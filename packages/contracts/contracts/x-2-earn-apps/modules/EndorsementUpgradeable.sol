@@ -34,7 +34,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     bytes32[] _unendorsedApps; // List of apps pending endorsement
     mapping(bytes32 => uint256) _unendorsedAppsIndex; // Mapping from app ID to index in the _unendorsedApps array, so we can remove an app in O(1)
     mapping(bytes32 => address[]) _appEndorsers; // Mapping to the endorsers of an app
-    mapping(uint8 => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
+    mapping(NodeStrengthLevel => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
     mapping(bytes32 => uint256) _appGracePeriod; // The grace period elapsed by the app since endorsed
     mapping(address => bool) endorsers; // Mapping to check if an address is an endorser
     uint256 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
@@ -62,17 +62,22 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function __Endorsement_init_unchained(uint256 gracePeriodDuration) internal onlyInitializing {
     EndorsementStorage storage $ = _getEndorsementStorage();
     $._gracePeriodDuration = gracePeriodDuration;
+
+    // Set the endorsement score for each node level
+    $._nodeEnodorsmentScore[NodeStrengthLevel.Strength] = 2; // Strength Node score
+    $._nodeEnodorsmentScore[NodeStrengthLevel.Thunder] = 13; // Thunder Node score
+    $._nodeEnodorsmentScore[NodeStrengthLevel.Mjolnir] = 50; // Mjolnir Node score
+
+    $._nodeEnodorsmentScore[NodeStrengthLevel.VeThorX] = 3; // VeThor X Node score
+    $._nodeEnodorsmentScore[NodeStrengthLevel.StrengthX] = 9; // Strength X Node score
+    $._nodeEnodorsmentScore[NodeStrengthLevel.ThunderX] = 35; // Thunder X Node score
+    $._nodeEnodorsmentScore[NodeStrengthLevel.MjolnirX] = 100; // Mjolnir X Node score
   }
 
   // ---------- Public ---------- //
+
   /**
-   * @notice Checks endorsements for a given app and updates its voting eligibility based on the endorsements' scores.
-   * @dev This function is intended to be called by a cron job prior to the start of each voting round.
-   * If the app has less than 100 points, the grace period is increased by 1.
-   * If the grace period elapsed by the app is greater than the threshold grace period, the app is marked as not eligible for voting.
-   * If an endorser has lost its node status (level 0), it is removed from the endorsers list.
-   * @param appId The unique identifier of the app being checked.
-   * @return True if the app is eligible for voting.
+   * @dev See {IX2EarnApps-checkEndorsement}.
    */
   function checkEndorsement(bytes32 appId) external returns (bool) {
     // Get the endorsement storage
@@ -213,28 +218,55 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev Internal function to get the score of an app and optionally remove an endorser's endorsement.
    * @param appId The unique identifier of the app.
-   * @param endorserToRemove Optional parameter. If provided, the function will remove this endorser's endorsement.
+   * @param endorserToRemove The address of the endorser to remove, or address(0) if no endorser should be removed.
    * @return uint256 The score of the app.
    */
   function _getScore(bytes32 appId, address endorserToRemove) internal returns (uint256) {
+    // Retrieve the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
     uint256 score;
-    for (uint256 i; i < $._appEndorsers[appId].length; ) {
-      address endorser = $._appEndorsers[appId][i];
-      uint256 endorserTokenID = $._tokenAuctionContract.ownerToId(endorser);
-      (, uint8 nodeLevel, , , , , ) = $._tokenAuctionContract.getMetadata(endorserTokenID);
 
-      if (nodeLevel == 0 || endorser == endorserToRemove) {
+    // Iterate over the list of endorsers for the given app
+    for (uint256 i; i < $._appEndorsers[appId].length; ) {
+      // Get the current endorser's address
+      address endorser = $._appEndorsers[appId][i];
+      // Get the node level of the endorser
+      NodeStrengthLevel nodeLevel = _getNodeLevel(endorser);
+
+      // Check if the endorser's node level is 0 or if the endorser is the one to be removed
+      if (nodeLevel == NodeStrengthLevel.None || endorser == endorserToRemove) {
         // Remove endorser by swapping with the last element and then reducing the length
         $._appEndorsers[appId][i] = $._appEndorsers[appId][$._appEndorsers[appId].length - 1];
         $._appEndorsers[appId].pop();
+
+        // Delete the endorser from the endorsers mapping
         delete $.endorsers[endorser];
       } else {
+        // Add the endorser's score to the total score
         score += $._nodeEnodorsmentScore[nodeLevel];
         i++; // Only increment i if we didn't remove an endorser
       }
     }
+
+    // Return the total score of the app
     return score;
+  }
+
+  /**
+   * @dev Internal function to get the node level of a user.
+   * @param user The address of the user.
+   * @return uint8 The node level of the user.
+   */
+  function _getNodeLevel(address user) internal view returns (NodeStrengthLevel) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    // Retrieve the token ID for the user
+    uint256 tokenID = $._tokenAuctionContract.ownerToId(user);
+
+    // Retrieve the metadata for the current user's token
+    (, uint8 nodeLevel, , , , , ) = $._tokenAuctionContract.getMetadata(tokenID);
+    // Cast uint8 to NodeStrengthLevel enum
+    NodeStrengthLevel level = NodeStrengthLevel(nodeLevel);
+    return level;
   }
 
   /**
@@ -351,5 +383,30 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function appsPendingEndorsement() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
     bytes32[] memory appIds = appIdsPendingEndorsement();
     return _getAppsInfo(appIds);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-getScore}.
+   */
+  function getScore(bytes32 appId) external returns (uint256) {
+    return _getScore(appId, address(0));
+  }
+
+  /**
+   * @dev See {IX2EarnApps-getEndorsers}.
+   */
+  function getEndorsers(bytes32 appId) external view returns (address[] memory) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    return $._appEndorsers[appId];
+  }
+
+  /**
+   * @dev See {IX2EarnApps-getNodeEndorsementScore}.
+   */
+  function getNodeEndorsementScore(address user) external view returns (uint256) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    NodeStrengthLevel nodeLevel = _getNodeLevel(user);
+    return $._nodeEnodorsmentScore[nodeLevel];
   }
 }
