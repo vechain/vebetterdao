@@ -52,7 +52,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev Sets the value for {baseURI}
+   * @dev Sets the value for the grace period ane the endorsement score for each node level.
    * @param gracePeriodDuration The initial grace period.
    */
   function __Endorsement_init(uint256 gracePeriodDuration) internal onlyInitializing {
