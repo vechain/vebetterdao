@@ -37,7 +37,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     mapping(uint8 => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
     mapping(bytes32 => uint256) _appGracePeriod; // The grace period elapsed by the app since endorsed
     mapping(address => bool) endorsers; // Mapping to check if an address is an endorser
-    uint256 _gracePeriod; // The grace period threshold for no endorsement in cycles
+    uint256 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
     ITokenAuction _tokenAuctionContract; // The token auction contract
   }
 
@@ -53,15 +53,15 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
   /**
    * @dev Sets the value for {baseURI}
-   * @param gracePeriod The initial grace period.
+   * @param gracePeriodDuration The initial grace period.
    */
-  function __Endorsement_init(uint256 gracePeriod) internal onlyInitializing {
-    __Endorsement_init_unchained(gracePeriod);
+  function __Endorsement_init(uint256 gracePeriodDuration) internal onlyInitializing {
+    __Endorsement_init_unchained(gracePeriodDuration);
   }
 
-  function __Endorsement_init_unchained(uint256 gracePeriod) internal onlyInitializing {
+  function __Endorsement_init_unchained(uint256 gracePeriodDuration) internal onlyInitializing {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    $._gracePeriod = gracePeriod;
+    $._gracePeriodDuration = gracePeriodDuration;
   }
 
   // ---------- Public ---------- //
@@ -83,11 +83,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     // Check the total score and update the grace period and voting eligibility accordingly
     if (score < 100) {
-      // Increase the grace period for the app
-      $._appGracePeriod[appId] += 1;
-
-      // Check if the grace period has exceeded the allowed threshold
-      if ($._appGracePeriod[appId] > $._gracePeriod) {
+      if ($._appGracePeriod[appId] == 0) {
+        $._appGracePeriod[appId] = clock() + $._gracePeriodDuration;
+      } else if ($._appGracePeriod[appId] > clock() && isEligibleNow(appId)) {
         // Mark the app as not eligible for voting
         _setVotingEligibility(appId, false);
 
@@ -98,8 +96,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
         return false;
       }
     } else if ($._appGracePeriod[appId] > 0) {
-      // If the apps grace period surpassed the threshold it was removed from the list of unendorsed apps we need to add it back
-      if ($._appGracePeriod[appId] > $._gracePeriod) {
+      // If the app is not eligible for voting, mark the app as eligible for voting
+      if (!isEligibleNow(appId)) {
         // Mark the app as eligible for voting
         _setVotingEligibility(appId, true);
 
@@ -149,8 +147,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     if (score >= 100) {
       // Check if the app has a grace period greater than 0
       if ($._appGracePeriod[appId] > 0) {
-        // If the apps grace period surpassed the threshold it was removed from the list of unendorsed apps we need to add it back
-        if ($._appGracePeriod[appId] > $._gracePeriod) {
+        // If the app is not eligible for voting, mark it as eligible
+        if (!isEligibleNow(appId)) {
           // Mark the app as eligible for voting
           _setVotingEligibility(appId, true);
 
@@ -197,10 +195,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     if (score < 100) {
-      $._appGracePeriod[appId] += 1;
-
-      // Check if the grace period has exceeded the allowed threshold
-      if ($._appGracePeriod[appId] > $._gracePeriod) {
+      if ($._appGracePeriod[appId] == 0) {
+        $._appGracePeriod[appId] = clock() + $._gracePeriodDuration;
+      } else if ($._appGracePeriod[appId] > clock()) {
         // Mark the app as not eligible for voting
         _setVotingEligibility(appId, false);
 
@@ -208,6 +205,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
         _setEndorsementStatus(appId, false);
       }
     }
+
+    return;
   }
 
   // ---------- Internal ---------- //
@@ -298,28 +297,28 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev Internal function to update the grace period.
    *
-   * @param gracePeriod The new grace period.
+   * @param gracePeriodDuration The new grace period.
    *
    * Emits a {GracePeriodUpdated} event.
    */
-  function _setGracePeriod(uint256 gracePeriod) internal {
+  function _setGracePeriod(uint256 gracePeriodDuration) internal {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    emit GracePeriodUpdated($._gracePeriod, gracePeriod);
+    emit GracePeriodUpdated($._gracePeriodDuration, gracePeriodDuration);
 
-    $._gracePeriod = gracePeriod;
+    $._gracePeriodDuration = gracePeriodDuration;
   }
 
   // ---------- Getters ---------- //
 
   /**
    * @dev See {IX2EarnApps-gracePeriod}.
-   * @return The current grace period.
+   * @return The current grace period duration in blocks.
    */
   function gracePeriod() external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    return $._gracePeriod;
+    return $._gracePeriodDuration;
   }
 
   /**
