@@ -169,6 +169,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
 
   /**
    * @dev Function to add app to the list of apps in VeBetterDAO ecosystem.
-    */
+   */
   function _addApp(bytes32 appId) internal virtual;
+
+  /**
+   * @dev Function to get the apps info.
+   */
+  function _getAppsInfo(bytes32[] memory appIds) internal view virtual returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
 }

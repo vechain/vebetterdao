@@ -142,6 +142,29 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     _setEndorsementStatus(id, false);
   }
 
+
+  function _getAppsInfo(bytes32[] memory appIds) internal view virtual override returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+
+    uint256 length = appIds.length;
+    X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory allApps = new X2EarnAppsDataTypes.AppWithDetailsReturnType[](
+      length
+    );
+
+    for (uint i = 0; i < length; i++) {
+      X2EarnAppsDataTypes.App memory _app = $._apps[appIds[i]];
+      allApps[i] = X2EarnAppsDataTypes.AppWithDetailsReturnType(
+        _app.id,
+        teamWalletAddress(_app.id),
+        _app.name,
+        metadataURI(_app.id),
+        _app.createdAtTimestamp,
+        isEligibleNow(_app.id)
+      );
+    }
+    return allApps;
+  }
+
   // ---------- Getters ---------- //
   /**
    * @dev See {IX2EarnApps-appExists}.
@@ -181,24 +204,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function apps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
-
-    uint256 length = $._appIds.length;
-    X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory allApps = new X2EarnAppsDataTypes.AppWithDetailsReturnType[](
-      length
-    );
-
-    for (uint i = 0; i < length; i++) {
-      X2EarnAppsDataTypes.App memory _app = $._apps[$._appIds[i]];
-      allApps[i] = X2EarnAppsDataTypes.AppWithDetailsReturnType(
-        _app.id,
-        teamWalletAddress(_app.id),
-        _app.name,
-        metadataURI(_app.id),
-        _app.createdAtTimestamp,
-        isEligibleNow(_app.id)
-      );
-    }
-    return allApps;
+    return _getAppsInfo($._appIds);
   }
 
   /**

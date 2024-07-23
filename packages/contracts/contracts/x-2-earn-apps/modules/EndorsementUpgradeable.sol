@@ -337,11 +337,19 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev All apps that are currently pending endorsement.
+   * @dev See {IX2EarnApps-appIdsPendingEndorsement}.
    */
-  function allAppsPendingEndorsement() public view returns (bytes32[] memory) {
+  function appIdsPendingEndorsement() public view returns (bytes32[] memory) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     return $._unendorsedApps;
+  }
+
+  /**
+   * @dev See {IX2EarnApps-appsPendingEndorsment}.
+   */
+  function appsPendingEndorsement() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
+    bytes32[] memory appIds = appIdsPendingEndorsement();
+    return _getAppsInfo(appIds);
   }
 }
