@@ -14,6 +14,6 @@ export const useProposalsEvents = () => {
   return useQuery({
     queryKey: getProposalsEventsQueryKey(),
     queryFn: async () => await getProposalsEvents(thor),
-    enabled: !!thor && !!thor.status.head.number,
+    enabled: !!thor,
   })
 }
