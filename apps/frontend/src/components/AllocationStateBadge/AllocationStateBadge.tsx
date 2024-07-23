@@ -1,8 +1,9 @@
-import { useAllocationsRoundState } from "@/api"
+import { useAllocationsRound, useAllocationsRoundState } from "@/api"
 import { HStack, Icon, Skeleton, StackProps, Text, TextProps } from "@chakra-ui/react"
-import { ReactNode } from "react"
+import { ReactNode, useMemo } from "react"
 import { DotSymbol } from "../DotSymbol"
 import { FaThumbsUp } from "react-icons/fa6"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   roundId: string
@@ -18,13 +19,18 @@ export const AllocationStateBadge = ({
   textProps = {},
   containerProps = {},
 }: Props) => {
+  const { t } = useTranslation()
   const { data, isLoading, error } = useAllocationsRoundState(roundId)
+  const { data: allocationRound } = useAllocationsRound(roundId)
+  const isActive = useMemo(() => {
+    return allocationRound?.state === 0 && allocationRound?.voteEndTimestamp?.isAfter()
+  }, [allocationRound])
 
   if (isLoading)
     return (
       <Skeleton>
         <Badge
-          text="loading"
+          text={t("loading")}
           containerProps={
             renderBadge
               ? {
@@ -60,12 +66,12 @@ export const AllocationStateBadge = ({
                 ...containerProps,
               }
         }
-        text="Error getting state"
+        text={t("Error getting state")}
         icon={renderIcon ? <DotSymbol size={4} color={"#D23F63"} /> : undefined}
       />
     )
 
-  if (data === 0)
+  if (isActive)
     return (
       <Badge
         textProps={{
@@ -84,11 +90,11 @@ export const AllocationStateBadge = ({
                 ...containerProps,
               }
         }
-        text="Active now"
+        text={t("Active now")}
         icon={renderIcon ? <DotSymbol pulse size={2} color={"#3A6F00"} /> : undefined}
       />
     )
-  if ([1, 2].includes(data))
+  if (!isActive)
     return (
       <Badge
         textProps={{
@@ -107,7 +113,7 @@ export const AllocationStateBadge = ({
                 ...containerProps,
               }
         }
-        text="Concluded"
+        text={t("Concluded")}
         icon={renderIcon ? <Icon as={FaThumbsUp} boxSize={4} color={"#004CFC"} /> : undefined}
       />
     )

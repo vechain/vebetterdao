@@ -128,6 +128,25 @@ This command relies on a turbo pipeline which:
 
 It also does not require the solo node to be running locally, as it will point to the staging environment.
 
+## Dev Testnet environment
+
+The dev testnet environment is a testnet that is used for testing purposes by developers that want to join VeBetterDAO.
+It is not the "testnet" environment used the first time we deployed, but a new one that is used for testing purposes.
+This environment is more focused on developer ux and needs (eg: faster voting rounds, a B3TR faucet, all can see settings, priority is given to the developer's needs).
+
+To deploy changes to this environment you will need to checkout the `dev-testnet` branch and push your changes there. Go to Vercel to execute the deployment.
+
+## Frontend App deployment
+
+The frontend app is deployed using Vercel. The deployment is triggered automatically when a new Release is created on the main branch (please look at the [Release](https://github.com/vechain/b3tr/releases) section).
+
+In order to successfully deploy the frontend app, the following steps need to be followed:
+
+1. Create a pr where the version in the `apps/frontend/package.json` file is updated. It should be a patch version bump, unless there are breaking changes, in which case it should be a minor or major version bump. The version should be in the format `x.x.x`, where `x` is a number.
+2. Once the pr is merged, create a new release on the main branch with the same version as the one in the pr.
+
+This will trigger the deployment of the frontend app to Vercel through the `on-release` workflow.
+
 ## Smart contracts
 
 Contracts can be found inside `./packages/contracts` folder.
@@ -303,8 +322,10 @@ yarn contracts:generate-docs
 
 The documentation will be generated in the `docs` folder inside `./packages/contracts`, and it's generated based on the @natspec tags in the contracts.
 
-## Slither Issue
-Note that slither does not seem to be working with the repo as-is 🤷, resulting in an enum type not found error:
+## Generate i18n files
+
+To regenerate the i18n translation files run:
+
 ```
-slither.solc_parsing.exceptions.ParsingError: Type not found struct Checkpoints.Trace208
+yarn generate-translations
 ```

@@ -3,10 +3,12 @@ import { TransactionModal } from "@/components/TransactionModal"
 import { useDistributeEmission } from "@/hooks"
 import { VStack, Button, Text, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 export const StartRoundButton = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId)
+  const { t } = useTranslation()
   const isCurrentRoundActive = useMemo(() => {
     return currentRound?.state === 0
   }, [currentRound])
@@ -51,7 +53,7 @@ export const StartRoundButton = () => {
             isDisabled={isCurrentRoundActive}
             onClick={handleSubmit}
             isLoading={distributionLoading}>
-            Start new round
+            {t("Start new round")}
           </Button>
         </VStack>
       </VStack>

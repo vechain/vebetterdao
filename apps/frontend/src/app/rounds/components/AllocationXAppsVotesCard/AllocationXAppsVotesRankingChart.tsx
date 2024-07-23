@@ -1,4 +1,11 @@
-import { useAllocationVotes, useMaxAllocationAmount, useRoundXApps, useXAppsVotes } from "@/api"
+import {
+  useAllocationAmount,
+  useAllocationBaseAmount,
+  useAllocationVotesQf,
+  useMaxAllocationAmount,
+  useRoundXApps,
+  useXAppsVotesQf,
+} from "@/api"
 import { Spinner, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { AppVotesHorizontalChart } from "./AppVotesHorizontalChart"
@@ -11,24 +18,33 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
   const { data: maxAllocation } = useMaxAllocationAmount(roundId)
+  const { data: allocationAmount } = useAllocationAmount(roundId)
+  const { data: baseAmount } = useAllocationBaseAmount(roundId)
 
-  const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
+  const { data: xAppsVotes, isLoading: xAppsVotesLoading } = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
 
-  const { data: votes } = useAllocationVotes(roundId)
+  const { data: votes } = useAllocationVotesQf(roundId)
 
-  const sortedData = useMemo(
-    () =>
-      xAppsVotes
-        .map(app => ({
-          votes: app.data?.votes ?? "0",
-          app: xApps?.find(xa => xa.id === app.data?.app)?.id ?? "",
-        }))
-        .sort((a, b) => Number(b.votes) - Number(a.votes)),
+  const maxAllocationPercentage = useMemo(() => {
+    const maxAmountWithVotes = Number(maxAllocation) - Number(baseAmount)
+    const totalVotesAllocation = Number(allocationAmount?.voteXAllocations) - Number(baseAmount) * (xApps?.length ?? 0)
+    const maxAllocationPercentage = (maxAmountWithVotes / totalVotesAllocation) * 100
 
-    [xAppsVotes, xApps],
-  )
+    return maxAllocationPercentage
+  }, [maxAllocation, baseAmount, allocationAmount, xApps])
 
-  const isLoading = xAppsLoading || xAppsVotes.some(query => query.isLoading)
+  const sortedData = useMemo(() => {
+    if (!xAppsVotes || !xApps) return []
+
+    return xAppsVotes
+      .map(appVotes => ({
+        votes: appVotes.votes ?? "0",
+        app: xApps?.find(xa => xa.id === appVotes.app)?.id ?? "",
+      }))
+      .sort((a, b) => Number(b.votes) - Number(a.votes))
+  }, [xAppsVotes, xApps])
+
+  const isLoading = xAppsLoading || xAppsVotesLoading
 
   if (isLoading) return <Spinner size={"lg"} alignSelf="center" />
 
@@ -38,12 +54,13 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
         <AppVotesHorizontalChart
           key={index}
           data={app}
-          index={index}
           totalVotes={votes}
           roundId={roundId}
           showReceived={true}
           maxAllocation={maxAllocation}
+          maxAllocationPercentage={maxAllocationPercentage}
           renderMaxAllocation={true}
+          showTotalVoters={true}
         />
       ))}
     </VStack>

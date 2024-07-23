@@ -27,6 +27,8 @@ import { motion } from "framer-motion"
 import { RiArrowRightSLine } from "react-icons/ri"
 import { coinFlipAnimation, pulseAnimation } from "@/constants"
 import { NFTWithRings } from "./components"
+import { CustomModalContent } from "../CustomModalContent"
+import { useTranslation } from "react-i18next"
 
 // Convert Button to a motion component
 const MotionImage = motion(Image)
@@ -35,23 +37,19 @@ export const GmNFT = () => {
   const { isClaimable: isNFTClaimable, isOwned } = useIsGMclaimable()
 
   const { account } = useWallet()
-
+  const { t } = useTranslation()
   const { isLoading: isLoadingHasVoted } = useParticipatedInGovernance(account)
 
   const { data: nftBalance, isLoading: isLoadingNftBalance } = useGMbalance(account)
 
-  const buttonColor = useColorModeValue("400", "300")
-
   const nftCardColor = useColorModeValue("50", "100")
   const nftCardBorderColor = useColorModeValue("500", "600")
-  const nftToClaimColorCard = useColorModeValue("300", "400")
-  const nftOwnedColorCard = useColorModeValue("100", "200")
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
   const { sendTransaction: freeMint, isTxReceiptLoading, sendTransactionPending } = useClaimNFT({ onFailure: onClose })
 
-  const { imageData, imageMetadata, tokenID, isLoading: isLoadingNFT, isError: isErrorImage } = useNFTImage()
+  const { imageData, tokenID, isLoading: isLoadingNFT } = useNFTImage()
 
   const handleFreeMint = useCallback(() => {
     freeMint()
@@ -71,23 +69,19 @@ export const GmNFT = () => {
   const modalContent = useMemo(() => {
     if (showLoader)
       return (
-        <ModalContent rounded="2xl" w="auto">
-          <ModalBody py={6} px={12}>
-            <VStack alignItems={"center"}>
-              <MotionImage {...coinFlipAnimation} src="/images/gm-nft-placeholder.png" maxW="250px" />
-              {isClaimLoading /* isClaimLoading */ && (
-                <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
-                  Please confirm the transaction in your wallet
-                </Text>
-              )}
-              {(isLoadingNFT || isTxReceiptLoading) && (
-                <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
-                  Almost there...
-                </Text>
-              )}
-            </VStack>{" "}
-          </ModalBody>
-        </ModalContent>
+        <VStack alignItems={"center"} py={6} px={12}>
+          <MotionImage {...coinFlipAnimation} src="/images/gm-nft-placeholder.png" maxW="250px" />
+          {isClaimLoading /* isClaimLoading */ && (
+            <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
+              {t("Please confirm the transaction in your wallet")}
+            </Text>
+          )}
+          {(isLoadingNFT || isTxReceiptLoading) && (
+            <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
+              {t("Almost there...")}
+            </Text>
+          )}
+        </VStack>
       )
 
     return (
@@ -112,7 +106,7 @@ export const GmNFT = () => {
               color={"white"}
               fontSize={28}
               fontWeight={700}>
-              VeBetterDAO <br /> Governance
+              {t("VeBetterDAO")} <br /> {t("Governance")}
             </Text>
 
             <NFTWithRings image={imageData?.image} tokenID={tokenID} />
@@ -125,7 +119,7 @@ export const GmNFT = () => {
               color={"white"}
               fontSize={24}
               fontWeight={600}>
-              GM Earth
+              {t("GM Earth")}
             </Text>
             <Text
               alignSelf={"center"}
@@ -135,7 +129,8 @@ export const GmNFT = () => {
               color={"white"}
               fontSize={16}
               fontWeight={500}>
-              #{tokenID}
+              {t("#")}
+              {tokenID}
             </Text>
           </VStack>
         </ModalBody>
@@ -144,7 +139,7 @@ export const GmNFT = () => {
         </ModalFooter>
       </ModalContent>
     )
-  }, [showLoader, isClaimLoading, isLoadingNFT, isTxReceiptLoading, imageData?.image, tokenID])
+  }, [showLoader, isClaimLoading, t, isLoadingNFT, isTxReceiptLoading, imageData?.image, tokenID])
 
   return (
     <>
@@ -152,7 +147,7 @@ export const GmNFT = () => {
         <Card w="full" variant={"baseWithBorder"}>
           <CardBody>
             <VStack spacing={4} align="flex-start" w={"full"}>
-              <Heading size="md">Galaxy Member</Heading>
+              <Heading size="md">{t("Galaxy Member")}</Heading>
               <VStack spacing={4} w="full">
                 <HStack
                   color={"black"}
@@ -167,7 +162,7 @@ export const GmNFT = () => {
 
                   <VStack alignItems={"self-start"} spacing={3} pr={4}>
                     <Text fontWeight={600} lineHeight="22px" fontSize={{ base: "18px", md: "20px" }}>
-                      You have a new GM NFT
+                      {t("You have a new GM NFT")}
                     </Text>
                   </VStack>
                 </HStack>
@@ -179,7 +174,7 @@ export const GmNFT = () => {
                   variant={"primaryAction"}
                   borderRadius={"full"}
                   w={"full"}>
-                  Mint now
+                  {t("Mint now")}
                 </Button>
               </VStack>
             </VStack>
@@ -192,7 +187,7 @@ export const GmNFT = () => {
           <CardBody>
             <VStack spacing={4} align="flex-start" w={"full"}>
               <HStack justifyContent={"space-between"} w="full">
-                <Heading size="md">Galaxy Member</Heading>
+                <Heading fontSize="24px">{t("Galaxy Member")}</Heading>
               </HStack>
               <VStack spacing={8} w="full">
                 <HStack
@@ -220,11 +215,12 @@ export const GmNFT = () => {
                       borderRadius={16}
                       m={2}
                       boxShadow={"0px 2.773px 9.473px -2.079px #0019A0"}>
-                      <Image src={imageData?.image} maxH="100px" borderRadius={16} />
+                      <Image src={imageData?.image} maxH="100px" borderRadius={16} alt="gm-image" />
                     </Box>
 
                     <Text fontWeight={600} lineHeight="22px" fontSize={{ base: "18px", md: "20px" }}>
-                      GM Earth #{tokenID}
+                      {t("GM Earth #")}
+                      {tokenID}
                     </Text>
                   </HStack>
                   <Box>
@@ -237,9 +233,13 @@ export const GmNFT = () => {
         </Card>
       )}
 
-      <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
+      <Modal isOpen={isOpen} onClose={onClose} trapFocus={false} isCentered={true}>
         <ModalOverlay />
-        {modalContent}
+        <CustomModalContent w={"auto"} maxW={"container.md"}>
+          <Card rounded={20}>
+            <CardBody>{modalContent}</CardBody>
+          </Card>
+        </CustomModalContent>
       </Modal>
     </>
   )

@@ -1,11 +1,15 @@
-import { CastAllocationVoteFormData } from "@/app/rounds/[roundId]/vote/percentages/components/SelectAppVotesInput"
 import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
 
-export type CastVoteData = CastAllocationVoteFormData["votes"]
+export type CastAllocationVoteFormData = {
+  appId: string
+  value: string | number
+  rawValue: number
+}
+
 export type CastAllocationFormStoreState = {
-  data: CastVoteData
-  setData: (_data: CastVoteData) => void
+  data: CastAllocationVoteFormData[]
+  setData: (_data: CastAllocationVoteFormData[]) => void
   clearData: () => void
 }
 
@@ -15,9 +19,9 @@ export type CastAllocationFormStoreState = {
 export const useCastAllocationFormStore = create<CastAllocationFormStoreState>()(
   devtools(
     persist(
-      (set, get) => ({
+      set => ({
         data: [],
-        setData: (data: CastVoteData) =>
+        setData: (data: CastAllocationVoteFormData[]) =>
           set({
             data,
           }),

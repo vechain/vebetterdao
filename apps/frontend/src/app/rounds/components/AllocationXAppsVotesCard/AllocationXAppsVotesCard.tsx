@@ -13,7 +13,7 @@ import {
   Spinner,
   VStack,
 } from "@chakra-ui/react"
-import { useAllocationsRound, useRoundXApps, useXAppsVotes } from "@/api"
+import { useAllocationsRound, useRoundXApps, useXAppsVotesQf } from "@/api"
 import { backdropBlurAnimation } from "@/app/theme"
 import { AllocationXAppsVotesRankingChart } from "./AllocationXAppsVotesRankingChart"
 import { useTranslation } from "react-i18next"
@@ -22,21 +22,19 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 
 type Props = {
   roundId: string
-  maxRanks?: number
 }
 
-export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
+export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
   const { t } = useTranslation()
-  const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
+  const { data: xApps } = useRoundXApps(roundId)
 
-  const xAppsVotes = useXAppsVotes(xApps?.map(app => app.id) ?? [], roundId)
+  const xAppsVotes = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
 
-  const isVotesLoading = xAppsVotes.some(query => query.isLoading)
-  const error = xAppsVotes.find(query => query.error)?.error
+  const error = xAppsVotes.error
 
-  const isLoading = isVotesLoading || roundInfoLoading
+  const isLoading = xAppsVotes.isLoading || roundInfoLoading
 
   const title = roundInfo.isCurrent && roundInfo.state === 0 ? t("Real time votes") : t("Votes")
 
@@ -93,7 +91,7 @@ export const AllocationXAppsVotesCard = ({ roundId, maxRanks = 8 }: Props) => {
               borderRadius={"xl"}>
               <AlertIcon boxSize="40px" mr={0} />
               <AlertTitle mt={4} mb={1} fontSize="lg">
-                Error loading votes
+                {t("Error loading votes")}
               </AlertTitle>
               <AlertDescription maxWidth="sm">
                 {error.message || "An error occurred while loading the votes"}

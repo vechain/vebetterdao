@@ -64,8 +64,14 @@ export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props
           {t("Claim back community support tokens")}
         </Text>
         <Text fontSize={16} fontWeight={400} mt={2} color={"#6A6A6A"}>
-          You can claim back <b>{compactFormatter.format(formattedDeposits)} VOT3</b> that you used to support{" "}
-          {userProposalsDeposited.length} proposal{userProposalDeposits.length > 1 ? "s" : ""}.
+          {t("You can claim back ")}
+          <b>
+            {compactFormatter.format(formattedDeposits)} {t("VOT3")}
+          </b>{" "}
+          {t("that you used to support")} {userProposalsDeposited.length}
+          {t(" proposal")}
+          {userProposalDeposits.length > 1 ? "s" : ""}
+          {t(".")}
         </Text>
         <Button onClick={handleClaim} w={"full"} variant={"primaryAction"} mt={5}>
           {t("Claim tokens")}
@@ -75,11 +81,11 @@ export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={"Deposits Withdraw Completed!"}
+        successTitle={t("Deposits Withdraw Completed!")}
         status={error ? "error" : status}
         errorDescription={error?.reason}
-        errorTitle={error ? "Error Withdrawing" : undefined}
-        pendingTitle="Withdrawing..."
+        errorTitle={error ? t("Error Withdrawing") : undefined}
+        pendingTitle={t("Withdrawing...")}
         showExplorerButton
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
       />

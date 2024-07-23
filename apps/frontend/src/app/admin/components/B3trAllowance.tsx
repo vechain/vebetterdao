@@ -26,6 +26,7 @@ import {
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 export const B3trAllowance = () => {
   const { account } = useWallet()
@@ -35,6 +36,7 @@ export const B3trAllowance = () => {
   const [amount, setAmount] = useState<number>(0)
   const [spenderFieldIsDirty, setSpenderFieldIsDirty] = useState<boolean>(false)
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)
+  const { t } = useTranslation()
 
   const { data: allowedAmount, isLoading: allowedAmountLoading } = useB3trAllowance(account ?? undefined, spender)
   const allowedAmountScaled = useMemo(() => {
@@ -88,8 +90,8 @@ export const B3trAllowance = () => {
     <>
       <Card w={"full"}>
         <CardHeader>
-          <Heading size="lg">B3TR Token Allowance</Heading>
-          <Text fontSize="sm">Allow an external address to spend your B3TR tokens.</Text>
+          <Heading size="lg">{t("B3TR Token Allowance")}</Heading>
+          <Text fontSize="sm">{t("Allow an external address to spend your B3TR tokens.")}</Text>
         </CardHeader>
         <CardBody>
           <form onSubmit={handleSubmit}>
@@ -97,7 +99,7 @@ export const B3trAllowance = () => {
               <HStack spacing={4} alignItems={"start"}>
                 <FormControl>
                   <FormLabel>
-                    <strong>{"Balance"}</strong>
+                    <strong>{t("Balance")}</strong>
                   </FormLabel>
                   <InputGroup>
                     <Input value={b3trBalance?.scaled} disabled={true} />
@@ -109,7 +111,7 @@ export const B3trAllowance = () => {
                       backgroundColor={"transparent"}
                       borderColor={"inherit"}
                       borderLeft={"none"}>
-                      B3TR
+                      {t("B3TR")}
                     </InputRightAddon>
                   </InputGroup>
                 </FormControl>
@@ -118,11 +120,11 @@ export const B3trAllowance = () => {
               <HStack spacing={4} alignItems={"start"} w={"full"}>
                 <FormControl isRequired isInvalid={!isValidAddress && spenderFieldIsDirty}>
                   <FormLabel>
-                    <strong>{"Spender"}</strong>
+                    <strong>{t("Spender")}</strong>
                   </FormLabel>
                   <InputGroup>
                     <Input
-                      placeholder="Who should be able to use the tokens?"
+                      placeholder={t("Who should be able to use the tokens?")}
                       value={spender}
                       onChange={e => {
                         setSpender(e.target.value)
@@ -131,18 +133,18 @@ export const B3trAllowance = () => {
                       disabled={isLoading}
                     />
                   </InputGroup>
-                  <FormErrorMessage>{"Address not valid"}</FormErrorMessage>
+                  <FormErrorMessage>{t("Address not valid")}</FormErrorMessage>
                 </FormControl>
               </HStack>
 
               <HStack spacing={4} w={"full"} justify={"space-between"} align={"start"}>
                 <FormControl isRequired isInvalid={!isAmountValid && amountFieldIsDirty} w={"full"}>
                   <FormLabel>
-                    <strong>{"Amount to allow"}</strong>
+                    <strong>{t("Amount to allow")}</strong>
                   </FormLabel>
                   <NumberInput
                     min={0}
-                    value={allowedAmountLoading ? "Loading..." : amount}
+                    value={allowedAmountLoading ? t("Loading...") : amount}
                     isDisabled={isLoading}
                     onChange={value => {
                       setAmount(parseInt(value))
@@ -154,16 +156,16 @@ export const B3trAllowance = () => {
                       <NumberDecrementStepper />
                     </NumberInputStepper>
                   </NumberInput>
-                  <FormErrorMessage>{"Invalid amount"}</FormErrorMessage>
+                  <FormErrorMessage>{t("Invalid amount")}</FormErrorMessage>
                 </FormControl>
 
                 <FormControl w={"full"}>
                   <FormLabel>
-                    <strong>{"Current allowance"}</strong>
+                    <strong>{t("Current allowance")}</strong>
                   </FormLabel>
                   <InputGroup>
                     <Input
-                      placeholder="Amount of tokens the inserted address is already allowed to spend"
+                      placeholder={t("Amount of tokens the inserted address is already allowed to spend")}
                       value={allowedAmountScaled}
                       disabled={true}
                     />
@@ -175,13 +177,13 @@ export const B3trAllowance = () => {
                       backgroundColor={"transparent"}
                       borderColor={"inherit"}
                       borderLeft={"none"}>
-                      B3TR
+                      {t("B3TR")}
                     </InputRightAddon>
                   </InputGroup>
                 </FormControl>
               </HStack>
               <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
-                Allow
+                {t("Allow")}
               </Button>
             </VStack>
           </form>
@@ -192,13 +194,13 @@ export const B3trAllowance = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? "error" : status}
-        successTitle={"B3TR tokens allowance updated successfully"}
+        successTitle={t("B3TR tokens allowance updated successfully")}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
-        pendingTitle={`Updating B3TR tokens allowance...`}
-        errorTitle={"Error updating allowance"}
+        pendingTitle={t(`Updating B3TR tokens allowance...`)}
+        errorTitle={t("Error updating allowance")}
         errorDescription={error?.reason}
       />
     </>

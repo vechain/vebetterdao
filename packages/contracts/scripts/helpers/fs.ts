@@ -1,5 +1,7 @@
 import fs from "fs"
 import path from "path"
+import FormData from "form-data"
+import archiver from "archiver"
 
 /**
  * Reads files from a directory and returns an array of `File` objects.
@@ -24,6 +26,58 @@ async function readFilesFromDirectory(dirPath: string): Promise<File[]> {
   }
 
   return files
+}
+
+function formData(path: string): FormData {
+  // Create a form data instance
+  const form = new FormData()
+  form.append("file", fs.createReadStream(path))
+  return form
+}
+
+function getFolderName(folderPath: string): string {
+  return path.basename(folderPath)
+}
+
+function copyImages(srcFolder: string, destFolder: string): string {
+  // Ensure the destination folder exists
+  if (!fs.existsSync(destFolder)) {
+    fs.mkdirSync(destFolder, { recursive: true })
+  }
+
+  // Read all files in the source folder
+  const files = fs.readdirSync(srcFolder)
+
+  // Copy each image file from the source folder to the destination folder
+  files.forEach(file => {
+    const srcFilePath = path.join(srcFolder, file)
+    const destFilePath = path.join(destFolder, file)
+
+    // Check if the file is an image (you can extend this to check for specific image types)
+    if (file.match(/\.(jpg|jpeg|png|gif)$/i)) {
+      fs.copyFileSync(srcFilePath, destFilePath)
+    }
+  })
+
+  return destFolder
+}
+
+async function zipFolder(sourceDir: string, outPath: fs.PathLike): Promise<void> {
+  // Ensure that the stream truncates (overwrites) the file if it already exists
+  const stream = fs.createWriteStream(outPath, { flags: "w" })
+
+  const archive = archiver("zip", { zlib: { level: 9 } })
+
+  return new Promise<void>((resolve, reject) => {
+    archive
+      .directory(sourceDir, path.basename(sourceDir)) // Keeps the root folder
+      .on("error", (err: any) => reject(err))
+      .pipe(stream)
+
+    stream.on("close", () => resolve())
+
+    archive.finalize()
+  })
 }
 
 /**
@@ -51,4 +105,4 @@ async function saveContractsToFile(
   console.log(`Contracts and libraries addresses saved to ${OUTPUT_PATH}`)
 }
 
-export { readFilesFromDirectory, saveContractsToFile }
+export { readFilesFromDirectory, formData, getFolderName, zipFolder, copyImages, saveContractsToFile }

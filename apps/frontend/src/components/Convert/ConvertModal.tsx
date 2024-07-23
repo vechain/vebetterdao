@@ -24,10 +24,10 @@ import { IoArrowBackOutline } from "react-icons/io5"
 import { BalanceInfo } from "./components"
 import { useB3trBalance, useB3trConverted, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { BaseTooltip } from "../BaseTooltip"
 import { FiInfo } from "react-icons/fi"
 import { motion } from "framer-motion"
 import BigNumber from "bignumber.js"
+import { useTranslation } from "react-i18next"
 
 export type Props = {
   isOpen: boolean
@@ -50,6 +50,7 @@ const zoomInVariants = {
 
 export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const [isB3trToVot3, setIsB3trToVot3] = useState<boolean>()
+  const { t } = useTranslation()
 
   const { account } = useWallet()
 
@@ -141,41 +142,42 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       return (
         <HStack>
           <Text as="b">{amountText}</Text>
-          <Text color={b3trColor}>B3TR</Text>
+          <Text color={b3trColor}>{t("B3TR")}</Text>
           <FaArrowRight />
           <Text as="b">{amountText}</Text>
-          <Text color={vot3Color}>VOT3</Text>
+          <Text color={vot3Color}>{t("VOT3")}</Text>
         </HStack>
       )
     } else {
       return (
         <HStack>
           <Text as="b">{amountText}</Text>
-          <Text color={vot3Color}>VOT3</Text>
+          <Text color={vot3Color}>{t("VOT3")}</Text>
           <FaArrowRight />
           <Text as="b">{amountText}</Text>
-          <Text color={b3trColor}>B3TR</Text>
+          <Text color={b3trColor}>{t("B3TR")}</Text>
         </HStack>
       )
     }
-  }, [isB3trToVot3, amountText, b3trColor, vot3Color])
+  }, [isB3trToVot3, amountText, b3trColor, t, vot3Color])
 
   const convertTitle = useMemo(() => {
-    return isB3trToVot3 ? "Turn B3TR into VOT3" : "Turn VOT3 into B3TR"
-  }, [isB3trToVot3])
+    return isB3trToVot3 ? t("Turn B3TR into VOT3") : t("Turn VOT3 into B3TR")
+  }, [isB3trToVot3, t])
 
   const convertDescription = useMemo(() => {
     return isB3trToVot3 ? (
       <Text fontSize={{ base: 14, md: 16 }} fontWeight={400}>
-        The more VOT3 in your balance, the more <b>voting power</b> you’ll have. Use it to vote on proposals and
-        allocation rounds.
+        {t("The more VOT3 in your balance, the more ")}
+        <b>{t("voting power")}</b>
+        {t(" you’ll have. Use it to vote on proposals and allocation rounds.")}
       </Text>
     ) : (
       <Text fontSize={{ base: 14, md: 16 }} fontWeight={400}>
-        B3TR are the tokens that you earn through the dApps and by participating on the voting sessions.
+        {t("B3TR are the tokens that you earn through the dApps and by participating on the voting sessions.")}
       </Text>
     )
-  }, [isB3trToVot3])
+  }, [isB3trToVot3, t])
 
   const renderCardContent = useCallback(() => {
     return isB3trToVot3 !== undefined ? (
@@ -215,8 +217,10 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
             <HStack px={4} py={3} bg={"#F8F8F8"} borderRadius={8} mt={2}>
               <FiInfo size={36} color="#6a6a6a" />
               <Text fontSize={{ base: 14 }} fontWeight={400}>
-                The maximum amount of VOT3 you can convert is <b>{swappableVot3Balance?.formatted}</b>. You can’t
-                convert VOT3 that <b>someone else transferred to you.</b>
+                {t("The maximum amount of VOT3 you can convert is ")}
+                <b>{swappableVot3Balance?.formatted}</b>
+                {t(". You can’t convert VOT3 that ")}
+                <b>{t("someone else transferred to you.")}</b>
               </Text>
             </HStack>
           )}
@@ -237,7 +241,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
             rounded={"full"}
             isDisabled={invalidAmount}
             size={"lg"}>
-            <Text fontSize={{ base: 14, md: 18 }}>Convert now</Text>
+            <Text fontSize={{ base: 14, md: 18 }}>{t("Convert now")}</Text>
           </Button>
 
           {/* <BaseTooltip
@@ -260,7 +264,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
         <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
         <VStack align={"flex-start"}>
           <Text fontSize={{ base: 18, md: 24 }} fontWeight={700}>
-            Convert tokens
+            {t("Convert tokens")}
           </Text>
           <Flex w="100%" direction={{ base: "column", md: "row" }} gap={4}>
             <motion.div variants={zoomInVariants} initial="hidden" animate="visible">
@@ -285,6 +289,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     isB3trToVot3,
     isVOT3BalanceMoreThanStakedB3TR,
     swappableVot3Balance,
+    t,
     vot3BalanceScaled,
   ])
 
@@ -294,13 +299,13 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
         isOpen={isOpen}
         onClose={handleClose}
         confirmationTitle={swapText}
-        successTitle={"Swap Completed!"}
+        successTitle={t("Swap Completed!")}
         status={mutationData.error ? "error" : mutationData.status}
         errorDescription={mutationData.error?.reason}
-        errorTitle={mutationData.error ? "Error swapping" : undefined}
+        errorTitle={mutationData.error ? t("Error swapping") : undefined}
         showTryAgainButton
         onTryAgain={handleConvertB3tr}
-        pendingTitle="Swapping..."
+        pendingTitle={t("Swapping...")}
         showSocialButtons
         socialDescriptionEncoded="%F0%9F%94%84%20Just%20swapped%20between%20B3TR%20and%20VOT3%20on%20%23VeBetterDAO%21%20%0A%0A%F0%9F%8C%B1%20Explore%20and%20join%20us%20at%20https%3A%2F%2Fvebetterdao.org.%0A%0A%23VeBetterDAO%20%23Vechain"
         showExplorerButton

@@ -3,6 +3,7 @@ import {
   Button,
   FormControl,
   FormErrorMessage,
+  HStack,
   Heading,
   Input,
   Modal,
@@ -19,6 +20,7 @@ import { useCallback } from "react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../../../AdminAppPageContent"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 type Props = {
   editAdminForm: UseFormReturn<AdminAppForm>
@@ -31,6 +33,7 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
   const {
     formState: { errors },
   } = addressForm
+  const { name } = useWalletName(addressForm.watch("moderatorAddress"))
 
   const onSubmit = useCallback(
     (data: { moderatorAddress: string }) => {
@@ -57,7 +60,15 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
               <UilUser size="54px" color="#004CFC" />
               <Heading fontSize="28px">{t("Add a new moderator")}</Heading>
               <VStack align="stretch">
-                <Text fontSize="14px">{t("User wallet address")}</Text>
+                <HStack justify={"space-between"}>
+                  <Text fontSize="14px">{t("User wallet address")}</Text>
+                  {name && (
+                    <Text fontSize="14px" fontWeight={"600"}>
+                      {"@"}
+                      {name}
+                    </Text>
+                  )}
+                </HStack>
                 <FormControl isInvalid={!!errors.moderatorAddress}>
                   <Input
                     {...addressForm.register("moderatorAddress", {

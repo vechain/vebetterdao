@@ -1,23 +1,9 @@
 import { useAllocationsRoundsEvents, useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
-import {
-  Card,
-  CardBody,
-  HStack,
-  Heading,
-  VStack,
-  Text,
-  Button,
-  useColorModeValue,
-  Box,
-  Image,
-  useDisclosure,
-  Skeleton,
-} from "@chakra-ui/react"
+import { Card, CardBody, Heading, VStack, Text, Button, Box, Image, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import React, { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
-import { TbGift } from "react-icons/tb"
 import { B3TRIcon } from "../Icons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { TransactionModal } from "../TransactionModal"
@@ -37,10 +23,6 @@ export const VoterRewards: React.FC = () => {
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
 
   const { isOpen, onClose, onOpen } = useDisclosure()
-
-  const iconColor = useColorModeValue("800", "900")
-
-  const iconBgColor = useColorModeValue("200", "300")
 
   const roundRewards = useMemo(() => {
     if (!rewardsPerRound) return []
@@ -64,8 +46,6 @@ export const VoterRewards: React.FC = () => {
 
     return totalRewards.decimalPlaces(DECIMAL_PLACES, BigNumber.ROUND_DOWN).toString()
   }, [totalRewards])
-
-  const isRewardsLoading = rewardsPerRound?.some(reward => reward.isLoading) // Loading rewards to claim
 
   const claimRewardsMutation = useClaimRewards({
     roundRewards,
@@ -95,13 +75,13 @@ export const VoterRewards: React.FC = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={"Rewards claimed!"}
+        successTitle={t("Rewards claimed!")}
         status={claimRewardsMutation.error ? "error" : claimRewardsMutation.status}
         errorDescription={claimRewardsMutation.error?.reason}
-        errorTitle={claimRewardsMutation.error ? "Error claiming" : undefined}
+        errorTitle={claimRewardsMutation.error ? t("Error claiming") : undefined}
         showTryAgainButton
         onTryAgain={onTryAgain}
-        pendingTitle="Claiming rewards..."
+        pendingTitle={t("Claiming rewards...")}
         showSocialButtons
         socialDescriptionEncoded="%F0%9F%8E%89%20Just%20claimed%20my%20%24B3TR%20rewards%20for%20voting%20in%20the%20%23VeBetterDAO%21%20%0A%0AJoin%20us%20and%20have%20your%20say%20in%20the%20future%20of%20sustainability%20at%20https%3A%2F%2Fvebetterdao.org.%20%0A%0A%23VeBetterDAO%20%23Vechain"
         showExplorerButton

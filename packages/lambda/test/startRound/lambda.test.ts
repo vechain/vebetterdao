@@ -12,7 +12,7 @@ describe("startRound", () => {
       const result = await new Promise((resolve, reject) => {
         execute({
           event,
-          lambdaPath: path.join(__dirname, "../../dist/testnet/index.js"),
+          lambdaPath: path.join(__dirname, "../../dist/mainnet/index.js"),
           timeoutMs: 5 * 60 * 1000,
           callback: (error: Error, result: unknown) => {
             if (error) {

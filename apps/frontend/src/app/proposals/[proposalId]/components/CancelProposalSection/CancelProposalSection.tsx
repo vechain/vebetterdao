@@ -107,13 +107,13 @@ export const CancelProposalSection = () => {
         isOpen={transactionModal.isOpen}
         onClose={handleCloseTransactionModal}
         status={cancelProposalMutation.error ? "error" : cancelProposalMutation.status}
-        successTitle="Proposal cancelled!"
+        successTitle={t("Proposal canceled!")}
         onTryAgain={handleCancelProposal}
         showTryAgainButton
         showExplorerButton
         txId={cancelProposalMutation.txReceipt?.meta.txID ?? cancelProposalMutation.sendTransactionTx?.txid}
-        pendingTitle="Cancelling proposal..."
-        errorTitle="Error cancelling proposal"
+        pendingTitle={t("Cancelling proposal...")}
+        errorTitle={t("Error cancelling proposal")}
         errorDescription={cancelProposalMutation.error?.reason}
       />
     </Card>

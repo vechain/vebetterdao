@@ -121,7 +121,11 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
                 </Text>
               </Skeleton>
             </VStack>
-            <AppVotesBreakdown votes={parsedCastVotesPercentages} isLoading={breakdownLoading} />
+            <AppVotesBreakdown
+              votes={parsedCastVotesPercentages}
+              isLoading={breakdownLoading}
+              minPercentageToNotMerge={minPercentageToNotMerge}
+            />
           </VStack>
         </CardBody>
       </Card>

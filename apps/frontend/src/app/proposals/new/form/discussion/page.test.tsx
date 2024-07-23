@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest"
 import NewProposalTextOnlyPage from "./page"
-import { fireEvent, render, screen, waitFor, within } from "../../../../../../test"
+import { fireEvent, render, screen, waitFor } from "../../../../../../test"
 import * as router from "next/navigation"
 import * as dappKit from "@vechain/dapp-kit-react"
 import FormProposalLayout from "../layout"
-import { GovernanceProposalTemplate, removePlaceholders } from "@/constants"
 
 const mockRouterPush = vi.fn()
 const mockBack = vi.fn()
@@ -27,7 +26,7 @@ describe("NewProposalDiscussion", async () => {
     vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
       account: null,
     })
-    const x = render(
+    render(
       <FormProposalLayout>
         <NewProposalTextOnlyPage />
       </FormProposalLayout>,

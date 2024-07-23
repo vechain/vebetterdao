@@ -93,19 +93,19 @@ export const ProposalOverviewVotes = () => {
             </Text>
             <VStack alignItems={"stretch"} gap={6}>
               <ProposalVotesProgressBar
-                text="Votes for"
+                text={t("Votes for")}
                 percentage={proposal.forPercentage}
                 color="#38BF66"
                 icon={<UilThumbsUp size="16px" color="#38BF66" />}
               />
               <ProposalVotesProgressBar
-                text="Against"
+                text={t("Against")}
                 percentage={proposal.againstPercentage}
                 color="#D23F63"
                 icon={<UilThumbsDown size="16px" color="#D23F63" />}
               />
               <ProposalVotesProgressBar
-                text="Abstained"
+                text={t("Abstained")}
                 percentage={proposal.abstainPercentage}
                 color="#B59525"
                 icon={<Image src={"/images/abstained.svg"} alt="abstained" />}

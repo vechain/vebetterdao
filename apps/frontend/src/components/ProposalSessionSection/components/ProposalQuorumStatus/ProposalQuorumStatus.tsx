@@ -7,6 +7,10 @@ import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(2)
 
+const getSafePercentage = (value: number) => {
+  return isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100)
+}
+
 type Props = {
   quorumQuery: UseQueryResult<string, Error>
   currentVotesQuery: UseQueryResult<string, Error>
@@ -26,8 +30,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }
     if (quorumQuery.data === undefined || currentVotesQuery.data === undefined) {
       return 0
     }
-    const quorumPercentage = (Number(currentVotesQuery.data) / Number(quorumQuery.data)) * 100
-    return Math.min(quorumPercentage, 100)
+    return (Number(currentVotesQuery.data) / Number(quorumQuery.data)) * 100
   }, [quorumQuery.data, currentVotesQuery.data])
 
   const stateColor = useMemo(() => {
@@ -57,7 +60,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }
           <HStack spacing={1} align="center">
             {isEndedAndQuorumNotReached && <UilTimes size="16px" color={stateColor} />}
             {isQuorumReached && <UilCheck size="16px" color={stateColor} />}
-            <Text fontWeight={400} fontSize={"14px"} color={stateColor}>
+            <Text fontWeight={600} fontSize={"14px"} color={stateColor}>
               {compactFormatter.format(Number(votesToQuorumPercentage))}
               {t("%")}
             </Text>
@@ -70,7 +73,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }
           bg={stateColor}
           h="8px"
           rounded="full"
-          w={`${Number(votesToQuorumPercentage)}%`}
+          w={`${Number(getSafePercentage(votesToQuorumPercentage))}%`}
           position="absolute"
           top={0}
           left={0}

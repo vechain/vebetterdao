@@ -2,7 +2,7 @@ import { RoundReward, buildClaimRewardsTx, getB3TrBalanceQueryKey, getRoundRewar
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { address } from "thor-devkit"
 
 type useClaimRewardsProps = {
@@ -30,7 +30,6 @@ export const useClaimRewards = ({
   onFailure,
   invalidateCache = true,
 }: useClaimRewardsProps): useClaimRewardsReturnValue => {
-  const { thor } = useConnex()
   const { account } = useWallet()
   const queryClient = useQueryClient()
 
@@ -38,10 +37,10 @@ export const useClaimRewards = ({
     (roundRewards: RoundReward[]) => {
       if (!address) throw new Error("address is required")
 
-      const clauses = buildClaimRewardsTx(thor, roundRewards, account ?? "")
+      const clauses = buildClaimRewardsTx(roundRewards, account ?? "")
       return clauses
     },
-    [account, thor],
+    [account],
   )
 
   // Refetch queries to update ui after the tx is confirmed

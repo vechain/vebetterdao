@@ -1,0 +1,11 @@
+{
+  "name": "VeBetterDAO Galaxy Member",
+  "description": "GM Earth is a community of people who participated in voting for the governance of VeBetter DAO.",
+  "image": "ipfs://bafybeihh7nenuhljj5d6ixfmf3b4ywmylpxvsgzntah6xjnk6fvdt3622i/images/1.png",
+  "attributes": [
+    {
+      "trait_type": "Level",
+      "value": 1
+    }
+  ]
+}
