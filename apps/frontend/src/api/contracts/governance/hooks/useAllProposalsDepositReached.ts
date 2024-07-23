@@ -3,7 +3,6 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { abi } from "thor-devkit"
-import { useProposalsEvents } from "./useProposalsEvents"
 import { getIsDepositReachedQueryKey } from "./useIsDepositReached"
 
 const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
@@ -24,13 +23,9 @@ const getAllProposalsDepositReachedClauses = (proposalIds: string[]) => {
 
 export const getAllProposalsDepositReachedQueryKey = () => ["PROPOSALS", "ALL", "DEPOSIT_REACHED"]
 
-export const useAllProposalsDepositReached = () => {
+export const useAllProposalsDepositReached = (proposalsIds: string[]) => {
   const { thor } = useConnex()
   const queryClient = useQueryClient()
-
-  const { data: proposals } = useProposalsEvents()
-
-  const proposalsIds = proposals?.created.map(proposal => proposal.proposalId) || []
 
   return useQuery({
     queryKey: getAllProposalsDepositReachedQueryKey(),

@@ -8,9 +8,15 @@ import { ProposalFilter, StateFilter } from "../components"
  */
 export const useFilteredProposals = () => {
   const { data: proposalsEvents, isLoading: proposalsEventsLoading } = useProposalsEvents()
-  const { data: allProposalsState, isLoading: allProposalsStateLoading } = useAllProposalsState()
+
+  const proposalsIds = useMemo(() => {
+    if (!proposalsEvents?.created) return []
+    return proposalsEvents?.created.map(proposal => proposal.proposalId)
+  }, [proposalsEvents])
+
+  const { data: allProposalsState, isLoading: allProposalsStateLoading } = useAllProposalsState(proposalsIds)
   const { data: allProposalsDepositReached, isLoading: allProposalsDepositReachedLoading } =
-    useAllProposalsDepositReached()
+    useAllProposalsDepositReached(proposalsIds)
   const { selectedFilter } = useProposalFilters()
 
   const checkProposalState = useCallback(
@@ -62,7 +68,7 @@ export const useFilteredProposals = () => {
   const sortedFilteredProposals = useMemo(() => {
     if (!filteredProposals) return []
 
-    const sortedProposals = filteredProposals.sort((a, b) => {
+    const sortedProposals = [...filteredProposals].sort((a, b) => {
       // sort first by roundId, then by timestamp
       const aRoundID = Number(a.roundIdVoteStart)
       const bRoundID = Number(b.roundIdVoteStart)

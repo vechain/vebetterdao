@@ -3,7 +3,6 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { abi } from "thor-devkit"
-import { useProposalsEvents } from "./useProposalsEvents"
 import { getProposalStateQueryKey, ProposalState } from "./useProposalState"
 
 const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
@@ -13,24 +12,22 @@ const proposalStateABi = new abi.Function(JSON.parse(proposalStateFragment))
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 
 const getAllProposalsStateClauses = (proposalIds: string[]) => {
-  const clauses: Connex.VM.Clause[] = proposalIds.map(proposalId => ({
-    to: GOVERNANCE_CONTRACT,
-    value: 0,
-    data: proposalStateABi.encode(proposalId),
-  }))
+  const clauses: Connex.VM.Clause[] = proposalIds.map(proposalId => {
+    return {
+      to: GOVERNANCE_CONTRACT,
+      value: 0,
+      data: proposalStateABi.encode(proposalId),
+    }
+  })
 
   return clauses
 }
 
 export const getAllProposalsStateQueryKey = () => ["PROPOSALS", "ALL", "STATE"]
 
-export const useAllProposalsState = () => {
+export const useAllProposalsState = (proposalsIds: string[]) => {
   const { thor } = useConnex()
   const queryClient = useQueryClient()
-
-  const { data: proposals } = useProposalsEvents()
-
-  const proposalsIds = proposals?.created.map(proposal => proposal.proposalId) || []
 
   return useQuery({
     queryKey: getAllProposalsStateQueryKey(),
