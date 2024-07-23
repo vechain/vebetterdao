@@ -76,7 +76,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function checkEndorsement(bytes32 appId) external returns (bool) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    uint256 score = _getScore(appId);
+    uint256 score = _getScore(appId, address(0));
 
     // Check the total score and update the grace period and voting eligibility accordingly
     if (score < 100) {
@@ -105,7 +105,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     $._appEndorsers[appId].push(msg.sender);
     $.endorsers[msg.sender] = true;
 
-    uint256 score = _getScore(appId);
+    uint256 score = _getScore(appId, address(0));
     if (score >= 100) {
       _addApp(appId);
       _setEndorsementStatus(appId, true);
@@ -114,14 +114,37 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     emit AppEndorsed(appId, msg.sender, true);
   }
 
+  function unendorseApp(bytes32 appId) external {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    require($.endorsers[msg.sender], "X2Earn: User is not an endorser");
+
+    uint256 score = _getScore(appId, msg.sender);
+
+    emit AppEndorsed(appId, msg.sender, false);
+
+    if ($._unendorsedAppsIndex[appId] < $._unendorsedApps.length) {
+      return;
+    }
+
+    if (score < 100) {
+      $._appGracePeriod[appId] += 1;
+      if ($._appGracePeriod[appId] > $._gracePeriod) {
+        _setVotingEligibility(appId, false);
+        _setEndorsementStatus(appId, false);
+      }
+    }
+    return;
+  }
+
   // ---------- Internal ---------- //
 
-  /* @dev Internal function to get the score of an app.
-   *
+  /**
+   * @dev Internal function to get the score of an app and optionally remove an endorser's endorsement.
    * @param appId The unique identifier of the app.
-   * @return The score of the app.
+   * @param endorserToRemove Optional parameter. If provided, the function will remove this endorser's endorsement.
+   * @return uint256 The score of the app.
    */
-  function _getScore(bytes32 appId) internal returns (uint256) {
+  function _getScore(bytes32 appId, address endorserToRemove) internal returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
     uint256 score;
     for (uint256 i; i < $._appEndorsers[appId].length; ) {
@@ -129,7 +152,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       uint256 endorserTokenID = $._tokenAuctionContract.ownerToId(endorser);
       (, uint8 nodeLevel, , , , , ) = $._tokenAuctionContract.getMetadata(endorserTokenID);
 
-      if (nodeLevel == 0) {
+      if (nodeLevel == 0 || endorser == endorserToRemove) {
         // Remove endorser by swapping with the last element and then reducing the length
         $._appEndorsers[appId][i] = $._appEndorsers[appId][$._appEndorsers[appId].length - 1];
         $._appEndorsers[appId].pop();
