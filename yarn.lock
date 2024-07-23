@@ -2788,6 +2788,26 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
+"@datadog/browser-core@5.23.0":
+  version "5.23.0"
+  resolved "https://registry.yarnpkg.com/@datadog/browser-core/-/browser-core-5.23.0.tgz#162414c89d0a065a8d0c47cc2603c77990b732e4"
+  integrity sha512-Nu8ux1sa+Bdtph+DTkB0MhziFKE1Grsqp+l59rWcFOjZjOUCmLT/0hpfiYYfahBOWvfLPAZZg799ykVLmEjnlw==
+
+"@datadog/browser-rum-core@5.23.0":
+  version "5.23.0"
+  resolved "https://registry.yarnpkg.com/@datadog/browser-rum-core/-/browser-rum-core-5.23.0.tgz#b8e260f4479e6bd81512f8b53d83ec16f64de2b9"
+  integrity sha512-iF1Bl+x20edGbQ3h0rSfqUzhHJ0OkReJtyXLaUhOAnbyos/6tuzELbEbFmiwqO8Aafo4GYq0MsjgtsbYC60noA==
+  dependencies:
+    "@datadog/browser-core" "5.23.0"
+
+"@datadog/browser-rum@^5.23.0":
+  version "5.23.0"
+  resolved "https://registry.yarnpkg.com/@datadog/browser-rum/-/browser-rum-5.23.0.tgz#27c31e3f162205de35d5ed3a288b6d573fd0a82b"
+  integrity sha512-6x7n51TKf7hwpbwBGJolgyQD9l3QZI4jXFn0IW2s6tyHsE/Yh2oLczAE28tHgcqCoz3zQW7zw7FszcnD5cDEUQ==
+  dependencies:
+    "@datadog/browser-core" "5.23.0"
+    "@datadog/browser-rum-core" "5.23.0"
+
 "@discoveryjs/json-ext@^0.5.0":
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/@discoveryjs/json-ext/-/json-ext-0.5.7.tgz#1d572bfbbe14b7704e0ba0f39b74815b84870d70"
