@@ -42,9 +42,14 @@ export const upgradeProxy = async (
   newVersionContractName: string,
   proxyAddress: string,
   args: any[] = [],
+  libraries: { [libraryName: string]: string } = {},
+  version?: number,
 ): Promise<BaseContract> => {
-  // Deploy the implementation contract
-  const Contract = await ethers.getContractFactory(newVersionContractName)
+  // Deploy the new implementation contract
+  const Contract = await ethers.getContractFactory(newVersionContractName, {
+    libraries: libraries,
+  })
+
   const implementation = await Contract.deploy()
   await implementation.waitForDeployment()
 
@@ -66,8 +71,8 @@ export const upgradeProxy = async (
   return Contract.attach(proxyAddress)
 }
 
-export function getInitializerData(contractInterface: Interface, args: any[]) {
-  const initializer = "initialize"
+export function getInitializerData(contractInterface: Interface, args: any[], version?: number) {
+  const initializer = version ? `initializeV${version}` : "initialize"
   const fragment = contractInterface.getFunction(initializer)
   if (!fragment) {
     throw new Error(`Contract initializer not found`)
