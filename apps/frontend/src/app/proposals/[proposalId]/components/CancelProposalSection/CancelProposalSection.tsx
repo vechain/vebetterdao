@@ -1,4 +1,3 @@
-import { ProposalState } from "@/api"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useCancelProposal } from "@/hooks/useCancelProposal"
 import {
@@ -16,15 +15,12 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { UilBan } from "@iconscout/react-unicons"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../hooks"
 
 export const CancelProposalSection = () => {
   const { t } = useTranslation()
-  const { account } = useWallet()
   const { proposal } = useProposalDetail()
   const confirmationModal = useDisclosure()
   const transactionModal = useDisclosure()
@@ -48,13 +44,12 @@ export const CancelProposalSection = () => {
     cancelProposalMutation.resetStatus()
   }, [cancelProposalMutation, transactionModal])
 
-  if (compareAddresses(proposal.proposer, account || "") && proposal.state !== ProposalState.Pending) {
-    return null
-  }
-
-  if (proposal.state !== ProposalState.Pending || !compareAddresses(proposal.proposer, account || "")) {
-    return null
-  }
+  // if (compareAddresses(proposal.proposer, account || "") && proposal.state !== ProposalState.Pending) {
+  //   return null
+  // }
+  // if (proposal.state !== ProposalState.Pending || !compareAddresses(proposal.proposer, account || "")) {
+  //   return null
+  // }
 
   return (
     <Card variant="baseWithBorder">
