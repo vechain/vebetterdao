@@ -5,6 +5,7 @@ import { useCallback, useMemo } from "react"
 import { FaRegClock } from "react-icons/fa"
 import { useClaimReward } from "@/hooks/useClaimReward"
 import { TransactionModal } from "@/components"
+import { Trans, useTranslation } from "react-i18next"
 
 type Props = {
   roundId: string
@@ -20,6 +21,8 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
   const { data: roundReward, isLoading: isRoundRewardLoading } = useRoundReward(account ?? "", roundId)
 
+  const { t } = useTranslation()
+
   const {
     sendTransaction,
     resetStatus,
@@ -27,7 +30,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
     status: claimRewardsStatus,
     txReceipt,
     sendTransactionTx,
-  } = useClaimReward({ roundId, roundReward: roundReward ?? "" })
+  } = useClaimReward({ roundId })
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
@@ -65,53 +68,68 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
     if (hasVoted && !isFinished) {
       return (
         <Text fontSize={14} fontWeight={400}>
-          <b>You’ve voted on this allocation round!</b>
-          {!isFinished && " You’ll be able to claim your reward when the round is over."}
+          <b>{t("You’ve voted on this allocation round!")}</b>
+          {!isFinished && ` ${t("You’ll be able to claim your reward when the round is over.")}`}
         </Text>
       )
     }
 
-    if (!hasVoted && !isFinished) {
+    if (!hasVoted && !isFinished)
       return (
         <Text fontSize={14} fontWeight={400}>
-          Vote on this allocation round to <b>receive rewards</b> after the voting session has ended.
+          <Trans
+            i18nKey={"Vote on this allocation round to receive rewards after the voting session has ended."}
+            t={t}
+          />
         </Text>
       )
-    }
 
     if (!hasVoted && isFinished)
       return (
         <Text fontSize={14} fontWeight={400}>
-          You didn't vote on this allocation round. You can still <b>vote on the next one to receive rewards.</b>
+          <Trans
+            i18nKey={"You didn't vote on this allocation round. You can still vote on the next one to receive rewards."}
+            t={t}
+          />
         </Text>
       )
 
     if (formattedRoundReward > 0)
       return (
         <Text fontSize={14} fontWeight={400}>
-          You’ve earned <b>{formattedRoundReward} B3TR</b> as a reward for voting on this allocation round.{" "}
-          <b>Claim them now!</b>
+          <Trans
+            i18nKey={
+              "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!"
+            }
+            values={{ formattedRoundReward }}
+            t={t}
+          />
         </Text>
       )
 
     return (
       <Text fontSize={14} fontWeight={400}>
-        You’ve claimed your voter rewards! Remember to <b>vote on the next allocation round</b> to receive more rewards.
+        <Trans
+          i18nKey={
+            "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards."
+          }
+          t={t}
+        />
       </Text>
     )
-  }, [formattedRoundReward, hasVoted, isFinished])
+  }, [formattedRoundReward, hasVoted, isFinished, t])
 
   const canClaim = useMemo(() => {
     return formattedRoundReward > 0 && isFinished
   }, [formattedRoundReward, isFinished])
 
   const buttonText = useMemo(() => {
-    if (hasVoted && formattedRoundReward === 0) return "Rewards claimed"
+    if (hasVoted && formattedRoundReward === 0) return t("Rewards claimed")
 
-    if (isFinished && formattedRoundReward > 0) return "Claim rewards"
+    if (isFinished && formattedRoundReward > 0) return t("Claim rewards")
 
-    return `Rewards claimable in ${remainingTime}`
-  }, [formattedRoundReward, hasVoted, isFinished, remainingTime])
+    return <Trans i18nKey={"Rewards claimable in {{remainingTime}}"} values={{ remainingTime }} t={t} />
+  }, [formattedRoundReward, hasVoted, isFinished, remainingTime, t])
 
   return (
     <>
@@ -130,7 +148,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
         <VStack alignItems={"flex-start"}>
           <Image src="/images/gift.svg" alt="Allocation voter rewards" boxSize={"72px"} />
           <Text fontSize={24} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
-            Voting rewards
+            {t("Voting rewards")}
           </Text>
           <Box mt={3} mb={1}>
             {description}
@@ -155,13 +173,13 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={"Rewards claimed!"}
+        successTitle={t("Rewards claimed!")}
         status={claimRewardError ? "error" : claimRewardsStatus}
         errorDescription={claimRewardError?.reason}
-        errorTitle={claimRewardError ? "Error claiming" : undefined}
+        errorTitle={claimRewardError ? t("Error claiming") : undefined}
         showTryAgainButton
         onTryAgain={onTryAgain}
-        pendingTitle="Claiming rewards..."
+        pendingTitle={t("Claiming rewards...")}
         showSocialButtons
         socialDescriptionEncoded="%F0%9F%8E%89%20Just%20claimed%20my%20%24B3TR%20rewards%20for%20voting%20in%20the%20%23VeBetterDAO%21%20%0A%0AJoin%20us%20and%20have%20your%20say%20in%20the%20future%20of%20sustainability%20at%20https%3A%2F%2Fvebetterdao.org.%20%0A%0A%23VeBetterDAO%20%23Vechain"
         showExplorerButton
