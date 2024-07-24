@@ -35,6 +35,7 @@ export type ContractsConfig = {
   VOTER_REWARDS_MULTIPLIER: number[]
 
   XAPP_BASE_URI: string
+  XAPP_GRACE_PERIOD: number
 
   TREASURY_TRANSFER_LIMIT_VET: bigint
   TREASURY_TRANSFER_LIMIT_B3TR: bigint
