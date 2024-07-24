@@ -14,6 +14,7 @@ import { getConfig } from "@repo/config"
 import "@/i18n"
 import { useEffect } from "react"
 import { t } from "i18next"
+import { datadogRum } from '@datadog/browser-rum'
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -27,6 +28,43 @@ const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").the
 
 //TODO: Is there a better place to initialise mixpanel? next/script?
 typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
+
+// initialise datadog with secrets from AWS Secrets Manager
+const getEnvDatadogApp = () => {
+  const token = process.env.NEXT_PUBLIC_DATADOG_APP_TOKEN
+
+  return token ?? ''
+}
+const getEnvDatadogClient = () => {
+  const token = process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN
+
+  return token ?? ''
+}
+const datadog_app_token = getEnvDatadogApp()
+const datadog_client_token =  getEnvDatadogClient()
+const datadog_env =  process.env.NEXT_PUBLIC_DATADOG_ENV
+
+console.log('Datadog App Token:', datadog_app_token);
+console.log('Datadog Client Token:', datadog_client_token);
+
+
+datadogRum.init({
+    applicationId: datadog_app_token,
+    clientToken: datadog_client_token,
+    // `site` refers to the Datadog site parameter of your organization
+    // see https://docs.datadoghq.com/getting_started/site/
+    site: 'datadoghq.eu',
+    service: 'b3tr',
+    env: datadog_env,
+    // Specify a version number to identify the deployed version of your application in Datadog
+    // version: '1.0.0', 
+    sessionSampleRate: 100,
+    sessionReplaySampleRate: 20,
+    trackUserInteractions: true,
+    trackResources: true,
+    trackLongTasks: true,
+    defaultPrivacyLevel: 'mask-user-input',
+});
 
 // workaround for "@iconscout/react-unicons
 const error = console.error
