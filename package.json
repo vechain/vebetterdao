@@ -10,7 +10,7 @@
     "build:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -- turbo build",
     "build:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo build",
     "build:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo build",
-    "dev": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo dev --",
+    "dev": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env -- turbo dev --",
     "dev:simulation": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v RUN_SIMULATION=true -- turbo dev --",
     "dev:staging": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -e .env -- turbo dev --",
     "dev:testnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo dev:testnet --",
@@ -39,13 +39,13 @@
     "prepare": "husky install"
   },
   "devDependencies": {
+    "@datadog/browser-rum": "^5.23.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "dotenv-cli": "latest",
     "husky": "^8.0.0",
     "prettier": "^3.3.0",
-    "turbo": "^1.13.3",
-    "@datadog/browser-rum": "^5.23.0"
+    "turbo": "^1.13.3"
   },
   "engines": {
     "node": ">=18"
@@ -54,5 +54,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
 }

@@ -30,10 +30,23 @@ const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").the
 typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
 
 // initialise datadog with secrets from AWS Secrets Manager
+const getEnvDatadogApp = () => {
+  const token = process.env.NEXT_PUBLIC_DATADOG_APP_TOKEN
 
-const datadog_app_token = getConfig().datadogApplicationId
-const datadog_client_token =  getConfig().datadogClientToken
-const datadog_env =  getConfig().datadogClientToken
+  return token ?? ''
+}
+const getEnvDatadogClient = () => {
+  const token = process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN
+
+  return token ?? ''
+}
+const datadog_app_token = getEnvDatadogApp()
+const datadog_client_token =  getEnvDatadogClient()
+const datadog_env =  process.env.NEXT_PUBLIC_DATADOG_ENV
+
+console.log('Datadog App Token:', datadog_app_token);
+console.log('Datadog Client Token:', datadog_client_token);
+
 
 datadogRum.init({
     applicationId: datadog_app_token,
