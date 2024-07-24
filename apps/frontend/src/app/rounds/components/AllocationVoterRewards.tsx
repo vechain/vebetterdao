@@ -6,11 +6,17 @@ import { FaRegClock } from "react-icons/fa"
 import { useClaimReward } from "@/hooks/useClaimReward"
 import { TransactionModal } from "@/components"
 import { Trans, useTranslation } from "react-i18next"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   roundId: string
   hasVoted?: boolean
 }
+
+const DECIMAL_PLACES = 4
+
+// Maximum precision of 4 decimals. Must also round down
+const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 
 export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
   const { data: roundState } = useAllocationsRoundState(roundId)
@@ -101,7 +107,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
             i18nKey={
               "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!"
             }
-            values={{ formattedRoundReward }}
+            values={{ formattedRoundReward: compactFormatter.format(formattedRoundReward) }}
             t={t}
           />
         </Text>
