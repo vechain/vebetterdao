@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
+import { Button, HStack, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
 import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ChangeEvent, useCallback, useRef, useState } from "react"
@@ -6,6 +6,7 @@ import { UilTrash, UilUpload } from "@iconscout/react-unicons"
 import { EditAppForm } from ".."
 import { imageListCompression } from "@/utils/imageListCompression"
 import { blobToBase64 } from "@/utils/BlobUtils"
+import { Reorder } from "framer-motion"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, undefined>
@@ -45,6 +46,13 @@ export const EditScreenshots = ({ form }: Props) => {
     [form, screenshots, toast],
   )
 
+  const reorderScreenshots = useCallback(
+    (screenshots: string[]) => {
+      form.setValue("screenshots", screenshots)
+    },
+    [form],
+  )
+
   return (
     <VStack align="stretch" gap={6}>
       <HStack justify={"space-between"} flexWrap={"wrap"}>
@@ -67,19 +75,40 @@ export const EditScreenshots = ({ form }: Props) => {
         />
       </HStack>
       {screenshots.length === 0 && <Text color="#6A6A6A">{t("No screenshot added yet")}</Text>}
-      <Box overflowX="auto" gap={4} whiteSpace={"nowrap"}>
+      <Reorder.Group
+        axis="x"
+        values={screenshots}
+        onReorder={reorderScreenshots}
+        layoutScroll
+        as="div"
+        style={{
+          gap: "8px",
+          alignItems: "center",
+          overflowX: "auto",
+          whiteSpace: "nowrap",
+        }}>
         {screenshots.map((screenshot, index) => (
-          <Box
-            key={index}
-            w="auto"
-            maxW="none"
-            h="400px"
-            borderRadius="8px"
-            overflow="hidden"
-            display={"inline-block"}
-            mx={2}
-            position="relative">
-            <Image src={screenshot} alt={`Screenshot ${index + 1}`} h="full" objectFit="cover" maxW="none" />
+          <Reorder.Item
+            key={screenshot}
+            value={screenshot}
+            as="div"
+            style={{
+              display: "inline-block",
+              width: "auto",
+              height: "400px",
+              margin: "0 8px",
+              borderRadius: "8px",
+              overflow: "hidden",
+              position: "relative",
+            }}>
+            <Image
+              src={screenshot}
+              alt={`Screenshot ${index + 1}`}
+              h="full"
+              objectFit="cover"
+              maxW="none"
+              draggable="false"
+            />
             <IconButton
               rounded="full"
               color="#D23F63"
@@ -98,9 +127,9 @@ export const EditScreenshots = ({ form }: Props) => {
                 )
               }}
             />
-          </Box>
+          </Reorder.Item>
         ))}
-      </Box>
+      </Reorder.Group>
     </VStack>
   )
 }

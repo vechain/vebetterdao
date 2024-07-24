@@ -17,8 +17,9 @@ export const useIsFormChanged = (form: UseFormReturn<EditAppForm, any, undefined
   const isAppUrlChanged = form.watch("external_url") !== appMetadata?.external_url
   const isDescriptionChanged = form.watch("description") !== appMetadata?.description
   const isScreenshotsChanged =
-    screenshots.some(screenshot => !form.watch("screenshots").includes(screenshot)) ||
-    screenshots.length !== form.watch("screenshots").length
+    screenshots.length !== form.watch("screenshots").length ||
+    screenshots.some((screenshot, index) => screenshot !== form.watch("screenshots")[index])
+
   const isSocialUrlsChanged =
     socialUrls.some(
       socialUrl => !appMetadata?.social_urls?.find(url => url.name === socialUrl.name && url.url === socialUrl.url),
