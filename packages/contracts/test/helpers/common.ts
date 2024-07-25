@@ -9,6 +9,7 @@ import { type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
 import { ZERO_ADDRESS } from "./const"
 import { buildTxBody, signAndSendTx } from "../../scripts/helpers/txHelper"
 import { getTestKeys } from "../../scripts/helpers/seedAccounts"
+import { endorseApp } from "./xnodes"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -439,12 +440,15 @@ export const voteOnApps = async (
 }
 
 export const addAppsToAllocationVoting = async (apps: string[], owner: HardhatEthersSigner) => {
-  const { x2EarnApps } = await getOrDeployContractInstances({})
+  const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({})
 
   let appIds: string[] = []
+  let i =  0;
   for (const app of apps) {
-    await x2EarnApps.connect(owner).addApp(app, app, app, "metadataURI")
-    appIds.push(ethers.keccak256(ethers.toUtf8Bytes(app)))
+    await x2EarnApps.connect(owner).registerApp(app, app, app, "metadataURI")
+    const appId = await x2EarnApps.hashAppName(app)
+    appIds.push(appId)
+    endorseApp(appId, otherAccounts[i])
   }
 
   return appIds
@@ -522,7 +526,8 @@ export const participateInAllocationVoting = async (user: HardhatEthersSigner, w
 
   const appName = "App" + Math.random()
 
-  await x2EarnApps.connect(owner).addApp(user.address, user.address, appName, "metadataURI")
+  await x2EarnApps.connect(owner).registerApp(user.address, user.address, appName, "metadataURI")
+  await endorseApp(await x2EarnApps.hashAppName(appName), user)
   const roundId = await startNewAllocationRound()
 
   // Vote
