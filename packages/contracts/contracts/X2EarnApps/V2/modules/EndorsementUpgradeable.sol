@@ -43,7 +43,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant EndorsementStorageLocation =
-    0x83b9a7e51f394efa93107c3888716138908bbbe611dfc86afa3639a826441100;
+    0xc1a7bcdc0c77e8c77ade4541d1777901ab96ca598d164d89afa5c8dfbfc44300;
 
   function _getEndorsementStorage() internal pure returns (EndorsementStorage storage $) {
     assembly {
@@ -282,7 +282,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    if (!endorsed) {
+    if (endorsed) {
       /**
        *  If the app is no longer pending endorsement we need to remove it from the _unendorsedApps array
        *
