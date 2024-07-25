@@ -127,10 +127,6 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
       revert X2EarnAppAlreadyExists(id);
     }
 
-    if (appPendingEndorsment(id)) {
-      revert X2EarnAppAlreadyExists(id);
-    }
-
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     // Store the new app
@@ -140,6 +136,8 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     _updateAppMetadata(id, metadataURI);
     _setTeamAllocationPercentage(id, 0);
     _setEndorsementStatus(id, false);
+
+    emit AppAdded(id, teamWalletAddress, appName, false);
   }
 
   function _getAppsInfo(
