@@ -72,10 +72,6 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
    * @dev Update the app availability for voting checkpoint.
    */
   function _setVotingEligibility(bytes32 appId, bool canBeVoted) internal override {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
     VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
 
     // We update the checkpoint with the new Eligibility status
@@ -125,6 +121,13 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
     emit VotingEligibilityUpdated(appId, canBeVoted);
   }
 
+  function _setBlacklist(bytes32 appId, bool isBlacklisted) internal {
+    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
+
+    $._blackList[appId] = isBlacklisted;
+    emit BlacklistUpdated(appId, isBlacklisted);
+  }
+
   /**
    * @dev Store a new checkpoint for the app's Eligibility.
    */
@@ -141,6 +144,15 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
     VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
 
     return $._eligibleApps;
+  }
+
+  /**
+   * @dev Returns true if an app is blacklisted.
+   */
+  function isBlacklisted(bytes32 appId) public view virtual override returns (bool) {
+    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
+
+    return $._blackList[appId];
   }
 
   /**

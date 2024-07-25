@@ -131,7 +131,20 @@ contract X2EarnAppsV2 is
    * @dev See {IX2EarnAppsV2-setVotingEligibility}.
    */
   function setVotingEligibility(bytes32 _appId, bool _isEligible) public onlyRole(GOVERNANCE_ROLE) {
-    _setVotingEligibility(_appId, _isEligible);
+    if (!appExists(_appId)) {
+      revert X2EarnNonexistentApp(_appId);
+    }
+
+    if (isEligibleNow(_appId) && !_isEligible) {
+      // Remove the app from the voting eligibility list
+      _setVotingEligibility(_appId, false);
+    } else if (!isEligibleNow(_appId) && _isEligible) {
+      // Add the app to the voting eligibility list
+      _setVotingEligibility(_appId, true);
+    }
+
+    // Set the app in the blacklist if not eligible and called by governance
+    _setBlacklist(_appId, !_isEligible);
   }
 
   /**

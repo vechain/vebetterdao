@@ -100,6 +100,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnAppsV2 {
   /**
    * @inheritdoc IX2EarnAppsV2
    */
+  function isBlacklisted(bytes32 appId) public view virtual returns (bool);
+
+  /**
+   * @inheritdoc IX2EarnAppsV2
+   */
   function baseURI() public view virtual returns (string memory);
 
   /**

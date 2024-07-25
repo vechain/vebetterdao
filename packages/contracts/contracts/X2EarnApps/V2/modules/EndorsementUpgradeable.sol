@@ -59,7 +59,10 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     __Endorsement_init_unchained(gracePeriodDuration, vechainNodesContract);
   }
 
-  function __Endorsement_init_unchained(uint256 gracePeriodDuration, address vechainNodesContract) internal onlyInitializing {
+  function __Endorsement_init_unchained(
+    uint256 gracePeriodDuration,
+    address vechainNodesContract
+  ) internal onlyInitializing {
     EndorsementStorage storage $ = _getEndorsementStorage();
     $._gracePeriodDuration = gracePeriodDuration;
     $._vechainNodesContract = ITokenAuction(vechainNodesContract);
@@ -83,6 +86,14 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function checkEndorsement(bytes32 appId) external returns (bool) {
     // Get the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
+
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    if (isBlacklisted(appId)) {
+      return false;
+    }
 
     // Calculate the score of the app, considering if any endorser needs to be removed
     uint256 score = _getScore(appId, address(0));
@@ -126,6 +137,16 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function endorseApp(bytes32 appId) public {
     // Get the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
+
+    // Check if the app exists
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    // Check if the app is blacklisted
+    if (isBlacklisted(appId)) {
+      revert X2EarnAppBlacklisted(appId);
+    }
 
     // Check if the app is pending endorsement
     if (!appPendingEndorsment(appId)) {
@@ -182,6 +203,11 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param appId The unique identifier of the app being unendorsed.
    */
   function unendorseApp(bytes32 appId) external {
+    // Check if the app exists
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
     // Get the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
 
@@ -276,10 +302,6 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param endorsed The endorsement status to set.
    */
   function _setEndorsementStatus(bytes32 appId, bool endorsed) internal override {
-    if (!appExists(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     if (endorsed) {

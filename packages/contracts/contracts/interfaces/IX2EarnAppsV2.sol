@@ -101,6 +101,11 @@ interface IX2EarnAppsV2 {
   error X2EarnMaxModeratorsReached(bytes32 appId);
 
   /**
+   * @dev The app is blacklisted.
+   */
+  error X2EarnAppBlacklisted(bytes32 appId);
+  
+  /**
    * @dev The maximum number of reward distributors has been reached.
    */
   error X2EarnMaxRewardDistributorsReached(bytes32 appId);
@@ -114,6 +119,11 @@ interface IX2EarnAppsV2 {
    * @dev Event fired when an app Eligibility for allocation voting changes.
    */
   event VotingEligibilityUpdated(bytes32 indexed appId, bool isAvailable);
+
+  /**
+   * @dev Event fired when an app is blacklisted or unblacklisted.
+   */
+  event BlacklistUpdated(bytes32 indexed appId, bool isBlacklisted);
 
   /**
    * @dev Event fired when the admin adds a new moderator to the app.
@@ -340,6 +350,13 @@ interface IX2EarnAppsV2 {
    * @param appId the id of the app
    */
   function appExists(bytes32 appId) external view returns (bool);
+
+  /**
+   * @dev Check if an app is blacklisted.
+   *
+   * @param appId the id of the app
+   */
+  function isBlacklisted(bytes32 appId) external view returns (bool);
 
   /**
    * @dev Allow or deny an app to participate in the next allocation voting rounds.
