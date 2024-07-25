@@ -3,20 +3,16 @@ import en from "../../i18n/languages/en.json"
 import { forEach } from "lodash"
 import { translations } from "../../i18n"
 import { KeyValueObject } from "./types"
-import { askChatGpt, languagesToGenerate, splitObjectIntoBatches } from "./utils"
-import { fixedWords } from "./fixedWords"
+import { askChatGpt, getFixedWordPrompt, languagesToGenerate, splitObjectIntoBatches } from "./utils"
 
 const generatePrompt = (language: string, batch: KeyValueObject) => {
-  const fixedWordsForLanguage = fixedWords[language] || {}
-
   return `
 I'm working on internationalizing my application. 
 I will send you a json object with the translations from English to ${language}.
 Keep the object keys identical, some object values are empty string, please fill just them.
 respond using an unique JSON object without any comments or any other descriptions.
 
-when translating the following words, please use the following translations (case insensitive):
-${JSON.stringify(fixedWordsForLanguage, null, 2)}
+${getFixedWordPrompt(language)}
 
 this is the JSON object with the translations:
 ${JSON.stringify(batch, null, 2)}

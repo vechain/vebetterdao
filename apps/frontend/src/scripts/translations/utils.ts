@@ -1,6 +1,7 @@
 import { OpenAIHelper } from "../../utils/OpenAiUtils"
 import { KeyValueObject } from "./types"
 import { languages } from "../../i18n"
+import { fixedWords } from "./fixedWords"
 
 export const languagesToGenerate = languages.filter(language => language.code !== "en")
 
@@ -29,4 +30,13 @@ export const splitObjectIntoBatches = (data: KeyValueObject): KeyValueObject[] =
   }
 
   return batches
+}
+
+export const getFixedWordPrompt = (language: string) => {
+  const fixedWordsForLanguage = fixedWords[language] || {}
+
+  return Object.keys(fixedWordsForLanguage).length > 0
+    ? `when translating the following words, please use the following translations (case insensitive):
+${JSON.stringify(fixedWordsForLanguage, null, 2)}`
+    : ""
 }

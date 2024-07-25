@@ -605,8 +605,8 @@
   " you’ll have. Use it to vote on proposals and allocation rounds.": "che avrai. Usalo per votare su proposte e round di allocazione.",
   "allocation rounds.": "round di allocazione.",
   "See all rounds": "Vedi tutti i round",
-  "in round #": "nel turno #",
-  "Last round id:": "ID dell'ultimo turno:",
-  "previous round": "turno precedente",
-  "Vote for your preferred app to determine funding from the Apps allocation budget. More votes mean more funding. Plus, earn rewards from the Voting Rewards allocation by voting in this round. This allocation process repeats every week.": "Vota per la tua app preferita per determinare il finanziamento dal budget di allocazione delle app. Più voti significano più finanziamenti. Inoltre, guadagna ricompense dall'allocazione delle Ricompense di Voto votando in questo turno. Questo processo di allocazione si ripete ogni settimana."
+  "in round #": "nel round #",
+  "Last round id:": "ID ultimo round:",
+  "previous round": "round precedente",
+  "Vote for your preferred app to determine funding from the Apps allocation budget. More votes mean more funding. Plus, earn rewards from the Voting Rewards allocation by voting in this round. This allocation process repeats every week.": "Vota per la tua app preferita per determinare i finanziamenti dal budget di allocazione delle app. Più voti significano più finanziamenti. Inoltre, guadagna ricompense dall'allocazione delle Ricompense di Votazione votando in questo round. Questo processo di allocazione si ripete ogni settimana."
 }
