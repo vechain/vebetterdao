@@ -16,6 +16,8 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { endorseApp } from "./helpers/xnodes"
 
 describe("X-Apps", function () {
   describe("Deployment", function () {
@@ -27,8 +29,9 @@ describe("X-Apps", function () {
 
   describe("Contract upgradeablity", () => {
     it("Cannot initialize twice", async function () {
-      const { x2EarnApps, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      await catchRevert(x2EarnApps.initialize("ipfs://", [owner.address], owner.address, owner.address))
+      const config = createLocalConfig()
+      const { x2EarnApps, vechainNodes } = await getOrDeployContractInstances({ forceDeploy: true })
+      await catchRevert(x2EarnApps.initializeV2(config.XAPP_GRACE_PERIOD, await vechainNodes.getAddress()))
     })
 
     it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
@@ -37,7 +40,7 @@ describe("X-Apps", function () {
       })
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("X2EarnApps")
+      const Contract = await ethers.getContractFactory("X2EarnAppsV2")
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -61,7 +64,7 @@ describe("X-Apps", function () {
       })
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("X2EarnApps")
+      const Contract = await ethers.getContractFactory("X2EarnAppsV2")
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -88,7 +91,7 @@ describe("X-Apps", function () {
     })
   })
 
-  describe("Settings", function () {
+   describe("Settings", function () {
     it("Admin can set baseURI for apps", async function () {
       const { owner, x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
 
@@ -110,13 +113,14 @@ describe("X-Apps", function () {
   })
 
   describe("Add apps", function () {
-    it("Should be able to add an app successfully", async function () {
+    it("Should be able to register an app successfully", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       let tx = await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
       let receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
@@ -128,66 +132,18 @@ describe("X-Apps", function () {
       expect(address).to.eql(otherAccounts[0].address)
     })
 
-    it("Should not be able to add an app if it is already added", async function () {
+    it("Should not be able to register an app if it is already registered", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
       await catchRevert(
         x2EarnApps
           .connect(owner)
-          .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI"),
+          .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI"),
       )
     })
-
-    it("Only admin address should be able to add an app", async function () {
-      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-
-      await catchRevert(
-        x2EarnApps
-          .connect(otherAccounts[0])
-          .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI"),
-      )
-    })
-
-    it("Should be possible to add a new app through the DAO", async function () {
-      const { otherAccounts, x2EarnApps, owner, timeLock } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      await bootstrapAndStartEmissions()
-
-      const proposer = otherAccounts[0]
-      const voter1 = otherAccounts[1]
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("Bike 4 Life"))
-
-      // check that the DAO is admin of the x2EarnApps contract
-      await x2EarnApps.connect(owner).grantRole(await x2EarnApps.GOVERNANCE_ROLE(), await timeLock.getAddress())
-      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), await timeLock.getAddress())).to.be.true
-
-      // check that app does not exists
-      expect(await x2EarnApps.appExists(app1Id)).to.be.false
-
-      await createProposalAndExecuteIt(
-        proposer,
-        voter1,
-        x2EarnApps,
-        await ethers.getContractFactory("X2EarnApps"),
-        "Add app to the list",
-        "addApp",
-        [otherAccounts[1].address, otherAccounts[1].address, "Bike 4 Life", "metadataURI"],
-      )
-
-      // check that app was added
-      const app = await x2EarnApps.app(app1Id)
-      expect(app[0]).to.eql(app1Id)
-      expect(app[1]).to.eql(otherAccounts[1].address)
-      expect(app[2]).to.eql("Bike 4 Life")
-
-      const admin = await x2EarnApps.appAdmin(app1Id)
-      expect(admin).to.eql(otherAccounts[1].address)
-    }).timeout(18000000)
 
     it("Should be able to fetch app team wallet address", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
@@ -198,10 +154,10 @@ describe("X-Apps", function () {
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
+        .registerApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
       const app1ReceiverAddress = await x2EarnApps.teamWalletAddress(app1Id)
       const app2ReceiverAddress = await x2EarnApps.teamWalletAddress(app2Id)
@@ -209,40 +165,71 @@ describe("X-Apps", function () {
       expect(app2ReceiverAddress).to.eql(otherAccounts[3].address)
     })
 
-    it("Cannot add an app that has ZERO address as the team wallet address", async function () {
+    it("Cannot register an app that has ZERO address as the team wallet address", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       await catchRevert(
-        x2EarnApps.connect(owner).addApp(ZERO_ADDRESS, otherAccounts[2].address, "My app", "metadataURI"),
+        x2EarnApps.connect(owner).registerApp(ZERO_ADDRESS, otherAccounts[2].address, "My app", "metadataURI"),
       )
     })
 
-    it("Cannot add an app that has ZERO address as the admin", async function () {
+    it("Cannot register an app that has ZERO address as the admin", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       await catchRevert(
-        x2EarnApps.connect(owner).addApp(otherAccounts[2].address, ZERO_ADDRESS, "My app", "metadataURI"),
+        x2EarnApps.connect(owner).registerApp(otherAccounts[2].address, ZERO_ADDRESS, "My app", "metadataURI"),
       )
     })
   })
 
   describe("Fetch apps", function () {
-    it("Can get apps count", async function () {
-      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+    it("Can get eligible apps count", async function () {
+      const { x2EarnApps, otherAccounts, owner, otherAccount} = await getOrDeployContractInstances({ forceDeploy: true })
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await endorseApp(app1Id, owner)
+
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+      
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+      await endorseApp(app2Id, otherAccount)
 
       const appsCount = await x2EarnApps.appsCount()
       expect(appsCount).to.eql(2n)
+    })
+
+    it("Can get unendorsed app ids", async function () {
+      const { x2EarnApps, otherAccounts, owner, otherAccount} = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      const apps = await x2EarnApps.appIdsPendingEndorsement()
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+
+      // unendorsed apps
+      const appIds = await x2EarnApps.appIdsPendingEndorsement()
+      expect(appIds).to.eql([app1Id, app2Id])
+
+      // endorsed apps
+      const appsCount = await x2EarnApps.appsCount()
+      expect(appsCount).to.eql(0n)
     })
 
     it("Can retrieve app by id", async function () {
@@ -251,7 +238,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const app = await x2EarnApps.app(app1Id)
       expect(app.id).to.eql(app1Id)
@@ -260,17 +247,39 @@ describe("X-Apps", function () {
       expect(app.metadataURI).to.eql("metadataURI")
     })
 
-    it("Can index apps", async function () {
+    it("Can index endorsed apps", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await endorseApp(app1Id, otherAccounts[0])
+      
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+      await endorseApp(app2Id, otherAccounts[1])
 
       const apps = await x2EarnApps.apps()
+      expect(apps.length).to.eql(2)
+    })
+
+    it("Can index unendorsed apps", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+
+      const apps = await x2EarnApps.appsPendingEndorsement()
       expect(apps.length).to.eql(2)
     })
 
@@ -279,16 +288,27 @@ describe("X-Apps", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await endorseApp(app1Id, otherAccounts[0])
+
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+      await endorseApp(app2Id, otherAccounts[1])
+
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
+        .registerApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
+      await endorseApp(app3Id, otherAccounts[2])
+
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
+        .registerApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
+      const app4Id = ethers.keccak256(ethers.toUtf8Bytes("My app #4"))
+      await endorseApp(app4Id, otherAccounts[3])
 
       const apps1 = await x2EarnApps.getPaginatedApps(0, 2)
       expect(apps1.length).to.eql(2)
@@ -306,17 +326,28 @@ describe("X-Apps", function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
       await x2EarnApps
-        .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
-      await x2EarnApps
-        .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
-      await x2EarnApps
-        .connect(owner)
-        .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
-      await x2EarnApps
-        .connect(owner)
-        .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
+      .connect(owner)
+      .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+    const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+    await endorseApp(app1Id, otherAccounts[0])
+
+    await x2EarnApps
+      .connect(owner)
+      .registerApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+    const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+    await endorseApp(app2Id, otherAccounts[1])
+
+    await x2EarnApps
+      .connect(owner)
+      .registerApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
+    const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
+    await endorseApp(app3Id, otherAccounts[2])
+
+    await x2EarnApps
+      .connect(owner)
+      .registerApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
+    const app4Id = ethers.keccak256(ethers.toUtf8Bytes("My app #4"))
+    await endorseApp(app4Id, otherAccounts[3])
 
       const count = await x2EarnApps.appsCount()
       expect(count).to.eql(4n)
@@ -336,16 +367,18 @@ describe("X-Apps", function () {
 
       // const limit = 1000
 
-      // let addAppsPromises = []
+      // let registerAppsPromises = []
       // for (let i = 1; i <= limit; i++) {
-      //   addAppsPromises.push(
+      //   registerAppsPromises.push(
       //     x2EarnApps
       //       .connect(owner)
-      //       .addApp(otherAccounts[1].address, otherAccounts[1].address, "My app" + i, "metadataURI"),
+      //       .registerApp(otherAccounts[1].address, otherAccounts[1].address, "My app" + i, "metadataURI"),
       //   )
+      //   const appId = ethers.keccak256(ethers.toUtf8Bytes("My app" + i))
+      //   await endorseApp(appId, otherAccounts[i])
       // }
 
-      // await Promise.all(addAppsPromises)
+      // await Promise.all(registerAppsPromises)
 
       // const apps = await x2EarnApps.apps()
       // expect(apps.length).to.eql(limit)
@@ -358,7 +391,7 @@ describe("X-Apps", function () {
   })
 
   describe("App availability for allocation voting", function () {
-    it("Should be possible to add an app and make it available for allocation voting", async function () {
+    it("Should be possible to endorse an app and make it available for allocation voting", async function () {
       const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -369,8 +402,11 @@ describe("X-Apps", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
-
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(appId, otherAccounts[0])
+      
       let roundId = await startNewAllocationRound()
 
       const isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, roundId)
@@ -387,7 +423,8 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      await endorseApp(app1Id, otherAccounts[0])
 
       let round1 = await startNewAllocationRound()
 
@@ -425,8 +462,11 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(appId, otherAccounts[0])
 
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(true)
       await x2EarnApps.connect(owner).setVotingEligibility(app1Id, false)
       expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(false)
 
@@ -453,6 +493,19 @@ describe("X-Apps", function () {
     })
 
     it("Non existing app is not eligible", async function () {
+      const { xAllocationVoting, x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+
+      expect(await x2EarnApps.isEligibleNow(appId)).to.eql(false)
+      expect(await x2EarnApps.isEligible(appId, (await xAllocationVoting.clock()) - 1n)).to.eql(false)
+    })
+
+    it("Non endorsed app is not eligible", async function () {
       const { xAllocationVoting, x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
 
       const app1Id = await x2EarnApps.hashAppName(ZERO_ADDRESS)
@@ -460,6 +513,7 @@ describe("X-Apps", function () {
       expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(false)
       expect(await x2EarnApps.isEligible(app1Id, (await xAllocationVoting.clock()) - 1n)).to.eql(false)
     })
+
 
     it("Cannot get eligilibity in the future", async function () {
       const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
@@ -469,13 +523,16 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(appId, otherAccounts[0])
 
       await expect(x2EarnApps.isEligible(app1Id, (await xAllocationVoting.clock()) + 1n)).to.be.reverted
     })
 
     it("DAO can make an app unavailable for allocation voting starting from next round", async function () {
-      const { otherAccounts, x2EarnApps, xAllocationVoting, emissions, timeLock } = await getOrDeployContractInstances({
+      const { otherAccounts, x2EarnApps, xAllocationVoting, emissions, timeLock, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -490,17 +547,14 @@ describe("X-Apps", function () {
 
       // granting role to the timelock
       await x2EarnApps.grantRole(await x2EarnApps.GOVERNANCE_ROLE(), await timeLock.getAddress())
+      
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "Bike 4 Life", "metadataURI")
+      await endorseApp(app1Id, otherAccounts[0])
 
-      await createProposalAndExecuteIt(
-        proposer,
-        voter1,
-        x2EarnApps,
-        await ethers.getContractFactory("X2EarnApps"),
-        "Add app to the list",
-        "addApp",
-        [otherAccounts[0].address, otherAccounts[0].address, "Bike 4 Life", "metadataURI"],
-      )
-
+      await waitForCurrentRoundToEnd()
+      
       // start new round
       await emissions.distribute()
       let round1 = await xAllocationVoting.currentRoundId()
@@ -513,7 +567,7 @@ describe("X-Apps", function () {
         proposer,
         voter1,
         x2EarnApps,
-        await ethers.getContractFactory("X2EarnApps"),
+        await ethers.getContractFactory("X2EarnAppsV2"),
         "Exclude app from the allocation voting rounds",
         "setVotingEligibility",
         [app1Id, false],
@@ -543,19 +597,7 @@ describe("X-Apps", function () {
       await catchRevert(x2EarnApps.connect(otherAccounts[0]).setVotingEligibility(app1Id, true))
     })
 
-    it("Only admin with governor role add an app to the list", async function () {
-      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: false })
-
-      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), otherAccounts[0].address)).to.eql(false)
-
-      await catchRevert(
-        x2EarnApps
-          .connect(otherAccounts[0])
-          .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI"),
-      )
-    })
-
-    it("App needs to wait next round if added during an ongoing round", async function () {
+    it("App needs to wait next round if endorsed during an ongoing round", async function () {
       const { otherAccounts, x2EarnApps, owner, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -572,7 +614,10 @@ describe("X-Apps", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(appId, otherAccounts[0])
       let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
       expect(isEligibleForVote).to.eql(false)
 
@@ -615,7 +660,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const admin = await x2EarnApps.appAdmin(app1Id)
       expect(admin).to.eql(otherAccounts[0].address)
@@ -640,7 +685,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await catchRevert(x2EarnApps.connect(otherAccounts[0]).setAppAdmin(app1Id, ZERO_ADDRESS))
     })
@@ -650,7 +695,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const admin = await x2EarnApps.appAdmin(app1Id)
       expect(admin).to.eql(otherAccounts[0].address)
@@ -667,7 +712,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       // check that is not admin
       expect(await x2EarnApps.isAppAdmin(app1Id, otherAccounts[1].address)).to.eql(false)
@@ -678,6 +723,7 @@ describe("X-Apps", function () {
       await catchRevert(x2EarnApps.connect(otherAccounts[1]).setAppAdmin(app1Id, otherAccounts[2].address))
     })
   })
+
 
   describe("Apps metadata", function () {
     it("Admin should be able to update baseURI", async function () {
@@ -697,7 +743,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const baseURI = await x2EarnApps.baseURI()
       const appURI = await x2EarnApps.appURI(app1Id)
@@ -710,7 +756,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const newMetadataURI = "metadataURI2"
       await x2EarnApps.connect(owner).updateAppMetadata(app1Id, newMetadataURI)
@@ -723,7 +769,7 @@ describe("X-Apps", function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const appAdmin = otherAccounts[9]
-      await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+      await x2EarnApps.connect(owner).registerApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
 
       const newMetadataURI = "metadataURI2"
       await x2EarnApps.connect(appAdmin).updateAppMetadata(app1Id, newMetadataURI)
@@ -737,7 +783,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const appAdmin = otherAccounts[9]
       const appModerator = otherAccounts[10]
-      await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+      await x2EarnApps.connect(owner).registerApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
 
       await x2EarnApps.connect(appAdmin).addAppModerator(app1Id, appModerator.address)
       expect(await x2EarnApps.isAppModerator(app1Id, appModerator.address)).to.be.true
@@ -755,7 +801,7 @@ describe("X-Apps", function () {
       const appAdmin = otherAccounts[9]
       const unauthorizedUser = otherAccounts[8]
       const oldMetadataURI = "metadataURI"
-      await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", oldMetadataURI)
+      await x2EarnApps.connect(owner).registerApp(otherAccounts[0].address, appAdmin.address, "My app", oldMetadataURI)
 
       const newMetadataURI = "metadataURI2"
       await expect(x2EarnApps.connect(unauthorizedUser).updateAppMetadata(app1Id, newMetadataURI)).to.be.rejected
@@ -780,13 +826,14 @@ describe("X-Apps", function () {
     })
   })
 
+
   describe("Team wallet address", function () {
     it("Should be able to fetch app team wallet address", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const teamWalletAddress = await x2EarnApps.teamWalletAddress(app1Id)
       expect(teamWalletAddress).to.eql(otherAccounts[0].address)
@@ -797,7 +844,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const appReceiverAddress1 = await x2EarnApps.teamWalletAddress(app1Id)
 
@@ -816,7 +863,7 @@ describe("X-Apps", function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const appAdmin = otherAccounts[9]
-      await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+      await x2EarnApps.connect(owner).registerApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
 
       const appReceiverAddress1 = await x2EarnApps.teamWalletAddress(app1Id)
 
@@ -838,7 +885,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const appReceiverAddress1 = await x2EarnApps.teamWalletAddress(app1Id)
 
@@ -863,7 +910,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const appReceiverAddress1 = await x2EarnApps.teamWalletAddress(app1Id)
 
@@ -888,7 +935,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const appReceiverAddress1 = await x2EarnApps.teamWalletAddress(app1Id)
 
@@ -916,7 +963,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await catchRevert(x2EarnApps.connect(otherAccounts[0]).updateTeamWalletAddress(app1Id, ZERO_ADDRESS))
     })
@@ -928,7 +975,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const isModerator = await x2EarnApps.isAppModerator(app1Id, otherAccounts[0].address)
       expect(isModerator).to.be.false
@@ -942,7 +989,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, owner.address)
@@ -959,7 +1006,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       await x2EarnApps.connect(owner).addAppModerator(app1Id, otherAccounts[1].address)
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
@@ -979,7 +1026,7 @@ describe("X-Apps", function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const appAdmin = otherAccounts[9]
-      await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+      await x2EarnApps.connect(owner).registerApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
 
       const adminRole = await x2EarnApps.DEFAULT_ADMIN_ROLE()
       const isAdmin = await x2EarnApps.hasRole(adminRole, appAdmin.address)
@@ -997,7 +1044,7 @@ describe("X-Apps", function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const appAdmin = otherAccounts[9]
-      await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+      await x2EarnApps.connect(owner).registerApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
       await x2EarnApps.connect(appAdmin).addAppModerator(app1Id, otherAccounts[1].address)
       await x2EarnApps.connect(appAdmin).addAppModerator(app1Id, otherAccounts[2].address)
 
@@ -1023,7 +1070,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       await x2EarnApps.connect(owner).addAppModerator(app1Id, otherAccounts[1].address)
       await x2EarnApps.connect(owner).addAppModerator(app1Id, otherAccounts[2].address)
 
@@ -1036,7 +1083,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       await x2EarnApps.connect(owner).addAppModerator(app1Id, otherAccounts[1].address)
 
       let isModerator = await x2EarnApps.isAppModerator(app1Id, otherAccounts[1].address)
@@ -1066,7 +1113,7 @@ describe("X-Apps", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await expect(x2EarnApps.connect(otherAccounts[0]).addAppModerator(app1Id, ZERO_ADDRESS)).to.be.rejected
     })
@@ -1077,7 +1124,7 @@ describe("X-Apps", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await expect(x2EarnApps.connect(otherAccounts[0]).removeAppModerator(app1Id, ZERO_ADDRESS)).to.be.rejected
     })
@@ -1103,7 +1150,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       await x2EarnApps.connect(owner).addAppModerator(app1Id, otherAccounts[1].address)
       await x2EarnApps.connect(owner).addAppModerator(app1Id, otherAccounts[2].address)
 
@@ -1127,7 +1174,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, otherAccounts[1].address)).to.be.rejected
     })
@@ -1137,7 +1184,7 @@ describe("X-Apps", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await expect(x2EarnApps.connect(owner).removeAppModerator(app1Id, ZERO_ADDRESS)).to.be.rejected
     })
@@ -1153,7 +1200,7 @@ describe("X-Apps", function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const appAdmin = otherAccounts[9]
-      await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+      await x2EarnApps.connect(owner).registerApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
 
       const limit = await x2EarnApps.MAX_MODERATORS()
 
@@ -1184,7 +1231,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await x2EarnApps.connect(owner).addRewardDistributor(app1Id, otherAccounts[1].address)
 
@@ -1197,7 +1244,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       await x2EarnApps.connect(owner).addRewardDistributor(app1Id, otherAccounts[1].address)
 
       let isDistributor = await x2EarnApps.isRewardDistributor(app1Id, otherAccounts[1].address)
@@ -1229,7 +1276,7 @@ describe("X-Apps", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await expect(x2EarnApps.connect(otherAccounts[0]).addRewardDistributor(app1Id, ZERO_ADDRESS)).to.be.rejected
     })
@@ -1240,7 +1287,7 @@ describe("X-Apps", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await expect(x2EarnApps.connect(otherAccounts[0]).removeRewardDistributor(app1Id, ZERO_ADDRESS)).to.be.rejected
     })
@@ -1251,7 +1298,7 @@ describe("X-Apps", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await expect(x2EarnApps.connect(owner).removeRewardDistributor(app1Id, otherAccounts[1].address)).to.be.rejected
     })
@@ -1261,7 +1308,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       await x2EarnApps.connect(owner).addRewardDistributor(app1Id, otherAccounts[1].address)
       await x2EarnApps.connect(owner).addRewardDistributor(app1Id, otherAccounts[2].address)
 
@@ -1285,7 +1332,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       await x2EarnApps.connect(owner).addRewardDistributor(app1Id, otherAccounts[1].address)
       await x2EarnApps.connect(owner).addRewardDistributor(app1Id, otherAccounts[2].address)
 
@@ -1298,7 +1345,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       await x2EarnApps.connect(owner).addRewardDistributor(app1Id, otherAccounts[1].address)
 
       let isDistributor = await x2EarnApps.isRewardDistributor(app1Id, otherAccounts[1].address)
@@ -1329,7 +1376,7 @@ describe("X-Apps", function () {
       const limit = await x2EarnApps.MAX_REWARD_DISTRIBUTORS()
       const app1Id = await x2EarnApps.hashAppName("My app")
       const appAdmin = otherAccounts[9]
-      await x2EarnApps.connect(owner).addApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
+      await x2EarnApps.connect(owner).registerApp(otherAccounts[0].address, appAdmin.address, "My app", "metadataURI")
 
       const addDistributorPromises = []
       for (let i = 1; i <= limit; i++) {
@@ -1358,7 +1405,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
       expect(teamAllocationPercentage).to.eql(0n)
@@ -1369,7 +1416,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       await x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 50)
 
       let teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
@@ -1386,7 +1433,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       await x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 50)
 
       let teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
@@ -1405,7 +1452,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await expect(x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 101)).to.be.rejected
     })
@@ -1415,7 +1462,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await expect(x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, -1)).to.be.rejected
     })
@@ -1436,7 +1483,7 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       await x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 50)
 
       let teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
@@ -1453,7 +1500,8 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      await endorseApp(app1Id, otherAccounts[0])
       await x2EarnApps.connect(owner).setTeamAllocationPercentage(app1Id, 0)
 
       let teamAllocationPercentage = await x2EarnApps.teamAllocationPercentage(app1Id)
