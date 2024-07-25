@@ -72,7 +72,7 @@ export function createTestnetConfig() {
     VOTER_REWARDS_MULTIPLIER: [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
     XAPP_BASE_URI: "ipfs://",
     XAPP_GRACE_PERIOD: 120960, // 2 weeks -> max time to be unendorsed by node before being removed from the XAlloction voting rounds
-    
+
     /*
       Token transfer limits. These values are not final and are for testing purposes only.
     */

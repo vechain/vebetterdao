@@ -32,7 +32,7 @@ export function createSoloStagingConfig() {
         "setAppSharesCap",
         "setVotingThreshold",
       ],
-      X2EarnApps: ["addApp", "setVotingEligibility"],
+      X2EarnAppsV2: ["setVotingEligibility"],
     },
 
     EMISSIONS_CYCLE_DURATION: 60, // blocks - 10 minutes.
