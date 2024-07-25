@@ -24,9 +24,9 @@
 pragma solidity 0.8.20;
 
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
-import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
+import { IX2EarnAppsV2 } from "../../interfaces/IX2EarnAppsV2.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
+import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
 
 /**
  * @title X2EarnAppsUpgradeable
@@ -38,7 +38,7 @@ import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
  * - a module to handle the administration of the app (handle moderators, admin, metadata, team address and percentage)
  * - a module to handle the settings of the contract
  */
-abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
+abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnAppsV2 {
   /**
    * @dev Initializes the contract
    */
@@ -84,7 +84,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   }
 
   /**
-   * @dev See {IX2EarnApps-hashAppName}.
+   * @dev See {IX2EarnAppsV2-hashAppName}.
    */
   function hashAppName(string memory appName) public pure returns (bytes32) {
     return keccak256(abi.encodePacked(appName));
@@ -93,32 +93,32 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   // --- To be implemented by the inheriting contract --- //
 
   /**
-   * @inheritdoc IX2EarnApps
+   * @inheritdoc IX2EarnAppsV2
    */
   function appExists(bytes32 appId) public view virtual returns (bool);
 
   /**
-   * @inheritdoc IX2EarnApps
+   * @inheritdoc IX2EarnAppsV2
    */
   function baseURI() public view virtual returns (string memory);
 
   /**
-   * @inheritdoc IX2EarnApps
+   * @inheritdoc IX2EarnAppsV2
    */
   function appPendingEndorsment(bytes32 appId) public view virtual returns (bool);
 
   /**
-   * @inheritdoc IX2EarnApps
+   * @inheritdoc IX2EarnAppsV2
    */
   function teamWalletAddress(bytes32 appId) public view virtual returns (address);
 
   /**
-   * @dev See {IX2EarnApps-appAdmin}
+   * @dev See {IX2EarnAppsV2-appAdmin}
    */
   function appAdmin(bytes32 appId) public view virtual returns (address);
 
   /**
-   * @dev See {IX2EarnApps-teamAllocationPercentage}
+   * @dev See {IX2EarnAppsV2-teamAllocationPercentage}
    */
   function teamAllocationPercentage(bytes32 appId) public view virtual returns (uint256);
 

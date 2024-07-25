@@ -23,12 +23,12 @@
 
 pragma solidity 0.8.20;
 
-import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol";
-import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/AdministrationUpgradeable.sol";
-import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgradeable.sol";
-import { ContractSettingsUpgradeable } from "./x-2-earn-apps/modules/ContractSettingsUpgradeable.sol";
-import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules/VoteEligibilityUpgradeable.sol";
-import { EndorsementUpgradeable } from "./x-2-earn-apps/modules/EndorsementUpgradeable.sol";
+import { X2EarnAppsUpgradeable } from "./X2EarnAppsUpgradeable.sol";
+import { AdministrationUpgradeable } from "./modules/AdministrationUpgradeable.sol";
+import { AppsStorageUpgradeable } from "./modules/AppsStorageUpgradeable.sol";
+import { ContractSettingsUpgradeable } from "./modules/ContractSettingsUpgradeable.sol";
+import { VoteEligibilityUpgradeable } from "./modules/VoteEligibilityUpgradeable.sol";
+import { EndorsementUpgradeable } from "./modules/EndorsementUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
@@ -41,7 +41,7 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
  * Admins can also control the app metadata and management.
  * Each app has a set of admins and moderators that can manage the app and settings.
  */
-contract X2EarnApps is
+contract X2EarnAppsV2 is
   X2EarnAppsUpgradeable,
   AdministrationUpgradeable,
   ContractSettingsUpgradeable,
@@ -128,14 +128,14 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-setVotingEligibility}.
+   * @dev See {IX2EarnAppsV2-setVotingEligibility}.
    */
   function setVotingEligibility(bytes32 _appId, bool _isEligible) public onlyRole(GOVERNANCE_ROLE) {
     _setVotingEligibility(_appId, _isEligible);
   }
 
   /**
-   * @dev See {IX2EarnApps-registerApp}.
+   * @dev See {IX2EarnAppsV2-registerApp}.
    */
   function registerApp(
     address _teamWalletAddress,
@@ -147,14 +147,14 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-setAppAdmin}.
+   * @dev See {IX2EarnAppsV2-setAppAdmin}.
    */
   function setAppAdmin(bytes32 _appId, address _newAdmin) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _setAppAdmin(_appId, _newAdmin);
   }
 
   /**
-   * @dev See {IX2EarnApps-updateTeamWalletAddress}.
+   * @dev See {IX2EarnAppsV2-updateTeamWalletAddress}.
    */
   function updateTeamWalletAddress(
     bytes32 _appId,
@@ -164,7 +164,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-setTeamAllocationPercentage}.
+   * @dev See {IX2EarnAppsV2-setTeamAllocationPercentage}.
    */
   function setTeamAllocationPercentage(
     bytes32 _appId,
@@ -174,14 +174,14 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-addAppModerator}.
+   * @dev See {IX2EarnAppsV2-addAppModerator}.
    */
   function addAppModerator(bytes32 _appId, address _moderator) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _addAppModerator(_appId, _moderator);
   }
 
   /**
-   * @dev See {IX2EarnApps-removeAppModerator}.
+   * @dev See {IX2EarnAppsV2-removeAppModerator}.
    */
   function removeAppModerator(
     bytes32 _appId,
@@ -191,7 +191,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-addRewardDistributor}.
+   * @dev See {IX2EarnAppsV2-addRewardDistributor}.
    */
   function addRewardDistributor(
     bytes32 _appId,
@@ -201,7 +201,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-removeRewardDistributor}.
+   * @dev See {IX2EarnAppsV2-removeRewardDistributor}.
    */
   function removeRewardDistributor(
     bytes32 _appId,
@@ -211,7 +211,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-updateAppMetadata}.
+   * @dev See {IX2EarnAppsV2-updateAppMetadata}.
    */
   function updateAppMetadata(
     bytes32 _appId,

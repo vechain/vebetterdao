@@ -25,8 +25,8 @@ pragma solidity 0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
-import { ITokenAuction } from "../../interfaces/ITokenAuction.sol";
-import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
+import { ITokenAuction } from "../../../interfaces/ITokenAuction.sol";
+import { X2EarnAppsDataTypes } from "../../../libraries/X2EarnAppsDataTypes.sol";
 
 abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Endorsment
@@ -36,9 +36,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     mapping(bytes32 => address[]) _appEndorsers; // Mapping to the endorsers of an app
     mapping(NodeStrengthLevel => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
     mapping(bytes32 => uint256) _appGracePeriod; // The grace period elapsed by the app since endorsed
-    mapping(address => bool) endorsers; // Mapping to check if an address is an endorser
+    mapping(address => bool) _endorsers; // Mapping to check if an address is an endorser
     uint256 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
-    ITokenAuction _tokenAuctionContract; // The token auction contract
+    ITokenAuction _vechainNodesContract; // The token auction contract
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
@@ -55,13 +55,14 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev Sets the value for the grace period ane the endorsement score for each node level.
    * @param gracePeriodDuration The initial grace period.
    */
-  function __Endorsement_init(uint256 gracePeriodDuration) internal onlyInitializing {
-    __Endorsement_init_unchained(gracePeriodDuration);
+  function __Endorsement_init(uint256 gracePeriodDuration, address vechainNodesContract) internal onlyInitializing {
+    __Endorsement_init_unchained(gracePeriodDuration, vechainNodesContract);
   }
 
-  function __Endorsement_init_unchained(uint256 gracePeriodDuration) internal onlyInitializing {
+  function __Endorsement_init_unchained(uint256 gracePeriodDuration, address vechainNodesContract) internal onlyInitializing {
     EndorsementStorage storage $ = _getEndorsementStorage();
     $._gracePeriodDuration = gracePeriodDuration;
+    $._vechainNodesContract = ITokenAuction(vechainNodesContract);
 
     // Set the endorsement score for each node level
     $._nodeEnodorsmentScore[NodeStrengthLevel.Strength] = 2; // Strength Node score
@@ -77,7 +78,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   // ---------- Public ---------- //
 
   /**
-   * @dev See {IX2EarnApps-checkEndorsement}.
+   * @dev See {IX2EarnAppsV2-checkEndorsement}.
    */
   function checkEndorsement(bytes32 appId) external returns (bool) {
     // Get the endorsement storage
@@ -132,18 +133,18 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Check if the caller is already an endorser
-    if ($.endorsers[msg.sender]) {
+    if ($._endorsers[msg.sender]) {
       revert X2EarnAlreadyEndorser();
     }
 
     // Check if the caller is a node holder
-    if (!$._tokenAuctionContract.isToken(msg.sender)) {
+    if (!$._vechainNodesContract.isToken(msg.sender)) {
       revert X2EarnNonNodeHolder();
     }
 
     // Add the caller to the list of endorsers for the app
     $._appEndorsers[appId].push(msg.sender);
-    $.endorsers[msg.sender] = true;
+    $._endorsers[msg.sender] = true;
 
     // Calculate the score of the app, considering the new endorsement
     uint256 score = _getScore(appId, address(0));
@@ -185,7 +186,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     // Check if the caller is an endorser
-    if (!$.endorsers[msg.sender]) {
+    if (!$._endorsers[msg.sender]) {
       revert X2EarnNonEndorser();
     }
 
@@ -240,7 +241,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
         $._appEndorsers[appId].pop();
 
         // Delete the endorser from the endorsers mapping
-        delete $.endorsers[endorser];
+        delete $._endorsers[endorser];
       } else {
         // Add the endorser's score to the total score
         score += $._nodeEnodorsmentScore[nodeLevel];
@@ -260,10 +261,10 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function _getNodeLevel(address user) internal view returns (NodeStrengthLevel) {
     EndorsementStorage storage $ = _getEndorsementStorage();
     // Retrieve the token ID for the user
-    uint256 tokenID = $._tokenAuctionContract.ownerToId(user);
+    uint256 tokenID = $._vechainNodesContract.ownerToId(user);
 
     // Retrieve the metadata for the current user's token
-    (, uint8 nodeLevel, , , , , ) = $._tokenAuctionContract.getMetadata(tokenID);
+    (, uint8 nodeLevel, , , , , ) = $._vechainNodesContract.getMetadata(tokenID);
     // Cast uint8 to NodeStrengthLevel enum
     NodeStrengthLevel level = NodeStrengthLevel(nodeLevel);
     return level;
@@ -344,7 +345,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   // ---------- Getters ---------- //
 
   /**
-   * @dev See {IX2EarnApps-gracePeriod}.
+   * @dev See {IX2EarnAppsV2-gracePeriod}.
    * @return The current grace period duration in blocks.
    */
   function gracePeriod() external view returns (uint256) {
@@ -354,7 +355,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnApps-appPendingEndorsment}.
+   * @dev See {IX2EarnAppsV2-appPendingEndorsment}.
    * @param appId The unique identifier of the app.
    * @return True if the app is pending endorsement.
    */
@@ -369,7 +370,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnApps-appIdsPendingEndorsement}.
+   * @dev See {IX2EarnAppsV2-appIdsPendingEndorsement}.
    */
   function appIdsPendingEndorsement() public view returns (bytes32[] memory) {
     EndorsementStorage storage $ = _getEndorsementStorage();
@@ -378,7 +379,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnApps-appsPendingEndorsment}.
+   * @dev See {IX2EarnAppsV2-appsPendingEndorsment}.
    */
   function appsPendingEndorsement() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
     bytes32[] memory appIds = appIdsPendingEndorsement();
@@ -386,14 +387,14 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnApps-getScore}.
+   * @dev See {IX2EarnAppsV2-getScore}.
    */
   function getScore(bytes32 appId) external returns (uint256) {
     return _getScore(appId, address(0));
   }
 
   /**
-   * @dev See {IX2EarnApps-getEndorsers}.
+   * @dev See {IX2EarnAppsV2-getEndorsers}.
    */
   function getEndorsers(bytes32 appId) external view returns (address[] memory) {
     EndorsementStorage storage $ = _getEndorsementStorage();
@@ -402,7 +403,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnApps-getNodeEndorsementScore}.
+   * @dev See {IX2EarnAppsV2-getNodeEndorsementScore}.
    */
   function getNodeEndorsementScore(address user) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
