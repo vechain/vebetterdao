@@ -1,4 +1,4 @@
-import { Emissions, Treasury, X2EarnApps } from "../../typechain-types"
+import { Emissions, Treasury, X2EarnAppsV1 } from "../../typechain-types"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
@@ -57,7 +57,7 @@ const APPS = [
   },
 ]
 
-export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnApps) => {
+export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnAppsV1) => {
   const start = performance.now()
   console.log("================ Setup local environment")
 
@@ -81,7 +81,7 @@ export const setupLocalEnvironment = async (emissions: Emissions, treasury: Trea
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
 
-export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps) => {
+export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnAppsV1) => {
   console.log("================ Setup Testnet environment")
   const start = performance.now()
 
@@ -103,7 +103,7 @@ export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2E
   console.log(`Setup complete in ${end - start}ms`)
 }
 
-export const setupMainnetEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps) => {
+export const setupMainnetEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnAppsV1) => {
   console.log("================ Setup Mainnet environment")
   const start = performance.now()
 

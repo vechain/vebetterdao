@@ -57,7 +57,7 @@ export const upgradeProxy = async (
 
   const tx = await currentImplementationContract.upgradeToAndCall(
     await implementation.getAddress(),
-    args.length > 0 ? getInitializerData(Contract.interface, args) : "0x",
+    args.length > 0 ? getInitializerData(Contract.interface, args, version) : "0x",
   )
   await tx.wait()
 
