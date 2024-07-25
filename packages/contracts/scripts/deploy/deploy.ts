@@ -10,8 +10,8 @@ import {
   VoterRewards,
   XAllocationPool,
   Treasury,
-  X2EarnApps,
   X2EarnRewardsPool,
+  X2EarnAppsV1,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -161,7 +161,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as Treasury
 
   const x2EarnApps = (await deployProxy(
-    "X2EarnApps",
+    "X2EarnAppsV1",
     [
       config.XAPP_BASE_URI,
       [TEMP_ADMIN], //admins
@@ -170,7 +170,7 @@ export async function deployAll(config: ContractsConfig) {
     ],
     undefined,
     true,
-  )) as X2EarnApps
+  )) as X2EarnAppsV1
 
   const x2EarnRewardsPool = (await deployProxy(
     "X2EarnRewardsPool",
@@ -811,7 +811,7 @@ const transferAdminRole = async (
     | XAllocationVoting
     | Treasury
     | B3TRGovernor
-    | X2EarnApps
+    | X2EarnAppsV1
     | TimeLock,
   oldAdmin: HardhatEthersSigner,
   newAdminAddress: string,
@@ -881,7 +881,7 @@ const transferMinterRole = async (
 
 // Transfer governance role to treasury contract admin for intial phases of project
 const transferGovernanceRole = async (
-  contract: Treasury | X2EarnApps,
+  contract: Treasury | X2EarnAppsV1,
   admin: HardhatEthersSigner,
   oldAddress: string,
   newAddress?: string,
@@ -1078,7 +1078,7 @@ const validateContractRole = async (
     | TimeLock
     | B3TRGovernor
     | X2EarnRewardsPool
-    | X2EarnApps,
+    | X2EarnAppsV1,
   expectedAddress: string,
   tempAdmin: string,
   role: string,
