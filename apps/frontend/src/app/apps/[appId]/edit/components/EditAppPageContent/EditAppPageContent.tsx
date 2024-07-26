@@ -28,6 +28,8 @@ import { useSocialUrls } from "./hooks/useSocialUrls"
 import { useIsFormChanged } from "./hooks/useIsFormChanged"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { UpdateAppMetadataTransactionModal } from "../../../components/UpdateAppMetadataTransactionModal"
+import { useAccountPermissions } from "@/api/contracts/account"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export type EditAppForm = {
   name: string
@@ -57,6 +59,8 @@ export const EditAppPageContent = () => {
   const router = useRouter()
   const transactionModal = useDisclosure()
   const { isAdminOrModerator } = useCurrentAppRole()
+  const { account } = useWallet()
+  const { isAdminOfX2EarnApps } = useAccountPermissions(account || "")
   const { appId } = useParams<{ appId: string }>()
 
   const form = useForm<EditAppForm>({
@@ -129,12 +133,12 @@ export const EditAppPageContent = () => {
   }, [handleClose, handleSubmit, onSubmit])
 
   useEffect(() => {
-    if (!isAdminOrModerator) {
+    if (!isAdminOrModerator && !isAdminOfX2EarnApps) {
       router.push(`/apps/${app?.id}`)
     }
-  }, [isAdminOrModerator, app?.id, router])
+  }, [isAdminOrModerator, app?.id, router, isAdminOfX2EarnApps])
 
-  if (!isAdminOrModerator) {
+  if (!isAdminOrModerator && !isAdminOfX2EarnApps) {
     return null
   }
 
