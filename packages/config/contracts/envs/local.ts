@@ -100,7 +100,7 @@ export function createLocalConfig() {
     VOTER_REWARDS_MULTIPLIER: [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
 
     XAPP_BASE_URI: "ipfs://",
-    XAPP_GRACE_PERIOD: 24, // 4 minutes -> max time to be unendorsed by node before being removed from the XAlloction voting rounds
+    XAPP_GRACE_PERIOD: 48, // 2 cycles - 8 minutes
 
     /*
       Token transfer limits. These values are not final and are for testing purposes only.

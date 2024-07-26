@@ -1602,7 +1602,7 @@ describe("X-Apps", function () {
 
       // Endorse XAPP with both Mjolnir node holders
       await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id) // Node holder endorsement score is 50
-      expect(await x2EarnApps.getScore(app1Id)).to.eql(50n)  // XAPP endorsement score is 50
+      expect(await x2EarnApps.getScore(app1Id)).to.eql(50n) // XAPP endorsement score is 50
       await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id) // Node holder endorsement score is 50
       expect(await x2EarnApps.getScore(app1Id)).to.eql(100n) // XAPP endorsement score is now 100
 
@@ -1635,7 +1635,7 @@ describe("X-Apps", function () {
 
       // Endorse XAPP with both Mjolnir node holder -> XAPP endorsement score is 50 -> XAPP is not eligible for XAllocation Voting
       await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id) // Node holder endorsement score is 50
-      expect(await x2EarnApps.getScore(app1Id)).to.eql(50n)  // XAPP endorsement score is 50
+      expect(await x2EarnApps.getScore(app1Id)).to.eql(50n) // XAPP endorsement score is 50
 
       const appIdsPendingEndorsement2 = await x2EarnApps.appIdsPendingEndorsement()
       expect(appIdsPendingEndorsement2.length).to.eql(1)
@@ -1678,7 +1678,21 @@ describe("X-Apps", function () {
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(false)
 
       // remove endorsement from one of the node holders
-      await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id);
+      const tx = await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id)
+
+      const receipt = await tx.wait()
+      if (!receipt) throw new Error("No receipt")
+
+      let events = receipt?.logs
+
+      let decodedEvents = events?.map(event => {
+        return x2EarnApps.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+      const event = decodedEvents.find(event => event?.name === "AppEndorsed")
+      expect(event).to.not.equal(undefined)
 
       // app should still be eligible for the current round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
@@ -1732,7 +1746,7 @@ describe("X-Apps", function () {
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(false)
 
       // remove endorsement from one of the node holders
-      await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id);
+      await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id)
 
       // app should still be eligible for the current round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
@@ -1767,8 +1781,98 @@ describe("X-Apps", function () {
       // check endorsement this time it will remove the app from the voting rounds
       await x2EarnApps.checkEndorsement(app1Id)
 
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      // start new round -> 3rd cycle unendorsed
+      let round4 = await startNewAllocationRound()
+
+      // app should not be eligible for the current round as it is not in the grace period
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round4)
+      expect(isEligibleForVote).to.eql(false)
+    })
+
+    it("If an XAPP is in the grace period for longer than 2 cycles and has not got reendorsed they are removed from voting rounds", async function () {
+      const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      const appIdsPendingEndorsement1 = await x2EarnApps.appIdsPendingEndorsement()
+      expect(appIdsPendingEndorsement1.length).to.eql(1)
+
+      // Create two Mjolnir node holders with an endorsement score of 50 each
+      await createNodeHolder(3, otherAccounts[1]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id) // Node holder endorsement score is 50
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id) // Node holder endorsement score is 50
+
+      let round1 = await startNewAllocationRound()
+
+      // app should be eligible for the current round
+      let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
+      expect(isEligibleForVote).to.eql(true)
+
+      // App is not pending endorsement
+      expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(false)
+
+      // remove endorsement from one of the node holders
+      await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id)
+
+      // app should still be eligible for the current round
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
+      expect(isEligibleForVote).to.eql(true)
+
+      // app should be pending endorsement -> score is now 50 -> grace period starts
+      expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(true)
+
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      // start new round -> 1st cycle unedorsed
+      let round2 = await startNewAllocationRound()
+
+      // app should still be eligible for the current round as it is in the grace period
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
+      expect(isEligibleForVote).to.eql(true)
+
       // check endorsement
       await x2EarnApps.checkEndorsement(app1Id)
+
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      // start new round -> 2nd cycle unendorsed
+      let round3 = await startNewAllocationRound()
+
+      // app should still be eligible for the current round as it is in the grace period
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round3)
+      expect(isEligibleForVote).to.eql(true)
+
+      // remove endorsement from one of the node holders -> grace period is passed -> app is removed from voting rounds
+      const tx = await x2EarnApps.connect(otherAccounts[2]).unendorseApp(app1Id)
+      const receipt = await tx.wait()
+      if (!receipt) throw new Error("No receipt")
+
+      // check event emitted
+      let events = receipt?.logs
+      let decodedEvents = events?.map(event => {
+        return x2EarnApps.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+      const event = decodedEvents.find(event => event?.name === "AppEndorsementStatusUpdated")
+      expect(event).to.not.equal(undefined)
 
       // wait for round to end
       await waitForCurrentRoundToEnd()
@@ -1815,7 +1919,7 @@ describe("X-Apps", function () {
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(false)
 
       // remove endorsement from one of the node holders
-      await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id);
+      await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id)
 
       // app should still be eligible for the current round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
@@ -1867,7 +1971,7 @@ describe("X-Apps", function () {
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(true)
 
       // reendorse the app
-      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id);
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id)
 
       // App is not pending endorsement
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(false)
@@ -1916,7 +2020,9 @@ describe("X-Apps", function () {
 
       // XNode holder transfers its XNode
       const tokenId = await vechainNodes.ownerToId(otherAccounts[1].address)
-      await vechainNodes.connect(otherAccounts[1]).transferFrom(otherAccounts[1].address, otherAccounts[3].address, tokenId)
+      await vechainNodes
+        .connect(otherAccounts[1])
+        .transferFrom(otherAccounts[1].address, otherAccounts[3].address, tokenId)
 
       const tokenId1 = await vechainNodes.ownerToId(otherAccounts[3].address)
       expect(tokenId1).to.eql(tokenId)
@@ -1967,13 +2073,16 @@ describe("X-Apps", function () {
           data: event?.data as string,
         })
       })
-      const proposalEvent = decodedEvents.find(event => event?.name === "AppEndorsed")
-      expect(proposalEvent).to.not.equal(undefined)
+      const event = decodedEvents.find(event => event?.name === "AppEndorsed")
+      expect(event).to.not.equal(undefined)
 
       // Should revert as app is already endorsed
       // Create another MjölnirX node holder with an endorsement score of 100
       await createNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
-      await expect(x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id)).to.revertedWithCustomError(x2EarnApps, "X2EarnAppAlreadyEndorsed")
+      await expect(x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id)).to.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnAppAlreadyEndorsed",
+      )
 
       // App should not be pending endorsement
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(false)
@@ -2021,7 +2130,9 @@ describe("X-Apps", function () {
 
       // XNode holder transfers its XNode
       const tokenId = await vechainNodes.ownerToId(otherAccounts[1].address)
-      await vechainNodes.connect(otherAccounts[1]).transferFrom(otherAccounts[1].address, otherAccounts[3].address, tokenId)
+      await vechainNodes
+        .connect(otherAccounts[1])
+        .transferFrom(otherAccounts[1].address, otherAccounts[3].address, tokenId)
 
       // Xnode holder should still be listed as an endorser
       const endorsers1 = await x2EarnApps.getEndorsers(app1Id)
@@ -2033,6 +2144,15 @@ describe("X-Apps", function () {
       // Xnode holder should no longer be listed as an endorser
       const endorsers2 = await x2EarnApps.getEndorsers(app1Id)
       expect(endorsers2.length).to.eql(0)
+    })
+
+    it("Should return correct value for grace period length", async function () {
+      const config = createLocalConfig()
+      const { x2EarnApps } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+      const gracePeriod = await x2EarnApps.gracePeriod()
+      expect(gracePeriod).to.eql(BigInt(config.XAPP_GRACE_PERIOD))
     })
 
     it("Grace period can be updated by admin with governance role", async function () {
@@ -2068,7 +2188,7 @@ describe("X-Apps", function () {
       await x2EarnApps
         .connect(owner)
         .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
-        await x2EarnApps
+      await x2EarnApps
         .connect(owner)
         .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
@@ -2082,10 +2202,13 @@ describe("X-Apps", function () {
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(true)
 
       // Endorse XAPP with MjölnirX node holder
-       await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id) // Node holder endorsement score is 100
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id) // Node holder endorsement score is 100
 
       // Should revert as endorser is already endorsing an XApp
-      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app2Id)).to.revertedWithCustomError(x2EarnApps, "X2EarnAlreadyEndorser")
+      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app2Id)).to.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnAlreadyEndorser",
+      )
 
       // App2 should be pending endorsement
       expect(await x2EarnApps.appPendingEndorsment(app2Id)).to.eql(true)
@@ -2110,7 +2233,10 @@ describe("X-Apps", function () {
       expect(appIdsPendingEndorsement1.length).to.eql(1)
 
       // Should revert as endorser is already endorsing an XApp
-      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id)).to.revertedWithCustomError(x2EarnApps, "X2EarnNonNodeHolder")
+      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id)).to.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnNonNodeHolder",
+      )
 
       // App2 should be pending endorsement
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(true)
@@ -2140,7 +2266,10 @@ describe("X-Apps", function () {
       await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // Should revert as endorser is already endorsing an XApp
-      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id)).to.revertedWithCustomError(x2EarnApps, "X2EarnAppBlacklisted")
+      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id)).to.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnAppBlacklisted",
+      )
 
       // App2 should be pending endorsement
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(false)
@@ -2158,7 +2287,10 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
       // Should revert as endorser is already endorsing an XApp
-      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id)).to.revertedWithCustomError(x2EarnApps, "X2EarnNonexistentApp")
+      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id)).to.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnNonexistentApp",
+      )
     })
 
     it("Cannot unendorse an XAPP that does not exist", async function () {
@@ -2170,7 +2302,10 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
       // Should revert as endorser is already endorsing an XApp
-      await expect(x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id)).to.revertedWithCustomError(x2EarnApps, "X2EarnNonexistentApp")
+      await expect(x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id)).to.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnNonexistentApp",
+      )
     })
 
     it("Cannot unendorse an XAPP if not an endorser", async function () {
@@ -2180,14 +2315,17 @@ describe("X-Apps", function () {
 
       // Register XAPPs -> XAPP is pending endorsement
       await x2EarnApps
-      .connect(owner)
-      .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
-    
+        .connect(owner)
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
       // AppId that does not exist
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
       // Should revert as user is not an endorser
-      await expect(x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id)).to.revertedWithCustomError(x2EarnApps, "X2EarnNonEndorser")
+      await expect(x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id)).to.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnNonEndorser",
+      )
     })
 
     it("Cannot check endorsement status of an XAPP that does not exist", async function () {
@@ -2199,7 +2337,10 @@ describe("X-Apps", function () {
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
       // Should revert as endorser is already endorsing an XApp
-      await expect(x2EarnApps.connect(otherAccounts[1]).checkEndorsement(app1Id)).to.revertedWithCustomError(x2EarnApps, "X2EarnNonexistentApp")
+      await expect(x2EarnApps.connect(otherAccounts[1]).checkEndorsement(app1Id)).to.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnNonexistentApp",
+      )
     })
 
     it("Does not revert if checking the status of a blacklisted XAPP", async function () {
@@ -2219,8 +2360,7 @@ describe("X-Apps", function () {
       // Blacklist XAPP
       await x2EarnApps.connect(owner).setVotingEligibility(app1Id, false)
 
-      expect(await x2EarnApps.checkEndorsement(app1Id)).to.not.be
-      .reverted
+      expect(await x2EarnApps.checkEndorsement(app1Id)).to.not.be.reverted
     })
 
     it("A blacklisted XAPP is not pending endorsement", async function () {
@@ -2329,7 +2469,7 @@ describe("X-Apps", function () {
       expect(endorsers2[0]).to.eql(otherAccounts[0].address)
     })
 
-    it("An XAPP that has been black listed should not be elgible for voting in following rounds even if endorsed", async function ()  {
+    it("An XAPP that has been black listed should not be elgible for voting in following rounds even if endorsed", async function () {
       const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2369,7 +2509,7 @@ describe("X-Apps", function () {
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
       expect(isEligibleForVote).to.eql(true)
 
-      // app should not be pending endorsement -> blacklisted XAPPS shoould nto be pending endorsement 
+      // app should not be pending endorsement -> blacklisted XAPPS shoould nto be pending endorsement
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(false)
 
       // wait for round to end
@@ -2400,7 +2540,7 @@ describe("X-Apps", function () {
       expect(isEligibleForVote).to.eql(false)
     })
 
-    it("An XAPP that has been removed from black list that had no endorsers should be pending endorsement", async function ()  {
+    it("An XAPP that has been removed from black list that had no endorsers should be pending endorsement", async function () {
       const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2440,7 +2580,7 @@ describe("X-Apps", function () {
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
       expect(isEligibleForVote).to.eql(true)
 
-      // app should not be pending endorsement -> blacklisted XAPPS shoould nto be pending endorsement 
+      // app should not be pending endorsement -> blacklisted XAPPS shoould nto be pending endorsement
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(false)
 
       // wait for round to end
@@ -2461,7 +2601,7 @@ describe("X-Apps", function () {
       const endorsers2 = await x2EarnApps.getEndorsers(app1Id)
       expect(endorsers2.length).to.eql(0)
 
-      // app should not be pending endorsement -> blacklisted XAPPS shoould not be pending endorsement 
+      // app should not be pending endorsement -> blacklisted XAPPS shoould not be pending endorsement
       expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(false)
 
       // wait for round to end
@@ -2484,7 +2624,79 @@ describe("X-Apps", function () {
       let round3 = await startNewAllocationRound()
 
       expect(await xAllocationVoting.isEligibleForVote(app1Id, round3)).to.eql(true)
+    })
 
+    it("Should be able to get a node holders endorsement score", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await createNodeHolder(0, otherAccounts[0]) // Node strength level 0 corresponds (None) to an endorsement score of 0
+      await createNodeHolder(1, otherAccounts[1]) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
+      await createNodeHolder(2, otherAccounts[2]) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+      await createNodeHolder(3, otherAccounts[3]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      await createNodeHolder(4, otherAccounts[4]) // Node strength level 4 corresponds (VeThorX) to an endorsement score of 3
+      await createNodeHolder(5, otherAccounts[5]) // Node strength level 5 corresponds (StrengthX) to an endorsement score of 9
+      await createNodeHolder(6, otherAccounts[6]) // Node strength level 6 corresponds (ThunderX) to an endorsement score of 35
+      await createNodeHolder(7, otherAccounts[7]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+
+      // Get endorsement score
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[0].address)).to.eql(0n) // Node strength level 0 corresponds (None) to an endorsement score of 0
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[1].address)).to.eql(2n) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[2].address)).to.eql(13n) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[3].address)).to.eql(50n) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[4].address)).to.eql(3n) // Node strength level 4 corresponds (VeThorX) to an endorsement score of 3
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[5].address)).to.eql(9n) // Node strength level 5 corresponds (StrengthX) to an endorsement score of 9
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[6].address)).to.eql(35n) // Node strength level 6 corresponds (ThunderX) to an endorsement score of 35
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[7].address)).to.eql(100n) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+    })
+
+    it("If an XAPP has a score less than 100 but one of its endorsers increases the node strength when endorsement status is checked they will be endorsed ", async function () {
+      const { x2EarnApps, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      const appIdsPendingEndorsement1 = await x2EarnApps.appIdsPendingEndorsement()
+      expect(appIdsPendingEndorsement1.length).to.eql(1)
+
+      // Create two node holders with an endorsement score
+      await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+      await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      await createNodeHolder(3, otherAccounts[3]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+
+      // Endorse XAPP with node holder -> combined endorsement score is 63 -> less than 100
+      await x2EarnApps.connect(owner).endorseApp(app1Id) // Node holder endorsement score is 50
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id) // Node holder endorsement score is 50
+
+      // Check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // app should be pending endorsement
+      expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(true)
+
+      // app should not be eligible for voting
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(false)
+
+      // Skip ahead 1 day to be able to transfer node
+      await time.setNextBlockTimestamp((await time.latest()) + 86400)
+      // XNode holder increases its node strength by getting a new node
+      const tokenId1 = await vechainNodes.ownerToId(owner.address)
+      await vechainNodes.connect(owner).transferFrom(owner.address, otherAccounts[4].address, tokenId1)
+      const tokenId2 = await vechainNodes.ownerToId(otherAccounts[3].address)
+      await vechainNodes.connect(otherAccounts[3]).transferFrom(otherAccounts[3].address, owner.address, tokenId2)
+
+      // check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // app should be pending endorsement
+      expect(await x2EarnApps.appPendingEndorsment(app1Id)).to.eql(false)
     })
   })
 })
