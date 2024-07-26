@@ -443,7 +443,7 @@ export const addAppsToAllocationVoting = async (apps: string[], owner: HardhatEt
   const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({})
 
   let appIds: string[] = []
-  let i =  0;
+  let i = 0
   for (const app of apps) {
     await x2EarnApps.connect(owner).registerApp(app, app, app, "metadataURI")
     const appId = await x2EarnApps.hashAppName(app)
