@@ -35,9 +35,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     mapping(bytes32 => uint256) _unendorsedAppsIndex; // Mapping from app ID to index in the _unendorsedApps array, so we can remove an app in O(1)
     mapping(bytes32 => address[]) _appEndorsers; // Mapping to the endorsers of an app
     mapping(NodeStrengthLevel => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
-    mapping(bytes32 => uint256) _appGracePeriod; // The grace period elapsed by the app since endorsed
+    mapping(bytes32 => uint48) _appGracePeriod; // The grace period elapsed by the app since endorsed
     mapping(address => bool) _endorsers; // Mapping to check if an address is an endorser
-    uint256 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
+    uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
     ITokenAuction _vechainNodesContract; // The token auction contract
   }
 
@@ -55,12 +55,12 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev Sets the value for the grace period ane the endorsement score for each node level.
    * @param gracePeriodDuration The initial grace period.
    */
-  function __Endorsement_init(uint256 gracePeriodDuration, address vechainNodesContract) internal onlyInitializing {
+  function __Endorsement_init(uint48 gracePeriodDuration, address vechainNodesContract) internal onlyInitializing {
     __Endorsement_init_unchained(gracePeriodDuration, vechainNodesContract);
   }
 
   function __Endorsement_init_unchained(
-    uint256 gracePeriodDuration,
+    uint48 gracePeriodDuration,
     address vechainNodesContract
   ) internal onlyInitializing {
     EndorsementStorage storage $ = _getEndorsementStorage();
@@ -96,13 +96,13 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Calculate the score of the app, considering if any endorser needs to be removed
-    uint256 score = _getScore(appId, address(0));
+    uint256 score = _getScoreAndUpdateEndorsers(appId, address(0));
 
     // Check the total score and update the grace period and voting eligibility accordingly
     if (score < 100) {
       if ($._appGracePeriod[appId] == 0) {
         $._appGracePeriod[appId] = clock() + $._gracePeriodDuration;
-      } else if ($._appGracePeriod[appId] > clock() && isEligibleNow(appId)) {
+      } else if (clock() > $._appGracePeriod[appId] && isEligibleNow(appId)) {
         // Mark the app as not eligible for voting
         _setVotingEligibility(appId, false);
 
@@ -168,7 +168,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     $._endorsers[msg.sender] = true;
 
     // Calculate the score of the app, considering the new endorsement
-    uint256 score = _getScore(appId, address(0));
+    uint256 score = _getScoreAndUpdateEndorsers(appId, address(0));
 
     // Check if the score is equal to or greater than 100
     if (score >= 100) {
@@ -217,19 +217,19 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Calculate the new score of the app after removing the caller's endorsement
-    uint256 score = _getScore(appId, msg.sender);
+    uint256 score = _getScoreAndUpdateEndorsers(appId, msg.sender);
 
     // Emit an event indicating the app has been unendorsed by the caller
     emit AppEndorsed(appId, msg.sender, false);
 
-    if ($._unendorsedAppsIndex[appId] < $._unendorsedApps.length) {
+    if ($._unendorsedAppsIndex[appId] < $._unendorsedApps.length || isBlacklisted(appId)) {
       return;
     }
 
     if (score < 100) {
       if ($._appGracePeriod[appId] == 0) {
         $._appGracePeriod[appId] = clock() + $._gracePeriodDuration;
-      } else if ($._appGracePeriod[appId] > clock()) {
+      } else if (clock() > $._appGracePeriod[appId]) {
         // Mark the app as not eligible for voting
         _setVotingEligibility(appId, false);
 
@@ -248,7 +248,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param endorserToRemove The address of the endorser to remove, or address(0) if no endorser should be removed.
    * @return uint256 The score of the app.
    */
-  function _getScore(bytes32 appId, address endorserToRemove) internal returns (uint256) {
+  function _getScoreAndUpdateEndorsers(bytes32 appId, address endorserToRemove) internal returns (uint256) {
     // Retrieve the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
     uint256 score;
@@ -273,6 +273,31 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
         score += $._nodeEnodorsmentScore[nodeLevel];
         i++; // Only increment i if we didn't remove an endorser
       }
+    }
+
+    // Return the total score of the app
+    return score;
+  }
+
+  /**
+   * @dev Internal function to get the score of an app
+   * @param appId The unique identifier of the app.
+   * @return uint256 The score of the app.
+   */
+  function _getScore(bytes32 appId) internal view returns (uint256) {
+    // Retrieve the endorsement storage
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    uint256 score;
+
+    // Iterate over the list of endorsers for the given app
+    for (uint256 i; i < $._appEndorsers[appId].length; i++) {
+      // Get the current endorser's address
+      address endorser = $._appEndorsers[appId][i];
+      // Get the node level of the endorser
+      NodeStrengthLevel nodeLevel = _getNodeLevel(endorser);
+
+      // Add the endorser's score to the total score
+      score += $._nodeEnodorsmentScore[nodeLevel];
     }
 
     // Return the total score of the app
@@ -356,7 +381,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    *
    * Emits a {GracePeriodUpdated} event.
    */
-  function _setGracePeriod(uint256 gracePeriodDuration) internal {
+  function _setGracePeriod(uint48 gracePeriodDuration) internal {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     emit GracePeriodUpdated($._gracePeriodDuration, gracePeriodDuration);
@@ -384,11 +409,18 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function appPendingEndorsment(bytes32 appId) public view override returns (bool) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    if ($._unendorsedAppsIndex[appId] < $._unendorsedApps.length || $._appGracePeriod[appId] > 0) {
-      return true;
+    // If the app is blacklisted, it cannot be pending endorsement
+    if (isBlacklisted(appId)) {
+      return false;
     }
 
-    return false;
+    // Check if the app is in the list of unendorsed apps
+    bool isUnendorsed = $._unendorsedAppsIndex[appId] < $._unendorsedApps.length;
+
+    // Check if the app has an active grace period
+    bool hasGracePeriod = $._appGracePeriod[appId] > 0;
+
+    return isUnendorsed || hasGracePeriod;
   }
 
   /**
@@ -411,8 +443,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev See {IX2EarnAppsV2-getScore}.
    */
-  function getScore(bytes32 appId) external returns (uint256) {
-    return _getScore(appId, address(0));
+  function getScore(bytes32 appId) external view returns (uint256) {
+    return _getScore(appId);
   }
 
   /**

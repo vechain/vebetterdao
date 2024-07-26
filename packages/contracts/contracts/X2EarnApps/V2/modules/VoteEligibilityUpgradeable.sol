@@ -121,11 +121,11 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
     emit VotingEligibilityUpdated(appId, canBeVoted);
   }
 
-  function _setBlacklist(bytes32 appId, bool isBlacklisted) internal {
+  function _setBlacklist(bytes32 _appId, bool _isBlacklisted) internal {
     VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
 
-    $._blackList[appId] = isBlacklisted;
-    emit BlacklistUpdated(appId, isBlacklisted);
+    $._blackList[_appId] = _isBlacklisted;
+    emit BlacklistUpdated(_appId, _isBlacklisted);
   }
 
   /**

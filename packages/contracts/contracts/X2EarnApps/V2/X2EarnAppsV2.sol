@@ -67,7 +67,7 @@ contract X2EarnAppsV2 is
    *
    * @dev This function is called only once during the contract deployment
    */
-  function initializeV2(uint256 _gracePeriod, address _vechainNodesContract) public reinitializer(2) {
+  function initializeV2(uint48 _gracePeriod, address _vechainNodesContract) public reinitializer(2) {
     require(_vechainNodesContract != address(0), "X2EarnApps: Invalid VechainNodes contract address");
     __Endorsement_init(_gracePeriod, _vechainNodesContract);
   }
@@ -231,5 +231,12 @@ contract X2EarnAppsV2 is
     string memory _newMetadataURI
   ) public onlyRoleAndAppAdminOrModerator(DEFAULT_ADMIN_ROLE, _appId) {
     _updateAppMetadata(_appId, _newMetadataURI);
+  }
+
+  /**
+   * @dev See {IX2EarnAppsV2-updateGracePeriod}.
+   */
+  function updateGracePeriod(uint48 _newGracePeriod) external onlyRole(GOVERNANCE_ROLE) {
+    _setGracePeriod(_newGracePeriod);
   }
 }
