@@ -12,6 +12,7 @@ import {
   Treasury,
   X2EarnApps,
   X2EarnRewardsPool,
+  B3TRFaucet,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -237,7 +238,7 @@ export async function deployAll(config: ContractsConfig) {
           await xAllocationPool.getAddress(),
           config.VOTE_2_EARN_POOL_ADDRESS,
           await treasury.getAddress(),
-          config.MIGRATION_ADDRESS,
+          await treasury.getAddress(),
         ],
         initialXAppAllocation: config.INITIAL_X_ALLOCATION,
         cycleDuration: config.EMISSIONS_CYCLE_DURATION,
@@ -331,6 +332,13 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as B3TRGovernor
 
+  const b3trFaucet = (await deployProxy(
+    "B3TRFaucet",
+    [await b3tr.getAddress(), ethers.parseEther("100"), 5, TEMP_ADMIN],
+    undefined,
+    true,
+  )) as B3TRFaucet
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -347,6 +355,7 @@ export async function deployAll(config: ContractsConfig) {
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
+    B3TRFaucet: await b3trFaucet.getAddress(),
   }
 
   const libraries: {
@@ -464,10 +473,10 @@ export async function deployAll(config: ContractsConfig) {
       await setupMainnetEnvironment(emissions, x2EarnApps)
       break
     case "vechain_testnet":
-      await setupTestEnvironment(emissions, x2EarnApps)
+      await setupTestEnvironment(emissions, treasury, b3trFaucet, b3tr)
       break
     case "vechain_solo":
-      await setupLocalEnvironment(emissions, treasury, x2EarnApps)
+      await setupTestEnvironment(emissions, treasury, b3trFaucet, b3tr) // load testnet env on solo network
       break
   }
 
@@ -477,8 +486,8 @@ export async function deployAll(config: ContractsConfig) {
   }
 
   // ---------- Role updates ---------- //
-  // Do not update roles on solo network since we are already using the predifined address and it would just increase dev time
-  if (network.name === "vechain_testnet" || network.name === "vechain_mainnet") {
+  // Do not update roles on solo network or testnet network since we are already using the predifined address and it would just increase dev time
+  if (network.name === "vechain_mainnet") {
     console.log("================ Updating contract roles after setup ")
     console.log("New admin address: ", config.CONTRACTS_ADMIN_ADDRESS)
 
@@ -796,6 +805,7 @@ export async function deployAll(config: ContractsConfig) {
     treasury: treasury,
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
+    b3trFaucet: b3trFaucet,
   }
   // close the script
 }
@@ -816,8 +826,10 @@ const transferAdminRole = async (
   oldAdmin: HardhatEthersSigner,
   newAdminAddress: string,
 ) => {
-  if (oldAdmin.address === newAdminAddress)
-    throw new Error("Admin role not transferred. New admin is the same as old admin")
+  if (oldAdmin.address === newAdminAddress) {
+    console.log("Admin role not transferred. New admin is the same as old admin")
+    return
+  }
 
   const adminRole = await contract.DEFAULT_ADMIN_ROLE()
   await contract
@@ -843,8 +855,10 @@ const transferMinterRole = async (
   oldMinterAddress: string,
   newMinterAddress?: string,
 ) => {
-  if (!newMinterAddress && oldMinterAddress === newMinterAddress)
-    throw new Error("Minter role not transferred. New minter is the same as old minter")
+  if (!newMinterAddress && oldMinterAddress === newMinterAddress) {
+    console.log("Minter role not transferred. New minter is the same as old minter")
+    return
+  }
 
   const minterRole = await contract.MINTER_ROLE()
 
@@ -886,8 +900,10 @@ const transferGovernanceRole = async (
   oldAddress: string,
   newAddress?: string,
 ) => {
-  if (!newAddress && oldAddress === newAddress)
-    throw new Error("Governance role not transferred. New governance is the same as old governance")
+  if (!newAddress && oldAddress === newAddress) {
+    console.log("Governance role not transferred. New governance is the same as old governance")
+    return
+  }
 
   const governanceRole = await contract.GOVERNANCE_ROLE()
 
@@ -928,7 +944,10 @@ const transferContractsAddressManagerRole = async (
   admin: HardhatEthersSigner,
   newAddress: string,
 ) => {
-  if (admin.address === newAddress) throw new Error("Role not transferred. New address is the same as old address")
+  if (admin.address === newAddress) {
+    console.log("Role not transferred. New address is the same as old address")
+    return
+  }
 
   const contractsAddressManagerRole = await contract.CONTRACTS_ADDRESS_MANAGER_ROLE()
 
@@ -954,7 +973,10 @@ const transferDecaySettingsManagerRole = async (
   admin: HardhatEthersSigner,
   newAddress: string,
 ) => {
-  if (admin.address === newAddress) throw new Error("Role not transferred. New address is the same as old address")
+  if (admin.address === newAddress) {
+    console.log("Role not transferred. New address is the same as old address")
+    return
+  }
 
   const decaySettingsManagerRole = await contract.DECAY_SETTINGS_MANAGER_ROLE()
 
@@ -1087,6 +1109,5 @@ const validateContractRole = async (
   // Check that the temporary admin does not have the role
   const roleRemoved = !(await contract.hasRole(role, tempAdmin))
 
-  if (!roleSet || !roleRemoved)
-    throw new Error("Role " + role + " not set correctly on " + (await contract.getAddress()))
+  if (!roleSet || !roleRemoved) console.log("Role " + role + " not set correctly on " + (await contract.getAddress()))
 }

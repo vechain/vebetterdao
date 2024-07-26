@@ -21,7 +21,7 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const { isAdminOfX2EarnApps, isAdminOfVot3, isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfB3TRGovernor } =
+  const { isAdminOfX2EarnApps, isAdminOfVot3, isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfB3TRGovernor, isAdmin } =
     useAccountPermissions(account ?? "")
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
@@ -40,7 +40,7 @@ export const AdminPageContent = () => {
             },
           }}>
           <Tab>{"Emissions"}</Tab>
-          {Number(currentRoundId) > 0 && <Tab>{"Allocation Rewards"}</Tab>}
+          {Number(currentRoundId) > 0 && isAdmin && <Tab>{"Allocation Rewards"}</Tab>}
           {isAdminOfX2EarnApps && <Tab>{"X2Earn Apps"}</Tab>}
           <Tab>{"Utils"}</Tab>
           <Tab>{"Contracts"}</Tab>
@@ -55,7 +55,7 @@ export const AdminPageContent = () => {
             </Grid>
           </TabPanel>
 
-          {Number(currentRoundId) > 0 && (
+          {Number(currentRoundId) > 0 && isAdmin && (
             <TabPanel>
               <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
                 <ClaimXAppAllocations />

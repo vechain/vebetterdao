@@ -1,10 +1,11 @@
 import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds"
 import { Grid, GridItem, VStack } from "@chakra-ui/react"
 import { DashboardSideBar } from "./DashboardSideBar"
-import { DashboardXApps } from "./DashboardXApps"
+// import { DashboardXApps } from "./DashboardXApps"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 import { LowOnVthoCard } from "./Banners"
 import { CastYourVoteCard } from "./Banners/CastYourVoteCard"
+import { AddNewAppCard } from "@/app/apps/components/AddNewAppCard"
 
 export const HomePageContent = () => {
   return (
@@ -16,10 +17,11 @@ export const HomePageContent = () => {
       <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
         <VStack flex={4.5} justifyContent="stretch" alignItems={"stretch"} spacing={"32px"} data-testid="homepage">
           <LowOnVthoCard />
-          <CastYourVoteCard />
           <SupplyBreakdownCard />
+          <AddNewAppCard />
+          <CastYourVoteCard />
           <DashboardAllocationRounds />
-          <DashboardXApps />
+          {/* <DashboardXApps /> */}
         </VStack>
       </GridItem>
       <GridItem colSpan={1} order={[1, 1, 2]}>
