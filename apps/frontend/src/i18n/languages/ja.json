@@ -608,5 +608,10 @@
   "Add a new reward distributor": "新しい報酬配布者を追加",
   "Contract or wallet address": "コントラクトまたはウォレットアドレス",
   "Rewards distributor already present": "報酬配布者は既に存在します",
-  "Add distributor": "配布者を追加"
+  "Add distributor": "配布者を追加",
+  "VeWorld Banner": "VeWorldバナー",
+  "Upload a banner to be displayed on the VeWorld mobile wallet": "VeWorldモバイルウォレットに表示するバナーをアップロードする",
+  "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "アプリのバナーは1240×460で、最も重要な内容を画像の中央の820×240の安全領域に配置する必要があります。これにより、すべてのデバイスで見栄えが良くなります。",
+  "Download template": "テンプレートをダウンロード",
+  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorldモバイルウォレットバナーは1024x576またはその倍数（例：2048x1152または3072x1728）にする必要があります。"
 }

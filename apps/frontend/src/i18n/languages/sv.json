@@ -608,5 +608,10 @@
   "Add a new reward distributor": "Lägg till en ny belöningsdistributör",
   "Contract or wallet address": "Kontrakts- eller plånboksadress",
   "Rewards distributor already present": "Belöningsdistributör redan närvarande",
-  "Add distributor": "Lägg till distributör"
+  "Add distributor": "Lägg till distributör",
+  "VeWorld Banner": "VeWorld Banner",
+  "Upload a banner to be displayed on the VeWorld mobile wallet": "Ladda upp en banner för att visas på VeWorlds mobilplånbok",
+  "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "App-banners bör vara 1240×460 och ha det viktigaste innehållet i ett säkert område på 820×240 i mitten av bilden för att se bra ut på alla enheter.",
+  "Download template": "Ladda ner mall",
+  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorlds mobilplånboksbanner bör vara 1024x576 eller en multipel av det (t.ex: 2048x1152 eller 3072x1728)."
 }

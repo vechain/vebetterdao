@@ -608,5 +608,10 @@
   "Add a new reward distributor": "नया पुरस्कार वितरक जोड़ें",
   "Contract or wallet address": "अनुबंध या वॉलेट पता",
   "Rewards distributor already present": "पुरस्कार वितरक पहले से ही मौजूद है",
-  "Add distributor": "वितरक जोड़ें"
+  "Add distributor": "वितरक जोड़ें",
+  "VeWorld Banner": "VeWorld बैनर",
+  "Upload a banner to be displayed on the VeWorld mobile wallet": "VeWorld मोबाइल वॉलेट पर प्रदर्शित होने के लिए एक बैनर अपलोड करें",
+  "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "ऐप बैनर 1240×460 होना चाहिए और सबसे महत्वपूर्ण सामग्री को प्रत्येक डिवाइस में अच्छा दिखने के लिए छवि के केंद्र में 820×240 के सुरक्षित क्षेत्र में होना चाहिए।",
+  "Download template": "टेम्पलेट डाउनलोड करें",
+  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorld मोबाइल वॉलेट बैनर 1024x576 या इसका गुणांक होना चाहिए (उदाहरण: 2048x1152 या 3072x1728)।"
 }

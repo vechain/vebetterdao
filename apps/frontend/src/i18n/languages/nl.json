@@ -608,5 +608,10 @@
   "Add a new reward distributor": "Voeg een nieuwe beloningsdistributeur toe",
   "Contract or wallet address": "Contract- of walletadres",
   "Rewards distributor already present": "Beloningsdistributeur al aanwezig",
-  "Add distributor": "Distributeur toevoegen"
+  "Add distributor": "Voeg verdeler toe",
+  "VeWorld Banner": "VeWorld Banner",
+  "Upload a banner to be displayed on the VeWorld mobile wallet": "Upload een banner om weer te geven in de VeWorld mobiele wallet",
+  "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "Appbanners moeten 1240×460 zijn en de belangrijkste content in een veilig gebied van 820×240 in het midden van de afbeelding hebben om er goed uit te zien op elk apparaat.",
+  "Download template": "Download template",
+  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "De VeWorld mobiele walletbanner moet 1024x576 zijn of een veelvoud daarvan (bijv.: 2048x1152 of 3072x1728)."
 }
