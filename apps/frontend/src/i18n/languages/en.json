@@ -1,5 +1,6 @@
 {
   "{{amount}}% distributed": "<strong>{{amount}}</strong>% distributed",
+
   "See round": "See round",
   "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.": "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.",
   "Time to cast your vote and earn rewards!": "Time to cast your vote and earn rewards!",
@@ -188,7 +189,7 @@
   "Share the proposal on social media and invite people to vote": "Share the proposal on social media and invite people to vote",
   "Executable in {{timestamp}}": "Executable in {{timestamp}}",
   "VOT3": "VOT3",
-  "Team wallet address": "Treasury address",
+  "Team wallet address": "Team wallet address",
   "Member since": "Member since",
   "Go to Website": "Go to Website",
   "Are you completely sure to cancel this proposal? All the support provided by the community will be lost.": "Are you completely sure to cancel this proposal? All the support provided by the community will be lost.",
@@ -591,7 +592,6 @@
   "Claiming rewards...": "Claiming rewards...",
   "Votes for": "Votes for",
   "Abstained": "Abstained",
-  "Welcome to our testnet environment. Follow the steps below to create your app and join the VeBetterDAO ecosystem.": "Welcome to our testnet environment. Follow the steps below to create your app and join the VeBetterDAO ecosystem.",
   "Deposit all": "Deposit all",
   "Deposit now": "Deposit now",
   "You'll deposit": "You'll deposit",
@@ -614,6 +614,5 @@
   "Upload a banner to be displayed on the VeWorld mobile wallet": "Upload a banner to be displayed on the VeWorld mobile wallet",
   "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.",
   "Download template": "Download template",
-  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).",
-  "Add now": "Add now"
+  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728)."
 }

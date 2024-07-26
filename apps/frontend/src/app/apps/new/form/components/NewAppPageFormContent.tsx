@@ -1,17 +1,10 @@
 import { CreateEditAppForm, CreateEditAppFormData } from "@/components/CreateEditAppForm"
-import { VStack, Grid, GridItem, Heading, useDisclosure } from "@chakra-ui/react"
+import { VStack, Grid, GridItem, Heading } from "@chakra-ui/react"
 import { useForm } from "react-hook-form"
 import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 import { useTranslation } from "react-i18next"
-import { useAddApp, useUploadAppMetadata } from "@/hooks"
-import { useCallback, useState } from "react"
-import { TransactionModal } from "@/components"
-import { useRouter } from "next/navigation"
-import { ethers } from "ethers"
 
 export const NewAppPageFormContent = () => {
-  const [appId, setAppId] = useState<string | null>(null)
-
   const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
     useForm<CreateEditAppFormData>({
       defaultValues: {
@@ -20,92 +13,76 @@ export const NewAppPageFormContent = () => {
         logo: "/images/dapp_icon_placeholder.svg",
         banner: "/images/dapp_banner_placeholder.svg",
         projectUrl: "",
-        adminAddress: "",
-        treasuryAddress: "",
+        teamWalletAddress: "",
       },
     })
 
   const { errors } = formState
   const { t } = useTranslation()
-  const router = useRouter()
 
-  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+  //   const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
 
-  const addAppMutation = useAddApp({
-    onSuccess: () => {
-      // go to app page
-      router.push(`/apps/${appId}`)
-    },
-  })
+  //   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+  const onSubmit = async (data: CreateEditAppFormData) => {
+    // onConfirmationOpen()
 
-  const uploadMetadataMutation = useUploadAppMetadata()
+    //TODO: integrate dapp creation contract logic
+    alert(`form submitted \n ${JSON.stringify(data)}`)
 
-  const handleClose = useCallback(() => {
-    onConfirmationClose()
-  }, [onConfirmationClose])
+    // const metadataUri = await onMetadataUpload({
+    //   name: data.name,
+    //   description: data.description,
+    //   logo: data.logo,
+    //   banner: data.banner,
+    //   external_url: data.projectUrl,
+    //   screenshots: metadata?.screenshots ?? [],
+    //   app_urls: metadata?.app_urls ?? [],
+    //   social_urls: metadata?.social_urls ?? [],
+    // })
+    // if (!metadataUri) return
+    // console.log("metadataUri", metadataUri)
 
-  const onSubmit = useCallback(
-    async (data: CreateEditAppFormData) => {
-      onConfirmationOpen()
+    // updateAppMetadataMutation.sendTransaction({
+    //   metadataUri,
+    //   ...(compareAddresses(data.teamWalletAddress, appData?.teamWalletAddress)
+    //     ? {}
+    //     : { teamWalletAddress: data.teamWalletAddress }),
+    // })
+  }
 
-      const metadataUri = await uploadMetadataMutation.onMetadataUpload({
-        name: data.name,
-        description: data.description,
-        external_url: data.projectUrl,
-        logo: data.logo,
-        banner: data.banner,
-        screenshots: [],
-        social_urls: [],
-        app_urls: [],
-        tweets: [],
-      })
-
-      if (!metadataUri) return
-
-      setAppId(ethers.keccak256(ethers.toUtf8Bytes(data.name)))
-
-      addAppMutation.sendTransaction({
-        adminAddress: data.adminAddress,
-        treasuryAddress: data.treasuryAddress,
-        name: data.name,
-        metadataURI: metadataUri,
-      })
-    },
-    [uploadMetadataMutation, addAppMutation, onConfirmationOpen],
-  )
-
-  const onTryAgain = useCallback(() => {
-    onSubmit(watch())
-  }, [onSubmit, watch])
+  //   const onTryAgain = useCallback(() => {
+  //     onConfirmationClose()
+  //     onConfirmationOpen()
+  //   }, [onConfirmationClose, onConfirmationOpen])
 
   return (
     <>
-      <TransactionModal
+      {/* <TransactionModal
         isOpen={isConfirmationOpen}
-        onClose={handleClose}
-        confirmationTitle="Add app"
-        successTitle="App added!"
+        onClose={onConfirmationClose}
+        confirmationTitle="Update App details"
+        successTitle="App details updated!"
         status={
-          uploadMetadataMutation.metadataUploading
+          metadataUploading
             ? "uploadingMetadata"
-            : addAppMutation.error || uploadMetadataMutation.metadataUploadError
+            : updateAppMetadataMutation.error || metadataUploadError
               ? "error"
-              : addAppMutation.status
+              : updateAppMetadataMutation.status
         }
-        errorDescription={uploadMetadataMutation.metadataUploadError?.message ?? addAppMutation.error?.reason}
+        errorDescription={metadataUploadError?.message ?? updateAppMetadataMutation.error?.reason}
         errorTitle={
-          uploadMetadataMutation.metadataUploadError
+          metadataUploadError
             ? "Error uploading metadata"
-            : addAppMutation.error
-              ? "Error adding app"
+            : updateAppMetadataMutation.error
+              ? "Error updating app details"
               : undefined
         }
         showTryAgainButton={true}
         onTryAgain={onTryAgain}
-        pendingTitle="Adding app..."
-        txId={addAppMutation.txReceipt?.meta.txID}
-        showExplorerButton
-      />
+        pendingTitle="Updating app details..."
+        txId={updateAppMetadataMutation.txReceipt?.meta.txID}
+        showExplorerButton={true}
+      /> */}
 
       <Grid templateColumns="repeat(3, 1fr)" gap={[4, 4, 8]} w="full" data-testid={`new-app-form`}>
         <GridItem colSpan={[3, 3, 2]}>

@@ -155,15 +155,13 @@ contract X2EarnApps is
 
   /**
    * @dev See {IX2EarnApps-addApp}.
-   *
-   * DEV-TESTNET: Everyone can add an app for testing purposes.
    */
   function addApp(
     address _teamWalletAddress,
     address _admin,
     string memory _appName,
     string memory _appMetadataURI
-  ) public {
+  ) public onlyRole(GOVERNANCE_ROLE) {
     _addApp(_teamWalletAddress, _admin, _appName, _appMetadataURI);
   }
 

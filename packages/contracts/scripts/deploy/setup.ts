@@ -1,4 +1,4 @@
-import { B3TR, B3TRFaucet, Emissions, Treasury, X2EarnApps } from "../../typechain-types"
+import { Emissions, Treasury, X2EarnApps } from "../../typechain-types"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
@@ -81,12 +81,7 @@ export const setupLocalEnvironment = async (emissions: Emissions, treasury: Trea
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
 
-export const setupTestEnvironment = async (
-  emissions: Emissions,
-  treasury: Treasury,
-  b3trFaucet: B3TRFaucet,
-  b3tr: B3TR,
-) => {
+export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps) => {
   console.log("================ Setup Testnet environment")
   const start = performance.now()
 
@@ -96,17 +91,13 @@ export const setupTestEnvironment = async (
   const emissionsContract = await emissions.getAddress()
   await bootstrapEmissions(emissionsContract, admin)
 
-  // Seed the first 5 accounts with some tokens
-  const treasuryAddress = await treasury.getAddress()
+  // Add x-apps to the XAllocationPool
+  console.log("Adding x-apps...")
 
-  // allow DEFAULT_ADMIN_ROLE the GOVERNANCE_ROLE
-  await treasury.grantRole(await treasury.GOVERNANCE_ROLE(), admin.address)
-
-  // set treasury transfer limit to all balance
-  await treasury.setTransferLimitToken(await b3tr.getAddress(), await b3tr.balanceOf(treasuryAddress))
-
-  // transfer all money from treasury to b3trFaucet
-  await treasury.transferB3TR(await b3trFaucet.getAddress(), await b3tr.balanceOf(treasuryAddress))
+  // Add x-apps to the XAllocationPool
+  const x2EarnAppsAddress = await x2EarnApps.getAddress()
+  await addXDapps(x2EarnAppsAddress, admin, APPS)
+  console.log("x-apps added")
 
   const end = performance.now()
   console.log(`Setup complete in ${end - start}ms`)

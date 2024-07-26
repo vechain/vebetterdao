@@ -147,14 +147,6 @@ In order to successfully deploy the frontend app, the following steps need to be
 
 This will trigger the deployment of the frontend app to Vercel through the `on-release` workflow.
 
-## Dev Testnet environment
-
-The dev testnet environment is a testnet that is used for testing purposes by developers that want to join VeBetterDAO.
-It is not the "testnet" environment used the first time we deployed, but a new one that is used for testing purposes.
-This environment is not 100% aligned with what we have in production and it's more focused on developer ux and needs (eg: faster voting rounds, a B3TR faucet, all can see settings, priority is given to the developer's needs).
-
-To deploy changes to this environment you will need to checkout the `dev-testnet` branch and push your changes there. Go to Vercel to execute the deployment.
-
 ## Smart contracts
 
 Contracts can be found inside `./packages/contracts` folder.

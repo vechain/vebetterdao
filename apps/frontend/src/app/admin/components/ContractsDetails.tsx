@@ -15,7 +15,6 @@ export const ContractsDetails = () => {
   const config = getConfig()
   return (
     <Grid w="full" gap={4} templateColumns={["repeat(1, 1fr)", "repeat(3, 1fr)"]}>
-      <ContractDetailsCard title="B3TRFaucet" address={config.b3trFaucetAddress} roles={[]} />
       <ContractDetailsCard
         title="B3TR"
         address={config.b3trContractAddress}
