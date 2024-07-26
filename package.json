@@ -58,7 +58,7 @@
   ],
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --quiet --fix",
+      "eslint --fix",
       "prettier --write --ignore-unknown"
     ],
     "*.{json,html}": [
