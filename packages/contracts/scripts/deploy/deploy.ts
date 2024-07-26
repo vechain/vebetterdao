@@ -21,7 +21,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployProxy, saveContractsToFile } from "../helpers"
 import { shouldRunSimulation } from "@repo/config/contracts"
 
-const gino = 0
+const gino = 10
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
 const symbol = "GM"
