@@ -128,7 +128,7 @@ export const PublishAndPreviewPageContent = () => {
       <Card w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">
         <CardBody py={8}>
           <VStack spacing={8} align="flex-start" divider={<Divider />}>
-            <Heading size="lg">{t("Check your proposal before publishing")}</Heading>
+            <Heading size={["md", "lg"]}>{t("Check your proposal before publishing")}</Heading>
             <MDEditor.Markdown
               source={markdownDescription}
               style={{
@@ -146,7 +146,7 @@ export const PublishAndPreviewPageContent = () => {
             )}
 
             <VStack spacing={4} align="flex-start" w="full">
-              <Heading size="md">{t("Voting session")}</Heading>
+              <Heading size={["sm", "md"]}>{t("Voting session")}</Heading>
               {votingStartRoundId && (
                 <SelectedRoundRadioCard
                   roundId={votingStartRoundId}
@@ -160,7 +160,7 @@ export const PublishAndPreviewPageContent = () => {
             </VStack>
 
             <VStack spacing={4} align="flex-start" w="full">
-              <Heading size="md">{t("Community support")}</Heading>
+              <Heading size={["sm", "md"]}>{t("Community support")}</Heading>
               {depositAmount !== undefined && threshold && (
                 <ProposalSupportProgressChart
                   isDepositThresholdReached={isDepositReached}

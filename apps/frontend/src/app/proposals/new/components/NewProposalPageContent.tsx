@@ -67,13 +67,15 @@ export const NewProposalPageContent = () => {
       <GridItem colSpan={2}>
         <Card variant="baseWithBorder">
           <CardBody>
-            <VStack spacing={8} align="flex-start">
-              <Heading size="lg">{t("Create a new proposal")}</Heading>
-              <Text fontSize={"lg"}>
-                {t(
-                  "Proposals represent your ideas as a valued member of the DAO community, aimed at enhancing or modifying aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to life.",
-                )}
-              </Text>
+            <VStack spacing={[6, 8]} align="flex-start">
+              <VStack spacing={[4, 6]} align="flex-start">
+                <Heading size={["md", "lg"]}>{t("Create a new proposal")}</Heading>
+                <Text fontSize={["sm", "md"]}>
+                  {t(
+                    "Proposals represent your ideas as a valued member of the DAO community, aimed at enhancing or modifying aspects of the ecosystem. Each proposal undergoes a voting process, and upon approval, is brought to life.",
+                  )}
+                </Text>
+              </VStack>
               <Stack direction={["column"]} w="full" spacing={4}>
                 {Steps(t).map(step => (
                   <StepCard
