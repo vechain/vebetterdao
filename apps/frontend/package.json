@@ -43,6 +43,7 @@
     "axios": "^1.6.8",
     "browser-image-compression": "^2.0.2",
     "dayjs": "^1.11.10",
+    "disqus-react": "^1.1.5",
     "form-data": "^4.0.0",
     "framer-motion": "^10.17.9",
     "i18next": "^23.11.4",

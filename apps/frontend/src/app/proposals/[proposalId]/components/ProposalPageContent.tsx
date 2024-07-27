@@ -1,4 +1,4 @@
-import { Grid, GridItem, VStack } from "@chakra-ui/react"
+import { Card, CardBody, CardHeader, Grid, GridItem, VStack } from "@chakra-ui/react"
 import { ProposalOverview } from "./ProposalOverview"
 import { ProposalContentAndActions } from "./ProposalContentAndActions"
 import { ProposalState, useProposalCreatedEvent, useProposalTotalVotes, useVot3PastSupply } from "@/api"
@@ -11,6 +11,7 @@ import { useProposalDetail } from "../hooks"
 import { ProposalSessionSection } from "@/components/ProposalSessionSection"
 import { ProposalTimeline } from "@/components/ProposalSessionSection/components/ProposalTimeline"
 import { useMemo } from "react"
+import { CommentCount, DiscussionEmbed } from "disqus-react"
 
 type Props = {
   proposalId: string
@@ -63,6 +64,31 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
           </VStack>
         </GridItem>
       </Grid>
+      <Card variant="baseWithBorder">
+        <CardHeader>
+          <CommentCount
+            shortname="vbd-1"
+            config={{
+              url: "https://b3tr-frontend.vercel.app/propopsals/" + proposal.id,
+              identifier: "https://b3tr-frontend.vercel.app/",
+              title: proposal.title,
+            }}>
+            {/* Placeholder Text */}
+            {"Comments"}
+          </CommentCount>
+        </CardHeader>
+        <CardBody>
+          <DiscussionEmbed
+            shortname="vbd-1"
+            config={{
+              url: "https://b3tr-frontend.vercel.app/propopsals/" + proposal.id,
+              identifier: "https://b3tr-frontend.vercel.app/",
+              title: proposal.title,
+              language: "en_EN", //e.g. for Traditional Chinese (Taiwan)
+            }}
+          />
+        </CardBody>
+      </Card>
     </VStack>
   )
 }
