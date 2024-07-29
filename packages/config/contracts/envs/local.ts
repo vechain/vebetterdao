@@ -33,6 +33,7 @@ export function createLocalConfig() {
         "setEmissions",
         "setVotingThreshold",
       ],
+      X2EarnApps: ["addApp", "setVotingEligibility"],
       X2EarnAppsV2: ["setVotingEligibility"],
     },
 
@@ -100,7 +101,6 @@ export function createLocalConfig() {
     VOTER_REWARDS_MULTIPLIER: [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
 
     XAPP_BASE_URI: "ipfs://",
-    XAPP_GRACE_PERIOD: 48, // 2 cycles - 8 minutes
 
     /*
       Token transfer limits. These values are not final and are for testing purposes only.
@@ -113,5 +113,9 @@ export function createLocalConfig() {
     // Migration
     MIGRATION_ADDRESS: "0x865306084235Bf804c8Bba8a8d56890940ca8F0b", // 10th account from mnemonic of solo network
     MIGRATION_AMOUNT: BigInt("3750000000000000000000000"), // 3.75 million B3TR tokens from pilot show
+
+    // Version 2
+    VECHAIN_NODES_CONTRACT_ADDRESS: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302", // The contract address of the VeChainNodes contract on mainnet
+    XAPP_GRACE_PERIOD: 48, // 2 cycles - 8 minutes
   })
 }
