@@ -407,7 +407,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await vot3.getAddress(),
@@ -465,7 +465,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await vot3.getAddress(),
@@ -523,7 +523,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await vot3.getAddress(),
@@ -581,7 +581,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: ZERO_ADDRESS,
@@ -639,7 +639,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await vot3.getAddress(),
@@ -697,7 +697,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await vot3.getAddress(),
@@ -5141,7 +5141,7 @@ describe("Governor and TimeLock", function () {
         })
 
         governor = (await deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await voterRewards.getAddress(), // wrong address
