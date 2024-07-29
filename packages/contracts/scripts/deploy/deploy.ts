@@ -11,15 +11,16 @@ import {
   XAllocationPool,
   Treasury,
   X2EarnRewardsPool,
-  X2EarnAppsV1,
+  X2EarnApps,
+  X2EarnAppsV2,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
 import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } from "./setup"
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { deployProxy, saveContractsToFile } from "../helpers"
-import { shouldRunSimulation } from "@repo/config/contracts"
+import { deployProxy, saveContractsToFile, upgradeProxy } from "../helpers"
+import { shouldRunSimulation, shouldUpgradeContracts } from "@repo/config/contracts"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -161,7 +162,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as Treasury
 
   const x2EarnApps = (await deployProxy(
-    "X2EarnAppsV1",
+    "X2EarnApps",
     [
       config.XAPP_BASE_URI,
       [TEMP_ADMIN], //admins
@@ -170,7 +171,7 @@ export async function deployAll(config: ContractsConfig) {
     ],
     undefined,
     true,
-  )) as X2EarnAppsV1
+  )) as X2EarnApps
 
   const x2EarnRewardsPool = (await deployProxy(
     "X2EarnRewardsPool",
@@ -772,6 +773,30 @@ export async function deployAll(config: ContractsConfig) {
     console.log("Roles validated successfully!")
   }
 
+  // ---------- Upgrade contracts ---------- //
+  console.log("================ Upgrading contracts =================")
+  let x2EarnAppsV2: X2EarnAppsV2 | undefined
+  if (shouldUpgradeContracts()) {
+    let vechainNodesAddress = config.VECHAIN_NODES_CONTRACT_ADDRESS
+    if (network.name != "mainnet") {
+      const operators = (await ethers.getSigners()).slice(0, 10)
+      const mocks = await deployVechainNodeMock(operators)
+      vechainNodesAddress = await mocks.vechainNodes.getAddress()
+    }
+
+    console.log("Upgrading contracts to V2")
+    // Upgrade X2EarnApps to X2EarnAppsV2
+    x2EarnAppsV2 = (await upgradeProxy(
+      "X2EarnApps",
+      "X2EarnAppsV2",
+      await x2EarnApps.getAddress(),
+      [config.XAPP_GRACE_PERIOD, vechainNodesAddress],
+      {},
+      2,
+    )) as X2EarnAppsV2
+  }
+
+  console.log("Contracts upgraded successfully!")
   console.log("================================================================================")
   console.log("Deployment completed successfully!")
   console.log("================================================================================")
@@ -795,6 +820,7 @@ export async function deployAll(config: ContractsConfig) {
     voterRewards: voterRewards,
     treasury: treasury,
     x2EarnApps: x2EarnApps,
+    x2EarnAppsV2: x2EarnAppsV2,
     x2EarnRewardsPool: x2EarnRewardsPool,
   }
   // close the script
@@ -811,7 +837,7 @@ const transferAdminRole = async (
     | XAllocationVoting
     | Treasury
     | B3TRGovernor
-    | X2EarnAppsV1
+    | X2EarnApps
     | TimeLock,
   oldAdmin: HardhatEthersSigner,
   newAdminAddress: string,
@@ -881,7 +907,7 @@ const transferMinterRole = async (
 
 // Transfer governance role to treasury contract admin for intial phases of project
 const transferGovernanceRole = async (
-  contract: Treasury | X2EarnAppsV1,
+  contract: Treasury | X2EarnApps,
   admin: HardhatEthersSigner,
   oldAddress: string,
   newAddress?: string,
@@ -1037,6 +1063,12 @@ export const setWhitelistedFunctions = async (
   const { B3TR_GOVERNOR_WHITELISTED_METHODS } = config
 
   for (const [contract, functions] of Object.entries(B3TR_GOVERNOR_WHITELISTED_METHODS)) {
+    // Check if the contract address exists
+    const contractAddress = contractAddresses[contract]
+    if (!contractAddress) {
+      if (logOutput) console.log(`Skipping ${contract} as it does not exist in contract addresses`)
+      continue // Skip this contract if address does not exist
+    }
     // Check if the current contract requires linking with any libraries
     const contractLibraries = libraries[contract]
 
@@ -1078,7 +1110,7 @@ const validateContractRole = async (
     | TimeLock
     | B3TRGovernor
     | X2EarnRewardsPool
-    | X2EarnAppsV1,
+    | X2EarnApps,
   expectedAddress: string,
   tempAdmin: string,
   role: string,
@@ -1089,4 +1121,23 @@ const validateContractRole = async (
 
   if (!roleSet || !roleRemoved)
     throw new Error("Role " + role + " not set correctly on " + (await contract.getAddress()))
+}
+
+const deployVechainNodeMock = async (operators: HardhatEthersSigner[]) => {
+  const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
+  const vechainNodes = await TokenAuctionLock.deploy()
+  await vechainNodes.waitForDeployment()
+
+  const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
+  const clockAuctionContract = await ClockAuctionLock.deploy(
+    await vechainNodes.getAddress(),
+    await operators[0].getAddress(),
+  )
+
+  await vechainNodes.setSaleAuctionAddress(await clockAuctionContract.getAddress())
+
+  for (const operator of operators) {
+    await vechainNodes.addOperator(operator.address)
+  }
+  return { vechainNodes: vechainNodes, clockAuctionContract: clockAuctionContract }
 }

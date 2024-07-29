@@ -26,7 +26,7 @@ import {
   MyERC721,
   MyERC1155,
   TokenAuction,
-  X2EarnAppsV1,
+  X2EarnApps,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, upgradeProxy } from "../../scripts/helpers"
@@ -41,7 +41,7 @@ interface DeployInstance {
   governor: B3TRGovernor
   galaxyMember: GalaxyMember
   x2EarnApps: X2EarnAppsV2
-  x2EarnAppsV1: X2EarnAppsV1
+  x2EarnAppsV1: X2EarnApps
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
   emissions: Emissions
@@ -235,17 +235,17 @@ export const getOrDeployContractInstances = async ({
     },
   ])) as GalaxyMember
 
-  // Deploy X2EarnAppsV1
-  const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
+  // Deploy X2EarnApps
+  const x2EarnAppsV1 = (await deployProxy("X2EarnApps", [
     "ipfs://",
     [await timeLock.getAddress(), owner.address],
     owner.address,
     owner.address,
-  ])) as X2EarnAppsV1
+  ])) as X2EarnApps
 
-  // Upgrade X2EarnAppsV1 to X2EarnAppsV2
+  // Upgrade X2EarnApps to X2EarnAppsV2
   const x2EarnApps = (await upgradeProxy(
-    "X2EarnAppsV1",
+    "X2EarnApps",
     "X2EarnAppsV2",
     await x2EarnAppsV1.getAddress(),
     [config.XAPP_GRACE_PERIOD, await vechainNodes.getAddress()],
