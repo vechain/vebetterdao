@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,7 +14,8 @@
     "test:watch": "vitest watch",
     "test:coverage:fe": "vitest run --coverage",
     "clean": "rm -rf .next node_modules dist",
-    "generate-translations": "npx ts-node ./src/scripts/generateTranslations.ts"
+    "generate-translations": "npx ts-node ./src/scripts/translations/generateTranslations.ts",
+    "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",
