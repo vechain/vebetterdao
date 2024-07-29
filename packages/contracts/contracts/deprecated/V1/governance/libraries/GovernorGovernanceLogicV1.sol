@@ -23,13 +23,13 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorStorageTypesV2 } from "./GovernorStorageTypesV2.sol";
+import { GovernorStorageTypesV1 } from "./GovernorStorageTypesV1.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 
-/// @title GovernorGovernanceLogicV2
+/// @title GovernorGovernanceLogicV1
 /// @notice Library for validating descriptions in governance proposals based on the proposer's address suffix.
-/// @dev Difference from V1: Updated the GovernorStorageTypes to GovernorStorageTypesV2.
-library GovernorGovernanceLogicV2 {
+/// @dev This library provides functions to manage the governance execution flow and validate the governance executor.
+library GovernorGovernanceLogicV1 {
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
 
   /// @dev Thrown when the `account` is not the governance executor.
@@ -53,7 +53,7 @@ library GovernorGovernanceLogicV2 {
    * @param self The storage reference for the GovernorStorage.
    * @return The executor address.
    */
-  function executor(GovernorStorageTypesV2.GovernorStorage storage self) internal view returns (address) {
+  function executor(GovernorStorageTypesV1.GovernorStorage storage self) internal view returns (address) {
     return address(self.timelock);
   }
 
@@ -66,7 +66,7 @@ library GovernorGovernanceLogicV2 {
    * @param contractAddress The address of the calling governance contract.
    */
   function checkGovernance(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     address sender,
     bytes calldata data,
     address contractAddress

@@ -222,7 +222,7 @@ library GovernorVotesLogic {
 
     _countVote(self, proposalId, voter, support, weight, power);
 
-    self.voterRewards.registerVote(GovernorProposalLogic._proposalSnapshot(self, proposalId), voter, weight, Math.sqrt(weight));
+    self.voterRewards.registerVote(proposalId, voter, weight, Math.sqrt(weight));
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 

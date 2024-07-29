@@ -27,7 +27,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { GalaxyMember, GalaxyMemberV2 } from "../typechain-types"
+import { GalaxyMember } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 
 describe("VoterRewards", () => {
@@ -101,7 +101,7 @@ describe("VoterRewards", () => {
       })
 
       await expect(
-        deployProxy("VoterRewards", [
+        deployProxy("VoterRewardsV1", [
           ZERO_ADDRESS, // admin
           owner.address, // upgrader
           owner.address, // contractsAddressManager
@@ -270,7 +270,7 @@ describe("VoterRewards", () => {
       })
 
       await expect(
-        deployProxy("VoterRewards", [
+        deployProxy("VoterRewardsV1", [
           owner.address,
           owner.address,
           owner.address,
@@ -289,7 +289,7 @@ describe("VoterRewards", () => {
       })
 
       await expect(
-        deployProxy("VoterRewards", [
+        deployProxy("VoterRewardsV1", [
           owner.address,
           owner.address,
           owner.address,
@@ -308,7 +308,7 @@ describe("VoterRewards", () => {
       })
 
       await expect(
-        deployProxy("VoterRewards", [
+        deployProxy("VoterRewardsV1", [
           owner.address,
           owner.address,
           owner.address,
@@ -327,7 +327,7 @@ describe("VoterRewards", () => {
       })
 
       await expect(
-        deployProxy("VoterRewards", [
+        deployProxy("VoterRewardsV1", [
           owner.address,
           owner.address,
           owner.address,
@@ -346,7 +346,7 @@ describe("VoterRewards", () => {
       })
 
       await expect(
-        deployProxy("VoterRewards", [
+        deployProxy("VoterRewardsV1", [
           owner.address,
           owner.address,
           owner.address,
@@ -788,7 +788,7 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -806,12 +806,12 @@ describe("VoterRewards", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 
@@ -928,7 +928,7 @@ describe("VoterRewards", () => {
         forceDeploy: true,
       })
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -946,12 +946,12 @@ describe("VoterRewards", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 
@@ -1075,7 +1075,7 @@ describe("VoterRewards", () => {
         config,
       })
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1093,12 +1093,12 @@ describe("VoterRewards", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 
@@ -1247,7 +1247,7 @@ describe("VoterRewards", () => {
         config,
       })
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1265,12 +1265,12 @@ describe("VoterRewards", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 
@@ -1388,7 +1388,7 @@ describe("VoterRewards", () => {
         config,
       })
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1406,12 +1406,12 @@ describe("VoterRewards", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 
@@ -1745,7 +1745,7 @@ describe("VoterRewards", () => {
 
       const governorV2 = await upgradeGovernanceToV2()
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1763,12 +1763,12 @@ describe("VoterRewards", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 
@@ -1866,7 +1866,7 @@ describe("VoterRewards", () => {
 
       const governorV2 = await upgradeGovernanceToV2()
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1884,12 +1884,12 @@ describe("VoterRewards", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 

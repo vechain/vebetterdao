@@ -23,21 +23,21 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorStorageTypesV2 } from "./GovernorStorageTypesV2.sol";
-import { GovernorTypesV2 } from "./GovernorTypesV2.sol";
-import { GovernorStateLogicV2 } from "./GovernorStateLogicV2.sol";
-import { GovernorClockLogicV2 } from "./GovernorClockLogicV2.sol";
-import { GovernorDepositLogicV2 } from "./GovernorDepositLogicV2.sol";
-import { GovernorGovernanceLogicV2 } from "./GovernorGovernanceLogicV2.sol";
-import { GovernorFunctionRestrictionsLogicV2 } from "./GovernorFunctionRestrictionsLogicV2.sol";
+import { GovernorStorageTypesV1 } from "./GovernorStorageTypesV1.sol";
+import { GovernorTypesV1 } from "./GovernorTypesV1.sol";
+import { GovernorStateLogicV1 } from "./GovernorStateLogicV1.sol";
+import { GovernorClockLogicV1 } from "./GovernorClockLogicV1.sol";
+import { GovernorDepositLogicV1 } from "./GovernorDepositLogicV1.sol";
+import { GovernorGovernanceLogicV1 } from "./GovernorGovernanceLogicV1.sol";
+import { GovernorFunctionRestrictionsLogicV1 } from "./GovernorFunctionRestrictionsLogicV1.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 
-/// @title GovernorProposalLogicV2
+/// @title GovernorProposalLogicV1
 /// @notice Library for managing proposals in the Governor contract.
-/// @dev Difference from V1: Updated GovernorStorageTypes, GovernorTypes, GovernorStateLogic, GovernorClockLogic, GovernorDepositLogic, GovernorGovernanceLogic, and GovernorFunctionRestrictionsLogic to V2.
-library GovernorProposalLogicV2 {
+/// @dev This library provides functions to create, cancel, execute, and validate proposals.
+library GovernorProposalLogicV1 {
   using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
 
   /**
@@ -75,7 +75,7 @@ library GovernorProposalLogicV2 {
    */
   error GovernorUnexpectedProposalState(
     uint256 proposalId,
-    GovernorTypesV2.ProposalState current,
+    GovernorTypesV1.ProposalState current,
     bytes32 expectedStates
   );
 
@@ -131,7 +131,7 @@ library GovernorProposalLogicV2 {
    * @return The address of the proposer.
    */
   function proposalProposer(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (address) {
     return self.proposals[proposalId].proposer;
@@ -144,7 +144,7 @@ library GovernorProposalLogicV2 {
    * @return The eta in seconds.
    */
   function proposalEta(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (uint256) {
     return self.proposals[proposalId].etaSeconds;
@@ -157,7 +157,7 @@ library GovernorProposalLogicV2 {
    * @return The start round id.
    */
   function proposalStartRound(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (uint256) {
     return self.proposals[proposalId].roundIdVoteStart;
@@ -171,7 +171,7 @@ library GovernorProposalLogicV2 {
    * @return The snapshot block number.
    */
   function proposalSnapshot(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) external view returns (uint256) {
     return _proposalSnapshot(self, proposalId);
@@ -185,7 +185,7 @@ library GovernorProposalLogicV2 {
    * @return The deadline block number.
    */
   function proposalDeadline(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) external view returns (uint256) {
     return _proposalDeadline(self, proposalId);
@@ -196,9 +196,7 @@ library GovernorProposalLogicV2 {
    * @param self The storage reference for the GovernorStorage.
    * @return True if the proposal can start in the next round, false otherwise.
    */
-  function canProposalStartInNextRound(
-    GovernorStorageTypesV2.GovernorStorage storage self
-  ) external view returns (bool) {
+  function canProposalStartInNextRound(GovernorStorageTypesV1.GovernorStorage storage self) external view returns (bool) {
     return _canProposalStartInNextRound(self);
   }
 
@@ -209,7 +207,7 @@ library GovernorProposalLogicV2 {
    * @return The total votes for the proposal.
    */
   function getProposalTotalVotes(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (uint256) {
     return self.proposalTotalVotes[proposalId];
@@ -222,7 +220,7 @@ library GovernorProposalLogicV2 {
    * @return The timelock id of the proposal.
    */
   function getTimelockId(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (bytes32) {
     return self.timelockIds[proposalId];
@@ -243,7 +241,7 @@ library GovernorProposalLogicV2 {
    * @return The proposal id.
    */
   function propose(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     address[] memory targets,
     uint256[] memory values,
     bytes[] memory calldatas,
@@ -268,10 +266,10 @@ library GovernorProposalLogicV2 {
    * @param proposalId The id of the proposal
    */
   function proposalNeedsQueuing(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) external view returns (bool) {
-    GovernorTypesV2.ProposalCore storage proposal = self.proposals[proposalId];
+    GovernorTypesV1.ProposalCore storage proposal = self.proposals[proposalId];
     if (proposal.roundIdVoteStart == 0) {
       return false;
     }
@@ -295,7 +293,7 @@ library GovernorProposalLogicV2 {
    * @return The proposal id.
    */
   function queue(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     address contractAddress, // Address of the calling contract
     address[] memory targets,
     uint256[] memory values,
@@ -304,10 +302,10 @@ library GovernorProposalLogicV2 {
   ) external returns (uint256) {
     uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
 
-    GovernorStateLogicV2.validateStateBitmap(
+    GovernorStateLogicV1.validateStateBitmap(
       self,
       proposalId,
-      GovernorStateLogicV2.encodeStateBitmap(GovernorTypesV2.ProposalState.Succeeded)
+      GovernorStateLogicV1.encodeStateBitmap(GovernorTypesV1.ProposalState.Succeeded)
     );
 
     uint48 etaSeconds = _queueOperations(
@@ -342,7 +340,7 @@ library GovernorProposalLogicV2 {
    * @return The proposal id.
    */
   function execute(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     address contractAddress, // Address of the calling contract
     address[] memory targets,
     uint256[] memory values,
@@ -351,18 +349,18 @@ library GovernorProposalLogicV2 {
   ) external returns (uint256) {
     uint256 proposalId = hashProposal(targets, values, calldatas, descriptionHash);
 
-    GovernorStateLogicV2.validateStateBitmap(
+    GovernorStateLogicV1.validateStateBitmap(
       self,
       proposalId,
-      GovernorStateLogicV2.encodeStateBitmap(GovernorTypesV2.ProposalState.Succeeded) |
-        GovernorStateLogicV2.encodeStateBitmap(GovernorTypesV2.ProposalState.Queued)
+      GovernorStateLogicV1.encodeStateBitmap(GovernorTypesV1.ProposalState.Succeeded) |
+        GovernorStateLogicV1.encodeStateBitmap(GovernorTypesV1.ProposalState.Queued)
     );
 
     // mark as executed before calls to avoid reentrancy
     self.proposals[proposalId].executed = true;
 
     // before execute: register governance call in queue.
-    if (GovernorGovernanceLogicV2.executor(self) != contractAddress) {
+    if (GovernorGovernanceLogicV1.executor(self) != contractAddress) {
       for (uint256 i; i < targets.length; ++i) {
         if (targets[i] == address(this)) {
           self.governanceCall.pushBack(keccak256(calldatas[i]));
@@ -373,7 +371,7 @@ library GovernorProposalLogicV2 {
     _executeOperations(self, contractAddress, proposalId, targets, values, calldatas, descriptionHash);
 
     // after execute: cleanup governance call queue.
-    if (GovernorGovernanceLogicV2.executor(self) != contractAddress && !self.governanceCall.empty()) {
+    if (GovernorGovernanceLogicV1.executor(self) != contractAddress && !self.governanceCall.empty()) {
       self.governanceCall.clear();
     }
 
@@ -393,7 +391,7 @@ library GovernorProposalLogicV2 {
    * @return The proposal id.
    */
   function cancel(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     address account,
     bool admin,
     address[] memory targets,
@@ -407,17 +405,17 @@ library GovernorProposalLogicV2 {
       revert UnauthorizedAccess(account);
     }
 
-    GovernorStateLogicV2.validateStateBitmap(
+    GovernorStateLogicV1.validateStateBitmap(
       self,
       proposalId,
-      GovernorStateLogicV2.ALL_PROPOSAL_STATES_BITMAP ^
-        GovernorStateLogicV2.encodeStateBitmap(GovernorTypesV2.ProposalState.Canceled) ^
-        GovernorStateLogicV2.encodeStateBitmap(GovernorTypesV2.ProposalState.Executed)
+      GovernorStateLogicV1.ALL_PROPOSAL_STATES_BITMAP ^
+        GovernorStateLogicV1.encodeStateBitmap(GovernorTypesV1.ProposalState.Canceled) ^
+        GovernorStateLogicV1.encodeStateBitmap(GovernorTypesV1.ProposalState.Executed)
     );
 
     if (account == proposalProposer(self, proposalId)) {
       require(
-        GovernorStateLogicV2._state(self, proposalId) == GovernorTypesV2.ProposalState.Pending,
+        GovernorStateLogicV1._state(self, proposalId) == GovernorTypesV1.ProposalState.Pending,
         "Governor: proposal not pending"
       );
     }
@@ -449,7 +447,7 @@ library GovernorProposalLogicV2 {
    * @return The proposal id.
    */
   function _propose(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     address proposer,
     uint256 proposalId,
     address[] memory targets,
@@ -459,7 +457,7 @@ library GovernorProposalLogicV2 {
     uint256 startRoundId,
     uint256 depositAmount
   ) private returns (uint256) {
-    uint256 depositThresholdAmount = GovernorDepositLogicV2._depositThreshold(self);
+    uint256 depositThresholdAmount = GovernorDepositLogicV1._depositThreshold(self);
 
     _setProposal(
       self,
@@ -473,7 +471,7 @@ library GovernorProposalLogicV2 {
     );
 
     if (depositAmount > 0) {
-      GovernorDepositLogicV2.depositFunds(self, depositAmount, proposer, proposalId);
+      GovernorDepositLogicV1.depositFunds(self, depositAmount, proposer, proposalId);
     }
 
     emit ProposalCreated(
@@ -503,7 +501,7 @@ library GovernorProposalLogicV2 {
    * @param proposalId The id of the proposal.
    */
   function validateProposeParams(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     address proposer,
     uint256 startRoundId,
     string memory description,
@@ -535,10 +533,10 @@ library GovernorProposalLogicV2 {
 
     if (self.proposals[proposalId].roundIdVoteStart != 0) {
       // Proposal already exists
-      revert GovernorUnexpectedProposalState(proposalId, GovernorStateLogicV2._state(self, proposalId), bytes32(0));
+      revert GovernorUnexpectedProposalState(proposalId, GovernorStateLogicV1._state(self, proposalId), bytes32(0));
     }
 
-    GovernorFunctionRestrictionsLogicV2.checkFunctionsRestriction(self, targets, calldatas);
+    GovernorFunctionRestrictionsLogicV1.checkFunctionsRestriction(self, targets, calldatas);
   }
 
   /**
@@ -553,7 +551,7 @@ library GovernorProposalLogicV2 {
    * @param proposalDepositThreshold The deposit threshold for the proposal.
    */
   function _setProposal(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId,
     address proposer,
     uint32 voteDuration,
@@ -562,7 +560,7 @@ library GovernorProposalLogicV2 {
     uint256 depositAmount,
     uint256 proposalDepositThreshold
   ) private {
-    GovernorTypesV2.ProposalCore storage proposal = self.proposals[proposalId];
+    GovernorTypesV1.ProposalCore storage proposal = self.proposals[proposalId];
 
     proposal.proposer = proposer;
     proposal.roundIdVoteStart = roundIdVoteStart;
@@ -583,7 +581,7 @@ library GovernorProposalLogicV2 {
    * @param descriptionHash The hash of the proposal description.
    */
   function _executeOperations(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     address contractAddress, // Address of the calling contract
     uint256 proposalId,
     address[] memory targets,
@@ -597,7 +595,7 @@ library GovernorProposalLogicV2 {
       values,
       calldatas,
       0,
-      GovernorGovernanceLogicV2.timelockSalt(descriptionHash, contractAddress)
+      GovernorGovernanceLogicV1.timelockSalt(descriptionHash, contractAddress)
     );
     // cleanup for refund
     delete self.timelockIds[proposalId];
@@ -615,7 +613,7 @@ library GovernorProposalLogicV2 {
    * @return The eta (estimated time of arrival) in seconds.
    */
   function _queueOperations(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     address contractAddress, // Address of the calling contract
     uint256 proposalId,
     address[] memory targets,
@@ -625,7 +623,7 @@ library GovernorProposalLogicV2 {
   ) private returns (uint48) {
     uint256 delay = self.timelock.getMinDelay();
 
-    bytes32 salt = GovernorGovernanceLogicV2.timelockSalt(descriptionHash, contractAddress);
+    bytes32 salt = GovernorGovernanceLogicV1.timelockSalt(descriptionHash, contractAddress);
     self.timelockIds[proposalId] = self.timelock.hashOperationBatch(targets, values, calldatas, 0, salt);
     self.timelock.scheduleBatch(targets, values, calldatas, 0, salt, delay);
 
@@ -638,7 +636,7 @@ library GovernorProposalLogicV2 {
    * @param proposalId The id of the proposal.
    * @return The proposal id.
    */
-  function _cancel(GovernorStorageTypesV2.GovernorStorage storage self, uint256 proposalId) private returns (uint256) {
+  function _cancel(GovernorStorageTypesV1.GovernorStorage storage self, uint256 proposalId) private returns (uint256) {
     self.proposals[proposalId].canceled = true;
     emit ProposalCanceled(proposalId);
 
@@ -651,11 +649,11 @@ library GovernorProposalLogicV2 {
    * @return True if the proposal can start in the next round, false otherwise.
    */
   function _canProposalStartInNextRound(
-    GovernorStorageTypesV2.GovernorStorage storage self
+    GovernorStorageTypesV1.GovernorStorage storage self
   ) internal view returns (bool) {
     uint256 currentRoundId = self.xAllocationVoting.currentRoundId();
     uint256 currentRoundDeadline = self.xAllocationVoting.roundDeadline(currentRoundId);
-    uint48 currentBlock = GovernorClockLogicV2.clock(self);
+    uint48 currentBlock = GovernorClockLogicV1.clock(self);
 
     // this could happen if the round ended and the next one not started yet
     if (currentRoundDeadline <= currentBlock) {
@@ -677,7 +675,7 @@ library GovernorProposalLogicV2 {
    * @return The snapshot block number.
    */
   function _proposalSnapshot(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (uint256) {
     // round when proposal should be active is already started
@@ -690,8 +688,8 @@ library GovernorProposalLogicV2 {
     uint256 currentRoundDeadline = self.xAllocationVoting.currentRoundDeadline();
 
     // if current round ended and a new one did not start yet
-    if (currentRoundDeadline <= GovernorClockLogicV2.clock(self)) {
-      currentRoundDeadline = GovernorClockLogicV2.clock(self);
+    if (currentRoundDeadline <= GovernorClockLogicV1.clock(self)) {
+      currentRoundDeadline = GovernorClockLogicV1.clock(self);
     }
 
     return currentRoundDeadline + roundsDurationLeft + amountOfRoundsLeft;
@@ -704,7 +702,7 @@ library GovernorProposalLogicV2 {
    * @return The deadline block number.
    */
   function _proposalDeadline(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (uint256) {
     // if round is active or already occured proposal end block is the block when round ends

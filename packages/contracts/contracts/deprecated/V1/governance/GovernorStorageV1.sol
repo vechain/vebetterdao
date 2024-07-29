@@ -23,19 +23,19 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorStorageTypesV2 } from "./libraries/V2/GovernorStorageTypesV2.sol";
-import { GovernorTypesV2 } from "./libraries/V2/GovernorTypesV2.sol";
+import { GovernorStorageTypesV1 } from "./libraries/GovernorStorageTypesV1.sol";
+import { GovernorTypesV1 } from "./libraries/GovernorTypesV1.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /// @title GovernorStorage
 /// @notice Contract used as storage of the B3TRGovernor contract.
-/// @dev Difference from V1: Updated the GovernorStorageTypes, and GovernorTypes to V2.
-contract GovernorStorageV2 is Initializable {
+/// @dev It defines the storage layout of the B3TRGovernor contract.
+contract GovernorStorageV1 is Initializable {
   // keccak256(abi.encode(uint256(keccak256("GovernorStorageLocation")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant GovernorStorageLocation = 0xd09a0aaf4ab3087bae7fa25ef74ddd4e5a4950980903ce417e66228cf7dc7b00;
 
   /// @dev Internal function to access the governor storage slot.
-  function getGovernorStorageV2() internal pure returns (GovernorStorageTypesV2.GovernorStorage storage $) {
+  function getGovernorStorage() internal pure returns (GovernorStorageTypesV1.GovernorStorage storage $) {
     assembly {
       $.slot := GovernorStorageLocation
     }
@@ -43,7 +43,7 @@ contract GovernorStorageV2 is Initializable {
 
   /// @dev Initializes the governor storage
   function __GovernorStorage_init(
-    GovernorTypesV2.InitializationData memory initializationData,
+    GovernorTypesV1.InitializationData memory initializationData,
     string memory governorName
   ) internal onlyInitializing {
     __GovernorStorage_init_unchained(initializationData, governorName);
@@ -51,10 +51,10 @@ contract GovernorStorageV2 is Initializable {
 
   /// @dev Part of the initialization process that configures the governor storage.
   function __GovernorStorage_init_unchained(
-    GovernorTypesV2.InitializationData memory initializationData,
+    GovernorTypesV1.InitializationData memory initializationData,
     string memory governorName
   ) internal onlyInitializing {
-    GovernorStorageTypesV2.GovernorStorage storage governorStorage = getGovernorStorageV2();
+    GovernorStorageTypesV1.GovernorStorage storage governorStorage = getGovernorStorage();
 
     // Validate and set the governor time lock storage
     require(address(initializationData.timelock) != address(0), "B3TRGovernor: timelock address cannot be zero");

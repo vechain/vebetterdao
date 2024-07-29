@@ -24,7 +24,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { GalaxyMember, GalaxyMemberV2 } from "../typechain-types"
+import { GalaxyMember } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 
 describe("Galaxy Member", () => {
@@ -338,7 +338,7 @@ describe("Galaxy Member", () => {
       const config = createLocalConfig()
 
       await expect(
-        deployProxy("GalaxyMember", [
+        deployProxy("GalaxyMemberV1", [
           {
             name: NFT_NAME,
             symbol: NFT_SYMBOL,
@@ -366,7 +366,7 @@ describe("Galaxy Member", () => {
       const config = createLocalConfig()
 
       await expect(
-        deployProxy("GalaxyMember", [
+        deployProxy("GalaxyMemberV1", [
           {
             name: NFT_NAME,
             symbol: NFT_SYMBOL,
@@ -385,7 +385,7 @@ describe("Galaxy Member", () => {
       ).to.be.reverted
 
       // Deploy with correct b3tr required to upgrade
-      const galaxyMember = (await deployProxy("GalaxyMember", [
+      const galaxyMember = (await deployProxy("GalaxyMemberV1", [
         {
           name: NFT_NAME,
           symbol: NFT_SYMBOL,
@@ -436,7 +436,7 @@ describe("Galaxy Member", () => {
       const config = createLocalConfig()
 
       await expect(
-        deployProxy("GalaxyMember", [
+        deployProxy("GalaxyMemberV1", [
           {
             name: NFT_NAME,
             symbol: NFT_SYMBOL,
@@ -463,7 +463,7 @@ describe("Galaxy Member", () => {
       const config = createLocalConfig()
 
       await expect(
-        deployProxy("GalaxyMember", [
+        deployProxy("GalaxyMemberV1", [
           {
             name: NFT_NAME,
             symbol: NFT_SYMBOL,
@@ -490,7 +490,7 @@ describe("Galaxy Member", () => {
       const config = createLocalConfig()
 
       await expect(
-        deployProxy("GalaxyMember", [
+        deployProxy("GalaxyMemberV1", [
           {
             name: NFT_NAME,
             symbol: NFT_SYMBOL,
@@ -537,7 +537,7 @@ describe("Galaxy Member", () => {
       await participateInAllocationVoting(otherAccount)
 
       // Deploy Galaxy Member contract
-      const galaxyMember = (await deployProxy("GalaxyMember", [
+      const galaxyMember = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -580,7 +580,7 @@ describe("Galaxy Member", () => {
       await participateInAllocationVoting(otherAccount)
 
       // Deploy Galaxy Member contract
-      const galaxyMember = (await deployProxy("GalaxyMember", [
+      const galaxyMember = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -619,7 +619,7 @@ describe("Galaxy Member", () => {
       await participateInAllocationVoting(otherAccount)
 
       // Deploy Galaxy Member contract
-      const galaxyMember = (await deployProxy("GalaxyMember", [
+      const galaxyMember = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1407,7 +1407,7 @@ describe("Galaxy Member", () => {
       // participation in governance is a requirement for minting
       await participateInAllocationVoting(owner, true)
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1425,12 +1425,12 @@ describe("Galaxy Member", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 
@@ -1495,7 +1495,7 @@ describe("Galaxy Member", () => {
       // participation in governance is a requirement for minting
       await participateInAllocationVoting(owner, true)
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1513,12 +1513,12 @@ describe("Galaxy Member", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 
@@ -1550,7 +1550,7 @@ describe("Galaxy Member", () => {
       // participation in governance is a requirement for minting
       await participateInAllocationVoting(owner, true)
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1568,12 +1568,12 @@ describe("Galaxy Member", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 
@@ -1601,7 +1601,7 @@ describe("Galaxy Member", () => {
       // participation in governance is a requirement for minting
       await participateInAllocationVoting(owner, true)
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1619,12 +1619,12 @@ describe("Galaxy Member", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 
@@ -1671,7 +1671,7 @@ describe("Galaxy Member", () => {
       // participation in governance is a requirement for minting
       await participateInAllocationVoting(owner, true)
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1689,12 +1689,12 @@ describe("Galaxy Member", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 
@@ -1723,7 +1723,7 @@ describe("Galaxy Member", () => {
       // participation in governance is a requirement for minting
       await participateInAllocationVoting(owner, true)
 
-      const galaxyMemberV1 = (await deployProxy("GalaxyMember", [
+      const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
         {
           name: "galaxyMember",
           symbol: "GM",
@@ -1741,12 +1741,12 @@ describe("Galaxy Member", () => {
       ])) as GalaxyMember
 
       const galaxyMember = (await upgradeProxy(
+        "GalaxyMemberV1",
         "GalaxyMember",
-        "GalaxyMemberV2",
         await galaxyMemberV1.getAddress(),
         [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       await galaxyMember.waitForDeployment()
 

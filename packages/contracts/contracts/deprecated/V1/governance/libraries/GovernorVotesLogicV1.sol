@@ -23,16 +23,16 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorStorageTypesV2 } from "./GovernorStorageTypesV2.sol";
-import { GovernorTypesV2 } from "./GovernorTypesV2.sol";
-import { GovernorStateLogicV2 } from "./GovernorStateLogicV2.sol";
-import { GovernorConfiguratorV2 } from "./GovernorConfiguratorV2.sol";
-import { GovernorProposalLogicV2 } from "./GovernorProposalLogicV2.sol";
+import { GovernorStorageTypesV1 } from "./GovernorStorageTypesV1.sol";
+import { GovernorTypesV1 } from "./GovernorTypesV1.sol";
+import { GovernorStateLogicV1 } from "./GovernorStateLogicV1.sol";
+import { GovernorConfiguratorV1 } from "./GovernorConfiguratorV1.sol";
+import { GovernorProposalLogicV1 } from "./GovernorProposalLogicV1.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
-/// @title GovernorVotesLogic
+/// @title GovernorVotesLogicV1
 /// @notice Library for handling voting logic in the Governor contract.
-library GovernorVotesLogicV2 {
+library GovernorVotesLogicV1 {
   /// @dev Thrown when a vote has already been cast by the voter.
   /// @param voter The address of the voter who already cast a vote.
   error GovernorAlreadyCastVote(address voter);
@@ -73,25 +73,25 @@ library GovernorVotesLogicV2 {
    * @param power The voting power of the voter.
    */
   function _countVote(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId,
     address account,
     uint8 support,
     uint256 weight,
     uint256 power
   ) private {
-    GovernorTypesV2.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
+    GovernorTypesV1.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
 
     if (proposalVote.hasVoted[account]) {
       revert GovernorAlreadyCastVote(account);
     }
     proposalVote.hasVoted[account] = true;
 
-    if (support == uint8(GovernorTypesV2.VoteType.Against)) {
+    if (support == uint8(GovernorTypesV1.VoteType.Against)) {
       proposalVote.againstVotes += power;
-    } else if (support == uint8(GovernorTypesV2.VoteType.For)) {
+    } else if (support == uint8(GovernorTypesV1.VoteType.For)) {
       proposalVote.forVotes += power;
-    } else if (support == uint8(GovernorTypesV2.VoteType.Abstain)) {
+    } else if (support == uint8(GovernorTypesV1.VoteType.Abstain)) {
       proposalVote.abstainVotes += power;
     } else {
       revert GovernorInvalidVoteType();
@@ -112,10 +112,10 @@ library GovernorVotesLogicV2 {
    * @return True if the vote succeeded, false otherwise.
    */
   function voteSucceeded(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (bool) {
-    GovernorTypesV2.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
+    GovernorTypesV1.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
     return proposalVote.forVotes > proposalVote.againstVotes;
   }
 
@@ -129,7 +129,7 @@ library GovernorVotesLogicV2 {
    * @return The votes of the account at the given timepoint.
    */
   function getVotes(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     address account,
     uint256 timepoint
   ) internal view returns (uint256) {
@@ -144,7 +144,7 @@ library GovernorVotesLogicV2 {
    * @return The quadratic voting power of the account.
    */
   function getQuadraticVotingPower(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     address account,
     uint256 timepoint
   ) external view returns (uint256) {
@@ -160,7 +160,7 @@ library GovernorVotesLogicV2 {
    * @return True if the account has voted, false otherwise.
    */
   function hasVoted(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId,
     address account
   ) internal view returns (bool) {
@@ -176,10 +176,10 @@ library GovernorVotesLogicV2 {
    * @return abstainVotes The number of abstain votes.
    */
   function getProposalVotes(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId
   ) internal view returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
-    GovernorTypesV2.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
+    GovernorTypesV1.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
     return (proposalVote.againstVotes, proposalVote.forVotes, proposalVote.abstainVotes);
   }
 
@@ -189,7 +189,7 @@ library GovernorVotesLogicV2 {
    * @param user The address of the user.
    * @return True if the user has voted once, false otherwise.
    */
-  function userVotedOnce(GovernorStorageTypesV2.GovernorStorage storage self, address user) internal view returns (bool) {
+  function userVotedOnce(GovernorStorageTypesV1.GovernorStorage storage self, address user) internal view returns (bool) {
     return self.hasVotedOnce[user];
   }
 
@@ -205,24 +205,33 @@ library GovernorVotesLogicV2 {
    * @return The weight of the vote.
    */
   function castVote(
-    GovernorStorageTypesV2.GovernorStorage storage self,
+    GovernorStorageTypesV1.GovernorStorage storage self,
     uint256 proposalId,
     address voter,
     uint8 support,
     string calldata reason
   ) external returns (uint256) {
-    GovernorStateLogicV2.validateStateBitmap(self, proposalId, GovernorStateLogicV2.encodeStateBitmap(GovernorTypesV2.ProposalState.Active));
+    GovernorStateLogicV1.validateStateBitmap(
+      self,
+      proposalId,
+      GovernorStateLogicV1.encodeStateBitmap(GovernorTypesV1.ProposalState.Active)
+    );
 
-    uint256 weight = self.vot3.getPastVotes(voter, GovernorProposalLogicV2._proposalSnapshot(self, proposalId));
+    uint256 weight = self.vot3.getPastVotes(voter, GovernorProposalLogicV1._proposalSnapshot(self, proposalId));
     uint256 power = Math.sqrt(weight) * 1e9;
 
-    if (weight < GovernorConfiguratorV2.getVotingThreshold(self)) {
-      revert GovernorVotingThresholdNotMet(weight, GovernorConfiguratorV2.getVotingThreshold(self));
+    if (weight < GovernorConfiguratorV1.getVotingThreshold(self)) {
+      revert GovernorVotingThresholdNotMet(weight, GovernorConfiguratorV1.getVotingThreshold(self));
     }
 
     _countVote(self, proposalId, voter, support, weight, power);
 
-    self.voterRewards.registerVote(proposalId, voter, weight, Math.sqrt(weight));
+    self.voterRewards.registerVote(
+      GovernorProposalLogicV1._proposalSnapshot(self, proposalId),
+      voter,
+      weight,
+      Math.sqrt(weight)
+    );
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 

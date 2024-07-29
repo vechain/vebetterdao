@@ -1,4 +1,3 @@
-import { B3TRGovernorV2 } from "./../../typechain-types"
 import { ethers } from "hardhat"
 import { getOrDeployContractInstances } from "./deploy"
 import {
@@ -8,91 +7,92 @@ import {
   waitForProposalToBeActive,
   waitForVotingPeriodToEnd,
 } from "./common"
+import { B3TRGovernor } from "../../typechain-types"
 
-export const upgradeGovernanceToV2 = async (): Promise<B3TRGovernorV2> => {
+export const upgradeGovernanceToV2 = async (): Promise<B3TRGovernor> => {
   const { governor, xAllocationVoting, otherAccount, owner } = await getOrDeployContractInstances({})
 
   ////////////////////////////
 
   // ---------------------- Deploy Libraries V2 ----------------------
   // Deploy Governor Clock Logic
-  const GovernorClockLogicV2 = await ethers.getContractFactory("GovernorClockLogicV2")
-  const GovernorClockLogicLibV2 = await GovernorClockLogicV2.deploy()
-  await GovernorClockLogicLibV2.waitForDeployment()
+  const GovernorClockLogic = await ethers.getContractFactory("GovernorClockLogic")
+  const GovernorClockLogicLib = await GovernorClockLogic.deploy()
+  await GovernorClockLogicLib.waitForDeployment()
 
   // Deploy Governor Configurator
-  const GovernorConfiguratorV2 = await ethers.getContractFactory("GovernorConfiguratorV2")
-  const GovernorConfiguratorLibV2 = await GovernorConfiguratorV2.deploy()
-  await GovernorConfiguratorLibV2.waitForDeployment()
+  const GovernorConfigurator = await ethers.getContractFactory("GovernorConfigurator")
+  const GovernorConfiguratorLib = await GovernorConfigurator.deploy()
+  await GovernorConfiguratorLib.waitForDeployment()
 
   // Deploy Governor Function Restrictions Logic
-  const GovernorFunctionRestrictionsLogicV2 = await ethers.getContractFactory("GovernorFunctionRestrictionsLogicV2")
-  const GovernorFunctionRestrictionsLogicLibV2 = await GovernorFunctionRestrictionsLogicV2.deploy()
-  await GovernorFunctionRestrictionsLogicLibV2.waitForDeployment()
+  const GovernorFunctionRestrictionsLogic = await ethers.getContractFactory("GovernorFunctionRestrictionsLogic")
+  const GovernorFunctionRestrictionsLogicLib = await GovernorFunctionRestrictionsLogic.deploy()
+  await GovernorFunctionRestrictionsLogicLib.waitForDeployment()
 
   // Deploy Governor Governance Logic
-  const GovernorGovernanceLogicV2 = await ethers.getContractFactory("GovernorGovernanceLogicV2")
-  const GovernorGovernanceLogicLibV2 = await GovernorGovernanceLogicV2.deploy()
-  await GovernorGovernanceLogicLibV2.waitForDeployment()
+  const GovernorGovernanceLogic = await ethers.getContractFactory("GovernorGovernanceLogic")
+  const GovernorGovernanceLogicLib = await GovernorGovernanceLogic.deploy()
+  await GovernorGovernanceLogicLib.waitForDeployment()
 
   // Deploy Governor Quorum Logic
-  const GovernorQuorumLogicV2 = await ethers.getContractFactory("GovernorQuorumLogicV2", {
+  const GovernorQuorumLogic = await ethers.getContractFactory("GovernorQuorumLogic", {
     libraries: {
-      GovernorClockLogicV2: await GovernorClockLogicLibV2.getAddress(),
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
     },
   })
-  const GovernorQuorumLogicLibV2 = await GovernorQuorumLogicV2.deploy()
-  await GovernorQuorumLogicLibV2.waitForDeployment()
+  const GovernorQuorumLogicLib = await GovernorQuorumLogic.deploy()
+  await GovernorQuorumLogicLib.waitForDeployment()
 
   // Deploy Governor Proposal Logic
-  const GovernorProposalLogicV2 = await ethers.getContractFactory("GovernorProposalLogicV2", {
+  const GovernorProposalLogic = await ethers.getContractFactory("GovernorProposalLogic", {
     libraries: {
-      GovernorClockLogicV2: await GovernorClockLogicLibV2.getAddress(),
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
     },
   })
-  const GovernorProposalLogicLibV2 = await GovernorProposalLogicV2.deploy()
-  await GovernorProposalLogicLibV2.waitForDeployment()
+  const GovernorProposalLogicLib = await GovernorProposalLogic.deploy()
+  await GovernorProposalLogicLib.waitForDeployment()
 
   // Deploy Governor Votes Logic
-  const GovernorVotesLogicV2 = await ethers.getContractFactory("GovernorVotesLogicV2", {
+  const GovernorVotesLogic = await ethers.getContractFactory("GovernorVotesLogic", {
     libraries: {
-      GovernorClockLogicV2: await GovernorClockLogicLibV2.getAddress(),
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
     },
   })
-  const GovernorVotesLogicLibV2 = await GovernorVotesLogicV2.deploy()
-  await GovernorVotesLogicLibV2.waitForDeployment()
+  const GovernorVotesLogicLib = await GovernorVotesLogic.deploy()
+  await GovernorVotesLogicLib.waitForDeployment()
 
   // Deploy Governor Deposit Logic
-  const GovernorDepositLogicV2 = await ethers.getContractFactory("GovernorDepositLogicV2", {
+  const GovernorDepositLogic = await ethers.getContractFactory("GovernorDepositLogic", {
     libraries: {
-      GovernorClockLogicV2: await GovernorClockLogicLibV2.getAddress(),
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
     },
   })
-  const GovernorDepositLogicLibV2 = await GovernorDepositLogicV2.deploy()
-  await GovernorDepositLogicLibV2.waitForDeployment()
+  const GovernorDepositLogicLib = await GovernorDepositLogic.deploy()
+  await GovernorDepositLogicLib.waitForDeployment()
 
   // Deploy Governor State Logic
-  const GovernorStateLogicV2 = await ethers.getContractFactory("GovernorStateLogicV2", {
+  const GovernorStateLogic = await ethers.getContractFactory("GovernorStateLogic", {
     libraries: {
-      GovernorClockLogicV2: await GovernorClockLogicLibV2.getAddress(),
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
     },
   })
-  const GovernorStateLogicLibV2 = await GovernorStateLogicV2.deploy()
-  await GovernorStateLogicLibV2.waitForDeployment()
+  const GovernorStateLogicLib = await GovernorStateLogic.deploy()
+  await GovernorStateLogicLib.waitForDeployment()
 
   // Start emissions
   await bootstrapAndStartEmissions()
 
-  const B3TRGovernorV2 = await ethers.getContractFactory("B3TRGovernorV2", {
+  const B3TRGovernorV2 = await ethers.getContractFactory("B3TRGovernor", {
     libraries: {
-      GovernorClockLogicV2: await GovernorClockLogicLibV2.getAddress(),
-      GovernorConfiguratorV2: await GovernorConfiguratorLibV2.getAddress(),
-      GovernorDepositLogicV2: await GovernorDepositLogicLibV2.getAddress(),
-      GovernorFunctionRestrictionsLogicV2: await GovernorFunctionRestrictionsLogicLibV2.getAddress(),
-      GovernorProposalLogicV2: await GovernorProposalLogicLibV2.getAddress(),
-      GovernorQuorumLogicV2: await GovernorQuorumLogicLibV2.getAddress(),
-      GovernorStateLogicV2: await GovernorStateLogicLibV2.getAddress(),
-      GovernorVotesLogicV2: await GovernorVotesLogicLibV2.getAddress(),
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+      GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
+      GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
+      GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+      GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
+      GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
+      GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
+      GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
     },
   })
 
@@ -131,7 +131,7 @@ export const upgradeGovernanceToV2 = async (): Promise<B3TRGovernorV2> => {
   await governor.execute([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
 
   // Check that the new implementation works
-  const governorV2 = B3TRGovernorV2.attach(await governor.getAddress()) as B3TRGovernorV2
+  const governorV2 = B3TRGovernorV2.attach(await governor.getAddress()) as B3TRGovernor
 
   return governorV2
 }

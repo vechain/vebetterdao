@@ -12,6 +12,7 @@ import {
   Treasury,
   X2EarnApps,
   X2EarnRewardsPool,
+  B3TRGovernorV1,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -1027,7 +1028,7 @@ async function deployB3trToken(admin: string, minter: string, pauser: string): P
 export const setWhitelistedFunctions = async (
   contractAddresses: Record<string, string>,
   config: ContractsConfig,
-  governor: B3TRGovernor,
+  governor: B3TRGovernorV1,
   admin: HardhatEthersSigner,
   libraries: Record<string, Record<string, string>>,
   logOutput = false,

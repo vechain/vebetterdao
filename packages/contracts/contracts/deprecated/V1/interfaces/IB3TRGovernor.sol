@@ -5,15 +5,24 @@ pragma solidity 0.8.20;
 
 import { IERC165 } from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import { IERC6372 } from "@openzeppelin/contracts/interfaces/IERC6372.sol";
-import { IB3TR } from "../IB3TR.sol";
-import { IVoterRewardsV2 } from "./IVoterRewardsV2.sol";
-import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
-import { GovernorTypesV2 } from "../../governance/libraries/V2/GovernorTypesV2.sol";
+import { IB3TR } from "./IB3TR.sol";
+import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
+import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
+import { GovernorTypesV1 } from "../governance/libraries/GovernorTypesV1.sol";
 
 /**
- * @dev Differences from V1: Updated the GovernorTypes to GovernorTypesV2, and IVoterRewards to IVoterRewardsV2.
+ * @dev Interface of the {B3TRGovernor} core.
+ *
+ * Modifications to original forked contract from OZ:
+ * - Removed votingDelay()
+ * - Removed the possibility to cast vote with params and with signature
+ * - Updated propose() and ProposalCreated event to accept the x allocation round id as param when proposal should become active
+ * - Added proposalStartRound() to get the round when the proposal should become active
+ * - Added canProposalStartInNextRound() to check if the proposal can start in the next allocation round
+ * - Added new state `DepositNotMet` to ProposalState enum
+ * - Added depositThreshold() to get the minimum required deposit for a proposal and removed proposalThreshold
  */
-interface IB3TRGovernorV2 is IERC165, IERC6372 {
+interface IB3TRGovernor is IERC165, IERC6372 {
   /**
    * @dev Empty proposal or a mismatch between the parameters length for a proposal call.
    */
@@ -64,11 +73,7 @@ interface IB3TRGovernorV2 is IERC165, IERC6372 {
    *
    * See {Governor-_encodeStateBitmap}.
    */
-  error GovernorUnexpectedProposalState(
-    uint256 proposalId,
-    GovernorTypesV2.ProposalState current,
-    bytes32 expectedStates
-  );
+  error GovernorUnexpectedProposalState(uint256 proposalId, GovernorTypesV1.ProposalState current, bytes32 expectedStates);
 
   /**
    * @dev The voting period set is not a valid period.
@@ -246,7 +251,7 @@ interface IB3TRGovernorV2 is IERC165, IERC6372 {
    * @notice module:core
    * @dev Current state of a proposal, following Compound's convention
    */
-  function state(uint256 proposalId) external view returns (GovernorTypesV2.ProposalState);
+  function state(uint256 proposalId) external view returns (GovernorTypesV1.ProposalState);
 
   /**
    * @notice module:core
@@ -264,7 +269,7 @@ interface IB3TRGovernorV2 is IERC165, IERC6372 {
    * @notice module:core
    * @dev Getter for the VoterRewards contract
    */
-  function voterRewards() external view returns (IVoterRewardsV2);
+  function voterRewards() external view returns (IVoterRewards);
 
   /**
    * @notice module:core
