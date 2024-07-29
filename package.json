@@ -36,6 +36,7 @@
     "solo-up": "make solo-up",
     "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo run playwright:e2e",
     "generate-translations": "dotenv -e .env -- turbo generate-translations",
+    "complete-translations": "dotenv -e .env -- turbo complete-translations",
     "prepare": "husky install"
   },
   "devDependencies": {
@@ -43,7 +44,9 @@
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "dotenv-cli": "latest",
+    "dotenv": "^16.4.5",
     "husky": "^8.0.0",
+    "lint-staged": "^15.2.7",
     "prettier": "^3.3.0",
     "turbo": "^1.13.3"
   },
@@ -55,7 +58,13 @@
     "apps/*",
     "packages/*"
   ],
-  "dependencies": {
-    "dotenv": "^16.4.5"
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write --ignore-unknown"
+    ],
+    "*.{json,html}": [
+      "prettier --write --ignore-unknown"
+    ]
   }
 }
