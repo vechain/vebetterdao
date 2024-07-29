@@ -74,7 +74,6 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
               title: proposal.title,
             }}>
             {/* Placeholder Text */}
-            {"Comments"}
           </CommentCount>
         </CardHeader>
         <CardBody>
