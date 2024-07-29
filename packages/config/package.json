@@ -6,7 +6,8 @@
     "index",
     "model",
     "local",
-    "generateMockLocalConfig"
+    "generateMockLocalConfig",
+    "datadog"
   ],
   "dependencies": {
     "@repo/constants": "*"

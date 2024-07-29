@@ -10,7 +10,7 @@ import duration from "dayjs/plugin/duration"
 import { Footer } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
-import { getConfig } from "@repo/config"
+import { getConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "@repo/config"
 import "@/i18n"
 import { useEffect } from "react"
 import { t } from "i18next"
@@ -30,21 +30,6 @@ const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").the
 typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
 
 // initialise datadog with secrets from AWS Secrets Manager
-const getEnvDatadogApp = () => {
-  const token = process.env.NEXT_PUBLIC_DATADOG_APP_TOKEN
-
-  return token ?? ''
-}
-const getEnvDatadogClient = () => {
-  const token = process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN
-
-  return token ?? ''
-}
-const getEnvDatadogEnv = () => {
-  const token = process.env.NEXT_PUBLIC_DATADOG_ENV
-
-  return token ?? ''
-}
 const datadog_app_token = getEnvDatadogApp()
 const datadog_client_token =  getEnvDatadogClient()
 const datadog_env =  getEnvDatadogEnv()
