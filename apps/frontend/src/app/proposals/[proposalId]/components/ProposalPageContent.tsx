@@ -70,7 +70,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
             shortname="vbd-1"
             config={{
               url: "https://b3tr-frontend.vercel.app/propopsals/" + proposal.id,
-              identifier: "https://b3tr-frontend.vercel.app/",
+              identifier: proposal.id,
               title: proposal.title,
             }}>
             {/* Placeholder Text */}
@@ -81,7 +81,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
             shortname="vbd-1"
             config={{
               url: "https://b3tr-frontend.vercel.app/propopsals/" + proposal.id,
-              identifier: "https://b3tr-frontend.vercel.app/",
+              identifier: proposal.id,
               title: proposal.title,
               language: "en_EN", //e.g. for Traditional Chinese (Taiwan)
             }}
