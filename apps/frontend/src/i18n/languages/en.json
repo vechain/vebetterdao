@@ -609,5 +609,8 @@
   "Add a new reward distributor": "Add a new reward distributor",
   "Contract or wallet address": "Contract or wallet address",
   "Rewards distributor already present": "Rewards distributor already present",
-  "Add distributor": "Add distributor"
+  "Add distributor": "Add distributor",
+  "Deposit B3TR to {{name}} app": "Deposit B3TR to {{name}} app",
+  "Rewards Pool": "Rewards Pool",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Total amount of B3TR tokens that the app has available for rewards distribution."
 }
