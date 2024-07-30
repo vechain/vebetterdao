@@ -414,13 +414,10 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       return false;
     }
 
-    // Check if the app is in the list of unendorsed apps
-    bool isUnendorsed = $._unendorsedAppsIndex[appId] < $._unendorsedApps.length;
-
     // Check if the app has an active grace period
     bool hasGracePeriod = $._appGracePeriod[appId] > 0;
 
-    return isUnendorsed || hasGracePeriod;
+    return !isEligibleNow(appId) || hasGracePeriod;
   }
 
   /**
