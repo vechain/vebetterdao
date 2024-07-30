@@ -166,7 +166,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
 
   // ---------- Getters ---------- //
   /**
-   * @dev See {IX2EarnAppsV2-appExists}.
+   * @dev See {IX2EarnApps-appExists}.
    */
   function appExists(bytes32 appId) public view override returns (bool) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
@@ -175,7 +175,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-app}.
+   * @dev See {IX2EarnApps-app}.
    *
    * @param appId the id of the app
    */
@@ -196,10 +196,10 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-apps}.
+   * @dev See {IX2EarnApps-apps}.
    *
-   * @notice This function could not be efficient with a large number of apps, in that case, use {IX2EarnAppsV2-getPaginatedApps}
-   * and then call {IX2EarnAppsV2-app} for each app id
+   * @notice This function could not be efficient with a large number of apps, in that case, use {IX2EarnApps-getPaginatedApps}
+   * and then call {IX2EarnApps-app} for each app id
    */
   function apps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
@@ -207,7 +207,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-getPaginatedApps}.
+   * @dev See {IX2EarnApps-getPaginatedApps}.
    */
   function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
@@ -235,7 +235,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-appsCount}.
+   * @dev See {IX2EarnApps-appsCount}.
    */
   function appsCount() external view returns (uint256) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();

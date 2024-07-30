@@ -79,7 +79,7 @@ abstract contract ContractSettingsUpgradeable is Initializable, X2EarnAppsUpgrad
   // ---------- Getters ---------- //
 
   /**
-   * @dev See {IX2EarnAppsV2-baseURI}.
+   * @dev See {IX2EarnApps-baseURI}.
    */
   function baseURI() public view virtual override returns (string memory) {
     ContractSettingsStorage storage $ = _getContractSettingsStorage();

@@ -286,7 +286,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-appAdmin}
+   * @dev See {IX2EarnApps-appAdmin}
    */
   function appAdmin(bytes32 appId) public view override returns (address) {
     AdministrationStorage storage $ = _getAdministrationStorage();

@@ -128,7 +128,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-setVotingEligibility}.
+   * @dev See {IX2EarnApps-setVotingEligibility}.
    */
   function setVotingEligibility(bytes32 _appId, bool _isEligible) public onlyRole(GOVERNANCE_ROLE) {
     if (!appExists(_appId)) {
@@ -148,7 +148,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-registerApp}.
+   * @dev See {IX2EarnApps-registerApp}.
    */
   function registerApp(
     address _teamWalletAddress,
@@ -160,14 +160,14 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-setAppAdmin}.
+   * @dev See {IX2EarnApps-setAppAdmin}.
    */
   function setAppAdmin(bytes32 _appId, address _newAdmin) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _setAppAdmin(_appId, _newAdmin);
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-updateTeamWalletAddress}.
+   * @dev See {IX2EarnApps-updateTeamWalletAddress}.
    */
   function updateTeamWalletAddress(
     bytes32 _appId,
@@ -177,7 +177,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-setTeamAllocationPercentage}.
+   * @dev See {IX2EarnApps-setTeamAllocationPercentage}.
    */
   function setTeamAllocationPercentage(
     bytes32 _appId,
@@ -187,14 +187,14 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-addAppModerator}.
+   * @dev See {IX2EarnApps-addAppModerator}.
    */
   function addAppModerator(bytes32 _appId, address _moderator) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _addAppModerator(_appId, _moderator);
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-removeAppModerator}.
+   * @dev See {IX2EarnApps-removeAppModerator}.
    */
   function removeAppModerator(
     bytes32 _appId,
@@ -204,7 +204,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-addRewardDistributor}.
+   * @dev See {IX2EarnApps-addRewardDistributor}.
    */
   function addRewardDistributor(
     bytes32 _appId,
@@ -214,7 +214,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-removeRewardDistributor}.
+   * @dev See {IX2EarnApps-removeRewardDistributor}.
    */
   function removeRewardDistributor(
     bytes32 _appId,
@@ -224,7 +224,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-updateAppMetadata}.
+   * @dev See {IX2EarnApps-updateAppMetadata}.
    */
   function updateAppMetadata(
     bytes32 _appId,
@@ -234,7 +234,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-updateGracePeriod}.
+   * @dev See {IX2EarnApps-updateGracePeriod}.
    */
   function updateGracePeriod(uint48 _newGracePeriod) external onlyRole(GOVERNANCE_ROLE) {
     _setGracePeriod(_newGracePeriod);

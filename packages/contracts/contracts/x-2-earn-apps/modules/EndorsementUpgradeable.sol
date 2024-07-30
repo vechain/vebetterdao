@@ -81,7 +81,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   // ---------- Public ---------- //
 
   /**
-   * @dev See {IX2EarnAppsV2-checkEndorsement}.
+   * @dev See {IX2EarnApps-checkEndorsement}.
    */
   function checkEndorsement(bytes32 appId) external returns (bool) {
     // Get the endorsement storage
@@ -392,7 +392,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   // ---------- Getters ---------- //
 
   /**
-   * @dev See {IX2EarnAppsV2-gracePeriod}.
+   * @dev See {IX2EarnApps-gracePeriod}.
    * @return The current grace period duration in blocks.
    */
   function gracePeriod() external view returns (uint256) {
@@ -402,7 +402,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-appPendingEndorsment}.
+   * @dev See {IX2EarnApps-appPendingEndorsment}.
    * @param appId The unique identifier of the app.
    * @return True if the app is pending endorsement.
    */
@@ -421,7 +421,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-appIdsPendingEndorsement}.
+   * @dev See {IX2EarnApps-appIdsPendingEndorsement}.
    */
   function appIdsPendingEndorsement() public view returns (bytes32[] memory) {
     EndorsementStorage storage $ = _getEndorsementStorage();
@@ -430,7 +430,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-appsPendingEndorsment}.
+   * @dev See {IX2EarnApps-appsPendingEndorsment}.
    */
   function appsPendingEndorsement() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
     bytes32[] memory appIds = appIdsPendingEndorsement();
@@ -438,14 +438,14 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-getScore}.
+   * @dev See {IX2EarnApps-getScore}.
    */
   function getScore(bytes32 appId) external view returns (uint256) {
     return _getScore(appId);
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-getEndorsers}.
+   * @dev See {IX2EarnApps-getEndorsers}.
    */
   function getEndorsers(bytes32 appId) external view returns (address[] memory) {
     EndorsementStorage storage $ = _getEndorsementStorage();
@@ -454,7 +454,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnAppsV2-getNodeEndorsementScore}.
+   * @dev See {IX2EarnApps-getNodeEndorsementScore}.
    */
   function getNodeEndorsementScore(address user) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
