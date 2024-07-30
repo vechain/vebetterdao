@@ -27,6 +27,9 @@ import {
   MyERC1155,
   TokenAuction,
   X2EarnAppsV1,
+  XAllocationPoolV1,
+  X2EarnRewardsPoolV1,
+  XAllocationVotingV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, upgradeProxy } from "../../scripts/helpers"
@@ -41,7 +44,6 @@ interface DeployInstance {
   governor: B3TRGovernor
   galaxyMember: GalaxyMember
   x2EarnApps: X2EarnApps
-  x2EarnAppsV1: X2EarnAppsV1
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
   emissions: Emissions
@@ -254,16 +256,26 @@ export const getOrDeployContractInstances = async ({
   )) as X2EarnApps
 
   // Deploy X2EarnRewardsPool
-  const x2EarnRewardsPool = (await deployProxy("X2EarnRewardsPool", [
+  const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
     owner.address,
     owner.address,
     owner.address,
     await b3tr.getAddress(),
     await x2EarnApps.getAddress(),
-  ])) as X2EarnRewardsPool
+  ])) as X2EarnRewardsPoolV1
+
+  // Upgrade X2EarnRewardsPool V1 to V2
+  const x2EarnRewardsPool = (await upgradeProxy(
+    "X2EarnRewardsPoolV1",
+    "X2EarnRewardsPool",
+    await x2EarnRewardsPoolV1.getAddress(),
+    [],
+    {},
+    2,
+  )) as X2EarnRewardsPool
 
   // Deploy XAllocationPool
-  const xAllocationPool = (await deployProxy("XAllocationPool", [
+  const xAllocationPoolV1 = (await deployProxy("XAllocationPoolV1", [
     owner.address,
     owner.address,
     owner.address,
@@ -271,7 +283,17 @@ export const getOrDeployContractInstances = async ({
     await treasury.getAddress(),
     await x2EarnApps.getAddress(),
     await x2EarnRewardsPool.getAddress(),
-  ])) as XAllocationPool
+  ])) as XAllocationPoolV1
+
+  // Upgrade xAllocationPool V1 to V2
+  const xAllocationPool = (await upgradeProxy(
+    "XAllocationPoolV1",
+    "XAllocationPool",
+    await xAllocationPoolV1.getAddress(),
+    [],
+    {},
+    2,
+  )) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
@@ -314,7 +336,7 @@ export const getOrDeployContractInstances = async ({
   await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
 
   // Deploy XAllocationVoting
-  const xAllocationVoting = (await deployProxy("XAllocationVoting", [
+  const xAllocationVotingV1 = (await deployProxy("XAllocationVotingV1", [
     {
       vot3Token: await vot3.getAddress(),
       quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
@@ -330,7 +352,17 @@ export const getOrDeployContractInstances = async ({
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
       votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
     },
-  ])) as XAllocationVoting
+  ])) as XAllocationVotingV1
+
+  // Upgrade XAllocationVoting V1 to XAllocationVoting V2
+  const xAllocationVoting = (await upgradeProxy(
+    "XAllocationVotingV1",
+    "XAllocationVoting",
+    await xAllocationVotingV1.getAddress(),
+    [],
+    {},
+    2,
+  )) as XAllocationVoting
 
   // Deploy Governor
   const governor = (await deployProxy(
@@ -449,7 +481,6 @@ export const getOrDeployContractInstances = async ({
     timeLock,
     governor,
     galaxyMember,
-    x2EarnAppsV1,
     x2EarnApps,
     xAllocationVoting,
     xAllocationPool,
