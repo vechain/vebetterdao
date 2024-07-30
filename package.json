@@ -44,6 +44,7 @@
     "@repo/typescript-config": "*",
     "dotenv-cli": "latest",
     "husky": "^8.0.0",
+    "lint-staged": "^15.2.7",
     "prettier": "^3.3.0",
     "turbo": "^1.13.3"
   },
@@ -54,5 +55,14 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write --ignore-unknown"
+    ],
+    "*.{json,html}": [
+      "prettier --write --ignore-unknown"
+    ]
+  }
 }
