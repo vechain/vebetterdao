@@ -73,31 +73,12 @@ contract X2EarnRewardsPool is
     }
   }
 
-  function initialize(
-    address _admin,
-    address _contractsManagerAdmin,
-    address _upgrader,
-    IB3TR _b3tr,
-    IX2EarnApps _x2EarnApps
-  ) external initializer {
-    require(_admin != address(0), "X2EarnRewardsPool: admin is the zero address");
-    require(_contractsManagerAdmin != address(0), "X2EarnRewardsPool: contracts manager admin is the zero address");
-    require(_upgrader != address(0), "X2EarnRewardsPool: upgrader is the zero address");
-    require(address(_b3tr) != address(0), "X2EarnRewardsPool: b3tr is the zero address");
-    require(address(_x2EarnApps) != address(0), "X2EarnRewardsPool: x2EarnApps is the zero address");
-
-    __UUPSUpgradeable_init();
-    __AccessControl_init();
-    __ReentrancyGuard_init();
-
-    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-    _grantRole(UPGRADER_ROLE, _upgrader);
-    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, _contractsManagerAdmin);
-
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    $.b3tr = _b3tr;
-    $.x2EarnApps = _x2EarnApps;
-  }
+  /**
+   * @notice Initialize the version 2 contract
+   *
+   * @dev This function is called only once during the contract deployment
+   */
+  function initializeV2() public reinitializer(2) {}
 
   // ---------- Authorizers ---------- //
 

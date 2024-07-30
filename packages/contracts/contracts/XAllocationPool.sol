@@ -79,45 +79,11 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   }
 
   /**
-   * @dev Initializes the contract.
+   * @notice Initialize the version 2 contract
    *
-   * @param _admin The address of the admin.
-   * @param upgrader The address of the upgrader.
-   * @param contractsAddressManager The address of the contracts address manager.
-   * @param _b3trAddress The address of the B3TR token.
-   * @param _treasury The address of the VeBetterDAO treasury.
-   * @param _x2EarnApps The address of the x2EarnApps contract.
-   * @param _x2EarnRewardsPool The address of the x2EarnRewardsPool contract.
+   * @dev This function is called only once during the contract deployment
    */
-  function initialize(
-    address _admin,
-    address upgrader,
-    address contractsAddressManager,
-    address _b3trAddress,
-    address _treasury,
-    address _x2EarnApps,
-    address _x2EarnRewardsPool
-  ) public initializer {
-    require(_b3trAddress != address(0), "XAllocationPool: new b3tr is the zero address");
-    require(_treasury != address(0), "XAllocationPool: new treasury is the zero address");
-    require(_x2EarnApps != address(0), "XAllocationPool: new x2EarnApps is the zero address");
-    require(_x2EarnRewardsPool != address(0), "XAllocationPool: new x2EarnRewardsPool is the zero address");
-
-    __AccessControl_init();
-    __ReentrancyGuard_init();
-    __UUPSUpgradeable_init();
-
-    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    $.b3tr = IB3TR(_b3trAddress);
-    $.treasury = ITreasury(_treasury);
-    $.x2EarnApps = IX2EarnApps(_x2EarnApps);
-    $.x2EarnRewardsPool = IX2EarnRewardsPool(_x2EarnRewardsPool);
-
-    require(_admin != address(0), "XAllocationPool: new admin is the zero address");
-    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-    _grantRole(UPGRADER_ROLE, upgrader);
-    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, contractsAddressManager);
-  }
+  function initializeV2() public reinitializer(2) {}
 
   // @dev Emit when the xAllocationVoting contract is set
   event XAllocationVotingSet(address oldContractAddress, address newContractAddress);
