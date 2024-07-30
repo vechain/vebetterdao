@@ -19,6 +19,11 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createNodeHolder, endorseApp } from "./helpers/xnodes"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
+import { deployProxy, upgradeProxy } from "../scripts/helpers"
+import { X2EarnApps, X2EarnAppsV1 } from "../typechain-types"
+import { simulateRounds } from "../scripts/deploy/simulateRounds"
+import { setupLocalEnvironment } from "../scripts/deploy/setup"
+import { keccak256 } from "ethers"
 
 describe("X-Apps", function () {
   describe("Deployment", function () {
@@ -89,6 +94,195 @@ describe("X-Apps", function () {
       })
 
       expect(await x2EarnApps.version()).to.equal("2")
+    })
+
+    it("X2Earn Apps Info added pre contract upgrade should should be same after upgrade", async () => {
+      const config = createLocalConfig()
+      config.EMISSIONS_CYCLE_DURATION = 24
+      const { timeLock, owner, otherAccounts, vechainNodes} = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy X2EarnApps
+      const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
+        "ipfs://",
+        [await timeLock.getAddress(), owner.address],
+        owner.address,
+        owner.address,
+      ])) as X2EarnAppsV1
+
+      // Add app 1
+      await x2EarnAppsV1
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
+        // Add app 2
+      await x2EarnAppsV1
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
+
+      // start round using V1 contract       
+      await startNewAllocationRound()
+
+      // Add app 3 during first round
+      await x2EarnAppsV1
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #3", "metadataURI")
+      
+        const appsV1 = await x2EarnAppsV1.apps()
+
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+        // Upgrade X2EarnAppsV1 to X2EarnApps
+      const x2EarnApps = (await upgradeProxy(
+        "X2EarnAppsV1",
+        "X2EarnApps",
+        await x2EarnAppsV1.getAddress(),
+        [config.XAPP_GRACE_PERIOD, await vechainNodes.getAddress()],
+        {},
+        2,
+      )) as X2EarnApps
+
+      // start new round
+      await startNewAllocationRound()
+
+      const appsV2 = await x2EarnApps.apps()
+
+      expect(appsV1).to.eql(appsV2)
+    })
+    it("X2Earn Apps added pre contract upgrade should need endorsement after upgrade and should be in grace period", async () => {
+      const config = createLocalConfig()
+      config.EMISSIONS_CYCLE_DURATION = 24
+      const { xAllocationVoting, x2EarnRewardsPool, xAllocationPool, timeLock, emissions, owner, vechainNodes, treasury, otherAccounts} = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy X2EarnApps
+      const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
+        "ipfs://",
+        [await timeLock.getAddress(), owner.address],
+        owner.address,
+        owner.address,
+      ])) as X2EarnAppsV1
+
+      await x2EarnRewardsPool.setX2EarnApps(await x2EarnAppsV1.getAddress())
+      await xAllocationPool.setX2EarnAppsAddress(await x2EarnAppsV1.getAddress())
+      await xAllocationVoting.setX2EarnAppsAddress(await x2EarnAppsV1.getAddress())
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
+
+      // Create two MjolnirX node holder with an endorsement score of 100
+      await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await createNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+
+      // Add apps -> should be eligble for next round
+      await x2EarnAppsV1
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
+      await x2EarnAppsV1
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
+
+      // start round using V1 contract       
+      const round1 = await startNewAllocationRound()
+
+      // Add app -> should be eligble for next round
+      await x2EarnAppsV1
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #3", "metadataURI")
+
+      // check eligibilty
+      expect(await x2EarnAppsV1.isEligibleNow(app1Id)).to.eql(true)
+      expect(await x2EarnAppsV1.isEligibleNow(app2Id)).to.eql(true)
+      expect(await x2EarnAppsV1.isEligibleNow(app3Id)).to.eql(true)
+
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, round1)).to.eql(true)
+      expect(await xAllocationVoting.isEligibleForVote(app2Id, round1)).to.eql(true)
+      expect(await xAllocationVoting.isEligibleForVote(app3Id, round1)).to.eql(false)
+
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+        // Upgrade X2EarnAppsV1 to X2EarnApps
+      const x2EarnAppsV2 = (await upgradeProxy(
+        "X2EarnAppsV1",
+        "X2EarnApps",
+        await x2EarnAppsV1.getAddress(),
+        [config.XAPP_GRACE_PERIOD, await vechainNodes.getAddress()],
+        {},
+        2,
+      )) as X2EarnApps
+
+      // start new round
+      const round2 = await startNewAllocationRound()
+
+      // check eligibilty
+      expect(await x2EarnAppsV2.isEligibleNow(app1Id)).to.eql(true)
+      expect(await x2EarnAppsV2.isEligibleNow(app2Id)).to.eql(true)
+      expect(await x2EarnAppsV2.isEligibleNow(app3Id)).to.eql(true)
+
+      // All apps should be eligible now
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, round2)).to.eql(true)
+      expect(await xAllocationVoting.isEligibleForVote(app2Id, round2)).to.eql(true)
+      expect(await xAllocationVoting.isEligibleForVote(app3Id, round2)).to.eql(true)
+
+      // Need to check the status of the apps so that they SC will reconise apps are unendrosed
+      await x2EarnAppsV2.checkEndorsement(app1Id)
+      await x2EarnAppsV2.checkEndorsement(app2Id)
+      await x2EarnAppsV2.checkEndorsement(app3Id)
+
+      // All apps should be seeking endorsement
+      expect(await x2EarnAppsV2.appPendingEndorsment(app1Id)).to.eql(true)
+      expect(await x2EarnAppsV2.appPendingEndorsment(app2Id)).to.eql(true)
+      expect(await x2EarnAppsV2.appPendingEndorsment(app3Id)).to.eql(true)
+
+      // 2 out of the three apps get endorsed
+      await x2EarnAppsV2.connect(otherAccounts[1]).endorseApp(app1Id) // Node holder endorsement score is 100
+      await x2EarnAppsV2.connect(otherAccounts[2]).endorseApp(app2Id) // Node holder endorsement score is 100
+
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      // Need to check the status of the apps so that they SC will reconise apps are unendrosed ans track grace period
+      await x2EarnAppsV2.checkEndorsement(app1Id)
+      await x2EarnAppsV2.checkEndorsement(app2Id)
+      await x2EarnAppsV2.checkEndorsement(app3Id)
+
+      // start new round
+      const round3 = await startNewAllocationRound()
+
+      // All apps should be eligible now
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, round3)).to.eql(true)
+      expect(await xAllocationVoting.isEligibleForVote(app2Id, round3)).to.eql(true)
+      expect(await xAllocationVoting.isEligibleForVote(app3Id, round3)).to.eql(true)
+
+      // Only 1 app should be seeking endorsement
+      expect(await x2EarnAppsV2.appPendingEndorsment(app1Id)).to.eql(false)
+      expect(await x2EarnAppsV2.appPendingEndorsment(app2Id)).to.eql(false)
+      expect(await x2EarnAppsV2.appPendingEndorsment(app3Id)).to.eql(true)
+
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      // Need to check the status of the apps so that they SC will reconise apps are unendrosed and track grace period
+      await x2EarnAppsV2.checkEndorsement(app1Id)
+      await x2EarnAppsV2.checkEndorsement(app2Id)
+      await x2EarnAppsV2.checkEndorsement(app3Id)
+
+      // start new round -> app3Id has had two rounds unendorsed so it is no longer in grace period an dnot eligeble for voting
+      const round4 = await startNewAllocationRound()
+
+      // All apps should be eligible now
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, round4)).to.eql(true)
+      expect(await xAllocationVoting.isEligibleForVote(app2Id, round4)).to.eql(true)
+      expect(await xAllocationVoting.isEligibleForVote(app3Id, round4)).to.eql(false)
+      
+      // Only 1 app should be seeking endorsement
+      expect(await x2EarnAppsV2.appPendingEndorsment(app1Id)).to.eql(false)
+      expect(await x2EarnAppsV2.appPendingEndorsment(app2Id)).to.eql(false)
+      expect(await x2EarnAppsV2.appPendingEndorsment(app3Id)).to.eql(true)
     })
   })
 
