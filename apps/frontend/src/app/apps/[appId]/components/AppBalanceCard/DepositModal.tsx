@@ -146,7 +146,6 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
-              {/* {t("Deposit B3TR to ${name} app")} */}
               <Trans i18nKey={"Deposit B3TR to {{name}} app"} values={{ name: app?.name ?? "" }} t={t} />
             </Text>
           </HStack>
