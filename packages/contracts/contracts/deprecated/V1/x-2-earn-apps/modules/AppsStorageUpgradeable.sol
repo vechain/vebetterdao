@@ -25,7 +25,7 @@ pragma solidity 0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
-import { X2EarnAppsDataTypes } from "../../../libraries/X2EarnAppsDataTypes.sol";
+import { X2EarnAppsDataTypes } from "../../../../libraries/X2EarnAppsDataTypes.sol";
 
 /**
  * @title AppsStorageUpgradeable

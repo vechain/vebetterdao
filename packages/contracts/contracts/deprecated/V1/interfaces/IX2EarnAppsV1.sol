@@ -1,30 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
+import { X2EarnAppsDataTypes } from "../../../libraries/X2EarnAppsDataTypes.sol";
 
 /**
  * @title IX2EarnApps
  * @notice Interface for the X2EarnApps contract.
  * @dev The contract inheriting this interface should be able to manage the x2earn apps and their Eligibility for allocation voting.
  */
-interface IX2EarnAppsV2 {
-  /**
-   * @dev The strength level of each node.
-   */
-  enum NodeStrengthLevel {
-    None,
-    // Normal Token
-    Strength,
-    Thunder,
-    Mjolnir,
-    // X Token
-    VeThorX,
-    StrengthX,
-    ThunderX,
-    MjolnirX
-  }
-
+interface IX2EarnAppsV1 {
   /**
    * @dev The clock was incorrectly modified.
    */
@@ -39,26 +23,6 @@ interface IX2EarnAppsV2 {
    * @dev The `addr` is not valid (eg: is the ZERO ADDRESS).
    */
   error X2EarnInvalidAddress(address addr);
-
-  /**
-   * @dev The caller is already an endorser.
-   */
-  error X2EarnAlreadyEndorser();
-
-  /**
-   * @dev The caller is not a node holder.
-   */
-  error X2EarnNonNodeHolder();
-
-  /**
-   * @dev The caller is not an endorser.
-   */
-  error X2EarnNonEndorser();
-
-  /**
-   * @dev The `appId` is already endorsed.
-   */
-  error X2EarnAppAlreadyEndorsed(bytes32 appId);
 
   /**
    * @dev An app with the specified `appId` already exists.
@@ -101,11 +65,6 @@ interface IX2EarnAppsV2 {
   error X2EarnMaxModeratorsReached(bytes32 appId);
 
   /**
-   * @dev The app is blacklisted.
-   */
-  error X2EarnAppBlacklisted(bytes32 appId);
-  
-  /**
    * @dev The maximum number of reward distributors has been reached.
    */
   error X2EarnMaxRewardDistributorsReached(bytes32 appId);
@@ -119,11 +78,6 @@ interface IX2EarnAppsV2 {
    * @dev Event fired when an app Eligibility for allocation voting changes.
    */
   event VotingEligibilityUpdated(bytes32 indexed appId, bool isAvailable);
-
-  /**
-   * @dev Event fired when an app is blacklisted or unblacklisted.
-   */
-  event BlacklistUpdated(bytes32 indexed appId, bool isBlacklisted);
 
   /**
    * @dev Event fired when the admin adds a new moderator to the app.
@@ -166,24 +120,9 @@ interface IX2EarnAppsV2 {
   event BaseURIUpdated(string oldBaseURI, string newBaseURI);
 
   /**
-   * @dev Event fired when the grace period duration is updated.
-   */
-  event GracePeriodUpdated(uint256 oldGracePeriod, uint256 newGracePeriod);
-
-  /**
-   * @dev Event fired when the app endorsement status is updated.
-   */
-  event AppEndorsementStatusUpdated(bytes32 indexed appId, bool endorsed);
-
-  /**
    * @dev Event fired when the team allocation percentage is updated.
    */
   event TeamAllocationPercentageUpdated(bytes32 indexed appId, uint256 oldPercentage, uint256 newPercentage);
-
-  /**
-   * @dev Event fired when an app is endorsed or unendorsed by a node.
-   */
-  event AppEndorsed(bytes32 indexed id, address teamAddress, bool endorsed);
 
   /**
    * @dev Generates the hash of the app name to be used as the app id.
@@ -191,6 +130,18 @@ interface IX2EarnAppsV2 {
    * @param name the name of the app
    */
   function hashAppName(string memory name) external pure returns (bytes32);
+
+  /**
+   * @dev Add a new app to the x2earn apps.
+   *
+   * @param teamWalletAddress the address where the app should receive allocation funds
+   * @param admin the address of the admin that will be able to manage the app and perform all administration actions
+   * @param appName the name of the app
+   * @param metadataURI the metadata URI of the app
+   *
+   * Emits a {AppAdded} event.
+   */
+  function addApp(address teamWalletAddress, address admin, string memory appName, string memory metadataURI) external;
 
   /**
    * @dev Get the app data by its id.
@@ -322,19 +273,6 @@ interface IX2EarnAppsV2 {
   function isRewardDistributor(bytes32 appId, address distributorAddress) external view returns (bool);
 
   /**
-   * @notice Checks endorsements for a given app and updates its voting eligibility based on the endorsements' scores.
-   *
-   * @dev This function is intended to be called by a cron job prior to the start of each voting round.
-   * If the app has less than 100 points, the grace period elasped is checked.
-   * If the grace period elapsed by the app is greater than the threshold grace period, the app is marked as not eligible for voting.
-   * If an endorser has lost its node status (level 0), it is removed from the endorsers list.
-   *
-   * @param appId The unique identifier of the app being checked.
-   * @return True if the app is eligible for voting.
-   */
-  function checkEndorsement(bytes32 appId) external returns (bool);
-
-  /**
    * @dev Update the metadata URI of the app.
    *
    * @param appId the id of the app
@@ -350,13 +288,6 @@ interface IX2EarnAppsV2 {
    * @param appId the id of the app
    */
   function appExists(bytes32 appId) external view returns (bool);
-
-  /**
-   * @dev Check if an app is blacklisted.
-   *
-   * @param appId the id of the app
-   */
-  function isBlacklisted(bytes32 appId) external view returns (bool);
 
   /**
    * @dev Allow or deny an app to participate in the next allocation voting rounds.
@@ -386,49 +317,6 @@ interface IX2EarnAppsV2 {
    * @dev return the base URI for the contract
    */
   function baseURI() external view returns (string memory);
-
-  /**
-   * @dev return the grace period for an XApp to find new endorsers after the previous one was removed.
-   */
-  function gracePeriod() external view returns (uint256);
-
-  /**
-   * @dev return true if an app is pending for endorsement.
-   */
-  function appPendingEndorsment(bytes32 appId) external view returns (bool);
-
-  /**
-   * @notice Gets the ids of all apps that are looking for endorsement.
-   * @return the ids of the apps that are pending for endorsement
-   */
-  function appIdsPendingEndorsement() external view returns (bytes32[] memory);
-
-  /**
-   * @notice Gets the information about all apps that are looking for endorsement.
-   * @return the information about the apps that are pending for endorsement
-   */
-  function appsPendingEndorsement() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
-
-  /**
-   * @dev Get the endorsement score of an app.
-   *
-   * @param appId the id of the app
-   */
-  function getScore(bytes32 appId) external returns (uint256);
-
-  /**
-   * @dev Get the endorsers of an app.
-   *
-   * @param appId the id of the app
-   */
-  function getEndorsers(bytes32 appId) external view returns (address[] memory);
-
-  /**
-   * @dev Get the endorsersment score of an individual.
-   *
-   * @param user the address of the user
-   */
-  function getNodeEndorsementScore(address user) external view returns (uint256);
 
   /**
    * @notice Get the version of the contract.

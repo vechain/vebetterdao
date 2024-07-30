@@ -23,11 +23,12 @@
 
 pragma solidity 0.8.20;
 
-import { X2EarnAppsUpgradeable } from "./X2EarnAppsUpgradeable.sol";
-import { AdministrationUpgradeable } from "./modules/AdministrationUpgradeable.sol";
-import { AppsStorageUpgradeable } from "./modules/AppsStorageUpgradeable.sol";
-import { ContractSettingsUpgradeable } from "./modules/ContractSettingsUpgradeable.sol";
-import { VoteEligibilityUpgradeable } from "./modules/VoteEligibilityUpgradeable.sol";
+import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol";
+import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/AdministrationUpgradeable.sol";
+import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgradeable.sol";
+import { ContractSettingsUpgradeable } from "./x-2-earn-apps/modules/ContractSettingsUpgradeable.sol";
+import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules//VoteEligibilityUpgradeable.sol";
+import { EndorsementUpgradeable } from "./x-2-earn-apps/modules/EndorsementUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
@@ -46,6 +47,7 @@ contract X2EarnApps is
   ContractSettingsUpgradeable,
   VoteEligibilityUpgradeable,
   AppsStorageUpgradeable,
+  EndorsementUpgradeable,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
@@ -60,35 +62,14 @@ contract X2EarnApps is
   }
 
   /**
-   * @notice Initialize the contract
-   * @param _baseURI the base URI for the contract
-   * @param _admins the addresses of the admins
-   * @param _upgrader the address of the upgrader
-   * @param _governor the address that will be granted the governance role
+   * @notice Initialize the version 2 contract
+   * @param _gracePeriod the grace period to be reendorsed
    *
    * @dev This function is called only once during the contract deployment
    */
-  function initialize(
-    string memory _baseURI,
-    address[] memory _admins,
-    address _upgrader,
-    address _governor
-  ) external initializer {
-    __X2EarnApps_init();
-    __Administration_init();
-    __AppsStorage_init();
-    __ContractSettings_init(_baseURI);
-    __VoteEligibility_init();
-    __UUPSUpgradeable_init();
-    __AccessControl_init();
-
-    for (uint256 i; i < _admins.length; i++) {
-      require(_admins[i] != address(0), "X2EarnApps: admin address cannot be zero");
-      _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
-    }
-
-    _grantRole(UPGRADER_ROLE, _upgrader);
-    _grantRole(GOVERNANCE_ROLE, _governor);
+  function initializeV2(uint48 _gracePeriod, address _vechainNodesContract) public reinitializer(2) {
+    require(_vechainNodesContract != address(0), "X2EarnApps: Invalid VechainNodes contract address");
+    __Endorsement_init(_gracePeriod, _vechainNodesContract);
   }
 
   // ---------- Modifiers ------------ //
@@ -130,7 +111,7 @@ contract X2EarnApps is
    * @return sting The version of the contract
    */
   function version() public pure virtual returns (string memory) {
-    return "1";
+    return "2";
   }
 
   // ---------- Overrides ------------ //
@@ -147,33 +128,46 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-setVotingEligibility}.
+   * @dev See {IX2EarnAppsV2-setVotingEligibility}.
    */
   function setVotingEligibility(bytes32 _appId, bool _isEligible) public onlyRole(GOVERNANCE_ROLE) {
-    _setVotingEligibility(_appId, _isEligible);
+    if (!appExists(_appId)) {
+      revert X2EarnNonexistentApp(_appId);
+    }
+
+    if (isEligibleNow(_appId) && !_isEligible) {
+      // Remove the app from the voting eligibility list
+      _setVotingEligibility(_appId, false);
+    } else if (!isEligibleNow(_appId) && _isEligible) {
+      // Add the app to the voting eligibility list
+      _setVotingEligibility(_appId, true);
+    }
+
+    // Set the app in the blacklist if not eligible and called by governance
+    _setBlacklist(_appId, !_isEligible);
   }
 
   /**
-   * @dev See {IX2EarnApps-addApp}.
+   * @dev See {IX2EarnAppsV2-registerApp}.
    */
-  function addApp(
+  function registerApp(
     address _teamWalletAddress,
     address _admin,
     string memory _appName,
     string memory _appMetadataURI
-  ) public onlyRole(GOVERNANCE_ROLE) {
-    _addApp(_teamWalletAddress, _admin, _appName, _appMetadataURI);
+  ) external {
+    _registerApp(_teamWalletAddress, _admin, _appName, _appMetadataURI);
   }
 
   /**
-   * @dev See {IX2EarnApps-setAppAdmin}.
+   * @dev See {IX2EarnAppsV2-setAppAdmin}.
    */
   function setAppAdmin(bytes32 _appId, address _newAdmin) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _setAppAdmin(_appId, _newAdmin);
   }
 
   /**
-   * @dev See {IX2EarnApps-updateTeamWalletAddress}.
+   * @dev See {IX2EarnAppsV2-updateTeamWalletAddress}.
    */
   function updateTeamWalletAddress(
     bytes32 _appId,
@@ -183,7 +177,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-setTeamAllocationPercentage}.
+   * @dev See {IX2EarnAppsV2-setTeamAllocationPercentage}.
    */
   function setTeamAllocationPercentage(
     bytes32 _appId,
@@ -193,14 +187,14 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-addAppModerator}.
+   * @dev See {IX2EarnAppsV2-addAppModerator}.
    */
   function addAppModerator(bytes32 _appId, address _moderator) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _addAppModerator(_appId, _moderator);
   }
 
   /**
-   * @dev See {IX2EarnApps-removeAppModerator}.
+   * @dev See {IX2EarnAppsV2-removeAppModerator}.
    */
   function removeAppModerator(
     bytes32 _appId,
@@ -210,7 +204,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-addRewardDistributor}.
+   * @dev See {IX2EarnAppsV2-addRewardDistributor}.
    */
   function addRewardDistributor(
     bytes32 _appId,
@@ -220,7 +214,7 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-removeRewardDistributor}.
+   * @dev See {IX2EarnAppsV2-removeRewardDistributor}.
    */
   function removeRewardDistributor(
     bytes32 _appId,
@@ -230,12 +224,19 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-updateAppMetadata}.
+   * @dev See {IX2EarnAppsV2-updateAppMetadata}.
    */
   function updateAppMetadata(
     bytes32 _appId,
     string memory _newMetadataURI
   ) public onlyRoleAndAppAdminOrModerator(DEFAULT_ADMIN_ROLE, _appId) {
     _updateAppMetadata(_appId, _newMetadataURI);
+  }
+
+  /**
+   * @dev See {IX2EarnAppsV2-updateGracePeriod}.
+   */
+  function updateGracePeriod(uint48 _newGracePeriod) external onlyRole(GOVERNANCE_ROLE) {
+    _setGracePeriod(_newGracePeriod);
   }
 }
