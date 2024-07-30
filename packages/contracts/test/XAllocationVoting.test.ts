@@ -23,8 +23,8 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { deployProxy } from "../scripts/helpers"
-import { XAllocationVoting } from "../typechain-types"
+import { deployProxy, upgradeProxy } from "../scripts/helpers"
+import { XAllocationVoting, XAllocationVotingV1 } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { endorseApp } from "./helpers/xnodes"
 
@@ -53,12 +53,11 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Can set multiple admins during deployment", async function () {
-      const { voterRewards, timeLock, emissions, x2EarnApps, vot3, otherAccounts } = await getOrDeployContractInstances(
-        {
+      const { voterRewards, timeLock, emissions, x2EarnApps, vot3, otherAccounts, owner } =
+        await getOrDeployContractInstances({
           forceDeploy: false,
-        },
-      )
-      const xAllocationVoting = (await deployProxy("XAllocationVoting", [
+        })
+      const xAllocationVotingV1 = (await deployProxy("XAllocationVotingV1", [
         {
           vot3Token: await vot3.getAddress(),
           quorumPercentage: 1,
@@ -67,14 +66,24 @@ describe("X-Allocation Voting", function () {
           voterRewards: await voterRewards.getAddress(),
           emissions: await emissions.getAddress(),
           admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
-          upgrader: otherAccounts[2].address,
+          upgrader: owner.address,
           contractsAddressManager: otherAccounts[2].address,
           x2EarnAppsAddress: await x2EarnApps.getAddress(),
           baseAllocationPercentage: 2,
           appSharesCap: 2,
           votingThreshold: BigInt(1),
         },
-      ])) as XAllocationVoting
+      ])) as XAllocationVotingV1
+
+      // Upgrade XAllocationVoting V1 to XAllocationVoting V2
+      const xAllocationVoting = (await upgradeProxy(
+        "XAllocationVotingV1",
+        "XAllocationVoting",
+        await xAllocationVotingV1.getAddress(),
+        [],
+        {},
+        2,
+      )) as XAllocationVoting
 
       expect(
         await xAllocationVoting.hasRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), await timeLock.getAddress()),
@@ -119,7 +128,7 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Clock returns block number if token does not implement clock function", async function () {
-      const { xAllocationVoting, timeLock, voterRewards, emissions, otherAccounts, x2EarnApps, b3tr } =
+      const { xAllocationVoting, timeLock, voterRewards, emissions, otherAccounts, x2EarnApps, b3tr, owner } =
         await getOrDeployContractInstances({
           forceDeploy: false,
         })
@@ -128,7 +137,7 @@ describe("X-Allocation Voting", function () {
 
       expect(parseInt(clock.toString())).to.eql(await ethers.provider.getBlockNumber())
 
-      const xAllocationVotingWithB3TR = (await deployProxy("XAllocationVoting", [
+      const xAllocationVotingWithB3TRV1 = (await deployProxy("XAllocationVotingV1", [
         {
           vot3Token: await b3tr.getAddress(),
           quorumPercentage: 1,
@@ -137,14 +146,24 @@ describe("X-Allocation Voting", function () {
           voterRewards: await voterRewards.getAddress(),
           emissions: await emissions.getAddress(),
           admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
-          upgrader: otherAccounts[2].address,
+          upgrader: owner.address,
           contractsAddressManager: otherAccounts[2].address,
           x2EarnAppsAddress: await x2EarnApps.getAddress(),
           baseAllocationPercentage: 2,
           appSharesCap: 2,
           votingThreshold: BigInt(1),
         },
-      ])) as XAllocationVoting
+      ])) as XAllocationVotingV1
+
+      // Upgrade XAllocationVoting V1 to XAllocationVoting V2
+      const xAllocationVotingWithB3TR = (await upgradeProxy(
+        "XAllocationVotingV1",
+        "XAllocationVoting",
+        await xAllocationVotingWithB3TRV1.getAddress(),
+        [],
+        {},
+        2,
+      )) as XAllocationVoting
 
       clock = await xAllocationVotingWithB3TR.clock()
       expect(parseInt(clock.toString())).to.eql(await ethers.provider.getBlockNumber())
@@ -169,7 +188,7 @@ describe("X-Allocation Voting", function () {
       })
 
       await expect(
-        deployProxy("XAllocationVoting", [
+        deployProxy("XAllocationVotingV1", [
           {
             vot3Token: ZERO_ADDRESS,
             quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
@@ -197,7 +216,7 @@ describe("X-Allocation Voting", function () {
       })
 
       await expect(
-        deployProxy("XAllocationVoting", [
+        deployProxy("XAllocationVotingV1", [
           {
             vot3Token: await vot3.getAddress(),
             quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
@@ -225,7 +244,7 @@ describe("X-Allocation Voting", function () {
       })
 
       await expect(
-        deployProxy("XAllocationVoting", [
+        deployProxy("XAllocationVotingV1", [
           {
             vot3Token: await vot3.getAddress(),
             quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
@@ -253,7 +272,7 @@ describe("X-Allocation Voting", function () {
       })
 
       await expect(
-        deployProxy("XAllocationVoting", [
+        deployProxy("XAllocationVotingV1", [
           {
             vot3Token: await vot3.getAddress(),
             quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
@@ -417,23 +436,7 @@ describe("X-Allocation Voting", function () {
         forceDeploy: true,
       })
 
-      await catchRevert(
-        xAllocationVoting.initialize({
-          vot3Token: owner.address,
-          quorumPercentage: 1,
-          initialVotingPeriod: 1,
-          timeLock: owner.address,
-          voterRewards: owner.address,
-          emissions: owner.address,
-          admins: [owner.address],
-          upgrader: owner.address,
-          contractsAddressManager: owner.address,
-          x2EarnAppsAddress: owner.address,
-          baseAllocationPercentage: 2,
-          appSharesCap: 2,
-          votingThreshold: BigInt(1),
-        }),
-      )
+      await catchRevert(xAllocationVoting.initializeV2())
     })
 
     it("Should return correct version of the contract", async () => {
@@ -1322,7 +1325,7 @@ describe("X-Allocation Voting", function () {
         .connect(owner)
         .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-await endorseApp(app1, otherAccounts[0])
+      await endorseApp(app1, otherAccounts[0])
       await getVot3Tokens(otherAccount, "1000")
 
       let tx = await xAllocationVoting.startNewRound()
@@ -1781,7 +1784,7 @@ await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
         .registerApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
-      
+
       const appId4 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
       await endorseApp(appId4, otherAccounts[4])
 
