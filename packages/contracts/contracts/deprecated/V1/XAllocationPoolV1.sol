@@ -23,19 +23,19 @@
 
 pragma solidity 0.8.20;
 
-import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
+import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
-import { ITreasury } from "./interfaces/ITreasury.sol";
-import { IEmissions } from "./interfaces/IEmissions.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { ITreasury } from "../../interfaces/ITreasury.sol";
+import { IEmissions } from "../../interfaces/IEmissions.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
-import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
+import { IX2EarnAppsV1 } from "./interfaces/IX2EarnAppsV1.sol";
+import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
 
 /**
  * @title XAllocationPool
@@ -45,7 +45,7 @@ import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
  * and the x2EarnApps contract to check app existence and the app's team wallet address.
  * The contract is using AccessControl to handle roles for upgrading the contract and external contract addresses.
  */
-contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+contract XAllocationPoolV1 is IXAllocationPool, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   uint256 public constant PERCENTAGE_PRECISION_SCALING_FACTOR = 1e4;
   /// @notice The role that can upgrade the contract.
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -58,7 +58,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     IEmissions _emissions;
     IB3TR b3tr;
     ITreasury treasury;
-    IX2EarnApps x2EarnApps;
+    IX2EarnAppsV1 x2EarnApps;
     IX2EarnRewardsPool x2EarnRewardsPool;
     mapping(bytes32 appId => mapping(uint256 => bool)) claimedRewards; // Mapping to store the claimed rewards for each app in each round
   }
@@ -110,7 +110,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $.b3tr = IB3TR(_b3trAddress);
     $.treasury = ITreasury(_treasury);
-    $.x2EarnApps = IX2EarnApps(_x2EarnApps);
+    $.x2EarnApps = IX2EarnAppsV1(_x2EarnApps);
     $.x2EarnRewardsPool = IX2EarnRewardsPool(_x2EarnRewardsPool);
 
     require(_admin != address(0), "XAllocationPool: new admin is the zero address");
@@ -177,7 +177,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     require(x2EarnApps_ != address(0), "XAllocationPool: new x2EarnApps is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    $.x2EarnApps = IX2EarnApps(x2EarnApps_);
+    $.x2EarnApps = IX2EarnAppsV1(x2EarnApps_);
 
     emit X2EarnAppsContractSet(address($.x2EarnApps), x2EarnApps_);
   }
@@ -561,7 +561,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   /**
    * @dev Returns the x2EarnApp contract.
    */
-  function x2EarnApps() external view returns (IX2EarnApps) {
+  function x2EarnApps() external view returns (IX2EarnAppsV1) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.x2EarnApps;
   }
@@ -571,6 +571,6 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
    * @return string The version of the contract
    */
   function version() external pure virtual returns (string memory) {
-    return "2";
+    return "1";
   }
 }

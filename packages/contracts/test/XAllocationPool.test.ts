@@ -16,8 +16,8 @@ import {
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { deployProxy } from "../scripts/helpers"
-import { XAllocationPool } from "../typechain-types"
+import { deployProxy, upgradeProxy } from "../scripts/helpers"
+import { XAllocationPool, XAllocationPoolV1 } from "../typechain-types"
 import { endorseApp } from "./helpers/xnodes"
 
 describe("X-Allocation Pool", async function () {
@@ -47,7 +47,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       await expect(
-        deployProxy("XAllocationPool", [
+        deployProxy("XAllocationPoolV1", [
           ZERO_ADDRESS,
           owner.address,
           owner.address,
@@ -142,7 +142,7 @@ describe("X-Allocation Pool", async function () {
       })
 
       await expect(
-        deployProxy("XAllocationPool", [
+        deployProxy("XAllocationPoolV1", [
           owner.address,
           owner.address,
           owner.address,
@@ -154,7 +154,7 @@ describe("X-Allocation Pool", async function () {
       ).to.be.reverted
 
       await expect(
-        deployProxy("XAllocationPool", [
+        deployProxy("XAllocationPoolV1", [
           owner.address,
           owner.address,
           owner.address,
@@ -166,7 +166,7 @@ describe("X-Allocation Pool", async function () {
       ).to.be.reverted
 
       await expect(
-        deployProxy("XAllocationPool", [
+        deployProxy("XAllocationPoolV1", [
           owner.address,
           owner.address,
           owner.address,
@@ -178,7 +178,7 @@ describe("X-Allocation Pool", async function () {
       ).to.be.reverted
 
       await expect(
-        deployProxy("XAllocationPool", [
+        deployProxy("XAllocationPoolV1", [
           owner.address,
           owner.address,
           owner.address,
@@ -191,17 +191,9 @@ describe("X-Allocation Pool", async function () {
     })
 
     it("Cannot initilize twice", async function () {
-      const { xAllocationPool, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { xAllocationPool } = await getOrDeployContractInstances({ forceDeploy: false })
       await catchRevert(
-        xAllocationPool.initialize(
-          owner.address,
-          owner.address,
-          owner.address,
-          owner.address,
-          owner.address,
-          owner.address,
-          owner.address,
-        ),
+        xAllocationPool.initializeV2(),
       )
     })
 
@@ -210,7 +202,7 @@ describe("X-Allocation Pool", async function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationPool.version()).to.equal("1")
+      expect(await xAllocationPool.version()).to.equal("2")
     })
   })
 
@@ -308,7 +300,7 @@ describe("X-Allocation Pool", async function () {
         })
 
         // Deploy XAllocationPool
-        const xAllocationPool = (await deployProxy("XAllocationPool", [
+        const xAllocationPoolV1 = (await deployProxy("XAllocationPoolV1", [
           owner.address,
           owner.address,
           owner.address,
@@ -316,7 +308,17 @@ describe("X-Allocation Pool", async function () {
           await treasury.getAddress(),
           await x2EarnApps.getAddress(),
           await x2EarnRewardsPool.getAddress(),
-        ])) as XAllocationPool
+        ])) as XAllocationPoolV1
+
+          // Upgrade xAllocationPool V1 to V2
+        const xAllocationPool = (await upgradeProxy(
+          "XAllocationPoolV1",
+          "XAllocationPool",
+          await xAllocationPoolV1.getAddress(),
+          [],
+          {},
+          2,
+        )) as XAllocationPool
 
         await xAllocationPool.setXAllocationVotingAddress(owner.address)
 
@@ -377,7 +379,7 @@ describe("X-Allocation Pool", async function () {
         })
 
         // Deploy XAllocationPool
-        const xAllocationPool = (await deployProxy("XAllocationPool", [
+        const xAllocationPoolV1 = (await deployProxy("XAllocationPoolV1", [
           owner.address,
           owner.address,
           owner.address,
@@ -385,7 +387,17 @@ describe("X-Allocation Pool", async function () {
           await treasury.getAddress(),
           await x2EarnApps.getAddress(),
           await x2EarnRewardsPool.getAddress(),
-        ])) as XAllocationPool
+        ])) as XAllocationPoolV1
+
+        // Upgrade xAllocationPool V1 to V2
+        const xAllocationPool = (await upgradeProxy(
+          "XAllocationPoolV1",
+          "XAllocationPool",
+          await xAllocationPoolV1.getAddress(),
+          [],
+          {},
+          2,
+        )) as XAllocationPool
 
         expect(await xAllocationPool.xAllocationVoting()).to.eql(ZERO_ADDRESS)
 
@@ -504,7 +516,9 @@ describe("X-Allocation Pool", async function () {
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
         await x2EarnApps.connect(owner).registerApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await x2EarnApps.connect(owner).registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         await endorseApp(app1Id, otherAccounts[3])
         await endorseApp(app2Id, otherAccounts[4])
@@ -567,7 +581,9 @@ describe("X-Allocation Pool", async function () {
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
         await x2EarnApps.connect(owner).registerApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await x2EarnApps.connect(owner).registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         await endorseApp(app1Id, otherAccounts[3])
         await endorseApp(app2Id, otherAccounts[4])
@@ -594,7 +610,9 @@ describe("X-Allocation Pool", async function () {
         // new emission, new round and new app
         const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
         const app3ReceiverAddress = otherAccounts[4].address
-        await x2EarnApps.connect(owner).registerApp(app3ReceiverAddress, app3ReceiverAddress, "My app #3", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .registerApp(app3ReceiverAddress, app3ReceiverAddress, "My app #3", "metadataURI")
         await endorseApp(app3Id, otherAccounts[5])
 
         await x2EarnApps.connect(otherAccounts[4]).setTeamAllocationPercentage(app3Id, 100)
@@ -1027,7 +1045,7 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps
           .connect(owner)
           .registerApp(otherAccounts[4].address, otherAccounts[4].address, "My app #3", "metadataURI")
-        
+
         await endorseApp(app3Id, otherAccounts[4])
 
         // Start new round
@@ -1164,7 +1182,9 @@ describe("X-Allocation Pool", async function () {
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
         await x2EarnApps.connect(owner).registerApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await x2EarnApps.connect(owner).registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         await endorseApp(app1Id, otherAccounts[3])
         await endorseApp(app2Id, otherAccounts[4])
@@ -1232,7 +1252,9 @@ describe("X-Allocation Pool", async function () {
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
         await x2EarnApps.connect(owner).registerApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await x2EarnApps.connect(owner).registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
 
         await endorseApp(app1Id, otherAccounts[3])
         await endorseApp(app2Id, otherAccounts[4])
@@ -1280,7 +1302,9 @@ describe("X-Allocation Pool", async function () {
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
         await x2EarnApps.connect(owner).registerApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await x2EarnApps.connect(owner).registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
         await endorseApp(app1Id, otherAccounts[3])
         await endorseApp(app2Id, otherAccounts[4])
 
@@ -1334,7 +1358,9 @@ describe("X-Allocation Pool", async function () {
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
         await x2EarnApps.connect(owner).registerApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await x2EarnApps.connect(owner).registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
         await endorseApp(app1Id, otherAccounts[3])
         await endorseApp(app2Id, otherAccounts[4])
 
@@ -1380,8 +1406,8 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps
           .connect(owner)
           .registerApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
-          await endorseApp(app1Id, otherAccounts[3])
-          await endorseApp(app2Id, otherAccounts[4])
+        await endorseApp(app1Id, otherAccounts[3])
+        await endorseApp(app2Id, otherAccounts[4])
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1436,7 +1462,9 @@ describe("X-Allocation Pool", async function () {
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
         await x2EarnApps.connect(owner).registerApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await x2EarnApps.connect(owner).registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
         await endorseApp(app1Id, otherAccounts[3])
         await endorseApp(app2Id, otherAccounts[4])
 
@@ -1481,7 +1509,9 @@ describe("X-Allocation Pool", async function () {
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
         await x2EarnApps.connect(owner).registerApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await x2EarnApps.connect(owner).registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
         await endorseApp(app1Id, otherAccounts[3])
         await endorseApp(app2Id, otherAccounts[4])
 
@@ -1527,8 +1557,8 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps
           .connect(owner)
           .registerApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
-          await endorseApp(app1Id, otherAccounts[3])
-          await endorseApp(app2Id, otherAccounts[4])
+        await endorseApp(app1Id, otherAccounts[3])
+        await endorseApp(app2Id, otherAccounts[4])
 
         // Set allocation percentage for the team to 100%
         await x2EarnApps.connect(otherAccounts[6]).setTeamAllocationPercentage(app1Id, 100)
@@ -1604,8 +1634,8 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps
           .connect(owner)
           .registerApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
-          await endorseApp(app1Id, otherAccounts[3])
-          await endorseApp(app2Id, otherAccounts[4])
+        await endorseApp(app1Id, otherAccounts[3])
+        await endorseApp(app2Id, otherAccounts[4])
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1649,8 +1679,8 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps
           .connect(owner)
           .registerApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
-          await endorseApp(app1Id, otherAccounts[3])
-          await endorseApp(app2Id, otherAccounts[4])
+        await endorseApp(app1Id, otherAccounts[3])
+        await endorseApp(app2Id, otherAccounts[4])
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1692,8 +1722,8 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps
           .connect(owner)
           .registerApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
-          await endorseApp(app1Id, otherAccounts[3])
-          await endorseApp(app2Id, otherAccounts[4])
+        await endorseApp(app1Id, otherAccounts[3])
+        await endorseApp(app2Id, otherAccounts[4])
 
         // Bootstrap emissions -> sends funds to contract
         await bootstrapEmissions()
@@ -1728,7 +1758,7 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps
           .connect(owner)
           .registerApp(otherAccounts[6].address, otherAccounts[6].address, "My app", "metadataURI")
-          await endorseApp(app1Id, otherAccounts[3])
+        await endorseApp(app1Id, otherAccounts[3])
 
         // Bootstrap emissions -> sends funds to contract
         await bootstrapEmissions()
@@ -1821,7 +1851,9 @@ describe("X-Allocation Pool", async function () {
         const app1ReceiverAddress = otherAccounts[3].address
         const app2ReceiverAddress = otherAccounts[4].address
         await x2EarnApps.connect(owner).registerApp(app1ReceiverAddress, app1ReceiverAddress, "My app", "metadataURI")
-        await x2EarnApps.connect(owner).registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .registerApp(app2ReceiverAddress, app2ReceiverAddress, "My app #2", "metadataURI")
         await endorseApp(app1Id, otherAccounts[3])
         await endorseApp(app2Id, otherAccounts[4])
 
@@ -1884,8 +1916,8 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps
           .connect(owner)
           .registerApp(otherAccounts[7].address, otherAccounts[7].address, "My app #2", "metadataURI")
-          await endorseApp(app1Id, otherAccounts[3])
-          await endorseApp(app2Id, otherAccounts[4])
+        await endorseApp(app1Id, otherAccounts[3])
+        await endorseApp(app2Id, otherAccounts[4])
 
         // Bootstrap emissions -> sends funds to contract
         await bootstrapEmissions()
@@ -2027,7 +2059,9 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps
           .connect(owner)
           .registerApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
-        await x2EarnApps.connect(owner).registerApp(otherAccounts[5].address, otherAccounts[5], "My app #3", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .registerApp(otherAccounts[5].address, otherAccounts[5], "My app #3", "metadataURI")
         await endorseApp(app1Id, otherAccounts[3])
         await endorseApp(app2Id, otherAccounts[4])
         await endorseApp(app3Id, otherAccounts[5])
@@ -2113,9 +2147,9 @@ describe("X-Allocation Pool", async function () {
         await x2EarnApps
           .connect(owner)
           .registerApp(otherAccounts[5].address, otherAccounts[5].address, "My app #3", "metadataURI")
-          await endorseApp(app1Id, otherAccounts[3])
-          await endorseApp(app2Id, otherAccounts[4])
-          await endorseApp(app3Id, otherAccounts[5])
+        await endorseApp(app1Id, otherAccounts[3])
+        await endorseApp(app2Id, otherAccounts[4])
+        await endorseApp(app3Id, otherAccounts[5])
 
         //Start allocation round
         const round1 = await startNewAllocationRound()
