@@ -21,9 +21,6 @@ import { createNodeHolder, endorseApp } from "./helpers/xnodes"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import { X2EarnApps, X2EarnAppsV1 } from "../typechain-types"
-import { simulateRounds } from "../scripts/deploy/simulateRounds"
-import { setupLocalEnvironment } from "../scripts/deploy/setup"
-import { keccak256 } from "ethers"
 
 describe("X-Apps", function () {
   describe("Deployment", function () {
@@ -2373,6 +2370,69 @@ describe("X-Apps", function () {
 
       const gracePeriodAfterUpdate = await x2EarnApps.gracePeriod()
       expect(gracePeriodAfterUpdate).to.eql(BigInt(newGracePeriod))
+    })
+
+    it("Node endorsement scores can be updated by admin with governance role", async function () {
+      const config = createLocalConfig()
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
+
+      await createNodeHolder(1, otherAccounts[1]) // Node strength level 1 corresponds (Thor) to an endorsement score of 10
+      await createNodeHolder(2, otherAccounts[2]) // Node strength level 2 corresponds (Odin) to an endorsement score of 20
+      await createNodeHolder(3, otherAccounts[3]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      await createNodeHolder(4, otherAccounts[4]) // Node strength level 4 corresponds (MjolnirX) to an endorsement score of 100
+      await createNodeHolder(5, otherAccounts[5]) // Node strength level 5 corresponds (MjolnirX) to an endorsement score of 100
+      await createNodeHolder(6, otherAccounts[6]) // Node strength level 6 corresponds (MjolnirX) to an endorsement score of 100
+      await createNodeHolder(7, otherAccounts[7]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[1].address)).to.eql(2n)
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[2].address)).to.eql(13n)
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[3].address)).to.eql(50n)
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[4].address)).to.eql(3n)
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[5].address)).to.eql(9n)
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[6].address)).to.eql(35n)
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[7].address)).to.eql(100n)
+
+      const newEndorsementScores = {
+      strength: 1,
+      thunder: 2,
+      mjolnir: 3,
+      veThorX: 4,
+      strengthX: 5,
+      thunderX: 6,
+      mjolnirX: 7,
+    }
+
+      await x2EarnApps.connect(owner).updateNodeEndorsementScores(newEndorsementScores)
+
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[1].address)).to.eql(BigInt(newEndorsementScores.strength))
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[2].address)).to.eql(BigInt(newEndorsementScores.thunder))
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[3].address)).to.eql(BigInt(newEndorsementScores.mjolnir))
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[4].address)).to.eql(BigInt(newEndorsementScores.veThorX))
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[5].address)).to.eql(BigInt(newEndorsementScores.strengthX))
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[6].address)).to.eql(BigInt(newEndorsementScores.thunderX))
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[7].address)).to.eql(BigInt(newEndorsementScores.mjolnirX))
+    })
+
+    it("Endorsement score threshold can be updated by admin with governance role", async function () {
+      const config = createLocalConfig()
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
+
+      expect(await x2EarnApps.endorsementScoreThreshold()).to.eql(BigInt(100n))
+
+      // Should revert as not admin
+      await catchRevert(x2EarnApps.connect(otherAccounts[3]).updateEndorsementScoreThreshold(1000))
+
+      // Update endorsement score threshold
+      await x2EarnApps.connect(owner).updateEndorsementScoreThreshold(1000)
+
+      // Check updated endorsement score threshold
+      expect(await x2EarnApps.endorsementScoreThreshold()).to.eql(BigInt(1000n))
     })
 
     it("An XAPP can only endorse one XApp at once", async function () {
