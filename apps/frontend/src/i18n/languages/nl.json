@@ -608,5 +608,8 @@
   "Add a new reward distributor": "Voeg een nieuwe beloningsdistributeur toe",
   "Contract or wallet address": "Contract- of walletadres",
   "Rewards distributor already present": "Beloningsdistributeur al aanwezig",
-  "Add distributor": "Distributeur toevoegen"
+  "Add distributor": "Distributeur toevoegen",
+  "Deposit B3TR to {{name}} app": "Stort B3TR naar {{name}} app",
+  "Rewards Pool": "Beloningen Pool",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Het totale aantal B3TR-tokens dat de app beschikbaar heeft voor beloningsdistributie."
 }

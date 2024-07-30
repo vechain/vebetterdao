@@ -608,5 +608,8 @@
   "Add a new reward distributor": "नया पुरस्कार वितरक जोड़ें",
   "Contract or wallet address": "अनुबंध या वॉलेट पता",
   "Rewards distributor already present": "पुरस्कार वितरक पहले से ही मौजूद है",
-  "Add distributor": "वितरक जोड़ें"
+  "Add distributor": "वितरक जोड़ें",
+  "Deposit B3TR to {{name}} app": "{{name}} ऐप में B3TR जमा करें",
+  "Rewards Pool": "इनाम पूल",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "पुरस्कार वितरण के लिए ऐप के पास उपलब्ध कुल B3TR टोकन की संख्या।"
 }

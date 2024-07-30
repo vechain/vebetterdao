@@ -608,5 +608,8 @@
   "Add a new reward distributor": "新しい報酬配布者を追加",
   "Contract or wallet address": "コントラクトまたはウォレットアドレス",
   "Rewards distributor already present": "報酬配布者は既に存在します",
-  "Add distributor": "配布者を追加"
+  "Add distributor": "配布者を追加",
+  "Deposit B3TR to {{name}} app": "{{name}}アプリにB3TRを預ける",
+  "Rewards Pool": "報酬プール",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "アプリが報酬分配用に利用可能なB3TRトークンの総量。"
 }
