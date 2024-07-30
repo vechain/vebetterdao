@@ -108,7 +108,7 @@ describe("X-Allocation Voting", function () {
       })
 
       expect(await xAllocationVoting.name()).to.eql("XAllocationVoting")
-      expect(await xAllocationVoting.version()).to.eql("1")
+      expect(await xAllocationVoting.version()).to.eql("2")
     })
 
     it("Counting mode is set correctly", async function () {
@@ -444,7 +444,7 @@ describe("X-Allocation Voting", function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationVoting.version()).to.equal("1")
+      expect(await xAllocationVoting.version()).to.equal("2")
     })
   })
 
