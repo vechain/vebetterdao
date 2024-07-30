@@ -39,6 +39,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     mapping(address => bool) _endorsers; // Mapping to check if an address is an endorser
     uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
     ITokenAuction _vechainNodesContract; // The token auction contract
+    uint256 _endorsementScoreThreshold; // The endorsement score threshold for an app to be eligible for voting
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
@@ -76,6 +77,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     $._nodeEnodorsmentScore[NodeStrengthLevel.StrengthX] = 9; // Strength X Node score
     $._nodeEnodorsmentScore[NodeStrengthLevel.ThunderX] = 35; // Thunder X Node score
     $._nodeEnodorsmentScore[NodeStrengthLevel.MjolnirX] = 100; // Mjolnir X Node score
+
+    // Set the score threshold for an app to be eligible for voting
+    $._endorsementScoreThreshold = 100;
   }
 
   // ---------- Public ---------- //
@@ -99,7 +103,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     uint256 score = _getScoreAndUpdateEndorsers(appId, address(0));
 
     // Check the total score and update the grace period and voting eligibility accordingly
-    if (score < 100) {
+    if (score < _endorsementScoreThreshold()) {
       if ($._appGracePeriod[appId] == 0) {
         $._appGracePeriod[appId] = clock() + $._gracePeriodDuration;
       } else if (clock() > $._appGracePeriod[appId] && isEligibleNow(appId)) {
@@ -170,8 +174,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     // Calculate the score of the app, considering the new endorsement
     uint256 score = _getScoreAndUpdateEndorsers(appId, address(0));
 
-    // Check if the score is equal to or greater than 100
-    if (score >= 100) {
+    // Check if the score is equal to or greater than the score threshold (100)
+    if (score >= _endorsementScoreThreshold()) {
       // Check if the app has a grace period greater than 0
       if ($._appGracePeriod[appId] > 0) {
         // If the app is not eligible for voting, mark it as eligible
@@ -227,7 +231,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       return;
     }
 
-    if (score < 100) {
+    // Check if the score is less than endorsement score threshold (100)
+    if (score < _endorsementScoreThreshold()) {
       // If the app has a grace period of 0, set the grace period
       if ($._appGracePeriod[appId] == 0) {
         $._appGracePeriod[appId] = clock() + $._gracePeriodDuration;
@@ -409,6 +414,31 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     emit GracePeriodUpdated($._gracePeriodDuration, gracePeriodDuration);
 
     $._gracePeriodDuration = gracePeriodDuration;
+  }
+
+  /**
+   * @dev Internal function to update the score threshold.
+   *
+   * @param scoreThreshold The new score threshold.
+   *
+   * Emits a {EndorsementScoreThresholdUpdated} event
+   */
+  function _updateEndorsementScoreThreshold(uint256 scoreThreshold) internal {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    emit EndorsementScoreThresholdUpdated($._endorsementScoreThreshold, scoreThreshold);
+
+    $._endorsementScoreThreshold = scoreThreshold;
+  }
+
+  /**
+   * @dev Internal function to get the score threshold.
+   * @return uint256 The score threshold.
+   */
+  function _endorsementScoreThreshold() internal view returns (uint256) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    return $._endorsementScoreThreshold;
   }
 
   // ---------- Getters ---------- //

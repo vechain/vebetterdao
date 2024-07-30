@@ -139,6 +139,11 @@ interface IX2EarnApps {
   event BlacklistUpdated(bytes32 indexed appId, bool isBlacklisted);
 
   /**
+   * @dev Event fired when the score threshold is updated.
+   */
+  event EndorsementScoreThresholdUpdated(uint256 oldThreshold, uint256 newThreshold);
+
+  /**
    * @dev Event fired when the admin adds a new moderator to the app.
    */
   event ModeratorAddedToApp(bytes32 indexed appId, address moderator);
@@ -479,4 +484,20 @@ interface IX2EarnApps {
    * Emits a {NodeStrengthScoreUpdated} event.
    */
   function updateNodeEndorsementScores(NodeStrengthScores calldata _nodeStrengthScores) external;
+
+  /**
+   * @notice Update th endorsement score threshold
+   * @dev This should be minimum endorsement score required for an app to be eligible for voting.
+   *
+   * @param _scoreThreshold the new score threshold
+   *
+   * Emits a {EndorsementScoreThresholdUpdated} event.
+   */
+
+  function updateEndorsementScoreThreshold(uint256 _scoreThreshold) external;
+
+  /**
+   * @dev Get the score threshold.
+   */
+  function endorsementScoreThreshold() external view returns (uint256);
 }

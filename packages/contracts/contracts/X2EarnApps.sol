@@ -246,4 +246,18 @@ contract X2EarnApps is
   function updateNodeEndorsementScores(NodeStrengthScores calldata _nodeStrengthScores) external onlyRole(GOVERNANCE_ROLE) {
     _updateNodeEndorsementScores(_nodeStrengthScores);
   }
+
+  /**
+   * @dev See {IX2EarnApps-updateEndorsementScoreThreshold}.
+   */
+  function updateEndorsementScoreThreshold(uint256 _scoreThreshold) external onlyRole(GOVERNANCE_ROLE) {
+    _updateEndorsementScoreThreshold(_scoreThreshold);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-endorsementScoreThreshold}.
+   */
+  function endorsementScoreThreshold() external view returns (uint256) {
+    return _endorsementScoreThreshold();
+  }
 }
