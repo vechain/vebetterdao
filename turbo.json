@@ -7,7 +7,8 @@
     "MNEMONIC",
     "NEXT_PUBLIC_IPFS_PINNING_SERVICE",
     "IS_TEST_COVERAGE",
-    "RUN_SIMULATION"
+    "RUN_SIMULATION",
+    "DO_NOT_UPGRADE"
   ],
   "pipeline": {
     "install": {

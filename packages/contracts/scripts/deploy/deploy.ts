@@ -20,7 +20,7 @@ import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } 
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployProxy, saveContractsToFile, upgradeProxy } from "../helpers"
-import { shouldRunSimulation, shouldUpgradeContracts } from "@repo/config/contracts"
+import { shouldRunSimulation, shouldNotUpgradeContracts } from "@repo/config/contracts"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -161,7 +161,8 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as Treasury
 
-  const x2EarnAppsV1 = (await deployProxy(
+  let x2EarnApps: X2EarnAppsV1 | X2EarnApps
+  x2EarnApps = (await deployProxy(
     "X2EarnAppsV1",
     [
       config.XAPP_BASE_URI,
@@ -180,7 +181,7 @@ export async function deployAll(config: ContractsConfig) {
       config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
       config.CONTRACTS_ADMIN_ADDRESS, // upgrader
       await b3tr.getAddress(),
-      await x2EarnAppsV1.getAddress(),
+      await x2EarnApps.getAddress(),
     ],
     undefined,
     true,
@@ -194,7 +195,7 @@ export async function deployAll(config: ContractsConfig) {
       TEMP_ADMIN, // contractsAddressManager
       await b3tr.getAddress(),
       await treasury.getAddress(),
-      await x2EarnAppsV1.getAddress(),
+      await x2EarnApps.getAddress(),
       await x2EarnRewardsPool.getAddress(),
     ],
     undefined,
@@ -286,7 +287,7 @@ export async function deployAll(config: ContractsConfig) {
         admins: [await timelock.getAddress(), TEMP_ADMIN],
         upgrader: config.CONTRACTS_ADMIN_ADDRESS,
         contractsAddressManager: TEMP_ADMIN,
-        x2EarnAppsAddress: await x2EarnAppsV1.getAddress(),
+        x2EarnAppsAddress: await x2EarnApps.getAddress(),
         baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
         appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
         votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
@@ -344,7 +345,7 @@ export async function deployAll(config: ContractsConfig) {
     Treasury: await treasury.getAddress(),
     VOT3: await vot3.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
-    X2EarnAppsV1: await x2EarnAppsV1.getAddress(),
+    X2EarnAppsV1: await x2EarnApps.getAddress(),
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
@@ -462,13 +463,13 @@ export async function deployAll(config: ContractsConfig) {
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
   switch (network.name) {
     case "vechain_mainnet":
-      await setupMainnetEnvironment(emissions, x2EarnAppsV1)
+      await setupMainnetEnvironment(emissions, x2EarnApps)
       break
     case "vechain_testnet":
-      await setupTestEnvironment(emissions, x2EarnAppsV1)
+      await setupTestEnvironment(emissions, x2EarnApps)
       break
     case "vechain_solo":
-      await setupLocalEnvironment(emissions, treasury, x2EarnAppsV1)
+      await setupLocalEnvironment(emissions, treasury, x2EarnApps)
       break
   }
 
@@ -519,8 +520,8 @@ export async function deployAll(config: ContractsConfig) {
     await transferGovernorFunctionSettingsRole(governor, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferAdminRole(governor, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
-    await transferGovernanceRole(x2EarnAppsV1, deployer, deployer.address, config.CONTRACTS_ADMIN_ADDRESS)
-    await transferAdminRole(x2EarnAppsV1, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferGovernanceRole(x2EarnApps, deployer, deployer.address, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferAdminRole(x2EarnApps, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferAdminRole(timelock, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
@@ -725,17 +726,17 @@ export async function deployAll(config: ContractsConfig) {
 
     // X2EarnApps
     await validateContractRole(
-      x2EarnAppsV1,
+      x2EarnApps,
       config.CONTRACTS_ADMIN_ADDRESS,
       TEMP_ADMIN,
-      await x2EarnAppsV1.DEFAULT_ADMIN_ROLE(),
+      await x2EarnApps.DEFAULT_ADMIN_ROLE(),
     )
-    await validateContractRole(x2EarnAppsV1, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await x2EarnAppsV1.UPGRADER_ROLE())
+    await validateContractRole(x2EarnApps, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await x2EarnApps.UPGRADER_ROLE())
     await validateContractRole(
-      x2EarnAppsV1,
+      x2EarnApps,
       config.CONTRACTS_ADMIN_ADDRESS,
       TEMP_ADMIN,
-      await x2EarnAppsV1.GOVERNANCE_ROLE(),
+      await x2EarnApps.GOVERNANCE_ROLE(),
     )
 
     // GalaxyMember
@@ -775,8 +776,7 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Upgrade contracts ---------- //
   console.log("================ Upgrading contracts =================")
-  let x2EarnAppsV2: X2EarnApps | undefined
-  if (shouldUpgradeContracts()) {
+  if (!shouldNotUpgradeContracts()) {
     let vechainNodesAddress = config.VECHAIN_NODES_CONTRACT_ADDRESS
     if (network.name != "mainnet") {
       const operators = (await ethers.getSigners()).slice(0, 10)
@@ -786,10 +786,10 @@ export async function deployAll(config: ContractsConfig) {
 
     console.log("Upgrading contracts to V2")
     // Upgrade X2EarnApps V1 to X2EarnApps V2
-    x2EarnAppsV2 = (await upgradeProxy(
+    x2EarnApps = (await upgradeProxy(
       "X2EarnAppsV1",
       "X2EarnApps",
-      await x2EarnAppsV1.getAddress(),
+      await x2EarnApps.getAddress(),
       [config.XAPP_GRACE_PERIOD, vechainNodesAddress],
       {},
       2,
@@ -819,8 +819,7 @@ export async function deployAll(config: ContractsConfig) {
     emissions: emissions,
     voterRewards: voterRewards,
     treasury: treasury,
-    x2EarnAppsV1: x2EarnAppsV1,
-    x2EarnAppsV2: x2EarnAppsV2,
+    x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
   }
   // close the script

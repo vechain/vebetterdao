@@ -57,7 +57,11 @@ const APPS = [
   },
 ]
 
-export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnApps | X2EarnAppsV1) => {
+export const setupLocalEnvironment = async (
+  emissions: Emissions,
+  treasury: Treasury,
+  x2EarnApps: X2EarnApps | X2EarnAppsV1,
+) => {
   const start = performance.now()
   console.log("================ Setup local environment")
 
