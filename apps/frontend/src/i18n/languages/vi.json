@@ -608,5 +608,8 @@
   "Add a new reward distributor": "Thêm nhà phân phối phần thưởng mới",
   "Contract or wallet address": "Địa chỉ hợp đồng hoặc ví",
   "Rewards distributor already present": "Nhà phân phối phần thưởng đã có mặt",
-  "Add distributor": "Thêm nhà phân phối"
+  "Add distributor": "Thêm nhà phân phối",
+  "Deposit B3TR to {{name}} app": "Nạp B3TR vào ứng dụng {{name}}",
+  "Rewards Pool": "Quỹ Phần Thưởng",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Tổng số lượng token B3TR mà ứng dụng có sẵn để phân phối phần thưởng."
 }

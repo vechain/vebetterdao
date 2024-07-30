@@ -608,5 +608,8 @@
   "Add a new reward distributor": "添加新的奖励分发者",
   "Contract or wallet address": "合约或钱包地址",
   "Rewards distributor already present": "奖励分发者已存在",
-  "Add distributor": "添加分发者"
+  "Add distributor": "添加分发者",
+  "Deposit B3TR to {{name}} app": "将 B3TR 存入 {{name}} 应用程序",
+  "Rewards Pool": "奖励池",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "应用程序可用于奖励分配的 B3TR 代币总量。"
 }

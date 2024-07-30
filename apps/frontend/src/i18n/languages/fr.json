@@ -608,5 +608,8 @@
   "Add a new reward distributor": "Ajouter un nouveau distributeur de récompenses",
   "Contract or wallet address": "Adresse de contrat ou de portefeuille",
   "Rewards distributor already present": "Distributeur de récompenses déjà présent",
-  "Add distributor": "Ajouter un distributeur"
+  "Add distributor": "Ajouter un distributeur",
+  "Deposit B3TR to {{name}} app": "Déposer B3TR sur l'application {{name}}",
+  "Rewards Pool": "Réserve de Récompenses",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Montant total de jetons B3TR que l'application a disponibles pour la distribution de récompenses."
 }

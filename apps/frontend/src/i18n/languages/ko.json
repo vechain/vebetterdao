@@ -608,5 +608,8 @@
   "Add a new reward distributor": "새 보상 분배자 추가",
   "Contract or wallet address": "계약 또는 지갑 주소",
   "Rewards distributor already present": "보상 분배자가 이미 존재합니다",
-  "Add distributor": "분배자 추가"
+  "Add distributor": "분배자 추가",
+  "Deposit B3TR to {{name}} app": "{{name}} 앱에 B3TR 입금",
+  "Rewards Pool": "보상 풀",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "앱이 보상 배포를 위해 사용할 수 있는 총 B3TR 토큰 수량입니다."
 }

@@ -18,12 +18,12 @@ import { useDepositToAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
 import { TransactionModal, CustomModalContent } from "@/components"
 import BigNumber from "bignumber.js"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
 import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
-import { useB3trBalance } from "@/api"
+import { useB3trBalance, useXApp } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
 
@@ -57,6 +57,8 @@ const layoutTransition = {
 export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+
+  const { data: app } = useXApp(appId)
 
   const { data: availableBalanceToDeposit } = useB3trBalance(account ?? "")
 
@@ -144,7 +146,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
-              {t("Deposit B3TR to your app")}
+              <Trans i18nKey={"Deposit B3TR to {{name}} app"} values={{ name: app?.name ?? "" }} t={t} />
             </Text>
           </HStack>
           <Text fontSize={{ base: 14, md: 16 }} fontWeight={400} opacity={0.7}>
@@ -222,6 +224,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
     setValue,
     appBalanceScaled,
     isAppBalanceLoading,
+    app,
   ])
 
   if (status !== "ready")
