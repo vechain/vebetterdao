@@ -1,4 +1,4 @@
-import { VOT3, X2EarnApps__factory, XAllocationVoting, XAllocationVoting__factory } from "../../typechain-types"
+import { VOT3, X2EarnAppsV1__factory, XAllocationVoting, XAllocationVoting__factory } from "../../typechain-types"
 import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
 import { buildTxBody, signAndSendTx } from "./txHelper"
 import { SeedAccount, TestPk } from "./seedAccounts"
@@ -23,7 +23,7 @@ export const addXDapps = async (contractAddress: string, account: TestPk, apps: 
       clauses.push(
         clauseBuilder.functionInteraction(
           contractAddress,
-          coder.createInterface(JSON.stringify(X2EarnApps__factory.abi)).getFunction("addApp") as FunctionFragment,
+          coder.createInterface(JSON.stringify(X2EarnAppsV1__factory.abi)).getFunction("addApp") as FunctionFragment,
           [app.teamWalletAddress, app.admin, app.name, app.metadataURI],
         ),
       )
