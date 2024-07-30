@@ -99,7 +99,7 @@ describe("X-Apps", function () {
     it("X2Earn Apps Info added pre contract upgrade should should be same after upgrade", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      const { timeLock, owner, otherAccounts, vechainNodes} = await getOrDeployContractInstances({
+      const { timeLock, owner, otherAccounts, vechainNodes } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -115,25 +115,25 @@ describe("X-Apps", function () {
       await x2EarnAppsV1
         .connect(owner)
         .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
-        // Add app 2
+      // Add app 2
       await x2EarnAppsV1
         .connect(owner)
         .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
-      // start round using V1 contract       
+      // start round using V1 contract
       await startNewAllocationRound()
 
       // Add app 3 during first round
       await x2EarnAppsV1
         .connect(owner)
         .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #3", "metadataURI")
-      
-        const appsV1 = await x2EarnAppsV1.apps()
+
+      const appsV1 = await x2EarnAppsV1.apps()
 
       // wait for round to end
       await waitForCurrentRoundToEnd()
 
-        // Upgrade X2EarnAppsV1 to X2EarnApps
+      // Upgrade X2EarnAppsV1 to X2EarnApps
       const x2EarnApps = (await upgradeProxy(
         "X2EarnAppsV1",
         "X2EarnApps",
@@ -153,7 +153,15 @@ describe("X-Apps", function () {
     it("X2Earn Apps added pre contract upgrade should need endorsement after upgrade and should be in grace period", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      const { xAllocationVoting, x2EarnRewardsPool, xAllocationPool, timeLock, emissions, owner, vechainNodes, treasury, otherAccounts} = await getOrDeployContractInstances({
+      const {
+        xAllocationVoting,
+        x2EarnRewardsPool,
+        xAllocationPool,
+        timeLock,
+        owner,
+        vechainNodes,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -185,7 +193,7 @@ describe("X-Apps", function () {
         .connect(owner)
         .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
-      // start round using V1 contract       
+      // start round using V1 contract
       const round1 = await startNewAllocationRound()
 
       // Add app -> should be eligble for next round
@@ -205,7 +213,7 @@ describe("X-Apps", function () {
       // wait for round to end
       await waitForCurrentRoundToEnd()
 
-        // Upgrade X2EarnAppsV1 to X2EarnApps
+      // Upgrade X2EarnAppsV1 to X2EarnApps
       const x2EarnAppsV2 = (await upgradeProxy(
         "X2EarnAppsV1",
         "X2EarnApps",
@@ -278,7 +286,7 @@ describe("X-Apps", function () {
       expect(await xAllocationVoting.isEligibleForVote(app1Id, round4)).to.eql(true)
       expect(await xAllocationVoting.isEligibleForVote(app2Id, round4)).to.eql(true)
       expect(await xAllocationVoting.isEligibleForVote(app3Id, round4)).to.eql(false)
-      
+
       // Only 1 app should be seeking endorsement
       expect(await x2EarnAppsV2.appPendingEndorsment(app1Id)).to.eql(false)
       expect(await x2EarnAppsV2.appPendingEndorsment(app2Id)).to.eql(false)
