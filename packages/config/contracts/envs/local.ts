@@ -33,8 +33,8 @@ export function createLocalConfig() {
         "setEmissions",
         "setVotingThreshold",
       ],
-      X2EarnApps: ["addApp", "setVotingEligibility"],
-      X2EarnAppsV2: ["setVotingEligibility"],
+      X2EarnAppsV1: ["addApp", "setVotingEligibility"],
+      X2EarnApps: ["setVotingEligibility"],
     },
 
     EMISSIONS_CYCLE_DURATION: 24, // 24 blocks - 4 minutes.

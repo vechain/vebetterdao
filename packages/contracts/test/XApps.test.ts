@@ -18,7 +18,6 @@ import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createNodeHolder, endorseApp } from "./helpers/xnodes"
-import { create } from "ts-node"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 
 describe("X-Apps", function () {
@@ -42,7 +41,7 @@ describe("X-Apps", function () {
       })
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("X2EarnAppsV2")
+      const Contract = await ethers.getContractFactory("X2EarnApps")
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -66,7 +65,7 @@ describe("X-Apps", function () {
       })
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("X2EarnAppsV2")
+      const Contract = await ethers.getContractFactory("X2EarnApps")
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -89,7 +88,7 @@ describe("X-Apps", function () {
         forceDeploy: true,
       })
 
-      expect(await x2EarnApps.version()).to.equal("1")
+      expect(await x2EarnApps.version()).to.equal("2")
     })
   })
 
@@ -575,7 +574,7 @@ describe("X-Apps", function () {
         proposer,
         voter1,
         x2EarnApps,
-        await ethers.getContractFactory("X2EarnAppsV2"),
+        await ethers.getContractFactory("X2EarnApps"),
         "Exclude app from the allocation voting rounds",
         "setVotingEligibility",
         [app1Id, false],
