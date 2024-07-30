@@ -6,7 +6,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy } from "../scripts/helpers"
 import { endorseApp } from "./helpers/xnodes"
 
-describe("X2EarnRewardsPool", function () {
+describe("X2EarnRewardsPoolV1", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {
@@ -15,23 +15,23 @@ describe("X2EarnRewardsPool", function () {
       })
 
       await expect(
-        deployProxy("X2EarnRewardsPool", [owner.address, owner.address, owner.address, owner.address, ZERO_ADDRESS]),
+        deployProxy("X2EarnRewardsPoolV1", [owner.address, owner.address, owner.address, owner.address, ZERO_ADDRESS]),
       ).to.be.reverted
 
       await expect(
-        deployProxy("X2EarnRewardsPool", [owner.address, owner.address, owner.address, ZERO_ADDRESS, owner.address]),
+        deployProxy("X2EarnRewardsPoolV1", [owner.address, owner.address, owner.address, ZERO_ADDRESS, owner.address]),
       ).to.be.reverted
 
       await expect(
-        deployProxy("X2EarnRewardsPool", [owner.address, owner.address, ZERO_ADDRESS, owner.address, owner.address]),
+        deployProxy("X2EarnRewardsPoolV1", [owner.address, owner.address, ZERO_ADDRESS, owner.address, owner.address]),
       ).to.be.reverted
 
       await expect(
-        deployProxy("X2EarnRewardsPool", [owner.address, ZERO_ADDRESS, owner.address, owner.address, owner.address]),
+        deployProxy("X2EarnRewardsPoolV1", [owner.address, ZERO_ADDRESS, owner.address, owner.address, owner.address]),
       ).to.be.reverted
 
       await expect(
-        deployProxy("X2EarnRewardsPool", [ZERO_ADDRESS, owner.address, owner.address, owner.address, owner.address]),
+        deployProxy("X2EarnRewardsPoolV1", [ZERO_ADDRESS, owner.address, owner.address, owner.address, owner.address]),
       ).to.be.reverted
     })
 
@@ -47,7 +47,7 @@ describe("X2EarnRewardsPool", function () {
 
     it("Version should be set correctly", async function () {
       const { x2EarnRewardsPool } = await getOrDeployContractInstances({ forceDeploy: false })
-      expect(await x2EarnRewardsPool.version()).to.equal("1")
+      expect(await x2EarnRewardsPool.version()).to.equal("2")
     })
 
     it("X2EarnApps should be set correctly", async function () {
@@ -59,15 +59,9 @@ describe("X2EarnRewardsPool", function () {
   // upgradeability
   describe("Contract upgradeablity", () => {
     it("Cannot initialize twice", async function () {
-      const { x2EarnRewardsPool, owner, b3tr, x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { x2EarnRewardsPool } = await getOrDeployContractInstances({ forceDeploy: true })
       await catchRevert(
-        x2EarnRewardsPool.initialize(
-          await owner.getAddress(),
-          await owner.getAddress(),
-          await owner.getAddress(),
-          await b3tr.getAddress(),
-          await x2EarnApps.getAddress(),
-        ),
+        x2EarnRewardsPool.initializeV2(),
       )
     })
 
@@ -77,7 +71,7 @@ describe("X2EarnRewardsPool", function () {
       })
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("X2EarnRewardsPool")
+      const Contract = await ethers.getContractFactory("X2EarnRewardsPoolV1")
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -101,7 +95,7 @@ describe("X2EarnRewardsPool", function () {
       })
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("X2EarnRewardsPool")
+      const Contract = await ethers.getContractFactory("X2EarnRewardsPoolV1")
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -124,7 +118,7 @@ describe("X2EarnRewardsPool", function () {
         forceDeploy: true,
       })
 
-      expect(await x2EarnApps.version()).to.equal("1")
+      expect(await x2EarnApps.version()).to.equal("2")
     })
   })
 
