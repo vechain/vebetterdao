@@ -106,7 +106,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param appName the name of the app
    * @param metadataURI the metadata URI of the app
    *
-   * Emits a {AppPendingEndorsment} event.
+   * Emits a {AppAdded} event.
    */
   function _registerApp(
     address teamWalletAddress,
@@ -140,6 +140,13 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     emit AppAdded(id, teamWalletAddress, appName, false);
   }
 
+  /**
+   * @notice Retrieves detailed information for multiple applications.
+   * @dev This function is an internal view function that overrides a virtual function.
+   * It fetches data from storage and constructs an array of AppWithDetailsReturnType objects.
+   * @param appIds An array of application IDs for which details are to be retrieved.
+   * @return allApps An array of AppWithDetailsReturnType containing detailed information about each application.
+   */
   function _getAppsInfo(
     bytes32[] memory appIds
   ) internal view virtual override returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
