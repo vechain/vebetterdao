@@ -222,11 +222,13 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     // Emit an event indicating the app has been unendorsed by the caller
     emit AppEndorsed(appId, msg.sender, false);
 
-    if ($._unendorsedAppsIndex[appId] < $._unendorsedApps.length || isBlacklisted(appId)) {
+    // Check if the app is no longer in teh voting allocation rounds dut to lack of endorsement or form being blacklisted
+    if (!isEligibleNow(appId) || isBlacklisted(appId)) {
       return;
     }
 
     if (score < 100) {
+      // If the app has a grace period of 0, set the grace period
       if ($._appGracePeriod[appId] == 0) {
         $._appGracePeriod[appId] = clock() + $._gracePeriodDuration;
       } else if (clock() > $._appGracePeriod[appId]) {
@@ -316,9 +318,29 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     // Retrieve the metadata for the current user's token
     (, uint8 nodeLevel, , , , , ) = $._vechainNodesContract.getMetadata(tokenID);
-    // Cast uint8 to NodeStrengthLevel enum
-    NodeStrengthLevel level = NodeStrengthLevel(nodeLevel);
-    return level;
+
+    // Cast uint8 to NodeStrengthLevel enum and return
+    return NodeStrengthLevel(nodeLevel);
+  }
+
+  /**
+   * @dev Internal function to update the endorsement scores of each node level.
+   * @param nodeStrengthScores The node level scores to update.
+   */
+  function _updateNodeEndorsementScores(NodeStrengthScores calldata nodeStrengthScores) internal {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    // Set the endorsement score for each node level
+    $._nodeEnodorsmentScore[NodeStrengthLevel.Strength] = nodeStrengthScores.strength; // Strength Node score
+    $._nodeEnodorsmentScore[NodeStrengthLevel.Thunder] = nodeStrengthScores.thunder; // Thunder Node score
+    $._nodeEnodorsmentScore[NodeStrengthLevel.Mjolnir] = nodeStrengthScores.mjolnir; // Mjolnir Node score
+
+    $._nodeEnodorsmentScore[NodeStrengthLevel.VeThorX] = nodeStrengthScores.veThorX; // VeThor X Node score
+    $._nodeEnodorsmentScore[NodeStrengthLevel.StrengthX] = nodeStrengthScores.strengthX; // Strength X Node score
+    $._nodeEnodorsmentScore[NodeStrengthLevel.ThunderX] = nodeStrengthScores.thunderX; // Thunder X Node score
+    $._nodeEnodorsmentScore[NodeStrengthLevel.MjolnirX] = nodeStrengthScores.mjolnirX; // Mjolnir X Node score
+
+    emit NodeStrengthScoresUpdated(nodeStrengthScores);
   }
 
   /**

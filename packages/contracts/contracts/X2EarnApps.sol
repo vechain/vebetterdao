@@ -239,4 +239,11 @@ contract X2EarnApps is
   function updateGracePeriod(uint48 _newGracePeriod) external onlyRole(GOVERNANCE_ROLE) {
     _setGracePeriod(_newGracePeriod);
   }
+
+    /**
+   * @dev See {IX2EarnApps-updateNodeEndorsementScores}.
+   */
+  function updateNodeEndorsementScores(NodeStrengthScores calldata _nodeStrengthScores) external onlyRole(GOVERNANCE_ROLE) {
+    _updateNodeEndorsementScores(_nodeStrengthScores);
+  }
 }

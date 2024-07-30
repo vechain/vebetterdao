@@ -26,6 +26,19 @@ interface IX2EarnApps {
   }
 
   /**
+   * @dev The score of a node.
+   */
+  struct NodeStrengthScores {
+    uint256 strength;
+    uint256 thunder;
+    uint256 mjolnir;
+    uint256 veThorX;
+    uint256 strengthX;
+    uint256 thunderX;
+    uint256 mjolnirX;
+  }
+
+  /**
    * @dev The clock was incorrectly modified.
    */
   error ERC6372InconsistentClock();
@@ -184,6 +197,11 @@ interface IX2EarnApps {
    * @dev Event fired when an app is endorsed or unendorsed by a node.
    */
   event AppEndorsed(bytes32 indexed id, address teamAddress, bool endorsed);
+
+  /**
+   * @dev Event fired when the node strength scores are updated.
+   */
+  event NodeStrengthScoresUpdated(NodeStrengthScores indexed nodeStrengthScores);
 
   /**
    * @dev Generates the hash of the app name to be used as the app id.
@@ -452,4 +470,13 @@ interface IX2EarnApps {
     string memory _appName,
     string memory _appMetadataURI
   ) external;
+
+  /**
+   * @dev Update the the endorsement scores of each node level.
+   *
+   * @param _nodeStrengthScores The node level scores to update.
+   *
+   * Emits a {NodeStrengthScoreUpdated} event.
+   */
+  function updateNodeEndorsementScores(NodeStrengthScores calldata _nodeStrengthScores) external;
 }
