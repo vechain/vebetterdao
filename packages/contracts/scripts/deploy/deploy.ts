@@ -13,6 +13,9 @@ import {
   X2EarnRewardsPool,
   X2EarnApps,
   X2EarnAppsV1,
+  X2EarnRewardsPoolV1,
+  XAllocationPoolV1,
+  XAllocationVotingV1,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -174,8 +177,9 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as X2EarnAppsV1
 
-  const x2EarnRewardsPool = (await deployProxy(
-    "X2EarnRewardsPool",
+  let x2EarnRewardsPool: X2EarnRewardsPoolV1 | X2EarnRewardsPool
+  x2EarnRewardsPool = (await deployProxy(
+    "X2EarnRewardsPoolV1",
     [
       config.CONTRACTS_ADMIN_ADDRESS, // admin
       config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
@@ -185,10 +189,11 @@ export async function deployAll(config: ContractsConfig) {
     ],
     undefined,
     true,
-  )) as X2EarnRewardsPool
+  )) as X2EarnRewardsPoolV1
 
-  const xAllocationPool = (await deployProxy(
-    "XAllocationPool",
+  let xAllocationPool: XAllocationPoolV1 | XAllocationPool
+  xAllocationPool = (await deployProxy(
+    "XAllocationPoolV1",
     [
       TEMP_ADMIN, // admin
       config.CONTRACTS_ADMIN_ADDRESS, // upgrader
@@ -200,7 +205,7 @@ export async function deployAll(config: ContractsConfig) {
     ],
     undefined,
     true,
-  )) as XAllocationPool
+  )) as XAllocationPoolV1
 
   // Deploy the GalaxyMember contract with Max Mintable Level 1
   const galaxyMember = (await deployProxy(
@@ -274,8 +279,9 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as VoterRewards
 
-  const xAllocationVoting = (await deployProxy(
-    "XAllocationVoting",
+  let xAllocationVoting: XAllocationVotingV1 | XAllocationVoting
+  xAllocationVoting = (await deployProxy(
+    "XAllocationVotingV1",
     [
       {
         vot3Token: await vot3.getAddress(),
@@ -295,7 +301,7 @@ export async function deployAll(config: ContractsConfig) {
     ],
     undefined,
     true,
-  )) as XAllocationVoting
+  )) as XAllocationVotingV1
 
   const governor = (await deployProxy(
     "B3TRGovernor",
@@ -794,6 +800,35 @@ export async function deployAll(config: ContractsConfig) {
       {},
       2,
     )) as X2EarnApps
+
+    // Upgrade X2EarnRewardsPool V1 to V2
+    x2EarnRewardsPool = (await upgradeProxy(
+      "X2EarnRewardsPoolV1",
+      "X2EarnRewardsPool",
+      await x2EarnRewardsPool.getAddress(),
+      [],
+      {},
+      2,
+    )) as X2EarnRewardsPool
+
+    // Upgrade xAllocationPool V1 to V2
+    xAllocationPool = (await upgradeProxy(
+      "XAllocationPoolV1",
+      "XAllocationPool",
+      await xAllocationPool.getAddress(),
+      [],
+      {},
+      2,
+    )) as XAllocationPool
+
+    xAllocationVoting = (await upgradeProxy(
+      "XAllocationVotingV1",
+      "XAllocationVoting",
+      await xAllocationVoting.getAddress(),
+      [],
+      {},
+      2,
+    )) as XAllocationVoting
   }
 
   console.log("Contracts upgraded successfully!")
@@ -833,7 +868,9 @@ const transferAdminRole = async (
     | Emissions
     | VoterRewards
     | XAllocationPool
+    | XAllocationPoolV1
     | XAllocationVoting
+    | XAllocationVotingV1
     | Treasury
     | B3TRGovernor
     | X2EarnApps
@@ -950,7 +987,7 @@ const transferGovernanceRole = async (
 }
 
 const transferContractsAddressManagerRole = async (
-  contract: GalaxyMember | XAllocationPool | XAllocationVoting | Emissions,
+  contract: GalaxyMember | XAllocationPool | XAllocationPoolV1 | XAllocationVotingV1 | XAllocationVoting | Emissions,
   admin: HardhatEthersSigner,
   newAddress: string,
 ) => {
@@ -1105,11 +1142,14 @@ const validateContractRole = async (
     | Emissions
     | VoterRewards
     | XAllocationPool
+    | XAllocationPoolV1
     | XAllocationVoting
+    | XAllocationVotingV1
     | Treasury
     | TimeLock
     | B3TRGovernor
     | X2EarnRewardsPool
+    | X2EarnRewardsPoolV1
     | X2EarnApps
     | X2EarnAppsV1,
   expectedAddress: string,
