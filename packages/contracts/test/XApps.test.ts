@@ -150,17 +150,10 @@ describe("X-Apps", function () {
     it("X2Earn Apps added pre contract upgrade should need endorsement after upgrade and should be in grace period", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      const {
-        xAllocationVoting,
-        x2EarnRewardsPool,
-        xAllocationPool,
-        timeLock,
-        owner,
-        vechainNodes,
-        otherAccounts,
-      } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnRewardsPool, xAllocationPool, timeLock, owner, vechainNodes, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Deploy X2EarnApps
       const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
@@ -2396,24 +2389,38 @@ describe("X-Apps", function () {
       expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[7].address)).to.eql(100n)
 
       const newEndorsementScores = {
-      strength: 1,
-      thunder: 2,
-      mjolnir: 3,
-      veThorX: 4,
-      strengthX: 5,
-      thunderX: 6,
-      mjolnirX: 7,
-    }
+        strength: 1,
+        thunder: 2,
+        mjolnir: 3,
+        veThorX: 4,
+        strengthX: 5,
+        thunderX: 6,
+        mjolnirX: 7,
+      }
 
       await x2EarnApps.connect(owner).updateNodeEndorsementScores(newEndorsementScores)
 
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[1].address)).to.eql(BigInt(newEndorsementScores.strength))
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[2].address)).to.eql(BigInt(newEndorsementScores.thunder))
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[3].address)).to.eql(BigInt(newEndorsementScores.mjolnir))
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[4].address)).to.eql(BigInt(newEndorsementScores.veThorX))
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[5].address)).to.eql(BigInt(newEndorsementScores.strengthX))
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[6].address)).to.eql(BigInt(newEndorsementScores.thunderX))
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[7].address)).to.eql(BigInt(newEndorsementScores.mjolnirX))
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[1].address)).to.eql(
+        BigInt(newEndorsementScores.strength),
+      )
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[2].address)).to.eql(
+        BigInt(newEndorsementScores.thunder),
+      )
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[3].address)).to.eql(
+        BigInt(newEndorsementScores.mjolnir),
+      )
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[4].address)).to.eql(
+        BigInt(newEndorsementScores.veThorX),
+      )
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[5].address)).to.eql(
+        BigInt(newEndorsementScores.strengthX),
+      )
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[6].address)).to.eql(
+        BigInt(newEndorsementScores.thunderX),
+      )
+      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[7].address)).to.eql(
+        BigInt(newEndorsementScores.mjolnirX),
+      )
     })
 
     it("Endorsement score threshold can be updated by admin with governance role", async function () {
