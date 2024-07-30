@@ -25,7 +25,7 @@ import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 import { TeamWalletAddress } from "./components/TeamWalletAddress"
 import { IoWalletOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
-import { PercentageSelectorButtons } from "./components/PercentageSelctorButtons"
+import { WithdrawPercentageSelectorButtons } from "./components/WithdrawPercentageSelectorButtons"
 
 export type Props = {
   appId: string
@@ -227,7 +227,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             </motion.div>
           </motion.div>
 
-          <PercentageSelectorButtons availableAmount={availableB3trToWithdrawScaled} setValue={setValue} />
+          <WithdrawPercentageSelectorButtons availableAmount={availableB3trToWithdrawScaled} setValue={setValue} />
 
           <TeamWalletAddress teamWalletAddress={teamWalletAddress} />
 
@@ -274,7 +274,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         showExplorerButton
         isAppWithdraw
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
-        b3trWithdrawAmount={amount}
+        b3trAmount={amount}
         b3trBalanceAfterSwap={b3trBalanceAfterSwap}
         b3trBalance={availableB3trToWithdrawScaled}
       />

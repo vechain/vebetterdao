@@ -1,4 +1,4 @@
-import { useMostVotedAppsInRound, usePreviousAllocationRoundId } from "@/api"
+import { useXApps } from "@/api"
 import { HStack, Heading, VStack, Grid, Spinner, Button } from "@chakra-ui/react"
 import { AppCard } from "./AppCard"
 import { AddNewAppCard } from "./AddNewAppCard"
@@ -8,17 +8,13 @@ import { FaPlus } from "react-icons/fa6"
 export const AppsPageContent = () => {
   const { t } = useTranslation()
 
-  // Apps are listed based on the votes they received in the previous round
-  const { data: previousRoundId, isLoading: isLoadingPreviousRoundId } = usePreviousAllocationRoundId()
-  const { data: xApps, isLoading: isLoadingXApps } = useMostVotedAppsInRound(previousRoundId ?? "")
-
-  const isLoading = isLoadingPreviousRoundId || isLoadingXApps
+  const { data: xApps, isLoading: isLoadingXApps } = useXApps()
 
   const openGrantPage = () => {
     window.open("https://vechain.org/grants/", "_blank", "noopener noreferrer")
   }
 
-  if (isLoading)
+  if (isLoadingXApps)
     return (
       <VStack w="full" spacing={12} h="80vh" justify="center" data-testid="apps-page-loading">
         <Spinner size={"lg"} />
@@ -37,7 +33,7 @@ export const AppsPageContent = () => {
         </Button>
       </HStack>
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={6} w="full">
-        {xApps?.map(xApp => <AppCard key={xApp.id} xApp={xApp.app} />)}
+        {xApps?.map(xApp => <AppCard key={xApp.id} xApp={xApp} />)}
 
         <AddNewAppCard />
       </Grid>

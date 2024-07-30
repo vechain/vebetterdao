@@ -57,7 +57,7 @@ export type ProposalVoteEvent = {
   blockMeta: Connex.Thor.Filter.WithMeta["meta"]
 }
 
-export const getProposalsEvents = async (thor: Connex.Thor) => {
+export const getProposalsEvents = async (thor: Connex.Thor, proposalId?: string) => {
   const proposalCreatedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalCreated")
   if (!proposalCreatedAbi) throw new Error("ProposalCreated event not found")
   const proposalCreatedEvent = new abi.Event(proposalCreatedAbi as abi.Event.Definition)
@@ -82,6 +82,8 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
   if (!proposalVoteAbi) throw new Error("ProposalVote event not found")
   const proposalVoteEvent = new abi.Event(proposalVoteAbi as abi.Event.Definition)
 
+  const proposalIdBytes = proposalId ? `0x${BigInt(proposalId).toString(16).padStart(64, "0")}` : undefined
+
   /**
    * Filter criteria to get the events from the governor contract that we are interested in
    * This way we can get all of them in one call
@@ -90,6 +92,7 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
     {
       address: GOVERNANCE_CONTRACT,
       topic0: proposalCreatedEvent.signature,
+      topic1: proposalIdBytes,
     },
     {
       address: GOVERNANCE_CONTRACT,
@@ -106,10 +109,12 @@ export const getProposalsEvents = async (thor: Connex.Thor) => {
     {
       address: GOVERNANCE_CONTRACT,
       topic0: proposalDepositEvent.signature,
+      topic2: proposalIdBytes,
     },
     {
       address: GOVERNANCE_CONTRACT,
       topic0: proposalVoteEvent.signature,
+      topic2: proposalIdBytes,
     },
   ]
 

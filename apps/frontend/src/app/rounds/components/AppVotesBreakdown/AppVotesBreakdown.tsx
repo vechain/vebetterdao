@@ -109,8 +109,17 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
         ))}
       </HStack>
       <HStack w="full" h={"full"}>
-        {parsedVotes.map((vote, index) =>
-          Number(vote.value) > 0 ? (
+        {parsedVotes.map((vote, index) => {
+          if (Number(vote.value) <= 0) return null
+
+          const relatedAppIndexInVotes = votedX2EarnApps.findIndex(app => app.id === vote.appId)
+
+          const logo = logos[relatedAppIndexInVotes]?.data?.image
+
+          const logoLoading = logos[relatedAppIndexInVotes]?.isLoading
+          const metadata = appsMetadata[relatedAppIndexInVotes]?.data
+
+          return (
             <VStack
               key={`${vote.appId}-line`}
               w={`${getLineWidth(Number(vote.value))}%`}
@@ -118,7 +127,7 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
               spacing={0}
               align="center">
               <Box w="3px" h={"full"} bg={getLinesColor(index)} />
-              <Skeleton isLoaded={!logos[index]?.isLoading}>
+              <Skeleton isLoaded={vote.isRest ? true : !logoLoading}>
                 {vote.isRest ? (
                   <Flex boxSize={"32px"} borderRadius="9px" bg="gray.100" justify={"center"} align={"center"}>
                     <Text fontSize="16px" fontWeight={600} data-testid="app-rest-vote">
@@ -126,20 +135,15 @@ export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 
                     </Text>
                   </Flex>
                 ) : (
-                  <Image
-                    src={logos[index]?.data?.image ?? notFoundImage}
-                    alt={appsMetadata[index]?.data?.name}
-                    boxSize={"32px"}
-                    borderRadius="9px"
-                  />
+                  <Image src={logo ?? notFoundImage} alt={metadata?.name} boxSize={"32px"} borderRadius="9px" />
                 )}
               </Skeleton>
               <Text fontSize="sm" mt={1} data-testid={`app-${vote.appId}-vote-${vote.value}`}>
                 {t("{{percentage}}%", { percentage: vote.value })}
               </Text>
             </VStack>
-          ) : null,
-        )}
+          )
+        })}
       </HStack>
     </VStack>
   )
