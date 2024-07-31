@@ -435,6 +435,8 @@ contract GalaxyMember is
       if (b3trDonatedLeft >= $._b3trToUpgradeToLevel[i]) {
         level = i;
         b3trDonatedLeft -= $._b3trToUpgradeToLevel[i];
+      } else {
+        break;
       }
     }
 
