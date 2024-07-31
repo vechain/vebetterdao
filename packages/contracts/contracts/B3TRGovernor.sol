@@ -51,7 +51,22 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
  * @title B3TRGovernor
- * @notice See B3TRGovernor for more information.
+ * @notice This contract is the main governance contract for the VeBetterDAO ecosystem.
+ * Anyone can create a proposal to both change the state of the contract, to execute a transaction
+ * on the timelock or to ask for a vote from the community without performing any onchain action.
+ * In order for the proposal to become active, the community needs to deposit a certain amount of VOT3 tokens.
+ * This is used as a heat check for the proposal, and funds are returned to the depositors after vote is concluded.
+ * Votes for proposals start periodically, based on the allocation rounds (see xAllocationVoting contract), and the round
+ * in which the proposal should be active is specified by the proposer during the proposal creation.
+ *
+ * A minimum amount of voting power is required in order to vote on a proposal.
+ * The voting power is calculated through the quadratic vote formula based on the amount of VOT3 tokens held by the
+ * voter at the block when the proposal becomes active.
+ *
+ * Once a proposal succeeds, it can be queued and executed. The execution is done through the timelock contract.
+ *
+ * The contract is upgradeable and uses the UUPS pattern.
+ * @dev The contract is upgradeable and uses the UUPS pattern. All logic is stored in libraries.
  * @dev Difference from V1: Updated all libraries to V2, and IVoterRewards to IVoterRewards version 2.
  */
 contract B3TRGovernor is

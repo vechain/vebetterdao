@@ -21,7 +21,7 @@
 //                                   ##############
 //                                   #########
 
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
@@ -39,16 +39,20 @@ import { IB3TR } from "./interfaces/IB3TR.sol";
 import { ITokenAuction } from "./interfaces/ITokenAuction.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-/// @title GalaxyMember
-/// @notice This contract manages the unique assets owned by users within the Galaxy Member ecosystem.
-/// @dev Differences from V1:
-/// - Added Vechain Nodes contract to attach and detach nodes to tokens
-/// - Added NODES_MANAGER_ROLE to manage Vechain Nodes Contract address and free upgrade levels
-/// - Added free upgrade levels for each Vechain node level
-/// - Removed automatic highest level owned selection
-/// - Added dynamic level fetching of the token based on the attached Vechain node and B3TR donated for upgrading
-/// - Core logic functions are now overridable through inheritance
-/// - B3TRGovernor has been updated to V2 thus pointing to the new interface
+/**
+ * @title GalaxyMember
+ * @notice This contract manages the unique assets owned by users within the Galaxy Member ecosystem.
+ * @dev Extends ERC721 Non-Fungible Token Standard basic implementation with upgradeable pattern, burnable, pausable, and access control functionalities.
+ * 
+ * @dev Differences from V1:
+ * - Added Vechain Nodes contract to attach and detach nodes to tokens
+ * - Added NODES_MANAGER_ROLE to manage Vechain Nodes Contract address and free upgrade levels
+ * - Added free upgrade levels for each Vechain node level
+ * - Removed automatic highest level owned selection
+ * - Added dynamic level fetching of the token based on the attached Vechain node and B3TR donated for upgrading
+ * - Core logic functions are now overridable through inheritance
+ * - B3TRGovernor has been updated to V2 thus pointing to the new interface
+ */
 contract GalaxyMember is
   ERC721Upgradeable,
   ERC721EnumerableUpgradeable,

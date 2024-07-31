@@ -39,6 +39,18 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * @notice This contract handles the rewards for voters in the VeBetterDAO ecosystem.
  * It calculates the rewards for voters based on their voting power and the level of their Galaxy Member NFT.
  *
+ * @dev The contract is
+ * - upgradeable using UUPSUpgradeable.
+ * - using AccessControl to handle the admin and upgrader roles.
+ * - using ReentrancyGuard to prevent reentrancy attacks.
+ * - following the ERC-7201 standard for storage layout.
+ *
+ * Roles:
+ * - DEFAULT_ADMIN_ROLE: The role that can add new admins and upgraders. It is also the role that can set scaling factor and the Galaxy Member level to multiplier mapping.
+ * - UPGRADER_ROLE: The role that can upgrade the contract.
+ * - VOTE_REGISTRAR_ROLE: The role that can register votes for rewards calculation.
+ * - CONTRACTS_ADDRESS_MANAGER_ROLE: The role that can set the addresses of the contracts used by the VoterRewards contract.
+ * 
  * @dev Differences from V1:
  * - Added the ability to track if a Galaxy Member NFT has voted in a proposal.
  * - Added the ability to track if a Vechain node attached to a Galaxy Member NFT has voted in a proposal.
