@@ -12,7 +12,6 @@ export const AppDetailsSidebar = () => {
   return (
     (isAppModerator || isAppAdmin) && (
       <VStack flex={1.5}>
-        {" "}
         <AppBalanceCard />
       </VStack>
     )
