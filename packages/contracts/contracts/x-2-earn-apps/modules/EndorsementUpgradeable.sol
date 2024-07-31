@@ -88,13 +88,12 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev See {IX2EarnApps-checkEndorsement}.
    */
   function checkEndorsement(bytes32 appId) external returns (bool) {
-    // Get the endorsement storage
-    EndorsementStorage storage $ = _getEndorsementStorage();
-
-    if (!appExists(appId)) {
+    // Ensure the app is registered
+    if (!_appRegistered(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
+    // If the app is blacklisted, endorsement status should be false
     if (isBlacklisted(appId)) {
       return false;
     }
@@ -104,30 +103,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     // Check the total score and update the grace period and voting eligibility accordingly
     if (score < _endorsementScoreThreshold()) {
-      if ($._appGracePeriod[appId] == 0) {
-        $._appGracePeriod[appId] = clock() + $._gracePeriodDuration;
-      } else if (clock() > $._appGracePeriod[appId] && isEligibleNow(appId)) {
-        // Mark the app as not eligible for voting
-        _setVotingEligibility(appId, false);
-
-        // Update the endorsement status
-        _setEndorsementStatus(appId, false);
-
-        // Return false indicating the app is not eligible for voting
-        return false;
-      }
-    } else if ($._appGracePeriod[appId] > 0) {
-      // If the app is not eligible for voting, mark the app as eligible for voting
-      if (!isEligibleNow(appId)) {
-        // Mark the app as eligible for voting
-        _setVotingEligibility(appId, true);
-
-        // Update the endorsement status
-        _setEndorsementStatus(appId, true);
-      }
-
-      // Reset the grace period if the app has more than 100 points
-      $._appGracePeriod[appId] = 0;
+      return _updateStatusIfThresholdNotMet(appId);
+    } else {
+      _updateStatusIfThresholdMet(appId);
     }
 
     // Return true indicating the app is eligible for voting
@@ -143,7 +121,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     // Check if the app exists
-    if (!appExists(appId)) {
+    if (!_appRegistered(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -176,26 +154,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     // Check if the score is equal to or greater than the score threshold (100)
     if (score >= _endorsementScoreThreshold()) {
-      // Check if the app has a grace period greater than 0
-      if ($._appGracePeriod[appId] > 0) {
-        // If the app is not eligible for voting, mark it as eligible
-        if (!isEligibleNow(appId)) {
-          // Mark the app as eligible for voting
-          _setVotingEligibility(appId, true);
-
-          // Update the endorsement status
-          _setEndorsementStatus(appId, true);
-        }
-
-        // Reset the grace period if the app has more than 100 points
-        $._appGracePeriod[appId] = 0;
-      } else {
-        // Add the app to the list of apps
-        _addApp(appId);
-
-        // Update the endorsement status
-        _setEndorsementStatus(appId, true);
-      }
+      _updateStatusIfThresholdMet(appId);
     }
 
     // Emit an event indicating the app has been endorsed by the caller
@@ -208,7 +167,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function unendorseApp(bytes32 appId) external {
     // Check if the app exists
-    if (!appExists(appId)) {
+    if (!_appRegistered(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -233,16 +192,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     // Check if the score is less than endorsement score threshold (100)
     if (score < _endorsementScoreThreshold()) {
-      // If the app has a grace period of 0, set the grace period
-      if ($._appGracePeriod[appId] == 0) {
-        $._appGracePeriod[appId] = clock() + $._gracePeriodDuration;
-      } else if (clock() > $._appGracePeriod[appId]) {
-        // Mark the app as not eligible for voting
-        _setVotingEligibility(appId, false);
-
-        // Update the endorsement status
-        _setEndorsementStatus(appId, false);
-      }
+      _updateStatusIfThresholdNotMet(appId);
     }
 
     return;
@@ -439,6 +389,62 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     return $._endorsementScoreThreshold;
+  }
+
+  // ---------- Private ---------- //
+
+  /**
+   * @dev Internal function to update the status of an app if the score threshold is met.
+   * @param appId The unique identifier of the app.
+   */
+  function _updateStatusIfThresholdMet(bytes32 appId) private {
+    // Get the endorsement storage
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    if (!appExists(appId)) {
+      // Add the app to the list of apps it will be eligible for voting by default from the next round
+      _addApp(appId);
+      // Mark the app as endorsed so that it is removed from the list of apps pending endorsement
+      _setEndorsementStatus(appId, true);
+    } else if (!isEligibleNow(appId)) {
+      // Mark the app as eligible for voting
+      _setVotingEligibility(appId, true);
+      // Mark the app as endorsed so that it is removed from the list of apps pending endorsement
+      _setEndorsementStatus(appId, true);
+    }
+
+    // Reset the grace period if the app has more than 100 points
+    $._appGracePeriod[appId] = 0;
+  }
+
+  /**
+   * @dev Internal function to update the status of an app if the score threshold is not met.
+   * @param appId The unique identifier of the app.
+   * @return bool True if the app is still eligible for voting.
+   */
+  function _updateStatusIfThresholdNotMet(bytes32 appId) private returns (bool) {
+    // Get the endorsement storage
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    // If the app has a grace period of 0, set the grace period
+    if ($._appGracePeriod[appId] == 0) {
+      // Set the grace period for the app -> current block + grace period duration
+      $._appGracePeriod[appId] = clock() + $._gracePeriodDuration;
+
+      // Return true indicating the app is eligible for voting
+      return true;
+
+      // If the X2Earn app is no longer in the grace period and is not eligible for voting
+    } else if (clock() > $._appGracePeriod[appId] && isEligibleNow(appId)) {
+      // Mark the app as not eligible for voting
+      _setVotingEligibility(appId, false);
+
+      // Update the endorsement status
+      _setEndorsementStatus(appId, false);
+
+      // Return false indicating the app is not eligible for voting
+      return false;
+    }
   }
 
   // ---------- Getters ---------- //
