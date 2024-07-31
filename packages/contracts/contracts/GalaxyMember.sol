@@ -191,7 +191,7 @@ contract GalaxyMember is
 
     $.vechainNodes = ITokenAuction(_vechainNodes);
 
-    for (uint8 i = 0; i < _nodeFreeLevels.length; i++) {
+    for (uint8 i; i < _nodeFreeLevels.length; i++) {
       require(_nodeFreeLevels[i] >= 1, "GalaxyMember: invalid node free level");
       $._nodeToFreeUpgradeLevel[i] = _nodeFreeLevels[i];
     }
@@ -380,7 +380,7 @@ contract GalaxyMember is
   /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
   function setB3TRtoUpgradeToLevel(uint256[] memory b3trToUpgradeToLevel) external onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorageV2 storage $ = _getGalaxyMemberStorageV2();
-    for (uint256 i = 0; i < b3trToUpgradeToLevel.length; i++) {
+    for (uint256 i; i < b3trToUpgradeToLevel.length; i++) {
       require(b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be greater than 0");
       $._b3trToUpgradeToLevel[i + 2] = b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
     }
