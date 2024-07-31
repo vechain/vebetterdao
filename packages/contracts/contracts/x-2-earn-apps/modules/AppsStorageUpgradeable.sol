@@ -67,7 +67,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param appId the if of the app
    */
   function _getAppStorage(bytes32 appId) internal view returns (X2EarnAppsDataTypes.App memory) {
-    if (!appExists(appId)) {
+    if (!_appRegistered(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -87,13 +87,13 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   function _addApp(bytes32 appId) internal virtual override {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
-    X2EarnAppsDataTypes.App memory _app = _getAppStorage(appId);
+    $._apps[appId].createdAtTimestamp = block.timestamp;
 
     // Store the new app
     $._appIds.push(appId);
     _setVotingEligibility(appId, true);
 
-    emit AppAdded(appId, teamWalletAddress(appId), _app.name, true);
+    emit AppAdded(appId, teamWalletAddress(appId), $._apps[appId].name, true);
   }
 
   /**
@@ -123,14 +123,14 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     bytes32 id = hashAppName(appName);
 
-    if (appExists(id)) {
+    if (_appRegistered(id)) {
       revert X2EarnAppAlreadyExists(id);
     }
 
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     // Store the new app
-    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
+    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, 0);
     _setAppAdmin(id, admin);
     _updateTeamWalletAddress(id, teamWalletAddress);
     _updateAppMetadata(id, metadataURI);
@@ -169,6 +169,17 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
       );
     }
     return allApps;
+  }
+
+  /**
+   * @dev Check if the app is registered
+   *
+   * @param appId the id of the app
+   */
+  function _appRegistered(bytes32 appId) internal view override returns (bool) {
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+
+    return $._apps[appId].id != bytes32(0);
   }
 
   // ---------- Getters ---------- //
