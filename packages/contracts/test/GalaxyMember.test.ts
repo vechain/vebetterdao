@@ -2302,5 +2302,38 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1) // Node is still attached
     })
+
+    it("Should not attach node to another GM NFT if node is already attached", async () => {
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      await addNodeToken(1, owner)
+
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.connect(owner).burn(0)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.setMaxLevel(10)
+
+      // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(owner).attachNode(1, 1)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+
+      await expect(galaxyMember.connect(owner).attachNode(1, 1)).to.be.revertedWith(
+        "GalaxyMember: node already attached to a token",
+      )
+    })
   })
 })
