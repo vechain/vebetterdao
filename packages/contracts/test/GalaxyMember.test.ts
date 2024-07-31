@@ -1227,6 +1227,91 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.balanceOf(await otherAccounts[0].getAddress())).to.equal(3) // Other accounts [0] has 3 NFTs
       expect(await galaxyMember.getSelectedTokenId(await otherAccounts[0].getAddress())).to.equal(1) // Nothing changed from the transfers to self, selected token is still 1
     })
+
+    it("operator should be able to transfer ALL NFTs on behalf of owner", async () => {
+      const { galaxyMember, owner, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.connect(owner).burn(0)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.connect(owner).setApprovalForAll(await otherAccount.getAddress(), true)
+
+      await galaxyMember
+        .connect(otherAccount)
+        .transferFrom(await owner.getAddress(), await otherAccounts[0].getAddress(), 1)
+
+      await galaxyMember
+        .connect(otherAccount)
+        .transferFrom(await owner.getAddress(), await otherAccounts[0].getAddress(), 2)
+
+      await galaxyMember
+        .connect(otherAccount)
+        .transferFrom(await owner.getAddress(), await otherAccounts[0].getAddress(), 3)
+
+      expect(await galaxyMember.balanceOf(await otherAccounts[0].getAddress())).to.equal(3)
+      expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(0)
+
+      expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccounts[0].getAddress())
+      expect(await galaxyMember.ownerOf(2)).to.equal(await otherAccounts[0].getAddress())
+      expect(await galaxyMember.ownerOf(3)).to.equal(await otherAccounts[0].getAddress())
+
+      expect(await galaxyMember.totalSupply()).to.equal(3)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(1)
+      expect(await galaxyMember.levelOf(2)).to.equal(1)
+      expect(await galaxyMember.levelOf(3)).to.equal(1)
+
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(0)
+      expect(await galaxyMember.getSelectedTokenId(await otherAccounts[0].getAddress())).to.equal(1)
+
+      await galaxyMember.connect(otherAccounts[0]).setApprovalForAll(await otherAccount.getAddress(), true)
+
+      // Transfer back to owner
+      await galaxyMember
+        .connect(otherAccount)
+        .transferFrom(await otherAccounts[0].getAddress(), await owner.getAddress(), 1)
+
+      expect(await galaxyMember.balanceOf(await otherAccounts[0].getAddress())).to.equal(2)
+      expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(1)
+
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(1)
+      expect(await galaxyMember.getSelectedTokenId(await otherAccounts[0].getAddress())).to.not.equal(0) // Must have a selected token so it's not 0
+
+      // Revoke approval
+      await galaxyMember.connect(otherAccounts[0]).setApprovalForAll(await otherAccount.getAddress(), false)
+
+      await expect(
+        galaxyMember
+          .connect(otherAccount)
+          .transferFrom(await otherAccounts[0].getAddress(), await owner.getAddress(), 2),
+      ).to.be.reverted
+
+      // Add approval again
+      await galaxyMember.connect(otherAccounts[0]).setApprovalForAll(await otherAccount.getAddress(), true)
+
+      // Transfer back to owner
+      await galaxyMember
+        .connect(otherAccount)
+        .transferFrom(await otherAccounts[0].getAddress(), await owner.getAddress(), 2)
+
+      expect(await galaxyMember.balanceOf(await otherAccounts[0].getAddress())).to.equal(1)
+      expect(await galaxyMember.balanceOf(await owner.getAddress())).to.equal(2)
+    })
   })
 
   describe("Token Selection", () => {
