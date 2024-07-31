@@ -73,16 +73,18 @@ export const NewProposalRoundPageContent = () => {
     <Card variant="baseWithBorder">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
-          <Heading size="lg">{t("Select a voting session date")}</Heading>
-          <Text fontSize="md">
-            {t("Choose the")}{" "}
-            <Text as="span" fontWeight={600}>
-              {t("weekly round")}{" "}
+          <VStack spacing={[4, 6]} align="flex-start">
+            <Heading size={["md", "lg"]}>{t("Select a voting session date")}</Heading>
+            <Text fontSize={["sm", "md"]}>
+              {t("Choose the")}{" "}
+              <Text as="span" fontWeight={600}>
+                {t("weekly round")}{" "}
+              </Text>
+              {t(
+                "during which your proposal will be considered for voting. Weekly rounds occur regularly on this platform along with the allocations.",
+              )}
             </Text>
-            {t(
-              "during which your proposal will be considered for voting. Weekly rounds occur regularly on this platform along with the allocations.",
-            )}
-          </Text>
+          </VStack>
 
           {isLoading ? (
             [...Array(roundsToRender).keys()].map(index => (

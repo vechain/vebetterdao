@@ -141,6 +141,9 @@
     },
     "generate-translations": {
       "cache": false
+    },
+    "complete-translations": {
+      "cache": false
     }
   }
 }

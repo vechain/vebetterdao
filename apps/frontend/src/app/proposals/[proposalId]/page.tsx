@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
 
   const connex = await getNodeJsConnex()
 
-  const proposalsEvents = await getProposalsEvents(connex.thor)
+  const proposalsEvents = await getProposalsEvents(connex.thor, params.proposalId)
 
   const proposal = proposalsEvents.created.find(ev => ev.proposalId === id)
   if (!proposal) throw new Error(`Proposal ${id} not found`)

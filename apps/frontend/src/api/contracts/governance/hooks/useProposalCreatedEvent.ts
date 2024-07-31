@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { useProposalsEvents } from "./useProposalsEvents"
 
 export const useProposalCreatedEvent = (proposalId: string) => {
-  const events = useProposalsEvents()
+  const events = useProposalsEvents(proposalId)
 
   const proposalCreatedEvent = useMemo(
     () => ({

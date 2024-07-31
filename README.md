@@ -329,3 +329,9 @@ To regenerate the i18n translation files run:
 ```
 yarn generate-translations
 ```
+
+To fill the empty i18n translations files run:
+
+```
+yarn complete-translations
+```
