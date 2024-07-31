@@ -43,7 +43,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * @title GalaxyMember
  * @notice This contract manages the unique assets owned by users within the Galaxy Member ecosystem.
  * @dev Extends ERC721 Non-Fungible Token Standard basic implementation with upgradeable pattern, burnable, pausable, and access control functionalities.
- * 
+ *
  * @dev Differences from V1:
  * - Added Vechain Nodes contract to attach and detach nodes to tokens
  * - Added NODES_MANAGER_ROLE to manage Vechain Nodes Contract address and free upgrade levels
@@ -146,34 +146,6 @@ contract GalaxyMember is
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
-  }
-
-  /// @notice Data for initializing the contract
-  /// @param name Name of the ERC721 token
-  /// @param symbol Symbol of the ERC721 token
-  /// @param admin Address to grant the admin role
-  /// @param upgrader Address to grant the upgrader role
-  /// @param pauser Address to grant the pauser role
-  /// @param minter Address to grant the minter role
-  /// @param contractsAddressManager Address that can update external contracts address
-  /// @param maxLevel Maximum level tokens can achieve
-  /// @param baseTokenURI Base URI for computing {tokenURI}
-  /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
-  /// @param _b3tr B3TR token contract address
-  /// @param _treasury Address of the treasury
-  struct InitializationData {
-    string name;
-    string symbol;
-    address admin;
-    address upgrader;
-    address pauser;
-    address minter;
-    address contractsAddressManager;
-    uint256 maxLevel;
-    string baseTokenURI;
-    uint256[] b3trToUpgradeToLevel;
-    address b3tr;
-    address treasury;
   }
 
   /// @notice Initializes a new GalaxyMember contract
