@@ -2262,5 +2262,45 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(1) // Owner has selected token ID 1
     })
+
+    it("Should reset level if node attached is not owned anymore", async () => {
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      await addNodeToken(1, owner)
+
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.connect(owner).burn(0)
+
+      await galaxyMember.setMaxLevel(10)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(owner).attachNode(1, 1)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+
+      // Skip ahead 1 day to be able to transfer node
+      await time.setNextBlockTimestamp((await time.latest()) + 86400)
+
+      await vechainNodesMock.transferFrom(owner.address, otherAccount.address, 1)
+
+      expect(await vechainNodesMock.idToOwner(1)).to.equal(otherAccount.address)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1 now even if the node is attached
+
+      expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1) // Node is still attached
+    })
   })
 })
