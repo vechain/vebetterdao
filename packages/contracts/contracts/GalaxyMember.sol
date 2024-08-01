@@ -395,7 +395,9 @@ contract GalaxyMember is
   /// @notice Gets the level of the GM token
   /// @param tokenId Token ID to check
   function levelOf(uint256 tokenId) public view virtual returns (uint256) {
-    (uint256 level, ) = _getLevelOfAndB3TRleft(tokenId);
+    uint256 nodeId = getNodeIdAttached(tokenId);
+
+    (uint256 level, ) = _getLevelOfAndB3TRleft(tokenId, nodeId);
 
     return level;
   }
@@ -403,7 +405,9 @@ contract GalaxyMember is
   /// @notice Gets the B3TR required to upgrade to the next level
   /// @param tokenId Token ID to check
   function getB3TRrequiredToUpgrade(uint256 tokenId) public view virtual returns (uint256) {
-    (uint256 currentLevel, uint256 b3trDonatedLeft) = _getLevelOfAndB3TRleft(tokenId);
+    uint256 nodeId = getNodeIdAttached(tokenId);
+
+    (uint256 currentLevel, uint256 b3trDonatedLeft) = _getLevelOfAndB3TRleft(tokenId, nodeId);
 
     return getB3TRtoUpgradeToLevel(currentLevel + 1) - b3trDonatedLeft;
   }
@@ -412,12 +416,10 @@ contract GalaxyMember is
   /// @param tokenId Token ID to check
   /// @return level The level of the token
   /// @return b3trDonatedLeft The B3TR donated left to upgrade
-  function _getLevelOfAndB3TRleft(uint256 tokenId) internal view virtual returns (uint256, uint256) {
+  function _getLevelOfAndB3TRleft(uint256 tokenId, uint256 nodeId) internal view virtual returns (uint256, uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     uint256 level = 1;
-
-    uint256 nodeId = getNodeIdAttached(tokenId);
 
     if (nodeId != 0 && $.vechainNodes.idToOwner(nodeId) == ownerOf(tokenId)) {
       uint8 nodeLevel = getNodeLevelOf(nodeId);
@@ -458,6 +460,23 @@ contract GalaxyMember is
   function getSelectedTokenId(address owner) public view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._selectedTokenID[owner];
+  }
+
+  /// @notice Gets the level of the token after attaching a node
+  /// @param tokenId - GM Token ID
+  /// @param nodeTokenId - Vechain Node Token ID
+  function getLevelAfterAttachingNode(uint256 tokenId, uint256 nodeTokenId) public view returns (uint256) {
+    (uint256 level, ) = _getLevelOfAndB3TRleft(tokenId, nodeTokenId);
+
+    return level;
+  }
+
+  /// @notice Gets the level of the token after detaching a node
+  /// @param tokenId - GM Token ID
+  function getLevelAfterDetachingNode(uint256 tokenId) public view returns (uint256) {
+    (uint256 level, ) = _getLevelOfAndB3TRleft(tokenId, 0);
+
+    return level;
   }
 
   /// @notice Gets whether the user has participated in governance
