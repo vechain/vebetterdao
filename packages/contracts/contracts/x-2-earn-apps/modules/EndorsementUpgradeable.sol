@@ -182,9 +182,6 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     // Calculate the new score of the app after removing the caller's endorsement
     uint256 score = _getScoreAndUpdateEndorsers(appId, msg.sender);
 
-    // Emit an event indicating the app has been unendorsed by the caller
-    emit AppEndorsed(appId, msg.sender, false);
-
     // Check if the app is no longer in teh voting allocation rounds dut to lack of endorsement or form being blacklisted
     if (!isEligibleNow(appId) || isBlacklisted(appId)) {
       return;
@@ -222,6 +219,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
         // Remove endorser by swapping with the last element and then reducing the length
         $._appEndorsers[appId][i] = $._appEndorsers[appId][$._appEndorsers[appId].length - 1];
         $._appEndorsers[appId].pop();
+
+        // Emit an event indicating the app has been unendorsed by the caller
+        emit AppEndorsed(appId, endorser, false);
 
         // Delete the endorser from the endorsers mapping
         delete $._endorsers[endorser];
@@ -302,23 +302,35 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev Update the endorsement status of an app.
    * @param appId The unique identifier of the app.
    * @param endorsed The endorsement status to set.
+   *
+   * Emits a {AppEndorsementStatusUpdated} event.
    */
   function _setEndorsementStatus(bytes32 appId, bool endorsed) internal override {
+    _updateAppsPendingEndorsement(appId, endorsed);
+    emit AppEndorsementStatusUpdated(appId, endorsed);
+  }
+
+  /**
+   * @dev Internal function to update the apps pending endorsement list.
+   * @param appId The unique identifier of the app.
+   * @param remove True if the app should be removed from the list.
+   */
+  function _updateAppsPendingEndorsement(bytes32 appId, bool remove) internal {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    if (endorsed) {
+    if (remove) {
       /**
        *  If the app is no longer pending endorsement we need to remove it from the _unendorsedApps array
        *
        * In order to remove an app from the _unendorsedApps array correctly we need to:
-       * 1) move the element in the last position of the array to the index we want to remove
+       * 1) Move the element in the last position of the array to the index we want to remove
        * 2) Update the `_unendorsedAppsIndex` mapping accordingly.
-       * 3) pop() the last element of the _unendorsedApps array and delete the index mapping of the app we removed
+       * 3) Pop the last element of the _unendorsedApps array and delete the index mapping of the app we removed
        *
        * Example:
        *
        * _unendorsedApps = [A, B, C, D, E]
-       * _unendorsedAppsIndex = {A: 0, B: 1, C: 2, D: 3, E: 4}
+       * _unendorsedAppsIndex = {A: 1, B: 2, C: 3, D: 4, E: 5}
        *
        * If we want to remove C:
        *
@@ -326,29 +338,28 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
        * _unendorsedApps = [A, B, E, D, E]
        *
        * 2) Update the index of E in the mapping
-       * _unendorsedAppsIndex = {A: 0, B: 1, C: 2, D: 3, E: 2}
+       * _unendorsedAppsIndex = {A: 1, B: 2, C: 3, D: 4, E: 3}
        *
-       * 3) pop() the last element of the array and delete the index mapping of the app we removed
+       * 3) Pop the last element of the array and delete the index mapping of the app we removed
        * _unendorsedApps = [A, B, E, D]
-       * _unendorsedAppsIndex = {A: 0, B: 1, D: 3, E: 2}
+       * _unendorsedAppsIndex = {A: 1, B: 2, D: 4, E: 3}
        *
        */
-      uint256 index = $._unendorsedAppsIndex[appId];
+      uint256 index = $._unendorsedAppsIndex[appId] - 1;
       uint256 lastIndex = $._unendorsedApps.length - 1;
       bytes32 lastAppId = $._unendorsedApps[lastIndex];
 
       $._unendorsedApps[index] = lastAppId;
-      $._unendorsedAppsIndex[lastAppId] = index;
+      $._unendorsedAppsIndex[lastAppId] = index + 1;
 
       $._unendorsedApps.pop();
       delete $._unendorsedAppsIndex[appId];
     } else {
       // If the app is pending endorsement we need to add it to the _unendorsedApps array
       $._unendorsedApps.push(appId);
-      $._unendorsedAppsIndex[appId] = $._unendorsedApps.length - 1;
+      // Store index + 1 to avoid zero index
+      $._unendorsedAppsIndex[appId] = $._unendorsedApps.length;
     }
-
-    emit AppEndorsementStatusUpdated(appId, endorsed);
   }
 
   /**
@@ -404,11 +415,13 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     if (!appExists(appId)) {
       // Add the app to the list of apps it will be eligible for voting by default from the next round
       _addApp(appId);
-      // Mark the app as endorsed so that it is removed from the list of apps pending endorsement
-      _setEndorsementStatus(appId, true);
     } else if (!isEligibleNow(appId)) {
       // Mark the app as eligible for voting
       _setVotingEligibility(appId, true);
+    }
+
+    // If the app is pending endorsement
+    if (appPendingEndorsment(appId)) {
       // Mark the app as endorsed so that it is removed from the list of apps pending endorsement
       _setEndorsementStatus(appId, true);
     }
@@ -426,10 +439,21 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     // Get the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
 
+    // If the app is not pending endorsement
+    if (!appPendingEndorsment(appId)) {
+      // Mark the app as not endorsed so that it is added to the list of apps pending endorsement
+      _setEndorsementStatus(appId, false);
+    }
+
     // If the app has a grace period of 0, set the grace period
     if ($._appGracePeriod[appId] == 0) {
-      // Set the grace period for the app -> current block + grace period duration
-      $._appGracePeriod[appId] = clock() + $._gracePeriodDuration;
+      // Calculate the end block of the grace period  > current block + grace period duration
+      uint48 endBlock = clock() + $._gracePeriodDuration;
+
+      // Set the grace period for the app
+      $._appGracePeriod[appId] = endBlock;
+
+      emit AppUnendorsedGracePeriodStarted(appId, clock(), endBlock);
 
       // Return true indicating the app is eligible for voting
       return true;
@@ -438,9 +462,6 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     } else if (clock() > $._appGracePeriod[appId] && isEligibleNow(appId)) {
       // Mark the app as not eligible for voting
       _setVotingEligibility(appId, false);
-
-      // Update the endorsement status
-      _setEndorsementStatus(appId, false);
 
       // Return false indicating the app is not eligible for voting
       return false;
@@ -472,10 +493,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       return false;
     }
 
-    // Check if the app has an active grace period
-    bool hasGracePeriod = $._appGracePeriod[appId] > 0;
-
-    return !isEligibleNow(appId) || hasGracePeriod;
+    // Check if the app is in the list of apps pending endorsement
+    return $._unendorsedAppsIndex[appId] > 0;
   }
 
   /**

@@ -135,12 +135,21 @@ contract X2EarnApps is
       revert X2EarnNonexistentApp(_appId);
     }
 
-    if (isEligibleNow(_appId) && !_isEligible) {
-      // Remove the app from the voting eligibility list
-      _setVotingEligibility(_appId, false);
-    } else if (!isEligibleNow(_appId) && _isEligible) {
-      // Add the app to the voting eligibility list
-      _setVotingEligibility(_appId, true);
+    if (appExists(_appId)) {
+      // Check if the app is eligible now and if the eligibility status has changed
+      if (isEligibleNow(_appId) && !_isEligible) {
+        // Remove the app from the voting eligibility list
+        _setVotingEligibility(_appId, false);
+       // Check if the app is not eligible now and if the eligibility status has changed
+      } else if (!isEligibleNow(_appId) && _isEligible) {
+        // Add the app to the voting eligibility list
+        _setVotingEligibility(_appId, true);
+      }
+    }
+
+    // If the app is pending endorsement and the app is getting blacklisted remove it from the pending endorsement list
+    if (appPendingEndorsment(_appId) && !_isEligible) {
+      _updateAppsPendingEndorsement(_appId, true);
     }
 
     // Set the app in the blacklist if not eligible and called by governance
@@ -240,10 +249,12 @@ contract X2EarnApps is
     _setGracePeriod(_newGracePeriod);
   }
 
-    /**
+  /**
    * @dev See {IX2EarnApps-updateNodeEndorsementScores}.
    */
-  function updateNodeEndorsementScores(NodeStrengthScores calldata _nodeStrengthScores) external onlyRole(GOVERNANCE_ROLE) {
+  function updateNodeEndorsementScores(
+    NodeStrengthScores calldata _nodeStrengthScores
+  ) external onlyRole(GOVERNANCE_ROLE) {
     _updateNodeEndorsementScores(_nodeStrengthScores);
   }
 

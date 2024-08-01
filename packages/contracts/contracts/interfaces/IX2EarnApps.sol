@@ -194,6 +194,11 @@ interface IX2EarnApps {
   event AppEndorsementStatusUpdated(bytes32 indexed appId, bool endorsed);
 
   /**
+   * @dev Event fired when the app endorsement grace period is started.
+   */
+  event AppUnendorsedGracePeriodStarted(bytes32 indexed appId, uint48 startBlock, uint48 endBlock);
+
+  /**
    * @dev Event fired when the team allocation percentage is updated.
    */
   event TeamAllocationPercentageUpdated(bytes32 indexed appId, uint256 oldPercentage, uint256 newPercentage);
