@@ -184,7 +184,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     // Calculate the new score of the app after removing the caller's endorsement
     uint256 score = _getScoreAndUpdateEndorsers(appId, msg.sender);
 
-    // Check if the app is no longer in teh voting allocation rounds dut to lack of endorsement or form being blacklisted
+    // Check if the app is no longer in the voting allocation rounds due to lack of endorsement or from being blacklisted
     if (!isEligibleNow(appId) || isBlacklisted(appId)) {
       return;
     }
