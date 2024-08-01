@@ -14,7 +14,7 @@ import { getConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } fr
 import "@/i18n"
 import { useEffect } from "react"
 import { t } from "i18next"
-import { datadogRum } from '@datadog/browser-rum'
+import { datadogRum } from "@datadog/browser-rum"
 
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
@@ -29,24 +29,24 @@ const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").the
 //TODO: Is there a better place to initialise mixpanel? next/script?
 typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
 
-// initialise datadog with secrets from AWS Secrets Manager
+// Initialise Datadog RUM - get the app token and client token from environment variables
 const datadog_app_token = getEnvDatadogApp()
-const datadog_client_token =  getEnvDatadogClient()
-const datadog_env =  getEnvDatadogEnv()
+const datadog_client_token = getEnvDatadogClient()
+const datadog_env = getEnvDatadogEnv()
 
 datadogRum.init({
-    applicationId: datadog_app_token,
-    clientToken: datadog_client_token,
-    site: 'datadoghq.eu',
-    service: 'b3tr',
-    env: datadog_env,
-    sessionSampleRate: 100,
-    sessionReplaySampleRate: 20,
-    trackUserInteractions: true,
-    trackResources: true,
-    trackLongTasks: true,
-    defaultPrivacyLevel: 'mask-user-input',
-});
+  applicationId: datadog_app_token,
+  clientToken: datadog_client_token,
+  site: "datadoghq.eu",
+  service: "b3tr",
+  env: datadog_env,
+  sessionSampleRate: 100,
+  sessionReplaySampleRate: 20,
+  trackUserInteractions: true,
+  trackResources: true,
+  trackLongTasks: true,
+  defaultPrivacyLevel: "mask-user-input",
+})
 
 // workaround for "@iconscout/react-unicons
 const error = console.error
