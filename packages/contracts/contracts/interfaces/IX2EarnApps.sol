@@ -2,6 +2,7 @@
 pragma solidity 0.8.20;
 
 import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
+import { VechainNodesDataTypes } from "../libraries/VechainNodesDataTypes.sol";
 
 /**
  * @title IX2EarnApps
@@ -9,35 +10,6 @@ import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
  * @dev The contract inheriting this interface should be able to manage the x2earn apps and their Eligibility for allocation voting.
  */
 interface IX2EarnApps {
-  /**
-   * @dev The strength level of each node.
-   */
-  enum NodeStrengthLevel {
-    None,
-    // Normal Token
-    Strength,
-    Thunder,
-    Mjolnir,
-    // X Token
-    VeThorX,
-    StrengthX,
-    ThunderX,
-    MjolnirX
-  }
-
-  /**
-   * @dev The score of a node.
-   */
-  struct NodeStrengthScores {
-    uint256 strength;
-    uint256 thunder;
-    uint256 mjolnir;
-    uint256 veThorX;
-    uint256 strengthX;
-    uint256 thunderX;
-    uint256 mjolnirX;
-  }
-
   /**
    * @dev The clock was incorrectly modified.
    */
@@ -211,7 +183,7 @@ interface IX2EarnApps {
   /**
    * @dev Event fired when the node strength scores are updated.
    */
-  event NodeStrengthScoresUpdated(NodeStrengthScores indexed nodeStrengthScores);
+  event NodeStrengthScoresUpdated(VechainNodesDataTypes.NodeStrengthScores indexed nodeStrengthScores);
 
   /**
    * @dev Generates the hash of the app name to be used as the app id.
@@ -488,7 +460,7 @@ interface IX2EarnApps {
    *
    * Emits a {NodeStrengthScoreUpdated} event.
    */
-  function updateNodeEndorsementScores(NodeStrengthScores calldata _nodeStrengthScores) external;
+  function updateNodeEndorsementScores(VechainNodesDataTypes.NodeStrengthScores calldata _nodeStrengthScores) external;
 
   /**
    * @notice Update th endorsement score threshold

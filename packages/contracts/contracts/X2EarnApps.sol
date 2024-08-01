@@ -29,6 +29,7 @@ import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgra
 import { ContractSettingsUpgradeable } from "./x-2-earn-apps/modules/ContractSettingsUpgradeable.sol";
 import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules//VoteEligibilityUpgradeable.sol";
 import { EndorsementUpgradeable } from "./x-2-earn-apps/modules/EndorsementUpgradeable.sol";
+import { VechainNodesDataTypes } from "./libraries/VechainNodesDataTypes.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
@@ -253,7 +254,7 @@ contract X2EarnApps is
    * @dev See {IX2EarnApps-updateNodeEndorsementScores}.
    */
   function updateNodeEndorsementScores(
-    NodeStrengthScores calldata _nodeStrengthScores
+    VechainNodesDataTypes.NodeStrengthScores calldata _nodeStrengthScores
   ) external onlyRole(GOVERNANCE_ROLE) {
     _updateNodeEndorsementScores(_nodeStrengthScores);
   }

@@ -24,6 +24,7 @@
 pragma solidity 0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 import { ITokenAuction } from "../../interfaces/ITokenAuction.sol";
 import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
@@ -34,7 +35,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     bytes32[] _unendorsedApps; // List of apps pending endorsement
     mapping(bytes32 => uint256) _unendorsedAppsIndex; // Mapping from app ID to index in the _unendorsedApps array, so we can remove an app in O(1)
     mapping(bytes32 => address[]) _appEndorsers; // Mapping to the endorsers of an app
-    mapping(NodeStrengthLevel => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
+    mapping(VechainNodesDataTypes.NodeStrengthLevel => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
     mapping(bytes32 => uint48) _appGracePeriod; // The grace period elapsed by the app since endorsed
     mapping(address => bool) _endorsers; // Mapping to check if an address is an endorser
     uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
@@ -70,14 +71,14 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     $._vechainNodesContract = ITokenAuction(vechainNodesContract);
 
     // Set the endorsement score for each node level
-    $._nodeEnodorsmentScore[NodeStrengthLevel.Strength] = 2; // Strength Node score
-    $._nodeEnodorsmentScore[NodeStrengthLevel.Thunder] = 13; // Thunder Node score
-    $._nodeEnodorsmentScore[NodeStrengthLevel.Mjolnir] = 50; // Mjolnir Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Strength] = 2; // Strength Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Thunder] = 13; // Thunder Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Mjolnir] = 50; // Mjolnir Node score
 
-    $._nodeEnodorsmentScore[NodeStrengthLevel.VeThorX] = 3; // VeThor X Node score
-    $._nodeEnodorsmentScore[NodeStrengthLevel.StrengthX] = 9; // Strength X Node score
-    $._nodeEnodorsmentScore[NodeStrengthLevel.ThunderX] = 35; // Thunder X Node score
-    $._nodeEnodorsmentScore[NodeStrengthLevel.MjolnirX] = 100; // Mjolnir X Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.VeThorX] = 3; // VeThor X Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.StrengthX] = 9; // Strength X Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.ThunderX] = 35; // Thunder X Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.MjolnirX] = 100; // Mjolnir X Node score
 
     // Set the score threshold for an app to be eligible for voting
     $._endorsementScoreThreshold = 100;
@@ -213,10 +214,10 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       // Get the current endorser's address
       address endorser = $._appEndorsers[appId][i];
       // Get the node level of the endorser
-      NodeStrengthLevel nodeLevel = _getNodeLevel(endorser);
+      VechainNodesDataTypes.NodeStrengthLevel nodeLevel = _getNodeLevel(endorser);
 
       // Check if the endorser's node level is 0 or if the endorser is the one to be removed
-      if (nodeLevel == NodeStrengthLevel.None || endorser == endorserToRemove) {
+      if (nodeLevel == VechainNodesDataTypes.NodeStrengthLevel.None || endorser == endorserToRemove) {
         // Remove endorser by swapping with the last element and then reducing the length
         $._appEndorsers[appId][i] = $._appEndorsers[appId][$._appEndorsers[appId].length - 1];
         $._appEndorsers[appId].pop();
@@ -245,7 +246,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param user The address of the user.
    * @return uint8 The node level of the user.
    */
-  function _getNodeLevel(address user) internal view returns (NodeStrengthLevel) {
+  function _getNodeLevel(address user) internal view returns (VechainNodesDataTypes.NodeStrengthLevel) {
     EndorsementStorage storage $ = _getEndorsementStorage();
     // Retrieve the token ID for the user
     uint256 tokenID = $._vechainNodesContract.ownerToId(user);
@@ -253,26 +254,26 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     // Retrieve the metadata for the current user's token
     (, uint8 nodeLevel, , , , , ) = $._vechainNodesContract.getMetadata(tokenID);
 
-    // Cast uint8 to NodeStrengthLevel enum and return
-    return NodeStrengthLevel(nodeLevel);
+    // Cast uint8 to VechainNodesDataTypes.NodeStrengthLevel enum and return
+    return VechainNodesDataTypes.NodeStrengthLevel(nodeLevel);
   }
 
   /**
    * @dev Internal function to update the endorsement scores of each node level.
    * @param nodeStrengthScores The node level scores to update.
    */
-  function _updateNodeEndorsementScores(NodeStrengthScores calldata nodeStrengthScores) internal {
+  function _updateNodeEndorsementScores(VechainNodesDataTypes.NodeStrengthScores calldata nodeStrengthScores) internal {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     // Set the endorsement score for each node level
-    $._nodeEnodorsmentScore[NodeStrengthLevel.Strength] = nodeStrengthScores.strength; // Strength Node score
-    $._nodeEnodorsmentScore[NodeStrengthLevel.Thunder] = nodeStrengthScores.thunder; // Thunder Node score
-    $._nodeEnodorsmentScore[NodeStrengthLevel.Mjolnir] = nodeStrengthScores.mjolnir; // Mjolnir Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Strength] = nodeStrengthScores.strength; // Strength Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Thunder] = nodeStrengthScores.thunder; // Thunder Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Mjolnir] = nodeStrengthScores.mjolnir; // Mjolnir Node score
 
-    $._nodeEnodorsmentScore[NodeStrengthLevel.VeThorX] = nodeStrengthScores.veThorX; // VeThor X Node score
-    $._nodeEnodorsmentScore[NodeStrengthLevel.StrengthX] = nodeStrengthScores.strengthX; // Strength X Node score
-    $._nodeEnodorsmentScore[NodeStrengthLevel.ThunderX] = nodeStrengthScores.thunderX; // Thunder X Node score
-    $._nodeEnodorsmentScore[NodeStrengthLevel.MjolnirX] = nodeStrengthScores.mjolnirX; // Mjolnir X Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.VeThorX] = nodeStrengthScores.veThorX; // VeThor X Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.StrengthX] = nodeStrengthScores.strengthX; // Strength X Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.ThunderX] = nodeStrengthScores.thunderX; // Thunder X Node score
+    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.MjolnirX] = nodeStrengthScores.mjolnirX; // Mjolnir X Node score
 
     emit NodeStrengthScoresUpdated(nodeStrengthScores);
   }
@@ -515,7 +516,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function getNodeEndorsementScore(address user) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    NodeStrengthLevel nodeLevel = _getNodeLevel(user);
+    VechainNodesDataTypes.NodeStrengthLevel nodeLevel = _getNodeLevel(user);
     return $._nodeEnodorsmentScore[nodeLevel];
   }
 }
