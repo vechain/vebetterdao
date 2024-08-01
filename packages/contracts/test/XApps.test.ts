@@ -8,6 +8,7 @@ import {
   createProposalAndExecuteIt,
   filterEventsByName,
   getOrDeployContractInstances,
+  getStorageSlots,
   getVot3Tokens,
   parseAppAddedEvent,
   startNewAllocationRound,
@@ -281,6 +282,98 @@ describe("X-Apps", function () {
       expect(await x2EarnAppsV2.appPendingEndorsment(app1Id)).to.eql(false)
       expect(await x2EarnAppsV2.appPendingEndorsment(app2Id)).to.eql(false)
       expect(await x2EarnAppsV2.appPendingEndorsment(app3Id)).to.eql(true)
+    })
+
+    it("Should not have state conflict after upgrading to V2", async () => {
+      const config = createLocalConfig()
+      config.EMISSIONS_CYCLE_DURATION = 24
+
+      const { xAllocationVoting, x2EarnRewardsPool, xAllocationPool, timeLock, owner, vechainNodes, otherAccounts } =
+        await getOrDeployContractInstances({ forceDeploy: true })
+
+      // Deploy X2EarnAppsV1
+      const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
+        "ipfs://",
+        [await timeLock.getAddress(), owner.address],
+        owner.address,
+        owner.address,
+      ])) as X2EarnAppsV1
+
+      await x2EarnRewardsPool.setX2EarnApps(await x2EarnAppsV1.getAddress())
+      await xAllocationPool.setX2EarnAppsAddress(await x2EarnAppsV1.getAddress())
+      await xAllocationVoting.setX2EarnAppsAddress(await x2EarnAppsV1.getAddress())
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
+
+      // Create two MjolnirX node holders with an endorsement score of 100
+      await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      await createNodeHolder(7, otherAccounts[2]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+
+      // Add apps -> should be eligible for the next round
+      await x2EarnAppsV1
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
+      await x2EarnAppsV1
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
+
+      // Start round using V1 contract
+      const round1 = await startNewAllocationRound()
+
+      // Add app -> should be eligible for the next round
+      await x2EarnAppsV1
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #3", "metadataURI")
+
+      // Check eligibility
+      expect(await x2EarnAppsV1.isEligibleNow(app1Id)).to.eql(true)
+      expect(await x2EarnAppsV1.isEligibleNow(app2Id)).to.eql(true)
+      expect(await x2EarnAppsV1.isEligibleNow(app3Id)).to.eql(true)
+
+      expect(await xAllocationVoting.isEligibleForVote(app1Id, round1)).to.eql(true)
+      expect(await xAllocationVoting.isEligibleForVote(app2Id, round1)).to.eql(true)
+      expect(await xAllocationVoting.isEligibleForVote(app3Id, round1)).to.eql(false)
+
+      // Wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      const initialSlotVoteEligibility = BigInt("0xb5b8d618af1ffb8d5bcc4bd23f445ba34ed08d7a16d1e1b5411cfbe7913e5900")
+      const initialSlotSettings = BigInt("0x83b9a7e51f394efa93107c3888716138908bbbe611dfc86afa3639a826441100")
+      const initialSlotAppsStorage = BigInt("0xb6909058bd527140b8d55a44344c5e42f1f148f1b3b16df7641882df8dd72900")
+      const initialSlotAdministration = BigInt("0x5830f0e95c01712d916c34d9e2fa42e9f749b325b67bce7382d70bb99c623500")
+
+      const storageSlots = await getStorageSlots(
+        x2EarnAppsV1.getAddress(),
+        initialSlotVoteEligibility,
+        initialSlotSettings,
+        initialSlotAppsStorage,
+        initialSlotAdministration,
+      )
+
+      // Upgrade X2EarnAppsV1 to X2EarnAppsV2
+      const x2EarnAppsV2 = await upgradeProxy(
+        "X2EarnAppsV1",
+        "X2EarnApps",
+        await x2EarnAppsV1.getAddress(),
+        [config.XAPP_GRACE_PERIOD, await vechainNodes.getAddress()],
+        {},
+        2,
+      )
+
+      const storageSlotsAfter = await getStorageSlots(
+        x2EarnAppsV2.getAddress(),
+        initialSlotVoteEligibility,
+        initialSlotSettings,
+        initialSlotAppsStorage,
+        initialSlotAdministration,
+      )
+
+      // Check if storage slots are the same after upgrade
+      for (let i = 0; i < storageSlots.length; i++) {
+        expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
+      }
     })
   })
 

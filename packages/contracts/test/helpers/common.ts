@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat"
 import { B3TR, GalaxyMember } from "../../typechain-types"
-import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
+import { AddressLike, BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
@@ -617,4 +617,22 @@ export const upgradeNFTtoNextLevel = async (
   await b3tr.connect(owner).approve(await nft.getAddress(), b3trToUpgrade)
 
   await nft.connect(owner).upgrade(tokenId)
+}
+
+/**
+ * Helper function to get storage slots.
+ * @param contractAddress The address of the contract.
+ * @param initialSlots The initial storage slots.
+ * @returns Array of storage slots.
+ */
+export const getStorageSlots = async (contractAddress: AddressLike, ...initialSlots: bigint[]) => {
+  const slots = []
+
+  for (const initialSlot of initialSlots) {
+    for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+      slots.push(await ethers.provider.getStorage(contractAddress, i))
+    }
+  }
+
+  return slots.filter(slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000") // Removing empty slots
 }
