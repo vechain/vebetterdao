@@ -517,7 +517,7 @@ describe("Galaxy Member", () => {
       expect(await galaxyMember.version()).to.equal("2")
     })
 
-    it.only("Should not have state conflict after upgrading to V2", async () => {
+    it("Should not have state conflict after upgrading to V2", async () => {
       const config = createLocalConfig()
       const {
         owner,
