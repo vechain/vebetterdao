@@ -118,7 +118,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @notice Endorses an app.
    * @param appId The unique identifier of the app being endorsed.
    */
-  function endorseApp(bytes32 appId) public {
+  function endorseApp(bytes32 appId) external {
     // Get the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
 
