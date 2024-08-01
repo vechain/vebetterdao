@@ -40,6 +40,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
     ITokenAuction _vechainNodesContract; // The token auction contract
     uint256 _endorsementScoreThreshold; // The endorsement score threshold for an app to be eligible for voting
+    mapping(bytes32 => uint256) _appScores; // The score of each app
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
@@ -232,30 +233,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       }
     }
 
-    // Return the total score of the app
-    return score;
-  }
-
-  /**
-   * @dev Internal function to get the score of an app
-   * @param appId The unique identifier of the app.
-   * @return uint256 The score of the app.
-   */
-  function _getScore(bytes32 appId) internal view returns (uint256) {
-    // Retrieve the endorsement storage
-    EndorsementStorage storage $ = _getEndorsementStorage();
-    uint256 score;
-
-    // Iterate over the list of endorsers for the given app
-    for (uint256 i; i < $._appEndorsers[appId].length; i++) {
-      // Get the current endorser's address
-      address endorser = $._appEndorsers[appId][i];
-      // Get the node level of the endorser
-      NodeStrengthLevel nodeLevel = _getNodeLevel(endorser);
-
-      // Add the endorser's score to the total score
-      score += $._nodeEnodorsmentScore[nodeLevel];
-    }
+    // Store the latest score of the app
+    $._appScores[appId] = score;
 
     // Return the total score of the app
     return score;
@@ -518,7 +497,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev See {IX2EarnApps-getScore}.
    */
   function getScore(bytes32 appId) external view returns (uint256) {
-    return _getScore(appId);
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return $._appScores[appId];
   }
 
   /**
