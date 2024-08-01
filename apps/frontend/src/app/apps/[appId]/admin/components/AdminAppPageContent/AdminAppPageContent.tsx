@@ -31,6 +31,7 @@ export const AdminAppPageContent = () => {
   const { appMetadata } = useCurrentAppMetadata()
   const { moderators } = useCurrentAppModerators()
   const { distributors } = useCurrentAppRewardDistributors()
+
   const { t } = useTranslation()
   const [editAdminAddress, setEditAdminAddress] = useState(false)
   const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
@@ -56,6 +57,14 @@ export const AdminAppPageContent = () => {
     "moderators",
     "distributors",
   ])
+
+  // Update the form values when the app fetches the data from blockchain
+  useEffect(() => {
+    form.setValue("moderators", moderators)
+  }, [moderators, form])
+  useEffect(() => {
+    form.setValue("distributors", distributors)
+  }, [distributors, form])
 
   const isAdminAddressChanged = !compareAddresses(adminAddress, admin || "")
   const isTeamWalletAddressChanged = !compareAddresses(teamWalletAddress, app?.teamWalletAddress || "")
