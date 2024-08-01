@@ -27,7 +27,7 @@ import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import { GalaxyMember, GalaxyMemberV1 } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 
-describe.only("Galaxy Member", () => {
+describe("Galaxy Member", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -2648,6 +2648,47 @@ describe.only("Galaxy Member", () => {
       await galaxyMember.connect(owner).detachNode(1, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(3) // Level 3
+    })
+
+    it("Should not be able to transfer GM NFT attached to node through approval", async () => {
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      await addNodeToken(1, owner)
+
+      await participateInAllocationVoting(owner)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.connect(owner).burn(0)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.setMaxLevel(10)
+
+      // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(owner).attachNode(1, 1)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+
+      await galaxyMember.connect(owner).approve(otherAccount.address, 1)
+
+      await expect(
+        galaxyMember.connect(otherAccount).transferFrom(owner.address, otherAccount.address, 1),
+      ).to.be.revertedWith("GalaxyMember: token attached to a node, detach before transfer")
+
+      await galaxyMember.connect(owner).detachNode(1, 1)
+
+      await galaxyMember.connect(otherAccount).transferFrom(owner.address, otherAccount.address, 1)
+
+      expect(await galaxyMember.ownerOf(1)).to.equal(otherAccount.address)
     })
   })
 })
