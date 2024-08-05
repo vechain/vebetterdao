@@ -1,0 +1,215 @@
+import { abi } from "thor-devkit"
+import { getAllEvents } from "@/api/blockchain/getEvents"
+import { getConfig } from "@repo/config"
+import { B3TRGovernorJson } from "@repo/contracts"
+const b3trGovernorAbi = B3TRGovernorJson.abi
+
+const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
+
+export type ProposalMetadata = {
+  title: string
+  shortDescription: string
+  markdownDescription: string
+}
+export type ProposalCreatedEvent = {
+  proposalId: string
+  proposer: string
+  targets: string[]
+  values: string[]
+  signatures: string[]
+  callDatas: string[]
+  description: string
+  roundIdVoteStart: string
+  depositThreshold: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
+}
+
+export type ProposalCanceledEvent = {
+  proposalId: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
+}
+
+export type ProposalExecutedEvent = {
+  proposalId: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
+}
+
+export type ProposalQueuedEvent = {
+  proposalId: string
+  etaSeconds: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
+}
+
+export type ProposalDepositEvent = {
+  depositor: string
+  proposalId: string
+  amount: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
+}
+
+export type ProposalVoteEvent = {
+  account: string
+  proposalId: string
+  support: string
+  weight: string
+  power: string
+  reason: string
+  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
+}
+
+export const getProposalsEvents = async (thor: Connex.Thor, proposalId?: string) => {
+  const proposalCreatedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalCreated")
+  if (!proposalCreatedAbi) throw new Error("ProposalCreated event not found")
+  const proposalCreatedEvent = new abi.Event(proposalCreatedAbi as abi.Event.Definition)
+
+  const proposalCanceledAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalCanceled")
+  if (!proposalCanceledAbi) throw new Error("ProposalCanceled event not found")
+  const proposalCanceledEvent = new abi.Event(proposalCanceledAbi as abi.Event.Definition)
+
+  const proposalExecutedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalExecuted")
+  if (!proposalExecutedAbi) throw new Error("ProposalExecuted event not found")
+  const proposalExecutedEvent = new abi.Event(proposalExecutedAbi as abi.Event.Definition)
+
+  const proposalQueuedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalQueued")
+  if (!proposalQueuedAbi) throw new Error("ProposalQueued event not found")
+  const proposalQueuedEvent = new abi.Event(proposalQueuedAbi as abi.Event.Definition)
+
+  const proposalDepositAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalDeposit")
+  if (!proposalDepositAbi) throw new Error("ProposalDeposit event not found")
+  const proposalDepositEvent = new abi.Event(proposalDepositAbi as abi.Event.Definition)
+
+  const proposalVoteAbi = b3trGovernorAbi.find(abi => abi.name === "VoteCast")
+  if (!proposalVoteAbi) throw new Error("ProposalVote event not found")
+  const proposalVoteEvent = new abi.Event(proposalVoteAbi as abi.Event.Definition)
+
+  const proposalIdBytes = proposalId ? `0x${BigInt(proposalId).toString(16).padStart(64, "0")}` : undefined
+
+  /**
+   * Filter criteria to get the events from the governor contract that we are interested in
+   * This way we can get all of them in one call
+   */
+  const filterCriteria = [
+    {
+      address: GOVERNANCE_CONTRACT,
+      topic0: proposalCreatedEvent.signature,
+      topic1: proposalIdBytes,
+    },
+    {
+      address: GOVERNANCE_CONTRACT,
+      topic0: proposalCanceledEvent.signature,
+    },
+    {
+      address: GOVERNANCE_CONTRACT,
+      topic0: proposalExecutedEvent.signature,
+    },
+    {
+      address: GOVERNANCE_CONTRACT,
+      topic0: proposalQueuedEvent.signature,
+    },
+    {
+      address: GOVERNANCE_CONTRACT,
+      topic0: proposalDepositEvent.signature,
+      topic2: proposalIdBytes,
+    },
+    {
+      address: GOVERNANCE_CONTRACT,
+      topic0: proposalVoteEvent.signature,
+      topic2: proposalIdBytes,
+    },
+  ]
+
+  const events = await getAllEvents({ thor, filterCriteria })
+
+  /**
+   * Decode the events to get the data we are interested in (i.e the proposals)
+   */
+  const decodedCreatedProposalEvents: ProposalCreatedEvent[] = []
+  const decodedCanceledProposalEvents: ProposalCanceledEvent[] = []
+  const decodedExecutedProposalEvents: ProposalExecutedEvent[] = []
+  const decodedQueuedProposalEvents: ProposalQueuedEvent[] = []
+  const decodedDepositProposalEvents: ProposalDepositEvent[] = []
+  const decodedVoteProposalEvents: ProposalVoteEvent[] = []
+
+  //   TODO: runtime validation with zod ?
+  events.forEach(event => {
+    switch (event.topics[0]) {
+      case proposalCreatedEvent.signature: {
+        const decoded = proposalCreatedEvent.decode(event.data, event.topics)
+        decodedCreatedProposalEvents.push({
+          proposalId: decoded[0],
+          proposer: decoded[1],
+          targets: decoded[2],
+          values: decoded[3],
+          signatures: decoded[4],
+          callDatas: decoded[5],
+          description: decoded[6],
+          roundIdVoteStart: decoded[7],
+          depositThreshold: decoded[8],
+          blockMeta: event.meta,
+        })
+        break
+      }
+      case proposalCanceledEvent.signature: {
+        const decoded = proposalCanceledEvent.decode(event.data, event.topics)
+        decodedCanceledProposalEvents.push({
+          proposalId: decoded[0],
+          blockMeta: event.meta,
+        })
+        break
+      }
+      case proposalExecutedEvent.signature: {
+        const decoded = proposalExecutedEvent.decode(event.data, event.topics)
+        decodedExecutedProposalEvents.push({
+          proposalId: decoded[0],
+          blockMeta: event.meta,
+        })
+        break
+      }
+      case proposalQueuedEvent.signature: {
+        const decoded = proposalQueuedEvent.decode(event.data, event.topics)
+        decodedQueuedProposalEvents.push({
+          proposalId: decoded[0],
+          etaSeconds: decoded[1],
+          blockMeta: event.meta,
+        })
+        break
+      }
+      case proposalDepositEvent.signature: {
+        const decoded = proposalDepositEvent.decode(event.data, event.topics)
+        decodedDepositProposalEvents.push({
+          depositor: decoded[0],
+          proposalId: decoded[1],
+          amount: decoded[2],
+          blockMeta: event.meta,
+        })
+        break
+      }
+      case proposalVoteEvent.signature: {
+        const decoded = proposalVoteEvent.decode(event.data, event.topics)
+
+        decodedVoteProposalEvents.push({
+          account: decoded[0],
+          proposalId: decoded[1],
+          support: decoded[2],
+          weight: decoded[3],
+          power: decoded[4],
+          reason: decoded[5],
+          blockMeta: event.meta,
+        })
+        break
+      }
+      default: {
+        throw new Error("Unknown event")
+      }
+    }
+  })
+
+  return {
+    created: decodedCreatedProposalEvents,
+    canceled: decodedCanceledProposalEvents,
+    executed: decodedExecutedProposalEvents,
+    queued: decodedQueuedProposalEvents,
+    deposits: decodedDepositProposalEvents,
+    votes: decodedVoteProposalEvents,
+  }
+}

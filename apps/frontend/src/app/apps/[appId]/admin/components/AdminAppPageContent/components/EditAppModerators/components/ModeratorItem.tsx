@@ -17,6 +17,7 @@ import { UilTrash } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { useBreakpointValue } from "@chakra-ui/react"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 type Props = {
   moderator: string
@@ -26,6 +27,8 @@ type Props = {
 export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const { name } = useWalletName(moderator)
+
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} size={"xl"}>
@@ -35,11 +38,16 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
             <VStack align="center" gap="20px">
               <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
               <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
-                {t("Delete {{address}} as moderator?", { address: humanAddress(moderator, 4, 4) })}
+                {t("Delete {{address}} as moderator?", { address: name || humanAddress(moderator, 4, 4) })}
               </Heading>
               <Text color="#6A6A6A" textAlign={"center"}>
                 {t("The user will not be able to access the app edition mode anymore.")}
               </Text>
+              {name && (
+                <Text color="#6A6A6A" textAlign={"center"}>
+                  {`Address: ${humanAddress(moderator, 8, 6)}`}
+                </Text>
+              )}
               <VStack align="center" gap="20px" mt="20px">
                 <Button variant="primaryAction" onClick={onClose}>
                   {t("Cancel")}
@@ -58,6 +66,9 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
             <AddressIcon address={moderator} h="48px" w="48px" rounded={"full"} />
             <Text fontSize={"14px"} color="#6A6A6A">
               {moderator}
+            </Text>
+            <Text fontSize={"14px"} color="#6A6A6A" borderLeft={"1px solid"} paddingLeft={2}>
+              {name}
             </Text>
           </HStack>
           <Button variant="dangerGhost" leftIcon={<UilTrash size={"14px"} color="#D23F63" />} onClick={onOpen}>

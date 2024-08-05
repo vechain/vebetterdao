@@ -1,7 +1,6 @@
 import { getConfig } from "@repo/config"
 import { XAllocationVotingGovernor__factory } from "@repo/contracts"
 import { getCallKey, useCall } from "@/hooks"
-import { ethers } from "ethers"
 
 const ALLOCATION_VOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 const allocationVotingInterface = XAllocationVotingGovernor__factory.createInterface()

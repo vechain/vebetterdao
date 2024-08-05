@@ -40,13 +40,15 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
   return (
     <Card w="full" data-testid="new-proposal-textonly-page">
       <CardBody py={8}>
-        <VStack spacing={8} align="flex-start">
-          <Heading size="lg">{t("General proposal")}</Heading>
-          <Text fontSize="md" color="gray.500">
-            {t(
-              "Choose a title a short description for your proposal. You will be able to provide more details in the next step.",
-            )}
-          </Text>
+        <VStack spacing={[6, 8]} align="flex-start">
+          <VStack spacing={[4, 6]} align="flex-start">
+            <Heading size={["md", "lg"]}>{t("General proposal")}</Heading>
+            <Text fontSize={["sm", "md"]} color="gray.500">
+              {t(
+                "Choose a title a short description for your proposal. You will be able to provide more details in the next step.",
+              )}
+            </Text>
+          </VStack>
 
           <NewProposalForm
             formId="new-proposal-form"

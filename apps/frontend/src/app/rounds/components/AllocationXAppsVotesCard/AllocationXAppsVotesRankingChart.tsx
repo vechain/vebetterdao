@@ -19,9 +19,9 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
 
   const { data: maxAllocation } = useMaxAllocationAmount(roundId)
   const { data: allocationAmount } = useAllocationAmount(roundId)
-  const { data: baseAmount, isLoading: baseAmountLoading } = useAllocationBaseAmount(roundId)
+  const { data: baseAmount } = useAllocationBaseAmount(roundId)
 
-  const xAppsVotes = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
+  const { data: xAppsVotes, isLoading: xAppsVotesLoading } = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
 
   const { data: votes } = useAllocationVotesQf(roundId)
 
@@ -33,19 +33,18 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
     return maxAllocationPercentage
   }, [maxAllocation, baseAmount, allocationAmount, xApps])
 
-  const sortedData = useMemo(
-    () =>
-      xAppsVotes
-        .map(app => ({
-          votes: app.data?.votes ?? "0",
-          app: xApps?.find(xa => xa.id === app.data?.app)?.id ?? "",
-        }))
-        .sort((a, b) => Number(b.votes) - Number(a.votes)),
+  const sortedData = useMemo(() => {
+    if (!xAppsVotes || !xApps) return []
 
-    [xAppsVotes, xApps],
-  )
+    return xAppsVotes
+      .map(appVotes => ({
+        votes: appVotes.votes ?? "0",
+        app: xApps?.find(xa => xa.id === appVotes.app)?.id ?? "",
+      }))
+      .sort((a, b) => Number(b.votes) - Number(a.votes))
+  }, [xAppsVotes, xApps])
 
-  const isLoading = xAppsLoading || xAppsVotes.some(query => query.isLoading)
+  const isLoading = xAppsLoading || xAppsVotesLoading
 
   if (isLoading) return <Spinner size={"lg"} alignSelf="center" />
 

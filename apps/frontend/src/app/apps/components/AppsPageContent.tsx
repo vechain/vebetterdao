@@ -6,21 +6,22 @@ import { useTranslation } from "react-i18next"
 import { FaPlus } from "react-icons/fa6"
 
 export const AppsPageContent = () => {
-  const { data, isLoading } = useXApps()
   const { t } = useTranslation()
+
+  const { data: xApps, isLoading: isLoadingXApps } = useXApps()
 
   const openGrantPage = () => {
     window.open("https://vechain.org/grants/", "_blank", "noopener noreferrer")
   }
 
-  if (isLoading)
+  if (isLoadingXApps)
     return (
       <VStack w="full" spacing={12} h="80vh" justify="center" data-testid="apps-page-loading">
         <Spinner size={"lg"} />
       </VStack>
     )
 
-  if (!data?.length) return null
+  if (!xApps?.length) return null
 
   //TODO: Pagination, search, filters
   return (
@@ -32,7 +33,7 @@ export const AppsPageContent = () => {
         </Button>
       </HStack>
       <Grid templateColumns={["repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={6} w="full">
-        {data?.map(xApp => <AppCard key={xApp.id} xApp={xApp} />)}
+        {xApps?.map(xApp => <AppCard key={xApp.id} xApp={xApp} />)}
 
         <AddNewAppCard />
       </Grid>

@@ -74,13 +74,15 @@ export const NewProposalPageDiscussionContent = () => {
   return (
     <Card w="full" variant="baseWithBorder" data-testid="new-proposal-content-page">
       <CardBody py={8}>
-        <VStack spacing={8} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
-          <Heading size="lg">{t("Share more about your idea")}</Heading>
-          <Text fontSize="md" color="gray.500">
-            {t(
-              "Providing more information will help the community understand the purpose of your proposal and make informed voting decisions. Include details such as motivation, a detailed description, or any other relevant information.",
-            )}
-          </Text>
+        <VStack spacing={[6, 8]} align="flex-start" as="form" onSubmit={handleSubmit(onSubmit)}>
+          <VStack spacing={[4, 6]} align="flex-start">
+            <Heading size={["md", "lg"]}>{t("Share more about your idea")}</Heading>
+            <Text fontSize={["sm", "md"]} color="gray.500">
+              {t(
+                "Providing more information will help the community understand the purpose of your proposal and make informed voting decisions. Include details such as motivation, a detailed description, or any other relevant information.",
+              )}
+            </Text>
+          </VStack>
           <FormControl isInvalid={!!errors.markdownDescription}>
             <Box w="full" h={500}>
               <Controller

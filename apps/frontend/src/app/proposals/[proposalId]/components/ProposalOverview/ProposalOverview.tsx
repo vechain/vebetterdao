@@ -26,11 +26,13 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useProposalDetail } from "../../hooks"
 import { ProposalShareButton } from "./components/ProposalShareButton"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 export const ProposalOverview = () => {
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { name: proposerName } = useWalletName(proposal.proposer)
 
   return (
     <Card variant="baseWithBorder">
@@ -54,7 +56,7 @@ export const ProposalOverview = () => {
                 </Show>
               </HStack>
               <Skeleton isLoaded={!proposal.isTitleLoading}>
-                <Heading fontWeight={700} fontSize="36px" color="#252525">
+                <Heading fontWeight={700} fontSize="36px" color="#252525" noOfLines={2}>
                   {proposal.title}
                 </Heading>
               </Skeleton>
@@ -63,7 +65,9 @@ export const ProposalOverview = () => {
               </Skeleton>
               <Spacer h={"24px"} />
               <SkeletonText isLoaded={!proposal.isDescriptionLoading}>
-                <Text color="#252525">{proposal.description}</Text>
+                <Text color="#252525" noOfLines={6}>
+                  {proposal.description}
+                </Text>
               </SkeletonText>
             </VStack>
             <VStack alignItems={"stretch"}>
@@ -80,7 +84,7 @@ export const ProposalOverview = () => {
                         {compareAddresses(proposal.proposer, account || "") ? (
                           <Text color="#252525">{t("You")}</Text>
                         ) : (
-                          <Text color="#252525">{humanAddress(proposal.proposer, 4, 6)}</Text>
+                          <Text color="#252525">{proposerName || humanAddress(proposal.proposer, 4, 6)}</Text>
                         )}
                       </HStack>
                     </Skeleton>

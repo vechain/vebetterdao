@@ -16,10 +16,10 @@ import {
   StepStatus,
   StepTitle,
   Stepper,
-  useSteps,
 } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useEffect, useMemo } from "react"
+import { t } from "i18next"
+import { useMemo } from "react"
 
 type Props = {
   roundId: string
@@ -37,12 +37,17 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
     return roundInfo?.state === 0
   }, [roundInfo?.state])
 
+  const isUpcoming = useMemo(() => {
+    return !isRoundActive && !quorumQuery.isLoading && !quorumQuery.data
+  }, [quorumQuery, isRoundActive])
+
   return (
     <ProposalSessionSection
       quorumQuery={quorumQuery}
       votesAtSnapshotQuery={votesAtSnapshotQuery}
       currentVotesQuery={currentVotesQuery}
       userVotesAtSnapshotQuery={userVotesAtSnapshotQuery}
+      renderQuroum={isUpcoming ? "upcoming" : "active"}
       isEnded={!isRoundActive}
       renderTimeline={<AllocationRoundTimeline roundId={roundId} />}
     />
@@ -51,39 +56,38 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
 
 const AllocationRoundTimeline = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)
+
+  const activeStep = useMemo(() => {
+    const stateNumber = Number(roundInfo.state)
+    switch (stateNumber) {
+      case 0:
+        return 1
+      case 1:
+        return 3
+      case 2:
+        return 3
+      default:
+        return 0
+    }
+  }, [roundInfo])
+
   const steps = useMemo(
     () => [
-      { title: "Voting session started", description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A") },
-      { title: "Voting session finished", description: roundInfo?.voteEndTimestamp?.format("MMMM D hh:mm A") },
       {
-        title: "Voting rewards are claimable",
+        title: activeStep > 0 ? t("Voting session started") : t("Voting session starts"),
+        description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A"),
+      },
+      {
+        title: activeStep > 1 ? t("Voting session ended") : t("Voting session ends"),
+        description: roundInfo?.voteEndTimestamp?.format("MMMM D hh:mm A"),
+      },
+      {
+        title: t("Voting rewards are claimable"),
         description: "",
       },
     ],
-    [roundInfo],
+    [roundInfo, activeStep],
   )
-
-  const { activeStep, setActiveStep } = useSteps({
-    index: 1,
-    count: steps.length,
-  })
-
-  useEffect(() => {
-    if (roundInfo) {
-      const stateNumber = Number(roundInfo.state)
-      switch (stateNumber) {
-        case 0:
-          setActiveStep(1)
-          break
-        case 1:
-          setActiveStep(3)
-          break
-        case 2:
-          setActiveStep(3)
-          break
-      }
-    }
-  }, [roundInfo, setActiveStep])
 
   return (
     <Stepper

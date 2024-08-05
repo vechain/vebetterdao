@@ -25,7 +25,7 @@ import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 import { TeamWalletAddress } from "./components/TeamWalletAddress"
 import { IoWalletOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
-import { PercentageSelectorButtons } from "./components/PercentageSelctorButtons"
+import { WithdrawPercentageSelectorButtons } from "./components/WithdrawPercentageSelectorButtons"
 
 export type Props = {
   appId: string
@@ -227,7 +227,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             </motion.div>
           </motion.div>
 
-          <PercentageSelectorButtons availableAmount={availableB3trToWithdrawScaled} setValue={setValue} />
+          <WithdrawPercentageSelectorButtons availableAmount={availableB3trToWithdrawScaled} setValue={setValue} />
 
           <TeamWalletAddress teamWalletAddress={teamWalletAddress} />
 
@@ -264,17 +264,17 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={"Withdraw completed!"}
+        successTitle={t("Withdraw completed!")}
         status={error ? "error" : status}
         errorDescription={error?.reason}
-        errorTitle={error ? "Error withdrawing" : undefined}
+        errorTitle={error ? t("Error withdrawing") : undefined}
         showTryAgainButton
         onTryAgain={handleWithdraw}
-        pendingTitle="Withdrawing..."
+        pendingTitle={t("Withdrawing...")}
         showExplorerButton
         isAppWithdraw
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
-        b3trWithdrawAmount={amount}
+        b3trAmount={amount}
         b3trBalanceAfterSwap={b3trBalanceAfterSwap}
         b3trBalance={availableB3trToWithdrawScaled}
       />

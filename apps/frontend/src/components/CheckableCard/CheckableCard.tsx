@@ -57,6 +57,7 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
             <Image src={imageSrc} boxSize={32} alt={`Checkable card image for ${title}`} />
             {inputType === "checkbox" ? (
               <Checkbox
+                pointerEvents={"none"}
                 size="lg"
                 data-testid={`checkable-card__${title}__checkbox`}
                 isChecked={checked}
@@ -74,8 +75,10 @@ export const CheckableCard: React.FC<CheckableCardProps> = ({
             )}
           </HStack>
           <Box>
-            <Heading size="md">{title}</Heading>
-            <Text mt={2}>{description}</Text>
+            <Heading size={["sm", "md"]}>{title}</Heading>
+            <Text fontSize={["sm", "md"]} mt={2}>
+              {description}
+            </Text>
           </Box>
         </Stack>
       </CardBody>

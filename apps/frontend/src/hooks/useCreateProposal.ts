@@ -1,4 +1,3 @@
-import { getProposalEvents } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
@@ -8,6 +7,7 @@ import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { isZero } from "@repo/utils/FormattingUtils"
+import { getProposalsEventsQueryKey } from "@/api"
 export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
@@ -29,6 +29,11 @@ export type ProposalAction = {
 export type useCreateProposalProps = {
   invalidateCache?: boolean
   onSuccess?: () => void
+}
+
+export type ReducedActions = {
+  contractsAddress: string[]
+  calldatas: string[]
 }
 
 type BuildClausesProps = {
@@ -60,10 +65,10 @@ export const useCreateProposal = ({
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
       await queryClient.cancelQueries({
-        queryKey: getProposalEvents(),
+        queryKey: getProposalsEventsQueryKey(),
       })
       await queryClient.refetchQueries({
-        queryKey: getProposalEvents(),
+        queryKey: getProposalsEventsQueryKey(),
       })
     }
 
@@ -78,10 +83,7 @@ export const useCreateProposal = ({
   const buildClauses = useCallback(
     ({ description, actions, startRoundId, depositAmount }: BuildClausesProps) => {
       if (!account) throw new Error("Account is required")
-      type ReducedActions = {
-        contractsAddress: string[]
-        calldatas: string[]
-      }
+
       const clauses: EnhancedClause[] = []
       const parsedDepositAmount = ethers.parseEther(depositAmount).toString()
 

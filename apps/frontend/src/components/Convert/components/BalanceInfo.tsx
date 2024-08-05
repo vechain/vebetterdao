@@ -1,6 +1,7 @@
 import { HStack, VStack, Text, Image } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   isB3TR: boolean
@@ -10,9 +11,11 @@ type Props = {
 const compactFormatter = getCompactFormatter(4)
 
 export const BalanceInfo = ({ isB3TR, balanceScaled }: Props) => {
+  const { t } = useTranslation()
+
   const title = useMemo(() => {
-    return isB3TR ? "Current B3TR Balance" : "Current VOT3 Balance"
-  }, [isB3TR])
+    return isB3TR ? t("Current B3TR Balance") : t("Current VOT3 Balance")
+  }, [isB3TR, t])
 
   const image = useMemo(() => {
     return isB3TR ? "/images/logo/b3tr_logo_dark.svg" : "/images/logo/vot3_logo_dark.svg"

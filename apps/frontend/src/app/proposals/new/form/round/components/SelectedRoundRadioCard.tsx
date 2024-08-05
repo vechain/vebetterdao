@@ -80,14 +80,14 @@ export const SelectedRoundRadioCard: React.FC<Props> = ({
         <HStack justify="space-between" w="full">
           <VStack spacing={2} align="flex-start">
             <Skeleton isLoaded={!renderSkeleton}>
-              <Heading size="md">
+              <Heading size={["sm", "md"]}>
                 {t("Round #{{round}}", {
                   round: roundId,
                 })}
               </Heading>
             </Skeleton>
             <Skeleton isLoaded={!isEstimatedStartTimeLoading}>
-              <Text fontSize="md" as="span" display={"inline-flex"} gap={1}>
+              <Text fontSize={["sm", "md"]} as="span" display={"inline-flex"} gap={1}>
                 {t("Starts on")}
                 <Text fontWeight="600">{estimatedStartTime?.format("MMM D")}</Text>
               </Text>
