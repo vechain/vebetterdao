@@ -134,6 +134,8 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
     if (isFinished && formattedRoundReward > 0) return t("Claim rewards")
 
+    if (!hasVoted && isFinished) return t("No rewards to claim")
+
     return <Trans i18nKey={"Rewards claimable in {{remainingTime}}"} values={{ remainingTime }} t={t} />
   }, [formattedRoundReward, hasVoted, isFinished, remainingTime, t])
 
