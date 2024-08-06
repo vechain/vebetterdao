@@ -30,6 +30,7 @@ import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { UpdateAppMetadataTransactionModal } from "../../../components/UpdateAppMetadataTransactionModal"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
 
 export type EditAppForm = {
   name: string
@@ -43,6 +44,7 @@ export type EditAppForm = {
   screenshots: string[]
   logoImage: string
   bannerImage: string
+  ve_world_banner: string
 }
 
 const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
@@ -76,6 +78,7 @@ export const EditAppPageContent = () => {
       telegramUrl: findUrlByName(appMetadata?.social_urls, "Telegram"),
       youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
       mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
+      ve_world_banner: appMetadata?.ve_world?.banner || "",
     },
   })
   const {
@@ -112,6 +115,9 @@ export const EditAppPageContent = () => {
         app_urls: [],
         social_urls: socialUrls,
         tweets: appMetadata?.tweets ?? [],
+        ve_world: {
+          banner: data.ve_world_banner,
+        },
       })
       if (!metadataUri) return
 
@@ -222,6 +228,7 @@ export const EditAppPageContent = () => {
         </Stack>
         <Divider />
         <EditScreenshots form={form} />
+        <EditVeWorldBanner form={form} />
       </VStack>
     </>
   )
