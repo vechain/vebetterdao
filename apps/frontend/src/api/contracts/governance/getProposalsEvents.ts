@@ -47,16 +47,6 @@ export type ProposalDepositEvent = {
   blockMeta: Connex.Thor.Filter.WithMeta["meta"]
 }
 
-export type ProposalVoteEvent = {
-  account: string
-  proposalId: string
-  support: string
-  weight: string
-  power: string
-  reason: string
-  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
-}
-
 export const getProposalsEvents = async (thor: Connex.Thor, proposalId?: string) => {
   const proposalCreatedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalCreated")
   if (!proposalCreatedAbi) throw new Error("ProposalCreated event not found")
