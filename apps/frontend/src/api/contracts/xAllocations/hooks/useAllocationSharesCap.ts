@@ -12,7 +12,9 @@ const XALLOCATIONVOTINGCONTRACT = getConfig().xAllocationVotingContractAddress
  * @returns  the percentage of the total shares that an xDapp can have in a given round
  */
 export const getAllocationSharesCap = async (thor: Connex.Thor, roundId: string): Promise<string> => {
-  const functionFragment = XAllocationVoting__factory.createInterface().getFunction("getRoundAppSharesCap").format("json")
+  const functionFragment = XAllocationVoting__factory.createInterface()
+    .getFunction("getRoundAppSharesCap")
+    .format("json")
   const res = await thor.account(XALLOCATIONVOTINGCONTRACT).method(JSON.parse(functionFragment)).call(roundId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))

@@ -10,13 +10,13 @@
     "build:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -- turbo build",
     "build:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo build",
     "build:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo build",
-    "dev": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo dev --",
+    "dev": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -e .env -- turbo dev --",
     "dev:simulation": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v RUN_SIMULATION=true -- turbo dev --",
     "dev:staging": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=solo-staging -e .env -- turbo dev --",
     "dev:testnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=testnet -e .env -- turbo dev:testnet --",
     "dev:mainnet": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -e .env -- turbo dev:mainnet --",
     "dev:e2e": "yarn && dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo dev --",
-    "lint": "turbo lint",
+    "lint": "turbo lint --",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "contracts:compile": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run compile --filter=contracts",
@@ -28,19 +28,29 @@
     "contracts:start-round:solo-staging": "dotenv -e .env.example -v NEXT_PUBLIC_APP_ENV=solo-staging -- turbo run start-round --filter=contracts",
     "contracts:test": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test --filter=contracts",
     "contracts:test:thor-solo": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:thor-solo --filter=contracts",
-    "contracts:generate-galaxy-member-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-galaxy-member-metadata --filter=contracts",
-    "contracts:upload-galaxy-member-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-galaxy-member-metadata --filter=contracts",
-    "contracts:generate-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-xapp-metadata --filter=contracts",
-    "contracts:upload-xapp-metadata": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run upload-xapp-metadata --filter=contracts",
+    "contracts:generate-galaxy-member-metadata:ipfs-dev": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run generate-galaxy-member-metadata --filter=contracts",
+    "contracts:upload-galaxy-member-metadata:ipfs-dev": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run upload-galaxy-member-metadata --filter=contracts",
+    "contracts:generate-xapp-metadata:ipfs-dev": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run generate-xapp-metadata --filter=contracts",
+    "contracts:upload-xapp-metadata:ipfs-dev": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run upload-xapp-metadata --filter=contracts",
+    "contracts:generate-galaxy-member-metadata:ipfs-prod": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run generate-galaxy-member-metadata --filter=contracts",
+    "contracts:upload-galaxy-member-metadata:ipfs-prod": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run upload-galaxy-member-metadata --filter=contracts",
+    "contracts:generate-xapp-metadata:ipfs-prod": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run generate-xapp-metadata --filter=contracts",
+    "contracts:upload-xapp-metadata:ipfs-prod": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run upload-xapp-metadata --filter=contracts",
     "contracts:generate-docs": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-docs --filter=contracts",
     "solo-up": "make solo-up",
     "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo run playwright:e2e",
-    "generate-translations": "dotenv -e .env -- turbo generate-translations"
+    "generate-translations": "dotenv -e .env -- turbo generate-translations",
+    "complete-translations": "dotenv -e .env -- turbo complete-translations",
+    "prepare": "husky install"
   },
   "devDependencies": {
+    "@datadog/browser-rum": "^5.23.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "dotenv-cli": "latest",
+    "dotenv": "^16.4.5",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.7",
     "prettier": "^3.3.0",
     "turbo": "^1.13.3"
   },
@@ -51,5 +61,14 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write --ignore-unknown"
+    ],
+    "*.{json,html}": [
+      "prettier --write --ignore-unknown"
+    ]
+  }
 }

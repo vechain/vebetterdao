@@ -1,5 +1,5 @@
 import { Button, Card, CardBody, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { AddTweetModal } from "./components/AddTweetModal"
 import { TweetList } from "./components/TweetList"
@@ -13,18 +13,18 @@ import { OkHandIcon } from "@/components"
 
 export const AppTweets = () => {
   const [editMode, setEditMode] = useState(false)
-  const [tweetsToRemove, setTweetsToRemove] = useState<string[]>([])
   const newTweetModal = useDisclosure()
   const { appMetadata, appMetadataLoading } = useCurrentAppMetadata()
   const metadataTweets = useMemo(() => appMetadata?.tweets?.filter(Boolean) ?? [], [appMetadata?.tweets])
+  const [tweets, setTweets] = useState<string[]>(metadataTweets)
   const transactionModal = useDisclosure()
   const { isAdminOrModerator } = useCurrentAppRole()
   const { t } = useTranslation()
   const { appId } = useParams<{ appId: string }>()
 
-  const removeTweet = useCallback((tweetId: string) => {
-    setTweetsToRemove(prev => [...prev, tweetId])
-  }, [])
+  useEffect(() => {
+    setTweets(metadataTweets)
+  }, [metadataTweets])
 
   const handleEdit = useCallback(() => {
     setEditMode(true)
@@ -32,8 +32,8 @@ export const AppTweets = () => {
 
   const handleCancelEdit = useCallback(() => {
     setEditMode(false)
-    setTweetsToRemove([])
-  }, [setEditMode])
+    setTweets(metadataTweets)
+  }, [metadataTweets])
 
   const handleClose = useCallback(() => {
     handleCancelEdit()
@@ -42,7 +42,10 @@ export const AppTweets = () => {
 
   const updateAppDetailsMutation = useUpdateAppDetails({
     appId,
-    onSuccess: handleClose,
+    onSuccess: () => {
+      handleClose()
+      updateAppDetailsMutation.resetStatus()
+    },
   })
   const uploadMetadataMutation = useUploadAppMetadata()
 
@@ -54,11 +57,7 @@ export const AppTweets = () => {
     const metadataUri = await uploadMetadataMutation.onMetadataUpload(
       {
         ...appMetadata,
-        tweets: (appMetadata.tweets || [])
-          .filter((tweetId: string) => {
-            return !tweetsToRemove.includes(tweetId)
-          })
-          .filter(Boolean),
+        tweets: [...tweets.filter(Boolean)],
       },
       false,
     )
@@ -67,7 +66,8 @@ export const AppTweets = () => {
     updateAppDetailsMutation.sendTransaction({
       metadataUri,
     })
-  }, [transactionModal, updateAppDetailsMutation, appMetadata, uploadMetadataMutation, tweetsToRemove])
+  }, [updateAppDetailsMutation, transactionModal, appMetadata, uploadMetadataMutation, tweets])
+
   const onTryAgain = useCallback(() => {
     onSubmit()
   }, [onSubmit])
@@ -105,7 +105,7 @@ export const AppTweets = () => {
                   <Button
                     variant="primaryAction"
                     leftIcon={<UilCheckCircle color="#FFFFFF" fontSize="16px" />}
-                    isDisabled={tweetsToRemove.length === 0}
+                    isDisabled={metadataTweets.every((metadataTweet, index) => metadataTweet === tweets[index])}
                     onClick={onSubmit}>
                     {t("Save changes")}
                   </Button>
@@ -144,7 +144,7 @@ export const AppTweets = () => {
             </CardBody>
           </Card>
         ) : (
-          <TweetList editMode={editMode} tweetsToRemove={tweetsToRemove} removeTweet={removeTweet} />
+          <TweetList editMode={editMode} tweets={tweets} setTweets={setTweets} />
         )}
       </VStack>
     </>

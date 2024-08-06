@@ -32,7 +32,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   const { t } = useTranslation()
   const router = useRouter()
 
-  const { data: allocationRound } = useAllocationsRound(round.roundId)
+  const { data: allocationRound, isLoading } = useAllocationsRound(round.roundId)
   const {
     data: roundAmount,
     isLoading: roundAmountLoading,
@@ -88,11 +88,13 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
               />
               <Show above="sm">
                 <DotSymbol color={"#6A6A6A"} size={"4px"} />
-                <Text fontWeight={400} color={"#6A6A6A"} fontSize={"14px"}>
-                  {isActive
-                    ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
-                    : `${allocationRound.voteStartTimestamp?.fromNow()}`}
-                </Text>
+                <Skeleton isLoaded={!isLoading}>
+                  <Text fontWeight={400} color={"#6A6A6A"} fontSize={"14px"}>
+                    {isActive
+                      ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
+                      : `${allocationRound.voteEndTimestamp?.fromNow()}`}
+                  </Text>
+                </Skeleton>
               </Show>
             </HStack>
 
@@ -104,10 +106,12 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
               </Heading>
             </HStack>
             <HStack w="fit-content" justify="space-between" fontSize={"12px"} fontWeight={400} color={cardTextColor}>
-              <Text>
-                {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}
-                {allocationRound.voteEndTimestamp?.format("MMM D")}
-              </Text>
+              <Skeleton isLoaded={!isLoading}>
+                <Text>
+                  {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}
+                  {allocationRound.voteEndTimestamp?.format("MMM D")}
+                </Text>
+              </Skeleton>
             </HStack>
           </Stack>
           <HStack spacing={4} justify="flex-end" flex={1}>

@@ -4,7 +4,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts"
-import { XApp } from "./useXApps"
+import { XApp } from "../getXApps"
 
 /**
  * Returns all the available xApps (apps that can be voted on for allocation)

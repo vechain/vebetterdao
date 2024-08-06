@@ -1,7 +1,6 @@
 import { getConfig } from "@repo/config"
 import { XAllocationVotingGovernor__factory } from "@repo/contracts"
 import { getCallKey, useCall } from "@/hooks"
-import { ethers } from "ethers"
 
 const ALLOCATION_VOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
 const allocationVotingInterface = XAllocationVotingGovernor__factory.createInterface()
@@ -27,8 +26,8 @@ export const getXAppVotesQf = async (thor: Connex.Thor, roundId: string, xAppId:
  *  Returns the query key for fetching the number of quadratic funding votes for a given app in a roundId.
  * @param roundId  the roundId the get the votes for
  */
-export const getXAppVotesQfQueryKey = (roundId: number | string, appId: string) =>
-  getCallKey({ method: "getAppVotesQF", keyArgs: [roundId, appId] })
+export const getXAppVotesQfQueryKey = (roundId: number | string, appId?: string) =>
+  getCallKey({ method: "getAppVotesQF", keyArgs: [roundId, ...(appId ? [appId] : [])] })
 
 /**
  *  Hook to get the number of quadratic funding votes for a given app in a roundId

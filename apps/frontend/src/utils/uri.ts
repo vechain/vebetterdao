@@ -1,4 +1,5 @@
 import { validateIpfsUri } from "./ipfs"
+import { getConfig } from "@repo/config"
 
 /**
  * Convert a URI to a URL
@@ -21,7 +22,7 @@ export const convertUriToUrl = (uri: string) => {
 
       // Check cache for IPFS document
 
-      return `https://api.gateway-proxy.vechain.org/ipfs/${uriWithoutProtocol}`
+      return `${getConfig().ipfsFetchingService}/${uriWithoutProtocol}`
     case "ar":
       return `https://arweave.net/${uriWithoutProtocol}`
     default:

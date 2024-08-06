@@ -99,7 +99,7 @@ export const B3trAllowance = () => {
               <HStack spacing={4} alignItems={"start"}>
                 <FormControl>
                   <FormLabel>
-                    <strong>{"Balance"}</strong>
+                    <strong>{t("Balance")}</strong>
                   </FormLabel>
                   <InputGroup>
                     <Input value={b3trBalance?.scaled} disabled={true} />
@@ -120,11 +120,11 @@ export const B3trAllowance = () => {
               <HStack spacing={4} alignItems={"start"} w={"full"}>
                 <FormControl isRequired isInvalid={!isValidAddress && spenderFieldIsDirty}>
                   <FormLabel>
-                    <strong>{"Spender"}</strong>
+                    <strong>{t("Spender")}</strong>
                   </FormLabel>
                   <InputGroup>
                     <Input
-                      placeholder="Who should be able to use the tokens?"
+                      placeholder={t("Who should be able to use the tokens?")}
                       value={spender}
                       onChange={e => {
                         setSpender(e.target.value)
@@ -133,18 +133,18 @@ export const B3trAllowance = () => {
                       disabled={isLoading}
                     />
                   </InputGroup>
-                  <FormErrorMessage>{"Address not valid"}</FormErrorMessage>
+                  <FormErrorMessage>{t("Address not valid")}</FormErrorMessage>
                 </FormControl>
               </HStack>
 
               <HStack spacing={4} w={"full"} justify={"space-between"} align={"start"}>
                 <FormControl isRequired isInvalid={!isAmountValid && amountFieldIsDirty} w={"full"}>
                   <FormLabel>
-                    <strong>{"Amount to allow"}</strong>
+                    <strong>{t("Amount to allow")}</strong>
                   </FormLabel>
                   <NumberInput
                     min={0}
-                    value={allowedAmountLoading ? "Loading..." : amount}
+                    value={allowedAmountLoading ? t("Loading...") : amount}
                     isDisabled={isLoading}
                     onChange={value => {
                       setAmount(parseInt(value))
@@ -156,16 +156,16 @@ export const B3trAllowance = () => {
                       <NumberDecrementStepper />
                     </NumberInputStepper>
                   </NumberInput>
-                  <FormErrorMessage>{"Invalid amount"}</FormErrorMessage>
+                  <FormErrorMessage>{t("Invalid amount")}</FormErrorMessage>
                 </FormControl>
 
                 <FormControl w={"full"}>
                   <FormLabel>
-                    <strong>{"Current allowance"}</strong>
+                    <strong>{t("Current allowance")}</strong>
                   </FormLabel>
                   <InputGroup>
                     <Input
-                      placeholder="Amount of tokens the inserted address is already allowed to spend"
+                      placeholder={t("Amount of tokens the inserted address is already allowed to spend")}
                       value={allowedAmountScaled}
                       disabled={true}
                     />
@@ -194,13 +194,13 @@ export const B3trAllowance = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? "error" : status}
-        successTitle={"B3TR tokens allowance updated successfully"}
+        successTitle={t("B3TR tokens allowance updated successfully")}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
-        pendingTitle={`Updating B3TR tokens allowance...`}
-        errorTitle={"Error updating allowance"}
+        pendingTitle={t(`Updating B3TR tokens allowance...`)}
+        errorTitle={t("Error updating allowance")}
         errorDescription={error?.reason}
       />
     </>

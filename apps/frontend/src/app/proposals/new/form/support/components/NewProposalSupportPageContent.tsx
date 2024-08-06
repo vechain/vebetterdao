@@ -64,17 +64,19 @@ export const NewProposalSupportPageContent = () => {
     <Card variant="baseWithBorder">
       <CardBody py={8}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <VStack spacing={8} align="flex-start">
-            <Heading size="lg">{t("Community support")}</Heading>
-            <Text fontSize="md" color="gray.500">
-              {t(
-                "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of",
-              )}{" "}
-              {compactFormatter.format(Number(threshold))}{" "}
-              {t("VOT3 to become active. You can also contribute with your own VOT3.")}
-            </Text>
+          <VStack spacing={[6, 8]} align="flex-start">
+            <VStack spacing={[4, 6]} align="flex-start">
+              <Heading size={["md", "lg"]}>{t("Community support")}</Heading>
+              <Text fontSize={["sm", "md"]} color="gray.500">
+                {t(
+                  "Your proposal will need support from the community to become active. Users who like your proposal and want to be able to vote for it can contribute with their VOT3 tokens to support it. The proposal will need a total of",
+                )}{" "}
+                {compactFormatter.format(Number(threshold))}{" "}
+                {t("VOT3 to become active. You can also contribute with your own VOT3.")}
+              </Text>
+            </VStack>
             <VStack spacing={2} align="flex-start" w="full">
-              <Heading size="md">{t("How much VOT3 do you want to lock to fund this proposal?")}</Heading>
+              <Heading size={["sm", "md"]}>{t("How much VOT3 do you want to lock to fund this proposal?")}</Heading>
               <Text fontSize="sm" color="gray.500">
                 {t("Your VOT3 will be unlocked when the voting session ends.")}
               </Text>

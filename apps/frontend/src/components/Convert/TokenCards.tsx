@@ -136,7 +136,7 @@ export const TokenCards = ({
               <VStack justify="stretch" flex={1} gap={1}>
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                   <Text fontSize={14} fontWeight={400}>
-                    {isB3trToVot3 ? "You'll convert" : "You'll receive"}
+                    {isB3trToVot3 ? t("You'll convert") : t("You'll receive")}
                   </Text>
                 </HStack>
                 <HStack w="full">
@@ -167,7 +167,7 @@ export const TokenCards = ({
               <VStack justify="stretch" flex={1} gap={1}>
                 <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                   <Text fontSize={14} fontWeight={400}>
-                    {isB3trToVot3 ? "You'll receive" : "You'll convert"}
+                    {isB3trToVot3 ? t("You'll receive") : t("You'll convert")}
                   </Text>
                 </HStack>
                 <HStack w="full">

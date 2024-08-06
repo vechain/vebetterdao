@@ -4,10 +4,13 @@ import testnetConfig from "./testnet"
 import mainnetConfig from "./mainnet"
 import { EnvConfig, getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
+import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from './datadog'
 
 export type AppConfig = {
   environment: EnvConfig
   basePath?: string
+  ipfsPinningService: string
+  ipfsFetchingService: string
   mixPanelProjectToken?: string
   b3trContractAddress: string
   vot3ContractAddress: string
@@ -36,4 +39,4 @@ export const getConfig = (env?: EnvConfig): AppConfig => {
   throw new Error(`Unsupported NEXT_PUBLIC_APP_ENV ${appEnv}`)
 }
 
-export { getContractsConfig }
+export { getContractsConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv }

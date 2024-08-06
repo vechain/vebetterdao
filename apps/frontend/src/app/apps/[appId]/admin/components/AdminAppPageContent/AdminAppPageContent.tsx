@@ -1,10 +1,15 @@
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
-import { useCurrentAppAdmin, useCurrentAppMetadata, useCurrentAppModerators } from "../../../hooks"
+import {
+  useCurrentAppAdmin,
+  useCurrentAppMetadata,
+  useCurrentAppModerators,
+  useCurrentAppRewardDistributors,
+} from "../../../hooks"
 import { useTranslation } from "react-i18next"
 import { EditAppModerators } from "./components/EditAppModerators"
 import { EditAppAddresses } from "./components/EditAppAddresses"
 import { useForm } from "react-hook-form"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { UpdateConfirmationModal } from "./components/UpdateConfirmationModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
@@ -12,21 +17,28 @@ import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useUpdateAppAdminInfo } from "@/hooks/useUpdateAppAdminInfo"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { EditAppRewardDistributors } from "./components/EditAppRewardDistributors"
+import { useAccountPermissions } from "@/api/contracts/account"
 
 export type AdminAppForm = {
   adminAddress: string
   teamWalletAddress: string
   moderators: string[]
+  distributors: string[]
 }
 
 export const AdminAppPageContent = () => {
   const { appMetadata } = useCurrentAppMetadata()
   const { moderators } = useCurrentAppModerators()
+  const { distributors } = useCurrentAppRewardDistributors()
+
   const { t } = useTranslation()
   const [editAdminAddress, setEditAdminAddress] = useState(false)
   const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
   const updateConfirmationModal = useDisclosure()
   const { admin } = useCurrentAppAdmin()
+  const { account } = useWallet()
+  const { isAdminOfX2EarnApps } = useAccountPermissions(account || "")
   const { app } = useCurrentAppInfo()
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
@@ -35,21 +47,35 @@ export const AdminAppPageContent = () => {
       moderators,
       adminAddress: admin || "",
       teamWalletAddress: app?.teamWalletAddress || "",
+      distributors,
     },
   })
 
-  const [adminAddress, teamWalletAddress, newModerators] = form.watch([
+  const [adminAddress, teamWalletAddress, newModerators, newDistributors] = form.watch([
     "adminAddress",
     "teamWalletAddress",
     "moderators",
+    "distributors",
   ])
+
+  // Update the form values when the app fetches the data from blockchain
+  useEffect(() => {
+    form.setValue("moderators", moderators)
+  }, [moderators, form])
+  useEffect(() => {
+    form.setValue("distributors", distributors)
+  }, [distributors, form])
 
   const isAdminAddressChanged = !compareAddresses(adminAddress, admin || "")
   const isTeamWalletAddressChanged = !compareAddresses(teamWalletAddress, app?.teamWalletAddress || "")
   const isModeratorsChanged =
     moderators.length !== newModerators.length ||
     !moderators.every((moderator, index) => compareAddresses(moderator, newModerators[index]))
-  const disableSaveButton = !isAdminAddressChanged && !isTeamWalletAddressChanged && !isModeratorsChanged
+  const isDistributorsChanged =
+    distributors.length !== newDistributors.length ||
+    !distributors.every((distributor, index) => compareAddresses(distributor, newDistributors[index]))
+  const disableSaveButton =
+    !isAdminAddressChanged && !isTeamWalletAddressChanged && !isModeratorsChanged && !isDistributorsChanged
   const router = useRouter()
 
   const updateMutation = useUpdateAppAdminInfo({
@@ -83,15 +109,33 @@ export const AdminAppPageContent = () => {
       const moderatorsToBeRemoved = moderators.filter(
         moderator => !data.moderators.some(newModerator => compareAddresses(moderator, newModerator)),
       )
+
+      const distributorsToBeAdded = data.distributors.filter(
+        newDistributor => !distributors.some(distributor => compareAddresses(distributor, newDistributor)),
+      )
+      const distributorsToBeRemoved = distributors.filter(
+        distributor => !data.distributors.some(newDistributor => compareAddresses(distributor, newDistributor)),
+      )
+
       updateMutation.sendTransaction({
         appId: app?.id || "",
         adminAddress: isAdminAddressChanged ? data.adminAddress : undefined,
         teamWalletAddress: isTeamWalletAddressChanged ? data.teamWalletAddress : undefined,
         moderatorsToBeAdded,
         moderatorsToBeRemoved,
+        distributorsToBeAdded,
+        distributorsToBeRemoved,
       })
     },
-    [app?.id, isAdminAddressChanged, isTeamWalletAddressChanged, moderators, onConfirmationOpen, updateMutation],
+    [
+      app?.id,
+      isAdminAddressChanged,
+      isTeamWalletAddressChanged,
+      moderators,
+      onConfirmationOpen,
+      updateMutation,
+      distributors,
+    ],
   )
 
   const checkAddresses = useCallback(
@@ -110,9 +154,10 @@ export const AdminAppPageContent = () => {
     form.handleSubmit(onSubmit)()
   }, [form, handleClose, onSubmit])
 
-  const { account } = useWallet()
-
-  const allowedToEditAdminInfo = compareAddresses(account || "", admin)
+  const allowedToEditAdminInfo = useMemo(
+    () => compareAddresses(account || "", admin) || isAdminOfX2EarnApps,
+    [account, admin, isAdminOfX2EarnApps],
+  )
 
   useEffect(() => {
     if (!allowedToEditAdminInfo) {
@@ -141,6 +186,7 @@ export const AdminAppPageContent = () => {
               editTeamWalletAddress={editTeamWalletAddress}
               setEditTeamWalletAddress={setEditTeamWalletAddress}
             />
+            <EditAppRewardDistributors form={form} />
             <HStack justify={"space-between"} mt={8}>
               <Button variant="primaryGhost" onClick={goBack}>
                 {t("Go back")}

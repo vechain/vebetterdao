@@ -32,10 +32,9 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
 
-  const isVotesLoading = xAppsVotes.some(query => query.isLoading)
-  const error = xAppsVotes.find(query => query.error)?.error
+  const error = xAppsVotes.error
 
-  const isLoading = isVotesLoading || roundInfoLoading
+  const isLoading = xAppsVotes.isLoading || roundInfoLoading
 
   const title = roundInfo.isCurrent && roundInfo.state === 0 ? t("Real time votes") : t("Votes")
 

@@ -13,7 +13,7 @@ import {
   useIsDepositReached,
   useIsProposalQuorumReached,
   useProposalDepositEvent,
-  useProposalVoteEvent,
+  useProposalVoteEvents,
   useProposalSnapshotVotingPower,
   useProposalSnapshot,
   useGetVotesOnBlock,
@@ -21,14 +21,17 @@ import {
   useProposalQuorum,
   useProposalQueuedEvent,
   useProposalExecutedEvent,
+  useProposalCanceledEvent,
 } from "@/api"
 import { ethers } from "ethers"
+import dayjs from "dayjs"
 
 export const useProposalDetailById = (proposalId: string) => {
   const { account } = useWallet()
   const proposalState = useProposalState(proposalId)
-  const proposalVoteEvents = useProposalVoteEvent(proposalId)
+  const proposalVoteEvents = useProposalVoteEvents(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
+  const proposalCanceledEvent = useProposalCanceledEvent(proposalId)
   const proposalQueuedEvent = useProposalQueuedEvent(proposalId)
   const proposalExecutedEvent = useProposalExecutedEvent(proposalId)
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
@@ -48,6 +51,13 @@ export const useProposalDetailById = (proposalId: string) => {
     () => proposalCreatedEvent.data?.roundIdVoteStart,
     [proposalCreatedEvent.data?.roundIdVoteStart],
   )
+
+  const proposalCanceledDate = useMemo(() => {
+    if (!proposalCanceledEvent.data?.blockMeta.blockTimestamp) {
+      return undefined
+    }
+    return dayjs.unix(proposalCanceledEvent.data?.blockMeta.blockTimestamp)
+  }, [proposalCanceledEvent.data?.blockMeta.blockTimestamp])
   const metadataUri = useMemo(() => {
     if (!proposalCreatedEvent.data?.description) {
       return undefined
@@ -63,6 +73,7 @@ export const useProposalDetailById = (proposalId: string) => {
       proposalVotes,
       proposalVoteEvents,
       proposalCreatedEvent,
+      proposalCanceledEvent,
       proposalDepositEvent,
       proposalUserDeposit,
       isDepositReached,
@@ -77,6 +88,7 @@ export const useProposalDetailById = (proposalId: string) => {
       proposalVotes,
       proposalVoteEvents,
       proposalCreatedEvent,
+      proposalCanceledEvent,
       proposalDepositEvent,
       proposalUserDeposit,
       isDepositReached,
@@ -98,14 +110,15 @@ export const useProposalDetailById = (proposalId: string) => {
   } = useProposalVoteDates(proposalId)
 
   const proposal = useMemo(() => {
-    const userVote = proposalVoteEvents.userVote
-    const votes = proposalVoteEvents.votes
-    const votesWithComment = proposalVoteEvents.votesWithComment
-    const hasUserVoted = proposalVoteEvents.hasUserVoted
-    const totalVot3UsedInVotes = Number(ethers.formatEther(BigInt(proposalVoteEvents.totalVot3UsedInVotes || 0)))
+    const userVote = proposalVoteEvents.data?.userVote
+    const votes = proposalVoteEvents.data?.votes
+    const votesWithComment = proposalVoteEvents.data?.votesWithComment
+    const hasUserVoted = proposalVoteEvents.data?.hasUserVoted
+    const totalVot3UsedInVotes = Number(ethers.formatEther(BigInt(proposalVoteEvents.data?.totalVot3UsedInVotes || 0)))
     const totalVotingPowerUsedInVotes = Number(
-      ethers.formatEther(BigInt(proposalVoteEvents.totalVotingPowerUsedInVotes || 0)),
+      ethers.formatEther(BigInt(proposalVoteEvents.data?.totalVotingPowerUsedInVotes || 0)),
     )
+
     const forVotes = Number(proposalVotes.data?.forVotes || "0")
     const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
     const abstainVotes = Number(proposalVotes.data?.abstainVotes || "0")
@@ -133,6 +146,7 @@ export const useProposalDetailById = (proposalId: string) => {
     const quorumChartPercentage = Math.min(quorumPercentage || 0, 1) * 100
     const result = {
       id: proposalId,
+      proposalCanceledDate,
       title: proposalMetadata.data?.title || "",
       isTitleLoading: proposalCreatedEvent.isLoading || proposalMetadata.isLoading,
       description: proposalMetadata.data?.shortDescription || "",
@@ -212,6 +226,7 @@ export const useProposalDetailById = (proposalId: string) => {
     return { ...result, ...mock }
   }, [
     proposalVoteEvents,
+    proposalCanceledDate,
     proposalVotes,
     proposalCreatedEvent,
     proposalUserDeposit,

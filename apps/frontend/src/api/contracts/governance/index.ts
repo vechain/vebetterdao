@@ -1,2 +1,4 @@
 export * from "./utils"
 export * from "./hooks"
+export * from "./getProposalsEvents"
+export * from "./getProposalsVotesEvents"

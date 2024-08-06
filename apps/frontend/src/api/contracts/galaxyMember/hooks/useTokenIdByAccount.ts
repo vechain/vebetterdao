@@ -34,7 +34,7 @@ export const getTokenIdByAccountQueryKey = (address: null | string) => ["TokenId
  * Get the token ID for an address given an index
  * @param address the address to get the token ID for
  * @param index the index of the token ID
- * 
+ *
  * @returns the token ID for the address
  */
 export const useTokenIdByAccount = (address: null | string, index: number) => {

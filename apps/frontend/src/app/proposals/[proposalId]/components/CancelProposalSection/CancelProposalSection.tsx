@@ -18,9 +18,10 @@ import {
 import { UilBan } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../hooks"
+import { useAccountPermissions } from "@/api/contracts/account"
 
 export const CancelProposalSection = () => {
   const { t } = useTranslation()
@@ -28,6 +29,7 @@ export const CancelProposalSection = () => {
   const { proposal } = useProposalDetail()
   const confirmationModal = useDisclosure()
   const transactionModal = useDisclosure()
+  const { isAdminOfB3TRGovernor } = useAccountPermissions(account ?? "")
 
   const handleCloseConfirmationModal = useCallback(() => {
     confirmationModal.onClose()
@@ -48,11 +50,16 @@ export const CancelProposalSection = () => {
     cancelProposalMutation.resetStatus()
   }, [cancelProposalMutation, transactionModal])
 
-  if (compareAddresses(proposal.proposer, account || "") && proposal.state !== ProposalState.Pending) {
+  const accountCanCancelProposal = useMemo(
+    () => compareAddresses(proposal.proposer, account || "") || isAdminOfB3TRGovernor,
+    [proposal.proposer, account, isAdminOfB3TRGovernor],
+  )
+
+  if (accountCanCancelProposal && proposal.state !== ProposalState.Pending) {
     return null
   }
 
-  if (proposal.state !== ProposalState.Pending || !compareAddresses(proposal.proposer, account || "")) {
+  if (proposal.state !== ProposalState.Pending || !accountCanCancelProposal) {
     return null
   }
 
@@ -107,13 +114,13 @@ export const CancelProposalSection = () => {
         isOpen={transactionModal.isOpen}
         onClose={handleCloseTransactionModal}
         status={cancelProposalMutation.error ? "error" : cancelProposalMutation.status}
-        successTitle="Proposal cancelled!"
+        successTitle={t("Proposal canceled!")}
         onTryAgain={handleCancelProposal}
         showTryAgainButton
         showExplorerButton
         txId={cancelProposalMutation.txReceipt?.meta.txID ?? cancelProposalMutation.sendTransactionTx?.txid}
-        pendingTitle="Cancelling proposal..."
-        errorTitle="Error cancelling proposal"
+        pendingTitle={t("Cancelling proposal...")}
+        errorTitle={t("Error cancelling proposal")}
         errorDescription={cancelProposalMutation.error?.reason}
       />
     </Card>

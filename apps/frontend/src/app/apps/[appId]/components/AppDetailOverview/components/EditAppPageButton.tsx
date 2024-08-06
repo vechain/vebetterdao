@@ -5,6 +5,7 @@ import { useCallback, useMemo } from "react"
 import { useCurrentAppAdmin, useCurrentAppModerators } from "../../../hooks"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useAccountPermissions } from "@/api/contracts/account"
 
 export const EditAppPageButton = () => {
   const { appId } = useParams()
@@ -17,12 +18,14 @@ export const EditAppPageButton = () => {
   const { account } = useWallet()
   const { admin } = useCurrentAppAdmin()
   const { moderators } = useCurrentAppModerators()
+  const { isAdminOfX2EarnApps } = useAccountPermissions(account || "")
 
   const showEditButton = useMemo(() => {
     if (compareAddresses(account || "", admin)) return true
     if (moderators?.find(moderator => compareAddresses(account || "", moderator))) return true
+    if (isAdminOfX2EarnApps) return true
     return false
-  }, [account, admin, moderators])
+  }, [account, admin, moderators, isAdminOfX2EarnApps])
 
   if (!showEditButton) {
     return null

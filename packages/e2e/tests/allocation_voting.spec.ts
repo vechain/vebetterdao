@@ -67,7 +67,7 @@ const fundVotingAccounts = async () => {
 // flow to start a new allocation round
 const adminOpenRound = async (page: Page, isFirstRound: boolean = false) => {
   await test.step("Start a new allocation round", async () => {
-    await veWorldMockClient.setConfig(page, { accountIndex: DAO_ADMIN_ACCOUNT})
+    await veWorldMockClient.setConfig(page, { accountIndex: DAO_ADMIN_ACCOUNT })
     let dashboardPage = new DashboardPage(page)
     await dashboardPage.connectWallet()
     const adminAddress = await veWorldMockClient.getSignerAddress(page)

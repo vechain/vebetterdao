@@ -10,6 +10,7 @@ import { ProposalCanceledAlert } from "./ProposalCanceledAlert"
 import { useProposalDetail } from "../hooks"
 import { ProposalSessionSection } from "@/components/ProposalSessionSection"
 import { ProposalTimeline } from "@/components/ProposalSessionSection/components/ProposalTimeline"
+import { useMemo } from "react"
 
 type Props = {
   proposalId: string
@@ -24,6 +25,12 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   const totalVotesQuery = useProposalTotalVotes(proposalId)
 
   const isEnded = proposal.state === ProposalState.DepositNotMet
+
+  const isCanceled = proposal.state === ProposalState.Canceled
+
+  const isUpcoming = useMemo(() => {
+    return !isEnded && !proposal.quorumQuery.isLoading && !proposal.quorumQuery.data
+  }, [proposal, isEnded])
 
   if (!proposalCreatedEvent) return null
 
@@ -46,6 +53,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
               quorumQuery={proposal.quorumQuery}
               votesAtSnapshotQuery={votesAtSnapshotQuery}
               userVotesAtSnapshotQuery={proposal.snapshotVotesQuery}
+              renderQuroum={isCanceled ? "none" : isUpcoming ? "upcoming" : "active"}
               isEnded={isEnded}
               currentVotesQuery={totalVotesQuery}
               renderTimeline={<ProposalTimeline />}

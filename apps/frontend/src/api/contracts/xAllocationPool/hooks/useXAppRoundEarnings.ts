@@ -34,10 +34,10 @@ export const getXAppRoundEarnings = async (
   return { amount: ethers.formatEther(res.decoded["0"]), appId: xAppId }
 }
 
-export const getXAppRoundEarningsQueryKey = (roundId: string, xAppId?: string) => [
+export const getXAppRoundEarningsQueryKey = (roundId: string | number, xAppId?: string) => [
   "roundEarnings",
   "roundId",
-  roundId,
+  Number(roundId),
   "appId",
   ...(xAppId ? [xAppId] : []),
 ]
@@ -58,7 +58,9 @@ export const useXAppRoundEarnings = (roundId: string, xAppId: string) => {
         queryFn: () => getRoundXApps(thor, roundId),
         queryKey: getRoundXAppsQueryKey(roundId),
       })
+
       const isXAppInRound = data.some(app => app.id === xAppId)
+
       if (!isXAppInRound) return { amount: "0", xAppId }
 
       return await getXAppRoundEarnings(thor, roundId, xAppId)

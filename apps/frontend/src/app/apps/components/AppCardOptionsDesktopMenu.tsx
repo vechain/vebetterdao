@@ -35,7 +35,7 @@ export const AppCardOptionsDesktopMenu = ({
   const handleOnCopy = () => {
     onCopy()
     toast({
-      title: "Team wallet address copied",
+      title: t("Team wallet address copied"),
       status: "success",
       duration: 3000,
       isClosable: true,
@@ -77,7 +77,7 @@ export const AppCardOptionsDesktopMenu = ({
             isExternal
             disabled={!externalUrl}
             icon={<FaExternalLinkAlt />}>
-            {externalUrl ? "Go to the App" : "No App link available"}
+            {externalUrl ? t("Go to the App") : t("No App link available")}
           </MenuItem>
         </Skeleton>
         <MenuItem onClick={handleOnCopy} icon={hasCopied ? <FaCheck /> : <FaCopy />}>
