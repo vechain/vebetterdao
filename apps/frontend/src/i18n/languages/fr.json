@@ -609,16 +609,7 @@
   "Contract or wallet address": "Adresse de contrat ou de portefeuille",
   "Rewards distributor already present": "Distributeur de récompenses déjà présent",
   "Add distributor": "Ajouter un distributeur",
-  "Deposit B3TR to {{name}} app": "Déposez des B3TR sur l'application {{name}}",
-  "Rewards Pool": "Réserve de récompenses",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Montant total des jetons B3TR que l'application a disponibles pour la distribution des récompenses.",
-  "You’ve voted on this allocation round!": "Vous avez voté lors de cette ronde d'allocation !",
-  "You’ll be able to claim your reward when the round is over.": "Vous pourrez réclamer votre récompense à la fin de la ronde.",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "Votez sur ce tour d'allocation pour <strong>recevoir des récompenses</strong> après la fin de la session de vote.",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Vous n'avez pas voté sur ce tour d'allocation. Vous pouvez toujours <strong>voter sur le prochain pour recevoir des récompenses.</strong>",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Vous avez gagné <strong>{{formattedRoundReward}} B3TR</strong> en récompense pour avoir voté sur ce tour d'allocation <strong>Réclamez-les maintenant!</strong>",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Vous avez réclamé vos récompenses de vote! N'oubliez pas de <strong>voter sur le prochain tour d'allocation</strong> pour recevoir plus de récompenses.",
-  "Rewards claimed": "Récompenses réclamées",
-  "Rewards claimable in {{remainingTime}}": "Récompenses réclamables dans {{remainingTime}}",
-  "No rewards to claim": "Pas de récompenses à réclamer"
+  "Deposit B3TR to {{name}} app": "Déposer B3TR sur l'application {{name}}",
+  "Rewards Pool": "Réserve de Récompenses",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Montant total de jetons B3TR que l'application a disponibles pour la distribution de récompenses."
 }

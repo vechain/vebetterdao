@@ -606,19 +606,10 @@
   "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.": "ये पते आपके ऐप बैलेंस का उपयोग करके यूज़र्स को पुरस्कार वितरित कर पाएंगे और ऐप से फंड्स निकाल पाएंगे।",
   "This address won't be able to distribute rewards anymore.": "यह पता अब पुरस्कार वितरित नहीं कर पाएगा।",
   "Add a new reward distributor": "नया पुरस्कार वितरक जोड़ें",
-  "Contract or wallet address": "कॉन्ट्रैक्ट या वॉलेट पता",
-  "Rewards distributor already present": "पुरस्कार वितरक पहले से मौजूद है",
+  "Contract or wallet address": "अनुबंध या वॉलेट पता",
+  "Rewards distributor already present": "पुरस्कार वितरक पहले से ही मौजूद है",
   "Add distributor": "वितरक जोड़ें",
   "Deposit B3TR to {{name}} app": "{{name}} ऐप में B3TR जमा करें",
-  "Rewards Pool": "पुरस्कार पूल",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "पुरस्कार वितरण के लिए ऐप में उपलब्ध कुल B3TR टोकन्स की मात्रा।",
-  "You’ve voted on this allocation round!": "आपने इस आवंटन दौर में वोट किया है!",
-  "You’ll be able to claim your reward when the round is over.": "जब दौर समाप्त हो जाएगा, तो आप अपना पुरस्कार दावा कर सकेंगे।",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "इस आवंटन राउंड पर वोट करें और वोटिंग सत्र समाप्त होने के बाद पुरस्कार प्राप्त करें।",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "आपने इस आवंटन राउंड पर वोट नहीं किया। आप अभी भी अगले राउंड पर वोट कर सकते हैं और पुरस्कार प्राप्त कर सकते हैं।",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "आपने इस आवंटन राउंड पर वोट करने के लिए {{formattedRoundReward}} B3TR का पुरस्कार जीता है। इन्हें अब प्राप्त करें!",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "आपने अपने वोटर पुरस्कार को प्राप्त कर लिया है! अगली आवंटन राउंड पर वोट करना याद रखें और अधिक पुरस्कार प्राप्त करें।",
-  "Rewards claimed": "पुरस्कार प्राप्त किए गए",
-  "Rewards claimable in {{remainingTime}}": "पुरस्कार {{remainingTime}} में प्राप्त किए जा सकते हैं",
-  "No rewards to claim": "कोई पुरस्कार प्राप्त करने के लिए नहीं"
+  "Rewards Pool": "इनाम पूल",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "पुरस्कार वितरण के लिए ऐप के पास उपलब्ध कुल B3TR टोकन की संख्या।"
 }

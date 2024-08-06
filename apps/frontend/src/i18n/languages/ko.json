@@ -611,14 +611,5 @@
   "Add distributor": "분배자 추가",
   "Deposit B3TR to {{name}} app": "{{name}} 앱에 B3TR 입금",
   "Rewards Pool": "보상 풀",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "앱이 보상 분배를 위해 사용할 수 있는 B3TR 토큰의 총량입니다.",
-  "You’ve voted on this allocation round!": "이번 배정 라운드에 투표하셨습니다!",
-  "You’ll be able to claim your reward when the round is over.": "라운드가 끝나면 보상을 청구할 수 있습니다.",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "이번 할당 라운드에 투표하여 투표 세션이 종료된 후 <strong>보상을 받으세요</strong>.",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "이번 할당 라운드에 투표하지 않았습니다. 다음 라운드에 <strong>투표하여 보상을 받을 수 있습니다</strong>.",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "이번 할당 라운드에 투표하여 <strong>{{formattedRoundReward}} B3TR</strong>의 보상을 획득했습니다. <strong>지금 청구하세요!</strong>",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "투표자 보상을 청구했습니다! 다음 할당 라운드에 <strong>투표하여 더 많은 보상을 받으세요</strong>.",
-  "Rewards claimed": "보상 청구됨",
-  "Rewards claimable in {{remainingTime}}": "{{remainingTime}} 후 청구 가능",
-  "No rewards to claim": "청구할 보상이 없음"
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "앱이 보상 배포를 위해 사용할 수 있는 총 B3TR 토큰 수량입니다."
 }

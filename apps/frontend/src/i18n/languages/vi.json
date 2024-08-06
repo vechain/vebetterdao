@@ -607,18 +607,9 @@
   "This address won't be able to distribute rewards anymore.": "Địa chỉ này sẽ không thể phân phối phần thưởng nữa.",
   "Add a new reward distributor": "Thêm nhà phân phối phần thưởng mới",
   "Contract or wallet address": "Địa chỉ hợp đồng hoặc ví",
-  "Rewards distributor already present": "Nhà phân phối phần thưởng đã tồn tại",
+  "Rewards distributor already present": "Nhà phân phối phần thưởng đã có mặt",
   "Add distributor": "Thêm nhà phân phối",
   "Deposit B3TR to {{name}} app": "Nạp B3TR vào ứng dụng {{name}}",
-  "Rewards Pool": "Quỹ phần thưởng",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Tổng số token B3TR mà ứng dụng có sẵn để phân phối phần thưởng.",
-  "You’ve voted on this allocation round!": "Bạn đã bỏ phiếu cho vòng phân bổ này!",
-  "You’ll be able to claim your reward when the round is over.": "Bạn sẽ có thể nhận phần thưởng của mình khi vòng kết thúc.",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "Bỏ phiếu trong vòng phân bổ này để <strong>nhận phần thưởng</strong> sau khi phiên bỏ phiếu kết thúc.",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Bạn đã không bỏ phiếu trong vòng phân bổ này. Bạn vẫn có thể <strong>bỏ phiếu cho vòng tiếp theo để nhận phần thưởng.</strong>",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Bạn đã kiếm được <strong>{{formattedRoundReward}} B3TR</strong> như là phần thưởng cho việc bỏ phiếu trong vòng phân bổ này <strong>Yêu cầu nhận ngay bây giờ!</strong>",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Bạn đã yêu cầu phần thưởng bỏ phiếu của mình! Hãy nhớ <strong>bỏ phiếu cho vòng phân bổ tiếp theo</strong> để nhận thêm phần thưởng.",
-  "Rewards claimed": "Đã yêu cầu phần thưởng",
-  "Rewards claimable in {{remainingTime}}": "Phần thưởng có thể yêu cầu trong {{remainingTime}}",
-  "No rewards to claim": "Không có phần thưởng để yêu cầu"
+  "Rewards Pool": "Quỹ Phần Thưởng",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Tổng số lượng token B3TR mà ứng dụng có sẵn để phân phối phần thưởng."
 }

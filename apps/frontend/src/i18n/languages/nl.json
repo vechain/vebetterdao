@@ -607,18 +607,9 @@
   "This address won't be able to distribute rewards anymore.": "Dit adres kan geen beloningen meer uitdelen.",
   "Add a new reward distributor": "Voeg een nieuwe beloningsverdeler toe",
   "Contract or wallet address": "Contract- of walletadres",
-  "Rewards distributor already present": "Beloningsverdeler al aanwezig",
-  "Add distributor": "Voeg verdeler toe",
-  "Deposit B3TR to {{name}} app": "Stort B3TR op {{name}} app",
-  "Rewards Pool": "Beloningenpool",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Totale hoeveelheid B3TR-tokens die de app beschikbaar heeft voor beloningsdistributie.",
-  "You’ve voted on this allocation round!": "Je hebt gestemd in deze toewijzingsronde!",
-  "You’ll be able to claim your reward when the round is over.": "Je kunt je beloning claimen als de ronde voorbij is.",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "Stem in deze allocatieronde om <strong>beloningen te ontvangen</strong> nadat de stemmingssessie is geëindigd.",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Je hebt niet gestemd in deze allocatieronde. Je kunt nog steeds <strong>stemmen in de volgende ronde om beloningen te ontvangen.</strong>",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Je hebt <strong>{{formattedRoundReward}} B3TR</strong> verdiend als beloning voor het stemmen in deze allocatieronde <strong>Claim ze nu!</strong>",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Je hebt je stembeloningen geclaimd! Vergeet niet om te <strong>stemmen in de volgende allocatieronde</strong> om meer beloningen te ontvangen.",
-  "Rewards claimed": "Beloningen geclaimd",
-  "Rewards claimable in {{remainingTime}}": "Beloningen claimbaar in {{remainingTime}}",
-  "No rewards to claim": "Geen beloningen om te claimen"
+  "Rewards distributor already present": "Beloningsdistributeur al aanwezig",
+  "Add distributor": "Distributeur toevoegen",
+  "Deposit B3TR to {{name}} app": "Stort B3TR naar {{name}} app",
+  "Rewards Pool": "Beloningen Pool",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Het totale aantal B3TR-tokens dat de app beschikbaar heeft voor beloningsdistributie."
 }

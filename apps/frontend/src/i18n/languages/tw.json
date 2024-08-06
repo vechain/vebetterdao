@@ -608,17 +608,8 @@
   "Add a new reward distributor": "新增一個獎勵分配者",
   "Contract or wallet address": "合約或錢包地址",
   "Rewards distributor already present": "獎勵分配者已存在",
-  "Add distributor": "新增分配者",
-  "Deposit B3TR to {{name}} app": "存入 B3TR 到 {{name}} 應用程式",
+  "Add distributor": "添加分配者",
+  "Deposit B3TR to {{name}} app": "存入 B3TR 至 {{name}} 應用程式",
   "Rewards Pool": "獎勵池",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "應用程式可用於獎勵分配的 B3TR 代幣總額。",
-  "You’ve voted on this allocation round!": "您已在此次分配輪次中投票！",
-  "You’ll be able to claim your reward when the round is over.": "輪次結束後您將可以領取您的獎勵。",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "投票此分配輪以在投票結束後<strong>獲得獎勵</strong>。",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "您沒有參與此分配輪的投票。您仍然可以在下一輪<strong>進行投票以獲得獎勵</strong>。",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "您已因參與此分配輪的投票而獲得<strong>{{formattedRoundReward}} B3TR</strong>的獎勵 <strong>立即領取</strong>！",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "您已領取您的投票獎勵！請記得在下一輪<strong>進行投票</strong>以獲得更多獎勵。",
-  "Rewards claimed": "獎勵已領取",
-  "Rewards claimable in {{remainingTime}}": "{{remainingTime}}後可領取獎勵",
-  "No rewards to claim": "沒有可領取的獎勵"
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "應用程式可用於獎勵分配的 B3TR 代幣總量。"
 }
