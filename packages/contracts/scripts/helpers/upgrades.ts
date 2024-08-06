@@ -2,6 +2,7 @@ import { BaseContract, Interface } from "ethers"
 import { ethers } from "hardhat"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { AddressUtils } from "@repo/utils"
+import { DeployUpgradeOptions } from "./type"
 
 export const deployProxy = async (
   contractName: string,
@@ -68,6 +69,50 @@ export const upgradeProxy = async (
   }
 
   return Contract.attach(proxyAddress)
+}
+
+export const deployAndUpgrade = async (
+  contractNames: string[],
+  args: any[][],
+  options: DeployUpgradeOptions,
+): Promise<BaseContract> => {
+  if (contractNames.length === 0) throw new Error("No contracts to deploy")
+
+  if (contractNames.length !== args.length) throw new Error("Contract names and arguments must have the same length")
+
+  if (options.libraries && contractNames.length !== options.libraries.length)
+    throw new Error("Contract names and libraries must have the same length")
+
+  if (options.versions && contractNames.length !== options.versions.length)
+    throw new Error("Contract names and versions must have the same length")
+
+  // 1. First we deploy proxy and first implementation
+  const contractName = contractNames[0]
+  const contractArgs = args[0]
+
+  let proxy = await deployProxy(
+    contractName,
+    contractArgs,
+    options.libraries?.[0],
+    options.logOutput,
+    options.versions?.[0],
+  )
+
+  for (let i = 1; i < contractNames.length; i++) {
+    const previousVersionContractName = contractNames[i - 1]
+    const newVersionContractName = contractNames[i]
+    const contractArgs = args[i]
+
+    proxy = await upgradeProxy(
+      previousVersionContractName,
+      newVersionContractName,
+      await proxy.getAddress(),
+      contractArgs,
+      { version: options.versions?.[i], libraries: options.libraries?.[i] },
+    )
+  }
+
+  return proxy
 }
 
 export function getInitializerData(contractInterface: Interface, args: any[], version?: number) {
