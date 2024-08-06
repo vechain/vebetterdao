@@ -611,5 +611,10 @@
   "Add distributor": "Lägg till distributör",
   "Deposit B3TR to {{name}} app": "Sätt in B3TR på {{name}} app",
   "Rewards Pool": "Belöningspool",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Totalt antal B3TR-tokens som appen har tillgängligt för belöningsdistribution."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Totalt antal B3TR-tokens som appen har tillgängligt för belöningsdistribution.",
+  "VeWorld Banner": "VeWorld Banner",
+  "Upload a banner to be displayed on the VeWorld mobile wallet": "Ladda upp en banner som ska visas på VeWorlds mobilplånbok",
+  "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "Appbanners bör vara 1240×460 och ha det viktigaste innehållet i ett säkert område på 820×240 i mitten av bilden för att se bra ut på alla enheter.",
+  "Download template": "Ladda ner mall",
+  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorlds mobilplånbokbanner bör vara 1024x576 eller en multipel av detta (t.ex.: 2048x1152 eller 3072x1728)."
 }
