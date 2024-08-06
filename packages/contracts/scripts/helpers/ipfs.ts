@@ -27,6 +27,29 @@ async function uploadDirectoryToIPFS(pathToUpload: string, path: string): Promis
 }
 
 /**
+ * Uploads a blob to IPFS.
+ * @param blob The Blob object to upload.
+ * @param filename A name for the file in the FormData payload.
+ * @returns The IPFS hash of the uploaded blob.
+ */
+export async function uploadBlobToIPFS(blob: Blob, filename: string): Promise<string> {
+  try {
+    const form = new FormData()
+    form.append("file", blob, filename)
+    const response = await axios.post(getConfig().ipfsPinningService, form)
+
+    // Extract the IPFS hash from the response
+    const ipfsHash = response.data.IpfsHash
+    console.log("IPFS Hash:", ipfsHash)
+
+    return ipfsHash
+  } catch (error) {
+    console.error("Error uploading blob:", error)
+    throw new Error("Failed to upload blob to IPFS")
+  }
+}
+
+/**
  * Constructs an IPFS URL using a CID, and optionally a folder name and a file name.
  * @param cid - The CID to convert into an IPFS URL.
  * @param fileName - The name of the file to append to the URL. Optional.
