@@ -611,10 +611,5 @@
   "Add distributor": "Dağıtıcı ekle",
   "Deposit B3TR to {{name}} app": "{{name}} uygulamasına B3TR yatır",
   "Rewards Pool": "Ödül Havuzu",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Uygulamanın ödül dağıtımı için mevcut olan toplam B3TR token miktarı.",
-  "VeWorld Banner": "VeWorld Afişi",
-  "Upload a banner to be displayed on the VeWorld mobile wallet": "VeWorld mobil cüzdanında görüntülenecek bir afiş yükleyin",
-  "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "Uygulama afişleri 1240×460 olmalıdır ve her cihazda iyi görünmesi için en önemli içerik görüntünün ortasında bulunan 820×240'lık güvenli bir alanda olmalıdır.",
-  "Download template": "Şablonu indir",
-  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorld mobil cüzdan afişi 1024x576 veya bunun katları olmalıdır (örn: 2048x1152 veya 3072x1728)."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Uygulamanın ödül dağıtımı için mevcut olan toplam B3TR token miktarı."
 }
