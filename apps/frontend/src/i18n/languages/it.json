@@ -611,5 +611,14 @@
   "Vote for your preferred app to determine funding from the Apps allocation budget. More votes mean more funding. Plus, earn rewards from the Voting Rewards allocation by voting in this round. This allocation process repeats every week.": "Vota per la tua app preferita per determinare i finanziamenti dal budget di allocazione delle app. Più voti significano più finanziamenti. Inoltre, guadagna ricompense dall'allocazione delle Ricompense di Votazione votando in questo round. Questo processo di allocazione si ripete ogni settimana.",
   "Deposit B3TR to {{name}} app": "Deposita B3TR nell'app {{name}}",
   "Rewards Pool": "Pool di Ricompense",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Ammontare totale di token B3TR che l'app ha disponibili per la distribuzione delle ricompense."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Ammontare totale di token B3TR che l'app ha disponibili per la distribuzione delle ricompense.",
+  "You’ve voted on this allocation round!": "Hai votato in questo turno di allocazione!",
+  "You’ll be able to claim your reward when the round is over.": "Potrai richiedere la tua ricompensa quando il turno sarà terminato.",
+  "Vote on this allocation round to receive rewards after the voting session has ended.": "Vota in questo turno di allocazione per ricevere ricompense dopo la fine della sessione di voto.",
+  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Non hai votato in questo turno di allocazione. Puoi ancora votare nel prossimo per ricevere ricompense.",
+  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Hai guadagnato {{formattedRoundReward}} B3TR come ricompensa per aver votato in questo turno di allocazione. Richiedili ora!",
+  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Hai richiesto le tue ricompense per i votanti! Ricorda di votare nel prossimo turno di allocazione per ricevere altre ricompense.",
+  "Rewards claimed": "Ricompense richieste",
+  "Rewards claimable in {{remainingTime}}": "Ricompense richiedibili in {{remainingTime}}",
+  "No rewards to claim": "Nessuna ricompensa da richiedere"
 }

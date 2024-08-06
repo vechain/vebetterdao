@@ -611,5 +611,14 @@
   "Add distributor": "Thêm nhà phân phối",
   "Deposit B3TR to {{name}} app": "Nạp B3TR vào ứng dụng {{name}}",
   "Rewards Pool": "Quỹ Phần Thưởng",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Tổng số lượng token B3TR mà ứng dụng có sẵn để phân phối phần thưởng."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Tổng số lượng token B3TR mà ứng dụng có sẵn để phân phối phần thưởng.",
+  "You’ve voted on this allocation round!": "Bạn đã bỏ phiếu trong vòng phân bổ này!",
+  "You’ll be able to claim your reward when the round is over.": "Bạn sẽ có thể nhận thưởng khi vòng này kết thúc.",
+  "Vote on this allocation round to receive rewards after the voting session has ended.": "Bỏ phiếu trong vòng phân bổ này để nhận thưởng sau khi phiên bỏ phiếu kết thúc.",
+  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Bạn đã không bỏ phiếu trong vòng phân bổ này. Bạn vẫn có thể bỏ phiếu trong vòng tiếp theo để nhận thưởng.",
+  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Bạn đã kiếm được {{formattedRoundReward}} B3TR như là phần thưởng cho việc bỏ phiếu trong vòng phân bổ này Hãy nhận ngay bây giờ!",
+  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Bạn đã nhận phần thưởng của bạn! Nhớ bỏ phiếu trong vòng phân bổ tiếp theo để nhận thêm phần thưởng.",
+  "Rewards claimed": "Phần thưởng đã nhận",
+  "Rewards claimable in {{remainingTime}}": "Phần thưởng sẽ có sẵn trong {{remainingTime}}",
+  "No rewards to claim": "Không có phần thưởng để nhận"
 }

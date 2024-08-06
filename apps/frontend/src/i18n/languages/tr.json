@@ -611,5 +611,14 @@
   "Add distributor": "Dağıtıcı ekle",
   "Deposit B3TR to {{name}} app": "{{name}} uygulamasına B3TR yatır",
   "Rewards Pool": "Ödül Havuzu",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Uygulamanın ödül dağıtımı için mevcut olan toplam B3TR token miktarı."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Uygulamanın ödül dağıtımı için mevcut olan toplam B3TR token miktarı.",
+  "You’ve voted on this allocation round!": "Bu tahsis turu için oy kullandınız!",
+  "You’ll be able to claim your reward when the round is over.": "Tur bittiğinde ödülünüzü talep edebileceksiniz.",
+  "Vote on this allocation round to receive rewards after the voting session has ended.": "Oylama oturumu sona erdikten sonra ödüller almak için bu tahsis turunda oy kullanın.",
+  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Bu tahsis turunda oy kullanmadınız. Ödül almak için bir sonraki turda oy kullanabilirsiniz.",
+  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Bu tahsis turunda oy kullandığınız için {{formattedRoundReward}} B3TR ödül kazandınız. Şimdi talep edin!",
+  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Oy veren ödüllerinizi talep ettiniz! Daha fazla ödül almak için bir sonraki tahsis turunda oy kullanmayı unutmayın.",
+  "Rewards claimed": "Ödüller talep edildi",
+  "Rewards claimable in {{remainingTime}}": "{{remainingTime}} içinde talep edilebilir ödüller",
+  "No rewards to claim": "Talep edilecek ödül yok"
 }

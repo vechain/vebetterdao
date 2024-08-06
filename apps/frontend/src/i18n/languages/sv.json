@@ -611,5 +611,14 @@
   "Add distributor": "Lägg till distributör",
   "Deposit B3TR to {{name}} app": "Sätt in B3TR på {{name}} app",
   "Rewards Pool": "Belöningspool",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Totalt antal B3TR-tokens som appen har tillgängligt för belöningsdistribution."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Totalt antal B3TR-tokens som appen har tillgängligt för belöningsdistribution.",
+  "You’ve voted on this allocation round!": "Du har röstat i denna tilldelningsomgång!",
+  "You’ll be able to claim your reward when the round is over.": "Du kommer kunna göra anspråk på din belöning när omgången är över.",
+  "Vote on this allocation round to receive rewards after the voting session has ended.": "Rösta i denna tilldelningsomgång för att få belöningar efter att röstsessionen har avslutats.",
+  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Du röstade inte i denna tilldelningsomgång. Du kan fortfarande rösta i nästa omgång för att få belöningar.",
+  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Du har tjänat {{formattedRoundReward}} B3TR som belöning för att ha röstat i denna tilldelningsomgång. Gör anspråk på dem nu!",
+  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Du har gjort anspråk på dina röstbelöningar! Kom ihåg att rösta i nästa tilldelningsomgång för att få fler belöningar.",
+  "Rewards claimed": "Belöningar har gjorts anspråk på",
+  "Rewards claimable in {{remainingTime}}": "Belöningar kan göras anspråk på om {{remainingTime}}",
+  "No rewards to claim": "Inga belöningar att göra anspråk på"
 }

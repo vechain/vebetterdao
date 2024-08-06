@@ -611,5 +611,14 @@
   "Add distributor": "Agregar distribuidor",
   "Deposit B3TR to {{name}} app": "Depositar B3TR en la aplicación {{name}}",
   "Rewards Pool": "Fondo de Recompensas",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Cantidad total de tokens B3TR que la aplicación tiene disponible para la distribución de recompensas."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Cantidad total de tokens B3TR que la aplicación tiene disponible para la distribución de recompensas.",
+  "You’ve voted on this allocation round!": "¡Has votado en esta ronda de asignación!",
+  "You’ll be able to claim your reward when the round is over.": "Podrás reclamar tu recompensa cuando la ronda termine.",
+  "Vote on this allocation round to receive rewards after the voting session has ended.": "Vota en esta ronda de asignación para recibir recompensas después de que la sesión de votación haya terminado.",
+  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "No votaste en esta ronda de asignación. Aún puedes votar en la próxima para recibir recompensas.",
+  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "¡Has ganado {{formattedRoundReward}} B3TR como recompensa por votar en esta ronda de asignación! ¡Reclámalos ahora!",
+  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "¡Has reclamado tus recompensas por votar! Recuerda votar en la siguiente ronda de asignación para recibir más recompensas.",
+  "Rewards claimed": "Recompensas reclamadas",
+  "Rewards claimable in {{remainingTime}}": "Recompensas reclamables en {{remainingTime}}",
+  "No rewards to claim": "No hay recompensas para reclamar"
 }

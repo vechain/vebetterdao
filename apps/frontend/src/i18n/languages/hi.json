@@ -611,5 +611,14 @@
   "Add distributor": "वितरक जोड़ें",
   "Deposit B3TR to {{name}} app": "{{name}} ऐप में B3TR जमा करें",
   "Rewards Pool": "इनाम पूल",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "पुरस्कार वितरण के लिए ऐप के पास उपलब्ध कुल B3TR टोकन की संख्या।"
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "पुरस्कार वितरण के लिए ऐप के पास उपलब्ध कुल B3TR टोकन की संख्या।",
+  "You’ve voted on this allocation round!": "आपने इस आवंटन दौर में मतदान किया है!",
+  "You’ll be able to claim your reward when the round is over.": "जब दौर समाप्त हो जाएगा, तो आप अपना इनाम प्राप्त कर सकेंगे।",
+  "Vote on this allocation round to receive rewards after the voting session has ended.": "इस आवंटन दौर में मतदान करें ताकि मतदान सत्र के समाप्त होने के बाद आपको इनाम मिल सके।",
+  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "आपने इस आवंटन दौर में मतदान नहीं किया। आप अगले दौर में मतदान करके अभी भी इनाम प्राप्त कर सकते हैं।",
+  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "आपने इस आवंटन दौर में मतदान के लिए {{formattedRoundReward}} B3TR का इनाम अर्जित किया है, उन्हें अभी प्राप्त करें!",
+  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "आपने अपने मतदाता पुरस्कार प्राप्त कर लिए हैं! और अधिक पुरस्कार प्राप्त करने के लिए अगले आवंटन दौर में मतदान करना याद रखें।",
+  "Rewards claimed": "पुरस्कार प्राप्त किए गए",
+  "Rewards claimable in {{remainingTime}}": "{{remainingTime}} में पुरस्कार प्राप्त करने योग्य",
+  "No rewards to claim": "कोई पुरस्कार प्राप्त करने के लिए नहीं"
 }

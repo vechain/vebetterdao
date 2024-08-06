@@ -611,5 +611,14 @@
   "Add distributor": "Verteilenden hinzufügen",
   "Deposit B3TR to {{name}} app": "B3TR in die {{name}}-App einzahlen",
   "Rewards Pool": "Belohnungspool",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Gesamtmenge an B3TR-Token, die die App für die Belohnungsverteilung zur Verfügung hat."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Gesamtmenge an B3TR-Token, die die App für die Belohnungsverteilung zur Verfügung hat.",
+  "You’ve voted on this allocation round!": "Sie haben in dieser Zuteilungsrunde abgestimmt!",
+  "You’ll be able to claim your reward when the round is over.": "Sie können Ihre Belohnung in Anspruch nehmen, wenn die Runde vorbei ist.",
+  "Vote on this allocation round to receive rewards after the voting session has ended.": "Stimmen Sie in dieser Zuteilungsrunde ab, um Belohnungen zu erhalten, nachdem die Abstimmungssitzung beendet ist.",
+  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Sie haben in dieser Zuteilungsrunde nicht abgestimmt. Sie können noch in der nächsten Runde abstimmen, um Belohnungen zu erhalten.",
+  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Sie haben {{formattedRoundReward}} B3TR als Belohnung für das Abstimmen in dieser Zuteilungsrunde verdient. Fordern Sie sie jetzt an!",
+  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Sie haben Ihre Wählerbelohnungen eingefordert! Denken Sie daran, in der nächsten Zuteilungsrunde abzustimmen, um weitere Belohnungen zu erhalten.",
+  "Rewards claimed": "Belohnungen eingefordert",
+  "Rewards claimable in {{remainingTime}}": "Belohnungen verfügbar in {{remainingTime}}",
+  "No rewards to claim": "Keine Belohnungen zum Einfordern"
 }
