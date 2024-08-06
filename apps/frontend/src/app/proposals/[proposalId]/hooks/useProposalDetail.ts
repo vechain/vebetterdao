@@ -13,7 +13,7 @@ import {
   useIsDepositReached,
   useIsProposalQuorumReached,
   useProposalDepositEvent,
-  useProposalVoteEvent,
+  useProposalVoteEvents,
   useProposalSnapshotVotingPower,
   useProposalSnapshot,
   useGetVotesOnBlock,
@@ -29,7 +29,7 @@ import dayjs from "dayjs"
 export const useProposalDetailById = (proposalId: string) => {
   const { account } = useWallet()
   const proposalState = useProposalState(proposalId)
-  const proposalVoteEvents = useProposalVoteEvent(proposalId)
+  const proposalVoteEvents = useProposalVoteEvents(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
   const proposalCanceledEvent = useProposalCanceledEvent(proposalId)
   const proposalQueuedEvent = useProposalQueuedEvent(proposalId)
@@ -110,13 +110,13 @@ export const useProposalDetailById = (proposalId: string) => {
   } = useProposalVoteDates(proposalId)
 
   const proposal = useMemo(() => {
-    const userVote = proposalVoteEvents.userVote
-    const votes = proposalVoteEvents.votes
-    const votesWithComment = proposalVoteEvents.votesWithComment
-    const hasUserVoted = proposalVoteEvents.hasUserVoted
-    const totalVot3UsedInVotes = Number(ethers.formatEther(BigInt(proposalVoteEvents.totalVot3UsedInVotes || 0)))
+    const userVote = proposalVoteEvents.data?.userVote
+    const votes = proposalVoteEvents.data?.votes
+    const votesWithComment = proposalVoteEvents.data?.votesWithComment
+    const hasUserVoted = proposalVoteEvents.data?.hasUserVoted
+    const totalVot3UsedInVotes = Number(ethers.formatEther(BigInt(proposalVoteEvents.data?.totalVot3UsedInVotes || 0)))
     const totalVotingPowerUsedInVotes = Number(
-      ethers.formatEther(BigInt(proposalVoteEvents.totalVotingPowerUsedInVotes || 0)),
+      ethers.formatEther(BigInt(proposalVoteEvents.data?.totalVotingPowerUsedInVotes || 0)),
     )
 
     const forVotes = Number(proposalVotes.data?.forVotes || "0")
