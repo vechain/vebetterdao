@@ -19,7 +19,7 @@ import { initReactI18next } from "react-i18next"
 
 export const enLang = "en"
 
-const translations: { [key: string]: any } = {
+export const translations: { [key: string]: any } = {
   en,
   it,
   fr,

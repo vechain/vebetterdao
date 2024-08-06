@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.4.4",
+  "version": "1.5.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,7 +14,8 @@
     "test:watch": "vitest watch",
     "test:coverage:fe": "vitest run --coverage",
     "clean": "rm -rf .next node_modules dist",
-    "generate-translations": "npx ts-node ./src/scripts/generateTranslations.ts"
+    "generate-translations": "npx ts-node ./src/scripts/translations/generateTranslations.ts",
+    "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts"
   },
   "dependencies": {
     "@chakra-ui/next-js": "^2.2.0",
@@ -33,6 +34,7 @@
     "@tanstack/react-query": "^5.28.12",
     "@tanstack/react-query-devtools": "^5.20.5",
     "@tanstack/react-query-persist-client": "^5.28.12",
+    "@transak/transak-sdk": "^3.1.1",
     "@uiw/react-md-editor": "^4.0.4",
     "@vechain.energy/dapp-kit-hooks": "^1.2.1",
     "@vechain/connex-driver": "^2.1.0",

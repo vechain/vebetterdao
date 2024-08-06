@@ -607,14 +607,9 @@
   "This address won't be able to distribute rewards anymore.": "此地址将无法再分配奖励。",
   "Add a new reward distributor": "添加新的奖励分配者",
   "Contract or wallet address": "合约或钱包地址",
-  "Rewards distributor already present": "奖励分配者已存在",
-  "Add distributor": "添加分配者",
-  "You’ve voted on this allocation round!": "您已对本轮分配进行了投票！",
-  "You’ll be able to claim your reward when the round is over.": "本轮结束时您可以领取您的奖励。",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "对本轮分配投票，以在投票结束后收到奖励。",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "您未对本轮分配投票。您仍然可以在下一轮进行投票以获得奖励。",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "您已因对本轮分配投票而获得<strong>{{formattedRoundReward}} B3TR</strong>奖励，<strong>现在就领取！</strong>",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "您已经领取了您的投票奖励！记得在下一个分配轮次<strong>投票</strong>以领取更多奖励。",
-  "Rewards claimed": "奖励已领取",
-  "Rewards claimable in {{remainingTime}}": "{{remainingTime}}后可领取奖励"
+  "Rewards distributor already present": "奖励分发者已存在",
+  "Add distributor": "添加分发者",
+  "Deposit B3TR to {{name}} app": "将 B3TR 存入 {{name}} 应用程序",
+  "Rewards Pool": "奖励池",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "应用程序可用于奖励分配的 B3TR 代币总量。"
 }

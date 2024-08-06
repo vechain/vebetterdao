@@ -1,16 +1,16 @@
 import { VStack } from "@chakra-ui/react"
 import { AppBalanceCard } from "./AppBalanceCard"
+import { useIsAppAdmin, useIsAppModerator } from "@/api"
 import { useCurrentAppInfo } from "../hooks/useCurrentAppInfo"
-import { useIsAppAdmin } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 
 export const AppDetailsSidebar = () => {
-  const { account } = useWallet()
   const { app } = useCurrentAppInfo()
+  const { account } = useWallet()
+  const { data: isAppModerator } = useIsAppModerator(app?.id ?? "", account ?? "")
   const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account ?? "")
-
   return (
-    isAppAdmin && (
+    (isAppModerator || isAppAdmin) && (
       <VStack flex={1.5}>
         <AppBalanceCard />
       </VStack>

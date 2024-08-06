@@ -606,15 +606,10 @@
   "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.": "これらのアドレスは、アプリの残高を使用してユーザーに報酬を配布し、アプリから資金を引き出すことができます。",
   "This address won't be able to distribute rewards anymore.": "このアドレスはもはや報酬を配布できません。",
   "Add a new reward distributor": "新しい報酬配布者を追加",
-  "Contract or wallet address": "契約またはウォレットアドレス",
-  "Rewards distributor already present": "報酬配布者が既に存在します",
+  "Contract or wallet address": "コントラクトまたはウォレットアドレス",
+  "Rewards distributor already present": "報酬配布者は既に存在します",
   "Add distributor": "配布者を追加",
-  "You’ve voted on this allocation round!": "この配分ラウンドに投票しました！",
-  "You’ll be able to claim your reward when the round is over.": "ラウンドが終了したら報酬を請求できます。",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "この配分ラウンドに投票して、投票セッション終了後に報酬を受け取ります。",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "この配分ラウンドに投票しませんでした。次のラウンドに投票して報酬を受け取ることができます。",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "この配分ラウンドに投票した報酬として <strong>{{formattedRoundReward}} B3TR</strong> を獲得しました。 <strong>今すぐ請求してください！</strong>",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "報酬を受領しました！次の割り当てラウンドで投票して、さらに多くの報酬を受け取りましょう。",
-  "Rewards claimed": "報酬受領済み",
-  "Rewards claimable in {{remainingTime}}": "{{remainingTime}}後に受け取れる報酬"
+  "Deposit B3TR to {{name}} app": "{{name}}アプリにB3TRを預ける",
+  "Rewards Pool": "報酬プール",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "アプリが報酬分配用に利用可能なB3TRトークンの総量。"
 }

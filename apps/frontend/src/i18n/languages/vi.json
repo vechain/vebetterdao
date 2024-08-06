@@ -609,12 +609,7 @@
   "Contract or wallet address": "Địa chỉ hợp đồng hoặc ví",
   "Rewards distributor already present": "Nhà phân phối phần thưởng đã có mặt",
   "Add distributor": "Thêm nhà phân phối",
-  "You’ve voted on this allocation round!": "Bạn đã bỏ phiếu trong vòng phân bổ này!",
-  "You’ll be able to claim your reward when the round is over.": "Bạn sẽ có thể nhận phần thưởng của mình khi vòng này kết thúc.",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "Bỏ phiếu trong vòng phân bổ này để nhận phần thưởng sau khi phiên bỏ phiếu kết thúc.",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Bạn đã không bỏ phiếu trong vòng phân bổ này. Bạn vẫn có thể bỏ phiếu trong vòng tiếp theo để nhận phần thưởng.",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Bạn đã kiếm được {{formattedRoundReward}} B3TR như là phần thưởng cho việc bỏ phiếu trong vòng phân bổ này Hãy nhận chúng ngay bây giờ!",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Bạn đã nhận phần thưởng cho cử tri của mình! Nhớ <strong>bỏ phiếu ở vòng phân bổ tiếp theo</strong> để nhận thêm phần thưởng.",
-  "Rewards claimed": "Phần thưởng đã được nhận",
-  "Rewards claimable in {{remainingTime}}": "Phần thưởng có thể nhận trong {{remainingTime}}"
+  "Deposit B3TR to {{name}} app": "Nạp B3TR vào ứng dụng {{name}}",
+  "Rewards Pool": "Quỹ Phần Thưởng",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Tổng số lượng token B3TR mà ứng dụng có sẵn để phân phối phần thưởng."
 }

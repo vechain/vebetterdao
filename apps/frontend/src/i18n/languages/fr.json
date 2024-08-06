@@ -609,12 +609,7 @@
   "Contract or wallet address": "Adresse du contrat ou du portefeuille",
   "Rewards distributor already present": "Distributeur de récompenses déjà présent",
   "Add distributor": "Ajouter un distributeur",
-  "You’ve voted on this allocation round!": "Vous avez voté pour ce tour d'allocation !",
-  "You’ll be able to claim your reward when the round is over.": "Vous pourrez réclamer votre récompense à la fin du tour.",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "Votez pour ce tour d'allocation pour <strong>recevoir des récompenses</strong> après la fin de la session de vote.",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Vous n'avez pas voté pour ce tour d'allocation. Vous pouvez encore <strong>voter pour le prochain tour pour recevoir des récompenses.</strong>",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Vous avez gagné <strong>{{formattedRoundReward}} B3TR</strong> en récompense pour avoir voté pour ce tour d'allocation <strong>Réclamez-les maintenant !</strong>",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Vous avez réclamé vos récompenses de vote ! N'oubliez pas de <strong>voter lors du prochain tour d'allocation</strong> pour recevoir plus de récompenses.",
-  "Rewards claimed": "Récompenses réclamées",
-  "Rewards claimable in {{remainingTime}}": "Récompenses réclamables dans {{remainingTime}}"
+  "Deposit B3TR to {{name}} app": "Déposer B3TR sur l'application {{name}}",
+  "Rewards Pool": "Réserve de Récompenses",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Montant total de jetons B3TR que l'application a disponibles pour la distribution de récompenses."
 }

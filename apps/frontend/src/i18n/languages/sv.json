@@ -606,15 +606,10 @@
   "These addresses will be able to distribute rewards to users using your app balance and withdraw funds from the app.": "Dessa adresser kommer att kunna distribuera belöningar till användare med ditt app-saldo och ta ut medel från appen.",
   "This address won't be able to distribute rewards anymore.": "Denna adress kommer inte längre att kunna distribuera belöningar.",
   "Add a new reward distributor": "Lägg till en ny belöningsdistributör",
-  "Contract or wallet address": "Kontrakt- eller plånboksadress",
-  "Rewards distributor already present": "Belöningsdistributör redan tillagd",
+  "Contract or wallet address": "Kontrakts- eller plånboksadress",
+  "Rewards distributor already present": "Belöningsdistributör redan närvarande",
   "Add distributor": "Lägg till distributör",
-  "You’ve voted on this allocation round!": "Du har röstat i denna allokeringsrunda!",
-  "You’ll be able to claim your reward when the round is over.": "Du kan hämta din belöning när rundan är över.",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "Rösta i denna allokeringsrunda för att <strong>få belöningar</strong> efter att röstningen är avslutad.",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Du röstade inte i denna allokeringsrunda. Du kan fortfarande <strong>rösta i nästa för att få belöningar.</strong>",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Du har tjänat <strong>{{formattedRoundReward}} B3TR</strong> som en belöning för att ha röstat i denna allokeringsrunda <strong>Hämta dem nu!</strong>",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Du har begärt dina väljarrabatter! Kom ihåg att <strong>rösta i nästa allokeringsrunda</strong> för att få fler belöningar.",
-  "Rewards claimed": "Belöningar begärda",
-  "Rewards claimable in {{remainingTime}}": "Belöningar kan begäras om {{remainingTime}}"
+  "Deposit B3TR to {{name}} app": "Sätt in B3TR på {{name}} app",
+  "Rewards Pool": "Belöningspool",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Totalt antal B3TR-tokens som appen har tillgängligt för belöningsdistribution."
 }

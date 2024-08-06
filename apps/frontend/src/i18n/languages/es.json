@@ -607,14 +607,9 @@
   "This address won't be able to distribute rewards anymore.": "Esta dirección ya no podrá distribuir recompensas.",
   "Add a new reward distributor": "Añadir un nuevo distribuidor de recompensas",
   "Contract or wallet address": "Dirección de contrato o billetera",
-  "Rewards distributor already present": "Distribuidor de recompensas ya presente",
-  "Add distributor": "Añadir distribuidor",
-  "You’ve voted on this allocation round!": "¡Has votado en esta ronda de asignación!",
-  "You’ll be able to claim your reward when the round is over.": "Podrás reclamar tu recompensa cuando termine la ronda.",
-  "Vote on this allocation round to receive rewards after the voting session has ended.": "Vota en esta ronda de asignación para <strong>recibir recompensas</strong> después de que termine la sesión de votación.",
-  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "No votaste en esta ronda de asignación. Aún puedes <strong>votar en la siguiente para recibir recompensas.</strong>",
-  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Has ganado <strong>{{formattedRoundReward}} B3TR</strong> como recompensa por votar en esta ronda de asignación <strong>¡Reclámalas ahora!</strong>",
-  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "¡Has reclamado tus recompensas de votante! Recuerda <strong>votar en la próxima ronda de asignación</strong> para recibir más recompensas.",
-  "Rewards claimed": "Recompensas reclamadas",
-  "Rewards claimable in {{remainingTime}}": "Recompensas reclamables en {{remainingTime}}"
+  "Rewards distributor already present": "El distribuidor de recompensas ya está presente",
+  "Add distributor": "Agregar distribuidor",
+  "Deposit B3TR to {{name}} app": "Depositar B3TR en la aplicación {{name}}",
+  "Rewards Pool": "Fondo de Recompensas",
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Cantidad total de tokens B3TR que la aplicación tiene disponible para la distribución de recompensas."
 }

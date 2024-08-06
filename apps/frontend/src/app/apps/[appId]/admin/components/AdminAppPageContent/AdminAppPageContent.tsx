@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next"
 import { EditAppModerators } from "./components/EditAppModerators"
 import { EditAppAddresses } from "./components/EditAppAddresses"
 import { useForm } from "react-hook-form"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { UpdateConfirmationModal } from "./components/UpdateConfirmationModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
@@ -18,6 +18,7 @@ import { useUpdateAppAdminInfo } from "@/hooks/useUpdateAppAdminInfo"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { EditAppRewardDistributors } from "./components/EditAppRewardDistributors"
+import { useAccountPermissions } from "@/api/contracts/account"
 
 export type AdminAppForm = {
   adminAddress: string
@@ -30,11 +31,14 @@ export const AdminAppPageContent = () => {
   const { appMetadata } = useCurrentAppMetadata()
   const { moderators } = useCurrentAppModerators()
   const { distributors } = useCurrentAppRewardDistributors()
+
   const { t } = useTranslation()
   const [editAdminAddress, setEditAdminAddress] = useState(false)
   const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
   const updateConfirmationModal = useDisclosure()
   const { admin } = useCurrentAppAdmin()
+  const { account } = useWallet()
+  const { isAdminOfX2EarnApps } = useAccountPermissions(account || "")
   const { app } = useCurrentAppInfo()
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
@@ -53,6 +57,14 @@ export const AdminAppPageContent = () => {
     "moderators",
     "distributors",
   ])
+
+  // Update the form values when the app fetches the data from blockchain
+  useEffect(() => {
+    form.setValue("moderators", moderators)
+  }, [moderators, form])
+  useEffect(() => {
+    form.setValue("distributors", distributors)
+  }, [distributors, form])
 
   const isAdminAddressChanged = !compareAddresses(adminAddress, admin || "")
   const isTeamWalletAddressChanged = !compareAddresses(teamWalletAddress, app?.teamWalletAddress || "")
@@ -142,9 +154,10 @@ export const AdminAppPageContent = () => {
     form.handleSubmit(onSubmit)()
   }, [form, handleClose, onSubmit])
 
-  const { account } = useWallet()
-
-  const allowedToEditAdminInfo = compareAddresses(account || "", admin)
+  const allowedToEditAdminInfo = useMemo(
+    () => compareAddresses(account || "", admin) || isAdminOfX2EarnApps,
+    [account, admin, isAdminOfX2EarnApps],
+  )
 
   useEffect(() => {
     if (!allowedToEditAdminInfo) {
