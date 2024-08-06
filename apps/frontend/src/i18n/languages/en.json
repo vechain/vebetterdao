@@ -1,6 +1,5 @@
 {
   "{{amount}}% distributed": "<strong>{{amount}}</strong>% distributed",
-
   "See round": "See round",
   "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.": "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.",
   "Time to cast your vote and earn rewards!": "Time to cast your vote and earn rewards!",
@@ -612,5 +611,14 @@
   "Add distributor": "Add distributor",
   "Deposit B3TR to {{name}} app": "Deposit B3TR to {{name}} app",
   "Rewards Pool": "Rewards Pool",
+  "You are on level {{level}}": "You are on level {{level}}",
+  "GM NFT attached to {{node}}": "GM NFT attached to {{node}}",
+  "Reward multiplier": "Reward multiplier",
+  "to endose Apps": "to endose Apps",
+  "You need": "You need",
+  "to upgrade your NFT to the next level": "to upgrade your NFT to the next level",
+  "Upgrade now!": "Upgrade now!",
+  "{{nftUpgradeOffset}} B3TR": "{{nftUpgradeOffset}} B3TR",
+  "Your token balance": "Your token balance",
   "Total amount of B3TR tokens that the app has available for rewards distribution.": "Total amount of B3TR tokens that the app has available for rewards distribution."
 }
