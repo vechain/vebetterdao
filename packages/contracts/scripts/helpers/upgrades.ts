@@ -86,7 +86,7 @@ export const deployAndUpgrade = async (
   if (options.versions && contractNames.length !== options.versions.length)
     throw new Error("Contract names and versions must have the same length")
 
-  // 1. First we deploy proxy and first implementation
+  // 1. Deploy proxy and first implementation
   const contractName = contractNames[0]
   const contractArgs = args[0]
 
@@ -98,6 +98,7 @@ export const deployAndUpgrade = async (
     options.versions?.[0],
   )
 
+  // 2. Upgrade the proxy to the next versions
   for (let i = 1; i < contractNames.length; i++) {
     const previousVersionContractName = contractNames[i - 1]
     const newVersionContractName = contractNames[i]
