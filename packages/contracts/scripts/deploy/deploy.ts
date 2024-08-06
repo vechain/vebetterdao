@@ -113,7 +113,7 @@ export async function deployAll(config: ContractsConfig) {
   const GovernorStateLogicLib = await GovernorStateLogic.deploy()
   await GovernorStateLogicLib.waitForDeployment()
 
-  console.log("================ Deploying Token Auction Contracts =================")
+  console.log("================ Deploying Vechain Nodes mock contracts =================")
 
   const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
   const vechainNodesMock = await TokenAuctionLock.deploy()
