@@ -611,5 +611,10 @@
   "Add distributor": "Agregar distribuidor",
   "Deposit B3TR to {{name}} app": "Depositar B3TR en la aplicación {{name}}",
   "Rewards Pool": "Fondo de Recompensas",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Cantidad total de tokens B3TR que la aplicación tiene disponible para la distribución de recompensas."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Cantidad total de tokens B3TR que la aplicación tiene disponible para la distribución de recompensas.",
+  "VeWorld Banner": "Banner de VeWorld",
+  "Upload a banner to be displayed on the VeWorld mobile wallet": "Subir un banner para mostrar en la billetera móvil VeWorld",
+  "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "Los banners de la aplicación deben ser de 1240×460 y tener el contenido más importante en una área segura de 820×240 en el centro de la imagen para que se vea bien en cada dispositivo.",
+  "Download template": "Descargar plantilla",
+  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "El banner de la billetera móvil VeWorld debe ser de 1024x576 o un múltiplo de ello (por ejemplo: 2048x1152 o 3072x1728)."
 }

@@ -611,5 +611,10 @@
   "Add distributor": "Thêm nhà phân phối",
   "Deposit B3TR to {{name}} app": "Nạp B3TR vào ứng dụng {{name}}",
   "Rewards Pool": "Quỹ Phần Thưởng",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Tổng số lượng token B3TR mà ứng dụng có sẵn để phân phối phần thưởng."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Tổng số lượng token B3TR mà ứng dụng có sẵn để phân phối phần thưởng.",
+  "VeWorld Banner": "Biểu ngữ VeWorld",
+  "Upload a banner to be displayed on the VeWorld mobile wallet": "Tải lên một biểu ngữ để hiển thị trên ví di động VeWorld",
+  "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "Biểu ngữ ứng dụng nên có kích thước 1240×460 và có nội dung quan trọng nhất trong khu vực an toàn 820×240 ở giữa hình ảnh để trông đẹp trên mọi thiết bị.",
+  "Download template": "Tải xuống mẫu",
+  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "Biểu ngữ ví di động VeWorld nên có kích thước 1024x576 hoặc bội số của nó (ví dụ: 2048x1152 hoặc 3072x1728)."
 }

@@ -611,5 +611,10 @@
   "Vote for your preferred app to determine funding from the Apps allocation budget. More votes mean more funding. Plus, earn rewards from the Voting Rewards allocation by voting in this round. This allocation process repeats every week.": "Vota per la tua app preferita per determinare i finanziamenti dal budget di allocazione delle app. Più voti significano più finanziamenti. Inoltre, guadagna ricompense dall'allocazione delle Ricompense di Votazione votando in questo round. Questo processo di allocazione si ripete ogni settimana.",
   "Deposit B3TR to {{name}} app": "Deposita B3TR nell'app {{name}}",
   "Rewards Pool": "Pool di Ricompense",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Ammontare totale di token B3TR che l'app ha disponibili per la distribuzione delle ricompense."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Ammontare totale di token B3TR che l'app ha disponibili per la distribuzione delle ricompense.",
+  "VeWorld Banner": "Banner VeWorld",
+  "Upload a banner to be displayed on the VeWorld mobile wallet": "Carica un banner da visualizzare sul portafoglio mobile VeWorld",
+  "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "I banner delle app devono essere di 1240×460 e avere il contenuto più importante in un'area sicura di 820×240 al centro dell'immagine per apparire bene su ogni dispositivo.",
+  "Download template": "Scarica il modello",
+  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "Il banner del portafoglio mobile VeWorld dovrebbe essere di 1024x576 o un suo multiplo (ad esempio: 2048x1152 o 3072x1728)."
 }
