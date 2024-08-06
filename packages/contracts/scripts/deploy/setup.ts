@@ -1,8 +1,10 @@
-import { Emissions, Treasury, X2EarnApps } from "../../typechain-types"
+import { B3TR, B3TRGovernorV1, Emissions, Treasury, VOT3, X2EarnApps, XAllocationVoting } from "../../typechain-types"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
-import { bootstrapEmissions } from "../helpers/emissions"
+import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury } from "../helpers/airdrop"
+import { proposeUpgradeGovernance } from "../helpers"
+import { convertB3trForVot3 } from "../helpers/swap"
 
 const accounts = getTestKeys(13)
 
@@ -57,7 +59,15 @@ const APPS = [
   },
 ]
 
-export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnApps) => {
+export const setupLocalEnvironment = async (
+  emissions: Emissions,
+  treasury: Treasury,
+  x2EarnApps: X2EarnApps,
+  governor: B3TRGovernorV1,
+  xAllocationVoting: XAllocationVoting,
+  b3tr: B3TR,
+  vot3: VOT3,
+) => {
   const start = performance.now()
   console.log("================ Setup local environment")
 
@@ -77,7 +87,14 @@ export const setupLocalEnvironment = async (emissions: Emissions, treasury: Trea
   const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
+  await convertB3trForVot3(b3tr, vot3, seedAccounts)
+
+  await startEmissions(emissionsContract, admin)
+
+  await proposeUpgradeGovernance(governor, xAllocationVoting)
+
   const end = new Date(performance.now() - start)
+
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
 
