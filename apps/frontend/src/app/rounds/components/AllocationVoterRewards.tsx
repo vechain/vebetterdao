@@ -58,7 +58,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
   const formattedRoundReward = useMemo(() => {
     if (!roundReward) return 0
 
-    return Number(roundReward)
+    return Number(roundReward.rewards)
   }, [roundReward])
 
   const isFinished = useMemo(() => {
@@ -69,6 +69,8 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
     // remove prefix/suffix
     if (!isFinished) return `${allocationRound?.voteEndTimestamp?.fromNow(true)}`
   }, [allocationRound?.voteEndTimestamp, isFinished])
+
+  console.log({ hasVoted, isFinished, formattedRoundReward, remainingTime, roundReward })
 
   const description = useMemo(() => {
     if (hasVoted && !isFinished) {
