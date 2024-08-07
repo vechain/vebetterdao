@@ -56,7 +56,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @param appId the hashed name of the app
    */
   function appURI(bytes32 appId) public view returns (string memory) {
-    if (!_appRegistered(appId)) {
+    if (!_appSubmitted(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -185,5 +185,5 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @dev Function to check if an apo is registered.
    */
-   function _appRegistered(bytes32 appId) internal view virtual returns (bool);
+   function _appSubmitted(bytes32 appId) internal view virtual returns (bool);
 }

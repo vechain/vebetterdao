@@ -132,7 +132,7 @@ contract X2EarnApps is
    * @dev See {IX2EarnApps-setVotingEligibility}.
    */
   function setVotingEligibility(bytes32 _appId, bool _isEligible) public virtual onlyRole(GOVERNANCE_ROLE) {
-    if (!_appRegistered(_appId)) {
+    if (!_appSubmitted(_appId)) {
       revert X2EarnNonexistentApp(_appId);
     }
 

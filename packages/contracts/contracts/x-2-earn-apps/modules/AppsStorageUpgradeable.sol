@@ -67,7 +67,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param appId the if of the app
    */
   function _getAppStorage(bytes32 appId) internal view returns (X2EarnAppsDataTypes.App memory) {
-    if (!_appRegistered(appId)) {
+    if (!_appSubmitted(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -123,7 +123,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     bytes32 id = hashAppName(appName);
 
-    if (_appRegistered(id)) {
+    if (_appSubmitted(id)) {
       revert X2EarnAppAlreadyExists(id);
     }
 
@@ -172,11 +172,11 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev Check if the app is registered
+   * @dev Check if the apps registration has been submitted.
    *
    * @param appId the id of the app
    */
-  function _appRegistered(bytes32 appId) internal view override returns (bool) {
+  function _appSubmitted(bytes32 appId) internal view override returns (bool) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
     return $._apps[appId].id != bytes32(0);

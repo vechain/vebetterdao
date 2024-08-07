@@ -91,7 +91,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function checkEndorsement(bytes32 appId) external returns (bool) {
     // Ensure the app is registered
-    if (!_appRegistered(appId)) {
+    if (!_appSubmitted(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -123,7 +123,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     // Check if the app exists
-    if (!_appRegistered(appId)) {
+    if (!_appSubmitted(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -169,7 +169,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function unendorseApp(bytes32 appId) external {
     // Check if the app exists
-    if (!_appRegistered(appId)) {
+    if (!_appSubmitted(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
