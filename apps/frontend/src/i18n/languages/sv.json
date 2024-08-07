@@ -620,5 +620,10 @@
   "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Du har gjort anspråk på dina röstbelöningar! Kom ihåg att rösta i nästa tilldelningsomgång för att få fler belöningar.",
   "Rewards claimed": "Belöningar har gjorts anspråk på",
   "Rewards claimable in {{remainingTime}}": "Belöningar kan göras anspråk på om {{remainingTime}}",
-  "No rewards to claim": "Inga belöningar att göra anspråk på"
+  "No rewards to claim": "Inga belöningar att göra anspråk på",
+  "VeWorld Banner": "VeWorld Banner",
+  "Upload a banner to be displayed on the VeWorld mobile wallet": "Ladda upp en banner som visas på VeWorld mobilplånbok",
+  "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "Appbanners bör vara 1240×460 och ha det viktigaste innehållet i ett säkert område på 820×240 i mitten av bilden för att se bra ut på alla enheter.",
+  "Download template": "Ladda ner mall",
+  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorld mobilplånboksbanner bör vara 1024x576 eller en multipel av den (t.ex. 2048x1152 eller 3072x1728)."
 }

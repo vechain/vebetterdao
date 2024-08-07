@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
-import { Button, Flex, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
+import { Flex, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
 import { notFoundImage } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
@@ -12,8 +12,8 @@ type Props = {
   form: UseFormReturn<EditAppForm, any, undefined>
 }
 
-export const EditAppBanner = ({ form }: Props) => {
-  const banner = form.watch("bannerImage")
+export const EditVeWorldBanner = ({ form }: Props) => {
+  const banner = form.watch("ve_world_banner")
   const inputRef = useRef<HTMLInputElement>(null)
   const toast = useToast()
   const { t } = useTranslation()
@@ -27,7 +27,7 @@ export const EditAppBanner = ({ form }: Props) => {
         if (file) {
           const compressedFile = await handleImageCompression(file)
           const base64File = await blobToBase64(compressedFile)
-          form.setValue("bannerImage", base64File)
+          form.setValue("ve_world_banner", base64File)
         }
       } catch (error) {
         toast({
@@ -43,18 +43,17 @@ export const EditAppBanner = ({ form }: Props) => {
     [form, toast],
   )
 
-  const handleDownload = () => {
-    const link = document.createElement("a")
-    link.href = "/images/VeBetterDAO-Banner Size Guide.zip"
-    link.download = "VeBetterDAO-Banner Size Guide.zip"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
-
   return (
     <VStack gap={2} align={"start"}>
-      <Flex w="full" h="220px" flexBasis={"64px"} position={"relative"} rounded="16px">
+      <VStack align="stretch" gap={2}>
+        <Heading fontSize="24px" fontWeight="700">
+          {t("VeWorld Banner")}
+        </Heading>
+        <Text fontSize="md" color="gray.500">
+          {t("Upload a banner to be displayed on the VeWorld mobile wallet")}
+        </Text>
+      </VStack>
+      <Flex w="full" h="220px" flexBasis={"64px"} position={"relative"} rounded="16px" mt={4}>
         <Image
           src={banner ?? notFoundImage}
           alt={"banner"}
@@ -89,12 +88,7 @@ export const EditAppBanner = ({ form }: Props) => {
         </Flex>
       </Flex>
       <Text fontSize={"sm"} color={"gray"} pt={0}>
-        {t(
-          "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.",
-        )}
-        <Button variant="link" colorScheme="blue" size={"sm"} pl={2} onClick={handleDownload}>
-          {t("Download template")}
-        </Button>
+        {t("VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).")}
       </Text>
     </VStack>
   )
