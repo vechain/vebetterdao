@@ -101,7 +101,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Calculate the score of the app, considering if any endorser needs to be removed
-    uint256 score = _getScoreAndUpdateEndorsers(appId, address(0));
+    uint256 score = _getScoreAndRemoveEndorsers(appId, address(0));
 
     // Check the total score and update the grace period and voting eligibility accordingly
     if (score < _endorsementScoreThreshold()) {
@@ -152,7 +152,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     $._endorsers[msg.sender] = true;
 
     // Calculate the score of the app, considering the new endorsement
-    uint256 score = _getScoreAndUpdateEndorsers(appId, address(0));
+    uint256 score = _getScoreAndRemoveEndorsers(appId, address(0));
 
     // Check if the score is equal to or greater than the score threshold (100)
     if (score >= _endorsementScoreThreshold()) {
@@ -182,7 +182,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Calculate the new score of the app after removing the caller's endorsement
-    uint256 score = _getScoreAndUpdateEndorsers(appId, msg.sender);
+    uint256 score = _getScoreAndRemoveEndorsers(appId, msg.sender);
 
     // Check if the app is no longer in the voting allocation rounds due to lack of endorsement or from being blacklisted
     if (!isEligibleNow(appId) || isBlacklisted(appId)) {
@@ -204,7 +204,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param endorserToRemove The address of the endorser to remove, or address(0) if no endorser should be removed.
    * @return uint256 The score of the app.
    */
-  function _getScoreAndUpdateEndorsers(bytes32 appId, address endorserToRemove) internal returns (uint256) {
+  function _getScoreAndRemoveEndorsers(bytes32 appId, address endorserToRemove) internal returns (uint256) {
     // Retrieve the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
     uint256 score;
