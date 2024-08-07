@@ -44,7 +44,7 @@ export const getRoundRewardQueryKey = (roundId?: string, address?: string) => ["
 export const useRoundReward = (address: string, roundId: string) => {
   const { thor } = useConnex()
   return useQuery({
-    queryKey: getRoundRewardQueryKey(roundId),
+    queryKey: getRoundRewardQueryKey(roundId, address),
     queryFn: async () => await getRoundReward(thor, address, roundId),
     enabled: !!thor,
   })
