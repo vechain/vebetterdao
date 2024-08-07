@@ -24,6 +24,8 @@ export const useIsFormChanged = (form: UseFormReturn<EditAppForm, any, undefined
       socialUrl => !appMetadata?.social_urls?.find(url => url.name === socialUrl.name && url.url === socialUrl.url),
     ) || socialUrls.length !== appMetadata?.social_urls?.length
 
+  const isVeWorldBannerChanged = form.watch("ve_world_banner") !== appMetadata?.ve_world?.banner
+
   return (
     isNameChanged ||
     isDescriptionChanged ||
@@ -31,6 +33,7 @@ export const useIsFormChanged = (form: UseFormReturn<EditAppForm, any, undefined
     isLogoChanged ||
     isBannerChanged ||
     isScreenshotsChanged ||
-    isSocialUrlsChanged
+    isSocialUrlsChanged ||
+    isVeWorldBannerChanged
   )
 }

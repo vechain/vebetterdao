@@ -58,6 +58,9 @@ export const NewAppPageFormContent = () => {
         social_urls: [],
         app_urls: [],
         tweets: [],
+        ve_world: {
+          banner: data.banner,
+        },
       })
 
       if (!metadataUri) return
