@@ -346,7 +346,9 @@ interface IX2EarnApps {
   function updateAppMetadata(bytes32 appId, string memory metadataURI) external;
 
   /**
-   * @dev Check if there is an app with the specified `appId`.
+   * @dev Check if there is an app with the specified `appId`. 
+   * @dev This function should be used to check if an app exists is part of the VeBetter DAO ecosystem.
+   * @notice An app is considered to exist if it has been included in at least one allocation round.
    *
    * @param appId the id of the app
    */

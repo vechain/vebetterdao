@@ -185,6 +185,8 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   // ---------- Getters ---------- //
   /**
    * @dev See {IX2EarnApps-appExists}.
+   *
+   * @notice An XApp must have been included in at least one allocation round to return true here.
    */
   function appExists(bytes32 appId) public view override returns (bool) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
