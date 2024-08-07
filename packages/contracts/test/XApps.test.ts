@@ -2088,7 +2088,7 @@ describe("X-Apps", function () {
       expect((await x2EarnApps.appsPendingEndorsement()).length).to.eql(1)
     })
 
-    it("If an XAPP is in the grace period for longer than 2 cycles and has not got reendorsed they are removed from voting rounds and any endorser cna remove their endorsement", async function () {
+    it("If an XAPP is in the grace period for longer than 2 cycles and has not got reendorsed they are removed from voting rounds and any endorser can remove their endorsement", async function () {
       const config = createLocalConfig()
       const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
