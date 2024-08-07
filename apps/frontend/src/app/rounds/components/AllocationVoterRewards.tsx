@@ -58,7 +58,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
   const formattedRoundReward = useMemo(() => {
     if (!roundReward) return 0
 
-    return Number(roundReward)
+    return Number(roundReward.rewards)
   }, [roundReward])
 
   const isFinished = useMemo(() => {
