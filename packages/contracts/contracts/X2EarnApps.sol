@@ -141,7 +141,7 @@ contract X2EarnApps is
     }
 
     // If the app is pending endorsement and the app is getting blacklisted remove it from the pending endorsement list
-    if (appPendingEndorsment(_appId) && !_isEligible) {
+    if (isAppUnendorsed(_appId) && !_isEligible) {
       _updateAppsPendingEndorsement(_appId, true);
     }
 

@@ -396,19 +396,19 @@ interface IX2EarnApps {
   /**
    * @dev return true if an app is pending for endorsement.
    */
-  function appPendingEndorsment(bytes32 appId) external view returns (bool);
+  function isAppUnendorsed(bytes32 appId) external view returns (bool);
 
   /**
    * @notice Gets the ids of all apps that are looking for endorsement.
    * @return the ids of the apps that are pending for endorsement
    */
-  function appIdsPendingEndorsement() external view returns (bytes32[] memory);
+  function unendorsedAppIds() external view returns (bytes32[] memory);
 
   /**
    * @notice Gets the information about all apps that are looking for endorsement.
    * @return the information about the apps that are pending for endorsement
    */
-  function appsPendingEndorsement() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
+  function unendorsedApps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
 
   /**
    * @dev Get the endorsement score of an app.

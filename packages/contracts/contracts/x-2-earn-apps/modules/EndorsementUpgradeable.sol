@@ -133,7 +133,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Check if the app is pending endorsement
-    if (!appPendingEndorsment(appId)) {
+    if (!isAppUnendorsed(appId)) {
       revert X2EarnAppAlreadyEndorsed(appId);
     }
 
@@ -401,7 +401,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // If the app is pending endorsement
-    if (appPendingEndorsment(appId)) {
+    if (isAppUnendorsed(appId)) {
       // Mark the app as endorsed so that it is removed from the list of apps pending endorsement
       _setEndorsementStatus(appId, true);
     }
@@ -420,7 +420,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     // If the app is not pending endorsement
-    if (!appPendingEndorsment(appId)) {
+    if (!isAppUnendorsed(appId)) {
       // Mark the app as not endorsed so that it is added to the list of apps pending endorsement
       _setEndorsementStatus(appId, false);
     }
@@ -461,11 +461,11 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnApps-appPendingEndorsment}.
+   * @dev See {IX2EarnApps-isAppUnendorsed}.
    * @param appId The unique identifier of the app.
    * @return True if the app is pending endorsement.
    */
-  function appPendingEndorsment(bytes32 appId) public view override returns (bool) {
+  function isAppUnendorsed(bytes32 appId) public view override returns (bool) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     // If the app is blacklisted, it cannot be pending endorsement
@@ -478,19 +478,19 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev See {IX2EarnApps-appIdsPendingEndorsement}.
+   * @dev See {IX2EarnApps-unendorsedAppIds}.
    */
-  function appIdsPendingEndorsement() public view returns (bytes32[] memory) {
+  function unendorsedAppIds() public view returns (bytes32[] memory) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     return $._unendorsedApps;
   }
 
   /**
-   * @dev See {IX2EarnApps-appsPendingEndorsment}.
+   * @dev See {IX2EarnApps-unendorsedApps}.
    */
-  function appsPendingEndorsement() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
-    bytes32[] memory appIds = appIdsPendingEndorsement();
+  function unendorsedApps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
+    bytes32[] memory appIds = unendorsedAppIds();
     return _getAppsInfo(appIds);
   }
 
