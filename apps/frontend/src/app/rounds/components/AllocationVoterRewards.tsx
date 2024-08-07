@@ -70,7 +70,6 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
     if (!isFinished) return `${allocationRound?.voteEndTimestamp?.fromNow(true)}`
   }, [allocationRound?.voteEndTimestamp, isFinished])
 
-  console.log({ hasVoted, isFinished, formattedRoundReward, remainingTime, roundReward })
 
   const description = useMemo(() => {
     if (hasVoted && !isFinished) {
