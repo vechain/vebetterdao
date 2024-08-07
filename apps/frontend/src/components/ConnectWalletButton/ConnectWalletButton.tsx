@@ -1,4 +1,4 @@
-import { Button, Fade, IconButton, Spinner, VStack, useMediaQuery } from "@chakra-ui/react"
+import { Button, Fade, IconButton, Skeleton, useMediaQuery } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { FaWallet } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
@@ -10,9 +10,9 @@ const DesktopConnectedUserButton = dynamic(
   {
     ssr: false,
     loading: () => (
-      <VStack w="full" spacing={12} h="80vh" justify="center">
-        <Spinner size={"lg"} />
-      </VStack>
+      <Skeleton rounded="full">
+        <Button size="md">{"Connect wallet"}</Button>
+      </Skeleton>
     ),
   },
 )
