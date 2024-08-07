@@ -3,6 +3,32 @@ import { useTxReceipt } from "@/api"
 import { UseMutateFunction, useMutation } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { Transaction } from "thor-devkit"
+
+/**
+ *  Estimate the gas for a transaction with a default 20% buffer
+ * @param thor the thor instance
+ * @param clauses the clauses to estimate the gas for
+ * @param caller the caller of the transaction
+ * @param buffer the buffer to add to the gas estimate (default: 1.2) - 1 is no buffer
+ * @returns the estimated gas
+ */
+const estimateTxGas = async (thor: Connex.Thor, clauses: Connex.VM.Clause[], caller: string, buffer = 2) => {
+  // Send tx details to the node to get the gas estimate
+  const outputs = await thor.explain(clauses).caller(caller).execute()
+
+  const execGas = outputs.reduce((sum, out) => sum + out.gasUsed, 0)
+
+  // Calculate the intrinsic gas (transaction fee) cast is needed as data could be undefinedin Connex.Vm.Clause
+  const intrinsicGas = Transaction.intrinsicGas(clauses as Transaction.Clause[])
+
+  // 15000 is the fee for invoking the VM
+  // Gas estimate is the sum of intrinsic gas and execution gas
+  const gasEstimate = intrinsicGas + (execGas ? execGas + 15000 : 0)
+
+  // Add 20% buffer to the gas estimate
+  return Math.round(gasEstimate * buffer)
+}
 
 /**
  * ready: the user has not clicked on the button yet
@@ -91,34 +117,34 @@ export const useSendTransaction = ({
     return clauses
   }
 
-  const sendTransaction = useCallback(async () => {
-    if (!clauses) throw new Error("clauses is required")
-    return await convertClauses(clauses).then(clauses => {
-      if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
-      return vendor.sign("tx", clauses).request()
-    })
-  }, [clauses, vendor, signerAccount])
-
   /**
    * Send a transaction with the given clauses (in case you need to pass data to build the clauses to mutate directly)
    * @returns see {@link UseSendTransactionReturnValue}
    */
-  const sendTransactionWithClauses = useCallback(
+  const sendTransaction = useCallback(
     async (clauses: EnhancedClause[]) => {
-      if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
-      return vendor.sign("tx", clauses).request()
+      const transaction = vendor.sign("tx", clauses)
+      if (signerAccount) {
+        const gasLimit = await estimateTxGas(thor, clauses, signerAccount)
+        return transaction.signer(signerAccount).gas(gasLimit).request()
+      }
+      return transaction.request()
     },
-    [vendor, signerAccount],
+    [vendor, signerAccount, thor],
   )
 
+  /**
+   * Adapter to send the transaction with the clauses passed to the hook or the ones passed to the function
+   */
   const sendTransactionAdapter = useCallback(
     async (_clauses?: EnhancedClause[]) => {
-      if (_clauses) {
-        return await sendTransactionWithClauses(_clauses)
-      }
-      return await sendTransaction()
+      if (_clauses) return await sendTransaction(_clauses)
+
+      if (!clauses) throw new Error("clauses are required")
+      _clauses = await convertClauses(clauses)
+      return await sendTransaction(_clauses)
     },
-    [sendTransactionWithClauses, sendTransaction],
+    [sendTransaction, clauses],
   )
   const {
     mutate: runSendTransaction,
