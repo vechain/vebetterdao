@@ -212,7 +212,8 @@ interface IX2EarnApps {
   function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory);
 
   /**
-   * @dev Get all apps
+   * @notice Get all the apps that exist in the VeBetter DAO ecosystem.
+   * @dev An XApp must have been included in at least one allocation round to be considered an existing app.
    */
   function apps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
 

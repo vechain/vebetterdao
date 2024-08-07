@@ -218,6 +218,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    *
    * @notice This function could not be efficient with a large number of apps, in that case, use {IX2EarnApps-getPaginatedApps}
    * and then call {IX2EarnApps-app} for each app id
+   * An XApp must have been included in at least one allocation round to be considered an existing app.
    */
   function apps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
