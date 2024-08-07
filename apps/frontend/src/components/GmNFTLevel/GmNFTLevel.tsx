@@ -51,8 +51,17 @@ export const GmNFTLevel = () => {
   const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
 
   return (
-    <Card bg="#004CFC" rounded="12px" p="24px" color="white">
-      <Stack gap={8} align="stretch" justify={"stretch"} direction={isAbove1200 ? "row" : "column-reverse"}>
+    <Card bg="#004CFC" rounded="12px" p="24px" color="white" position="relative" overflow={"hidden"}>
+      <Box
+        position="absolute"
+        top={isAbove1200 ? "-50%" : "-10%"}
+        left={isAbove1200 ? "0" : "-50%"}
+        w={isAbove1200 ? "100%" : "200%"}
+        h="auto"
+        zIndex="2">
+        <Image src={"/images/cloud-background.png"} alt="cloud" objectFit={"contain"} />
+      </Box>
+      <Stack gap={8} align="stretch" justify={"stretch"} direction={isAbove1200 ? "row" : "column-reverse"} zIndex="10">
         <VStack flex="3" align={"stretch"} gap="24px">
           <HStack gap="40px" align={"baseline"} justify={"space-between"}>
             <Heading fontSize={"20px"} fontWeight={600}>
@@ -114,7 +123,7 @@ export const GmNFTLevel = () => {
               <FaChevronRight size={"24px"} />
             </HStack>
           </Stack>
-          <Stack justify={"space-between"} direction={isAbove1200 ? "row" : "column"} gap={2}>
+          <Stack justify={"space-between"} direction={isAbove1200 ? "row" : "column"} gap={"20px"}>
             <HStack gap={2}>
               <UilArrowCircleUp size={"30px"} color="#B1F16C" />
               <Box>
@@ -137,7 +146,7 @@ export const GmNFTLevel = () => {
           <Text fontSize={"20px"} fontWeight={700}>
             {t("Your token balance")}
           </Text>
-          <Stack gap="24px" dir={isAbove1200 ? "row" : "column"}>
+          <Stack gap="24px" direction={isAbove1200 ? "row" : "column"}>
             <VStack
               align={"stretch"}
               flex="1"
