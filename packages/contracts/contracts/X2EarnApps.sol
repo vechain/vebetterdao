@@ -131,21 +131,13 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-setVotingEligibility}.
    */
-  function setVotingEligibility(bytes32 _appId, bool _isEligible) public onlyRole(GOVERNANCE_ROLE) {
+  function setVotingEligibility(bytes32 _appId, bool _isEligible) public virtual onlyRole(GOVERNANCE_ROLE) {
     if (!_appRegistered(_appId)) {
       revert X2EarnNonexistentApp(_appId);
     }
 
     if (appExists(_appId)) {
-      // Check if the app is eligible now and if the eligibility status has changed
-      if (isEligibleNow(_appId) && !_isEligible) {
-        // Remove the app from the voting eligibility list
-        _setVotingEligibility(_appId, false);
-       // Check if the app is not eligible now and if the eligibility status has changed
-      } else if (!isEligibleNow(_appId) && _isEligible) {
-        // Add the app to the voting eligibility list
-        _setVotingEligibility(_appId, true);
-      }
+      _setVotingEligibility(_appId, _isEligible);
     }
 
     // If the app is pending endorsement and the app is getting blacklisted remove it from the pending endorsement list
@@ -165,7 +157,7 @@ contract X2EarnApps is
     address _admin,
     string memory _appName,
     string memory _appMetadataURI
-  ) external {
+  ) public virtual {
     _registerApp(_teamWalletAddress, _admin, _appName, _appMetadataURI);
   }
 
@@ -246,7 +238,7 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-updateGracePeriod}.
    */
-  function updateGracePeriod(uint48 _newGracePeriod) external onlyRole(GOVERNANCE_ROLE) {
+  function updateGracePeriod(uint48 _newGracePeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
     _setGracePeriod(_newGracePeriod);
   }
 
