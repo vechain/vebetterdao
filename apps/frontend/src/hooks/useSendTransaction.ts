@@ -13,7 +13,7 @@ import { Transaction } from "thor-devkit"
  * @param buffer the buffer to add to the gas estimate (default: 1.2) - 1 is no buffer
  * @returns the estimated gas
  */
-const estimateTxGas = async (thor: Connex.Thor, clauses: Connex.VM.Clause[], caller: string, buffer = 2) => {
+const estimateTxGas = async (thor: Connex.Thor, clauses: Connex.VM.Clause[], caller: string, buffer = 1.25) => {
   // Send tx details to the node to get the gas estimate
   const outputs = await thor.explain(clauses).caller(caller).execute()
 
