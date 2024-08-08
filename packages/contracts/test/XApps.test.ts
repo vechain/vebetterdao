@@ -1,4 +1,4 @@
-import { ethers } from "hardhat"
+import { ethers, network } from "hardhat"
 import { expect } from "chai"
 import {
   ZERO_ADDRESS,
@@ -21,7 +21,11 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createNodeHolder, endorseApp } from "./helpers/xnodes"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { X2EarnApps, X2EarnAppsV1 } from "../typechain-types"
+import { X2EarnApps, X2EarnAppsV1, X2EarnApps__factory } from "../typechain-types"
+import { SeedAccount, getTestKeys } from "../scripts/helpers/seedAccounts"
+import { buildTxBody, signAndSendTx } from "../scripts/helpers/txHelper"
+import { clauseBuilder, unitsUtils, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
+import { airdropVTHO } from "../scripts/helpers/airdrop"
 
 describe("X-Apps", function () {
   describe("Deployment", function () {
@@ -3786,6 +3790,68 @@ describe("X-Apps", function () {
 
       const appIdsPendingEndorsement3 = await x2EarnApps.unendorsedAppIds()
       expect(appIdsPendingEndorsement3.length).to.eql(1)
+    })
+
+    it("Check how expensive it is to check the endorsement status of an XAPP with 50 endorsers (MAX amount)", async function () {
+      if (network.name == "hardhat") {
+        return console.log(
+          "Skipping VTHO transfer test on hardhat network as hardcoded VTHO contract address in Treasury does not exist",
+        )
+      }
+      const { x2EarnApps, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      const accounts = getTestKeys(50)
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      console.log(`HERE 4`)
+      const level = 1 // score = 2
+
+      const seedAccounts: SeedAccount[] = []
+
+      accounts.forEach(key => {
+        seedAccounts.push({
+          key,
+          amount: unitsUtils.parseVET("200000"),
+        })
+      })
+
+      // aidrop VTHO
+      await airdropVTHO(seedAccounts, accounts[2])
+
+      for (let i = 0; i < 50; i++) {
+        // Create two node holders with an endorsement score
+        await vechainNodes.addToken(accounts[i].address, level, false, 0, 0)
+
+        const clauses = [
+          clauseBuilder.functionInteraction(
+            await x2EarnApps.getAddress(),
+            coder
+              .createInterface(JSON.stringify(X2EarnApps__factory.abi))
+              .getFunction("endorseApp") as FunctionFragment,
+            [app1Id],
+          ),
+        ]
+
+        const body: TransactionBody = await buildTxBody(clauses, accounts[i].address, 32, 10_000_000)
+
+        if (!accounts[i].pk) throw new Error("No private key")
+
+        await signAndSendTx(body, accounts[i].pk)
+      }
+
+      const endorsers = await x2EarnApps.getEndorsers(app1Id)
+      expect(endorsers.length).to.eql(50)
+
+      const tx = await x2EarnApps.checkEndorsement(app1Id)
+      const receipt = await tx.wait()
+
+      console.log(receipt?.gasUsed)
     })
   })
 })
