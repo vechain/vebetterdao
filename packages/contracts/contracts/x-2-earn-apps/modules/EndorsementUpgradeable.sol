@@ -512,19 +512,33 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function getEndorsers(bytes32 appId) external view returns (address[] memory) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    address[] memory endorsers;
-    for (uint256 i; i < $._appEndorsers[appId].length; i++) {
-      endorsers[i] = $._vechainNodesContract.idToOwner($._appEndorsers[appId][i]);
+    uint256 length = $._appEndorsers[appId].length;
+    address[] memory endorsers = new address[](length);
+    uint256 count = 0;
+
+    for (uint256 i = 0; i < length; i++) {
+      address endorser = $._vechainNodesContract.idToOwner($._appEndorsers[appId][i]);
+      if (endorser != address(0)) {
+        endorsers[count] = endorser;
+        count++;
+      }
+    }
+
+    // Resize the array to the actual number of non-zero addresses
+    assembly {
+      mstore(endorsers, count)
     }
 
     return endorsers;
   }
 
   /**
-   * @dev See {IX2EarnApps-getNodeEndorsementScore}.
+   * @dev See {IX2EarnApps-getUsersEndorsementScore}.
    */
-  function getNodeEndorsementScore(uint256 nodeID) external view returns (uint256) {
+  function getUsersEndorsementScore(address user) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
+
+    uint256 nodeID = $._vechainNodesContract.ownerToId(user);
     VechainNodesDataTypes.NodeStrengthLevel nodeLevel = _getNodeLevel(nodeID);
     return $._nodeEnodorsmentScore[nodeLevel];
   }

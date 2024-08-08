@@ -2565,13 +2565,13 @@ describe("X-Apps", function () {
       await createNodeHolder(6, otherAccounts[6]) // Node strength level 6 corresponds (MjolnirX) to an endorsement score of 100
       await createNodeHolder(7, otherAccounts[7]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[1].address)).to.eql(2n)
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[2].address)).to.eql(13n)
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[3].address)).to.eql(50n)
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[4].address)).to.eql(3n)
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[5].address)).to.eql(9n)
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[6].address)).to.eql(35n)
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[7].address)).to.eql(100n)
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[1].address)).to.eql(2n)
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[2].address)).to.eql(13n)
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[3].address)).to.eql(50n)
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[4].address)).to.eql(3n)
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[5].address)).to.eql(9n)
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[6].address)).to.eql(35n)
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[7].address)).to.eql(100n)
 
       const newEndorsementScores = {
         strength: 1,
@@ -2585,25 +2585,25 @@ describe("X-Apps", function () {
 
       await x2EarnApps.connect(owner).updateNodeEndorsementScores(newEndorsementScores)
 
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[1].address)).to.eql(
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[1].address)).to.eql(
         BigInt(newEndorsementScores.strength),
       )
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[2].address)).to.eql(
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[2].address)).to.eql(
         BigInt(newEndorsementScores.thunder),
       )
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[3].address)).to.eql(
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[3].address)).to.eql(
         BigInt(newEndorsementScores.mjolnir),
       )
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[4].address)).to.eql(
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[4].address)).to.eql(
         BigInt(newEndorsementScores.veThorX),
       )
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[5].address)).to.eql(
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[5].address)).to.eql(
         BigInt(newEndorsementScores.strengthX),
       )
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[6].address)).to.eql(
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[6].address)).to.eql(
         BigInt(newEndorsementScores.thunderX),
       )
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[7].address)).to.eql(
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[7].address)).to.eql(
         BigInt(newEndorsementScores.mjolnirX),
       )
     })
@@ -3362,14 +3362,14 @@ describe("X-Apps", function () {
       await createNodeHolder(7, otherAccounts[7]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // Get endorsement score
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[0].address)).to.eql(0n) // Node strength level 0 corresponds (None) to an endorsement score of 0
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[1].address)).to.eql(2n) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[2].address)).to.eql(13n) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[3].address)).to.eql(50n) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[4].address)).to.eql(3n) // Node strength level 4 corresponds (VeThorX) to an endorsement score of 3
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[5].address)).to.eql(9n) // Node strength level 5 corresponds (StrengthX) to an endorsement score of 9
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[6].address)).to.eql(35n) // Node strength level 6 corresponds (ThunderX) to an endorsement score of 35
-      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[7].address)).to.eql(100n) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[0].address)).to.eql(0n) // Node strength level 0 corresponds (None) to an endorsement score of 0
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[1].address)).to.eql(2n) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[2].address)).to.eql(13n) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[3].address)).to.eql(50n) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[4].address)).to.eql(3n) // Node strength level 4 corresponds (VeThorX) to an endorsement score of 3
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[5].address)).to.eql(9n) // Node strength level 5 corresponds (StrengthX) to an endorsement score of 9
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[6].address)).to.eql(35n) // Node strength level 6 corresponds (ThunderX) to an endorsement score of 35
+      expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[7].address)).to.eql(100n) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
     })
 
     it("If an XAPP has a score less than 100 but one of its endorsers increases the node strength when endorsement status is checked they will be endorsed ", async function () {

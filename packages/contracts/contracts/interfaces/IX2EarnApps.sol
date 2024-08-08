@@ -429,9 +429,9 @@ interface IX2EarnApps {
   /**
    * @dev Get the endorsersment score of an individual.
    *
-   * @param nodeId the node ID of the vechain node.
+   * @param user the address of the user who holds a NODE
    */
-  function getNodeEndorsementScore(uint256 nodeId) external view returns (uint256);
+  function getUsersEndorsementScore(address user) external view returns (uint256);
 
   /**
    * @notice Get the version of the contract.
