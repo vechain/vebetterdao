@@ -611,5 +611,19 @@
   "Add distributor": "Distributeur toevoegen",
   "Deposit B3TR to {{name}} app": "Stort B3TR naar {{name}} app",
   "Rewards Pool": "Beloningen Pool",
-  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Het totale aantal B3TR-tokens dat de app beschikbaar heeft voor beloningsdistributie."
+  "Total amount of B3TR tokens that the app has available for rewards distribution.": "Het totale aantal B3TR-tokens dat de app beschikbaar heeft voor beloningsdistributie.",
+  "You’ve voted on this allocation round!": "Je hebt gestemd op deze allocatieronde!",
+  "You’ll be able to claim your reward when the round is over.": "Je kunt je beloning opeisen zodra de ronde voorbij is.",
+  "Vote on this allocation round to receive rewards after the voting session has ended.": "Stem op deze allocatieronde om beloningen te ontvangen nadat de stemmingssessie is beëindigd.",
+  "You didn't vote on this allocation round. You can still vote on the next one to receive rewards.": "Je hebt niet gestemd op deze allocatieronde. Je kunt nog stemmen op de volgende om beloningen te ontvangen.",
+  "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "Je hebt {{formattedRoundReward}} B3TR verdiend als beloning voor het stemmen op deze allocatieronde. Claim ze nu!",
+  "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "Je hebt je stembeloningen opgeëist! Vergeet niet te stemmen in de volgende allocatieronde om meer beloningen te ontvangen.",
+  "Rewards claimed": "Beloningen opgeëist",
+  "Rewards claimable in {{remainingTime}}": "Beloningen opeisbaar in {{remainingTime}}",
+  "No rewards to claim": "Geen beloningen om te claimen",
+  "VeWorld Banner": "VeWorld Banner",
+  "Upload a banner to be displayed on the VeWorld mobile wallet": "Upload een banner om weer te geven op de VeWorld mobiele portemonnee",
+  "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.": "App-banners moeten 1240×460 zijn en de belangrijkste inhoud hebben in een veilige zone van 820×240 in het midden van de afbeelding om er goed uit te zien op elk apparaat.",
+  "Download template": "Download sjabloon",
+  "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "De VeWorld mobiele portemonneebanner moet 1024x576 zijn of een veelvoud daarvan (bijv. 2048x1152 of 3072x1728)."
 }
