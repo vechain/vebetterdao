@@ -147,11 +147,11 @@ export const useSendTransaction = ({
     async (clauses: EnhancedClause[]) => {
       const transaction = vendor.sign("tx", clauses)
       if (signerAccount) {
-        const gasLimitNext = await estimateTxGasWithNext(clauses, signerAccount, 1)
+        const gasLimitNext = await estimateTxGasWithNext([...clauses], signerAccount, 1)
 
         const parsedGasLimit = suggestedMaxGas ? Math.max(gasLimitNext, suggestedMaxGas) : gasLimitNext
 
-        return transaction.signer(signerAccount).gas(parsedGasLimit).request()
+        return transaction.signer(signerAccount).gas(parseInt(parsedGasLimit.toString())).request()
       }
       return transaction.request()
     },
@@ -163,16 +163,11 @@ export const useSendTransaction = ({
    */
   const sendTransactionAdapter = useCallback(
     async (_clauses?: EnhancedClause[]) => {
-      if (_clauses) {
-        _clauses = await convertClauses(_clauses)
-        return await sendTransaction(_clauses)
-      }
+      if (_clauses) return await sendTransaction(_clauses)
 
       if (!clauses) throw new Error("clauses are required")
 
       _clauses = await convertClauses(clauses)
-
-      console.log("clauses", _clauses)
 
       return await sendTransaction(_clauses)
     },
