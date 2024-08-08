@@ -1,6 +1,6 @@
 "use client"
 
-import { Grid, GridItem, Spinner, VStack, useBreakpointValue } from "@chakra-ui/react"
+import { Grid, GridItem, Show, Spinner, VStack, useBreakpointValue } from "@chakra-ui/react"
 import { AllocationRoundNavbar } from "../components/AllocationRoundNavbar"
 import { AllocationRoundHeaderCard } from "../components/AllocationRoundHeaderCard/AllocationRoundHeaderCard"
 import { AllocationRoundSessionInfoCard } from "../components/AllocationRoundSessionInfoCard"
@@ -10,6 +10,7 @@ import { useLayoutEffect } from "react"
 import { redirect } from "next/navigation"
 import { AllocationXAppsVotesCard } from "../components/AllocationXAppsVotesCard"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { AllocationVoterRewards } from "../components/AllocationVoterRewards"
 
 type Props = {
   roundId: string
@@ -51,14 +52,20 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full" alignItems={"flex-start"}>
         <GridItem colSpan={[3, 3, 2]} w="full">
           <VStack spacing={8} w="full">
+            <Show below="sm">
+              <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />
+            </Show>
             {hasVoted && (
               <AllocationRoundUserVotes roundId={roundId} minPercentageToNotMerge={userVoteMinPercentageToNotMerge} />
             )}
             <AllocationXAppsVotesCard roundId={roundId} />
           </VStack>
         </GridItem>
-        <GridItem colSpan={[3, 3, 1]} w="full" pos={"sticky"} top={24} left={0} alignSelf={"start"}>
+        <GridItem colSpan={[3, 3, 1]} w="full" alignSelf={"start"}>
           <AllocationRoundSessionInfoCard roundId={roundId} />
+          <Show above="sm">
+            <AllocationVoterRewards roundId={roundId} hasVoted={hasVoted} />
+          </Show>
         </GridItem>
       </Grid>
     </VStack>

@@ -3,6 +3,7 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@repo/contracts"
 import { ethers } from "ethers"
+import { RoundReward } from "../utils"
 
 // Get the voter rewards contract address from the configuration
 const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
@@ -15,14 +16,19 @@ const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
  * @param {string} roundId - The id of the round.
  * @returns {Promise<string>} A promise that resolves to the reward for the given round and voter.
  */
-export const getRoundReward = async (thor: Connex.Thor, address: string, roundId: string): Promise<string> => {
+export const getRoundReward = async (thor: Connex.Thor, address: string, roundId: string): Promise<RoundReward> => {
   const functionFragment = VoterRewards__factory.createInterface().getFunction("getReward").format("json")
 
   const res = await thor.account(VOTER_REWARDS_CONTRACT).method(JSON.parse(functionFragment)).call(roundId, address)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  return ethers.formatEther(res.decoded[0])
+  const reward = ethers.formatEther(res.decoded[0])
+
+  return {
+    roundId,
+    rewards: reward,
+  }
 }
 
 /**
@@ -44,8 +50,8 @@ export const getRoundRewardQueryKey = (roundId?: string, address?: string) => ["
 export const useRoundReward = (address: string, roundId: string) => {
   const { thor } = useConnex()
   return useQuery({
-    queryKey: getRoundRewardQueryKey(roundId),
+    queryKey: getRoundRewardQueryKey(roundId, address),
     queryFn: async () => await getRoundReward(thor, address, roundId),
-    enabled: !!thor,
+    enabled: !!thor && !!address && !!roundId,
   })
 }

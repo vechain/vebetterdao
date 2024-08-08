@@ -1,8 +1,8 @@
 import React, { useMemo } from "react"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
-import { ProposalState, useProposalCreatedEvent, useProposalVoteEvent, useProposalVotes } from "@/api"
-import { Box, Card, CardBody, HStack, Text, VStack } from "@chakra-ui/react"
+import { ProposalState, useProposalCreatedEvent, useProposalVoteEvents, useProposalVotes } from "@/api"
+import { Box, Card, CardBody, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
@@ -18,7 +18,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   const isDepositReached = useIsDepositReached(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
   const { data: proposalVotes } = useProposalVotes(proposalId)
-  const { hasUserVoted, userVote } = useProposalVoteEvent(proposalId)
+  const { data: votesEvents, isLoading: votesEventsLoading } = useProposalVoteEvents(proposalId)
 
   const hasUserDeposited = useMemo(() => {
     if (!proposalDepositEvent) return false
@@ -42,7 +42,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   const isForGreaterThanAgainst = forPercentage > againstAndAbstainPercentage
 
   const getVoteType = useMemo(() => {
-    switch (userVote?.support) {
+    switch (votesEvents?.userVote?.support) {
       case "0":
         return "Against"
       case "1":
@@ -52,7 +52,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
       default:
         return null
     }
-  }, [userVote])
+  }, [votesEvents])
 
   const { t } = useTranslation()
 
@@ -137,27 +137,29 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
               position="absolute" //inverse if isForGreaterThanAgainst is true
             />
           </Box>
-          {hasUserVoted === true ? (
-            <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
-              {t("You voted")}
-              <b
-                style={{
-                  color:
-                    getVoteType === "For"
-                      ? "rgba(56, 191, 102, 1)"
-                      : getVoteType === "Abstain"
-                        ? "rgba(181, 149, 37, 1)"
-                        : "rgba(210, 63, 99, 1)",
-                  marginLeft: 2,
-                }}>
-                {getVoteType}
-              </b>
-            </Text>
-          ) : (
-            <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
-              {t("You haven't voted")}
-            </Text>
-          )}
+          <Skeleton isLoaded={!votesEventsLoading}>
+            {votesEvents?.hasUserVoted === true ? (
+              <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
+                {t("You voted")}
+                <b
+                  style={{
+                    color:
+                      getVoteType === "For"
+                        ? "rgba(56, 191, 102, 1)"
+                        : getVoteType === "Abstain"
+                          ? "rgba(181, 149, 37, 1)"
+                          : "rgba(210, 63, 99, 1)",
+                    marginLeft: 2,
+                  }}>
+                  {getVoteType}
+                </b>
+              </Text>
+            ) : (
+              <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
+                {t("You haven't voted")}
+              </Text>
+            )}
+          </Skeleton>
         </VStack>
       )
     }

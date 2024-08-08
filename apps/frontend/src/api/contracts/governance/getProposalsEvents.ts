@@ -47,16 +47,6 @@ export type ProposalDepositEvent = {
   blockMeta: Connex.Thor.Filter.WithMeta["meta"]
 }
 
-export type ProposalVoteEvent = {
-  account: string
-  proposalId: string
-  support: string
-  weight: string
-  power: string
-  reason: string
-  blockMeta: Connex.Thor.Filter.WithMeta["meta"]
-}
-
 export const getProposalsEvents = async (thor: Connex.Thor, proposalId?: string) => {
   const proposalCreatedAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalCreated")
   if (!proposalCreatedAbi) throw new Error("ProposalCreated event not found")
@@ -77,10 +67,6 @@ export const getProposalsEvents = async (thor: Connex.Thor, proposalId?: string)
   const proposalDepositAbi = b3trGovernorAbi.find(abi => abi.name === "ProposalDeposit")
   if (!proposalDepositAbi) throw new Error("ProposalDeposit event not found")
   const proposalDepositEvent = new abi.Event(proposalDepositAbi as abi.Event.Definition)
-
-  const proposalVoteAbi = b3trGovernorAbi.find(abi => abi.name === "VoteCast")
-  if (!proposalVoteAbi) throw new Error("ProposalVote event not found")
-  const proposalVoteEvent = new abi.Event(proposalVoteAbi as abi.Event.Definition)
 
   const proposalIdBytes = proposalId ? `0x${BigInt(proposalId).toString(16).padStart(64, "0")}` : undefined
 
@@ -111,11 +97,6 @@ export const getProposalsEvents = async (thor: Connex.Thor, proposalId?: string)
       topic0: proposalDepositEvent.signature,
       topic2: proposalIdBytes,
     },
-    {
-      address: GOVERNANCE_CONTRACT,
-      topic0: proposalVoteEvent.signature,
-      topic2: proposalIdBytes,
-    },
   ]
 
   const events = await getAllEvents({ thor, filterCriteria })
@@ -128,7 +109,6 @@ export const getProposalsEvents = async (thor: Connex.Thor, proposalId?: string)
   const decodedExecutedProposalEvents: ProposalExecutedEvent[] = []
   const decodedQueuedProposalEvents: ProposalQueuedEvent[] = []
   const decodedDepositProposalEvents: ProposalDepositEvent[] = []
-  const decodedVoteProposalEvents: ProposalVoteEvent[] = []
 
   //   TODO: runtime validation with zod ?
   events.forEach(event => {
@@ -184,20 +164,6 @@ export const getProposalsEvents = async (thor: Connex.Thor, proposalId?: string)
         })
         break
       }
-      case proposalVoteEvent.signature: {
-        const decoded = proposalVoteEvent.decode(event.data, event.topics)
-
-        decodedVoteProposalEvents.push({
-          account: decoded[0],
-          proposalId: decoded[1],
-          support: decoded[2],
-          weight: decoded[3],
-          power: decoded[4],
-          reason: decoded[5],
-          blockMeta: event.meta,
-        })
-        break
-      }
       default: {
         throw new Error("Unknown event")
       }
@@ -210,6 +176,5 @@ export const getProposalsEvents = async (thor: Connex.Thor, proposalId?: string)
     executed: decodedExecutedProposalEvents,
     queued: decodedQueuedProposalEvents,
     deposits: decodedDepositProposalEvents,
-    votes: decodedVoteProposalEvents,
   }
 }
