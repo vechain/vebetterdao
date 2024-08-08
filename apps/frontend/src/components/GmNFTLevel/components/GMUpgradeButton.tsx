@@ -2,16 +2,22 @@ import { Box, Button, Circle, HStack, Skeleton, Stack, Text, useMediaQuery } fro
 import { UilArrowCircleUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useUserB3trBalance } from "@/api"
-import { useMemo } from "react"
+import { useCurrentAllocationsRoundId, useHasVotedInRound, useUserB3trBalance } from "@/api"
+import { useCallback, useMemo } from "react"
 import { SparklesIcon } from "@/components/Icons"
+import { useRouter } from "next/navigation"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const compactFormatter = getCompactFormatter(4)
 
 export const GMUpgradeButton = () => {
   const { t } = useTranslation()
   const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { account } = useWallet()
+  const { data: hasUserVoted } = useHasVotedInRound(currentRoundId, account ?? undefined)
   // TODO: map data
+  const isGMMintable = true
   const isGMMinted = false
   const isNodeHolder = false
   const isNodeAttached = true
@@ -23,6 +29,24 @@ export const GMUpgradeButton = () => {
   const isEnoughBalanceToUpgradeGM = b3trBalance && Number(b3trBalance.scaled) >= b3trToUpgradeGM
 
   const upgradeMessage = useMemo(() => {
+    if (!hasUserVoted && !isGMMinted && !isGMMintable) {
+      return (
+        <Box>
+          <Text as="span" fontSize={"14px"}>
+            {t("Vote and mint the GM NFT for free!")}
+          </Text>
+        </Box>
+      )
+    }
+    if (!isGMMintable && !isGMMinted) {
+      return (
+        <Box>
+          <Text as="span" fontSize={"14px"}>
+            {t("Wait for the next round to mint the GM NFT")}
+          </Text>
+        </Box>
+      )
+    }
     if (!isGMMinted) {
       if (isNodeHolder) {
         return (
@@ -90,9 +114,21 @@ export const GMUpgradeButton = () => {
         </Box>
       )
     }
-  }, [b3trBalance?.scaled, isEnoughBalanceToUpgradeGM, isGMMinted, isNodeAttached, isNodeHolder, t])
+  }, [
+    b3trBalance?.scaled,
+    hasUserVoted,
+    isEnoughBalanceToUpgradeGM,
+    isGMMintable,
+    isGMMinted,
+    isNodeAttached,
+    isNodeHolder,
+    t,
+  ])
 
   const actionLabel = useMemo(() => {
+    if (!hasUserVoted && !isGMMinted && !isGMMintable) {
+      return t("Vote now!")
+    }
     if (!isGMMinted) {
       return t("Mint now!")
     }
@@ -100,14 +136,32 @@ export const GMUpgradeButton = () => {
       return t("Attach and Upgrade!")
     }
     return t("Upgrade now!")
-  }, [isGMMinted, isNodeAttached, isNodeHolder, t])
+  }, [hasUserVoted, isGMMintable, isGMMinted, isNodeAttached, isNodeHolder, t])
+
+  const router = useRouter()
+  const action = useCallback(() => {
+    if (!hasUserVoted && !isGMMinted && !isGMMintable) {
+      router.push(`/rounds/${currentRoundId}/vote`)
+      return
+    }
+    if (!isGMMinted) {
+      return
+    }
+    if (isNodeHolder && !isNodeAttached) {
+      return
+    }
+    return
+  }, [currentRoundId, hasUserVoted, isGMMintable, isGMMinted, isNodeAttached, isNodeHolder, router])
 
   const isActionDisabled = useMemo(() => {
+    if (!isGMMintable && !isGMMinted) {
+      return true
+    }
     if ((isNodeHolder && !isNodeAttached) || !isGMMinted) {
       return false
     }
     return !isEnoughBalanceToUpgradeGM
-  }, [isEnoughBalanceToUpgradeGM, isGMMinted, isNodeAttached, isNodeHolder])
+  }, [isEnoughBalanceToUpgradeGM, isGMMintable, isGMMinted, isNodeAttached, isNodeHolder])
 
   return (
     <Stack
@@ -128,7 +182,7 @@ export const GMUpgradeButton = () => {
         </HStack>
       </Skeleton>
       <Skeleton isLoaded={!isB3trBalanceLoading}>
-        <Button variant={"tertiaryAction"} isDisabled={isActionDisabled} w="full">
+        <Button variant={"tertiaryAction"} isDisabled={isActionDisabled} w="full" onClick={action}>
           {actionLabel}
         </Button>
       </Skeleton>

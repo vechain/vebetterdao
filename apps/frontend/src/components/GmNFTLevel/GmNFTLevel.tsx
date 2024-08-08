@@ -46,7 +46,7 @@ export const GmNFTLevel = () => {
 
   // both
   const isNodeHolder = true
-  const isNodeAttached = isNodeHolder && true
+  const isNodeAttached = isNodeHolder && false
   const nodeAttachedColor = isNodeAttached ? "#B1F16C" : "#FFFFFF80"
 
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useUserB3trBalance()
