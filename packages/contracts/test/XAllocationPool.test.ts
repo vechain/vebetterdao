@@ -191,9 +191,31 @@ describe("X-Allocation Pool", async function () {
     })
 
     it("Cannot initilize twice", async function () {
-      const { xAllocationPool } = await getOrDeployContractInstances({ forceDeploy: false })
+      const { owner, b3tr, treasury, x2EarnApps, x2EarnRewardsPool } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+
+      // Deploy XAllocationPool
+      const xAllocationPoolV1 = (await deployProxy("XAllocationPoolV1", [
+        owner.address,
+        owner.address,
+        owner.address,
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+        await x2EarnApps.getAddress(),
+        await x2EarnRewardsPool.getAddress(),
+      ])) as XAllocationPoolV1
+
       await catchRevert(
-        xAllocationPool.initializeV2(),
+        xAllocationPoolV1.initialize(
+          owner.address,
+          owner.address,
+          owner.address,
+          await b3tr.getAddress(),
+          await treasury.getAddress(),
+          await x2EarnApps.getAddress(),
+          await x2EarnRewardsPool.getAddress(),
+        ),
       )
     })
 
@@ -310,7 +332,7 @@ describe("X-Allocation Pool", async function () {
           await x2EarnRewardsPool.getAddress(),
         ])) as XAllocationPoolV1
 
-          // Upgrade xAllocationPool V1 to V2
+        // Upgrade xAllocationPool V1 to V2
         const xAllocationPool = (await upgradeProxy(
           "XAllocationPoolV1",
           "XAllocationPool",

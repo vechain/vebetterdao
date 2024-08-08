@@ -78,13 +78,6 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     _disableInitializers();
   }
 
-  /**
-   * @notice Initialize the version 2 contract
-   *
-   * @dev This function is called only once during the contract deployment
-   */
-  function initializeV2() public reinitializer(2) {}
-
   // @dev Emit when the xAllocationVoting contract is set
   event XAllocationVotingSet(address oldContractAddress, address newContractAddress);
   // @dev Emit when the emissions contract is set

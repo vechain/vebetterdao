@@ -73,13 +73,6 @@ contract X2EarnRewardsPool is
     }
   }
 
-  /**
-   * @notice Initialize the version 2 contract
-   *
-   * @dev This function is called only once during the contract deployment
-   */
-  function initializeV2() public reinitializer(2) {}
-
   // ---------- Authorizers ---------- //
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}

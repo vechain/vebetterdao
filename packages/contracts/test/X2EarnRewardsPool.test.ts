@@ -5,6 +5,7 @@ import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy } from "../scripts/helpers"
 import { endorseApp } from "./helpers/xnodes"
+import { X2EarnRewardsPoolV1 } from "../typechain-types"
 
 describe("X2EarnRewardsPoolV1", function () {
   // deployment
@@ -59,9 +60,17 @@ describe("X2EarnRewardsPoolV1", function () {
   // upgradeability
   describe("Contract upgradeablity", () => {
     it("Cannot initialize twice", async function () {
-      const { x2EarnRewardsPool } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
+        owner.address,
+        owner.address,
+        owner.address,
+        owner.address,
+        owner.address,
+      ])) as X2EarnRewardsPoolV1
       await catchRevert(
-        x2EarnRewardsPool.initializeV2(),
+        x2EarnRewardsPoolV1.initialize(owner.address, owner.address, owner.address, owner.address, owner.address),
       )
     })
 
@@ -489,7 +498,7 @@ describe("X2EarnRewardsPoolV1", function () {
       await x2EarnApps.registerApp(owner.address, owner.address, "My app #2", "metadataURI")
       const appId = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
-      
+
       await endorseApp(appId, owner)
       await endorseApp(app2Id, minterAccount)
 

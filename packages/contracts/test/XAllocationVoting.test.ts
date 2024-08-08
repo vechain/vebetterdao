@@ -432,11 +432,45 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Cannot initialize twice", async function () {
-      const { owner, xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { voterRewards, timeLock, emissions, x2EarnApps, vot3, otherAccounts, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: false,
+        })
+      const xAllocationVotingV1 = (await deployProxy("XAllocationVotingV1", [
+        {
+          vot3Token: await vot3.getAddress(),
+          quorumPercentage: 1,
+          initialVotingPeriod: 2,
+          timeLock: await timeLock.getAddress(),
+          voterRewards: await voterRewards.getAddress(),
+          emissions: await emissions.getAddress(),
+          admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
+          upgrader: owner.address,
+          contractsAddressManager: otherAccounts[2].address,
+          x2EarnAppsAddress: await x2EarnApps.getAddress(),
+          baseAllocationPercentage: 2,
+          appSharesCap: 2,
+          votingThreshold: BigInt(1),
+        },
+      ])) as XAllocationVotingV1
 
-      await catchRevert(xAllocationVoting.initializeV2())
+      await catchRevert(
+        xAllocationVotingV1.initialize({
+          vot3Token: await vot3.getAddress(),
+          quorumPercentage: 1,
+          initialVotingPeriod: 2,
+          timeLock: await timeLock.getAddress(),
+          voterRewards: await voterRewards.getAddress(),
+          emissions: await emissions.getAddress(),
+          admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
+          upgrader: owner.address,
+          contractsAddressManager: otherAccounts[2].address,
+          x2EarnAppsAddress: await x2EarnApps.getAddress(),
+          baseAllocationPercentage: 2,
+          appSharesCap: 2,
+          votingThreshold: BigInt(1),
+        }),
+      )
     })
 
     it("Should return correct version of the contract", async () => {
