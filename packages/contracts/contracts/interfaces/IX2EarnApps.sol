@@ -178,7 +178,7 @@ interface IX2EarnApps {
   /**
    * @dev Event fired when an app is endorsed or unendorsed by a node.
    */
-  event AppEndorsed(bytes32 indexed id, address teamAddress, bool endorsed);
+  event AppEndorsed(bytes32 indexed id, uint256 nodeId, bool endorsed);
 
   /**
    * @dev Event fired when the node strength scores are updated.
@@ -429,9 +429,9 @@ interface IX2EarnApps {
   /**
    * @dev Get the endorsersment score of an individual.
    *
-   * @param user the address of the user
+   * @param nodeId the node ID of the vechain node.
    */
-  function getNodeEndorsementScore(address user) external view returns (uint256);
+  function getNodeEndorsementScore(uint256 nodeId) external view returns (uint256);
 
   /**
    * @notice Get the version of the contract.

@@ -34,10 +34,10 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   struct EndorsementStorage {
     bytes32[] _unendorsedApps; // List of apps pending endorsement
     mapping(bytes32 => uint256) _unendorsedAppsIndex; // Mapping from app ID to index in the _unendorsedApps array, so we can remove an app in O(1)
-    mapping(bytes32 => address[]) _appEndorsers; // Mapping to the endorsers of an app
+    mapping(bytes32 => uint256[]) _appEndorsers; // Maps each app ID to an array of node IDs that have endorsed it
     mapping(VechainNodesDataTypes.NodeStrengthLevel => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
     mapping(bytes32 => uint48) _appGracePeriod; // The grace period elapsed by the app since endorsed
-    mapping(address => bool) _endorsers; // Mapping to check if an address is an endorser
+    mapping(uint256 => bytes32) _nodeToEndorsedApp; // Maps a node ID to the app it currently endorses
     uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
     ITokenAuction _vechainNodesContract; // The token auction contract
     uint256 _endorsementScoreThreshold; // The endorsement score threshold for an app to be eligible for voting
@@ -101,7 +101,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Calculate the score of the app, considering if any endorser needs to be removed
-    uint256 score = _getScoreAndRemoveEndorsers(appId, address(0));
+    uint256 score = _getScoreAndRemoveEndorsement(appId, 0);
 
     // Check the total score and update the grace period and voting eligibility accordingly
     if (score < _endorsementScoreThreshold()) {
@@ -137,22 +137,25 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       revert X2EarnAppAlreadyEndorsed(appId);
     }
 
-    // Check if the caller is already an endorser
-    if ($._endorsers[msg.sender]) {
-      revert X2EarnAlreadyEndorser();
-    }
+    // Retrieve the token ID for the user
+    uint256 tokenID = $._vechainNodesContract.ownerToId(msg.sender);
 
     // Check if the caller is a node holder
-    if (!$._vechainNodesContract.isToken(msg.sender)) {
+    if (tokenID == 0) {
       revert X2EarnNonNodeHolder();
     }
 
+    // Check if the callers Node ID is already an endorser
+    if ($._nodeToEndorsedApp[tokenID] != bytes32(0)) {
+      revert X2EarnAlreadyEndorser();
+    }
+
     // Add the caller to the list of endorsers for the app
-    $._appEndorsers[appId].push(msg.sender);
-    $._endorsers[msg.sender] = true;
+    $._appEndorsers[appId].push(tokenID);
+    $._nodeToEndorsedApp[tokenID] = appId;
 
     // Calculate the score of the app, considering the new endorsement
-    uint256 score = _getScoreAndRemoveEndorsers(appId, address(0));
+    uint256 score = _getScoreAndRemoveEndorsement(appId, 0);
 
     // Check if the score is equal to or greater than the score threshold (100)
     if (score >= _endorsementScoreThreshold()) {
@@ -160,7 +163,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Emit an event indicating the app has been endorsed by the caller
-    emit AppEndorsed(appId, msg.sender, true);
+    emit AppEndorsed(appId, tokenID, true);
   }
 
   /**
@@ -176,13 +179,16 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     // Get the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
 
+    // Retrieve the token ID for the user
+    uint256 tokenID = $._vechainNodesContract.ownerToId(msg.sender);
+
     // Check if the caller is an endorser
-    if (!$._endorsers[msg.sender]) {
+    if ($._nodeToEndorsedApp[tokenID] == bytes32(0)) {
       revert X2EarnNonEndorser();
     }
 
     // Calculate the new score of the app after removing the caller's endorsement
-    uint256 score = _getScoreAndRemoveEndorsers(appId, msg.sender);
+    uint256 score = _getScoreAndRemoveEndorsement(appId, tokenID);
 
     // Check if the app is no longer in the voting allocation rounds due to lack of endorsement or from being blacklisted
     if (!isEligibleNow(appId) || isBlacklisted(appId)) {
@@ -201,18 +207,18 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev Internal function to get the score of an app and optionally remove an endorser's endorsement.
    * @param appId The unique identifier of the app.
-   * @param endorserToRemove The address of the endorser to remove, or address(0) if no endorser should be removed.
+   * @param endorserToRemove The node ID of the endorser to remove.
    * @return uint256 The score of the app.
    */
-  function _getScoreAndRemoveEndorsers(bytes32 appId, address endorserToRemove) internal returns (uint256) {
+  function _getScoreAndRemoveEndorsement(bytes32 appId, uint256 endorserToRemove) internal returns (uint256) {
     // Retrieve the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
     uint256 score;
 
     // Iterate over the list of endorsers for the given app
     for (uint256 i; i < $._appEndorsers[appId].length; ) {
-      // Get the current endorser's address
-      address endorser = $._appEndorsers[appId][i];
+      // Get the current endorser's node id
+      uint256 endorser = $._appEndorsers[appId][i];
       // Get the node level of the endorser
       VechainNodesDataTypes.NodeStrengthLevel nodeLevel = _getNodeLevel(endorser);
 
@@ -222,11 +228,11 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
         $._appEndorsers[appId][i] = $._appEndorsers[appId][$._appEndorsers[appId].length - 1];
         $._appEndorsers[appId].pop();
 
-        // Emit an event indicating the app has been unendorsed by the caller
+        // Emit an event indicating the app has been unendorsed by the node ID
         emit AppEndorsed(appId, endorser, false);
 
         // Delete the endorser from the endorsers mapping
-        delete $._endorsers[endorser];
+        delete $._nodeToEndorsedApp[endorser];
       } else {
         // Add the endorser's score to the total score
         score += $._nodeEnodorsmentScore[nodeLevel];
@@ -242,14 +248,12 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev Internal function to get the node level of a user.
-   * @param user The address of the user.
+   * @dev Internal function to get the node level of a token ID.
+   * @param tokenID The token ID of the endorsing node.
    * @return uint8 The node level of the user.
    */
-  function _getNodeLevel(address user) internal view returns (VechainNodesDataTypes.NodeStrengthLevel) {
+  function _getNodeLevel(uint256 tokenID) internal view returns (VechainNodesDataTypes.NodeStrengthLevel) {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    // Retrieve the token ID for the user
-    uint256 tokenID = $._vechainNodesContract.ownerToId(user);
 
     // Retrieve the metadata for the current user's token
     (, uint8 nodeLevel, , , , , ) = $._vechainNodesContract.getMetadata(tokenID);
@@ -413,9 +417,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev Internal function to update the status of an app if the score threshold is not met.
    * @param appId The unique identifier of the app.
-   * @return bool True if the app is still eligible for voting.
+   * @return stillEligble True if the app is still eligible for voting.
    */
-  function _updateStatusIfThresholdNotMet(bytes32 appId) private returns (bool) {
+  function _updateStatusIfThresholdNotMet(bytes32 appId) private returns (bool stillEligble) {
     // Get the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
 
@@ -508,15 +512,20 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function getEndorsers(bytes32 appId) external view returns (address[] memory) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    return $._appEndorsers[appId];
+    address[] memory endorsers;
+    for (uint256 i; i < $._appEndorsers[appId].length; i++) {
+      endorsers[i] = $._vechainNodesContract.idToOwner($._appEndorsers[appId][i]);
+    }
+
+    return endorsers;
   }
 
   /**
    * @dev See {IX2EarnApps-getNodeEndorsementScore}.
    */
-  function getNodeEndorsementScore(address user) external view returns (uint256) {
+  function getNodeEndorsementScore(uint256 nodeID) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    VechainNodesDataTypes.NodeStrengthLevel nodeLevel = _getNodeLevel(user);
+    VechainNodesDataTypes.NodeStrengthLevel nodeLevel = _getNodeLevel(nodeID);
     return $._nodeEnodorsmentScore[nodeLevel];
   }
 }
