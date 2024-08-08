@@ -16,12 +16,13 @@ import {
   useMediaQuery,
   VStack,
 } from "@chakra-ui/react"
-import { UilExchangeAlt } from "@iconscout/react-unicons"
+import { UilExchangeAlt, UilPolygon } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
 import { ConvertModal } from "../Convert/ConvertModal"
 import { GMUpgradeButton } from "./components/GMUpgradeButton"
+import { useMemo } from "react"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -31,6 +32,7 @@ export const GmNFTLevel = () => {
 
   // TODO: map data
   //gm
+  const isGMMinted = false
   const gmLevel = "1"
   const rewardMultiplier = "X3"
   const gmLevelName = "Planet Venus"
@@ -41,8 +43,8 @@ export const GmNFTLevel = () => {
   const nodePoints = "100"
 
   // both
-  const isNodeHolder = false
-  const isNodeAttached = isNodeHolder && false
+  const isNodeHolder = true
+  const isNodeAttached = isNodeHolder && true
   const nodeAttachedColor = isNodeAttached ? "#B1F16C" : "#FFFFFF80"
 
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useUserB3trBalance()
@@ -55,6 +57,31 @@ export const GmNFTLevel = () => {
 
   const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
 
+  const nodeSeparator = useMemo(() => {
+    return (
+      <Flex
+        ml={isGMMinted ? "-10px" : "-9px"}
+        mr={"-10px"}
+        my={"-10px"}
+        position={"relative"}
+        align="center"
+        justify="center">
+        <Image
+          src={isNodeAttached ? "/images/nft-attachment.png" : "/images/nft-attachment-off.png"}
+          alt="nft-attachment"
+          w="50px"
+          h="50px"
+          transform={isAbove1200 ? undefined : "rotate(90deg)"}
+        />
+        {isAbove1200 && isNodeAttached && (
+          <>
+            <Flex h="62px" w="1px" bg="#B1F16C" position={"absolute"} bottom="50%" left="50%" />
+            <Circle size="6px" bg="#B1F16C" position={"absolute"} top="-12px" left="calc(50% - 3px)" />
+          </>
+        )}
+      </Flex>
+    )
+  }, [isAbove1200, isNodeAttached, isGMMinted])
   return (
     <Card bg="#004CFC" rounded="12px" p="24px" color="white" position="relative" overflow={"hidden"}>
       <Box
@@ -66,7 +93,7 @@ export const GmNFTLevel = () => {
         zIndex="2">
         <Image src={"/images/cloud-background.png"} alt="cloud" objectFit={"contain"} />
       </Box>
-      <Stack gap={8} align="stretch" justify={"stretch"} direction={isAbove1200 ? "row" : "column-reverse"} zIndex="10">
+      <Stack gap={8} align="stretch" justify={"stretch"} direction={isAbove1200 ? "row" : "column-reverse"} zIndex="3">
         <VStack flex="3" align={"stretch"} gap="24px">
           <HStack gap="40px" align={"baseline"} justify={"space-between"}>
             <Heading fontSize={"20px"} fontWeight={600}>
@@ -82,54 +109,67 @@ export const GmNFTLevel = () => {
             )}
           </HStack>
           <Stack gap="0" direction={isAbove1200 ? "row" : "column"} align="stretch" justify="stretch">
-            <HStack
-              p="9px 12px"
-              border="1px solid"
-              borderColor={nodeAttachedColor}
-              justify="space-between"
-              rounded="12px"
-              gap={6}
-              flex={1}>
-              <Image
-                src={gmImage}
-                alt="gm"
-                w="68px"
-                h="68px"
-                rounded="4px"
+            {!isGMMinted ? (
+              <HStack
+                rounded="12px"
+                p="24px 12px"
+                position="relative"
+                flex={1}
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23FFFFFF80' stroke-width='1' stroke-dasharray='12%2c 20' stroke-dashoffset='2' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                }}>
+                <UilPolygon size={"36px"} color={"#FFFFFF80"} style={{ transform: "rotate(90deg)" }} />
+                <Text color={"#FFFFFF80"}>{t("You need to mint an NFT to get reward multipliers")}</Text>
+              </HStack>
+            ) : (
+              <HStack
+                bg="#0D5DFB"
+                p="9px 12px"
                 border="1px solid"
                 borderColor={nodeAttachedColor}
-              />
-              <VStack flex="1" align={"flex-start"}>
-                <Text fontWeight={700}>{gmLevelName}</Text>
-                <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-                  <Text fontSize={"12px"} fontWeight={600}>
-                    {rewardMultiplier}
-                  </Text>
-                  <Text fontSize={"12px"} fontWeight={400}>
-                    {t("Reward multiplier")}
-                  </Text>
-                </HStack>
-              </VStack>
-              <FaChevronRight size={"24px"} />
-            </HStack>
+                justify="space-between"
+                rounded="12px"
+                gap={6}
+                flex={1}>
+                <Image
+                  src={gmImage}
+                  alt="gm"
+                  w="68px"
+                  h="68px"
+                  rounded="4px"
+                  border="1px solid"
+                  borderColor={nodeAttachedColor}
+                />
+                <VStack flex="1" align={"flex-start"}>
+                  <Text fontWeight={700}>{gmLevelName}</Text>
+                  <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+                    <Text fontSize={"12px"} fontWeight={600}>
+                      {rewardMultiplier}
+                    </Text>
+                    <Text fontSize={"12px"} fontWeight={400}>
+                      {t("Reward multiplier")}
+                    </Text>
+                  </HStack>
+                </VStack>
+                <FaChevronRight size={"24px"} />
+              </HStack>
+            )}
+
             {isNodeHolder && (
               <>
-                <Flex mx={"-10px"} my={"-10px"} position={"relative"} align="center" justify="center">
-                  <Image
-                    src={isNodeAttached ? "/images/nft-attachment.png" : "/images/nft-attachment-off.png"}
-                    alt="nft-attachment"
-                    w="50px"
-                    h="50px"
-                    transform={isAbove1200 ? undefined : "rotate(90deg)"}
-                  />
-                  {isAbove1200 && isNodeAttached && (
-                    <>
-                      <Flex h="62px" w="1px" bg="#B1F16C" position={"absolute"} bottom="50%" left="50%" />
-                      <Circle size="6px" bg="#B1F16C" position={"absolute"} top="-12px" left="calc(50% - 3px)" />
-                    </>
-                  )}
-                </Flex>
+                {isAbove1200 ? (
+                  nodeSeparator
+                ) : (
+                  <HStack justify={"space-between"}>
+                    <Text fontSize={"12px"} fontWeight={600} color="#B1F16C">
+                      {t("GM NFT attached")}
+                    </Text>
+                    {nodeSeparator}
+                    <Box flexBasis={"100px"} />
+                  </HStack>
+                )}
                 <HStack
+                  bg="#0D5DFB"
                   p="9px 12px"
                   border="1px solid"
                   borderColor={nodeAttachedColor}

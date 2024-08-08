@@ -11,6 +11,7 @@ const compactFormatter = getCompactFormatter(4)
 export const GMUpgradeButton = () => {
   const { t } = useTranslation()
   const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
+  // TODO: map data
   const isGMMinted = false
   const isNodeHolder = false
   const isNodeAttached = true
@@ -46,11 +47,11 @@ export const GMUpgradeButton = () => {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
-            {t("Attach your XNode to you GM NFT and")}
+            {t("Attach your XNode to you GM NFT and")}{" "}
           </Text>
-          <Text as="strong" fontSize={"14px"} mx="5px" fontWeight={600}>
+          <Text as="strong" fontSize={"14px"} fontWeight={600}>
             {t("upgrade")}
-          </Text>
+          </Text>{" "}
           <Text as="span" fontSize={"14px"}>
             {t("it to Venus for free!")}
           </Text>
@@ -63,8 +64,8 @@ export const GMUpgradeButton = () => {
         <Box>
           <Text as="span" fontSize={"14px"}>
             {t("You can upgrade and get {{rewardMultiplier}} on your rewards for", { rewardMultiplier })}
-          </Text>
-          <Text as="span" fontSize={"16px"} color="#B1F16C" mx="5px">
+          </Text>{" "}
+          <Text as="span" fontSize={"16px"} color="#B1F16C">
             {compactFormatter.format(b3trToUpgradeGM)}
           </Text>
           <Text as="span" fontSize={"14px"}>
@@ -79,10 +80,10 @@ export const GMUpgradeButton = () => {
         <Box>
           <Text as="span" fontSize={"14px"}>
             {t("You need")}
-          </Text>
-          <Text as="span" fontSize={"14px"} color="#B1F16C" mx="5px">
+          </Text>{" "}
+          <Text as="span" fontSize={"14px"} color="#B1F16C">
             {t("{{b3trToUpgradeGM}} B3TR", { b3trToUpgradeGM: compactFormatter.format(missingB3tr) })}
-          </Text>
+          </Text>{" "}
           <Text as="span" fontSize={"14px"}>
             {t("to upgrade your NFT to the next level")}
           </Text>
@@ -109,7 +110,11 @@ export const GMUpgradeButton = () => {
   }, [isEnoughBalanceToUpgradeGM, isGMMinted, isNodeAttached, isNodeHolder])
 
   return (
-    <Stack justify="space-between" align="center" direction={isAbove1200 ? "row" : "column"} gap={"20px"}>
+    <Stack
+      justify="space-between"
+      align={isAbove1200 ? "center" : "stretch"}
+      direction={isAbove1200 ? "row" : "column"}
+      gap={"20px"}>
       <Skeleton isLoaded={!isB3trBalanceLoading}>
         <HStack gap={2}>
           {isGMMinted ? (
@@ -123,7 +128,7 @@ export const GMUpgradeButton = () => {
         </HStack>
       </Skeleton>
       <Skeleton isLoaded={!isB3trBalanceLoading}>
-        <Button variant={"tertiaryAction"} isDisabled={isActionDisabled}>
+        <Button variant={"tertiaryAction"} isDisabled={isActionDisabled} w="full">
           {actionLabel}
         </Button>
       </Skeleton>
