@@ -619,7 +619,7 @@ describe("Galaxy Member", () => {
       const storageSlotsAfter = []
 
       for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
-        storageSlotsAfter.push(await ethers.provider.getStorage(await galaxyMember.getAddress(), i))
+        storageSlotsAfter.push(await ethers.provider.getStorage(await galaxyMemberV2.getAddress(), i))
       }
 
       // Check if storage slots are the same after upgrade

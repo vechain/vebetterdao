@@ -27,7 +27,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { GalaxyMember } from "../typechain-types"
+import { GalaxyMember, VoterRewards, VoterRewardsV1 } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 
 describe("VoterRewards", () => {
@@ -365,6 +365,71 @@ describe("VoterRewards", () => {
       })
 
       expect(await voterRewards.version()).to.equal("2")
+    })
+
+    it("Should not have state conflict after upgrading to V2", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr, emissions, galaxyMember, vechainNodesMock } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+        deployMocks: true,
+      })
+
+      console.log("Galaxy member address: ", await galaxyMember.getAddress())
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // Should be able to free mint after participating in allocation voting
+      await participateInAllocationVoting(owner)
+
+      const voterRewards = (await deployProxy("VoterRewardsV1", [
+        owner.address, // admin
+        owner.address, // upgrader
+        owner.address, // contractsAddressManager
+        await emissions.getAddress(),
+        await galaxyMember.getAddress(),
+        await b3tr.getAddress(),
+        levels,
+        multipliers,
+      ])) as VoterRewardsV1
+
+      await voterRewards.waitForDeployment()
+
+      let storageSlots = []
+
+      const initialSlot = BigInt("0x114e7ffaaf205d38cd05b17b56f3357806ef2ce889cb4748445ae91cdfc37c00") // Slot 0 of VoterRewardsV1
+
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlots.push(await ethers.provider.getStorage(await voterRewards.getAddress(), i))
+      }
+
+      console.log(storageSlots)
+
+      const voterRewardsV2 = (await upgradeProxy(
+        "VoterRewardsV1",
+        "VoterRewards",
+        await voterRewards.getAddress(),
+        [],
+        {
+          version: 2,
+        },
+      )) as VoterRewards
+
+      const storageSlotsAfter = []
+
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlotsAfter.push(await ethers.provider.getStorage(await voterRewardsV2.getAddress(), i))
+      }
+
+      console.log(storageSlotsAfter)
+
+      // Check if storage slots are the same after upgrade
+      for (let i = 0; i < storageSlots.length; i++) {
+        expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
+      }
     })
   })
 

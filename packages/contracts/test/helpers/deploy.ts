@@ -11,7 +11,6 @@ import {
   XAllocationPool,
   VoterRewards,
   Treasury,
-  B3TRGovernor,
   X2EarnApps,
   GovernorClockLogicV1,
   GovernorConfiguratorV1,
@@ -28,6 +27,7 @@ import {
   TokenAuction,
   GalaxyMemberV1,
   B3TRGovernorV1,
+  VoterRewardsV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, upgradeProxy } from "../../scripts/helpers"
@@ -281,7 +281,7 @@ export const getOrDeployContractInstances = async ({
     await b3tr.getAddress(),
     levels,
     multipliers,
-  ])) as VoterRewards
+  ])) as VoterRewardsV1
 
   const voterRewardsV2 = (await upgradeProxy("VoterRewardsV1", "VoterRewards", await voterRewards.getAddress(), [], {
     version: 2,
