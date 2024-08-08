@@ -2296,7 +2296,7 @@ describe("X-Apps", function () {
       expect(isEligibleForVote).to.eql(true)
     })
 
-    it("If an XNode endorser transfers its XNode XApp will enter grace period", async function () {
+    it("If an XNode endorser transfers its XNode XApp will not enter grace period, they will remain endorsed", async function () {
       const { x2EarnApps, xAllocationVoting, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2342,11 +2342,11 @@ describe("X-Apps", function () {
       await x2EarnApps.checkEndorsement(app1Id)
 
       // app should be pending endorsement -> score is now 50 -> grace period starts
-      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
-      expect(await x2EarnApps.getScore(app1Id)).to.eql(50n)
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
+      expect(await x2EarnApps.getScore(app1Id)).to.eql(100n)
 
-      // App is pending endorsent
-      expect((await x2EarnApps.unendorsedApps()).length).to.eql(1)
+      // App is not pending endorsent
+      expect((await x2EarnApps.unendorsedApps()).length).to.eql(0)
     })
 
     it("An XAPP can only be endorsed if it is pending endorsement (score < 100)", async function () {
@@ -2411,6 +2411,63 @@ describe("X-Apps", function () {
       expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(true)
     })
 
+    it("If a XNode holder transfers/sells its XNode the XAPPs remains endorsed by XNode and new owner is endorser", async function () {
+      const { x2EarnApps, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      const appIdsPendingEndorsement1 = await x2EarnApps.unendorsedAppIds()
+      expect(appIdsPendingEndorsement1.length).to.eql(1)
+
+      // Create MjölnirX node holder with an endorsement score of 100
+      await createNodeHolder(7, otherAccounts[1]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+
+      // App should be pending endorsement -> score is 0 never endorsed
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // Endorse XAPP with MjölnirX node holder
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id) // Node holder endorsement score is 100
+
+      // Get XAPP score
+      const score = await x2EarnApps.getScore(app1Id)
+
+      // App should not be pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
+
+      // Xnode holder should be listed as an endorser
+      const endorsers = await x2EarnApps.getEndorsers(app1Id)
+      expect(endorsers[0]).to.eql(otherAccounts[1].address)
+
+      // Xnode holder loses its XNode status
+      // Skip ahead 1 day to be able to transfer node
+      await time.setNextBlockTimestamp((await time.latest()) + 86400)
+
+      // XNode holder transfers its XNode
+      const tokenId = await vechainNodes.ownerToId(otherAccounts[1].address)
+      await vechainNodes
+        .connect(otherAccounts[1])
+        .transferFrom(otherAccounts[1].address, otherAccounts[3].address, tokenId)
+
+      // New Xnode holder should still listed as an endorser
+      const endorsers1 = await x2EarnApps.getEndorsers(app1Id)
+      expect(endorsers1[0]).to.eql(otherAccounts[3].address)
+
+      // XAPP should have same score
+      expect(await x2EarnApps.getScore(app1Id)).to.eql(score)
+
+      // XAPP should not be pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
+    })
+
     it("If a XNode holder loses its XNode status they are removed as an endorser when XApp endorser score is checked", async function () {
       const { x2EarnApps, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2445,25 +2502,25 @@ describe("X-Apps", function () {
       expect(endorsers[0]).to.eql(otherAccounts[1].address)
 
       // Xnode holder loses its XNode status
-      // Skip ahead 1 day to be able to transfer node
+      // Skip ahead 1 day
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
 
       // XNode holder transfers its XNode
       const tokenId = await vechainNodes.ownerToId(otherAccounts[1].address)
-      await vechainNodes
-        .connect(otherAccounts[1])
-        .transferFrom(otherAccounts[1].address, otherAccounts[3].address, tokenId)
+      await vechainNodes.connect(owner).downgradeTo(tokenId, 0)
 
-      // Xnode holder should still be listed as an endorser
+      // Xnode holder should not still be listed as an endorser
       const endorsers1 = await x2EarnApps.getEndorsers(app1Id)
-      expect(endorsers1[0]).to.eql(otherAccounts[1].address)
+      expect(endorsers1.length).to.eql(0)
+
+      // XApp is not pending endorsement yet
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
 
       // this will only get picked up if endorsement is checked
       await x2EarnApps.checkEndorsement(app1Id)
 
-      // Xnode holder should no longer be listed as an endorser
-      const endorsers2 = await x2EarnApps.getEndorsers(app1Id)
-      expect(endorsers2.length).to.eql(0)
+      // App is pending endorsent
+      expect((await x2EarnApps.unendorsedApps()).length).to.eql(1)
     })
 
     it("Should return correct value for grace period length", async function () {
@@ -2495,7 +2552,6 @@ describe("X-Apps", function () {
     })
 
     it("Node endorsement scores can be updated by admin with governance role", async function () {
-      const config = createLocalConfig()
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2509,13 +2565,13 @@ describe("X-Apps", function () {
       await createNodeHolder(6, otherAccounts[6]) // Node strength level 6 corresponds (MjolnirX) to an endorsement score of 100
       await createNodeHolder(7, otherAccounts[7]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[1].address)).to.eql(2n)
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[2].address)).to.eql(13n)
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[3].address)).to.eql(50n)
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[4].address)).to.eql(3n)
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[5].address)).to.eql(9n)
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[6].address)).to.eql(35n)
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[7].address)).to.eql(100n)
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[1].address)).to.eql(2n)
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[2].address)).to.eql(13n)
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[3].address)).to.eql(50n)
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[4].address)).to.eql(3n)
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[5].address)).to.eql(9n)
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[6].address)).to.eql(35n)
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[7].address)).to.eql(100n)
 
       const newEndorsementScores = {
         strength: 1,
@@ -2529,25 +2585,25 @@ describe("X-Apps", function () {
 
       await x2EarnApps.connect(owner).updateNodeEndorsementScores(newEndorsementScores)
 
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[1].address)).to.eql(
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[1].address)).to.eql(
         BigInt(newEndorsementScores.strength),
       )
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[2].address)).to.eql(
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[2].address)).to.eql(
         BigInt(newEndorsementScores.thunder),
       )
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[3].address)).to.eql(
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[3].address)).to.eql(
         BigInt(newEndorsementScores.mjolnir),
       )
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[4].address)).to.eql(
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[4].address)).to.eql(
         BigInt(newEndorsementScores.veThorX),
       )
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[5].address)).to.eql(
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[5].address)).to.eql(
         BigInt(newEndorsementScores.strengthX),
       )
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[6].address)).to.eql(
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[6].address)).to.eql(
         BigInt(newEndorsementScores.thunderX),
       )
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[7].address)).to.eql(
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[7].address)).to.eql(
         BigInt(newEndorsementScores.mjolnirX),
       )
     })
@@ -3215,12 +3271,11 @@ describe("X-Apps", function () {
 
       // Create two node holders with an endorsement score
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
-      await createNodeHolder(3, otherAccounts[3]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      await createNodeHolder(1, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 2
 
       // Endorse XAPP with node holder -> combined endorsement score is 63 -> less than 100
       await x2EarnApps.connect(owner).endorseApp(app1Id) // Node holder endorsement score is 50
-      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id) // Node holder endorsement score is 50
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id) // Node holder endorsement score is 2
 
       // Check endorsement
       await x2EarnApps.checkEndorsement(app1Id)
@@ -3246,10 +3301,9 @@ describe("X-Apps", function () {
       // Skip ahead 1 day to be able to transfer node
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
       // XNode holder increases its node strength by getting a new node while XAPP is blacklisted
-      const tokenId1 = await vechainNodes.ownerToId(owner.address)
-      await vechainNodes.connect(owner).transferFrom(owner.address, otherAccounts[4].address, tokenId1)
-      const tokenId2 = await vechainNodes.ownerToId(otherAccounts[3].address)
-      await vechainNodes.connect(otherAccounts[3]).transferFrom(otherAccounts[3].address, owner.address, tokenId2)
+
+      const tokenId2 = await vechainNodes.ownerToId(otherAccounts[2].address)
+      await vechainNodes.upgradeTo(tokenId2, 7)
 
       // app should not be pending endorsement -> blacklisted XAPPS should not be pending endorsement
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
@@ -3308,14 +3362,14 @@ describe("X-Apps", function () {
       await createNodeHolder(7, otherAccounts[7]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
       // Get endorsement score
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[0].address)).to.eql(0n) // Node strength level 0 corresponds (None) to an endorsement score of 0
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[1].address)).to.eql(2n) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[2].address)).to.eql(13n) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[3].address)).to.eql(50n) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[4].address)).to.eql(3n) // Node strength level 4 corresponds (VeThorX) to an endorsement score of 3
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[5].address)).to.eql(9n) // Node strength level 5 corresponds (StrengthX) to an endorsement score of 9
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[6].address)).to.eql(35n) // Node strength level 6 corresponds (ThunderX) to an endorsement score of 35
-      expect(await x2EarnApps.getNodeEndorsementScore(otherAccounts[7].address)).to.eql(100n) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[0].address)).to.eql(0n) // Node strength level 0 corresponds (None) to an endorsement score of 0
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[1].address)).to.eql(2n) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[2].address)).to.eql(13n) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[3].address)).to.eql(50n) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[4].address)).to.eql(3n) // Node strength level 4 corresponds (VeThorX) to an endorsement score of 3
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[5].address)).to.eql(9n) // Node strength level 5 corresponds (StrengthX) to an endorsement score of 9
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[6].address)).to.eql(35n) // Node strength level 6 corresponds (ThunderX) to an endorsement score of 35
+      expect(await x2EarnApps.getUserNodeEndorsementScore(otherAccounts[7].address)).to.eql(100n) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
     })
 
     it("If an XAPP has a score less than 100 but one of its endorsers increases the node strength when endorsement status is checked they will be endorsed ", async function () {
@@ -3336,7 +3390,6 @@ describe("X-Apps", function () {
       // Create two node holders with an endorsement score
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
       await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
-      await createNodeHolder(3, otherAccounts[3]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
 
       // Endorse XAPP with node holder -> combined endorsement score is 63 -> less than 100
       await x2EarnApps.connect(owner).endorseApp(app1Id) // Node holder endorsement score is 50
@@ -3358,13 +3411,11 @@ describe("X-Apps", function () {
       const appsInfo = await x2EarnApps.apps()
       expect(appsInfo.length).to.eql(0)
 
-      // Skip ahead 1 day to be able to transfer node
+      // Skip ahead 1 day
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
       // XNode holder increases its node strength by getting a new node
-      const tokenId1 = await vechainNodes.ownerToId(owner.address)
-      await vechainNodes.connect(owner).transferFrom(owner.address, otherAccounts[4].address, tokenId1)
-      const tokenId2 = await vechainNodes.ownerToId(otherAccounts[3].address)
-      await vechainNodes.connect(otherAccounts[3]).transferFrom(otherAccounts[3].address, owner.address, tokenId2)
+      const tokenId2 = await vechainNodes.ownerToId(otherAccounts[2].address)
+      await vechainNodes.upgradeTo(tokenId2, 7)
 
       // check endorsement
       await x2EarnApps.checkEndorsement(app1Id)
@@ -3381,6 +3432,85 @@ describe("X-Apps", function () {
 
       // Unedorsed apps list should be empty
       expect((await x2EarnApps.unendorsedAppIds()).length).to.eql(0)
+    })
+
+    it("If a user recieves an XNode that is endorsing an XAPP they can remove endorsement and endorse another XAPP", async function () {
+      const { x2EarnApps, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+      const app2Id = await x2EarnApps.hashAppName(otherAccounts[1].address)
+
+      // Register XAPP -> XAPP is pending endorsement
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI 1")
+
+      const appIdsPendingEndorsement1 = await x2EarnApps.unendorsedAppIds()
+      expect(appIdsPendingEndorsement1.length).to.eql(2)
+
+      // Create two node holders with an endorsement score
+      await createNodeHolder(7, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+
+      // Endorse XAPP with node holder
+      await x2EarnApps.connect(owner).endorseApp(app1Id) // Node holder endorsement score 100
+
+      // Check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // app should be pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
+
+      // app should be eligible for voting
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(true)
+
+      // App should be added so should exist in vebetter DAO app list
+      expect(await x2EarnApps.appExists(app1Id)).to.eql(true)
+
+      // Skip ahead 1 day to be able to transfer node
+      await time.setNextBlockTimestamp((await time.latest()) + 86400)
+      // XNode holder increases its node strength by getting a new node
+      const tokenId = await vechainNodes.ownerToId(owner.address)
+      await vechainNodes.connect(owner).transfer(otherAccounts[0].address, tokenId)
+
+      // check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // app should not be pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
+
+      // Get apps info should have 1 app
+      const appsInfo2 = await x2EarnApps.apps()
+      expect(appsInfo2.length).to.eql(1)
+
+      // Unedorsed apps list should be empty
+      expect((await x2EarnApps.unendorsedAppIds()).length).to.eql(1)
+
+      // new owner should be able to unendorse XAPP
+      await x2EarnApps.connect(otherAccounts[0]).unendorseApp(app1Id)
+
+      // app should be pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // check endorsers should be 0
+      const endorsers = await x2EarnApps.getEndorsers(app1Id)
+      expect(endorsers.length).to.eql(0)
+
+      const appIdsPendingEndorsement2 = await x2EarnApps.unendorsedAppIds()
+      expect(appIdsPendingEndorsement2.length).to.eql(2)
+
+      // should be able to endorse new XAPP
+      await x2EarnApps.connect(otherAccounts[0]).endorseApp(app2Id) // Node holder endorsement score 100
+
+      // app should not be pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      const appIdsPendingEndorsement3 = await x2EarnApps.unendorsedAppIds()
+      expect(appIdsPendingEndorsement3.length).to.eql(1)
     })
   })
 })
