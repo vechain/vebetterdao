@@ -59,6 +59,20 @@ export const ButtonStyle: ComponentStyleConfig = {
         },
       },
     },
+    whiteAction: {
+      rounded: "full",
+      fontSize: "16px",
+      fontWeight: 500,
+      px: "24px",
+      color: "#004CFC",
+      bgColor: "rgba(224, 233, 254, 1)",
+      _hover: {
+        bg: "rgba(224, 233, 254, 0.9)",
+        _disabled: {
+          bg: "rgba(224, 233, 254, 0.7)",
+        },
+      },
+    },
     secondary: {
       rounded: "full",
       color: "rgba(0, 76, 252, 1)",

@@ -23,6 +23,8 @@ import { FaChevronRight } from "react-icons/fa6"
 import { ConvertModal } from "../Convert/ConvertModal"
 import { GMUpgradeButton } from "./components/GMUpgradeButton"
 import { useMemo } from "react"
+import { NotConnectedWallet } from "./components/NotConnectedWallet"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -82,6 +84,11 @@ export const GmNFTLevel = () => {
       </Flex>
     )
   }, [isAbove1200, isNodeAttached, isGMMinted])
+
+  const { account } = useWallet()
+  if (!account) {
+    return <NotConnectedWallet />
+  }
   return (
     <Card bg="#004CFC" rounded="12px" p="24px" color="white" position="relative" overflow={"hidden"}>
       <Box
@@ -250,19 +257,11 @@ export const GmNFTLevel = () => {
                 }}
               />
             }
-            variant={"tertiaryAction"}
+            variant={"whiteAction"}
             rounded={"full"}
             fontSize="16px"
             fontWeight={500}
-            px="24px"
-            color="#004CFC"
-            bgColor="rgba(224, 233, 254, 1)"
-            _hover={{
-              bg: "rgba(224, 233, 254, 0.9)",
-              _disabled: {
-                bg: "rgba(224, 233, 254, 0.7)",
-              },
-            }}>
+            px="24px">
             {t("Convert tokens")}
           </Button>
         </VStack>
