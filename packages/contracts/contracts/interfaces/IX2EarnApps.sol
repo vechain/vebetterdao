@@ -346,7 +346,7 @@ interface IX2EarnApps {
   function updateAppMetadata(bytes32 appId, string memory metadataURI) external;
 
   /**
-   * @dev Check if there is an app with the specified `appId`. 
+   * @dev Check if there is an app with the specified `appId`.
    * @dev This function should be used to check if an app exists is part of the VeBetter DAO ecosystem.
    * @notice An app is considered to exist if it has been included in at least one allocation round.
    *
@@ -432,6 +432,13 @@ interface IX2EarnApps {
    * @param user the address of the user who holds a NODE
    */
   function getUsersEndorsementScore(address user) external view returns (uint256);
+
+  /**
+   * @dev Get the endorsersment score of a node ID.
+   *
+   * @param nodeId the ID of a node.
+   */
+  function getNodeEndorsementScore(uint256 nodeId) external view returns (uint256);
 
   /**
    * @notice Get the version of the contract.

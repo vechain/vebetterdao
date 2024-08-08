@@ -3372,6 +3372,31 @@ describe("X-Apps", function () {
       expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[7].address)).to.eql(100n) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
     })
 
+    it("Should be able to get a nodes endorsement score", async function () {
+      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await createNodeHolder(0, otherAccounts[0]) // Node strength level 0 corresponds (None) to an endorsement score of 0
+      await createNodeHolder(1, otherAccounts[1]) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
+      await createNodeHolder(2, otherAccounts[2]) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+      await createNodeHolder(3, otherAccounts[3]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      await createNodeHolder(4, otherAccounts[4]) // Node strength level 4 corresponds (VeThorX) to an endorsement score of 3
+      await createNodeHolder(5, otherAccounts[5]) // Node strength level 5 corresponds (StrengthX) to an endorsement score of 9
+      await createNodeHolder(6, otherAccounts[6]) // Node strength level 6 corresponds (ThunderX) to an endorsement score of 35
+      await createNodeHolder(7, otherAccounts[7]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+
+      // Get endorsement score
+      expect(await x2EarnApps.getNodeEndorsementScore(1)).to.eql(0n) // Node strength level 0 corresponds (None) to an endorsement score of 0
+      expect(await x2EarnApps.getNodeEndorsementScore(2)).to.eql(2n) // Node strength level 1 corresponds (Strength) to an endorsement score of 2
+      expect(await x2EarnApps.getNodeEndorsementScore(3)).to.eql(13n) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+      expect(await x2EarnApps.getNodeEndorsementScore(4)).to.eql(50n) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      expect(await x2EarnApps.getNodeEndorsementScore(5)).to.eql(3n) // Node strength level 4 corresponds (VeThorX) to an endorsement score of 3
+      expect(await x2EarnApps.getNodeEndorsementScore(6)).to.eql(9n) // Node strength level 5 corresponds (StrengthX) to an endorsement score of 9
+      expect(await x2EarnApps.getNodeEndorsementScore(7)).to.eql(35n) // Node strength level 6 corresponds (ThunderX) to an endorsement score of 35
+      expect(await x2EarnApps.getNodeEndorsementScore(8)).to.eql(100n) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
+    })
+
     it("If an XAPP has a score less than 100 but one of its endorsers increases the node strength when endorsement status is checked they will be endorsed ", async function () {
       const { x2EarnApps, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
         forceDeploy: true,
