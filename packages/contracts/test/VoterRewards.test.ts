@@ -406,8 +406,6 @@ describe("VoterRewards", () => {
         storageSlots.push(await ethers.provider.getStorage(await voterRewards.getAddress(), i))
       }
 
-      console.log(storageSlots)
-
       const voterRewardsV2 = (await upgradeProxy(
         "VoterRewardsV1",
         "VoterRewards",
@@ -423,8 +421,6 @@ describe("VoterRewards", () => {
       for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
         storageSlotsAfter.push(await ethers.provider.getStorage(await voterRewardsV2.getAddress(), i))
       }
-
-      console.log(storageSlotsAfter)
 
       // Check if storage slots are the same after upgrade
       for (let i = 0; i < storageSlots.length; i++) {
