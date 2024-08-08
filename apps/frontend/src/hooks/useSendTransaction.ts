@@ -1,21 +1,39 @@
 "use client"
 import { useTxReceipt } from "@/api"
+import { getConfig } from "@repo/config"
 import { UseMutateFunction, useMutation } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Transaction } from "thor-devkit"
 
-/**
- *  Estimate the gas for a transaction with a default 20% buffer
- * @param thor the thor instance
- * @param clauses the clauses to estimate the gas for
- * @param caller the caller of the transaction
- * @param buffer the buffer to add to the gas estimate (default: 1.2) - 1 is no buffer
- * @returns the estimated gas
- */
-const estimateTxGas = async (thor: Connex.Thor, clauses: Connex.VM.Clause[], caller: string, buffer = 1.25) => {
+type InspectClausesResponse = {
+  data: string
+  gasUsed: number
+  reverted: boolean
+  vmError: string
+  events: Connex.VM.Event[]
+  transfers: Connex.VM.Transfer[]
+}[]
+
+const nodeUrl = getConfig().nodeUrl
+
+const estimateTxGasWithNext = async (clauses: Connex.VM.Clause[], caller: string, buffer = 1.25) => {
   // Send tx details to the node to get the gas estimate
-  const outputs = await thor.explain(clauses).caller(caller).execute()
+  const response = await fetch(`${nodeUrl}/accounts/*?revision=next`, {
+    method: "POST",
+    body: JSON.stringify({
+      clauses: clauses.map(clause => ({
+        to: clause.to,
+        value: clause.value,
+        data: clause.data,
+      })),
+      caller,
+    }),
+  })
+
+  if (!response.ok) throw new Error("Failed to estimate gas")
+
+  const outputs = (await response.json()) as InspectClausesResponse
 
   const execGas = outputs.reduce((sum, out) => sum + out.gasUsed, 0)
 
@@ -129,13 +147,15 @@ export const useSendTransaction = ({
     async (clauses: EnhancedClause[]) => {
       const transaction = vendor.sign("tx", clauses)
       if (signerAccount) {
-        const gasLimit = await estimateTxGas(thor, clauses, signerAccount)
-        const parsedGasLimit = suggestedMaxGas ? Math.max(gasLimit, suggestedMaxGas) : gasLimit
+        const gasLimitNext = await estimateTxGasWithNext(clauses, signerAccount, 1)
+
+        const parsedGasLimit = suggestedMaxGas ? Math.max(gasLimitNext, suggestedMaxGas) : gasLimitNext
+
         return transaction.signer(signerAccount).gas(parsedGasLimit).request()
       }
       return transaction.request()
     },
-    [vendor, signerAccount, thor, suggestedMaxGas],
+    [vendor, signerAccount, suggestedMaxGas],
   )
 
   /**
@@ -143,10 +163,17 @@ export const useSendTransaction = ({
    */
   const sendTransactionAdapter = useCallback(
     async (_clauses?: EnhancedClause[]) => {
-      if (_clauses) return await sendTransaction(_clauses)
+      if (_clauses) {
+        _clauses = await convertClauses(_clauses)
+        return await sendTransaction(_clauses)
+      }
 
       if (!clauses) throw new Error("clauses are required")
+
       _clauses = await convertClauses(clauses)
+
+      console.log("clauses", _clauses)
+
       return await sendTransaction(_clauses)
     },
     [sendTransaction, clauses],
