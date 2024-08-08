@@ -2,7 +2,6 @@ import { useQueries } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { getRoundReward, getRoundRewardQueryKey } from "./useVotingRoundReward"
-import { RoundReward } from "../utils"
 import { useAllocationsRoundState } from "../../xAllocations"
 
 /**
@@ -26,14 +25,7 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
     queries: rounds.map(roundId => ({
       queryKey: getRoundRewardQueryKey(roundId, voter),
       queryFn: async () => {
-        const reward = await getRoundReward(thor, voter ?? "", roundId)
-
-        const rondReward: RoundReward = {
-          roundId,
-          rewards: reward,
-        }
-
-        return rondReward
+        return await getRoundReward(thor, voter ?? "", roundId)
       },
     })),
   })

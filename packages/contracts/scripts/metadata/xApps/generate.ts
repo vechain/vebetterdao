@@ -22,6 +22,9 @@ interface XAppMetadata {
   screenshots: string[]
   social_urls: SocialUrl[]
   app_urls: AppUrl[]
+  ve_world: {
+    banner: string
+  }
 }
 
 const SRC_JSON_PATH = path.join(__dirname, `../../../metadata/xApps/src/json`)
@@ -64,6 +67,7 @@ const generateMetadata = async (file: string): Promise<XAppMetadata> => {
 
   metadata.banner = toIPFSURL(imagesIpfsUrl, "banner.png", "media")
   metadata.logo = toIPFSURL(imagesIpfsUrl, "logo.png", "media")
+  metadata.ve_world.banner = toIPFSURL(imagesIpfsUrl, "banner.png", "media")
 
   return metadata
 }
