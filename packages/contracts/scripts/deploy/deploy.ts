@@ -491,7 +491,16 @@ export async function deployAll(config: ContractsConfig) {
       await setupTestEnvironment(emissions, x2EarnApps)
       break
     case "vechain_solo":
-      await setupLocalEnvironment(emissions, treasury, x2EarnApps, governor, xAllocationVoting, b3tr, vot3)
+      await setupLocalEnvironment(
+        emissions,
+        treasury,
+        x2EarnApps,
+        governor,
+        xAllocationVoting,
+        b3tr,
+        vot3,
+        vechainNodesMock,
+      )
       break
   }
 
