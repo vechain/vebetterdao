@@ -26,7 +26,7 @@ const estimateTxGas = async (thor: Connex.Thor, clauses: Connex.VM.Clause[], cal
   // Gas estimate is the sum of intrinsic gas and execution gas
   const gasEstimate = intrinsicGas + (execGas ? execGas + 15000 : 0)
 
-  // Add 20% buffer to the gas estimate
+  // Add a % buffer to the gas estimate
   return Math.round(gasEstimate * buffer)
 }
 
@@ -61,12 +61,15 @@ export type EnhancedClause = Connex.VM.Clause & {
  * @param signerAccount the signer account to use
  * @param clauses clauses to send in the transaction
  * @param onTxConfirmed callback to run when the tx is confirmed
+ * @param onTxFailedOrCancelled callback to run when the tx fails or is cancelled
+ * @param suggestedMaxGas the suggested max gas for the transaction
  */
 type UseSendTransactionProps = {
   signerAccount?: string | null
   clauses?: EnhancedClause[] | (() => EnhancedClause[]) | (() => Promise<EnhancedClause[]>)
   onTxConfirmed?: () => void | Promise<void>
   onTxFailedOrCancelled?: () => void | Promise<void>
+  suggestedMaxGas?: number
 }
 
 /**
@@ -105,6 +108,7 @@ export const useSendTransaction = ({
   clauses,
   onTxConfirmed,
   onTxFailedOrCancelled,
+  suggestedMaxGas,
 }: UseSendTransactionProps): UseSendTransactionReturnValue => {
   const { vendor, thor } = useConnex()
 
@@ -126,11 +130,12 @@ export const useSendTransaction = ({
       const transaction = vendor.sign("tx", clauses)
       if (signerAccount) {
         const gasLimit = await estimateTxGas(thor, clauses, signerAccount)
-        return transaction.signer(signerAccount).gas(gasLimit).request()
+        const parsedGasLimit = suggestedMaxGas ? Math.max(gasLimit, suggestedMaxGas) : gasLimit
+        return transaction.signer(signerAccount).gas(parsedGasLimit).request()
       }
       return transaction.request()
     },
-    [vendor, signerAccount, thor],
+    [vendor, signerAccount, thor, suggestedMaxGas],
   )
 
   /**
