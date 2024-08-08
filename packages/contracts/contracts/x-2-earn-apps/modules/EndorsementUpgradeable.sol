@@ -187,20 +187,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       revert X2EarnNonEndorser();
     }
 
-    // Calculate the new score of the app after removing the caller's endorsement
-    uint256 score = _getScoreAndRemoveEndorsement(appId, tokenID);
-
-    // Check if the app is no longer in the voting allocation rounds due to lack of endorsement or from being blacklisted
-    if (!isEligibleNow(appId) || isBlacklisted(appId)) {
-      return;
-    }
-
-    // Check if the score is less than endorsement score threshold (100)
-    if (score < _endorsementScoreThreshold()) {
-      _updateStatusIfThresholdNotMet(appId);
-    }
-
-    return;
+    return _removeEndorsement(appId, tokenID);
   }
 
   // ---------- Internal ---------- //
@@ -386,6 +373,28 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     return $._endorsementScoreThreshold;
   }
 
+  /**
+   * @notice This function can be called by an XAPP admin that wishes to remove an endorserment from a specific node ID
+   * @param appId The unique identifier of the app that wishes to be unendorsed.
+   * @param nodeId The unique identifier of the node they wish to remove from their list of endorsers.
+   */
+  function _removeNodeEndorsement(bytes32 appId, uint256 nodeId) internal virtual {
+    // Check if the app exists
+    if (!_appSubmitted(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    // Get the endorsement storage
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    // Check if the nodeId is an endorser of the specified appId
+    if ($._nodeToEndorsedApp[nodeId] != appId) {
+      revert X2EarnNonEndorser();
+    }
+
+    return _removeEndorsement(appId, nodeId);
+  }
+
   // ---------- Private ---------- //
 
   /**
@@ -412,6 +421,28 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     // Reset the grace period if the app has more than 100 points
     $._appGracePeriod[appId] = 0;
+  }
+
+  /**
+   * @notice Private function that removes a node IDs endorsement
+   * @param appId The unique identifier of the app that is to be unendorsed.
+   * @param nodeId The unique identifier of the node to remove from the XApps list of endorsers.
+   */
+  function _removeEndorsement(bytes32 appId, uint256 nodeId) private {
+    // Calculate the new score of the app after removing the node ID's endorsement
+    uint256 score = _getScoreAndRemoveEndorsement(appId, nodeId);
+
+    // Check if the app is no longer in the voting allocation rounds due to lack of endorsement or from being blacklisted
+    if (!isEligibleNow(appId) || isBlacklisted(appId)) {
+      return;
+    }
+
+    // Check if the score is less than endorsement score threshold (100)
+    if (score < _endorsementScoreThreshold()) {
+      _updateStatusIfThresholdNotMet(appId);
+    }
+
+    return;
   }
 
   /**

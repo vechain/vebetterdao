@@ -473,7 +473,7 @@ interface IX2EarnApps {
   function updateNodeEndorsementScores(VechainNodesDataTypes.NodeStrengthScores calldata _nodeStrengthScores) external;
 
   /**
-   * @notice Update th endorsement score threshold
+   * @notice Update the endorsement score threshold
    * @dev This should be minimum endorsement score required for an app to be eligible for voting.
    *
    * @param _scoreThreshold the new score threshold
@@ -482,6 +482,14 @@ interface IX2EarnApps {
    */
 
   function updateEndorsementScoreThreshold(uint256 _scoreThreshold) external;
+
+  /**
+   * @notice This function can be called by an XAPP admin that wishes to remove an endorserment from a specific node ID
+   * @dev Can only be valled by DEFAULT_ADMIN or XAPP admin
+   * @param _appId The unique identifier of the app that wishes to be unendorsed.
+   * @param _nodeId The unique identifier of the node they wish to remove from their list of endorsers.
+   */
+  function removeNodeEndorsement(bytes32 _appId, uint256 _nodeId) external;
 
   /**
    * @dev Get the score threshold.
