@@ -165,6 +165,11 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
         description: "Update the delay between proposal queue and execution",
         abiDefinition: getFunctionDefinitionFromAbi(TimeLockContractJson, "updateDelay"),
       },
+      {
+        name: "Update implementation",
+        description: "Update the implementation of a contract",
+        abiDefinition: getFunctionDefinitionFromAbi(B3TRGovernorJson, "upgradeToAndCall"),
+      },
     ],
   },
   {
