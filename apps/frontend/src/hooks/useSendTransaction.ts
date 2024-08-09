@@ -148,7 +148,6 @@ export const useSendTransaction = ({
       const transaction = vendor.sign("tx", clauses)
       if (signerAccount) {
         let gasLimitNext
-
         try {
           gasLimitNext = await estimateTxGasWithNext([...clauses], signerAccount, 1)
         } catch (e) {
