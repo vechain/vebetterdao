@@ -13,9 +13,9 @@ import { useCallback } from "react"
 import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { address } from "thor-devkit"
 
-const buffer = 1.01
+// const buffer = 1.01
 // Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
-const suggestedMaxGas = 184934 * buffer
+// const suggestedMaxGas = 184934 * buffer
 
 type useCastVoteProps = {
   proposalId: string
@@ -98,7 +98,7 @@ export const useCastVote = ({
   const result = useSendTransaction({
     signerAccount: account,
     onTxConfirmed: handleOnSuccess,
-    suggestedMaxGas,
+    // suggestedMaxGas,
   })
 
   /**
