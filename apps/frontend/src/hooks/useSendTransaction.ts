@@ -147,11 +147,18 @@ export const useSendTransaction = ({
     async (clauses: EnhancedClause[]) => {
       const transaction = vendor.sign("tx", clauses)
       if (signerAccount) {
-        const gasLimitNext = await estimateTxGasWithNext([...clauses], signerAccount, 1)
+        let gasLimitNext
+        try {
+          gasLimitNext = await estimateTxGasWithNext([...clauses], signerAccount, 1)
+        } catch (e) {
+          console.error("Gas estimation failed", e)
+        }
 
-        const parsedGasLimit = suggestedMaxGas ? Math.max(gasLimitNext, suggestedMaxGas) : gasLimitNext
-
-        return transaction.signer(signerAccount).gas(parseInt(parsedGasLimit.toString())).request()
+        const parsedGasLimit = Math.max(gasLimitNext ?? 0, suggestedMaxGas ?? 0)
+        // specify gasLimit if we have a suggested or an estimation
+        if (parsedGasLimit > 0)
+          return transaction.signer(signerAccount).gas(parseInt(parsedGasLimit.toString())).request()
+        else return transaction.signer(signerAccount).request()
       }
       return transaction.request()
     },
