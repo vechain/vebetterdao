@@ -17,6 +17,10 @@ export type useClaimRewardsReturnValue = {
   sendTransaction: () => Promise<void>
 } & Omit<UseSendTransactionReturnValue, "sendTransaction">
 
+const buffer = 1.01
+// Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
+const suggestedMaxGas = 70026 * buffer
+
 /**
  * useClaimRewards is a custom hook that claims voting rewards for a given set of rounds.
  * It uses the useSendTransaction hook to send the transaction and the useQueryClient hook to invalidate the queries after the transaction.
@@ -71,6 +75,7 @@ export const useClaimRewards = ({
     signerAccount: account,
     onTxConfirmed: handleOnSuccess,
     onTxFailedOrCancelled: onFailure,
+    suggestedMaxGas,
   })
 
   const onMutate = useCallback(async () => {
