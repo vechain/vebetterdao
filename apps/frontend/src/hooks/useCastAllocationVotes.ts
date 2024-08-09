@@ -14,9 +14,9 @@ import { XAllocationVoting__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
 
-const buffer = 1.01
+// const buffer = 1.01
 // Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
-const suggestedMaxGas = 565580 * buffer
+// const suggestedMaxGas = 565580 * buffer
 
 /**
  * CastAllocationVotesProps is the type of the data to send to the castAllocationVotes hook
@@ -128,7 +128,7 @@ export const useCastAllocationVotes = ({
   const result = useSendTransaction({
     signerAccount: account,
     onTxConfirmed: handleOnSuccess,
-    suggestedMaxGas,
+    // suggestedMaxGas,
   })
 
   /**

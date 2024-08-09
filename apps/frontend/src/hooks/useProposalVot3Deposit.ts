@@ -19,9 +19,9 @@ const VOT3_CONTRACT = config.vot3ContractAddress
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 const GOVERNANCE_CONTRACT = config.b3trGovernorAddress
 
-const buffer = 1.01
+// const buffer = 1.01
 // Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
-const suggestedMaxGas = 157424 * buffer
+// const suggestedMaxGas = 157424 * buffer
 
 type UseProposalVot3DepositProps = {
   proposalId: string
@@ -79,6 +79,6 @@ export const useProposalVot3Deposit = ({
     clauseBuilder,
     refetchQueryKeys,
     onSuccess,
-    suggestedMaxGas,
+    // suggestedMaxGas,
   })
 }
