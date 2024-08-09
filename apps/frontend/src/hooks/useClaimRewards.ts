@@ -17,8 +17,6 @@ export type useClaimRewardsReturnValue = {
   sendTransaction: () => Promise<void>
 } & Omit<UseSendTransactionReturnValue, "sendTransaction">
 
-70026
-
 const buffer = 1.01
 // Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
 const suggestedMaxGas = 70026 * buffer
