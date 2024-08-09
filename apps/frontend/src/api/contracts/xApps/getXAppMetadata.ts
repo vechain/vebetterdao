@@ -28,6 +28,9 @@ export type XAppMetadata = {
     url: string
   }[]
   tweets: string[]
+  ve_world: {
+    banner: string
+  }
 }
 /**
   dapp-kit broke the pre-fetching
