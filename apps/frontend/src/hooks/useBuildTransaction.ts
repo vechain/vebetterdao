@@ -8,6 +8,7 @@ export type BuildTransactionProps<ClausesParams> = {
   refetchQueryKeys?: string[][]
   onSuccess?: () => void
   invalidateCache?: boolean
+  suggestedMaxGas?: number
 }
 
 /**
@@ -16,6 +17,7 @@ export type BuildTransactionProps<ClausesParams> = {
  * @param refetchQueryKeys - An optional array of query keys to refetch after the transaction is sent.
  * @param invalidateCache - A flag indicating whether to invalidate the cache and refetch queries after the transaction is sent.
  * @param onSuccess - An optional callback function to be called after the transaction is successfully sent.
+ * @param suggestedMaxGas - The suggested maximum gas for the transaction.
  * @returns An object containing the result of the `useSendTransaction` hook and a `sendTransaction` function.
  */
 export const useBuildTransaction = <ClausesParams>({
@@ -23,6 +25,7 @@ export const useBuildTransaction = <ClausesParams>({
   refetchQueryKeys,
   invalidateCache = true,
   onSuccess,
+  suggestedMaxGas,
 }: BuildTransactionProps<ClausesParams>) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
@@ -49,6 +52,7 @@ export const useBuildTransaction = <ClausesParams>({
   const result = useSendTransaction({
     signerAccount: account,
     onTxConfirmed: handleOnSuccess,
+    suggestedMaxGas,
   })
 
   /**
