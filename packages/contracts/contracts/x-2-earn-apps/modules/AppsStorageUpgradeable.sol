@@ -166,7 +166,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
       length
     );
 
-    for (uint i = 0; i < length; i++) {
+    for (uint i; i < length; i++) {
       X2EarnAppsDataTypes.App memory _app = $._apps[$._appIds[i]];
       allApps[i] = X2EarnAppsDataTypes.AppWithDetailsReturnType(
         _app.id,

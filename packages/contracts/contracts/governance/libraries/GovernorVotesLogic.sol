@@ -32,6 +32,7 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
 /// @title GovernorVotesLogic
 /// @notice Library for handling voting logic in the Governor contract.
+/// @dev Difference from V1: `proposalId` is passed as an argument to `registerVote` function instead of `proposalSnapshot`.
 library GovernorVotesLogic {
   /// @dev Thrown when a vote has already been cast by the voter.
   /// @param voter The address of the voter who already cast a vote.
@@ -222,7 +223,7 @@ library GovernorVotesLogic {
 
     _countVote(self, proposalId, voter, support, weight, power);
 
-    self.voterRewards.registerVote(GovernorProposalLogic._proposalSnapshot(self, proposalId), voter, weight, Math.sqrt(weight));
+    self.voterRewards.registerVote(proposalId, voter, weight, Math.sqrt(weight));
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 
