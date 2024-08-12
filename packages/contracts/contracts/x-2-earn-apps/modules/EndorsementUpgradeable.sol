@@ -26,8 +26,8 @@ pragma solidity 0.8.20;
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
-import { ITokenAuction } from "../../interfaces/ITokenAuction.sol";
 import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
+import { INodeManagement } from "../../interfaces/INodeManagement.sol";
 
 abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Endorsment
@@ -39,9 +39,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     mapping(bytes32 => uint48) _appGracePeriod; // The grace period elapsed by the app since endorsed
     mapping(uint256 => bytes32) _nodeToEndorsedApp; // Maps a node ID to the app it currently endorses
     uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
-    ITokenAuction _vechainNodesContract; // The token auction contract
     uint256 _endorsementScoreThreshold; // The endorsement score threshold for an app to be eligible for voting
     mapping(bytes32 => uint256) _appScores; // The score of each app
+    INodeManagement _nodeManagementContract; // The token auction contract
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
@@ -64,11 +64,11 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
   function __Endorsement_init_unchained(
     uint48 gracePeriodDuration,
-    address vechainNodesContract
+    address nodeManagementContract
   ) internal onlyInitializing {
     EndorsementStorage storage $ = _getEndorsementStorage();
     $._gracePeriodDuration = gracePeriodDuration;
-    $._vechainNodesContract = ITokenAuction(vechainNodesContract);
+    $._nodeManagementContract = INodeManagement(nodeManagementContract);
 
     // Set the endorsement score for each node level
     $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Strength] = 2; // Strength Node score
@@ -138,7 +138,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Retrieve the token ID for the user
-    uint256 tokenID = $._vechainNodesContract.ownerToId(msg.sender);
+    uint256 tokenID = $._nodeManagementContract.getNodeId(msg.sender);
 
     // Check if the caller is a node holder
     if (tokenID == 0) {
@@ -180,7 +180,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     EndorsementStorage storage $ = _getEndorsementStorage();
 
     // Retrieve the token ID for the user
-    uint256 tokenID = $._vechainNodesContract.ownerToId(msg.sender);
+    uint256 tokenID = $._nodeManagementContract.getNodeId(msg.sender);
 
     // Check if the caller is an endorser
     if ($._nodeToEndorsedApp[tokenID] == bytes32(0)) {
@@ -207,7 +207,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       // Get the current endorser's node id
       uint256 endorser = $._appEndorsers[appId][i];
       // Get the node level of the endorser
-      VechainNodesDataTypes.NodeStrengthLevel nodeLevel = _getNodeLevel(endorser);
+      VechainNodesDataTypes.NodeStrengthLevel nodeLevel = $._nodeManagementContract.getNodeLevel(endorser);
 
       // Check if the endorser's node level is 0 or if the endorser is the one to be removed
       if (nodeLevel == VechainNodesDataTypes.NodeStrengthLevel.None || endorser == endorserToRemove) {
@@ -232,21 +232,6 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     // Return the total score of the app
     return score;
-  }
-
-  /**
-   * @dev Internal function to get the node level of a token ID.
-   * @param tokenID The token ID of the endorsing node.
-   * @return uint8 The node level of the user.
-   */
-  function _getNodeLevel(uint256 tokenID) internal view returns (VechainNodesDataTypes.NodeStrengthLevel) {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-
-    // Retrieve the metadata for the current user's token
-    (, uint8 nodeLevel, , , , , ) = $._vechainNodesContract.getMetadata(tokenID);
-
-    // Cast uint8 to VechainNodesDataTypes.NodeStrengthLevel enum and return
-    return VechainNodesDataTypes.NodeStrengthLevel(nodeLevel);
   }
 
   /**
@@ -548,7 +533,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     uint256 count = 0;
 
     for (uint256 i = 0; i < length; i++) {
-      address endorser = $._vechainNodesContract.idToOwner($._appEndorsers[appId][i]);
+      address endorser = $._nodeManagementContract.getNodeManager($._appEndorsers[appId][i]);
       if (endorser != address(0)) {
         endorsers[count] = endorser;
         count++;
@@ -569,8 +554,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function getUsersEndorsementScore(address user) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    uint256 nodeID = $._vechainNodesContract.ownerToId(user);
-    VechainNodesDataTypes.NodeStrengthLevel nodeLevel = _getNodeLevel(nodeID);
+    VechainNodesDataTypes.NodeStrengthLevel nodeLevel = $._nodeManagementContract.getUsersNodeLevel(user);
     return $._nodeEnodorsmentScore[nodeLevel];
   }
 
@@ -580,7 +564,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function getNodeEndorsementScore(uint256 nodeId) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    VechainNodesDataTypes.NodeStrengthLevel nodeLevel = _getNodeLevel(nodeId);
+    VechainNodesDataTypes.NodeStrengthLevel nodeLevel = $._nodeManagementContract.getNodeLevel(nodeId);
     return $._nodeEnodorsmentScore[nodeLevel];
   }
 }
