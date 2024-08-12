@@ -407,8 +407,15 @@ contract GalaxyMember is
   function getB3TRrequiredToUpgrade(uint256 tokenId) public view virtual returns (uint256) {
     uint256 nodeId = getNodeIdAttached(tokenId);
 
+    // Get the level of the token and the B3TR donated left to upgrade
     (uint256 currentLevel, uint256 b3trDonatedLeft) = _getLevelOfAndB3TRleft(tokenId, nodeId);
 
+    // If the current level is the max level, return 0
+    if (currentLevel == MAX_LEVEL()) {
+      return 0;
+    }
+
+    // Get the B3TR required to upgrade to the next level by subtracting the B3TR donated left from the B3TR required to upgrade to the next level
     return getB3TRtoUpgradeToLevel(currentLevel + 1) - b3trDonatedLeft;
   }
 
@@ -419,29 +426,39 @@ contract GalaxyMember is
   function _getLevelOfAndB3TRleft(uint256 tokenId, uint256 nodeId) internal view virtual returns (uint256, uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
+    // Default level is 1 if the token is not attached to a node or the token has not been upgraded
     uint256 level = 1;
 
+    // if the token is attached to a node and the node is owned by the token owner
     if (nodeId != 0 && $.vechainNodes.idToOwner(nodeId) == ownerOf(tokenId)) {
+      // Get the level of the node (i.e., Strength, Thunder, Mjolnir, VeThorX, StrengthX, ThunderX, MjolnirX)
       uint8 nodeLevel = getNodeLevelOf(nodeId);
 
+      // If the node level is not 0 (i.e., None)
       if (nodeLevel != 0) {
+        // Get the level of the token that can be upgraded for free
         uint256 nodeToFreeLevel = getNodeToFreeLevel(nodeLevel);
 
+        // If the free upgrade level is greater than the current max level, set the level to the max level
         level = nodeToFreeLevel <= $.MAX_LEVEL ? nodeToFreeLevel : $.MAX_LEVEL;
       }
     }
 
+    // Initialise the B3TR donated which keeps track of the B3TR left after upgrading the token
     uint256 b3trDonatedLeft = $._tokenIdToB3TRdonated[tokenId];
 
+    // Loop through the levels starting from the current level and check if the B3TR donated is enough to upgrade to the next level
     for (uint256 i = level + 1; i <= $.MAX_LEVEL; i++) {
       if (b3trDonatedLeft >= $._b3trToUpgradeToLevel[i]) {
         level = i;
         b3trDonatedLeft -= $._b3trToUpgradeToLevel[i];
       } else {
+        // If the B3TR donated is not enough to upgrade to the next level, break the loop
         break;
       }
     }
 
+    // Return the level and the B3TR donated left.
     return (level, b3trDonatedLeft);
   }
 
@@ -506,13 +523,6 @@ contract GalaxyMember is
   function getB3TRtoUpgradeToLevel(uint256 level) public view returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._b3trToUpgradeToLevel[level];
-  }
-
-  /// @notice Gets the B3TR required to upgrade to the next level of the token
-  /// @param tokenId Token ID to check
-  function getB3TRtoUpgrade(uint256 tokenId) public view returns (uint256) {
-    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    return $._b3trToUpgradeToLevel[levelOf(tokenId) + 1];
   }
 
   /// @notice gets the token URI for a specific token
