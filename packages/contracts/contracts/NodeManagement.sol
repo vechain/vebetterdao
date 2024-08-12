@@ -88,19 +88,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    */
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}
 
-  /**
-   * @notice Set the address of the VeChain Nodes contract.
-   * @dev This function allows the admin to update the address of the VeChain Nodes contract.
-   * @param vechainNodesContract The new address of the VeChain Nodes contract.
-   */
-  function setVechainNodesContract(address vechainNodesContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(vechainNodesContract != address(0), "NodeManagement: vechainNodesContract cannot be the zero address");
-    
-    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
-
-    emit VechainNodeContractSet(address($.vechainNodesContract), vechainNodesContract);
-    $.vechainNodesContract = ITokenAuction(vechainNodesContract);
-  }
+  // ---------- Setters ---------- //
   /**
    * @notice Delegate a node to another address.
    * @dev This function allows a node owner to delegate their node to another address. The node can only be delegated if it is not already delegated to another address.
@@ -169,20 +157,20 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   /**
-   * @notice Retrieve the node ID associated with a user, either through direct ownership or delegation.
-   * @param user The address of the user to check.
-   * @return uint256 The node ID associated with the user.
+   * @notice Set the address of the VeChain Nodes contract.
+   * @dev This function allows the admin to update the address of the VeChain Nodes contract.
+   * @param vechainNodesContract The new address of the VeChain Nodes contract.
    */
-  function getNodeId(address user) public view returns (uint256) {
+  function setVechainNodesContract(address vechainNodesContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(vechainNodesContract != address(0), "NodeManagement: vechainNodesContract cannot be the zero address");
+
     NodeDelegationStorage storage $ = _getNodeDelegationStorage();
 
-    // Get the delegated node ID for the user
-    uint256 nodeId = $.delegateeToNodeId[user];
-
-    // Return the delegated node ID if it exists, otherwise return the node ID directly owned by the user
-    return nodeId != 0 ? nodeId : $.vechainNodesContract.ownerToId(user);
+    emit VechainNodeContractSet(address($.vechainNodesContract), vechainNodesContract);
+    $.vechainNodesContract = ITokenAuction(vechainNodesContract);
   }
 
+  // ---------- Getters ---------- //
   /**
    * @notice Retrieves the address of the user managing the node ID endorsement either through ownership or delegation.
    * @dev If the node is delegated, this function returns the delegatee's address. If the node is not delegated, it returns the owner's address.
@@ -197,6 +185,21 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
 
     // Return the delegated node ID if it exists, otherwise return the node ID directly owned by the user
     return user != address(0) ? user : $.vechainNodesContract.idToOwner(nodeId);
+  }
+
+  /**
+   * @notice Retrieve the node ID associated with a user, either through direct ownership or delegation.
+   * @param user The address of the user to check.
+   * @return uint256 The node ID associated with the user.
+   */
+  function getNodeId(address user) public view returns (uint256) {
+    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+
+    // Get the delegated node ID for the user
+    uint256 nodeId = $.delegateeToNodeId[user];
+
+    // Return the delegated node ID if it exists, otherwise return the node ID directly owned by the user
+    return nodeId != 0 ? nodeId : $.vechainNodesContract.ownerToId(user);
   }
 
   /**
@@ -245,5 +248,21 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
 
     // Retrieve and return the node level of the managed node
     return getNodeLevel(nodeId);
+  }
+
+  /**
+   * @notice Returns the Vechain node contract instance.
+   * @return ITokenAuction The instance of the Vechain node contract.
+   */
+  function getVechainNodesContract() external view returns (ITokenAuction) {
+    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+    return $.vechainNodesContract;
+  }
+
+  /**
+   * @notice Retrieves the current version of the contract
+   */
+  function version() external pure virtual returns (string memory) {
+    return "1";
   }
 }
