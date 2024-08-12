@@ -49,7 +49,7 @@ export const useProposalVot3Deposit = ({
         to: VOT3_CONTRACT,
         method: "approve",
         args: [GOVERNANCE_CONTRACT, amount],
-        comment: `Approve to transfer ${amount} VOT3`,
+        comment: `Approve to transfer ${ethers.formatEther(amount)} VOT3`,
       }),
       buildClause({
         contractInterface: GovernorInterface,
