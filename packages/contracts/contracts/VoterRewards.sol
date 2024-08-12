@@ -180,12 +180,14 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // Record the reward-weighted vote power for the voter in the cycle.
     $.cycleToVoterToTotal[cycle][voter] += rewardWeightedVote;
 
+    // Record that the GM NFT has voted in the proposal, if it exists.
     if (selectedGMNFT != 0) {
       $.proposalToGalaxyMemberToHasVoted[proposalId][selectedGMNFT] = true;
     }
 
     uint256 nodeIdAttached = $.galaxyMember.getNodeIdAttached(selectedGMNFT);
 
+    // Record that the Vechain node attached to the GM NFT has voted in the proposal, if it exists.
     if (nodeIdAttached != 0) {
       $.proposalToNodeToHasVoted[proposalId][nodeIdAttached] = true;
     }
@@ -244,7 +246,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @notice Check if a Vechain Node has voted in a proposal
   /// @param nodeId Id of the Vechain node
   /// @param proposalId Id of the proposal
-  function hasNodeVoted(uint256 nodeId, uint256 proposalId) public view returns (bool) {
+  function hasNodeVoted(uint256 nodeId, uint256 proposalId) public view virtual returns (bool) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
     return $.proposalToNodeToHasVoted[proposalId][nodeId];
@@ -253,7 +255,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @notice Check if a Galaxy Member has voted in a proposal
   /// @param tokenId Id of the Galaxy Member NFT
   /// @param proposalId Id of the proposal
-  function hasTokenVoted(uint256 tokenId, uint256 proposalId) public view returns (bool) {
+  function hasTokenVoted(uint256 tokenId, uint256 proposalId) public view virtual returns (bool) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
     return $.proposalToGalaxyMemberToHasVoted[proposalId][tokenId];
