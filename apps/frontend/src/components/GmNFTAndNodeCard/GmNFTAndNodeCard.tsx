@@ -1,8 +1,6 @@
-import { useIsGMclaimable, useUserB3trBalance, useUserVot3Balance } from "@/api"
-import { notFoundImage } from "@/constants"
+import { useGMNFT, useXNode } from "@/api"
 import {
   Box,
-  Button,
   Card,
   Circle,
   Flex,
@@ -12,53 +10,27 @@ import {
   Skeleton,
   Stack,
   Text,
-  useDisclosure,
   useMediaQuery,
   VStack,
 } from "@chakra-ui/react"
-import { UilExchangeAlt, UilPolygon } from "@iconscout/react-unicons"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { UilPolygon } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
-import { ConvertModal } from "../Convert/ConvertModal"
 import { GMUpgradeButton } from "./components/GMUpgradeButton"
 import { useMemo } from "react"
 import { NotConnectedWallet } from "./components/NotConnectedWallet"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useNFTImage } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
+import { SwapB3trVot3 } from "./components/SwapB3trVot3"
 
-const compactFormatter = getCompactFormatter(4)
-
-export const GmNFTLevel = () => {
+export const GmNFTAndNodeCard = () => {
   const { t } = useTranslation()
-  const { isOpen, onClose, onOpen } = useDisclosure()
-  const { isOwned: isGMOwned } = useIsGMclaimable()
-  const { imageData, imageMetadata, isLoading: isLoadingNFT } = useNFTImage()
 
-  //gm
-  const gmImage = imageData?.image || notFoundImage
-  const gmName = imageMetadata?.name
+  const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned } = useGMNFT()
 
-  // TODO: map data
-  const gmLevel = "1"
-  const rewardMultiplier = "X3"
   //node
-  const node = "X-Node"
-  const nodeImage = notFoundImage
-  const nodePoints = "100"
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeAttachedToGM } = useXNode()
 
-  // both
-  const isNodeHolder = true
-  const isNodeAttached = isNodeHolder && false
-  const nodeAttachedColor = isNodeAttached ? "#B1F16C" : "#FFFFFF80"
-
-  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useUserB3trBalance()
-  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useUserVot3Balance()
-
-  const hasNoBalance = (!b3trBalance || b3trBalance.scaled === "0") && (!vot3Balance || vot3Balance.scaled === "0")
-  const isLoading = isB3trBalanceLoading || isVot3BalanceLoading
-
-  const buttonDisabled = isLoading || hasNoBalance
+  const nodeAttachedColor = isXNodeAttachedToGM ? "#B1F16C" : "#FFFFFF80"
 
   const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
 
@@ -72,13 +44,13 @@ export const GmNFTLevel = () => {
         align="center"
         justify="center">
         <Image
-          src={isNodeAttached ? "/images/nft-attachment.png" : "/images/nft-attachment-off.png"}
+          src={isXNodeAttachedToGM ? "/images/nft-attachment.png" : "/images/nft-attachment-off.png"}
           alt="nft-attachment"
           w="50px"
           h="50px"
           transform={isAbove1200 ? undefined : "rotate(90deg)"}
         />
-        {isAbove1200 && isNodeAttached && (
+        {isAbove1200 && isXNodeAttachedToGM && (
           <>
             <Flex h="62px" w="1px" bg="#B1F16C" position={"absolute"} bottom="50%" left="50%" />
             <Circle size="6px" bg="#B1F16C" position={"absolute"} top="-12px" left="calc(50% - 3px)" />
@@ -86,7 +58,7 @@ export const GmNFTLevel = () => {
         )}
       </Flex>
     )
-  }, [isAbove1200, isNodeAttached, isGMOwned])
+  }, [isAbove1200, isXNodeAttachedToGM, isGMOwned])
 
   const { account } = useWallet()
   if (!account) {
@@ -109,10 +81,10 @@ export const GmNFTLevel = () => {
             <Heading fontSize={"20px"} fontWeight={600}>
               {t("You are on level {{level}}", { level: gmLevel })}
             </Heading>
-            {isAbove1200 && isNodeAttached && (
+            {isAbove1200 && isXNodeAttachedToGM && (
               <>
                 <Text fontSize={"12px"} fontWeight={600} color="#B1F16C">
-                  {t("GM NFT attached to {{node}}", { node })}
+                  {t("GM NFT attached to {{node}}", { node: xNodeName })}
                 </Text>
                 <Box flexBasis={"150px"} />
               </>
@@ -141,7 +113,7 @@ export const GmNFTLevel = () => {
                 rounded="12px"
                 gap={6}
                 flex={1}>
-                <Skeleton isLoaded={!isLoadingNFT} w="68px" h="68px" rounded="8px">
+                <Skeleton isLoaded={!isGMLoading} w="68px" h="68px" rounded="8px">
                   <Image
                     src={gmImage}
                     alt="gm"
@@ -158,9 +130,9 @@ export const GmNFTLevel = () => {
                   </Text>
                   <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
                     <Text fontSize={"12px"} fontWeight={600}>
-                      {rewardMultiplier}
+                      {gmRewardMultiplier}
                     </Text>
-                    <Text fontSize={"12px"} fontWeight={400}>
+                    <Text fontSize={"12px"} fontWeight={400} noOfLines={1}>
                       {t("Reward multiplier")}
                     </Text>
                   </HStack>
@@ -169,15 +141,19 @@ export const GmNFTLevel = () => {
               </HStack>
             )}
 
-            {isNodeHolder && (
+            {isXNodeHolder && (
               <>
                 {isAbove1200 ? (
                   nodeSeparator
                 ) : (
                   <HStack justify={"space-between"}>
-                    <Text fontSize={"12px"} fontWeight={600} color="#B1F16C">
-                      {t("GM NFT attached")}
-                    </Text>
+                    {isXNodeAttachedToGM ? (
+                      <Text fontSize={"12px"} fontWeight={600} color="#B1F16C">
+                        {t("GM NFT attached")}
+                      </Text>
+                    ) : (
+                      <Box flexBasis={"100px"} />
+                    )}
                     {nodeSeparator}
                     <Box flexBasis={"100px"} />
                   </HStack>
@@ -191,16 +167,16 @@ export const GmNFTLevel = () => {
                   rounded="12px"
                   gap={6}
                   flex={1}>
-                  <Image src={nodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
+                  <Image src={xNodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
                   <VStack flex="1" align={"flex-start"}>
                     <Text fontWeight={700} noOfLines={1}>
-                      {node}
+                      {xNodeName}
                     </Text>
                     <HStack gap={1}>
                       <Text fontSize={"14px"} fontWeight={600}>
-                        {nodePoints}
+                        {xNodePoints}
                       </Text>
-                      <Text fontSize={"14px"} fontWeight={400}>
+                      <Text fontSize={"14px"} fontWeight={400} noOfLines={1}>
                         {t("to endorse Apps")}
                       </Text>
                     </HStack>
@@ -213,69 +189,8 @@ export const GmNFTLevel = () => {
           <GMUpgradeButton />
         </VStack>
         <Flex w={isAbove1200 ? "1px" : "auto"} h={isAbove1200 ? "auto" : "1px"} bg="#FFFFFF80" />
-        <VStack flex="2" align={"stretch"} gap="24px">
-          <Text fontSize={"20px"} fontWeight={700}>
-            {t("Your token balance")}
-          </Text>
-          <Stack gap="24px" direction={isAbove1200 ? "row" : "column"}>
-            <VStack
-              align={"stretch"}
-              flex="1"
-              gap="8px"
-              bg="#FFFFFF26"
-              borderColor={"#FFFFFF33"}
-              p="12px 16px"
-              rounded="8px">
-              <Text fontSize={"14px"} color="#FFFFFFB2">
-                {t("Total B3TR Balance")}
-              </Text>
-              <HStack>
-                <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"30px"} alt="B3TR Icon" />
-                <Skeleton isLoaded={!isB3trBalanceLoading}>
-                  <Heading fontSize={"28px"}>{compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}</Heading>
-                </Skeleton>
-              </HStack>
-            </VStack>
-            <VStack
-              align={"stretch"}
-              flex="1"
-              gap="8px"
-              bg="#FFFFFF26"
-              borderColor={"#FFFFFF33"}
-              p="12px 16px"
-              rounded="8px">
-              <Text fontSize={"14px"} color="#FFFFFFB2">
-                {t("Total VOT3 Balance")}
-              </Text>
-              <HStack>
-                <Image src={"/images/logo/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
-                <Skeleton isLoaded={!isVot3BalanceLoading}>
-                  <Heading fontSize={"28px"}>{compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}</Heading>
-                </Skeleton>
-              </HStack>
-            </VStack>
-          </Stack>
-          <Button
-            isDisabled={buttonDisabled}
-            onClick={onOpen}
-            leftIcon={
-              <UilExchangeAlt
-                size={"16px"}
-                style={{
-                  transform: "rotate(90deg)",
-                }}
-              />
-            }
-            variant={"whiteAction"}
-            rounded={"full"}
-            fontSize="16px"
-            fontWeight={500}
-            px="24px">
-            {t("Convert tokens")}
-          </Button>
-        </VStack>
+        <SwapB3trVot3 />
       </Stack>
-      <ConvertModal isOpen={isOpen} onClose={onClose} />
     </Card>
   )
 }

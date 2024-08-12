@@ -5,7 +5,7 @@ import { DashboardXApps } from "./DashboardXApps"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 import { LowOnVthoCard } from "./Banners"
 import { CastYourVoteCard } from "./Banners/CastYourVoteCard"
-import { GmNFTLevel } from "./GmNFTLevel"
+import { GmNFTAndNodeCard } from "./GmNFTAndNodeCard"
 
 export const HomePageContent = () => {
   return (
@@ -15,7 +15,7 @@ export const HomePageContent = () => {
       w="full"
       data-testid="form-proposal-layout">
       <GridItem colSpan={[1, 1, 3]} order={1}>
-        <GmNFTLevel />
+        <GmNFTAndNodeCard />
       </GridItem>
       <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
         <VStack flex={4.5} justifyContent="stretch" alignItems={"stretch"} spacing={"32px"} data-testid="homepage">

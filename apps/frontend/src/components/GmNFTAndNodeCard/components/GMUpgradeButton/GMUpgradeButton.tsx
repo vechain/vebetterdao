@@ -2,7 +2,13 @@ import { Box, Button, Circle, HStack, Skeleton, Stack, Text, useDisclosure, useM
 import { UilArrowCircleUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useCurrentAllocationsRoundId, useIsGMclaimable, useParticipatedInGovernance, useUserB3trBalance } from "@/api"
+import {
+  useCurrentAllocationsRoundId,
+  useGMNFT,
+  useParticipatedInGovernance,
+  useUserB3trBalance,
+  useXNode,
+} from "@/api"
 import { useCallback, useMemo } from "react"
 import { SparklesIcon } from "@/components/Icons"
 import { useRouter } from "next/navigation"
@@ -18,12 +24,8 @@ export const GMUpgradeButton = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account)
-  const { isClaimable: isGMClaimable, isOwned: isGMOwned } = useIsGMclaimable()
-  // TODO: map data
-  const isNodeHolder = false
-  const isNodeAttached = true
-  const b3trToUpgradeGM = 5000000
-  const rewardMultiplier = "X3"
+  const { nextLevelGMRewardMultiplier, isGMOwned, isGMClaimable, b3trToUpgradeGM } = useGMNFT()
+  const { isXNodeHolder, isXNodeAttachedToGM } = useXNode()
 
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useUserB3trBalance()
 
@@ -49,7 +51,7 @@ export const GMUpgradeButton = () => {
       )
     }
     if (!isGMOwned) {
-      if (isNodeHolder) {
+      if (isXNodeHolder) {
         return (
           <Box>
             <Text as="span" fontSize={"14px"}>
@@ -68,7 +70,7 @@ export const GMUpgradeButton = () => {
       }
     }
 
-    if (isNodeHolder && !isNodeAttached) {
+    if (isXNodeHolder && !isXNodeAttachedToGM) {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
@@ -88,7 +90,9 @@ export const GMUpgradeButton = () => {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
-            {t("You can upgrade and get {{rewardMultiplier}} on your rewards for", { rewardMultiplier })}
+            {t("You can upgrade and get {{rewardMultiplier}}X on your rewards for", {
+              rewardMultiplier: nextLevelGMRewardMultiplier,
+            })}
           </Text>{" "}
           <Text as="span" fontSize={"16px"} color="#B1F16C">
             {compactFormatter.format(b3trToUpgradeGM)}
@@ -117,12 +121,14 @@ export const GMUpgradeButton = () => {
     }
   }, [
     b3trBalance?.scaled,
+    b3trToUpgradeGM,
     hasUserVoted,
     isEnoughBalanceToUpgradeGM,
     isGMClaimable,
     isGMOwned,
-    isNodeAttached,
-    isNodeHolder,
+    isXNodeAttachedToGM,
+    isXNodeHolder,
+    nextLevelGMRewardMultiplier,
     t,
   ])
 
@@ -133,11 +139,11 @@ export const GMUpgradeButton = () => {
     if (!isGMOwned) {
       return t("Mint now!")
     }
-    if (isNodeHolder && !isNodeAttached) {
+    if (isXNodeHolder && !isXNodeAttachedToGM) {
       return t("Attach and Upgrade!")
     }
     return t("Upgrade now!")
-  }, [hasUserVoted, isGMClaimable, isGMOwned, isNodeAttached, isNodeHolder, t])
+  }, [hasUserVoted, isGMClaimable, isGMOwned, isXNodeAttachedToGM, isXNodeHolder, t])
 
   const router = useRouter()
   const mintNftModal = useDisclosure()
@@ -161,22 +167,22 @@ export const GMUpgradeButton = () => {
     if (!isGMOwned && isGMClaimable) {
       return handleMintGM()
     }
-    if (isNodeHolder && !isNodeAttached) {
+    if (isXNodeHolder && !isXNodeAttachedToGM) {
       // TODO: add action
       return
     }
     return
-  }, [currentRoundId, handleMintGM, hasUserVoted, isGMClaimable, isGMOwned, isNodeAttached, isNodeHolder, router])
+  }, [currentRoundId, handleMintGM, hasUserVoted, isGMClaimable, isGMOwned, isXNodeAttachedToGM, isXNodeHolder, router])
 
   const isActionDisabled = useMemo(() => {
     if (!isGMClaimable && !isGMOwned) {
       return true
     }
-    if ((isNodeHolder && !isNodeAttached) || !isGMOwned) {
+    if ((isXNodeHolder && !isXNodeAttachedToGM) || !isGMOwned) {
       return false
     }
     return !isEnoughBalanceToUpgradeGM
-  }, [isEnoughBalanceToUpgradeGM, isGMClaimable, isGMOwned, isNodeAttached, isNodeHolder])
+  }, [isEnoughBalanceToUpgradeGM, isGMClaimable, isGMOwned, isXNodeAttachedToGM, isXNodeHolder])
 
   return (
     <Stack
