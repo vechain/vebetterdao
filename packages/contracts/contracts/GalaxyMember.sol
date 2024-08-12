@@ -179,19 +179,19 @@ contract GalaxyMember is
   /// @notice Pauses the Galaxy Member contract
   /// @dev pausing the contract will prevent minting, upgrading, and transferring of tokens
   /// @dev Only callable by the pauser role
-  function pause() external onlyRole(PAUSER_ROLE) {
+  function pause() public virtual onlyRole(PAUSER_ROLE) {
     _pause();
   }
 
   /// @notice Unpauses the Galaxy Member contract
   /// @dev Only callable by the pauser role
-  function unpause() external onlyRole(PAUSER_ROLE) {
+  function unpause() public virtual onlyRole(PAUSER_ROLE) {
     _unpause();
   }
 
   /// @notice Allows a user to freely mint a token if they have participated in governance
   /// @dev Mints a token with level 1 and ensures that the public minting is not paused
-  function freeMint() external whenPublicMintingNotPaused {
+  function freeMint() public virtual whenPublicMintingNotPaused {
     require(participatedInGovernance(msg.sender), "Galaxy Member: User has not participated in governance");
 
     safeMint(msg.sender);
@@ -246,7 +246,7 @@ contract GalaxyMember is
   /// @notice Allows the token owner to burn their token
   /// @dev Overrides the ERC721BurnableUpgradeable function to include custom burning logic
   /// @param tokenId Token ID to burn
-  function burn(uint256 tokenId) public override(ERC721BurnableUpgradeable) {
+  function burn(uint256 tokenId) public virtual override(ERC721BurnableUpgradeable) {
     require(ownerOf(tokenId) == msg.sender, "Galaxy Member: caller is not the owner of the token");
 
     super.burn(tokenId);
@@ -285,7 +285,7 @@ contract GalaxyMember is
   /// @notice Internal function to safely mint a token
   /// @dev Adds a token to the total supply and assigns it to an address, incrementing the owner's balance
   /// @param to Address to mint the token to
-  function safeMint(address to) internal {
+  function safeMint(address to) internal virtual {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     uint256 tokenId = $._nextTokenId++;
@@ -296,7 +296,7 @@ contract GalaxyMember is
 
   /// @notice Sets the maximum level that tokens can be minted or upgraded to
   /// @dev Only callable by the admin role
-  function setMaxLevel(uint256 level) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setMaxLevel(uint256 level) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     require(level > $.MAX_LEVEL, "Galaxy Member: Max level must be greater than the current max level");
@@ -318,7 +318,7 @@ contract GalaxyMember is
   /// @param _xAllocationsGovernor XAllocationVotingGovernor contract address
   function setXAllocationsGovernorAddress(
     address _xAllocationsGovernor
-  ) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  ) public virtual onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_xAllocationsGovernor != address(0), "Galaxy Member: _xAllocationsGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
@@ -329,7 +329,7 @@ contract GalaxyMember is
   /// @notice Sets the B3TRGovernor contract address
   /// @dev Only callable by the contractsAddressManager role
   /// @param _b3trGovernor B3TRGovernor contract address
-  function setB3trGovernorAddress(address _b3trGovernor) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setB3trGovernorAddress(address _b3trGovernor) public virtual onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(_b3trGovernor != address(0), "Galaxy Member: _b3trGovernor cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
@@ -340,7 +340,7 @@ contract GalaxyMember is
   /// @notice Sets the base URI for computing the tokenURI
   /// @dev Only callable by the admin role
   /// @param baseTokenURI Base URI for the Token
-  function setBaseURI(string memory baseTokenURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setBaseURI(string memory baseTokenURI) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     require(bytes(baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     emit BaseURIUpdated(baseTokenURI, $._baseTokenURI);
@@ -350,7 +350,7 @@ contract GalaxyMember is
   /// @notice Sets the amount of B3TR required to upgrade to each level
   /// @dev Only callable by the admin role
   /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
-  function setB3TRtoUpgradeToLevel(uint256[] memory b3trToUpgradeToLevel) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setB3TRtoUpgradeToLevel(uint256[] memory b3trToUpgradeToLevel) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     for (uint256 i; i < b3trToUpgradeToLevel.length; i++) {
       require(b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be greater than 0");
@@ -362,7 +362,7 @@ contract GalaxyMember is
   /// @notice Pauses public minting
   /// @dev Only callable by the admin role
   /// @param isPaused Flag to pause or unpause public minting
-  function setIsPublicMintingPaused(bool isPaused) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setIsPublicMintingPaused(bool isPaused) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     emit PublicMintingPaused(isPaused);
     $.isPublicMintingPaused = isPaused;
@@ -370,7 +370,7 @@ contract GalaxyMember is
 
   /// @notice Sets the Vechain Nodes contract address
   /// @param _vechainNodes Vechain Nodes contract address
-  function setVechainNodes(address _vechainNodes) external onlyRole(NODES_MANAGER_ROLE) {
+  function setVechainNodes(address _vechainNodes) public virtual onlyRole(NODES_MANAGER_ROLE) {
     require(_vechainNodes != address(0), "GalaxyMember: _vechainNodes cannot be the zero address");
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     $.vechainNodes = ITokenAuction(_vechainNodes);
@@ -379,7 +379,7 @@ contract GalaxyMember is
   /// @notice Sets the treasury contract address
   /// @param nodeLevel Vechain node level (i.e., 1, 2, 3, 4, 5, 6, 7, 8 => Strength, Thunder, Mjolnir, VeThorX, StrengthX, ThunderX, MjolnirX)
   /// @param level new free upgrade level
-  function setNodeToFreeUpgradeLevel(uint8 nodeLevel, uint256 level) external onlyRole(NODES_MANAGER_ROLE) {
+  function setNodeToFreeUpgradeLevel(uint8 nodeLevel, uint256 level) public virtual onlyRole(NODES_MANAGER_ROLE) {
     require(level >= 1, "GalaxyMember: invalid level");
     require(nodeLevel >= 1, "GalaxyMember: invalid node level");
 
@@ -464,7 +464,7 @@ contract GalaxyMember is
 
   /// @notice Gets the strength level of the Vechain node
   /// @param nodeId Vechain Node Token ID
-  function getNodeLevelOf(uint256 nodeId) public view returns (uint8) {
+  function getNodeLevelOf(uint256 nodeId) public view virtual returns (uint8) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     (, uint8 nodeLevel, , , , , ) = $.vechainNodes.getMetadata(nodeId);
@@ -474,7 +474,7 @@ contract GalaxyMember is
 
   /// @notice Gets the selected token ID for the user
   /// @param owner The address of the owner to check
-  function getSelectedTokenId(address owner) public view returns (uint256) {
+  function getSelectedTokenId(address owner) public view virtual returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._selectedTokenID[owner];
   }
@@ -482,7 +482,7 @@ contract GalaxyMember is
   /// @notice Gets the level of the token after attaching a node
   /// @param tokenId - GM Token ID
   /// @param nodeTokenId - Vechain Node Token ID
-  function getLevelAfterAttachingNode(uint256 tokenId, uint256 nodeTokenId) public view returns (uint256) {
+  function getLevelAfterAttachingNode(uint256 tokenId, uint256 nodeTokenId) public view virtual returns (uint256) {
     (uint256 level, ) = _getLevelOfAndB3TRleft(tokenId, nodeTokenId);
 
     return level;
@@ -490,7 +490,7 @@ contract GalaxyMember is
 
   /// @notice Gets the level of the token after detaching a node
   /// @param tokenId - GM Token ID
-  function getLevelAfterDetachingNode(uint256 tokenId) public view returns (uint256) {
+  function getLevelAfterDetachingNode(uint256 tokenId) public view virtual returns (uint256) {
     (uint256 level, ) = _getLevelOfAndB3TRleft(tokenId, 0);
 
     return level;
@@ -498,7 +498,7 @@ contract GalaxyMember is
 
   /// @notice Gets whether the user has participated in governance
   /// @param user The address of the user to check
-  function participatedInGovernance(address user) public view returns (bool) {
+  function participatedInGovernance(address user) public view virtual returns (bool) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     require(
       $.xAllocationsGovernor != IXAllocationVotingGovernor(address(0)),
@@ -514,13 +514,13 @@ contract GalaxyMember is
   }
 
   /// @notice Gets the base URI for computing the tokenURI
-  function baseURI() public view returns (string memory) {
+  function baseURI() public view virtual returns (string memory) {
     return _baseURI();
   }
 
   /// @notice Gets the B3TR required to upgrade to a specific level
   /// @param level Level to upgrade to
-  function getB3TRtoUpgradeToLevel(uint256 level) public view returns (uint256) {
+  function getB3TRtoUpgradeToLevel(uint256 level) public view virtual returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $._b3trToUpgradeToLevel[level];
   }
@@ -560,32 +560,32 @@ contract GalaxyMember is
   }
 
   /// @notice Gets the maximum level that tokens can be minted or upgraded to
-  function MAX_LEVEL() public view returns (uint256) {
+  function MAX_LEVEL() public view virtual returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.MAX_LEVEL;
   }
 
   /// @notice Get the GM Token ID attached to the Vechain Node Token ID
   /// @param nodeId Vechain node Token ID
-  function getIdAttachedToNode(uint256 nodeId) public view returns (uint256) {
+  function getIdAttachedToNode(uint256 nodeId) public view virtual returns (uint256) {
     return _getGalaxyMemberStorage()._nodeToTokenId[nodeId];
   }
 
   /// @notice Get the Vechain Node Token ID attached to the GM Token ID
   /// @param tokenId GM Token ID
-  function getNodeIdAttached(uint256 tokenId) public view returns (uint256) {
+  function getNodeIdAttached(uint256 tokenId) public view virtual returns (uint256) {
     return _getGalaxyMemberStorage()._tokenIdToNode[tokenId];
   }
 
   /// @notice Get the GM level that can be upgraded for free for a given Vechain node level
   /// @param nodeLevel Vechain node level
-  function getNodeToFreeLevel(uint8 nodeLevel) public view returns (uint256) {
+  function getNodeToFreeLevel(uint8 nodeLevel) public view virtual returns (uint256) {
     return _getGalaxyMemberStorage()._nodeToFreeUpgradeLevel[nodeLevel];
   }
 
   /// @notice Get the B3TR donated for upgrading a token
   /// @param tokenId Token ID to check
-  function getB3TRdonated(uint256 tokenId) public view returns (uint256) {
+  function getB3TRdonated(uint256 tokenId) public view virtual returns (uint256) {
     return _getGalaxyMemberStorage()._tokenIdToB3TRdonated[tokenId];
   }
 
