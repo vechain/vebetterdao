@@ -2271,11 +2271,11 @@ describe("Galaxy Member", () => {
 
       await galaxyMember.setMaxLevel(10)
 
-      expect(await galaxyMember.getB3TRrequiredToUpgrade(2)).to.equal(await galaxyMember.getB3TRrequiredToUpgrade(0))
+      expect(await galaxyMember.getB3TRtoUpgrade(2)).to.equal(await galaxyMember.getB3TRtoUpgrade(0))
 
-      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRrequiredToUpgrade(0))
+      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRtoUpgrade(0))
 
-      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(0))
+      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(0))
 
       await galaxyMember.connect(owner).upgrade(0) // Upgrade token id 1 to level 2
 
@@ -2300,13 +2300,13 @@ describe("Galaxy Member", () => {
         - Token ID 0 has Strength Economy Node attached
         - Token ID requires 15,000 B3TR to upgrade to level 3 instead of 25,000 B3TR as Strength Economy Node allows for Level 2 for Free and we've already donated 10,000 B3TR
       */
-      expect(await galaxyMember.getB3TRrequiredToUpgrade(0)).to.equal(
+      expect(await galaxyMember.getB3TRtoUpgrade(0)).to.equal(
         (await galaxyMember.getB3TRtoUpgradeToLevel(3)) - (await galaxyMember.getB3TRdonated(0)),
       )
 
-      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRrequiredToUpgrade(0))
+      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRtoUpgrade(0))
 
-      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(0))
+      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(0))
 
       await galaxyMember.connect(owner).upgrade(0) // Upgrade token id 1 to level 2
 
@@ -2326,7 +2326,7 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.getB3TRdonated(0)).to.equal(ethers.parseEther("25000"))
 
-      expect(await galaxyMember.getB3TRrequiredToUpgrade(0)).to.equal(ethers.parseEther("10000"))
+      expect(await galaxyMember.getB3TRtoUpgrade(0)).to.equal(ethers.parseEther("10000"))
     })
 
     it("Should correctly track B3TR required for upgrades when attaching and detaching nodes", async () => {
@@ -2361,11 +2361,9 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.levelOf(0)).to.equal(7) // Level 7
 
-      await b3tr.connect(minterAccount).mint(otherAccount, await galaxyMember.getB3TRrequiredToUpgrade(0))
+      await b3tr.connect(minterAccount).mint(otherAccount, await galaxyMember.getB3TRtoUpgrade(0))
 
-      await b3tr
-        .connect(otherAccount)
-        .approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(0))
+      await b3tr.connect(otherAccount).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(0))
 
       await galaxyMember.connect(otherAccount).upgrade(0) // Upgrade token id 1 to level 8 by donating 2,500,000 B3TR
 
@@ -2385,13 +2383,11 @@ describe("Galaxy Member", () => {
       */
       expect(await galaxyMember.levelOf(0)).to.equal(7) // Level 7
 
-      expect(await galaxyMember.getB3TRrequiredToUpgrade(0)).to.equal(ethers.parseEther("935000"))
+      expect(await galaxyMember.getB3TRtoUpgrade(0)).to.equal(ethers.parseEther("935000"))
 
-      await b3tr.connect(minterAccount).mint(otherAccount, await galaxyMember.getB3TRrequiredToUpgrade(0))
+      await b3tr.connect(minterAccount).mint(otherAccount, await galaxyMember.getB3TRtoUpgrade(0))
 
-      await b3tr
-        .connect(otherAccount)
-        .approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(0))
+      await b3tr.connect(otherAccount).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(0))
 
       await galaxyMember.connect(otherAccount).upgrade(0) // Upgrade token id 1 to level 8 by donating 935,000 B3TR
 
@@ -2619,17 +2615,17 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
 
-      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRtoUpgrade(1))
 
-      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(1))
 
       await galaxyMember.connect(owner).upgrade(1) // Upgrade token id 1 to level 2
 
       expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
 
-      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRtoUpgrade(1))
 
-      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(1))
 
       await galaxyMember.connect(owner).upgrade(1) // Upgrade token id 1 to level 3
 

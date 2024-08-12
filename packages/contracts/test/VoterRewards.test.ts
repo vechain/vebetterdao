@@ -2614,35 +2614,27 @@ describe("VoterRewards", () => {
       expect(await voterRewards.getReward(xAllocationsRoundID, voter3.address)).to.equal(444444444444444444444444n)
 
       // Now let's upgrade the GM NFT to level 10
-      await b3tr.connect(minterAccount).mint(voter1, await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(minterAccount).mint(voter1, await galaxyMember.getB3TRtoUpgrade(1))
 
-      await b3tr
-        .connect(voter1)
-        .approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(voter1).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(1))
 
       await galaxyMember.connect(voter1).upgrade(1) // Upgrade token id 1
 
-      await b3tr.connect(minterAccount).mint(voter1, await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(minterAccount).mint(voter1, await galaxyMember.getB3TRtoUpgrade(1))
 
-      await b3tr
-        .connect(voter1)
-        .approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(voter1).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(1))
 
       await galaxyMember.connect(voter1).upgrade(1) // Upgrade token id 1
 
-      await b3tr.connect(minterAccount).mint(voter1, await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(minterAccount).mint(voter1, await galaxyMember.getB3TRtoUpgrade(1))
 
-      await b3tr
-        .connect(voter1)
-        .approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(voter1).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(1))
 
       await galaxyMember.connect(voter1).upgrade(1) // Upgrade token id 1
 
-      await b3tr.connect(minterAccount).mint(voter1, await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(minterAccount).mint(voter1, await galaxyMember.getB3TRtoUpgrade(1))
 
-      await b3tr
-        .connect(voter1)
-        .approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRrequiredToUpgrade(1))
+      await b3tr.connect(voter1).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(1))
 
       await galaxyMember.connect(voter1).upgrade(1) // Upgrade token id 1
 
@@ -2698,7 +2690,7 @@ describe("VoterRewards", () => {
       await galaxyMember.connect(voter1).detachNode(1, 1) // Detach Mjolnir from GM NFT
 
       expect(await galaxyMember.levelOf(1)).to.equal(9)
-      expect(await galaxyMember.getB3TRrequiredToUpgrade(1)).to.equal(ethers.parseEther("435000"))
+      expect(await galaxyMember.getB3TRtoUpgrade(1)).to.equal(ethers.parseEther("435000"))
 
       await voteOnApps(
         [app1, app2],

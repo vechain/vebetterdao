@@ -208,7 +208,7 @@ contract GalaxyMember is
 
     require(currentLevel < MAX_LEVEL(), "Galaxy Member: Token is already at max level");
 
-    uint256 b3trRequired = getB3TRrequiredToUpgrade(tokenId);
+    uint256 b3trRequired = getB3TRtoUpgrade(tokenId);
 
     require($.b3tr.balanceOf(msg.sender) >= b3trRequired, "Galaxy Member: Insufficient balance to upgrade");
 
@@ -404,7 +404,7 @@ contract GalaxyMember is
 
   /// @notice Gets the B3TR required to upgrade to the next level
   /// @param tokenId Token ID to check
-  function getB3TRrequiredToUpgrade(uint256 tokenId) public view virtual returns (uint256) {
+  function getB3TRtoUpgrade(uint256 tokenId) public view virtual returns (uint256) {
     uint256 nodeId = getNodeIdAttached(tokenId);
 
     // Get the level of the token and the B3TR donated left to upgrade

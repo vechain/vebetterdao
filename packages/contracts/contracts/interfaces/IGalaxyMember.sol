@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.20;
+pragma solidity ^0.8.20;
 
 interface IGalaxyMember {
   error AccessControlBadConfirmation();
@@ -84,8 +84,6 @@ interface IGalaxyMember {
   function getApproved(uint256 tokenId) external view returns (address);
 
   function getB3TRdonated(uint256 tokenId) external view returns (uint256);
-
-  function getB3TRrequiredToUpgrade(uint256 tokenId) external view returns (uint256);
 
   function getB3TRtoUpgrade(uint256 tokenId) external view returns (uint256);
 
