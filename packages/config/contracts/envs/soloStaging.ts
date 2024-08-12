@@ -15,7 +15,7 @@ export function createSoloStagingConfig() {
     */
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
       B3TR: ["tokenDetails"],
-      B3TRGovernor: [
+      B3TRGovernorV1: [
         "setProposalThreshold",
         "setMinVotingDelay",
         "setWhitelistFunction",
@@ -56,6 +56,19 @@ export function createSoloStagingConfig() {
     INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M B3TR
 
     GM_NFT_BASE_URI: "ipfs://bafybeienna2npuyliqaqsrxziu4texyginznh5ewxcvlvlqcxfyw7ef52q/metadata/", // IPFS base URI for the GM NFT
+
+    /*
+      Vechain Node => Free Upgrade Level
+      None => 1
+      Strength => 2
+      Thunder => 4
+      Mjolnir => 6
+      VeThorX => 2
+      StrengthX => 4
+      ThunderX => 6
+      MjolnirX => 7
+    */
+    GM_NFT_NODE_TO_FREE_LEVEL: [1, 2, 4, 6, 2, 4, 6, 7],
 
     /*
       Level => B3TR Required

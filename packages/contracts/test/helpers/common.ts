@@ -10,6 +10,7 @@ import { ZERO_ADDRESS } from "./const"
 import { buildTxBody, signAndSendTx } from "../../scripts/helpers/txHelper"
 import { getTestKeys } from "../../scripts/helpers/seedAccounts"
 import { endorseApp } from "./xnodes"
+import { time } from "@nomicfoundation/hardhat-network-helpers"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -635,4 +636,33 @@ export const getStorageSlots = async (contractAddress: AddressLike, ...initialSl
   }
 
   return slots.filter(slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000") // Removing empty slots
+}
+
+export const addNodeToken = async (
+  level: number,
+  owner: HardhatEthersSigner,
+): Promise<[string, bigint, boolean, boolean, bigint, bigint, bigint]> => {
+  const { vechainNodesMock } = await getOrDeployContractInstances({})
+
+  if (!vechainNodesMock) throw new Error("VechainNodesMock not found")
+
+  const blockNumBefore = await ethers.provider.getBlockNumber()
+  const blockBefore = await ethers.provider.getBlock(blockNumBefore)
+  if (!blockBefore) throw new Error("Block before not found")
+
+  const timestampBefore = blockBefore.timestamp
+  const nextBlockTimestamp = timestampBefore + 1000
+  await time.setNextBlockTimestamp(nextBlockTimestamp)
+
+  await vechainNodesMock.addToken(owner.address, level, false, 0, 0)
+
+  return [
+    owner.address,
+    BigInt(level),
+    false,
+    false,
+    ethers.toBigInt(nextBlockTimestamp),
+    ethers.toBigInt(nextBlockTimestamp),
+    ethers.toBigInt(nextBlockTimestamp),
+  ]
 }

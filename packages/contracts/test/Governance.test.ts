@@ -120,16 +120,16 @@ describe("Governor and TimeLock", function () {
       await bootstrapAndStartEmissions()
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("B3TRGovernor", {
+      const Contract = await ethers.getContractFactory("B3TRGovernorV1", {
         libraries: {
-          GovernorClockLogic: await governorClockLogicLib.getAddress(),
-          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+          GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
         },
       })
       const implementation = await Contract.deploy()
@@ -246,16 +246,16 @@ describe("Governor and TimeLock", function () {
       await bootstrapAndStartEmissions()
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("B3TRGovernor", {
+      const Contract = await ethers.getContractFactory("B3TRGovernorV1", {
         libraries: {
-          GovernorClockLogic: await governorClockLogicLib.getAddress(),
-          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+          GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
         },
       })
       const implementation = await Contract.deploy()
@@ -407,7 +407,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await vot3.getAddress(),
@@ -430,14 +430,14 @@ describe("Governor and TimeLock", function () {
             },
           ],
           {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -465,7 +465,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await vot3.getAddress(),
@@ -488,14 +488,14 @@ describe("Governor and TimeLock", function () {
             },
           ],
           {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -523,7 +523,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await vot3.getAddress(),
@@ -546,14 +546,14 @@ describe("Governor and TimeLock", function () {
             },
           ],
           {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -581,7 +581,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: ZERO_ADDRESS,
@@ -604,14 +604,14 @@ describe("Governor and TimeLock", function () {
             },
           ],
           {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -639,7 +639,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await vot3.getAddress(),
@@ -662,14 +662,14 @@ describe("Governor and TimeLock", function () {
             },
           ],
           {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -697,7 +697,7 @@ describe("Governor and TimeLock", function () {
 
       await expect(
         deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await vot3.getAddress(),
@@ -720,14 +720,14 @@ describe("Governor and TimeLock", function () {
             },
           ],
           {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -758,16 +758,16 @@ describe("Governor and TimeLock", function () {
         forceDeploy: true,
       })
 
-      b3trGovernorFactory = await ethers.getContractFactory("B3TRGovernor", {
+      b3trGovernorFactory = await ethers.getContractFactory("B3TRGovernorV1", {
         libraries: {
-          GovernorClockLogic: await governorClockLogicLib.getAddress(),
-          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+          GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
         },
       })
     })
@@ -5141,7 +5141,7 @@ describe("Governor and TimeLock", function () {
         })
 
         governor = (await deployProxy(
-          "B3TRGovernor",
+          "B3TRGovernorV1",
           [
             {
               vot3Token: await voterRewards.getAddress(), // wrong address
@@ -5164,14 +5164,14 @@ describe("Governor and TimeLock", function () {
             },
           ],
           {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
           },
         )) as B3TRGovernor
       })
@@ -5206,16 +5206,16 @@ describe("Governor and TimeLock", function () {
           forceDeploy: true,
         })
 
-        b3trGovernorFactory = await ethers.getContractFactory("B3TRGovernor", {
+        b3trGovernorFactory = await ethers.getContractFactory("B3TRGovernorV1", {
           libraries: {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
           },
         })
 
@@ -5372,16 +5372,16 @@ describe("Governor and TimeLock", function () {
         owner,
         owner,
         governor,
-        await ethers.getContractFactory("B3TRGovernor", {
+        await ethers.getContractFactory("B3TRGovernorV1", {
           libraries: {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
           },
         }),
         "Relay transaction",

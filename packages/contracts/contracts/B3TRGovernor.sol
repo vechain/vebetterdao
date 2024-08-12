@@ -67,6 +67,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  *
  * The contract is upgradeable and uses the UUPS pattern.
  * @dev The contract is upgradeable and uses the UUPS pattern. All logic is stored in libraries.
+ * @dev Difference from V1: Updated all libraries to V2, and IVoterRewards to IVoterRewards version 2.
  */
 contract B3TRGovernor is
   IB3TRGovernor,
@@ -127,31 +128,6 @@ contract B3TRGovernor is
       _checkRole(role, _msgSender());
     }
     _;
-  }
-
-  /**
-   * @notice Initializes the contract with the initial parameters
-   * @param data Initialization data containing the initial settings for the governor
-   */
-  function initialize(
-    GovernorTypes.InitializationData memory data,
-    GovernorTypes.InitializationRolesData memory rolesData
-  ) external initializer {
-    __GovernorStorage_init(data, "B3TRGovernor");
-    __AccessControl_init();
-    __UUPSUpgradeable_init();
-    __Pausable_init();
-
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorQuorumLogic.updateQuorumNumerator($, data.quorumPercentage);
-
-    // Validate and set the governor external contracts storage
-    require(address(rolesData.governorAdmin) != address(0), "B3TRGovernor: governor admin address cannot be zero");
-    _grantRole(DEFAULT_ADMIN_ROLE, rolesData.governorAdmin);
-    _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, rolesData.governorFunctionSettingsRoleAddress);
-    _grantRole(PAUSER_ROLE, rolesData.pauser);
-    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, rolesData.contractsAddressManager);
-    _grantRole(PROPOSAL_EXECUTOR_ROLE, rolesData.proposalExecutor);
   }
 
   /**
@@ -576,7 +552,7 @@ contract B3TRGovernor is
 
   /**
    * @notice The voter rewards contract.
-   * @return IVoterRewards The voter rewards contract
+   * @return IVoterRewardsV2 The voter rewards contract
    */
   function voterRewards() external view returns (IVoterRewards) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
