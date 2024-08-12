@@ -117,8 +117,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @notice Endorses an app.
    * @param appId The unique identifier of the app being endorsed.
+   * @param nodeId The unique identifier of the node they wish to use for endorsing app.
    */
-  function endorseApp(bytes32 appId) public virtual {
+  function endorseApp(bytes32 appId, uint256 nodeId) public virtual {
     // Get the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
 
@@ -132,27 +133,29 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       revert X2EarnAppBlacklisted(appId);
     }
 
+    // Check if the caller is a node holder
+    if (nodeId == 0) {
+      revert X2EarnNonNodeHolder();
+    }
+
     // Check if the app is pending endorsement
     if (!isAppUnendorsed(appId)) {
       revert X2EarnAppAlreadyEndorsed(appId);
     }
 
-    // Retrieve the token ID for the user
-    uint256 tokenID = $._nodeManagementContract.getNodeId(msg.sender);
-
-    // Check if the caller is a node holder
-    if (tokenID == 0) {
+    // Check if the user is managing the specified nodeId either through delegation or ownership
+    if (!$._nodeManagementContract.isNodeManager(msg.sender, nodeId)) {
       revert X2EarnNonNodeHolder();
     }
 
     // Check if the callers Node ID is already an endorser
-    if ($._nodeToEndorsedApp[tokenID] != bytes32(0)) {
+    if ($._nodeToEndorsedApp[nodeId] != bytes32(0)) {
       revert X2EarnAlreadyEndorser();
     }
 
     // Add the caller to the list of endorsers for the app
-    $._appEndorsers[appId].push(tokenID);
-    $._nodeToEndorsedApp[tokenID] = appId;
+    $._appEndorsers[appId].push(nodeId);
+    $._nodeToEndorsedApp[nodeId] = appId;
 
     // Calculate the score of the app, considering the new endorsement
     uint256 score = _getScoreAndRemoveEndorsement(appId, 0);
@@ -163,31 +166,33 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Emit an event indicating the app has been endorsed by the caller
-    emit AppEndorsed(appId, tokenID, true);
+    emit AppEndorsed(appId, nodeId, true);
   }
 
   /**
    * @notice Unendorses an app.
    * @param appId The unique identifier of the app being unendorsed.
    */
-  function unendorseApp(bytes32 appId) public virtual {
+  function unendorseApp(bytes32 appId, uint256 nodeId) public virtual {
+    // Get the endorsement storage
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
     // Check if the app exists
     if (!_appSubmitted(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
-    // Get the endorsement storage
-    EndorsementStorage storage $ = _getEndorsementStorage();
-
-    // Retrieve the token ID for the user
-    uint256 tokenID = $._nodeManagementContract.getNodeId(msg.sender);
-
     // Check if the caller is an endorser
-    if ($._nodeToEndorsedApp[tokenID] == bytes32(0)) {
+    if ($._nodeToEndorsedApp[nodeId] == bytes32(0)) {
       revert X2EarnNonEndorser();
     }
 
-    return _removeEndorsement(appId, tokenID);
+    // Check if the user is managing the specified nodeId either through delegation or ownership
+    if (!$._nodeManagementContract.isNodeManager(msg.sender, nodeId)) {
+      revert X2EarnNonNodeHolder();
+    }
+
+    return _removeEndorsement(appId, nodeId);
   }
 
   // ---------- Internal ---------- //
@@ -554,8 +559,17 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function getUsersEndorsementScore(address user) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    VechainNodesDataTypes.NodeStrengthLevel nodeLevel = $._nodeManagementContract.getUsersNodeLevel(user);
-    return $._nodeEnodorsmentScore[nodeLevel];
+    // Retrieve the node levels managed by the user
+    VechainNodesDataTypes.NodeStrengthLevel[] memory nodeLevels = $._nodeManagementContract.getUsersNodeLevels(user);
+
+    uint256 totalScore;
+
+    // Iterate over each node level and sum the endorsement scores
+    for (uint256 i; i < nodeLevels.length; i++) {
+      totalScore += $._nodeEnodorsmentScore[nodeLevels[i]];
+    }
+
+    return totalScore;
   }
 
   /**
