@@ -1,37 +1,17 @@
 // SPDX-License-Identifier: MIT
 
-//                                      #######
-//                                 ################
-//                               ####################
-//                             ###########   #########
-//                            #########      #########
-//          #######          #########       #########
-//          #########       #########      ##########
-//           ##########     ########     ####################
-//            ##########   #########  #########################
-//              ################### ############################
-//               #################  ##########          ########
-//                 ##############      ###              ########
-//                  ############                       #########
-//                    ##########                     ##########
-//                     ########                    ###########
-//                       ###                    ############
-//                                          ##############
-//                                    #################
-//                                   ##############
-//                                   #########
-
 pragma solidity 0.8.20;
 
-import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { VechainNodesDataTypes } from "./libraries/VechainNodesDataTypes.sol";
 import { ITokenAuction } from "./interfaces/ITokenAuction.sol";
 import { INodeManagement } from "./interfaces/INodeManagement.sol";
-import { VechainNodesDataTypes } from "./libraries/VechainNodesDataTypes.sol";
 
 contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgradeable {
+  using EnumerableSet for EnumerableSet.UintSet;
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -42,8 +22,8 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   /// @custom:storage-location erc7201:b3tr.storage.NodeDelegation
   struct NodeDelegationStorage {
     ITokenAuction vechainNodesContract; // The token auction contract
-    mapping(address delagatee => uint256 nodeId) delegateeToNodeId; // Map delegatee address to node ID
-    mapping(uint256 nodeId => address delagatee) nodeIdToDelegatee; // Map delegator address to delegatee address
+    mapping(address => EnumerableSet.UintSet) delegateeToNodeIds; // Map delegatee address to set of node IDs
+    mapping(uint256 => address) nodeIdToDelegatee; // Map node ID to delegatee address
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.NodeDelegation")) - 1)) & ~bytes32(uint256(0xff))
@@ -81,25 +61,20 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
     emit VechainNodeContractSet(address(0), _vechainNodesContract);
   }
 
-  /**
-   * @notice Authorize the upgrade to a new implementation.
-   * @dev Internal function to authorize the upgrade to a new contract implementation. This function is restricted to addresses with the upgrader role.
-   * @param newImplementation The address of the new contract implementation.
-   */
-  function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}
-
   // ---------- Setters ---------- //
+
   /**
    * @notice Delegate a node to another address.
-   * @dev This function allows a node owner to delegate their node to another address. The node can only be delegated if it is not already delegated to another address.
+   * @dev This function allows a node owner to delegate their node to another address.
    * @param delegatee The address to delegate the node to.
-   * @custom:requirements The caller must own a node. The node must not be already delegated to another address.
-   * @custom:events Emits a `NodeDelegated` event on successful delegation.
-   * @custom:errors Reverts with `NodeManagementNonNodeHolder` if the caller does not own a node.
-   * Reverts with `NodeManagementNodeAlreadyDelegated` if the node is already delegated.
    */
   function delegateNode(address delegatee) public virtual {
     NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+
+    // Check if the delegatee address is the zero address
+    if (delegatee == address(0)) {
+      revert NodeManagementZeroAddress();
+    }
 
     // Get the node ID of the caller
     uint256 nodeId = $.vechainNodesContract.ownerToId(msg.sender);
@@ -109,13 +84,20 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
       revert NodeManagementNonNodeHolder();
     }
 
-    // Check if node ID is already delegated to another user
+    if (msg.sender == delegatee) {
+      revert NodeManagementSelfDelegation();
+    }
+
+    // Check if node ID is already delegated to another user and if so remove the delegation
     if ($.nodeIdToDelegatee[nodeId] != address(0)) {
-      revert NodeManagementNodeAlreadyDelegated(nodeId, $.nodeIdToDelegatee[nodeId]);
+      // Emit event for delegation removal
+      emit NodeDelegated(nodeId, $.nodeIdToDelegatee[nodeId], false);
+      // Remove delegation
+      $.delegateeToNodeIds[delegatee].remove(nodeId);
     }
 
     // Update mappings for delegation
-    $.delegateeToNodeId[delegatee] = nodeId; // Map delegatee to node ID
+    $.delegateeToNodeIds[delegatee].add(nodeId); // Add node ID to delegatee's set
     $.nodeIdToDelegatee[nodeId] = delegatee; // Map node ID to delegatee
 
     // Emit event for delegation
@@ -125,10 +107,6 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   /**
    * @notice Remove the delegation of a node.
    * @dev This function allows a node owner to remove the delegation of their node, effectively revoking the delegatee's access to the node.
-   * @custom:requirements The caller must own a node. The node must be currently delegated.
-   * @custom:events Emits a `NodeDelegated` event on successful removal of delegation.
-   * @custom:errors Reverts with `NodeManagementNonNodeHolder` if the caller does not own a node.
-   * Reverts with `NodeManagementNodeNotDelegated` if the node is not currently delegated.
    */
   function removeNodeDelegation() public virtual {
     NodeDelegationStorage storage $ = _getNodeDelegationStorage();
@@ -142,15 +120,14 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
     }
 
     // Check if node is delegated
-    if ($.nodeIdToDelegatee[nodeId] == address(0)) {
+    address delegatee = $.nodeIdToDelegatee[nodeId];
+    if (delegatee == address(0)) {
       revert NodeManagementNodeNotDelegated();
     }
 
-    address delegatee = $.nodeIdToDelegatee[nodeId];
-
     // Remove delegation
+    $.delegateeToNodeIds[delegatee].remove(nodeId);
     delete $.nodeIdToDelegatee[nodeId];
-    delete $.delegateeToNodeId[delegatee];
 
     // Emit event for delegation removal
     emit NodeDelegated(nodeId, delegatee, false);
@@ -171,6 +148,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   // ---------- Getters ---------- //
+
   /**
    * @notice Retrieves the address of the user managing the node ID endorsement either through ownership or delegation.
    * @dev If the node is delegated, this function returns the delegatee's address. If the node is not delegated, it returns the owner's address.
@@ -188,18 +166,35 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   /**
-   * @notice Retrieve the node ID associated with a user, either through direct ownership or delegation.
+   * @notice Retrieve the node IDs associated with a user, either through direct ownership or delegation.
    * @param user The address of the user to check.
-   * @return uint256 The node ID associated with the user.
+   * @return uint256[] The node IDs associated with the user.
    */
-  function getNodeId(address user) public view returns (uint256) {
+  function getNodeIds(address user) public view returns (uint256[] memory) {
     NodeDelegationStorage storage $ = _getNodeDelegationStorage();
 
-    // Get the delegated node ID for the user
-    uint256 nodeId = $.delegateeToNodeId[user];
+    // Get the set of node IDs delegated to the user
+    EnumerableSet.UintSet storage nodeIdsSet = $.delegateeToNodeIds[user];
 
-    // Return the delegated node ID if it exists, otherwise return the node ID directly owned by the user
-    return nodeId != 0 ? nodeId : $.vechainNodesContract.ownerToId(user);
+    // Calculate the total number of node IDs
+    uint256 count = nodeIdsSet.length();
+
+    // Create an array to hold the node IDs
+    uint256[] memory nodeIds = new uint256[](count);
+
+    // Populate the array with node IDs from the set
+    for (uint256 i = 0; i < count; i++) {
+      nodeIds[i] = nodeIdsSet.at(i);
+    }
+
+    // Get the node ID directly owned by the user
+    uint256 ownedNodeId = $.vechainNodesContract.ownerToId(user);
+    if (ownedNodeId != 0 && $.nodeIdToDelegatee[ownedNodeId] == address(0)) {
+      // If the user directly owns a node, add it to the array
+      nodeIds = _appendToArray(nodeIds, ownedNodeId);
+    }
+
+    return nodeIds;
   }
 
   /**
@@ -217,9 +212,15 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
       return $.vechainNodesContract.idToOwner(nodeId) != address(0);
     }
 
+    if ($.nodeIdToDelegatee[nodeId] != address(0)) {
+      // If the node ID is delegated to another user, return false
+      return false;
+    }
+
     // Check if the user owns the node ID
     return $.vechainNodesContract.idToOwner(nodeId) == user;
   }
+
   /**
    * @notice Retrieves the node level of a given node ID.
    * @dev Internal function to get the node level of a token ID. The node level is determined based on the metadata associated with the token ID.
@@ -237,17 +238,27 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   /**
-   * @notice Retrieves the node level of a user's managed node.
-   * @dev This function retrieves the node level of the node managed by the specified user, either through ownership or delegation.
-   * @param user The address of the user managing the node.
-   * @return The node level of the node managed by the user as a VechainNodesDataTypes.NodeStrengthLevel enum.
+   * @notice Retrieves the node levels of a user's managed nodes.
+   * @dev This function retrieves the node levels of the nodes managed by the specified user, either through ownership or delegation.
+   * @param user The address of the user managing the nodes.
+   * @return VechainNodesDataTypes.NodeStrengthLevel[] The node levels of the nodes managed by the user.
    */
-  function getUsersNodeLevel(address user) public view returns (VechainNodesDataTypes.NodeStrengthLevel) {
-    // Retrieve the node ID managed by the specified user
-    uint256 nodeId = getNodeId(user);
+  function getUsersNodeLevels(address user) public view returns (VechainNodesDataTypes.NodeStrengthLevel[] memory) {
+    // Retrieve the node IDs managed by the specified user
+    uint256[] memory nodeIds = getNodeIds(user);
 
-    // Retrieve and return the node level of the managed node
-    return getNodeLevel(nodeId);
+    // Initialize an array to hold the node levels
+    VechainNodesDataTypes.NodeStrengthLevel[] memory nodeLevels = new VechainNodesDataTypes.NodeStrengthLevel[](
+      nodeIds.length
+    );
+
+    // Retrieve the node level for each node ID and store it in the nodeLevels array
+    for (uint256 i; i < nodeIds.length; i++) {
+      nodeLevels[i] = getNodeLevel(nodeIds[i]);
+    }
+
+    // Return the array of node levels
+    return nodeLevels;
   }
 
   /**
@@ -260,9 +271,35 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   /**
-   * @notice Retrieves the current version of the contract
+   * @notice Retrieves the current version of the contract.
+   * @return string The current version of the contract.
    */
   function version() external pure virtual returns (string memory) {
     return "1";
   }
+
+  // ---------- Internal ---------- //
+
+  /**
+   * @notice Appends an element to an array.
+   * @dev Internal function to append an element to an array.
+   * @param array The array to append to.
+   * @param element The element to append.
+   * @return uint256[] The new array with the appended element.
+   */
+  function _appendToArray(uint256[] memory array, uint256 element) internal pure returns (uint256[] memory) {
+    uint256[] memory newArray = new uint256[](array.length + 1);
+    for (uint256 i; i < array.length; i++) {
+      newArray[i] = array[i];
+    }
+    newArray[array.length] = element;
+    return newArray;
+  }
+
+  /**
+   * @notice Authorize the upgrade to a new implementation.
+   * @dev Internal function to authorize the upgrade to a new contract implementation. This function is restricted to addresses with the upgrader role.
+   * @param newImplementation The address of the new contract implementation.
+   */
+  function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}
 }

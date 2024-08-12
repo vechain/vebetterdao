@@ -16,6 +16,16 @@ interface INodeManagement {
   error NodeManagementNodeNotDelegated();
 
   /**
+   * @notice Error indicating that an address is being set to the zero address.
+   */
+  error NodeManagementZeroAddress();
+
+  /**
+   * @notice Error indicating that an address is being set to the zero address.
+   */
+  error NodeManagementSelfDelegation();
+
+  /**
    * @notice Error indicating that the node is already delegated to another user.
    * @param nodeId The ID of the node that is already delegated.
    * @param delegatee The address of the current delegatee.
@@ -65,7 +75,7 @@ interface INodeManagement {
    * @param user The address of the user to check.
    * @return uint256 The node ID associated with the user.
    */
-  function getNodeId(address user) external view returns (uint256);
+  function getNodeIds(address user) external view returns (uint256[] memory);
 
   /**
    * @notice Retrieves the address of the user managing the node ID endorsement either through ownership or delegation.
@@ -94,5 +104,5 @@ interface INodeManagement {
    * @param user The address of the user managing the node.
    * @return VechainNodesDataTypes.NodeStrengthLevel The node level of the node managed by the user.
    */
-  function getUsersNodeLevel(address user) external view returns (VechainNodesDataTypes.NodeStrengthLevel);
+  function getUsersNodeLevels(address user) external view returns (VechainNodesDataTypes.NodeStrengthLevel[] memory);
 }
