@@ -155,7 +155,7 @@ describe("X-Apps", function () {
     it("X2Earn Apps added pre contract upgrade should need endorsement after upgrade and should be in grace period", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      const { xAllocationVoting, x2EarnRewardsPool, xAllocationPool, timeLock, owner, vechainNodes, otherAccounts } =
+      const { xAllocationVoting, x2EarnRewardsPool, xAllocationPool, timeLock, owner, nodeManagement, otherAccounts } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -213,7 +213,7 @@ describe("X-Apps", function () {
         "X2EarnAppsV1",
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
-        [config.XAPP_GRACE_PERIOD, await vechainNodes.getAddress()],
+        [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress()],
         {},
         2,
       )) as X2EarnApps
