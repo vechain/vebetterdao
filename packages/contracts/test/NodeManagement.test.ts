@@ -430,7 +430,7 @@ describe("Node Management", function () {
 
       await nodeManagement.connect(owner).delegateNode(otherAccount.address)
 
-      // Node should not be delegated at this point so the level should be 2
+      // Node should be delegated at this point so the other account should be the manager
       const isManager = await nodeManagement.isNodeManager(otherAccount.address, 1)
       expect(isManager).to.equal(true)
     })
@@ -446,8 +446,23 @@ describe("Node Management", function () {
 
       await nodeManagement.connect(owner).delegateNode(otherAccount.address)
 
-      // Node should not be delegated at this point so the level should be 2
+      // Node should be delegated at this point so the other account should be the manager and owner should not be
       const isManager = await nodeManagement.isNodeManager(owner.address, 1)
+      expect(isManager).to.equal(false)
+    })
+    it("should return false if a user not owning a node is checked for being a node manager", async function () {
+      const { owner, otherAccount, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      // Mock node ownership
+      await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+      await vechainNodes.ownerToId(owner.address)
+
+      await nodeManagement.connect(owner).delegateNode(otherAccount.address)
+
+      const isManager = await nodeManagement.isNodeManager(otherAccount.address, 2)
       expect(isManager).to.equal(false)
     })
   })
