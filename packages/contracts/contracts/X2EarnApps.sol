@@ -65,12 +65,13 @@ contract X2EarnApps is
   /**
    * @notice Initialize the version 2 contract
    * @param _gracePeriod the grace period to be reendorsed
+   * @param _nodeManagementContract the address of the vechain node management contract
    *
    * @dev This function is called only once during the contract deployment
    */
-  function initializeV2(uint48 _gracePeriod, address _vechainNodesContract) public reinitializer(2) {
-    require(_vechainNodesContract != address(0), "X2EarnApps: Invalid VechainNodes contract address");
-    __Endorsement_init(_gracePeriod, _vechainNodesContract);
+  function initializeV2(uint48 _gracePeriod, address _nodeManagementContract) public reinitializer(2) {
+    require(_nodeManagementContract != address(0), "X2EarnApps: Invalid Node Managementcontract address");
+    __Endorsement_init(_gracePeriod, _nodeManagementContract);
   }
 
   // ---------- Modifiers ------------ //
