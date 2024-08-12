@@ -1,4 +1,4 @@
-import { useUserB3trBalance, useUserVot3Balance } from "@/api"
+import { useIsGMclaimable, useUserB3trBalance, useUserVot3Balance } from "@/api"
 import { notFoundImage } from "@/constants"
 import {
   Box,
@@ -25,20 +25,23 @@ import { GMUpgradeButton } from "./components/GMUpgradeButton"
 import { useMemo } from "react"
 import { NotConnectedWallet } from "./components/NotConnectedWallet"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { useNFTImage } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
 
 const compactFormatter = getCompactFormatter(4)
 
 export const GmNFTLevel = () => {
   const { t } = useTranslation()
   const { isOpen, onClose, onOpen } = useDisclosure()
+  const { isOwned: isGMOwned } = useIsGMclaimable()
+  const { imageData, imageMetadata, isLoading: isLoadingNFT } = useNFTImage()
+
+  //gm
+  const gmImage = imageData?.image || notFoundImage
+  const gmName = imageMetadata?.name
 
   // TODO: map data
-  //gm
-  const isGMMinted = false
   const gmLevel = "1"
   const rewardMultiplier = "X3"
-  const gmLevelName = "Planet Venus"
-  const gmImage = notFoundImage
   //node
   const node = "X-Node"
   const nodeImage = notFoundImage
@@ -62,7 +65,7 @@ export const GmNFTLevel = () => {
   const nodeSeparator = useMemo(() => {
     return (
       <Flex
-        ml={isGMMinted ? "-10px" : "-9px"}
+        ml={isGMOwned ? "-10px" : "-9px"}
         mr={"-10px"}
         my={"-10px"}
         position={"relative"}
@@ -83,7 +86,7 @@ export const GmNFTLevel = () => {
         )}
       </Flex>
     )
-  }, [isAbove1200, isNodeAttached, isGMMinted])
+  }, [isAbove1200, isNodeAttached, isGMOwned])
 
   const { account } = useWallet()
   if (!account) {
@@ -116,7 +119,7 @@ export const GmNFTLevel = () => {
             )}
           </HStack>
           <Stack gap="0" direction={isAbove1200 ? "row" : "column"} align="stretch" justify="stretch">
-            {!isGMMinted ? (
+            {!isGMOwned ? (
               <HStack
                 rounded="12px"
                 p="24px 12px"
@@ -138,17 +141,21 @@ export const GmNFTLevel = () => {
                 rounded="12px"
                 gap={6}
                 flex={1}>
-                <Image
-                  src={gmImage}
-                  alt="gm"
-                  w="68px"
-                  h="68px"
-                  rounded="4px"
-                  border="1px solid"
-                  borderColor={nodeAttachedColor}
-                />
+                <Skeleton isLoaded={!isLoadingNFT} w="68px" h="68px" rounded="8px">
+                  <Image
+                    src={gmImage}
+                    alt="gm"
+                    w="68px"
+                    h="68px"
+                    rounded="8px"
+                    border="1px solid"
+                    borderColor={nodeAttachedColor}
+                  />
+                </Skeleton>
                 <VStack flex="1" align={"flex-start"}>
-                  <Text fontWeight={700}>{gmLevelName}</Text>
+                  <Text fontWeight={700} noOfLines={1}>
+                    {gmName}
+                  </Text>
                   <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
                     <Text fontSize={"12px"} fontWeight={600}>
                       {rewardMultiplier}
@@ -184,9 +191,11 @@ export const GmNFTLevel = () => {
                   rounded="12px"
                   gap={6}
                   flex={1}>
-                  <Image src={nodeImage} alt="gm" w="68px" h="68px" rounded="4px" />
+                  <Image src={nodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
                   <VStack flex="1" align={"flex-start"}>
-                    <Text fontWeight={700}>{node}</Text>
+                    <Text fontWeight={700} noOfLines={1}>
+                      {node}
+                    </Text>
                     <HStack gap={1}>
                       <Text fontSize={"14px"} fontWeight={600}>
                         {nodePoints}
