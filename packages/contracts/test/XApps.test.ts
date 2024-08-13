@@ -38,8 +38,8 @@ describe("X-Apps", function () {
   describe("Contract upgradeablity", () => {
     it("Cannot initialize twice", async function () {
       const config = createLocalConfig()
-      const { x2EarnApps, vechainNodes } = await getOrDeployContractInstances({ forceDeploy: true })
-      await catchRevert(x2EarnApps.initializeV2(config.XAPP_GRACE_PERIOD, await vechainNodes.getAddress()))
+      const { x2EarnApps, vechainNodesMock } = await getOrDeployContractInstances({ forceDeploy: true })
+      await catchRevert(x2EarnApps.initializeV2(config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()))
     })
 
     it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
@@ -101,7 +101,7 @@ describe("X-Apps", function () {
     it("X2Earn Apps Info added pre contract upgrade should should be same after upgrade", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      const { timeLock, owner, otherAccounts, vechainNodes } = await getOrDeployContractInstances({
+      const { timeLock, owner, otherAccounts, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -140,9 +140,8 @@ describe("X-Apps", function () {
         "X2EarnAppsV1",
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
-        [config.XAPP_GRACE_PERIOD, await vechainNodes.getAddress()],
-        {},
-        2,
+        [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
+        { version: 2 },
       )) as X2EarnApps
 
       // start new round
@@ -214,8 +213,7 @@ describe("X-Apps", function () {
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
         [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress()],
-        {},
-        2,
+        { version: 2 },
       )) as X2EarnApps
 
       // start new round
@@ -292,8 +290,15 @@ describe("X-Apps", function () {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
 
-      const { xAllocationVoting, x2EarnRewardsPool, xAllocationPool, timeLock, owner, vechainNodes, otherAccounts } =
-        await getOrDeployContractInstances({ forceDeploy: true })
+      const {
+        xAllocationVoting,
+        x2EarnRewardsPool,
+        xAllocationPool,
+        timeLock,
+        owner,
+        vechainNodesMock,
+        otherAccounts,
+      } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Deploy X2EarnAppsV1
       const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
@@ -361,9 +366,8 @@ describe("X-Apps", function () {
         "X2EarnAppsV1",
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
-        [config.XAPP_GRACE_PERIOD, await vechainNodes.getAddress()],
-        {},
-        2,
+        [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
+        { version: 2 },
       )
 
       const storageSlotsAfter = await getStorageSlots(
@@ -2474,9 +2478,10 @@ describe("X-Apps", function () {
     })
 
     it("If an XNode endorser transfers its XNode XApp will not enter grace period, they will remain endorsed", async function () {
-      const { x2EarnApps, xAllocationVoting, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, xAllocationVoting, otherAccounts, owner, vechainNodesMock } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
 
@@ -2507,12 +2512,12 @@ describe("X-Apps", function () {
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
 
       // XNode holder transfers its XNode
-      const tokenId = await vechainNodes.ownerToId(otherAccounts[1].address)
-      await vechainNodes
+      const tokenId = await vechainNodesMock.ownerToId(otherAccounts[1].address)
+      await vechainNodesMock
         .connect(otherAccounts[1])
         .transferFrom(otherAccounts[1].address, otherAccounts[3].address, tokenId)
 
-      const tokenId1 = await vechainNodes.ownerToId(otherAccounts[3].address)
+      const tokenId1 = await vechainNodesMock.ownerToId(otherAccounts[3].address)
       expect(tokenId1).to.eql(tokenId)
 
       // this will only get picked up if endorsement is checked
@@ -2589,7 +2594,7 @@ describe("X-Apps", function () {
     })
 
     it("If a XNode holder transfers/sells its XNode the XAPPs remains endorsed by XNode and new owner is endorser", async function () {
-      const { x2EarnApps, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -2629,8 +2634,8 @@ describe("X-Apps", function () {
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
 
       // XNode holder transfers its XNode
-      const tokenId = await vechainNodes.ownerToId(otherAccounts[1].address)
-      await vechainNodes
+      const tokenId = await vechainNodesMock.ownerToId(otherAccounts[1].address)
+      await vechainNodesMock
         .connect(otherAccounts[1])
         .transferFrom(otherAccounts[1].address, otherAccounts[3].address, tokenId)
 
@@ -2646,7 +2651,7 @@ describe("X-Apps", function () {
     })
 
     it("If a XNode holder loses its XNode status they are removed as an endorser when XApp endorser score is checked", async function () {
-      const { x2EarnApps, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -2683,8 +2688,8 @@ describe("X-Apps", function () {
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
 
       // XNode holder transfers its XNode
-      const tokenId = await vechainNodes.ownerToId(otherAccounts[1].address)
-      await vechainNodes.connect(owner).downgradeTo(tokenId, 0)
+      const tokenId = await vechainNodesMock.ownerToId(otherAccounts[1].address)
+      await vechainNodesMock.connect(owner).downgradeTo(tokenId, 0)
 
       // Xnode holder should not still be listed as an endorser
       const endorsers1 = await x2EarnApps.getEndorsers(app1Id)
@@ -3507,9 +3512,10 @@ describe("X-Apps", function () {
     })
 
     it("An XAPP that has been removed from black list, but did not reach score threshold pre blacklist, but node has increased score since so that XApp now has a score greater than 100, they should not be peding endorsement ", async function () {
-      const { x2EarnApps, xAllocationVoting, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, xAllocationVoting, otherAccounts, owner, vechainNodesMock } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
 
@@ -3556,8 +3562,8 @@ describe("X-Apps", function () {
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
       // XNode holder increases its node strength by getting a new node while XAPP is blacklisted
 
-      const tokenId2 = await vechainNodes.ownerToId(otherAccounts[2].address)
-      await vechainNodes.upgradeTo(tokenId2, 7)
+      const tokenId2 = await vechainNodesMock.ownerToId(otherAccounts[2].address)
+      await vechainNodesMock.upgradeTo(tokenId2, 7)
 
       // app should not be pending endorsement -> blacklisted XAPPS should not be pending endorsement
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
@@ -3652,7 +3658,7 @@ describe("X-Apps", function () {
     })
 
     it("If an XAPP has a score less than 100 but one of its endorsers increases the node strength when endorsement status is checked they will be endorsed ", async function () {
-      const { x2EarnApps, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -3693,8 +3699,8 @@ describe("X-Apps", function () {
       // Skip ahead 1 day
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
       // XNode holder increases its node strength by getting a new node
-      const tokenId2 = await vechainNodes.ownerToId(otherAccounts[2].address)
-      await vechainNodes.upgradeTo(tokenId2, 7)
+      const tokenId2 = await vechainNodesMock.ownerToId(otherAccounts[2].address)
+      await vechainNodesMock.upgradeTo(tokenId2, 7)
 
       // check endorsement
       await x2EarnApps.checkEndorsement(app1Id)
@@ -3714,7 +3720,7 @@ describe("X-Apps", function () {
     })
 
     it("If a user recieves an XNode that is endorsing an XAPP they can remove endorsement and endorse another XAPP", async function () {
-      const { x2EarnApps, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -3753,8 +3759,8 @@ describe("X-Apps", function () {
       // Skip ahead 1 day to be able to transfer node
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
       // XNode holder increases its node strength by getting a new node
-      const tokenId = await vechainNodes.ownerToId(owner.address)
-      await vechainNodes.connect(owner).transfer(otherAccounts[0].address, tokenId)
+      const tokenId = await vechainNodesMock.ownerToId(owner.address)
+      await vechainNodesMock.connect(owner).transfer(otherAccounts[0].address, tokenId)
 
       // check endorsement
       await x2EarnApps.checkEndorsement(app1Id)
@@ -3798,7 +3804,7 @@ describe("X-Apps", function () {
           "Skipping VTHO transfer test on hardhat network as hardcoded VTHO contract address in Treasury does not exist",
         )
       }
-      const { x2EarnApps, otherAccounts, owner, vechainNodes } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
 
@@ -3826,7 +3832,7 @@ describe("X-Apps", function () {
 
       for (let i = 0; i < 50; i++) {
         // Create two node holders with an endorsement score
-        await vechainNodes.addToken(accounts[i].address, level, false, 0, 0)
+        await vechainNodesMock.addToken(accounts[i].address, level, false, 0, 0)
 
         const clauses = [
           clauseBuilder.functionInteraction(
