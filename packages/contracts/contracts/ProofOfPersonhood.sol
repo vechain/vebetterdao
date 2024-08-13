@@ -31,6 +31,7 @@ import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -60,6 +61,7 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     uint256 roundThreshold; // threshold for a user to be considered a person in a round
     uint256 totalThreshold; // threshold for a user to be considered a person in total
     bool isTotalScoreConsidered; // flag to indicate if the total score is considered for a user to be a person
+    uint256 roundsForCumulativeScore; // number of rounds to consider for the cumulative score
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.ProofOfPersonhood")) - 1)) & ~bytes32(uint256(0xff))
@@ -145,6 +147,8 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.EASY] = 1; // Default multiplier for easy actions
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.MEDIUM] = 2; // Default multiplier for medium actions
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.HARD] = 3; // Default multiplier for hard actions
+
+    $.roundsForCumulativeScore = 3; // Default number of rounds to consider for the cumulative score, current round not included
   }
 
   // ---------- Authorizers ---------- //
@@ -262,8 +266,9 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     // If the user is whitelisted, the user is considered as a person
     if (isWhiteListed(user)) return (true, "User is whitelisted");
 
-    // If the user's score in the round is greater than or equal to the round threshold, the user is considered as a person
-    if (getUserRoundScore(user, round) >= getRoundThreshold()) return (true, "User is a person in this round");
+    // If the user's cumulated quadratic score in the round is greater than or equal to the round threshold, the user is considered as a person
+    if (getQuadraticCumulativeScore(user, round) >= getRoundThreshold())
+      return (true, "User is a person in this round");
 
     // If the total score is considered for personhood and the user's total score is greater than or equal to the total threshold, the user is considered as a person
     if (isTotalScoreConsidered() && getUserTotalScore(user) >= getTotalThreshold())
@@ -271,6 +276,34 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
 
     // Otherwise, the user is not considered as a person
     return (false, "User is not a person");
+  }
+
+  /// @notice Gets the quadratic cumulative score of a user for a number of last rounds
+  /// @param user - the user address
+  /// @param currentRound - the round
+  function getQuadraticCumulativeScore(address user, uint256 currentRound) public view virtual returns (uint256) {
+    ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
+
+    // Cumulative score of the user
+    uint256 cumulativeScore = 0;
+
+    // Factor to calculate the cumulative quadratic score
+    uint256 factor = 0;
+
+    // Calculate the cumulative quadratic score for the number of rounds to consider for the cumulative score
+    for (uint256 round = currentRound; round >= 0 && round >= currentRound - $.roundsForCumulativeScore; round--) {
+      uint256 score = $.userRoundScore[user][round];
+
+      // NOTE: the ** operator does not support fractional exponents so we use the Math.sqrt function in a loop to calculate the square root
+      for (uint256 i = 0; i < factor; i++) {
+        score = Math.sqrt(score);
+      }
+
+      cumulativeScore += score;
+      factor++;
+    }
+
+    return cumulativeScore;
   }
 
   /// @notice Checks if a user is whitelisted
