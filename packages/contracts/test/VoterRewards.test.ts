@@ -2131,15 +2131,17 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
 
       const voter1 = otherAccounts[1]
       const voter2 = otherAccounts[2]
@@ -2320,15 +2322,19 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      await endorseApp(ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address)), otherAccounts[0])
 
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+      await endorseApp(ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address)), otherAccounts[1])
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
 
       const voter1 = otherAccounts[1]
       const voter2 = otherAccounts[2]
@@ -2512,13 +2518,15 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      await endorseApp(ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address)), otherAccounts[0])
 
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+      await endorseApp(ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address)), otherAccounts[1])
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
 

@@ -68,7 +68,7 @@ interface DeployInstance {
   governorVotesLogicLib: GovernorVotesLogicV1
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
-  vechainNodesMock: TokenAuction | undefined
+  vechainNodesMock: TokenAuction
 }
 
 export const NFT_NAME = "GalaxyMember"

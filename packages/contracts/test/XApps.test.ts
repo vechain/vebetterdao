@@ -141,8 +141,7 @@ describe("X-Apps", function () {
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
         [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
-        {},
-        2,
+        { version: 2 },
       )) as X2EarnApps
 
       // start new round
@@ -221,8 +220,7 @@ describe("X-Apps", function () {
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
         [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
-        {},
-        2,
+        { version: 2 },
       )) as X2EarnApps
 
       // start new round
@@ -376,8 +374,7 @@ describe("X-Apps", function () {
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
         [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
-        {},
-        2,
+        { version: 2 },
       )
 
       const storageSlotsAfter = await getStorageSlots(

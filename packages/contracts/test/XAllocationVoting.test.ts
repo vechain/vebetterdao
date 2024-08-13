@@ -81,8 +81,7 @@ describe("X-Allocation Voting", function () {
         "XAllocationVoting",
         await xAllocationVotingV1.getAddress(),
         [],
-        {},
-        2,
+        { version: 2 },
       )) as XAllocationVoting
 
       expect(
@@ -161,8 +160,7 @@ describe("X-Allocation Voting", function () {
         "XAllocationVoting",
         await xAllocationVotingWithB3TRV1.getAddress(),
         [],
-        {},
-        2,
+        { version: 2 },
       )) as XAllocationVoting
 
       clock = await xAllocationVotingWithB3TR.clock()
