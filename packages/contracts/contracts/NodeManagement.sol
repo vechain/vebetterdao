@@ -84,6 +84,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
       revert NodeManagementNonNodeHolder();
     }
 
+    // Check if the delegatee is the same as the caller, a node owner by defualt is the node manager and cannot delegate to themselves
     if (msg.sender == delegatee) {
       revert NodeManagementSelfDelegation();
     }
