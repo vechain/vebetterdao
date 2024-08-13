@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import { ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
+import { useProposalFilters } from "@/store"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -14,7 +15,8 @@ export const ProposalsPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
 
-  const { filteredProposals, isLoading } = useFilteredProposals()
+  const { selectedFilter } = useProposalFilters()
+  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter ? [selectedFilter] : [])
 
   const userProposalDeposits = useProposalClaimableUserDeposits(account ?? "")
 

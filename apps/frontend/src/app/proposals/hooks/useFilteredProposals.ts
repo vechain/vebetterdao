@@ -1,12 +1,11 @@
 import { ProposalState, useAllProposalsState, useProposalsEvents, useAllProposalsDepositReached } from "@/api"
-import { useProposalFilters } from "@/store"
 import { useCallback, useMemo } from "react"
 import { ProposalFilter, StateFilter } from "../components"
 
 /**
  * Reacting to the changes in the useFiltersProposals store, this hook returns the filtered proposals.
  */
-export const useFilteredProposals = () => {
+export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFilter)[]) => {
   const { data: proposalsEvents, isLoading: proposalsEventsLoading } = useProposalsEvents()
 
   const proposalsIds = useMemo(() => {
@@ -17,7 +16,6 @@ export const useFilteredProposals = () => {
   const { data: allProposalsState, isLoading: allProposalsStateLoading } = useAllProposalsState(proposalsIds)
   const { data: allProposalsDepositReached, isLoading: allProposalsDepositReachedLoading } =
     useAllProposalsDepositReached(proposalsIds)
-  const { selectedFilter } = useProposalFilters()
 
   const checkProposalState = useCallback(
     (proposalIndex: number, state: number) => {
@@ -30,39 +28,45 @@ export const useFilteredProposals = () => {
   const filteredProposals = useMemo(() => {
     if (!proposalsEvents) return []
 
-    switch (selectedFilter) {
-      case ProposalFilter.InThisRound:
-        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Active))
-      case StateFilter.Active:
-        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Active))
-      case StateFilter.Canceled:
-        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Canceled))
-      case StateFilter.Succeeded:
-        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Succeeded))
-      case StateFilter.Defeated:
-        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Defeated))
-      case StateFilter.DepositNotMet:
-        return proposalsEvents.created.filter((_proposal, index) =>
-          checkProposalState(index, ProposalState.DepositNotMet),
-        )
-      case StateFilter.Queued:
-        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Queued))
-      case StateFilter.Executed:
-        return proposalsEvents.created.filter((_proposal, index) => checkProposalState(index, ProposalState.Executed))
-      case ProposalFilter.LookingForSupport:
-        return proposalsEvents.created.filter(
-          (_proposal, index) =>
-            checkProposalState(index, ProposalState.Pending) && !allProposalsDepositReached?.[index]?.depositReached,
-        )
-      case ProposalFilter.UpcomingVoting:
-        return proposalsEvents.created.filter(
-          (_proposal, index) =>
-            checkProposalState(index, ProposalState.Pending) && allProposalsDepositReached?.[index]?.depositReached,
-        )
+    if (!selectedFilter || selectedFilter.length === 0) return proposalsEvents.created
 
-      default:
-        return proposalsEvents.created
+    const proposals = []
+
+    for (const filter of selectedFilter) {
+      proposals.push(
+        ...proposalsEvents.created.filter((_proposal, index) => {
+          switch (filter) {
+            case ProposalFilter.InThisRound:
+              return checkProposalState(index, ProposalState.Active)
+            case StateFilter.Active:
+              return checkProposalState(index, ProposalState.Active)
+            case StateFilter.Canceled:
+              return checkProposalState(index, ProposalState.Canceled)
+            case StateFilter.Succeeded:
+              return checkProposalState(index, ProposalState.Succeeded)
+            case StateFilter.Defeated:
+              return checkProposalState(index, ProposalState.Defeated)
+            case StateFilter.DepositNotMet:
+              return checkProposalState(index, ProposalState.DepositNotMet)
+            case StateFilter.Queued:
+              return checkProposalState(index, ProposalState.Queued)
+            case StateFilter.Executed:
+              return checkProposalState(index, ProposalState.Executed)
+            case ProposalFilter.LookingForSupport:
+              return (
+                checkProposalState(index, ProposalState.Pending) && !allProposalsDepositReached?.[index]?.depositReached
+              )
+            case ProposalFilter.UpcomingVoting:
+              return (
+                checkProposalState(index, ProposalState.Pending) && allProposalsDepositReached?.[index]?.depositReached
+              )
+            default:
+              return true
+          }
+        }),
+      )
     }
+    return proposals
   }, [proposalsEvents, selectedFilter, checkProposalState, allProposalsDepositReached])
 
   const sortedFilteredProposals = useMemo(() => {
