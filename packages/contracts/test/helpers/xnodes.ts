@@ -16,7 +16,7 @@ export const endorseApp = async (appId: string, owner: HardhatEthersSigner) => {
 }
 
 export const createNodeHolder = async (level: number, owner: HardhatEthersSigner) => {
-  const { vechainNodes } = await getOrDeployContractInstances({})
+  const { vechainNodesMock } = await getOrDeployContractInstances({})
 
-  await vechainNodes.addToken(owner.address, level, false, 0, 0)
+  await vechainNodesMock.addToken(owner.address, level, false, 0, 0)
 }
