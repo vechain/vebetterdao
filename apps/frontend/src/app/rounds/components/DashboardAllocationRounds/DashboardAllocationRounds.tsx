@@ -1,5 +1,7 @@
 import { useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
-import { DotSymbol, ResponsiveCard } from "@/components"
+import { ProposalFilter, StateFilter } from "@/app/proposals"
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 import { Button, Heading, HStack, Text, VStack } from "@chakra-ui/react"
 import { useEffect, useMemo, useState } from "react"
@@ -15,6 +17,17 @@ export const DashboardAllocationRounds = () => {
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(selectedRoundId)
+
+  const currentRoundIdProposals = useFilteredProposals([
+    StateFilter.Active,
+    ProposalFilter.InThisRound,
+    ProposalFilter.LookingForSupport,
+    ProposalFilter.UpcomingVoting,
+  ])
+
+  const otherProposals = currentRoundIdProposals.allProposals.filter(
+    proposal => proposal.roundIdVoteStart === selectedRoundId,
+  )
 
   useEffect(() => {
     if (currentRoundId && !selectedRoundId) {
@@ -70,6 +83,17 @@ export const DashboardAllocationRounds = () => {
           </Button>
         </HStack>
         {selectedRound && <AllocationRoundCard round={selectedRound} />}
+        <VStack spacing={4} w="full">
+          <Heading fontSize="24px" fontWeight={400}>
+            Proposals in this round
+          </Heading>
+          {selectedRound?.roundId === currentRoundId &&
+            currentRoundIdProposals.filteredProposals.map(proposal => (
+              <ProposalCompactCard key={proposal.proposalId} proposal={proposal} />
+            ))}
+          {otherProposals.length > 0 &&
+            otherProposals.map(proposal => <ProposalCompactCard key={proposal.proposalId} proposal={proposal} />)}
+        </VStack>
       </VStack>
     </ResponsiveCard>
   )
