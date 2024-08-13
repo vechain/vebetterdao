@@ -28,7 +28,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.NodeDelegation")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant NodeDelegationStorageLocation =
-    0xc1a7bcdc0c77e8c77ade4541d1777901ab96ca598d164d89afa5c8dfbfc44300;
+    0x7b5bf20ba5f4b867b37b67e3c96a3ee71f9136cfd5c3839dabd1106f8d4dc000;
 
   /**
    * @notice Retrieve the storage reference for node delegation data.
