@@ -48,7 +48,6 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
 
   /// @custom:storage-location erc7201:b3tr.storage.ProofOfPersonhood
   struct ProofOfPersonhoodStorage {
-    IB3TR b3tr;
     IX2EarnApps x2EarnApps;
     mapping(bytes32 appId => uint256 baseScore) baseActionScore; // Base score for an app's sustainable action
     mapping(ACTION_DIFFICULTY difficulty => uint256 multiplier) actionDifficultyMultiplier; // Multiplier of the base action score based on the action difficulty
