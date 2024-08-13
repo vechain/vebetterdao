@@ -26,7 +26,7 @@ import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } 
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployAndUpgrade, deployProxy, saveContractsToFile } from "../helpers"
-import { shouldRunSimulation } from "@repo/config/contracts"
+import { shouldEndorseXApps, shouldRunSimulation } from "@repo/config/contracts"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -506,7 +506,7 @@ export async function deployAll(config: ContractsConfig) {
       await setupMainnetEnvironment(emissions, x2EarnApps)
       break
     case "vechain_testnet":
-      await setupTestEnvironment(emissions, x2EarnApps)
+      await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock)
       break
     case "vechain_solo":
       await setupLocalEnvironment(
@@ -518,6 +518,7 @@ export async function deployAll(config: ContractsConfig) {
         b3tr,
         vot3,
         vechainNodesMock,
+        shouldEndorseXApps(),
       )
       break
   }
@@ -1162,23 +1163,4 @@ const validateContractRole = async (
 
   if (!roleSet || !roleRemoved)
     throw new Error("Role " + role + " not set correctly on " + (await contract.getAddress()))
-}
-
-const deployVechainNodeMock = async (operators: HardhatEthersSigner[]) => {
-  const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
-  const vechainNodes = await TokenAuctionLock.deploy()
-  await vechainNodes.waitForDeployment()
-
-  const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
-  const clockAuctionContract = await ClockAuctionLock.deploy(
-    await vechainNodes.getAddress(),
-    await operators[0].getAddress(),
-  )
-
-  await vechainNodes.setSaleAuctionAddress(await clockAuctionContract.getAddress())
-
-  for (const operator of operators) {
-    await vechainNodes.addOperator(operator.address)
-  }
-  return { vechainNodes: vechainNodes, clockAuctionContract: clockAuctionContract }
 }

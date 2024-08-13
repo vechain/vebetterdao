@@ -10,6 +10,7 @@
     "NEXT_PUBLIC_IPFS_PINNING_SERVICE",
     "IS_TEST_COVERAGE",
     "RUN_SIMULATION",
+    "ENDORSE_XAPPS",
     "DO_NOT_UPGRADE"
   ],
   "pipeline": {

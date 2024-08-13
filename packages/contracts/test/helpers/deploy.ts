@@ -264,8 +264,7 @@ export const getOrDeployContractInstances = async ({
     "X2EarnApps",
     await x2EarnAppsV1.getAddress(),
     [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
-    {},
-    2,
+    { version: 2 },
   )) as X2EarnApps
 
   // Deploy X2EarnRewardsPool
@@ -283,8 +282,7 @@ export const getOrDeployContractInstances = async ({
     "X2EarnRewardsPool",
     await x2EarnRewardsPoolV1.getAddress(),
     [],
-    {},
-    2,
+    { version: 2 },
   )) as X2EarnRewardsPool
 
   // Deploy XAllocationPool
@@ -304,8 +302,7 @@ export const getOrDeployContractInstances = async ({
     "XAllocationPool",
     await xAllocationPoolV1.getAddress(),
     [],
-    {},
-    2,
+    { version: 2 },
   )) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
@@ -377,8 +374,7 @@ export const getOrDeployContractInstances = async ({
     "XAllocationVoting",
     await xAllocationVotingV1.getAddress(),
     [],
-    {},
-    2,
+    { version: 2 },
   )) as XAllocationVoting
 
   // Deploy Governor

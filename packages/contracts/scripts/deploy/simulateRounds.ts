@@ -45,8 +45,11 @@ export const simulateRounds = async (
 
   // Start emissions
   const emissionsContract = await emissions.getAddress()
-  await startEmissions(emissionsContract, admin)
-  const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
+  let roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
+  if (roundId === 0) {
+    await startEmissions(emissionsContract, admin)
+    roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
+  }
 
   // console.log("Casting random votes to xDapps...")
   const xDapps = (await xAllocationVoting.getAppsOfRound(roundId)).map(app => app.id)
