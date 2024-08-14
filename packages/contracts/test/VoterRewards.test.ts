@@ -24,8 +24,9 @@ import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { deployProxy } from "../scripts/helpers"
-import { GalaxyMember } from "../typechain-types"
+import { deployProxy, upgradeProxy } from "../scripts/helpers"
+import { B3TRGovernor, GalaxyMember, VoterRewards, VoterRewardsV1, XAllocationVoting } from "../typechain-types"
+import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./helpers"
 
 describe("VoterRewards", () => {
   describe("Contract parameters", () => {
@@ -389,6 +390,358 @@ describe("VoterRewards", () => {
       })
 
       expect(await voterRewards.version()).to.equal("2")
+    })
+
+    it("Should not have state conflict after upgrading to V2", async () => {
+      const config = createLocalConfig()
+      const {
+        otherAccounts,
+        otherAccount: voter1,
+        owner,
+        emissions,
+        b3tr,
+        minterAccount,
+        timeLock,
+        galaxyMember,
+        vot3,
+        x2EarnApps,
+        xAllocationPool,
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const voterRewardsV1 = (await deployProxy("VoterRewardsV1", [
+        owner.address, // admin
+        owner.address, // upgrader
+        owner.address, // contractsAddressManager
+        await emissions.getAddress(),
+        await galaxyMember.getAddress(),
+        await b3tr.getAddress(),
+        levels,
+        multipliers,
+      ])) as VoterRewardsV1
+
+      // Deploy XAllocationVoting
+      const xAllocationVoting = (await deployProxy("XAllocationVoting", [
+        {
+          vot3Token: await vot3.getAddress(),
+          quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
+          initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
+          timeLock: await timeLock.getAddress(),
+          voterRewards: await voterRewardsV1.getAddress(),
+          emissions: await emissions.getAddress(),
+          admins: [await timeLock.getAddress(), owner.address],
+          upgrader: owner.address,
+          contractsAddressManager: owner.address,
+          x2EarnAppsAddress: await x2EarnApps.getAddress(),
+          baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+          appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+          votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
+        },
+      ])) as XAllocationVoting
+
+      // Deploy Governor
+      const governor = (await deployProxy(
+        "B3TRGovernor",
+        [
+          {
+            vot3Token: await vot3.getAddress(),
+            timelock: await timeLock.getAddress(),
+            xAllocationVoting: await xAllocationVoting.getAddress(),
+            b3tr: await b3tr.getAddress(),
+            quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+            initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
+            initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+            initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+            voterRewards: await voterRewardsV1.getAddress(),
+            isFunctionRestrictionEnabled: true,
+          },
+          {
+            governorAdmin: owner.address,
+            pauser: owner.address,
+            contractsAddressManager: owner.address,
+            proposalExecutor: owner.address,
+            governorFunctionSettingsRoleAddress: owner.address,
+          },
+        ],
+        {
+          GovernorClockLogic: await governorClockLogicLib.getAddress(),
+          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+        },
+      )) as B3TRGovernor
+
+      await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
+
+      // Grant Vote registrar role to XAllocationVoting
+      await voterRewardsV1
+        .connect(owner)
+        .grantRole(await voterRewardsV1.VOTE_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
+      // Grant Vote registrar role to Governor
+      await voterRewardsV1
+        .connect(owner)
+        .grantRole(await voterRewardsV1.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
+
+      // Grant admin role to voter rewards for registering x allocation voting
+      await xAllocationVoting
+        .connect(owner)
+        .grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), emissions.getAddress())
+
+      // Set xAllocationGovernor in emissions
+      await emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await emissions.connect(owner).setVote2EarnAddress(await voterRewardsV1.getAddress())
+
+      // Setup XAllocationPool addresses
+      await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
+      await xAllocationPool.connect(owner).setEmissionsAddress(await emissions.getAddress())
+
+      //Set the emissions address and the admin as the ROUND_STARTER_ROLE in XAllocationVoting
+      const roundStarterRole = await xAllocationVoting.ROUND_STARTER_ROLE()
+      await xAllocationVoting
+        .connect(owner)
+        .grantRole(roundStarterRole, await emissions.getAddress())
+        .then(async tx => await tx.wait())
+      await xAllocationVoting
+        .connect(owner)
+        .grantRole(roundStarterRole, owner.address)
+        .then(async tx => await tx.wait())
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+      const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      const voter2 = otherAccounts[3]
+      const voter3 = otherAccounts[4]
+
+      await getVot3Tokens(voter1, "1000")
+      await getVot3Tokens(voter2, "1000")
+      await getVot3Tokens(voter3, "1000")
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions()
+
+      const roundId = await xAllocationVoting.currentRoundId()
+
+      expect(roundId).to.equal(1)
+
+      expect(await xAllocationVoting.roundDeadline(roundId)).to.lt(await emissions.getNextCycleBlock())
+
+      await xAllocationVoting
+        .connect(voter1)
+        .castVote(roundId, [app1, app2], [ethers.parseEther("1000"), ethers.parseEther("0")])
+      await xAllocationVoting
+        .connect(voter2)
+        .castVote(roundId, [app1, app2], [ethers.parseEther("200"), ethers.parseEther("100")])
+      await xAllocationVoting
+        .connect(voter3)
+        .castVote(roundId, [app1, app2], [ethers.parseEther("500"), ethers.parseEther("500")])
+
+      expect(await emissions.isCycleEnded(1)).to.equal(false)
+
+      await catchRevert(voterRewardsV1.claimReward(1, voter1.address))
+
+      expect(await voterRewardsV1.cycleToVoterToTotal(1, voter1)).to.equal(ethers.parseEther("31.622776601"))
+
+      expect(await voterRewardsV1.cycleToVoterToTotal(1, voter2)).to.equal(ethers.parseEther("17.320508075"))
+
+      await catchRevert(voterRewardsV1.claimReward(1, voter2.address))
+
+      expect(await voterRewardsV1.cycleToVoterToTotal(1, voter3)).to.equal(ethers.parseEther("31.622776601"))
+
+      // Votes should be tracked correctly
+      let appVotes = await xAllocationVoting.getAppVotes(roundId, app1)
+      expect(appVotes).to.eql(ethers.parseEther("1700"))
+      appVotes = await xAllocationVoting.getAppVotes(roundId, app2)
+      expect(appVotes).to.eql(ethers.parseEther("600"))
+
+      let totalVotes = await xAllocationVoting.totalVotes(roundId)
+      expect(totalVotes).to.eql(ethers.parseEther("2300"))
+
+      // Total voters should be tracked correctly
+      let totalVoters = await xAllocationVoting.totalVoters(roundId)
+      expect(totalVoters).to.eql(BigInt(3))
+
+      // Voter rewards checks
+      expect(await voterRewardsV1.cycleToTotal(1)).to.equal(ethers.parseEther("80.566061277")) // Total votes -> Math.sqrt(1000) + Math.sqrt(300) + Math.sqrt(1000)
+      expect(await voterRewardsV1.cycleToTotal(1)).to.equal(
+        (await voterRewardsV1.cycleToVoterToTotal(1, voter1)) +
+          (await voterRewardsV1.cycleToVoterToTotal(1, voter2)) +
+          (await voterRewardsV1.cycleToVoterToTotal(1, voter3)),
+      ) // Total votes
+      let storageSlots = []
+
+      const initialSlot = BigInt("0x114e7ffaaf205d38cd05b17b56f3357806ef2ce889cb4748445ae91cdfc37c00") // Slot 0 of VoterRewards
+
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlots.push(await ethers.provider.getStorage(await voterRewardsV1.getAddress(), i))
+      }
+
+      storageSlots = storageSlots.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ) // removing empty slots
+
+      const voterRewardsV2 = (await upgradeProxy(
+        "VoterRewardsV1",
+        "VoterRewards",
+        await voterRewardsV1.getAddress(),
+        [true],
+        {
+          version: 2,
+        },
+      )) as VoterRewards
+
+      const storageSlotsAfter = []
+
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlotsAfter.push(await ethers.provider.getStorage(await voterRewardsV2.getAddress(), i))
+      }
+
+      // Check if storage slots are the same after upgrade
+      for (let i = 0; i < storageSlots.length; i++) {
+        expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
+      }
+
+      await waitForRoundToEnd(Number(roundId))
+
+      // Votes should be the same after round ended
+      appVotes = await xAllocationVoting.getAppVotes(roundId, app1)
+      expect(appVotes).to.eql(ethers.parseEther("1700"))
+      appVotes = await xAllocationVoting.getAppVotes(roundId, app2)
+      expect(appVotes).to.eql(ethers.parseEther("600"))
+
+      totalVotes = await xAllocationVoting.totalVotes(roundId)
+      expect(totalVotes).to.eql(ethers.parseEther("2300"))
+
+      await waitForNextCycle()
+
+      expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
+      expect(await emissions.isNextCycleDistributable()).to.equal(true)
+
+      // Reward claiming
+      expect(await emissions.isCycleDistributed(1)).to.equal(true)
+      expect(await b3tr.balanceOf(await voterRewardsV2.getAddress())).to.equal(await emissions.getVote2EarnAmount(1))
+
+      const voter1Rewards = await voterRewardsV2.getReward(1, voter1.address)
+      const voter2Rewards = await voterRewardsV2.getReward(1, voter2.address)
+      const voter3Rewards = await voterRewardsV2.getReward(1, voter3.address)
+
+      await voterRewardsV2.connect(voter1).claimReward(1, voter1)
+
+      expect(await b3tr.balanceOf(voter1.address)).to.equal(voter1Rewards)
+
+      expect(await b3tr.balanceOf(await voterRewardsV2.getAddress())).to.equal(
+        (await emissions.getVote2EarnAmount(1)) - voter1Rewards,
+      )
+
+      // Second round
+      await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
+
+      const roundId2 = await xAllocationVoting.currentRoundId()
+
+      expect(roundId2).to.equal(2)
+
+      expect(await xAllocationVoting.roundDeadline(roundId)).to.lt(await emissions.getNextCycleBlock())
+
+      await xAllocationVoting
+        .connect(voter1)
+        .castVote(roundId2, [app1, app2], [ethers.parseEther("0"), ethers.parseEther("1000")])
+      await xAllocationVoting
+        .connect(voter2)
+        .castVote(roundId2, [app1, app2], [ethers.parseEther("100"), ethers.parseEther("500")])
+      await xAllocationVoting
+        .connect(voter3)
+        .castVote(roundId2, [app1, app2], [ethers.parseEther("500"), ethers.parseEther("500")])
+
+      expect(await emissions.isCycleEnded(2)).to.equal(false)
+
+      await catchRevert(voterRewardsV2.claimReward(2, voter1.address))
+
+      expect(await voterRewardsV2.cycleToVoterToTotal(2, voter1)).to.equal(ethers.parseEther("31.622776601"))
+
+      expect(await voterRewardsV2.cycleToVoterToTotal(2, voter2)).to.equal(ethers.parseEther("24.494897427"))
+
+      await catchRevert(voterRewardsV2.claimReward(2, voter2.address))
+
+      expect(await voterRewardsV2.cycleToVoterToTotal(2, voter3)).to.equal(ethers.parseEther("31.622776601"))
+
+      // Votes should be tracked correctly
+      appVotes = await xAllocationVoting.getAppVotes(roundId2, app1)
+      expect(appVotes).to.eql(ethers.parseEther("600"))
+      appVotes = await xAllocationVoting.getAppVotes(roundId2, app2)
+      expect(appVotes).to.eql(ethers.parseEther("2000"))
+
+      totalVotes = await xAllocationVoting.totalVotes(roundId2)
+      expect(totalVotes).to.eql(ethers.parseEther("2600"))
+
+      // Total voters should be tracked correctly
+      totalVoters = await xAllocationVoting.totalVoters(roundId2)
+      expect(totalVoters).to.eql(BigInt(3))
+
+      // Voter rewards checks
+      expect(await voterRewardsV2.cycleToTotal(2)).to.equal(ethers.parseEther("87.740450629")) // Total votes -> Math.sqrt(1000) + Math.sqrt(300) + Math.sqrt(1000)
+      expect(await voterRewardsV2.cycleToTotal(2)).to.equal(
+        (await voterRewardsV2.cycleToVoterToTotal(2, voter1)) +
+          (await voterRewardsV2.cycleToVoterToTotal(2, voter2)) +
+          (await voterRewardsV2.cycleToVoterToTotal(2, voter3)),
+      ) // Total votes
+
+      await waitForRoundToEnd(Number(roundId2))
+
+      // Votes should be the same after round ended
+      appVotes = await xAllocationVoting.getAppVotes(roundId2, app1)
+      expect(appVotes).to.eql(ethers.parseEther("600"))
+      appVotes = await xAllocationVoting.getAppVotes(roundId2, app2)
+      expect(appVotes).to.eql(ethers.parseEther("2000"))
+
+      totalVotes = await xAllocationVoting.totalVotes(roundId2)
+      expect(totalVotes).to.eql(ethers.parseEther("2600"))
+
+      await waitForNextCycle()
+
+      expect(await emissions.isCycleEnded(2)).to.equal(true)
+
+      expect(await emissions.isCycleDistributed(await emissions.nextCycle())).to.equal(false)
+      expect(await emissions.isNextCycleDistributable()).to.equal(true)
+
+      // Reward claiming
+      expect(await emissions.isCycleDistributed(2)).to.equal(true)
+      expect(await b3tr.balanceOf(await voterRewardsV2.getAddress())).to.gt(await emissions.getVote2EarnAmount(2)) // Voters of round 1 can still claim rewards of round 1 thus the balance of VoterRewards contract should be greater than the emission amount
+
+      const voter1Rewards2 = await voterRewardsV2.getReward(2, voter1.address)
+      const voter2Rewards2 = await voterRewardsV2.getReward(2, voter2.address)
+      const voter3Rewards2 = await voterRewardsV2.getReward(2, voter3.address)
+
+      await voterRewardsV2.connect(voter1).claimReward(2, voter1)
+      await voterRewardsV2.connect(voter2).claimReward(2, voter2)
+      await voterRewardsV2.connect(voter3).claimReward(2, voter3)
+
+      expect(await b3tr.balanceOf(voter1.address)).to.equal(voter1Rewards + voter1Rewards2) // Voter 1 claimed also rewards of round 1
+      expect(await b3tr.balanceOf(voter2.address)).to.equal(voter2Rewards2)
+      expect(await b3tr.balanceOf(voter3.address)).to.equal(voter3Rewards2)
+
+      // Voters of round 1 can still claim rewards of round 1
+      await voterRewardsV2.connect(voter2).claimReward(1, voter2)
+      await voterRewardsV2.connect(voter3).claimReward(1, voter3)
+
+      expect(await b3tr.balanceOf(voter2.address)).to.equal(voter2Rewards + voter2Rewards2)
+      expect(await b3tr.balanceOf(voter3.address)).to.equal(voter3Rewards + voter3Rewards2)
     })
   })
 
