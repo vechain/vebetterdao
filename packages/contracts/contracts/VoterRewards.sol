@@ -68,8 +68,8 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @notice The scaling factor for the rewards calculation.
   uint256 public constant SCALING_FACTOR = 1e6;
 
-  /// @notice The block number at which the quadratic rewarding was added.
-  uint256 private constant QUADRATIC_REWARDING_FLAG_ADDED = 10; // TODO: Update the block number @Agilulfo1820 @pierobassa @roisindowling before deployment
+  /// @notice The cycle number at which the quadratic rewarding was added.
+  uint256 private constant QUADRATIC_REWARDING_FLAG_ADDED = 0; // TODO: Update the cycle number @Agilulfo1820 @pierobassa @roisindowling before deployment
 
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
   struct VoterRewardsStorage {
@@ -319,7 +319,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     if ($.cycleToQuadraticRewardingStatus[cycle] == QuadraticRewardingRoundStatus.Unknown) {
       // If the cycle is before the quadratic rewarding flag was added, return true.
-      if (block.number < QUADRATIC_REWARDING_FLAG_ADDED) {
+      if (cycle < QUADRATIC_REWARDING_FLAG_ADDED) {
         return true;
       } else {
         return $.quadraticRewardingFlag;
