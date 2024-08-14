@@ -148,7 +148,7 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.MEDIUM] = 2; // Default multiplier for medium actions
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.HARD] = 3; // Default multiplier for hard actions
 
-    $.roundsForCumulativeScore = 3; // Default number of rounds to consider for the cumulative score, current round not included
+    $.roundsForCumulativeScore = 3; // Default number of rounds to consider for the cumulative score
   }
 
   // ---------- Authorizers ---------- //
@@ -291,7 +291,7 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     uint256 factor = 0;
 
     // Calculate the cumulative quadratic score for the number of rounds to consider for the cumulative score
-    for (uint256 round = currentRound; round >= 0 && round >= currentRound - $.roundsForCumulativeScore; round--) {
+    for (uint256 round = currentRound; round >= 1 && round > currentRound - $.roundsForCumulativeScore; round--) {
       uint256 score = $.userRoundScore[user][round];
 
       // NOTE: the ** operator does not support fractional exponents so we use the Math.sqrt function in a loop to calculate the square root
