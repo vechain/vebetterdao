@@ -45,6 +45,34 @@ export const ButtonStyle: ComponentStyleConfig = {
         },
       },
     },
+    tertiaryAction: {
+      rounded: "full",
+      fontSize: "16px",
+      fontWeight: 500,
+      px: "24px",
+      color: "#004CFC",
+      bgColor: "rgba(177, 241, 108, 1)",
+      _hover: {
+        bg: "rgba(177, 241, 108, 0.9)",
+        _disabled: {
+          bg: "rgba(177, 241, 108, 0.7)",
+        },
+      },
+    },
+    whiteAction: {
+      rounded: "full",
+      fontSize: "16px",
+      fontWeight: 500,
+      px: "24px",
+      color: "#004CFC",
+      bgColor: "rgba(224, 233, 254, 1)",
+      _hover: {
+        bg: "rgba(224, 233, 254, 0.9)",
+        _disabled: {
+          bg: "rgba(224, 233, 254, 0.7)",
+        },
+      },
+    },
     secondary: {
       rounded: "full",
       color: "rgba(0, 76, 252, 1)",

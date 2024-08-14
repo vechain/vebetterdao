@@ -1,6 +1,6 @@
 import { FormattingUtils } from "@repo/utils"
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { B3trContractJson } from "@repo/contracts"
 import { ethers } from "ethers"
@@ -50,4 +50,9 @@ export const useB3trBalance = (address?: string) => {
     queryFn: () => getB3trBalance(thor, address),
     enabled: !!address,
   })
+}
+
+export const useUserB3trBalance = () => {
+  const { account } = useWallet()
+  return useB3trBalance(account ?? undefined)
 }
