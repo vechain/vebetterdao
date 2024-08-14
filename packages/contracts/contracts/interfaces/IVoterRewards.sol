@@ -72,16 +72,6 @@ interface IVoterRewards {
 
   function hasRole(bytes32 role, address account) external view returns (bool);
 
-  function initialize(
-    address admin,
-    address upgrader,
-    address _emissions,
-    address _galaxyMember,
-    address _b3tr,
-    uint256[] memory levels,
-    uint256[] memory multipliers
-  ) external;
-
   function levelToMultiplier(uint256 level) external view returns (uint256);
 
   function proxiableUUID() external view returns (bytes32);
@@ -109,4 +99,10 @@ interface IVoterRewards {
   function version() external view returns (string memory);
 
   function upgradeToAndCall(address newImplementation, bytes memory data) external payable;
+
+  function initializeV2(bool _quadraticRewardingFlag) external;
+
+  function quadraticRewardingEnabled(uint256 cycle) external view returns (bool);
+
+  function setQuadraticRewarding(bool _quadraticRewardingFlag) external;
 }
