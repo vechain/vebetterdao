@@ -18,7 +18,7 @@ import { HttpNetworkConfig } from "hardhat/types"
 import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } from "./setup"
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { deployProxy, saveContractsToFile } from "../helpers"
+import { deployAndUpgrade, deployProxy, saveContractsToFile } from "../helpers"
 import { shouldRunSimulation } from "@repo/config/contracts"
 
 // GalaxyMember NFT Values
@@ -256,20 +256,24 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as Emissions
 
-  const voterRewards = (await deployProxy(
-    "VoterRewards",
+  const voterRewards = (await deployAndUpgrade(
+    ["VoterRewardsV1", "VoterRewards"],
     [
-      TEMP_ADMIN, // admin
-      config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      config.CONTRACTS_ADMIN_ADDRESS, // contractsAddressManager
-      await emissions.getAddress(),
-      await galaxyMember.getAddress(),
-      await b3tr.getAddress(),
-      config.VOTER_REWARDS_LEVELS,
-      config.VOTER_REWARDS_MULTIPLIER,
+      [
+        TEMP_ADMIN, // admin
+        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        config.CONTRACTS_ADMIN_ADDRESS, // contractsAddressManager
+        await emissions.getAddress(),
+        await galaxyMember.getAddress(),
+        await b3tr.getAddress(),
+        config.VOTER_REWARDS_LEVELS,
+        config.VOTER_REWARDS_MULTIPLIER,
+      ],
+      [config.QUADRATIC_REWARDING_ENABLED],
     ],
-    undefined,
-    true,
+    {
+      versions: [undefined, 2],
+    },
   )) as VoterRewards
 
   const xAllocationVoting = (await deployProxy(
