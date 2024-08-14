@@ -117,7 +117,8 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     uint256 _roundThreshold,
     uint256 _threshold,
     bool _isTotalScoreConsidered,
-    IX2EarnApps _x2EarnApps
+    IX2EarnApps _x2EarnApps,
+    uint256 _roundsForCumulativeScore
   ) external initializer {
     require(_admin != address(0), "ProofOfPersonhood: admin is the zero address");
     require(_contractsManagerAdmin != address(0), "ProofOfPersonhood: contracts manager admin is the zero address");
@@ -148,7 +149,7 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.MEDIUM] = 2; // Default multiplier for medium actions
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.HARD] = 3; // Default multiplier for hard actions
 
-    $.roundsForCumulativeScore = 3; // Default number of rounds to consider for the cumulative score
+    $.roundsForCumulativeScore = _roundsForCumulativeScore; // Default number of rounds to consider for the cumulative score
   }
 
   // ---------- Authorizers ---------- //
