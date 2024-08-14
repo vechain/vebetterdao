@@ -1,3 +1,4 @@
+import detector from "i18next-browser-languagedetector"
 import i18next from "i18next"
 
 import en from "./languages/en.json"
@@ -109,15 +110,17 @@ export const languages = [
   },
 ]
 
-i18next.use(initReactI18next).init({
-  resources: languages.reduce((acc, language) => {
-    acc[language.code] = {
-      translation: translations[language.code] || {},
-    }
-    return acc
-  }, {} as any),
-  defaultNS: "translation",
-  lng: enLang,
-  debug: false,
-  fallbackLng: enLang,
-})
+i18next
+  .use(detector)
+  .use(initReactI18next)
+  .init({
+    resources: languages.reduce((acc, language) => {
+      acc[language.code] = {
+        translation: translations[language.code] || {},
+      }
+      return acc
+    }, {} as any),
+    defaultNS: "translation",
+    debug: false,
+    fallbackLng: enLang,
+  })
