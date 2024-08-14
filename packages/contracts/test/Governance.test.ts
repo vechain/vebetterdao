@@ -76,7 +76,7 @@ describe("Governor and TimeLock", function () {
 
       // check version
       const version = await governor.version()
-      expect(version).to.eql("1")
+      expect(version).to.eql("2")
 
       // deposit threshold is set correctly
       const depositThreshold = await governor.depositThresholdPercentage()
@@ -970,17 +970,24 @@ describe("Governor and TimeLock", function () {
       expect(updatedThreshold).to.eql(newThreshold)
     })
 
-    it("only governance can update proposal threshold", async function () {
-      const { governor, owner } = await getOrDeployContractInstances({
+    it("only governance or defualt admin can update proposal threshold", async function () {
+      const { governor, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       const newThreshold = 10n
 
-      await catchRevert(governor.connect(owner).setDepositThresholdPercentage(newThreshold))
+      expect(await governor.hasRole(await governor.DEFAULT_ADMIN_ROLE(), otherAccount.address)).to.eql(false)
+
+      await catchRevert(governor.connect(otherAccount).setDepositThresholdPercentage(newThreshold))
 
       const updatedThreshold = await governor.depositThresholdPercentage()
       expect(updatedThreshold).to.not.eql(newThreshold)
+
+      expect(await governor.hasRole(await governor.DEFAULT_ADMIN_ROLE(), owner.address)).to.eql(true)
+
+      await governor.connect(owner).setDepositThresholdPercentage(newThreshold)
+      expect(await governor.depositThresholdPercentage()).to.eql(newThreshold)
     })
 
     it("Cannot update proposal threshold to more than 100%", async function () {
@@ -1026,17 +1033,24 @@ describe("Governor and TimeLock", function () {
       expect(updatedThreshold).to.eql(newThreshold)
     })
 
-    it("only governance can update voting threshold", async function () {
-      const { governor, owner } = await getOrDeployContractInstances({
+    it("only governance or default admin can update voting threshold", async function () {
+      const { governor, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       const newThreshold = 10n
 
-      await catchRevert(governor.connect(owner).setVotingThreshold(newThreshold))
+      expect(await governor.hasRole(await governor.DEFAULT_ADMIN_ROLE(), otherAccount.address)).to.eql(false)
+
+      await catchRevert(governor.connect(otherAccount).setVotingThreshold(newThreshold))
 
       const updatedThreshold = await governor.votingThreshold()
       expect(updatedThreshold).to.not.eql(newThreshold)
+
+      expect(await governor.hasRole(await governor.DEFAULT_ADMIN_ROLE(), owner.address)).to.eql(true)
+
+      await governor.connect(owner).setVotingThreshold(newThreshold)
+      expect(await governor.votingThreshold()).to.eql(newThreshold)
     })
 
     it("can update min voting delay through governance", async function () {
@@ -1068,17 +1082,23 @@ describe("Governor and TimeLock", function () {
       expect(delay).to.eql(1n)
     })
 
-    it("only governance can update min voting delay", async function () {
-      const { governor, owner } = await getOrDeployContractInstances({
+    it("only governance or default admin can update min voting delay", async function () {
+      const { governor, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       const newDelay = 10n
 
-      await catchRevert(governor.connect(owner).setMinVotingDelay(newDelay))
+      expect(await governor.hasRole(await governor.DEFAULT_ADMIN_ROLE(), owner.address)).to.eql(true)
+      expect(await governor.hasRole(await governor.DEFAULT_ADMIN_ROLE(), otherAccount.address)).to.eql(false)
+
+      await catchRevert(governor.connect(otherAccount).setMinVotingDelay(newDelay))
 
       const updatedDelay = await governor.minVotingDelay()
       expect(updatedDelay).to.not.eql(newDelay)
+
+      await governor.connect(owner).setMinVotingDelay(newDelay)
+      expect(await governor.minVotingDelay()).to.eql(newDelay)
     })
 
     it("Should not be able to create proposal of a restricted function", async function () {
