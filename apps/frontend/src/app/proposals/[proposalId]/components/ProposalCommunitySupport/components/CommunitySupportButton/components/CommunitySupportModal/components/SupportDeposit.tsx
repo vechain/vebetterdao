@@ -20,17 +20,21 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
     [proposal.communityDeposits, proposal.depositThreshold],
   )
 
-  const formattedAmount = useMemo(() => {
+  const parsedAmount = useMemo(() => {
     if (!amount || !ethers) return "0"
 
-    return ethers.formatEther(amount)
+    try {
+      return `${ethers.parseEther(amount)}`
+    } catch (e) {
+      return "0"
+    }
   }, [amount])
 
   const depositMax = useCallback(() => {
     if (!vot3Balance) return "0"
 
     if (missingSupport < Number(vot3Balance?.scaled)) {
-      setAmount(`${ethers.parseEther(missingSupport.toString())}`)
+      setAmount(`${missingSupport.toLocaleString("fullwide", { useGrouping: false })}`) // "fullwide" and "useGrouping" are used to display without scientific notation
       return
     }
 
@@ -45,15 +49,13 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
-      onSubmit(amount)
+      onSubmit(parsedAmount)
       e.preventDefault()
     },
-    [amount, onSubmit],
+    [onSubmit, parsedAmount],
   )
-  const userDepositsForecasted = useMemo(
-    () => Number(formattedAmount) + proposal.userSupport,
-    [formattedAmount, proposal.userSupport],
-  )
+
+  const userDepositsForecasted = useMemo(() => Number(amount) + proposal.userSupport, [amount, proposal.userSupport])
 
   const isDepositThresholdReached = useMemo(
     () => userDepositsForecasted >= proposal.depositThreshold,
@@ -83,7 +85,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
             fontSize="36px"
             fontWeight={700}
             type="text"
-            value={formattedAmount}
+            value={amount}
             onChange={handleChange}
             variant="unstyled"
             _placeholder={{ color: "black" }}
