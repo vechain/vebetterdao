@@ -133,31 +133,6 @@ contract B3TRGovernor is
   }
 
   /**
-   * @notice Initializes the contract with the initial parameters
-   * @param data Initialization data containing the initial settings for the governor
-   */
-  function initialize(
-    GovernorTypes.InitializationData memory data,
-    GovernorTypes.InitializationRolesData memory rolesData
-  ) external initializer {
-    __GovernorStorage_init(data, "B3TRGovernor");
-    __AccessControl_init();
-    __UUPSUpgradeable_init();
-    __Pausable_init();
-
-    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    GovernorQuorumLogic.updateQuorumNumerator($, data.quorumPercentage);
-
-    // Validate and set the governor external contracts storage
-    require(address(rolesData.governorAdmin) != address(0), "B3TRGovernor: governor admin address cannot be zero");
-    _grantRole(DEFAULT_ADMIN_ROLE, rolesData.governorAdmin);
-    _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, rolesData.governorFunctionSettingsRoleAddress);
-    _grantRole(PAUSER_ROLE, rolesData.pauser);
-    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, rolesData.contractsAddressManager);
-    _grantRole(PROPOSAL_EXECUTOR_ROLE, rolesData.proposalExecutor);
-  }
-
-  /**
    * @dev Function to receive VET that will be handled by the governor (disabled if executor is a third party contract)
    */
   receive() external payable virtual {
