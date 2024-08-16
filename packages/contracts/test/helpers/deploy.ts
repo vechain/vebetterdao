@@ -1,6 +1,6 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractFactory, ContractTransactionResponse } from "ethers"
-import { ethers } from "hardhat"
+import { ethers, vechain } from "hardhat"
 import {
   B3TR,
   TimeLock,
@@ -25,8 +25,12 @@ import {
   MyERC721,
   MyERC1155,
   TokenAuction,
-  GalaxyMemberV1,
+  X2EarnAppsV1,
+  XAllocationPoolV1,
+  X2EarnRewardsPoolV1,
+  XAllocationVotingV1,
   B3TRGovernorV1,
+  GalaxyMemberV1,
   VoterRewardsV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
@@ -64,7 +68,7 @@ interface DeployInstance {
   governorVotesLogicLib: GovernorVotesLogicV1
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
-  vechainNodesMock: TokenAuction | undefined
+  vechainNodesMock: TokenAuction
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -156,6 +160,34 @@ export const getOrDeployContractInstances = async ({
   const GovernorStateLogicV1Lib = await GovernorStateLogicV1.deploy()
   await GovernorStateLogicV1Lib.waitForDeployment()
 
+  // ---------------------- Deploy Mocks ----------------------
+
+  // deploy Mocks
+  const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
+  const vechainNodesMock = await TokenAuctionLock.deploy()
+  await vechainNodesMock.waitForDeployment()
+
+  const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
+  const clockAuctionContract = await ClockAuctionLock.deploy(
+    await vechainNodesMock.getAddress(),
+    await owner.getAddress(),
+  )
+
+  await vechainNodesMock.setSaleAuctionAddress(await clockAuctionContract.getAddress())
+
+  await vechainNodesMock.addOperator(await owner.getAddress())
+
+  let myErc1155, myErc721
+  if (deployMocks) {
+    const MyERC721 = await ethers.getContractFactory("MyERC721")
+    myErc721 = await MyERC721.deploy(owner.address)
+    await myErc721.waitForDeployment()
+
+    const MyERC1155 = await ethers.getContractFactory("MyERC1155")
+    myErc1155 = await MyERC1155.deploy(owner.address)
+    await myErc1155.waitForDeployment()
+  }
+
   // ---------------------- Deploy Contracts ----------------------
   // Deploy B3TR
   const B3trContract = await ethers.getContractFactory("B3TR")
@@ -218,25 +250,43 @@ export const getOrDeployContractInstances = async ({
     { version: 2 },
   )) as unknown as GalaxyMember
 
-  // Deploy X2EarnApps
-  const x2EarnApps = (await deployProxy("X2EarnApps", [
+  // Deploy X2EarnAppsV1
+  const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
     "ipfs://",
     [await timeLock.getAddress(), owner.address],
     owner.address,
     owner.address,
-  ])) as X2EarnApps
+  ])) as X2EarnAppsV1
+
+  // Upgrade X2EarnAppsV1 to X2EarnApps
+  const x2EarnApps = (await upgradeProxy(
+    "X2EarnAppsV1",
+    "X2EarnApps",
+    await x2EarnAppsV1.getAddress(),
+    [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
+    { version: 2 },
+  )) as X2EarnApps
 
   // Deploy X2EarnRewardsPool
-  const x2EarnRewardsPool = (await deployProxy("X2EarnRewardsPool", [
+  const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
     owner.address,
     owner.address,
     owner.address,
     await b3tr.getAddress(),
     await x2EarnApps.getAddress(),
-  ])) as X2EarnRewardsPool
+  ])) as X2EarnRewardsPoolV1
+
+  // Upgrade X2EarnRewardsPool V1 to V2
+  const x2EarnRewardsPool = (await upgradeProxy(
+    "X2EarnRewardsPoolV1",
+    "X2EarnRewardsPool",
+    await x2EarnRewardsPoolV1.getAddress(),
+    [],
+    { version: 2 },
+  )) as X2EarnRewardsPool
 
   // Deploy XAllocationPool
-  const xAllocationPool = (await deployProxy("XAllocationPool", [
+  const xAllocationPoolV1 = (await deployProxy("XAllocationPoolV1", [
     owner.address,
     owner.address,
     owner.address,
@@ -244,7 +294,16 @@ export const getOrDeployContractInstances = async ({
     await treasury.getAddress(),
     await x2EarnApps.getAddress(),
     await x2EarnRewardsPool.getAddress(),
-  ])) as XAllocationPool
+  ])) as XAllocationPoolV1
+
+  // Upgrade xAllocationPool V1 to V2
+  const xAllocationPool = (await upgradeProxy(
+    "XAllocationPoolV1",
+    "XAllocationPool",
+    await xAllocationPoolV1.getAddress(),
+    [],
+    { version: 2 },
+  )) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
@@ -291,7 +350,7 @@ export const getOrDeployContractInstances = async ({
   await emissions.connect(owner).setVote2EarnAddress(await voterRewardsV2.getAddress())
 
   // Deploy XAllocationVoting
-  const xAllocationVoting = (await deployProxy("XAllocationVoting", [
+  const xAllocationVotingV1 = (await deployProxy("XAllocationVotingV1", [
     {
       vot3Token: await vot3.getAddress(),
       quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
@@ -307,7 +366,16 @@ export const getOrDeployContractInstances = async ({
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
       votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
     },
-  ])) as XAllocationVoting
+  ])) as XAllocationVotingV1
+
+  // Upgrade XAllocationVoting V1 to XAllocationVoting V2
+  const xAllocationVoting = (await upgradeProxy(
+    "XAllocationVotingV1",
+    "XAllocationVoting",
+    await xAllocationVotingV1.getAddress(),
+    [],
+    { version: 2 },
+  )) as XAllocationVoting
 
   // Deploy Governor
   const governor = (await deployProxy(
@@ -417,32 +485,6 @@ export const getOrDeployContractInstances = async ({
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
     await callBootstrapAndStartEmissions()
-  }
-
-  // deploy Mocks
-  let myErc1155, myErc721, vechainNodesMock
-  if (deployMocks) {
-    const MyERC721 = await ethers.getContractFactory("MyERC721")
-    myErc721 = await MyERC721.deploy(owner.address)
-    await myErc721.waitForDeployment()
-
-    const MyERC1155 = await ethers.getContractFactory("MyERC1155")
-    myErc1155 = await MyERC1155.deploy(owner.address)
-    await myErc1155.waitForDeployment()
-
-    const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
-    vechainNodesMock = await TokenAuctionLock.deploy()
-    await vechainNodesMock.waitForDeployment()
-
-    const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
-    const clockAuctionContract = await ClockAuctionLock.deploy(
-      await vechainNodesMock.getAddress(),
-      await owner.getAddress(),
-    )
-
-    await vechainNodesMock.setSaleAuctionAddress(await clockAuctionContract.getAddress())
-
-    await vechainNodesMock.addOperator(await owner.getAddress())
   }
 
   cachedDeployInstance = {

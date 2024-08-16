@@ -45,4 +45,9 @@ export type ContractsConfig = {
   // Migration
   MIGRATION_ADDRESS: string
   MIGRATION_AMOUNT: bigint
+
+  // Version 2
+  VECHAIN_NODES_CONTRACT_ADDRESS: string
+
+  XAPP_GRACE_PERIOD: number
 }

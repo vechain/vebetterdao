@@ -44,7 +44,6 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
     bytes32[] _eligibleApps; // Array containing an up to date list of apps that are eligible for voting
     mapping(bytes32 appId => uint256 index) _eligibleAppIndex; // Mapping from app ID to index in the _eligibleApps array, so we can remove an app in O(1)
     mapping(bytes32 appId => Checkpoints.Trace208) _isAppEligibleCheckpoints; // Checkpoints to track the eligibility changes of an app over time
-    mapping(bytes32 => bool) _blackList; // Mapping to store the blacklisted apps
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.VoteEligibility")) - 1)) & ~bytes32(uint256(0xff))
@@ -72,12 +71,11 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
    * @dev Update the app availability for voting checkpoint.
    */
   function _setVotingEligibility(bytes32 appId, bool canBeVoted) internal override {
-    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
-
-    // If the app is already in the desired state we do nothing
-    if (isEligibleNow(appId) == canBeVoted) {
-      return;
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
     }
+
+    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
 
     // We update the checkpoint with the new Eligibility status
     _pushCheckpoint($._isAppEligibleCheckpoints[appId], canBeVoted ? SafeCast.toUint208(1) : SafeCast.toUint208(0));
@@ -126,13 +124,6 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
     emit VotingEligibilityUpdated(appId, canBeVoted);
   }
 
-  function _setBlacklist(bytes32 _appId, bool _isBlacklisted) internal virtual {
-    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
-
-    $._blackList[_appId] = _isBlacklisted;
-    emit BlacklistUpdated(_appId, _isBlacklisted);
-  }
-
   /**
    * @dev Store a new checkpoint for the app's Eligibility.
    */
@@ -149,15 +140,6 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
     VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
 
     return $._eligibleApps;
-  }
-
-  /**
-   * @dev Returns true if an app is blacklisted.
-   */
-  function isBlacklisted(bytes32 appId) public view virtual override returns (bool) {
-    VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
-
-    return $._blackList[appId];
   }
 
   /**

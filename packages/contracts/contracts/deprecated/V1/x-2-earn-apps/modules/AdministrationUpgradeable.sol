@@ -76,7 +76,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param newAdmin the address of the new admin
    */
   function _setAppAdmin(bytes32 appId, address newAdmin) internal override {
-    if (!_appSubmitted(appId)) {
+    if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -102,7 +102,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
       revert X2EarnInvalidAddress(moderator);
     }
 
-    if (!_appSubmitted(appId)) {
+    if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -128,7 +128,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
       revert X2EarnInvalidAddress(moderator);
     }
 
-    if (!_appSubmitted(appId)) {
+    if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -160,7 +160,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
       revert X2EarnInvalidAddress(distributor);
     }
 
-    if (!_appSubmitted(appId)) {
+    if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -186,7 +186,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
       revert X2EarnInvalidAddress(distributor);
     }
 
-    if (!_appSubmitted(appId)) {
+    if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -218,7 +218,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
       revert X2EarnInvalidAddress(newTeamWalletAddress);
     }
 
-    if (!_appSubmitted(appId)) {
+    if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -238,7 +238,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * Emits a {AppMetadataURIUpdated} event.
    */
   function _updateAppMetadata(bytes32 appId, string memory newMetadataURI) internal override {
-    if (!_appSubmitted(appId)) {
+    if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -256,7 +256,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param newAllocationPercentage the new allocation percentage
    */
   function _setTeamAllocationPercentage(bytes32 appId, uint256 newAllocationPercentage) internal virtual override {
-    if (!_appSubmitted(appId)) {
+    if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 

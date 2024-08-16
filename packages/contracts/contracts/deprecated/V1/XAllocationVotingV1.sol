@@ -44,7 +44,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * @dev Interacts with the VotingRewards contract to save the user from casting a vote.
  * @dev The contract is using AccessControl to handle roles for admin, governance, and round-starting operations.
  */
-contract XAllocationVoting is
+contract XAllocationVotingV1 is
   XAllocationVotingGovernor,
   VotingSettingsUpgradeable,
   RoundVotesCountingUpgradeable,
@@ -66,17 +66,79 @@ contract XAllocationVoting is
   /// @notice The role that can set the addresses of the contracts used by the VoterRewards contract.
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
 
+  /**
+   * @notice Data for initializing the contract
+   * @param vot3Token The address of the VOT3 token used for voting
+   * @param quorumPercentage quorum as a percentage of the total supply
+   * @param initialVotingPeriod The round duration
+   * @param timeLock Address of the timelock contract controlling governance actions
+   * @param voterRewards The address of the VoterRewards contract
+   * @param emissions The address of the Emissions contract
+   * @param admins The addresses of the admins
+   * @param upgrader The address of the upgrader
+   * @param contractsAddressManager The address of the contracts address manager.
+   * @param x2EarnAppsAddress The address of the X2EarnApps contract
+   * @param baseAllocationPercentage A percentage of the total amount of allocations that should be equaly distributed to all apps in a round
+   * @param appSharesCap Max amount of % of votes an app can get in a round
+   * @param votingThreshold Minimum amount of VOT3 balance to cast a vote
+   */
+  struct InitializationData {
+    IVotes vot3Token;
+    uint256 quorumPercentage;
+    uint32 initialVotingPeriod;
+    address timeLock;
+    IVoterRewards voterRewards;
+    IEmissions emissions;
+    address[] admins;
+    address upgrader;
+    address contractsAddressManager;
+    IX2EarnAppsV1 x2EarnAppsAddress;
+    uint256 baseAllocationPercentage;
+    uint256 appSharesCap;
+    uint256 votingThreshold;
+  }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
   }
 
+  /**
+   * @notice Initialize the contract
+   * @param data The initialization data
+   */
+  function initialize(InitializationData memory data) public initializer {
+    require(address(data.vot3Token) != address(0), "XAllocationVoting: invalid VOT3 token address");
+    require(address(data.voterRewards) != address(0), "XAllocationVoting: invalid VoterRewards address");
+    require(address(data.emissions) != address(0), "XAllocationVoting: invalid Emissions address");
+    
+    __XAllocationVotingGovernor_init("XAllocationVoting");
+    __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions, data.voterRewards);
+    __VotingSettings_init(data.initialVotingPeriod);
+    __RoundVotesCounting_init(data.votingThreshold);
+    __Votes_init(data.vot3Token);
+    __VotesQuorumFraction_init(data.quorumPercentage);
+    __RoundEarningsSettings_init(data.baseAllocationPercentage, data.appSharesCap);
+    __RoundFinalization_init();
+    __RoundsStorage_init();
+    __AccessControl_init();
+    __UUPSUpgradeable_init();
+
+    for (uint256 i; i < data.admins.length; i++) {
+      require(data.admins[i] != address(0), "XAllocationVoting: invalid admin address");
+      _grantRole(DEFAULT_ADMIN_ROLE, data.admins[i]);
+    }
+
+    _grantRole(UPGRADER_ROLE, data.upgrader);
+    _grantRole(GOVERNANCE_ROLE, data.timeLock);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
+  }
+
   // ---------- Setters ---------- //
   /**
    * @dev Set the address of the X2EarnApps contract
    */
-  function setX2EarnAppsAddress(IX2EarnApps newX2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setX2EarnAppsAddress(IX2EarnAppsV1 newX2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setX2EarnApps(newX2EarnApps);
   }
 

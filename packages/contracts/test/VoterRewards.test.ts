@@ -29,6 +29,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import { GalaxyMember, VoterRewards, VoterRewardsV1 } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
+import { endorseApp } from "./helpers/xnodes"
 
 describe("VoterRewards", () => {
   describe("Contract parameters", () => {
@@ -450,12 +451,14 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
 
@@ -634,12 +637,14 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
 
@@ -882,12 +887,14 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
 
@@ -1022,12 +1029,14 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
 
@@ -1169,12 +1178,14 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
 
@@ -1341,12 +1352,14 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
 
@@ -1482,12 +1495,15 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
+
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
 
@@ -1960,12 +1976,14 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
 
       const voter1 = otherAccounts[0]
       const voter2 = otherAccounts[1]
@@ -2113,15 +2131,17 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[8])
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[7])
 
       const voter1 = otherAccounts[1]
       const voter2 = otherAccounts[2]
@@ -2145,7 +2165,7 @@ describe("VoterRewards", () => {
       await galaxyMember.setMaxLevel(10)
 
       // Attach node to GM NFT
-      await galaxyMember.connect(voter1).attachNode(1, 1)
+      await galaxyMember.connect(voter1).attachNode(3, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 1
 
@@ -2196,11 +2216,11 @@ describe("VoterRewards", () => {
         "GalaxyMember: token attached to a node, detach before transfer",
       ) // Can't transfer GM NFT attached to a node
 
-      await galaxyMember.connect(voter1).detachNode(1, 1) // Detach node
+      await galaxyMember.connect(voter1).detachNode(3, 1) // Detach node
 
       await galaxyMember.connect(voter1).transferFrom(voter1.address, voter3.address, 1) // Now we can transfer the NFT
 
-      await galaxyMember.connect(voter3).attachNode(2, 1) // Attach Mjolnir to GM NFT of voter3 that he just received
+      await galaxyMember.connect(voter3).attachNode(4, 1) // Attach Mjolnir to GM NFT of voter3 that he just received
 
       expect(await galaxyMember.levelOf(1)).to.equal(6) // Level 6 because of the Mjolnir node
 
@@ -2302,15 +2322,17 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[5])
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[6])
 
       const voter1 = otherAccounts[1]
       const voter2 = otherAccounts[2]
@@ -2352,7 +2374,7 @@ describe("VoterRewards", () => {
       await emissions.distribute()
 
       // Attach node to GM NFT
-      await galaxyMember.connect(voter1).attachNode(1, 1)
+      await galaxyMember.connect(voter1).attachNode(3, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(6) // Level 6 because of the Mjolnir node attached
 
@@ -2386,15 +2408,15 @@ describe("VoterRewards", () => {
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
 
       // Transfer Mjolnir to voter2
-      await vechainNodesMock.connect(voter1).transferFrom(voter1.address, voter2.address, 1)
+      await vechainNodesMock.connect(voter1).transferFrom(voter1.address, voter2.address, 3)
 
       await galaxyMember.connect(voter2).freeMint() // Token Id 2
 
-      await expect(galaxyMember.connect(voter2).attachNode(1, 2)).to.be.reverted // Mjolnir (token Id 1) is still attached to voter1
+      await expect(galaxyMember.connect(voter2).attachNode(3, 2)).to.be.reverted // Mjolnir (token Id 1) is still attached to voter1
 
-      await galaxyMember.connect(voter2).detachNode(1, await galaxyMember.getIdAttachedToNode(1)) // Detach Mjolnir from voter1's GM NFT
+      await galaxyMember.connect(voter2).detachNode(3, await galaxyMember.getIdAttachedToNode(3)) // Detach Mjolnir from voter1's GM NFT
 
-      await galaxyMember.connect(voter2).attachNode(1, 2) // Attach Mjolnir to voter2's GM NFT
+      await galaxyMember.connect(voter2).attachNode(3, 2) // Attach Mjolnir to voter2's GM NFT
 
       expect(await galaxyMember.levelOf(2)).to.equal(6) // Level 6 because of the Mjolnir node attached
       expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1 because Mjolnir was detached
@@ -2494,15 +2516,17 @@ describe("VoterRewards", () => {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[6])
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[7])
 
       const voter1 = otherAccounts[1]
       const voter2 = otherAccounts[2]
@@ -2544,7 +2568,7 @@ describe("VoterRewards", () => {
       await emissions.distribute()
 
       // Attach node to GM NFT
-      await galaxyMember.connect(voter1).attachNode(1, 1)
+      await galaxyMember.connect(voter1).attachNode(3, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(3) // Level 3 because of the Mjolnir node attached but max level is 3.
 
@@ -2687,7 +2711,7 @@ describe("VoterRewards", () => {
 
         Starting from Level 1 (when Mjolnir is detached), the GM NFT Level would be = Level 9 with 435,000 B3TR required to upgrade to Level 10
       */
-      await galaxyMember.connect(voter1).detachNode(1, 1) // Detach Mjolnir from GM NFT
+      await galaxyMember.connect(voter1).detachNode(3, 1) // Detach Mjolnir from GM NFT
 
       expect(await galaxyMember.levelOf(1)).to.equal(9)
       expect(await galaxyMember.getB3TRtoUpgrade(1)).to.equal(ethers.parseEther("435000"))

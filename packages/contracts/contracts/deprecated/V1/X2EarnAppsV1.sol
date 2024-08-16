@@ -27,9 +27,7 @@ import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol
 import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/AdministrationUpgradeable.sol";
 import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgradeable.sol";
 import { ContractSettingsUpgradeable } from "./x-2-earn-apps/modules/ContractSettingsUpgradeable.sol";
-import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules//VoteEligibilityUpgradeable.sol";
-import { EndorsementUpgradeable } from "./x-2-earn-apps/modules/EndorsementUpgradeable.sol";
-import { VechainNodesDataTypes } from "./libraries/VechainNodesDataTypes.sol";
+import { VoteEligibilityUpgradeable } from "./x-2-earn-apps/modules/VoteEligibilityUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
@@ -42,13 +40,12 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
  * Admins can also control the app metadata and management.
  * Each app has a set of admins and moderators that can manage the app and settings.
  */
-contract X2EarnApps is
+contract X2EarnAppsV1 is
   X2EarnAppsUpgradeable,
   AdministrationUpgradeable,
   ContractSettingsUpgradeable,
   VoteEligibilityUpgradeable,
   AppsStorageUpgradeable,
-  EndorsementUpgradeable,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
@@ -63,14 +60,35 @@ contract X2EarnApps is
   }
 
   /**
-   * @notice Initialize the version 2 contract
-   * @param _gracePeriod the grace period to be reendorsed
+   * @notice Initialize the contract
+   * @param _baseURI the base URI for the contract
+   * @param _admins the addresses of the admins
+   * @param _upgrader the address of the upgrader
+   * @param _governor the address that will be granted the governance role
    *
    * @dev This function is called only once during the contract deployment
    */
-  function initializeV2(uint48 _gracePeriod, address _vechainNodesContract) public reinitializer(2) {
-    require(_vechainNodesContract != address(0), "X2EarnApps: Invalid VechainNodes contract address");
-    __Endorsement_init(_gracePeriod, _vechainNodesContract);
+  function initialize(
+    string memory _baseURI,
+    address[] memory _admins,
+    address _upgrader,
+    address _governor
+  ) external initializer {
+    __X2EarnApps_init();
+    __Administration_init();
+    __AppsStorage_init();
+    __ContractSettings_init(_baseURI);
+    __VoteEligibility_init();
+    __UUPSUpgradeable_init();
+    __AccessControl_init();
+
+    for (uint256 i; i < _admins.length; i++) {
+      require(_admins[i] != address(0), "X2EarnApps: admin address cannot be zero");
+      _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
+    }
+
+    _grantRole(UPGRADER_ROLE, _upgrader);
+    _grantRole(GOVERNANCE_ROLE, _governor);
   }
 
   // ---------- Modifiers ------------ //
@@ -112,7 +130,7 @@ contract X2EarnApps is
    * @return sting The version of the contract
    */
   function version() public pure virtual returns (string memory) {
-    return "2";
+    return "1";
   }
 
   // ---------- Overrides ------------ //
@@ -131,34 +149,20 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-setVotingEligibility}.
    */
-  function setVotingEligibility(bytes32 _appId, bool _isEligible) public virtual onlyRole(GOVERNANCE_ROLE) {
-    if (!_appSubmitted(_appId)) {
-      revert X2EarnNonexistentApp(_appId);
-    }
-
-    if (appExists(_appId)) {
-      _setVotingEligibility(_appId, _isEligible);
-    }
-
-    // If the app is pending endorsement and the app is getting blacklisted remove it from the pending endorsement list
-    if (isAppUnendorsed(_appId) && !_isEligible) {
-      _updateAppsPendingEndorsement(_appId, true);
-    }
-
-    // Set the app in the blacklist if not eligible and called by governance
-    _setBlacklist(_appId, !_isEligible);
+  function setVotingEligibility(bytes32 _appId, bool _isEligible) public onlyRole(GOVERNANCE_ROLE) {
+    _setVotingEligibility(_appId, _isEligible);
   }
 
   /**
-   * @dev See {IX2EarnApps-registerApp}.
+   * @dev See {IX2EarnApps-addApp}.
    */
-  function registerApp(
+  function addApp(
     address _teamWalletAddress,
     address _admin,
     string memory _appName,
     string memory _appMetadataURI
-  ) public virtual {
-    _registerApp(_teamWalletAddress, _admin, _appName, _appMetadataURI);
+  ) public onlyRole(GOVERNANCE_ROLE) {
+    _addApp(_teamWalletAddress, _admin, _appName, _appMetadataURI);
   }
 
   /**
@@ -233,42 +237,5 @@ contract X2EarnApps is
     string memory _newMetadataURI
   ) public onlyRoleAndAppAdminOrModerator(DEFAULT_ADMIN_ROLE, _appId) {
     _updateAppMetadata(_appId, _newMetadataURI);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-updateGracePeriod}.
-   */
-  function updateGracePeriod(uint48 _newGracePeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
-    _setGracePeriod(_newGracePeriod);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-updateNodeEndorsementScores}.
-   */
-  function updateNodeEndorsementScores(
-    VechainNodesDataTypes.NodeStrengthScores calldata _nodeStrengthScores
-  ) external onlyRole(GOVERNANCE_ROLE) {
-    _updateNodeEndorsementScores(_nodeStrengthScores);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-updateEndorsementScoreThreshold}.
-   */
-  function updateEndorsementScoreThreshold(uint256 _scoreThreshold) external onlyRole(GOVERNANCE_ROLE) {
-    _updateEndorsementScoreThreshold(_scoreThreshold);
-  }
-
-  /**
-   * @dev See {IX2EarnApps-endorsementScoreThreshold}.
-   */
-  function endorsementScoreThreshold() external view returns (uint256) {
-    return _endorsementScoreThreshold();
-  }
-
-  /**
-   * @dev See {IX2EarnApps-removeNodeEndorsement}.
-   */
-  function removeNodeEndorsement(bytes32 _appId, uint256 _nodeId) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
-    _removeNodeEndorsement(_appId, _nodeId);
   }
 }

@@ -24,9 +24,9 @@
 pragma solidity 0.8.20;
 
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
-import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
+import { IX2EarnAppsV1 } from "../interfaces/IX2EarnAppsV1.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
+import { X2EarnAppsDataTypes } from "../../../libraries/X2EarnAppsDataTypes.sol";
 
 /**
  * @title X2EarnAppsUpgradeable
@@ -38,7 +38,7 @@ import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
  * - a module to handle the administration of the app (handle moderators, admin, metadata, team address and percentage)
  * - a module to handle the settings of the contract
  */
-abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
+abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnAppsV1 {
   /**
    * @dev Initializes the contract
    */
@@ -56,7 +56,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @param appId the hashed name of the app
    */
   function appURI(bytes32 appId) public view returns (string memory) {
-    if (!_appSubmitted(appId)) {
+    if (!appExists(appId)) {
       revert X2EarnNonexistentApp(appId);
     }
 
@@ -84,7 +84,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   }
 
   /**
-   * @dev See {IX2EarnApps-hashAppName}.
+   * @dev See {IX2EarnAppsV1-hashAppName}.
    */
   function hashAppName(string memory appName) public pure returns (bytes32) {
     return keccak256(abi.encodePacked(appName));
@@ -93,37 +93,27 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   // --- To be implemented by the inheriting contract --- //
 
   /**
-   * @inheritdoc IX2EarnApps
+   * @inheritdoc IX2EarnAppsV1
    */
   function appExists(bytes32 appId) public view virtual returns (bool);
 
   /**
-   * @inheritdoc IX2EarnApps
-   */
-  function isBlacklisted(bytes32 appId) public view virtual returns (bool);
-
-  /**
-   * @inheritdoc IX2EarnApps
+   * @inheritdoc IX2EarnAppsV1
    */
   function baseURI() public view virtual returns (string memory);
 
   /**
-   * @inheritdoc IX2EarnApps
-   */
-  function isAppUnendorsed(bytes32 appId) public view virtual returns (bool);
-
-  /**
-   * @inheritdoc IX2EarnApps
+   * @inheritdoc IX2EarnAppsV1
    */
   function teamWalletAddress(bytes32 appId) public view virtual returns (address);
 
   /**
-   * @dev See {IX2EarnApps-appAdmin}
+   * @dev See {IX2EarnAppsV1-appAdmin}
    */
   function appAdmin(bytes32 appId) public view virtual returns (address);
 
   /**
-   * @dev See {IX2EarnApps-teamAllocationPercentage}
+   * @dev See {IX2EarnAppsV1-teamAllocationPercentage}
    */
   function teamAllocationPercentage(bytes32 appId) public view virtual returns (uint256);
 
@@ -166,24 +156,4 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
    * @dev Update the allocation percentage of the team.
    */
   function _setTeamAllocationPercentage(bytes32 appId, uint256 percentage) internal virtual;
-
-  /**
-   * @dev Function to set the endorsement status of an app.
-   */
-  function _setEndorsementStatus(bytes32 appId, bool status) internal virtual;
-
-  /**
-   * @dev Function to add app to the list of apps in VeBetterDAO ecosystem.
-   */
-  function _addApp(bytes32 appId) internal virtual;
-
-  /**
-   * @dev Function to get the apps info.
-   */
-  function _getAppsInfo(bytes32[] memory appIds) internal view virtual returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
-
-  /**
-   * @dev Function to check if an apo is registered.
-   */
-   function _appSubmitted(bytes32 appId) internal view virtual returns (bool);
 }

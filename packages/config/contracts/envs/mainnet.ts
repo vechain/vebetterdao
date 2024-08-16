@@ -97,5 +97,10 @@ export function createMainnetConfig() {
     TREASURY_TRANSFER_LIMIT_B3TR: BigInt("200000000000000000000000"), // 200,000 B3TR
     TREASURY_TRANSFER_LIMIT_VTHO: BigInt("3000000000000000000000000"), // 3,000,000 VTHO
     TREASURY_TRANSFER_LIMIT_VOT3: BigInt("500000000000000000000000"), // 50,000 VOT3
+
+    // VERSION 2
+    VECHAIN_NODES_CONTRACT_ADDRESS: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302", // The contract address of the VeChainNodes contract on mainnet
+
+    XAPP_GRACE_PERIOD: 120960, // 2 weeks -> max time to be unendorsed by node before being removed from the XAlloction voting rounds
   })
 }

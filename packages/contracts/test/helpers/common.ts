@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat"
 import { B3TR, GalaxyMember } from "../../typechain-types"
-import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
+import { AddressLike, BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
@@ -9,6 +9,7 @@ import { type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
 import { ZERO_ADDRESS } from "./const"
 import { buildTxBody, signAndSendTx } from "../../scripts/helpers/txHelper"
 import { getTestKeys } from "../../scripts/helpers/seedAccounts"
+import { endorseApp } from "./xnodes"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 
 export const waitForNextBlock = async () => {
@@ -440,12 +441,15 @@ export const voteOnApps = async (
 }
 
 export const addAppsToAllocationVoting = async (apps: string[], owner: HardhatEthersSigner) => {
-  const { x2EarnApps } = await getOrDeployContractInstances({})
+  const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({})
 
   let appIds: string[] = []
+  let i = 0
   for (const app of apps) {
-    await x2EarnApps.connect(owner).addApp(app, app, app, "metadataURI")
-    appIds.push(ethers.keccak256(ethers.toUtf8Bytes(app)))
+    await x2EarnApps.connect(owner).registerApp(app, app, app, "metadataURI")
+    const appId = await x2EarnApps.hashAppName(app)
+    appIds.push(appId)
+    endorseApp(appId, otherAccounts[i])
   }
 
   return appIds
@@ -515,7 +519,11 @@ export const calculateUnallocatedAppAllocationOffChain = async (roundId: number,
   return (totalAvailable * appShares) / BigInt(100)
 }
 
-export const participateInAllocationVoting = async (user: HardhatEthersSigner, waitRoundToEnd: boolean = false) => {
+export const participateInAllocationVoting = async (
+  user: HardhatEthersSigner,
+  waitRoundToEnd: boolean = false,
+  endorser?: HardhatEthersSigner,
+) => {
   const { xAllocationVoting, x2EarnApps, owner } = await getOrDeployContractInstances({})
 
   await getVot3Tokens(user, "1")
@@ -523,7 +531,8 @@ export const participateInAllocationVoting = async (user: HardhatEthersSigner, w
 
   const appName = "App" + Math.random()
 
-  await x2EarnApps.connect(owner).addApp(user.address, user.address, appName, "metadataURI")
+  await x2EarnApps.connect(owner).registerApp(user.address, user.address, appName, "metadataURI")
+  await endorseApp(await x2EarnApps.hashAppName(appName), endorser ? endorser : owner)
   const roundId = await startNewAllocationRound()
 
   // Vote
@@ -613,6 +622,24 @@ export const upgradeNFTtoNextLevel = async (
   await b3tr.connect(owner).approve(await nft.getAddress(), b3trToUpgrade)
 
   await nft.connect(owner).upgrade(tokenId)
+}
+
+/**
+ * Helper function to get storage slots.
+ * @param contractAddress The address of the contract.
+ * @param initialSlots The initial storage slots.
+ * @returns Array of storage slots.
+ */
+export const getStorageSlots = async (contractAddress: AddressLike, ...initialSlots: bigint[]) => {
+  const slots = []
+
+  for (const initialSlot of initialSlots) {
+    for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+      slots.push(await ethers.provider.getStorage(contractAddress, i))
+    }
+  }
+
+  return slots.filter(slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000") // Removing empty slots
 }
 
 export const addNodeToken = async (

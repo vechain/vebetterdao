@@ -25,7 +25,7 @@ pragma solidity 0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
-import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
+import { X2EarnAppsDataTypes } from "../../../../libraries/X2EarnAppsDataTypes.sol";
 
 /**
  * @title AppsStorageUpgradeable
@@ -61,45 +61,12 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   function __AppsStorage_init_unchained() internal onlyInitializing {}
 
   // ---------- Internal ---------- //
-  /**
-   * @dev Get the app data saved in storage
-   *
-   * @param appId the if of the app
-   */
-  function _getAppStorage(bytes32 appId) internal view returns (X2EarnAppsDataTypes.App memory) {
-    if (!_appSubmitted(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-    return $._apps[appId];
-  }
-
-  /**
-   * @dev Add app.
-   * Will be eligible for voting by default from the next round and
-   * the team allocation percentage will be 0%.
-   *
-   * @param appId the id of the app
-   *
-   * Emits a {AppAdded} event.
-   */
-  function _addApp(bytes32 appId) internal virtual override {
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-
-    $._apps[appId].createdAtTimestamp = block.timestamp;
-
-    // Store the new app
-    $._appIds.push(appId);
-    _setVotingEligibility(appId, true);
-
-    emit AppAdded(appId, teamWalletAddress(appId), $._apps[appId].name, true);
-  }
 
   /**
    * @dev Create app.
    * The id of the app is the hash of the app name.
-   * Will be pending endorsement.
+   * Will be eligible for voting by default from the next round and
+   * the team allocation percentage will be 0%.
    *
    * @param teamWalletAddress the address where the app should receive allocation funds
    * @param admin the address of the admin
@@ -108,7 +75,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    *
    * Emits a {AppAdded} event.
    */
-  function _registerApp(
+  function _addApp(
     address teamWalletAddress,
     address admin,
     string memory appName,
@@ -121,72 +88,42 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
       revert X2EarnInvalidAddress(admin);
     }
 
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
     bytes32 id = hashAppName(appName);
 
-    if (_appSubmitted(id)) {
+    if (appExists(id)) {
       revert X2EarnAppAlreadyExists(id);
     }
 
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-
     // Store the new app
-    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, 0);
+    $._apps[id] = X2EarnAppsDataTypes.App(id, appName, block.timestamp);
+    $._appIds.push(id);
     _setAppAdmin(id, admin);
+    _setVotingEligibility(id, true);
     _updateTeamWalletAddress(id, teamWalletAddress);
     _updateAppMetadata(id, metadataURI);
     _setTeamAllocationPercentage(id, 0);
-    _setEndorsementStatus(id, false);
 
-    emit AppAdded(id, teamWalletAddress, appName, false);
+    emit AppAdded(id, teamWalletAddress, appName, true);
   }
 
   /**
-   * @notice Retrieves detailed information for multiple applications.
-   * @dev This function is an internal view function that overrides a virtual function.
-   * It fetches data from storage and constructs an array of AppWithDetailsReturnType objects.
-   * @param appIds An array of application IDs for which details are to be retrieved.
-   * @return allApps An array of AppWithDetailsReturnType containing detailed information about each application.
-   */
-  function _getAppsInfo(
-    bytes32[] memory appIds
-  ) internal view virtual override returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
-
-    uint256 length = appIds.length;
-    X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory allApps = new X2EarnAppsDataTypes.AppWithDetailsReturnType[](
-      length
-    );
-
-    for (uint i; i < length; i++) {
-      X2EarnAppsDataTypes.App memory _app = $._apps[appIds[i]];
-      allApps[i] = X2EarnAppsDataTypes.AppWithDetailsReturnType(
-        _app.id,
-        teamWalletAddress(_app.id),
-        _app.name,
-        metadataURI(_app.id),
-        _app.createdAtTimestamp,
-        isEligibleNow(_app.id)
-      );
-    }
-    return allApps;
-  }
-
-  /**
-   * @dev Check if the apps registration has been submitted.
+   * @dev Get the app data saved in storage
    *
-   * @param appId the id of the app
+   * @param appId the if of the app
    */
-  function _appSubmitted(bytes32 appId) internal view override returns (bool) {
-    AppsStorageStorage storage $ = _getAppsStorageStorage();
+  function _getAppStorage(bytes32 appId) internal view returns (X2EarnAppsDataTypes.App memory) {
+    if (!appExists(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
 
-    return $._apps[appId].id != bytes32(0);
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+    return $._apps[appId];
   }
 
   // ---------- Getters ---------- //
   /**
    * @dev See {IX2EarnApps-appExists}.
-   *
-   * @notice An XApp must have been included in at least one allocation round to return true here.
    */
   function appExists(bytes32 appId) public view override returns (bool) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
@@ -220,11 +157,27 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    *
    * @notice This function could not be efficient with a large number of apps, in that case, use {IX2EarnApps-getPaginatedApps}
    * and then call {IX2EarnApps-app} for each app id
-   * An XApp must have been included in at least one allocation round to be considered an existing app.
    */
   function apps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
-    return _getAppsInfo($._appIds);
+
+    uint256 length = $._appIds.length;
+    X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory allApps = new X2EarnAppsDataTypes.AppWithDetailsReturnType[](
+      length
+    );
+
+    for (uint i = 0; i < length; i++) {
+      X2EarnAppsDataTypes.App memory _app = $._apps[$._appIds[i]];
+      allApps[i] = X2EarnAppsDataTypes.AppWithDetailsReturnType(
+        _app.id,
+        teamWalletAddress(_app.id),
+        _app.name,
+        metadataURI(_app.id),
+        _app.createdAtTimestamp,
+        isEligibleNow(_app.id)
+      );
+    }
+    return allApps;
   }
 
   /**

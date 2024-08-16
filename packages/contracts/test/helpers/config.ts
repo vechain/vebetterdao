@@ -102,5 +102,9 @@ export function createTestConfig() {
     // Migration
     MIGRATION_ADDRESS: "0x865306084235Bf804c8Bba8a8d56890940ca8F0b", // 10th account from mnemonic of solo network
     MIGRATION_AMOUNT: BigInt("3750000000000000000000000"), // 3.75 million B3TR tokens from pilot show
+
+    // version 2
+    XAPP_GRACE_PERIOD: 120960, // 120960 blocks = 2 weeks
+    VECHAIN_NODES_CONTRACT_ADDRESS: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302", // The contract address of the VeChainNodes contract on mainnet
   })
 }

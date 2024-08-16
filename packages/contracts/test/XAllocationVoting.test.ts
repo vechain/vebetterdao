@@ -23,9 +23,10 @@ import {
 } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { deployProxy } from "../scripts/helpers"
-import { XAllocationVoting } from "../typechain-types"
+import { deployProxy, upgradeProxy } from "../scripts/helpers"
+import { XAllocationVoting, XAllocationVotingV1 } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { endorseApp } from "./helpers/xnodes"
 
 describe("X-Allocation Voting", function () {
   describe("Deployment", function () {
@@ -52,12 +53,11 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Can set multiple admins during deployment", async function () {
-      const { voterRewards, timeLock, emissions, x2EarnApps, vot3, otherAccounts } = await getOrDeployContractInstances(
-        {
+      const { voterRewards, timeLock, emissions, x2EarnApps, vot3, otherAccounts, owner } =
+        await getOrDeployContractInstances({
           forceDeploy: false,
-        },
-      )
-      const xAllocationVoting = (await deployProxy("XAllocationVoting", [
+        })
+      const xAllocationVotingV1 = (await deployProxy("XAllocationVotingV1", [
         {
           vot3Token: await vot3.getAddress(),
           quorumPercentage: 1,
@@ -66,14 +66,23 @@ describe("X-Allocation Voting", function () {
           voterRewards: await voterRewards.getAddress(),
           emissions: await emissions.getAddress(),
           admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
-          upgrader: otherAccounts[2].address,
+          upgrader: owner.address,
           contractsAddressManager: otherAccounts[2].address,
           x2EarnAppsAddress: await x2EarnApps.getAddress(),
           baseAllocationPercentage: 2,
           appSharesCap: 2,
           votingThreshold: BigInt(1),
         },
-      ])) as XAllocationVoting
+      ])) as XAllocationVotingV1
+
+      // Upgrade XAllocationVoting V1 to XAllocationVoting V2
+      const xAllocationVoting = (await upgradeProxy(
+        "XAllocationVotingV1",
+        "XAllocationVoting",
+        await xAllocationVotingV1.getAddress(),
+        [],
+        { version: 2 },
+      )) as XAllocationVoting
 
       expect(
         await xAllocationVoting.hasRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), await timeLock.getAddress()),
@@ -98,7 +107,7 @@ describe("X-Allocation Voting", function () {
       })
 
       expect(await xAllocationVoting.name()).to.eql("XAllocationVoting")
-      expect(await xAllocationVoting.version()).to.eql("1")
+      expect(await xAllocationVoting.version()).to.eql("2")
     })
 
     it("Counting mode is set correctly", async function () {
@@ -118,7 +127,7 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Clock returns block number if token does not implement clock function", async function () {
-      const { xAllocationVoting, timeLock, voterRewards, emissions, otherAccounts, x2EarnApps, b3tr } =
+      const { xAllocationVoting, timeLock, voterRewards, emissions, otherAccounts, x2EarnApps, b3tr, owner } =
         await getOrDeployContractInstances({
           forceDeploy: false,
         })
@@ -127,7 +136,7 @@ describe("X-Allocation Voting", function () {
 
       expect(parseInt(clock.toString())).to.eql(await ethers.provider.getBlockNumber())
 
-      const xAllocationVotingWithB3TR = (await deployProxy("XAllocationVoting", [
+      const xAllocationVotingWithB3TRV1 = (await deployProxy("XAllocationVotingV1", [
         {
           vot3Token: await b3tr.getAddress(),
           quorumPercentage: 1,
@@ -136,14 +145,23 @@ describe("X-Allocation Voting", function () {
           voterRewards: await voterRewards.getAddress(),
           emissions: await emissions.getAddress(),
           admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
-          upgrader: otherAccounts[2].address,
+          upgrader: owner.address,
           contractsAddressManager: otherAccounts[2].address,
           x2EarnAppsAddress: await x2EarnApps.getAddress(),
           baseAllocationPercentage: 2,
           appSharesCap: 2,
           votingThreshold: BigInt(1),
         },
-      ])) as XAllocationVoting
+      ])) as XAllocationVotingV1
+
+      // Upgrade XAllocationVoting V1 to XAllocationVoting V2
+      const xAllocationVotingWithB3TR = (await upgradeProxy(
+        "XAllocationVotingV1",
+        "XAllocationVoting",
+        await xAllocationVotingWithB3TRV1.getAddress(),
+        [],
+        { version: 2 },
+      )) as XAllocationVoting
 
       clock = await xAllocationVotingWithB3TR.clock()
       expect(parseInt(clock.toString())).to.eql(await ethers.provider.getBlockNumber())
@@ -168,7 +186,7 @@ describe("X-Allocation Voting", function () {
       })
 
       await expect(
-        deployProxy("XAllocationVoting", [
+        deployProxy("XAllocationVotingV1", [
           {
             vot3Token: ZERO_ADDRESS,
             quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
@@ -196,7 +214,7 @@ describe("X-Allocation Voting", function () {
       })
 
       await expect(
-        deployProxy("XAllocationVoting", [
+        deployProxy("XAllocationVotingV1", [
           {
             vot3Token: await vot3.getAddress(),
             quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
@@ -224,7 +242,7 @@ describe("X-Allocation Voting", function () {
       })
 
       await expect(
-        deployProxy("XAllocationVoting", [
+        deployProxy("XAllocationVotingV1", [
           {
             vot3Token: await vot3.getAddress(),
             quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
@@ -252,7 +270,7 @@ describe("X-Allocation Voting", function () {
       })
 
       await expect(
-        deployProxy("XAllocationVoting", [
+        deployProxy("XAllocationVotingV1", [
           {
             vot3Token: await vot3.getAddress(),
             quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
@@ -412,22 +430,40 @@ describe("X-Allocation Voting", function () {
     })
 
     it("Cannot initialize twice", async function () {
-      const { owner, xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { voterRewards, timeLock, emissions, x2EarnApps, vot3, otherAccounts, owner } =
+        await getOrDeployContractInstances({
+          forceDeploy: false,
+        })
+      const xAllocationVotingV1 = (await deployProxy("XAllocationVotingV1", [
+        {
+          vot3Token: await vot3.getAddress(),
+          quorumPercentage: 1,
+          initialVotingPeriod: 2,
+          timeLock: await timeLock.getAddress(),
+          voterRewards: await voterRewards.getAddress(),
+          emissions: await emissions.getAddress(),
+          admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
+          upgrader: owner.address,
+          contractsAddressManager: otherAccounts[2].address,
+          x2EarnAppsAddress: await x2EarnApps.getAddress(),
+          baseAllocationPercentage: 2,
+          appSharesCap: 2,
+          votingThreshold: BigInt(1),
+        },
+      ])) as XAllocationVotingV1
 
       await catchRevert(
-        xAllocationVoting.initialize({
-          vot3Token: owner.address,
+        xAllocationVotingV1.initialize({
+          vot3Token: await vot3.getAddress(),
           quorumPercentage: 1,
-          initialVotingPeriod: 1,
-          timeLock: owner.address,
-          voterRewards: owner.address,
-          emissions: owner.address,
-          admins: [owner.address],
+          initialVotingPeriod: 2,
+          timeLock: await timeLock.getAddress(),
+          voterRewards: await voterRewards.getAddress(),
+          emissions: await emissions.getAddress(),
+          admins: [await timeLock.getAddress(), otherAccounts[2].address, otherAccounts[2].address],
           upgrader: owner.address,
-          contractsAddressManager: owner.address,
-          x2EarnAppsAddress: owner.address,
+          contractsAddressManager: otherAccounts[2].address,
+          x2EarnAppsAddress: await x2EarnApps.getAddress(),
           baseAllocationPercentage: 2,
           appSharesCap: 2,
           votingThreshold: BigInt(1),
@@ -440,7 +476,7 @@ describe("X-Allocation Voting", function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationVoting.version()).to.equal("1")
+      expect(await xAllocationVoting.version()).to.equal("2")
     })
   })
 
@@ -995,7 +1031,9 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(appId, otherAccounts[0])
 
       let tx = await xAllocationVoting.connect(owner).startNewRound()
       let receipt = await tx.wait()
@@ -1183,7 +1221,9 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(appId, otherAccounts[0])
 
       await getVot3Tokens(otherAccount, "1000")
 
@@ -1212,8 +1252,9 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
 
       await getVot3Tokens(otherAccount, "1000")
 
@@ -1239,8 +1280,9 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
 
       await getVot3Tokens(otherAccount, "1000")
 
@@ -1285,8 +1327,9 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
 
       await getVot3Tokens(otherAccount, "0.1")
 
@@ -1312,9 +1355,9 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-
+      await endorseApp(app1, otherAccounts[0])
       await getVot3Tokens(otherAccount, "1000")
 
       let tx = await xAllocationVoting.startNewRound()
@@ -1342,9 +1385,9 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-
+      await endorseApp(app1, otherAccounts[0])
       await getVot3Tokens(otherAccount, "1000")
 
       let tx = await xAllocationVoting.startNewRound()
@@ -1373,13 +1416,14 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
-
+      await endorseApp(app2, otherAccounts[1])
       await getVot3Tokens(otherAccount, "1000")
 
       let tx = await xAllocationVoting.startNewRound()
@@ -1448,12 +1492,15 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
+
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
 
@@ -1531,9 +1578,9 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
-
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps.setTeamAllocationPercentage(app1, 100)
 
       await getVot3Tokens(otherAccount, "1000")
@@ -1578,12 +1625,15 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
+
       const app3 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
 
       await getVot3Tokens(otherAccount, "1000")
@@ -1621,12 +1671,14 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
 
       await getVot3Tokens(otherAccount, "1000")
 
@@ -1669,13 +1721,14 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
-
+      await endorseApp(app2, otherAccounts[1])
       await getVot3Tokens(otherAccount, "1000")
 
       let tx = await xAllocationVoting.startNewRound()
@@ -1715,12 +1768,16 @@ describe("X-Allocation Voting", function () {
       // 2 apps in round1
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
+
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
+
       let round1 = await startNewAllocationRound()
       let getAppIdsOfRound = await xAllocationVoting.getAppIdsOfRound(round1)
       expect(getAppIdsOfRound.length).to.equal(2n)
@@ -1728,10 +1785,16 @@ describe("X-Allocation Voting", function () {
       // add new app before round ends
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+        .registerApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      const app3 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      await endorseApp(app3, otherAccounts[2])
+
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+        .registerApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+      const app4 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      await endorseApp(app4, otherAccounts[3])
+
       await waitForRoundToEnd(round1)
 
       // 4 apps in round2
@@ -1752,7 +1815,11 @@ describe("X-Allocation Voting", function () {
       // add another app before round ends
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+        .registerApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+
+      const appId4 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await endorseApp(appId4, otherAccounts[4])
+
       await waitForRoundToEnd(round3)
 
       // 3 apps in round 4
@@ -1777,12 +1844,16 @@ describe("X-Allocation Voting", function () {
       // 2 apps in round1
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
+
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
+
       let round1 = await startNewAllocationRound()
       let getAppIdsOfRound = await xAllocationVoting.getAppIdsOfRound(round1)
       expect(getAppIdsOfRound.length).to.equal(2n)
@@ -1812,7 +1883,10 @@ describe("X-Allocation Voting", function () {
 
       const appName = "App"
 
-      await x2EarnApps.connect(owner).addApp(otherAccount.address, otherAccount.address, appName, "metadataURI")
+      await x2EarnApps.connect(owner).registerApp(otherAccount.address, otherAccount.address, appName, "metadataURI")
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(appName))
+      await endorseApp(appId, otherAccount)
+
       const roundId = await startNewAllocationRound()
 
       // Vote
@@ -1832,8 +1906,9 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1Id, otherAccounts[0])
 
       await getVot3Tokens(otherAccount, "1000")
 
@@ -1858,7 +1933,9 @@ describe("X-Allocation Voting", function () {
 
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1Id, otherAccounts[0])
 
       await getVot3Tokens(otherAccount, "1000")
 
@@ -1881,12 +1958,15 @@ describe("X-Allocation Voting", function () {
       // add apps
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1, otherAccounts[0])
+
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2, otherAccounts[1])
 
       await getVot3Tokens(otherAccount, "1000")
 
@@ -2137,13 +2217,16 @@ describe("X-Allocation Voting", function () {
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+        .registerApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      await endorseApp(app1Id, otherAccounts[2])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+        .registerApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+      await endorseApp(app2Id, otherAccounts[3])
       await x2EarnApps
         .connect(owner)
-        .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+        .registerApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+      await endorseApp(app3Id, otherAccounts[4])
 
       //Start allocation round
       const round1 = await startNewAllocationRound()

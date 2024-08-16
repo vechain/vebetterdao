@@ -10,8 +10,12 @@ import {
   VoterRewards,
   XAllocationPool,
   Treasury,
-  X2EarnApps,
   X2EarnRewardsPool,
+  X2EarnApps,
+  X2EarnAppsV1,
+  X2EarnRewardsPoolV1,
+  XAllocationPoolV1,
+  XAllocationVotingV1,
   B3TRGovernorV1,
   GalaxyMemberV1,
   VoterRewardsV1,
@@ -22,7 +26,7 @@ import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } 
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployAndUpgrade, deployProxy, saveContractsToFile } from "../helpers"
-import { shouldRunSimulation } from "@repo/config/contracts"
+import { shouldEndorseXApps, shouldRunSimulation } from "@repo/config/contracts"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -178,44 +182,56 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as Treasury
 
-  const x2EarnApps = (await deployProxy(
-    "X2EarnApps",
+  const x2EarnApps = (await deployAndUpgrade(
+    ["X2EarnAppsV1", "X2EarnApps"],
     [
-      config.XAPP_BASE_URI,
-      [TEMP_ADMIN], //admins
-      config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      TEMP_ADMIN, // governance role
+      [
+        config.XAPP_BASE_URI,
+        [TEMP_ADMIN], //admins
+        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        TEMP_ADMIN, // governance role
+      ],
+      [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
     ],
-    undefined,
-    true,
+    {
+      versions: [undefined, 2],
+    },
   )) as X2EarnApps
 
-  const x2EarnRewardsPool = (await deployProxy(
-    "X2EarnRewardsPool",
+  const x2EarnRewardsPool = (await deployAndUpgrade(
+    ["X2EarnRewardsPoolV1", "X2EarnRewardsPool"],
     [
-      config.CONTRACTS_ADMIN_ADDRESS, // admin
-      config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
-      config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      await b3tr.getAddress(),
-      await x2EarnApps.getAddress(),
+      [
+        config.CONTRACTS_ADMIN_ADDRESS, // admin
+        config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
+        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        await b3tr.getAddress(),
+        await x2EarnApps.getAddress(),
+      ],
+      [],
     ],
-    undefined,
-    true,
-  )) as X2EarnRewardsPool
+    {
+      versions: [undefined, 2],
+    },
+  )) as XAllocationPool
 
-  const xAllocationPool = (await deployProxy(
-    "XAllocationPool",
+  const xAllocationPool = (await deployAndUpgrade(
+    ["XAllocationPoolV1", "XAllocationPool"],
     [
-      TEMP_ADMIN, // admin
-      config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      TEMP_ADMIN, // contractsAddressManager
-      await b3tr.getAddress(),
-      await treasury.getAddress(),
-      await x2EarnApps.getAddress(),
-      await x2EarnRewardsPool.getAddress(),
+      [
+        TEMP_ADMIN, // admin
+        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        TEMP_ADMIN, // contractsAddressManager
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+        await x2EarnApps.getAddress(),
+        await x2EarnRewardsPool.getAddress(),
+      ],
+      [],
     ],
-    undefined,
-    true,
+    {
+      versions: [undefined, 2],
+    },
   )) as XAllocationPool
 
   const galaxyMember = (await deployAndUpgrade(
@@ -295,27 +311,29 @@ export async function deployAll(config: ContractsConfig) {
     {},
   )) as VoterRewards
 
-  const xAllocationVoting = (await deployProxy(
-    "XAllocationVoting",
+  const xAllocationVoting = (await deployAndUpgrade(
+    ["XAllocationVotingV1", "XAllocationVoting"],
     [
-      {
-        vot3Token: await vot3.getAddress(),
-        quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
-        initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
-        timeLock: await timelock.getAddress(),
-        voterRewards: await voterRewards.getAddress(),
-        emissions: await emissions.getAddress(),
-        admins: [await timelock.getAddress(), TEMP_ADMIN],
-        upgrader: config.CONTRACTS_ADMIN_ADDRESS,
-        contractsAddressManager: TEMP_ADMIN,
-        x2EarnAppsAddress: await x2EarnApps.getAddress(),
-        baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
-        appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
-        votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
-      },
+      [
+        {
+          vot3Token: await vot3.getAddress(),
+          quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
+          initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
+          timeLock: await timelock.getAddress(),
+          voterRewards: await voterRewards.getAddress(),
+          emissions: await emissions.getAddress(),
+          admins: [await timelock.getAddress(), TEMP_ADMIN],
+          upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+          contractsAddressManager: TEMP_ADMIN,
+          x2EarnAppsAddress: await x2EarnApps.getAddress(),
+          baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+          appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+          votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
+        },
+      ],
+      [],
     ],
-    undefined,
-    true,
+    {},
   )) as XAllocationVoting
 
   const governor = (await deployProxy(
@@ -366,7 +384,7 @@ export async function deployAll(config: ContractsConfig) {
     Treasury: await treasury.getAddress(),
     VOT3: await vot3.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
-    X2EarnApps: await x2EarnApps.getAddress(),
+    X2EarnAppsV1: await x2EarnApps.getAddress(),
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
@@ -488,7 +506,7 @@ export async function deployAll(config: ContractsConfig) {
       await setupMainnetEnvironment(emissions, x2EarnApps)
       break
     case "vechain_testnet":
-      await setupTestEnvironment(emissions, x2EarnApps)
+      await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock)
       break
     case "vechain_solo":
       await setupLocalEnvironment(
@@ -500,6 +518,7 @@ export async function deployAll(config: ContractsConfig) {
         b3tr,
         vot3,
         vechainNodesMock,
+        shouldEndorseXApps(),
       )
       break
   }
@@ -804,8 +823,6 @@ export async function deployAll(config: ContractsConfig) {
 
     console.log("Roles validated successfully!")
   }
-
-  console.log("================================================================================")
   console.log("Deployment completed successfully!")
   console.log("================================================================================")
 
@@ -844,10 +861,13 @@ const transferAdminRole = async (
     | VoterRewards
     | VoterRewardsV1
     | XAllocationPool
+    | XAllocationPoolV1
     | XAllocationVoting
+    | XAllocationVotingV1
     | Treasury
     | B3TRGovernor
     | X2EarnApps
+    | X2EarnAppsV1
     | TimeLock,
   oldAdmin: HardhatEthersSigner,
   newAdminAddress: string,
@@ -917,7 +937,7 @@ const transferMinterRole = async (
 
 // Transfer governance role to treasury contract admin for intial phases of project
 const transferGovernanceRole = async (
-  contract: Treasury | X2EarnApps,
+  contract: Treasury | X2EarnApps | X2EarnAppsV1,
   admin: HardhatEthersSigner,
   oldAddress: string,
   newAddress?: string,
@@ -960,7 +980,14 @@ const transferGovernanceRole = async (
 }
 
 const transferContractsAddressManagerRole = async (
-  contract: GalaxyMember | GalaxyMemberV1 | XAllocationPool | XAllocationVoting | Emissions,
+  contract:
+    | GalaxyMember
+    | GalaxyMemberV1
+    | XAllocationPool
+    | XAllocationPoolV1
+    | XAllocationVotingV1
+    | XAllocationVoting
+    | Emissions,
   admin: HardhatEthersSigner,
   newAddress: string,
 ) => {
@@ -1073,6 +1100,12 @@ export const setWhitelistedFunctions = async (
   const { B3TR_GOVERNOR_WHITELISTED_METHODS } = config
 
   for (const [contract, functions] of Object.entries(B3TR_GOVERNOR_WHITELISTED_METHODS)) {
+    // Check if the contract address exists
+    const contractAddress = contractAddresses[contract]
+    if (!contractAddress) {
+      if (logOutput) console.log(`Skipping ${contract} as it does not exist in contract addresses`)
+      continue // Skip this contract if address does not exist
+    }
     // Check if the current contract requires linking with any libraries
     const contractLibraries = libraries[contract]
 
@@ -1110,12 +1143,16 @@ const validateContractRole = async (
     | VoterRewards
     | VoterRewardsV1
     | XAllocationPool
+    | XAllocationPoolV1
     | XAllocationVoting
+    | XAllocationVotingV1
     | Treasury
     | TimeLock
     | B3TRGovernor
     | X2EarnRewardsPool
-    | X2EarnApps,
+    | X2EarnRewardsPoolV1
+    | X2EarnApps
+    | X2EarnAppsV1,
   expectedAddress: string,
   tempAdmin: string,
   role: string,

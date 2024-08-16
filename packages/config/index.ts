@@ -4,7 +4,7 @@ import testnetConfig from "./testnet"
 import mainnetConfig from "./mainnet"
 import { EnvConfig, getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
-import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from './datadog'
+import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "./datadog"
 
 export type AppConfig = {
   environment: EnvConfig
