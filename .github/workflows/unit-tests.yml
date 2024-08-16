@@ -9,7 +9,6 @@ on:
   push:
     branches:
       - main
-      - gm-and-endorsements
       - Comment-only-solidity-changes
       - testnet
 
