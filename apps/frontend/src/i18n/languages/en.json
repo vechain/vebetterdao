@@ -1,4 +1,7 @@
 {
+  "Proposals in this round": "Proposals in this round",
+  "{{from}} to {{to}}": "{{from}} to {{to}}",
+  "We're in Round #{{round}}": "We're in Round <b>#{{round}}</b>",
   "{{amount}}% distributed": "<strong>{{amount}}</strong>% distributed",
   "See round": "See round",
   "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.": "The Allocation round #{{roundId}} is active! Vote for your favorite apps to help them get more B3TR and earn rewards for participating.",

@@ -1,18 +1,5 @@
-import {
-  Text,
-  Flex,
-  Card,
-  CardHeader,
-  CardBody,
-  VStack,
-  HStack,
-  Box,
-  SkeletonText,
-  Show,
-  Skeleton,
-  IconButton,
-} from "@chakra-ui/react"
-import React, { useCallback, useMemo } from "react"
+import { Text, Card, CardBody, VStack, HStack, Box, SkeletonText, IconButton } from "@chakra-ui/react"
+import React, { useCallback } from "react"
 import {
   ProposalCreatedEvent,
   ProposalMetadata,
@@ -58,7 +45,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
 
   return (
     <Card
-      variant={"filled"}
+      variant={["baseWithBorder", "baseWithBorder", "filled"]}
       onClick={goToProposal}
       _hover={{ bg: "#F8F8F8" }}
       cursor={"pointer"}

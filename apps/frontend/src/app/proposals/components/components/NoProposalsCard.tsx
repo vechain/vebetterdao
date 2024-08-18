@@ -1,24 +1,14 @@
 import { Box, VStack, Image, Text, Button } from "@chakra-ui/react"
-import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
-import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import React from "react"
 import { useTranslation } from "react-i18next"
 
-export const NoProposalsCard = () => {
-  const router = useRouter()
-  const { account } = useWallet()
-  const { open } = useWalletModal()
-
+type Props = {
+  buttonText: string
+  onClick: () => void
+  description?: React.ReactNode
+}
+export const NoProposalsCard = ({ buttonText, onClick, description }: Props) => {
   const { t } = useTranslation()
-
-  const onNewClick = useCallback(() => {
-    if (!account) {
-      open()
-      return
-    }
-
-    router.push("/proposals/new")
-  }, [account, open, router])
 
   return (
     <Box
@@ -46,13 +36,9 @@ export const NoProposalsCard = () => {
           alignSelf={"flex-start"}>
           {t("No Proposals Found")}
         </Text>
-        <Text fontSize={16} fontWeight={400} mt={2} color={"#6A6A6A"}>
-          {t("Have an idea for something that could improve the experience in VeBetterDAO? ")}
-          <b style={{ color: "black" }}>{t("Create a proposal")}</b>
-          {t(" and let the community vote to make it happen!")}
-        </Text>
-        <Button onClick={onNewClick} variant={"primaryAction"} alignSelf={"flex-start"} mt={4} mb={2}>
-          {t("Create proposal")}
+        {description}
+        <Button onClick={onClick} variant={"primaryAction"} alignSelf={"flex-start"} mt={4} mb={2}>
+          {buttonText}
         </Button>
       </VStack>
     </Box>

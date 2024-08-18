@@ -18,9 +18,11 @@ export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFil
     useAllProposalsDepositReached(proposalsIds)
 
   const checkProposalState = useCallback(
-    (proposalIndex: number, state: number) => {
+    (proposalId: string, state: number) => {
       if (!allProposalsState) return false
-      return allProposalsState[proposalIndex]?.state === state
+      const proposalWithState = allProposalsState.find(proposal => proposal.proposalId === proposalId)
+
+      return proposalWithState?.state === state
     },
     [allProposalsState],
   )
@@ -33,35 +35,38 @@ export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFil
     const proposals = []
 
     for (const filter of selectedFilter) {
+      console.log("Checking filter: ", filter)
       proposals.push(
-        ...proposalsEvents.created.filter((_proposal, index) => {
+        ...proposalsEvents.created.filter((proposal, index) => {
           switch (filter) {
             case ProposalFilter.InThisRound:
-              return checkProposalState(index, ProposalState.Active)
+              return checkProposalState(proposal.proposalId, ProposalState.Active)
             case StateFilter.Active:
-              return checkProposalState(index, ProposalState.Active)
+              return checkProposalState(proposal.proposalId, ProposalState.Active)
             case StateFilter.Canceled:
-              return checkProposalState(index, ProposalState.Canceled)
+              return checkProposalState(proposal.proposalId, ProposalState.Canceled)
             case StateFilter.Succeeded:
-              return checkProposalState(index, ProposalState.Succeeded)
+              return checkProposalState(proposal.proposalId, ProposalState.Succeeded)
             case StateFilter.Defeated:
-              return checkProposalState(index, ProposalState.Defeated)
+              return checkProposalState(proposal.proposalId, ProposalState.Defeated)
             case StateFilter.DepositNotMet:
-              return checkProposalState(index, ProposalState.DepositNotMet)
+              return checkProposalState(proposal.proposalId, ProposalState.DepositNotMet)
             case StateFilter.Queued:
-              return checkProposalState(index, ProposalState.Queued)
+              return checkProposalState(proposal.proposalId, ProposalState.Queued)
             case StateFilter.Executed:
-              return checkProposalState(index, ProposalState.Executed)
+              return checkProposalState(proposal.proposalId, ProposalState.Executed)
             case ProposalFilter.LookingForSupport:
               return (
-                checkProposalState(index, ProposalState.Pending) && !allProposalsDepositReached?.[index]?.depositReached
+                checkProposalState(proposal.proposalId, ProposalState.Pending) &&
+                !allProposalsDepositReached?.[index]?.depositReached
               )
             case ProposalFilter.UpcomingVoting:
               return (
-                checkProposalState(index, ProposalState.Pending) && allProposalsDepositReached?.[index]?.depositReached
+                checkProposalState(proposal.proposalId, ProposalState.Pending) &&
+                allProposalsDepositReached?.[index]?.depositReached
               )
             default:
-              return true
+              return false
           }
         }),
       )
