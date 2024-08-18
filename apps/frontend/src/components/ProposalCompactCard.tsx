@@ -1,5 +1,5 @@
-import { Text, Card, CardBody, VStack, HStack, Box, SkeletonText, IconButton } from "@chakra-ui/react"
-import React, { useCallback } from "react"
+import { Text, Card, CardBody, VStack, HStack, Box, SkeletonText, IconButton, Skeleton } from "@chakra-ui/react"
+import React, { useCallback, useMemo } from "react"
 import {
   ProposalCreatedEvent,
   ProposalMetadata,
@@ -24,12 +24,12 @@ type Props = {
 
 export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
   const { account } = useWallet()
-  const { proposalId, description, roundIdVoteStart } = proposal
+  const { proposalId, description } = proposal
   const proposalMetadata = useIpfsMetadata<ProposalMetadata>(toIPFSURL(description))
 
   const router = useRouter()
 
-  const { votingStartDate, votingEndDate } = useProposalVoteDates(proposalId)
+  const { votingStartDate, isVotingStartDateLoading } = useProposalVoteDates(proposalId)
 
   const { t } = useTranslation()
 
@@ -42,6 +42,29 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
   }, [router, proposalId])
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVoted(proposal.proposalId, account ?? "")
+
+  const hasVotedText = useMemo(() => {
+    switch (proposalState) {
+      case ProposalState.Pending:
+        return t("Starting {{date}}", { date: dayjs(votingStartDate).format("MMM D, YYYY") })
+      case ProposalState.Canceled:
+        return t("Vote didn't start")
+      case ProposalState.DepositNotMet:
+        return t("Vote didn't start")
+      case ProposalState.Active:
+        return hasVoted ? t("You have voted") : t("You didn't vote yet")
+      case ProposalState.Executed:
+        return hasVoted ? t("You have voted") : t("You haven't voted")
+      case ProposalState.Defeated:
+        return hasVoted ? t("You have voted") : t("You haven't voted")
+      case ProposalState.Succeeded:
+        return hasVoted ? t("You have voted") : t("You haven't voted")
+      case ProposalState.Queued:
+        return hasVoted ? t("You have voted") : t("You haven't voted")
+      default:
+        return ""
+    }
+  }, [votingStartDate, proposalState, t, hasVoted])
 
   return (
     <Card
@@ -67,9 +90,11 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
                 {proposalMetadata.data?.title}
               </Text>
             </SkeletonText>
-            <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
-              Starting {dayjs(votingStartDate).fromNow()}
-            </Text>
+            <Skeleton isLoaded={!isVotingStartDateLoading && !hasVotedLoading}>
+              <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+                {hasVotedText}
+              </Text>
+            </Skeleton>
           </VStack>
           <IconButton
             aria-label="Go to proposal"
