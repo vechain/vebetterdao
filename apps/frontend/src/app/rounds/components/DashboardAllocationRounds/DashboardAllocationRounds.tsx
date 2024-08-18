@@ -5,6 +5,7 @@ import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 import { useBreakpoints } from "@/hooks"
 import { Button, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { useRouter } from "next/navigation"
 
 import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -49,6 +50,8 @@ export const DashboardAllocationRounds = () => {
   const onRoundChange = (roundId: string) => () => {
     setSelectedRoundId(roundId)
   }
+
+  const router = useRouter()
 
   return (
     <ResponsiveCard>
@@ -132,6 +135,9 @@ export const DashboardAllocationRounds = () => {
             ))}
           </VStack>
         )}
+        <Button onClick={() => router.push("/proposals")} variant="link" colorScheme="primary">
+          {t("View all proposals")}
+        </Button>
       </VStack>
     </ResponsiveCard>
   )
