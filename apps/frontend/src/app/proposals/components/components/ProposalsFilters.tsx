@@ -2,6 +2,7 @@ import { useCallback, useState } from "react"
 import { HStack, StackProps, IconButton, Button, Text, Stack } from "@chakra-ui/react"
 import { MdClose } from "react-icons/md"
 import { useProposalFilters, ProposalFilter, StateFilter } from "@/store"
+import { useTranslation } from "react-i18next"
 
 const filters: Record<ProposalFilter, string[]> = {
   [ProposalFilter.State]: [
@@ -19,6 +20,7 @@ const filters: Record<ProposalFilter, string[]> = {
 
 type Props = StackProps
 export const ProposalsFilters = (props: Props) => {
+  const { t } = useTranslation()
   const { selectedFilter, setSelectedFilter, clearFilter } = useProposalFilters()
 
   // if the filter is selected, we show the options
@@ -40,6 +42,8 @@ export const ProposalsFilters = (props: Props) => {
 
   return (
     <Stack
+      pos="relative"
+      overflowY={"visible"}
       direction={["column", "column", "row"]}
       justify={["flex-start", "flex-start", "space-between"]}
       align={["flex-end", "flex-end", "center"]}
@@ -48,8 +52,8 @@ export const ProposalsFilters = (props: Props) => {
       {!isStateFilter ? (
         <HStack
           spacing={2}
-          overflowX={{ base: "scroll", md: "hidden" }}
-          overflowY={"hidden"}
+          overflowY={"visible"}
+          overflowX={"auto"}
           w="full"
           // Remove scrollbar
           css={{
@@ -73,6 +77,8 @@ export const ProposalsFilters = (props: Props) => {
 
             const isSelected = selectedFilter?.includes(filterKey as ProposalFilter)
 
+            const stateCount = selectedFilter?.filter(f => stateFilters.includes(f)).length
+
             return (
               <Button
                 lineHeight="inherit"
@@ -91,9 +97,24 @@ export const ProposalsFilters = (props: Props) => {
                 _hover={{
                   bg: isSelected ? "#1a1a1a" : "#EFEFEF",
                 }}>
-                <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
-                  {filterKey}
-                </Text>
+                <HStack spacing={2} alignItems={"center"}>
+                  <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
+                    {filterKey}
+                  </Text>
+                  {stateCount > 0 && filterKey === ProposalFilter.State && (
+                    <Text
+                      bg={"black"}
+                      color={"white"}
+                      borderRadius={"50%"}
+                      fontSize={12}
+                      fontWeight={600}
+                      lineHeight={1}
+                      py={1}
+                      px={2}>
+                      {stateCount}
+                    </Text>
+                  )}
+                </HStack>
               </Button>
             )
           })}
@@ -158,7 +179,7 @@ export const ProposalsFilters = (props: Props) => {
         </HStack>
       )}
       <Button variant="link" colorScheme="primary" onClick={clearFilter}>
-        Reset filters
+        {t("Reset filters")}
       </Button>
     </Stack>
   )
