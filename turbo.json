@@ -11,7 +11,8 @@
     "IS_TEST_COVERAGE",
     "RUN_SIMULATION",
     "ENDORSE_XAPPS",
-    "DO_NOT_UPGRADE"
+    "DO_NOT_UPGRADE",
+    "SHARD"
   ],
   "pipeline": {
     "install": {
@@ -118,6 +119,10 @@
       "cache": false
     },
     "test:hardhat": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "test:hardhat:shard": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
