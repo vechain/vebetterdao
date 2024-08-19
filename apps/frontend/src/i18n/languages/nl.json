@@ -627,5 +627,14 @@
   "Download template": "Sjabloon downloaden",
   "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorld mobiele portemonnee banner moet 1024x576 zijn of een veelvoud daarvan (bijv: 2048x1152 of 3072x1728).",
   "wallets voted": "wallets gestemd",
-  "Wallets voted": "Wallets gestemd"
+  "Wallets voted": "Wallets gestemd",
+  "View all proposals": "Bekijk alle voorstellen",
+  "You have voted": "U heeft gestemd",
+  "You didn't vote yet": "U heeft nog niet gestemd",
+  "Vote didn't start": "Stemmen is nog niet begonnen",
+  "Starting {{date}}": "Begint {{date}}",
+  "Ending {{date}}": "Eindigt {{date}}",
+  "Proposals in this round": "Voorstellen in deze ronde",
+  "{{from}} to {{to}}": "{{from}} tot {{to}}",
+  "We're in Round #{{round}}": "We zitten in ronde #{{round}}"
 }

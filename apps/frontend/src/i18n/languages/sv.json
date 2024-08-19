@@ -627,5 +627,15 @@
   "Download template": "Ladda ner mall",
   "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorlds mobilplånboksbanner bör vara 1024x576 eller en multipel av det (t.ex.: 2048x1152 eller 3072x1728).",
   "wallets voted": "plånböcker röstade",
-  "Wallets voted": "Plånböcker röstade"
+  "Wallets voted": "Plånböcker röstade",
+  "View all proposals": "Visa alla förslag",
+  "You have voted": "Du har röstat",
+  "You didn't vote yet": "Du har inte röstat än",
+  "Vote didn't start": "Röstningen har inte börjat",
+  "Starting {{date}}": "Startar {{date}}",
+  "Ending {{date}}": "Slutar {{date}}",
+  "Proposals in this round": "Förslag i denna omgång",
+  "{{from}} to {{to}}": "{{from}} till {{to}}",
+  "We're in Round #{{round}}": "Vi är i omgång #{{round}}",
+  "Progress": "Framsteg"
 }

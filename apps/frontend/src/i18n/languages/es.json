@@ -627,5 +627,14 @@
   "Download template": "Descargar plantilla",
   "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "El banner de la billetera móvil VeWorld debe ser de 1024x576 o un múltiplo de este (por ejemplo: 2048x1152 o 3072x1728).",
   "wallets voted": "billeteras votadas",
-  "Wallets voted": "Billeteras votadas"
+  "Wallets voted": "Billeteras votadas",
+  "View all proposals": "Ver todas las propuestas",
+  "You have voted": "Has votado",
+  "You didn't vote yet": "Aún no has votado",
+  "Vote didn't start": "La votación no ha comenzado",
+  "Starting {{date}}": "Comenzando el {{date}}",
+  "Ending {{date}}": "Finalizando el {{date}}",
+  "Proposals in this round": "Propuestas en esta ronda",
+  "{{from}} to {{to}}": "{{from}} a {{to}}",
+  "We're in Round #{{round}}": "Estamos en la Ronda #{{round}}"
 }

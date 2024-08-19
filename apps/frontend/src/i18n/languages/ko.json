@@ -627,5 +627,14 @@
   "Download template": "템플릿 다운로드",
   "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "베월드 모바일 지갑 배너는 1024x576 또는 그 배수 (예: 2048x1152 또는 3072x1728)여야 합니다.",
   "wallets voted": "투표한 지갑",
-  "Wallets voted": "투표한 지갑"
+  "Wallets voted": "투표한 지갑",
+  "View all proposals": "모든 제안 보기",
+  "You have voted": "투표하셨습니다",
+  "You didn't vote yet": "아직 투표하지 않았습니다",
+  "Vote didn't start": "투표가 시작되지 않았습니다",
+  "Starting {{date}}": "{{date}} 시작",
+  "Ending {{date}}": "{{date}} 종료",
+  "Proposals in this round": "이번 라운드의 제안",
+  "{{from}} to {{to}}": "{{from}}에서 {{to}}까지",
+  "We're in Round #{{round}}": "우리는 #{{round}} 라운드에 있습니다"
 }

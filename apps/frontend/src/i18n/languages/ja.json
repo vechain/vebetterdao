@@ -627,5 +627,14 @@
   "Download template": "テンプレートをダウンロード",
   "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorldモバイルウォレットのバナーは1024x576またはその倍数である必要があります（例: 2048x1152または3072x1728）。",
   "wallets voted": "投票したウォレット",
-  "Wallets voted": "投票したウォレット"
+  "Wallets voted": "投票したウォレット",
+  "View all proposals": "すべての提案を見る",
+  "You have voted": "投票済み",
+  "You didn't vote yet": "まだ投票していません",
+  "Vote didn't start": "投票は開始されていません",
+  "Starting {{date}}": "{{date}} に開始",
+  "Ending {{date}}": "{{date}} に終了",
+  "Proposals in this round": "このラウンドの提案",
+  "{{from}} to {{to}}": "{{from}} から {{to}} まで",
+  "We're in Round #{{round}}": "ラウンド #{{round}} です"
 }

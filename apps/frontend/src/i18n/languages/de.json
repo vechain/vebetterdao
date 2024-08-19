@@ -627,5 +627,14 @@
   "Download template": "Vorlage herunterladen",
   "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "Das Banner für die VeWorld Mobile Wallet sollte 1024x576 oder ein Vielfaches davon sein (z. B. 2048x1152 oder 3072x1728).",
   "wallets voted": "Wallets abgestimmt",
-  "Wallets voted": "Wallets abgestimmt"
+  "Wallets voted": "Wallets abgestimmt",
+  "View all proposals": "Alle Vorschläge anzeigen",
+  "You have voted": "Du hast abgestimmt",
+  "You didn't vote yet": "Du hast noch nicht abgestimmt",
+  "Vote didn't start": "Abstimmung hat nicht begonnen",
+  "Starting {{date}}": "Beginn {{date}}",
+  "Ending {{date}}": "Ende {{date}}",
+  "Proposals in this round": "Vorschläge in dieser Runde",
+  "{{from}} to {{to}}": "{{from}} bis {{to}}",
+  "We're in Round #{{round}}": "Wir sind in Runde #{{round}}"
 }
