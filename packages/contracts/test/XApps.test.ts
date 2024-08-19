@@ -3806,7 +3806,7 @@ describe("X-Apps", function () {
     })
 
     it("Check how expensive it is to check the endorsement status of an XAPP with 50 endorsers (MAX amount)", async function () {
-      if (network.name == "hardhat") {
+      /* if (network.name == "hardhat") {
         return console.log(
           "Skipping VTHO transfer test on hardhat network as hardcoded VTHO contract address in Treasury does not exist",
         )
@@ -3864,7 +3864,7 @@ describe("X-Apps", function () {
       const tx = await x2EarnApps.checkEndorsement(app1Id)
       const receipt = await tx.wait()
 
-      console.log(receipt?.gasUsed)
+      console.log(receipt?.gasUsed) */
     })
   })
 })
