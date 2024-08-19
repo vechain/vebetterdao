@@ -35,7 +35,6 @@ export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFil
     const proposals = []
 
     for (const filter of selectedFilter) {
-      console.log("Checking filter: ", filter)
       proposals.push(
         ...proposalsEvents.created.filter((proposal, index) => {
           switch (filter) {

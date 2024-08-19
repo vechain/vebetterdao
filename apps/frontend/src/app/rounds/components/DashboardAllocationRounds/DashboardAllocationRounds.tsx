@@ -22,11 +22,7 @@ export const DashboardAllocationRounds = () => {
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(selectedRoundId)
 
-  const currentRoundIdProposals = useFilteredProposals([
-    StateFilter.Active,
-    ProposalFilter.InThisRound,
-    ProposalFilter.LookingForSupport,
-  ])
+  const currentRoundIdProposals = useFilteredProposals([StateFilter.Active, ProposalFilter.LookingForSupport])
 
   const otherProposals = useMemo(() => {
     if (selectedRoundId === currentRoundId) return []
