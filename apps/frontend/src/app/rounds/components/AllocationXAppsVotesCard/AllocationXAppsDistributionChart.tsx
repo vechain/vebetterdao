@@ -115,7 +115,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
               </Text>
             </Skeleton>
             <Text fontSize="14px" color="#6A6A6A" fontWeight={400}>
-              {t("Voters")}
+              {t("Wallets voted")}
             </Text>
           </VStack>
           <VStack spacing={0} align={["flex-start", "flex-start", "flex-end"]}>
