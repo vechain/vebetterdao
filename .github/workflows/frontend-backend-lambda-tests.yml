@@ -1,0 +1,116 @@
+name: Frontend, Backend, and Lambda Testing
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - testnet
+  push:
+    branches:
+      - main
+      - testnet
+
+jobs:
+  # Path filter jobs to detect changes in specific parts of the project
+  frontend-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.filter.outputs.src }}
+    steps:
+      - name: Check for Frontend changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            src:
+              - 'apps/frontend/**'
+
+  backend-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.filter.outputs.src }}
+    steps:
+      - name: Check for Backend changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            src:
+              - 'apps/backend/**'
+
+  lambda-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.filter.outputs.src }}
+    steps:
+      - name: Check for Lambda changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            src:
+              - 'packages/lambda/**'
+
+  # Frontend tests job
+  frontend-tests:
+    runs-on: ubuntu-latest
+    needs: frontend-changes
+    if: needs.frontend-changes.outputs.changes == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node v20
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run Frontend Tests
+        run: yarn test --filter=frontend
+
+  # Backend tests job
+  backend-tests:
+    runs-on: ubuntu-latest
+    needs: backend-changes
+    if: needs.backend-changes.outputs.changes == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node v20
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run Backend Tests
+        run: yarn test --filter=backend
+
+  # Lambda tests job
+  lambda-tests:
+    runs-on: ubuntu-latest
+    needs: lambda-changes
+    if: needs.lambda-changes.outputs.changes == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node v20
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run Lambda Tests
+        run: yarn test --filter=lambda
