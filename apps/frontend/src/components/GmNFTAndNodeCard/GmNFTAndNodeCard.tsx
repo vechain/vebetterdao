@@ -17,10 +17,11 @@ import { UilPolygon } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
 import { GMUpgradeButton } from "./components/GMUpgradeButton"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { NotConnectedWallet } from "./components/NotConnectedWallet"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { SwapB3trVot3 } from "./components/SwapB3trVot3"
+import { useRouter } from "next/navigation"
 
 export const GmNFTAndNodeCard = () => {
   const { t } = useTranslation()
@@ -60,10 +61,16 @@ export const GmNFTAndNodeCard = () => {
     )
   }, [isAbove1200, isXNodeAttachedToGM, isGMOwned])
 
+  const router = useRouter()
+  const goToGmNftPage = useCallback(() => {
+    router.push("/gm-nft")
+  }, [router])
+
   const { account } = useWallet()
   if (!account) {
     return <NotConnectedWallet />
   }
+
   return (
     <Card bg="#004CFC" rounded="12px" p="24px" color="white" position="relative" overflow={"hidden"}>
       <Box
@@ -112,7 +119,9 @@ export const GmNFTAndNodeCard = () => {
                 justify="space-between"
                 rounded="12px"
                 gap={6}
-                flex={1}>
+                flex={1}
+                cursor={"pointer"}
+                onClick={goToGmNftPage}>
                 <Skeleton isLoaded={!isGMLoading} w="68px" h="68px" rounded="8px">
                   <Image
                     src={gmImage}
