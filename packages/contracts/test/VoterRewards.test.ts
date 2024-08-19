@@ -26,7 +26,6 @@ import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import { B3TRGovernor, GalaxyMember, VoterRewards, VoterRewardsV1, XAllocationVoting } from "../typechain-types"
-import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./helpers"
 
 describe("VoterRewards", () => {
   describe("Contract parameters", () => {
@@ -225,6 +224,12 @@ describe("VoterRewards", () => {
       const { voterRewards, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
 
       await expect(voterRewards.connect(otherAccount).disableQuadraticRewarding(true)).to.be.reverted
+    })
+
+    it("Clock should return correct block number", async () => {
+      const { voterRewards } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await voterRewards.clock()).to.equal(await ethers.provider.getBlockNumber())
     })
   })
 
