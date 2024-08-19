@@ -44,7 +44,4 @@ export type ContractsConfig = {
   // Migration
   MIGRATION_ADDRESS: string
   MIGRATION_AMOUNT: bigint
-
-  // VERSION 2 - X2Earn
-  QUADRATIC_REWARDING_ENABLED: boolean
 }

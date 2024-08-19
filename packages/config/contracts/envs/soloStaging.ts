@@ -111,9 +111,5 @@ export function createSoloStagingConfig() {
     // Migration
     MIGRATION_ADDRESS: "0x865306084235Bf804c8Bba8a8d56890940ca8F0b", // 10th account from mnemonic of solo network
     MIGRATION_AMOUNT: BigInt("3750000000000000000000000"), // 3.75 million B3TR tokens from pilot show
-
-    // ------------------- Version 2 -------------------
-    // Voter Rewards
-    QUADRATIC_REWARDING_ENABLED: true,
   })
 }
