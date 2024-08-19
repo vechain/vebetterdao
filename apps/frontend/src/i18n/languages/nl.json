@@ -636,5 +636,6 @@
   "Ending {{date}}": "Eindigt {{date}}",
   "Proposals in this round": "Voorstellen in deze ronde",
   "{{from}} to {{to}}": "{{from}} tot {{to}}",
-  "We're in Round #{{round}}": "We zitten in ronde #{{round}}"
+  "We're in Round #{{round}}": "We zitten in ronde #{{round}}",
+  "Reset filters": "Filters opnieuw instellen"
 }

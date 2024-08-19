@@ -1,9 +1,9 @@
 import { useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
-import { ProposalFilter, StateFilter } from "@/app/proposals"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 import { useBreakpoints } from "@/hooks"
+import { ProposalFilter } from "@/store"
 import { Button, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 
@@ -22,7 +22,7 @@ export const DashboardAllocationRounds = () => {
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(selectedRoundId)
 
-  const currentRoundIdProposals = useFilteredProposals([StateFilter.Active, ProposalFilter.LookingForSupport])
+  const currentRoundIdProposals = useFilteredProposals([ProposalFilter.InThisRound, ProposalFilter.LookingForSupport])
 
   const otherProposals = useMemo(() => {
     if (selectedRoundId === currentRoundId) return []

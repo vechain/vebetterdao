@@ -636,5 +636,6 @@
   "Ending {{date}}": "结束日期 {{date}}",
   "Proposals in this round": "本轮提案",
   "{{from}} to {{to}}": "从 {{from}} 至 {{to}}",
-  "We're in Round #{{round}}": "我们在第 #{{round}} 轮"
+  "We're in Round #{{round}}": "我们在第 #{{round}} 轮",
+  "Reset filters": "重置筛选条件"
 }

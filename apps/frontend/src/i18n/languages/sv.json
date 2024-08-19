@@ -637,5 +637,6 @@
   "Proposals in this round": "Förslag i denna omgång",
   "{{from}} to {{to}}": "{{from}} till {{to}}",
   "We're in Round #{{round}}": "Vi är i omgång #{{round}}",
-  "Progress": "Framsteg"
+  "Progress": "Framsteg",
+  "Reset filters": "Återställ filter"
 }

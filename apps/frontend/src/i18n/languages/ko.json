@@ -636,5 +636,6 @@
   "Ending {{date}}": "{{date}} 종료",
   "Proposals in this round": "이번 라운드의 제안",
   "{{from}} to {{to}}": "{{from}}에서 {{to}}까지",
-  "We're in Round #{{round}}": "우리는 #{{round}} 라운드에 있습니다"
+  "We're in Round #{{round}}": "우리는 #{{round}} 라운드에 있습니다",
+  "Reset filters": "필터 재설정"
 }

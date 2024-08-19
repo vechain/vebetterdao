@@ -636,5 +636,6 @@
   "Ending {{date}}": "Kết thúc {{date}}",
   "Proposals in this round": "Các đề xuất trong vòng này",
   "{{from}} to {{to}}": "{{from}} đến {{to}}",
-  "We're in Round #{{round}}": "Chúng ta đang ở Vòng #{{round}}"
+  "We're in Round #{{round}}": "Chúng ta đang ở Vòng #{{round}}",
+  "Reset filters": "Đặt lại bộ lọc"
 }

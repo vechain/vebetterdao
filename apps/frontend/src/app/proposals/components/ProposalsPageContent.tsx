@@ -1,4 +1,4 @@
-import { useProposalClaimableUserDeposits } from "@/api"
+import { ProposalState, useProposalClaimableUserDeposits } from "@/api"
 import { ProposalInfoCard, JoinCommunity } from "@/components"
 import { VStack, HStack, Heading, Box, Button, Show, Spinner, Text } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
@@ -16,7 +16,7 @@ export const ProposalsPageContent = () => {
   const { t } = useTranslation()
 
   const { selectedFilter } = useProposalFilters()
-  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter ? [selectedFilter] : [])
+  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
 
   const userProposalDeposits = useProposalClaimableUserDeposits(account ?? "")
 
@@ -26,7 +26,7 @@ export const ProposalsPageContent = () => {
     }, BigInt(0))
   }, [userProposalDeposits])
 
-  const onNewCLick = useCallback(() => {
+  const onNewClick = useCallback(() => {
     if (!account) {
       open()
       return
@@ -34,6 +34,20 @@ export const ProposalsPageContent = () => {
 
     router.push("/proposals/new")
   }, [account, open, router])
+
+  //First active, then looking for support (pending + deposit not met), then upcoming (pending + deposit met)
+  const sortedProposals = useMemo(() => {
+    return filteredProposals.sort((a, b) => {
+      const getPriority = (proposal: (typeof filteredProposals)[0]) => {
+        if (proposal.state === ProposalState.Active) return 1
+        if (proposal.state === ProposalState.Pending && !proposal.isDepositReached) return 2 // lookingForSupport
+        if (proposal.state === ProposalState.Pending && proposal.isDepositReached) return 3 // upcoming
+        return 4 // Everything else
+      }
+
+      return getPriority(a) - getPriority(b)
+    })
+  }, [filteredProposals])
 
   if (isLoading)
     return (
@@ -55,7 +69,7 @@ export const ProposalsPageContent = () => {
           </Box>
           <Show below="sm">
             {filteredProposals.length > 0 && (
-              <Button onClick={onNewCLick} variant={"primaryAction"}>
+              <Button onClick={onNewClick} variant={"primaryAction"}>
                 {t("Create proposal")}
               </Button>
             )}
@@ -77,12 +91,12 @@ export const ProposalsPageContent = () => {
           alignSelf={"flex-start"}
           gap={4}
           w={{ base: "full", md: undefined }}>
-          {filteredProposals.map(proposal => (
+          {sortedProposals.map(proposal => (
             <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
           ))}
-          {filteredProposals.length === 0 && !isLoading && (
+          {sortedProposals.length === 0 && !isLoading && (
             <NoProposalsCard
-              onClick={onNewCLick}
+              onClick={onNewClick}
               buttonText={t("Create proposal")}
               description={
                 <Text fontSize={16} fontWeight={400} mt={2} color={"#6A6A6A"}>
@@ -99,7 +113,7 @@ export const ProposalsPageContent = () => {
             {userTotalDeposits > 0 && (
               <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDeposits} />
             )}
-            {filteredProposals.length > 0 && <CreateProposalCard />}
+            {sortedProposals.length > 0 && <CreateProposalCard />}
             <JoinCommunity />
           </VStack>
         </Show>
