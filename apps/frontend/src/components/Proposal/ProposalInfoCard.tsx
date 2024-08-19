@@ -46,7 +46,9 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
 
   const descriptionText = useMemo(() => {
     if (proposalMetadata.data) {
-      return proposalMetadata.data.shortDescription.length > 200 ? `${proposalMetadata.data.shortDescription.slice(0, 200)}...` : proposalMetadata.data.shortDescription
+      return proposalMetadata.data.shortDescription.length > 200
+        ? `${proposalMetadata.data.shortDescription.slice(0, 200)}...`
+        : proposalMetadata.data.shortDescription
     }
     return ""
   }, [proposalMetadata.data])
