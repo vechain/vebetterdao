@@ -31,6 +31,9 @@ import "./interfaces/IXAllocationVotingGovernor.sol";
 import "./interfaces/IEmissions.sol";
 import "./interfaces/IB3TR.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import "@openzeppelin/contracts/utils/types/Time.sol";
 
 /**
  * @title VoterRewards
@@ -56,6 +59,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * - Added a new initilization function to initialize the quadratic rewarding flag.
  */
 contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+  using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
+
   /// @notice The role that can register votes for rewards calculation.
   bytes32 public constant VOTE_REGISTRAR_ROLE = keccak256("VOTE_REGISTRAR_ROLE");
 
@@ -68,9 +73,6 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @notice The scaling factor for the rewards calculation.
   uint256 public constant SCALING_FACTOR = 1e6;
 
-  /// @notice The cycle number at which the quadratic rewarding was added.
-  uint256 private constant QUADRATIC_REWARDING_FLAG_ADDED = 0; // TODO: Update the cycle number @Agilulfo1820 @pierobassa @roisindowling before deployment
-
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
   struct VoterRewardsStorage {
     IGalaxyMember galaxyMember;
@@ -82,17 +84,8 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     mapping(uint256 => uint256) cycleToTotal;
     // cycle => voter => total weighted votes for the voter in the cycle
     mapping(uint256 cycle => mapping(address voter => uint256 total)) cycleToVoterToTotal;
-    // quadratic rewarding flag -> true if quadratic rewarding is enabled, false otherwise
-    bool quadraticRewardingFlag;
-    // mapping to the quadratic rewarding status for a cycle
-    mapping(uint256 => QuadraticRewardingRoundStatus) cycleToQuadraticRewardingStatus;
-  }
-
-  /// @notice The status of the quadratic rewarding for a specific cycle, state will be unknown at the start of the cycle, when first vote is registered, it will be set based on the quadraticRewardingFlag.
-  enum QuadraticRewardingRoundStatus {
-    Unknown,
-    Enabled,
-    Disabled
+    // checkpoints for the quadratic rewarding status for each cycle
+    Checkpoints.Trace208 quadraticRewardingDisabled;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.VoterRewards")) - 1)) & ~bytes32(uint256(0xff))
@@ -134,22 +127,13 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
   event LevelToMultiplierSet(uint256 indexed level, uint256 multiplier);
 
-  /// @notice Emitted when quadratic rewarding is enabled or disabled.
-  /// @param enabled - The flag to enable or disable quadratic rewarding.
-  event QuadraticRewarding(bool indexed enabled);
+  /// @notice Emits true if quadratic rewarding is disabled, false otherwise.
+  /// @param disabled - The flag to enable or disable quadratic rewarding.
+  event QuadraticRewardingDisabled(bool indexed disabled);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
-  }
-
-  /// @notice Reinitialize the contract implementation for version 2.
-  function initializeV2(bool _quadraticRewardingFlag) external reinitializer(2) {
-    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    // Set the quadratic rewarding flag to the specified value.
-    $.quadraticRewardingFlag = _quadraticRewardingFlag;
-    // Emit an event to log the quadratic rewarding flag.
-    emit QuadraticRewarding(_quadraticRewardingFlag);
   }
 
   /// @notice Upgrade the implementation of the VoterRewards contract.
@@ -192,16 +176,11 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // Set the scaled vote power to the total votes cast by the voter.
     uint256 scaledVotePower = votes;
 
-    // If the quadratic rewarding flag is unknown, set it based on the quadraticRewardingFlag.
-    // This will be set only once for the cycle, when the first vote is registered.
-    if ($.cycleToQuadraticRewardingStatus[cycle] == QuadraticRewardingRoundStatus.Unknown) {
-      $.cycleToQuadraticRewardingStatus[cycle] = $.quadraticRewardingFlag
-        ? QuadraticRewardingRoundStatus.Enabled
-        : QuadraticRewardingRoundStatus.Disabled;
-    }
+    // Get the block number the emission cycle started.
+    uint48 emissionCycleStartBlock = SafeCast.toUint48($.emissions.lastEmissionBlock());
 
-    // If quadratic rewarding is enabled, scale the vote power by 1e9 to counteract the square root operation on 1e18.
-    if ($.cycleToQuadraticRewardingStatus[cycle] == QuadraticRewardingRoundStatus.Enabled) {
+    // If quadratic rewarding is enabled, scale the vote power by 1e9 to counteract the square root operation on 1e18. (0: enabled, 1: disabled)
+    if ($.quadraticRewardingDisabled.upperLookupRecent(emissionCycleStartBlock) == 0) {
       scaledVotePower = votePower * 1e9;
     }
 
@@ -313,20 +292,28 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     return $.b3tr;
   }
 
-  /// @notice Check if quadratic rewarding is enabled.
-  /// @param cycle - The cycle in which the rewards are claimed.
-  function quadraticRewardingEnabled(uint256 cycle) external view returns (bool) {
+  /// @notice Check if quadratic rewarding is disabled at a specific block number.
+  /// @dev To check if quadratic rewarding was disabled for a cycle, use the block number the cycle started.
+  /// @param blockNumber - The block number to check the quadratic rewarding status.
+  /// @return true if quadratic rewarding is disabled, false otherwise.
+  function isQuadraticRewardingDisabledAtBlock(uint48 blockNumber) external view returns (bool) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-    if ($.cycleToQuadraticRewardingStatus[cycle] == QuadraticRewardingRoundStatus.Unknown) {
-      // If the cycle is before the quadratic rewarding flag was added, return true.
-      if (cycle < QUADRATIC_REWARDING_FLAG_ADDED) {
-        return true;
-      } else {
-        return $.quadraticRewardingFlag;
-      }
-    }
-    // Return true if quadratic rewarding is enabled, false otherwise.
-    return $.cycleToQuadraticRewardingStatus[cycle] == QuadraticRewardingRoundStatus.Enabled ? true : false;
+
+    // Check if quadratic rewarding is enabled or disabled at the block number.
+    return $.quadraticRewardingDisabled.upperLookupRecent(blockNumber) == 1; // 0: enabled, 1: disabled
+  }
+
+  /// @notice Check if quadratic rewarding is disabled for the current cycle.
+  /// @return true if quadratic rewarding is disabled, false otherwise.
+  function isQuadraticRewardingDisabledForCurrentCycle() external view returns (bool) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    // Get the block number the emission cycle started.
+    uint256 emissionCycleStartBlock = $.emissions.lastEmissionBlock();
+
+    uint208 currentStatus = $.quadraticRewardingDisabled.upperLookupRecent(SafeCast.toUint48(emissionCycleStartBlock));
+
+    // Check if quadratic rewarding is enabled or disabled for the current cycle.
+    return currentStatus == 1; // 0: enabled, 1: disabled
   }
 
   // ----------------- Setters ----------------- //
@@ -368,16 +355,17 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     $.emissions = IEmissions(_emissions);
   }
 
-  /// @notice Set the Quadratic Rewarding flag to enable or disable quadratic rewarding.
-  /// @dev Quadratic rewarding is enabled by default.
-  /// @param _quadraticRewardingFlag - The flag to enable or disable quadratic rewarding.
-  function setQuadraticRewarding(bool _quadraticRewardingFlag) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  /// @notice Disable quadratic rewarding for a specific cycle.
+  /// @dev This function is used to disable quadratic rewarding for a specific cycle by default is enabled.
+  /// @param _disableQuadraticRewarding - The flag to enable or disable quadratic rewarding, true to disable, false to enable.
+  function disableQuadraticRewarding(bool _disableQuadraticRewarding) external onlyRole(DEFAULT_ADMIN_ROLE) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
-    require($.quadraticRewardingFlag != _quadraticRewardingFlag, "VoterRewards: quadratic rewarding flag is the same");
+    // Set the quadratic rewarding flag -> 0: enabled, 1: disabled.
+    $.quadraticRewardingDisabled.push(clock(), _disableQuadraticRewarding ? 1 : 0);
 
-    $.quadraticRewardingFlag = _quadraticRewardingFlag;
-    emit QuadraticRewarding(_quadraticRewardingFlag);
+    // Emit an event to log the quadratic rewarding status.
+    emit QuadraticRewardingDisabled(_disableQuadraticRewarding);
   }
 
   /// @notice Returns the version of the contract
@@ -385,5 +373,10 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
     return "2";
+  }
+
+  /// @dev Clock used for flagging checkpoints.
+  function clock() public view virtual returns (uint48) {
+    return Time.blockNumber();
   }
 }
