@@ -269,7 +269,7 @@ export async function deployAll(config: ContractsConfig) {
         config.VOTER_REWARDS_LEVELS,
         config.VOTER_REWARDS_MULTIPLIER,
       ],
-      [config.QUADRATIC_REWARDING_ENABLED],
+      [],
     ],
     {
       versions: [undefined, 2],
