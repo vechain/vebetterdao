@@ -55,8 +55,10 @@ import "@openzeppelin/contracts/utils/types/Time.sol";
  * - CONTRACTS_ADDRESS_MANAGER_ROLE: The role that can set the addresses of the contracts used by the VoterRewards contract.
  *
  * ------------------ Version 2 Changes ------------------
- * - Added quadratic rewarding flag to enable or disable quadratic rewarding.
- * - Added a new initilization function to initialize the quadratic rewarding flag.
+ * - Added quadratic rewarding disabled checkpoints to disable quadratic rewarding for a specific cycle.
+ * - Added the clock function to get the current block number.
+ * - Added functions to check if quadratic rewarding is disabled at a specific block number or for the current cycle.
+ * - Added function to disable quadratic rewarding or re-enable it.
  */
 contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
