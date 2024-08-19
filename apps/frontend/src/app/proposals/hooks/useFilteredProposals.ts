@@ -1,6 +1,6 @@
 import { ProposalState, useAllProposalsState, useProposalsEvents, useAllProposalsDepositReached } from "@/api"
 import { useCallback, useMemo } from "react"
-import { ProposalFilter, StateFilter } from "../components"
+import { ProposalFilter, StateFilter } from "@/store"
 
 /**
  * Reacting to the changes in the useFiltersProposals store, this hook returns the filtered proposals.
@@ -39,8 +39,6 @@ export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFil
         ...proposalsEvents.created.filter((proposal, index) => {
           switch (filter) {
             case ProposalFilter.InThisRound:
-              return checkProposalState(proposal.proposalId, ProposalState.Active)
-            case StateFilter.Active:
               return checkProposalState(proposal.proposalId, ProposalState.Active)
             case StateFilter.Canceled:
               return checkProposalState(proposal.proposalId, ProposalState.Canceled)

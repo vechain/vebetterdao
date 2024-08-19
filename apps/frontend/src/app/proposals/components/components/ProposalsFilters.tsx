@@ -1,12 +1,10 @@
 import { useCallback, useState } from "react"
-import { HStack, Box, Text, StackProps, IconButton, Button } from "@chakra-ui/react"
+import { HStack, StackProps, IconButton, Button, Text, Stack } from "@chakra-ui/react"
 import { MdClose } from "react-icons/md"
-import { ProposalFilter, StateFilter } from "./types"
-import { useProposalFilters } from "@/store"
+import { useProposalFilters, ProposalFilter, StateFilter } from "@/store"
 
 const filters: Record<ProposalFilter, string[]> = {
   [ProposalFilter.State]: [
-    StateFilter.Active,
     StateFilter.Canceled,
     StateFilter.Defeated,
     StateFilter.Succeeded,
@@ -23,45 +21,31 @@ type Props = StackProps
 export const ProposalsFilters = (props: Props) => {
   const { selectedFilter, setSelectedFilter, clearFilter } = useProposalFilters()
 
-  const [selectedFilterOptions, setSelectedFilterOptions] = useState<string[]>()
+  // if the filter is selected, we show the options
+  const [isStateFilter, setIsStateFilter] = useState(false)
 
-  //TODO: DO we need the selectedOption state?
-  const [_selectedOption, setSelectedOption] = useState<string>()
+  const stateFilters = filters[ProposalFilter.State]
 
   const handleFilterClick = useCallback(
-    (filter: ProposalFilter) => {
-      if (filters[filter]?.length === 0) {
-        setSelectedFilter(filter)
-        setSelectedFilterOptions(undefined)
-      } else {
-        setSelectedFilterOptions(filters[filter])
-      }
-    },
-    [setSelectedFilter],
-  )
-
-  const handleOptionClick = useCallback(
-    (option: string) => {
-      setSelectedOption(option)
-      setSelectedFilterOptions(undefined)
-
-      if (Object.values(StateFilter).includes(option as StateFilter)) {
-        setSelectedFilter(option as StateFilter)
+    (filter: ProposalFilter | StateFilter) => {
+      const alreadySelected = selectedFilter?.includes(filter)
+      if (alreadySelected) {
+        setSelectedFilter(selectedFilter?.filter(f => f !== filter))
         return
       }
+      setSelectedFilter([...selectedFilter, filter])
     },
-    [setSelectedFilter],
+    [setSelectedFilter, selectedFilter],
   )
 
-  const handleClearFilter = useCallback(() => {
-    clearFilter()
-    setSelectedOption(undefined)
-    setSelectedFilterOptions(undefined)
-  }, [clearFilter])
-
   return (
-    <>
-      {!selectedFilter && !selectedFilterOptions && (
+    <Stack
+      direction={["column", "column", "row"]}
+      justify={["flex-start", "flex-start", "space-between"]}
+      align={["flex-end", "flex-end", "center"]}
+      spacing={4}
+      w="full">
+      {!isStateFilter ? (
         <HStack
           spacing={2}
           overflowX={{ base: "scroll", md: "hidden" }}
@@ -76,32 +60,45 @@ export const ProposalsFilters = (props: Props) => {
             msOverflowStyle: "none",
           }}
           {...props}>
-          {Object.keys(filters).map(filterKey => (
-            <Button
-              lineHeight="inherit"
-              h="auto"
-              minW={"auto"}
-              variant="ghost"
-              px={4}
-              py={3}
-              borderRadius={78}
-              key={filterKey}
-              bg={"white"}
-              color={"black"}
-              onClick={() => handleFilterClick(filterKey as ProposalFilter)}
-              borderWidth={1}
-              borderColor={"#EFEFEF"}
-              _hover={{
-                bg: "#EFEFEF",
-              }}>
-              <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
-                {filterKey}
-              </Text>
-            </Button>
-          ))}
+          {Object.keys(filters).map(filterKey => {
+            const isStateButton = filterKey === ProposalFilter.State
+
+            const onClick = () => {
+              if (isStateButton) {
+                setIsStateFilter(true)
+              } else {
+                handleFilterClick(filterKey as ProposalFilter)
+              }
+            }
+
+            const isSelected = selectedFilter?.includes(filterKey as ProposalFilter)
+
+            return (
+              <Button
+                lineHeight="inherit"
+                h="auto"
+                minW={"auto"}
+                variant="ghost"
+                px={4}
+                py={3}
+                borderRadius={78}
+                key={filterKey}
+                bg={isSelected ? "black" : "white"}
+                color={isSelected ? "white" : "black"}
+                onClick={onClick}
+                borderWidth={1}
+                borderColor={"#EFEFEF"}
+                _hover={{
+                  bg: isSelected ? "#1a1a1a" : "#EFEFEF",
+                }}>
+                <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
+                  {filterKey}
+                </Text>
+              </Button>
+            )
+          })}
         </HStack>
-      )}
-      {selectedFilterOptions && (
+      ) : (
         <HStack spacing={2} w="full" align={"center"}>
           <IconButton
             lineHeight="inherit"
@@ -114,7 +111,7 @@ export const ProposalsFilters = (props: Props) => {
             borderRadius={"full"}
             borderWidth={1}
             borderColor={"#EFEFEF"}
-            onClick={handleClearFilter}
+            onClick={() => setIsStateFilter(false)}
             icon={<MdClose size={18} />}
           />
 
@@ -130,64 +127,39 @@ export const ProposalsFilters = (props: Props) => {
               msOverflowStyle: "none",
             }}
             maxW={{ base: "350px", md: "100%" }}>
-            {selectedFilterOptions?.map(optionKey => (
-              <Button
-                lineHeight="inherit"
-                h="auto"
-                minW={"auto"}
-                variant={"ghost"}
-                px={4}
-                py={3}
-                borderRadius={78}
-                key={optionKey}
-                bg={"white"}
-                color={"black"}
-                onClick={() => handleOptionClick(optionKey)}
-                borderWidth={1}
-                borderColor={"#EFEFEF"}
-                _hover={{
-                  bg: "#EFEFEF",
-                }}>
-                <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
-                  {optionKey}
-                </Text>
-              </Button>
-            ))}
+            {stateFilters?.map(optionKey => {
+              const isSelected = selectedFilter?.includes(optionKey as StateFilter)
+
+              return (
+                <Button
+                  lineHeight="inherit"
+                  h="auto"
+                  minW={"auto"}
+                  variant={"ghost"}
+                  px={4}
+                  py={3}
+                  borderRadius={78}
+                  key={optionKey}
+                  bg={isSelected ? "black" : "white"}
+                  color={isSelected ? "white" : "black"}
+                  onClick={() => handleFilterClick(optionKey as StateFilter)}
+                  borderWidth={1}
+                  borderColor={"#EFEFEF"}
+                  _hover={{
+                    bg: isSelected ? "#1a1a1a" : "#EFEFEF",
+                  }}>
+                  <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
+                    {optionKey}
+                  </Text>
+                </Button>
+              )
+            })}
           </HStack>
         </HStack>
       )}
-      {selectedFilter && !selectedFilterOptions?.length && (
-        <HStack spacing={2} w="full">
-          <IconButton
-            h="auto"
-            minW={"auto"}
-            lineHeight="inherit"
-            variant={"ghost"}
-            aria-label="Clear filter"
-            p={3}
-            bg={"white"}
-            borderRadius={"full"}
-            borderWidth={1}
-            borderColor={"#EFEFEF"}
-            onClick={handleClearFilter}
-            icon={<MdClose size={18} />}
-          />
-          <HStack spacing={0} borderWidth={1} borderColor={"#EFEFEF"} borderRadius={78}>
-            <Box px={4} py={3} borderRadius={78} bg={"black"} color={"white"}>
-              <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
-                {selectedFilter}
-              </Text>
-            </Box>
-            {/* {selectedOption && (
-              <Box px={4} py={3} borderRadius={78} color={"black"}>
-                <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
-                  {selectedOption}
-                </Text>
-              </Box>
-            )} */}
-          </HStack>
-        </HStack>
-      )}
-    </>
+      <Button variant="link" colorScheme="primary" onClick={clearFilter}>
+        Reset filters
+      </Button>
+    </Stack>
   )
 }

@@ -16,7 +16,7 @@ export const ProposalsPageContent = () => {
   const { t } = useTranslation()
 
   const { selectedFilter } = useProposalFilters()
-  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter ? [selectedFilter] : [])
+  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
 
   const userProposalDeposits = useProposalClaimableUserDeposits(account ?? "")
 
