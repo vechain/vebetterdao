@@ -636,5 +636,6 @@
   "Ending {{date}}": "{{date}} tarihinde bitiyor",
   "Proposals in this round": "Bu turdaki teklifler",
   "{{from}} to {{to}}": "{{from}} ile {{to}} arası",
-  "We're in Round #{{round}}": "Şu an {{round}}. turdayız"
+  "We're in Round #{{round}}": "Şu an {{round}}. turdayız",
+  "Reset filters": "Filtreleri sıfırla"
 }
