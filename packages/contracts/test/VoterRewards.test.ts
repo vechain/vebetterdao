@@ -184,6 +184,48 @@ describe("VoterRewards", () => {
         voterRewards.connect(otherAccount).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), otherAccount.address),
       ).to.be.reverted
     })
+
+    it("Should be able to disable Quadratic Rewards", async () => {
+      const { voterRewards, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await voterRewards.isQuadraticRewardingDisabledAtBlock(await ethers.provider.getBlockNumber())).to.eql(
+        false,
+      )
+
+      const tx = await voterRewards.connect(owner).disableQuadraticRewarding(true)
+
+      const receipt = await tx.wait()
+      if (!receipt) throw new Error("No receipt")
+
+      let events = receipt?.logs
+
+      let decodedEvents = events?.map(event => {
+        return voterRewards.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      const event = decodedEvents.find(event => event?.name === "QuadraticRewardingDisabled")
+
+      expect(event).to.not.equal(undefined)
+
+      expect(await voterRewards.isQuadraticRewardingDisabledAtBlock(await ethers.provider.getBlockNumber())).to.eql(
+        true,
+      )
+    })
+
+    it("Quadratic Rewards should be enabled by default", async () => {
+      const { voterRewards } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      expect(await voterRewards.isQuadraticRewardingDisabledAtBlock(1)).to.eql(false)
+    })
+
+    it("Only admin should be able to disable Quadratic Rewards", async () => {
+      const { voterRewards, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await expect(voterRewards.connect(otherAccount).disableQuadraticRewarding(true)).to.be.reverted
+    })
   })
 
   describe("Contract upgradeablity", () => {
@@ -279,14 +321,6 @@ describe("VoterRewards", () => {
           multipliers,
         ),
       ).to.be.reverted
-    })
-
-    it("Should not be able to initialize the V2 contract after already being initialized", async function () {
-      const { voterRewards } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      await expect(voterRewards.initializeV2(true)).to.be.reverted
     })
 
     it("Should not be able to deploy proxy with galaxy member address as zero address", async function () {
@@ -400,7 +434,6 @@ describe("VoterRewards", () => {
         owner,
         emissions,
         b3tr,
-        minterAccount,
         timeLock,
         galaxyMember,
         vot3,
@@ -601,7 +634,7 @@ describe("VoterRewards", () => {
         "VoterRewardsV1",
         "VoterRewards",
         await voterRewardsV1.getAddress(),
-        [true],
+        [],
         {
           version: 2,
         },
@@ -948,8 +981,9 @@ describe("VoterRewards", () => {
         x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
-        config: { ...config, QUADRATIC_REWARDING_ENABLED: false },
       })
+
+      await voterRewards.connect(owner).disableQuadraticRewarding(true)
 
       await x2EarnApps
         .connect(owner)
@@ -1157,8 +1191,8 @@ describe("VoterRewards", () => {
 
       const roundId = await xAllocationVoting.currentRoundId()
 
-      const isenabled = await voterRewards.quadraticRewardingEnabled(roundId)
-      expect(isenabled).to.equal(true)
+      const isdisabled = await voterRewards.isQuadraticRewardingDisabledForCurrentCycle()
+      expect(isdisabled).to.equal(false)
 
       expect(roundId).to.equal(1)
 
@@ -2170,7 +2204,7 @@ describe("VoterRewards", () => {
 
       const cycle = await governor.proposalStartRound(proposalId)
 
-      expect(await voterRewards.quadraticRewardingEnabled(cycle)).to.be.true
+      expect(await voterRewards.isQuadraticRewardingDisabledForCurrentCycle()).to.be.false
 
       const proposalState = await waitForProposalToBeActive(proposalId)
 
@@ -2411,7 +2445,7 @@ describe("VoterRewards", () => {
       await bootstrapAndStartEmissions() // round 1
 
       // Quadratic rewarding enabled
-      expect(await voterRewards.quadraticRewardingEnabled(1)).to.be.true
+      expect(await voterRewards.isQuadraticRewardingDisabledForCurrentCycle()).to.be.false
 
       let nextCycle = await emissions.nextCycle() // next cycle round 2
 
@@ -2527,9 +2561,10 @@ describe("VoterRewards", () => {
           ...config,
           EMISSIONS_CYCLE_DURATION: 200,
           B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 0,
-          QUADRATIC_REWARDING_ENABLED: false,
         },
       })
+
+      await voterRewards.disableQuadraticRewarding(true)
 
       const galaxyMember = (await deployProxy("GalaxyMember", [
         {
@@ -2576,7 +2611,7 @@ describe("VoterRewards", () => {
       await bootstrapAndStartEmissions() // round 1
 
       // Quadratic rewarding disabled
-      expect(await voterRewards.quadraticRewardingEnabled(1)).to.be.false
+      expect(await voterRewards.isQuadraticRewardingDisabledForCurrentCycle()).to.be.true
 
       let nextCycle = await emissions.nextCycle() // next cycle round 2
 
@@ -2764,10 +2799,13 @@ describe("VoterRewards", () => {
       expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
       // Disable quadratic rewarding mid round
-      await voterRewards.setQuadraticRewarding(false)
+      await voterRewards.disableQuadraticRewarding(true)
 
       // Quadratic rewarding should still be enabled for the current round
-      expect(await voterRewards.quadraticRewardingEnabled(2)).to.be.true
+      expect(await voterRewards.isQuadraticRewardingDisabledForCurrentCycle()).to.be.false
+
+      // Flag should be set to enable quadratic rewarding for the next round
+      expect(await voterRewards.isQuadraticRewardingDisabledAtBlock(await ethers.provider.getBlockNumber())).to.be.true
 
       // Vote on apps for the second round
       await voteOnApps(
@@ -2931,10 +2969,13 @@ describe("VoterRewards", () => {
       expect(await galaxyMember.getHighestLevel(voter1.address)).to.equal(5)
 
       // Disable quadratic rewarding mid round
-      await voterRewards.setQuadraticRewarding(true)
+      await voterRewards.disableQuadraticRewarding(true)
 
       // Quadratic rewarding should still be disabled for the current round
-      expect(await voterRewards.quadraticRewardingEnabled(2)).to.be.false
+      expect(await voterRewards.isQuadraticRewardingDisabledForCurrentCycle()).to.be.false
+
+      // Flag should be set to enable quadratic rewarding for the next round
+      expect(await voterRewards.isQuadraticRewardingDisabledAtBlock(await ethers.provider.getBlockNumber())).to.be.true
 
       // Vote on apps for the second round
       await voteOnApps(
