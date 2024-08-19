@@ -1,12 +1,13 @@
 import { useProposalClaimableUserDeposits } from "@/api"
 import { ProposalInfoCard, JoinCommunity } from "@/components"
-import { VStack, HStack, Heading, Box, Button, Show, Spinner } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Box, Button, Show, Spinner, Text } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
+import { useProposalFilters } from "@/store"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -14,7 +15,8 @@ export const ProposalsPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
 
-  const { filteredProposals, isLoading } = useFilteredProposals()
+  const { selectedFilter } = useProposalFilters()
+  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter ? [selectedFilter] : [])
 
   const userProposalDeposits = useProposalClaimableUserDeposits(account ?? "")
 
@@ -78,7 +80,19 @@ export const ProposalsPageContent = () => {
           {filteredProposals.map(proposal => (
             <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
           ))}
-          {filteredProposals.length === 0 && !isLoading && <NoProposalsCard />}
+          {filteredProposals.length === 0 && !isLoading && (
+            <NoProposalsCard
+              onClick={onNewCLick}
+              buttonText={t("Create proposal")}
+              description={
+                <Text fontSize={16} fontWeight={400} mt={2} color={"#6A6A6A"}>
+                  {t("Have an idea for something that could improve the experience in VeBetterDAO? ")}
+                  <b style={{ color: "black" }}>{t("Create a proposal")}</b>
+                  {t(" and let the community vote to make it happen!")}
+                </Text>
+              }
+            />
+          )}
         </VStack>
         <Show above="sm">
           <VStack flex={2} alignSelf="flex-start" spacing={6} position={"sticky"} top={24}>

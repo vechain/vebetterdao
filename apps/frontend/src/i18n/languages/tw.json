@@ -627,5 +627,14 @@
   "Download template": "下載模板",
   "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorld 手機錢包橫幅應為 1024x576 或其倍數（例如：2048x1152 或 3072x1728）。",
   "wallets voted": "已投票的錢包",
-  "Wallets voted": "已投票的錢包"
+  "Wallets voted": "已投票的錢包",
+  "View all proposals": "查看所有提案",
+  "You have voted": "你已投票",
+  "You didn't vote yet": "你還沒投票",
+  "Vote didn't start": "投票尚未開始",
+  "Starting {{date}}": "開始於 {{date}}",
+  "Ending {{date}}": "結束於 {{date}}",
+  "Proposals in this round": "本輪提案",
+  "{{from}} to {{to}}": "從 {{from}} 到 {{to}}",
+  "We're in Round #{{round}}": "我們在第 #{{round}} 輪"
 }

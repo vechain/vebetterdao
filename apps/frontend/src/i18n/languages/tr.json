@@ -627,5 +627,14 @@
   "Download template": "Şablonu indir",
   "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "VeWorld mobil cüzdan afişi 1024x576 veya bunun katları olmalıdır (örneğin: 2048x1152 veya 3072x1728).",
   "wallets voted": "cüzdanlar oy verdi",
-  "Wallets voted": "Cüzdanlar oy verdi"
+  "Wallets voted": "Cüzdanlar oy verdi",
+  "View all proposals": "Tüm teklifleri görüntüle",
+  "You have voted": "Oy kullandınız",
+  "You didn't vote yet": "Henüz oy kullanmadınız",
+  "Vote didn't start": "Oylama başlamadı",
+  "Starting {{date}}": "{{date}} tarihinde başlıyor",
+  "Ending {{date}}": "{{date}} tarihinde bitiyor",
+  "Proposals in this round": "Bu turdaki teklifler",
+  "{{from}} to {{to}}": "{{from}} ile {{to}} arası",
+  "We're in Round #{{round}}": "Şu an {{round}}. turdayız"
 }

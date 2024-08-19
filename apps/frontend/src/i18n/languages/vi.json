@@ -627,5 +627,14 @@
   "Download template": "Tải mẫu về",
   "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "Biểu ngữ ví di động VeWorld nên có kích thước 1024x576 hoặc bội số của nó (ví dụ: 2048x1152 hoặc 3072x1728).",
   "wallets voted": "ví đã bỏ phiếu",
-  "Wallets voted": "Ví đã bỏ phiếu"
+  "Wallets voted": "Ví đã bỏ phiếu",
+  "View all proposals": "Xem tất cả các đề xuất",
+  "You have voted": "Bạn đã bỏ phiếu",
+  "You didn't vote yet": "Bạn chưa bỏ phiếu",
+  "Vote didn't start": "Bỏ phiếu chưa bắt đầu",
+  "Starting {{date}}": "Bắt đầu {{date}}",
+  "Ending {{date}}": "Kết thúc {{date}}",
+  "Proposals in this round": "Các đề xuất trong vòng này",
+  "{{from}} to {{to}}": "{{from}} đến {{to}}",
+  "We're in Round #{{round}}": "Chúng ta đang ở Vòng #{{round}}"
 }

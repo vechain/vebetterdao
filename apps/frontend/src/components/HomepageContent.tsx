@@ -1,4 +1,4 @@
-import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds"
+import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
 import { Grid, GridItem, VStack } from "@chakra-ui/react"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { DashboardXApps } from "./DashboardXApps"

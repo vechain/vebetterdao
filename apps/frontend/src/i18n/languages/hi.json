@@ -627,5 +627,14 @@
   "Download template": "टेम्पलेट डाउनलोड करें",
   "VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).": "वेवर्ल्ड मोबाइल वॉलेट बैनर 1024x576 या उसके गुणक (जैसे: 2048x1152 या 3072x1728) होना चाहिए।",
   "wallets voted": "वोट किए गए वॉलेट",
-  "Wallets voted": "वोट किए गए वॉलेट"
+  "Wallets voted": "वोट किए गए वॉलेट",
+  "View all proposals": "सभी प्रस्ताव देखें",
+  "You have voted": "आपने वोट दिया है",
+  "You didn't vote yet": "आपने अभी तक वोट नहीं दिया है",
+  "Vote didn't start": "वोटिंग शुरू नहीं हुई",
+  "Starting {{date}}": "आरंभ हो रहा {{date}}",
+  "Ending {{date}}": "समाप्त हो रहा {{date}}",
+  "Proposals in this round": "इस दौर में प्रस्ताव",
+  "{{from}} to {{to}}": "{{from}} से {{to}}",
+  "We're in Round #{{round}}": "हम राउंड #{{round}} में हैं"
 }
