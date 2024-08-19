@@ -273,15 +273,9 @@ export const getOrDeployContractInstances = async ({
     multipliers,
   ])) as VoterRewardsV1
 
-  const voterRewards = (await upgradeProxy(
-    "VoterRewardsV1",
-    "VoterRewards",
-    await voterRewardsV1.getAddress(),
-    [config.QUADRATIC_REWARDING_ENABLED],
-    {
-      version: 2,
-    },
-  )) as VoterRewards
+  const voterRewards = (await upgradeProxy("VoterRewardsV1", "VoterRewards", await voterRewardsV1.getAddress(), [], {
+    version: 2,
+  })) as VoterRewards
 
   // Set vote 2 earn (VoterRewards deployed contract) address in emissions
   await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
