@@ -44,6 +44,8 @@ interface IVoterRewards {
 
   event LevelToMultiplierSet(uint256 indexed level, uint256 multiplier);
 
+  event QuadraticRewardingDisabled(bool indexed disabled);
+
   function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
 
   function UPGRADER_ROLE() external view returns (bytes32);
@@ -102,7 +104,9 @@ interface IVoterRewards {
 
   function initializeV2(bool _quadraticRewardingFlag) external;
 
-  function quadraticRewardingEnabled(uint256 cycle) external view returns (bool);
+  function isQuadraticRewardingDisabledAtBlock(uint48 blockNumber) external view returns (bool);
 
-  function setQuadraticRewarding(bool _quadraticRewardingFlag) external;
+  function isQuadraticRewardingDisabledForCurrentCycle() external view returns (bool);
+
+  function disableQuadraticRewarding(bool _disableQuadraticRewarding) external;
 }
