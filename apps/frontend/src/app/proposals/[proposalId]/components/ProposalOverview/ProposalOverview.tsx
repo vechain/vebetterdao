@@ -59,7 +59,7 @@ export const ProposalOverview = () => {
               </Skeleton>
               <Spacer h={"24px"} />
               <SkeletonText isLoaded={!proposal.isDescriptionLoading}>
-                <Text color="#252525" noOfLines={6}>
+                <Text color="gray.500" fontSize={["sm", "md"]}>
                   {proposal.description}
                 </Text>
               </SkeletonText>
@@ -101,9 +101,9 @@ export const ProposalOverview = () => {
               <CastProposalVoteButton />
             </Stack>
           </VStack>
-          <Skeleton isLoaded={!proposal.isVotesLoading && !proposal.isStateLoading} rounded="8px" flex={1}>
+          <VStack flex={1} h="full">
             <ProposalOverviewVotes />
-          </Skeleton>
+          </VStack>
         </Stack>
       </CardBody>
     </Card>
