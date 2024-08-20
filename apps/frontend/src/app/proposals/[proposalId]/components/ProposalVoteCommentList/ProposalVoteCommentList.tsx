@@ -3,7 +3,7 @@ import { Card, CardBody, Heading, Spinner, Text, VStack } from "@chakra-ui/react
 import { t } from "i18next"
 import { ProposalVoteComment } from "./components/ProposalVoteComment"
 import InfiniteScroll from "react-infinite-scroll-component"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useProposalDetail } from "../../hooks"
 
 export const ProposalVoteCommentList = () => {
@@ -11,14 +11,22 @@ export const ProposalVoteCommentList = () => {
 
   const [visibleComments, setVisibleComments] = useState<ProposalVoteEvent[]>([])
 
+  const sortedComments = useMemo(
+    () =>
+      proposal.votesWithComment?.sort((a, b) => {
+        return b.blockMeta.blockNumber - a.blockMeta.blockNumber
+      }) ?? [],
+    [proposal.votesWithComment],
+  )
+
   const loadData = useCallback(() => {
     setVisibleComments(prev => [
       ...prev,
-      ...(proposal.votesWithComment?.slice(visibleComments.length, visibleComments.length + 10) ?? []),
+      ...(sortedComments.slice(visibleComments.length, visibleComments.length + 10) ?? []),
     ])
   }, [proposal.votesWithComment, visibleComments.length])
 
-  if (!proposal.votesWithComment?.length) return null
+  if (!sortedComments.length) return null
   return (
     <Card variant="baseWithBorder">
       <CardBody>
@@ -28,10 +36,15 @@ export const ProposalVoteCommentList = () => {
           </Heading>
           <Text color="#7E7E7E">{t("Users who have made a comment along with their vote")}</Text>
           <InfiniteScroll
-            dataLength={proposal.votesWithComment?.length}
+            dataLength={visibleComments.length}
             next={loadData}
-            hasMore={visibleComments.length < proposal.votesWithComment.length}
-            loader={<Spinner size="md" alignSelf={"center"} />}>
+            hasMore={visibleComments.length < sortedComments.length}
+            loader={<Spinner size="md" alignSelf={"center"} />}
+            endMessage={
+              <Heading size="md" textAlign={"center"} mt={4}>
+                {t("You reached the end!")}
+              </Heading>
+            }>
             <VStack alignItems="stretch">
               {visibleComments?.map(vote => <ProposalVoteComment key={vote.account} vote={vote} />)}
             </VStack>
