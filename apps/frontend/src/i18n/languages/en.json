@@ -1,4 +1,10 @@
 {
+  "Defeated": "Defeated",
+  "Succeeded": "Succeeded",
+  "Queued": "Queued",
+  "Executed": "Executed",
+  "State": "State",
+  "In this round": "In this round",
   "You reached the end!": "You reached the end!",
   "Reset filters": "Reset filters",
   "View all proposals": "View all proposals",
