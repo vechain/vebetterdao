@@ -102,7 +102,7 @@ export const ProposalOverview = () => {
             </Stack>
           </VStack>
           <VStack flex={1} h="full">
-            <ProposalOverviewVotes />
+            <ProposalOverviewVotes proposalId={proposal.id} />
           </VStack>
         </Stack>
       </CardBody>

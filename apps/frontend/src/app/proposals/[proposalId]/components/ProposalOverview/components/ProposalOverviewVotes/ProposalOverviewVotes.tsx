@@ -1,4 +1,4 @@
-import { ProposalState } from "@/api"
+import { ProposalState, useProposalState, useProposalVotes } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
 import { Box, Image, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
@@ -9,10 +9,16 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 
-export const ProposalOverviewVotes = () => {
-  const { proposal } = useProposalDetail()
+type Props = {
+  proposalId: string
+}
+export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { t } = useTranslation()
 
+  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotes(proposalId)
+  const { data: proposalState } = useProposalState(proposalId)
+
+  const { proposal } = useProposalDetail()
   const [_, setSeconds] = useState(0)
 
   useEffect(() => {
@@ -22,9 +28,7 @@ export const ProposalOverviewVotes = () => {
     return () => clearInterval(interval)
   }, [])
 
-  const votesAreLoading = proposal.proposalVotesQuery.isLoading || proposal.proposalVoteEventsQuery.isLoading
-
-  switch (proposal.state) {
+  switch (proposalState) {
     case ProposalState.DepositNotMet:
       return (
         <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
@@ -83,36 +87,42 @@ export const ProposalOverviewVotes = () => {
       }
       return (
         <ResponsiveCard
-          cardProps={{ variant: "filled", w: "full", flex: 1, borderColor: borderColorMap, borderWidth: 1 }}>
+          cardProps={{
+            variant: "filled",
+            w: "full",
+            flex: 1,
+            borderColor: borderColorMap[proposalState],
+            borderWidth: 1,
+          }}>
           <VStack alignItems={"stretch"} w="full" justify={"space-between"}>
             <Text color="#000000" fontWeight={"700"} fontSize="20px">
               {t("Real time votes")}
             </Text>
             <VStack alignItems={"stretch"} gap={6}>
               <ProposalVotesProgressBar
-                isLoading={votesAreLoading}
+                isLoading={proposalVotesLoading}
                 text={t("Votes for")}
-                percentage={proposal.forPercentage}
+                percentage={proposalVotes?.forPercentage ?? 0}
                 color="#38BF66"
                 icon={<UilThumbsUp size="16px" color="#38BF66" />}
               />
               <ProposalVotesProgressBar
-                isLoading={votesAreLoading}
+                isLoading={proposalVotesLoading}
                 text={t("Against")}
-                percentage={proposal.againstPercentage}
+                percentage={proposalVotes?.againstPercentage ?? 0}
                 color="#D23F63"
                 icon={<UilThumbsDown size="16px" color="#D23F63" />}
               />
               <ProposalVotesProgressBar
-                isLoading={votesAreLoading}
+                isLoading={proposalVotesLoading}
                 text={t("Abstained")}
-                percentage={proposal.abstainPercentage}
+                percentage={proposalVotes?.abstainPercentage ?? 0}
                 color="#B59525"
                 icon={<Image src={"/images/abstained.svg"} alt="abstained" />}
               />
             </VStack>
             <Box mt={2}>
-              <ProposalVotesResults proposalId={proposal.id} />
+              <ProposalVotesResults proposalId={proposalId} />
             </Box>
           </VStack>
         </ResponsiveCard>
