@@ -4,7 +4,7 @@ import { VoteIcon } from "@/components"
 import { Button } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 export const CastProposalVoteButton = () => {
@@ -13,6 +13,10 @@ export const CastProposalVoteButton = () => {
   const router = useRouter()
   const { account } = useWallet()
   const { open: openConnectModal } = useWalletModal()
+
+  const hasVotesAtSnapshot = useMemo(() => {
+    return Number(proposal.userVot3OnSnapshot ?? 0) > 0
+  }, [proposal])
 
   const goToProposalVote = useCallback(() => {
     router.push(`/proposals/${proposal.id}/vote`)
@@ -26,12 +30,16 @@ export const CastProposalVoteButton = () => {
     goToProposalVote()
   }, [account, goToProposalVote, openConnectModal])
 
-  if (proposal.state === ProposalState.Active && !proposal.hasUserVoted) {
+  const shouldSeeVoteButton = useMemo(() => {
+    return proposal.state === ProposalState.Active && !!account && !proposal.hasUserVoted && hasVotesAtSnapshot
+  }, [proposal, account, hasVotesAtSnapshot])
+
+  if (shouldSeeVoteButton)
     return (
       <Button leftIcon={<VoteIcon boxSize={"16px"} color="white" />} onClick={handleClick} variant="primaryAction">
         {t("Cast your vote")}
       </Button>
     )
-  }
+
   return null
 }
