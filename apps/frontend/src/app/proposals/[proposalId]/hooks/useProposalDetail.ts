@@ -219,6 +219,7 @@ export const useProposalDetailById = (proposalId: string) => {
       votingStartBlock,
       votingEndBlock,
       proposalVotesQuery: proposalVotes,
+      proposalVoteEventsQuery: proposalVoteEvents,
     }
 
     const mock = {}

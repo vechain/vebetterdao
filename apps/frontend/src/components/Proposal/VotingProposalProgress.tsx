@@ -165,6 +165,8 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
     }
   }
 
+  if (proposalState === ProposalState.Canceled) return null
+
   return (
     <Card variant="filledWithBorder" w="full">
       <CardBody>{getProposalData()}</CardBody>
