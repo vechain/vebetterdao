@@ -7,7 +7,7 @@ import { deployProxy } from "../scripts/helpers"
 import { endorseApp } from "./helpers/xnodes"
 import { X2EarnRewardsPoolV1 } from "../typechain-types"
 
-describe("X2EarnRewardsPool", function () {
+describe("X2EarnRewardsPool - @shard2", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {

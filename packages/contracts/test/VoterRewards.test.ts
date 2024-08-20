@@ -31,7 +31,7 @@ import { GalaxyMember, VoterRewards, VoterRewardsV1 } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { endorseApp } from "./helpers/xnodes"
 
-describe("VoterRewards", () => {
+describe("VoterRewards - @shard2", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { voterRewards, owner, galaxyMember, emissions } = await getOrDeployContractInstances({ forceDeploy: true })

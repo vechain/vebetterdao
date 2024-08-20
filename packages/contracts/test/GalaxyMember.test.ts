@@ -27,7 +27,7 @@ import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import { GalaxyMember, GalaxyMemberV1 } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 
-describe("Galaxy Member", () => {
+describe("Galaxy Member - @shard1", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })

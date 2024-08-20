@@ -28,7 +28,7 @@ import { XAllocationVoting, XAllocationVotingV1 } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { endorseApp } from "./helpers/xnodes"
 
-describe("X-Allocation Voting", function () {
+describe("X-Allocation Voting - @shard2", function () {
   describe("Deployment", function () {
     it("Admins and addresses should be set correctly", async function () {
       const { xAllocationVoting, owner, timeLock, emissions, x2EarnApps } = await getOrDeployContractInstances({

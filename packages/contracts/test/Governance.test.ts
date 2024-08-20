@@ -29,7 +29,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor, B3TRGovernor__factory } from "../typechain-types"
 import { deployProxy } from "../scripts/helpers"
 
-describe("Governor and TimeLock", function () {
+describe("Governor and TimeLock - @shard1", function () {
   describe("Governor deployment", function () {
     it("Should set constructors correctly", async function () {
       const config = createLocalConfig()
