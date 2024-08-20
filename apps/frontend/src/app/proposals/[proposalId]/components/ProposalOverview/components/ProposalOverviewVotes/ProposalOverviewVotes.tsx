@@ -22,6 +22,8 @@ export const ProposalOverviewVotes = () => {
     return () => clearInterval(interval)
   }, [])
 
+  const votesAreLoading = proposal.proposalVotesQuery.isLoading || proposal.proposalVoteEventsQuery.isLoading
+
   switch (proposal.state) {
     case ProposalState.DepositNotMet:
       return (
@@ -93,18 +95,21 @@ export const ProposalOverviewVotes = () => {
             </Text>
             <VStack alignItems={"stretch"} gap={6}>
               <ProposalVotesProgressBar
+                isLoading={votesAreLoading}
                 text={t("Votes for")}
                 percentage={proposal.forPercentage}
                 color="#38BF66"
                 icon={<UilThumbsUp size="16px" color="#38BF66" />}
               />
               <ProposalVotesProgressBar
+                isLoading={votesAreLoading}
                 text={t("Against")}
                 percentage={proposal.againstPercentage}
                 color="#D23F63"
                 icon={<UilThumbsDown size="16px" color="#D23F63" />}
               />
               <ProposalVotesProgressBar
+                isLoading={votesAreLoading}
                 text={t("Abstained")}
                 percentage={proposal.abstainPercentage}
                 color="#B59525"
@@ -112,7 +117,7 @@ export const ProposalOverviewVotes = () => {
               />
             </VStack>
             <Box mt={2}>
-              <ProposalVotesResults />
+              <ProposalVotesResults proposalId={proposal.id} />
             </Box>
           </VStack>
         </Flex>
