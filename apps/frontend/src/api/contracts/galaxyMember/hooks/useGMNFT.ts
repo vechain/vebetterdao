@@ -1,6 +1,7 @@
 import { notFoundImage } from "@/constants"
 import { useIsGMclaimable } from "./useIsGMclaimable"
 import { useNFTImage } from "./useNFTImage"
+import { useUserB3trBalance } from "../../b3tr"
 
 /**
  * Custom hook for retrieving data related to a Galaxy Member NFT.
@@ -17,16 +18,20 @@ import { useNFTImage } from "./useNFTImage"
 export const useGMNFT = () => {
   const { isOwned: isGMOwned, isClaimable: isGMClaimable } = useIsGMclaimable()
   const { imageData, imageMetadata, isLoading: isGMLoading } = useNFTImage()
+  const { data: b3trBalance } = useUserB3trBalance()
 
   //gm
   const gmImage = imageData?.image || notFoundImage
   const gmName = imageMetadata?.name
 
   // TODO: map data
-  const gmLevel = "1"
+  const gmLevel = 1
   const gmRewardMultiplier = "3"
   const nextLevelGMRewardMultiplier = "4"
-  const b3trToUpgradeGM = 5000000
+  const b3trToUpgradeGMToNextLevel = 5000000
+
+  const isEnoughBalanceToUpgradeGM = b3trBalance && Number(b3trBalance?.scaled || 0) >= b3trToUpgradeGMToNextLevel
+  const missingB3trToUpgrade = b3trToUpgradeGMToNextLevel - Number(b3trBalance?.scaled || 0)
 
   return {
     gmImage,
@@ -37,6 +42,8 @@ export const useGMNFT = () => {
     isGMLoading,
     isGMOwned,
     isGMClaimable,
-    b3trToUpgradeGM,
+    b3trToUpgradeGMToNextLevel,
+    isEnoughBalanceToUpgradeGM,
+    missingB3trToUpgrade,
   }
 }

@@ -24,12 +24,17 @@ export const GMUpgradeButton = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account)
-  const { nextLevelGMRewardMultiplier, isGMOwned, isGMClaimable, b3trToUpgradeGM } = useGMNFT()
+  const {
+    nextLevelGMRewardMultiplier,
+    isGMOwned,
+    isGMClaimable,
+    b3trToUpgradeGMToNextLevel,
+    missingB3trToUpgrade,
+    isEnoughBalanceToUpgradeGM,
+  } = useGMNFT()
   const { isXNodeHolder, isXNodeAttachedToGM } = useXNode()
 
-  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useUserB3trBalance()
-
-  const isEnoughBalanceToUpgradeGM = b3trBalance && Number(b3trBalance.scaled) >= b3trToUpgradeGM
+  const { isLoading: isB3trBalanceLoading } = useUserB3trBalance()
 
   const upgradeMessage = useMemo(() => {
     if (!hasUserVoted && !isGMOwned && !isGMClaimable) {
@@ -95,7 +100,7 @@ export const GMUpgradeButton = () => {
             })}
           </Text>{" "}
           <Text as="span" fontSize={"16px"} color="#B1F16C">
-            {compactFormatter.format(b3trToUpgradeGM)}
+            {compactFormatter.format(b3trToUpgradeGMToNextLevel)}
           </Text>
           <Text as="span" fontSize={"14px"}>
             {"!"}
@@ -103,15 +108,13 @@ export const GMUpgradeButton = () => {
         </Box>
       )
     } else {
-      const missingB3tr = b3trToUpgradeGM - Number(b3trBalance?.scaled || 0)
-
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
             {t("You need")}
           </Text>{" "}
           <Text as="span" fontSize={"14px"} color="#B1F16C">
-            {t("{{b3trToUpgradeGM}} B3TR", { b3trToUpgradeGM: compactFormatter.format(missingB3tr) })}
+            {t("{{b3trToUpgradeGM}} B3TR", { b3trToUpgradeGM: compactFormatter.format(missingB3trToUpgrade) })}
           </Text>{" "}
           <Text as="span" fontSize={"14px"}>
             {t("to upgrade your NFT to the next level")}
@@ -120,14 +123,14 @@ export const GMUpgradeButton = () => {
       )
     }
   }, [
-    b3trBalance?.scaled,
-    b3trToUpgradeGM,
+    b3trToUpgradeGMToNextLevel,
     hasUserVoted,
     isEnoughBalanceToUpgradeGM,
     isGMClaimable,
     isGMOwned,
     isXNodeAttachedToGM,
     isXNodeHolder,
+    missingB3trToUpgrade,
     nextLevelGMRewardMultiplier,
     t,
   ])

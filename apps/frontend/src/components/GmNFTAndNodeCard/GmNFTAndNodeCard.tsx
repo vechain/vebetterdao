@@ -34,6 +34,7 @@ export const GmNFTAndNodeCard = () => {
   const nodeAttachedColor = isXNodeAttachedToGM ? "#B1F16C" : "#FFFFFF80"
 
   const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
+  const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const nodeSeparator = useMemo(() => {
     return (
@@ -49,9 +50,9 @@ export const GmNFTAndNodeCard = () => {
           alt="nft-attachment"
           w="50px"
           h="50px"
-          transform={isAbove1200 ? undefined : "rotate(90deg)"}
+          transform={isAbove800 ? undefined : "rotate(90deg)"}
         />
-        {isAbove1200 && isXNodeAttachedToGM && (
+        {isAbove800 && isXNodeAttachedToGM && (
           <>
             <Flex h="62px" w="1px" bg="#B1F16C" position={"absolute"} bottom="50%" left="50%" />
             <Circle size="6px" bg="#B1F16C" position={"absolute"} top="-12px" left="calc(50% - 3px)" />
@@ -59,7 +60,7 @@ export const GmNFTAndNodeCard = () => {
         )}
       </Flex>
     )
-  }, [isAbove1200, isXNodeAttachedToGM, isGMOwned])
+  }, [isAbove800, isXNodeAttachedToGM, isGMOwned])
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
@@ -75,9 +76,9 @@ export const GmNFTAndNodeCard = () => {
     <Card bg="#004CFC" rounded="12px" p="24px" color="white" position="relative" overflow={"hidden"}>
       <Box
         position="absolute"
-        top={isAbove1200 ? "-50%" : "-10%"}
-        left={isAbove1200 ? "0" : "-50%"}
-        w={isAbove1200 ? "100%" : "200%"}
+        top={isAbove800 ? "-50%" : "-10%"}
+        left={isAbove800 ? "0" : "-50%"}
+        w={isAbove800 ? "100%" : "200%"}
         h="auto"
         zIndex="2">
         <Image src={"/images/cloud-background.png"} alt="cloud" objectFit={"contain"} />
@@ -85,19 +86,19 @@ export const GmNFTAndNodeCard = () => {
       <Stack gap={8} align="stretch" justify={"stretch"} direction={isAbove1200 ? "row" : "column-reverse"} zIndex="3">
         <VStack flex="3" align={"stretch"} gap="24px">
           <HStack gap="40px" align={"baseline"} justify={"space-between"}>
-            <Heading fontSize={"20px"} fontWeight={600}>
-              {t("You are on level {{level}}", { level: gmLevel })}
+            <Heading fontSize="xl" fontWeight={600}>
+              {t("You are on LEVEL {{level}}", { level: gmLevel })}
             </Heading>
-            {isAbove1200 && isXNodeAttachedToGM && (
+            {isAbove800 && isXNodeAttachedToGM && (
               <>
-                <Text fontSize={"12px"} fontWeight={600} color="#B1F16C">
+                <Text fontSize="xs" fontWeight={600} color="#B1F16C">
                   {t("GM NFT attached to {{node}}", { node: xNodeName })}
                 </Text>
                 <Box flexBasis={"150px"} />
               </>
             )}
           </HStack>
-          <Stack gap="0" direction={isAbove1200 ? "row" : "column"} align="stretch" justify="stretch">
+          <Stack gap="0" direction={isAbove800 ? "row" : "column"} align="stretch" justify="stretch">
             {!isGMOwned ? (
               <HStack
                 rounded="12px"
@@ -138,11 +139,12 @@ export const GmNFTAndNodeCard = () => {
                     {gmName}
                   </Text>
                   <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-                    <Text fontSize={"12px"} fontWeight={600}>
+                    <Text fontSize="xs" fontWeight={600}>
                       {gmRewardMultiplier}
+                      {"x"}
                     </Text>
-                    <Text fontSize={"12px"} fontWeight={400} noOfLines={1}>
-                      {t("Reward multiplier")}
+                    <Text fontSize="xs" fontWeight={400} noOfLines={1}>
+                      {t("Voting reward multiplier")}
                     </Text>
                   </HStack>
                 </VStack>
@@ -152,12 +154,12 @@ export const GmNFTAndNodeCard = () => {
 
             {isXNodeHolder && (
               <>
-                {isAbove1200 ? (
+                {isAbove800 ? (
                   nodeSeparator
                 ) : (
                   <HStack justify={"space-between"}>
                     {isXNodeAttachedToGM ? (
-                      <Text fontSize={"12px"} fontWeight={600} color="#B1F16C">
+                      <Text fontSize="xs" fontWeight={600} color="#B1F16C">
                         {t("GM NFT attached")}
                       </Text>
                     ) : (
@@ -182,10 +184,10 @@ export const GmNFTAndNodeCard = () => {
                       {xNodeName}
                     </Text>
                     <HStack gap={1}>
-                      <Text fontSize={"14px"} fontWeight={600}>
+                      <Text fontSize="sm" fontWeight={600}>
                         {xNodePoints}
                       </Text>
-                      <Text fontSize={"14px"} fontWeight={400} noOfLines={1}>
+                      <Text fontSize="sm" fontWeight={400} noOfLines={1}>
                         {t("to endorse Apps")}
                       </Text>
                     </HStack>
@@ -197,7 +199,7 @@ export const GmNFTAndNodeCard = () => {
           </Stack>
           <GMUpgradeButton />
         </VStack>
-        <Flex w={isAbove1200 ? "1px" : "auto"} h={isAbove1200 ? "auto" : "1px"} bg="#FFFFFF80" />
+        <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />
         <SwapB3trVot3 />
       </Stack>
     </Card>
