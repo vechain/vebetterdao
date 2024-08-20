@@ -12,15 +12,15 @@ import {
   Skeleton,
 } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
-import { ProposalCreatedEvent, ProposalMetadata, ProposalState, useIsDepositReached, useProposalState } from "@/api"
+import { ProposalCreatedEvent, ProposalMetadata, ProposalState, useProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { parseDate, toIPFSURL } from "@/utils"
 import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
 import VotingProposalProgress from "@/components/Proposal/VotingProposalProgress"
-import StatusBadge from "@/components/Proposal/StatusBadge"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { MdArrowOutward } from "react-icons/md"
+import { ProposalStatusBadge } from "@/app/proposals/[proposalId]/components/ProposalOverview/components/ProposalStatusBadge"
 
 type Props = {
   proposal: ProposalCreatedEvent
@@ -38,15 +38,15 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
 
   const { data: proposalState } = useProposalState(proposalId)
 
-  const { data: isDepositReached } = useIsDepositReached(proposalId)
-
   const goToProposal = useCallback(() => {
     router.push(`/proposals/${proposalId}`)
   }, [router, proposalId])
 
   const descriptionText = useMemo(() => {
     if (proposalMetadata.data) {
-      return proposalMetadata.data.shortDescription.length > 200 ? `${proposalMetadata.data.shortDescription.slice(0, 200)}...` : proposalMetadata.data.shortDescription
+      return proposalMetadata.data.shortDescription.length > 200
+        ? `${proposalMetadata.data.shortDescription.slice(0, 200)}...`
+        : proposalMetadata.data.shortDescription
     }
     return ""
   }, [proposalMetadata.data])
@@ -122,9 +122,13 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
           </Box>
         </Flex>
         <HStack w={"full"} justifyContent={"space-between"} mt={6}>
-          <Box>
-            <StatusBadge type={proposalState ?? ProposalState.Pending} isDepositReached={isDepositReached} />
-          </Box>
+          <ProposalStatusBadge
+            proposalId={proposal.proposalId}
+            containerProps={{
+              py: 1,
+              px: 2,
+            }}
+          />
           <HStack cursor={"pointer"}>
             <Text fontWeight={500} color="rgba(0, 76, 252, 1)" fontSize={16}>
               {t("See proposal")}

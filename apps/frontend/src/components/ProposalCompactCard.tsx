@@ -1,22 +1,15 @@
-import { Text, Card, CardBody, VStack, HStack, Box, SkeletonText, IconButton, Skeleton } from "@chakra-ui/react"
+import { Text, Card, CardBody, VStack, HStack, SkeletonText, IconButton, Skeleton } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
-import {
-  ProposalCreatedEvent,
-  ProposalMetadata,
-  ProposalState,
-  useHasVoted,
-  useIsDepositReached,
-  useProposalState,
-} from "@/api"
+import { ProposalCreatedEvent, ProposalMetadata, ProposalState, useHasVoted, useProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { toIPFSURL } from "@/utils"
 import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
-import StatusBadge from "@/components/Proposal/StatusBadge"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
 import dayjs from "dayjs"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { ProposalStatusBadge } from "@/app/proposals/[proposalId]/components/ProposalOverview/components/ProposalStatusBadge"
 
 type Props = {
   proposal: ProposalCreatedEvent
@@ -34,8 +27,6 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
   const { t } = useTranslation()
 
   const { data: proposalState } = useProposalState(proposalId)
-
-  const { data: isDepositReached } = useIsDepositReached(proposalId)
 
   const goToProposal = useCallback(() => {
     router.push(`/proposals/${proposalId}`)
@@ -77,9 +68,13 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
       <CardBody>
         <HStack justifyContent={"space-between"} w="full">
           <VStack w="full" justifyContent={"space-between"} spacing={3} align={"flex-start"}>
-            <Box>
-              <StatusBadge type={proposalState ?? ProposalState.Pending} isDepositReached={isDepositReached} />
-            </Box>
+            <ProposalStatusBadge
+              proposalId={proposal.proposalId}
+              containerProps={{
+                py: 1,
+                px: 2,
+              }}
+            />
             <SkeletonText
               isLoaded={proposalMetadata.data !== undefined}
               noOfLines={3}
