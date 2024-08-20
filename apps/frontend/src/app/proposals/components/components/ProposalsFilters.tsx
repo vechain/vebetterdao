@@ -99,7 +99,7 @@ export const ProposalsFilters = (props: Props) => {
                 }}>
                 <HStack spacing={2} alignItems={"center"}>
                   <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
-                    {t(filterKey)}
+                    {filterKey}
                   </Text>
                   {stateCount > 0 && filterKey === ProposalFilter.State && (
                     <Text
@@ -170,7 +170,7 @@ export const ProposalsFilters = (props: Props) => {
                     bg: isSelected ? "#1a1a1a" : "#EFEFEF",
                   }}>
                   <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
-                    {t(optionKey)}
+                    {optionKey}
                   </Text>
                 </Button>
               )
