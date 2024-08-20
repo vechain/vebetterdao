@@ -28,10 +28,15 @@ export const ProposalVoteCommentList = () => {
           </Heading>
           <Text color="#7E7E7E">{t("Users who have made a comment along with their vote")}</Text>
           <InfiniteScroll
-            dataLength={proposal.votesWithComment?.length}
+            dataLength={visibleComments.length}
             next={loadData}
             hasMore={visibleComments.length < proposal.votesWithComment.length}
-            loader={<Spinner size="md" alignSelf={"center"} />}>
+            loader={<Spinner size="md" alignSelf={"center"} />}
+            endMessage={
+              <Heading size="md" textAlign={"center"} mt={4}>
+                {t("You reached the end!")}
+              </Heading>
+            }>
             <VStack alignItems="stretch">
               {visibleComments?.map(vote => <ProposalVoteComment key={vote.account} vote={vote} />)}
             </VStack>
