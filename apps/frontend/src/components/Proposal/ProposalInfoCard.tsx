@@ -20,7 +20,7 @@ import VotingProposalProgress from "@/components/Proposal/VotingProposalProgress
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { MdArrowOutward } from "react-icons/md"
-import { ProposalStatusBadge } from "@/app/proposals/[proposalId]/components/ProposalOverview/components/ProposalStatusBadge"
+import { ProposalStatusBadge } from "./ProposalStatusBadge"
 
 type Props = {
   proposal: ProposalCreatedEvent

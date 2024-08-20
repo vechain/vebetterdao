@@ -1,4 +1,15 @@
-import { Text, Card, CardBody, VStack, HStack, SkeletonText, IconButton, Skeleton } from "@chakra-ui/react"
+import {
+  Text,
+  Card,
+  CardBody,
+  VStack,
+  HStack,
+  SkeletonText,
+  IconButton,
+  Skeleton,
+  VStack,
+  VStack,
+} from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
 import { ProposalCreatedEvent, ProposalMetadata, ProposalState, useHasVoted, useProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
@@ -9,7 +20,7 @@ import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
 import dayjs from "dayjs"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { ProposalStatusBadge } from "@/app/proposals/[proposalId]/components/ProposalOverview/components/ProposalStatusBadge"
+import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 
 type Props = {
   proposal: ProposalCreatedEvent

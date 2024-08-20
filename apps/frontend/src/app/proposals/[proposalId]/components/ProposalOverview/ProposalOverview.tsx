@@ -16,7 +16,6 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { ProposalOverviewVotes } from "./components/ProposalOverviewVotes"
 import { ProposalOverviewTime } from "./components/ProposalOverviewTime"
-import { ProposalStatusBadge } from "./components/ProposalStatusBadge"
 import { ProposalOverviewYourSupport } from "./components/ProposalOverviewYourSupport"
 import { ProposalOverviewCommunitySupport } from "./components/ProposalOverviewCommunitySupport"
 import { ProposalYourVote } from "./components/ProposalYourVote"
@@ -27,6 +26,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useProposalDetail } from "../../hooks"
 import { ProposalShareButton } from "./components/ProposalShareButton"
 import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
+import { ProposalStatusBadge } from "@/components"
 
 export const ProposalOverview = () => {
   const { proposal } = useProposalDetail()
