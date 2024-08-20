@@ -101,7 +101,7 @@
     },
     "test": {
       "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config", "test:hardhat"]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "test:watch": {
       "cache": false,

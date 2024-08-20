@@ -73,7 +73,7 @@ jobs:
       # Run global unit tests if contract or utils changes are detected
       - name: Global Unit Tests
         if: needs.check-changes.outputs.contracts-changed == 'true' || needs.check-changes.outputs.utils-changed == 'true'
-        run: yarn test --filter!=contract
+        run: yarn test
 
       # Run Frontend unit tests if there are frontend changes, or if contracts/utils have changed
       - name: Frontend Unit Tests
