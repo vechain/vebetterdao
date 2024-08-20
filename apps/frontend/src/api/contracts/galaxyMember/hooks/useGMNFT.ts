@@ -29,6 +29,7 @@ export const useGMNFT = () => {
   const gmRewardMultiplier = "3"
   const nextLevelGMRewardMultiplier = "4"
   const b3trToUpgradeGMToNextLevel = 5000000
+  const isGMActive = false
 
   const isEnoughBalanceToUpgradeGM = b3trBalance && Number(b3trBalance?.scaled || 0) >= b3trToUpgradeGMToNextLevel
   const missingB3trToUpgrade = b3trToUpgradeGMToNextLevel - Number(b3trBalance?.scaled || 0)
@@ -45,5 +46,6 @@ export const useGMNFT = () => {
     b3trToUpgradeGMToNextLevel,
     isEnoughBalanceToUpgradeGM,
     missingB3trToUpgrade,
+    isGMActive,
   }
 }
