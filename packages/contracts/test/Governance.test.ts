@@ -830,7 +830,7 @@ describe("Governor and TimeLock", function () {
             initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
             initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
             voterRewards: await voterRewards.getAddress(),
-            isFunctionRestrictionEnabled: true,
+            isFunctionRestrictionEnabled: false,
           },
           {
             governorAdmin: owner.address,
@@ -880,10 +880,11 @@ describe("Governor and TimeLock", function () {
       // first add to the whitelist
       const funcSig = governorV1.interface.getFunction("updateQuorumNumerator")?.selector
       await governorV1.connect(owner).setWhitelistFunction(await governorV1.getAddress(), funcSig, true)
+      const funcSig2 = governorV1.interface.getFunction("upgradeToAndCall")?.selector
+      await governorV1.connect(owner).setWhitelistFunction(await governorV1.getAddress(), funcSig2, true)
       const newQuorum = 10n
 
       // load votes
-      // console.log("Loading votes");
       await getVot3Tokens(owner, "30000")
       await waitForNextBlock()
 
@@ -901,6 +902,7 @@ describe("Governor and TimeLock", function () {
         })
 
       const proposalId = await getProposalIdFromTx(tx0)
+
       const proposalThreshold = await governorV1.proposalDepositThreshold(proposalId)
       await getVot3Tokens(otherAccount, ethers.formatEther(proposalThreshold))
       // We also need to wait a block to update the proposer's votes snapshot
@@ -924,13 +926,13 @@ describe("Governor and TimeLock", function () {
 
       const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes("Update Quorum Percentage"))
 
-      await governorV1.queue([await governorV1.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
+      await governorV1.queue([address], [0], [encodedFunctionCall], descriptionHash, {
         gasLimit: 10_000_000,
       })
 
       await waitForNextBlock()
 
-      await governorV1.execute([await governorV1.getAddress()], [0], [encodedFunctionCall], descriptionHash, {
+      await governorV1.execute([address], [0], [encodedFunctionCall], descriptionHash, {
         gasLimit: 10_000_000,
       })
 
@@ -947,16 +949,18 @@ describe("Governor and TimeLock", function () {
 
       const initialSlot = BigInt("0xd09a0aaf4ab3087bae7fa25ef74ddd4e5a4950980903ce417e66228cf7dc7b00") // Slot 0 of VoterRewards
 
-      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+      for (let i = initialSlot; i < initialSlot + BigInt(50); i++) {
         storageSlots.push(await ethers.provider.getStorage(await governorV1.getAddress(), i))
       }
 
       storageSlots = storageSlots.filter(
-        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
-      ) // removing empty slots
+        slot =>
+          slot !== "0x0000000000000000000000000000000000000000000000000000000000000000" &&
+          slot !== "0x0000000000000000000000000000000100000000000000000000000000000001",
+      ) // removing empty slots and slots that track governance proposals getting executed on the governor
 
-      const governorV2 = (await upgradeProxy("B3TRGovernorV1", "B3TRGovernor", await governorV1.getAddress(), [], {
-        version: 2,
+      // Upgrade to V2 via governance
+      const Contract = await ethers.getContractFactory("B3TRGovernor", {
         libraries: {
           GovernorClockLogic: await governorClockLogicLib.getAddress(),
           GovernorConfigurator: await governorConfiguratorLib.getAddress(),
@@ -967,7 +971,65 @@ describe("Governor and TimeLock", function () {
           GovernorStateLogic: await governorStateLogicLib.getAddress(),
           GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
         },
-      })) as B3TRGovernor
+      })
+      const implementation = await Contract.deploy()
+      await implementation.waitForDeployment()
+
+      // Now we can create a proposal
+      const encodedFunctionCall2 = b3trGovernorFactory.interface.encodeFunctionData("upgradeToAndCall", [
+        await implementation.getAddress(),
+        "0x",
+      ])
+      const description = "Upgrading Governance contracts"
+      const descriptionHash2 = ethers.keccak256(ethers.toUtf8Bytes(description))
+      const currentRoundId = await xAllocationVoting.currentRoundId()
+
+      const tx = await governorV1
+        .connect(owner)
+        .propose([await governorV1.getAddress()], [0], [encodedFunctionCall2], description, currentRoundId + 2n, 0, {
+          gasLimit: 10_000_000,
+        })
+
+      const proposalId2 = await getProposalIdFromTx(tx)
+
+      await getVot3Tokens(otherAccount, "30000")
+
+      await waitForNextBlock()
+
+      const proposalThreshold2 = await governorV1.proposalDepositThreshold(proposalId2)
+
+      await getVot3Tokens(owner, ethers.formatEther(proposalThreshold2))
+      await vot3.connect(otherAccount).approve(await governorV1.getAddress(), proposalThreshold2)
+
+      await vot3.connect(owner).approve(await governorV1.getAddress(), proposalThreshold2)
+      await governorV1.connect(owner).deposit(proposalThreshold2, proposalId2)
+
+      proposalState = await governorV1.state(proposalId2) // proposal id of the proposal in the beforeAll step
+
+      if (proposalState.toString() !== "1")
+        await moveToCycle(parseInt((await governorV1.proposalStartRound(proposalId2)).toString()) + 1)
+
+      // vote
+      await governorV1.connect(otherAccount).castVote(proposalId2, 1, { gasLimit: 10_000_000 }) // vote for
+      await governorV1.connect(owner).castVote(proposalId2, 1, { gasLimit: 10_000_000 }) // vote for
+
+      const deadline2 = await governorV1.proposalDeadline(proposalId2)
+
+      const currentBlock2 = await governorV1.clock()
+
+      await moveBlocks(parseInt((deadline2 - currentBlock2 + BigInt(1)).toString()))
+
+      await governorV1.queue([await governorV1.getAddress()], [0], [encodedFunctionCall2], descriptionHash2, {
+        gasLimit: 10_000_000,
+      })
+
+      await waitForNextBlock()
+
+      await governorV1.execute([await governorV1.getAddress()], [0], [encodedFunctionCall2], descriptionHash2, {
+        gasLimit: 10_000_000,
+      })
+
+      const governorV2 = Contract.attach(await governorV1.getAddress()) as B3TRGovernor
 
       let storageSlotsAfter = []
 
@@ -976,8 +1038,10 @@ describe("Governor and TimeLock", function () {
       }
 
       storageSlotsAfter = storageSlotsAfter.filter(
-        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
-      ) // removing empty slots
+        slot =>
+          slot !== "0x0000000000000000000000000000000000000000000000000000000000000000" &&
+          slot !== "0x0000000000000000000000000000000200000000000000000000000000000002",
+      ) // removing empty slots and slots that track governance proposals getting executed on the governor
 
       // Check if storage slots are the same after upgrade
       for (let i = 0; i < storageSlots.length; i++) {
