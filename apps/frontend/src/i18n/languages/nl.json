@@ -637,5 +637,6 @@
   "Proposals in this round": "Voorstellen in deze ronde",
   "{{from}} to {{to}}": "{{from}} tot {{to}}",
   "We're in Round #{{round}}": "We zitten in ronde #{{round}}",
-  "Reset filters": "Filters opnieuw instellen"
+  "Reset filters": "Filters opnieuw instellen",
+  "You reached the end!": "Je hebt het einde bereikt!"
 }

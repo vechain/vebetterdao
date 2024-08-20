@@ -1,11 +1,12 @@
 import { ProposalState } from "@/api"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { VoteIcon } from "@/components"
-import { Button } from "@chakra-ui/react"
+
+import { Button, Icon } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { MdHowToVote } from "react-icons/md"
 
 export const CastProposalVoteButton = () => {
   const { proposal } = useProposalDetail()
@@ -36,7 +37,12 @@ export const CastProposalVoteButton = () => {
 
   if (shouldSeeVoteButton)
     return (
-      <Button leftIcon={<VoteIcon boxSize={"16px"} color="white" />} onClick={handleClick} variant="primaryAction">
+      <Button
+        leftIcon={<Icon as={MdHowToVote} boxSize={4} />}
+        onClick={handleClick}
+        variant="primaryAction"
+        w={["full", "auto"]}
+        size={["lg", "md"]}>
         {t("Cast your vote")}
       </Button>
     )

@@ -637,5 +637,6 @@
   "Proposals in this round": "本輪提案",
   "{{from}} to {{to}}": "從 {{from}} 到 {{to}}",
   "We're in Round #{{round}}": "我們在第 #{{round}} 輪",
-  "Reset filters": "重設篩選條件"
+  "Reset filters": "重設篩選條件",
+  "You reached the end!": "您已到達結束！"
 }

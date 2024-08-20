@@ -637,5 +637,6 @@
   "Proposals in this round": "Vorschläge in dieser Runde",
   "{{from}} to {{to}}": "{{from}} bis {{to}}",
   "We're in Round #{{round}}": "Wir sind in Runde #{{round}}",
-  "Reset filters": "Filter zurücksetzen"
+  "Reset filters": "Filter zurücksetzen",
+  "You reached the end!": "Du hast das Ende erreicht!"
 }

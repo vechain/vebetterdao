@@ -1,10 +1,10 @@
 import { ProposalState } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
-import { Box, Flex, Image, Text, VStack } from "@chakra-ui/react"
+import { Box, Image, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
 import { ProposalVotesResults } from "./components/ProposalVotesResults"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
-import { ExclamationTriangle } from "@/components"
+import { ExclamationTriangle, ResponsiveCard } from "@/components"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
@@ -27,21 +27,21 @@ export const ProposalOverviewVotes = () => {
   switch (proposal.state) {
     case ProposalState.DepositNotMet:
       return (
-        <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
-          <VStack p="32px">
+        <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
+          <VStack>
             <ExclamationTriangle color="#757575" />
             <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
               {t("The community has not supported this proposal and was canceled")}
             </Text>
           </VStack>
-        </Flex>
+        </ResponsiveCard>
       )
 
     case ProposalState.Pending:
       if (proposal.isDepositReached) {
         return (
-          <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
-            <VStack p="32px">
+          <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
+            <VStack>
               <Image w="88px" h="88px" color="#004CFC" src="/images/vote.svg" alt="vote-icon" />
               <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
                 {t("This proposal will be voted in")}
@@ -50,12 +50,12 @@ export const ProposalOverviewVotes = () => {
                 {timestampToTimeLeft(proposal.votingStartDate)}
               </Text>
             </VStack>
-          </Flex>
+          </ResponsiveCard>
         )
       }
       return (
-        <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
-          <VStack p="32px">
+        <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
+          <VStack>
             <ExclamationTriangle />
             <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
               {t("This proposal must get the support of the community before the round starts")}
@@ -64,7 +64,7 @@ export const ProposalOverviewVotes = () => {
               {timestampToTimeLeft(proposal.votingStartDate)}
             </Text>
           </VStack>
-        </Flex>
+        </ResponsiveCard>
       )
 
     case ProposalState.Active:
@@ -82,14 +82,9 @@ export const ProposalOverviewVotes = () => {
         [ProposalState.Executed]: "#38BF66",
       }
       return (
-        <Flex
-          h={"full"}
-          bg={"#F8F8F8"}
-          rounded="8px"
-          flex={1.5}
-          borderWidth={1}
-          borderColor={borderColorMap[proposal.state]}>
-          <VStack p="24px" alignItems={"stretch"} w="full" justify={"space-between"}>
+        <ResponsiveCard
+          cardProps={{ variant: "filled", w: "full", flex: 1, borderColor: borderColorMap, borderWidth: 1 }}>
+          <VStack alignItems={"stretch"} w="full" justify={"space-between"}>
             <Text color="#000000" fontWeight={"700"} fontSize="20px">
               {t("Real time votes")}
             </Text>
@@ -120,7 +115,7 @@ export const ProposalOverviewVotes = () => {
               <ProposalVotesResults proposalId={proposal.id} />
             </Box>
           </VStack>
-        </Flex>
+        </ResponsiveCard>
       )
   }
 }
