@@ -42,7 +42,9 @@ export const ProposalContentAndActions: React.FC<Props> = ({ proposal }) => {
     <Card w="full" variant="baseWithBorder">
       <CardBody py={8}>
         <VStack spacing={8} align="flex-start">
-          <Heading size="lg">{t("About the proposal")}</Heading>
+          <Heading fontSize={"24px"} fontWeight={700}>
+            {t("About the proposal")}
+          </Heading>
           <MDEditor.Markdown
             source={metadata?.data?.markdownDescription}
             style={{
