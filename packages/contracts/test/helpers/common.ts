@@ -519,7 +519,11 @@ export const calculateUnallocatedAppAllocationOffChain = async (roundId: number,
   return (totalAvailable * appShares) / BigInt(100)
 }
 
-export const participateInAllocationVoting = async (user: HardhatEthersSigner, waitRoundToEnd: boolean = false) => {
+export const participateInAllocationVoting = async (
+  user: HardhatEthersSigner,
+  waitRoundToEnd: boolean = false,
+  endorser?: HardhatEthersSigner,
+) => {
   const { xAllocationVoting, x2EarnApps, owner } = await getOrDeployContractInstances({})
 
   await getVot3Tokens(user, "1")
@@ -528,7 +532,7 @@ export const participateInAllocationVoting = async (user: HardhatEthersSigner, w
   const appName = "App" + Math.random()
 
   await x2EarnApps.connect(owner).registerApp(user.address, user.address, appName, "metadataURI")
-  await endorseApp(await x2EarnApps.hashAppName(appName), user)
+  await endorseApp(await x2EarnApps.hashAppName(appName), endorser ? endorser : owner)
   const roundId = await startNewAllocationRound()
 
   // Vote

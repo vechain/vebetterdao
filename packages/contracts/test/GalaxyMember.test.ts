@@ -541,7 +541,7 @@ describe("Galaxy Member", () => {
       await bootstrapEmissions()
 
       // Should be able to free mint after participating in allocation voting
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(owner, false, otherAccounts[10])
 
       const galaxyMember = (await deployProxy("GalaxyMemberV1", [
         {
@@ -654,14 +654,14 @@ describe("Galaxy Member", () => {
       // Mint MjolnirX
       await addNodeToken(7, otherAccount)
 
-      expect(await vechainNodesMock.idToOwner(1)).to.equal(await otherAccount.getAddress())
+      expect(await vechainNodesMock.idToOwner(2)).to.equal(await otherAccount.getAddress())
       expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress())
 
       await galaxyMember.setMaxLevel(10)
 
-      expect(await galaxyMemberV2.getLevelAfterAttachingNode(1, 1)).to.equal(7)
+      expect(await galaxyMemberV2.getLevelAfterAttachingNode(1, 2)).to.equal(7)
 
-      await galaxyMemberV2.connect(otherAccount).attachNode(1, 1)
+      await galaxyMemberV2.connect(otherAccount).attachNode(2, 1)
 
       expect(await galaxyMemberV2.levelOf(1)).to.equal(7)
 
@@ -968,7 +968,7 @@ describe("Galaxy Member", () => {
     })
 
     it("Should handle multiple mints from different accounts correctly", async () => {
-      const { galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
+      const { galaxyMember, otherAccount, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -981,7 +981,7 @@ describe("Galaxy Member", () => {
       await galaxyMember.connect(otherAccount).freeMint()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(owner, false)
+      await participateInAllocationVoting(owner, false, otherAccounts[4])
 
       await galaxyMember.connect(owner).freeMint()
 
@@ -1153,7 +1153,7 @@ describe("Galaxy Member", () => {
     })
 
     it("Should be able to receive a GM NFT from another account if you already have one", async () => {
-      const { galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
+      const { galaxyMember, otherAccount, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -1161,8 +1161,8 @@ describe("Galaxy Member", () => {
       await bootstrapEmissions()
 
       // participation in governance is a requirement for minting
-      await participateInAllocationVoting(otherAccount, true)
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(otherAccount, true, otherAccounts[2])
+      await participateInAllocationVoting(owner, false, otherAccounts[3])
 
       await galaxyMember.connect(otherAccount).freeMint()
 
@@ -2027,7 +2027,7 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.getNodeLevelOf(1)).to.equal(1) // The Mock Vechain Node is Strength Economy Node which is Level 1
 
-      await participateInAllocationVoting(otherAccount)
+      await participateInAllocationVoting(otherAccount, false, owner)
 
       await galaxyMember.connect(otherAccount).freeMint()
 
@@ -2054,7 +2054,7 @@ describe("Galaxy Member", () => {
     })
 
     it("Should track all Vechain Nodes attached to GM NFTs correctly", async () => {
-      const { vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
+      const { vechainNodesMock, galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
@@ -2065,7 +2065,7 @@ describe("Galaxy Member", () => {
 
       await addNodeToken(1, otherAccount) // Mint Mock Strength Economy Node (Level 1)
 
-      await participateInAllocationVoting(otherAccount)
+      await participateInAllocationVoting(otherAccount, false, owner)
 
       await galaxyMember.connect(otherAccount).freeMint()
 
@@ -2161,7 +2161,7 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.getNodeLevelOf(1)).to.equal(1) // The Mock Vechain Node is Strength Economy Node which is Level 1
 
-      await participateInAllocationVoting(otherAccount)
+      await participateInAllocationVoting(otherAccount, false, owner)
 
       await galaxyMember.connect(otherAccount).freeMint()
 
@@ -2190,7 +2190,7 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.getNodeLevelOf(1)).to.equal(1) // The Mock Vechain Node is Strength Economy Node which is Level 1
 
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(owner, false, otherAccount)
 
       await galaxyMember.connect(owner).freeMint()
 
@@ -2201,10 +2201,12 @@ describe("Galaxy Member", () => {
     })
 
     it("Should be able to detach GM NFT from node after transfering the node", async () => {
-      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
+      const { owner, vechainNodesMock, galaxyMember, otherAccount, otherAccounts } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+          deployMocks: true,
+        },
+      )
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
@@ -2219,7 +2221,7 @@ describe("Galaxy Member", () => {
 
       expect(await galaxyMember.getNodeLevelOf(1)).to.equal(1) // The Mock Vechain Node is Strength Economy Node which is Level 1
 
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(owner, false, otherAccounts[3])
 
       await galaxyMember.connect(owner).freeMint()
 
@@ -2253,10 +2255,11 @@ describe("Galaxy Member", () => {
     })
 
     it("Should be able to upgrade GM NFT attached to Vechain node", async () => {
-      const { owner, vechainNodesMock, galaxyMember, b3tr, minterAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
+      const { owner, vechainNodesMock, galaxyMember, b3tr, minterAccount, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
@@ -2265,7 +2268,7 @@ describe("Galaxy Member", () => {
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
 
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(owner, false, otherAccounts[3])
 
       await galaxyMember.connect(owner).freeMint()
 
@@ -2395,10 +2398,12 @@ describe("Galaxy Member", () => {
     })
 
     it("Should not be able to transfer GM NFT attached to Vechain node", async () => {
-      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
+      const { owner, vechainNodesMock, galaxyMember, otherAccount, otherAccounts } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+          deployMocks: true,
+        },
+      )
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
@@ -2407,7 +2412,7 @@ describe("Galaxy Member", () => {
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
 
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(owner, false, otherAccounts[3])
 
       await galaxyMember.connect(owner).freeMint()
 
@@ -2426,7 +2431,7 @@ describe("Galaxy Member", () => {
     })
 
     it("Should reset level if node attached doesn't exist anymore", async () => {
-      const { owner, vechainNodesMock, galaxyMember } = await getOrDeployContractInstances({
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
@@ -2438,7 +2443,7 @@ describe("Galaxy Member", () => {
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
 
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(owner, false, otherAccount)
 
       await galaxyMember.connect(owner).freeMint()
 
@@ -2471,21 +2476,21 @@ describe("Galaxy Member", () => {
       // I can attach another node
       await addNodeToken(2, owner)
 
-      await expect(galaxyMember.connect(owner).attachNode(2, 1)).to.be.revertedWith(
+      await expect(galaxyMember.connect(owner).attachNode(3, 1)).to.be.revertedWith(
         "GalaxyMember: token already attached to a node",
       )
 
       await galaxyMember.connect(owner).detachNode(await galaxyMember.getNodeIdAttached(1), 1)
 
-      expect(await galaxyMember.getLevelAfterAttachingNode(1, 2)).to.equal(4) // Level 4
+      expect(await galaxyMember.getLevelAfterAttachingNode(1, 3)).to.equal(4) // Level 4
 
-      await galaxyMember.connect(owner).attachNode(2, 1)
+      await galaxyMember.connect(owner).attachNode(3, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(4) // Level 4
     })
 
     it("User can select a different GM NFT owned", async () => {
-      const { owner, vechainNodesMock, galaxyMember } = await getOrDeployContractInstances({
+      const { owner, vechainNodesMock, galaxyMember, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
@@ -2497,7 +2502,7 @@ describe("Galaxy Member", () => {
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
 
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(owner, false, otherAccounts[3])
 
       await galaxyMember.connect(owner).freeMint()
 
@@ -2521,10 +2526,12 @@ describe("Galaxy Member", () => {
     })
 
     it("Should reset level if node attached is not owned anymore", async () => {
-      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
+      const { owner, vechainNodesMock, galaxyMember, otherAccount, otherAccounts } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+          deployMocks: true,
+        },
+      )
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
@@ -2533,7 +2540,7 @@ describe("Galaxy Member", () => {
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
 
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(owner, false, otherAccounts[3])
 
       await galaxyMember.connect(owner).freeMint()
 
@@ -2561,7 +2568,7 @@ describe("Galaxy Member", () => {
     })
 
     it("Should not attach node to another GM NFT if node is already attached", async () => {
-      const { owner, vechainNodesMock, galaxyMember } = await getOrDeployContractInstances({
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
@@ -2573,7 +2580,7 @@ describe("Galaxy Member", () => {
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
 
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(owner, false, otherAccount)
 
       await galaxyMember.connect(owner).freeMint()
 
@@ -2594,16 +2601,17 @@ describe("Galaxy Member", () => {
     })
 
     it("Should be able to attach a node on an upgraded GM NFT", async () => {
-      const { owner, vechainNodesMock, galaxyMember, b3tr, minterAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
+      const { owner, vechainNodesMock, galaxyMember, b3tr, minterAccount, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
       await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
 
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(owner, false, otherAccounts[4])
 
       await galaxyMember.connect(owner).freeMint()
 
@@ -2633,24 +2641,26 @@ describe("Galaxy Member", () => {
 
       await addNodeToken(2, owner)
 
-      await galaxyMember.connect(owner).attachNode(1, 1)
+      await galaxyMember.connect(owner).attachNode(2, 1)
 
-      expect(await galaxyMember.getLevelAfterAttachingNode(1, 1)).to.equal(4) // Level 4
+      expect(await galaxyMember.getLevelAfterAttachingNode(1, 2)).to.equal(4) // Level 4
 
       expect(await galaxyMember.levelOf(1)).to.equal(4) // Level 4
 
       expect(await galaxyMember.getLevelAfterDetachingNode(1)).to.equal(3) // Level 3
 
-      await galaxyMember.connect(owner).detachNode(1, 1)
+      await galaxyMember.connect(owner).detachNode(2, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(3) // Level 3
     })
 
     it("Should not be able to transfer GM NFT attached to node through approval", async () => {
-      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
+      const { owner, vechainNodesMock, galaxyMember, otherAccount, otherAccounts } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+          deployMocks: true,
+        },
+      )
 
       if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
 
@@ -2659,7 +2669,7 @@ describe("Galaxy Member", () => {
       // Mint Mock Strength Economy Node (Level 1)
       await addNodeToken(1, owner)
 
-      await participateInAllocationVoting(owner)
+      await participateInAllocationVoting(owner, false, otherAccounts[2])
 
       await galaxyMember.connect(owner).freeMint()
 

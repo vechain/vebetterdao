@@ -1,6 +1,6 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { ContractFactory, ContractTransactionResponse } from "ethers"
-import { ethers } from "hardhat"
+import { ethers, vechain } from "hardhat"
 import {
   B3TR,
   TimeLock,
@@ -30,9 +30,9 @@ import {
   X2EarnRewardsPoolV1,
   XAllocationVotingV1,
   NodeManagement,
+  B3TRGovernorV1,
   GalaxyMemberV1,
   VoterRewardsV1,
-  B3TRGovernorV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, upgradeProxy } from "../../scripts/helpers"

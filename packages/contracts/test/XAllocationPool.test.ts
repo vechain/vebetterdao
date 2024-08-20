@@ -338,8 +338,7 @@ describe("X-Allocation Pool", async function () {
           "XAllocationPool",
           await xAllocationPoolV1.getAddress(),
           [],
-          {},
-          2,
+          { version: 2 },
         )) as XAllocationPool
 
         await xAllocationPool.setXAllocationVotingAddress(owner.address)
@@ -417,8 +416,7 @@ describe("X-Allocation Pool", async function () {
           "XAllocationPool",
           await xAllocationPoolV1.getAddress(),
           [],
-          {},
-          2,
+          { version: 2 },
         )) as XAllocationPool
 
         expect(await xAllocationPool.xAllocationVoting()).to.eql(ZERO_ADDRESS)

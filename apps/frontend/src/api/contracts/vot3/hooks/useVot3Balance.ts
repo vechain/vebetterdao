@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { FormattingUtils } from "@repo/utils"
 import { TokenBalance } from "../../b3tr"
 import { getConfig } from "@repo/config"
@@ -46,4 +46,9 @@ export const useVot3Balance = (address?: string) => {
     queryFn: () => getVot3Balance(thor, address),
     enabled: !!address,
   })
+}
+
+export const useUserVot3Balance = () => {
+  const { account } = useWallet()
+  return useVot3Balance(account ?? undefined)
 }
