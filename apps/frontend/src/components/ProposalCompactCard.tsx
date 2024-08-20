@@ -1,15 +1,4 @@
-import {
-  Text,
-  Card,
-  CardBody,
-  VStack,
-  HStack,
-  SkeletonText,
-  IconButton,
-  Skeleton,
-  VStack,
-  VStack,
-} from "@chakra-ui/react"
+import { Text, Card, CardBody, VStack, HStack, SkeletonText, IconButton, Skeleton } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
 import { ProposalCreatedEvent, ProposalMetadata, ProposalState, useHasVoted, useProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"

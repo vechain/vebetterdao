@@ -637,5 +637,6 @@
   "Proposals in this round": "इस दौर में प्रस्ताव",
   "{{from}} to {{to}}": "{{from}} से {{to}}",
   "We're in Round #{{round}}": "हम राउंड #{{round}} में हैं",
-  "Reset filters": "फिल्टर रीसेट करें"
+  "Reset filters": "फिल्टर रीसेट करें",
+  "You reached the end!": "आप अंत तक पहुँच गए हैं!"
 }

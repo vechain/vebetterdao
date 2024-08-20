@@ -637,5 +637,6 @@
   "Proposals in this round": "Bu turdaki teklifler",
   "{{from}} to {{to}}": "{{from}} ile {{to}} arası",
   "We're in Round #{{round}}": "Şu an {{round}}. turdayız",
-  "Reset filters": "Filtreleri sıfırla"
+  "Reset filters": "Filtreleri sıfırla",
+  "You reached the end!": "Sonuna geldiniz!"
 }

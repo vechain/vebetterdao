@@ -637,5 +637,6 @@
   "Proposals in this round": "このラウンドの提案",
   "{{from}} to {{to}}": "{{from}} から {{to}} まで",
   "We're in Round #{{round}}": "ラウンド #{{round}} です",
-  "Reset filters": "フィルターをリセット"
+  "Reset filters": "フィルターをリセット",
+  "You reached the end!": "終わりに達しました！"
 }
