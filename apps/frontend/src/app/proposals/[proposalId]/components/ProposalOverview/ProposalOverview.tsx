@@ -1,4 +1,5 @@
 import {
+  Box,
   Card,
   CardBody,
   Divider,
@@ -63,37 +64,44 @@ export const ProposalOverview = () => {
                 </Text>
               </SkeletonText>
             </VStack>
-            <VStack alignItems={"stretch"}>
-              <Divider color="#D5D5D5" />
-              <HStack justify={"space-between"} flexWrap={"wrap"}>
-                <HStack justify={{ base: "space-between", md: "flex-start" }} flexWrap={"wrap"} gap={8}>
-                  <VStack alignItems={"stretch"}>
-                    <Text fontWeight={"400"} color="#6A6A6A">
-                      {t("Created by")}
-                    </Text>
-                    <Skeleton isLoaded={!proposal.isProposerLoading}>
-                      <HStack>
-                        <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
-                        {compareAddresses(proposal.proposer, account || "") ? (
-                          <Text color="#252525">{t("You")}</Text>
-                        ) : (
-                          <Text color="#252525">{proposerName || humanAddress(proposal.proposer, 4, 6)}</Text>
-                        )}
-                      </HStack>
-                    </Skeleton>
-                  </VStack>
-                  <ProposalYourVote />
-                  <ProposalOverviewTime />
-                  <ProposalOverviewCommunitySupport />
-                  <ProposalOverviewYourSupport />
-                </HStack>
-                <HStack justify={"flex-end"} flexWrap={"wrap"} gap={4}>
-                  <CastProposalVoteButton />
-                </HStack>
-              </HStack>
-            </VStack>
+
+            <Divider color={"#D5D5D5"} />
+            <Stack
+              direction={["column", "column", "row"]}
+              w="full"
+              justify={["flex-start", "flex-start", "space-between"]}
+              spacing={8}>
+              <Stack
+                direction={["column", "column", "row"]}
+                spacing={[4, 4, 12]}
+                align={["flex-start", "flex-start", "center"]}>
+                <Box>
+                  <Text fontWeight={"400"} color="#6A6A6A">
+                    {t("Created by")}
+                  </Text>
+                  <Skeleton isLoaded={!proposal.isProposerLoading}>
+                    <HStack>
+                      <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
+                      {compareAddresses(proposal.proposer, account || "") ? (
+                        <Text color="#252525">{t("You")}</Text>
+                      ) : (
+                        <Text color="#252525">{proposerName || humanAddress(proposal.proposer, 4, 6)}</Text>
+                      )}
+                    </HStack>
+                  </Skeleton>
+                </Box>
+
+                <ProposalOverviewTime />
+                <ProposalOverviewCommunitySupport />
+                <ProposalOverviewYourSupport />
+
+                <ProposalYourVote />
+              </Stack>
+
+              <CastProposalVoteButton />
+            </Stack>
           </VStack>
-          <Skeleton isLoaded={!proposal.isVotesLoading && !proposal.isStateLoading} rounded="8px" flex={1.5}>
+          <Skeleton isLoaded={!proposal.isVotesLoading && !proposal.isStateLoading} rounded="8px" flex={1}>
             <ProposalOverviewVotes />
           </Skeleton>
         </Stack>

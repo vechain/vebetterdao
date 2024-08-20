@@ -1,5 +1,5 @@
 import { ProposalState } from "@/api"
-import { HStack, Text, VStack } from "@chakra-ui/react"
+import { Box, HStack, Text } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../../hooks"
@@ -22,7 +22,7 @@ export const ProposalOverviewCommunitySupport = () => {
     case ProposalState.DepositNotMet:
     case ProposalState.Pending:
       return (
-        <VStack alignItems={"stretch"}>
+        <Box>
           <Text fontWeight={"400"} color="#6A6A6A">
             {t("Community Support")}
           </Text>
@@ -32,7 +32,7 @@ export const ProposalOverviewCommunitySupport = () => {
               {t("{{percentage}}%", { percentage: Math.floor(proposal.communityDepositPercentage * 100) })}
             </Text>
           </HStack>
-        </VStack>
+        </Box>
       )
   }
 }

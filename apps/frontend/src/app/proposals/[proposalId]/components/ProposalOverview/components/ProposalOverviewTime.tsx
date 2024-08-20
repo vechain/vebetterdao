@@ -1,6 +1,6 @@
 import { ProposalState } from "@/api"
 import { timestampToTimeLeftCompact } from "@/utils"
-import { HStack, Text, VStack } from "@chakra-ui/react"
+import { Box, HStack, Text } from "@chakra-ui/react"
 import { UilClockEight } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../../hooks"
@@ -14,19 +14,19 @@ export const ProposalOverviewTime = () => {
   switch (proposal.state) {
     case ProposalState.Succeeded:
       return (
-        <VStack alignItems={"stretch"}>
+        <Box>
           <Text fontWeight={"400"}>{t("Finished")}</Text>
           <HStack>
             <UilClockEight />
             <Text>{t("{{time}} ago", { time: timestampToTimeLeftCompact(proposal.votingEndDate) })}</Text>
           </HStack>
-        </VStack>
+        </Box>
       )
 
     case ProposalState.Pending:
       if (proposal.isDepositReached) {
         return (
-          <VStack alignItems={"stretch"}>
+          <Box>
             <Text fontWeight={"400"} color="#6A6A6A">
               {t("Starts in")}
             </Text>
@@ -34,21 +34,21 @@ export const ProposalOverviewTime = () => {
               <UilClockEight size="20px" />
               <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
             </HStack>
-          </VStack>
+          </Box>
         )
       }
       return (
-        <VStack alignItems={"stretch"}>
+        <Box>
           <Text fontWeight={"400"}>{t("Starts in")}</Text>
           <HStack>
             <UilClockEight size="20px" />
             <Text fontWeight={600}>{timestampToTimeLeftCompact(proposal.votingStartDate)}</Text>
           </HStack>
-        </VStack>
+        </Box>
       )
     case ProposalState.Active:
       return (
-        <VStack alignItems={"stretch"}>
+        <Box>
           <Text fontWeight={"400"} color="#6A6A6A">
             {t("Finish in")}
           </Text>
@@ -56,7 +56,7 @@ export const ProposalOverviewTime = () => {
             <UilClockEight />
             <Text color="#252525">{timestampToTimeLeftCompact(proposal.votingEndDate)}</Text>
           </HStack>
-        </VStack>
+        </Box>
       )
     default:
       return null
