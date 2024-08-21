@@ -3,7 +3,7 @@ import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/usePro
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
 import { ProposalState, useProposalCreatedEvent, useProposalVoteEvents, useProposalVotes } from "@/api"
 import { Box, Card, CardBody, HStack, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
+import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { FaRegHeart } from "react-icons/fa6"
@@ -58,6 +58,16 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   }
 
   const getProposalData = () => {
+    if (proposalState === ProposalState.Canceled)
+      return (
+        <VStack w={"full"} spacing={1} align={"center"}>
+          <Icon as={UilBan} boxSize={["28px", "28px", "24px"]} color={againstColor} />
+          <Text fontSize={["16px", "16px", "12px"]} fontWeight={400} color={"#6A6A6A"} textAlign={"center"}>
+            {t("Proposal canceled by creator or VeBetter")}
+          </Text>
+        </VStack>
+      )
+
     if ([ProposalState.Pending, ProposalState.DepositNotMet].includes(proposalState))
       return <VotingSupportProgress proposalId={proposalId} proposalState={proposalState} />
 
@@ -132,8 +142,6 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
     )
   }
 
-  if (proposalState === ProposalState.Canceled) return null
-
   return (
     <Card variant="filledWithBorder" w="full">
       <CardBody>{getProposalData()}</CardBody>
@@ -167,9 +175,9 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
     <VStack w={"full"} spacing={1}>
       <HStack w={"full"} justifyContent={"space-between"}>
         <HStack>
-          <FaRegHeart
-            width={18}
-            height={18}
+          <Icon
+            as={FaRegHeart}
+            boxSize={["20px", "20px", "16px"]}
             color={
               isDepositReached
                 ? "rgba(0, 76, 252, 1)"
@@ -178,9 +186,10 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
                   : "#F29B32"
             }
           />
+
           <Text
-            fontSize={16}
-            fontWeight={600}
+            fontSize={"16px"}
+            fontWeight={400}
             color={
               isDepositReached
                 ? "rgba(0, 76, 252, 1)"
@@ -188,7 +197,7 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
                   ? "rgba(210, 63, 99, 1)"
                   : "#F29B32"
             }>
-            {isDepositReached ? 100 : communityDepositPercentage.toFixed(0)} {t("%")}
+            <b>{isDepositReached ? 100 : communityDepositPercentage.toFixed(0)}</b> {t("%")}
           </Text>
         </HStack>
       </HStack>
