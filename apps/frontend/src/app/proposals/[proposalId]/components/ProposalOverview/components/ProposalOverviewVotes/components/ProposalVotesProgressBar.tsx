@@ -11,7 +11,7 @@ type Props = {
   isLoading?: boolean
 }
 
-const compactFormatter = getCompactFormatter(2)
+const compactFormatter = getCompactFormatter(1)
 
 export const ProposalVotesProgressBar = ({ isLoading, text, percentage, color, icon }: Props) => {
   const { t } = useTranslation()

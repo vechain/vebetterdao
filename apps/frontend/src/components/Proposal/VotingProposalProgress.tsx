@@ -7,6 +7,7 @@ import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { FaRegHeart } from "react-icons/fa6"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 const forColor = "#3DBA67"
 const againstColor = "#C84968"
@@ -80,7 +81,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
               <HStack key={key} color={vote.color}>
                 {vote.icon}
                 <Text fontSize={["16px", "16px", "12px"]} fontWeight={400}>
-                  {vote.percentage.toFixed(0)} {t("%")}
+                  {getCompactFormatter(1).format(vote.percentage)} {t("%")}
                 </Text>
               </HStack>
             )
