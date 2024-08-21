@@ -26,14 +26,15 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
-import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
-import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
+import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { IProofModule } from "../interfaces/IProofModule.sol";
 
-contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
+contract SuistainabilityProof is UUPSUpgradeable, AccessControlUpgradeable, ReentrancyGuardUpgradeable, IProofModule {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
   bytes32 public constant ACTION_REGISTRAR_ROLE = keccak256("ACTION_REGISTRAR_ROLE");
@@ -62,6 +63,28 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     uint256 totalThreshold; // threshold for a user to be considered a person in total
     bool isTotalScoreConsidered; // flag to indicate if the total score is considered for a user to be a person
     uint256 roundsForCumulativeScore; // number of rounds to consider for the cumulative score
+  }
+
+  /// @param admin - the admin of the contract
+  /// @param contractsManagerAdmin - the admin of the contracts manager
+  /// @param upgrader - the upgrader of the contract
+  /// @param actionRegistrar - the registrar of the actions
+  /// @param actionScoreManager - the action score manager
+  /// @param roundThreshold - the threshold for a user to be considered a person in a round
+  /// @param threshold - the threshold for a user to be considered a person in total
+  /// @param isTotalScoreConsidered - flag to indicate if the total score is considered for a user to be a person
+  /// @param x2EarnApps - the x2EarnApps contract address
+  struct InitializationData {
+    address admin;
+    address contractsManagerAdmin;
+    address upgrader;
+    address actionRegistrar;
+    address actionScoreManager;
+    uint256 roundThreshold;
+    uint256 threshold;
+    bool isTotalScoreConsidered;
+    IX2EarnApps x2EarnApps;
+    uint256 roundsForCumulativeScore;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.ProofOfPersonhood")) - 1)) & ~bytes32(uint256(0xff))
@@ -99,57 +122,37 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
   }
 
   /// @notice Initializes the contract
-  /// @param _admin - the admin of the contract
-  /// @param _contractsManagerAdmin - the admin of the contracts manager
-  /// @param _upgrader - the upgrader of the contract
-  /// @param _actionRegistrar - the registrar of the actions
-  /// @param _actionScoreManager - the action score manager
-  /// @param _roundThreshold - the threshold for a user to be considered a person in a round
-  /// @param _threshold - the threshold for a user to be considered a person in total
-  /// @param _isTotalScoreConsidered - flag to indicate if the total score is considered for a user to be a person
-  /// @param _x2EarnApps - the x2EarnApps contract address
-  function initialize(
-    address _admin,
-    address _contractsManagerAdmin,
-    address _upgrader,
-    address _actionRegistrar,
-    address _actionScoreManager,
-    uint256 _roundThreshold,
-    uint256 _threshold,
-    bool _isTotalScoreConsidered,
-    IX2EarnApps _x2EarnApps,
-    uint256 _roundsForCumulativeScore
-  ) external initializer {
-    require(_admin != address(0), "ProofOfPersonhood: admin is the zero address");
-    require(_contractsManagerAdmin != address(0), "ProofOfPersonhood: contracts manager admin is the zero address");
-    require(_upgrader != address(0), "ProofOfPersonhood: upgrader is the zero address");
-    require(address(_x2EarnApps) != address(0), "ProofOfPersonhood: x2EarnApps is the zero address");
-    require(_roundThreshold > 0, "ProofOfPersonhood: round threshold is zero");
-    require(_threshold > 0, "ProofOfPersonhood: threshold is zero");
+  function initialize(InitializationData memory data) external initializer {
+    require(data.admin != address(0), "ProofOfPersonhood: admin is the zero address");
+    require(data.contractsManagerAdmin != address(0), "ProofOfPersonhood: contracts manager admin is the zero address");
+    require(data.upgrader != address(0), "ProofOfPersonhood: upgrader is the zero address");
+    require(address(data.x2EarnApps) != address(0), "ProofOfPersonhood: x2EarnApps is the zero address");
+    require(data.roundThreshold > 0, "ProofOfPersonhood: round threshold is zero");
+    require(data.threshold > 0, "ProofOfPersonhood: threshold is zero");
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
     __ReentrancyGuard_init();
 
-    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-    _grantRole(UPGRADER_ROLE, _upgrader);
-    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, _contractsManagerAdmin);
+    _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
+    _grantRole(UPGRADER_ROLE, data.upgrader);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsManagerAdmin);
 
     ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
 
-    $.x2EarnApps = _x2EarnApps;
-    $.roundThreshold = _roundThreshold;
-    $.totalThreshold = _threshold;
-    $.isTotalScoreConsidered = _isTotalScoreConsidered;
+    $.x2EarnApps = data.x2EarnApps;
+    $.roundThreshold = data.roundThreshold;
+    $.totalThreshold = data.threshold;
+    $.isTotalScoreConsidered = data.isTotalScoreConsidered;
 
-    _grantRole(ACTION_REGISTRAR_ROLE, _actionRegistrar);
-    _grantRole(ACTION_SCORE_MANAGER_ROLE, _actionScoreManager);
+    _grantRole(ACTION_REGISTRAR_ROLE, data.actionRegistrar);
+    _grantRole(ACTION_SCORE_MANAGER_ROLE, data.actionScoreManager);
 
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.EASY] = 1; // Default multiplier for easy actions
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.MEDIUM] = 2; // Default multiplier for medium actions
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.HARD] = 3; // Default multiplier for hard actions
 
-    $.roundsForCumulativeScore = _roundsForCumulativeScore; // Default number of rounds to consider for the cumulative score
+    $.roundsForCumulativeScore = data.roundsForCumulativeScore; // Default number of rounds to consider for the cumulative score
   }
 
   // ---------- Authorizers ---------- //
@@ -216,17 +219,6 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     $.baseActionScore[appId] = baseActionScore;
   }
 
-  /// @notice Sets the whitelisted status of a user
-  /// @dev The whitelisted status of a user can be modified by the DEFAULT_ADMIN_ROLE
-  /// @dev A whitelisted user is considered as a person without any checks
-  /// @param user - the user address
-  /// @param isWhitelisted - the whitelisted status
-  function setWhitelistedUser(address user, bool isWhitelisted) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(user != address(0), "ProofOfPersonhood: user is the zero address");
-
-    _getProofOfPersonhoodStorage().whitelist[user] = isWhitelisted;
-  }
-
   /// @notice Sets the X2EarnApps contract address
   /// @dev The X2EarnApps contract address can be modified by the CONTRACTS_ADDRESS_MANAGER_ROLE
   /// @param _x2EarnApps - the X2EarnApps contract address
@@ -257,6 +249,31 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
   }
 
   // ---------- Getters ---------- //
+
+  function getScore(address user) public view virtual override returns (uint256) {
+    return getUserTotalScore(user);
+  }
+
+  function getNormalizedScore(address user) public view virtual override returns (uint256) {
+    ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
+
+    // Get the user's total score
+    uint256 userScore = getUserTotalScore(user);
+
+    // Use the totalThreshold as the maximum score for normalization
+    uint256 maxScore = $.totalThreshold;
+
+    // Ensure maxScore is not zero to avoid division by zero
+    if (maxScore == 0) {
+      return 0;
+    }
+
+    // Normalize the user's score to a value between 0 and 1 with 18 decimals of precision
+    uint256 normalizedScore = (userScore * 1e18) / maxScore;
+
+    // Return the normalized score
+    return normalizedScore;
+  }
 
   /// @notice Checks if a user is a person in a round
   /// @param user - the user address
@@ -361,5 +378,9 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
   /// @param difficulty - the action difficulty between EASY, MEDIUM, HARD
   function getDifficultyMultiplier(ACTION_DIFFICULTY difficulty) public view virtual returns (uint256) {
     return _getProofOfPersonhoodStorage().actionDifficultyMultiplier[difficulty];
+  }
+
+  function version() public pure returns (string memory) {
+    return "1";
   }
 }
