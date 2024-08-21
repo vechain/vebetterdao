@@ -41,8 +41,8 @@ export const useProposalDetailById = (proposalId: string) => {
   const isDepositReached = useIsDepositReached(proposalId)
   const isProposalActive = useMemo(() => proposalState?.data === ProposalState.Active, [proposalState?.data])
   const isProposalNotPending = useMemo(() => proposalState?.data !== ProposalState.Pending, [proposalState?.data])
-  const proposalQuorum = useProposalQuorum(proposalSnapshotBlock, isProposalActive)
-  const isQuorumReached = useIsProposalQuorumReached(proposalId, isProposalActive)
+  const proposalQuorum = useProposalQuorum(proposalSnapshotBlock)
+  const isQuorumReached = useIsProposalQuorumReached(proposalId)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
   const proposalVotes = useProposalVotes(proposalId, isProposalNotPending)
   const proposalSnapshotVot3 = useGetVotesOnBlock(proposalSnapshotBlock, account ?? undefined, isProposalActive)
@@ -115,16 +115,15 @@ export const useProposalDetailById = (proposalId: string) => {
     const votesWithComment = proposalVoteEvents.data?.votesWithComment
     const hasUserVoted = proposalVoteEvents.data?.hasUserVoted
     const totalVot3UsedInVotes = Number(ethers.formatEther(BigInt(proposalVoteEvents.data?.totalVot3UsedInVotes || 0)))
-    const totalVotingPowerUsedInVotes = Number(
-      ethers.formatEther(BigInt(proposalVoteEvents.data?.totalVotingPowerUsedInVotes || 0)),
-    )
+    const totalVotingPowerUsedInVotes = Number(proposalVotes.data?.totalVotes || "0")
 
     const forVotes = Number(proposalVotes.data?.forVotes || "0")
     const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
     const abstainVotes = Number(proposalVotes.data?.abstainVotes || "0")
-    const forPercentage = (totalVotingPowerUsedInVotes ? forVotes / totalVotingPowerUsedInVotes : 0) * 100
-    const againstPercentage = (totalVotingPowerUsedInVotes ? againstVotes / totalVotingPowerUsedInVotes : 0) * 100
-    const abstainPercentage = (totalVotingPowerUsedInVotes ? abstainVotes / totalVotingPowerUsedInVotes : 0) * 100
+    const forPercentage = Number(proposalVotes.data?.forPercentage || "0")
+
+    const againstPercentage = Number(proposalVotes.data?.againstPercentage || "0")
+    const abstainPercentage = Number(proposalVotes.data?.abstainPercentage || "0")
     const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
     const communityDeposits = proposalDepositEvent.communityDeposits
     const communityDepositPercentage = communityDeposits / depositThreshold
@@ -219,6 +218,7 @@ export const useProposalDetailById = (proposalId: string) => {
       votingStartBlock,
       votingEndBlock,
       proposalVotesQuery: proposalVotes,
+      proposalVoteEventsQuery: proposalVoteEvents,
     }
 
     const mock = {}

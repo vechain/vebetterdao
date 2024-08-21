@@ -24,13 +24,20 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
   const totalVotesQuery = useProposalTotalVotes(proposalId)
 
-  const isEnded = proposal.state === ProposalState.DepositNotMet
+  const isEnded = [
+    ProposalState.Executed,
+    ProposalState.Succeeded,
+    ProposalState.Defeated,
+    ProposalState.Queued,
+    ProposalState.DepositNotMet,
+  ].includes(proposal.state as ProposalState)
 
-  const isCanceled = proposal.state === ProposalState.Canceled
-
+  const shouldNotRenderQuorum = useMemo(() => {
+    return [ProposalState.DepositNotMet, ProposalState.Canceled].includes(proposal.state as ProposalState)
+  }, [])
   const isUpcoming = useMemo(() => {
-    return !isEnded && !proposal.quorumQuery.isLoading && !proposal.quorumQuery.data
-  }, [proposal, isEnded])
+    return proposal.state === ProposalState.Pending && proposal.isDepositReached
+  }, [proposal])
 
   if (!proposalCreatedEvent) return null
 
@@ -53,7 +60,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
               quorumQuery={proposal.quorumQuery}
               votesAtSnapshotQuery={votesAtSnapshotQuery}
               userVotesAtSnapshotQuery={proposal.snapshotVotesQuery}
-              renderQuroum={isCanceled ? "none" : isUpcoming ? "upcoming" : "active"}
+              renderQuroum={shouldNotRenderQuorum ? "none" : isUpcoming ? "upcoming" : "active"}
               isEnded={isEnded}
               currentVotesQuery={totalVotesQuery}
               renderTimeline={<ProposalTimeline />}
