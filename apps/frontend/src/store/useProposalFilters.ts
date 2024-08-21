@@ -15,7 +15,7 @@ export enum StateFilter {
   Succeeded = "Succeeded",
   Queued = "Queued",
   Executed = "Executed",
-  DepositNotMet = "Deposit not met",
+  DepositNotMet = "Support not reached",
 }
 
 export const initialProposalsFilterValues = [ProposalFilter.InThisRound, ProposalFilter.LookingForSupport]
