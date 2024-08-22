@@ -3,9 +3,10 @@ import { t } from "i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { FaRegHeart } from "react-icons/fa6"
-const compactFormatter = getCompactFormatter(2)
 
 const getSafeScaledPercentage = (percentage: number) => Math.min(percentage, 1) * 100
+
+const compactFormatter = getCompactFormatter(1)
 
 type Props = {
   isDepositThresholdReached?: boolean

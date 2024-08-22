@@ -14,6 +14,8 @@ const forColor = "#3DBA67"
 const againstColor = "#C84968"
 const abstainColor = "#B59525"
 
+const compactFormatter = getCompactFormatter(1)
+
 interface VotingProposalProgressProps {
   proposalId: string
   proposalState: ProposalState
@@ -135,7 +137,7 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
 
   const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
   const communityDeposits = proposalDepositEvent.communityDeposits
-  const communityDepositPercentage = (communityDeposits / depositThreshold) * 100
+  const communityDepositPercentage = compactFormatter.format((communityDeposits / depositThreshold) * 100)
 
   const hasUserDeposited = useMemo(() => {
     if (!proposalDepositEvent) return false
@@ -145,33 +147,31 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
 
   return (
     <VStack w={"full"} spacing={1}>
-      <HStack w={"full"} justifyContent={"space-between"}>
-        <HStack>
-          <Icon
-            as={FaRegHeart}
-            boxSize={["20px", "20px", "16px"]}
-            color={
-              isDepositReached
-                ? "rgba(0, 76, 252, 1)"
-                : proposalState !== ProposalState.Pending
-                  ? "rgba(210, 63, 99, 1)"
-                  : "#F29B32"
-            }
-          />
+      <HStack w="full">
+        <Icon
+          as={FaRegHeart}
+          boxSize={["20px", "20px", "16px"]}
+          color={
+            isDepositReached
+              ? "rgba(0, 76, 252, 1)"
+              : proposalState !== ProposalState.Pending
+                ? "rgba(210, 63, 99, 1)"
+                : "#F29B32"
+          }
+        />
 
-          <Text
-            fontSize={"16px"}
-            fontWeight={400}
-            color={
-              isDepositReached
-                ? "rgba(0, 76, 252, 1)"
-                : proposalState !== ProposalState.Pending
-                  ? "rgba(210, 63, 99, 1)"
-                  : "#F29B32"
-            }>
-            <b>{isDepositReached ? 100 : communityDepositPercentage.toFixed(0)}</b> {t("%")}
-          </Text>
-        </HStack>
+        <Text
+          fontSize={"16px"}
+          fontWeight={400}
+          color={
+            isDepositReached
+              ? "rgba(0, 76, 252, 1)"
+              : proposalState !== ProposalState.Pending
+                ? "rgba(210, 63, 99, 1)"
+                : "#F29B32"
+          }>
+          <b>{isDepositReached ? 100 : communityDepositPercentage}</b> {t("%")}
+        </Text>
       </HStack>
       <Box position="relative" height="8px" width="100%" mt={2} bg={"gray.200"} borderRadius="md">
         <Box
