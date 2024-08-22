@@ -2,9 +2,10 @@ import { useCallback, useMemo } from "react"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getProposalsEventsQueryKey, getProposalVotesQuerykey } from "@/api"
+import { getProposalsEventsQueryKey, getProposalVotesQuerykey, getUserProposalsVoteEventsQueryKey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { getIsProposalQuorumReachedQueryKey } from "@/api/contracts/governance/hooks/useIsProposalQuorumReached"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
@@ -24,6 +25,7 @@ type Props = { proposalId: string; onSuccess?: () => void }
  * @returns {ReturnType} - The return value of the custom hook.
  */
 export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
+  const { account } = useWallet()
   const clauseBuilder = useCallback(({ proposalId, vote, comment = "" }: ClausesProps) => {
     return [
       buildClause({
@@ -40,6 +42,7 @@ export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
     () => [
       getProposalVotesQuerykey(proposalId),
       getIsProposalQuorumReachedQueryKey(proposalId),
+      getUserProposalsVoteEventsQueryKey(account ?? undefined),
       getProposalsEventsQueryKey(),
     ],
     [proposalId],
