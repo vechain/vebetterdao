@@ -1,6 +1,5 @@
 import {
   Text,
-  Flex,
   Card,
   CardHeader,
   CardBody,
@@ -10,6 +9,7 @@ import {
   SkeletonText,
   Show,
   Skeleton,
+  Stack,
 } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
 import { ProposalCreatedEvent, ProposalMetadata, ProposalState, useProposalState } from "@/api"
@@ -103,24 +103,22 @@ export const ProposalInfoCard: React.FC<Props> = ({ proposal }) => {
         </HStack>
       </CardHeader>
       <CardBody py={2} mb={4}>
-        <Flex w="full" justifyContent={"space-between"} flexDir={{ base: "column", md: "row" }}>
+        <Stack direction={["column", "row"]} w="full" justifyContent={"space-between"} spacing={4}>
           <SkeletonText
             isLoaded={proposalMetadata.data !== undefined}
-            minH={"90px"}
             minW={"300px"}
             noOfLines={3}
-            flex={2.5}
-            mr={{ base: 0, md: 10 }}
+            flex={2}
             alignSelf={"flex-start"}>
             <Text fontSize={16} fontWeight={400} noOfLines={3}>
               {descriptionText}
             </Text>
           </SkeletonText>
 
-          <Box flex={1} mt={{ base: 2, md: 0 }}>
+          <Box flex={1}>
             <VotingProposalProgress proposalId={proposalId} proposalState={proposalState ?? ProposalState.Pending} />
           </Box>
-        </Flex>
+        </Stack>
         <HStack w={"full"} justifyContent={"space-between"} mt={6}>
           <ProposalStatusBadge
             proposalId={proposal.proposalId}

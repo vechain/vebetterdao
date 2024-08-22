@@ -1,6 +1,6 @@
 import { ProposalState, useProposalState, useProposalVotes } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
-import { Box, Image, Text, VStack } from "@chakra-ui/react"
+import { Box, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
 import { ProposalVotesResults } from "./components/ProposalVotesResults"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
@@ -12,6 +12,11 @@ import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 type Props = {
   proposalId: string
 }
+
+const forColor = "#3DBA67"
+const againstColor = "#C84968"
+const abstainColor = "#B59525"
+
 export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { t } = useTranslation()
 
@@ -27,6 +32,28 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
     }, 1000)
     return () => clearInterval(interval)
   }, [])
+
+  const votes = {
+    for: {
+      color: forColor,
+      text: t("Votes for"),
+      percentage: proposalVotes?.forPercentage ?? 0,
+      icon: <Icon as={UilThumbsUp} boxSize={["20px", "20px", "16px"]} />,
+    },
+    against: {
+      color: againstColor,
+      text: t("Against"),
+      percentage: proposalVotes?.againstPercentage ?? 0,
+      icon: <Icon as={UilThumbsDown} boxSize={["20px", "20px", "16px"]} />,
+    },
+
+    abstain: {
+      color: abstainColor,
+      text: t("Abstained"),
+      percentage: proposalVotes?.abstainPercentage ?? 0,
+      icon: <Image src={"/images/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
+    },
+  }
 
   switch (proposalState) {
     case ProposalState.DepositNotMet:
@@ -99,27 +126,16 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
               {t("Real time votes")}
             </Text>
             <VStack alignItems={"stretch"} gap={6}>
-              <ProposalVotesProgressBar
-                isLoading={proposalVotesLoading}
-                text={t("Votes for")}
-                percentage={proposalVotes?.forPercentage ?? 0}
-                color="#38BF66"
-                icon={<UilThumbsUp size="16px" color="#38BF66" />}
-              />
-              <ProposalVotesProgressBar
-                isLoading={proposalVotesLoading}
-                text={t("Against")}
-                percentage={proposalVotes?.againstPercentage ?? 0}
-                color="#D23F63"
-                icon={<UilThumbsDown size="16px" color="#D23F63" />}
-              />
-              <ProposalVotesProgressBar
-                isLoading={proposalVotesLoading}
-                text={t("Abstained")}
-                percentage={proposalVotes?.abstainPercentage ?? 0}
-                color="#B59525"
-                icon={<Image src={"/images/abstained.svg"} alt="abstained" />}
-              />
+              {Object.entries(votes).map(([key, value]) => (
+                <ProposalVotesProgressBar
+                  isLoading={proposalVotesLoading}
+                  key={key}
+                  text={value.text}
+                  percentage={value.percentage}
+                  color={value.color}
+                  icon={value.icon}
+                />
+              ))}
             </VStack>
             <Box mt={2}>
               <ProposalVotesResults proposalId={proposalId} />
