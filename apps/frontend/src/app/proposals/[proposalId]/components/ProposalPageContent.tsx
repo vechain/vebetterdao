@@ -36,7 +36,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
     return [ProposalState.DepositNotMet, ProposalState.Canceled].includes(proposal.state as ProposalState)
   }, [])
   const isUpcoming = useMemo(() => {
-    return proposal.state === ProposalState.Pending && proposal.isDepositReached
+    return proposal.state === ProposalState.Pending
   }, [proposal])
 
   if (!proposalCreatedEvent) return null
