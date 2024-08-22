@@ -66,6 +66,9 @@ export const GmNFTAndNodeCard = () => {
   const goToGmNftPage = useCallback(() => {
     router.push("/gm-nft")
   }, [router])
+  const goToXNodePage = useCallback(() => {
+    router.push("/xnode")
+  }, [router])
 
   const { account } = useWallet()
   if (!account) {
@@ -177,7 +180,9 @@ export const GmNFTAndNodeCard = () => {
                   justify="space-between"
                   rounded="12px"
                   gap={6}
-                  flex={1}>
+                  flex={1}
+                  onClick={goToXNodePage}
+                  cursor="pointer">
                   <Image src={xNodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
                   <VStack flex="1" align={"flex-start"}>
                     <Text fontWeight={700} noOfLines={1}>

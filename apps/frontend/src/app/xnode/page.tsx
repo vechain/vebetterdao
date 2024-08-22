@@ -6,7 +6,7 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const GmNFTPageContent = dynamic(() => import("./components/GmNFTPageContent").then(mod => mod.GmNFTPageContent), {
+const XNodeContent = dynamic(() => import("./XNodeContent").then(mod => mod.XNodeContent), {
   ssr: false,
   loading: () => (
     <VStack w="full" spacing={12} h="80vh" justify="center">
@@ -15,14 +15,14 @@ const GmNFTPageContent = dynamic(() => import("./components/GmNFTPageContent").t
   ),
 })
 
-export default function GMNFTPage() {
+export default function XNodePage() {
   useEffect(() => {
-    AnalyticsUtils.trackPage("GMNFTPage")
+    AnalyticsUtils.trackPage("XNodePage")
   }, [])
 
   return (
     <MotionVStack>
-      <GmNFTPageContent />
+      <XNodeContent />
     </MotionVStack>
   )
 }
