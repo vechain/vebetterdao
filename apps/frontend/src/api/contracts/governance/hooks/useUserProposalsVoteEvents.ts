@@ -4,12 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
 import { useMemo } from "react"
 
-export const getUserProposalsVoteEventsQueryKey = (proposalId?: string, user?: string) => [
-  "PROPOSALS",
-  proposalId ?? "ALL",
-  "VOTES",
-  user,
-]
+export const getUserProposalsVoteEventsQueryKey = (user?: string) => ["PROPOSALS", "ALL", "VOTES", user]
 
 /**
  * Custom hook that retrieves the vote events of a specific user for all proposals.
@@ -20,7 +15,7 @@ export const useUserProposalsVoteEvents = () => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getUserProposalsVoteEventsQueryKey(undefined, account ?? undefined),
+    queryKey: getUserProposalsVoteEventsQueryKey(account ?? undefined),
     queryFn: async () => {
       const { votes } = await getProposalsVoteEvents(thor, undefined, account ?? undefined)
 
