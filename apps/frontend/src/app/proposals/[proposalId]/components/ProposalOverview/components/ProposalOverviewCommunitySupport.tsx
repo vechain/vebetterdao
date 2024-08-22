@@ -4,11 +4,14 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../../hooks"
 import { FaRegHeart } from "react-icons/fa6"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
+const compactFormatter = getCompactFormatter(1)
 export const ProposalOverviewCommunitySupport = () => {
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
+  const percentage = Math.min(proposal.communityDepositPercentage * 100, 100)
   const supportIconColor = useMemo(() => {
     if (proposal.state === ProposalState.DepositNotMet) {
       return "#D23F63"
@@ -28,9 +31,7 @@ export const ProposalOverviewCommunitySupport = () => {
           </Text>
           <HStack>
             <FaRegHeart color={supportIconColor} />
-            <Text color="#252525">
-              {t("{{percentage}}%", { percentage: Math.floor(proposal.communityDepositPercentage * 100) })}
-            </Text>
+            <Text color="#252525">{t("{{percentage}}%", { percentage: compactFormatter.format(percentage) })}</Text>
           </HStack>
         </Box>
       )
