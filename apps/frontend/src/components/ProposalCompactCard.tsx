@@ -85,11 +85,13 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
                 {proposalMetadata.data?.title}
               </Text>
             </SkeletonText>
-            <Skeleton isLoaded={!isVotingStartDateLoading && !hasVotedLoading}>
-              <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
-                {hasVotedText}
-              </Text>
-            </Skeleton>
+            {account && (
+              <Skeleton isLoaded={!isVotingStartDateLoading && !hasVotedLoading}>
+                <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+                  {hasVotedText}
+                </Text>
+              </Skeleton>
+            )}
           </VStack>
           <IconButton
             aria-label="Go to proposal"

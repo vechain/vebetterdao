@@ -5,8 +5,10 @@ import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../../hooks"
 import { useMemo } from "react"
 import { MdHowToVote } from "react-icons/md"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export const ProposalYourVote = () => {
+  const { account } = useWallet()
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
 
@@ -15,14 +17,17 @@ export const ProposalYourVote = () => {
   }, [proposal])
 
   const shouldRender = useMemo(() => {
-    return [
-      ProposalState.Active,
-      ProposalState.Defeated,
-      ProposalState.Executed,
-      ProposalState.Queued,
-      ProposalState.Succeeded,
-    ].includes(proposal.state as ProposalState)
-  }, [proposal])
+    return (
+      account &&
+      [
+        ProposalState.Active,
+        ProposalState.Defeated,
+        ProposalState.Executed,
+        ProposalState.Queued,
+        ProposalState.Succeeded,
+      ].includes(proposal.state as ProposalState)
+    )
+  }, [proposal, account])
 
   if (!shouldRender) return null
 
