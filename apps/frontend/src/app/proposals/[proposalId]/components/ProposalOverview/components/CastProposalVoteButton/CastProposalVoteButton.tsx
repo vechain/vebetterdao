@@ -1,5 +1,10 @@
-import { ProposalState } from "@/api"
-import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import {
+  ProposalState,
+  useGetVotesOnBlock,
+  useProposalSnapshot,
+  useProposalState,
+  useUserSingleProposalVoteEvent,
+} from "@/api"
 
 import { Button, Icon } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
@@ -8,20 +13,30 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { MdHowToVote } from "react-icons/md"
 
-export const CastProposalVoteButton = () => {
-  const { proposal } = useProposalDetail()
-  const { t } = useTranslation()
+type Props = {
+  proposalId: string
+}
+export const CastProposalVoteButton = ({ proposalId }: Props) => {
   const router = useRouter()
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { open: openConnectModal } = useWalletModal()
 
+  const { data: userVote, isLoading: userVoteLoading } = useUserSingleProposalVoteEvent(proposalId)
+  const { data: state } = useProposalState(proposalId)
+  const { data: snapshotBlock } = useProposalSnapshot(proposalId)
+  const { data: userSnapshot } = useGetVotesOnBlock(
+    snapshotBlock ? Number(snapshotBlock) : undefined,
+    account ?? undefined,
+  )
+
   const hasVotesAtSnapshot = useMemo(() => {
-    return Number(proposal.userVot3OnSnapshot ?? 0) > 0
-  }, [proposal])
+    return Number(userSnapshot ?? 0) > 0
+  }, [userSnapshot])
 
   const goToProposalVote = useCallback(() => {
-    router.push(`/proposals/${proposal.id}/vote`)
-  }, [proposal.id, router])
+    router.push(`/proposals/${proposalId}/vote`)
+  }, [proposalId, router])
 
   const handleClick = useCallback(() => {
     if (!account) {
@@ -32,8 +47,8 @@ export const CastProposalVoteButton = () => {
   }, [account, goToProposalVote, openConnectModal])
 
   const shouldSeeVoteButton = useMemo(() => {
-    return proposal.state === ProposalState.Active && !!account && !proposal.hasUserVoted && hasVotesAtSnapshot
-  }, [proposal, account, hasVotesAtSnapshot])
+    return state === ProposalState.Active && !!account && !userVote && !userVoteLoading && hasVotesAtSnapshot
+  }, [state, account, userVote, userVoteLoading, hasVotesAtSnapshot])
 
   if (shouldSeeVoteButton)
     return (

@@ -28,9 +28,10 @@ import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 import { ProposalStatusBadge, ProposalYourVote } from "@/components"
 
 export const ProposalOverview = () => {
-  const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const { account } = useWallet()
+
+  const { proposal } = useProposalDetail()
   const { name: proposerName } = useWalletName(proposal.proposer)
 
   return (
@@ -97,7 +98,7 @@ export const ProposalOverview = () => {
                 <ProposalYourVote proposalId={proposal.id} />
               </Stack>
 
-              <CastProposalVoteButton />
+              {account && <CastProposalVoteButton proposalId={proposal.id} />}
             </Stack>
           </VStack>
           <VStack flex={1} h="full">
