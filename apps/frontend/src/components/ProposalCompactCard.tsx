@@ -10,6 +10,7 @@ import { FaAngleRight } from "react-icons/fa6"
 import dayjs from "dayjs"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
+import { ProposalYourVote } from "./Proposal/ProposalYourVote"
 
 type Props = {
   proposal: ProposalCreatedEvent
@@ -37,21 +38,32 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
   const hasVotedText = useMemo(() => {
     switch (proposalState) {
       case ProposalState.Pending:
-        return t("Starting {{date}}", { date: dayjs(votingStartDate).format("MMM D, YYYY") })
+        return (
+          <Skeleton isLoaded={!isVotingStartDateLoading}>
+            <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+              {t("Starting {{date}}", { date: dayjs(votingStartDate).format("MMM D, YYYY") })}
+            </Text>
+          </Skeleton>
+        )
       case ProposalState.Canceled:
-        return t("Vote didn't start")
       case ProposalState.DepositNotMet:
-        return t("Vote didn't start")
+        return (
+          <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
+            {t("Vote didn't start")}
+          </Text>
+        )
       case ProposalState.Active:
-        return hasVoted ? t("You have voted") : t("You didn't vote yet")
       case ProposalState.Executed:
-        return hasVoted ? t("You have voted") : t("You haven't voted")
       case ProposalState.Defeated:
-        return hasVoted ? t("You have voted") : t("You haven't voted")
       case ProposalState.Succeeded:
-        return hasVoted ? t("You have voted") : t("You haven't voted")
       case ProposalState.Queued:
-        return hasVoted ? t("You have voted") : t("You haven't voted")
+        return (
+          <ProposalYourVote
+            proposalId={proposalId}
+            renderTitle={false}
+            textProps={{ color: "gray.500", fontSize: "14px" }}
+          />
+        )
       default:
         return ""
     }

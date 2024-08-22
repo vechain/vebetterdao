@@ -1,17 +1,19 @@
 import React, { useMemo } from "react"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
-import { ProposalState, useProposalCreatedEvent, useProposalVoteEvents, useProposalVotes } from "@/api"
-import { Box, Card, CardBody, HStack, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { ProposalState, useProposalCreatedEvent, useProposalVotes } from "@/api"
+import { Box, Card, CardBody, HStack, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { FaRegHeart } from "react-icons/fa6"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { ProposalYourVote } from "./ProposalYourVote"
 
 const forColor = "#3DBA67"
 const againstColor = "#C84968"
 const abstainColor = "#B59525"
+
 interface VotingProposalProgressProps {
   proposalId: string
   proposalState: ProposalState
@@ -20,24 +22,10 @@ interface VotingProposalProgressProps {
 const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposalId, proposalState }) => {
   const { t } = useTranslation()
   const { data: proposalVotes } = useProposalVotes(proposalId)
-  const { data: votesEvents, isLoading: votesEventsLoading } = useProposalVoteEvents(proposalId)
 
   const forVotesPercentage = Number(proposalVotes?.forPercentage || 0)
   const againstVotesPercentage = Number(proposalVotes?.againstPercentage || 0)
   const abstainVotesPercentage = Number(proposalVotes?.abstainPercentage || 0)
-
-  const getVoteType = useMemo(() => {
-    switch (votesEvents?.userVote?.support) {
-      case "0":
-        return "Against"
-      case "1":
-        return "For"
-      case "2":
-        return "Abstain"
-      default:
-        return null
-    }
-  }, [votesEvents])
 
   const votes = {
     for: {
@@ -73,7 +61,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
       return <VotingSupportProgress proposalId={proposalId} proposalState={proposalState} />
 
     return (
-      <VStack w={"full"} spacing={1}>
+      <VStack w={"full"} spacing={3}>
         <HStack w={"full"} justifyContent={"space-between"}>
           {Object.keys(votes).map(key => {
             const vote = votes[key as keyof typeof votes]
@@ -88,7 +76,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
           })}
         </HStack>
 
-        <Box position="relative" height="8px" width="100%" mt={2} bg={"gray.200"} borderRadius="md">
+        <Box position="relative" height="8px" width="100%" bg={"gray.200"} borderRadius="md">
           {Object.keys(votes).map((key, index) => {
             const vote = votes[key as keyof typeof votes]
             // the sum of all the percentages before this
@@ -114,31 +102,14 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
               />
             )
           })}
-          <Box height="100%" width={`${forVotesPercentage}%`} bg={"##3DBA67"} borderRadius="md" position="absolute" />
         </Box>
-        <Skeleton isLoaded={!votesEventsLoading}>
-          {votesEvents?.hasUserVoted === true ? (
-            <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
-              {t("You voted")}
-              <b
-                style={{
-                  color:
-                    getVoteType === "For"
-                      ? "rgba(56, 191, 102, 1)"
-                      : getVoteType === "Abstain"
-                        ? "rgba(181, 149, 37, 1)"
-                        : "rgba(210, 63, 99, 1)",
-                  marginLeft: 2,
-                }}>
-                {getVoteType}
-              </b>
-            </Text>
-          ) : (
-            <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} mt={1}>
-              {t("You haven't voted")}
-            </Text>
-          )}
-        </Skeleton>
+        <ProposalYourVote
+          proposalId={proposalId}
+          renderTitle={false}
+          textProps={{
+            fontSize: "12px",
+          }}
+        />
       </VStack>
     )
   }

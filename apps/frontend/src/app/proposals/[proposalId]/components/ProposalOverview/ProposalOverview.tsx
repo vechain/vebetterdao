@@ -18,7 +18,6 @@ import { ProposalOverviewVotes } from "./components/ProposalOverviewVotes"
 import { ProposalOverviewTime } from "./components/ProposalOverviewTime"
 import { ProposalOverviewYourSupport } from "./components/ProposalOverviewYourSupport"
 import { ProposalOverviewCommunitySupport } from "./components/ProposalOverviewCommunitySupport"
-import { ProposalYourVote } from "./components/ProposalYourVote"
 import { useTranslation } from "react-i18next"
 import { CastProposalVoteButton } from "./components/CastProposalVoteButton"
 import { compareAddresses } from "@repo/utils/AddressUtils"
@@ -26,7 +25,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useProposalDetail } from "../../hooks"
 import { ProposalShareButton } from "./components/ProposalShareButton"
 import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
-import { ProposalStatusBadge } from "@/components"
+import { ProposalStatusBadge, ProposalYourVote } from "@/components"
 
 export const ProposalOverview = () => {
   const { proposal } = useProposalDetail()
@@ -95,7 +94,7 @@ export const ProposalOverview = () => {
                 <ProposalOverviewCommunitySupport />
                 <ProposalOverviewYourSupport />
 
-                <ProposalYourVote />
+                <ProposalYourVote proposalId={proposal.id} />
               </Stack>
 
               <CastProposalVoteButton />
