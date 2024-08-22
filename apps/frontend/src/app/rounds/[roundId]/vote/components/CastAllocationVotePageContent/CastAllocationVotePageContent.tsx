@@ -5,6 +5,7 @@ import {
   useGetVotesOnBlock,
   useHasVotedInRound,
   useRoundXApps,
+  useVotingThreshold,
 } from "@/api"
 import { Heading, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo, useState } from "react"
@@ -36,7 +37,11 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
     account ?? undefined,
   )
 
-  const hasNoVotes = !votesAtSnapshot || votesAtSnapshot === "0"
+  const { data: threshold } = useVotingThreshold()
+
+  const hasVotesAtSnapshot = useMemo(() => {
+    return Number(votesAtSnapshot) > (threshold ?? 0)
+  }, [votesAtSnapshot])
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = [1, 2].includes(state ?? 0)
@@ -58,10 +63,10 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
 
   const shouldSeeThePage = useMemo(() => {
     return {
-      value: !hasVoted && !isVotingConcluded && !hasNoVotes,
+      value: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot,
       loading: hasVotedLoading || stateLoading || votesAtSnapshotLoading,
     }
-  }, [hasVotedLoading, hasVoted, isVotingConcluded, hasNoVotes, stateLoading, votesAtSnapshotLoading])
+  }, [hasVotedLoading, hasVoted, isVotingConcluded, hasVotesAtSnapshot, stateLoading, votesAtSnapshotLoading])
 
   //   redirect to round page if user already voted or voting is concluded
   useLayoutEffect(() => {

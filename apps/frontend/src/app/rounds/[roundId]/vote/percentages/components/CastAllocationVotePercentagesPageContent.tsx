@@ -1,5 +1,11 @@
 "use client"
-import { useAllocationsRound, useAllocationsRoundState, useGetVotesOnBlock, useHasVotedInRound } from "@/api"
+import {
+  useAllocationsRound,
+  useAllocationsRoundState,
+  useGetVotesOnBlock,
+  useHasVotedInRound,
+  useVotingThreshold,
+} from "@/api"
 import { Button, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -30,7 +36,11 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
     account ?? undefined,
   )
 
-  const hasNoVotes = !votesAtSnapshot || votesAtSnapshot === "0"
+  const { data: threshold } = useVotingThreshold()
+
+  const hasVotesAtSnapshot = useMemo(() => {
+    return Number(votesAtSnapshot) > (threshold ?? 0)
+  }, [votesAtSnapshot])
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore() && [1, 2].includes(state ?? 0)
@@ -81,10 +91,10 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
 
   const shouldSeeThePage = useMemo(() => {
     return {
-      value: !hasVoted && !isVotingConcluded && !hasNoVotes && votes.length > 0,
+      value: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && votes.length > 0,
       loading: hasVotedLoading || stateLoading || votesAtSnapshotLoading,
     }
-  }, [hasVotedLoading, hasVoted, isVotingConcluded, hasNoVotes, stateLoading, votesAtSnapshotLoading, votes])
+  }, [hasVotedLoading, hasVoted, isVotingConcluded, hasVotesAtSnapshot, stateLoading, votesAtSnapshotLoading, votes])
 
   //   redirect to round page if user already voted or voting is concluded
   useLayoutEffect(() => {

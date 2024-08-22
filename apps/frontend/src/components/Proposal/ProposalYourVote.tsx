@@ -4,6 +4,7 @@ import {
   useProposalSnapshot,
   useProposalState,
   useUserSingleProposalVoteEvent,
+  useVotingThreshold,
 } from "@/api"
 import { Box, HStack, Icon, Image, Skeleton, Text, TextProps } from "@chakra-ui/react"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
@@ -145,11 +146,12 @@ const NoVoteAndActiveCheckVotingPower = ({
     snapshotBlock ? Number(snapshotBlock) : undefined,
     account ?? undefined,
   )
+  const { data: threshold } = useVotingThreshold()
 
   const snapshotLoading = snapshotBlockloading || userSnapshotLoading
 
   const hasVotesAtSnapshot = useMemo(() => {
-    return Number(userSnapshot ?? 0) > 0
+    return Number(userSnapshot ?? 0) > (threshold ?? 0)
   }, [userSnapshot])
 
   return (
