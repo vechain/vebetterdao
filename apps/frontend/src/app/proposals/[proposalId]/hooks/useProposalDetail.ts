@@ -149,6 +149,7 @@ export const useProposalDetailById = (proposalId: string) => {
       title: proposalMetadata.data?.title || "",
       isTitleLoading: proposalCreatedEvent.isLoading || proposalMetadata.isLoading,
       description: proposalMetadata.data?.shortDescription || "",
+      type: (proposalCreatedEvent.data?.targets.length ?? 0) >= 1 ? "on-chain" : "text",
       isDescriptionLoading: proposalCreatedEvent.isLoading || proposalMetadata.isLoading,
       proposer: proposalCreatedEvent.data?.proposer || "",
       isProposerLoading: proposalCreatedEvent.isLoading,
@@ -225,6 +226,7 @@ export const useProposalDetailById = (proposalId: string) => {
 
     return { ...result, ...mock }
   }, [
+    proposalCreatedEvent,
     proposalVoteEvents,
     proposalCanceledDate,
     proposalVotes,
