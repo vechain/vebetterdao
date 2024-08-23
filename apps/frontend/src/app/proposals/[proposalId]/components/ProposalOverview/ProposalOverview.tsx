@@ -38,7 +38,7 @@ export const ProposalOverview = () => {
     <Card variant="baseWithBorder" w="full" borderRadius={"3xl"}>
       <CardBody>
         <Stack direction={["column", "row"]} justify="space-between" spacing={12} w="full" alignItems={"stretch"}>
-          <VStack spacing={4} align="flex-start" flex={2}>
+          <VStack spacing={4} align="flex-start" flex={2} justify={"space-between"}>
             <VStack spacing={2} align="flex-start">
               <HStack justify={"space-between"} align={"center"} w="full">
                 <Skeleton isLoaded={!proposal.isRoundIdVoteStartLoading}>

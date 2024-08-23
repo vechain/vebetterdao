@@ -45,7 +45,7 @@ export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
       getUserProposalsVoteEventsQueryKey(account ?? undefined),
       getProposalsEventsQueryKey(),
     ],
-    [proposalId],
+    [proposalId, account],
   )
 
   return useBuildTransaction<ClausesProps>({

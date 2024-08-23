@@ -27,7 +27,7 @@ export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFil
         proposalDepositReached => proposalDepositReached.proposalId === proposal.proposalId,
       )?.depositReached,
     }))
-  }, [proposalsEvents, allProposalsState])
+  }, [proposalsEvents, allProposalsState, allProposalsDepositReached])
 
   const filteredProposals = useMemo(() => {
     if (!proposalsWithStateAndDeposit) return []
@@ -65,7 +65,7 @@ export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFil
       )
     }
     return proposals
-  }, [proposalsEvents, selectedFilter, allProposalsDepositReached])
+  }, [selectedFilter, proposalsWithStateAndDeposit])
 
   const sortedFilteredProposals = useMemo(() => {
     if (!filteredProposals) return []

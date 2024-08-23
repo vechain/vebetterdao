@@ -4,6 +4,7 @@ import {
   useProposalSnapshot,
   useProposalState,
   useUserSingleProposalVoteEvent,
+  useVotingThreshold,
 } from "@/api"
 
 import { Button, Icon } from "@chakra-ui/react"
@@ -29,10 +30,11 @@ export const CastProposalVoteButton = ({ proposalId }: Props) => {
     snapshotBlock ? Number(snapshotBlock) : undefined,
     account ?? undefined,
   )
+  const { data: threhsold } = useVotingThreshold()
 
   const hasVotesAtSnapshot = useMemo(() => {
-    return Number(userSnapshot ?? 0) > 0
-  }, [userSnapshot])
+    return Number(userSnapshot ?? 0) >= (threhsold ?? 0)
+  }, [userSnapshot, threhsold])
 
   const goToProposalVote = useCallback(() => {
     router.push(`/proposals/${proposalId}/vote`)
