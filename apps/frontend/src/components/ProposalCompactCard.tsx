@@ -1,6 +1,6 @@
 import { Text, Card, CardBody, VStack, HStack, SkeletonText, IconButton, Skeleton } from "@chakra-ui/react"
 import React, { useCallback, useMemo } from "react"
-import { ProposalCreatedEvent, ProposalMetadata, ProposalState, useHasVoted, useProposalState } from "@/api"
+import { ProposalCreatedEvent, ProposalMetadata, ProposalState, useProposalState } from "@/api"
 import { useIpfsMetadata } from "@/api/ipfs"
 import { toIPFSURL } from "@/utils"
 import { useProposalVoteDates } from "@/api/contracts/governance/hooks/useProposalVoteDates"
@@ -32,8 +32,6 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
   const goToProposal = useCallback(() => {
     router.push(`/proposals/${proposalId}`)
   }, [router, proposalId])
-
-  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVoted(proposal.proposalId, account ?? "")
 
   const hasVotedText = useMemo(() => {
     switch (proposalState) {
@@ -67,7 +65,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
       default:
         return ""
     }
-  }, [votingStartDate, proposalState, t, hasVoted])
+  }, [votingStartDate, proposalState, t, isVotingStartDateLoading, proposalId])
 
   return (
     <Card
@@ -97,13 +95,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
                 {proposalMetadata.data?.title}
               </Text>
             </SkeletonText>
-            {account && (
-              <Skeleton isLoaded={!isVotingStartDateLoading && !hasVotedLoading}>
-                <Text fontSize={"14px"} color={"gray.500"} fontWeight={400}>
-                  {hasVotedText}
-                </Text>
-              </Skeleton>
-            )}
+            {!!account && hasVotedText}
           </VStack>
           <IconButton
             aria-label="Go to proposal"

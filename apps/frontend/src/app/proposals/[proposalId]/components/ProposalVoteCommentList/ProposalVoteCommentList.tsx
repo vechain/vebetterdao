@@ -24,7 +24,7 @@ export const ProposalVoteCommentList = () => {
       ...prev,
       ...(sortedComments.slice(visibleComments.length, visibleComments.length + 10) ?? []),
     ])
-  }, [proposal.votesWithComment, visibleComments.length])
+  }, [sortedComments, visibleComments.length])
 
   if (!sortedComments.length) return null
   return (

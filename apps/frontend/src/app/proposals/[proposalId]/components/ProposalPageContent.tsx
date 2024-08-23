@@ -34,7 +34,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
   const shouldNotRenderQuorum = useMemo(() => {
     return [ProposalState.DepositNotMet, ProposalState.Canceled].includes(proposal.state as ProposalState)
-  }, [])
+  }, [proposal.state])
   const isUpcoming = useMemo(() => {
     return proposal.state === ProposalState.Pending
   }, [proposal])

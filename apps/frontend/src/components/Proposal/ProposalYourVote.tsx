@@ -85,7 +85,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
         </Text>
       </HStack>
     )
-  }, [userVote])
+  }, [userVote, account, textProps, t])
 
   const shouldRender = useMemo(() => {
     return (

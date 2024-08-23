@@ -226,7 +226,6 @@ export const useProposalDetailById = (proposalId: string) => {
 
     return { ...result, ...mock }
   }, [
-    proposalCreatedEvent,
     proposalVoteEvents,
     proposalCanceledDate,
     proposalVotes,
