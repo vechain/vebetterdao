@@ -152,7 +152,7 @@ const NoVoteAndActiveCheckVotingPower = ({
 
   const hasVotesAtSnapshot = useMemo(() => {
     return Number(userSnapshot ?? 0) > (threshold ?? 0)
-  }, [userSnapshot])
+  }, [userSnapshot, threshold])
 
   return (
     <Skeleton isLoaded={!snapshotLoading}>
