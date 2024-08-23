@@ -1,12 +1,13 @@
-import { useProposalClaimableUserDeposits } from "@/api"
+import { ProposalState, useProposalClaimableUserDeposits } from "@/api"
 import { ProposalInfoCard, JoinCommunity } from "@/components"
-import { VStack, HStack, Heading, Box, Button, Show, Spinner } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Box, Button, Show, Spinner, Text } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
+import { useProposalFilters } from "@/store"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -14,7 +15,8 @@ export const ProposalsPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
 
-  const { filteredProposals, isLoading } = useFilteredProposals()
+  const { selectedFilter } = useProposalFilters()
+  const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
 
   const userProposalDeposits = useProposalClaimableUserDeposits(account ?? "")
 
@@ -24,7 +26,7 @@ export const ProposalsPageContent = () => {
     }, BigInt(0))
   }, [userProposalDeposits])
 
-  const onNewCLick = useCallback(() => {
+  const onNewClick = useCallback(() => {
     if (!account) {
       open()
       return
@@ -32,6 +34,20 @@ export const ProposalsPageContent = () => {
 
     router.push("/proposals/new")
   }, [account, open, router])
+
+  //First active, then looking for support (pending + deposit not met), then upcoming (pending + deposit met)
+  const sortedProposals = useMemo(() => {
+    return filteredProposals.sort((a, b) => {
+      const getPriority = (proposal: (typeof filteredProposals)[0]) => {
+        if (proposal.state === ProposalState.Active) return 1
+        if (proposal.state === ProposalState.Pending && !proposal.isDepositReached) return 2 // lookingForSupport
+        if (proposal.state === ProposalState.Pending && proposal.isDepositReached) return 3 // upcoming
+        return 4 // Everything else
+      }
+
+      return getPriority(a) - getPriority(b)
+    })
+  }, [filteredProposals])
 
   if (isLoading)
     return (
@@ -53,7 +69,7 @@ export const ProposalsPageContent = () => {
           </Box>
           <Show below="sm">
             {filteredProposals.length > 0 && (
-              <Button onClick={onNewCLick} variant={"primaryAction"}>
+              <Button onClick={onNewClick} variant={"primaryAction"}>
                 {t("Create proposal")}
               </Button>
             )}
@@ -75,17 +91,29 @@ export const ProposalsPageContent = () => {
           alignSelf={"flex-start"}
           gap={4}
           w={{ base: "full", md: undefined }}>
-          {filteredProposals.map(proposal => (
+          {sortedProposals.map(proposal => (
             <ProposalInfoCard proposal={proposal} key={proposal.proposalId} />
           ))}
-          {filteredProposals.length === 0 && !isLoading && <NoProposalsCard />}
+          {sortedProposals.length === 0 && !isLoading && (
+            <NoProposalsCard
+              onClick={onNewClick}
+              buttonText={t("Create proposal")}
+              description={
+                <Text fontSize={16} fontWeight={400} mt={2} color={"#6A6A6A"}>
+                  {t("Have an idea for something that could improve the experience in VeBetterDAO? ")}{" "}
+                  <b style={{ color: "black" }}>{t("Create a proposal")}</b>{" "}
+                  {t("and let the community vote to make it happen!")}
+                </Text>
+              }
+            />
+          )}
         </VStack>
         <Show above="sm">
           <VStack flex={2} alignSelf="flex-start" spacing={6} position={"sticky"} top={24}>
             {userTotalDeposits > 0 && (
               <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDeposits} />
             )}
-            {filteredProposals.length > 0 && <CreateProposalCard />}
+            {sortedProposals.length > 0 && <CreateProposalCard />}
             <JoinCommunity />
           </VStack>
         </Show>

@@ -1,25 +1,32 @@
-import { ProposalState } from "@/api"
-import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { HStack, Text } from "@chakra-ui/react"
+import { ProposalState, useIsProposalQuorumReached, useProposalState } from "@/api"
+import { HStack, Skeleton, Text } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 
-export const ProposalVotesResults = () => {
-  const { proposal } = useProposalDetail()
+type Props = {
+  proposalId: string
+}
+export const ProposalVotesResults = ({ proposalId }: Props) => {
   const { t } = useTranslation()
+  const { data: state } = useProposalState(proposalId)
+  const { data: isQuorumReached, isLoading: isQuorumReachedLoading } = useIsProposalQuorumReached(proposalId, true)
 
-  switch (proposal.state) {
+  switch (state) {
     case ProposalState.Defeated:
-      if (!proposal.isQuorumReached)
+      if (!isQuorumReached)
         return (
-          <Text fontSize="14px" color="#D23F63" fontWeight={600}>
-            {t("Quorum was not reached")}
-          </Text>
+          <Skeleton isLoaded={!isQuorumReachedLoading}>
+            <Text fontSize="14px" color="#D23F63" fontWeight={600}>
+              {t("Quorum was not reached")}
+            </Text>
+          </Skeleton>
         )
       return (
-        <Text fontSize="14px" color="#D23F63" fontWeight={600}>
-          {t("Proposal rejected by voting")}
-        </Text>
+        <Skeleton isLoaded={!isQuorumReachedLoading}>
+          <Text fontSize="14px" color="#D23F63" fontWeight={600}>
+            {t("Proposal rejected by voting")}
+          </Text>
+        </Skeleton>
       )
     case ProposalState.Succeeded:
     case ProposalState.Queued:
@@ -39,14 +46,23 @@ export const ProposalVotesResults = () => {
         </HStack>
       )
     case ProposalState.Active:
-      if (!proposal.isQuorumReached)
-        return (
+      return (
+        <Skeleton isLoaded={!isQuorumReachedLoading}>
           <HStack>
             <UilExclamationCircle />
-            <Text fontSize="14px" color="#6A6A6A">
-              {t("Quorum not reached yet")}
+            <Text fontSize="14px" color="#6A6A6A" fontWeight={isQuorumReached ? 600 : 400}>
+              {isQuorumReached ? t("Quorum reached") : t("Quorum not reached yet")}
             </Text>
           </HStack>
-        )
+        </Skeleton>
+      )
+    default:
+      return (
+        <Skeleton>
+          <Text fontSize="14px" color="#38BF66" fontWeight={600}>
+            {t("Proposal approved by voting")}
+          </Text>
+        </Skeleton>
+      )
   }
 }

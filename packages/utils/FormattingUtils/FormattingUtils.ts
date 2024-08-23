@@ -1,6 +1,5 @@
 import { BigNumber } from "bignumber.js"
 import { isFinite } from "lodash"
-import RoundingMode = BigNumber.RoundingMode
 
 export const ROUND_DECIMAL_ZERO = 0
 export const ROUND_DECIMAL_DEFAULT = 2
@@ -189,7 +188,7 @@ export function formatToHumanNumber(
   // Round the number to the specified decimal places
   const roundedAmount = Math.floor(numberAmount * scale) / scale
 
-  const options = formatToCurrency
+  const options: Intl.NumberFormatOptions = formatToCurrency
     ? { style: "currency", currency: "USD", minimumFractionDigits: decimals, maximumFractionDigits: decimals }
     : { minimumFractionDigits: decimals, maximumFractionDigits: decimals }
 
