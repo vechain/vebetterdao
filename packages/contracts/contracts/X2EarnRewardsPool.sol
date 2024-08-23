@@ -31,6 +31,8 @@ import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+import { X2EarnAppsDataTypes } from "./libraries/X2EarnAppsDataTypes.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -155,14 +157,53 @@ contract X2EarnRewardsPool is
   }
 
   /**
+   * @dev Deprecated function, that will call the internal distribute method with empty proof
+   * @notice the proof argument is unused but kept for backwards compatibility
+   */
+  function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external {
+    _distributeReward(appId, amount, receiver, "", "", "", "", new uint256[](8));
+  }
+
+  /**
    * @dev See {IX2EarnRewardsPool-distributeReward}
    */
   function distributeReward(
     bytes32 appId,
     uint256 amount,
     address receiver,
-    string memory proof
-  ) external nonReentrant {
+    string memory action_type,
+    string memory proof_type,
+    string memory proof_data,
+    string memory description,
+    uint256[] memory impact
+  ) external {
+    _distributeReward(appId, amount, receiver, action_type, proof_type, proof_data, description, impact);
+  }
+
+  /**
+   * @dev See {IX2EarnRewardsPool-distributeReward}
+   * @notice The impact is an array of integers that represent the impact of the action. Each index of the array
+   * corresponds to a specific impact category.
+   * The impact categories are the following:
+   * "carbon": "0", // grams reduced or removed of CO2
+   * "water": "0", // ml of water saved
+   * "energy": "0", // Wh of energy saved
+   * "waste_mass": "1", // grams of waste diverted from landfills
+   * "learning_time": "1" // minutes a user spent learning about sustainability topics
+   * "timber": "0", // grams of timber saved
+   * "plastic": "0" // grams of plastic saved,
+   * "trees_planted": "0" // number of planted trees
+   */
+  function _distributeReward(
+    bytes32 appId,
+    uint256 amount,
+    address receiver,
+    string memory action_type,
+    string memory proof_type,
+    string memory proof_data,
+    string memory description,
+    uint256[] memory impact
+  ) internal nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
@@ -179,8 +220,91 @@ contract X2EarnRewardsPool is
     $.availableFunds[appId] -= amount;
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
+    X2EarnAppsDataTypes.AppWithDetailsReturnType memory app = $.x2EarnApps.app(appId);
+
+    // buildJsonProof
+    string memory proofJson = _buildJsonProof(app.name, action_type, proof_type, proof_data, description, impact);
+
     // emit event
-    emit RewardDistributed(amount, appId, receiver, proof, msg.sender);
+    emit RewardDistributed(amount, appId, receiver, proofJson, msg.sender);
+  }
+
+  /**
+   * @dev Builds the JSON proof string.
+   */
+  function _buildJsonProof(
+    string memory app_name,
+    string memory action_type,
+    string memory proof_type,
+    string memory proof_data,
+    string memory description,
+    uint256[] memory impact
+  ) internal pure returns (string memory) {
+    string memory impactJson = _buildImpactJson(impact);
+
+    return
+      string(
+        abi.encodePacked(
+          "{",
+          '"app_name": "',
+          app_name,
+          '",',
+          '"action_type": "',
+          action_type,
+          '",',
+          '"proof": {',
+          '"proof_type": "',
+          proof_type,
+          '",',
+          '"proof_data": "',
+          proof_data,
+          '"},',
+          '"metadata": {',
+          '"description": "',
+          description,
+          '"},',
+          '"impact": {',
+          impactJson,
+          "}",
+          "}"
+        )
+      );
+  }
+
+  /**
+   * @dev Builds the impact JSON string.
+   * @param impact an array of integers that represent the impact of the action. Each index of the array
+   */
+  function _buildImpactJson(uint256[] memory impact) internal pure returns (string memory) {
+    return
+      string(
+        abi.encodePacked(
+          '"carbon": "',
+          Strings.toString(impact[0]),
+          '", ',
+          '"water": "',
+          Strings.toString(impact[1]),
+          '", ',
+          '"energy": "',
+          Strings.toString(impact[2]),
+          '", ',
+          '"waste_mass": "',
+          Strings.toString(impact[3]),
+          '", ',
+          '"learning_time": "',
+          Strings.toString(impact[4]),
+          '", ',
+          '"timber": "',
+          Strings.toString(impact[5]),
+          '", ',
+          '"plastic": "',
+          Strings.toString(impact[6]),
+          '", ',
+          '"trees_planted": "',
+          Strings.toString(impact[7]),
+          '"'
+        )
+      );
   }
 
   /**

@@ -85,6 +85,7 @@ interface IX2EarnRewardsPool {
 
   /**
    * @dev Function used by x2earn apps to reward users that performed sustainable actions.
+   * @notice This function is depracted in favor of the one that accepts separate impact and proof arguments.
    *
    * @param appId the app id that is emitting the reward
    * @param amount the amount of B3TR token the user is rewarded with
@@ -92,4 +93,27 @@ interface IX2EarnRewardsPool {
    * @param proof a JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
    */
   function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external;
+
+  /**
+   * @dev Function used by x2earn apps to reward users that performed sustainable actions.
+   *
+   * @param appId the app id that is emitting the reward
+   * @param amount the amount of B3TR token the user is rewarded with
+   * @param receiver the address of the user that performed the sustainable action and is rewarded
+   * @param action_type the type of action that was performed
+   * @param proof_type the type of proof that was provided
+   * @param proof_data the data of the proof that was provided
+   * @param description a description of the action that was performed
+   * @param impact the impact of the action that was performed
+   */
+  function distributeReward(
+    bytes32 appId,
+    uint256 amount,
+    address receiver,
+    string memory action_type,
+    string memory proof_type,
+    string memory proof_data,
+    string memory description,
+    uint256[] memory impact
+  ) external;
 }
