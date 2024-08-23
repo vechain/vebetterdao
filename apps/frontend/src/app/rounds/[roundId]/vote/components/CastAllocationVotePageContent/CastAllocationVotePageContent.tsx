@@ -41,7 +41,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
 
   const hasVotesAtSnapshot = useMemo(() => {
     return Number(votesAtSnapshot) > (threshold ?? 0)
-  }, [votesAtSnapshot])
+  }, [votesAtSnapshot, threshold])
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = [1, 2].includes(state ?? 0)
