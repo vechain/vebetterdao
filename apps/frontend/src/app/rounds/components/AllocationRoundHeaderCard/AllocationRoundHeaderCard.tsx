@@ -63,7 +63,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { data: roundState, isLoading: roundStateLoading } = useAllocationsRoundState(roundId)
 
   const hasVotesAtSnapshot = useMemo(() => {
-    return Number(votesAtSnapshot) > (threshold ?? 0)
+    return Number(votesAtSnapshot) >= (threshold ?? 0)
   }, [votesAtSnapshot, threshold])
 
   const isFinished = useMemo(() => {

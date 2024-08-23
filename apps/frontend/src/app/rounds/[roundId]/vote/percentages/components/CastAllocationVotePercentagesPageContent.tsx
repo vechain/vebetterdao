@@ -39,7 +39,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   const { data: threshold } = useVotingThreshold()
 
   const hasVotesAtSnapshot = useMemo(() => {
-    return Number(votesAtSnapshot) > (threshold ?? 0)
+    return Number(votesAtSnapshot) >= (threshold ?? 0)
   }, [votesAtSnapshot, threshold])
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)

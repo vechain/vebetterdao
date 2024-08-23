@@ -1,6 +1,7 @@
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { getCallKey, useCall } from "@/hooks"
+import { ethers } from "ethers"
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 const governorInterface = B3TRGovernor__factory.createInterface()
@@ -23,5 +24,6 @@ export const useVotingThreshold = () => {
     contractAddress: GOVERNANCE_CONTRACT,
     method: "votingThreshold",
     args: [],
+    mapResponse: res => ethers.formatEther(res.decoded[0]),
   })
 }
