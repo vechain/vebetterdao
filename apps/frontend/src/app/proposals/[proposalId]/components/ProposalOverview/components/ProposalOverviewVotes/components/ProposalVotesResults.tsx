@@ -46,17 +46,16 @@ export const ProposalVotesResults = ({ proposalId }: Props) => {
         </HStack>
       )
     case ProposalState.Active:
-      if (!isQuorumReached)
-        return (
-          <Skeleton isLoaded={!isQuorumReachedLoading}>
-            <HStack>
-              <UilExclamationCircle />
-              <Text fontSize="14px" color="#6A6A6A">
-                {t("Quorum not reached yet")}
-              </Text>
-            </HStack>
-          </Skeleton>
-        )
+      return (
+        <Skeleton isLoaded={!isQuorumReachedLoading}>
+          <HStack>
+            <UilExclamationCircle />
+            <Text fontSize="14px" color="#6A6A6A" fontWeight={isQuorumReached ? 600 : 400}>
+              {isQuorumReached ? t("Quorum reached") : t("Quorum not reached yet")}
+            </Text>
+          </HStack>
+        </Skeleton>
+      )
     default:
       return (
         <Skeleton>
