@@ -3,22 +3,12 @@
 pragma solidity 0.8.20;
 
 /**
- * @title IX2EarnRewardsPool
+ * @title IX2EarnRewardsPoolV1
  * @dev Interface designed to be used by a contract that allows x2Earn apps to reward users that performed sustainable actions.
  * Funds can be deposited into this contract by specifying the app id that can access the funds.
  * Admins of x2EarnApps can withdraw funds from the rewards pool, whihc are sent to the team wallet.
  */
-interface IX2EarnRewardsPool {
-  struct Proof {
-    string proofType; // url, photo, video, etc.
-    string value;
-  }
-
-  struct Impact {
-    string[] codes; // carbon, water, etc.
-    uint256[] values; // 100, 200, etc.
-  }
-
+interface IX2EarnRewardsPoolV1 {
   /**
    * @dev Event emitted when a new deposit is made into the rewards pool.
    *
@@ -95,7 +85,6 @@ interface IX2EarnRewardsPool {
 
   /**
    * @dev Function used by x2earn apps to reward users that performed sustainable actions.
-   * @notice This function is depracted in favor of the one that accepts separate impact and proof arguments.
    *
    * @param appId the app id that is emitting the reward
    * @param amount the amount of B3TR token the user is rewarded with
@@ -103,21 +92,4 @@ interface IX2EarnRewardsPool {
    * @param proof a JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
    */
   function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external;
-
-  /**
-   * @dev Function used by x2earn apps to reward users that performed sustainable actions.
-   *
-   * @param appId the app id that is emitting the reward
-   * @param amount the amount of B3TR token the user is rewarded with
-   * @param receiver the address of the user that performed the sustainable action and is rewarded
-   * @param proof a type and value pair that adds information on the type of action that was performed
-   * @param impact a list of codes and values that represent the impact of the sustainable action
-   */
-  function distributeReward(
-    bytes32 appId,
-    uint256 amount,
-    address receiver,
-    Proof memory proof,
-    Impact memory impact
-  ) external;
 }

@@ -25,9 +25,11 @@ import {
   X2EarnRewardsPool,
   MyERC721,
   MyERC1155,
+  X2EarnRewardsPoolV1,
+  ProofOfSustainability,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { deployProxy } from "../../scripts/helpers"
+import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deploy"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 
@@ -61,6 +63,7 @@ interface DeployInstance {
   governorVotesLogicLib: GovernorVotesLogic
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
+  proofOfSustainability: ProofOfSustainability
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -214,14 +217,25 @@ export const getOrDeployContractInstances = async ({
     owner.address,
   ])) as X2EarnApps
 
-  // Deploy X2EarnRewardsPool
-  const x2EarnRewardsPool = (await deployProxy("X2EarnRewardsPool", [
+  const proofOfSustainabilityProxyAddress = await deployProxyOnly("ProofOfSustainability", undefined, false)
+
+  const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
     owner.address,
     owner.address,
     owner.address,
     await b3tr.getAddress(),
     await x2EarnApps.getAddress(),
-  ])) as X2EarnRewardsPool
+  ])) as X2EarnRewardsPoolV1
+
+  const x2EarnRewardsPool = (await upgradeProxy(
+    "X2EarnRewardsPoolV1",
+    "X2EarnRewardsPool",
+    await x2EarnRewardsPoolV1.getAddress(),
+    [proofOfSustainabilityProxyAddress],
+    {
+      version: 2,
+    },
+  )) as X2EarnRewardsPool
 
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [
@@ -292,6 +306,22 @@ export const getOrDeployContractInstances = async ({
       votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
     },
   ])) as XAllocationVoting
+
+  const proofOfSustainability = (await initializeProxy(proofOfSustainabilityProxyAddress, "ProofOfSustainability", [
+    {
+      admin: owner.address,
+      contractsManagerAdmin: owner.address,
+      upgrader: owner.address,
+      actionRegistrar: await x2EarnRewardsPoolV1.getAddress(),
+      actionScoreManager: owner.address,
+      roundThreshold: 1,
+      threshold: 1,
+      isTotalScoreConsidered: true,
+      x2EarnApps: await x2EarnApps.getAddress(),
+      roundsForCumulativeScore: 5,
+      xAllocationVoting: await xAllocationVoting.getAddress(),
+    },
+  ])) as ProofOfSustainability
 
   // Deploy Governor
   const governor = (await deployProxy(
@@ -445,6 +475,7 @@ export const getOrDeployContractInstances = async ({
     governorVotesLogicLib: GovernorVotesLogicLib,
     myErc721: myErc721,
     myErc1155: myErc1155,
+    proofOfSustainability,
   }
   return cachedDeployInstance
 }

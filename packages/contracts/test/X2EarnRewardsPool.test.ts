@@ -46,7 +46,7 @@ describe("X2EarnRewardsPool", function () {
 
     it("Version should be set correctly", async function () {
       const { x2EarnRewardsPool } = await getOrDeployContractInstances({ forceDeploy: false })
-      expect(await x2EarnRewardsPool.version()).to.equal("1")
+      expect(await x2EarnRewardsPool.version()).to.equal("2")
     })
 
     it("X2EarnApps should be set correctly", async function () {
@@ -561,7 +561,9 @@ describe("X2EarnRewardsPool", function () {
 
       const tx = await x2EarnRewardsPool
         .connect(owner)
-        .distributeReward(appId, ethers.parseEther("1"), user.address, "ipfs://metadata")
+        [
+          "distributeReward(bytes32,uint256,address,string)"
+        ](appId, ethers.parseEther("1"), user.address, "ipfs://metadata")
       const receipt = await tx.wait()
 
       expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
@@ -576,7 +578,7 @@ describe("X2EarnRewardsPool", function () {
       expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
       expect(event[0].args[1]).to.equal(appId)
       expect(event[0].args[2]).to.equal(user.address)
-      expect(event[0].args[3]).to.equal("ipfs://metadata")
+      expect(event[0].args[3]).to.equal("") // Because it's using a deprecated function
       expect(event[0].args[4]).to.equal(owner.address)
     })
 
@@ -600,8 +602,13 @@ describe("X2EarnRewardsPool", function () {
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
-      await expect(x2EarnRewardsPool.connect(owner).distributeReward(appId, ethers.parseEther("101"), user.address, ""))
-        .to.be.reverted
+      // https://docs.ethers.org/v5/single-page/#/v5/migration/web3/-%23-migration-from-web3-js--contracts--overloaded-functions
+      // for ambiguous functions (two functions with the same name), the signature must also be specified
+      await expect(
+        x2EarnRewardsPool
+          .connect(owner)
+          ["distributeReward(bytes32,uint256,address,string)"](appId, ethers.parseEther("101"), user.address, ""),
+      ).to.be.reverted
 
       expect(await b3tr.balanceOf(user.address)).to.equal(0)
       expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(amount)
@@ -628,7 +635,9 @@ describe("X2EarnRewardsPool", function () {
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
       await catchRevert(
-        x2EarnRewardsPool.connect(user).distributeReward(appId, ethers.parseEther("1"), user.address, ""),
+        x2EarnRewardsPool
+          .connect(user)
+          ["distributeReward(bytes32,uint256,address,string)"](appId, ethers.parseEther("1"), user.address, ""),
       )
 
       expect(await b3tr.balanceOf(user.address)).to.equal(0)
@@ -650,7 +659,9 @@ describe("X2EarnRewardsPool", function () {
       await catchRevert(
         x2EarnRewardsPool
           .connect(teamWallet)
-          .distributeReward(await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), user.address, ""),
+          [
+            "distributeReward(bytes32,uint256,address,string)"
+          ](await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), user.address, ""),
       )
     })
 
@@ -674,7 +685,9 @@ describe("X2EarnRewardsPool", function () {
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
       await catchRevert(
-        x2EarnRewardsPool.connect(teamWallet).distributeReward(appId, ethers.parseEther("1"), user.address, ""),
+        x2EarnRewardsPool
+          .connect(teamWallet)
+          ["distributeReward(bytes32,uint256,address,string)"](appId, ethers.parseEther("1"), user.address, ""),
       )
     })
 
@@ -699,7 +712,9 @@ describe("X2EarnRewardsPool", function () {
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
       await catchRevert(
-        x2EarnRewardsPool.connect(teamWallet).distributeReward(appId, ethers.parseEther("101"), user.address, ""),
+        x2EarnRewardsPool
+          .connect(teamWallet)
+          ["distributeReward(bytes32,uint256,address,string)"](appId, ethers.parseEther("101"), user.address, ""),
       )
     })
 
@@ -724,7 +739,9 @@ describe("X2EarnRewardsPool", function () {
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
       await expect(
-        x2EarnRewardsPool.connect(teamWallet).distributeReward(appId, ethers.parseEther("101"), user.address, ""),
+        x2EarnRewardsPool
+          .connect(teamWallet)
+          ["distributeReward(bytes32,uint256,address,string)"](appId, ethers.parseEther("101"), user.address, ""),
       ).to.be.reverted
     })
   })

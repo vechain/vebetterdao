@@ -18,7 +18,7 @@ import { HttpNetworkConfig } from "hardhat/types"
 import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } from "./setup"
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { deployProxy, saveContractsToFile } from "../helpers"
+import { deployAndUpgrade, deployProxy, saveContractsToFile } from "../helpers"
 import { shouldRunSimulation } from "@repo/config/contracts"
 
 // GalaxyMember NFT Values
@@ -172,17 +172,21 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as X2EarnApps
 
-  const x2EarnRewardsPool = (await deployProxy(
-    "X2EarnRewardsPool",
+  const x2EarnRewardsPool = (await deployAndUpgrade(
+    ["X2EarnRewardsPoolV1", "X2EarnRewardsPool"],
     [
-      config.CONTRACTS_ADMIN_ADDRESS, // admin
-      config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
-      config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      await b3tr.getAddress(),
-      await x2EarnApps.getAddress(),
+      [
+        config.CONTRACTS_ADMIN_ADDRESS, // admin
+        config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
+        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        await b3tr.getAddress(),
+        await x2EarnApps.getAddress(),
+      ],
+      [],
     ],
-    undefined,
-    true,
+    {
+      versions: [undefined, 2],
+    },
   )) as X2EarnRewardsPool
 
   const xAllocationPool = (await deployProxy(

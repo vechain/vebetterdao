@@ -26,14 +26,11 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
-import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
-import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
+import { IX2EarnRewardsPoolV1 } from "./interfaces/IX2EarnRewardsPoolV1.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import { X2EarnAppsDataTypes } from "./libraries/X2EarnAppsDataTypes.sol";
-import { IProofOfSustainability } from "./interfaces/IProofOfSustainability.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -45,8 +42,8 @@ import { IProofOfSustainability } from "./interfaces/IProofOfSustainability.sol"
  * to the team wallet.
  * The contract is upgradable through the UUPS proxy pattern and UPGRADER_ROLE can authorize the upgrade.
  */
-contract X2EarnRewardsPool is
-  IX2EarnRewardsPool,
+contract X2EarnRewardsPoolV1 is
+  IX2EarnRewardsPoolV1,
   UUPSUpgradeable,
   AccessControlUpgradeable,
   ReentrancyGuardUpgradeable
@@ -64,7 +61,6 @@ contract X2EarnRewardsPool is
     IB3TR b3tr;
     IX2EarnApps x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
-    IProofOfSustainability proofOfSustainability;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -101,13 +97,6 @@ contract X2EarnRewardsPool is
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.b3tr = _b3tr;
     $.x2EarnApps = _x2EarnApps;
-  }
-
-  function initializeV2(address _proofOfSustainability) external reinitializer(2) {
-    require(_proofOfSustainability != address(0), "X2EarnRewardsPool: proofOfSustainability is the zero address");
-
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    $.proofOfSustainability = IProofOfSustainability(_proofOfSustainability);
   }
 
   // ---------- Authorizers ---------- //
@@ -166,158 +155,32 @@ contract X2EarnRewardsPool is
   }
 
   /**
-   * @dev Deprecated function, that will call the internal distribute method with empty proof
-   * @notice the proof argument is unused but kept for backwards compatibility
-   */
-  // solc-ignore-next-line unused-param
-  function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external {
-    _distributeReward(appId, amount, receiver, Proof("", ""), Impact(new string[](0), new uint256[](0)));
-  }
-
-  /**
    * @dev See {IX2EarnRewardsPool-distributeReward}
    */
   function distributeReward(
     bytes32 appId,
     uint256 amount,
     address receiver,
-    Proof memory proof,
-    Impact memory impact
-  ) external {
-    _distributeReward(appId, amount, receiver, proof, impact);
-  }
-
-  /**
-   * @dev See {IX2EarnRewardsPool-distributeReward}
-   * @notice The impact is an array of integers and codes that represent the impact of the action.
-   * Each index of the array represents a different impact.
-   * The codes are predefined and the values are the impact values.
-   * Example: ["carbon", "water", "energy"], [100, 200, 300]
-   */
-  function _distributeReward(
-    bytes32 appId,
-    uint256 amount,
-    address receiver,
-    Proof memory proof,
-    Impact memory impact
-  ) internal nonReentrant {
+    string memory proof
+  ) external nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
-    // check authorization
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
+
     require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
 
-    // check if the app has enough available funds to distribute
+    // check if the app has enough available funds to reward users
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
+
+    // check if the contract has enough funds
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
 
-    // buildJsonProof
-    string memory jsonProof = _buildJsonProof(proof, impact);
-
-    // emit event
-    emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
-
-    // Transfer the rewards to the receiver
+    // transfer the rewards to the receiver
     $.availableFunds[appId] -= amount;
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
-    // Register the action in the proof of sustainability contract
-    $.proofOfSustainability.registerAction(receiver, appId, impact.codes, impact.values);
-  }
-
-  /**
-   * @dev Builds the JSON proof string.
-   */
-  function _buildJsonProof(Proof memory proof, Impact memory impact) internal pure returns (string memory) {
-    bool hasProof = bytes(proof.proofType).length > 0 || bytes(proof.value).length > 0;
-    bool hasImpact = impact.codes.length > 0 && impact.values.length > 0;
-
-    // Initialize an empty JSON string
-    string memory json = "{";
-
-    // Add proof if available
-    if (hasProof) {
-      json = string(
-        abi.encodePacked(
-          json,
-          '"proof": {',
-          '"proof_type": "',
-          proof.proofType,
-          '",',
-          '"proof_data": "',
-          proof.value,
-          '"}'
-        )
-      );
-    }
-
-    // Add impact if available
-    if (hasImpact) {
-      string memory jsonImpact = _buildImpactJson(impact);
-
-      if (hasProof) {
-        // Add a comma if proof was already added
-        json = string(abi.encodePacked(json, ","));
-      }
-
-      json = string(abi.encodePacked(json, '"impact": ', jsonImpact));
-    }
-
-    // Close the JSON object
-    json = string(abi.encodePacked(json, "}"));
-
-    // If neither proof nor impact is provided, return an empty string
-    if (!hasProof && !hasImpact) {
-      return "";
-    }
-
-    return json;
-  }
-
-  /**
-   * @dev Builds the impact JSON string.
-   * @param impact an array of integers that represent the impact of the action. Each index of the array
-   */
-  function _buildImpactJson(Impact memory impact) internal pure returns (string memory) {
-    require(impact.codes.length == impact.values.length, "Mismatched input lengths");
-
-    bytes memory json = abi.encodePacked("{");
-
-    // Define the allowed keys
-    string[8] memory allowedKeys = [
-      "carbon",
-      "water",
-      "energy",
-      "waste_mass",
-      "learning_time",
-      "timber",
-      "plastic",
-      "trees_planted"
-    ];
-
-    for (uint256 i = 0; i < impact.values.length; i++) {
-      if (_isAllowedKey(impact.codes[i], allowedKeys)) {
-        json = abi.encodePacked(json, '"', impact.codes[i], '":"', Strings.toString(impact.values[i]), '"');
-        if (i < impact.values.length - 1) {
-          json = abi.encodePacked(json, ",");
-        }
-      }
-    }
-
-    json = abi.encodePacked(json, "}");
-    return string(json);
-  }
-
-  /**
-   * @dev Checks if the key is allowed.
-   */
-  function _isAllowedKey(string memory key, string[8] memory allowedKeys) internal pure returns (bool) {
-    for (uint256 i = 0; i < allowedKeys.length; i++) {
-      if (keccak256(abi.encodePacked(key)) == keccak256(abi.encodePacked(allowedKeys[i]))) {
-        return true;
-      }
-    }
-    return false;
+    // emit event
+    emit RewardDistributed(amount, appId, receiver, proof, msg.sender);
   }
 
   /**
@@ -346,7 +209,7 @@ contract X2EarnRewardsPool is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "2";
+    return "1";
   }
 
   /**
