@@ -332,6 +332,22 @@ contract X2EarnRewardsPool is
     $.x2EarnApps = _x2EarnApps;
   }
 
+  /**
+   * @dev Sets the ProofOfSustainability contract address.
+   * @param _proofOfSustainability the new ProofOfSustainability contract
+   */
+  function setProofOfSustainability(
+    IProofOfSustainability _proofOfSustainability
+  ) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    require(
+      address(_proofOfSustainability) != address(0),
+      "X2EarnRewardsPool: proofOfSustainability is the zero address"
+    );
+
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    $.proofOfSustainability = _proofOfSustainability;
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -363,6 +379,11 @@ contract X2EarnRewardsPool is
   function x2EarnApps() external view returns (IX2EarnApps) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.x2EarnApps;
+  }
+
+  function proofOfSustainability() external view returns (IProofOfSustainability) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.proofOfSustainability;
   }
 
   // ---------- Fallbacks ---------- //
