@@ -171,7 +171,7 @@ contract X2EarnRewardsPool is
    */
   // solc-ignore-next-line unused-param
   function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external {
-    _distributeReward(appId, amount, receiver, Proof("", ""), Impact(new string[](0), new uint256[](0)));
+    _distributeReward(appId, amount, receiver, Proof("", ""), Impact(new string[](0), new uint256[](0)), "");
   }
 
   /**
@@ -182,9 +182,10 @@ contract X2EarnRewardsPool is
     uint256 amount,
     address receiver,
     Proof memory proof,
-    Impact memory impact
+    Impact memory impact,
+    string memory description
   ) external {
-    _distributeReward(appId, amount, receiver, proof, impact);
+    _distributeReward(appId, amount, receiver, proof, impact, description);
   }
 
   /**
@@ -199,7 +200,8 @@ contract X2EarnRewardsPool is
     uint256 amount,
     address receiver,
     Proof memory proof,
-    Impact memory impact
+    Impact memory impact,
+    string memory description
   ) internal nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
@@ -212,7 +214,7 @@ contract X2EarnRewardsPool is
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
 
     // buildJsonProof
-    string memory jsonProof = _buildJsonProof(proof, impact);
+    string memory jsonProof = _buildJsonProof(proof, impact, description);
 
     // emit event
     emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
@@ -228,9 +230,14 @@ contract X2EarnRewardsPool is
   /**
    * @dev Builds the JSON proof string.
    */
-  function _buildJsonProof(Proof memory proof, Impact memory impact) internal pure returns (string memory) {
+  function _buildJsonProof(
+    Proof memory proof,
+    Impact memory impact,
+    string memory description
+  ) internal pure returns (string memory) {
     bool hasProof = bytes(proof.proofType).length > 0 || bytes(proof.value).length > 0;
     bool hasImpact = impact.codes.length > 0 && impact.values.length > 0;
+    bool hasDescription = bytes(description).length > 0;
 
     // Initialize an empty JSON string
     string memory json = "{";
@@ -251,12 +258,21 @@ contract X2EarnRewardsPool is
       );
     }
 
+    // Add description if available
+    if (hasDescription) {
+      if (hasProof) {
+        // Add a comma if proof was already added
+        json = string(abi.encodePacked(json, ","));
+      }
+      json = string(abi.encodePacked(json, '"metadata": {', '"description": "', description, '"}'));
+    }
+
     // Add impact if available
     if (hasImpact) {
       string memory jsonImpact = _buildImpactJson(impact);
 
-      if (hasProof) {
-        // Add a comma if proof was already added
+      if (hasProof || hasDescription) {
+        // Add a comma if proof or description was already added
         json = string(abi.encodePacked(json, ","));
       }
 
@@ -266,8 +282,8 @@ contract X2EarnRewardsPool is
     // Close the JSON object
     json = string(abi.encodePacked(json, "}"));
 
-    // If neither proof nor impact is provided, return an empty string
-    if (!hasProof && !hasImpact) {
+    // If neither proof, description, nor impact is provided, return an empty string
+    if (!hasProof && !hasImpact && !hasDescription) {
       return "";
     }
 

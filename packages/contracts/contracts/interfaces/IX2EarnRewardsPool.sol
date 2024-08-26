@@ -112,12 +112,14 @@ interface IX2EarnRewardsPool {
    * @param receiver the address of the user that performed the sustainable action and is rewarded
    * @param proof a type and value pair that adds information on the type of action that was performed
    * @param impact a list of codes and values that represent the impact of the sustainable action
+   * @param description a description of the sustainable action that was performed
    */
   function distributeReward(
     bytes32 appId,
     uint256 amount,
     address receiver,
     Proof memory proof,
-    Impact memory impact
+    Impact memory impact,
+    string memory description
   ) external;
 }
