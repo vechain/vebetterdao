@@ -199,7 +199,7 @@ contract X2EarnRewardsPool is
    * @notice the proof argument is unused but kept for backwards compatibility
    */
   // solc-ignore-next-line unused-param
-  function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external {
+  function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory /*proof*/) external {
     _distributeReward(appId, amount, receiver, Proof("", ""), Impact(new string[](0), new uint256[](0)), "");
   }
 
