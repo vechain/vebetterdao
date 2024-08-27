@@ -360,6 +360,7 @@ contract X2EarnRewardsPool is
     return
       keccak256(abi.encodePacked(proofType)) == keccak256(abi.encodePacked("image")) ||
       keccak256(abi.encodePacked(proofType)) == keccak256(abi.encodePacked("link")) ||
+      keccak256(abi.encodePacked(proofType)) == keccak256(abi.encodePacked("text")) ||
       keccak256(abi.encodePacked(proofType)) == keccak256(abi.encodePacked("video"));
   }
 

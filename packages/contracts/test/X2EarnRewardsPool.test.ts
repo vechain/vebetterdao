@@ -747,7 +747,7 @@ describe.only("X2EarnRewardsPool", function () {
   })
 
   describe.only("Proofs and Impact", async function () {
-    it("App can provide proof and impact as parameters", async function () {
+    it("Json proof is created by the contract", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -863,8 +863,454 @@ describe.only("X2EarnRewardsPool", function () {
       expect(event[0].args[4]).to.equal(owner.address)
     })
 
-    //Apps can provide proofs when rewarding users
+    it("App can provide only proofs without impact", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
 
-    // app can pass impact as parameter
+      const teamWallet = otherAccounts[10]
+      const user = otherAccounts[11]
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.addApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
+
+      // fill the pool
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      const tx = await x2EarnRewardsPool
+        .connect(owner)
+        [
+          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+        ](appId, ethers.parseEther("1"), user.address, { types: ["image", "link"], values: ["https://image.png", "https://twitter.com/tweet/1"] }, { codes: [], values: [] }, "The description of the action")
+
+      const receipt = await tx.wait()
+
+      expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
+      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(ethers.parseEther("99"))
+
+      // event emitted
+      if (!receipt) throw new Error("No receipt")
+
+      let event = filterEventsByName(receipt.logs, "RewardDistributed")
+
+      expect(event).not.to.eql([])
+      expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
+      expect(event[0].args[1]).to.equal(appId)
+      expect(event[0].args[2]).to.equal(user.address)
+
+      const emittedProof = JSON.parse(event[0].args[3])
+
+      expect(emittedProof).to.have.property("version")
+      expect(emittedProof.version).to.equal(2)
+      expect(emittedProof).to.have.deep.property("proof", {
+        image: "https://image.png",
+        link: "https://twitter.com/tweet/1",
+      })
+      expect(emittedProof).to.have.property("description")
+      expect(emittedProof.description).to.equal("The description of the action")
+
+      expect(emittedProof).to.not.have.property("impact")
+    })
+
+    it("App can provide only impact without proofs", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccounts[10]
+      const user = otherAccounts[11]
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.addApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
+
+      // fill the pool
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      const tx = await x2EarnRewardsPool
+        .connect(owner)
+        [
+          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+        ](appId, ethers.parseEther("1"), user.address, { types: [], values: [] }, { codes: ["carbon", "water"], values: [100,
+              200] }, "The description of the action")
+
+      const receipt = await tx.wait()
+
+      expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
+      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(ethers.parseEther("99"))
+
+      // event emitted
+      if (!receipt) throw new Error("No receipt")
+
+      let event = filterEventsByName(receipt.logs, "RewardDistributed")
+
+      expect(event).not.to.eql([])
+      expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
+      expect(event[0].args[1]).to.equal(appId)
+      expect(event[0].args[2]).to.equal(user.address)
+
+      const emittedProof = JSON.parse(event[0].args[3])
+
+      expect(emittedProof).to.have.property("version")
+      expect(emittedProof.version).to.equal(2)
+      expect(emittedProof).to.have.property("description")
+      expect(emittedProof.description).to.equal("The description of the action")
+      expect(emittedProof).to.have.deep.property("impact", { carbon: 100, water: 200 })
+
+      expect(emittedProof).to.not.have.property("proof")
+    })
+
+    it("If only description is passed, without proofs and impact, nothing is emitted", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccounts[10]
+      const user = otherAccounts[11]
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.addApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
+
+      // fill the pool
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      const tx = await x2EarnRewardsPool
+        .connect(owner)
+        [
+          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+        ](appId, ethers.parseEther("1"), user.address, { types: [], values: [] }, { codes: [], values: [] }, "The description of the action")
+
+      const receipt = await tx.wait()
+
+      expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
+      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(ethers.parseEther("99"))
+
+      // event emitted
+      if (!receipt) throw new Error("No receipt")
+
+      let event = filterEventsByName(receipt.logs, "RewardDistributed")
+
+      expect(event).not.to.eql([])
+      expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
+      expect(event[0].args[1]).to.equal(appId)
+      expect(event[0].args[2]).to.equal(user.address)
+      expect(event[0].args[3]).to.equal("")
+    })
+
+    it("If no proof, nor impact, nor description is passed, nothing is emitted", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccounts[10]
+      const user = otherAccounts[11]
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.addApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
+
+      // fill the pool
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      const tx = await x2EarnRewardsPool
+        .connect(owner)
+        [
+          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+        ](appId, ethers.parseEther("1"), user.address, { types: [], values: [] }, { codes: [], values: [] }, "")
+
+      const receipt = await tx.wait()
+
+      expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
+      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(ethers.parseEther("99"))
+
+      // event emitted
+      if (!receipt) throw new Error("No receipt")
+
+      let event = filterEventsByName(receipt.logs, "RewardDistributed")
+
+      expect(event).not.to.eql([])
+      expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
+      expect(event[0].args[1]).to.equal(appId)
+      expect(event[0].args[2]).to.equal(user.address)
+      expect(event[0].args[3]).to.equal("")
+    })
+
+    it("If a non valid proof type is passed, it reverts", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        bootstrapAndStartEmissions: true,
+      })
+
+      await catchRevert(
+        x2EarnRewardsPool
+          .connect(owner)
+          [
+            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+          ](await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), owner.address, { types: ["invalid"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
+                200] }, "The description of the action"),
+      )
+    })
+
+    it("Only valid proofs are image, text, link, video", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccounts[10]
+      const user = otherAccounts[11]
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.addApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
+
+      // fill the pool
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      await catchRevert(
+        x2EarnRewardsPool
+          .connect(owner)
+          [
+            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+          ](appId, ethers.parseEther("1"), user.address, { types: ["invalid"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
+                200] }, "The description of the action"),
+      )
+
+      await expect(
+        x2EarnRewardsPool
+          .connect(owner)
+          [
+            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+          ](appId, ethers.parseEther("1"), user.address, { types: ["video"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
+                200] }, "The description of the action"),
+      ).not.to.be.reverted
+
+      await expect(
+        x2EarnRewardsPool
+          .connect(owner)
+          [
+            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+          ](appId, ethers.parseEther("1"), user.address, { types: ["image"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
+                200] }, "The description of the action"),
+      ).not.to.be.reverted
+
+      await expect(
+        x2EarnRewardsPool
+          .connect(owner)
+          [
+            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+          ](appId, ethers.parseEther("1"), user.address, { types: ["link"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
+                200] }, "The description of the action"),
+      ).not.to.be.reverted
+    })
+
+    it("If a non valid impact type is passed, it reverts", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        bootstrapAndStartEmissions: true,
+      })
+
+      await catchRevert(
+        x2EarnRewardsPool
+          .connect(owner)
+          [
+            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+          ](await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), owner.address, { types: ["image"], values: ["https://image.png"] }, { codes: ["invalid"], values: [100,
+                200] }, "The description of the action"),
+      )
+    })
+
+    it("If impact values length differs from codes length, it reverts", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        bootstrapAndStartEmissions: true,
+      })
+
+      await catchRevert(
+        x2EarnRewardsPool
+          .connect(owner)
+          [
+            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+          ](await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), owner.address, { types: ["image"], values: ["https://image.png"] }, { codes: ["carbon"], values: [100,
+                200] }, "The description of the action"),
+      )
+    })
+
+    it("If proof values length differs from types length, it reverts", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        bootstrapAndStartEmissions: true,
+      })
+
+      await catchRevert(
+        x2EarnRewardsPool
+          .connect(owner)
+          [
+            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+          ](await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), owner.address, { types: ["image", "link"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
+                200] }, "The description of the action"),
+      )
+    })
+
+    it("Anyone can index available impact codes", async function () {
+      const { x2EarnRewardsPool } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        bootstrapAndStartEmissions: true,
+      })
+
+      const impactCodes = await x2EarnRewardsPool.getAllowedImpactKeys()
+
+      expect(impactCodes).to.eql([
+        "carbon",
+        "water",
+        "energy",
+        "waste_mass",
+        "learning_time",
+        "timber",
+        "plastic",
+        "trees_planted",
+      ])
+    })
+
+    it("IMPACT_KEY_MANAGER_ROLE and DEFAULT_ADMIN can remove an impact code", async function () {
+      const { x2EarnRewardsPool, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        bootstrapAndStartEmissions: true,
+      })
+
+      expect(await x2EarnRewardsPool.hasRole(await x2EarnRewardsPool.DEFAULT_ADMIN_ROLE(), owner.address)).to.equal(
+        true,
+      )
+
+      await x2EarnRewardsPool.connect(owner).removeImpactKey("carbon")
+
+      const impactCodes = await x2EarnRewardsPool.getAllowedImpactKeys()
+
+      expect(impactCodes).to.eql([
+        "trees_planted",
+        "water",
+        "energy",
+        "waste_mass",
+        "learning_time",
+        "timber",
+        "plastic",
+      ])
+
+      await x2EarnRewardsPool
+        .connect(owner)
+        .grantRole(await x2EarnRewardsPool.IMPACT_KEY_MANAGER_ROLE(), otherAccount.address)
+
+      await x2EarnRewardsPool.connect(otherAccount).removeImpactKey("water")
+
+      const impactCodes2 = await x2EarnRewardsPool.getAllowedImpactKeys()
+
+      expect(impactCodes2).to.eql(["trees_planted", "plastic", "energy", "waste_mass", "learning_time", "timber"])
+    })
+
+    it("IMPACT_KEY_MANAGER_ROLE and DEFAULT_ADMIN can add an impact code", async function () {
+      const { x2EarnRewardsPool, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        bootstrapAndStartEmissions: true,
+      })
+
+      expect(await x2EarnRewardsPool.hasRole(await x2EarnRewardsPool.DEFAULT_ADMIN_ROLE(), owner.address)).to.equal(
+        true,
+      )
+
+      await x2EarnRewardsPool.connect(owner).addImpactKey("new_impact")
+
+      const impactCodes = await x2EarnRewardsPool.getAllowedImpactKeys()
+
+      expect(impactCodes).to.eql([
+        "carbon",
+        "water",
+        "energy",
+        "waste_mass",
+        "learning_time",
+        "timber",
+        "plastic",
+        "trees_planted",
+        "new_impact",
+      ])
+
+      await x2EarnRewardsPool
+        .connect(owner)
+        .grantRole(await x2EarnRewardsPool.IMPACT_KEY_MANAGER_ROLE(), otherAccount.address)
+
+      await x2EarnRewardsPool.connect(otherAccount).addImpactKey("new_impact_2")
+
+      const impactCodes2 = await x2EarnRewardsPool.getAllowedImpactKeys()
+
+      expect(impactCodes2).to.eql([
+        "carbon",
+        "water",
+        "energy",
+        "waste_mass",
+        "learning_time",
+        "timber",
+        "plastic",
+        "trees_planted",
+        "new_impact",
+        "new_impact_2",
+      ])
+    })
+
+    it("Only admin can add and remove impact codes", async function () {
+      const { x2EarnRewardsPool, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        bootstrapAndStartEmissions: true,
+      })
+
+      expect(
+        await x2EarnRewardsPool.hasRole(await x2EarnRewardsPool.DEFAULT_ADMIN_ROLE(), otherAccounts[10].address),
+      ).to.equal(false)
+      expect(
+        await x2EarnRewardsPool.hasRole(await x2EarnRewardsPool.IMPACT_KEY_MANAGER_ROLE(), otherAccounts[10].address),
+      ).to.equal(false)
+
+      await catchRevert(x2EarnRewardsPool.connect(otherAccounts[10]).addImpactKey("new_impact"))
+      await catchRevert(x2EarnRewardsPool.connect(otherAccounts[10]).removeImpactKey("carbon"))
+    })
   })
 })

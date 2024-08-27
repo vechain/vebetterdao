@@ -3,7 +3,7 @@ pragma solidity 0.8.20;
 
 library ProofDataTypes {
   struct Proof {
-    string[] types; // link, photo, video, etc.
+    string[] types; // link, photo, video, text, etc.
     string[] values; // "https://...", "Qm...", etc.
   }
 
