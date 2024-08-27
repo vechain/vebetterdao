@@ -1,4 +1,4 @@
-import { useGMNFT, useXNode } from "@/api"
+import { useSelectedGmNft, useXNode } from "@/api"
 import {
   Box,
   Card,
@@ -22,11 +22,12 @@ import { NotConnectedWallet } from "./components/NotConnectedWallet"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { SwapB3trVot3 } from "./components/SwapB3trVot3"
 import { useRouter } from "next/navigation"
+import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 
 export const GmNFTAndNodeCard = () => {
   const { t } = useTranslation()
 
-  const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned } = useGMNFT()
+  const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned } = useSelectedGmNft()
 
   //node
   const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeAttachedToGM } = useXNode()
@@ -127,15 +128,16 @@ export const GmNFTAndNodeCard = () => {
                 cursor={"pointer"}
                 onClick={goToGmNftPage}>
                 <Skeleton isLoaded={!isGMLoading} w="68px" h="68px" rounded="8px">
-                  <Image
-                    src={gmImage}
-                    alt="gm"
-                    w="68px"
-                    h="68px"
+                  <Box
+                    w={"68px"}
+                    h={"68px"}
                     rounded="8px"
-                    border="1px solid"
-                    borderColor={nodeAttachedColor}
-                  />
+                    bgGradient={getLevelGradient(Number(gmLevel))}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center">
+                    <Image src={gmImage} alt="gm" w={"64px"} h={"64px"} rounded="7px" />
+                  </Box>
                 </Skeleton>
                 <VStack flex="1" align={"flex-start"}>
                   <Text fontWeight={700} noOfLines={1}>

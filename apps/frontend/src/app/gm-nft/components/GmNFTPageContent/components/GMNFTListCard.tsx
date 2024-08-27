@@ -1,4 +1,4 @@
-import { useGMNFT } from "@/api"
+import { useSelectedGmNft } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import {
   Box,
@@ -20,7 +20,10 @@ import { useTranslation } from "react-i18next"
 
 export const GMNFTListCard = () => {
   const { t } = useTranslation()
-  const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, isGMActive } = useGMNFT()
+  const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel } = useSelectedGmNft()
+
+  // TODO: bind this data
+  const isGMActive = false
 
   const actionButton = useMemo(() => {
     return (

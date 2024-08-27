@@ -12,5 +12,5 @@ export const getLevelGradient = (level: number) => {
     "linear-gradient(225deg, #2D335C 2.27%, #D28458 47.09%, #A2B2C9 92.8%)",
   ]
 
-  return gradients[level]
+  return gradients[level - 1]
 }

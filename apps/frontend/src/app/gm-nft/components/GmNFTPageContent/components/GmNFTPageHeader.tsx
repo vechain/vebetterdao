@@ -1,4 +1,4 @@
-import { useGMNFT, useUserB3trBalance, useXNode } from "@/api"
+import { useSelectedGmNft, useUserB3trBalance, useXNode } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { Box, Button, Card, Flex, HStack, Image, Skeleton, Stack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { UilArrowCircleUp } from "@iconscout/react-unicons"
@@ -10,7 +10,7 @@ const compactFormatter = getCompactFormatter(4)
 
 export const GmNFTPageHeader = () => {
   const { t } = useTranslation()
-  const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, b3trToUpgradeGMToNextLevel } = useGMNFT()
+  const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, b3trToUpgradeGMToNextLevel } = useSelectedGmNft()
 
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 

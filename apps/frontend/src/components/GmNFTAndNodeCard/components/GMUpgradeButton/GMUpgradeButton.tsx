@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import {
   useCurrentAllocationsRoundId,
-  useGMNFT,
+  useSelectedGmNft,
   useParticipatedInGovernance,
   useUserB3trBalance,
   useXNode,
@@ -31,7 +31,7 @@ export const GMUpgradeButton = () => {
     b3trToUpgradeGMToNextLevel,
     missingB3trToUpgrade,
     isEnoughBalanceToUpgradeGM,
-  } = useGMNFT()
+  } = useSelectedGmNft()
   const { isXNodeHolder, isXNodeAttachedToGM } = useXNode()
 
   const { isLoading: isB3trBalanceLoading } = useUserB3trBalance()
@@ -95,7 +95,7 @@ export const GMUpgradeButton = () => {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
-            {t("You can upgrade and get {{rewardMultiplier}}X on your rewards for", {
+            {t("You can upgrade and get {{rewardMultiplier}}x on your rewards for", {
               rewardMultiplier: nextLevelGMRewardMultiplier,
             })}
           </Text>{" "}
@@ -157,7 +157,6 @@ export const GMUpgradeButton = () => {
   } = useClaimNFT({ onFailure: mintNftModal.onClose })
 
   const handleMintGM = useCallback(() => {
-    console.log("handleMintGM")
     freeMint()
     mintNftModal.onOpen()
   }, [freeMint, mintNftModal])
