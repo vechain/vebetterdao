@@ -449,7 +449,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   }
 
   /**
-   * @dev Returns the scaled quadratic funding percentage of votes for a given app in a given round.
+   * @dev Returns the funding percentage of votes for a given app in a given round.
    * When calculating the percentage of votes received we check if the app exceeds the max cap of shares, eg:
    * if an app has 80 votes out of 100, and the max cap is 50, then the app will have a share of 50% of the available funds.
    * The remaining 30% will be sent to the treasury.
@@ -469,15 +469,13 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
       return (0, 0);
     }
 
-    uint256 totalVotesQF = _xAllocationVoting.totalVotesQF(roundId);
-    uint256 appVotesQF = _xAllocationVoting.getAppVotesQF(roundId, appId);
-
-    uint256 appVotesQFValue = appVotesQF * appVotesQF;
+    uint256 totalVotes = _xAllocationVoting.totalVotes(roundId);
+    uint256 appVotes = _xAllocationVoting.getAppVotes(roundId, appId);
 
     // avoid division by zero
-    if (appVotesQFValue == 0) return (0, 0);
+    if (appVotes == 0) return (0, 0);
 
-    uint256 appShare = (appVotesQFValue * PERCENTAGE_PRECISION_SCALING_FACTOR) / totalVotesQF;
+    uint256 appShare = (appVotes * PERCENTAGE_PRECISION_SCALING_FACTOR) / totalVotes;
 
     // This is the amount unallocated if appShare is greater than max cap, this will be sent to treasury
     uint256 unallocatedShare;
@@ -571,6 +569,6 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
    * @return string The version of the contract
    */
   function version() external pure virtual returns (string memory) {
-    return "1";
+    return "2";
   }
 }
