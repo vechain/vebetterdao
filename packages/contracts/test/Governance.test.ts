@@ -1325,7 +1325,7 @@ describe("Governor and TimeLock", function () {
       expect(updatedQuorum).to.eql(newQuorum)
     })
 
-    it("Should not be ablet to update the quorum percentage if not governance", async function () {
+    it("Should not be able to update the quorum percentage if not governance", async function () {
       const { governor, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2584,7 +2584,7 @@ describe("Governor and TimeLock", function () {
       )
     })
 
-    it("can create a proposal even if user did not manually self delegated (because of automatic self-delegation)", async function () {
+    it("can create a proposal even if user did not manually self delegate (because of automatic self-delegation)", async function () {
       const { B3trContract, vot3, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2603,7 +2603,7 @@ describe("Governor and TimeLock", function () {
       await createProposal(b3tr, B3trContract, owner, description, functionToCall, [])
     })
 
-    it("can create a proposal if VOT3 holder that self-delegated", async function () {
+    it("can create a proposal if VOT3 holder has self-delegated", async function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       const { governor, B3trContract, b3tr, owner, xAllocationVoting } = await getOrDeployContractInstances({
@@ -3020,7 +3020,7 @@ describe("Governor and TimeLock", function () {
       )
     })
 
-    it("can count votes correctly", async function () {
+    it.skip("[Quadratic] can count votes correctly", async function () {
       const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
@@ -3044,6 +3044,36 @@ describe("Governor and TimeLock", function () {
       // Note that if this test is ran in isolation, the following votes will be 0
       expect(votes[1]).to.satisfy((votes: bigint) => {
         return votes === ethers.parseEther("1031.622776601") || votes === BigInt(0)
+      })
+
+      // abstain
+      expect(votes[2].toString()).to.eql("0")
+    })
+
+    it("can count votes correctly", async function () {
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
+
+      const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
+
+      expect(proposalState.toString()).to.eql("1") // active
+
+      //vote against
+      await governor.connect(voter4).castVote(proposalId, 0)
+
+      // now we should have the following votes:
+      // voter1: 0 yes
+      // voter2: 0 yes
+      // voter3: 1,000,000 + 1,000 = 1,001,000 yes
+      // voter4: 9 = 9 no
+      // abstain: 0
+      const votes = await governor.proposalVotes(proposalId)
+
+      // against votes
+      expect(votes[0]).to.eql(ethers.parseEther("9"))
+
+      // Note that if this test is ran in isolation, the following votes will be 0
+      expect(votes[1]).to.satisfy((votes: bigint) => {
+        return votes === ethers.parseEther("1001000") || votes === BigInt(0)
       })
 
       // abstain
@@ -3146,7 +3176,7 @@ describe("Governor and TimeLock", function () {
       await waitForProposalToBeActive(proposalId)
 
       // vote
-      await governor.connect(voter).castVote(proposalId, 0) // vote agains
+      await governor.connect(voter).castVote(proposalId, 0) // vote against
       await governor.connect(voter2).castVote(proposalId, 1) // vote for
       await governor.connect(voter3).castVote(proposalId, 2) // vote abastain
 
@@ -3166,7 +3196,7 @@ describe("Governor and TimeLock", function () {
       expect(isQuorumReached).to.equal(true)
     })
 
-    it("Against votes are counted correctly for quorum", async function () {
+    it.skip("[Quadratic] Against votes are counted correctly for quorum", async function () {
       const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -3216,7 +3246,57 @@ describe("Governor and TimeLock", function () {
       expect(votes[0]).to.eql(ethers.parseEther("346.410161512"))
     })
 
-    it("Abstain votes are counted correctly for quorum", async function () {
+    it("Against votes are counted correctly for quorum", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      const voter3 = otherAccounts[2]
+      await getVot3Tokens(voter, "30000")
+      await getVot3Tokens(voter2, "30000")
+      await getVot3Tokens(voter3, "30000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId, voter)
+
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 0) // vote against
+      await governor.connect(voter2).castVote(proposalId, 0) // vote against
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+
+      // Check if quorum is calculated correctly
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+
+      // check against votes are counted correctly
+      const votes = await governor.proposalVotes(proposalId)
+      expect(votes[0]).to.eql(ethers.parseEther("60000"))
+    })
+
+    it.skip("[Quadratic] Abstain votes are counted correctly for quorum", async function () {
       const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -3266,7 +3346,57 @@ describe("Governor and TimeLock", function () {
       expect(votes[2]).to.eql(ethers.parseEther("346.410161512"))
     })
 
-    it("Yes votes are counted correctly for quorum", async function () {
+    it("Abstain votes are counted correctly for quorum", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      const voter3 = otherAccounts[2]
+      await getVot3Tokens(voter, "30000")
+      await getVot3Tokens(voter2, "30000")
+      await getVot3Tokens(voter3, "30000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId, voter)
+
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 2) // vote abstain
+      await governor.connect(voter2).castVote(proposalId, 2) // vote abstain
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+
+      // Check if quorum is calculated correctly
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+
+      // check abstain votes are counted correctly
+      const votes = await governor.proposalVotes(proposalId)
+      expect(votes[2]).to.eql(ethers.parseEther("60000"))
+    })
+
+    it.skip("[Quadratic] Yes votes are counted correctly for quorum", async function () {
       const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -3317,7 +3447,58 @@ describe("Governor and TimeLock", function () {
       expect(votes[1]).to.eql(ethers.parseEther("346.410161512"))
     })
 
-    it("Can get correct quadratic voting power", async function () {
+    it("Yes votes are counted correctly for quorum", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      const voter3 = otherAccounts[2]
+      await getVot3Tokens(voter, "30000")
+      await getVot3Tokens(voter2, "30000")
+      await getVot3Tokens(voter3, "30000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId, voter)
+
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 1) // vote yes
+      await governor.connect(voter2).castVote(proposalId, 1) // vote yes
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+
+      // Check if quorum is calculated correctly
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+
+      // check yes votes are counted correctly
+      const votes = await governor.proposalVotes(proposalId)
+      // 30,000 * 2 = 60,000
+      expect(votes[1]).to.eql(ethers.parseEther("60000"))
+    })
+
+    it.skip("[Quadratic] Can get correct quadratic voting power", async function () {
       const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -3372,6 +3553,58 @@ describe("Governor and TimeLock", function () {
       const votes = await governor.proposalVotes(proposalId)
       // sqrt(1000) * 3 = 94.868329937 - scaled to 9 decimals
       expect(votes[1]).to.eql(power1 + power2 + power3)
+    })
+
+    it("Can get correct voting power", async function () {
+      const { governor, otherAccounts, b3tr, B3trContract } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      const voter3 = otherAccounts[2]
+      await getVot3Tokens(voter, "30000")
+      await getVot3Tokens(voter2, "30000")
+      await getVot3Tokens(voter3, "30000")
+      await waitForNextBlock()
+
+      // Create a proposal
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        voter,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      ) // Adding the test title to the description to make it unique otherwise it would revert due to proposal already exists
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId, voter)
+
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 1) // vote yes
+      await governor.connect(voter2).castVote(proposalId, 1) // vote yes
+      await governor.connect(voter3).castVote(proposalId, 1) // vote yes
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+
+      // Check if quorum is calculated correctly
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+
+      // check yes votes are counted correctly
+      const votes = await governor.proposalVotes(proposalId)
+      // 30,000 * 3 = 90,000
+      expect(votes[1]).to.eql(ethers.parseEther("90000"))
     })
 
     it("Can correctly cast vote with reason", async () => {
@@ -3987,7 +4220,7 @@ describe("Governor and TimeLock", function () {
       expect(proposalState.toString()).to.eql("6")
     })
 
-    it("Cannot execute prpopsal directly from TimeLock", async function () {
+    it("Cannot execute proposal directly from TimeLock", async function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
       config.EMISSIONS_CYCLE_DURATION = 15
@@ -4953,6 +5186,7 @@ describe("Governor and TimeLock", function () {
 
       // user cannot deposit when proposal is not pending
       await expect(governor.connect(sponser).deposit(ethers.parseEther("1000"), proposalId, { gasLimit: 10_000_000 }))
+        .to.be.reverted
     })
 
     it("Deposit should be 2% of the total B3TR supply when proposal was created", async () => {
@@ -5187,6 +5421,7 @@ describe("Governor and TimeLock", function () {
         expect(blockNumber).to.eql("mode=blocknumber&from=default")
       })
     })
+
     describe("GovernorQuorumLogic", function () {
       it("Should be able to lookup historic quorom numerators", async () => {
         let b3trGovernorFactory: B3TRGovernor__factory
