@@ -33,6 +33,7 @@ import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import { X2EarnAppsDataTypes } from "./libraries/X2EarnAppsDataTypes.sol";
+import { ProofDataTypes } from "./libraries/ProofDataTypes.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -194,18 +195,26 @@ contract X2EarnRewardsPool is
    * @notice the proof argument is unused but kept for backwards compatibility
    */
   function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory /*proof*/) external {
-    _distributeReward(appId, amount, receiver, Proof("", ""), Impact(new string[](0), new uint256[](0)), "");
+    _distributeReward(
+      appId,
+      amount,
+      receiver,
+      ProofDataTypes.Proof("", ""),
+      ProofDataTypes.Impact(new string[](0), new uint256[](0)),
+      ""
+    );
   }
 
   /**
    * @dev See {IX2EarnRewardsPool-distributeReward}
+   * @notice Currently only "image" and "link" proof types are supported.
    */
   function distributeReward(
     bytes32 appId,
     uint256 amount,
     address receiver,
-    Proof memory proof,
-    Impact memory impact,
+    ProofDataTypes.Proof memory proof,
+    ProofDataTypes.Impact memory impact,
     string memory description
   ) external {
     _distributeReward(appId, amount, receiver, proof, impact, description);
@@ -222,8 +231,8 @@ contract X2EarnRewardsPool is
     bytes32 appId,
     uint256 amount,
     address receiver,
-    Proof memory proof,
-    Impact memory impact,
+    ProofDataTypes.Proof memory proof,
+    ProofDataTypes.Impact memory impact,
     string memory description
   ) internal nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
@@ -251,40 +260,36 @@ contract X2EarnRewardsPool is
    * @dev Builds the JSON proof string.
    */
   function _buildJsonProof(
-    Proof memory proof,
-    Impact memory impact,
+    ProofDataTypes.Proof memory proof,
+    ProofDataTypes.Impact memory impact,
     string memory description
   ) internal view returns (string memory) {
     bool hasProof = bytes(proof.proofType).length > 0 || bytes(proof.value).length > 0;
     bool hasImpact = impact.codes.length > 0 && impact.values.length > 0;
     bool hasDescription = bytes(description).length > 0;
 
-    // Initialize an empty JSON string
-    string memory json = "{";
-
-    // Add proof if available
-    if (hasProof) {
-      json = string(
-        abi.encodePacked(
-          json,
-          '"proof": {',
-          '"proof_type": "',
-          proof.proofType,
-          '",',
-          '"proof_data": "',
-          proof.value,
-          '"}'
-        )
-      );
+    // If neither proof, description, nor impact is provided, return an empty string
+    if (!hasProof || !hasImpact) {
+      return "";
     }
+
+    // Initialize an empty JSON string with version
+    string memory json = '{"version": 2';
 
     // Add description if available
     if (hasDescription) {
-      if (hasProof) {
-        // Add a comma if proof was already added
-        json = string(abi.encodePacked(json, ","));
-      }
-      json = string(abi.encodePacked(json, '"metadata": {', '"description": "', description, '"}'));
+      json = string(abi.encodePacked(json, ',"description": "', description, '"'));
+    }
+
+    // Add proof if available and check proofType
+    if (hasProof) {
+      require(
+        keccak256(abi.encodePacked(proof.proofType)) == keccak256(abi.encodePacked("image")) ||
+          keccak256(abi.encodePacked(proof.proofType)) == keccak256(abi.encodePacked("link")),
+        "X2EarnRewardsPool: Invalid proof type"
+      );
+
+      json = string(abi.encodePacked(json, ',"proof": {', '"', proof.proofType, '": "', proof.value, '"}'));
     }
 
     // Add impact if available
@@ -302,11 +307,6 @@ contract X2EarnRewardsPool is
     // Close the JSON object
     json = string(abi.encodePacked(json, "}"));
 
-    // If neither proof, description, nor impact is provided, return an empty string
-    if (!hasProof && !hasImpact && !hasDescription) {
-      return "";
-    }
-
     return json;
   }
 
@@ -314,14 +314,14 @@ contract X2EarnRewardsPool is
    * @dev Builds the impact JSON string.
    * @param impact an array of integers that represent the impact of the action. Each index of the array
    */
-  function _buildImpactJson(Impact memory impact) internal view returns (string memory) {
+  function _buildImpactJson(ProofDataTypes.Impact memory impact) internal view returns (string memory) {
     require(impact.codes.length == impact.values.length, "Mismatched input lengths");
 
     bytes memory json = abi.encodePacked("{");
 
     for (uint256 i = 0; i < impact.values.length; i++) {
       if (_isAllowedImpactKey(impact.codes[i])) {
-        json = abi.encodePacked(json, '"', impact.codes[i], '":"', Strings.toString(impact.values[i]), '"');
+        json = abi.encodePacked(json, '"', impact.codes[i], '":', Strings.toString(impact.values[i]), "");
         if (i < impact.values.length - 1) {
           json = abi.encodePacked(json, ",");
         }

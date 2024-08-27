@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.20;
 
+import { ProofDataTypes } from "../libraries/ProofDataTypes.sol";
+
 /**
  * @title IX2EarnRewardsPool
  * @dev Interface designed to be used by a contract that allows x2Earn apps to reward users that performed sustainable actions.
@@ -9,16 +11,6 @@ pragma solidity 0.8.20;
  * Admins of x2EarnApps can withdraw funds from the rewards pool, whihc are sent to the team wallet.
  */
 interface IX2EarnRewardsPool {
-  struct Proof {
-    string proofType; // url, photo, video, etc.
-    string value;
-  }
-
-  struct Impact {
-    string[] codes; // carbon, water, etc.
-    uint256[] values; // 100, 200, etc.
-  }
-
   /**
    * @dev Event emitted when a new deposit is made into the rewards pool.
    *
@@ -118,8 +110,8 @@ interface IX2EarnRewardsPool {
     bytes32 appId,
     uint256 amount,
     address receiver,
-    Proof memory proof,
-    Impact memory impact,
+    ProofDataTypes.Proof memory proof,
+    ProofDataTypes.Impact memory impact,
     string memory description
   ) external;
 }
