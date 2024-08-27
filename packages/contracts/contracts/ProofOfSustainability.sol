@@ -57,20 +57,11 @@ contract ProofOfSustainability is
   uint256 public constant PLASTIC_WEIGHT = 1;
   uint256 public constant TREES_PLANTED_WEIGHT = 100;
 
-  /// @notice Action difficulty indicates how hard it is for the user to perform the sustainable action
-  /// @dev Action difficulty is used to calculate the overall score of a sustainable action from the app's `baseActionScore`
-  enum ACTION_DIFFICULTY {
-    EASY,
-    MEDIUM,
-    HARD
-  }
-
-  /// @custom:storage-location erc7201:b3tr.storage.ProofOfPersonhood
-  struct ProofOfPersonhoodStorage {
+  /// @custom:storage-location erc7201:b3tr.storage.ProofOfSustainability
+  struct ProofOfSustainablityStorage {
     IX2EarnApps x2EarnApps;
     IXAllocationVotingGovernor xAllocationVoting;
     mapping(bytes32 appId => uint256 baseScore) baseActionScore; // Base score for an app's sustainable action
-    mapping(ACTION_DIFFICULTY difficulty => uint256 multiplier) actionDifficultyMultiplier; // Multiplier of the base action score based on the action difficulty
     mapping(address user => uint256 totalScore) userTotalScore; // all-time total score of a user
     mapping(address user => mapping(bytes32 appId => uint256 totalScore)) userAppTotalScore; // all-time total score of a user for a specific app
     mapping(address user => mapping(uint256 round => uint256 score)) userRoundScore; // score of a user in a specific round
@@ -83,13 +74,13 @@ contract ProofOfSustainability is
     uint256 roundsForCumulativeScore; // number of rounds to consider for the cumulative score
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.ProofOfPersonhood")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant ProofOfPersonhoodStorageLocation =
-    0x562263107a1e976e9702432b2a9ec9bf8e9dd832561ba7545f0d5824f7628f00;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.ProofOfSustainability")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant ProofOfSustainablityStorageLocation =
+    0xe614f0865544369f02c9d8b69468a3c9362aebea4a45c4410b6d66cbe0685100;
 
-  function _getProofOfPersonhoodStorage() private pure returns (ProofOfPersonhoodStorage storage $) {
+  function _getProofOfSustainabilityStorage() private pure returns (ProofOfSustainablityStorage storage $) {
     assembly {
-      $.slot := ProofOfPersonhoodStorageLocation
+      $.slot := ProofOfSustainablityStorageLocation
     }
   }
 
@@ -97,7 +88,7 @@ contract ProofOfSustainability is
   /// @param role - the role to check
   modifier onlyRoleOrAdmin(bytes32 role) {
     if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
-      revert ProofOfPersonhoodUnauthorizedUser(msg.sender);
+      revert ProofOfSustainabilityUnauthorizedUser(msg.sender);
     }
     _;
   }
@@ -110,7 +101,7 @@ contract ProofOfSustainability is
   event RegisteredAction(address indexed user, bytes32 indexed appId, uint256 indexed round, uint256 actionScore);
 
   /// @notice Emitted when a user is not authorized to perform an action
-  error ProofOfPersonhoodUnauthorizedUser(address user);
+  error ProofOfSustainabilityUnauthorizedUser(address user);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -142,13 +133,19 @@ contract ProofOfSustainability is
 
   /// @notice Initializes the contract
   function initialize(InitializationData memory data) external initializer {
-    require(data.admin != address(0), "ProofOfPersonhood: admin is the zero address");
-    require(data.contractsManagerAdmin != address(0), "ProofOfPersonhood: contracts manager admin is the zero address");
-    require(data.upgrader != address(0), "ProofOfPersonhood: upgrader is the zero address");
-    require(address(data.x2EarnApps) != address(0), "ProofOfPersonhood: x2EarnApps is the zero address");
-    require(data.roundThreshold > 0, "ProofOfPersonhood: round threshold is zero");
-    require(data.threshold > 0, "ProofOfPersonhood: threshold is zero");
-    require(address(data.xAllocationVoting) != address(0), "ProofOfPersonhood: xAllocationVoting is the zero address");
+    require(data.admin != address(0), "ProofOfSustainability: admin is the zero address");
+    require(
+      data.contractsManagerAdmin != address(0),
+      "ProofOfSustainability: contracts manager admin is the zero address"
+    );
+    require(data.upgrader != address(0), "ProofOfSustainability: upgrader is the zero address");
+    require(address(data.x2EarnApps) != address(0), "ProofOfSustainability: x2EarnApps is the zero address");
+    require(data.roundThreshold > 0, "ProofOfSustainability: round threshold is zero");
+    require(data.threshold > 0, "ProofOfSustainability: threshold is zero");
+    require(
+      address(data.xAllocationVoting) != address(0),
+      "ProofOfSustainability: xAllocationVoting is the zero address"
+    );
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
@@ -158,7 +155,7 @@ contract ProofOfSustainability is
     _grantRole(UPGRADER_ROLE, data.upgrader);
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsManagerAdmin);
 
-    ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
+    ProofOfSustainablityStorage storage $ = _getProofOfSustainabilityStorage();
 
     $.x2EarnApps = data.x2EarnApps;
     $.xAllocationVoting = data.xAllocationVoting;
@@ -168,10 +165,6 @@ contract ProofOfSustainability is
 
     _grantRole(ACTION_REGISTRAR_ROLE, data.actionRegistrar);
     _grantRole(ACTION_SCORE_MANAGER_ROLE, data.actionScoreManager);
-
-    $.actionDifficultyMultiplier[ACTION_DIFFICULTY.EASY] = 1; // Default multiplier for easy actions
-    $.actionDifficultyMultiplier[ACTION_DIFFICULTY.MEDIUM] = 2; // Default multiplier for medium actions
-    $.actionDifficultyMultiplier[ACTION_DIFFICULTY.HARD] = 3; // Default multiplier for hard actions
 
     $.roundsForCumulativeScore = data.roundsForCumulativeScore; // Default number of rounds to consider for the cumulative score
   }
@@ -194,11 +187,11 @@ contract ProofOfSustainability is
     string[] memory impactCodes,
     uint256[] memory impact
   ) public virtual onlyRole(ACTION_REGISTRAR_ROLE) {
-    require(user != address(0), "ProofOfPersonhood: user is the zero address");
+    require(user != address(0), "ProofOfSustainability: user is the zero address");
 
-    ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
+    ProofOfSustainablityStorage storage $ = _getProofOfSustainabilityStorage();
 
-    require($.x2EarnApps.appExists(appId), "ProofOfPersonhood: app does not exist");
+    require($.x2EarnApps.appExists(appId), "ProofOfSustainability: app does not exist");
 
     uint256 round = $.xAllocationVoting.currentRoundId();
 
@@ -261,11 +254,11 @@ contract ProofOfSustainability is
     bytes32 appId,
     uint256 baseActionScore
   ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
-    require(baseActionScore > 0, "ProofOfPersonhood: baseActionScore is zero");
+    require(baseActionScore > 0, "ProofOfSustainability: baseActionScore is zero");
 
-    ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
+    ProofOfSustainablityStorage storage $ = _getProofOfSustainabilityStorage();
 
-    require($.x2EarnApps.appExists(appId), "ProofOfPersonhood: app does not exist");
+    require($.x2EarnApps.appExists(appId), "ProofOfSustainability: app does not exist");
 
     $.baseActionScore[appId] = baseActionScore;
   }
@@ -274,9 +267,9 @@ contract ProofOfSustainability is
   /// @dev The X2EarnApps contract address can be modified by the CONTRACTS_ADDRESS_MANAGER_ROLE
   /// @param _x2EarnApps - the X2EarnApps contract address
   function setX2EarnApps(IX2EarnApps _x2EarnApps) public virtual onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
-    require(address(_x2EarnApps) != address(0), "ProofOfPersonhood: x2EarnApps is the zero address");
+    require(address(_x2EarnApps) != address(0), "ProofOfSustainability: x2EarnApps is the zero address");
 
-    _getProofOfPersonhoodStorage().x2EarnApps = _x2EarnApps;
+    _getProofOfSustainabilityStorage().x2EarnApps = _x2EarnApps;
   }
 
   /// @notice Sets if the total score is considered for a user to be a person
@@ -284,19 +277,7 @@ contract ProofOfSustainability is
   /// @dev If the total score is considered, the user is considered a person if the user's total score is greater than or equal to the total threshold
   /// @param _isTotalScoreConsidered - the total score considered flag
   function setIsTotalScoreConsidered(bool _isTotalScoreConsidered) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    _getProofOfPersonhoodStorage().isTotalScoreConsidered = _isTotalScoreConsidered;
-  }
-
-  /// @notice Sets the difficulty multiplier for an action difficulty
-  /// @param difficulty - the action difficulty between EASY, MEDIUM, HARD
-  /// @param multiplier - the multiplier
-  function setDifficultyMultiplier(
-    ACTION_DIFFICULTY difficulty,
-    uint256 multiplier
-  ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
-    require(multiplier > 0, "ProofOfPersonhood: multiplier is zero");
-
-    _getProofOfPersonhoodStorage().actionDifficultyMultiplier[difficulty] = multiplier;
+    _getProofOfSustainabilityStorage().isTotalScoreConsidered = _isTotalScoreConsidered;
   }
 
   // ---------- Getters ---------- //
@@ -306,7 +287,7 @@ contract ProofOfSustainability is
   // }
 
   // function getNormalizedScore(address user) public view virtual override returns (uint256) {
-  //   ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
+  //   ProofOfSustainablityStorage storage $ = _getProofOfSustainabilityStorage();
 
   //   // Get the user's total score
   //   uint256 userScore = getUserTotalScore(user);
@@ -352,7 +333,7 @@ contract ProofOfSustainability is
   /// @param currentRound - the round
   /// if we want to look back 5 rounds we will do: score of current round + sqrt of previous round score + sqrt of (round -2 score )
   function getQuadraticCumulativeScore(address user, uint256 currentRound) public view virtual returns (uint256) {
-    ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
+    ProofOfSustainablityStorage storage $ = _getProofOfSustainabilityStorage();
 
     // Cumulative score of the user
     uint256 cumulativeScore = 0;
@@ -380,36 +361,42 @@ contract ProofOfSustainability is
   /// @notice Checks if a user is whitelisted
   /// @param user - the user address
   function isWhiteListed(address user) public view virtual returns (bool) {
-    return _getProofOfPersonhoodStorage().whitelist[user];
+    return _getProofOfSustainabilityStorage().whitelist[user];
+  }
+
+  /// @notice Checks if a user is blacklisted
+  /// @param user - the user address
+  function isBlacklisted(address user) public view virtual returns (bool) {
+    return _getProofOfSustainabilityStorage().blacklist[user];
   }
 
   /// @notice Checks if the total score is considered for a user to be a person
   /// @return isTotalScoreConsidered - the total score considered flag
   function isTotalScoreConsidered() public view virtual returns (bool) {
-    return _getProofOfPersonhoodStorage().isTotalScoreConsidered;
+    return _getProofOfSustainabilityStorage().isTotalScoreConsidered;
   }
 
   /// @notice Gets the round score of a user
   /// @param user - the user address
   /// @param round - the round
   function getUserRoundScore(address user, uint256 round) public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().userRoundScore[user][round];
+    return _getProofOfSustainabilityStorage().userRoundScore[user][round];
   }
 
   /// @notice Gets the total score of a user
   /// @param user - the user address
   function getUserTotalScore(address user) public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().userTotalScore[user];
+    return _getProofOfSustainabilityStorage().userTotalScore[user];
   }
 
   /// @notice Gets the round threshold for a user to be considered a person
   function getRoundThreshold() public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().roundThreshold;
+    return _getProofOfSustainabilityStorage().roundThreshold;
   }
 
   /// @notice Gets the total threshold for a user to be considered a person
   function getTotalThreshold() public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().totalThreshold;
+    return _getProofOfSustainabilityStorage().totalThreshold;
   }
 
   /// @notice Gets the score of a user for an app in a round
@@ -417,20 +404,14 @@ contract ProofOfSustainability is
   /// @param round - the round
   /// @param appId - the app id
   function getUserRoundScoreApp(address user, uint256 round, bytes32 appId) public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().userAppRoundScore[user][round][appId];
+    return _getProofOfSustainabilityStorage().userAppRoundScore[user][round][appId];
   }
 
   /// @notice Gets the total score of a user for an app
   /// @param user - the user address
   /// @param appId - the app id
   function getUserTotalScoreApp(address user, bytes32 appId) public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().userAppTotalScore[user][appId];
-  }
-
-  /// @notice Gets the difficulty multiplier for an action difficulty
-  /// @param difficulty - the action difficulty between EASY, MEDIUM, HARD
-  function getDifficultyMultiplier(ACTION_DIFFICULTY difficulty) public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().actionDifficultyMultiplier[difficulty];
+    return _getProofOfSustainabilityStorage().userAppTotalScore[user][appId];
   }
 
   function version() public pure returns (string memory) {
