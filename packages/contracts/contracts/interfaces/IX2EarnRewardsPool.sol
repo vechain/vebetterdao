@@ -63,6 +63,14 @@ interface IX2EarnRewardsPool {
   );
 
   /**
+   * @dev Event emitted when the proof of sustainability external contract call fails.
+   *
+   * @param reason The reason for the failure.
+   * @param lowLevelData The low level data returned by the external contract.
+   */
+  event ProofOfSustainabilityFailed(string reason, bytes lowLevelData);
+
+  /**
    * @dev Retrieves the current version of the contract.
    *
    * @return The version of the contract.

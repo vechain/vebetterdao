@@ -252,8 +252,16 @@ contract X2EarnRewardsPool is
     $.availableFunds[appId] -= amount;
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
-    // Register the action in the proof of sustainability contract
-    $.proofOfSustainability.registerAction(receiver, appId, impact.codes, impact.values);
+    // Try to register the action in the proof of sustainability contract
+    try $.proofOfSustainability.registerAction(receiver, appId, impact.codes, impact.values) {
+      // If the call succeeds, you can optionally handle success here.
+    } catch Error(string memory reason) {
+      // If the call reverts with a revert reason string, this block is executed.
+      emit ProofOfSustainabilityFailed(reason, "");
+    } catch (bytes memory lowLevelData) {
+      // If the call reverts without a revert reason or with a custom error, this block is executed.
+      emit ProofOfSustainabilityFailed("Low-level error", lowLevelData);
+    }
   }
 
   /**
