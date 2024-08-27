@@ -312,11 +312,13 @@ contract X2EarnRewardsPool is
     ];
 
     for (uint256 i = 0; i < impact.values.length; i++) {
-      if (_isAllowedKey(impact.codes[i], allowedKeys)) {
+      if (_isAllowedImpactKey(impact.codes[i], allowedKeys)) {
         json = abi.encodePacked(json, '"', impact.codes[i], '":"', Strings.toString(impact.values[i]), '"');
         if (i < impact.values.length - 1) {
           json = abi.encodePacked(json, ",");
         }
+      } else {
+        revert("X2EarnRewardsPool: Invalid impact key");
       }
     }
 
@@ -327,7 +329,7 @@ contract X2EarnRewardsPool is
   /**
    * @dev Checks if the key is allowed.
    */
-  function _isAllowedKey(string memory key, string[8] memory allowedKeys) internal pure returns (bool) {
+  function _isAllowedImpactKey(string memory key, string[8] memory allowedKeys) internal pure returns (bool) {
     for (uint256 i = 0; i < allowedKeys.length; i++) {
       if (keccak256(abi.encodePacked(key)) == keccak256(abi.encodePacked(allowedKeys[i]))) {
         return true;
