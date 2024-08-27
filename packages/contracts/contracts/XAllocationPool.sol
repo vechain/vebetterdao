@@ -473,7 +473,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     uint256 appVotes = _xAllocationVoting.getAppVotes(roundId, appId);
 
     // avoid division by zero
-    if (appVotes == 0) return (0, 0);
+    if (totalVotes == 0) return (0, 0);
 
     uint256 appShare = (appVotes * PERCENTAGE_PRECISION_SCALING_FACTOR) / totalVotes;
 
