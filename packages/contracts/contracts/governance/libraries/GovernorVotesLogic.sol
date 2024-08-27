@@ -70,7 +70,6 @@ library GovernorVotesLogic {
    * @param account The address of the voter.
    * @param support The support value of the vote.
    * @param weight The weight of the vote.
-   * @param power The voting power of the voter.
    */
   function _countVote(
     GovernorStorageTypes.GovernorStorage storage self,
@@ -78,7 +77,7 @@ library GovernorVotesLogic {
     address account,
     uint8 support,
     uint256 weight,
-    uint256 power
+    uint256 /* power */
   ) private {
     GovernorTypes.ProposalVote storage proposalVote = self.proposalVotes[proposalId];
 
@@ -88,11 +87,11 @@ library GovernorVotesLogic {
     proposalVote.hasVoted[account] = true;
 
     if (support == uint8(GovernorTypes.VoteType.Against)) {
-      proposalVote.againstVotes += power;
+      proposalVote.againstVotes += weight;
     } else if (support == uint8(GovernorTypes.VoteType.For)) {
-      proposalVote.forVotes += power;
+      proposalVote.forVotes += weight;
     } else if (support == uint8(GovernorTypes.VoteType.Abstain)) {
-      proposalVote.abstainVotes += power;
+      proposalVote.abstainVotes += weight;
     } else {
       revert GovernorInvalidVoteType();
     }
