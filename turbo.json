@@ -1,11 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDotEnv": [
-    ".env"
-  ],
-  "globalDependencies": [
-    "**/.env.*local"
-  ],
+  "globalDotEnv": [".env"],
+  "globalDependencies": ["**/.env.*local"],
   "globalEnv": [
     "NEXT_PUBLIC_APP_ENV",
     "MNEMONIC",
@@ -17,23 +13,14 @@
   ],
   "pipeline": {
     "install": {
-      "dependsOn": [
-        "@repo/contracts#install",
-        "^compile"
-      ]
+      "dependsOn": ["@repo/contracts#install", "^compile"]
     },
     "@repo/contracts#install": {
       "cache": false
     },
     "build": {
-      "dependsOn": [
-        "^compile",
-        "@repo/config#check-or-generate-local-config"
-      ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**"
-      ]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"],
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
       "cache": false
@@ -43,169 +30,122 @@
     },
     "dev": {
       "cache": false,
-      "dependsOn": [
-        "^setup-contracts"
-      ]
+      "dependsOn": ["^setup-contracts"]
     },
     "dev:testnet": {
       "cache": false,
       "persistent": true,
-      "dependsOn": [
-        "^setup-contracts:testnet"
-      ]
+      "dependsOn": ["^setup-contracts:testnet"]
     },
     "dev:mainnet": {
       "cache": false,
       "persistent": true,
-      "dependsOn": [
-        "^setup-contracts:mainnet"
-      ]
+      "dependsOn": ["^setup-contracts:mainnet"]
     },
     "setup-contracts": {
       "cache": false,
       "persistent": true,
-      "dependsOn": [
-        "^compile",
-        "@repo/contracts#check-contracts-deployment"
-      ]
+      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment"]
     },
     "setup-contracts:testnet": {
       "cache": false,
       "persistent": true,
-      "dependsOn": [
-        "^compile",
-        "@repo/contracts#check-contracts-deployment:testnet"
-      ]
+      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:testnet"]
     },
     "setup-contracts:mainnet": {
       "cache": false,
       "persistent": true,
-      "dependsOn": [
-        "^compile",
-        "@repo/contracts#check-contracts-deployment:mainnet"
-      ]
+      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:mainnet"]
     },
     "@repo/config#check-or-generate-local-config": {
       "cache": false
     },
     "@repo/contracts#check-contracts-deployment": {
       "cache": false,
-      "dependsOn": [
-        "^compile",
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "@repo/contracts#check-contracts-deployment:testnet": {
       "cache": false,
-      "dependsOn": [
-        "^compile",
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "@repo/contracts#check-contracts-deployment:mainnet": {
       "cache": false,
-      "dependsOn": [
-        "^compile",
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "clean": {
       "cache": false
     },
     "compile": {
       "cache": false,
-      "dependsOn": [
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "deploy": {
-      "dependsOn": [
-        "^deploy",
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["^deploy", "@repo/config#check-or-generate-local-config"]
     },
     "deploy:testnet": {
-      "dependsOn": [
-        "^deploy:testnet"
-      ]
+      "dependsOn": ["^deploy:testnet"]
     },
     "deploy:mainnet": {
-      "dependsOn": [
-        "^deploy:mainnet"
-      ]
+      "dependsOn": ["^deploy:mainnet"]
+    },
+    "upgrade:voter-rewards": {
+      "dependsOn": ["^upgrade:voter-rewards", "@repo/config#check-or-generate-local-config"]
+    },
+    "upgrade:voter-rewards:solo-staging": {
+      "dependsOn": ["^upgrade:voter-rewards:solo-staging"]
+    },
+    "upgrade:voter-rewards:testnet": {
+      "dependsOn": ["^upgrade:voter-rewards:testnet"]
+    },
+    "upgrade:voter-rewards:mainnet": {
+      "dependsOn": ["^upgrade:voter-rewards:mainnet"]
     },
     "start-round:testnet": {
-      "dependsOn": [
-        "@repo/config#check-or-generate-local-config"
-      ],
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
       "cache": false
     },
     "start-round": {
-      "dependsOn": [
-        "@repo/config#check-or-generate-local-config"
-      ],
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
       "cache": false
     },
     "test": {
       "cache": false,
-      "dependsOn": [
-        "^compile",
-        "@repo/config#check-or-generate-local-config",
-        "test:hardhat"
-      ]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config", "test:hardhat"]
     },
     "test:watch": {
       "cache": false,
-      "dependsOn": [
-        "^compile",
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "test:coverage:fe": {
       "cache": false,
-      "dependsOn": [
-        "^compile",
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "test:coverage:solidity": {
       "cache": false,
-      "dependsOn": [
-        "^@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["^@repo/config#check-or-generate-local-config"]
     },
     "test:thor-solo": {
       "cache": false
     },
     "test:hardhat": {
       "cache": false,
-      "dependsOn": [
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "generate-galaxy-member-metadata": {
       "cache": false,
-      "dependsOn": [
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "upload-galaxy-member-metadata": {
       "cache": false,
-      "dependsOn": [
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "generate-xapp-metadata": {
       "cache": false,
-      "dependsOn": [
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "upload-xapp-metadata": {
       "cache": false,
-      "dependsOn": [
-        "@repo/config#check-or-generate-local-config"
-      ]
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "playwright:e2e": {
       "cache": false
