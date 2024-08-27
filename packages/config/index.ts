@@ -24,7 +24,6 @@ export type AppConfig = {
   treasuryContractAddress: string
   x2EarnAppsContractAddress: string
   x2EarnRewardsPoolContractAddress: string
-  proofOfSustainabilityContractAddress: string
   nodeUrl: string
   network: Network
 }

@@ -33,7 +33,6 @@ import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import { X2EarnAppsDataTypes } from "./libraries/X2EarnAppsDataTypes.sol";
-import { IProofOfSustainability } from "./interfaces/IProofOfSustainability.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -65,7 +64,6 @@ contract X2EarnRewardsPool is
     IB3TR b3tr;
     IX2EarnApps x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
-    IProofOfSustainability proofOfSustainability;
     string[] allowedImpactKeys;
   }
 
@@ -105,15 +103,12 @@ contract X2EarnRewardsPool is
     $.x2EarnApps = _x2EarnApps;
   }
 
-  function initializeV2(address _proofOfSustainability, address _impactKeyManager) external reinitializer(2) {
-    require(_proofOfSustainability != address(0), "X2EarnRewardsPool: proofOfSustainability is the zero address");
+  function initializeV2(address _impactKeyManager) external reinitializer(2) {
     require(_impactKeyManager != address(0), "X2EarnRewardsPool: impactKeyManager is the zero address");
-
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    $.proofOfSustainability = IProofOfSustainability(_proofOfSustainability);
 
     _grantRole(IMPACT_KEY_MANAGER_ROLE, _impactKeyManager);
 
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     // pre fill the allowed impact keys
     $.allowedImpactKeys = [
       "carbon",
@@ -244,23 +239,12 @@ contract X2EarnRewardsPool is
     // buildJsonProof
     string memory jsonProof = _buildJsonProof(proof, impact, description);
 
-    // emit event
-    emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
-
     // Transfer the rewards to the receiver
     $.availableFunds[appId] -= amount;
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
-    // Try to register the action in the proof of sustainability contract
-    try $.proofOfSustainability.registerAction(receiver, appId, impact.codes, impact.values) {
-      // If the call succeeds, you can optionally handle success here.
-    } catch Error(string memory reason) {
-      // If the call reverts with a revert reason string, this block is executed.
-      emit ProofOfSustainabilityFailed(reason, "");
-    } catch (bytes memory lowLevelData) {
-      // If the call reverts without a revert reason or with a custom error, this block is executed.
-      emit ProofOfSustainabilityFailed("Low-level error", lowLevelData);
-    }
+    // emit event
+    emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
   }
 
   /**
@@ -376,22 +360,6 @@ contract X2EarnRewardsPool is
   }
 
   /**
-   * @dev Sets the ProofOfSustainability contract address.
-   * @param _proofOfSustainability the new ProofOfSustainability contract
-   */
-  function setProofOfSustainability(
-    IProofOfSustainability _proofOfSustainability
-  ) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
-    require(
-      address(_proofOfSustainability) != address(0),
-      "X2EarnRewardsPool: proofOfSustainability is the zero address"
-    );
-
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    $.proofOfSustainability = _proofOfSustainability;
-  }
-
-  /**
    * @dev Adds a new allowed impact key.
    * @param newKey the new key to add
    */
@@ -449,11 +417,6 @@ contract X2EarnRewardsPool is
   function x2EarnApps() external view returns (IX2EarnApps) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.x2EarnApps;
-  }
-
-  function proofOfSustainability() external view returns (IProofOfSustainability) {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.proofOfSustainability;
   }
 
   /**
