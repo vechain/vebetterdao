@@ -18,6 +18,7 @@ const config: AppConfig = {
   x2EarnAppsContractAddress: "",
   treasuryContractAddress: "",
   x2EarnRewardsPoolContractAddress: "",
+  proofOfSustainabilityContractAddress: "",
   nodeUrl: "https://testnet.vechain.org",
   network: {
     id: "testnet",

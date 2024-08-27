@@ -231,7 +231,7 @@ export const getOrDeployContractInstances = async ({
     "X2EarnRewardsPoolV1",
     "X2EarnRewardsPool",
     await x2EarnRewardsPoolV1.getAddress(),
-    [proofOfSustainabilityProxyAddress],
+    [proofOfSustainabilityProxyAddress, owner.address],
     {
       version: 2,
     },

@@ -53,6 +53,7 @@ contract X2EarnRewardsPool is
 {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
+  bytes32 public constant IMPACT_KEY_MANAGER_ROLE = keccak256("IMPACT_KEY_MANAGER_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -65,6 +66,7 @@ contract X2EarnRewardsPool is
     IX2EarnApps x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
     IProofOfSustainability proofOfSustainability;
+    string[] allowedImpactKeys;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -103,11 +105,38 @@ contract X2EarnRewardsPool is
     $.x2EarnApps = _x2EarnApps;
   }
 
-  function initializeV2(address _proofOfSustainability) external reinitializer(2) {
+  function initializeV2(address _proofOfSustainability, address _impactKeyManager) external reinitializer(2) {
     require(_proofOfSustainability != address(0), "X2EarnRewardsPool: proofOfSustainability is the zero address");
+    require(_impactKeyManager != address(0), "X2EarnRewardsPool: impactKeyManager is the zero address");
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.proofOfSustainability = IProofOfSustainability(_proofOfSustainability);
+
+    _grantRole(IMPACT_KEY_MANAGER_ROLE, _impactKeyManager);
+
+    // pre fill the allowed impact keys
+    $.allowedImpactKeys = [
+      "carbon",
+      "water",
+      "energy",
+      "waste_mass",
+      "learning_time",
+      "timber",
+      "plastic",
+      "trees_planted"
+    ];
+  }
+
+  // ---------- Modifiers ---------- //
+  /**
+   * @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
+   * @param role - the role to check
+   */
+  modifier onlyRoleOrAdmin(bytes32 role) {
+    if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+      revert("X2EarnRewardsPool: sender is not an admin nor has the required role");
+    }
+    _;
   }
 
   // ---------- Authorizers ---------- //
@@ -234,7 +263,7 @@ contract X2EarnRewardsPool is
     Proof memory proof,
     Impact memory impact,
     string memory description
-  ) internal pure returns (string memory) {
+  ) internal view returns (string memory) {
     bool hasProof = bytes(proof.proofType).length > 0 || bytes(proof.value).length > 0;
     bool hasImpact = impact.codes.length > 0 && impact.values.length > 0;
     bool hasDescription = bytes(description).length > 0;
@@ -294,25 +323,13 @@ contract X2EarnRewardsPool is
    * @dev Builds the impact JSON string.
    * @param impact an array of integers that represent the impact of the action. Each index of the array
    */
-  function _buildImpactJson(Impact memory impact) internal pure returns (string memory) {
+  function _buildImpactJson(Impact memory impact) internal view returns (string memory) {
     require(impact.codes.length == impact.values.length, "Mismatched input lengths");
 
     bytes memory json = abi.encodePacked("{");
 
-    // Define the allowed keys
-    string[8] memory allowedKeys = [
-      "carbon",
-      "water",
-      "energy",
-      "waste_mass",
-      "learning_time",
-      "timber",
-      "plastic",
-      "trees_planted"
-    ];
-
     for (uint256 i = 0; i < impact.values.length; i++) {
-      if (_isAllowedImpactKey(impact.codes[i], allowedKeys)) {
+      if (_isAllowedImpactKey(impact.codes[i])) {
         json = abi.encodePacked(json, '"', impact.codes[i], '":"', Strings.toString(impact.values[i]), '"');
         if (i < impact.values.length - 1) {
           json = abi.encodePacked(json, ",");
@@ -329,9 +346,10 @@ contract X2EarnRewardsPool is
   /**
    * @dev Checks if the key is allowed.
    */
-  function _isAllowedImpactKey(string memory key, string[8] memory allowedKeys) internal pure returns (bool) {
-    for (uint256 i = 0; i < allowedKeys.length; i++) {
-      if (keccak256(abi.encodePacked(key)) == keccak256(abi.encodePacked(allowedKeys[i]))) {
+  function _isAllowedImpactKey(string memory key) internal view returns (bool) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    for (uint256 i = 0; i < $.allowedImpactKeys.length; i++) {
+      if (keccak256(abi.encodePacked(key)) == keccak256(abi.encodePacked($.allowedImpactKeys[i]))) {
         return true;
       }
     }
@@ -364,6 +382,33 @@ contract X2EarnRewardsPool is
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.proofOfSustainability = _proofOfSustainability;
+  }
+
+  /**
+   * @dev Adds a new allowed impact key.
+   * @param newKey the new key to add
+   */
+  function addImpactKey(string memory newKey) external onlyRoleOrAdmin(IMPACT_KEY_MANAGER_ROLE) {
+    require(!_isAllowedImpactKey(newKey), "X2EarnRewardsPool: Key already exists");
+
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    $.allowedImpactKeys.push(newKey);
+  }
+
+  /**
+   * @dev Removes an allowed impact key.
+   * @param keyToRemove the key to remove
+   */
+  function removeImpactKey(string memory keyToRemove) external onlyRoleOrAdmin(IMPACT_KEY_MANAGER_ROLE) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    for (uint256 i = 0; i < $.allowedImpactKeys.length; i++) {
+      if (keccak256(abi.encodePacked($.allowedImpactKeys[i])) == keccak256(abi.encodePacked(keyToRemove))) {
+        $.allowedImpactKeys[i] = $.allowedImpactKeys[$.allowedImpactKeys.length - 1];
+        $.allowedImpactKeys.pop();
+        return;
+      }
+    }
+    revert("X2EarnRewardsPool: Key not found");
   }
 
   // ---------- Getters ---------- //
@@ -402,6 +447,14 @@ contract X2EarnRewardsPool is
   function proofOfSustainability() external view returns (IProofOfSustainability) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.proofOfSustainability;
+  }
+
+  /**
+   * @dev Retrieves the allowed impact keys.
+   */
+  function getAllowedImpactKeys() external view returns (string[] memory) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.allowedImpactKeys;
   }
 
   // ---------- Fallbacks ---------- //

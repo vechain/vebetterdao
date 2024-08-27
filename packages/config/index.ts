@@ -4,7 +4,7 @@ import testnetConfig from "./testnet"
 import mainnetConfig from "./mainnet"
 import { EnvConfig, getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
-import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from './datadog'
+import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "./datadog"
 
 export type AppConfig = {
   environment: EnvConfig
@@ -24,6 +24,7 @@ export type AppConfig = {
   treasuryContractAddress: string
   x2EarnAppsContractAddress: string
   x2EarnRewardsPoolContractAddress: string
+  proofOfSustainabilityContractAddress: string
   nodeUrl: string
   network: Network
 }

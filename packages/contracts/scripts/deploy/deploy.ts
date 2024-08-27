@@ -12,13 +12,14 @@ import {
   Treasury,
   X2EarnApps,
   X2EarnRewardsPool,
+  ProofOfSustainability,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
 import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } from "./setup"
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { deployAndUpgrade, deployProxy, saveContractsToFile } from "../helpers"
+import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, saveContractsToFile } from "../helpers"
 import { shouldRunSimulation } from "@repo/config/contracts"
 
 // GalaxyMember NFT Values
@@ -172,6 +173,9 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as X2EarnApps
 
+  // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
+  const proofOfSustainabilityProxyAddress = await deployProxyOnly("ProofOfSustainability", undefined, false)
+
   const x2EarnRewardsPool = (await deployAndUpgrade(
     ["X2EarnRewardsPoolV1", "X2EarnRewardsPool"],
     [
@@ -182,7 +186,10 @@ export async function deployAll(config: ContractsConfig) {
         await b3tr.getAddress(),
         await x2EarnApps.getAddress(),
       ],
-      [],
+      [
+        proofOfSustainabilityProxyAddress,
+        config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
+      ],
     ],
     {
       versions: [undefined, 2],
@@ -335,6 +342,22 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as B3TRGovernor
 
+  const proofOfSustainability = (await initializeProxy(proofOfSustainabilityProxyAddress, "ProofOfSustainability", [
+    {
+      admin: config.CONTRACTS_ADMIN_ADDRESS,
+      contractsManagerAdmin: config.CONTRACTS_ADMIN_ADDRESS,
+      upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+      actionRegistrar: await x2EarnRewardsPool.getAddress(),
+      actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS,
+      roundThreshold: 1, // TODO
+      threshold: 1, //TODO
+      isTotalScoreConsidered: true,
+      x2EarnApps: await x2EarnApps.getAddress(),
+      roundsForCumulativeScore: 5, //TODO
+      xAllocationVoting: await xAllocationVoting.getAddress(),
+    },
+  ])) as ProofOfSustainability
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -351,6 +374,7 @@ export async function deployAll(config: ContractsConfig) {
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
+    ProofOfSustainability: await proofOfSustainability.getAddress(),
   }
 
   const libraries: {
@@ -773,6 +797,8 @@ export async function deployAll(config: ContractsConfig) {
       await galaxyMember.MINTER_ROLE(),
     )
 
+    //TODO: validate roles for ProofOfSustainability
+
     console.log("Roles validated successfully!")
   }
 
@@ -800,6 +826,7 @@ export async function deployAll(config: ContractsConfig) {
     treasury: treasury,
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
+    proofOfSustainability: proofOfSustainability,
   }
   // close the script
 }

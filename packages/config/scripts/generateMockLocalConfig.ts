@@ -31,6 +31,7 @@ export const generateMockLocalConfig = () => {
     treasuryContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     x2EarnAppsContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     x2EarnRewardsPoolContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
+    proofOfSustainabilityContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     "nodeUrl": "http://localhost:8669",
     "network": {
       "id": "solo",
