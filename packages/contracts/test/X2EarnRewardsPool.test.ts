@@ -746,8 +746,8 @@ describe.only("X2EarnRewardsPool", function () {
     })
   })
 
-  describe("Proofs and Impact", async function () {
-    it.only("App can provide proof and impact as parameters", async function () {
+  describe.only("Proofs and Impact", async function () {
+    it("App can provide proof and impact as parameters", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -773,8 +773,8 @@ describe.only("X2EarnRewardsPool", function () {
       const tx = await x2EarnRewardsPool
         .connect(owner)
         [
-          "distributeReward(bytes32,uint256,address,(string,string),(string[],uint256[]),string)"
-        ](appId, ethers.parseEther("1"), user.address, { proofType: "image", value: "https://image.png" }, { codes: ["carbon", "water"], values: [100,
+          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+        ](appId, ethers.parseEther("1"), user.address, { types: ["image"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
               200] }, "The description of the action")
 
       const receipt = await tx.wait()
@@ -793,11 +793,69 @@ describe.only("X2EarnRewardsPool", function () {
       expect(event[0].args[2]).to.equal(user.address)
 
       const emittedProof = JSON.parse(event[0].args[3])
-      console.log(emittedProof)
 
       expect(emittedProof).to.have.property("version")
       expect(emittedProof.version).to.equal(2)
       expect(emittedProof).to.have.deep.property("proof", { image: "https://image.png" })
+      expect(emittedProof).to.have.property("description")
+      expect(emittedProof.description).to.equal("The description of the action")
+      expect(emittedProof).to.have.deep.property("impact", { carbon: 100, water: 200 })
+
+      expect(event[0].args[4]).to.equal(owner.address)
+    })
+
+    it("App can provide multiple proofs", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccounts[10]
+      const user = otherAccounts[11]
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.addApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
+
+      // fill the pool
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      const tx = await x2EarnRewardsPool
+        .connect(owner)
+        [
+          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
+        ](appId, ethers.parseEther("1"), user.address, { types: ["image", "link"], values: ["https://image.png", "https://twitter.com/tweet/1"] }, { codes: ["carbon", "water"], values: [100,
+              200] }, "The description of the action")
+
+      const receipt = await tx.wait()
+
+      expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
+      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(ethers.parseEther("99"))
+
+      // event emitted
+      if (!receipt) throw new Error("No receipt")
+
+      let event = filterEventsByName(receipt.logs, "RewardDistributed")
+
+      expect(event).not.to.eql([])
+      expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
+      expect(event[0].args[1]).to.equal(appId)
+      expect(event[0].args[2]).to.equal(user.address)
+
+      const emittedProof = JSON.parse(event[0].args[3])
+      expect(emittedProof).to.have.property("version")
+      expect(emittedProof.version).to.equal(2)
+      expect(emittedProof).to.have.deep.property("proof", {
+        image: "https://image.png",
+        link: "https://twitter.com/tweet/1",
+      })
       expect(emittedProof).to.have.property("description")
       expect(emittedProof.description).to.equal("The description of the action")
       expect(emittedProof).to.have.deep.property("impact", { carbon: 100, water: 200 })

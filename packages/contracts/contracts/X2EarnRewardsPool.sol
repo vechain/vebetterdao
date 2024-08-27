@@ -199,7 +199,7 @@ contract X2EarnRewardsPool is
       appId,
       amount,
       receiver,
-      ProofDataTypes.Proof("", ""),
+      ProofDataTypes.Proof(new string[](0), new string[](0)),
       ProofDataTypes.Impact(new string[](0), new uint256[](0)),
       ""
     );
@@ -248,12 +248,12 @@ contract X2EarnRewardsPool is
     // buildJsonProof
     string memory jsonProof = _buildJsonProof(proof, impact, description);
 
+    // emit event
+    emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
+
     // Transfer the rewards to the receiver
     $.availableFunds[appId] -= amount;
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
-
-    // emit event
-    emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
   }
 
   /**
@@ -264,12 +264,12 @@ contract X2EarnRewardsPool is
     ProofDataTypes.Impact memory impact,
     string memory description
   ) internal view returns (string memory) {
-    bool hasProof = bytes(proof.proofType).length > 0 || bytes(proof.value).length > 0;
+    bool hasProof = proof.types.length > 0 && proof.values.length > 0;
     bool hasImpact = impact.codes.length > 0 && impact.values.length > 0;
     bool hasDescription = bytes(description).length > 0;
 
-    // If neither proof, description, nor impact is provided, return an empty string
-    if (!hasProof || !hasImpact) {
+    // If neither proof nor impact is provided, return an empty string
+    if (!hasProof && !hasImpact) {
       return "";
     }
 
@@ -281,15 +281,21 @@ contract X2EarnRewardsPool is
       json = string(abi.encodePacked(json, ',"description": "', description, '"'));
     }
 
-    // Add proof if available and check proofType
+    // Add proof if available
     if (hasProof) {
-      require(
-        keccak256(abi.encodePacked(proof.proofType)) == keccak256(abi.encodePacked("image")) ||
-          keccak256(abi.encodePacked(proof.proofType)) == keccak256(abi.encodePacked("link")),
-        "X2EarnRewardsPool: Invalid proof type"
-      );
+      json = string(abi.encodePacked(json, ',"proof": {'));
 
-      json = string(abi.encodePacked(json, ',"proof": {', '"', proof.proofType, '": "', proof.value, '"}'));
+      for (uint256 i = 0; i < proof.types.length; i++) {
+        require(_isValidProofType(proof.types[i]), "X2EarnRewardsPool: Invalid proof type");
+
+        json = string(abi.encodePacked(json, '"', proof.types[i], '": "', proof.values[i], '"'));
+
+        if (i < proof.types.length - 1) {
+          json = string(abi.encodePacked(json, ","));
+        }
+      }
+
+      json = string(abi.encodePacked(json, "}"));
     }
 
     // Add impact if available
@@ -345,6 +351,16 @@ contract X2EarnRewardsPool is
       }
     }
     return false;
+  }
+
+  /**
+   * @dev Checks if the proof type is valid.
+   */
+  function _isValidProofType(string memory proofType) internal pure returns (bool) {
+    return
+      keccak256(abi.encodePacked(proofType)) == keccak256(abi.encodePacked("image")) ||
+      keccak256(abi.encodePacked(proofType)) == keccak256(abi.encodePacked("link")) ||
+      keccak256(abi.encodePacked(proofType)) == keccak256(abi.encodePacked("video"));
   }
 
   /**
