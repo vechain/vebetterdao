@@ -49,16 +49,8 @@ export const ProposalShareButton = () => {
 
   return (
     <>
-      <IconButton
-        aria-label="share"
-        rounded="full"
-        bgColor="#E0E9FE"
-        color="#004CFC"
-        h="40px"
-        w="40px"
-        mt={["20px", "0px"]}
-        onClick={onOpen}>
-        <UilShareAlt size="20px" />
+      <IconButton aria-label="share" rounded="full" bgColor="#E0E9FE" color="#004CFC" boxSize={"40px"} onClick={onOpen}>
+        <UilShareAlt />
       </IconButton>
       <Modal
         isOpen={isOpen}

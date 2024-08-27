@@ -1,18 +1,32 @@
-import { ProposalState } from "@/api"
+import { ProposalState, useProposalState, useProposalVoteEvents, useProposalVotes } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
-import { Box, Flex, Image, Text, VStack } from "@chakra-ui/react"
+import { Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
 import { ProposalVotesResults } from "./components/ProposalVotesResults"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
-import { ExclamationTriangle } from "@/components"
+import { ExclamationTriangle, ResponsiveCard } from "@/components"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
-export const ProposalOverviewVotes = () => {
-  const { proposal } = useProposalDetail()
+type Props = {
+  proposalId: string
+}
+
+const forColor = "#3DBA67"
+const againstColor = "#C84968"
+const abstainColor = "#B59525"
+
+export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { t } = useTranslation()
 
+  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotes(proposalId)
+  const { data: proposalState } = useProposalState(proposalId)
+
+  const { data: voteEvents, isLoading: voteEventsLoading } = useProposalVoteEvents(proposalId)
+
+  const { proposal } = useProposalDetail()
   const [_, setSeconds] = useState(0)
 
   useEffect(() => {
@@ -22,24 +36,46 @@ export const ProposalOverviewVotes = () => {
     return () => clearInterval(interval)
   }, [])
 
-  switch (proposal.state) {
+  const votes = {
+    for: {
+      color: forColor,
+      text: t("Votes for"),
+      percentage: proposalVotes?.forPercentage ?? 0,
+      icon: <Icon as={UilThumbsUp} boxSize={["20px", "20px", "16px"]} />,
+    },
+    against: {
+      color: againstColor,
+      text: t("Against"),
+      percentage: proposalVotes?.againstPercentage ?? 0,
+      icon: <Icon as={UilThumbsDown} boxSize={["20px", "20px", "16px"]} />,
+    },
+
+    abstain: {
+      color: abstainColor,
+      text: t("Abstained"),
+      percentage: proposalVotes?.abstainPercentage ?? 0,
+      icon: <Image src={"/images/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
+    },
+  }
+
+  switch (proposalState) {
     case ProposalState.DepositNotMet:
       return (
-        <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
-          <VStack p="32px">
+        <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
+          <VStack>
             <ExclamationTriangle color="#757575" />
             <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
               {t("The community has not supported this proposal and was canceled")}
             </Text>
           </VStack>
-        </Flex>
+        </ResponsiveCard>
       )
 
     case ProposalState.Pending:
       if (proposal.isDepositReached) {
         return (
-          <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
-            <VStack p="32px">
+          <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
+            <VStack>
               <Image w="88px" h="88px" color="#004CFC" src="/images/vote.svg" alt="vote-icon" />
               <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
                 {t("This proposal will be voted in")}
@@ -48,12 +84,12 @@ export const ProposalOverviewVotes = () => {
                 {timestampToTimeLeft(proposal.votingStartDate)}
               </Text>
             </VStack>
-          </Flex>
+          </ResponsiveCard>
         )
       }
       return (
-        <Flex h={"full"} bg={"#F8F8F8"} rounded="8px" justify={"center"} alignItems={"center"} flex={1.5}>
-          <VStack p="32px">
+        <ResponsiveCard cardProps={{ variant: "filled", w: "full", flex: 1 }}>
+          <VStack>
             <ExclamationTriangle />
             <Text color="#252525" fontWeight={"500"} textAlign={"center"} fontSize="20px">
               {t("This proposal must get the support of the community before the round starts")}
@@ -62,7 +98,7 @@ export const ProposalOverviewVotes = () => {
               {timestampToTimeLeft(proposal.votingStartDate)}
             </Text>
           </VStack>
-        </Flex>
+        </ResponsiveCard>
       )
 
     case ProposalState.Active:
@@ -80,42 +116,41 @@ export const ProposalOverviewVotes = () => {
         [ProposalState.Executed]: "#38BF66",
       }
       return (
-        <Flex
-          h={"full"}
-          bg={"#F8F8F8"}
-          rounded="8px"
-          flex={1.5}
-          borderWidth={1}
-          borderColor={borderColorMap[proposal.state]}>
-          <VStack p="24px" alignItems={"stretch"} w="full" justify={"space-between"}>
-            <Text color="#000000" fontWeight={"700"} fontSize="20px">
+        <ResponsiveCard
+          cardProps={{
+            variant: "filled",
+            w: "full",
+            flex: 1,
+            borderColor: borderColorMap[proposalState],
+            borderWidth: 1,
+          }}>
+          <VStack alignItems={"stretch"} w="full" justify={"space-between"} spacing={3}>
+            <Heading fontWeight={"700"} fontSize="20px">
               {t("Real time votes")}
-            </Text>
-            <VStack alignItems={"stretch"} gap={6}>
-              <ProposalVotesProgressBar
-                text={t("Votes for")}
-                percentage={proposal.forPercentage}
-                color="#38BF66"
-                icon={<UilThumbsUp size="16px" color="#38BF66" />}
-              />
-              <ProposalVotesProgressBar
-                text={t("Against")}
-                percentage={proposal.againstPercentage}
-                color="#D23F63"
-                icon={<UilThumbsDown size="16px" color="#D23F63" />}
-              />
-              <ProposalVotesProgressBar
-                text={t("Abstained")}
-                percentage={proposal.abstainPercentage}
-                color="#B59525"
-                icon={<Image src={"/images/abstained.svg"} alt="abstained" />}
-              />
+            </Heading>
+            <VStack w="full" justify={"space-between"} spacing={0} align={"flex-start"}>
+              <Text fontWeight={"400"} color="#6A6A6A">
+                {t("Wallets voted")}
+              </Text>
+              <Skeleton isLoaded={!voteEventsLoading}>
+                <Heading size="sm">{getCompactFormatter(2).format(voteEvents?.votes.length ?? 0)}</Heading>
+              </Skeleton>
             </VStack>
-            <Box mt={2}>
-              <ProposalVotesResults />
-            </Box>
+            <VStack alignItems={"stretch"} gap={6}>
+              {Object.entries(votes).map(([key, value]) => (
+                <ProposalVotesProgressBar
+                  isLoading={proposalVotesLoading}
+                  key={key}
+                  text={value.text}
+                  percentage={value.percentage}
+                  color={value.color}
+                  icon={value.icon}
+                />
+              ))}
+            </VStack>
+            <ProposalVotesResults proposalId={proposalId} />
           </VStack>
-        </Flex>
+        </ResponsiveCard>
       )
   }
 }

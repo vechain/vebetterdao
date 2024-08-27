@@ -17,6 +17,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
   const { t } = useTranslation()
   const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotes(proposal.proposalId)
   const { data: proposalSnapshotBlock } = useProposalSnapshot(proposal.proposalId)
+
   const { data: quorum, isLoading: quorumLoading } = useProposalQuorum(proposalSnapshotBlock)
   const { data: currentBlock } = useCurrentBlock()
 
