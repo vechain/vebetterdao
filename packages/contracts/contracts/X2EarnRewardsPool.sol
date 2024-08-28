@@ -206,10 +206,9 @@ contract X2EarnRewardsPool is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-distributeReward}
-   * @notice Currently only "image" and "link" proof types are supported.
+   * @dev See {IX2EarnRewardsPool-distributeRewardWithProof}
    */
-  function distributeReward(
+  function distributeRewardWithProof(
     bytes32 appId,
     uint256 amount,
     address receiver,

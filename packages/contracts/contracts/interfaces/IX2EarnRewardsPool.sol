@@ -92,7 +92,7 @@ interface IX2EarnRewardsPool {
    * @param appId the app id that is emitting the reward
    * @param amount the amount of B3TR token the user is rewarded with
    * @param receiver the address of the user that performed the sustainable action and is rewarded
-   * @param proof a JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
+   * @param proof deprecated argument, use the new function that accepts a ProofDataTypes.Proof argument
    */
   function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external;
 
@@ -106,7 +106,7 @@ interface IX2EarnRewardsPool {
    * @param impact a list of codes and values that represent the impact of the sustainable action
    * @param description a description of the sustainable action that was performed
    */
-  function distributeReward(
+  function distributeRewardWithProof(
     bytes32 appId,
     uint256 amount,
     address receiver,

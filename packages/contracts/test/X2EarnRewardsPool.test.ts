@@ -5,7 +5,7 @@ import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy } from "../scripts/helpers"
 
-describe.only("X2EarnRewardsPool", function () {
+describe("X2EarnRewardsPool", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {
@@ -561,9 +561,7 @@ describe.only("X2EarnRewardsPool", function () {
 
       const tx = await x2EarnRewardsPool
         .connect(owner)
-        [
-          "distributeReward(bytes32,uint256,address,string)"
-        ](appId, ethers.parseEther("1"), user.address, "ipfs://metadata")
+        .distributeReward(appId, ethers.parseEther("1"), user.address, "ipfs://metadata")
       const receipt = await tx.wait()
 
       expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
@@ -604,11 +602,8 @@ describe.only("X2EarnRewardsPool", function () {
 
       // https://docs.ethers.org/v5/single-page/#/v5/migration/web3/-%23-migration-from-web3-js--contracts--overloaded-functions
       // for ambiguous functions (two functions with the same name), the signature must also be specified
-      await expect(
-        x2EarnRewardsPool
-          .connect(owner)
-          ["distributeReward(bytes32,uint256,address,string)"](appId, ethers.parseEther("101"), user.address, ""),
-      ).to.be.reverted
+      await expect(x2EarnRewardsPool.connect(owner).distributeReward(appId, ethers.parseEther("101"), user.address, ""))
+        .to.be.reverted
 
       expect(await b3tr.balanceOf(user.address)).to.equal(0)
       expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(amount)
@@ -635,9 +630,7 @@ describe.only("X2EarnRewardsPool", function () {
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
       await catchRevert(
-        x2EarnRewardsPool
-          .connect(user)
-          ["distributeReward(bytes32,uint256,address,string)"](appId, ethers.parseEther("1"), user.address, ""),
+        x2EarnRewardsPool.connect(user).distributeReward(appId, ethers.parseEther("1"), user.address, ""),
       )
 
       expect(await b3tr.balanceOf(user.address)).to.equal(0)
@@ -659,9 +652,7 @@ describe.only("X2EarnRewardsPool", function () {
       await catchRevert(
         x2EarnRewardsPool
           .connect(teamWallet)
-          [
-            "distributeReward(bytes32,uint256,address,string)"
-          ](await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), user.address, ""),
+          .distributeReward(await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), user.address, ""),
       )
     })
 
@@ -685,9 +676,7 @@ describe.only("X2EarnRewardsPool", function () {
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
       await catchRevert(
-        x2EarnRewardsPool
-          .connect(teamWallet)
-          ["distributeReward(bytes32,uint256,address,string)"](appId, ethers.parseEther("1"), user.address, ""),
+        x2EarnRewardsPool.connect(teamWallet).distributeReward(appId, ethers.parseEther("1"), user.address, ""),
       )
     })
 
@@ -712,9 +701,7 @@ describe.only("X2EarnRewardsPool", function () {
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
       await catchRevert(
-        x2EarnRewardsPool
-          .connect(teamWallet)
-          ["distributeReward(bytes32,uint256,address,string)"](appId, ethers.parseEther("101"), user.address, ""),
+        x2EarnRewardsPool.connect(teamWallet).distributeReward(appId, ethers.parseEther("101"), user.address, ""),
       )
     })
 
@@ -739,14 +726,12 @@ describe.only("X2EarnRewardsPool", function () {
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
       await expect(
-        x2EarnRewardsPool
-          .connect(teamWallet)
-          ["distributeReward(bytes32,uint256,address,string)"](appId, ethers.parseEther("101"), user.address, ""),
+        x2EarnRewardsPool.connect(teamWallet).distributeReward(appId, ethers.parseEther("101"), user.address, ""),
       ).to.be.reverted
     })
   })
 
-  describe.only("Proofs and Impact", async function () {
+  describe("Proofs and Impact", async function () {
     it("Json proof is created by the contract", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({
@@ -772,10 +757,14 @@ describe.only("X2EarnRewardsPool", function () {
 
       const tx = await x2EarnRewardsPool
         .connect(owner)
-        [
-          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-        ](appId, ethers.parseEther("1"), user.address, { types: ["image"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
-              200] }, "The description of the action")
+        .distributeRewardWithProof(
+          appId,
+          ethers.parseEther("1"),
+          user.address,
+          { types: ["image"], values: ["https://image.png"] },
+          { codes: ["carbon", "water"], values: [100, 200] },
+          "The description of the action",
+        )
 
       const receipt = await tx.wait()
 
@@ -829,10 +818,14 @@ describe.only("X2EarnRewardsPool", function () {
 
       const tx = await x2EarnRewardsPool
         .connect(owner)
-        [
-          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-        ](appId, ethers.parseEther("1"), user.address, { types: ["image", "link"], values: ["https://image.png", "https://twitter.com/tweet/1"] }, { codes: ["carbon", "water"], values: [100,
-              200] }, "The description of the action")
+        .distributeRewardWithProof(
+          appId,
+          ethers.parseEther("1"),
+          user.address,
+          { types: ["image", "link"], values: ["https://image.png", "https://twitter.com/tweet/1"] },
+          { codes: ["carbon", "water"], values: [100, 200] },
+          "The description of the action",
+        )
 
       const receipt = await tx.wait()
 
@@ -888,9 +881,14 @@ describe.only("X2EarnRewardsPool", function () {
 
       const tx = await x2EarnRewardsPool
         .connect(owner)
-        [
-          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-        ](appId, ethers.parseEther("1"), user.address, { types: ["image", "link"], values: ["https://image.png", "https://twitter.com/tweet/1"] }, { codes: [], values: [] }, "The description of the action")
+        .distributeRewardWithProof(
+          appId,
+          ethers.parseEther("1"),
+          user.address,
+          { types: ["image", "link"], values: ["https://image.png", "https://twitter.com/tweet/1"] },
+          { codes: [], values: [] },
+          "The description of the action",
+        )
 
       const receipt = await tx.wait()
 
@@ -946,10 +944,14 @@ describe.only("X2EarnRewardsPool", function () {
 
       const tx = await x2EarnRewardsPool
         .connect(owner)
-        [
-          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-        ](appId, ethers.parseEther("1"), user.address, { types: [], values: [] }, { codes: ["carbon", "water"], values: [100,
-              200] }, "The description of the action")
+        .distributeRewardWithProof(
+          appId,
+          ethers.parseEther("1"),
+          user.address,
+          { types: [], values: [] },
+          { codes: ["carbon", "water"], values: [100, 200] },
+          "The description of the action",
+        )
 
       const receipt = await tx.wait()
 
@@ -1002,9 +1004,14 @@ describe.only("X2EarnRewardsPool", function () {
 
       const tx = await x2EarnRewardsPool
         .connect(owner)
-        [
-          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-        ](appId, ethers.parseEther("1"), user.address, { types: [], values: [] }, { codes: [], values: [] }, "The description of the action")
+        .distributeRewardWithProof(
+          appId,
+          ethers.parseEther("1"),
+          user.address,
+          { types: [], values: [] },
+          { codes: [], values: [] },
+          "The description of the action",
+        )
 
       const receipt = await tx.wait()
 
@@ -1048,9 +1055,14 @@ describe.only("X2EarnRewardsPool", function () {
 
       const tx = await x2EarnRewardsPool
         .connect(owner)
-        [
-          "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-        ](appId, ethers.parseEther("1"), user.address, { types: [], values: [] }, { codes: [], values: [] }, "")
+        .distributeRewardWithProof(
+          appId,
+          ethers.parseEther("1"),
+          user.address,
+          { types: [], values: [] },
+          { codes: [], values: [] },
+          "",
+        )
 
       const receipt = await tx.wait()
 
@@ -1078,10 +1090,14 @@ describe.only("X2EarnRewardsPool", function () {
       await catchRevert(
         x2EarnRewardsPool
           .connect(owner)
-          [
-            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-          ](await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), owner.address, { types: ["invalid"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
-                200] }, "The description of the action"),
+          .distributeRewardWithProof(
+            await x2EarnApps.hashAppName("My app"),
+            ethers.parseEther("1"),
+            owner.address,
+            { types: ["invalid"], values: ["https://image.png"] },
+            { codes: ["carbon", "water"], values: [100, 200] },
+            "The description of the action",
+          ),
       )
     })
 
@@ -1111,37 +1127,53 @@ describe.only("X2EarnRewardsPool", function () {
       await catchRevert(
         x2EarnRewardsPool
           .connect(owner)
-          [
-            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-          ](appId, ethers.parseEther("1"), user.address, { types: ["invalid"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
-                200] }, "The description of the action"),
+          .distributeRewardWithProof(
+            appId,
+            ethers.parseEther("1"),
+            user.address,
+            { types: ["invalid"], values: ["https://image.png"] },
+            { codes: ["carbon", "water"], values: [100, 200] },
+            "The description of the action",
+          ),
       )
 
       await expect(
         x2EarnRewardsPool
           .connect(owner)
-          [
-            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-          ](appId, ethers.parseEther("1"), user.address, { types: ["video"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
-                200] }, "The description of the action"),
+          .distributeRewardWithProof(
+            appId,
+            ethers.parseEther("1"),
+            user.address,
+            { types: ["video"], values: ["https://image.png"] },
+            { codes: ["carbon", "water"], values: [100, 200] },
+            "The description of the action",
+          ),
       ).not.to.be.reverted
 
       await expect(
         x2EarnRewardsPool
           .connect(owner)
-          [
-            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-          ](appId, ethers.parseEther("1"), user.address, { types: ["image"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
-                200] }, "The description of the action"),
+          .distributeRewardWithProof(
+            appId,
+            ethers.parseEther("1"),
+            user.address,
+            { types: ["image"], values: ["https://image.png"] },
+            { codes: ["carbon", "water"], values: [100, 200] },
+            "The description of the action",
+          ),
       ).not.to.be.reverted
 
       await expect(
         x2EarnRewardsPool
           .connect(owner)
-          [
-            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-          ](appId, ethers.parseEther("1"), user.address, { types: ["link"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
-                200] }, "The description of the action"),
+          .distributeRewardWithProof(
+            appId,
+            ethers.parseEther("1"),
+            user.address,
+            { types: ["link"], values: ["https://image.png"] },
+            { codes: ["carbon", "water"], values: [100, 200] },
+            "The description of the action",
+          ),
       ).not.to.be.reverted
     })
 
@@ -1154,10 +1186,14 @@ describe.only("X2EarnRewardsPool", function () {
       await catchRevert(
         x2EarnRewardsPool
           .connect(owner)
-          [
-            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-          ](await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), owner.address, { types: ["image"], values: ["https://image.png"] }, { codes: ["invalid"], values: [100,
-                200] }, "The description of the action"),
+          .distributeRewardWithProof(
+            await x2EarnApps.hashAppName("My app"),
+            ethers.parseEther("1"),
+            owner.address,
+            { types: ["image"], values: ["https://image.png"] },
+            { codes: ["invalid"], values: [100, 200] },
+            "The description of the action",
+          ),
       )
     })
 
@@ -1170,10 +1206,14 @@ describe.only("X2EarnRewardsPool", function () {
       await catchRevert(
         x2EarnRewardsPool
           .connect(owner)
-          [
-            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-          ](await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), owner.address, { types: ["image"], values: ["https://image.png"] }, { codes: ["carbon"], values: [100,
-                200] }, "The description of the action"),
+          .distributeRewardWithProof(
+            await x2EarnApps.hashAppName("My app"),
+            ethers.parseEther("1"),
+            owner.address,
+            { types: ["image"], values: ["https://image.png"] },
+            { codes: ["carbon"], values: [100, 200] },
+            "The description of the action",
+          ),
       )
     })
 
@@ -1186,10 +1226,14 @@ describe.only("X2EarnRewardsPool", function () {
       await catchRevert(
         x2EarnRewardsPool
           .connect(owner)
-          [
-            "distributeReward(bytes32,uint256,address,(string[],string[]),(string[],uint256[]),string)"
-          ](await x2EarnApps.hashAppName("My app"), ethers.parseEther("1"), owner.address, { types: ["image", "link"], values: ["https://image.png"] }, { codes: ["carbon", "water"], values: [100,
-                200] }, "The description of the action"),
+          .distributeRewardWithProof(
+            await x2EarnApps.hashAppName("My app"),
+            ethers.parseEther("1"),
+            owner.address,
+            { types: ["image", "link"], values: ["https://image.png"] },
+            { codes: ["carbon", "water"], values: [100, 200] },
+            "The description of the action",
+          ),
       )
     })
 
