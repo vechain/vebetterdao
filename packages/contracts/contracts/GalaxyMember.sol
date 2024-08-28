@@ -596,6 +596,74 @@ contract GalaxyMember is
     return "2";
   }
 
+  struct TokenInfo {
+    uint256 tokenId;
+    string tokenURI;
+    uint256 tokenLevel;
+    uint256 b3trToUpgrade;
+  }
+
+  /// @notice Gets the token info by token ID
+  /// @param tokenId Token ID to get the info for
+  /// @return TokenInfo The token info
+  function getTokenInfoByTokenId(uint256 tokenId) public view returns (TokenInfo memory) {
+    TokenInfo memory tokenInfo;
+    tokenInfo.tokenId = tokenId;
+    tokenInfo.tokenURI = tokenURI(tokenId);
+    tokenInfo.tokenLevel = levelOf(tokenId);
+    tokenInfo.b3trToUpgrade = getB3TRtoUpgrade(tokenId);
+    return tokenInfo;
+  }
+
+  /// @notice Gets the selected token info for an address
+  /// @param owner The address of the owner to check
+  /// @return TokenInfo The selected token info
+  function getSelectedTokenInfoByOwner(address owner) public view returns (TokenInfo memory) {
+    uint256 tokenId = getSelectedTokenId(owner);
+    return getTokenInfoByTokenId(tokenId);
+  }
+
+  /// @notice Gets the tokens owned by an address
+  /// @param owner The address of the owner to check
+  /// @param page The page number to fetch
+  /// @param size The number of tokens to fetch
+  /// @return TokenInfo[] The tokens owned by the address
+  function getTokensInfoByOwner(address owner, uint256 page, uint256 size) public view returns (TokenInfo[] memory) {
+    uint256 balance = balanceOf(owner); // Get the number of tokens owned by the address
+
+    // If page and size are both zero, return all tokens
+    if (page == 0 && size == 0) {
+      size = balance;
+    }
+
+    // Calculate the starting index for the current page
+    uint256 start = page * size;
+
+    // If start index is greater than or equal to balance, return an empty array
+    if (start >= balance) {
+      return new TokenInfo[](0);
+    }
+
+    // Calculate the end index (exclusive)
+    uint256 end = start + size;
+    if (end > balance) {
+      end = balance; // Ensure the end index doesn't exceed the owner's balance
+    }
+
+    // Calculate the number of tokens to return
+    uint256 numTokens = end - start;
+
+    TokenInfo[] memory tokens = new TokenInfo[](numTokens);
+
+    for (uint256 i = 0; i < numTokens; i++) {
+      uint256 tokenIndex = start + i;
+      uint256 tokenId = tokenOfOwnerByIndex(owner, tokenIndex);
+      tokens[i] = getTokenInfoByTokenId(tokenId);
+    }
+
+    return tokens;
+  }
+
   // ---------- Overrides ---------- //
 
   /// @notice Performs automatic level updating upon token updates
