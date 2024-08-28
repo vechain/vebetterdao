@@ -100,7 +100,7 @@ module "ecs-cluster" {
 
 module "ecs-lb-service-thor-solo" {
   depends_on                 = [module.ecs-cluster, resource.aws_security_group.ecs_service_sg, resource.aws_security_group.alb-sg]
-  source                     = "git::git@github.com:/vechain/terraform_infrastructure_modules.git//ecs-loadbalanced-webservice?ref=v.1.0.23"
+  source                     = "git::git@github.com:/vechain/terraform_infrastructure_modules.git//ecs-loadbalanced-webservice?ref=v.1.0.69"
   region                     = local.config.region
   vpc_id                     = local.config.vpc_id
   cluster_name               = module.ecs-cluster.name
@@ -114,6 +114,7 @@ module "ecs-lb-service-thor-solo" {
   assign_public_ip           = false
   app_name                   = "thor-solo"
   ecr_image_tag              = local.config.image_tag
+  ssl_policy                 = "ELBSecurityPolicy-TLS-1-2-2017-01"
   project                    = local.config.project
   cpu                        = local.config.cpu
   memory                     = local.config.memory

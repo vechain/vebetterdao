@@ -6,11 +6,13 @@ import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ethers } from "ethers"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 const compactFormatter = getCompactFormatter(2)
 
 export const ProposalVoteComment = ({ vote }: { vote: ProposalVoteEvent }) => {
   const { t } = useTranslation()
+  const { name: accountName } = useWalletName(vote.account)
 
   const voteType = Number(vote.support) as VoteType
 
@@ -79,7 +81,7 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalVoteEvent }) => {
           </VStack>
           <HStack align={"center"}>
             <AddressIcon address={vote.account} boxSize={4} rounded={"full"} />
-            <Text fontWeight={"400"}>{humanAddress(vote.account, 4, 6)}</Text>
+            <Text fontWeight={"400"}>{accountName || humanAddress(vote.account, 4, 6)}</Text>
           </HStack>
         </HStack>
       </VStack>

@@ -1,5 +1,5 @@
 import { ProposalState } from "@/api"
-import { HStack, Image, Text, VStack } from "@chakra-ui/react"
+import { Box, HStack, Image, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../../hooks"
@@ -11,11 +11,10 @@ export const ProposalOverviewYourSupport = () => {
   const { t } = useTranslation()
 
   switch (proposal.state) {
-    case ProposalState.Active:
     case ProposalState.DepositNotMet:
     case ProposalState.Pending:
       return (
-        <VStack alignItems={"stretch"}>
+        <Box>
           <Text fontWeight={"400"} color="#6A6A6A">
             {t("Your support")}
           </Text>
@@ -25,7 +24,7 @@ export const ProposalOverviewYourSupport = () => {
               {compactFormatter.format(Number(proposal.userSupport))}
             </Text>
           </HStack>
-        </VStack>
+        </Box>
       )
   }
 }

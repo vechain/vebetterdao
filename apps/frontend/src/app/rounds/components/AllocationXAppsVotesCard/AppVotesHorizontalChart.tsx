@@ -88,7 +88,7 @@ export const AppVotesHorizontalChart = ({
               {showTotalVoters && (
                 <Skeleton isLoaded={!votersLoading}>
                   <Text fontSize={["12px"]} fontWeight={400} color="#6A6A6A">
-                    {`${appVoters} ${t("voters")}`}
+                    {`${appVoters} ${t("wallets voted")}`}
                   </Text>
                 </Skeleton>
               )}
