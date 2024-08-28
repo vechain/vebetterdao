@@ -600,8 +600,6 @@ describe("X2EarnRewardsPool", function () {
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
-      // https://docs.ethers.org/v5/single-page/#/v5/migration/web3/-%23-migration-from-web3-js--contracts--overloaded-functions
-      // for ambiguous functions (two functions with the same name), the signature must also be specified
       await expect(x2EarnRewardsPool.connect(owner).distributeReward(appId, ethers.parseEther("101"), user.address, ""))
         .to.be.reverted
 
