@@ -977,7 +977,7 @@ describe("Galaxy Member - @shard1", () => {
       expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(otherAccount))).to.equal(1) // Level 1
     })
 
-    it.only("Should be able to free mint multiple NFTs and retrieve them with pagination", async () => {
+    it("Should be able to free mint multiple NFTs and retrieve them with pagination", async () => {
       const { galaxyMember, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
