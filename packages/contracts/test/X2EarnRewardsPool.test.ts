@@ -1400,7 +1400,7 @@ describe("X2EarnRewardsPool", function () {
       ])
     })
 
-    it("Only admin can add and remove impact codes", async function () {
+    it("Non admin users cannot add and remove impact codes", async function () {
       const { x2EarnRewardsPool, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         bootstrapAndStartEmissions: true,
