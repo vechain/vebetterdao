@@ -167,6 +167,7 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
       },
       {
         name: "Upgrade B3TR Governor contract",
+        icon: "/images/contract-upgrade.svg",
         description: "Upgrade the B3TR Governor contract",
         abiDefinition: getFunctionDefinitionFromAbi(B3TRGovernorJson, "upgradeToAndCall"),
       },
