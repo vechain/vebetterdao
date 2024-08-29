@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test:thor-solo": "npx hardhat test",
-    "test:hardhat": "hardhat test --network hardhat",
+    "test:hardhat": "hardhat test --network hardhat --grep 'T1'",
     "test:coverage:solidity": "hardhat coverage --testfiles ./test/**/*test.ts",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy",
@@ -26,7 +26,8 @@
     "clean": "rm -rf dist artifacts typechain-types cache node_modules",
     "lint": "eslint . --ext .ts",
     "format": "eslint . --ext .ts --fix",
-    "generate-docs": "npx hardhat docgen"
+    "generate-docs": "npx hardhat docgen",
+    "upgrade:b3tr-governor": "npx hardhat run scripts/deploy/upgrades/b3trGovernorV2.ts"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
