@@ -813,6 +813,16 @@ export async function deployAll(config: ContractsConfig) {
     treasury: treasury,
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
+    libraries: {
+      governorClockLogic: GovernorClockLogicLib,
+      governorConfigurator: GovernorConfiguratorLib,
+      governorDepositLogic: GovernorDepositLogicLib,
+      governorFunctionRestrictionsLogic: GovernorFunctionRestrictionsLogicLib,
+      governorProposalLogic: GovernorProposalLogicLib,
+      governorQuorumLogic: GovernorQuorumLogicLib,
+      governorStateLogic: GovernorStateLogicLib,
+      governorVotesLogic: GovernorVotesLogicLib,
+    },
   }
   // close the script
 }
