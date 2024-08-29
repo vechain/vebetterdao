@@ -27,8 +27,8 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { B3TRGovernor, B3TRGovernorV1, B3TRGovernorV1__factory, B3TRGovernor__factory } from "../typechain-types"
-import { deployProxy, upgradeProxy } from "../scripts/helpers"
+import { B3TRGovernor, B3TRGovernorV1, B3TRGovernor__factory } from "../typechain-types"
+import { deployProxy } from "../scripts/helpers"
 
 describe("Governor and TimeLock", function () {
   describe("Governor deployment", function () {
@@ -830,7 +830,7 @@ describe("Governor and TimeLock", function () {
             initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
             initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
             voterRewards: await voterRewards.getAddress(),
-            isFunctionRestrictionEnabled: false,
+            isFunctionRestrictionEnabled: true,
           },
           {
             governorAdmin: owner.address,
