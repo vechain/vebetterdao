@@ -67,7 +67,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  *
  * The contract is upgradeable and uses the UUPS pattern.
  * @dev The contract is upgradeable and uses the UUPS pattern. All logic is stored in libraries.
- * 
+ *
  * ------------------ VERSION 2 ------------------
  * - Replaced onlyGovernance modifier with onlyRoleOrGovernance which checks if the caller has the DEFAULT_ADMIN_ROLE role or if the function is called through a governance proposal
  */
@@ -143,6 +143,32 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Initializes the contract with the initial parameters
+   * @dev This fucntion can only be called once
+   * @param data Initialization data containing the initial settings for the governor
+   */
+  function initialize(
+    GovernorTypes.InitializationData memory data,
+    GovernorTypes.InitializationRolesData memory rolesData
+  ) external initializer {
+    __GovernorStorage_init(data, "B3TRGovernor");
+    __AccessControl_init();
+    __UUPSUpgradeable_init();
+    __Pausable_init();
+
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorQuorumLogic.updateQuorumNumerator($, data.quorumPercentage);
+
+    // Validate and set the governor external contracts storage
+    require(address(rolesData.governorAdmin) != address(0), "B3TRGovernor: governor admin address cannot be zero");
+    _grantRole(DEFAULT_ADMIN_ROLE, rolesData.governorAdmin);
+    _grantRole(GOVERNOR_FUNCTIONS_SETTINGS_ROLE, rolesData.governorFunctionSettingsRoleAddress);
+    _grantRole(PAUSER_ROLE, rolesData.pauser);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, rolesData.contractsAddressManager);
+    _grantRole(PROPOSAL_EXECUTOR_ROLE, rolesData.proposalExecutor);
+  }
+
+  /**
    * @notice Relays a transaction or function call to an arbitrary target. In cases where the governance executor
    * is some contract other than the governor itself, like when using a timelock, this function can be invoked
    * in a governance proposal to recover tokens or Ether that was sent to the governor contract by mistake.
@@ -151,7 +177,11 @@ contract B3TRGovernor is
    * @param value The amount of ether to send
    * @param data The data to call the target with
    */
-  function relay(address target, uint256 value, bytes calldata data) external payable virtual onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+  function relay(
+    address target,
+    uint256 value,
+    bytes calldata data
+  ) external payable virtual onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     (bool success, bytes memory returndata) = target.call{ value: value }(data);
     Address.verifyCallResult(success, returndata);
   }
@@ -846,7 +876,9 @@ contract B3TRGovernor is
    * CAUTION: It is not recommended to change the timelock while there are other queued governance proposals.
    * @param newTimelock The new timelock controller
    */
-  function updateTimelock(TimelockControllerUpgradeable newTimelock) external virtual onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+  function updateTimelock(
+    TimelockControllerUpgradeable newTimelock
+  ) external virtual onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfigurator.updateTimelock($, newTimelock);
   }
