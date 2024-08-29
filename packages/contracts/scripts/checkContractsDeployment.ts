@@ -52,6 +52,17 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     treasuryContractAddress: await contracts.treasury.getAddress(),
     x2EarnAppsContractAddress: await contracts.x2EarnApps.getAddress(),
     x2EarnRewardsPoolContractAddress: await contracts.x2EarnRewardsPool.getAddress(),
+    b3trGovernorLibraries: {
+      governorClockLogicAddress: await contracts.libraries.governorClockLogic.getAddress(),
+      governorConfiguratorAddress: await contracts.libraries.governorConfigurator.getAddress(),
+      governorDepositLogicAddress: await contracts.libraries.governorDepositLogic.getAddress(),
+      governorFunctionRestrictionsLogicAddress:
+        await contracts.libraries.governorFunctionRestrictionsLogic.getAddress(),
+      governorProposalLogicAddressAddress: await contracts.libraries.governorProposalLogic.getAddress(),
+      governorQuorumLogicAddress: await contracts.libraries.governorQuorumLogic.getAddress(),
+      governorStateLogicAddress: await contracts.libraries.governorStateLogic.getAddress(),
+      governorVotesLogicAddress: await contracts.libraries.governorVotesLogic.getAddress(),
+    },
   }
 
   // eslint-disable-next-line
