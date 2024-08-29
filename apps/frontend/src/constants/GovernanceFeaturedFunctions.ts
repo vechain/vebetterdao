@@ -137,7 +137,7 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
   },
   {
     name: "Governance",
-    description: "Change the params that govern the DAO",
+    description: "Change the params that govern the DAO or upgrade the Governor contract",
     contract: { abi: B3TRGovernorJson, address: config.b3trGovernorAddress },
     functions: [
       {
@@ -164,6 +164,11 @@ export const GovernanceFeaturedContractsWithFunctions: GovernanceFeaturedContrac
         name: "Update execution delay",
         description: "Update the delay between proposal queue and execution",
         abiDefinition: getFunctionDefinitionFromAbi(TimeLockContractJson, "updateDelay"),
+      },
+      {
+        name: "Upgrade B3TR Governor contract",
+        description: "Upgrade the B3TR Governor contract",
+        abiDefinition: getFunctionDefinitionFromAbi(B3TRGovernorJson, "upgradeToAndCall"),
       },
     ],
   },
