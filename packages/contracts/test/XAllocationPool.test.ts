@@ -2856,6 +2856,45 @@ describe("X-Allocation Pool", async function () {
         expect(app2round1Earnings2[0]).to.eql(5993n)
         expect(app3round1Earnings3[0]).to.eql(2861n)
       })
+      it("Should be able to toggle quadratic funding on and off", async function () {
+        const { xAllocationPool, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        // Bootstrap emissions
+        await bootstrapEmissions()
+
+        expect(await xAllocationPool.isQuadraticFundingDisabledForCurrentRound()).to.eql(false)
+
+        await xAllocationPool.connect(owner).toggleQuadraticFunding()
+
+        // Start new round
+        const round1 = await startNewAllocationRound()
+
+        expect(await xAllocationPool.isQuadraticFundingDisabledForCurrentRound()).to.eql(true)
+
+        expect(await xAllocationPool.isQuadraticFundingDisabledForRound(round1)).to.eql(true)
+
+        await xAllocationPool.connect(owner).toggleQuadraticFunding()
+
+        // wait for round to end
+        await waitForRoundToEnd(round1)
+
+        // Start new round
+        const round2 = await startNewAllocationRound()
+
+        expect(await xAllocationPool.isQuadraticFundingDisabledForCurrentRound()).to.eql(false)
+
+        expect(await xAllocationPool.isQuadraticFundingDisabledForRound(round2)).to.eql(false)
+      })
+
+      it("Only DEFAULT_ADMIN can toggle quadratic funding", async function () {
+        const { xAllocationPool, otherAccounts } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        await catchRevert(xAllocationPool.connect(otherAccounts[1]).toggleQuadraticFunding())
+      })
     })
   })
 })
