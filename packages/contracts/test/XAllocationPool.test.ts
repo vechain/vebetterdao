@@ -1852,7 +1852,7 @@ describe("X-Allocation Pool", async function () {
     })
 
     describe("Quadratic funding & Linear Funding", async function () {
-      it.skip("[Quadratic] Should calculate correct app shares with Quadratic funding distrubiton with max cap at 20%", async function () {
+      it("[Quadratic] Should calculate correct app shares with Quadratic funding distrubiton with max cap at 20%", async function () {
         const { xAllocationVoting, otherAccounts, owner, xAllocationPool, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
@@ -1929,7 +1929,7 @@ describe("X-Allocation Pool", async function () {
         expect(app3Shares[0]).to.eql(2000n) // reached cap would be 28.61% of the total votes
       })
 
-      it("Should calculate correct app shares with Linear funding distrubiton with max cap at 20%", async function () {
+      it("[Linear] Should calculate correct app shares with Linear funding distrubiton with max cap at 20%", async function () {
         const { xAllocationVoting, otherAccounts, owner, xAllocationPool, x2EarnApps } =
           await getOrDeployContractInstances({
             forceDeploy: true,
@@ -1941,6 +1941,9 @@ describe("X-Allocation Pool", async function () {
         otherAccounts.forEach(async account => {
           await getVot3Tokens(account, "10000")
         })
+
+        // Turn off quadratic funding
+        await xAllocationPool.connect(owner).toggleQuadraticFunding()
 
         //Add apps
         await x2EarnApps
@@ -1958,6 +1961,10 @@ describe("X-Allocation Pool", async function () {
 
         //Start allocation round
         const round1 = await startNewAllocationRound()
+
+        // Check if quadratic funding is off
+        expect(await xAllocationPool.isQuadraticFundingDisabledForCurrentRound()).to.eql(true)
+
         // Vote
         await xAllocationVoting
           .connect(otherAccounts[1])
@@ -2019,7 +2026,7 @@ describe("X-Allocation Pool", async function () {
         expect(app3Shares[0]).to.eql(1612n) // reached cap would be 28.61% of the total votes
       })
 
-      it.skip("[Quadratic] Should calculate correct app shares with Quadratic funding distrubiton with no max cap", async function () {
+      it("[Quadratic] Should calculate correct app shares with Quadratic funding distrubiton with no max cap", async function () {
         const config = createLocalConfig()
         config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
         const { xAllocationVoting, otherAccounts, owner, xAllocationPool, x2EarnApps } =
@@ -2097,7 +2104,7 @@ describe("X-Allocation Pool", async function () {
         expect(app3Shares[0]).to.eql(2861n) // reached cap would be 28.61% of the total votes
       })
 
-      it("Should calculate correct app shares with Linear funding distrubiton with no max cap", async function () {
+      it("[Linear] Should calculate correct app shares with Linear funding distrubiton with no max cap", async function () {
         const config = createLocalConfig()
         config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
         const { xAllocationVoting, otherAccounts, owner, xAllocationPool, x2EarnApps } =
@@ -2105,6 +2112,9 @@ describe("X-Allocation Pool", async function () {
             forceDeploy: true,
             config,
           })
+
+        // Turn off quadratic funding
+        await xAllocationPool.connect(owner).toggleQuadraticFunding()
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -2127,6 +2137,10 @@ describe("X-Allocation Pool", async function () {
 
         //Start allocation round
         const round1 = await startNewAllocationRound()
+
+        // Check Quadratic Funding is off
+        expect(await xAllocationPool.isQuadraticFundingDisabledForCurrentRound()).to.eql(true)
+
         // Vote
         await xAllocationVoting
           .connect(otherAccounts[1])
@@ -2186,7 +2200,7 @@ describe("X-Allocation Pool", async function () {
         expect(app3Shares[0]).to.eql(1612n) // reached cap would be 28.61% of the total votes
       })
 
-      it.skip("[Quadratic] Should give correct rewards based with Quadratic Funding", async function () {
+      it("[Quadratic] Should give correct rewards based with Quadratic Funding", async function () {
         const config = createLocalConfig()
         config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
         config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE = 0
@@ -2268,7 +2282,7 @@ describe("X-Allocation Pool", async function () {
         expect(app3app3Earnings[0]).to.eql(2861n)
       })
 
-      it("Should give correct rewards based with Linear Funding", async function () {
+      it("[Linear] Should give correct rewards based with Linear Funding", async function () {
         const config = createLocalConfig()
         config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
         config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE = 0
@@ -2286,6 +2300,9 @@ describe("X-Allocation Pool", async function () {
           await getVot3Tokens(account, "10000")
         })
 
+        // Turn off quadratic funding
+        await xAllocationPool.connect(owner).toggleQuadraticFunding()
+
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
         const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
@@ -2302,6 +2319,10 @@ describe("X-Allocation Pool", async function () {
 
         //Start allocation round
         const round1 = await startNewAllocationRound()
+
+        // Check Quadratic Funding is off
+        expect(await xAllocationPool.isQuadraticFundingDisabledForCurrentRound()).to.eql(true)
+
         // Vote
         await xAllocationVoting
           .connect(otherAccounts[1])
