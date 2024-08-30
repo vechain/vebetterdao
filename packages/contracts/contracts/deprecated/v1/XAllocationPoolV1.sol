@@ -23,7 +23,7 @@
 
 pragma solidity 0.8.20;
 
-import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
+import { IXAllocationPoolV1 } from "./interfaces/IXAllocationPoolV1.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
@@ -45,7 +45,7 @@ import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
  * and the x2EarnApps contract to check app existence and the app's team wallet address.
  * The contract is using AccessControl to handle roles for upgrading the contract and external contract addresses.
  */
-contract XAllocationPoolV1 is IXAllocationPool, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+contract XAllocationPoolV1 is IXAllocationPoolV1, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   uint256 public constant PERCENTAGE_PRECISION_SCALING_FACTOR = 1e4;
   /// @notice The role that can upgrade the contract.
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
