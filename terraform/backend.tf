@@ -3,6 +3,9 @@ terraform {
     aws = {
       source = "hashicorp/aws"
     }
+    datadog = {
+      source = "DataDog/datadog"
+    }
   }
   backend "s3" {
     bucket = "b3tr-terraform-state-dev"
@@ -22,6 +25,13 @@ provider "aws" {
   }
 }
 
+provider "datadog" {
+  api_key = try(jsondecode(data.aws_secretsmanager_secret_version.datadog_api_keys[0].secret_string)["datadog_api_key"], "")
+  app_key = try(jsondecode(data.aws_secretsmanager_secret_version.datadog_api_keys[0].secret_string)["datadog_app_key"], "")
+  validate = var.enable_datadog_integration_aws
+  api_url = "https://api.datadoghq.eu/"
+}
+
 data "external" "git" {
   program = [
     "git",
@@ -30,4 +40,10 @@ data "external" "git" {
     "-1",
     "HEAD"
   ]
+}
+
+
+data "aws_secretsmanager_secret_version" "datadog_api_keys" {
+  count     = var.enable_datadog_integration_aws ? 1 : 0
+  secret_id = local.config.secret_id
 }

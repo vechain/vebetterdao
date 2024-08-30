@@ -22,3 +22,9 @@ variable "ecr_names" {
   type    = list(string)
   default = ["thor-solo"]
 }
+
+variable "enable_datadog_integration_aws" {
+  type        = bool
+  description = "Enable Datadog AWS integration"
+  default     = false
+}
