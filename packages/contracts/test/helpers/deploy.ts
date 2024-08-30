@@ -239,13 +239,13 @@ export const getOrDeployContractInstances = async ({
 
   const xAllocationPool = (await upgradeProxy(
     "XAllocationPoolV1",
-    "VoterXAllocationPoolRewards",
+    "XAllocationPool",
     await xAllocationPoolV1.getAddress(),
     [],
     {
       version: 2,
     },
-  )) as VoterRewards
+  )) as XAllocationPool
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
