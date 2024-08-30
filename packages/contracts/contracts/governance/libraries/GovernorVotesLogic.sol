@@ -96,7 +96,8 @@ library GovernorVotesLogic {
     proposalVote.hasVoted[account] = true;
 
     uint256 vote = power;
-    if(isQuadraticVotingDisabledForCurrentRound(self)) {
+    // If quadratic voting is disabled, use the weight directly
+    if (isQuadraticVotingDisabledForCurrentRound(self)) {
       vote = weight;
     }
     if (support == uint8(GovernorTypes.VoteType.Against)) {
@@ -239,12 +240,7 @@ library GovernorVotesLogic {
 
     _countVote(self, proposalId, voter, support, weight, power);
 
-    self.voterRewards.registerVote(
-      proposalSnapshot,
-      voter,
-      weight,
-      Math.sqrt(weight)
-    );
+    self.voterRewards.registerVote(proposalSnapshot, voter, weight, Math.sqrt(weight));
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 
@@ -254,6 +250,7 @@ library GovernorVotesLogic {
   /**
    * @notice Toggle quadratic voting for a specific cycle.
    * @dev This function toggles the state of quadratic voting for a specific cycle.
+   * @param self - The storage reference for the GovernorStorage.
    * The state will flip between enabled and disabled each time the function is called.
    */
   function toggleQuadraticVoting(GovernorStorageTypes.GovernorStorage storage self) external {
@@ -269,10 +266,14 @@ library GovernorVotesLogic {
   /**
    * @notice Check if quadratic voting is disabled at a specific block number.
    * @dev To check if quadratic voting was disabled for a round, use the block number the cycle started.
+   * @param self - The storage reference for the GovernorStorage.
    * @param roundId - The round ID for which to check if quadratic voting is disabled.
    * @return true if quadratic voting is disabled, false otherwise.
    */
-  function isQuadraticVotingDisabledForRound(GovernorStorageTypes.GovernorStorage storage self, uint48 roundId) external view returns (bool) {
+  function isQuadraticVotingDisabledForRound(
+    GovernorStorageTypes.GovernorStorage storage self,
+    uint256 roundId
+  ) external view returns (bool) {
     // Get the block number the round started.
     uint48 blockNumber = SafeCast.toUint48(self.xAllocationVoting.roundSnapshot(roundId));
 
@@ -282,6 +283,7 @@ library GovernorVotesLogic {
 
   /**
    * @notice Check if quadratic voting is disabled for the current round.
+   * @param self - The storage reference for the GovernorStorage.
    * @return true if quadratic voting is disabled, false otherwise.
    */
   function isQuadraticVotingDisabledForCurrentRound(
