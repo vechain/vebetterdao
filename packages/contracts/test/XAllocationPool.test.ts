@@ -2381,6 +2381,167 @@ describe("X-Allocation Pool", async function () {
         expect(app2app2Earnings[0]).to.eql(5161n)
         expect(app3app3Earnings[0]).to.eql(1612n)
       })
+      it("Should calculate correct app shares across rounds where both quadratic and linear funding are used", async function () {
+        const config = createLocalConfig()
+        config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
+        config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE = 0
+        config.INITIAL_X_ALLOCATION = 10000n
+        config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE = 0
+        const { xAllocationVoting, otherAccounts, owner, xAllocationPool, x2EarnApps } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            config,
+          })
+
+        // Bootstrap emissions
+        await bootstrapEmissions()
+
+        otherAccounts.forEach(async account => {
+          await getVot3Tokens(account, "10000")
+        })
+
+        //Add apps
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+        const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+        const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
+        await x2EarnApps
+          .connect(owner)
+          .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .addApp(otherAccounts[5].address, otherAccounts[5].address, "My app #3", "metadataURI")
+
+        //Start allocation round
+        const round1 = await startNewAllocationRound()
+
+        // Check Quadratic Funding is on
+        expect(await xAllocationPool.isQuadraticFundingDisabledForCurrentRound()).to.eql(false)
+
+        // Vote
+        await xAllocationVoting
+          .connect(otherAccounts[1])
+          .castVote(
+            round1,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+          )
+        await xAllocationVoting
+          .connect(otherAccounts[2])
+          .castVote(
+            round1,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
+          )
+        await xAllocationVoting
+          .connect(otherAccounts[3])
+          .castVote(
+            round1,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+          )
+        await xAllocationVoting
+          .connect(otherAccounts[4])
+          .castVote(
+            round1,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+          )
+        await xAllocationVoting
+          .connect(otherAccounts[5])
+          .castVote(
+            round1,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
+          )
+
+        // Turn off quadratic funding
+        await xAllocationPool.connect(owner).toggleQuadraticFunding()
+
+        await waitForRoundToEnd(round1)
+
+        const app1round1Earnings = await xAllocationPool.roundEarnings(round1, app1Id)
+        const app2round1Earnings = await xAllocationPool.roundEarnings(round1, app2Id)
+        const app3round1Earnings = await xAllocationPool.roundEarnings(round1, app3Id)
+
+        expect(app1round1Earnings[0]).to.eql(1144n)
+        expect(app2round1Earnings[0]).to.eql(5993n)
+        expect(app3round1Earnings[0]).to.eql(2861n)
+
+        //Start allocation round
+        const round2 = await startNewAllocationRound()
+
+        // Check Quadratic Funding is off
+        expect(await xAllocationPool.isQuadraticFundingDisabledForCurrentRound()).to.eql(true)
+
+        expect(await xAllocationPool.isQuadraticFundingDisabledForRound(2)).to.eql(true)
+
+        // Vote
+        await xAllocationVoting
+          .connect(otherAccounts[1])
+          .castVote(
+            round2,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+          )
+        await xAllocationVoting
+          .connect(otherAccounts[2])
+          .castVote(
+            round2,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
+          )
+        await xAllocationVoting
+          .connect(otherAccounts[3])
+          .castVote(
+            round2,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+          )
+        await xAllocationVoting
+          .connect(otherAccounts[4])
+          .castVote(
+            round2,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+          )
+        await xAllocationVoting
+          .connect(otherAccounts[5])
+          .castVote(
+            round2,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
+          )
+
+        await waitForRoundToEnd(round2)
+
+        // start new round
+
+        const app1round2Earnings = await xAllocationPool.roundEarnings(round2, app1Id)
+        const app2round2Earnings = await xAllocationPool.roundEarnings(round2, app2Id)
+        const app3round2Earnings = await xAllocationPool.roundEarnings(round2, app3Id)
+
+        /*
+          app1 percentage = 1000 / 3100 = 32.25% (No cap)
+          app2 percentage = 1600 / 3100 = 51.61% (No cap)
+          app3 percentage = 500 / 3100 = 16.12%
+        */
+        expect(app1round2Earnings[0]).to.eql(3225n)
+        expect(app2round2Earnings[0]).to.eql(5161n)
+        expect(app3round2Earnings[0]).to.eql(1612n)
+
+        // Check that round earings from round 1 are still the same after toggle
+        const app1round1Earnings1 = await xAllocationPool.roundEarnings(round1, app1Id)
+        const app2round1Earnings2 = await xAllocationPool.roundEarnings(round1, app2Id)
+        const app3round1Earnings3 = await xAllocationPool.roundEarnings(round1, app3Id)
+
+        // Check that round earings from round 1 are still the same after toggle
+        expect(app1round1Earnings1[0]).to.eql(1144n)
+        expect(app2round1Earnings2[0]).to.eql(5993n)
+        expect(app3round1Earnings3[0]).to.eql(2861n)
+      })
     })
   })
 })
