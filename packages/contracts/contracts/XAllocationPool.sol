@@ -63,7 +63,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     IX2EarnApps x2EarnApps;
     IX2EarnRewardsPool x2EarnRewardsPool;
     mapping(bytes32 appId => mapping(uint256 => bool)) claimedRewards; // Mapping to store the claimed rewards for each app in each round
-    Checkpoints.Trace208 quadraticFundingDisabled; // checkpoints for the quadratic funding status for each cycle
+    Checkpoints.Trace208 quadraticFundingDisabled; // checkpoints for the quadratic funding status for each round
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -190,15 +190,15 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   }
 
   /**
-   * @notice Toggle quadratic funding for a specific cycle.
-   * @dev This function toggles the state of quadratic funding for a specific cycle.
+   * @notice Toggle quadratic funding for a specific round.
+   * @dev This function toggles the state of quadratic funding for a specific round.
    * The state will flip between enabled and disabled each time the function is called.
    */
   function toggleQuadraticFunding() external onlyRole(DEFAULT_ADMIN_ROLE) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
 
     // Get the current status
-    bool currentStatus = isQuadraticFundingDisabledForCurrentCycle();
+    bool currentStatus = isQuadraticFundingDisabledForCurrentRound();
 
     // Toggle the status -> 0: enabled, 1: disabled
     $.quadraticFundingDisabled.push(clock(), currentStatus ? 0 : 1);
@@ -486,7 +486,6 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
    */
   function getAppShares(uint256 roundId, bytes32 appId) public view returns (uint256, uint256) {
     IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
-    IEmissions _emissions = emissions();
 
     require(_xAllocationVoting != IXAllocationVotingGovernor(address(0)), "XAllocationVotingGovernor contract not set");
 
@@ -495,11 +494,9 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
       return (0, 0);
     }
 
-    uint48 blockNumber = SafeCast.toUint48(_emissions.getEmissionStartBlock(roundId));
-
     uint256 relativeTotalVotes;
     uint256 relativeAppVotes;
-    if (isQuadraticFundingDisabledAtBlock(blockNumber)) {
+    if (isQuadraticFundingDisabledForRound(roundId)) {
       relativeTotalVotes = _xAllocationVoting.totalVotes(roundId);
       relativeAppVotes = _xAllocationVoting.getAppVotes(roundId, appId);
     } else {
@@ -564,30 +561,33 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
 
   /**
    * @notice Check if quadratic funding is disabled at a specific block number.
-   * @dev To check if quadratic funding was disabled for a cycle, use the block number the cycle started.
-   * @param blockNumber - The block number to check the quadratic funding status.
+   * @dev To check if quadratic funding was disabled for a round, use the block number the cycle started.
+   * @param roundId - The round ID for which to check if quadratic funding is disabled.
    * @return true if quadratic funding is disabled, false otherwise.
    */
-  function isQuadraticFundingDisabledAtBlock(uint48 blockNumber) public view returns (bool) {
+  function isQuadraticFundingDisabledForRound(uint256 roundId) public view returns (bool) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+
+    // Get the block number the round started.
+    uint48 blockNumber = SafeCast.toUint48($._xAllocationVoting.roundSnapshot(roundId));
 
     // Check if quadratic funding is enabled or disabled at the block number.
     return $.quadraticFundingDisabled.upperLookupRecent(blockNumber) == 1; // 0: enabled, 1: disabled
   }
 
   /**
-   * @notice Check if quadratic funding is disabled for the current cycle.
+   * @notice Check if quadratic funding is disabled for the current round.
    * @return true if quadratic funding is disabled, false otherwise.
    */
-  function isQuadraticFundingDisabledForCurrentCycle() public view returns (bool) {
+  function isQuadraticFundingDisabledForCurrentRound() public view returns (bool) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
 
-    // Get the block number the emission cycle started.
-    uint256 emissionCycleStartBlock = $._emissions.lastEmissionBlock();
+    // Get the block number the current round started.
+    uint256 currentRoundStartBlock = $._xAllocationVoting.currentRoundSnapshot();
 
-    uint208 currentStatus = $.quadraticFundingDisabled.upperLookupRecent(SafeCast.toUint48(emissionCycleStartBlock));
+    uint208 currentStatus = $.quadraticFundingDisabled.upperLookupRecent(SafeCast.toUint48(currentRoundStartBlock));
 
-    // Check if quadratic rewarding is enabled or disabled for the current cycle.
+    // Check if quadratic funding is enabled or disabled for the current round.
     return currentStatus == 1; // 0: enabled, 1: disabled
   }
 
