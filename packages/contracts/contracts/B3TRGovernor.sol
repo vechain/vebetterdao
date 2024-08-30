@@ -533,11 +533,31 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Check if quadratic voting is disabled for the current round.
+   * @return true if quadratic voting is disabled, false otherwise.
+   */
+  function isQuadraticVotingDisabledForCurrentRound() external view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorVotesLogic.isQuadraticVotingDisabledForCurrentRound($);
+  }
+
+  /**
+   * @notice Check if quadratic voting is disabled at a specific block number.
+   * @dev To check if quadratic voting was disabled for a round, use the block number the cycle started.
+   * @param roundId - The round ID for which to check if quadratic voting is disabled.
+   * @return true if quadratic voting is disabled, false otherwise.
+   */
+  function isQuadraticVotingDisabledForRound(uint256 roundId) external view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorVotesLogic.isQuadraticVotingDisabledForRound($, roundId);
+  }
+
+  /**
    * @notice See {IB3TRGovernor-version}.
    * @return string The version of the governor
    */
   function version() external pure returns (string memory) {
-    return "1";
+    return "2";
   }
 
   /**
@@ -766,6 +786,16 @@ contract B3TRGovernor is
   function updateQuorumNumerator(uint256 newQuorumNumerator) external onlyGovernance {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorQuorumLogic.updateQuorumNumerator($, newQuorumNumerator);
+  }
+
+  /**
+   * @notice Toggle quadratic voting for a specific cycle.
+   * @dev This function toggles the state of quadratic voting for a specific cycle.
+   * The state will flip between enabled and disabled each time the function is called.
+   */
+  function toggleQuadraticVoting() external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorVotesLogic.toggleQuadraticVoting($);
   }
 
   /**
