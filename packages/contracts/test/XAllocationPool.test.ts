@@ -16,8 +16,8 @@ import {
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { deployProxy } from "../scripts/helpers"
-import { XAllocationPool } from "../typechain-types"
+import { deployProxy, upgradeProxy } from "../scripts/helpers"
+import { XAllocationPool, XAllocationPoolV1 } from "../typechain-types"
 
 describe("X-Allocation Pool", async function () {
   describe("Deployment", async function () {
@@ -210,6 +210,320 @@ describe("X-Allocation Pool", async function () {
       })
 
       expect(await xAllocationPool.version()).to.equal("2")
+    })
+
+    it("Should not have state conflict after upgrading to V2", async () => {
+      const config = createLocalConfig()
+      config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
+      config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE = 0
+      config.INITIAL_X_ALLOCATION = 10000n
+      config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE = 0
+      const { otherAccounts, owner, b3tr, x2EarnRewardsPool, emissions, x2EarnApps, xAllocationVoting, treasury } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      // Deploy XAllocationPool
+      const xAllocationPoolV1 = (await deployProxy("XAllocationPoolV1", [
+        owner.address,
+        owner.address,
+        owner.address,
+        await b3tr.getAddress(),
+        await treasury.getAddress(),
+        await x2EarnApps.getAddress(),
+        await x2EarnRewardsPool.getAddress(),
+      ])) as XAllocationPoolV1
+
+      await xAllocationPoolV1.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
+      await xAllocationPoolV1.connect(owner).setEmissionsAddress(await emissions.getAddress())
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, "My app", "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[5].address, otherAccounts[5].address, "My app #3", "metadataURI")
+
+      //Start allocation round
+      const round1 = await startNewAllocationRound()
+
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[2])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[3])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[4])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[5])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
+        )
+
+      await waitForRoundToEnd(round1)
+
+      const app1round1Earnings = await xAllocationPoolV1.roundEarnings(round1, app1Id)
+      const app2round1Earnings = await xAllocationPoolV1.roundEarnings(round1, app2Id)
+      const app3round1Earnings = await xAllocationPoolV1.roundEarnings(round1, app3Id)
+
+      expect(app1round1Earnings[0]).to.eql(1144n)
+      expect(app2round1Earnings[0]).to.eql(5993n)
+      expect(app3round1Earnings[0]).to.eql(2861n)
+
+      //Start allocation round
+      const round2 = await startNewAllocationRound()
+
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(
+          round2,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[2])
+        .castVote(
+          round2,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[3])
+        .castVote(
+          round2,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[4])
+        .castVote(
+          round2,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[5])
+        .castVote(
+          round2,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
+        )
+
+      await waitForRoundToEnd(round2)
+
+      // start new round
+      const app1round2Earnings = await xAllocationPoolV1.roundEarnings(round2, app1Id)
+      const app2round2Earnings = await xAllocationPoolV1.roundEarnings(round2, app2Id)
+      const app3round2Earnings = await xAllocationPoolV1.roundEarnings(round2, app3Id)
+
+      expect(app1round2Earnings[0]).to.eql(1144n)
+      expect(app2round2Earnings[0]).to.eql(5993n)
+      expect(app3round2Earnings[0]).to.eql(2861n)
+
+      let storageSlots = []
+
+      const initialSlot = BigInt("0xba46220259871765522240056f76631a28aa19c5092d6dd51d6b858b4ebcb300") // Slot 0 of VoterRewards
+
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlots.push(await ethers.provider.getStorage(await xAllocationPoolV1.getAddress(), i))
+      }
+
+      storageSlots = storageSlots.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ) // removing empty slots
+
+      const xAllocationPool = (await upgradeProxy(
+        "XAllocationPoolV1",
+        "XAllocationPool",
+        await xAllocationPoolV1.getAddress(),
+        [],
+        {
+          version: 2,
+        },
+      )) as XAllocationPool
+
+      const storageSlotsAfter = []
+
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlotsAfter.push(await ethers.provider.getStorage(await xAllocationPool.getAddress(), i))
+      }
+
+      // Check if storage slots are the same after upgrade
+      for (let i = 0; i < storageSlots.length; i++) {
+        expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
+      }
+
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+
+      //Start allocation round
+      const round3 = await startNewAllocationRound()
+
+      // Check Quadratic Funding is on
+      expect(await xAllocationPool.isQuadraticFundingDisabledForCurrentRound()).to.eql(false)
+
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(
+          round3,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[2])
+        .castVote(
+          round3,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[3])
+        .castVote(
+          round3,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[4])
+        .castVote(
+          round3,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[5])
+        .castVote(
+          round3,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
+        )
+
+      // Turn off quadratic funding
+      await xAllocationPool.connect(owner).toggleQuadraticFunding()
+
+      await waitForRoundToEnd(round1)
+
+      const app1round3Earnings = await xAllocationPool.roundEarnings(round3, app1Id)
+      const app2round3Earnings = await xAllocationPool.roundEarnings(round3, app2Id)
+      const app3round3Earnings = await xAllocationPool.roundEarnings(round3, app3Id)
+
+      expect(app1round3Earnings[0]).to.eql(1144n)
+      expect(app2round3Earnings[0]).to.eql(5993n)
+      expect(app3round3Earnings[0]).to.eql(2861n)
+
+      //Start allocation round
+      const round4 = await startNewAllocationRound()
+
+      // Check Quadratic Funding is off
+      expect(await xAllocationPool.isQuadraticFundingDisabledForCurrentRound()).to.eql(true)
+
+      expect(await xAllocationPool.isQuadraticFundingDisabledForRound(round4)).to.eql(true)
+
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(
+          round4,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[2])
+        .castVote(
+          round4,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[3])
+        .castVote(
+          round4,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[4])
+        .castVote(
+          round4,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
+        )
+      await xAllocationVoting
+        .connect(otherAccounts[5])
+        .castVote(
+          round4,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
+        )
+
+      await waitForRoundToEnd(round4)
+
+      // start new round
+
+      const app1round4Earnings = await xAllocationPool.roundEarnings(round4, app1Id)
+      const app2round4Earnings = await xAllocationPool.roundEarnings(round4, app2Id)
+      const app3round4Earnings = await xAllocationPool.roundEarnings(round4, app3Id)
+
+      /*
+        app1 percentage = 1000 / 3100 = 32.25% (No cap)
+        app2 percentage = 1600 / 3100 = 51.61% (No cap)
+        app3 percentage = 500 / 3100 = 16.12%
+      */
+      expect(app1round4Earnings[0]).to.eql(3225n)
+      expect(app2round4Earnings[0]).to.eql(5161n)
+      expect(app3round4Earnings[0]).to.eql(1612n)
+
+      // Check that round earings from round 1 are still the same after toggle
+      const app1round1Earnings1 = await xAllocationPool.roundEarnings(round1, app1Id)
+      const app2round1Earnings2 = await xAllocationPool.roundEarnings(round1, app2Id)
+      const app3round1Earnings3 = await xAllocationPool.roundEarnings(round1, app3Id)
+
+      // Check that round earings from round 1 are still the same after toggle
+      expect(app1round1Earnings1[0]).to.eql(1144n)
+      expect(app2round1Earnings2[0]).to.eql(5993n)
+      expect(app3round1Earnings3[0]).to.eql(2861n)
     })
   })
 

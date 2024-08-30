@@ -26,6 +26,7 @@ import {
   MyERC721,
   MyERC1155,
   B3TRGovernorV1,
+  XAllocationPoolV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, upgradeProxy } from "../../scripts/helpers"
@@ -226,7 +227,7 @@ export const getOrDeployContractInstances = async ({
   ])) as X2EarnRewardsPool
 
   // Deploy XAllocationPool
-  const xAllocationPool = (await deployProxy("XAllocationPool", [
+  const xAllocationPoolV1 = (await deployProxy("XAllocationPoolV1", [
     owner.address,
     owner.address,
     owner.address,
@@ -234,7 +235,17 @@ export const getOrDeployContractInstances = async ({
     await treasury.getAddress(),
     await x2EarnApps.getAddress(),
     await x2EarnRewardsPool.getAddress(),
-  ])) as XAllocationPool
+  ])) as XAllocationPoolV1
+
+  const xAllocationPool = (await upgradeProxy(
+    "XAllocationPoolV1",
+    "VoterXAllocationPoolRewards",
+    await xAllocationPoolV1.getAddress(),
+    [],
+    {
+      version: 2,
+    },
+  )) as VoterRewards
 
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
