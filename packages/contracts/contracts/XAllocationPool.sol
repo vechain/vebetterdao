@@ -46,6 +46,8 @@ import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
  * The contract is using AccessControl to handle roles for upgrading the contract and external contract addresses.
  */
 contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+  using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing the voting mechanism used in the XAllocationVoting contract
+
   uint256 public constant PERCENTAGE_PRECISION_SCALING_FACTOR = 1e4;
   /// @notice The role that can upgrade the contract.
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -61,6 +63,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     IX2EarnApps x2EarnApps;
     IX2EarnRewardsPool x2EarnRewardsPool;
     mapping(bytes32 appId => mapping(uint256 => bool)) claimedRewards; // Mapping to store the claimed rewards for each app in each round
+    Checkpoints.Trace208 quadraticFundingDisabled; // checkpoints for the quadratic funding status for each cycle
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -128,6 +131,10 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   // @dev Emit when the x2EarnApps contract is set
   event X2EarnAppsContractSet(address oldContractAddress, address newContractAddress);
 
+  /// @notice Emits true if quadratic funding is disabled, false otherwise.
+  /// @param disabled - The flag to enable or disable quadratic funding.
+  event QuadraticFundingToggled(bool indexed disabled);
+
   // ---------- Authorizers ---------- //
 
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
@@ -180,6 +187,24 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     $.x2EarnApps = IX2EarnApps(x2EarnApps_);
 
     emit X2EarnAppsContractSet(address($.x2EarnApps), x2EarnApps_);
+  }
+
+  /**
+   * @notice Toggle quadratic funding for a specific cycle.
+   * @dev This function toggles the state of quadratic funding for a specific cycle.
+   * The state will flip between enabled and disabled each time the function is called.
+   */
+  function toggleQuadraticFunding() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+
+    // Get the current status
+    bool currentStatus = isQuadraticFundingDisabledForCurrentCycle();
+
+    // Toggle the status -> 0: enabled, 1: disabled
+    $.quadraticFundingDisabled.push(clock(), currentStatus ? 0 : 1);
+
+    // Emit an event to log the new quadratic funding status.
+    emit QuadraticFundingToggled(!currentStatus);
   }
 
   /**
@@ -461,6 +486,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
    */
   function getAppShares(uint256 roundId, bytes32 appId) public view returns (uint256, uint256) {
     IXAllocationVotingGovernor _xAllocationVoting = xAllocationVoting();
+    IEmissions _emissions = emissions();
 
     require(_xAllocationVoting != IXAllocationVotingGovernor(address(0)), "XAllocationVotingGovernor contract not set");
 
@@ -469,13 +495,25 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
       return (0, 0);
     }
 
-    uint256 totalVotes = _xAllocationVoting.totalVotes(roundId);
-    uint256 appVotes = _xAllocationVoting.getAppVotes(roundId, appId);
+    uint48 blockNumber = SafeCast.toUint48(_emissions.getEmissionStartBlock(roundId));
+
+    uint256 relativeTotalVotes;
+    uint256 relativeAppVotes;
+    if (isQuadraticFundingDisabledAtBlock(blockNumber)) {
+      relativeTotalVotes = _xAllocationVoting.totalVotes(roundId);
+      relativeAppVotes = _xAllocationVoting.getAppVotes(roundId, appId);
+    } else {
+      relativeTotalVotes = _xAllocationVoting.totalVotesQF(roundId);
+      uint256 appVotesQF = _xAllocationVoting.getAppVotesQF(roundId, appId);
+
+      relativeAppVotes = appVotesQF * appVotesQF;
+    }
 
     // avoid division by zero
-    if (totalVotes == 0) return (0, 0);
+    if (relativeTotalVotes == 0) return (0, 0);
 
-    uint256 appShare = (appVotes * PERCENTAGE_PRECISION_SCALING_FACTOR) / totalVotes;
+    // Calculate the app share
+    uint256 appShare = (relativeAppVotes * PERCENTAGE_PRECISION_SCALING_FACTOR) / relativeTotalVotes;
 
     // This is the amount unallocated if appShare is greater than max cap, this will be sent to treasury
     uint256 unallocatedShare;
@@ -525,6 +563,35 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   }
 
   /**
+   * @notice Check if quadratic funding is disabled at a specific block number.
+   * @dev To check if quadratic funding was disabled for a cycle, use the block number the cycle started.
+   * @param blockNumber - The block number to check the quadratic funding status.
+   * @return true if quadratic funding is disabled, false otherwise.
+   */
+  function isQuadraticFundingDisabledAtBlock(uint48 blockNumber) public view returns (bool) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+
+    // Check if quadratic funding is enabled or disabled at the block number.
+    return $.quadraticFundingDisabled.upperLookupRecent(blockNumber) == 1; // 0: enabled, 1: disabled
+  }
+
+  /**
+   * @notice Check if quadratic funding is disabled for the current cycle.
+   * @return true if quadratic funding is disabled, false otherwise.
+   */
+  function isQuadraticFundingDisabledForCurrentCycle() public view returns (bool) {
+    XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
+
+    // Get the block number the emission cycle started.
+    uint256 emissionCycleStartBlock = $._emissions.lastEmissionBlock();
+
+    uint208 currentStatus = $.quadraticFundingDisabled.upperLookupRecent(SafeCast.toUint48(emissionCycleStartBlock));
+
+    // Check if quadratic rewarding is enabled or disabled for the current cycle.
+    return currentStatus == 1; // 0: enabled, 1: disabled
+  }
+
+  /**
    * @dev Returns the XAllocationVotingGovernor contract.
    */
   function xAllocationVoting() public view returns (IXAllocationVotingGovernor) {
@@ -570,5 +637,12 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
    */
   function version() external pure virtual returns (string memory) {
     return "2";
+  }
+
+  /**
+   * @dev Clock used for flagging checkpoints.
+   */
+  function clock() public view virtual returns (uint48) {
+    return Time.blockNumber();
   }
 }
