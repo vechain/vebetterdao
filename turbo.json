@@ -88,6 +88,18 @@
     "deploy:mainnet": {
       "dependsOn": ["^deploy:mainnet"]
     },
+    "upgrade:voter-rewards": {
+      "dependsOn": ["^upgrade:voter-rewards", "@repo/config#check-or-generate-local-config"]
+    },
+    "upgrade:voter-rewards:solo-staging": {
+      "dependsOn": ["^upgrade:voter-rewards:solo-staging"]
+    },
+    "upgrade:voter-rewards:testnet": {
+      "dependsOn": ["^upgrade:voter-rewards:testnet"]
+    },
+    "upgrade:voter-rewards:mainnet": {
+      "dependsOn": ["^upgrade:voter-rewards:mainnet"]
+    },
     "upgrade:b3tr-governor": {
       "dependsOn": ["^upgrade:b3tr-governor", "@repo/config#check-or-generate-local-config"]
     },
