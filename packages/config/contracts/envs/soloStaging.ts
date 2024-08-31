@@ -24,6 +24,7 @@ export function createSoloStagingConfig() {
         "updateDelay",
         "setDepositThresholdPercentage",
         "setVotingThreshold",
+        "upgradeToAndCall",
       ],
       Treasury: ["transferB3TR"],
       XAllocationVoting: [

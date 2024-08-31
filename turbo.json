@@ -100,6 +100,18 @@
     "upgrade:voter-rewards:mainnet": {
       "dependsOn": ["^upgrade:voter-rewards:mainnet"]
     },
+    "upgrade:b3tr-governor": {
+      "dependsOn": ["^upgrade:b3tr-governor", "@repo/config#check-or-generate-local-config"]
+    },
+    "upgrade:b3tr-governor:solo-staging": {
+      "dependsOn": ["^upgrade:b3tr-governor:solo-staging"]
+    },
+    "upgrade:b3tr-governor:testnet": {
+      "dependsOn": ["^upgrade:b3tr-governor:testnet"]
+    },
+    "upgrade:b3tr-governor:mainnet": {
+      "dependsOn": ["^upgrade:b3tr-governor:mainnet"]
+    },
     "start-round:testnet": {
       "dependsOn": ["@repo/config#check-or-generate-local-config"],
       "cache": false
