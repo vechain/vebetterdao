@@ -276,27 +276,31 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as VoterRewards
 
-  const xAllocationVoting = (await deployProxy(
-    "XAllocationVoting",
+  const xAllocationVoting = (await deployAndUpgrade(
+    ["XAllocationVotingV1", "XAllocationVoting"],
     [
-      {
-        vot3Token: await vot3.getAddress(),
-        quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
-        initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
-        timeLock: await timelock.getAddress(),
-        voterRewards: await voterRewards.getAddress(),
-        emissions: await emissions.getAddress(),
-        admins: [await timelock.getAddress(), TEMP_ADMIN],
-        upgrader: config.CONTRACTS_ADMIN_ADDRESS,
-        contractsAddressManager: TEMP_ADMIN,
-        x2EarnAppsAddress: await x2EarnApps.getAddress(),
-        baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
-        appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
-        votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
-      },
+      [
+        {
+          vot3Token: await vot3.getAddress(),
+          quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
+          initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
+          timeLock: await timelock.getAddress(),
+          voterRewards: await voterRewards.getAddress(),
+          emissions: await emissions.getAddress(),
+          admins: [await timelock.getAddress(), TEMP_ADMIN],
+          upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+          contractsAddressManager: TEMP_ADMIN,
+          x2EarnAppsAddress: await x2EarnApps.getAddress(),
+          baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+          appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+          votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
+        },
+      ],
+      [],
     ],
-    undefined,
-    true,
+    {
+      versions: [undefined, 2],
+    },
   )) as XAllocationVoting
 
   const governor = (await deployAndUpgrade(
