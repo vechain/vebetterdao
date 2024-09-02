@@ -282,7 +282,7 @@ export async function deployAll(config: ContractsConfig) {
       [],
     ],
     {
-      versions: [undefined, 2],
+      versions: [undefined, 2, 3],
       libraries: [
         {
           GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
