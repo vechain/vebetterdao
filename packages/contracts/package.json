@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test:thor-solo": "npx hardhat test",
-    "test:hardhat": "hardhat test --network hardhat",
+    "test:hardhat": "hardhat test --network hardhat --grep 'Proposal Voting'",
     "test:coverage:solidity": "hardhat coverage --testfiles ./test/**/*test.ts",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy",
@@ -27,7 +27,8 @@
     "lint": "eslint . --ext .ts",
     "format": "eslint . --ext .ts --fix",
     "generate-docs": "npx hardhat docgen",
-    "upgrade:b3tr-governor": "npx hardhat run scripts/deploy/upgrades/b3trGovernorV2.ts"
+    "upgrade:b3tr-governor": "npx hardhat run scripts/deploy/upgrades/b3trGovernorV3.ts",
+    "upgrade:xallocation-pool": "npx hardhat run scripts/deploy/upgrades/xAllocationPoolV2.ts"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
