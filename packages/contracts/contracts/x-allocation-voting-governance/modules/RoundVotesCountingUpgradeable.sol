@@ -160,6 +160,11 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
 
     // Iterate through the apps and weights to calculate the total weight of votes cast by the voter
     for (uint256 i; i < apps.length; i++) {
+      // Check if the weight of the vote cast by the voter is for an XAPP is greater than the voting threshold
+      if (weights[i] < votingThreshold()) {
+        revert GovernorVotingThresholdNotMet(votingThreshold(), totalWeight);
+      }
+
       // Update the total weight of votes cast by the voter
       totalWeight += weights[i];
 
@@ -185,11 +190,6 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
       // Update the quadratic funding votes received for the given app - sum of the square roots of individual votes
       $._roundVotes[roundId].votesReceivedQF[apps[i]] = qfAppVotesPostVote; // ∑(sqrt(votes)) -> sqrt(votes1) + sqrt(votes2) + ... + sqrt(votesN+1)
       $._roundVotes[roundId].votesReceived[apps[i]] += weights[i]; // ∑votes + votesN+1
-    }
-
-    // Check if the total weight of votes cast by the voter is greater than the voting threshold
-    if (totalWeight < votingThreshold()) {
-      revert GovernorVotingThresholdNotMet(votingThreshold(), totalWeight);
     }
 
     // Apply the total adjustment to storage
