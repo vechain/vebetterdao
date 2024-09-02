@@ -1,21 +1,23 @@
 import inquirer from "inquirer"
 import { execSync } from "child_process"
 
-// Define contract options with specific versions for each contract
 const contractOptions: { [key: string]: { name: string; versions: string[] } } = {
   "Voter Rewards": {
     name: "voter-rewards",
-    versions: ["v2"], // Versions specific to Voter Rewards
+    versions: ["v2"],
   },
   "B3TR Governor": {
     name: "b3tr-governor",
+    versions: ["v2"],
+  },
+  "XAllocation Voting": {
+    name: "x-allocation-voting",
     versions: ["v2"],
   },
 }
 
 ;(async () => {
   try {
-    // Retrieve the environment from NEXT_PUBLIC_APP_ENV
     const env = process.env.NEXT_PUBLIC_APP_ENV
 
     if (!env) {
