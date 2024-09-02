@@ -3428,27 +3428,20 @@ describe("Governor and TimeLock", function () {
     })
 
     it("[Linear] can count votes correctly", async function () {
-      const config = createLocalConfig()
-      config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 1
-      config.EMISSIONS_CYCLE_DURATION = 15
-      const { governor, otherAccount, b3tr, B3trContract, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
-
-      // we do it here but will use in the next test
-      await getVot3Tokens(otherAccounts[0], "1000000")
-      await getVot3Tokens(otherAccounts[1], "9")
-      await getVot3Tokens(otherAccounts[2], "100000")
+      const { governor, b3tr, B3trContract, otherAccount } = await getOrDeployContractInstances({ forceDeploy: false })
 
       // Turn off quadratic voting
       await governor.toggleQuadraticVoting()
 
-      // Start emissions
-      await bootstrapAndStartEmissions()
-
       // Now we can create a new proposal
-      const tx = await createProposal(b3tr, B3trContract, otherAccount, description, functionToCall, [])
+      const tx = await createProposal(
+        b3tr,
+        B3trContract,
+        otherAccount,
+        description + ` ${this.test?.title}`,
+        functionToCall,
+        [],
+      )
       proposalId = await getProposalIdFromTx(tx)
       payDeposit(proposalId, otherAccount)
 
@@ -3460,7 +3453,7 @@ describe("Governor and TimeLock", function () {
       expect(proposalState.toString()).to.eql("1") // active
 
       //vote against
-      await governor.connect(otherAccounts[1]).castVote(proposalId, 0)
+      await governor.connect(voter4).castVote(proposalId, 0)
 
       // now we should have the following votes:
       // voter1: 0 yes
@@ -3483,17 +3476,17 @@ describe("Governor and TimeLock", function () {
     })
 
     it("cannot vote twice", async function () {
-      const { governor, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: false })
+      const { governor } = await getOrDeployContractInstances({ forceDeploy: false })
 
       const proposalState = await waitForProposalToBeActive(proposalId) // proposal id of the proposal in the beforeAll step & block when the proposal was created
 
       expect(proposalState.toString()).to.eql("1") // active
 
-      const hasVoted = await governor.hasVoted(proposalId, await otherAccounts[1].getAddress())
+      const hasVoted = await governor.hasVoted(proposalId, await voter4.getAddress())
 
-      if (!hasVoted) await governor.connect(otherAccounts[1]).castVote(proposalId, 1)
+      if (!hasVoted) await governor.connect(voter4).castVote(proposalId, 1)
 
-      await catchRevert(governor.connect(otherAccounts[1]).castVote(proposalId, 1))
+      await catchRevert(governor.connect(voter4).castVote(proposalId, 1))
     })
 
     it("cannot vote after voting period ends", async function () {
@@ -4232,6 +4225,109 @@ describe("Governor and TimeLock", function () {
       expect(proposalState.toString()).to.eql("4") // succeeded
       const isQuorumReached = await governor.quorumReached(proposalId)
       expect(isQuorumReached).to.equal(true)
+    })
+
+    it("Only admin or governance can toggle quadratic voting", async () => {
+      const {
+        governor,
+        otherAccounts,
+        owner,
+        emissions,
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const admin = owner
+      const voter = otherAccounts[0]
+      const voter2 = otherAccounts[1]
+      await getVot3Tokens(voter, "30000")
+      await getVot3Tokens(voter2, "30000")
+      await waitForNextBlock()
+
+      // Only admin or governance can toggle quadratic voting
+      await catchRevert(governor.connect(otherAccounts[0]).toggleQuadraticVoting())
+      await catchRevert(governor.connect(otherAccounts[1]).toggleQuadraticVoting())
+
+      // Admin can toggle quadratic voting
+      await governor.connect(admin).toggleQuadraticVoting()
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      const quadraticVoting = await governor.isQuadraticVotingDisabledForCurrentRound()
+      expect(quadraticVoting).to.equal(true)
+
+      const b3trGovernorFactory = await ethers.getContractFactory("B3TRGovernor", {
+        libraries: {
+          GovernorClockLogic: await governorClockLogicLib.getAddress(),
+          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+        },
+      })
+
+      // Governance can toggle quadratic voting
+      // Whiteist function
+      const funcSig = governor.interface.getFunction("toggleQuadraticVoting")?.selector
+      await governor.connect(owner).setWhitelistFunction(await governor.getAddress(), funcSig, true)
+
+      // Create a proposal
+      const tx = await createProposal(
+        governor,
+        b3trGovernorFactory,
+        otherAccounts[0],
+        description,
+        "toggleQuadraticVoting",
+        [],
+      )
+      proposalId = await getProposalIdFromTx(tx)
+      // pay deposit
+      await payDeposit(proposalId, voter)
+
+      // wait
+      await waitForProposalToBeActive(proposalId)
+
+      // vote
+      await governor.connect(voter).castVote(proposalId, 1) // vote yes
+      await governor.connect(voter2).castVote(proposalId, 1) // vote yes
+
+      // wait
+      await waitForVotingPeriodToEnd(proposalId)
+
+      // Check if quorum is calculated correctly
+      const isQuorumReached = await governor.quorumReached(proposalId)
+      expect(isQuorumReached).to.equal(true)
+
+      const encodedFunctionCall = b3trGovernorFactory.interface.encodeFunctionData("toggleQuadraticVoting", [])
+      const descriptionHash = ethers.keccak256(ethers.toUtf8Bytes(description))
+
+      // Queue the proposal
+      await governor.queue([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(5n)
+
+      await governor.execute([await governor.getAddress()], [0], [encodedFunctionCall], descriptionHash)
+      expect(await governor.state(proposalId)).to.eql(6n)
+
+      const cycle = await emissions.getCurrentCycle()
+      await moveToCycle(Number(cycle) + 2)
+
+      const quadraticVotingAfter = await governor.isQuadraticVotingDisabledForCurrentRound()
+      expect(quadraticVotingAfter).to.equal(false)
+
+      expect(await governor.isQuadraticVotingDisabledForRound(cycle)).to.equal(true)
+      expect(await governor.isQuadraticVotingDisabledForRound(cycle + 1n)).to.equal(false)
     })
   })
 
