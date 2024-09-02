@@ -17,7 +17,6 @@ import {
   GovernorConfigurator,
   GovernorDepositLogic,
   GovernorFunctionRestrictionsLogic,
-  GovernorGovernanceLogic,
   GovernorProposalLogic,
   GovernorQuorumLogic,
   GovernorStateLogic,
@@ -328,7 +327,7 @@ export const getOrDeployContractInstances = async ({
   })) as B3TRGovernorV2
 
   const governor = (await upgradeProxy("B3TRGovernorV2", "B3TRGovernor", await governorV1.getAddress(), [], {
-    version: 2,
+    version: 3,
     libraries: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
       GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
