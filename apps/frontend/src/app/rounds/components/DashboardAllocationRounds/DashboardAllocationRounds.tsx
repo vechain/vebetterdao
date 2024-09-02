@@ -1,4 +1,4 @@
-import { useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
+import { ProposalState, useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
@@ -26,7 +26,9 @@ export const DashboardAllocationRounds = () => {
 
   const otherProposals = useMemo(() => {
     if (selectedRoundId === currentRoundId) return []
-    return currentRoundIdProposals.allProposals.filter(proposal => proposal.roundIdVoteStart === selectedRoundId)
+    return currentRoundIdProposals.allProposals.filter(
+      proposal => proposal.roundIdVoteStart === selectedRoundId && proposal.state !== ProposalState.Canceled,
+    )
   }, [currentRoundIdProposals, selectedRoundId, currentRoundId])
 
   useEffect(() => {
