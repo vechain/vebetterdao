@@ -264,8 +264,8 @@ library GovernorVotesLogic {
   }
 
   /**
-   * @notice Check if quadratic voting is disabled at a specific block number.
-   * @dev To check if quadratic voting was disabled for a round, use the block number the cycle started.
+   * @notice Check if quadratic voting is disabled at a specific round.
+   * @dev To check if quadratic voting was disabled for a round, use the block number the round started.
    * @param self - The storage reference for the GovernorStorage.
    * @param roundId - The round ID for which to check if quadratic voting is disabled.
    * @return true if quadratic voting is disabled, false otherwise.

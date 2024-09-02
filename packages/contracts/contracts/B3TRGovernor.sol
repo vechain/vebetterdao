@@ -548,8 +548,7 @@ contract B3TRGovernor is
   }
 
   /**
-   * @notice Check if quadratic voting is disabled at a specific block number.
-   * @dev To check if quadratic voting was disabled for a round, use the block number the cycle started.
+   * @notice Check if quadratic voting is disabled at a specific round.
    * @param roundId - The round ID for which to check if quadratic voting is disabled.
    * @return true if quadratic voting is disabled, false otherwise.
    */
@@ -795,8 +794,8 @@ contract B3TRGovernor is
   }
 
   /**
-   * @notice Toggle quadratic voting for a specific cycle.
-   * @dev This function toggles the state of quadratic voting for a specific cycle.
+   * @notice Toggle quadratic voting for next round.
+   * @dev This function toggles the state of quadratic votingstarting from the next round.
    * The state will flip between enabled and disabled each time the function is called.
    */
   function toggleQuadraticVoting() external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {

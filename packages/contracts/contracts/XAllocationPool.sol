@@ -190,8 +190,8 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   }
 
   /**
-   * @notice Toggle quadratic funding for a specific round.
-   * @dev This function toggles the state of quadratic funding for a specific round.
+   * @notice Toggle quadratic funding for the next round.
+   * @dev This function toggles the state of quadratic funding with new state being used in the next round.
    * The state will flip between enabled and disabled each time the function is called.
    */
   function toggleQuadraticFunding() external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -560,7 +560,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   }
 
   /**
-   * @notice Check if quadratic funding is disabled at a specific block number.
+   * @notice Check if quadratic funding is disabled at a specific round.
    * @dev To check if quadratic funding was disabled for a round, use the block number the cycle started.
    * @param roundId - The round ID for which to check if quadratic funding is disabled.
    * @return true if quadratic funding is disabled, false otherwise.
