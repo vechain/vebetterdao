@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test:thor-solo": "npx hardhat test",
-    "test:hardhat": "hardhat test --network hardhat --grep 'Proposal Voting'",
+    "test:hardhat": "hardhat test --network hardhat",
     "test:coverage:solidity": "hardhat coverage --testfiles ./test/**/*test.ts",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy",
