@@ -644,9 +644,7 @@ describe("X-Allocation Pool", async function () {
         const round1 = await xAllocationVoting.currentRoundId()
 
         // Vote
-        await xAllocationVoting
-          .connect(voter1)
-          .castVote(round1, [app1Id, app2Id], [ethers.parseEther("1000"), ethers.parseEther("0")])
+        await xAllocationVoting.connect(voter1).castVote(round1, [app1Id], [ethers.parseEther("1000")])
 
         await waitForRoundToEnd(Number(round1))
         let state = await xAllocationVoting.state(round1)
@@ -662,9 +660,7 @@ describe("X-Allocation Pool", async function () {
         const round2 = await xAllocationVoting.currentRoundId()
 
         // Vote
-        await xAllocationVoting
-          .connect(voter1)
-          .castVote(round2, [app1Id, app2Id], [ethers.parseEther("1000"), ethers.parseEther("0")])
+        await xAllocationVoting.connect(voter1).castVote(round2, [app1Id], [ethers.parseEther("1000")])
 
         await waitForRoundToEnd(Number(round2))
 
@@ -732,9 +728,7 @@ describe("X-Allocation Pool", async function () {
         const round1 = await xAllocationVoting.currentRoundId()
 
         // Vote
-        await xAllocationVoting
-          .connect(voter1)
-          .castVote(round1, [app1Id, app2Id], [ethers.parseEther("1000"), ethers.parseEther("0")])
+        await xAllocationVoting.connect(voter1).castVote(round1, [app1Id], [ethers.parseEther("1000")])
 
         await waitForRoundToEnd(Number(round1))
         let state = await xAllocationVoting.state(round1)
@@ -750,9 +744,7 @@ describe("X-Allocation Pool", async function () {
         const round2 = await xAllocationVoting.currentRoundId()
 
         // Vote
-        await xAllocationVoting
-          .connect(voter1)
-          .castVote(round2, [app1Id, app2Id], [ethers.parseEther("1000"), ethers.parseEther("0")])
+        await xAllocationVoting.connect(voter1).castVote(round2, [app1Id], [ethers.parseEther("1000")])
 
         await waitForRoundToEnd(Number(round2))
 
@@ -1600,9 +1592,7 @@ describe("X-Allocation Pool", async function () {
         const round1 = await xAllocationVoting.currentRoundId()
 
         // Vote
-        await xAllocationVoting
-          .connect(voter1)
-          .castVote(round1, [app1Id, app2Id], [ethers.parseEther("0"), ethers.parseEther("1000")])
+        await xAllocationVoting.connect(voter1).castVote(round1, [app2Id], [ethers.parseEther("1000")])
 
         await waitForRoundToEnd(Number(round1))
         let state = await xAllocationVoting.state(round1)
@@ -1640,9 +1630,7 @@ describe("X-Allocation Pool", async function () {
         const round1 = await xAllocationVoting.currentRoundId()
 
         // Vote
-        await xAllocationVoting
-          .connect(voter1)
-          .castVote(round1, [app1Id, app2Id], [ethers.parseEther("0"), ethers.parseEther("1000")])
+        await xAllocationVoting.connect(voter1).castVote(round1, [app2Id], [ethers.parseEther("1000")])
 
         await waitForRoundToEnd(Number(round1))
 
@@ -1825,9 +1813,7 @@ describe("X-Allocation Pool", async function () {
         const round1 = await xAllocationVoting.currentRoundId()
 
         // Vote
-        await xAllocationVoting
-          .connect(voter1)
-          .castVote(round1, [app1Id, app2Id], [ethers.parseEther("0"), ethers.parseEther("1000")])
+        await xAllocationVoting.connect(voter1).castVote(round1, [app2Id], [ethers.parseEther("1000")])
 
         await waitForRoundToEnd(Number(round1))
         expect(await xAllocationVoting.state(round1)).to.eql(2n) // succeeded
@@ -1884,39 +1870,19 @@ describe("X-Allocation Pool", async function () {
         // Vote
         await xAllocationVoting
           .connect(otherAccounts[1])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("900"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[2])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("500"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[3])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("100"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[4])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("100"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[5])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app1Id, app2Id, app3Id], [ethers.parseEther("1000"), ethers.parseEther("100")])
 
         await waitForRoundToEnd(round1)
 
@@ -1962,39 +1928,19 @@ describe("X-Allocation Pool", async function () {
         // Vote
         await xAllocationVoting
           .connect(otherAccounts[1])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("900"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[2])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("500"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[3])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("100"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[4])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("100"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[5])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app1Id, app3Id], [ethers.parseEther("1000"), ethers.parseEther("100")])
 
         await waitForRoundToEnd(round1)
 
@@ -2044,39 +1990,19 @@ describe("X-Allocation Pool", async function () {
         // Vote
         await xAllocationVoting
           .connect(otherAccounts[1])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("900"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[2])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("500"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("500"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[3])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("100"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[4])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("100"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[5])
-          .castVote(
-            round1,
-            [app1Id, app2Id, app3Id],
-            [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
-          )
+          .castVote(round1, [app1Id, app3Id], [ethers.parseEther("1000"), ethers.parseEther("100")])
 
         await waitForRoundToEnd(round1)
 

@@ -581,9 +581,7 @@ describe("VoterRewards", () => {
 
       expect(await xAllocationVoting.roundDeadline(roundId)).to.lt(await emissions.getNextCycleBlock())
 
-      await xAllocationVoting
-        .connect(voter1)
-        .castVote(roundId, [app1, app2], [ethers.parseEther("1000"), ethers.parseEther("0")])
+      await xAllocationVoting.connect(voter1).castVote(roundId, [app1], [ethers.parseEther("1000")])
       await xAllocationVoting
         .connect(voter2)
         .castVote(roundId, [app1, app2], [ethers.parseEther("200"), ethers.parseEther("100")])
@@ -697,9 +695,7 @@ describe("VoterRewards", () => {
 
       expect(await xAllocationVoting.roundDeadline(roundId)).to.lt(await emissions.getNextCycleBlock())
 
-      await xAllocationVoting
-        .connect(voter1)
-        .castVote(roundId2, [app1, app2], [ethers.parseEther("0"), ethers.parseEther("1000")])
+      await xAllocationVoting.connect(voter1).castVote(roundId2, [app2], [ethers.parseEther("1000")])
       await xAllocationVoting
         .connect(voter2)
         .castVote(roundId2, [app1, app2], [ethers.parseEther("100"), ethers.parseEther("500")])
