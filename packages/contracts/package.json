@@ -28,7 +28,8 @@
     "format": "eslint . --ext .ts --fix",
     "generate-docs": "npx hardhat docgen",
     "upgrade:b3tr-governor": "npx hardhat run scripts/deploy/upgrades/b3trGovernorV3.ts",
-    "upgrade:xallocation-pool": "npx hardhat run scripts/deploy/upgrades/xAllocationPoolV2.ts"
+    "upgrade:xallocation-pool": "npx hardhat run scripts/deploy/upgrades/xAllocationPoolV2.ts",
+    "upgrade:voter-rewards": "npx hardhat run scripts/deploy/upgrades/voterRewardsV2.ts"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
