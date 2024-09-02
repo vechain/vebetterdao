@@ -70,6 +70,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * 
  * ------------------ VERSION 2 ------------------
  * - Replaced onlyGovernance modifier with onlyRoleOrGovernance which checks if the caller has the DEFAULT_ADMIN_ROLE role or if the function is called through a governance proposal
+ * ------------------ VERSION 3 ------------------
+ * - Added the ability to toggle the quadratic voting mechanism on and off
  */
 contract B3TRGovernor is
   IB3TRGovernor,
@@ -561,7 +563,7 @@ contract B3TRGovernor is
    * @return string The version of the governor
    */
   function version() external pure returns (string memory) {
-    return "2";
+    return "3";
   }
 
   /**
