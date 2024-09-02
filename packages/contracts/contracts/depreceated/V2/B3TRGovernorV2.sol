@@ -23,22 +23,22 @@
 
 pragma solidity 0.8.20;
 
-import { GovernorProposalLogicV1 } from "./governance/libraries/GovernorProposalLogicV1.sol";
-import { GovernorStateLogicV1 } from "./governance/libraries/GovernorStateLogicV1.sol";
-import { GovernorVotesLogicV1 } from "./governance/libraries/GovernorVotesLogicV1.sol";
-import { GovernorQuorumLogicV1 } from "./governance/libraries/GovernorQuorumLogicV1.sol";
-import { GovernorDepositLogicV1 } from "./governance/libraries/GovernorDepositLogicV1.sol";
-import { GovernorStorageTypesV1 } from "./governance/libraries/GovernorStorageTypesV1.sol";
-import { GovernorClockLogicV1 } from "./governance/libraries/GovernorClockLogicV1.sol";
-import { GovernorFunctionRestrictionsLogicV1 } from "./governance/libraries/GovernorFunctionRestrictionsLogicV1.sol";
-import { GovernorGovernanceLogicV1 } from "./governance/libraries/GovernorGovernanceLogicV1.sol";
-import { GovernorConfiguratorV1 } from "./governance/libraries/GovernorConfiguratorV1.sol";
-import { GovernorTypesV1 } from "./governance/libraries/GovernorTypesV1.sol";
-import { GovernorStorageV1 } from "./governance/GovernorStorageV1.sol";
+import { GovernorProposalLogicV1 } from "../V1/governance/libraries/GovernorProposalLogicV1.sol";
+import { GovernorStateLogicV1 } from "../V1/governance/libraries/GovernorStateLogicV1.sol";
+import { GovernorVotesLogicV1 } from "../V1/governance/libraries/GovernorVotesLogicV1.sol";
+import { GovernorQuorumLogicV1 } from "../V1/governance/libraries/GovernorQuorumLogicV1.sol";
+import { GovernorDepositLogicV1 } from "../V1/governance/libraries/GovernorDepositLogicV1.sol";
+import { GovernorStorageTypesV1 } from "../V1/governance/libraries/GovernorStorageTypesV1.sol";
+import { GovernorClockLogicV1} from "../V1/governance/libraries/GovernorClockLogicV1.sol";
+import { GovernorFunctionRestrictionsLogicV1 } from "../V1/governance/libraries/GovernorFunctionRestrictionsLogicV1.sol";
+import { GovernorGovernanceLogicV1 } from "../V1/governance/libraries/GovernorGovernanceLogicV1.sol";
+import { GovernorConfiguratorV1 } from "../V1/governance/libraries/GovernorConfiguratorV1.sol";
+import { GovernorTypesV1 } from "../V1/governance/libraries/GovernorTypesV1.sol";
+import { GovernorStorageV1 } from "../V1/governance/GovernorStorageV1.sol";
 import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
 import { IVOT3 } from "../../interfaces/IVOT3.sol";
 import { IB3TR } from "../../interfaces/IB3TR.sol";
-import { IB3TRGovernorV1 } from "./interfaces/IB3TRGovernorV1.sol";
+import { IB3TRGovernorV1 } from "../V1/interfaces/IB3TRGovernorV1.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
@@ -66,9 +66,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * Once a proposal succeeds, it can be queued and executed. The execution is done through the timelock contract.
  *
  * The contract is upgradeable and uses the UUPS pattern.
- * @dev The contract is upgradeable and uses the UUPS pattern. All LogicV1 is stored in libraries.
+ * @dev The contract is upgradeable and uses the UUPS pattern. All logic is stored in libraries.
+ * 
+ * ------------------ VERSION 2 ------------------
+ * - Replaced onlyGovernance modifier with onlyRoleOrGovernance which checks if the caller has the DEFAULT_ADMIN_ROLE role or if the function is called through a governance proposal
  */
-contract B3TRGovernorV1 is
+contract B3TRGovernorV2 is
   IB3TRGovernorV1,
   GovernorStorageV1,
   AccessControlUpgradeable,
@@ -131,6 +134,7 @@ contract B3TRGovernorV1 is
 
   /**
    * @notice Initializes the contract with the initial parameters
+   * @dev This function is called only once during the contract deployment
    * @param data Initialization data containing the initial settings for the governor
    */
   function initialize(
@@ -173,7 +177,7 @@ contract B3TRGovernorV1 is
    * @param value The amount of ether to send
    * @param data The data to call the target with
    */
-  function relay(address target, uint256 value, bytes calldata data) external payable virtual onlyGovernance {
+  function relay(address target, uint256 value, bytes calldata data) external payable virtual onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     (bool success, bytes memory returndata) = target.call{ value: value }(data);
     Address.verifyCallResult(success, returndata);
   }
@@ -537,7 +541,7 @@ contract B3TRGovernorV1 is
    * @return string The version of the governor
    */
   function version() external pure returns (string memory) {
-    return "1";
+    return "2";
   }
 
   /**
@@ -763,7 +767,7 @@ contract B3TRGovernorV1 is
    * Emits a {QuorumNumeratorUpdated} event.
    * @param newQuorumNumerator The new quorum numerator
    */
-  function updateQuorumNumerator(uint256 newQuorumNumerator) external onlyGovernance {
+  function updateQuorumNumerator(uint256 newQuorumNumerator) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypesV1.GovernorStorage storage $ = getGovernorStorage();
     GovernorQuorumLogicV1.updateQuorumNumerator($, newQuorumNumerator);
   }
@@ -814,7 +818,7 @@ contract B3TRGovernorV1 is
    * Emits a {DepositThresholdSet} event.
    * @param newDepositThreshold The new deposit threshold
    */
-  function setDepositThresholdPercentage(uint256 newDepositThreshold) public onlyGovernance {
+  function setDepositThresholdPercentage(uint256 newDepositThreshold) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypesV1.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfiguratorV1.setDepositThresholdPercentage($, newDepositThreshold);
   }
@@ -824,7 +828,7 @@ contract B3TRGovernorV1 is
    * Emits a {VotingThresholdSet} event.
    * @param newVotingThreshold The new voting threshold
    */
-  function setVotingThreshold(uint256 newVotingThreshold) public onlyGovernance {
+  function setVotingThreshold(uint256 newVotingThreshold) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypesV1.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfiguratorV1.setVotingThreshold($, newVotingThreshold);
   }
@@ -835,7 +839,7 @@ contract B3TRGovernorV1 is
    * Emits a {MinVotingDelaySet} event.
    * @param newMinVotingDelay The new minimum voting delay
    */
-  function setMinVotingDelay(uint256 newMinVotingDelay) public onlyGovernance {
+  function setMinVotingDelay(uint256 newMinVotingDelay) public onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypesV1.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfiguratorV1.setMinVotingDelay($, newMinVotingDelay);
   }
@@ -868,7 +872,7 @@ contract B3TRGovernorV1 is
    * CAUTION: It is not recommended to change the timelock while there are other queued governance proposals.
    * @param newTimelock The new timelock controller
    */
-  function updateTimelock(TimelockControllerUpgradeable newTimelock) external virtual onlyGovernance {
+  function updateTimelock(TimelockControllerUpgradeable newTimelock) external virtual onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypesV1.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfiguratorV1.updateTimelock($, newTimelock);
   }
