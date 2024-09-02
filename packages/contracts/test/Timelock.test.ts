@@ -13,7 +13,7 @@ describe("TimeLock - @shard2", function () {
       })
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("TimeLock - @shard2")
+      const Contract = await ethers.getContractFactory("TimeLock")
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
