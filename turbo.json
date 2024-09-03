@@ -9,7 +9,10 @@
     "NEXT_PUBLIC_DATADOG_CLIENT_TOKEN",
     "NEXT_PUBLIC_IPFS_PINNING_SERVICE",
     "IS_TEST_COVERAGE",
-    "RUN_SIMULATION"
+    "RUN_SIMULATION",
+    "SHARD",
+    "CONTRACT_TO_UPGRADE",
+    "CONTRACT_VERSION"
   ],
   "pipeline": {
     "install": {
@@ -88,29 +91,21 @@
     "deploy:mainnet": {
       "dependsOn": ["^deploy:mainnet"]
     },
-    "upgrade:voter-rewards": {
-      "dependsOn": ["^upgrade:voter-rewards", "@repo/config#check-or-generate-local-config"]
+    "upgrade:contract": {
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": []
     },
-    "upgrade:voter-rewards:solo-staging": {
-      "dependsOn": ["^upgrade:voter-rewards:solo-staging"]
+    "upgrade:contract:local": {
+      "dependsOn": ["upgrade:contract"]
     },
-    "upgrade:voter-rewards:testnet": {
-      "dependsOn": ["^upgrade:voter-rewards:testnet"]
+    "upgrade:contract:solo-staging": {
+      "dependsOn": ["upgrade:contract"]
     },
-    "upgrade:voter-rewards:mainnet": {
-      "dependsOn": ["^upgrade:voter-rewards:mainnet"]
+    "upgrade:contract:testnet": {
+      "dependsOn": ["upgrade:contract"]
     },
-    "upgrade:b3tr-governor": {
-      "dependsOn": ["^upgrade:b3tr-governor", "@repo/config#check-or-generate-local-config"]
-    },
-    "upgrade:b3tr-governor:solo-staging": {
-      "dependsOn": ["^upgrade:b3tr-governor:solo-staging"]
-    },
-    "upgrade:b3tr-governor:testnet": {
-      "dependsOn": ["^upgrade:b3tr-governor:testnet"]
-    },
-    "upgrade:b3tr-governor:mainnet": {
-      "dependsOn": ["^upgrade:b3tr-governor:mainnet"]
+    "upgrade:contract:mainnet": {
+      "dependsOn": ["upgrade:contract"]
     },
     "upgrade:xallocation-pool": {
       "dependsOn": ["^upgrade:xallocation-pool", "@repo/config#check-or-generate-local-config"]
@@ -134,7 +129,7 @@
     },
     "test": {
       "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config", "test:hardhat"]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "test:watch": {
       "cache": false,
@@ -152,6 +147,10 @@
       "cache": false
     },
     "test:hardhat": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "test:hardhat:shard": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },

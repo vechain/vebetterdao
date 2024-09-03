@@ -14,9 +14,38 @@ on:
       - testnet
 
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend-changed: ${{ steps.changes.outputs.frontend }}
+      contracts-changed: ${{ steps.changes.outputs.contracts }}
+      utils-changed: ${{ steps.changes.outputs.utils }}
+      backend-changed: ${{ steps.changes.outputs.backend }}
+      lambda-changed: ${{ steps.changes.outputs.lambda }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check for Changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'apps/frontend/**'
+            contracts:
+              - 'packages/contracts/**'
+            utils:
+              - 'packages/utils/**'
+            backend:
+              - 'apps/backend/**'
+            lambda:
+              - 'packages/lambda/**'
+
   run-unit-tests:
     name: Unit Testing
     runs-on: ubuntu-latest
+    needs: check-changes
     strategy:
       fail-fast: false
 
@@ -41,84 +70,56 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-solc-
 
-      - name: Check for Frontend changes
-        uses: dorny/paths-filter@v3
-        id: frontend_changes
-        with:
-          filters: |
-            src:
-              - 'apps/frontend/**'
-
-      - name: Check for Solidity changes
-        uses: dorny/paths-filter@v3
-        id: contract_changes
-        with:
-          filters: |
-            src:
-              - 'packages/contracts/**'
-
-      - name: Check for Utils changes
-        uses: dorny/paths-filter@v3
-        id: utils_changes
-        with:
-          filters: |
-            src:
-              - 'packages/utils/**'
-
-      - name: Check for Backend changes
-        uses: dorny/paths-filter@v3
-        id: backend_changes
-        with:
-          filters: |
-            src:
-              - 'apps/backend/**'
-
-      - name: Check for Lambda changes
-        uses: dorny/paths-filter@v3
-        id: lambda_changes
-        with:
-          filters: |
-            src:
-              - 'packages/lambda/**'
-
-      # Run global unit tests if any of the following changes are detected
+      # Run global unit tests if contract or utils changes are detected
       - name: Global Unit Tests
-        if: steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true'
+        if: needs.check-changes.outputs.contracts-changed == 'true' || needs.check-changes.outputs.utils-changed == 'true'
         run: yarn test
 
-      # Otherwise, run specific unit tests based on the changes detected
+      # Run Frontend unit tests if there are frontend changes, or if contracts/utils have changed
       - name: Frontend Unit Tests
-        if: steps.frontend_changes.outputs.src == 'true' && !(steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true')
+        if: needs.check-changes.outputs.frontend-changed == 'true' || needs.check-changes.outputs.contracts-changed == 'true' || needs.check-changes.outputs.utils-changed == 'true'
         run: yarn test --filter=frontend
 
+      # Run Backend unit tests only if there are backend changes and no contracts/utils changes
       - name: Backend Unit Tests
-        if: steps.backend_changes.outputs.src == 'true' && !(steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true')
+        if: needs.check-changes.outputs.backend-changed == 'true' && needs.check-changes.outputs.contracts-changed != 'true' && needs.check-changes.outputs.utils-changed != 'true'
         run: yarn test --filter=backend
 
+      # Run Lambda unit tests only if there are lambda changes and no contracts/utils changes
       - name: Lambda Unit Tests
-        if: steps.lambda_changes.outputs.src == 'true' && !(steps.contract_changes.outputs.src == 'true' || steps.utils_changes.outputs.src == 'true')
+        if: needs.check-changes.outputs.lambda-changed == 'true' && needs.check-changes.outputs.contracts-changed != 'true' && needs.check-changes.outputs.utils-changed != 'true'
         run: yarn test --filter=lambda
 
-      # Run Slither if Solidity changes are detected
-      # - name: Run Slither
-      #   uses: crytic/slither-action@v0.4.0
-      #   id: slither
-      #   if: steps.contract_changes.outputs.src == 'true'
-      #   with:
-      #     ignore-compile: true
-      #     target: "packages/contracts/"
-      #     solc-version: "0.8.20"
-      #     fail-on: none
-      #     slither-args: --filter-paths "openzeppelin" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+  run-contract-tests:
+    name: Contract Testing
+    runs-on: ubuntu-latest
+    needs: check-changes
+    if: needs.check-changes.outputs.contracts-changed == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [shard1, shard2, shard3]
 
-      # - name: Create/update checklist as PR comment
-      #   uses: actions/github-script@v7
-      #   if: github.event_name == 'pull_request' && steps.contract_changes.outputs.src == 'true'
-      #   env:
-      #     REPORT: ${{ steps.slither.outputs.stdout }}
-      #   with:
-      #     script: |
-      #       const script = require('.github/scripts/comment')
-      #       const header = '# Slither report'
-      #       const body = process.env.REPORT
-      #       await script({ github, context, header, body })
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node v20
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Cache Solidity compilers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/hardhat-nodejs
+          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-solc-
+
+      - name: Run Contract Tests for ${{ matrix.shard }}
+        run: SHARD='@${{ matrix.shard }}' yarn contracts:test:shard
