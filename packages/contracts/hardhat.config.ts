@@ -40,9 +40,9 @@ module.exports = {
       // viaIR: true, // Enable IR-based compilation
     },
   },
-  // gasReporter: {
-  //   enabled: true,
-  // },
+  gasReporter: {
+    enabled: true,
+  },
   contractSizer: {
     alphaSort: true,
     disambiguatePaths: false,
