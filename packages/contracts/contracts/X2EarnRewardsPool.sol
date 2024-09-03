@@ -122,7 +122,7 @@ contract X2EarnRewardsPool is
       "trees_planted"
     ];
 
-    for (uint256 i = 0; i < initialImpactKeys.length; i++) {
+    for (uint256 i; i < initialImpactKeys.length; i++) {
       _addImpactKey(initialImpactKeys[i], $);
     }
   }
@@ -288,7 +288,7 @@ contract X2EarnRewardsPool is
     if (hasProof) {
       json = abi.encodePacked(json, ',"proof": {');
 
-      for (uint256 i = 0; i < proof.types.length; i++) {
+      for (uint256 i; i < proof.types.length; i++) {
         require(_isValidProofType(proof.types[i]), "X2EarnRewardsPool: Invalid proof type");
 
         json = abi.encodePacked(json, '"', proof.types[i], '": "', proof.values[i], '"');
@@ -328,7 +328,7 @@ contract X2EarnRewardsPool is
 
     bytes memory json = abi.encodePacked("{");
 
-    for (uint256 i = 0; i < impact.values.length; i++) {
+    for (uint256 i; i < impact.values.length; i++) {
       if (_isAllowedImpactKey(impact.codes[i])) {
         json = abi.encodePacked(json, '"', impact.codes[i], '":', Strings.toString(impact.values[i]));
         if (i < impact.values.length - 1) {
