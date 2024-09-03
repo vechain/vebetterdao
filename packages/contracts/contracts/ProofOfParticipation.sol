@@ -32,13 +32,21 @@ import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
+import { IPassportModule } from "./interfaces/IPassportModule.sol";
+import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 
-contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
+contract ProofOfParticipation is
+  UUPSUpgradeable,
+  AccessControlUpgradeable,
+  ReentrancyGuardUpgradeable,
+  IPassportModule
+{
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
   bytes32 public constant ACTION_REGISTRAR_ROLE = keccak256("ACTION_REGISTRAR_ROLE");
   bytes32 public constant ACTION_SCORE_MANAGER_ROLE = keccak256("ACTION_SCORE_MANAGER_ROLE");
 
+  //TODO: instead of difficulty it should be something that indicates how hard it is for the user to trick the dapp
   /// @notice Action difficulty indicates how hard it is for the user to perform the sustainable action
   /// @dev Action difficulty is used to calculate the overall score of a sustainable action from the app's `baseActionScore`
   enum ACTION_DIFFICULTY {
@@ -47,9 +55,10 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     HARD
   }
 
-  /// @custom:storage-location erc7201:b3tr.storage.ProofOfPersonhood
-  struct ProofOfPersonhoodStorage {
+  /// @custom:storage-location erc7201:b3tr.storage.ProofOfParticipation
+  struct ProofOfParticipationStorage {
     IX2EarnApps x2EarnApps;
+    IXAllocationVotingGovernor xAllocationVoting;
     mapping(bytes32 appId => uint256 baseScore) baseActionScore; // Base score for an app's sustainable action
     mapping(ACTION_DIFFICULTY difficulty => uint256 multiplier) actionDifficultyMultiplier; // Multiplier of the base action score based on the action difficulty
     mapping(address user => uint256 totalScore) userTotalScore; // all-time total score of a user
@@ -64,13 +73,13 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     uint256 roundsForCumulativeScore; // number of rounds to consider for the cumulative score
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.ProofOfPersonhood")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant ProofOfPersonhoodStorageLocation =
-    0x562263107a1e976e9702432b2a9ec9bf8e9dd832561ba7545f0d5824f7628f00;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.ProofOfParticipation")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant ProofOfParticipationStorageLocation =
+    0xc9931bd7ecbba177fc71b0ded00eb01d4035361d4a0ee711add00987aca69000;
 
-  function _getProofOfPersonhoodStorage() private pure returns (ProofOfPersonhoodStorage storage $) {
+  function _getProofOfParticipationStorage() private pure returns (ProofOfParticipationStorage storage $) {
     assembly {
-      $.slot := ProofOfPersonhoodStorageLocation
+      $.slot := ProofOfParticipationStorageLocation
     }
   }
 
@@ -78,7 +87,7 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
   /// @param role - the role to check
   modifier onlyRoleOrAdmin(bytes32 role) {
     if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
-      revert ProofOfPersonhoodUnauthorizedUser(msg.sender);
+      revert ProofOfParticipationUnauthorizedUser(msg.sender);
     }
     _;
   }
@@ -91,65 +100,63 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
   event RegisteredAction(address indexed user, bytes32 indexed appId, uint256 indexed round, uint256 actionScore);
 
   /// @notice Emitted when a user is not authorized to perform an action
-  error ProofOfPersonhoodUnauthorizedUser(address user);
+  error ProofOfParticipationUnauthorizedUser(address user);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
   }
 
+  struct InitializationData {
+    address admin;
+    address contractsManagerAdmin;
+    address upgrader;
+    address actionRegistrar;
+    address actionScoreManager;
+    uint256 roundThreshold;
+    uint256 threshold;
+    bool isTotalScoreConsidered;
+    IX2EarnApps x2EarnApps;
+    IXAllocationVotingGovernor xAllocationVoting;
+    uint256 roundsForCumulativeScore;
+  }
+
   /// @notice Initializes the contract
-  /// @param _admin - the admin of the contract
-  /// @param _contractsManagerAdmin - the admin of the contracts manager
-  /// @param _upgrader - the upgrader of the contract
-  /// @param _actionRegistrar - the registrar of the actions
-  /// @param _actionScoreManager - the action score manager
-  /// @param _roundThreshold - the threshold for a user to be considered a person in a round
-  /// @param _threshold - the threshold for a user to be considered a person in total
-  /// @param _isTotalScoreConsidered - flag to indicate if the total score is considered for a user to be a person
-  /// @param _x2EarnApps - the x2EarnApps contract address
-  function initialize(
-    address _admin,
-    address _contractsManagerAdmin,
-    address _upgrader,
-    address _actionRegistrar,
-    address _actionScoreManager,
-    uint256 _roundThreshold,
-    uint256 _threshold,
-    bool _isTotalScoreConsidered,
-    IX2EarnApps _x2EarnApps,
-    uint256 _roundsForCumulativeScore
-  ) external initializer {
-    require(_admin != address(0), "ProofOfPersonhood: admin is the zero address");
-    require(_contractsManagerAdmin != address(0), "ProofOfPersonhood: contracts manager admin is the zero address");
-    require(_upgrader != address(0), "ProofOfPersonhood: upgrader is the zero address");
-    require(address(_x2EarnApps) != address(0), "ProofOfPersonhood: x2EarnApps is the zero address");
-    require(_roundThreshold > 0, "ProofOfPersonhood: round threshold is zero");
-    require(_threshold > 0, "ProofOfPersonhood: threshold is zero");
+  function initialize(InitializationData memory data) external initializer {
+    require(data.admin != address(0), "ProofOfParticipation: admin is the zero address");
+    require(
+      data.contractsManagerAdmin != address(0),
+      "ProofOfParticipation: contracts manager admin is the zero address"
+    );
+    require(data.upgrader != address(0), "ProofOfParticipation: upgrader is the zero address");
+    require(address(data.x2EarnApps) != address(0), "ProofOfParticipation: x2EarnApps is the zero address");
+    require(data.roundThreshold > 0, "ProofOfParticipation: round threshold is zero");
+    require(data.threshold > 0, "ProofOfParticipation: threshold is zero");
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
     __ReentrancyGuard_init();
 
-    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
-    _grantRole(UPGRADER_ROLE, _upgrader);
-    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, _contractsManagerAdmin);
+    _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
+    _grantRole(UPGRADER_ROLE, data.upgrader);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsManagerAdmin);
 
-    ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
+    ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
-    $.x2EarnApps = _x2EarnApps;
-    $.roundThreshold = _roundThreshold;
-    $.totalThreshold = _threshold;
-    $.isTotalScoreConsidered = _isTotalScoreConsidered;
+    $.x2EarnApps = data.x2EarnApps;
+    $.xAllocationVoting = data.xAllocationVoting;
+    $.roundThreshold = data.roundThreshold;
+    $.totalThreshold = data.threshold;
+    $.isTotalScoreConsidered = data.isTotalScoreConsidered;
 
-    _grantRole(ACTION_REGISTRAR_ROLE, _actionRegistrar);
-    _grantRole(ACTION_SCORE_MANAGER_ROLE, _actionScoreManager);
+    _grantRole(ACTION_REGISTRAR_ROLE, data.actionRegistrar);
+    _grantRole(ACTION_SCORE_MANAGER_ROLE, data.actionScoreManager);
 
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.EASY] = 1; // Default multiplier for easy actions
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.MEDIUM] = 2; // Default multiplier for medium actions
     $.actionDifficultyMultiplier[ACTION_DIFFICULTY.HARD] = 3; // Default multiplier for hard actions
 
-    $.roundsForCumulativeScore = _roundsForCumulativeScore; // Default number of rounds to consider for the cumulative score
+    $.roundsForCumulativeScore = data.roundsForCumulativeScore; // Default number of rounds to consider for the cumulative score
   }
 
   // ---------- Authorizers ---------- //
@@ -171,11 +178,11 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     uint256 round,
     ACTION_DIFFICULTY actionDifficulty
   ) public virtual onlyRole(ACTION_REGISTRAR_ROLE) {
-    require(user != address(0), "ProofOfPersonhood: user is the zero address");
+    require(user != address(0), "ProofOfParticipation: user is the zero address");
 
-    ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
+    ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
-    require($.x2EarnApps.appExists(appId), "ProofOfPersonhood: app does not exist");
+    require($.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
 
     // If the base action score is not set, set it to 1. This is for setting the default base action score to an app that has received an action for the first time
     if ($.baseActionScore[appId] == 0) $.baseActionScore[appId] = 1;
@@ -207,11 +214,11 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     bytes32 appId,
     uint256 baseActionScore
   ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
-    require(baseActionScore > 0, "ProofOfPersonhood: baseActionScore is zero");
+    require(baseActionScore > 0, "ProofOfParticipation: baseActionScore is zero");
 
-    ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
+    ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
-    require($.x2EarnApps.appExists(appId), "ProofOfPersonhood: app does not exist");
+    require($.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
 
     $.baseActionScore[appId] = baseActionScore;
   }
@@ -222,18 +229,18 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
   /// @param user - the user address
   /// @param isWhitelisted - the whitelisted status
   function setWhitelistedUser(address user, bool isWhitelisted) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    require(user != address(0), "ProofOfPersonhood: user is the zero address");
+    require(user != address(0), "ProofOfParticipation: user is the zero address");
 
-    _getProofOfPersonhoodStorage().whitelist[user] = isWhitelisted;
+    _getProofOfParticipationStorage().whitelist[user] = isWhitelisted;
   }
 
   /// @notice Sets the X2EarnApps contract address
   /// @dev The X2EarnApps contract address can be modified by the CONTRACTS_ADDRESS_MANAGER_ROLE
   /// @param _x2EarnApps - the X2EarnApps contract address
   function setX2EarnApps(IX2EarnApps _x2EarnApps) public virtual onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
-    require(address(_x2EarnApps) != address(0), "ProofOfPersonhood: x2EarnApps is the zero address");
+    require(address(_x2EarnApps) != address(0), "ProofOfParticipation: x2EarnApps is the zero address");
 
-    _getProofOfPersonhoodStorage().x2EarnApps = _x2EarnApps;
+    _getProofOfParticipationStorage().x2EarnApps = _x2EarnApps;
   }
 
   /// @notice Sets if the total score is considered for a user to be a person
@@ -241,7 +248,7 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
   /// @dev If the total score is considered, the user is considered a person if the user's total score is greater than or equal to the total threshold
   /// @param _isTotalScoreConsidered - the total score considered flag
   function setIsTotalScoreConsidered(bool _isTotalScoreConsidered) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    _getProofOfPersonhoodStorage().isTotalScoreConsidered = _isTotalScoreConsidered;
+    _getProofOfParticipationStorage().isTotalScoreConsidered = _isTotalScoreConsidered;
   }
 
   /// @notice Sets the difficulty multiplier for an action difficulty
@@ -251,9 +258,9 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     ACTION_DIFFICULTY difficulty,
     uint256 multiplier
   ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
-    require(multiplier > 0, "ProofOfPersonhood: multiplier is zero");
+    require(multiplier > 0, "ProofOfParticipation: multiplier is zero");
 
-    _getProofOfPersonhoodStorage().actionDifficultyMultiplier[difficulty] = multiplier;
+    _getProofOfParticipationStorage().actionDifficultyMultiplier[difficulty] = multiplier;
   }
 
   // ---------- Getters ---------- //
@@ -279,11 +286,16 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     return (false, "User is not a person");
   }
 
+  function getScore(address _user) external view override returns (uint256) {
+    ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
+    return getQuadraticCumulativeScore(_user, $.xAllocationVoting.currentRoundId());
+  }
+
   /// @notice Gets the quadratic cumulative score of a user for a number of last rounds
   /// @param user - the user address
-  /// @param currentRound - the round
-  function getQuadraticCumulativeScore(address user, uint256 currentRound) public view virtual returns (uint256) {
-    ProofOfPersonhoodStorage storage $ = _getProofOfPersonhoodStorage();
+  /// @param lastRound - the round to consider as a starting point for the cumulative score
+  function getQuadraticCumulativeScore(address user, uint256 lastRound) public view virtual returns (uint256) {
+    ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
     // Cumulative score of the user
     uint256 cumulativeScore = 0;
@@ -292,7 +304,7 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
     uint256 factor = 0;
 
     // Calculate the cumulative quadratic score for the number of rounds to consider for the cumulative score
-    for (uint256 round = currentRound; round >= 1 && round > currentRound - $.roundsForCumulativeScore; round--) {
+    for (uint256 round = lastRound; round >= 1 && round > lastRound - $.roundsForCumulativeScore; round--) {
       uint256 score = $.userRoundScore[user][round];
 
       // NOTE: the ** operator does not support fractional exponents so we use the Math.sqrt function in a loop to calculate the square root
@@ -310,36 +322,36 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
   /// @notice Checks if a user is whitelisted
   /// @param user - the user address
   function isWhiteListed(address user) public view virtual returns (bool) {
-    return _getProofOfPersonhoodStorage().whitelist[user];
+    return _getProofOfParticipationStorage().whitelist[user];
   }
 
   /// @notice Checks if the total score is considered for a user to be a person
   /// @return isTotalScoreConsidered - the total score considered flag
   function isTotalScoreConsidered() public view virtual returns (bool) {
-    return _getProofOfPersonhoodStorage().isTotalScoreConsidered;
+    return _getProofOfParticipationStorage().isTotalScoreConsidered;
   }
 
   /// @notice Gets the round score of a user
   /// @param user - the user address
   /// @param round - the round
   function getUserRoundScore(address user, uint256 round) public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().userRoundScore[user][round];
+    return _getProofOfParticipationStorage().userRoundScore[user][round];
   }
 
   /// @notice Gets the total score of a user
   /// @param user - the user address
   function getUserTotalScore(address user) public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().userTotalScore[user];
+    return _getProofOfParticipationStorage().userTotalScore[user];
   }
 
   /// @notice Gets the round threshold for a user to be considered a person
   function getRoundThreshold() public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().roundThreshold;
+    return _getProofOfParticipationStorage().roundThreshold;
   }
 
   /// @notice Gets the total threshold for a user to be considered a person
   function getTotalThreshold() public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().totalThreshold;
+    return _getProofOfParticipationStorage().totalThreshold;
   }
 
   /// @notice Gets the score of a user for an app in a round
@@ -347,19 +359,19 @@ contract ProofOfPersonhood is UUPSUpgradeable, AccessControlUpgradeable, Reentra
   /// @param round - the round
   /// @param appId - the app id
   function getUserRoundScoreApp(address user, uint256 round, bytes32 appId) public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().userAppRoundScore[user][round][appId];
+    return _getProofOfParticipationStorage().userAppRoundScore[user][round][appId];
   }
 
   /// @notice Gets the total score of a user for an app
   /// @param user - the user address
   /// @param appId - the app id
   function getUserTotalScoreApp(address user, bytes32 appId) public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().userAppTotalScore[user][appId];
+    return _getProofOfParticipationStorage().userAppTotalScore[user][appId];
   }
 
   /// @notice Gets the difficulty multiplier for an action difficulty
   /// @param difficulty - the action difficulty between EASY, MEDIUM, HARD
   function getDifficultyMultiplier(ACTION_DIFFICULTY difficulty) public view virtual returns (uint256) {
-    return _getProofOfPersonhoodStorage().actionDifficultyMultiplier[difficulty];
+    return _getProofOfParticipationStorage().actionDifficultyMultiplier[difficulty];
   }
 }
