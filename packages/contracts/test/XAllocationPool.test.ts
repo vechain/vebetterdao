@@ -1882,7 +1882,7 @@ describe("X-Allocation Pool - @shard3", async function () {
           .castVote(round1, [app2Id, app3Id], [ethers.parseEther("100"), ethers.parseEther("100")])
         await xAllocationVoting
           .connect(otherAccounts[5])
-          .castVote(round1, [app1Id, app2Id, app3Id], [ethers.parseEther("1000"), ethers.parseEther("100")])
+          .castVote(round1, [app2Id, app3Id], [ethers.parseEther("1000"), ethers.parseEther("100")])
 
         await waitForRoundToEnd(round1)
 
