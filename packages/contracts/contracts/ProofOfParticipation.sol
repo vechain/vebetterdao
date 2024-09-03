@@ -34,19 +34,20 @@ import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Rec
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 import { IPassportModule } from "./interfaces/IPassportModule.sol";
 import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { IProofOfParticipation } from "./interfaces/IProofOfParticipation.sol";
 
 contract ProofOfParticipation is
   UUPSUpgradeable,
   AccessControlUpgradeable,
   ReentrancyGuardUpgradeable,
-  IPassportModule
+  IPassportModule,
+  IProofOfParticipation
 {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
   bytes32 public constant ACTION_REGISTRAR_ROLE = keccak256("ACTION_REGISTRAR_ROLE");
   bytes32 public constant ACTION_SCORE_MANAGER_ROLE = keccak256("ACTION_SCORE_MANAGER_ROLE");
 
-  //TODO: instead of difficulty it should be something that indicates how hard it is for the user to trick the dapp
   /// @notice Action difficulty indicates how hard it is for the user to perform the sustainable action
   /// @dev Action difficulty is used to calculate the overall score of a sustainable action from the app's `baseActionScore`
   enum ACTION_DIFFICULTY {
@@ -55,18 +56,35 @@ contract ProofOfParticipation is
     HARD
   }
 
+  /// @notice Security level indicates how secure the app is
+  /// @dev App security is used to calculate the overall score of a sustainable action
+  enum APP_SECURITY {
+    LOW,
+    MEDIUM,
+    HIGH
+  }
+
   /// @custom:storage-location erc7201:b3tr.storage.ProofOfParticipation
   struct ProofOfParticipationStorage {
+    // External contracts
     IX2EarnApps x2EarnApps;
     IXAllocationVotingGovernor xAllocationVoting;
-    mapping(bytes32 appId => uint256 baseScore) baseActionScore; // Base score for an app's sustainable action
+    // Base score for an app's sustainable action
+    mapping(bytes32 appId => uint256 baseScore) baseActionScore;
+    // Multipliers
     mapping(ACTION_DIFFICULTY difficulty => uint256 multiplier) actionDifficultyMultiplier; // Multiplier of the base action score based on the action difficulty
+    mapping(bytes32 appId => ACTION_DIFFICULTY difficulty) appActionDifficulty; // Action difficulty of an app
+    mapping(APP_SECURITY security => uint256 multiplier) appSecurityMultiplier; // Multiplier of the base action score based on the app security
+    mapping(bytes32 appId => APP_SECURITY security) appSecurity; // Security level of an app
+    // User scores
     mapping(address user => uint256 totalScore) userTotalScore; // all-time total score of a user
     mapping(address user => mapping(bytes32 appId => uint256 totalScore)) userAppTotalScore; // all-time total score of a user for a specific app
     mapping(address user => mapping(uint256 round => uint256 score)) userRoundScore; // score of a user in a specific round
     mapping(address user => mapping(uint256 round => mapping(bytes32 appId => uint256 score))) userAppRoundScore; // score of a user for a specific app in a specific round
+    // Whitelist and blacklist
     mapping(address user => bool) whitelist; // whitelist of users that are valid without any checks
     mapping(address user => bool) blacklist; // blacklist of users that are invalid without any checks
+    // Thresholds
     uint256 roundThreshold; // threshold for a user to be considered a person in a round
     uint256 totalThreshold; // threshold for a user to be considered a person in total
     bool isTotalScoreConsidered; // flag to indicate if the total score is considered for a user to be a person
@@ -82,25 +100,6 @@ contract ProofOfParticipation is
       $.slot := ProofOfParticipationStorageLocation
     }
   }
-
-  /// @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
-  /// @param role - the role to check
-  modifier onlyRoleOrAdmin(bytes32 role) {
-    if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
-      revert ProofOfParticipationUnauthorizedUser(msg.sender);
-    }
-    _;
-  }
-
-  /// @notice Emitted when a user registers an action
-  /// @param user - the user that registered the action
-  /// @param appId - the app id of the action
-  /// @param round - the round of the action
-  /// @param actionScore - the score of the action
-  event RegisteredAction(address indexed user, bytes32 indexed appId, uint256 indexed round, uint256 actionScore);
-
-  /// @notice Emitted when a user is not authorized to perform an action
-  error ProofOfParticipationUnauthorizedUser(address user);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -159,6 +158,17 @@ contract ProofOfParticipation is
     $.roundsForCumulativeScore = data.roundsForCumulativeScore; // Default number of rounds to consider for the cumulative score
   }
 
+  // ---------- Modifiers ---------- //
+
+  /// @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
+  /// @param role - the role to check
+  modifier onlyRoleOrAdmin(bytes32 role) {
+    if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+      revert ProofOfParticipationUnauthorizedUser(msg.sender);
+    }
+    _;
+  }
+
   // ---------- Authorizers ---------- //
 
   /// @notice Authorizes the upgrade of the contract
@@ -171,24 +181,27 @@ contract ProofOfParticipation is
   /// @param user - the user that performed the action
   /// @param appId - the app id of the action
   /// @param round - the round of the action
-  /// @param actionDifficulty - the difficulty of the action between EASY, MEDIUM, HARD
-  function registerAction(
-    address user,
-    bytes32 appId,
-    uint256 round,
-    ACTION_DIFFICULTY actionDifficulty
-  ) public virtual onlyRole(ACTION_REGISTRAR_ROLE) {
+  function registerAction(address user, bytes32 appId, uint256 round) public virtual onlyRole(ACTION_REGISTRAR_ROLE) {
     require(user != address(0), "ProofOfParticipation: user is the zero address");
 
     ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
     require($.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
+    require($.xAllocationVoting.currentRoundId() >= round && round > 0, "ProofOfParticipation: wrong round");
+    require(!$.blacklist[user], "ProofOfParticipation: user is blacklisted");
 
     // If the base action score is not set, set it to 1. This is for setting the default base action score to an app that has received an action for the first time
     if ($.baseActionScore[appId] == 0) $.baseActionScore[appId] = 1;
+    // If the action difficulty is not set, set it to EASY. This is for setting the default action difficulty to an app that has received an action for the first time
+    if ($.appActionDifficulty[appId] == ACTION_DIFFICULTY.EASY)
+      $.actionDifficultyMultiplier[ACTION_DIFFICULTY.EASY] = 1;
+    // If the app security is not set, set it to LOW. This is for setting the default app security to an app that has received an action for the first time
+    if ($.appSecurity[appId] == APP_SECURITY.LOW) $.appSecurityMultiplier[APP_SECURITY.LOW] = 1;
 
-    // Calculate the action score by multiplying the base action score with the action difficulty multiplier
-    uint256 actionScore = $.baseActionScore[appId] * $.actionDifficultyMultiplier[actionDifficulty];
+    // Calculate the action score by multiplying the base action score with the action difficulty multiplier and the app security multiplier
+    uint256 actionScore = $.baseActionScore[appId] *
+      $.actionDifficultyMultiplier[$.appActionDifficulty[appId]] *
+      $.appSecurityMultiplier[$.appSecurity[appId]];
 
     // Update the user's score for the round
     $.userRoundScore[user][round] += actionScore;
@@ -262,6 +275,12 @@ contract ProofOfParticipation is
 
     _getProofOfParticipationStorage().actionDifficultyMultiplier[difficulty] = multiplier;
   }
+
+  // TODO: set security multiplier
+
+  // TODO: update app difficulty and app security
+
+  // TODO: blacklist user
 
   // ---------- Getters ---------- //
 
