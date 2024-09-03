@@ -1,32 +1,26 @@
-import { ProposalVoteEvent } from "@/api"
-import { Card, CardBody, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Card, CardBody, Heading, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
-import { ProposalVoteComment } from "./components/ProposalVoteComment"
-import InfiniteScroll from "react-infinite-scroll-component"
-import { useCallback, useMemo, useState } from "react"
-import { useProposalDetail } from "../../hooks"
 
+//TODO: Re-enable everything once we have indexer
 export const ProposalVoteCommentList = () => {
-  const { proposal } = useProposalDetail()
+  //   const [visibleComments, setVisibleComments] = useState<ProposalVoteEvent[]>([])
 
-  const [visibleComments, setVisibleComments] = useState<ProposalVoteEvent[]>([])
+  //   const sortedComments = useMemo(
+  //     () =>
+  //       proposal.votesWithComment?.sort((a, b) => {
+  //         return b.blockMeta.blockNumber - a.blockMeta.blockNumber
+  //       }) ?? [],
+  //     [proposal.votesWithComment],
+  //   )
 
-  const sortedComments = useMemo(
-    () =>
-      proposal.votesWithComment?.sort((a, b) => {
-        return b.blockMeta.blockNumber - a.blockMeta.blockNumber
-      }) ?? [],
-    [proposal.votesWithComment],
-  )
+  //   const loadData = useCallback(() => {
+  //     setVisibleComments(prev => [
+  //       ...prev,
+  //       ...(sortedComments.slice(visibleComments.length, visibleComments.length + 10) ?? []),
+  //     ])
+  //   }, [sortedComments, visibleComments.length])
 
-  const loadData = useCallback(() => {
-    setVisibleComments(prev => [
-      ...prev,
-      ...(sortedComments.slice(visibleComments.length, visibleComments.length + 10) ?? []),
-    ])
-  }, [sortedComments, visibleComments.length])
-
-  if (!sortedComments.length) return null
+  //   if (!sortedComments.length) return null
   return (
     <Card variant="baseWithBorder">
       <CardBody>
@@ -35,7 +29,7 @@ export const ProposalVoteCommentList = () => {
             {t("Proposal Comments")}
           </Heading>
           <Text color="#7E7E7E">{t("Users who have made a comment along with their vote")}</Text>
-          <InfiniteScroll
+          {/* <InfiniteScroll
             dataLength={visibleComments.length}
             next={loadData}
             hasMore={visibleComments.length < sortedComments.length}
@@ -48,7 +42,7 @@ export const ProposalVoteCommentList = () => {
             <VStack alignItems="stretch">
               {visibleComments?.map(vote => <ProposalVoteComment key={vote.account} vote={vote} />)}
             </VStack>
-          </InfiniteScroll>
+          </InfiniteScroll> */}
         </VStack>
       </CardBody>
     </Card>

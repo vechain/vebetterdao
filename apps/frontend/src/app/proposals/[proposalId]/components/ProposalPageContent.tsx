@@ -5,7 +5,6 @@ import { ProposalState, useProposalCreatedEvent, useProposalTotalVotes, useVot3P
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
 import { CancelProposalSection } from "./CancelProposalSection/CancelProposalSection"
-import { ProposalVoteCommentList } from "./ProposalVoteCommentList"
 import { ProposalCanceledAlert } from "./ProposalCanceledAlert"
 import { useProposalDetail } from "../hooks"
 import { ProposalSessionSection } from "@/components/ProposalSessionSection"
@@ -50,7 +49,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
           <VStack align="stretch" gap={8}>
             <ProposalCommunitySupport />
             <ProposalContentAndActions proposal={proposalCreatedEvent} />
-            <ProposalVoteCommentList />
+            {/* <ProposalVoteCommentList /> */}
           </VStack>
         </GridItem>
         <GridItem colSpan={[3, 3, 1]}>
