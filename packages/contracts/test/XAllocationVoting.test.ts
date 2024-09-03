@@ -699,7 +699,7 @@ describe("X-Allocation Voting - @shard3", function () {
       await expect(
         xAllocationVoting
           .connect(voter1)
-          .castVote(roundId2, [app1, app2], [ethers.parseEther("0"), ethers.parseEther("1000")]),
+          .castVote(roundId2, [app1, app2], [ethers.parseEther("0"), ethers.parseEther("0.5")]),
       ).to.be.reverted
       await xAllocationVoting.connect(voter1).castVote(roundId2, [app2], [ethers.parseEther("1000")])
       await xAllocationVoting
@@ -990,7 +990,7 @@ describe("X-Allocation Voting - @shard3", function () {
         expect(updatedThreshold).to.not.eql(newThreshold)
       })
 
-      it("should revert if votes cast for an XAPP are less than teh voting threshold", async function () {
+      it("should revert if total votes cast are less than the voting threshold", async function () {
         const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -1027,7 +1027,7 @@ describe("X-Allocation Voting - @shard3", function () {
             .castVote(
               round1,
               [app1Id, app2Id, app3Id],
-              [ethers.parseEther("0.5"), ethers.parseEther("900"), ethers.parseEther("100")],
+              [ethers.parseEther("0.5"), ethers.parseEther("0.1"), ethers.parseEther("0.01")],
             ),
         ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorVotingThresholdNotMet")
 
@@ -1040,8 +1040,74 @@ describe("X-Allocation Voting - @shard3", function () {
         await expect(
           xAllocationVoting
             .connect(otherAccounts[2])
-            .castVote(round1, [app2Id, app3Id], [ethers.parseEther("1"), ethers.parseEther("1")]),
+            .castVote(round1, [app2Id, app3Id], [ethers.parseEther("0.5"), ethers.parseEther("0.5")]),
         ).to.not.be.reverted
+      })
+
+      it("If the vote weight for an XApp is less than 1, the exact vote weight should be applied to increase the XApp's total votes, rather than using the square root of the vote weight", async function () {
+        const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+        // Bootstrap emissions
+        await bootstrapEmissions()
+
+        otherAccounts.forEach(async account => {
+          await getVot3Tokens(account, "10000")
+        })
+
+        //Add apps
+
+        const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+        const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+        const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+        await x2EarnApps
+          .connect(owner)
+          .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+        await x2EarnApps
+          .connect(owner)
+          .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+        await x2EarnApps
+          .connect(owner)
+          .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+
+        //Start allocation round
+        const round1 = await startNewAllocationRound()
+        // Vote
+        await xAllocationVoting
+          .connect(otherAccounts[1])
+          .castVote(
+            round1,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0.5"), ethers.parseEther("0.5"), ethers.parseEther("0.5")],
+          )
+
+        await xAllocationVoting
+          .connect(otherAccounts[2])
+          .castVote(
+            round1,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0.4"), ethers.parseEther("0.1"), ethers.parseEther("0.5")],
+          )
+
+        await xAllocationVoting
+          .connect(otherAccounts[3])
+          .castVote(
+            round1,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0.1"), ethers.parseEther("0.4"), ethers.parseEther("1")],
+          )
+
+        // Votes should be tracked correctly
+        let appVotes = await xAllocationVoting.getAppVotes(round1, app1Id)
+        expect(appVotes).to.eql(ethers.parseEther("1"))
+
+        appVotes = await xAllocationVoting.getAppVotes(round1, app2Id)
+        expect(appVotes).to.eql(ethers.parseEther("1"))
+
+        appVotes = await xAllocationVoting.getAppVotes(round1, app3Id)
+        expect(appVotes).to.eql(ethers.parseEther("2"))
       })
     })
 
