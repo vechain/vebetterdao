@@ -28,7 +28,7 @@ import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import { B3TRGovernor, XAllocationVoting, XAllocationVotingV1 } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
-describe("X-Allocation Voting", function () {
+describe("X-Allocation Voting - @shard3", function () {
   describe("Deployment", function () {
     it("Admins and addresses should be set correctly", async function () {
       const { xAllocationVoting, owner, timeLock, emissions, x2EarnApps } = await getOrDeployContractInstances({

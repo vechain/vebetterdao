@@ -18,7 +18,7 @@ import { generateB3trAllocations } from "./helpers/generateB3trAllocations"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy } from "../scripts/helpers"
 
-describe("Emissions", () => {
+describe("Emissions - @shard1", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const config = createLocalConfig()
