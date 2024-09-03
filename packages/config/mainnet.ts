@@ -18,6 +18,16 @@ const config: AppConfig = {
   treasuryContractAddress: "0xD5903BCc66e439c753e525F8AF2FeC7be2429593",
   x2EarnAppsContractAddress: "0x8392B7CCc763dB03b47afcD8E8f5e24F9cf0554D",
   x2EarnRewardsPoolContractAddress: "0x6Bee7DDab6c99d5B2Af0554EaEA484CE18F52631",
+  b3trGovernorLibraries: {
+    governorClockLogicAddress: "0xaAD03b8561aDD749c7f8B9F819e40A6D4D5E6dD0",
+    governorConfiguratorAddress: "0xAdB833cc800c8EB3421469C79e6672c14597A8D6",
+    governorDepositLogicAddress: "0x9e278AC6E55E0c8e1C8F74808d219BC42C3e685C",
+    governorFunctionRestrictionsLogicAddress: "0x869acC8f146d094Ff93e707F4F880F60f8bbCe49",
+    governorProposalLogicAddressAddress: "0xFd8dF678BB62c36D33ffcEA95942fD32239384e2",
+    governorQuorumLogicAddress: "0x8360cE947Ff76433e57e8D33A0b64f2521A553c4",
+    governorStateLogicAddress: "0xB5083e959F9636d3B0244e4fb0Daad9c1738Eb8E",
+    governorVotesLogicAddress: "0x9A3adc3d37a5B4E7f4271D6F9D3AD03F761EC0b8",
+  },
   nodeUrl: "https://mainnet.vechain.org",
   network: {
     id: "main",

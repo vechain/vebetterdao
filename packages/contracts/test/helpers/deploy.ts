@@ -25,9 +25,11 @@ import {
   X2EarnRewardsPool,
   MyERC721,
   MyERC1155,
+  VoterRewardsV1,
+  B3TRGovernorV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { deployProxy } from "../../scripts/helpers"
+import { deployProxy, upgradeProxy } from "../../scripts/helpers"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deploy"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 
@@ -37,12 +39,14 @@ interface DeployInstance {
   vot3: VOT3
   timeLock: TimeLock
   governor: B3TRGovernor
+  governorV1: B3TRGovernorV1
   galaxyMember: GalaxyMember
   x2EarnApps: X2EarnApps
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
   emissions: Emissions
   voterRewards: VoterRewards
+  voterRewardsV1: VoterRewardsV1
   treasury: Treasury
   x2EarnRewardsPool: X2EarnRewardsPool
   owner: HardhatEthersSigner
@@ -260,7 +264,7 @@ export const getOrDeployContractInstances = async ({
     },
   ])) as Emissions
 
-  const voterRewards = (await deployProxy("VoterRewards", [
+  const voterRewardsV1 = (await deployProxy("VoterRewardsV1", [
     owner.address, // admin
     owner.address, // upgrader
     owner.address, // contractsAddressManager
@@ -269,7 +273,11 @@ export const getOrDeployContractInstances = async ({
     await b3tr.getAddress(),
     levels,
     multipliers,
-  ])) as VoterRewards
+  ])) as VoterRewardsV1
+
+  const voterRewards = (await upgradeProxy("VoterRewardsV1", "VoterRewards", await voterRewardsV1.getAddress(), [], {
+    version: 2,
+  })) as VoterRewards
 
   // Set vote 2 earn (VoterRewards deployed contract) address in emissions
   await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
@@ -294,8 +302,8 @@ export const getOrDeployContractInstances = async ({
   ])) as XAllocationVoting
 
   // Deploy Governor
-  const governor = (await deployProxy(
-    "B3TRGovernor",
+  const governorV1 = (await deployProxy(
+    "B3TRGovernorV1",
     [
       {
         vot3Token: await vot3.getAddress(),
@@ -327,7 +335,21 @@ export const getOrDeployContractInstances = async ({
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
       GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
     },
-  )) as B3TRGovernor
+  )) as B3TRGovernorV1
+
+  const governor = (await upgradeProxy("B3TRGovernorV1", "B3TRGovernor", await governorV1.getAddress(), [], {
+    version: 2,
+    libraries: {
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+      GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
+      GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
+      GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+      GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
+      GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
+      GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
+      GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+    },
+  })) as B3TRGovernor
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
@@ -421,12 +443,14 @@ export const getOrDeployContractInstances = async ({
     vot3,
     timeLock,
     governor,
+    governorV1,
     galaxyMember,
     x2EarnApps,
     xAllocationVoting,
     xAllocationPool,
     emissions,
     voterRewards,
+    voterRewardsV1,
     owner,
     otherAccount,
     minterAccount,

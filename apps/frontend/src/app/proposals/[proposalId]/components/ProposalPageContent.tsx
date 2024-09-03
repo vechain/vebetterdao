@@ -5,7 +5,6 @@ import { ProposalState, useProposalCreatedEvent, useProposalTotalVotes, useVot3P
 import { ProposalCommunitySupport } from "./ProposalCommunitySupport"
 import { ProposalWithdrawDeposit } from "./ProposalWithdrawDeposit"
 import { CancelProposalSection } from "./CancelProposalSection/CancelProposalSection"
-import { ProposalVoteCommentList } from "./ProposalVoteCommentList"
 import { ProposalCanceledAlert } from "./ProposalCanceledAlert"
 import { useProposalDetail } from "../hooks"
 import { ProposalSessionSection } from "@/components/ProposalSessionSection"
@@ -24,13 +23,20 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
   const totalVotesQuery = useProposalTotalVotes(proposalId)
 
-  const isEnded = proposal.state === ProposalState.DepositNotMet
+  const isEnded = [
+    ProposalState.Executed,
+    ProposalState.Succeeded,
+    ProposalState.Defeated,
+    ProposalState.Queued,
+    ProposalState.DepositNotMet,
+  ].includes(proposal.state as ProposalState)
 
-  const isCanceled = proposal.state === ProposalState.Canceled
-
+  const shouldNotRenderQuorum = useMemo(() => {
+    return [ProposalState.DepositNotMet, ProposalState.Canceled].includes(proposal.state as ProposalState)
+  }, [proposal.state])
   const isUpcoming = useMemo(() => {
-    return !isEnded && !proposal.quorumQuery.isLoading && !proposal.quorumQuery.data
-  }, [proposal, isEnded])
+    return proposal.state === ProposalState.Pending
+  }, [proposal])
 
   if (!proposalCreatedEvent) return null
 
@@ -43,7 +49,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
           <VStack align="stretch" gap={8}>
             <ProposalCommunitySupport />
             <ProposalContentAndActions proposal={proposalCreatedEvent} />
-            <ProposalVoteCommentList />
+            {/* <ProposalVoteCommentList /> */}
           </VStack>
         </GridItem>
         <GridItem colSpan={[3, 3, 1]}>
@@ -53,7 +59,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
               quorumQuery={proposal.quorumQuery}
               votesAtSnapshotQuery={votesAtSnapshotQuery}
               userVotesAtSnapshotQuery={proposal.snapshotVotesQuery}
-              renderQuroum={isCanceled ? "none" : isUpcoming ? "upcoming" : "active"}
+              renderQuroum={shouldNotRenderQuorum ? "none" : isUpcoming ? "upcoming" : "active"}
               isEnded={isEnded}
               currentVotesQuery={totalVotesQuery}
               renderTimeline={<ProposalTimeline />}

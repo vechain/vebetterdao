@@ -42,6 +42,11 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }
 
   const isEndedAndQuorumNotReached = isEnded && !isQuorumReached
 
+  const quorumQueryReady = !quorumQuery.isLoading && quorumQuery.status === "success" && quorumQuery.data !== undefined
+
+  const votesQueryReady =
+    !currentVotesQuery.isLoading && currentVotesQuery.status === "success" && currentVotesQuery.data !== undefined
+
   return (
     <VStack align="stretch">
       <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
@@ -50,13 +55,13 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }
       <HStack justify={"space-between"} align={"baseline"}>
         <HStack gap={2}>
           <Image h="20px" w="20px" src="/images/vot3-token.png" alt="vot3-token" />
-          <Skeleton isLoaded={!currentVotesQuery.isLoading}>
+          <Skeleton isLoaded={votesQueryReady && quorumQueryReady}>
             <Text fontSize="24px" fontWeight={700}>
               {compactFormatter.format(Number(currentVotesQuery.data ?? 0))}
             </Text>
           </Skeleton>
         </HStack>
-        <Skeleton isLoaded={!quorumQuery.isLoading && !currentVotesQuery.isLoading}>
+        <Skeleton isLoaded={quorumQueryReady && votesQueryReady}>
           <HStack spacing={1} align="center">
             {isEndedAndQuorumNotReached && <UilTimes size="16px" color={stateColor} />}
             {isQuorumReached && <UilCheck size="16px" color={stateColor} />}
@@ -68,19 +73,21 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }
         </Skeleton>
       </HStack>
       <Box position="relative">
-        <Box bg="#D5D5D5" h="8px" rounded="full" />
-        <Box
-          bg={stateColor}
-          h="8px"
-          rounded="full"
-          w={`${Number(getSafePercentage(votesToQuorumPercentage))}%`}
-          position="absolute"
-          top={0}
-          left={0}
-        />
+        <Skeleton isLoaded={quorumQueryReady && votesQueryReady}>
+          <Box bg="#D5D5D5" h="8px" rounded="full" />
+          <Box
+            bg={stateColor}
+            h="8px"
+            rounded="full"
+            w={`${Number(getSafePercentage(votesToQuorumPercentage))}%`}
+            position="absolute"
+            top={0}
+            left={0}
+          />
+        </Skeleton>
       </Box>
       <HStack>
-        <Skeleton isLoaded={!quorumQuery.isLoading}>
+        <Skeleton isLoaded={quorumQueryReady}>
           <Text color="#252525" fontWeight={600} fontSize={"14px"}>
             {`${compactFormatter.format(Number(quorumQuery.data ?? 0))} VOT3`}
           </Text>

@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query"
 
 export type BuildTransactionProps<ClausesParams> = {
   clauseBuilder: (props: ClausesParams) => EnhancedClause[]
-  refetchQueryKeys?: string[][]
+  refetchQueryKeys?: (string | undefined)[][]
   onSuccess?: () => void
   invalidateCache?: boolean
   suggestedMaxGas?: number

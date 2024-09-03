@@ -11,6 +11,10 @@ type ProposalVotes = {
   againstVotes: string
   forVotes: string
   abstainVotes: string
+  totalVotes: number
+  againstPercentage: number
+  forPercentage: number
+  abstainPercentage: number
 }
 /**
  * Get the proposal votes from the governor contract (i.e the number of votes for, against and abstain)
@@ -24,10 +28,19 @@ export const getProposalVotes = async (thor: Connex.Thor, proposalId: string): P
   const res = await thor.account(GOVERNANCE_CONTRACT).method(proposalVotesAbi).call(proposalId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
-  return {
+  const parsed = {
     againstVotes: ethers.formatEther(res.decoded[0]),
     forVotes: ethers.formatEther(res.decoded[1]),
     abstainVotes: ethers.formatEther(res.decoded[2]),
+  }
+
+  const totalVotes = Number(parsed.againstVotes) + Number(parsed.forVotes) + Number(parsed.abstainVotes)
+  return {
+    ...parsed,
+    totalVotes,
+    againstPercentage: Math.min(100, (Number(parsed.againstVotes) / totalVotes) * 100),
+    forPercentage: Math.min(100, (Number(parsed.forVotes) / totalVotes) * 100),
+    abstainPercentage: Math.min(100, (Number(parsed.abstainVotes) / totalVotes) * 100),
   }
 }
 

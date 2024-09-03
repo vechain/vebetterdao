@@ -12,7 +12,7 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
 
   return (
     <HStack p="16px" rounded="12px" bg="#FAFAFA" justify={"space-between"}>
-      <VStack align="stretch" gap={1}>
+      <VStack align="stretch" gap={1} flex={1}>
         <Skeleton isLoaded={!votesAtSnapshotQuery.isLoading}>
           <Text color="#252525" fontWeight={600}>
             {FormattingUtils.humanNumber(votesAtSnapshotQuery.data ?? 0)}
@@ -23,7 +23,7 @@ export const ProposalSessionVot3 = ({ votesAtSnapshotQuery, userVotesAtSnapshotQ
           {t("Votes at snapshot")}
         </Text>
       </VStack>
-      <VStack align="stretch" gap={1}>
+      <VStack align="stretch" gap={1} flex={1}>
         <Skeleton isLoaded={!userVotesAtSnapshotQuery.isLoading}>
           <Text color="#252525" fontWeight={600}>
             {FormattingUtils.humanNumber(userVotesAtSnapshotQuery.data ?? 0)}

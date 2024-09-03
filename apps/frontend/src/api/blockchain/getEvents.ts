@@ -1,3 +1,7 @@
+import { getConfig } from "@repo/config"
+
+const nodeUrl = getConfig().nodeUrl
+const MAX_EVENTS_PER_QUERY = 1000
 /**
  * Params for getEvents function
  * @param thor the thor client
@@ -29,20 +33,33 @@ export const getEvents = async ({
   thor,
   order = "asc",
   offset = 0,
-  limit = 256,
+  limit = MAX_EVENTS_PER_QUERY,
   from = 0,
   to = thor.status.head.number,
   filterCriteria,
 }: GetEventsProps): Promise<Connex.Thor.Filter.Row<"event">[]> => {
-  return await thor
-    .filter("event", filterCriteria)
-    .range({
-      from,
-      to,
-      unit: "block",
-    })
-    .order(order)
-    .apply(offset, limit)
+  // Send tx details to the node to get the gas estimate
+  const response = await fetch(`${nodeUrl}/logs/event`, {
+    method: "POST",
+    body: JSON.stringify({
+      range: {
+        from,
+        to,
+        unit: "block",
+      },
+      options: {
+        offset,
+        limit,
+      },
+      criteriaSet: filterCriteria,
+      order,
+    }),
+  })
+
+  if (!response.ok) throw new Error("Failed to fetch events")
+
+  const outputs = (await response.json()) as Connex.Thor.Filter.Row<"event", {}>[]
+  return outputs
 }
 
 /**
@@ -76,14 +93,14 @@ export const getAllEvents = async ({
       filterCriteria,
       from,
       to,
-      limit: 256,
+      limit: MAX_EVENTS_PER_QUERY,
       order,
       offset,
     })
     allEvents.push(...events)
-    if (events.length < 256) {
+    if (events.length < MAX_EVENTS_PER_QUERY) {
       return allEvents
     }
-    offset += 256
+    offset += MAX_EVENTS_PER_QUERY
   }
 }

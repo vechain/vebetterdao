@@ -5,7 +5,7 @@ import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy } from "../scripts/helpers"
 
-describe("X2EarnRewardsPool", function () {
+describe("X2EarnRewardsPool - @shard3", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {
