@@ -65,7 +65,8 @@ contract X2EarnRewardsPool is
     IB3TR b3tr;
     IX2EarnApps x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
-    string[] allowedImpactKeys;
+    mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
+    string[] allowedImpactKeys; // Array storing impact keys
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -110,8 +111,7 @@ contract X2EarnRewardsPool is
     _grantRole(IMPACT_KEY_MANAGER_ROLE, _impactKeyManager);
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    // pre fill the allowed impact keys
-    $.allowedImpactKeys = [
+    string[8] memory initialImpactKeys = [
       "carbon",
       "water",
       "energy",
@@ -121,6 +121,10 @@ contract X2EarnRewardsPool is
       "plastic",
       "trees_planted"
     ];
+
+    for (uint256 i = 0; i < initialImpactKeys.length; i++) {
+      _addImpactKey(initialImpactKeys[i], $);
+    }
   }
 
   // ---------- Modifiers ---------- //
@@ -344,12 +348,7 @@ contract X2EarnRewardsPool is
    */
   function _isAllowedImpactKey(string memory key) internal view returns (bool) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    for (uint256 i = 0; i < $.allowedImpactKeys.length; i++) {
-      if (keccak256(abi.encodePacked(key)) == keccak256(abi.encodePacked($.allowedImpactKeys[i]))) {
-        return true;
-      }
-    }
-    return false;
+    return $.impactKeyIndex[key] > 0;
   }
 
   /**
@@ -380,10 +379,19 @@ contract X2EarnRewardsPool is
    * @param newKey the new key to add
    */
   function addImpactKey(string memory newKey) external onlyRoleOrAdmin(IMPACT_KEY_MANAGER_ROLE) {
-    require(!_isAllowedImpactKey(newKey), "X2EarnRewardsPool: Key already exists");
-
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    $.allowedImpactKeys.push(newKey);
+    _addImpactKey(newKey, $);
+  }
+
+  /**
+   * @dev Internal function to add a new allowed impact key.
+   * @param key the new key to add
+   * @param $ the storage pointer
+   */
+  function _addImpactKey(string memory key, X2EarnRewardsPoolStorage storage $) internal {
+    require($.impactKeyIndex[key] == 0, "X2EarnRewardsPool: Key already exists");
+    $.allowedImpactKeys.push(key);
+    $.impactKeyIndex[key] = $.allowedImpactKeys.length; // Store 1-based index
   }
 
   /**
@@ -392,14 +400,17 @@ contract X2EarnRewardsPool is
    */
   function removeImpactKey(string memory keyToRemove) external onlyRoleOrAdmin(IMPACT_KEY_MANAGER_ROLE) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    for (uint256 i = 0; i < $.allowedImpactKeys.length; i++) {
-      if (keccak256(abi.encodePacked($.allowedImpactKeys[i])) == keccak256(abi.encodePacked(keyToRemove))) {
-        $.allowedImpactKeys[i] = $.allowedImpactKeys[$.allowedImpactKeys.length - 1];
-        $.allowedImpactKeys.pop();
-        return;
-      }
-    }
-    revert("X2EarnRewardsPool: Key not found");
+    uint256 index = $.impactKeyIndex[keyToRemove];
+    require(index > 0, "X2EarnRewardsPool: Key not found");
+
+    // Move the last element into the place to delete
+    string memory lastKey = $.allowedImpactKeys[$.allowedImpactKeys.length - 1];
+    $.allowedImpactKeys[index - 1] = lastKey;
+    $.impactKeyIndex[lastKey] = index; // Update the index of the last key
+
+    // Remove the last element
+    $.allowedImpactKeys.pop();
+    delete $.impactKeyIndex[keyToRemove];
   }
 
   // ---------- Getters ---------- //
