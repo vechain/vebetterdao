@@ -41,7 +41,7 @@ module.exports = {
     },
   },
   gasReporter: {
-    enabled: true,
+    enabled: false,
   },
   contractSizer: {
     alphaSort: true,
