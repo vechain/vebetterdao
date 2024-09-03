@@ -10,6 +10,7 @@
     "NEXT_PUBLIC_IPFS_PINNING_SERVICE",
     "IS_TEST_COVERAGE",
     "RUN_SIMULATION",
+    "SHARD",
     "CONTRACT_TO_UPGRADE",
     "CONTRACT_VERSION"
   ],
@@ -116,7 +117,7 @@
     },
     "test": {
       "cache": false,
-      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config", "test:hardhat"]
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
     "test:watch": {
       "cache": false,
@@ -134,6 +135,10 @@
       "cache": false
     },
     "test:hardhat": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "test:hardhat:shard": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },

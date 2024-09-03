@@ -19,7 +19,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy } from "../scripts/helpers"
 import { XAllocationPool } from "../typechain-types"
 
-describe("X-Allocation Pool", async function () {
+describe("X-Allocation Pool - @shard3", async function () {
   describe("Deployment", async function () {
     it("Contract is correctly initialized", async function () {
       const { xAllocationPool, owner, x2EarnApps, emissions, b3tr, treasury } = await getOrDeployContractInstances({
