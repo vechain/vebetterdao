@@ -5901,7 +5901,7 @@ describe("Governor and TimeLock - @shard1", function () {
         })
 
         governor = (await deployProxy(
-          "B3TRGovernorV1",
+          "B3TRGovernor",
           [
             {
               vot3Token: await voterRewards.getAddress(), // wrong address
