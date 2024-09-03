@@ -28,8 +28,7 @@
     "lint": "eslint . --ext .ts",
     "format": "eslint . --ext .ts --fix",
     "generate-docs": "npx hardhat docgen",
-    "upgrade:voter-rewards": "npx hardhat run scripts/deploy/upgrades/voterRewardsV2.ts",
-    "upgrade:b3tr-governor": "npx hardhat run scripts/deploy/upgrades/b3trGovernorV2.ts"
+    "upgrade:contract": "npx hardhat run scripts/upgrade/upgrades/\"$CONTRACT_TO_UPGRADE\"-\"$CONTRACT_VERSION\".ts"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
@@ -72,6 +71,7 @@
     "@nomicfoundation/hardhat-verify": "^1.1.1",
     "@repo/eslint-config": "*",
     "@typechain/ethers-v6": "^0.4.3",
+    "@types/inquirer": "^9.0.7",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",

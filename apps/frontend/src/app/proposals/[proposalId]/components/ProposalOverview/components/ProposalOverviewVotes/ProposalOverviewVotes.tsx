@@ -1,6 +1,6 @@
-import { ProposalState, useProposalState, useProposalVoteEvents, useProposalVotes } from "@/api"
+import { ProposalState, useProposalState, useProposalVotes } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
-import { Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Heading, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
 import { ProposalVotesResults } from "./components/ProposalVotesResults"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
@@ -8,7 +8,6 @@ import { ExclamationTriangle, ResponsiveCard } from "@/components"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   proposalId: string
@@ -24,7 +23,8 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotes(proposalId)
   const { data: proposalState } = useProposalState(proposalId)
 
-  const { data: voteEvents, isLoading: voteEventsLoading } = useProposalVoteEvents(proposalId)
+  //TODO: Enable again when indexer is ready
+  //   const { data: voteEvents, isLoading: voteEventsLoading } = useProposalVoteEvents(proposalId)
 
   const { proposal } = useProposalDetail()
   const [_, setSeconds] = useState(0)
@@ -132,9 +132,9 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
               <Text fontWeight={"400"} color="#6A6A6A">
                 {t("Wallets voted")}
               </Text>
-              <Skeleton isLoaded={!voteEventsLoading}>
+              {/* <Skeleton isLoaded={!voteEventsLoading}>
                 <Heading size="sm">{getCompactFormatter(2).format(voteEvents?.votes.length ?? 0)}</Heading>
-              </Skeleton>
+              </Skeleton> */}
             </VStack>
             <VStack alignItems={"stretch"} gap={6}>
               {Object.entries(votes).map(([key, value]) => (
