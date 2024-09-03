@@ -272,61 +272,61 @@ contract X2EarnRewardsPool is
       return "";
     }
 
-    // Initialize an empty JSON string with version
-    string memory json = '{"version": 2';
+    // Initialize an empty JSON bytes array with version
+    bytes memory json = abi.encodePacked('{"version": 2');
 
     // Add description if available
     if (hasDescription) {
-      json = string(abi.encodePacked(json, ',"description": "', description, '"'));
+      json = abi.encodePacked(json, ',"description": "', description, '"');
     }
 
     // Add proof if available
     if (hasProof) {
-      json = string(abi.encodePacked(json, ',"proof": {'));
+      json = abi.encodePacked(json, ',"proof": {');
 
       for (uint256 i = 0; i < proof.types.length; i++) {
         require(_isValidProofType(proof.types[i]), "X2EarnRewardsPool: Invalid proof type");
 
-        json = string(abi.encodePacked(json, '"', proof.types[i], '": "', proof.values[i], '"'));
+        json = abi.encodePacked(json, '"', proof.types[i], '": "', proof.values[i], '"');
 
         if (i < proof.types.length - 1) {
-          json = string(abi.encodePacked(json, ","));
+          json = abi.encodePacked(json, ",");
         }
       }
 
-      json = string(abi.encodePacked(json, "}"));
+      json = abi.encodePacked(json, "}");
     }
 
     // Add impact if available
     if (hasImpact) {
-      string memory jsonImpact = _buildImpactJson(impact);
+      bytes memory jsonImpact = _buildImpactJson(impact);
 
       if (hasProof || hasDescription) {
         // Add a comma if proof or description was already added
-        json = string(abi.encodePacked(json, ","));
+        json = abi.encodePacked(json, ",");
       }
 
-      json = string(abi.encodePacked(json, '"impact": ', jsonImpact));
+      json = abi.encodePacked(json, '"impact": ', jsonImpact);
     }
 
     // Close the JSON object
-    json = string(abi.encodePacked(json, "}"));
+    json = abi.encodePacked(json, "}");
 
-    return json;
+    return string(json);
   }
 
   /**
    * @dev Builds the impact JSON string.
    * @param impact an array of integers that represent the impact of the action. Each index of the array
    */
-  function _buildImpactJson(ProofDataTypes.Impact memory impact) internal view returns (string memory) {
+  function _buildImpactJson(ProofDataTypes.Impact memory impact) internal view returns (bytes memory) {
     require(impact.codes.length == impact.values.length, "Mismatched input lengths");
 
     bytes memory json = abi.encodePacked("{");
 
     for (uint256 i = 0; i < impact.values.length; i++) {
       if (_isAllowedImpactKey(impact.codes[i])) {
-        json = abi.encodePacked(json, '"', impact.codes[i], '":', Strings.toString(impact.values[i]), "");
+        json = abi.encodePacked(json, '"', impact.codes[i], '":', Strings.toString(impact.values[i]));
         if (i < impact.values.length - 1) {
           json = abi.encodePacked(json, ",");
         }
@@ -336,7 +336,7 @@ contract X2EarnRewardsPool is
     }
 
     json = abi.encodePacked(json, "}");
-    return string(json);
+    return json;
   }
 
   /**
