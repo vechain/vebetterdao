@@ -443,7 +443,7 @@ describe("X-Allocation Pool - @shard3", async function () {
       // Turn off quadratic funding
       await xAllocationPool.connect(owner).toggleQuadraticFunding()
 
-      await waitForRoundToEnd(round1)
+      await waitForRoundToEnd(round3)
 
       const app1round3Earnings = await xAllocationPool.roundEarnings(round3, app1Id)
       const app2round3Earnings = await xAllocationPool.roundEarnings(round3, app2Id)
