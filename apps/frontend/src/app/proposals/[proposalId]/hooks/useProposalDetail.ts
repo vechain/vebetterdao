@@ -13,7 +13,6 @@ import {
   useIsDepositReached,
   useIsProposalQuorumReached,
   useProposalDepositEvent,
-  useProposalVoteEvents,
   useProposalSnapshotVotingPower,
   useProposalSnapshot,
   useGetVotesOnBlock,
@@ -29,7 +28,6 @@ import dayjs from "dayjs"
 export const useProposalDetailById = (proposalId: string) => {
   const { account } = useWallet()
   const proposalState = useProposalState(proposalId)
-  const proposalVoteEvents = useProposalVoteEvents(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
   const proposalCanceledEvent = useProposalCanceledEvent(proposalId)
   const proposalQueuedEvent = useProposalQueuedEvent(proposalId)
@@ -71,7 +69,6 @@ export const useProposalDetailById = (proposalId: string) => {
     () => [
       proposalState,
       proposalVotes,
-      proposalVoteEvents,
       proposalCreatedEvent,
       proposalCanceledEvent,
       proposalDepositEvent,
@@ -86,7 +83,6 @@ export const useProposalDetailById = (proposalId: string) => {
     [
       proposalState,
       proposalVotes,
-      proposalVoteEvents,
       proposalCreatedEvent,
       proposalCanceledEvent,
       proposalDepositEvent,
@@ -110,11 +106,6 @@ export const useProposalDetailById = (proposalId: string) => {
   } = useProposalVoteDates(proposalId)
 
   const proposal = useMemo(() => {
-    const userVote = proposalVoteEvents.data?.userVote
-    const votes = proposalVoteEvents.data?.votes
-    const votesWithComment = proposalVoteEvents.data?.votesWithComment
-    const hasUserVoted = proposalVoteEvents.data?.hasUserVoted
-    const totalVot3UsedInVotes = Number(ethers.formatEther(BigInt(proposalVoteEvents.data?.totalVot3UsedInVotes || 0)))
     const totalVotingPowerUsedInVotes = Number(proposalVotes.data?.totalVotes || "0")
 
     const forVotes = Number(proposalVotes.data?.forVotes || "0")
@@ -141,8 +132,6 @@ export const useProposalDetailById = (proposalId: string) => {
     const othersSupportUserCount = proposalDepositEvent.othersSupportUserCount
     const userVotingPowerOnSnapshot = ethers.formatEther(proposalSnapshotVotingPower.data || 0)
     const userVot3OnSnapshot = proposalSnapshotVot3.data ?? "0"
-    const quorumPercentage = totalVot3UsedInVotes ? totalVot3UsedInVotes / Number(proposalQuorum.data) : 0
-    const quorumChartPercentage = Math.min(quorumPercentage || 0, 1) * 100
     const result = {
       id: proposalId,
       proposalCanceledDate,
@@ -191,7 +180,6 @@ export const useProposalDetailById = (proposalId: string) => {
       othersSupportUserCount,
       state: proposalState.data,
       isStateLoading: proposalState.isLoading,
-      totalVot3UsedInVotes,
       totalVotingPowerUsedInVotes,
       forVotes,
       againstVotes,
@@ -199,10 +187,6 @@ export const useProposalDetailById = (proposalId: string) => {
       forPercentage,
       againstPercentage,
       abstainPercentage,
-      votes,
-      votesWithComment,
-      userVote,
-      hasUserVoted,
       userVotingPowerOnSnapshot,
       isUserVotingPowerOnSnapshotLoading: proposalSnapshotVotingPower.isLoading,
       userVot3OnSnapshot,
@@ -214,19 +198,15 @@ export const useProposalDetailById = (proposalId: string) => {
       quorum: proposalQuorum.data || 0,
       quorumQuery: proposalQuorum,
       isQuorumLoading: proposalQuorum.isLoading,
-      quorumPercentage,
-      quorumChartPercentage,
       votingStartBlock,
       votingEndBlock,
       proposalVotesQuery: proposalVotes,
-      proposalVoteEventsQuery: proposalVoteEvents,
     }
 
     const mock = {}
 
     return { ...result, ...mock }
   }, [
-    proposalVoteEvents,
     proposalCanceledDate,
     proposalVotes,
     proposalCreatedEvent,

@@ -1,4 +1,4 @@
-import { ProposalState } from "@/api"
+import { ProposalState, useUserSingleProposalVoteEvent } from "@/api"
 import { AbstainedIcon, VoteIcon } from "@/components"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
@@ -50,7 +50,10 @@ const votes = [
 
 const compactFormatter = getCompactFormatter(2)
 
-export const ProposalVote = () => {
+type Props = {
+  proposalId: string
+}
+export const ProposalVote = ({ proposalId }: Props) => {
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const [selectedVote, setSelectedVote] = useState("1")
@@ -59,7 +62,9 @@ export const ProposalVote = () => {
   const router = useRouter()
   const { account } = useWallet()
 
-  const isPageNotAllowed = proposal.state !== ProposalState.Active || proposal.hasUserVoted || !account
+  const { data: userVote } = useUserSingleProposalVoteEvent(proposalId)
+
+  const isPageNotAllowed = proposal.state !== ProposalState.Active || !!userVote || !account
 
   useLayoutEffect(() => {
     if (isPageNotAllowed) {
