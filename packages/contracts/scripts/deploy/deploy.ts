@@ -189,7 +189,7 @@ export async function deployAll(config: ContractsConfig) {
       [veBetterPassportAddress],
     ],
     {
-      logOutput: true,
+      logOutput: false,
       versions: [undefined, 2],
     },
   )) as X2EarnRewardsPool

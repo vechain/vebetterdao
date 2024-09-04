@@ -169,8 +169,8 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     // If the app security is not set, set it to LOW. This is for setting the default app security to an app that has received an action for the first time
     if ($.appSecurity[appId] == APP_SECURITY.LOW) $.appSecurityMultiplier[APP_SECURITY.LOW] = 1;
 
-    // Calculate the action score by multiplying the base action score with the action difficulty multiplier and the app security multiplier
-    uint256 actionScore = $.actionDifficultyMultiplier[$.appActionDifficulty[appId]] *
+    // Calculate the action score, can be max 6
+    uint256 actionScore = $.actionDifficultyMultiplier[$.appActionDifficulty[appId]] +
       $.appSecurityMultiplier[$.appSecurity[appId]];
 
     // Update the user's score for the round
