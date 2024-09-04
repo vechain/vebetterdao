@@ -13,17 +13,10 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
   bytes32 public constant ACTION_REGISTRAR_ROLE = keccak256("ACTION_REGISTRAR_ROLE");
   bytes32 public constant ACTION_SCORE_MANAGER_ROLE = keccak256("ACTION_SCORE_MANAGER_ROLE");
 
-  /// @notice Action difficulty indicates how hard it is for the user to perform the sustainable action
-  /// @dev Action difficulty is used to calculate the overall score of a sustainable action from the app's `baseActionScore`
-  enum ACTION_DIFFICULTY {
-    EASY,
-    MEDIUM,
-    HARD
-  }
-
   /// @notice Security level indicates how secure the app is
   /// @dev App security is used to calculate the overall score of a sustainable action
   enum APP_SECURITY {
+    NONE,
     LOW,
     MEDIUM,
     HIGH
@@ -41,20 +34,16 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     IX2EarnApps x2EarnApps;
     IXAllocationVotingGovernor xAllocationVoting;
     // Multipliers
-    mapping(ACTION_DIFFICULTY difficulty => uint256 multiplier) actionDifficultyMultiplier; // Multiplier of the base action score based on the action difficulty
-    mapping(APP_SECURITY security => uint256 multiplier) appSecurityMultiplier; // Multiplier of the base action score based on the app security
+    mapping(APP_SECURITY security => uint256 multiplier) securityMultiplier; // Multiplier of the base action score based on the app security
     // App settings
     mapping(bytes32 appId => APP_SECURITY security) appSecurity; // Security level of an app
-    mapping(bytes32 appId => ACTION_DIFFICULTY difficulty) appActionDifficulty; // Action difficulty of an app
     // User scores
     mapping(address user => uint256 totalScore) userTotalScore; // all-time total score of a user
     mapping(address user => mapping(bytes32 appId => uint256 totalScore)) userAppTotalScore; // all-time total score of a user for a specific app
     mapping(address user => mapping(uint256 round => uint256 score)) userRoundScore; // score of a user in a specific round
     mapping(address user => mapping(uint256 round => mapping(bytes32 appId => uint256 score))) userAppRoundScore; // score of a user for a specific app in a specific round
     // Thresholds
-    uint256 roundThreshold; // threshold for a user to be considered a person in a round //round threshold can be 0
-    uint256 totalThreshold; // threshold for a user to be considered a person in total // total threshold can be 0
-    bool isTotalScoreConsidered; // flag to indicate if the total score is considered for a user to be a person
+    uint256 threshold; // threshold for a user to be considered a person in a round //threshold can be 0
     uint256 roundsForCumulativeScore; // number of rounds to consider for the cumulative score
   }
 
@@ -76,9 +65,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     IXAllocationVotingGovernor _xAllocationVoting,
     address _actionRegistrar,
     address _actionScoreManager,
-    uint256 _roundThreshold,
     uint256 _threshold,
-    bool _isTotalScoreConsidered,
     uint256 _roundsForCumulativeScore
   ) internal onlyInitializing {
     __ProofOfParticipation_init_unchained(
@@ -86,9 +73,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
       _xAllocationVoting,
       _actionRegistrar,
       _actionScoreManager,
-      _roundThreshold,
       _threshold,
-      _isTotalScoreConsidered,
       _roundsForCumulativeScore
     );
   }
@@ -98,9 +83,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     IXAllocationVotingGovernor _xAllocationVoting,
     address _actionRegistrar,
     address _actionScoreManager,
-    uint256 _roundThreshold,
     uint256 _threshold,
-    bool _isTotalScoreConsidered,
     uint256 _roundsForCumulativeScore
   ) internal onlyInitializing {
     require(_x2EarnApps != address(0), "ProofOfParticipation: x2EarnApps is the zero address");
@@ -112,27 +95,22 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
 
     $.x2EarnApps = IX2EarnApps(_x2EarnApps);
     $.xAllocationVoting = _xAllocationVoting;
-    $.roundThreshold = _roundThreshold;
-    $.totalThreshold = _threshold;
-    $.isTotalScoreConsidered = _isTotalScoreConsidered;
+    $.threshold = _threshold;
     $.roundsForCumulativeScore = _roundsForCumulativeScore;
 
     _grantRole(ACTION_REGISTRAR_ROLE, _actionRegistrar);
     _grantRole(ACTION_SCORE_MANAGER_ROLE, _actionScoreManager);
 
-    $.actionDifficultyMultiplier[ACTION_DIFFICULTY.EASY] = 1; // Default multiplier for easy actions
-    $.actionDifficultyMultiplier[ACTION_DIFFICULTY.MEDIUM] = 2; // Default multiplier for medium actions
-    $.actionDifficultyMultiplier[ACTION_DIFFICULTY.HARD] = 3; // Default multiplier for hard actions
+    $.securityMultiplier[APP_SECURITY.NONE] = 0;
+    $.securityMultiplier[APP_SECURITY.LOW] = 1;
+    $.securityMultiplier[APP_SECURITY.MEDIUM] = 3;
+    $.securityMultiplier[APP_SECURITY.HIGH] = 6;
 
     $.roundsForCumulativeScore = _roundsForCumulativeScore; // Default number of rounds to consider for the cumulative score
   }
 
   // ---------- Modifiers ------------ //
 
-  /**
-   * @dev Modifier to restrict access to only the admin role and the app admin role.
-   * @param appId the app ID
-   */
   /// @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
   /// @param role - the role to check
   modifier onlyRoleOrAdmin(bytes32 role) virtual {
@@ -163,15 +141,11 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
 
     require($.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
 
-    // If the action difficulty is not set, set it to EASY. This is for setting the default action difficulty to an app that has received an action for the first time
-    if ($.appActionDifficulty[appId] == ACTION_DIFFICULTY.EASY)
-      $.actionDifficultyMultiplier[ACTION_DIFFICULTY.EASY] = 1;
     // If the app security is not set, set it to LOW. This is for setting the default app security to an app that has received an action for the first time
-    if ($.appSecurity[appId] == APP_SECURITY.LOW) $.appSecurityMultiplier[APP_SECURITY.LOW] = 1;
+    if ($.appSecurity[appId] == APP_SECURITY.LOW) $.securityMultiplier[APP_SECURITY.LOW] = 1;
 
-    // Calculate the action score, can be max 6
-    uint256 actionScore = $.actionDifficultyMultiplier[$.appActionDifficulty[appId]] +
-      $.appSecurityMultiplier[$.appSecurity[appId]];
+    // Calculate the action score, can be min 0, max 6
+    uint256 actionScore = $.securityMultiplier[$.appSecurity[appId]];
 
     // Update the user's score for the round
     $.userRoundScore[user][round] += actionScore;
@@ -194,40 +168,12 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     _getProofOfParticipationStorage().x2EarnApps = _x2EarnApps;
   }
 
-  /// @notice Sets if the total score is considered for a user to be a person
-  /// @dev The total score considered flag can be modified by the DEFAULT_ADMIN_ROLE
-  /// @dev If the total score is considered, the user is considered a person if the user's total score is greater than or equal to the total threshold
-  /// @param _isTotalScoreConsidered - the total score considered flag
-  function setIsTotalScoreConsidered(bool _isTotalScoreConsidered) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    _getProofOfParticipationStorage().isTotalScoreConsidered = _isTotalScoreConsidered;
-  }
-
-  /// @notice Sets the difficulty multiplier for an action difficulty
-  /// @param difficulty - the action difficulty between EASY, MEDIUM, HARD
-  /// @param multiplier - the multiplier
-  function setDifficultyMultiplier(
-    ACTION_DIFFICULTY difficulty,
-    uint256 multiplier
-  ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
-    require(multiplier > 0, "ProofOfParticipation: multiplier is zero");
-
-    _getProofOfParticipationStorage().actionDifficultyMultiplier[difficulty] = multiplier;
-  }
-
-  /// @notice Sets the round threshold for a user to be considered a person
+  /// @notice Sets the threshold for a user to be considered a person
   /// @param threshold - the round threshold
-  function setRoundThreshold(uint256 threshold) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+  function setThreshold(uint256 threshold) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
     require(threshold > 0, "ProofOfParticipation: threshold is zero");
 
-    _getProofOfParticipationStorage().roundThreshold = threshold;
-  }
-
-  /// @notice Sets the total threshold for a user to be considered a person
-  /// @param threshold - the total threshold
-  function setTotalThreshold(uint256 threshold) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
-    require(threshold > 0, "ProofOfParticipation: threshold is zero");
-
-    _getProofOfParticipationStorage().totalThreshold = threshold;
+    _getProofOfParticipationStorage().threshold = threshold;
   }
 
   /// @notice Sets the number of rounds to consider for the cumulative score
@@ -247,17 +193,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
   ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
     require(multiplier > 0, "ProofOfParticipation: multiplier is zero");
 
-    _getProofOfParticipationStorage().appSecurityMultiplier[security] = multiplier;
-  }
-
-  /// @dev Sets the action difficulty of an app
-  /// @param appId - the app id
-  /// @param difficulty - the action difficulty
-  function setAppActionDifficulty(
-    bytes32 appId,
-    ACTION_DIFFICULTY difficulty
-  ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
-    _getProofOfParticipationStorage().appActionDifficulty[appId] = difficulty;
+    _getProofOfParticipationStorage().securityMultiplier[security] = multiplier;
   }
 
   /// @dev Sets the security level of an app
@@ -328,32 +264,15 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     return _getProofOfParticipationStorage().userAppTotalScore[user][appId];
   }
 
-  /// @notice Gets the round threshold for a user to be considered a person
-  function roundThreshold() public view virtual returns (uint256) {
-    return _getProofOfParticipationStorage().roundThreshold;
-  }
-
-  /// @notice Gets the total threshold for a user to be considered a person
-  function totalThreshold() public view virtual returns (uint256) {
-    return _getProofOfParticipationStorage().totalThreshold;
-  }
-
-  /// @notice Checks if the total score is considered for a user to be a person
-  /// @return isTotalScoreConsidered - the total score considered flag
-  function isTotalScoreConsidered() public view virtual returns (bool) {
-    return _getProofOfParticipationStorage().isTotalScoreConsidered;
-  }
-
-  /// @notice Gets the difficulty multiplier for an action difficulty
-  /// @param difficulty - the action difficulty between EASY, MEDIUM, HARD
-  function difficultyMultiplier(ACTION_DIFFICULTY difficulty) public view virtual returns (uint256) {
-    return _getProofOfParticipationStorage().actionDifficultyMultiplier[difficulty];
+  /// @notice Gets the threshold for a user to be considered a person
+  function thresholdParticipationScore() public view virtual returns (uint256) {
+    return _getProofOfParticipationStorage().threshold;
   }
 
   /// @notice Gets the security multiplier for an app security
   /// @param security - the app security between LOW, MEDIUM, HIGH
   function securityMultiplier(APP_SECURITY security) public view virtual returns (uint256) {
-    return _getProofOfParticipationStorage().appSecurityMultiplier[security];
+    return _getProofOfParticipationStorage().securityMultiplier[security];
   }
 
   /// @notice Gets the round threshold for a user to be considered a person

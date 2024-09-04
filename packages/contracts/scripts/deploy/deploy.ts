@@ -319,9 +319,7 @@ export async function deployAll(config: ContractsConfig) {
       whitelisters: [config.CONTRACTS_ADMIN_ADDRESS], // _whitelisters
       actionRegistrar: config.CONTRACTS_ADMIN_ADDRESS, // _actionRegistrar
       actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS, // _actionScoreManager
-      roundThreshold: 0, // roundThreshold
       threshold: 0, //threshold
-      isTotalScoreConsidered: false, //isTotalScoreConsidered
       roundsForCumulativeScore: 5, //roundsForCumulativeScore}
     },
   ])) as VeBetterDAOPassport

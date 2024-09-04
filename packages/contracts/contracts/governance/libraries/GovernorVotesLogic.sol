@@ -211,7 +211,11 @@ library GovernorVotesLogic {
     uint8 support,
     string calldata reason
   ) external returns (uint256) {
-    GovernorStateLogic.validateStateBitmap(self, proposalId, GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active));
+    GovernorStateLogic.validateStateBitmap(
+      self,
+      proposalId,
+      GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active)
+    );
 
     uint256 weight = self.vot3.getPastVotes(voter, GovernorProposalLogic._proposalSnapshot(self, proposalId));
     uint256 power = Math.sqrt(weight) * 1e9;
@@ -222,7 +226,12 @@ library GovernorVotesLogic {
 
     _countVote(self, proposalId, voter, support, weight, power);
 
-    self.voterRewards.registerVote(GovernorProposalLogic._proposalSnapshot(self, proposalId), voter, weight, Math.sqrt(weight));
+    self.voterRewards.registerVote(
+      GovernorProposalLogic._proposalSnapshot(self, proposalId),
+      voter,
+      weight,
+      Math.sqrt(weight)
+    );
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 

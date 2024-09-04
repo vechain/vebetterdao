@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
-import { Blacklist } from "./modules/Blacklist.sol";
+import { BotSignaling } from "./modules/BotSignaling.sol";
 import { ProofOfParticipation } from "./modules/ProofOfParticipation.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 
@@ -12,7 +12,7 @@ contract VeBetterPassport is
   AccessControlUpgradeable,
   UUPSUpgradeable,
   ProofOfParticipation,
-  Blacklist,
+  BotSignaling,
   IVeBetterPassport
 {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -49,9 +49,7 @@ contract VeBetterPassport is
     address[] whitelisters;
     address actionRegistrar;
     address actionScoreManager;
-    uint256 roundThreshold;
     uint256 threshold;
-    bool isTotalScoreConsidered;
     uint256 roundsForCumulativeScore;
   }
 
@@ -68,12 +66,10 @@ contract VeBetterPassport is
       data.xAllocationVoting,
       data.actionRegistrar,
       data.actionScoreManager,
-      data.roundThreshold,
       data.threshold,
-      data.isTotalScoreConsidered,
       data.roundsForCumulativeScore
     );
-    __Blacklist_init(data.blacklisters, data.whitelisters);
+    __BotSignaling_init(data.blacklisters, data.whitelisters);
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
     $.xAllocationVoting = data.xAllocationVoting;
@@ -94,13 +90,9 @@ contract VeBetterPassport is
 
   // ---------- Modifiers ------------ //
 
-  /**
-   * @dev Modifier to restrict access to only the admin role and the app admin role.
-   * @param appId the app ID
-   */
   /// @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
   /// @param role - the role to check
-  modifier onlyRoleOrAdmin(bytes32 role) override(Blacklist, ProofOfParticipation) {
+  modifier onlyRoleOrAdmin(bytes32 role) override(BotSignaling, ProofOfParticipation) {
     if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
       revert VeBetterPassportUnauthorizedUser(msg.sender);
     }
@@ -133,19 +125,24 @@ contract VeBetterPassport is
 
   // ---------- Getters ---------- //
 
+  /**
+   * @dev Checks if a wallet is a person or not based on the participation score, blacklisting, and xnode and GM holdings
+   */
   function isPerson(address _user) public view returns (bool) {
-    // If a wallet is blacklisted and has been blacklisted more than once, it is not a person
-    if (!isBlacklisted(_user)) {
-      return true;
+    // If a wallet is not whitelisted and has been signaled more than 2 times
+    if (!isWhitelisted(_user) && signaledCounter(_user) > 2) {
+      return false;
     }
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
 
+    // If the user's cumulated score in the last rounds is greater than or equal to the threshold
     uint256 participationScore = getQuadraticCumulativeScore(_user, $.xAllocationVoting.currentRoundId());
-    // If the user's cumulated quadratic score in the round is greater than or equal to the round threshold
-    if (participationScore >= roundThreshold()) return true;
-    // If the total score is considered for personhood and the user's total score is greater than or equal to the total threshold
-    if (isTotalScoreConsidered() && userTotalScore(_user) >= totalThreshold()) return true;
+    if (participationScore >= thresholdParticipationScore()) return true;
+
+    // TODO: gm
+
+    // TODO: check xnode
 
     return false;
   }
