@@ -3,7 +3,9 @@ import { expect } from "chai"
 import { ZERO_ADDRESS, catchRevert, filterEventsByName, getOrDeployContractInstances } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { deployProxy } from "../scripts/helpers"
+import { deployProxy, upgradeProxy } from "../scripts/helpers"
+import { X2EarnRewardsPool } from "../typechain-types"
+import { X2EarnRewardsPoolV1 } from "../typechain-types/contracts/depreceated/V1"
 
 describe("X2EarnRewardsPool - @shard3", function () {
   // deployment
@@ -124,6 +126,55 @@ describe("X2EarnRewardsPool - @shard3", function () {
       })
 
       expect(await x2EarnApps.version()).to.equal("1")
+    })
+
+    it("Storage should be preserved after upgrade", async () => {
+      const { owner, b3tr, x2EarnApps, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
+        owner.address,
+        owner.address,
+        owner.address,
+        await b3tr.getAddress(),
+        await x2EarnApps.getAddress(),
+      ])) as X2EarnRewardsPoolV1
+
+      expect(await x2EarnRewardsPoolV1.version()).to.equal("1")
+
+      // update x2EarnApps address
+      await x2EarnRewardsPoolV1.connect(owner).setX2EarnApps(await x2EarnApps.getAddress())
+      const x2EarnAppsAddress = await x2EarnRewardsPoolV1.x2EarnApps()
+
+      // deposit some funds
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      // create app
+      await x2EarnApps.addApp(owner.address, owner.address, "My app", "metadataURI")
+      await x2EarnApps.addApp(owner.address, owner.address, "My app #2", "metadataURI")
+
+      await b3tr.connect(owner).approve(await x2EarnRewardsPoolV1.getAddress(), amount)
+      await x2EarnRewardsPoolV1.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
+
+      expect(await b3tr.balanceOf(await x2EarnRewardsPoolV1.getAddress())).to.equal(amount)
+
+      // upgrade to new version
+      const x2EarnRewardsPoolV2 = (await upgradeProxy(
+        "X2EarnRewardsPoolV1",
+        "X2EarnRewardsPool",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [owner.address],
+        {
+          version: 2,
+        },
+      )) as X2EarnRewardsPool
+
+      expect(await x2EarnRewardsPoolV2.version()).to.equal("2")
+      expect(await x2EarnRewardsPoolV2.x2EarnApps()).to.equal(x2EarnAppsAddress)
+      expect(await x2EarnRewardsPoolV2.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
     })
   })
 
