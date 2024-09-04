@@ -195,18 +195,25 @@ contract X2EarnRewardsPool is
   }
 
   /**
+   * @dev Distribute rewards to a user with a self provided proof.
+   * @notice This function is deprecated and kept for backwards compatibility, will be removed in future versions.
+   */
+  function distributeRewardDeprecated(bytes32 appId, uint256 amount, address receiver, string memory proof) external {
+    // emit event with provided json proof
+    emit RewardDistributed(amount, appId, receiver, proof, msg.sender);
+
+    _distributeReward(appId, amount, receiver);
+  }
+
+  /**
    * @dev {IX2EarnRewardsPool-distributeReward}
    * @notice the proof argument is unused but kept for backwards compatibility
    */
   function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory /*proof*/) external {
-    _distributeReward(
-      appId,
-      amount,
-      receiver,
-      ProofDataTypes.Proof(new string[](0), new string[](0)),
-      ProofDataTypes.Impact(new string[](0), new uint256[](0)),
-      ""
-    );
+    // emit event with empty proof
+    emit RewardDistributed(amount, appId, receiver, "", msg.sender);
+
+    _distributeReward(appId, amount, receiver);
   }
 
   /**
@@ -220,7 +227,8 @@ contract X2EarnRewardsPool is
     ProofDataTypes.Impact memory impact,
     string memory description
   ) external {
-    _distributeReward(appId, amount, receiver, proof, impact, description);
+    _emitProof(appId, amount, receiver, proof, impact, description);
+    _distributeReward(appId, amount, receiver);
   }
 
   /**
@@ -230,14 +238,7 @@ contract X2EarnRewardsPool is
    * The codes are predefined and the values are the impact values.
    * Example: ["carbon", "water", "energy"], [100, 200, 300]
    */
-  function _distributeReward(
-    bytes32 appId,
-    uint256 amount,
-    address receiver,
-    ProofDataTypes.Proof memory proof,
-    ProofDataTypes.Impact memory impact,
-    string memory description
-  ) internal nonReentrant {
+  function _distributeReward(bytes32 appId, uint256 amount, address receiver) internal nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     // check authorization
@@ -248,15 +249,27 @@ contract X2EarnRewardsPool is
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
 
+    // Transfer the rewards to the receiver
+    $.availableFunds[appId] -= amount;
+    require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
+  }
+
+  /**
+   * @dev Emits the RewardDistributed event with the provided proofs and impacts.
+   */
+  function _emitProof(
+    bytes32 appId,
+    uint256 amount,
+    address receiver,
+    ProofDataTypes.Proof memory proof,
+    ProofDataTypes.Impact memory impact,
+    string memory description
+  ) internal {
     // buildJsonProof
     string memory jsonProof = _buildJsonProof(proof, impact, description);
 
     // emit event
     emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
-
-    // Transfer the rewards to the receiver
-    $.availableFunds[appId] -= amount;
-    require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
   }
 
   /**

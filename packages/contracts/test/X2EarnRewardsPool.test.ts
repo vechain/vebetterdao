@@ -1465,5 +1465,55 @@ describe("X2EarnRewardsPool - @shard3", function () {
       await catchRevert(x2EarnRewardsPool.connect(otherAccounts[10]).addImpactKey("new_impact"))
       await catchRevert(x2EarnRewardsPool.connect(otherAccounts[10]).removeImpactKey("carbon"))
     })
+
+    it("Deprecated: can distribute rewards with a self-provided proof and impact", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccounts[10]
+      const user = otherAccounts[11]
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.addApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
+
+      // fill the pool
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      const proof = { mycustomproof: "https://image.png" }
+
+      const tx = await x2EarnRewardsPool
+        .connect(owner)
+        .distributeRewardDeprecated(appId, ethers.parseEther("1"), user.address, JSON.stringify(proof))
+
+      const receipt = await tx.wait()
+
+      expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
+      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(ethers.parseEther("99"))
+
+      // event emitted
+      if (!receipt) throw new Error("No receipt")
+
+      let event = filterEventsByName(receipt.logs, "RewardDistributed")
+
+      expect(event).not.to.eql([])
+      expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
+      expect(event[0].args[1]).to.equal(appId)
+      expect(event[0].args[2]).to.equal(user.address)
+
+      const emittedProof = JSON.parse(event[0].args[3])
+
+      expect(emittedProof).to.have.property("mycustomproof")
+      expect(emittedProof.mycustomproof).to.equal("https://image.png")
+    })
   })
 })
