@@ -31,7 +31,7 @@ contract VeBetterPassport is
 
   // keccak256(abi.encode(uint256(keccak256("storage.VeBetterPassport")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant VeBetterPassportStorageLocation =
-    0xc9931bd7ecbba177fc71b0ded00eb01d4035361d4a0ee711add00987aca69000;
+    0x525c75e32ceef242f2da07b664b7c31005134df413b2946d2db9b8715bb6b900;
 
   function _getVeBetterPassportStorage() private pure returns (VeBetterPassportStorage storage $) {
     assembly {

@@ -60,7 +60,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
 
   // keccak256(abi.encode(uint256(keccak256("storage.ProofOfParticipation")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant ProofOfParticipationStorageLocation =
-    0xc9931bd7ecbba177fc71b0ded00eb01d4035361d4a0ee711add00987aca69000;
+    0xbe260213d6c64572cce1f1819a6788d452acca94b337419ad1da5de983036200;
 
   function _getProofOfParticipationStorage() private pure returns (ProofOfParticipationStorage storage $) {
     assembly {
@@ -116,6 +116,15 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     $.totalThreshold = _threshold;
     $.isTotalScoreConsidered = _isTotalScoreConsidered;
     $.roundsForCumulativeScore = _roundsForCumulativeScore;
+
+    _grantRole(ACTION_REGISTRAR_ROLE, _actionRegistrar);
+    _grantRole(ACTION_SCORE_MANAGER_ROLE, _actionScoreManager);
+
+    $.actionDifficultyMultiplier[ACTION_DIFFICULTY.EASY] = 1; // Default multiplier for easy actions
+    $.actionDifficultyMultiplier[ACTION_DIFFICULTY.MEDIUM] = 2; // Default multiplier for medium actions
+    $.actionDifficultyMultiplier[ACTION_DIFFICULTY.HARD] = 3; // Default multiplier for hard actions
+
+    $.roundsForCumulativeScore = _roundsForCumulativeScore; // Default number of rounds to consider for the cumulative score
   }
 
   // ---------- Modifiers ------------ //

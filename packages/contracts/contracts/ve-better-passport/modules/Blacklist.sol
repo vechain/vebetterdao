@@ -24,7 +24,7 @@ contract Blacklist is Initializable, AccessControlUpgradeable, IBlacklist {
 
   // keccak256(abi.encode(uint256(keccak256("storage.Blacklist")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant BlacklistStorageLocation =
-    0xc9931bd7ecbba177fc71b0ded00eb01d4035361d4a0ee711add00987aca69000;
+    0x9ffa16eb72159005d2d25d4912adfb2b37f2cbac37eb07513de20f97b58df600;
 
   function _getBlacklistStorage() private pure returns (BlacklistStorage storage $) {
     assembly {
