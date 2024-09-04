@@ -37,7 +37,11 @@ module.exports = {
         enabled: true,
         runs: 1,
       },
+      // viaIR: true, // Enable IR-based compilation
     },
+  },
+  gasReporter: {
+    enabled: false,
   },
   contractSizer: {
     alphaSort: true,

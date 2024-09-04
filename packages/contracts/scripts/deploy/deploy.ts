@@ -172,17 +172,23 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as X2EarnApps
 
-  const x2EarnRewardsPool = (await deployProxy(
-    "X2EarnRewardsPool",
+  const x2EarnRewardsPool = (await deployAndUpgrade(
+    ["X2EarnRewardsPoolV1", "X2EarnRewardsPool"],
     [
-      config.CONTRACTS_ADMIN_ADDRESS, // admin
-      config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
-      config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      await b3tr.getAddress(),
-      await x2EarnApps.getAddress(),
+      [
+        config.CONTRACTS_ADMIN_ADDRESS, // admin
+        config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
+        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        await b3tr.getAddress(),
+        await x2EarnApps.getAddress(),
+      ],
+      [
+        config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
+      ],
     ],
-    undefined,
-    true,
+    {
+      versions: [undefined, 2],
+    },
   )) as X2EarnRewardsPool
 
   const xAllocationPool = (await deployProxy(
