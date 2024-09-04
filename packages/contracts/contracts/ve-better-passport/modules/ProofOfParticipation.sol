@@ -275,6 +275,12 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     return _getProofOfParticipationStorage().securityMultiplier[security];
   }
 
+  /// @notice Gets the security level of an app
+  /// @param appId - the app id
+  function appSecurity(bytes32 appId) public view virtual returns (APP_SECURITY) {
+    return _getProofOfParticipationStorage().appSecurity[appId];
+  }
+
   /// @notice Gets the round threshold for a user to be considered a person
   function roundsForCumulativeScore() public view virtual returns (uint256) {
     return _getProofOfParticipationStorage().roundsForCumulativeScore;

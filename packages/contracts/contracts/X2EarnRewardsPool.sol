@@ -446,6 +446,18 @@ contract X2EarnRewardsPool is
     delete $.impactKeyIndex[keyToRemove];
   }
 
+  /**
+   * @dev Sets the VeBetterPassport contract address.
+   *
+   * @param _veBetterPassport the new VeBetterPassport contract
+   */
+  function setVeBetterPassport(IVeBetterPassport _veBetterPassport) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    require(address(_veBetterPassport) != address(0), "X2EarnRewardsPool: veBetterPassport is the zero address");
+
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    $.veBetterPassport = _veBetterPassport;
+  }
+
   // ---------- Getters ---------- //
 
   /**
@@ -485,6 +497,14 @@ contract X2EarnRewardsPool is
   function getAllowedImpactKeys() external view returns (string[] memory) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.allowedImpactKeys;
+  }
+
+  /**
+   * @dev Retrieves the VeBetterPassport contract.
+   */
+  function veBetterPassport() external view returns (IVeBetterPassport) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.veBetterPassport;
   }
 
   // ---------- Fallbacks ---------- //

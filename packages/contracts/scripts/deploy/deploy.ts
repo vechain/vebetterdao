@@ -12,6 +12,7 @@ import {
   Treasury,
   X2EarnApps,
   X2EarnRewardsPool,
+  VeBetterPassport,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -20,7 +21,6 @@ import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, saveContractsToFile } from "../helpers"
 import { shouldRunSimulation } from "@repo/config/contracts"
-import { VeBetterDAOPassport } from "../../typechain-types/contracts/passport"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -192,7 +192,7 @@ export async function deployAll(config: ContractsConfig) {
       ],
     ],
     {
-      logOutput: false,
+      logOutput: true,
       versions: [undefined, 2],
     },
   )) as X2EarnRewardsPool
@@ -325,7 +325,7 @@ export async function deployAll(config: ContractsConfig) {
       threshold: 0, //threshold
       roundsForCumulativeScore: 5, //roundsForCumulativeScore}
     },
-  ])) as VeBetterDAOPassport
+  ])) as VeBetterPassport
 
   const governor = (await deployAndUpgrade(
     ["B3TRGovernorV1", "B3TRGovernor"],

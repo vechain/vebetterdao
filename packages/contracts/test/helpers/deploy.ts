@@ -28,9 +28,10 @@ import {
   VoterRewardsV1,
   B3TRGovernorV1,
   X2EarnRewardsPoolV1,
+  VeBetterPassport,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { deployProxy, upgradeProxy } from "../../scripts/helpers"
+import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deploy"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 
@@ -50,6 +51,7 @@ interface DeployInstance {
   voterRewardsV1: VoterRewardsV1
   treasury: Treasury
   x2EarnRewardsPool: X2EarnRewardsPool
+  veBetterPassport: VeBetterPassport
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -219,6 +221,9 @@ export const getOrDeployContractInstances = async ({
     owner.address,
   ])) as X2EarnApps
 
+  // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
+  const veBetterPassportAddress = await deployProxyOnly("VeBetterPassport", undefined, false)
+
   const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
     owner.address,
     owner.address,
@@ -231,7 +236,7 @@ export const getOrDeployContractInstances = async ({
     "X2EarnRewardsPoolV1",
     "X2EarnRewardsPool",
     await x2EarnRewardsPoolV1.getAddress(),
-    [owner.address],
+    [owner.address, veBetterPassportAddress],
     {
       version: 2,
     },
@@ -311,6 +316,22 @@ export const getOrDeployContractInstances = async ({
     },
   ])) as XAllocationVoting
 
+  const veBetterPassport = (await initializeProxy(veBetterPassportAddress, "VeBetterPassport", [
+    {
+      x2EarnApps: await x2EarnApps.getAddress(),
+      xAllocationVoting: await xAllocationVoting.getAddress(),
+      upgrader: owner.address, // upgrader
+      admins: [owner.address], // admins
+      roleGranters: [owner.address], // roleGranters
+      blacklisters: [owner.address], // _blacklisters
+      whitelisters: [owner.address], // _whitelisters
+      actionRegistrar: await x2EarnRewardsPool.getAddress(), // _actionRegistrar
+      actionScoreManager: owner.address, // _actionScoreManager
+      threshold: 0, //threshold
+      roundsForCumulativeScore: 5, //roundsForCumulativeScore}
+    },
+  ])) as VeBetterPassport
+
   // Deploy Governor
   const governorV1 = (await deployProxy(
     "B3TRGovernorV1",
@@ -373,6 +394,7 @@ export const getOrDeployContractInstances = async ({
     XAllocationPool: await xAllocationPool.getAddress(),
     B3TRGovernor: await governor.getAddress(),
     X2EarnApps: await x2EarnApps.getAddress(),
+    VeBetterPassport: veBetterPassportAddress,
   }
 
   const libraries = {
@@ -468,6 +490,7 @@ export const getOrDeployContractInstances = async ({
     otherAccounts,
     treasury,
     x2EarnRewardsPool,
+    veBetterPassport,
     governorClockLogicLib: GovernorClockLogicLib,
     governorConfiguratorLib: GovernorConfiguratorLib,
     governorDepositLogicLib: GovernorDepositLogicLib,
