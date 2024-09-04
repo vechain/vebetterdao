@@ -188,8 +188,8 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [
         config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
+        veBetterPassportAddress,
       ],
-      [veBetterPassportAddress],
     ],
     {
       logOutput: false,

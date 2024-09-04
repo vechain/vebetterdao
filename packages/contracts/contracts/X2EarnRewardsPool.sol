@@ -111,8 +111,9 @@ contract X2EarnRewardsPool is
     $.x2EarnApps = _x2EarnApps;
   }
 
-  function initializeV2(address _impactKeyManager) external reinitializer(2) {
+  function initializeV2(address _impactKeyManager, IVeBetterPassport _veBetterPassport) external reinitializer(2) {
     require(_impactKeyManager != address(0), "X2EarnRewardsPool: impactKeyManager is the zero address");
+    require(address(_veBetterPassport) != address(0), "X2EarnRewardsPool: veBetterPassport is the zero address");
 
     _grantRole(IMPACT_KEY_MANAGER_ROLE, _impactKeyManager);
 
@@ -131,6 +132,8 @@ contract X2EarnRewardsPool is
     for (uint256 i; i < initialImpactKeys.length; i++) {
       _addImpactKey(initialImpactKeys[i], $);
     }
+
+    $.veBetterPassport = _veBetterPassport;
   }
 
   // ---------- Modifiers ---------- //
@@ -143,13 +146,6 @@ contract X2EarnRewardsPool is
       revert("X2EarnRewardsPool: sender is not an admin nor has the required role");
     }
     _;
-  }
-
-  function initializeV2(IVeBetterPassport _veBetterPassport) external reinitializer(2) {
-    require(address(_veBetterPassport) != address(0), "X2EarnRewardsPool: veBetterPassport is the zero address");
-
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    $.veBetterPassport = _veBetterPassport;
   }
 
   // ---------- Authorizers ---------- //
@@ -266,7 +262,7 @@ contract X2EarnRewardsPool is
     $.availableFunds[appId] -= amount;
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
-        // Try to register the action in the veBetterPassport contract
+    // Try to register the action in the veBetterPassport contract
     try $.veBetterPassport.registerAction(receiver, appId) {
       // If the call succeeds, you can optionally handle success here.
     } catch Error(string memory reason) {

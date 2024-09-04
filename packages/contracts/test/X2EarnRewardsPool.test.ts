@@ -5,7 +5,7 @@ import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import { X2EarnRewardsPool } from "../typechain-types"
-import { X2EarnRewardsPoolV1 } from "../typechain-types/contracts/depreceated/V1"
+import { X2EarnRewardsPoolV1 } from "../typechain-types/contracts/deprecated/V1"
 
 describe("X2EarnRewardsPool - @shard3", function () {
   // deployment
