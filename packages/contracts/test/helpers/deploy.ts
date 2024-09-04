@@ -36,6 +36,7 @@ import {
   GovernorQuorumLogicV1,
   GovernorDepositLogicV1,
   GovernorClockLogicV1,
+  X2EarnRewardsPoolV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, upgradeProxy } from "../../scripts/helpers"
@@ -189,14 +190,23 @@ export const getOrDeployContractInstances = async ({
     owner.address,
   ])) as X2EarnApps
 
-  // Deploy X2EarnRewardsPool
-  const x2EarnRewardsPool = (await deployProxy("X2EarnRewardsPool", [
+  const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
     owner.address,
     owner.address,
     owner.address,
     await b3tr.getAddress(),
     await x2EarnApps.getAddress(),
-  ])) as X2EarnRewardsPool
+  ])) as X2EarnRewardsPoolV1
+
+  const x2EarnRewardsPool = (await upgradeProxy(
+    "X2EarnRewardsPoolV1",
+    "X2EarnRewardsPool",
+    await x2EarnRewardsPoolV1.getAddress(),
+    [owner.address],
+    {
+      version: 2,
+    },
+  )) as X2EarnRewardsPool
 
   // Deploy XAllocationPool
   const xAllocationPoolV1 = (await deployProxy("XAllocationPoolV1", [
