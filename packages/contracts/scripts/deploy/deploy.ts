@@ -174,7 +174,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as X2EarnApps
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
-  const veBetterPassportAddress = await deployProxyOnly("VeBetterPassport", undefined, false)
+  const veBetterPassportAddress = await deployProxyOnly("VeBetterPassport", undefined, true)
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
     ["X2EarnRewardsPoolV1", "X2EarnRewardsPool"],
@@ -182,34 +182,17 @@ export async function deployAll(config: ContractsConfig) {
       [
         config.CONTRACTS_ADMIN_ADDRESS, // admin
         config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
-        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        TEMP_ADMIN, // upgrader //TODO: transferRole
         await b3tr.getAddress(),
         await x2EarnApps.getAddress(),
       ],
       [veBetterPassportAddress],
     ],
     {
+      logOutput: true,
       versions: [undefined, 2],
     },
   )) as X2EarnRewardsPool
-
-  const veBetterPassport = (await initializeProxy(veBetterPassportAddress, "VeBetterPassport", [
-    {
-      x2EarnApps: await x2EarnApps.getAddress(),
-      x2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
-      upgrader: config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      admins: [config.CONTRACTS_ADMIN_ADDRESS], // admins
-      roleGranters: [config.CONTRACTS_ADMIN_ADDRESS], // roleGranters
-      _blacklisters: [config.CONTRACTS_ADMIN_ADDRESS], // _blacklisters
-      _whitelisters: [config.CONTRACTS_ADMIN_ADDRESS], // _whitelisters
-      _actionRegistrar: config.CONTRACTS_ADMIN_ADDRESS, // _actionRegistrar
-      _actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS, // _actionScoreManager
-      roundThreshold: 0, // roundThreshold
-      threshold: 0, //threshold
-      isTotalScoreConsidered: false, //isTotalScoreConsidered
-      roundsForCumulativeScore: 5, //roundsForCumulativeScore}
-    },
-  ])) as VeBetterDAOPassport
 
   const xAllocationPool = (await deployProxy(
     "XAllocationPool",
@@ -287,7 +270,7 @@ export async function deployAll(config: ContractsConfig) {
     [
       [
         TEMP_ADMIN, // admin
-        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        TEMP_ADMIN, // upgrader // TODO: transferRole
         config.CONTRACTS_ADMIN_ADDRESS, // contractsAddressManager
         await emissions.getAddress(),
         await galaxyMember.getAddress(),
@@ -324,6 +307,24 @@ export async function deployAll(config: ContractsConfig) {
     undefined,
     true,
   )) as XAllocationVoting
+
+  const veBetterPassport = (await initializeProxy(veBetterPassportAddress, "VeBetterPassport", [
+    {
+      x2EarnApps: await x2EarnApps.getAddress(),
+      xAllocationVoting: await xAllocationVoting.getAddress(),
+      upgrader: config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+      admins: [config.CONTRACTS_ADMIN_ADDRESS], // admins
+      roleGranters: [config.CONTRACTS_ADMIN_ADDRESS], // roleGranters
+      blacklisters: [config.CONTRACTS_ADMIN_ADDRESS], // _blacklisters
+      whitelisters: [config.CONTRACTS_ADMIN_ADDRESS], // _whitelisters
+      actionRegistrar: config.CONTRACTS_ADMIN_ADDRESS, // _actionRegistrar
+      actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS, // _actionScoreManager
+      roundThreshold: 0, // roundThreshold
+      threshold: 0, //threshold
+      isTotalScoreConsidered: false, //isTotalScoreConsidered
+      roundsForCumulativeScore: 5, //roundsForCumulativeScore}
+    },
+  ])) as VeBetterDAOPassport
 
   const governor = (await deployAndUpgrade(
     ["B3TRGovernorV1", "B3TRGovernor"],
