@@ -39,39 +39,56 @@ contract VeBetterPassport is
     }
   }
 
+  struct InitializationData {
+    IXAllocationVotingGovernor xAllocationVoting;
+    address x2EarnApps;
+    address upgrader;
+    address[] admins;
+    address[] roleGranters;
+    address[] blacklisters;
+    address[] whitelisters;
+    address actionRegistrar;
+    address actionScoreManager;
+    uint256 roundThreshold;
+    uint256 threshold;
+    bool isTotalScoreConsidered;
+    uint256 roundsForCumulativeScore;
+  }
+
   /// @notice Initializes the contract
-  function initialize(
-    address _upgrader,
-    address[] memory _admins,
-    address[] memory _roleGranters,
-    address[] memory _blacklisters,
-    address[] memory _whitelisters,
-    address _x2EarnApps,
-    IXAllocationVotingGovernor _xAllocationVoting
-  ) external initializer {
-    require(address(_xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
-    require(_x2EarnApps != address(0), "VeBetterPassport: x2EarnApps is the zero address");
-    require(_upgrader != address(0), "VeBetterPassport: upgrader is the zero address");
+  function initialize(InitializationData memory data) external initializer {
+    require(address(data.xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
+    require(data.x2EarnApps != address(0), "VeBetterPassport: x2EarnApps is the zero address");
+    require(data.upgrader != address(0), "VeBetterPassport: upgrader is the zero address");
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
-    __ProofOfParticipation_init(_x2EarnApps, _xAllocationVoting);
-    __Blacklist_init(_blacklisters, _whitelisters);
+    __ProofOfParticipation_init(
+      data.x2EarnApps,
+      data.xAllocationVoting,
+      data.actionRegistrar,
+      data.actionScoreManager,
+      data.roundThreshold,
+      data.threshold,
+      data.isTotalScoreConsidered,
+      data.roundsForCumulativeScore
+    );
+    __Blacklist_init(data.blacklisters, data.whitelisters);
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
-    $.xAllocationVoting = _xAllocationVoting;
+    $.xAllocationVoting = data.xAllocationVoting;
 
     // Grant roles
-    _grantRole(UPGRADER_ROLE, _upgrader);
+    _grantRole(UPGRADER_ROLE, data.upgrader);
 
-    for (uint256 i; i < _admins.length; i++) {
-      require(_admins[i] != address(0), "VeBetterPassport: admin address cannot be zero");
-      _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
+    for (uint256 i; i < data.admins.length; i++) {
+      require(data.admins[i] != address(0), "VeBetterPassport: admin address cannot be zero");
+      _grantRole(DEFAULT_ADMIN_ROLE, data.admins[i]);
     }
 
-    for (uint256 i; i < _roleGranters.length; i++) {
-      require(_roleGranters[i] != address(0), "VeBetterPassport: role granter address cannot be zero");
-      _grantRole(ROLE_GRANTER, _roleGranters[i]);
+    for (uint256 i; i < data.roleGranters.length; i++) {
+      require(data.roleGranters[i] != address(0), "VeBetterPassport: role granter address cannot be zero");
+      _grantRole(ROLE_GRANTER, data.roleGranters[i]);
     }
   }
 

@@ -18,8 +18,9 @@ import { HttpNetworkConfig } from "hardhat/types"
 import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } from "./setup"
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { deployAndUpgrade, deployProxy, saveContractsToFile } from "../helpers"
+import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, saveContractsToFile } from "../helpers"
 import { shouldRunSimulation } from "@repo/config/contracts"
+import { VeBetterDAOPassport } from "../../typechain-types/contracts/passport"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -172,18 +173,43 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as X2EarnApps
 
-  const x2EarnRewardsPool = (await deployProxy(
-    "X2EarnRewardsPool",
+  // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
+  const veBetterPassportAddress = await deployProxyOnly("VeBetterPassport", undefined, false)
+
+  const x2EarnRewardsPool = (await deployAndUpgrade(
+    ["X2EarnRewardsPoolV1", "X2EarnRewardsPool"],
     [
-      config.CONTRACTS_ADMIN_ADDRESS, // admin
-      config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
-      config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      await b3tr.getAddress(),
-      await x2EarnApps.getAddress(),
+      [
+        config.CONTRACTS_ADMIN_ADDRESS, // admin
+        config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
+        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        await b3tr.getAddress(),
+        await x2EarnApps.getAddress(),
+      ],
+      [veBetterPassportAddress],
     ],
-    undefined,
-    true,
+    {
+      versions: [undefined, 2],
+    },
   )) as X2EarnRewardsPool
+
+  const veBetterPassport = (await initializeProxy(veBetterPassportAddress, "VeBetterPassport", [
+    {
+      x2EarnApps: await x2EarnApps.getAddress(),
+      x2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
+      upgrader: config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+      admins: [config.CONTRACTS_ADMIN_ADDRESS], // admins
+      roleGranters: [config.CONTRACTS_ADMIN_ADDRESS], // roleGranters
+      _blacklisters: [config.CONTRACTS_ADMIN_ADDRESS], // _blacklisters
+      _whitelisters: [config.CONTRACTS_ADMIN_ADDRESS], // _whitelisters
+      _actionRegistrar: config.CONTRACTS_ADMIN_ADDRESS, // _actionRegistrar
+      _actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS, // _actionScoreManager
+      roundThreshold: 0, // roundThreshold
+      threshold: 0, //threshold
+      isTotalScoreConsidered: false, //isTotalScoreConsidered
+      roundsForCumulativeScore: 5, //roundsForCumulativeScore}
+    },
+  ])) as VeBetterDAOPassport
 
   const xAllocationPool = (await deployProxy(
     "XAllocationPool",
@@ -368,6 +394,7 @@ export async function deployAll(config: ContractsConfig) {
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
+    VeBetterPassport: await veBetterPassport.getAddress(),
   }
 
   const libraries: {
@@ -817,6 +844,7 @@ export async function deployAll(config: ContractsConfig) {
     treasury: treasury,
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
+    veBetterPassport: veBetterPassport,
     libraries: {
       governorClockLogic: GovernorClockLogicLib,
       governorConfigurator: GovernorConfiguratorLib,

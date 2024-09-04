@@ -26,12 +26,11 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
-import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
-import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
+import { IX2EarnRewardsPoolV1 } from "./interfaces/IX2EarnRewardsPoolV1.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import { IVeBetterPassport } from "./ve-better-passport/interfaces/IVeBetterPassport.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -42,13 +41,9 @@ import { IVeBetterPassport } from "./ve-better-passport/interfaces/IVeBetterPass
  * Reward distributors of a x2Earn app can distribute rewards to users that performed sustainable actions or withdraw funds
  * to the team wallet.
  * The contract is upgradable through the UUPS proxy pattern and UPGRADER_ROLE can authorize the upgrade.
- *
- * ----- Version 2 -----
- * - Added onchain proof and impact tracking
- * - Added VeBetterPassport integration
  */
-contract X2EarnRewardsPool is
-  IX2EarnRewardsPool,
+contract X2EarnRewardsPoolV1 is
+  IX2EarnRewardsPoolV1,
   UUPSUpgradeable,
   AccessControlUpgradeable,
   ReentrancyGuardUpgradeable
@@ -66,7 +61,6 @@ contract X2EarnRewardsPool is
     IB3TR b3tr;
     IX2EarnApps x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
-    IVeBetterPassport veBetterPassport;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -103,13 +97,6 @@ contract X2EarnRewardsPool is
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.b3tr = _b3tr;
     $.x2EarnApps = _x2EarnApps;
-  }
-
-  function initializeV2(IVeBetterPassport _veBetterPassport) external reinitializer(2) {
-    require(address(_veBetterPassport) != address(0), "X2EarnRewardsPool: veBetterPassport is the zero address");
-
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    $.veBetterPassport = _veBetterPassport;
   }
 
   // ---------- Authorizers ---------- //
@@ -194,17 +181,6 @@ contract X2EarnRewardsPool is
 
     // emit event
     emit RewardDistributed(amount, appId, receiver, proof, msg.sender);
-
-    // Try to register the action in the veBetterPassport contract
-    try $.veBetterPassport.registerAction(receiver, appId) {
-      // If the call succeeds, you can optionally handle success here.
-    } catch Error(string memory reason) {
-      // If the call reverts with a revert reason string, this block is executed.
-      emit RegisterActionFailed(reason, "");
-    } catch (bytes memory lowLevelData) {
-      // If the call reverts without a revert reason or with a custom error, this block is executed.
-      emit RegisterActionFailed("Low-level error", lowLevelData);
-    }
   }
 
   /**

@@ -52,8 +52,8 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     mapping(address user => mapping(uint256 round => uint256 score)) userRoundScore; // score of a user in a specific round
     mapping(address user => mapping(uint256 round => mapping(bytes32 appId => uint256 score))) userAppRoundScore; // score of a user for a specific app in a specific round
     // Thresholds
-    uint256 roundThreshold; // threshold for a user to be considered a person in a round
-    uint256 totalThreshold; // threshold for a user to be considered a person in total
+    uint256 roundThreshold; // threshold for a user to be considered a person in a round //round threshold can be 0
+    uint256 totalThreshold; // threshold for a user to be considered a person in total // total threshold can be 0
     bool isTotalScoreConsidered; // flag to indicate if the total score is considered for a user to be a person
     uint256 roundsForCumulativeScore; // number of rounds to consider for the cumulative score
   }
@@ -73,19 +73,49 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
    */
   function __ProofOfParticipation_init(
     address _x2EarnApps,
-    IXAllocationVotingGovernor _xAllocationVoting
+    IXAllocationVotingGovernor _xAllocationVoting,
+    address _actionRegistrar,
+    address _actionScoreManager,
+    uint256 _roundThreshold,
+    uint256 _threshold,
+    bool _isTotalScoreConsidered,
+    uint256 _roundsForCumulativeScore
   ) internal onlyInitializing {
-    __ProofOfParticipation_init_unchained(_x2EarnApps, _xAllocationVoting);
+    __ProofOfParticipation_init_unchained(
+      _x2EarnApps,
+      _xAllocationVoting,
+      _actionRegistrar,
+      _actionScoreManager,
+      _roundThreshold,
+      _threshold,
+      _isTotalScoreConsidered,
+      _roundsForCumulativeScore
+    );
   }
 
   function __ProofOfParticipation_init_unchained(
     address _x2EarnApps,
-    IXAllocationVotingGovernor _xAllocationVoting
+    IXAllocationVotingGovernor _xAllocationVoting,
+    address _actionRegistrar,
+    address _actionScoreManager,
+    uint256 _roundThreshold,
+    uint256 _threshold,
+    bool _isTotalScoreConsidered,
+    uint256 _roundsForCumulativeScore
   ) internal onlyInitializing {
+    require(_x2EarnApps != address(0), "ProofOfParticipation: x2EarnApps is the zero address");
+    require(address(_xAllocationVoting) != address(0), "ProofOfParticipation: xAllocationVoting is the zero address");
+    require(_actionRegistrar != address(0), "ProofOfParticipation: actionRegistrar is the zero address");
+    require(_actionScoreManager != address(0), "ProofOfParticipation: actionScoreManager is the zero address");
+
     ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
     $.x2EarnApps = IX2EarnApps(_x2EarnApps);
     $.xAllocationVoting = _xAllocationVoting;
+    $.roundThreshold = _roundThreshold;
+    $.totalThreshold = _threshold;
+    $.isTotalScoreConsidered = _isTotalScoreConsidered;
+    $.roundsForCumulativeScore = _roundsForCumulativeScore;
   }
 
   // ---------- Modifiers ------------ //
