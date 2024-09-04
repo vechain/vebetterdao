@@ -3,7 +3,7 @@
 pragma solidity 0.8.20;
 
 /**
- * @title IX2EarnRewardsPool
+ * @title IX2EarnRewardsPoolV1
  * @dev Interface designed to be used by a contract that allows x2Earn apps to reward users that performed sustainable actions.
  * Funds can be deposited into this contract by specifying the app id that can access the funds.
  * Admins of x2EarnApps can withdraw funds from the rewards pool, whihc are sent to the team wallet.
@@ -51,14 +51,6 @@ interface IX2EarnRewardsPoolV1 {
     string proof,
     address indexed distributor
   );
-
-  /**
-   * @dev Event emitted when the proof of sustainability external contract call fails.
-   *
-   * @param reason The reason for the failure.
-   * @param lowLevelData The low level data returned by the external contract.
-   */
-  event RegisterActionFailed(string reason, bytes lowLevelData);
 
   /**
    * @dev Retrieves the current version of the contract.

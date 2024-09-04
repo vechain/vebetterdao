@@ -186,6 +186,9 @@ export async function deployAll(config: ContractsConfig) {
         await b3tr.getAddress(),
         await x2EarnApps.getAddress(),
       ],
+      [
+        config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
+      ],
       [veBetterPassportAddress],
     ],
     {

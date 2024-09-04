@@ -11,4 +11,8 @@ export const upgradeConfig = {
     name: "x-allocation-voting",
     versions: ["v2"],
   },
+  "X2Earn Rewards Pool": {
+    name: "x2earn-rewards-pool",
+    versions: ["v2"],
+  },
 } as const
