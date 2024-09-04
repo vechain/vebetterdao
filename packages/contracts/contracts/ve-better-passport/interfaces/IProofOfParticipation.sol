@@ -11,4 +11,10 @@ interface IProofOfParticipation {
 
   /// @notice Emitted when a user is not authorized to perform an action
   error ProofOfParticipationUnauthorizedUser(address user);
+
+  function registerAction(address user, bytes32 appId) external;
+
+  function registerActionForRound(address user, bytes32 appId, uint256 round) external;
+
+  function getQuadraticCumulativeScore(address user, uint256 round) external returns (uint256);
 }
