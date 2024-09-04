@@ -5,11 +5,10 @@ import { AppConfig } from "@repo/config"
 import fs from "fs"
 import path from "path"
 import { Network } from "@repo/constants"
-import { EnvConfig } from "@repo/config/contracts"
 
-const env = process.env.NEXT_PUBLIC_APP_ENV as EnvConfig
-if (!env) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set")
 const config = getConfig()
+const env = config.environment
+if (!env) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set")
 
 const isSoloNetwork = network.name === "vechain_solo"
 
