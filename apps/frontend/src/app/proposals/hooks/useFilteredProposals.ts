@@ -88,6 +88,6 @@ export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFil
   return {
     filteredProposals: sortedFilteredProposals,
     isLoading,
-    allProposals: proposalsEvents?.created ?? [],
+    allProposals: proposalsWithStateAndDeposit ?? [],
   }
 }

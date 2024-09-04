@@ -12,7 +12,9 @@
     "RUN_SIMULATION",
     "ENDORSE_XAPPS",
     "DO_NOT_UPGRADE",
-    "SHARD"
+    "SHARD",
+    "CONTRACT_TO_UPGRADE",
+    "CONTRACT_VERSION"
   ],
   "pipeline": {
     "install": {
@@ -90,6 +92,22 @@
     },
     "deploy:mainnet": {
       "dependsOn": ["^deploy:mainnet"]
+    },
+    "upgrade:contract": {
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": []
+    },
+    "upgrade:contract:local": {
+      "dependsOn": ["upgrade:contract"]
+    },
+    "upgrade:contract:solo-staging": {
+      "dependsOn": ["upgrade:contract"]
+    },
+    "upgrade:contract:testnet": {
+      "dependsOn": ["upgrade:contract"]
+    },
+    "upgrade:contract:mainnet": {
+      "dependsOn": ["upgrade:contract"]
     },
     "start-round:testnet": {
       "dependsOn": ["@repo/config#check-or-generate-local-config"],

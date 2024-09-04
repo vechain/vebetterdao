@@ -208,12 +208,14 @@ export async function deployAll(config: ContractsConfig) {
         await b3tr.getAddress(),
         await x2EarnApps.getAddress(),
       ],
-      [],
+      [
+        config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
+      ],
     ],
     {
       versions: [undefined, 2],
     },
-  )) as XAllocationPool
+  )) as X2EarnRewardsPool
 
   const xAllocationPool = (await deployAndUpgrade(
     ["XAllocationPoolV1", "XAllocationPool"],
@@ -294,7 +296,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as Emissions
 
   const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewards"],
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewards"],
     [
       [
         TEMP_ADMIN, // admin
@@ -307,8 +309,11 @@ export async function deployAll(config: ContractsConfig) {
         config.VOTER_REWARDS_MULTIPLIER,
       ],
       [],
+      [],
     ],
-    {},
+    {
+      versions: [undefined, 2, 3],
+    },
   )) as VoterRewards
 
   const xAllocationVoting = (await deployAndUpgrade(
@@ -336,41 +341,69 @@ export async function deployAll(config: ContractsConfig) {
     {},
   )) as XAllocationVoting
 
-  const governor = (await deployProxy(
-    "B3TRGovernorV1",
+  const governor = (await deployAndUpgrade(
+    ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernor"],
     [
-      {
-        vot3Token: await vot3.getAddress(),
-        timelock: await timelock.getAddress(),
-        xAllocationVoting: await xAllocationVoting.getAddress(),
-        b3tr: await b3tr.getAddress(),
-        quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-        initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
-        initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
-        initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
-        voterRewards: await voterRewards.getAddress(),
-        isFunctionRestrictionEnabled: true,
-      },
-      {
-        governorAdmin: TEMP_ADMIN,
-        pauser: config.CONTRACTS_ADMIN_ADDRESS,
-        contractsAddressManager: config.CONTRACTS_ADMIN_ADDRESS,
-        proposalExecutor: config.CONTRACTS_ADMIN_ADDRESS,
-        governorFunctionSettingsRoleAddress: TEMP_ADMIN,
-      },
+      [
+        {
+          vot3Token: await vot3.getAddress(),
+          timelock: await timelock.getAddress(),
+          xAllocationVoting: await xAllocationVoting.getAddress(),
+          b3tr: await b3tr.getAddress(),
+          quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+          initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
+          initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+          initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+          voterRewards: await voterRewards.getAddress(),
+          isFunctionRestrictionEnabled: true,
+        },
+        {
+          governorAdmin: TEMP_ADMIN,
+          pauser: config.CONTRACTS_ADMIN_ADDRESS,
+          contractsAddressManager: config.CONTRACTS_ADMIN_ADDRESS,
+          proposalExecutor: config.CONTRACTS_ADMIN_ADDRESS,
+          governorFunctionSettingsRoleAddress: TEMP_ADMIN,
+        },
+      ],
+      [],
+      [],
     ],
     {
-      GovernorClockLogicV1: await GovernorClockLogicLib.getAddress(),
-      GovernorConfiguratorV1: await GovernorConfiguratorLib.getAddress(),
-      GovernorDepositLogicV1: await GovernorDepositLogicLib.getAddress(),
-      GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLib.getAddress(),
-      GovernorProposalLogicV1: await GovernorProposalLogicLib.getAddress(),
-      GovernorQuorumLogicV1: await GovernorQuorumLogicLib.getAddress(),
-      GovernorStateLogicV1: await GovernorStateLogicLib.getAddress(),
-      GovernorVotesLogicV1: await GovernorVotesLogicLib.getAddress(),
+      versions: [undefined, 2, 3],
+      libraries: [
+        {
+          GovernorClockLogicV1: await GovernorClockLogicLib.getAddress(),
+          GovernorConfiguratorV1: await GovernorConfiguratorLib.getAddress(),
+          GovernorDepositLogicV1: await GovernorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogicV1: await GovernorProposalLogicLib.getAddress(),
+          GovernorQuorumLogicV1: await GovernorQuorumLogicLib.getAddress(),
+          GovernorStateLogicV1: await GovernorStateLogicLib.getAddress(),
+          GovernorVotesLogicV1: await GovernorVotesLogicLib.getAddress(),
+        },
+        {
+          GovernorClockLogicV1: await GovernorClockLogicLib.getAddress(),
+          GovernorConfiguratorV1: await GovernorConfiguratorLib.getAddress(),
+          GovernorDepositLogicV1: await GovernorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogicV1: await GovernorProposalLogicLib.getAddress(),
+          GovernorQuorumLogicV1: await GovernorQuorumLogicLib.getAddress(),
+          GovernorStateLogicV1: await GovernorStateLogicLib.getAddress(),
+          GovernorVotesLogicV1: await GovernorVotesLogicLib.getAddress(),
+        },
+        {
+          GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+          GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+        },
+      ],
     },
-    true,
-  )) as B3TRGovernorV1
+  )) as B3TRGovernor
 
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
@@ -847,6 +880,16 @@ export async function deployAll(config: ContractsConfig) {
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
     vechainNodesMock: vechainNodesMock,
+    libraries: {
+      governorClockLogic: GovernorClockLogicLib,
+      governorConfigurator: GovernorConfiguratorLib,
+      governorDepositLogic: GovernorDepositLogicLib,
+      governorFunctionRestrictionsLogic: GovernorFunctionRestrictionsLogicLib,
+      governorProposalLogic: GovernorProposalLogicLib,
+      governorQuorumLogic: GovernorQuorumLogicLib,
+      governorStateLogic: GovernorStateLogicLib,
+      governorVotesLogic: GovernorVotesLogicLib,
+    },
   }
   // close the script
 }

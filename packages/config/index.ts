@@ -6,6 +6,17 @@ import { EnvConfig, getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
 import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "./datadog"
 
+type B3TRGovernorLibraries = {
+  governorClockLogicAddress: string
+  governorConfiguratorAddress: string
+  governorDepositLogicAddress: string
+  governorFunctionRestrictionsLogicAddress: string
+  governorProposalLogicAddressAddress: string
+  governorQuorumLogicAddress: string
+  governorStateLogicAddress: string
+  governorVotesLogicAddress: string
+}
+
 export type AppConfig = {
   environment: EnvConfig
   basePath?: string
@@ -24,6 +35,7 @@ export type AppConfig = {
   treasuryContractAddress: string
   x2EarnAppsContractAddress: string
   x2EarnRewardsPoolContractAddress: string
+  b3trGovernorLibraries: B3TRGovernorLibraries
   nodeUrl: string
   network: Network
 }
