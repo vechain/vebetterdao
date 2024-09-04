@@ -1,5 +1,5 @@
 "use client"
-import { useAllocationsRound, useGetVotesOnBlock } from "@/api"
+import { useAllocationsRound, useGetVotesOnBlock, useIsQuadraticFundingDisabled } from "@/api"
 import { ResponsiveCard, VOT3Icon } from "@/components"
 import { useBreakpoints } from "@/hooks"
 import { VStack, Heading, Box, HStack, Skeleton, Text } from "@chakra-ui/react"
@@ -21,6 +21,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
     Number(roundInfo.voteStart),
     account ?? undefined,
   )
+  const { data: quadraticFundingDisabled } = useIsQuadraticFundingDisabled()
 
   return (
     <ResponsiveCard>
@@ -43,7 +44,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
             {t("VOT3 balance at snapshot")}
           </Text>
         </VStack>
-        {isDesktop && (
+        {isDesktop && !quadraticFundingDisabled && (
           <Box fontSize={"14px"} color={"#6A6A6A"} fontWeight={400}>
             <Text fontWeight={600}>{t("We use the quadratic formula to calculate the results")}</Text>
             <Text>
