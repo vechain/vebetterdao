@@ -4,6 +4,7 @@ import {
   XAllocationVoting,
   XAllocationVoting__factory,
   X2EarnApps,
+  TokenAuction,
 } from "../../typechain-types"
 import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
 import { buildTxBody, signAndSendTx } from "./txHelper"
@@ -45,19 +46,29 @@ export const registerXDapps = async (contractAddress: string, account: TestPk, a
   }
 }
 
-export const endorseXApps = async (endorsers: SeedAccount[], x2EarnApps: X2EarnApps, apps: string[]): Promise<void> => {
+export const endorseXApps = async (
+  endorsers: SeedAccount[],
+  x2EarnApps: X2EarnApps,
+  apps: string[],
+  vechainNodesMock: TokenAuction,
+): Promise<void> => {
   console.log("Endorsing x-apps...")
 
   for (let i = 0; i < apps.length; i++) {
+    const owner = endorsers[i].key.address
+    const nodeId = await vechainNodesMock.ownerToId(owner)
     const clause = clauseBuilder.functionInteraction(
       await x2EarnApps.getAddress(),
       coder.createInterface(JSON.stringify(X2EarnApps__factory.abi)).getFunction("endorseApp") as FunctionFragment,
-      [apps[i]],
+      [apps[i], nodeId],
     )
 
-    const body: TransactionBody = await buildTxBody([clause], endorsers[i].key.address, 32)
-
-    await signAndSendTx(body, endorsers[i].key.pk)
+    try {
+      const body: TransactionBody = await buildTxBody([clause], owner, 32)
+      await signAndSendTx(body, endorsers[i].key.pk)
+    } catch (e) {
+      console.log("Endorsing x-apps failed with error: ", e)
+    }
   }
 
   console.log("x-apps endorsed.")

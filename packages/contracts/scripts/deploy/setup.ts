@@ -127,7 +127,7 @@ export const setupLocalEnvironment = async (
   if (endorseApps) {
     // Get unendorsed XAPPs
     const unedorsedApps = await x2EarnApps.unendorsedAppIds()
-    await endorseXApps(endorserAccounts, x2EarnApps, unedorsedApps)
+    await endorseXApps(endorserAccounts, x2EarnApps, unedorsedApps, vechainNodesMock)
   }
 
   await startEmissions(emissionsContract, admin)
