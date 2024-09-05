@@ -1,4 +1,4 @@
-FROM vechain/thor:v2.1.2
+FROM vechain/thor:v2.1.3
 
 USER root
 

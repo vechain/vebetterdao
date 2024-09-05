@@ -88,7 +88,7 @@ async function zipFolder(sourceDir: string, outPath: fs.PathLike): Promise<void>
 async function saveContractsToFile(
   contracts: Record<string, string>,
   libraries: {
-    B3TRGovernorV1: Record<string, string>
+    B3TRGovernor: Record<string, string>
   },
 ): Promise<void> {
   const OUTPUT_PATH = path.join(__dirname, `../../deploy_output`)

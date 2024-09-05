@@ -9,8 +9,8 @@ slack_alert_channel   : C06M2KBPGSY
 slack_alert_workspace : T03L3PQD8GK
 
 #datadog settings
-environment_name: b3tr-dev
-secret_arn:   arn:aws:secretsmanager:eu-west-1:211125319139:secret:dev/datadog_keys-fbWmra
+environment_name : b3tr-dev
+secret_id : arn:aws:secretsmanager:eu-west-1:211125319139:secret:dev/datadog_keys-fbWmra
 
 
 #thor solo settings

@@ -31,6 +31,9 @@ import "./interfaces/IXAllocationVotingGovernor.sol";
 import "./interfaces/IEmissions.sol";
 import "./interfaces/IB3TR.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import "@openzeppelin/contracts/utils/types/Time.sol";
 
 /**
  * @title VoterRewards
@@ -50,14 +53,22 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * - UPGRADER_ROLE: The role that can upgrade the contract.
  * - VOTE_REGISTRAR_ROLE: The role that can register votes for rewards calculation.
  * - CONTRACTS_ADDRESS_MANAGER_ROLE: The role that can set the addresses of the contracts used by the VoterRewards contract.
- * 
- * @dev Differences from V1:
+ *
+ * ------------------ Version 2 Changes ------------------
+ * - Added quadratic rewarding disabled checkpoints to disable quadratic rewarding for a specific cycle.
+ * - Added the clock function to get the current block number.
+ * - Added functions to check if quadratic rewarding is disabled at a specific block number or for the current cycle.
+ * - Added function to disable quadratic rewarding or re-enable it.
+ *
+ * ------------------ Version 3 Changes ------------------
  * - Added the ability to track if a Galaxy Member NFT has voted in a proposal.
  * - Added the ability to track if a Vechain node attached to a Galaxy Member NFT has voted in a proposal.
  * - Proposal Id is now required when registering votes instead of proposal snapshot.
  * - Core logic functions are now virtual allowing to be overridden through inheritance.
  */
 contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+  using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
+
   /// @notice The role that can register votes for rewards calculation.
   bytes32 public constant VOTE_REGISTRAR_ROLE = keccak256("VOTE_REGISTRAR_ROLE");
 
@@ -81,7 +92,10 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     mapping(uint256 => uint256) cycleToTotal;
     // cycle => voter => total weighted votes for the voter in the cycle
     mapping(uint256 cycle => mapping(address voter => uint256 total)) cycleToVoterToTotal;
-    // --------------------------- V2 Additions --------------------------- //
+    // ----------------- V2 Additions ---------------- //
+    // checkpoints for the quadratic rewarding status for each cycle
+    Checkpoints.Trace208 quadraticRewardingDisabled;
+    // --------------------------- V3 Additions --------------------------- //
     // proposalId => tokenId => hasVoted (keeps track of whether a galaxy member has voted in a proposal)
     mapping(uint256 proposalId => mapping(uint256 tokenId => bool)) proposalToGalaxyMemberToHasVoted;
     // proposalId => nodeId => hasVoted (keeps track of whether a vechain node has been used while attached to a galaxy member NFT when voting for a proposal)
@@ -127,6 +141,10 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
   event LevelToMultiplierSet(uint256 indexed level, uint256 multiplier);
 
+  /// @notice Emits true if quadratic rewarding is disabled, false otherwise.
+  /// @param disabled - The flag to enable or disable quadratic rewarding.
+  event QuadraticRewardingToggled(bool indexed disabled);
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -167,8 +185,16 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // Determine the reward multiplier based on the GM NFT level and if the GM NFT or Vechain node attached have already voted on this proposal.
     uint256 multiplier = getMultiplier(selectedGMNFT, proposalId);
 
-    // Scale vote power by 1e9 to counteract the square root operation on 1e18.
-    uint256 scaledVotePower = votePower * 1e9;
+    // Set the scaled vote power to the total votes cast by the voter.
+    uint256 scaledVotePower = votes;
+
+    // Get the block number the emission cycle started.
+    uint48 emissionCycleStartBlock = SafeCast.toUint48($.emissions.lastEmissionBlock());
+
+    // If quadratic rewarding is enabled, scale the vote power by 1e9 to counteract the square root operation on 1e18. (0: enabled, 1: disabled)
+    if ($.quadraticRewardingDisabled.upperLookupRecent(emissionCycleStartBlock) == 0) {
+      scaledVotePower = votePower * 1e9;
+    }
 
     // Calculate the weighted vote power for rewards, adjusting vote power with the level-based multiplier.
     // votePower is the square root of the total votes cast by the voter.
@@ -325,6 +351,30 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     return $.b3tr;
   }
 
+  /// @notice Check if quadratic rewarding is disabled at a specific block number.
+  /// @dev To check if quadratic rewarding was disabled for a cycle, use the block number the cycle started.
+  /// @param blockNumber - The block number to check the quadratic rewarding status.
+  /// @return true if quadratic rewarding is disabled, false otherwise.
+  function isQuadraticRewardingDisabledAtBlock(uint48 blockNumber) public view returns (bool) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    // Check if quadratic rewarding is enabled or disabled at the block number.
+    return $.quadraticRewardingDisabled.upperLookupRecent(blockNumber) == 1; // 0: enabled, 1: disabled
+  }
+
+  /// @notice Check if quadratic rewarding is disabled for the current cycle.
+  /// @return true if quadratic rewarding is disabled, false otherwise.
+  function isQuadraticRewardingDisabledForCurrentCycle() public view returns (bool) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    // Get the block number the emission cycle started.
+    uint256 emissionCycleStartBlock = $.emissions.lastEmissionBlock();
+
+    uint208 currentStatus = $.quadraticRewardingDisabled.upperLookupRecent(SafeCast.toUint48(emissionCycleStartBlock));
+
+    // Check if quadratic rewarding is enabled or disabled for the current cycle.
+    return currentStatus == 1; // 0: enabled, 1: disabled
+  }
+
   // ----------------- Setters ----------------- //
 
   /// @notice Set the Galaxy Member contract.
@@ -364,10 +414,31 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     $.emissions = IEmissions(_emissions);
   }
 
+  /// @notice Toggle quadratic rewarding for a specific cycle.
+  /// @dev This function toggles the state of quadratic rewarding for a specific cycle.
+  /// The state will flip between enabled and disabled each time the function is called.
+  function toggleQuadraticRewarding() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    // Get the current status
+    bool currentStatus = isQuadraticRewardingDisabledForCurrentCycle();
+
+    // Toggle the status -> 0: enabled, 1: disabled
+    $.quadraticRewardingDisabled.push(clock(), currentStatus ? 0 : 1);
+
+    // Emit an event to log the new quadratic rewarding status.
+    emit QuadraticRewardingToggled(!currentStatus);
+  }
+
   /// @notice Returns the version of the contract
   /// @dev This should be updated every time a new version of implementation is deployed
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
-    return "2";
+    return "3";
+  }
+
+  /// @dev Clock used for flagging checkpoints.
+  function clock() public view virtual returns (uint48) {
+    return Time.blockNumber();
   }
 }

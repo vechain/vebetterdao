@@ -879,7 +879,7 @@ contract B3TRGovernorV1 is
    * @notice Authorizes upgrade to a new implementation
    * @param newImplementation The address of the new implementation
    */
-  function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
+  function _authorizeUpgrade(address newImplementation) internal override onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {}
 
   /**
    * @notice Checks if the contract supports a specific interface

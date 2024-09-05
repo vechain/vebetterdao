@@ -13,7 +13,6 @@ import {
   useIsDepositReached,
   useIsProposalQuorumReached,
   useProposalDepositEvent,
-  useProposalVoteEvents,
   useProposalSnapshotVotingPower,
   useProposalSnapshot,
   useGetVotesOnBlock,
@@ -29,7 +28,6 @@ import dayjs from "dayjs"
 export const useProposalDetailById = (proposalId: string) => {
   const { account } = useWallet()
   const proposalState = useProposalState(proposalId)
-  const proposalVoteEvents = useProposalVoteEvents(proposalId)
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
   const proposalCanceledEvent = useProposalCanceledEvent(proposalId)
   const proposalQueuedEvent = useProposalQueuedEvent(proposalId)
@@ -41,8 +39,8 @@ export const useProposalDetailById = (proposalId: string) => {
   const isDepositReached = useIsDepositReached(proposalId)
   const isProposalActive = useMemo(() => proposalState?.data === ProposalState.Active, [proposalState?.data])
   const isProposalNotPending = useMemo(() => proposalState?.data !== ProposalState.Pending, [proposalState?.data])
-  const proposalQuorum = useProposalQuorum(proposalSnapshotBlock, isProposalActive)
-  const isQuorumReached = useIsProposalQuorumReached(proposalId, isProposalActive)
+  const proposalQuorum = useProposalQuorum(proposalSnapshotBlock)
+  const isQuorumReached = useIsProposalQuorumReached(proposalId)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
   const proposalVotes = useProposalVotes(proposalId, isProposalNotPending)
   const proposalSnapshotVot3 = useGetVotesOnBlock(proposalSnapshotBlock, account ?? undefined, isProposalActive)
@@ -71,7 +69,6 @@ export const useProposalDetailById = (proposalId: string) => {
     () => [
       proposalState,
       proposalVotes,
-      proposalVoteEvents,
       proposalCreatedEvent,
       proposalCanceledEvent,
       proposalDepositEvent,
@@ -86,7 +83,6 @@ export const useProposalDetailById = (proposalId: string) => {
     [
       proposalState,
       proposalVotes,
-      proposalVoteEvents,
       proposalCreatedEvent,
       proposalCanceledEvent,
       proposalDepositEvent,
@@ -110,21 +106,15 @@ export const useProposalDetailById = (proposalId: string) => {
   } = useProposalVoteDates(proposalId)
 
   const proposal = useMemo(() => {
-    const userVote = proposalVoteEvents.data?.userVote
-    const votes = proposalVoteEvents.data?.votes
-    const votesWithComment = proposalVoteEvents.data?.votesWithComment
-    const hasUserVoted = proposalVoteEvents.data?.hasUserVoted
-    const totalVot3UsedInVotes = Number(ethers.formatEther(BigInt(proposalVoteEvents.data?.totalVot3UsedInVotes || 0)))
-    const totalVotingPowerUsedInVotes = Number(
-      ethers.formatEther(BigInt(proposalVoteEvents.data?.totalVotingPowerUsedInVotes || 0)),
-    )
+    const totalVotingPowerUsedInVotes = Number(proposalVotes.data?.totalVotes || "0")
 
     const forVotes = Number(proposalVotes.data?.forVotes || "0")
     const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
     const abstainVotes = Number(proposalVotes.data?.abstainVotes || "0")
-    const forPercentage = (totalVotingPowerUsedInVotes ? forVotes / totalVotingPowerUsedInVotes : 0) * 100
-    const againstPercentage = (totalVotingPowerUsedInVotes ? againstVotes / totalVotingPowerUsedInVotes : 0) * 100
-    const abstainPercentage = (totalVotingPowerUsedInVotes ? abstainVotes / totalVotingPowerUsedInVotes : 0) * 100
+    const forPercentage = Number(proposalVotes.data?.forPercentage || "0")
+
+    const againstPercentage = Number(proposalVotes.data?.againstPercentage || "0")
+    const abstainPercentage = Number(proposalVotes.data?.abstainPercentage || "0")
     const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
     const communityDeposits = proposalDepositEvent.communityDeposits
     const communityDepositPercentage = communityDeposits / depositThreshold
@@ -142,14 +132,13 @@ export const useProposalDetailById = (proposalId: string) => {
     const othersSupportUserCount = proposalDepositEvent.othersSupportUserCount
     const userVotingPowerOnSnapshot = ethers.formatEther(proposalSnapshotVotingPower.data || 0)
     const userVot3OnSnapshot = proposalSnapshotVot3.data ?? "0"
-    const quorumPercentage = totalVot3UsedInVotes ? totalVot3UsedInVotes / Number(proposalQuorum.data) : 0
-    const quorumChartPercentage = Math.min(quorumPercentage || 0, 1) * 100
     const result = {
       id: proposalId,
       proposalCanceledDate,
       title: proposalMetadata.data?.title || "",
       isTitleLoading: proposalCreatedEvent.isLoading || proposalMetadata.isLoading,
       description: proposalMetadata.data?.shortDescription || "",
+      type: (proposalCreatedEvent.data?.targets.length ?? 0) >= 1 ? "on-chain" : "text",
       isDescriptionLoading: proposalCreatedEvent.isLoading || proposalMetadata.isLoading,
       proposer: proposalCreatedEvent.data?.proposer || "",
       isProposerLoading: proposalCreatedEvent.isLoading,
@@ -191,7 +180,6 @@ export const useProposalDetailById = (proposalId: string) => {
       othersSupportUserCount,
       state: proposalState.data,
       isStateLoading: proposalState.isLoading,
-      totalVot3UsedInVotes,
       totalVotingPowerUsedInVotes,
       forVotes,
       againstVotes,
@@ -199,10 +187,6 @@ export const useProposalDetailById = (proposalId: string) => {
       forPercentage,
       againstPercentage,
       abstainPercentage,
-      votes,
-      votesWithComment,
-      userVote,
-      hasUserVoted,
       userVotingPowerOnSnapshot,
       isUserVotingPowerOnSnapshotLoading: proposalSnapshotVotingPower.isLoading,
       userVot3OnSnapshot,
@@ -214,8 +198,6 @@ export const useProposalDetailById = (proposalId: string) => {
       quorum: proposalQuorum.data || 0,
       quorumQuery: proposalQuorum,
       isQuorumLoading: proposalQuorum.isLoading,
-      quorumPercentage,
-      quorumChartPercentage,
       votingStartBlock,
       votingEndBlock,
       proposalVotesQuery: proposalVotes,
@@ -225,7 +207,6 @@ export const useProposalDetailById = (proposalId: string) => {
 
     return { ...result, ...mock }
   }, [
-    proposalVoteEvents,
     proposalCanceledDate,
     proposalVotes,
     proposalCreatedEvent,

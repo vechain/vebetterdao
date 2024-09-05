@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.20;
 
+import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+
 interface IGalaxyMember {
   error AccessControlBadConfirmation();
   error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);

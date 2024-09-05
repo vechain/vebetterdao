@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.20;
 
+import { ProofDataTypes } from "../libraries/ProofDataTypes.sol";
+
 /**
  * @title IX2EarnRewardsPool
  * @dev Interface designed to be used by a contract that allows x2Earn apps to reward users that performed sustainable actions.
@@ -85,11 +87,31 @@ interface IX2EarnRewardsPool {
 
   /**
    * @dev Function used by x2earn apps to reward users that performed sustainable actions.
+   * @notice This function is depracted in favor of the one that accepts separate impact and proof arguments.
    *
    * @param appId the app id that is emitting the reward
    * @param amount the amount of B3TR token the user is rewarded with
    * @param receiver the address of the user that performed the sustainable action and is rewarded
-   * @param proof a JSON file uploaded on IPFS by the app that adds information on the type of action that was performed
+   * @param proof deprecated argument, use the new function that accepts a ProofDataTypes.Proof argument
    */
   function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external;
+
+  /**
+   * @dev Function used by x2earn apps to reward users that performed sustainable actions.
+   *
+   * @param appId the app id that is emitting the reward
+   * @param amount the amount of B3TR token the user is rewarded with
+   * @param receiver the address of the user that performed the sustainable action and is rewarded
+   * @param proof a type and value pair that adds information on the type of action that was performed
+   * @param impact a list of codes and values that represent the impact of the sustainable action
+   * @param description a description of the sustainable action that was performed
+   */
+  function distributeRewardWithProof(
+    bytes32 appId,
+    uint256 amount,
+    address receiver,
+    ProofDataTypes.Proof memory proof,
+    ProofDataTypes.Impact memory impact,
+    string memory description
+  ) external;
 }

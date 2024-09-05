@@ -15,7 +15,7 @@ export function createLocalConfig() {
     */
     B3TR_GOVERNOR_WHITELISTED_METHODS: {
       B3TR: ["tokenDetails"],
-      B3TRGovernorV1: [
+      B3TRGovernor: [
         "upgradeToAndCall",
         "setXAllocationVoting",
         "setVoterRewards",

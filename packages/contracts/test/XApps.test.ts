@@ -27,7 +27,7 @@ import { buildTxBody, signAndSendTx } from "../scripts/helpers/txHelper"
 import { clauseBuilder, unitsUtils, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
 import { airdropVTHO } from "../scripts/helpers/airdrop"
 
-describe("X-Apps", function () {
+describe("X-Apps - @shard3", function () {
   describe("Deployment", function () {
     it("Clock mode is set correctly", async function () {
       const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })

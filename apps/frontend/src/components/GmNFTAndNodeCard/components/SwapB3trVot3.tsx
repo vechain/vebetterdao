@@ -20,7 +20,7 @@ const compactFormatter = getCompactFormatter(4)
 
 export const SwapB3trVot3 = () => {
   const { t } = useTranslation()
-  const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
+  const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useUserB3trBalance()
   const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useUserVot3Balance()
@@ -34,10 +34,10 @@ export const SwapB3trVot3 = () => {
   return (
     <>
       <VStack flex="2" align={"stretch"} gap="24px">
-        <Text fontSize={"20px"} fontWeight={700}>
+        <Text fontSize="xl" fontWeight={700}>
           {t("Your token balance")}
         </Text>
-        <Stack gap="24px" direction={isAbove1200 ? "row" : "column"}>
+        <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
           <VStack
             align={"stretch"}
             flex="1"
@@ -46,13 +46,13 @@ export const SwapB3trVot3 = () => {
             borderColor={"#FFFFFF33"}
             p="12px 16px"
             rounded="8px">
-            <Text fontSize={"14px"} color="#FFFFFFB2">
+            <Text fontSize="sm" color="#FFFFFFB2">
               {t("Total B3TR Balance")}
             </Text>
             <HStack>
               <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"30px"} alt="B3TR Icon" />
               <Skeleton isLoaded={!isB3trBalanceLoading}>
-                <Heading fontSize={"28px"}>{compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}</Heading>
+                <Heading fontSize="1.75rem">{compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}</Heading>
               </Skeleton>
             </HStack>
           </VStack>
@@ -64,13 +64,13 @@ export const SwapB3trVot3 = () => {
             borderColor={"#FFFFFF33"}
             p="12px 16px"
             rounded="8px">
-            <Text fontSize={"14px"} color="#FFFFFFB2">
+            <Text fontSize="sm" color="#FFFFFFB2">
               {t("Total VOT3 Balance")}
             </Text>
             <HStack>
               <Image src={"/images/logo/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
               <Skeleton isLoaded={!isVot3BalanceLoading}>
-                <Heading fontSize={"28px"}>{compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}</Heading>
+                <Heading fontSize="1.75rem">{compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}</Heading>
               </Skeleton>
             </HStack>
           </VStack>
@@ -88,7 +88,6 @@ export const SwapB3trVot3 = () => {
           }
           variant={"whiteAction"}
           rounded={"full"}
-          fontSize="16px"
           fontWeight={500}
           px="24px">
           {t("Convert tokens")}

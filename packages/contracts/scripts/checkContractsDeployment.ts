@@ -21,7 +21,7 @@ async function main() {
 // check if the contracts specified in the config file are deployed on the network, if not, deploy them (only on solo network)
 async function checkContractsDeployment() {
   try {
-    const code = await ethers.provider.getCode(config.b3trContractAddress)
+    const code = config.b3trContractAddress ? await ethers.provider.getCode(config.b3trContractAddress) : "0x"
     if (code === "0x") {
       console.log(`B3tr contract not deployed at address ${config.b3trContractAddress}`)
       if (isSoloNetwork) {
@@ -52,6 +52,17 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     x2EarnAppsContractAddress: await contracts.x2EarnApps.getAddress(),
     x2EarnRewardsPoolContractAddress: await contracts.x2EarnRewardsPool.getAddress(),
     nodeManagementContractAddress: await contracts.nodeManagement.getAddress(),
+    b3trGovernorLibraries: {
+      governorClockLogicAddress: await contracts.libraries.governorClockLogic.getAddress(),
+      governorConfiguratorAddress: await contracts.libraries.governorConfigurator.getAddress(),
+      governorDepositLogicAddress: await contracts.libraries.governorDepositLogic.getAddress(),
+      governorFunctionRestrictionsLogicAddress:
+        await contracts.libraries.governorFunctionRestrictionsLogic.getAddress(),
+      governorProposalLogicAddressAddress: await contracts.libraries.governorProposalLogic.getAddress(),
+      governorQuorumLogicAddress: await contracts.libraries.governorQuorumLogic.getAddress(),
+      governorStateLogicAddress: await contracts.libraries.governorStateLogic.getAddress(),
+      governorVotesLogicAddress: await contracts.libraries.governorVotesLogic.getAddress(),
+    },
   }
 
   // eslint-disable-next-line

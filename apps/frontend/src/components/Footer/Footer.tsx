@@ -8,7 +8,7 @@ import { Socials } from "./components/Socials"
 import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "@/constants"
 import { useTranslation } from "react-i18next"
 import { LanguageSelector } from "./components/LanguageSelector"
-import { version } from "../../../package.json"
+import packageJson from "../../../package.json"
 
 export const Footer: React.FC = () => {
   const { t } = useTranslation()
@@ -45,7 +45,7 @@ export const Footer: React.FC = () => {
             {t("2024 VeBetterDAO. All rights reserved.")}
           </Text>
           <Text fontSize="14px" color="#8c8c8c">
-            {t("Version")} {version}
+            {t("Version")} {packageJson.version}
           </Text>
         </VStack>
         <HStack spacing={4}>
@@ -103,7 +103,7 @@ export const Footer: React.FC = () => {
           {t("2024 VeBetterDAO. All rights reserved.")}
         </Text>
         <Text fontSize="14px" color="#8c8c8c">
-          {t("Version")} {version}
+          {t("Version")} {packageJson.version}
         </Text>
       </VStack>
     </VStack>

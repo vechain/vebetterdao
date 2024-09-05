@@ -22,7 +22,7 @@ export const NotConnectedWallet = () => {
         <Stack direction={isAbove1200 ? "row" : "column"} gap="24px" zIndex={"2"} align="center">
           <WalletIcon />
           <Stack align="stretch">
-            <Text fontSize={"24px"} fontWeight={600} align={isAbove1200 ? "left" : "center"}>
+            <Text fontSize="2xl" fontWeight={600} align={isAbove1200 ? "left" : "center"}>
               {t("Wallet not connected")}
             </Text>
             <Text align={isAbove1200 ? "left" : "center"}>
@@ -36,7 +36,6 @@ export const NotConnectedWallet = () => {
           leftIcon={<UilWallet size={"16px"} />}
           variant={"whiteAction"}
           rounded={"full"}
-          fontSize="16px"
           fontWeight={500}
           px="24px">
           {t("Connect Wallet")}

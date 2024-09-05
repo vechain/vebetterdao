@@ -31,6 +31,9 @@ import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+import { X2EarnAppsDataTypes } from "./libraries/X2EarnAppsDataTypes.sol";
+import { ProofDataTypes } from "./libraries/ProofDataTypes.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -50,6 +53,7 @@ contract X2EarnRewardsPool is
 {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
+  bytes32 public constant IMPACT_KEY_MANAGER_ROLE = keccak256("IMPACT_KEY_MANAGER_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -61,6 +65,8 @@ contract X2EarnRewardsPool is
     IB3TR b3tr;
     IX2EarnApps x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
+    mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
+    string[] allowedImpactKeys; // Array storing impact keys
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -71,6 +77,66 @@ contract X2EarnRewardsPool is
     assembly {
       $.slot := X2EarnRewardsPoolStorageLocation
     }
+  }
+
+  function initialize(
+    address _admin,
+    address _contractsManagerAdmin,
+    address _upgrader,
+    IB3TR _b3tr,
+    IX2EarnApps _x2EarnApps
+  ) external initializer {
+    require(_admin != address(0), "X2EarnRewardsPool: admin is the zero address");
+    require(_contractsManagerAdmin != address(0), "X2EarnRewardsPool: contracts manager admin is the zero address");
+    require(_upgrader != address(0), "X2EarnRewardsPool: upgrader is the zero address");
+    require(address(_b3tr) != address(0), "X2EarnRewardsPool: b3tr is the zero address");
+    require(address(_x2EarnApps) != address(0), "X2EarnRewardsPool: x2EarnApps is the zero address");
+
+    __UUPSUpgradeable_init();
+    __AccessControl_init();
+    __ReentrancyGuard_init();
+
+    _grantRole(DEFAULT_ADMIN_ROLE, _admin);
+    _grantRole(UPGRADER_ROLE, _upgrader);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, _contractsManagerAdmin);
+
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    $.b3tr = _b3tr;
+    $.x2EarnApps = _x2EarnApps;
+  }
+
+  function initializeV2(address _impactKeyManager) external reinitializer(2) {
+    require(_impactKeyManager != address(0), "X2EarnRewardsPool: impactKeyManager is the zero address");
+
+    _grantRole(IMPACT_KEY_MANAGER_ROLE, _impactKeyManager);
+
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    string[8] memory initialImpactKeys = [
+      "carbon",
+      "water",
+      "energy",
+      "waste_mass",
+      "learning_time",
+      "timber",
+      "plastic",
+      "trees_planted"
+    ];
+
+    for (uint256 i; i < initialImpactKeys.length; i++) {
+      _addImpactKey(initialImpactKeys[i], $);
+    }
+  }
+
+  // ---------- Modifiers ---------- //
+  /**
+   * @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
+   * @param role - the role to check
+   */
+  modifier onlyRoleOrAdmin(bytes32 role) {
+    if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+      revert("X2EarnRewardsPool: sender is not an admin nor has the required role");
+    }
+    _;
   }
 
   // ---------- Authorizers ---------- //
@@ -129,32 +195,184 @@ contract X2EarnRewardsPool is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-distributeReward}
+   * @dev Distribute rewards to a user with a self provided proof.
+   * @notice This function is deprecated and kept for backwards compatibility, will be removed in future versions.
    */
-  function distributeReward(
+  function distributeRewardDeprecated(bytes32 appId, uint256 amount, address receiver, string memory proof) external {
+    // emit event with provided json proof
+    emit RewardDistributed(amount, appId, receiver, proof, msg.sender);
+
+    _distributeReward(appId, amount, receiver);
+  }
+
+  /**
+   * @dev {IX2EarnRewardsPool-distributeReward}
+   * @notice the proof argument is unused but kept for backwards compatibility
+   */
+  function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory /*proof*/) external {
+    // emit event with empty proof
+    emit RewardDistributed(amount, appId, receiver, "", msg.sender);
+
+    _distributeReward(appId, amount, receiver);
+  }
+
+  /**
+   * @dev See {IX2EarnRewardsPool-distributeRewardWithProof}
+   */
+  function distributeRewardWithProof(
     bytes32 appId,
     uint256 amount,
     address receiver,
-    string memory proof
-  ) external nonReentrant {
+    ProofDataTypes.Proof memory proof,
+    ProofDataTypes.Impact memory impact,
+    string memory description
+  ) external {
+    _emitProof(appId, amount, receiver, proof, impact, description);
+    _distributeReward(appId, amount, receiver);
+  }
+
+  /**
+   * @dev See {IX2EarnRewardsPool-distributeReward}
+   * @notice The impact is an array of integers and codes that represent the impact of the action.
+   * Each index of the array represents a different impact.
+   * The codes are predefined and the values are the impact values.
+   * Example: ["carbon", "water", "energy"], [100, 200, 300]
+   */
+  function _distributeReward(bytes32 appId, uint256 amount, address receiver) internal nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
+    // check authorization
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
-
     require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
 
-    // check if the app has enough available funds to reward users
+    // check if the app has enough available funds to distribute
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
-
-    // check if the contract has enough funds
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
 
-    // transfer the rewards to the receiver
+    // Transfer the rewards to the receiver
     $.availableFunds[appId] -= amount;
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
+  }
+
+  /**
+   * @dev Emits the RewardDistributed event with the provided proofs and impacts.
+   */
+  function _emitProof(
+    bytes32 appId,
+    uint256 amount,
+    address receiver,
+    ProofDataTypes.Proof memory proof,
+    ProofDataTypes.Impact memory impact,
+    string memory description
+  ) internal {
+    // buildJsonProof
+    string memory jsonProof = _buildJsonProof(proof, impact, description);
 
     // emit event
-    emit RewardDistributed(amount, appId, receiver, proof, msg.sender);
+    emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
+  }
+
+  /**
+   * @dev Builds the JSON proof string.
+   */
+  function _buildJsonProof(
+    ProofDataTypes.Proof memory proof,
+    ProofDataTypes.Impact memory impact,
+    string memory description
+  ) internal view returns (string memory) {
+    bool hasProof = proof.types.length > 0 && proof.values.length > 0;
+    bool hasImpact = impact.codes.length > 0 && impact.values.length > 0;
+    bool hasDescription = bytes(description).length > 0;
+
+    // If neither proof nor impact is provided, return an empty string
+    if (!hasProof && !hasImpact) {
+      return "";
+    }
+
+    // Initialize an empty JSON bytes array with version
+    bytes memory json = abi.encodePacked('{"version": 2');
+
+    // Add description if available
+    if (hasDescription) {
+      json = abi.encodePacked(json, ',"description": "', description, '"');
+    }
+
+    // Add proof if available
+    if (hasProof) {
+      json = abi.encodePacked(json, ',"proof": {');
+
+      for (uint256 i; i < proof.types.length; i++) {
+        require(_isValidProofType(proof.types[i]), "X2EarnRewardsPool: Invalid proof type");
+
+        json = abi.encodePacked(json, '"', proof.types[i], '": "', proof.values[i], '"');
+
+        if (i < proof.types.length - 1) {
+          json = abi.encodePacked(json, ",");
+        }
+      }
+
+      json = abi.encodePacked(json, "}");
+    }
+
+    // Add impact if available
+    if (hasImpact) {
+      bytes memory jsonImpact = _buildImpactJson(impact);
+
+      if (hasProof || hasDescription) {
+        // Add a comma if proof or description was already added
+        json = abi.encodePacked(json, ",");
+      }
+
+      json = abi.encodePacked(json, '"impact": ', jsonImpact);
+    }
+
+    // Close the JSON object
+    json = abi.encodePacked(json, "}");
+
+    return string(json);
+  }
+
+  /**
+   * @dev Builds the impact JSON string.
+   * @param impact an array of integers that represent the impact of the action. Each index of the array
+   */
+  function _buildImpactJson(ProofDataTypes.Impact memory impact) internal view returns (bytes memory) {
+    require(impact.codes.length == impact.values.length, "Mismatched input lengths");
+
+    bytes memory json = abi.encodePacked("{");
+
+    for (uint256 i; i < impact.values.length; i++) {
+      if (_isAllowedImpactKey(impact.codes[i])) {
+        json = abi.encodePacked(json, '"', impact.codes[i], '":', Strings.toString(impact.values[i]));
+        if (i < impact.values.length - 1) {
+          json = abi.encodePacked(json, ",");
+        }
+      } else {
+        revert("X2EarnRewardsPool: Invalid impact key");
+      }
+    }
+
+    json = abi.encodePacked(json, "}");
+    return json;
+  }
+
+  /**
+   * @dev Checks if the key is allowed.
+   */
+  function _isAllowedImpactKey(string memory key) internal view returns (bool) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.impactKeyIndex[key] > 0;
+  }
+
+  /**
+   * @dev Checks if the proof type is valid.
+   */
+  function _isValidProofType(string memory proofType) internal pure returns (bool) {
+    return
+      keccak256(abi.encodePacked(proofType)) == keccak256(abi.encodePacked("image")) ||
+      keccak256(abi.encodePacked(proofType)) == keccak256(abi.encodePacked("link")) ||
+      keccak256(abi.encodePacked(proofType)) == keccak256(abi.encodePacked("text")) ||
+      keccak256(abi.encodePacked(proofType)) == keccak256(abi.encodePacked("video"));
   }
 
   /**
@@ -167,6 +385,45 @@ contract X2EarnRewardsPool is
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.x2EarnApps = _x2EarnApps;
+  }
+
+  /**
+   * @dev Adds a new allowed impact key.
+   * @param newKey the new key to add
+   */
+  function addImpactKey(string memory newKey) external onlyRoleOrAdmin(IMPACT_KEY_MANAGER_ROLE) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    _addImpactKey(newKey, $);
+  }
+
+  /**
+   * @dev Internal function to add a new allowed impact key.
+   * @param key the new key to add
+   * @param $ the storage pointer
+   */
+  function _addImpactKey(string memory key, X2EarnRewardsPoolStorage storage $) internal {
+    require($.impactKeyIndex[key] == 0, "X2EarnRewardsPool: Key already exists");
+    $.allowedImpactKeys.push(key);
+    $.impactKeyIndex[key] = $.allowedImpactKeys.length; // Store 1-based index
+  }
+
+  /**
+   * @dev Removes an allowed impact key.
+   * @param keyToRemove the key to remove
+   */
+  function removeImpactKey(string memory keyToRemove) external onlyRoleOrAdmin(IMPACT_KEY_MANAGER_ROLE) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    uint256 index = $.impactKeyIndex[keyToRemove];
+    require(index > 0, "X2EarnRewardsPool: Key not found");
+
+    // Move the last element into the place to delete
+    string memory lastKey = $.allowedImpactKeys[$.allowedImpactKeys.length - 1];
+    $.allowedImpactKeys[index - 1] = lastKey;
+    $.impactKeyIndex[lastKey] = index; // Update the index of the last key
+
+    // Remove the last element
+    $.allowedImpactKeys.pop();
+    delete $.impactKeyIndex[keyToRemove];
   }
 
   // ---------- Getters ---------- //
@@ -183,7 +440,7 @@ contract X2EarnRewardsPool is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "2";
+    return "3";
   }
 
   /**
@@ -200,6 +457,14 @@ contract X2EarnRewardsPool is
   function x2EarnApps() external view returns (IX2EarnApps) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.x2EarnApps;
+  }
+
+  /**
+   * @dev Retrieves the allowed impact keys.
+   */
+  function getAllowedImpactKeys() external view returns (string[] memory) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.allowedImpactKeys;
   }
 
   // ---------- Fallbacks ---------- //

@@ -1,7 +1,7 @@
 import { B3TR, Emissions, Treasury, VOT3, VoterRewards, XAllocationVoting } from "../../typechain-types"
 import { moveBlocks } from "../../test/helpers"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
-import { distributeEmissions, startEmissions } from "../helpers/emissions"
+import { distributeEmissions, startEmissions, toggleQuadraticRewarding } from "../helpers/emissions"
 import { airdropB3trFromTreasury, airdropVTHO, transferErc20 } from "../helpers/airdrop"
 import { convertB3trForVot3 } from "../helpers/swap"
 import { castVotesToXDapps } from "../helpers/xApp"
@@ -21,6 +21,7 @@ export const simulateRounds = async (
   treasury: Treasury,
 ) => {
   const start = performance.now()
+  console.log("================")
   console.log("Running simulation...")
 
   const accounts = getTestKeys(10)
@@ -64,7 +65,12 @@ export const simulateRounds = async (
   // Convert B3TR for VOT3
   await convertB3trForVot3(b3tr, vot3, seedAccounts)
 
-  for (let i = 1; i < 634; i++) {
+  for (let i = 1; i < 100; i++) {
+    // Disable quadratic rewarding after 10 rounds, then enable it again after 20 rounds
+    if (i === 10 || i === 30) {
+      await toggleQuadraticRewarding(voterRewards, admin)
+    }
+
     await distributeEmissions(emissionsContract, admin)
     const roundId = parseInt((await xAllocationVoting.currentRoundId()).toString())
     console.log(`Casting random votes to xDapps for round ${roundId}...`)

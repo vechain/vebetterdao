@@ -7,7 +7,7 @@ import { ProposalWithdrawButton } from "../ProposalWithdrawButton"
 import { useProposalDetail } from "../../hooks"
 import { FaRegHeart } from "react-icons/fa6"
 
-const compactFormatter = getCompactFormatter(2)
+const compactFormatter = getCompactFormatter(1)
 
 export const ProposalWithdrawDeposit = () => {
   const { proposal } = useProposalDetail()

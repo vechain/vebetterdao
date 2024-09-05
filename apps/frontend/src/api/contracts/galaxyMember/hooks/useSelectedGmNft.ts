@@ -1,0 +1,132 @@
+import { notFoundImage } from "@/constants"
+import { useIsGMclaimable } from "./useIsGMclaimable"
+import { NFTMetadata, useNFTImage } from "./useNFTImage"
+import { useUserB3trBalance } from "../../b3tr"
+import { useSelectedTokenId } from "./useSelectedTokenId"
+import { useNFTMetadataUri } from "./useNFTMetadataUri"
+import { useIpfsImage, useIpfsMetadata } from "@/api/ipfs"
+import { useLevelOfToken } from "./useLevelOfToken"
+import { useLevelMultiplier } from "./useLevelMultiplier"
+import { useB3trToUpgradeToLevel } from "./useB3trToUpgradeToLevel"
+
+/**
+ * Custom hook for retrieving data related to a Galaxy Member NFT.
+ *
+ * @returns An object containing the following properties:
+ *   - gmImage: The image URL of the Galaxy Member NFT.
+ *   - gmName: The name of the Galaxy Member NFT.
+ *   - gmLevel: The level of the Galaxy Member NFT.
+ *   - gmRewardMultiplier: The reward multiplier of the Galaxy Member NFT.
+ *   - isGMLoading: A boolean indicating whether the Galaxy Member NFT data is currently being loaded.
+ *   - isGMOwned: A boolean indicating whether the user owns the Galaxy Member NFT.
+ *   - isGMClaimable: A boolean indicating whether the Galaxy Member NFT is claimable.
+ */
+export const useSelectedGmNft = () => {
+  const { isOwned: isGMOwned, isClaimable: isGMClaimable } = useIsGMclaimable()
+  const { isLoading: isGMLoading } = useNFTImage()
+  const { data: b3trBalance } = useUserB3trBalance()
+  const {
+    data: selectedTokenId,
+    isLoading: isSelectedTokenIdLoading,
+    isError: isErrorSelectedTokenId,
+    error: errorSelectedTokenIdError,
+  } = useSelectedTokenId()
+
+  const {
+    data: gmLevel,
+    isLoading: isLevelOfTokenLoading,
+    isError: isErrorLevelOfToken,
+    error: errorLevelOfToken,
+  } = useLevelOfToken(selectedTokenId)
+
+  const {
+    data: gmRewardMultiplier,
+    isLoading: isGMLoadingMultiplier,
+    isError: isErrorGMLoadingMultiplier,
+    error: errorGMLoadingMultiplier,
+  } = useLevelMultiplier(gmLevel)
+
+  const {
+    data: nextLevelGMRewardMultiplier,
+    isLoading: isNextLevelGMRewardMultiplierLoading,
+    isError: isErrorNextLevelGMRewardMultiplier,
+    error: errorNextLevelGMRewardMultiplier,
+  } = useLevelMultiplier(String(Number(gmLevel) + 1))
+
+  const {
+    data: b3trToUpgradeGMToNextLevel,
+    isLoading: isB3trToUpgradeGMToNextLevelLoading,
+    isError: isErrorB3trToUpgradeGMToNextLevel,
+    error: errorB3trToUpgradeGMToNextLevel,
+  } = useB3trToUpgradeToLevel(String(Number(gmLevel) + 1))
+
+  const {
+    data: metadataURI,
+    isLoading: isLoadingMetadataUri,
+    isError: isErrorMetadataUri,
+    error: errorMetadataURI,
+  } = useNFTMetadataUri(selectedTokenId ?? null)
+
+  const {
+    data: nftMetadata,
+    isLoading: isLoadingMetadata,
+    isError: isErrorMetadata,
+    error: errorMetadata,
+  } = useIpfsMetadata<NFTMetadata>(metadataURI)
+
+  const {
+    data: gmImage,
+    isLoading: isLoadingImageData,
+    isError: isErrorImageData,
+    error: errorImageData,
+  } = useIpfsImage(nftMetadata?.image ?? null)
+
+  const isLoading =
+    isGMLoading ||
+    isSelectedTokenIdLoading ||
+    isLoadingMetadataUri ||
+    isLoadingMetadata ||
+    isLoadingImageData ||
+    isLevelOfTokenLoading ||
+    isGMLoadingMultiplier ||
+    isB3trToUpgradeGMToNextLevelLoading ||
+    isNextLevelGMRewardMultiplierLoading
+  const isError =
+    isErrorSelectedTokenId ||
+    isErrorMetadataUri ||
+    isErrorMetadata ||
+    isErrorImageData ||
+    isErrorLevelOfToken ||
+    isErrorGMLoadingMultiplier ||
+    isErrorB3trToUpgradeGMToNextLevel ||
+    isErrorNextLevelGMRewardMultiplier
+  const error =
+    errorSelectedTokenIdError ||
+    errorMetadataURI ||
+    errorMetadata ||
+    errorImageData ||
+    errorLevelOfToken ||
+    errorGMLoadingMultiplier ||
+    errorB3trToUpgradeGMToNextLevel ||
+    errorNextLevelGMRewardMultiplier
+
+  const isEnoughBalanceToUpgradeGM = b3trBalance && Number(b3trBalance?.scaled || 0) >= b3trToUpgradeGMToNextLevel
+  const missingB3trToUpgrade = b3trToUpgradeGMToNextLevel - Number(b3trBalance?.scaled || 0)
+
+  return {
+    gmImage: gmImage?.image || notFoundImage,
+    gmName: nftMetadata?.name,
+    gmLevel,
+    gmRewardMultiplier,
+    nextLevelGMRewardMultiplier,
+    isGMLoading,
+    isGMOwned,
+    isGMClaimable,
+    b3trToUpgradeGMToNextLevel,
+    isEnoughBalanceToUpgradeGM,
+    missingB3trToUpgrade,
+    isLoading,
+    isError,
+    error,
+  }
+}

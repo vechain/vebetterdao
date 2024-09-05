@@ -20,7 +20,7 @@ import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import { XAllocationPool, XAllocationPoolV1 } from "../typechain-types"
 import { endorseApp } from "./helpers/xnodes"
 
-describe("X-Allocation Pool", async function () {
+describe("X-Allocation Pool - @shard3", async function () {
   describe("Deployment", async function () {
     it("Contract is correctly initialized", async function () {
       const { xAllocationPool, owner, x2EarnApps, emissions, b3tr, treasury } = await getOrDeployContractInstances({

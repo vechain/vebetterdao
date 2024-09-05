@@ -22,12 +22,15 @@ export type ProposalVoteEvent = {
  * @param proposalId  the proposal id to get the events (optional)
  * @returns  the proposal vote events
  */
-export const getProposalsVoteEvents = async (thor: Connex.Thor, proposalId?: string) => {
+export const getProposalsVoteEvents = async (thor: Connex.Thor, proposalId?: string, voter?: string) => {
   const proposalVoteAbi = b3trGovernorAbi.find(abi => abi.name === "VoteCast")
   if (!proposalVoteAbi) throw new Error("ProposalVote event not found")
   const proposalVoteEvent = new abi.Event(proposalVoteAbi as abi.Event.Definition)
 
-  const proposalIdBytes = proposalId ? `0x${BigInt(proposalId).toString(16).padStart(64, "0")}` : undefined
+  const topics = proposalVoteEvent.encode({
+    ...(proposalId ? { proposalId: proposalId } : {}),
+    ...(voter ? { voter: voter } : {}),
+  })
 
   /**
    * Filter criteria to get the events from the governor contract that we are interested in
@@ -36,8 +39,11 @@ export const getProposalsVoteEvents = async (thor: Connex.Thor, proposalId?: str
   const filterCriteria = [
     {
       address: GOVERNANCE_CONTRACT,
-      topic0: proposalVoteEvent.signature,
-      topic2: proposalIdBytes,
+      topic0: topics[0] ?? undefined,
+      topic1: topics[1] ?? undefined,
+      topic2: topics[2] ?? undefined,
+      topic3: topics[3] ?? undefined,
+      topic4: topics[4] ?? undefined,
     },
   ]
 

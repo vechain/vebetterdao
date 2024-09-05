@@ -14,11 +14,13 @@ export const useXNode = () => {
   // TODO: map missing data
   const xNodeName = "X-Node"
   const xNodeImage = notFoundImage
+  const isXNodeLoading = false
   const xNodePoints = "100"
   const isXNodeHolder = true
-  const isXNodeAttachedToGM = isXNodeHolder && false
+  const isXNodeAttachedToGM = isXNodeHolder && true
 
   return {
+    isXNodeLoading,
     xNodeName,
     xNodeImage,
     xNodePoints,

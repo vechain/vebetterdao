@@ -1,22 +1,44 @@
-import { ProposalState } from "@/api"
-import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { VoteIcon } from "@/components"
-import { Button } from "@chakra-ui/react"
+import {
+  ProposalState,
+  useGetVotesOnBlock,
+  useProposalSnapshot,
+  useProposalState,
+  useUserSingleProposalVoteEvent,
+  useVotingThreshold,
+} from "@/api"
+
+import { Button, Icon } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { MdHowToVote } from "react-icons/md"
 
-export const CastProposalVoteButton = () => {
-  const { proposal } = useProposalDetail()
-  const { t } = useTranslation()
+type Props = {
+  proposalId: string
+}
+export const CastProposalVoteButton = ({ proposalId }: Props) => {
   const router = useRouter()
+  const { t } = useTranslation()
   const { account } = useWallet()
   const { open: openConnectModal } = useWalletModal()
 
+  const { data: userVote, isLoading: userVoteLoading } = useUserSingleProposalVoteEvent(proposalId)
+  const { data: state } = useProposalState(proposalId)
+  const { data: snapshotBlock } = useProposalSnapshot(proposalId)
+  const { data: userSnapshot } = useGetVotesOnBlock(
+    snapshotBlock ? Number(snapshotBlock) : undefined,
+    account ?? undefined,
+  )
+  const { data: threhsold } = useVotingThreshold()
+
+  const hasVotesAtSnapshot = useMemo(() => {
+    return Number(userSnapshot ?? 0) >= (threhsold ?? 0)
+  }, [userSnapshot, threhsold])
+
   const goToProposalVote = useCallback(() => {
-    router.push(`/proposals/${proposal.id}/vote`)
-  }, [proposal.id, router])
+    router.push(`/proposals/${proposalId}/vote`)
+  }, [proposalId, router])
 
   const handleClick = useCallback(() => {
     if (!account) {
@@ -26,12 +48,21 @@ export const CastProposalVoteButton = () => {
     goToProposalVote()
   }, [account, goToProposalVote, openConnectModal])
 
-  if (proposal.state === ProposalState.Active && !proposal.hasUserVoted) {
+  const shouldSeeVoteButton = useMemo(() => {
+    return state === ProposalState.Active && !!account && !userVote && !userVoteLoading && hasVotesAtSnapshot
+  }, [state, account, userVote, userVoteLoading, hasVotesAtSnapshot])
+
+  if (shouldSeeVoteButton)
     return (
-      <Button leftIcon={<VoteIcon boxSize={"16px"} color="white" />} onClick={handleClick} variant="primaryAction">
+      <Button
+        leftIcon={<Icon as={MdHowToVote} boxSize={4} />}
+        onClick={handleClick}
+        variant="primaryAction"
+        w={["full", "auto"]}
+        size={["lg", "md"]}>
         {t("Cast your vote")}
       </Button>
     )
-  }
+
   return null
 }

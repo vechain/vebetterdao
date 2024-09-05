@@ -72,32 +72,28 @@ export const ProposalTimeline = () => {
               title={activeStep > 3 ? t("Voting session ended") : t("Voting session ends")}
               description={dayjs(proposal.votingEndDate).format("MMM D, YYYY")}
             />,
-            <TimelineItem
-              key={4}
-              title={t("Proposal on queue")}
-              description={proposal.proposalQueuedDate ? dayjs(proposal.proposalQueuedDate).format("MMM D, YYYY") : ""}
-              actionButton={showQueueButton && <ProposalQueueButton />}
-            />,
-            <TimelineItem
-              key={5}
-              title={t("Proposal executed")}
-              description={
-                proposal.proposalExecutedDate ? dayjs(proposal.proposalExecutedDate).format("MMM D, YYYY") : ""
-              }
-              actionButton={showExecuteButton && <ProposalExecuteButton />}
-            />,
+            ...(proposal.type === "on-chain"
+              ? [
+                  <TimelineItem
+                    key={4}
+                    title={t("Proposal on queue")}
+                    description={
+                      proposal.proposalQueuedDate ? dayjs(proposal.proposalQueuedDate).format("MMM D, YYYY") : ""
+                    }
+                    actionButton={showQueueButton && <ProposalQueueButton />}
+                  />,
+                  <TimelineItem
+                    key={5}
+                    title={t("Proposal executed")}
+                    description={
+                      proposal.proposalExecutedDate ? dayjs(proposal.proposalExecutedDate).format("MMM D, YYYY") : ""
+                    }
+                    actionButton={showExecuteButton && <ProposalExecuteButton />}
+                  />,
+                ]
+              : []),
           ],
-    [
-      proposal.proposalExecutedDate,
-      proposal.proposalCanceledDate,
-      proposal.proposalQueuedDate,
-      proposal.votingEndDate,
-      proposal.votingStartDate,
-      showExecuteButton,
-      showQueueButton,
-      activeStep,
-      isCanceled,
-    ],
+    [proposal, showExecuteButton, showQueueButton, activeStep, isCanceled],
   )
 
   const height = useMemo(() => {

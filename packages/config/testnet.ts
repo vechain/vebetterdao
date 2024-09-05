@@ -19,6 +19,16 @@ const config: AppConfig = {
   x2EarnAppsContractAddress: "",
   treasuryContractAddress: "",
   x2EarnRewardsPoolContractAddress: "",
+  b3trGovernorLibraries: {
+    governorClockLogicAddress: "",
+    governorConfiguratorAddress: "",
+    governorDepositLogicAddress: "",
+    governorFunctionRestrictionsLogicAddress: "",
+    governorProposalLogicAddressAddress: "",
+    governorQuorumLogicAddress: "",
+    governorStateLogicAddress: "",
+    governorVotesLogicAddress: "",
+  },
   nodeUrl: "https://testnet.vechain.org",
   network: {
     id: "testnet",
