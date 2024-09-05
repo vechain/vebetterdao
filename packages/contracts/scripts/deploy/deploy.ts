@@ -19,6 +19,7 @@ import {
   B3TRGovernorV1,
   GalaxyMemberV1,
   VoterRewardsV1,
+  NodeManagement,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -182,6 +183,13 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as Treasury
 
+  // Deploy NodeManagement
+  const nodeManagement = (await deployProxy("NodeManagement", [
+    await vechainNodesMock.getAddress(),
+    config.CONTRACTS_ADMIN_ADDRESS,
+    config.CONTRACTS_ADMIN_ADDRESS,
+  ])) as NodeManagement
+
   const x2EarnApps = (await deployAndUpgrade(
     ["X2EarnAppsV1", "X2EarnApps"],
     [
@@ -191,7 +199,7 @@ export async function deployAll(config: ContractsConfig) {
         config.CONTRACTS_ADMIN_ADDRESS, // upgrader
         TEMP_ADMIN, // governance role
       ],
-      [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
+      [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress()],
     ],
     {
       versions: [undefined, 2],
