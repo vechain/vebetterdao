@@ -28,7 +28,7 @@ import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor, B3TRGovernorV1, B3TRGovernor__factory } from "../typechain-types"
-import { deployProxy } from "../scripts/helpers"
+import { deployAndUpgrade, deployProxy } from "../scripts/helpers"
 
 describe("Governor and TimeLock - @shard1", function () {
   describe("Governor deployment", function () {
@@ -5530,8 +5530,17 @@ describe("Governor and TimeLock - @shard1", function () {
           governorQuorumLogicLib,
           governorStateLogicLib,
           governorVotesLogicLib,
+          governorClockLogicLibV1,
+          governorConfiguratorLibV1,
+          governorDepositLogicLibV1,
+          governorFunctionRestrictionsLogicLibV1,
+          governorProposalLogicLibV1,
+          governorQuorumLogicLibV1,
+          governorStateLogicLibV1,
+          governorVotesLogicLibV1,
           owner,
           b3tr,
+          vot3,
           timeLock,
           voterRewards,
           xAllocationVoting,
@@ -5539,41 +5548,70 @@ describe("Governor and TimeLock - @shard1", function () {
           forceDeploy: true,
         })
 
-        governor = (await deployProxy(
-          "B3TRGovernorV1",
+        governor = await deployAndUpgrade(
+          ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernor"],
           [
-            {
-              vot3Token: await voterRewards.getAddress(), // wrong address
-              timelock: await timeLock.getAddress(),
-              xAllocationVoting: await xAllocationVoting.getAddress(),
-              b3tr: await b3tr.getAddress(),
-              quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-              initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
-              initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
-              initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
-              voterRewards: await voterRewards.getAddress(),
-              isFunctionRestrictionEnabled: true,
-            },
-            {
-              governorAdmin: owner.address,
-              pauser: owner.address,
-              contractsAddressManager: owner.address,
-              proposalExecutor: owner.address,
-              governorFunctionSettingsRoleAddress: owner.address,
-            },
+            [
+              {
+                vot3Token: await vot3.getAddress(),
+                timelock: await timeLock.getAddress(),
+                xAllocationVoting: await xAllocationVoting.getAddress(),
+                b3tr: await b3tr.getAddress(),
+                quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+                initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
+                initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+                initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+                voterRewards: await voterRewards.getAddress(),
+                isFunctionRestrictionEnabled: true,
+              },
+              {
+                governorAdmin: owner.address,
+                pauser: config.CONTRACTS_ADMIN_ADDRESS,
+                contractsAddressManager: config.CONTRACTS_ADMIN_ADDRESS,
+                proposalExecutor: config.CONTRACTS_ADMIN_ADDRESS,
+                governorFunctionSettingsRoleAddress: owner.address,
+              },
+            ],
+            [],
+            [],
           ],
           {
-            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
-            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
+            versions: [undefined, 2, 3],
+            libraries: [
+              {
+                GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+                GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+                GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+                GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+                GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+                GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+                GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+                GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+              },
+              {
+                GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+                GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+                GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+                GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+                GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+                GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+                GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+                GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+              },
+              {
+                GovernorClockLogic: await governorClockLogicLib.getAddress(),
+                GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+                GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+                GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+                GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+                GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+                GovernorStateLogic: await governorStateLogicLib.getAddress(),
+                GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+              },
+            ],
           },
-        )) as B3TRGovernor
-      })
+        )
+      }) as unknown as B3TRGovernor
 
       it("Should return the block number retrieved via the Time library if error occurs getting block form vot3 contract", async () => {
         const expectedBlockNumber = await ethers.provider.getBlockNumber()
