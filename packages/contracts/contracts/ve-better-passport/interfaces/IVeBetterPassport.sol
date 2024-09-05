@@ -8,4 +8,12 @@ interface IVeBetterPassport is IBotSignaling, IProofOfParticipation {
   error VeBetterPassportUnauthorizedUser(address user);
 
   function isPerson(address _user) external view returns (bool);
+
+  function assignSignalerToApp(bytes32 app, address user) external;
+
+  function removeSignalerFromApp(address user) external;
+
+  function grantRole(bytes32 role, address user) external;
+
+  function revokeRole(bytes32 role, address user) external;
 }

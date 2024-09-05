@@ -20,8 +20,10 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     // Mapping to store blacklist status
     mapping(address user => bool) _whitelisted;
     mapping(address user => uint256) _signaledCounter;
-
-    // TODO: store what app signaled the user and the amount of signals of user for each app
+    // App signals counter
+    mapping(address signaler => bytes32 app) _appOfSignaler;
+    mapping(bytes32 app => mapping(address user => uint256)) _appSignalsCounter;
+    mapping(bytes32 app => uint256) _appTotalSignalsCounter;
   }
 
   // keccak256(abi.encode(uint256(keccak256("storage.BotSignaling")) - 1)) & ~bytes32(uint256(0xff))
@@ -67,27 +69,74 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     _;
   }
 
+  // ---------- Getters ---------- //
+
+  /// @notice Returns if a user is whitelisted
+  function isWhitelisted(address _user) public view returns (bool) {
+    return _getBotSignalingStorage()._whitelisted[_user];
+  }
+
+  /// @notice Returns the number of times a user has been signaled
+  function signaledCounter(address _user) public view returns (uint256) {
+    return _getBotSignalingStorage()._signaledCounter[_user];
+  }
+
+  /// @notice Returns the belonging app of a signaler
+  function appOfSignaler(address _signaler) public view returns (bytes32) {
+    return _getBotSignalingStorage()._appOfSignaler[_signaler];
+  }
+
+  /// @notice Returns the number of times a user has been signaled by an app
+  function appSignalsCounter(bytes32 _app, address _user) public view returns (uint256) {
+    return _getBotSignalingStorage()._appSignalsCounter[_app][_user];
+  }
+
+  /// @notice Returns the total number of signals for an app
+  function appTotalSignalsCounter(bytes32 _app) public view returns (uint256) {
+    return _getBotSignalingStorage()._appTotalSignalsCounter[_app];
+  }
+
   // ---------- Setters ---------- //
 
+  /// @notice Signals a user
   function signalUser(address _user) external override onlyRoleOrAdmin(SIGNALER_ROLE) {
-    _getBotSignalingStorage()._signaledCounter[_user]++;
+    BotSignalingStorage storage $ = _getBotSignalingStorage();
+    $._signaledCounter[_user]++;
 
-    emit UserSignaled(_user, msg.sender);
+    bytes32 app = $._appOfSignaler[msg.sender];
+    $._appSignalsCounter[app][_user]++;
+    $._appTotalSignalsCounter[app]++;
+
+    emit UserSignaled(_user, msg.sender, app);
+  }
+
+  /// @notice Internal function to assign a signaler to an app
+  function _assignSignalerToApp(bytes32 _app, address _user) internal virtual {
+    require(_app != bytes32(0), "BotSignaling: app cannot be zero");
+    require(_user != address(0), "BotSignaling: user cannot be zero");
+
+    BotSignalingStorage storage $ = _getBotSignalingStorage();
+    $._appOfSignaler[_user] = _app;
+    emit SignalerAssignedToApp(_user, _app);
+  }
+
+  /// @notice Internal function to remove a signaler from an app
+  function _removeSignalerFromApp(address user) internal virtual {
+    require(user != address(0), "BotSignaling: user cannot be zero");
+
+    BotSignalingStorage storage $ = _getBotSignalingStorage();
+
+    // to emit in the event
+    bytes32 app = $._appOfSignaler[user];
+
+    $._appOfSignaler[user] = bytes32(0);
+
+    emit SignalerRemovedFromApp(user, app);
   }
 
   /// @notice user can be whitelisted but the counter will not be reset
   function whitelistUser(address _user) external override onlyRoleOrAdmin(WHITELISTER_ROLE) {
     _getBotSignalingStorage()._whitelisted[_user] = false;
     emit UserWhitelisted(_user, msg.sender);
-  }
-
-  // ---------- Getters ---------- //
-
-  function isWhitelisted(address _user) public view returns (bool) {
-    return _getBotSignalingStorage()._whitelisted[_user];
-  }
-
-  function signaledCounter(address _user) public view returns (uint256) {
-    return _getBotSignalingStorage()._signaledCounter[_user];
   }
 }

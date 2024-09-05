@@ -105,24 +105,6 @@ contract VeBetterPassport is
   /// @param newImplementation - the new implementation address
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}
 
-  // ---------- Setters ---------- //
-
-  /// @dev Grants a role to an account
-  /// @notice Overrides the grantRole function to add a modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
-  /// @param role - the role to grant
-  /// @param account - the account to grant the role to
-  function grantRole(bytes32 role, address account) public override onlyRoleOrAdmin(ROLE_GRANTER) {
-    _grantRole(role, account);
-  }
-
-  /// @dev Revokes a role from an account
-  /// @notice Overrides the revokeRole function to add a modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
-  /// @param role - the role to revoke
-  /// @param account - the account to revoke the role from
-  function revokeRole(bytes32 role, address account) public override onlyRoleOrAdmin(ROLE_GRANTER) {
-    _revokeRole(role, account);
-  }
-
   // ---------- Getters ---------- //
 
   /**
@@ -150,5 +132,46 @@ contract VeBetterPassport is
   /// @notice Returns the version of the contract
   function version() public pure virtual returns (string memory) {
     return "1";
+  }
+
+  // ---------- Setters ---------- //
+
+  // ---------- Overrides ---------- //
+
+  /// @dev Grants a role to an account
+  /// @notice Overrides the grantRole function to add a modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
+  /// @param role - the role to grant
+  /// @param account - the account to grant the role to
+  function grantRole(
+    bytes32 role,
+    address account
+  ) public override(AccessControlUpgradeable, IVeBetterPassport) onlyRoleOrAdmin(ROLE_GRANTER) {
+    _grantRole(role, account);
+  }
+
+  /// @dev Revokes a role from an account
+  /// @notice Overrides the revokeRole function to add a modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
+  /// @param role - the role to revoke
+  /// @param account - the account to revoke the role from
+  function revokeRole(
+    bytes32 role,
+    address account
+  ) public override(AccessControlUpgradeable, IVeBetterPassport) onlyRoleOrAdmin(ROLE_GRANTER) {
+    _revokeRole(role, account);
+  }
+
+  /// @dev Assigns a signaler to an app, allowing us to track the amount of signals from a specific app
+  /// @notice to be used together with grantRole
+  /// @param _app - the app ID
+  /// @param user - the signaler address
+  function assignSignalerToApp(bytes32 _app, address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
+    _assignSignalerToApp(_app, user);
+  }
+
+  /// @dev Removes a signaler from an app
+  /// @notice to be used together with revokeRole
+  /// @param user - the signaler address
+  function removeSignalerFromApp(address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
+    _removeSignalerFromApp(user);
   }
 }

@@ -3,7 +3,9 @@ pragma solidity 0.8.20;
 
 interface IBotSignaling {
   event UserWhitelisted(address indexed user, address indexed whitelister);
-  event UserSignaled(address indexed user, address indexed signaler);
+  event UserSignaled(address indexed user, address indexed signaler, bytes32 indexed app);
+  event SignalerAssignedToApp(address indexed signaler, bytes32 indexed app);
+  event SignalerRemovedFromApp(address indexed signaler, bytes32 indexed app);
 
   error BotSignalingUnauthorizedUser(address user);
 
