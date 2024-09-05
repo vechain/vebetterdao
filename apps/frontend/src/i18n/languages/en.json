@@ -1,4 +1,9 @@
 {
+  "New": "New",
+  "Submitted on {{date}}": "Submitted on {{date}}",
+  "{{value}} new apps": "{{value}} new apps",
+  "Active apps": "Active apps",
+  "Looking for endorsement": "Looking for endorsement",
   "Proposal canceled by creator or VeBetter": "Proposal canceled by creator or VeBetter",
   "Defeated": "Defeated",
   "Succeeded": "Succeeded",
