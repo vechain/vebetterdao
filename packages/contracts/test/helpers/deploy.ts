@@ -28,12 +28,13 @@ import {
   XAllocationPoolV1,
   X2EarnRewardsPoolV1,
   XAllocationVotingV1,
+  B3TRGovernor,
+  NodeManagement,
+  B3TRGovernorV1,
   B3TRGovernorV2,
   GalaxyMemberV1,
   VoterRewardsV2,
   VoterRewardsV1,
-  B3TRGovernorV1,
-  B3TRGovernor,
   GovernorClockLogic,
   GovernorConfigurator,
   GovernorDepositLogic,
@@ -66,6 +67,7 @@ interface DeployInstance {
   voterRewardsV1: VoterRewardsV1
   treasury: Treasury
   x2EarnRewardsPool: X2EarnRewardsPool
+  nodeManagement: NodeManagement
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -226,6 +228,13 @@ export const getOrDeployContractInstances = async ({
     { version: 2 },
   )) as GalaxyMember
 
+  // Deploy NodeManagement
+  const nodeManagement = (await deployProxy("NodeManagement", [
+    await vechainNodesMock.getAddress(),
+    owner.address,
+    owner.address,
+  ])) as NodeManagement
+
   // Deploy X2EarnAppsV1
   const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
     "ipfs://",
@@ -239,7 +248,7 @@ export const getOrDeployContractInstances = async ({
     "X2EarnAppsV1",
     "X2EarnApps",
     await x2EarnAppsV1.getAddress(),
-    [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
+    [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress()],
     { version: 2 },
   )) as X2EarnApps
 
@@ -530,6 +539,7 @@ export const getOrDeployContractInstances = async ({
     otherAccounts,
     treasury,
     x2EarnRewardsPool,
+    nodeManagement,
     governorClockLogicLib: GovernorClockLogicLib,
     governorConfiguratorLib: GovernorConfiguratorLib,
     governorDepositLogicLib: GovernorDepositLogicLib,

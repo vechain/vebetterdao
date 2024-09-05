@@ -5,7 +5,7 @@ help:
 
 # Thor solo
 solo-up: #@ Start Thor solo
-	docker compose -f packages/contracts/docker-compose.yaml up -d --wait thor-solo
+	docker compose -f packages/contracts/docker-compose.yaml up -d --wait 
 solo-down: #@ Stop Thor solo
 	docker compose -f packages/contracts/docker-compose.yaml down
 solo-clean: #@ Clean Thor solo

@@ -4,8 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:testnet": "next dev",
-    "dev:mainnet": "next dev",
     "staging": "next dev",
     "build": "next build",
     "start": "next start",

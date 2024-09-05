@@ -5,11 +5,10 @@ import { AppConfig } from "@repo/config"
 import fs from "fs"
 import path from "path"
 import { Network } from "@repo/constants"
-import { EnvConfig } from "@repo/config/contracts"
 
-const env = process.env.NEXT_PUBLIC_APP_ENV as EnvConfig
-if (!env) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set")
 const config = getConfig()
+const env = config.environment
+if (!env) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set")
 
 const isSoloNetwork = network.name === "vechain_solo"
 
@@ -52,6 +51,7 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     treasuryContractAddress: await contracts.treasury.getAddress(),
     x2EarnAppsContractAddress: await contracts.x2EarnApps.getAddress(),
     x2EarnRewardsPoolContractAddress: await contracts.x2EarnRewardsPool.getAddress(),
+    nodeManagementContractAddress: await contracts.nodeManagement.getAddress(),
     b3trGovernorLibraries: {
       governorClockLogicAddress: await contracts.libraries.governorClockLogic.getAddress(),
       governorConfiguratorAddress: await contracts.libraries.governorConfigurator.getAddress(),

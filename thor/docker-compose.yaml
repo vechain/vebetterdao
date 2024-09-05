@@ -16,6 +16,14 @@ services:
       - thor-volume:/data/thor
     networks:
       - vechain-thor
+  insight:
+    image: ghcr.io/vechain/insight-app:master
+    hostname: insight
+    container_name: insight
+    environment:
+      - VUE_APP_SOLO_URL=http://localhost:8669
+    ports:
+      - "8080:80"
 
 volumes:
   thor-volume:
