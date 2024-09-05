@@ -51,6 +51,7 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     treasuryContractAddress: await contracts.treasury.getAddress(),
     x2EarnAppsContractAddress: await contracts.x2EarnApps.getAddress(),
     x2EarnRewardsPoolContractAddress: await contracts.x2EarnRewardsPool.getAddress(),
+    nodeManagementContractAddress: await contracts.nodeManagement.getAddress(),
   }
 
   // eslint-disable-next-line

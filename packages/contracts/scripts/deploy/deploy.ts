@@ -855,6 +855,7 @@ export async function deployAll(config: ContractsConfig) {
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
     vechainNodesMock: vechainNodesMock,
+    nodeManagement: nodeManagement,
   }
   // close the script
 }

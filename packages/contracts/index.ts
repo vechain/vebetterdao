@@ -13,6 +13,7 @@ import X2EarnAppsJson from "./artifacts/contracts/X2EarnApps.sol/X2EarnApps.json
 import TreasuryJson from "./artifacts/contracts/Treasury.sol/Treasury.json"
 import X2EarnRewardsPoolJson from "./artifacts/contracts/X2EarnRewardsPool.sol/X2EarnRewardsPool.json"
 import VechainNodesJson from "./artifacts/contracts/mocks/VechainNodes/TokenAuction.sol/TokenAuction.json"
+import NodeManagementJson from "./artifacts/contracts/NodeManagement.sol/NodeManagement.json"
 
 export {
   VOT3__factory,
@@ -29,6 +30,7 @@ export {
   Treasury__factory,
   X2EarnRewardsPool__factory,
   TokenAuction__factory,
+  NodeManagement__factory,
 } from "./typechain-types"
 
 export {
@@ -47,4 +49,5 @@ export {
   TreasuryJson,
   X2EarnRewardsPoolJson,
   VechainNodesJson,
+  NodeManagementJson,
 }
