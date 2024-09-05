@@ -16,7 +16,6 @@ import {
   GovernorConfiguratorV1,
   GovernorDepositLogicV1,
   GovernorFunctionRestrictionsLogicV1,
-  GovernorGovernanceLogicV1,
   GovernorProposalLogicV1,
   GovernorQuorumLogicV1,
   GovernorStateLogicV1,
@@ -43,6 +42,7 @@ import {
   GovernorQuorumLogic,
   GovernorStateLogic,
   GovernorVotesLogic,
+  X2EarnRewardsPoolV2,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, upgradeProxy, deployLibraries } from "../../scripts/helpers"
@@ -253,13 +253,24 @@ export const getOrDeployContractInstances = async ({
   ])) as X2EarnRewardsPoolV1
 
   // Upgrade X2EarnRewardsPool V1 to V2
-  const x2EarnRewardsPool = (await upgradeProxy(
+  await upgradeProxy(
     "X2EarnRewardsPoolV1",
-    "X2EarnRewardsPool",
+    "X2EarnRewardsPoolV2",
     await x2EarnRewardsPoolV1.getAddress(),
     [owner.address],
     {
       version: 2,
+    },
+  )
+
+  // Upgrade X2EarnRewardsPool V2 to V3
+  const x2EarnRewardsPool = (await upgradeProxy(
+    "X2EarnRewardsPoolV2",
+    "X2EarnRewardsPool",
+    await x2EarnRewardsPoolV1.getAddress(),
+    [],
+    {
+      version: 3,
     },
   )) as X2EarnRewardsPool
 
@@ -433,7 +444,7 @@ export const getOrDeployContractInstances = async ({
     TimeLock: await timeLock.getAddress(),
     VOT3: await vot3.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
-    B3TRGovernorV1: await governor.getAddress(),
+    B3TRGovernor: await governor.getAddress(),
     X2EarnApps: await x2EarnApps.getAddress(),
   }
 
@@ -511,6 +522,7 @@ export const getOrDeployContractInstances = async ({
     xAllocationPool,
     emissions,
     voterRewards,
+    voterRewardsV1,
     owner,
     otherAccount,
     minterAccount,

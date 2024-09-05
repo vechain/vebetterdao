@@ -105,14 +105,14 @@ describe("Governor and TimeLock - @shard1", function () {
         emissions,
         xAllocationVoting,
         vot3,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
+        governorClockLogicLibV1,
+        governorConfiguratorLibV1,
+        governorDepositLogicLibV1,
+        governorFunctionRestrictionsLogicLibV1,
+        governorProposalLogicLibV1,
+        governorQuorumLogicLibV1,
+        governorStateLogicLibV1,
+        governorVotesLogicLibV1,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -123,14 +123,14 @@ describe("Governor and TimeLock - @shard1", function () {
       // Deploy the implementation contract
       const Contract = await ethers.getContractFactory("B3TRGovernorV1", {
         libraries: {
-          GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
-          GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
+          GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+          GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+          GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+          GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+          GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+          GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+          GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
         },
       })
       const implementation = await Contract.deploy()
@@ -227,14 +227,14 @@ describe("Governor and TimeLock - @shard1", function () {
 
     it("Should be able to upgrade the governor contract through governance when libraries change", async function () {
       const {
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
+        governorClockLogicLibV1,
+        governorConfiguratorLibV1,
+        governorDepositLogicLibV1,
+        governorFunctionRestrictionsLogicLibV1,
+        governorProposalLogicLibV1,
+        governorQuorumLogicLibV1,
+        governorStateLogicLibV1,
+        governorVotesLogicLibV1,
       } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
@@ -249,14 +249,14 @@ describe("Governor and TimeLock - @shard1", function () {
       // Deploy the implementation contract
       const Contract = await ethers.getContractFactory("B3TRGovernorV1", {
         libraries: {
-          GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
-          GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
+          GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+          GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+          GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+          GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+          GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+          GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+          GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
         },
       })
       const implementation = await Contract.deploy()
@@ -331,14 +331,14 @@ describe("Governor and TimeLock - @shard1", function () {
         timeLock,
         xAllocationVoting,
         voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
+        governorClockLogicLibV1,
+        governorConfiguratorLibV1,
+        governorDepositLogicLibV1,
+        governorFunctionRestrictionsLogicLibV1,
+        governorProposalLogicLibV1,
+        governorQuorumLogicLibV1,
+        governorStateLogicLibV1,
+        governorVotesLogicLibV1,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -368,14 +368,14 @@ describe("Governor and TimeLock - @shard1", function () {
           },
         ],
         {
-          GovernorClockLogic: await governorClockLogicLib.getAddress(),
-          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+          GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+          GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+          GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+          GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+          GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+          GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
         },
       )) as B3TRGovernorV1
 
@@ -445,14 +445,14 @@ describe("Governor and TimeLock - @shard1", function () {
         timeLock,
         xAllocationVoting,
         voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
+        governorClockLogicLibV1,
+        governorConfiguratorLibV1,
+        governorDepositLogicLibV1,
+        governorFunctionRestrictionsLogicLibV1,
+        governorProposalLogicLibV1,
+        governorQuorumLogicLibV1,
+        governorStateLogicLibV1,
+        governorVotesLogicLibV1,
       } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
@@ -482,14 +482,14 @@ describe("Governor and TimeLock - @shard1", function () {
             },
           ],
           {
-            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
-            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -503,14 +503,14 @@ describe("Governor and TimeLock - @shard1", function () {
         vot3,
         xAllocationVoting,
         voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
+        governorClockLogicLibV1,
+        governorConfiguratorLibV1,
+        governorDepositLogicLibV1,
+        governorFunctionRestrictionsLogicLibV1,
+        governorProposalLogicLibV1,
+        governorQuorumLogicLibV1,
+        governorStateLogicLibV1,
+        governorVotesLogicLibV1,
       } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
@@ -540,14 +540,14 @@ describe("Governor and TimeLock - @shard1", function () {
             },
           ],
           {
-            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
-            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -561,14 +561,14 @@ describe("Governor and TimeLock - @shard1", function () {
         timeLock,
         xAllocationVoting,
         voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
+        governorClockLogicLibV1,
+        governorConfiguratorLibV1,
+        governorDepositLogicLibV1,
+        governorFunctionRestrictionsLogicLibV1,
+        governorProposalLogicLibV1,
+        governorQuorumLogicLibV1,
+        governorStateLogicLibV1,
+        governorVotesLogicLibV1,
       } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
@@ -598,14 +598,14 @@ describe("Governor and TimeLock - @shard1", function () {
             },
           ],
           {
-            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
-            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -619,14 +619,14 @@ describe("Governor and TimeLock - @shard1", function () {
         timeLock,
         xAllocationVoting,
         voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
+        governorClockLogicLibV1,
+        governorConfiguratorLibV1,
+        governorDepositLogicLibV1,
+        governorFunctionRestrictionsLogicLibV1,
+        governorProposalLogicLibV1,
+        governorQuorumLogicLibV1,
+        governorStateLogicLibV1,
+        governorVotesLogicLibV1,
       } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
@@ -656,14 +656,14 @@ describe("Governor and TimeLock - @shard1", function () {
             },
           ],
           {
-            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
-            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -677,14 +677,14 @@ describe("Governor and TimeLock - @shard1", function () {
         vot3,
         timeLock,
         voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
+        governorClockLogicLibV1,
+        governorConfiguratorLibV1,
+        governorDepositLogicLibV1,
+        governorFunctionRestrictionsLogicLibV1,
+        governorProposalLogicLibV1,
+        governorQuorumLogicLibV1,
+        governorStateLogicLibV1,
+        governorVotesLogicLibV1,
       } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
@@ -714,14 +714,14 @@ describe("Governor and TimeLock - @shard1", function () {
             },
           ],
           {
-            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
-            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -735,14 +735,14 @@ describe("Governor and TimeLock - @shard1", function () {
         vot3,
         timeLock,
         xAllocationVoting,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
+        governorClockLogicLibV1,
+        governorConfiguratorLibV1,
+        governorDepositLogicLibV1,
+        governorFunctionRestrictionsLogicLibV1,
+        governorProposalLogicLibV1,
+        governorQuorumLogicLibV1,
+        governorStateLogicLibV1,
+        governorVotesLogicLibV1,
       } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
@@ -772,14 +772,14 @@ describe("Governor and TimeLock - @shard1", function () {
             },
           ],
           {
-            GovernorClockLogicV1: await governorClockLogicLib.getAddress(),
-            GovernorConfiguratorV1: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogicV1: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogicV1: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogicV1: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogicV1: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogicV1: await governorVotesLogicLib.getAddress(),
+            GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+            GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+            GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+            GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+            GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+            GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+            GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+            GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
           },
         ),
       ).to.be.reverted
@@ -793,7 +793,7 @@ describe("Governor and TimeLock - @shard1", function () {
       expect(await governor.depositThresholdPercentage()).to.eql(2n)
     })
 
-    it("Should not have state conflict after upgrading to V2", async () => {
+    it("Should not have state conflict after upgrading to V2 and V3", async () => {
       const config = createLocalConfig()
       const {
         owner,
@@ -812,6 +812,14 @@ describe("Governor and TimeLock - @shard1", function () {
         otherAccount,
         governorStateLogicLib,
         governorVotesLogicLib,
+        governorClockLogicLibV1,
+        governorConfiguratorLibV1,
+        governorDepositLogicLibV1,
+        governorFunctionRestrictionsLogicLibV1,
+        governorProposalLogicLibV1,
+        governorQuorumLogicLibV1,
+        governorStateLogicLibV1,
+        governorVotesLogicLibV1,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -841,27 +849,27 @@ describe("Governor and TimeLock - @shard1", function () {
           },
         ],
         {
-          GovernorClockLogic: await governorClockLogicLib.getAddress(),
-          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+          GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+          GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+          GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+          GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+          GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+          GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
         },
       )) as B3TRGovernor
 
       const b3trGovernorFactory = await ethers.getContractFactory("B3TRGovernorV1", {
         libraries: {
-          GovernorClockLogic: await governorClockLogicLib.getAddress(),
-          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+          GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+          GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+          GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+          GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+          GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+          GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
         },
       })
 
@@ -960,16 +968,16 @@ describe("Governor and TimeLock - @shard1", function () {
       ) // removing empty slots and slots that track governance proposals getting executed on the governor
 
       // Upgrade to V2 via governance
-      const Contract = await ethers.getContractFactory("B3TRGovernor", {
+      const Contract = await ethers.getContractFactory("B3TRGovernorV2", {
         libraries: {
-          GovernorClockLogic: await governorClockLogicLib.getAddress(),
-          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+          GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+          GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+          GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+          GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+          GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+          GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+          GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
         },
       })
       const implementation = await Contract.deploy()
@@ -1059,6 +1067,57 @@ describe("Governor and TimeLock - @shard1", function () {
       expect(proposalVotesPostUpgrade).to.eql(proposalVotesPreUpgrade)
       expect(quorumDenominatorPostUpgrade).to.eql(quorumDenominatorPreUpgrade)
       expect(quorumDepositThresholdPostUpgrade).to.eql(quorumDepositThresholdPreUpgrade)
+
+      storageSlots = []
+
+      for (let i = initialSlot; i < initialSlot + BigInt(50); i++) {
+        storageSlots.push(await ethers.provider.getStorage(await governorV1.getAddress(), i))
+      }
+
+      storageSlots = storageSlots.filter(
+        slot =>
+          slot !== "0x0000000000000000000000000000000000000000000000000000000000000000" &&
+          slot !== "0x0000000000000000000000000000000200000000000000000000000000000002",
+      ) // removing empty slots and slots that track governance proposals getting executed on the governor
+
+      // Upgrade to V3
+      const ContractV3 = await ethers.getContractFactory("B3TRGovernor", {
+        libraries: {
+          GovernorClockLogic: await governorClockLogicLib.getAddress(),
+          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await governorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+        },
+      })
+      const implementationv3 = await ContractV3.deploy()
+      await implementationv3.waitForDeployment()
+
+      // Now we can create a proposal
+      const tx3 = await governorV2.upgradeToAndCall(await implementationv3.getAddress(), "0x")
+      await tx3.wait()
+
+      const governorV3 = ContractV3.attach(await governorV1.getAddress()) as B3TRGovernor
+
+      storageSlotsAfter = []
+
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlotsAfter.push(await ethers.provider.getStorage(await governorV3.getAddress(), i))
+      }
+
+      storageSlotsAfter = storageSlotsAfter.filter(
+        slot =>
+          slot !== "0x0000000000000000000000000000000000000000000000000000000000000000" &&
+          slot !== "0x0000000000000000000000000000000200000000000000000000000000000002",
+      ) // removing empty slots and slots that track governance proposals getting executed on the governor
+
+      // Check if storage slots are the same after upgrade
+      for (let i = 0; i < storageSlots.length; i++) {
+        expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
+      }
     })
   })
 

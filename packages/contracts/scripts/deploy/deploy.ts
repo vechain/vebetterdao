@@ -25,7 +25,7 @@ import { HttpNetworkConfig } from "hardhat/types"
 import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } from "./setup"
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { deployAndUpgrade, deployProxy, saveContractsToFile } from "../helpers"
+import { deployAndUpgrade, deployProxy, saveContractsToFile, deployLibraries } from "../helpers"
 import { shouldEndorseXApps, shouldRunSimulation } from "@repo/config/contracts"
 
 // GalaxyMember NFT Values
@@ -52,70 +52,24 @@ export async function deployAll(config: ContractsConfig) {
   // ---------- Contracts Deployment ---------- //
   console.log(`================  Contracts Deployment Initiated `)
   // ---------------------- Deploy Libraries ----------------------
-  // Deploy Governor Clock Logic
-  const GovernorClockLogic = await ethers.getContractFactory("GovernorClockLogicV1")
-  const GovernorClockLogicLib = await GovernorClockLogic.deploy()
-  await GovernorClockLogicLib.waitForDeployment()
-
-  // Deploy Governor Configurator
-  const GovernorConfigurator = await ethers.getContractFactory("GovernorConfiguratorV1")
-  const GovernorConfiguratorLib = await GovernorConfigurator.deploy()
-  await GovernorConfiguratorLib.waitForDeployment()
-
-  // Deploy Governor Function Restrictions Logic
-  const GovernorFunctionRestrictionsLogic = await ethers.getContractFactory("GovernorFunctionRestrictionsLogicV1")
-  const GovernorFunctionRestrictionsLogicLib = await GovernorFunctionRestrictionsLogic.deploy()
-  await GovernorFunctionRestrictionsLogicLib.waitForDeployment()
-
-  // Deploy Governor Governance Logic
-  const GovernorGovernanceLogic = await ethers.getContractFactory("GovernorGovernanceLogicV1")
-  const GovernorGovernanceLogicLib = await GovernorGovernanceLogic.deploy()
-  await GovernorGovernanceLogicLib.waitForDeployment()
-
-  // Deploy Governor Quorum Logic
-  const GovernorQuorumLogic = await ethers.getContractFactory("GovernorQuorumLogicV1", {
-    libraries: {
-      GovernorClockLogicV1: await GovernorClockLogicLib.getAddress(),
-    },
-  })
-  const GovernorQuorumLogicLib = await GovernorQuorumLogic.deploy()
-  await GovernorQuorumLogicLib.waitForDeployment()
-
-  // Deploy Governor Proposal Logic
-  const GovernorProposalLogic = await ethers.getContractFactory("GovernorProposalLogicV1", {
-    libraries: {
-      GovernorClockLogicV1: await GovernorClockLogicLib.getAddress(),
-    },
-  })
-  const GovernorProposalLogicLib = await GovernorProposalLogic.deploy()
-  await GovernorProposalLogicLib.waitForDeployment()
-
-  // Deploy Governor Votes Logic
-  const GovernorVotesLogic = await ethers.getContractFactory("GovernorVotesLogicV1", {
-    libraries: {
-      GovernorClockLogicV1: await GovernorClockLogicLib.getAddress(),
-    },
-  })
-  const GovernorVotesLogicLib = await GovernorVotesLogic.deploy()
-  await GovernorVotesLogicLib.waitForDeployment()
-
-  // Deploy Governor Deposit Logic
-  const GovernorDepositLogic = await ethers.getContractFactory("GovernorDepositLogicV1", {
-    libraries: {
-      GovernorClockLogicV1: await GovernorClockLogicLib.getAddress(),
-    },
-  })
-  const GovernorDepositLogicLib = await GovernorDepositLogic.deploy()
-  await GovernorDepositLogicLib.waitForDeployment()
-
-  // Deploy Governor State Logic
-  const GovernorStateLogic = await ethers.getContractFactory("GovernorStateLogicV1", {
-    libraries: {
-      GovernorClockLogicV1: await GovernorClockLogicLib.getAddress(),
-    },
-  })
-  const GovernorStateLogicLib = await GovernorStateLogic.deploy()
-  await GovernorStateLogicLib.waitForDeployment()
+  const {
+    GovernorClockLogicLibV1,
+    GovernorConfiguratorLibV1,
+    GovernorDepositLogicLibV1,
+    GovernorFunctionRestrictionsLogicLibV1,
+    GovernorProposalLogicLibV1,
+    GovernorQuorumLogicLibV1,
+    GovernorVotesLogicLibV1,
+    GovernorStateLogicLibV1,
+    GovernorClockLogicLib,
+    GovernorConfiguratorLib,
+    GovernorDepositLogicLib,
+    GovernorFunctionRestrictionsLogicLib,
+    GovernorProposalLogicLib,
+    GovernorQuorumLogicLib,
+    GovernorVotesLogicLib,
+    GovernorStateLogicLib,
+  } = await deployLibraries()
 
   console.log("================ Deploying Vechain Nodes mock contracts =================")
 
@@ -199,7 +153,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as X2EarnApps
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
-    ["X2EarnRewardsPoolV1", "X2EarnRewardsPool"],
+    ["X2EarnRewardsPoolV1", "X2EarnRewardsPoolV2", "X2EarnRewardsPool"],
     [
       [
         config.CONTRACTS_ADMIN_ADDRESS, // admin
@@ -211,9 +165,10 @@ export async function deployAll(config: ContractsConfig) {
       [
         config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
       ],
+      [],
     ],
     {
-      versions: [undefined, 2],
+      versions: [undefined, 2, 3],
     },
   )) as X2EarnRewardsPool
 
@@ -372,24 +327,24 @@ export async function deployAll(config: ContractsConfig) {
       versions: [undefined, 2, 3],
       libraries: [
         {
-          GovernorClockLogicV1: await GovernorClockLogicLib.getAddress(),
-          GovernorConfiguratorV1: await GovernorConfiguratorLib.getAddress(),
-          GovernorDepositLogicV1: await GovernorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogicV1: await GovernorProposalLogicLib.getAddress(),
-          GovernorQuorumLogicV1: await GovernorQuorumLogicLib.getAddress(),
-          GovernorStateLogicV1: await GovernorStateLogicLib.getAddress(),
-          GovernorVotesLogicV1: await GovernorVotesLogicLib.getAddress(),
+          GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
+          GovernorConfiguratorV1: await GovernorConfiguratorLibV1.getAddress(),
+          GovernorDepositLogicV1: await GovernorDepositLogicLibV1.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLibV1.getAddress(),
+          GovernorProposalLogicV1: await GovernorProposalLogicLibV1.getAddress(),
+          GovernorQuorumLogicV1: await GovernorQuorumLogicLibV1.getAddress(),
+          GovernorStateLogicV1: await GovernorStateLogicLibV1.getAddress(),
+          GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
         },
         {
-          GovernorClockLogicV1: await GovernorClockLogicLib.getAddress(),
-          GovernorConfiguratorV1: await GovernorConfiguratorLib.getAddress(),
-          GovernorDepositLogicV1: await GovernorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogicV1: await GovernorProposalLogicLib.getAddress(),
-          GovernorQuorumLogicV1: await GovernorQuorumLogicLib.getAddress(),
-          GovernorStateLogicV1: await GovernorStateLogicLib.getAddress(),
-          GovernorVotesLogicV1: await GovernorVotesLogicLib.getAddress(),
+          GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
+          GovernorConfiguratorV1: await GovernorConfiguratorLibV1.getAddress(),
+          GovernorDepositLogicV1: await GovernorDepositLogicLibV1.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLibV1.getAddress(),
+          GovernorProposalLogicV1: await GovernorProposalLogicLibV1.getAddress(),
+          GovernorQuorumLogicV1: await GovernorQuorumLogicLibV1.getAddress(),
+          GovernorStateLogicV1: await GovernorStateLogicLibV1.getAddress(),
+          GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
         },
         {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -425,17 +380,17 @@ export async function deployAll(config: ContractsConfig) {
   }
 
   const libraries: {
-    B3TRGovernorV1: Record<string, string>
+    B3TRGovernor: Record<string, string>
   } = {
-    B3TRGovernorV1: {
-      GovernorClockLogicV1: await GovernorClockLogicLib.getAddress(),
-      GovernorConfiguratorV1: await GovernorConfiguratorLib.getAddress(),
-      GovernorDepositLogicV1: await GovernorDepositLogicLib.getAddress(),
-      GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLib.getAddress(),
-      GovernorProposalLogicV1: await GovernorProposalLogicLib.getAddress(),
-      GovernorQuorumLogicV1: await GovernorQuorumLogicLib.getAddress(),
-      GovernorStateLogicV1: await GovernorStateLogicLib.getAddress(),
-      GovernorVotesLogicV1: await GovernorVotesLogicLib.getAddress(),
+    B3TRGovernor: {
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+      GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
+      GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
+      GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+      GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
+      GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
+      GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
+      GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
     },
   }
 

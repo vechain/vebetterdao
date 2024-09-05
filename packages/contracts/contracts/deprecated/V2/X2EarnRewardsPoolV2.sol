@@ -26,14 +26,14 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
-import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
-import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
+import { IB3TR } from "../V1/interfaces/IB3TR.sol";
+import { IX2EarnApps } from "../V1/interfaces/IX2EarnApps.sol";
+import { IX2EarnRewardsPool } from "../V1/interfaces/IX2EarnRewardsPool.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import { X2EarnAppsDataTypes } from "./libraries/X2EarnAppsDataTypes.sol";
-import { ProofDataTypes } from "./libraries/ProofDataTypes.sol";
+import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
+import { ProofDataTypes } from "../../libraries/ProofDataTypes.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -45,7 +45,7 @@ import { ProofDataTypes } from "./libraries/ProofDataTypes.sol";
  * to the team wallet.
  * The contract is upgradable through the UUPS proxy pattern and UPGRADER_ROLE can authorize the upgrade.
  */
-contract X2EarnRewardsPool is
+contract X2EarnRewardsPoolV2 is
   IX2EarnRewardsPool,
   UUPSUpgradeable,
   AccessControlUpgradeable,
@@ -440,7 +440,7 @@ contract X2EarnRewardsPool is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "3";
+    return "2";
   }
 
   /**
