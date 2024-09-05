@@ -539,6 +539,7 @@ export const getOrDeployContractInstances = async ({
     otherAccounts,
     treasury,
     x2EarnRewardsPool,
+    nodeManagement,
     governorClockLogicLib: GovernorClockLogicLib,
     governorConfiguratorLib: GovernorConfiguratorLib,
     governorDepositLogicLib: GovernorDepositLogicLib,
