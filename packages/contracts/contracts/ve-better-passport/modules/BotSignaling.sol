@@ -5,6 +5,9 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IBotSignaling } from "../interfaces/IBotSignaling.sol";
 
+/// @title BotSignaling
+/// @notice Contract to handle the signaling of users that apps consider as bots or malicious actors.
+/// Only addresses with the SIGNALER_ROLE can signal users.
 contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling {
   bytes32 public constant SIGNALER_ROLE = keccak256("SIGNALER_ROLE");
   bytes32 public constant WHITELISTER_ROLE = keccak256("WHITELISTER_ROLE");

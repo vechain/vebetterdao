@@ -8,6 +8,10 @@ import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
+/// @title ProofOfParticipation
+/// @notice This contract is used to track the actions of users in the VeBetterDAO ecosystem.
+/// The contract calculates the score of a user based on the actions performed by him inside
+/// a specific range of rounds.
 contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProofOfParticipation {
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
   bytes32 public constant ACTION_REGISTRAR_ROLE = keccak256("ACTION_REGISTRAR_ROLE");
