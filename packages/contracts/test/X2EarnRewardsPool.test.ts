@@ -49,7 +49,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
     it("Version should be set correctly", async function () {
       const { x2EarnRewardsPool } = await getOrDeployContractInstances({ forceDeploy: false })
-      expect(await x2EarnRewardsPool.version()).to.equal("2")
+      expect(await x2EarnRewardsPool.version()).to.equal("3")
     })
 
     it("X2EarnApps should be set correctly", async function () {
