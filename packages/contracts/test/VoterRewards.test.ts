@@ -1619,10 +1619,6 @@ describe("VoterRewards - @shard2", () => {
       // GM NFT token mint and upgrade
       await galaxyMember.connect(voter1).freeMint()
 
-      await galaxyMember.connect(voter1).burn(0)
-
-      await galaxyMember.connect(voter1).freeMint()
-
       await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
       expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(voter1.address))).to.equal(5)
@@ -1762,9 +1758,6 @@ describe("VoterRewards - @shard2", () => {
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
       // GM NFT token mint and upgrade
-      await galaxyMember.connect(voter1).freeMint()
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint()
 
@@ -1908,9 +1901,6 @@ describe("VoterRewards - @shard2", () => {
       await waitForNextCycle()
 
       // GM NFT token mint and upgrade
-      await galaxyMember.connect(voter1).freeMint()
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint()
 
@@ -2082,9 +2072,6 @@ describe("VoterRewards - @shard2", () => {
       await waitForNextCycle()
 
       // GM NFT token mint and upgrade
-      await galaxyMember.connect(voter1).freeMint()
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint()
 
@@ -2226,9 +2213,6 @@ describe("VoterRewards - @shard2", () => {
       await waitForNextCycle()
 
       // GM NFT token mint and upgrade
-      await galaxyMember.connect(voter1).freeMint()
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint()
 
@@ -2567,9 +2551,6 @@ describe("VoterRewards - @shard2", () => {
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
       // GM NFT token mint and upgrade
-      await galaxyMember.connect(voter1).freeMint()
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint()
 
@@ -3360,10 +3341,6 @@ describe("VoterRewards - @shard2", () => {
 
       await participateInAllocationVoting(voter1)
 
-      await galaxyMember.connect(voter1).freeMint() // Token Id 0
-
-      await galaxyMember.connect(voter1).burn(0)
-
       await galaxyMember.connect(voter1).freeMint() // Token Id 1
 
       await galaxyMember.setMaxLevel(10)
@@ -3564,10 +3541,6 @@ describe("VoterRewards - @shard2", () => {
         BigInt(roundId),
       )
 
-      await galaxyMember.connect(voter1).freeMint() // Token Id 0
-
-      await galaxyMember.connect(voter1).burn(0)
-
       await galaxyMember.connect(voter1).freeMint() // Token Id 1
 
       await galaxyMember.setMaxLevel(10)
@@ -3757,10 +3730,6 @@ describe("VoterRewards - @shard2", () => {
         ],
         BigInt(roundId),
       )
-
-      await galaxyMember.connect(voter1).freeMint() // Token Id 0
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint() // Token Id 1
 
