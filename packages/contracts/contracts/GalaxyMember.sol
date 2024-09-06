@@ -148,6 +148,78 @@ contract GalaxyMember is
     _disableInitializers();
   }
 
+  /// @notice Data for initializing the contract
+  /// @param name Name of the ERC721 token
+  /// @param symbol Symbol of the ERC721 token
+  /// @param admin Address to grant the admin role
+  /// @param upgrader Address to grant the upgrader role
+  /// @param pauser Address to grant the pauser role
+  /// @param minter Address to grant the minter role
+  /// @param contractsAddressManager Address that can update external contracts address
+  /// @param maxLevel Maximum level tokens can achieve
+  /// @param baseTokenURI Base URI for computing {tokenURI}
+  /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
+  /// @param _b3tr B3TR token contract address
+  /// @param _treasury Address of the treasury
+  struct InitializationData {
+    string name;
+    string symbol;
+    address admin;
+    address upgrader;
+    address pauser;
+    address minter;
+    address contractsAddressManager;
+    uint256 maxLevel;
+    string baseTokenURI;
+    uint256[] b3trToUpgradeToLevel;
+    address b3tr;
+    address treasury;
+  }
+
+  /// @notice Initializes a new GalaxyMember contract
+  /// @dev Sets initial values for all relevant contract properties and state variables.
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  function initialize(InitializationData memory data) external initializer {
+    require(data.maxLevel > 0, "Galaxy Member: Max level must be greater than 0");
+    require(bytes(data.baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
+    require(data.b3tr != address(0), "Galaxy Member: B3TR token address cannot be the zero address");
+    require(data.treasury != address(0), "Galaxy Member: Treasury address cannot be the zero address");
+    require(
+      data.b3trToUpgradeToLevel.length >= data.maxLevel - 1,
+      "Galaxy Member: B3TR to upgrade must be set for all unlocked levels"
+    );
+
+    __ERC721_init(data.name, data.symbol);
+    __ERC721Enumerable_init();
+    __ERC721Pausable_init();
+    __ERC721Burnable_init();
+    __AccessControl_init();
+    __ReentrancyGuard_init();
+    __UUPSUpgradeable_init();
+
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+
+    $._baseTokenURI = data.baseTokenURI;
+
+    for (uint256 i = 0; i < data.b3trToUpgradeToLevel.length; i++) {
+      require(data.b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be greater than 0");
+      $._b3trToUpgradeToLevel[i + 2] = data.b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
+    }
+
+    $.MAX_LEVEL = data.maxLevel;
+    $._nextTokenId = 1;
+
+    $.b3tr = IB3TR(data.b3tr);
+    $.treasury = data.treasury;
+
+    require(data.admin != address(0), "Galaxy Member: Admin address cannot be the zero address");
+    _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
+    _grantRole(UPGRADER_ROLE, data.upgrader);
+    _grantRole(PAUSER_ROLE, data.pauser);
+    _grantRole(MINTER_ROLE, data.minter);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
+  }
+
   /// @notice Initializes a new GalaxyMember contract
   /// @dev Sets initial values for all relevant contract properties and state variables.
   /// @custom:oz-upgrades-unsafe-allow constructor
