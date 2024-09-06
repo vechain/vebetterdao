@@ -456,7 +456,7 @@ interface IX2EarnApps {
    *
    * Emits a {AppAdded} event.
    */
-  function registerApp(
+  function submitApp(
     address _teamWalletAddress,
     address _admin,
     string memory _appName,

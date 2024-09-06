@@ -151,9 +151,9 @@ contract X2EarnApps is
   }
 
   /**
-   * @dev See {IX2EarnApps-registerApp}.
+   * @dev See {IX2EarnApps-submitApp}.
    */
-  function registerApp(
+  function submitApp(
     address _teamWalletAddress,
     address _admin,
     string memory _appName,

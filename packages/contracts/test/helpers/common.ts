@@ -446,7 +446,7 @@ export const addAppsToAllocationVoting = async (apps: string[], owner: HardhatEt
   let appIds: string[] = []
   let i = 0
   for (const app of apps) {
-    await x2EarnApps.connect(owner).registerApp(app, app, app, "metadataURI")
+    await x2EarnApps.connect(owner).submitApp(app, app, app, "metadataURI")
     const appId = await x2EarnApps.hashAppName(app)
     appIds.push(appId)
     endorseApp(appId, otherAccounts[i])
@@ -531,7 +531,7 @@ export const participateInAllocationVoting = async (
 
   const appName = "App" + Math.random()
 
-  await x2EarnApps.connect(owner).registerApp(user.address, user.address, appName, "metadataURI")
+  await x2EarnApps.connect(owner).submitApp(user.address, user.address, appName, "metadataURI")
   await endorseApp(await x2EarnApps.hashAppName(appName), endorser ? endorser : owner)
   const roundId = await startNewAllocationRound()
 
