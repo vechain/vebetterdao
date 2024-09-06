@@ -1,16 +1,21 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { ZERO_ADDRESS, catchRevert, filterEventsByName, getOrDeployContractInstances } from "./helpers"
+import {
+  ZERO_ADDRESS,
+  catchRevert,
+  filterEventsByName,
+  getOrDeployContractInstances,
+  createNodeHolder,
+} from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { createNodeHolder } from "./helpers/xnodes"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 
-describe("Node Management", function () {
+describe("Node Management -@shard1", function () {
   describe("Contract upgradeablity", () => {
     it("Cannot initialize twice", async function () {
-      const { nodeManagement, vechainNodes, owner } = await getOrDeployContractInstances({ forceDeploy: true })
-      await catchRevert(nodeManagement.initialize(await vechainNodes.getAddress(), owner.address, owner.address))
+      const { nodeManagement, vechainNodesMock, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+      await catchRevert(nodeManagement.initialize(await vechainNodesMock.getAddress(), owner.address, owner.address))
     })
 
     it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
@@ -91,14 +96,14 @@ describe("Node Management", function () {
 
   describe("Node Delegation", () => {
     it("Should allow node owner to delegate node", async function () {
-      const { owner, otherAccount, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+      const { owner, otherAccount, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      const nodeId = await vechainNodes.ownerToId(owner.address)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
 
       const tx = await nodeManagement.connect(owner).delegateNode(otherAccount.address)
 
@@ -113,7 +118,7 @@ describe("Node Management", function () {
     })
 
     it("Should allow node owner to remove delegation", async function () {
-      const { owner, otherAccount, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+      const { owner, otherAccount, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
@@ -121,7 +126,7 @@ describe("Node Management", function () {
       // Mock node ownership and delegation
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
 
-      const nodeId = await vechainNodes.ownerToId(owner.address)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
 
       await nodeManagement.connect(owner).delegateNode(otherAccount.address)
 
@@ -171,7 +176,7 @@ describe("Node Management", function () {
     })
 
     it("Should revert if node is getting delegated to the zero address", async function () {
-      const { owner, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+      const { owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
@@ -179,7 +184,7 @@ describe("Node Management", function () {
       // Mock node ownership and delegation
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
 
-      await vechainNodes.ownerToId(owner.address)
+      await vechainNodesMock.ownerToId(owner.address)
 
       // Node cannot be delegated to the zero address
       await expect(nodeManagement.connect(owner).delegateNode(ZERO_ADDRESS)).to.be.revertedWithCustomError(
@@ -189,7 +194,7 @@ describe("Node Management", function () {
     })
 
     it("A user can have multiple nodes delegated to them", async function () {
-      const { owner, otherAccount, nodeManagement, vechainNodes, otherAccounts } = await getOrDeployContractInstances({
+      const { owner, otherAccount, nodeManagement, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
@@ -213,26 +218,27 @@ describe("Node Management", function () {
     })
 
     it("A node owner should be able to re-delegate node", async function () {
-      const { owner, nodeManagement, vechainNodes, otherAccount, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
+      const { owner, nodeManagement, vechainNodesMock, otherAccount, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
 
       // Mock node ownership and delegation
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
 
-      await vechainNodes.ownerToId(owner.address)
+      await vechainNodesMock.ownerToId(owner.address)
 
       await nodeManagement.connect(owner).delegateNode(otherAccount.address)
 
-      expect(await nodeManagement.getNodeManager(await vechainNodes.ownerToId(owner.address))).to.equal(
+      expect(await nodeManagement.getNodeManager(await vechainNodesMock.ownerToId(owner.address))).to.equal(
         otherAccount.address,
       )
 
       // Should be able to re-delegate the node
       const tx = await nodeManagement.connect(owner).delegateNode(otherAccounts[1].address)
 
-      expect(await nodeManagement.getNodeManager(await vechainNodes.ownerToId(owner.address))).to.equal(
+      expect(await nodeManagement.getNodeManager(await vechainNodesMock.ownerToId(owner.address))).to.equal(
         otherAccounts[1].address,
       )
 
@@ -273,7 +279,7 @@ describe("Node Management", function () {
     })
 
     it("If a node is downgraded to level NONE, it cannot be delegated", async function () {
-      const { owner, nodeManagement, vechainNodes, otherAccounts } = await getOrDeployContractInstances({
+      const { owner, nodeManagement, vechainNodesMock, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
@@ -285,8 +291,8 @@ describe("Node Management", function () {
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
 
       //Downgrade the node to level NONE
-      const nodeId = await vechainNodes.ownerToId(owner.address)
-      await vechainNodes.connect(owner).downgradeTo(nodeId, 0)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
+      await vechainNodesMock.connect(owner).downgradeTo(nodeId, 0)
 
       await expect(nodeManagement.connect(owner).delegateNode(otherAccounts[5].address)).to.be.revertedWithCustomError(
         nodeManagement,
@@ -295,7 +301,7 @@ describe("Node Management", function () {
     })
 
     it("If a node is tranfserred new owner can re-delegate to another account to manage", async function () {
-      const { owner, nodeManagement, vechainNodes, otherAccounts } = await getOrDeployContractInstances({
+      const { owner, nodeManagement, vechainNodesMock, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
@@ -309,7 +315,7 @@ describe("Node Management", function () {
       // Skip ahead 1 day
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
       // Transfer the node to the other account
-      await vechainNodes.connect(owner).transfer(otherAccounts[0].address, 1)
+      await vechainNodesMock.connect(owner).transfer(otherAccounts[0].address, 1)
 
       // Account 5 should still be the manager
       expect(await nodeManagement.getNodeManager(1)).to.equal(otherAccounts[5].address)
@@ -322,7 +328,7 @@ describe("Node Management", function () {
     })
 
     it("If a node is tranfserred that was delegated new owner can remove delegation if they want to manage it", async function () {
-      const { owner, nodeManagement, vechainNodes, otherAccounts } = await getOrDeployContractInstances({
+      const { owner, nodeManagement, vechainNodesMock, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
@@ -336,7 +342,7 @@ describe("Node Management", function () {
       // Skip ahead 1 day
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
       // Transfer the node to the other account
-      await vechainNodes.connect(owner).transfer(otherAccounts[0].address, 1)
+      await vechainNodesMock.connect(owner).transfer(otherAccounts[0].address, 1)
 
       // Account 5 should still be the manager
       expect(await nodeManagement.getNodeManager(1)).to.equal(otherAccounts[5].address)
@@ -354,14 +360,14 @@ describe("Node Management", function () {
 
   describe("Node Management", () => {
     it("Should return the owner as the node manager if the node has not been delegated", async function () {
-      const { owner, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+      const { owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      const nodeId = await vechainNodes.ownerToId(owner.address)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
 
       // Node should not be delegated at this point so the manager should be the owner
       const manager = await nodeManagement.getNodeManager(nodeId)
@@ -369,14 +375,14 @@ describe("Node Management", function () {
     })
 
     it("Should return the correct node manager if the node has been delegated", async function () {
-      const { owner, otherAccount, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+      const { owner, otherAccount, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      const nodeId = await vechainNodes.ownerToId(owner.address)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
 
       await nodeManagement.connect(owner).delegateNode(otherAccount.address)
 
@@ -386,14 +392,15 @@ describe("Node Management", function () {
     })
 
     it("Should return the correct node manager if the node has been re-delegated", async function () {
-      const { owner, otherAccount, nodeManagement, vechainNodes, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
+      const { owner, otherAccount, nodeManagement, vechainNodesMock, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      const nodeId = await vechainNodes.ownerToId(owner.address)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
 
       await nodeManagement.connect(owner).delegateNode(otherAccount.address)
 
@@ -409,14 +416,15 @@ describe("Node Management", function () {
     })
 
     it("Should return the correct node manager if the node has been re-delegated multiple times", async function () {
-      const { owner, otherAccount, nodeManagement, vechainNodes, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
+      const { owner, otherAccount, nodeManagement, vechainNodesMock, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      const nodeId = await vechainNodes.ownerToId(owner.address)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
 
       await nodeManagement.connect(owner).delegateNode(otherAccount.address)
 
@@ -438,14 +446,14 @@ describe("Node Management", function () {
     })
 
     it("should return the correct node level", async function () {
-      const { owner, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+      const { owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      const nodeId = await vechainNodes.ownerToId(owner.address)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
 
       // Node should not be delegated at this point so the level should be 2
       const nodeLevel = await nodeManagement.getNodeLevel(nodeId)
@@ -453,14 +461,14 @@ describe("Node Management", function () {
     })
 
     it("Should return correct node level of a user owning a node", async function () {
-      const { owner, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+      const { owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      await vechainNodes.ownerToId(owner.address)
+      await vechainNodesMock.ownerToId(owner.address)
 
       // Node should not be delegated at this point so the level should be 2
       const nodeLevels = await nodeManagement.getUsersNodeLevels(owner.address)
@@ -488,14 +496,14 @@ describe("Node Management", function () {
     })
 
     it("Should return true if a user owning a node is checked for being a node manager", async function () {
-      const { owner, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+      const { owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      const nodeId = await vechainNodes.ownerToId(owner.address)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
 
       // Node should not be delegated at this point so the level should be 2
       const isManager = await nodeManagement.isNodeManager(owner.address, nodeId)
@@ -503,14 +511,14 @@ describe("Node Management", function () {
     })
 
     it("Should return true if a user with a node delegated is checked for being a node manager", async function () {
-      const { owner, otherAccount, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+      const { owner, otherAccount, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      await vechainNodes.ownerToId(owner.address)
+      await vechainNodesMock.ownerToId(owner.address)
 
       await nodeManagement.connect(owner).delegateNode(otherAccount.address)
 
@@ -520,14 +528,14 @@ describe("Node Management", function () {
     })
 
     it("Should return false if a user owning a node who delegated it is checked for being a node manager", async function () {
-      const { owner, otherAccount, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+      const { owner, otherAccount, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      await vechainNodes.ownerToId(owner.address)
+      await vechainNodesMock.ownerToId(owner.address)
 
       await nodeManagement.connect(owner).delegateNode(otherAccount.address)
 
@@ -537,14 +545,14 @@ describe("Node Management", function () {
     })
 
     it("Should return false if a user not owning a node is checked for being a node manager", async function () {
-      const { owner, otherAccount, nodeManagement, vechainNodes } = await getOrDeployContractInstances({
+      const { owner, otherAccount, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
-      await vechainNodes.ownerToId(owner.address)
+      await vechainNodesMock.ownerToId(owner.address)
 
       await nodeManagement.connect(owner).delegateNode(otherAccount.address)
 
@@ -553,51 +561,53 @@ describe("Node Management", function () {
     })
 
     it("If a node is delegated to a user and the owner transfers the node, the same user should be the manager", async function () {
-      const { owner, otherAccount, nodeManagement, vechainNodes, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
+      const { owner, otherAccount, nodeManagement, vechainNodesMock, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
 
       await nodeManagement.connect(owner).delegateNode(otherAccounts[5].address)
 
-      const nodeId = await vechainNodes.ownerToId(owner.address)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
 
       // Transfer the node to the other account
       // Skip ahead 1 day to be able to transfer node
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
-      await vechainNodes.connect(owner).transfer(otherAccount.address, 1)
+      await vechainNodesMock.connect(owner).transfer(otherAccount.address, 1)
 
       const manager = await nodeManagement.getNodeManager(nodeId)
       expect(manager).to.equal(otherAccounts[5].address)
     })
 
     it("If a node is delegated to a user and the owner transfers the node, the same user should be the manager", async function () {
-      const { owner, otherAccount, nodeManagement, vechainNodes, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
+      const { owner, otherAccount, nodeManagement, vechainNodesMock, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
 
       // Mock node ownership
       await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
 
       await nodeManagement.connect(owner).delegateNode(otherAccounts[5].address)
 
-      const nodeId = await vechainNodes.ownerToId(owner.address)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
 
       // Transfer the node to the other account
       // Skip ahead 1 day to be able to transfer node
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
-      await vechainNodes.connect(owner).transfer(otherAccount.address, 1)
+      await vechainNodesMock.connect(owner).transfer(otherAccount.address, 1)
 
       const manager = await nodeManagement.getNodeManager(nodeId)
       expect(manager).to.equal(otherAccounts[5].address)
     })
 
     it("If a node is delegated and downgraded to level NONE false gets returned when check is user NODE manager", async function () {
-      const { owner, nodeManagement, vechainNodes, otherAccounts } = await getOrDeployContractInstances({
+      const { owner, nodeManagement, vechainNodesMock, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         deployMocks: true,
       })
@@ -611,8 +621,8 @@ describe("Node Management", function () {
       await time.setNextBlockTimestamp((await time.latest()) + 86400)
 
       //Downgrade the node to level NONE
-      const nodeId = await vechainNodes.ownerToId(owner.address)
-      await vechainNodes.connect(owner).downgradeTo(nodeId, 0)
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
+      await vechainNodesMock.connect(owner).downgradeTo(nodeId, 0)
 
       const manager = await nodeManagement.isNodeManager(otherAccounts[5].address, 1)
       expect(manager).to.equal(false)

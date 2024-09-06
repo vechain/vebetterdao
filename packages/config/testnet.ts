@@ -19,6 +19,7 @@ const config: AppConfig = {
   x2EarnAppsContractAddress: "",
   treasuryContractAddress: "",
   x2EarnRewardsPoolContractAddress: "",
+  nodeManagementContractAddress: "",
   b3trGovernorLibraries: {
     governorClockLogicAddress: "",
     governorConfiguratorAddress: "",
