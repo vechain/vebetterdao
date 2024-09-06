@@ -1,16 +1,20 @@
-import { useUnendorsedApps, useXApps } from "@/api"
-import { HStack, VStack, Grid, Spinner, Button, useDisclosure, Text, Skeleton } from "@chakra-ui/react"
+import { useUnendorsedApps, useUserEndorsementScore, useXApps } from "@/api"
+import { HStack, VStack, Grid, Spinner, Button, useDisclosure, Text, Skeleton, Box, Heading } from "@chakra-ui/react"
 import { AppCard } from "./AppCard"
 import { AddNewAppCard } from "./AddNewAppCard"
 import { useTranslation } from "react-i18next"
 import { useMemo } from "react"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export const AppsPageContent = () => {
   const { t } = useTranslation()
+  const { account } = useWallet()
 
   const { data: xApps, isLoading: isLoadingXApps } = useXApps()
   const { data: unendorsedApps, isLoading: unendorsedAppsLoading } = useUnendorsedApps()
+
+  const userEndorsementScore = useUserEndorsementScore(account)
 
   const {
     isOpen: isActiveSection,
@@ -49,6 +53,10 @@ export const AppsPageContent = () => {
   //TODO: Pagination, search, filters
   return (
     <VStack spacing={8} data-testid="apps-page">
+      <Box alignSelf={"flex-start"}>
+        <Heading size="lg">{userEndorsementScore.data}</Heading>
+        <Text>{t("Endorsement score")}</Text>
+      </Box>
       <HStack w="full">
         <Button onClick={onActiveSection} borderRadius={"24px"} bg={isActiveSection ? "#E0E9FE" : "transparent"}>
           {t("Active apps")}
