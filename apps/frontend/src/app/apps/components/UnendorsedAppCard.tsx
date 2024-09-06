@@ -1,7 +1,20 @@
 import { UnendorsedApp, useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
-import { Button, Card, CardBody, HStack, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  CardBody,
+  HStack,
+  Icon,
+  Image,
+  Skeleton,
+  Text,
+  VStack,
+  Divider,
+  Center,
+  useBreakpointValue,
+} from "@chakra-ui/react"
 import { UilStar } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
@@ -16,45 +29,68 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
 
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
+  // const { data: unendorsementScoreApps, isLoading: unendorsementScoreAppsLoading } = useUnendorsementScoreApps(xApp.id)
+
+  // const unendorsedAppSize = useBreakpointValue({ base: VStack, md: HStack })
+
   return (
     <Card variant={"baseWithBorder"} w="full">
-      <CardBody mt={5}>
-        <VStack spacing={6} align="flex-start" w="full">
-          <HStack spacing={3} align={"center"} w={"full"}>
-            <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
-              <Image src={logo?.image ?? notFoundImage} alt={"logo"} boxSize={14} borderRadius="9px" />
-            </Skeleton>
-            <VStack spacing={1} align="flex-start" w="full">
-              <HStack spacing={1} align="center" w={"full"}>
-                <Button leftIcon={<Icon as={UilStar} />} color="#F29B32" bg="#FFF3E5" borderRadius={"12px"} size={"xs"}>
-                  {t("Looking for support")}
-                </Button>
-                <Button
-                  leftIcon={<Icon as={UilStar} />}
-                  bg="#B1F16C"
-                  borderRadius={"12px"}
-                  color={"#3B3B3B"}
-                  fontWeight={600}
-                  size={"xs"}>
-                  {t("New")}
-                </Button>
-              </HStack>
-              <Skeleton isLoaded={!appMetadataLoading}>
-                <Text fontWeight={"600"} size={"xs"}>
-                  {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
-                </Text>
+      <CardBody mt={5} borderColor={"yellow"}>
+        <HStack>
+          <VStack spacing={6} align="flex-start" w="full">
+            <HStack spacing={3} align={"center"} w={"full"}>
+              <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
+                <Image src={logo?.image ?? notFoundImage} alt={"logo"} boxSize={14} borderRadius="9px" />
               </Skeleton>
-              <Text fontSize={"14px"} fontWeight={400} color={"gray.500"}>
-                {t("Submitted on {{date}}", { date: dayjs.unix(xApp.createdAtTimestamp).format("MMMM DD, YYYY") })}
+              <VStack spacing={1} align="flex-start" w="full">
+                <HStack spacing={1} align="center" w={"full"}>
+                  <Button
+                    leftIcon={<Icon as={UilStar} />}
+                    color="#F29B32"
+                    bg="#FFF3E5"
+                    borderRadius={"12px"}
+                    size={"xs"}>
+                    {t("Looking for support")}
+                  </Button>
+                  <Button
+                    leftIcon={<Icon as={UilStar} />}
+                    bg="#B1F16C"
+                    borderRadius={"12px"}
+                    color={"#3B3B3B"}
+                    fontWeight={600}
+                    size={"xs"}>
+                    {t("New")}
+                  </Button>
+                </HStack>
+                <Skeleton isLoaded={!appMetadataLoading}>
+                  <Text fontWeight={"600"} size={"xs"}>
+                    {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
+                  </Text>
+                </Skeleton>
+                <Text fontSize={"14px"} fontWeight={400} color={"gray.500"}>
+                  {t("Submitted on {{date}}", { date: dayjs.unix(xApp.createdAtTimestamp).format("MMMM DD, YYYY") })}
+                </Text>
+              </VStack>
+            </HStack>
+            <Skeleton isLoaded={!appMetadataLoading}>
+              <Text fontSize={"sm"} color={"gray.500"}>
+                {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
               </Text>
+            </Skeleton>
+          </VStack>
+
+          <Center height={"180px"} mr={"30px"} ml={"30px"}>
+            <Divider orientation={useBreakpointValue({ base: "horizontal", md: "vertical" })} />
+          </Center>
+          <VStack spacing={3} align="flex-start" w="150px">
+            <VStack spacing={1} align="flex-start">
+              <Text fontSize={"sm"}>{t("Endorsement score")}</Text>
             </VStack>
-          </HStack>
-          <Skeleton isLoaded={!appMetadataLoading}>
-            <Text fontSize={"sm"} color={"gray.500"}>
-              {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
-            </Text>
-          </Skeleton>
-        </VStack>
+            <VStack spacing={1} align="flex-start">
+              <Text fontSize={"sm"}>{t("Users endorsing")}</Text>
+            </VStack>
+          </VStack>
+        </HStack>
       </CardBody>
     </Card>
   )

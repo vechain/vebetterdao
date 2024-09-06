@@ -1,4 +1,3 @@
-import { useUnendorsedApps, useXApps } from "@/api"
 import { HStack, VStack, Grid, Spinner, Button, useDisclosure, Text, Skeleton } from "@chakra-ui/react"
 import { AppCard } from "./AppCard"
 import { AddNewAppCard } from "./AddNewAppCard"
