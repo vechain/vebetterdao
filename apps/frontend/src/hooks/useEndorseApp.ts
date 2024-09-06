@@ -1,0 +1,38 @@
+import { useCallback, useMemo } from "react"
+import { X2EarnApps__factory } from "@repo/contracts"
+import { getConfig } from "@repo/config"
+import { useBuildTransaction } from "./useBuildTransaction"
+import { getAppEndorsementScore } from "@/api"
+import { buildClause } from "@/utils/buildClause"
+
+const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
+
+type Props = { appId: string; nodeId: string; onSuccess?: () => void }
+
+/**
+ * Hook to execute a proposal
+ * @param proposalId  the proposal id to execute
+ * @param onSuccess  the callback to call after the proposal is executed
+ * @returns the execute transaction
+ */
+export const useEndorseApp = ({ appId, nodeId, onSuccess }: Props) => {
+  const clauseBuilder = useCallback(() => {
+    return [
+      buildClause({
+        to: getConfig().x2EarnAppsContractAddress,
+        contractInterface: X2EarnAppsInterface,
+        method: "endorseApp",
+        args: [appId, nodeId],
+        comment: `Endorse app ${appId} with node ${nodeId}`,
+      }),
+    ]
+  }, [appId, nodeId])
+
+  const refetchQueryKeys = useMemo(() => [getAppEndorsementScore(appId)], [appId])
+
+  return useBuildTransaction({
+    clauseBuilder,
+    refetchQueryKeys,
+    onSuccess,
+  })
+}
