@@ -272,4 +272,11 @@ contract X2EarnApps is
   function removeNodeEndorsement(bytes32 _appId, uint256 _nodeId) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _removeNodeEndorsement(_appId, _nodeId);
   }
+
+  /**
+   * @dev See {IX2EarnApps-removeXAppSubmission}.
+   */
+  function removeXAppSubmission(bytes32 _appId) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+    _removeXAppSubmission(_appId);
+  } 
 }

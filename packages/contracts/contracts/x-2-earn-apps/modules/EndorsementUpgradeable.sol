@@ -385,6 +385,27 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     return _removeEndorsement(appId, nodeId);
   }
 
+  /**
+   * @notice This fucntion can be called by an XAPP admin or contract admin that wishes to remove an XAPP submission
+   * @param appId The unique identifier of the app that wishes to be removed.
+   */
+  function _removeXAppSubmission(bytes32 appId) internal virtual {
+    // Get the endorsement storage
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    // Check if the app has been submitted
+    if (!_appSubmitted(appId)) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    // Check if the app is already included in the list of apps
+    if (appExists(appId)) {
+      revert NodeManagementXAppAlreadyIncluded(appId);
+    }
+
+    _updateAppsPendingEndorsement(appId, true);
+  }
+
   // ---------- Private ---------- //
 
   /**

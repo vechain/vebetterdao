@@ -4110,5 +4110,143 @@ describe("X-Apps - @shard3", function () {
       // XNode owner should now be the endorser
       expect(await x2EarnApps.getEndorsers(app1Id)).to.eql([otherAccounts[1].address])
     })
+
+    it("Admins should be able to remove an XApp from submission list", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.hasRole(await x2EarnApps.DEFAULT_ADMIN_ROLE(), owner.address)).to.eql(true)
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      const appIdsPendingEndorsement1 = await x2EarnApps.unendorsedAppIds()
+      expect(appIdsPendingEndorsement1.length).to.eql(1)
+
+      // Remove XAPP from submission list
+      await x2EarnApps.connect(owner).removeXAppSubmission(app1Id)
+
+      const appIdsPendingEndorsement2 = await x2EarnApps.unendorsedAppIds()
+
+      expect(appIdsPendingEndorsement2.length).to.eql(0)
+    })
+
+    it("Only app admins and contract admin should be able to remove an XApp from submission list", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.hasRole(await x2EarnApps.DEFAULT_ADMIN_ROLE(), owner.address)).to.eql(true)
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[1].address)
+      const app2Id = await x2EarnApps.hashAppName(otherAccounts[2].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(otherAccounts[1])
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI 1")
+
+      await x2EarnApps
+        .connect(otherAccounts[2])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI 2")
+
+      const appIdsPendingEndorsement1 = await x2EarnApps.unendorsedAppIds()
+      expect(appIdsPendingEndorsement1.length).to.eql(2)
+
+      await expect(x2EarnApps.connect(otherAccounts[6]).removeXAppSubmission(app1Id)).to.be.reverted
+
+      // Remove XAPP from submission list
+      await expect(x2EarnApps.connect(owner).removeXAppSubmission(app1Id)).to.not.be.reverted
+
+      await expect(x2EarnApps.connect(otherAccounts[2]).removeXAppSubmission(app2Id)).to.not.be.reverted
+
+      const appIdsPendingEndorsement2 = await x2EarnApps.unendorsedAppIds()
+
+      expect(appIdsPendingEndorsement2.length).to.eql(0)
+    })
+
+    it("Should revert if trying to remove XApp that has not been submitted", async function () {
+      const { x2EarnApps, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const app1Id = await x2EarnApps.hashAppName(owner.address)
+
+      await expect(x2EarnApps.connect(owner).removeXAppSubmission(app1Id)).to.be.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnNonexistentApp",
+      )
+    })
+
+    it("Should revert if trying to remove XApp that has participatted in one or more XAllocationg Voting rounds", async function () {
+      const { x2EarnApps, owner, otherAccounts, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      await endorseApp(app1Id, owner)
+
+      // app should be eligible for voting
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(true)
+
+      let round1 = await startNewAllocationRound()
+
+      // app should be eligible for the current round
+      let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
+      expect(isEligibleForVote).to.eql(true)
+
+      // App is not pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
+
+      await expect(x2EarnApps.connect(owner).removeXAppSubmission(app1Id)).to.be.revertedWithCustomError(
+        x2EarnApps,
+        "NodeManagementXAppAlreadyIncluded",
+      )
+    })
+
+    it("Should revert if trying to remove XApp that has participatted in one or more XAllocationg Voting rounds even if unendorsed", async function () {
+      const { x2EarnApps, owner, otherAccounts, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      await endorseApp(app1Id, owner)
+
+      // app should be eligible for voting
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(true)
+
+      let round1 = await startNewAllocationRound()
+
+      // app should be eligible for the current round
+      let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
+      expect(isEligibleForVote).to.eql(true)
+
+      await x2EarnApps.connect(owner).unendorseApp(app1Id, 1)
+
+      // App is not pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      await expect(x2EarnApps.connect(owner).removeXAppSubmission(app1Id)).to.be.revertedWithCustomError(
+        x2EarnApps,
+        "NodeManagementXAppAlreadyIncluded",
+      )
+    })
   })
 })

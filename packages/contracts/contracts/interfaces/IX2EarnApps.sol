@@ -61,6 +61,11 @@ interface IX2EarnApps {
   error X2EarnInvalidStartIndex();
 
   /**
+   * @notice Error indicating that an XAPP has already been included in a XAllocation Voting round and submission cant be removed.
+   */
+  error NodeManagementXAppAlreadyIncluded(bytes32 appId);
+
+  /**
    * @dev Lookup to future votes is not available.
    */
   error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
@@ -495,4 +500,9 @@ interface IX2EarnApps {
    * @dev Get the score threshold.
    */
   function endorsementScoreThreshold() external view returns (uint256);
+
+  /**
+   * @dev Remove an XApps submission.
+   */
+  function removeXAppSubmission(bytes32 _appId) external;
 }
