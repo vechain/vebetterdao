@@ -9,6 +9,11 @@ interface IBotSignaling {
   /// @param whitelister  The address of the user that whitelisted the user.
   event UserWhitelisted(address indexed user, address indexed whitelister);
 
+  /// @notice Emitted when a user is removed from the whitelist.
+  /// @param user  The address of the user that was removed from the whitelist.
+  /// @param whitelister  The address of the user that removed the user from the whitelist.
+  event RemovedUserFromWhitelist(address indexed user, address indexed whitelister);
+
   /// @notice Emitted when a user is signaled.
   /// @param user  The address of the user that was signaled.
   /// @param signaler  The address of the user that signaled the user.
@@ -31,6 +36,9 @@ interface IBotSignaling {
 
   /// @notice Whitelists a user.
   function whitelistUser(address user) external;
+
+  /// @notice Removes a user from the whitelist.
+  function removeWhitelistedUser(address user) external;
 
   /// @notice Signals a user.
   function signalUser(address user) external;

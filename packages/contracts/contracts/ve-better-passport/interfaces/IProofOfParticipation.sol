@@ -26,8 +26,9 @@ interface IProofOfParticipation {
   /// @param round - the round of the action
   function registerActionForRound(address user, bytes32 appId, uint256 round) external;
 
-  /// @notice Function to get the cumulative score of a user using the quadratic formula
-  /// @param user - the user to get the score for
-  /// @param round - the round to get the score for
-  function getQuadraticCumulativeScore(address user, uint256 round) external returns (uint256);
+  /// @notice Gets the cumulative score of a user based on exponential decay for a number of last rounds
+  /// This function calculates the decayed score f(t) = a * (1 - r)^t
+  /// @param user - the user address
+  /// @param lastRound - the round to consider as a starting point for the cumulative score
+  function getCumulativeScoreWithDecay(address user, uint256 lastRound) external returns (uint256);
 }

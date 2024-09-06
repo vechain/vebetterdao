@@ -39,8 +39,10 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     IXAllocationVotingGovernor xAllocationVoting;
     // Multipliers
     mapping(APP_SECURITY security => uint256 multiplier) securityMultiplier; // Multiplier of the base action score based on the app security
-    // App settings
-    mapping(bytes32 appId => APP_SECURITY security) appSecurity; // Security level of an app
+    // Security level of an app
+    // By default all app ids are accepted but the security is none.
+    // VBD team must set the security level of the apps in order to enable the scoring.
+    mapping(bytes32 appId => APP_SECURITY security) appSecurity;
     // User scores
     mapping(address user => uint256 totalScore) userTotalScore; // all-time total score of a user
     mapping(address user => mapping(bytes32 appId => uint256 totalScore)) userAppTotalScore; // all-time total score of a user for a specific app
@@ -49,6 +51,8 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     // Thresholds
     uint256 threshold; // threshold for a user to be considered a person in a round //threshold can be 0
     uint256 roundsForCumulativeScore; // number of rounds to consider for the cumulative score
+    // Decay
+    uint256 decayRate; // decay rate for the exponential decay
   }
 
   // keccak256(abi.encode(uint256(keccak256("storage.ProofOfParticipation")) - 1)) & ~bytes32(uint256(0xff))
@@ -106,9 +110,11 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     _grantRole(ACTION_SCORE_MANAGER_ROLE, _actionScoreManager);
 
     $.securityMultiplier[APP_SECURITY.NONE] = 0;
-    $.securityMultiplier[APP_SECURITY.LOW] = 1;
-    $.securityMultiplier[APP_SECURITY.MEDIUM] = 3;
-    $.securityMultiplier[APP_SECURITY.HIGH] = 6;
+    $.securityMultiplier[APP_SECURITY.LOW] = 100;
+    $.securityMultiplier[APP_SECURITY.MEDIUM] = 300;
+    $.securityMultiplier[APP_SECURITY.HIGH] = 600;
+
+    $.decayRate = 20; // 20% decay rate
 
     $.roundsForCumulativeScore = _roundsForCumulativeScore; // Default number of rounds to consider for the cumulative score
   }
@@ -122,6 +128,82 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
       revert ProofOfParticipationUnauthorizedUser(msg.sender);
     }
     _;
+  }
+
+  // ---------- Getters ---------- //
+  /// @notice Gets the cumulative score of a user based on exponential decay for a number of last rounds
+  /// This function calculates the decayed score f(t) = a * (1 - r)^t
+  /// @param user - the user address
+  /// @param lastRound - the round to consider as a starting point for the cumulative score
+  function getCumulativeScoreWithDecay(address user, uint256 lastRound) public view virtual returns (uint256) {
+    uint256 scalingFactor = 1e18;
+
+    ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
+
+    uint256 decayFactor = ((100 - $.decayRate) * scalingFactor) / 100;
+
+    // Calculate the cumulative score with exponential decay
+    uint256 cumulativeScore = 0;
+    for (uint256 round = lastRound - $.roundsForCumulativeScore + 1; round <= lastRound; round++) {
+      cumulativeScore = $.userRoundScore[user][round] + (cumulativeScore * decayFactor) / scalingFactor;
+    }
+
+    return cumulativeScore;
+  }
+
+  /// @notice Gets the round score of a user
+  /// @param user - the user address
+  /// @param round - the round
+  function userRoundScore(address user, uint256 round) public view virtual returns (uint256) {
+    return _getProofOfParticipationStorage().userRoundScore[user][round];
+  }
+
+  /// @notice Gets the total score of a user
+  /// @param user - the user address
+  function userTotalScore(address user) public view virtual returns (uint256) {
+    return _getProofOfParticipationStorage().userTotalScore[user];
+  }
+
+  /// @notice Gets the score of a user for an app in a round
+  /// @param user - the user address
+  /// @param round - the round
+  /// @param appId - the app id
+  function userRoundScoreApp(address user, uint256 round, bytes32 appId) public view virtual returns (uint256) {
+    return _getProofOfParticipationStorage().userAppRoundScore[user][round][appId];
+  }
+
+  /// @notice Gets the total score of a user for an app
+  /// @param user - the user address
+  /// @param appId - the app id
+  function userAppTotalScore(address user, bytes32 appId) public view virtual returns (uint256) {
+    return _getProofOfParticipationStorage().userAppTotalScore[user][appId];
+  }
+
+  /// @notice Gets the threshold for a user to be considered a person
+  function thresholdParticipationScore() public view virtual returns (uint256) {
+    return _getProofOfParticipationStorage().threshold;
+  }
+
+  /// @notice Gets the security multiplier for an app security
+  /// @param security - the app security between LOW, MEDIUM, HIGH
+  function securityMultiplier(APP_SECURITY security) public view virtual returns (uint256) {
+    return _getProofOfParticipationStorage().securityMultiplier[security];
+  }
+
+  /// @notice Gets the security level of an app
+  /// @param appId - the app id
+  function appSecurity(bytes32 appId) public view virtual returns (APP_SECURITY) {
+    return _getProofOfParticipationStorage().appSecurity[appId];
+  }
+
+  /// @notice Gets the round threshold for a user to be considered a person
+  function roundsForCumulativeScore() public view virtual returns (uint256) {
+    return _getProofOfParticipationStorage().roundsForCumulativeScore;
+  }
+
+  /// @notice Gets the x2EarnApps contract address
+  function x2EarnApps() public view virtual returns (IX2EarnApps) {
+    return _getProofOfParticipationStorage().x2EarnApps;
   }
 
   // ---------- Setters ---------- //
@@ -144,9 +226,6 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
     require($.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
-
-    // If the app security is not set, set it to LOW. This is for setting the default app security to an app that has received an action for the first time
-    if ($.appSecurity[appId] == APP_SECURITY.LOW) $.securityMultiplier[APP_SECURITY.LOW] = 1;
 
     // Calculate the action score, can be min 0, max 6
     uint256 actionScore = $.securityMultiplier[$.appSecurity[appId]];
@@ -210,88 +289,11 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     _getProofOfParticipationStorage().appSecurity[appId] = security;
   }
 
-  // ---------- Getters ---------- //
+  /// @notice Sets the decay rate for the exponential decay
+  /// @param decayRate - the decay rate
+  function setDecayRate(uint256 decayRate) public virtual onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+    require(decayRate > 0, "ProofOfParticipation: decay rate is zero");
 
-  /// @notice Gets the quadratic cumulative score of a user for a number of last rounds
-  /// @param user - the user address
-  /// @param lastRound - the round to consider as a starting point for the cumulative score
-  function getQuadraticCumulativeScore(address user, uint256 lastRound) public view virtual returns (uint256) {
-    ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
-
-    // Cumulative score of the user
-    uint256 cumulativeScore = 0;
-
-    // Factor to calculate the cumulative quadratic score
-    uint256 factor = 0;
-
-    // Calculate the cumulative quadratic score for the number of rounds to consider for the cumulative score
-    for (uint256 round = lastRound; round >= 1 && round > lastRound - $.roundsForCumulativeScore; round--) {
-      uint256 score = $.userRoundScore[user][round];
-
-      // NOTE: the ** operator does not support fractional exponents so we use the Math.sqrt function in a loop to calculate the square root
-      for (uint256 i = 0; i < factor; i++) {
-        score = Math.sqrt(score);
-      }
-
-      cumulativeScore += score;
-      factor++;
-    }
-
-    return cumulativeScore;
-  }
-
-  /// @notice Gets the round score of a user
-  /// @param user - the user address
-  /// @param round - the round
-  function userRoundScore(address user, uint256 round) public view virtual returns (uint256) {
-    return _getProofOfParticipationStorage().userRoundScore[user][round];
-  }
-
-  /// @notice Gets the total score of a user
-  /// @param user - the user address
-  function userTotalScore(address user) public view virtual returns (uint256) {
-    return _getProofOfParticipationStorage().userTotalScore[user];
-  }
-
-  /// @notice Gets the score of a user for an app in a round
-  /// @param user - the user address
-  /// @param round - the round
-  /// @param appId - the app id
-  function userRoundScoreApp(address user, uint256 round, bytes32 appId) public view virtual returns (uint256) {
-    return _getProofOfParticipationStorage().userAppRoundScore[user][round][appId];
-  }
-
-  /// @notice Gets the total score of a user for an app
-  /// @param user - the user address
-  /// @param appId - the app id
-  function userTotalScoreApp(address user, bytes32 appId) public view virtual returns (uint256) {
-    return _getProofOfParticipationStorage().userAppTotalScore[user][appId];
-  }
-
-  /// @notice Gets the threshold for a user to be considered a person
-  function thresholdParticipationScore() public view virtual returns (uint256) {
-    return _getProofOfParticipationStorage().threshold;
-  }
-
-  /// @notice Gets the security multiplier for an app security
-  /// @param security - the app security between LOW, MEDIUM, HIGH
-  function securityMultiplier(APP_SECURITY security) public view virtual returns (uint256) {
-    return _getProofOfParticipationStorage().securityMultiplier[security];
-  }
-
-  /// @notice Gets the security level of an app
-  /// @param appId - the app id
-  function appSecurity(bytes32 appId) public view virtual returns (APP_SECURITY) {
-    return _getProofOfParticipationStorage().appSecurity[appId];
-  }
-
-  /// @notice Gets the round threshold for a user to be considered a person
-  function roundsForCumulativeScore() public view virtual returns (uint256) {
-    return _getProofOfParticipationStorage().roundsForCumulativeScore;
-  }
-
-  /// @notice Gets the x2EarnApps contract address
-  function x2EarnApps() public view virtual returns (IX2EarnApps) {
-    return _getProofOfParticipationStorage().x2EarnApps;
+    _getProofOfParticipationStorage().decayRate = decayRate;
   }
 }

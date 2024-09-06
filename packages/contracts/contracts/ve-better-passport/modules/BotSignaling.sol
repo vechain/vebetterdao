@@ -139,7 +139,13 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
 
   /// @notice user can be whitelisted but the counter will not be reset
   function whitelistUser(address _user) external override onlyRoleOrAdmin(WHITELISTER_ROLE) {
-    _getBotSignalingStorage()._whitelisted[_user] = false;
+    _getBotSignalingStorage()._whitelisted[_user] = true;
     emit UserWhitelisted(_user, msg.sender);
+  }
+
+  /// @notice Removes a user from the whitelist
+  function removeWhitelistedUser(address _user) external override onlyRoleOrAdmin(WHITELISTER_ROLE) {
+    _getBotSignalingStorage()._whitelisted[_user] = false;
+    emit RemovedUserFromWhitelist(_user, msg.sender);
   }
 }

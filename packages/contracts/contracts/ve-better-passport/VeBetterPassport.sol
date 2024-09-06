@@ -8,6 +8,9 @@ import { BotSignaling } from "./modules/BotSignaling.sol";
 import { ProofOfParticipation } from "./modules/ProofOfParticipation.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 
+/// @title VeBetterPassport
+/// @notice Contract to manage the VeBetterPassport, a system to determine if a wallet is a person or not
+/// based on the participation score, blacklisting, and xnode, GM holdings and much more that can be added in the future.
 contract VeBetterPassport is
   AccessControlUpgradeable,
   UUPSUpgradeable,
@@ -111,15 +114,18 @@ contract VeBetterPassport is
    * @dev Checks if a wallet is a person or not based on the participation score, blacklisting, and xnode and GM holdings
    */
   function isPerson(address _user) public view returns (bool) {
+    // If a wallet is whitelisted, it is a person
+    if (isWhitelisted(_user)) return true;
+
     // If a wallet is not whitelisted and has been signaled more than 2 times
-    if (!isWhitelisted(_user) && signaledCounter(_user) > 2) {
+    if (signaledCounter(_user) > 2) {
       return false;
     }
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
 
     // If the user's cumulated score in the last rounds is greater than or equal to the threshold
-    uint256 participationScore = getQuadraticCumulativeScore(_user, $.xAllocationVoting.currentRoundId());
+    uint256 participationScore = getCumulativeScoreWithDecay(_user, $.xAllocationVoting.currentRoundId());
     if (participationScore >= thresholdParticipationScore()) return true;
 
     // TODO: gm
