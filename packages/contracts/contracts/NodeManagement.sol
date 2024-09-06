@@ -109,7 +109,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    * @notice Remove the delegation of a node.
    * @dev This function allows a node owner to remove the delegation of their node, effectively revoking the delegatee's access to the node.
    */
-  function removeNodeManagement() public virtual {
+  function removeNodeDelegation() public virtual {
     NodeManagementStorage storage $ = _getNodeManagementStorage();
 
     // Get the node ID of the caller
