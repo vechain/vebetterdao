@@ -194,6 +194,8 @@ contract GalaxyMemberV1 is
     }
 
     $.MAX_LEVEL = data.maxLevel;
+    // Note this line does not exist in the original contract -> tokenId 0 has been burned on mainnet
+    $._nextTokenId = 1;
 
     $.b3tr = IB3TR(data.b3tr);
     $.treasury = data.treasury;
