@@ -12,6 +12,7 @@ import {
   Treasury,
   X2EarnApps,
   X2EarnRewardsPool,
+  NodeManagement,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -110,6 +111,21 @@ export async function deployAll(config: ContractsConfig) {
   const GovernorStateLogicLib = await GovernorStateLogic.deploy()
   await GovernorStateLogicLib.waitForDeployment()
 
+  console.log("================ Deploying Vechain Nodes mock contracts =================")
+
+  const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
+  const vechainNodesMock = await TokenAuctionLock.deploy()
+  await vechainNodesMock.waitForDeployment()
+
+  const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
+  const clockAuctionContract = await ClockAuctionLock.deploy(await vechainNodesMock.getAddress(), TEMP_ADMIN)
+
+  await vechainNodesMock.setSaleAuctionAddress(await clockAuctionContract.getAddress())
+
+  await vechainNodesMock.addOperator(TEMP_ADMIN)
+
+  console.log("Vechain Nodes Mock deployed at: ", await vechainNodesMock.getAddress())
+
   // ---------------------- Deploy Contracts ----------------------
   const b3tr = await deployB3trToken(
     TEMP_ADMIN,
@@ -160,6 +176,13 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as Treasury
 
+  // Deploy NodeManagement
+  const nodeManagement = (await deployProxy("NodeManagement", [
+    await vechainNodesMock.getAddress(),
+    config.CONTRACTS_ADMIN_ADDRESS,
+    config.CONTRACTS_ADMIN_ADDRESS,
+  ])) as NodeManagement
+
   const x2EarnApps = (await deployProxy(
     "X2EarnApps",
     [
@@ -172,17 +195,23 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as X2EarnApps
 
-  const x2EarnRewardsPool = (await deployProxy(
-    "X2EarnRewardsPool",
+  const x2EarnRewardsPool = (await deployAndUpgrade(
+    ["X2EarnRewardsPoolV1", "X2EarnRewardsPool"],
     [
-      config.CONTRACTS_ADMIN_ADDRESS, // admin
-      config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
-      config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      await b3tr.getAddress(),
-      await x2EarnApps.getAddress(),
+      [
+        config.CONTRACTS_ADMIN_ADDRESS, // admin
+        config.CONTRACTS_ADMIN_ADDRESS, // contracts address manager
+        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        await b3tr.getAddress(),
+        await x2EarnApps.getAddress(),
+      ],
+      [
+        config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
+      ],
     ],
-    undefined,
-    true,
+    {
+      versions: [undefined, 2],
+    },
   )) as X2EarnRewardsPool
 
   const xAllocationPool = (await deployProxy(
@@ -372,6 +401,7 @@ export async function deployAll(config: ContractsConfig) {
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
+    vechainNodesManagement: await nodeManagement.getAddress(),
   }
 
   const libraries: {
@@ -821,6 +851,8 @@ export async function deployAll(config: ContractsConfig) {
     treasury: treasury,
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
+    vechainNodesMock: vechainNodesMock,
+    vechainNodeManagement: nodeManagement,
     libraries: {
       governorClockLogic: GovernorClockLogicLib,
       governorConfigurator: GovernorConfiguratorLib,
