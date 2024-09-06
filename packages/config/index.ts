@@ -35,6 +35,7 @@ export type AppConfig = {
   treasuryContractAddress: string
   x2EarnAppsContractAddress: string
   x2EarnRewardsPoolContractAddress: string
+  nodeManagementContractAddress: string
   b3trGovernorLibraries: B3TRGovernorLibraries
   nodeUrl: string
   network: Network
