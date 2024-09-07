@@ -7,6 +7,7 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
 import { BotSignaling } from "./modules/BotSignaling.sol";
 import { ProofOfParticipation } from "./modules/ProofOfParticipation.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
+import { PersonhoodDelegation } from "./modules/PersonhoodDelegation.sol";
 
 /// @title VeBetterPassport
 /// @notice Contract to manage the VeBetterPassport, a system to determine if a wallet is a person or not
@@ -14,6 +15,7 @@ import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGove
 contract VeBetterPassport is
   AccessControlUpgradeable,
   UUPSUpgradeable,
+  PersonhoodDelegation,
   ProofOfParticipation,
   BotSignaling,
   IVeBetterPassport
@@ -73,6 +75,7 @@ contract VeBetterPassport is
       data.roundsForCumulativeScore
     );
     __BotSignaling_init(data.blacklisters, data.whitelisters);
+    __PersonhoodDelegation_init();
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
     $.xAllocationVoting = data.xAllocationVoting;
@@ -95,7 +98,7 @@ contract VeBetterPassport is
 
   /// @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
   /// @param role - the role to check
-  modifier onlyRoleOrAdmin(bytes32 role) override(BotSignaling, ProofOfParticipation) {
+  modifier onlyRoleOrAdmin(bytes32 role) override(BotSignaling, ProofOfParticipation, PersonhoodDelegation) {
     if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
       revert VeBetterPassportUnauthorizedUser(msg.sender);
     }

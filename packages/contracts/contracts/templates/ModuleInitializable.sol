@@ -31,11 +31,11 @@ contract ModuleInitializable is Initializable, AccessControlUpgradeable {
   /**
    * @dev Initializes the contract
    */
-  function __ContractSettings_init() internal onlyInitializing {
-    __ContractSettings_init_unchained();
+  function __ModuleInitializable_init() internal onlyInitializing {
+    __ModuleInitializable_init_unchained();
   }
 
-  function __ContractSettings_init_unchained() internal onlyInitializing {
+  function __ModuleInitializable_init_unchained() internal onlyInitializing {
     // ModuleInitializableStorage storage $ = _getModuleInitializableStorage();
   }
 

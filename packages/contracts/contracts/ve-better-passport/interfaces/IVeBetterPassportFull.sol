@@ -95,4 +95,24 @@ interface IVeBetterPassport {
   function whitelistUser(address _user) external;
 
   function x2EarnApps() external view returns (address);
+
+  function delegate(address user) external;
+
+  function revokeDelegation() external;
+
+  function isDelegator(address user) external view returns (bool);
+
+  function isDelegatorInTimepoint(address user, uint256 timepoint) external view returns (bool);
+
+  function isDelegatee(address user) external view returns (bool);
+
+  function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool);
+
+  function getDelegator(address delegatee) external view returns (address);
+
+  function getDelegatorInTimepoint(address delegatee, uint256 timepoint) external view returns (address);
+
+  function getDelegatee(address delegator) external view returns (address);
+
+  function getDelegateeInTimepoint(address delegator, uint256 timepoint) external view returns (address);
 }
