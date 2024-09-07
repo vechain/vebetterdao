@@ -32,6 +32,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { IEmissions } from "../interfaces/IEmissions.sol";
 import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
+import { IVeBetterPassport } from "../ve-better-passport/interfaces/IVeBetterPassport.sol";
 
 /**
  * @title XAllocationVotingGovernor
@@ -45,6 +46,9 @@ import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
  * - A rounds storage module must implement {_startNewRound}, {roundSnapshot}, {roundDeadline}, and {currentRoundId}
  * - A rounds finalization module must implement {finalize}
  * - A earnings settings module must implement {_snapshotRoundEarningsCap}
+ *
+ * ----- Version 2 -----
+ * - Integrated VeBetterPassport
  */
 abstract contract XAllocationVotingGovernor is
   Initializable,
@@ -57,6 +61,7 @@ abstract contract XAllocationVotingGovernor is
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor
   struct XAllocationVotingGovernorStorage {
     string _name;
+    IVeBetterPassport _veBetterPassport;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor")) - 1)) & ~bytes32(uint256(0xff))
@@ -81,6 +86,11 @@ abstract contract XAllocationVotingGovernor is
     $._name = name_;
   }
 
+  function __XAllocationVotingGovernor_init_v2(IVeBetterPassport veBetterPassport_) internal onlyInitializing {
+    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
+    $._veBetterPassport = veBetterPassport_;
+  }
+
   // ---------- Setters ---------- //
 
   /**
@@ -101,12 +111,23 @@ abstract contract XAllocationVotingGovernor is
 
   /**
    * @dev Cast a vote for a set of x-2-earn applications.
+   * @notice Only addresses with a valid passport can vote.
    */
   function castVote(uint256 roundId, bytes32[] memory appIds, uint256[] memory voteWeights) public virtual {
     _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
 
     require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
     require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
+
+    uint256 _currentRoundSnapshot = currentRoundSnapshot();
+    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
+
+    // Only addresses with a valid passport can vote, if the sender is a delegatee, we need to check the delegator address
+    address personhoodAddress = $._veBetterPassport.isDelegateeInTimepoint(msg.sender, _currentRoundSnapshot)
+      ? $._veBetterPassport.getDelegatorInTimepoint(msg.sender, _currentRoundSnapshot)
+      : _msgSender();
+
+    require($._veBetterPassport.isPerson(personhoodAddress), "XAllocationVotingGovernor: voter is not a person");
 
     address voter = _msgSender();
 
@@ -149,7 +170,7 @@ abstract contract XAllocationVotingGovernor is
    * @dev Returns the version of the governor.
    */
   function version() public view virtual returns (string memory) {
-    return "1";
+    return "2";
   }
 
   /**
@@ -293,6 +314,11 @@ abstract contract XAllocationVotingGovernor is
    * @dev Returns the latest round id.
    */
   function currentRoundId() public view virtual returns (uint256);
+
+  /**
+   * @dev Returns the X2EarnApps contract.
+   */
+  function currentRoundSnapshot() public view virtual returns (uint256);
 
   /**
    * @dev Returns the X2EarnApps contract.

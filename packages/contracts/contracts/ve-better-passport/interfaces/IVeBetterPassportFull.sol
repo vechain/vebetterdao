@@ -96,9 +96,9 @@ interface IVeBetterPassport {
 
   function x2EarnApps() external view returns (address);
 
-  function delegate(address user) external;
+  function delegateWithSignature(address delegator, uint256 nonce, uint256 deadline, bytes memory signature) external;
 
-  function revokeDelegation() external;
+  function revokeDelegation(address delegator) external;
 
   function isDelegator(address user) external view returns (bool);
 

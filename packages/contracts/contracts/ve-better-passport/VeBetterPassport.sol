@@ -145,6 +145,15 @@ contract VeBetterPassport is
 
   // ---------- Setters ---------- //
 
+  /// @dev Sets the xAllocationVoting contract
+  /// @param xAllocationVoting - the xAllocationVoting contract address
+  function setXAllocationVoting(
+    IXAllocationVotingGovernor xAllocationVoting
+  ) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+    VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
+    $.xAllocationVoting = xAllocationVoting;
+  }
+
   // ---------- Overrides ---------- //
 
   /// @dev Grants a role to an account

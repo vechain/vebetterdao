@@ -217,7 +217,15 @@ library GovernorVotesLogic {
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active)
     );
 
-    uint256 weight = self.vot3.getPastVotes(voter, GovernorProposalLogic._proposalSnapshot(self, proposalId));
+    uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(self, proposalId);
+
+    address personhoodAddress = self.veBetterPassport.isDelegateeInTimepoint(voter, proposalSnapshot)
+      ? self.veBetterPassport.getDelegatorInTimepoint(voter, proposalSnapshot)
+      : voter;
+
+    require(self.veBetterPassport.isPerson(personhoodAddress), "GovernorVotesLogic: voter is not a person");
+
+    uint256 weight = self.vot3.getPastVotes(voter, proposalSnapshot);
     uint256 power = Math.sqrt(weight) * 1e9;
 
     if (weight < GovernorConfigurator.getVotingThreshold(self)) {
@@ -226,12 +234,7 @@ library GovernorVotesLogic {
 
     _countVote(self, proposalId, voter, support, weight, power);
 
-    self.voterRewards.registerVote(
-      GovernorProposalLogic._proposalSnapshot(self, proposalId),
-      voter,
-      weight,
-      Math.sqrt(weight)
-    );
+    self.voterRewards.registerVote(proposalSnapshot, voter, weight, Math.sqrt(weight));
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 

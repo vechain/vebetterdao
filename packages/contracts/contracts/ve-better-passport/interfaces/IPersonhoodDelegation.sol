@@ -25,11 +25,11 @@ interface IPersonhoodDelegation {
   /// @notice Emitted when a user revokes the delegation of personhood to another user.
   event DelegationRevoked(address indexed delegator, address indexed delegatee);
 
-  /// @notice Delegates personhood to another user.
-  function delegate(address user) external;
+  /// @notice Delegates personhood, must be called by the delegatee providing the delegator signature.
+  function delegateWithSignature(address delegator, uint256 nonce, uint256 deadline, bytes memory signature) external;
 
   /// @notice Revokes the delegation of personhood to another user.
-  function revokeDelegation() external;
+  function revokeDelegation(address delegator) external;
 
   /// @notice Checks if a user is a delegator.
   function isDelegator(address user) external view returns (bool);

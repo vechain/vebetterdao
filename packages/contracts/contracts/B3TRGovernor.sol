@@ -48,6 +48,7 @@ import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { IVeBetterPassport } from "./ve-better-passport/interfaces/IVeBetterPassport.sol";
 
 /**
  * @title B3TRGovernor
@@ -67,9 +68,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  *
  * The contract is upgradeable and uses the UUPS pattern.
  * @dev The contract is upgradeable and uses the UUPS pattern. All logic is stored in libraries.
- * 
+ *
  * ------------------ VERSION 2 ------------------
  * - Replaced onlyGovernance modifier with onlyRoleOrGovernance which checks if the caller has the DEFAULT_ADMIN_ROLE role or if the function is called through a governance proposal
+ *
+ * ------------------ VERSION 3 ------------------
+ * - Integrated VeBetterPassport
  */
 contract B3TRGovernor is
   IB3TRGovernor,
@@ -158,6 +162,10 @@ contract B3TRGovernor is
     _grantRole(PROPOSAL_EXECUTOR_ROLE, rolesData.proposalExecutor);
   }
 
+  function initializeV3(IVeBetterPassport _veBetterPassport) public reinitializer(3) {
+    __GovernorStorage_init_v3(_veBetterPassport);
+  }
+
   /**
    * @dev Function to receive VET that will be handled by the governor (disabled if executor is a third party contract)
    */
@@ -177,7 +185,11 @@ contract B3TRGovernor is
    * @param value The amount of ether to send
    * @param data The data to call the target with
    */
-  function relay(address target, uint256 value, bytes calldata data) external payable virtual onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+  function relay(
+    address target,
+    uint256 value,
+    bytes calldata data
+  ) external payable virtual onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     (bool success, bytes memory returndata) = target.call{ value: value }(data);
     Address.verifyCallResult(success, returndata);
   }
@@ -541,7 +553,7 @@ contract B3TRGovernor is
    * @return string The version of the governor
    */
   function version() external pure returns (string memory) {
-    return "2";
+    return "3";
   }
 
   /**
@@ -872,7 +884,9 @@ contract B3TRGovernor is
    * CAUTION: It is not recommended to change the timelock while there are other queued governance proposals.
    * @param newTimelock The new timelock controller
    */
-  function updateTimelock(TimelockControllerUpgradeable newTimelock) external virtual onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+  function updateTimelock(
+    TimelockControllerUpgradeable newTimelock
+  ) external virtual onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfigurator.updateTimelock($, newTimelock);
   }
