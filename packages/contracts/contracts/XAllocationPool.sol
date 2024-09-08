@@ -132,8 +132,8 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   event X2EarnAppsContractSet(address oldContractAddress, address newContractAddress);
 
   /// @notice Emits true if quadratic funding is disabled, false otherwise.
-  /// @param disabled - The flag to enable or disable quadratic funding.
-  event QuadraticFundingToggled(bool indexed disabled);
+  /// @param isDisabled - The flag to enable or disable quadratic funding.
+  event QuadraticFundingToggled(bool indexed isDisabled);
 
   // ---------- Authorizers ---------- //
 
