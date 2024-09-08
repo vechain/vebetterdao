@@ -21,7 +21,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
     Number(roundInfo.voteStart),
     account ?? undefined,
   )
-  const { data: quadraticFundingDisabled } = useIsQuadraticFundingDisabled()
+  const { data: isQuadraticFundingDisabled } = useIsQuadraticFundingDisabled()
 
   return (
     <ResponsiveCard>
@@ -44,7 +44,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
             {t("VOT3 balance at snapshot")}
           </Text>
         </VStack>
-        {isDesktop && !quadraticFundingDisabled && (
+        {isDesktop && !isQuadraticFundingDisabled && (
           <Box fontSize={"14px"} color={"#6A6A6A"} fontWeight={400}>
             <Text fontWeight={600}>{t("We use the quadratic formula to calculate the results")}</Text>
             <Text>
