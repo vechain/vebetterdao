@@ -589,10 +589,8 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     // Get the block number the current round started.
     uint256 currentRoundStartBlock = $._xAllocationVoting.currentRoundSnapshot();
 
-    uint208 currentStatus = $.quadraticFundingDisabled.upperLookupRecent(SafeCast.toUint48(currentRoundStartBlock));
-
-    // Check if quadratic funding is enabled or disabled for the current round.
-    return currentStatus == 1; // 0: enabled, 1: disabled
+    // Check if quadratic funding is enabled or disabled at the block number.
+    return $.quadraticFundingDisabled.upperLookupRecent(SafeCast.toUint48(currentRoundStartBlock)) == 1; // 0: enabled, 1: disabled
   }
 
   /**
