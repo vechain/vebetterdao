@@ -200,7 +200,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     // Get the current status
     bool currentStatus = isQuadraticFundingDisabledForCurrentRound();
 
-    uint208 currentStatusUint = currentStatus ? SafeCast.toUint208(1) : SafeCast.toUint208(0);
+    uint208 currentStatusUint = currentStatus ? SafeCast.toUint208(0) : SafeCast.toUint208(1);
 
     // Toggle the status -> 0: enabled, 1: disabled
     $.quadraticFundingDisabled.push(clock(), currentStatusUint);
