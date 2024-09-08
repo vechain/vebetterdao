@@ -253,13 +253,16 @@ library GovernorVotesLogic {
    * The state will flip between enabled and disabled each time the function is called.
    */
   function toggleQuadraticVoting(GovernorStorageTypes.GovernorStorage storage self) external {
-    bool currentStatus = isQuadraticVotingDisabledForCurrentRound(self);
+    bool isQuadraticDisabled = isQuadraticVotingDisabledForCurrentRound(self);
+
+    // If quadratic voting is disabled, set the new status to enabled, otherwise set it to disabled.
+    uint208 newStatus = isQuadraticDisabled ? SafeCast.toUint208(0) : SafeCast.toUint208(1);
 
     // Toggle the status -> 0: enabled, 1: disabled
-    self.quadraticVotingDisabled.push(GovernorClockLogic.clock(self), currentStatus ? 0 : 1);
+    self.quadraticVotingDisabled.push(GovernorClockLogic.clock(self), newStatus);
 
     // Emit an event to log the new quadratic voting status.
-    emit QuadraticVotingToggled(!currentStatus);
+    emit QuadraticVotingToggled(!isQuadraticDisabled);
   }
 
   /**
