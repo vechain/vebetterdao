@@ -294,9 +294,7 @@ library GovernorVotesLogic {
     // Get the block number the emission round started.
     uint256 roundStartBlock = self.xAllocationVoting.currentRoundSnapshot();
 
-    uint208 currentStatus = self.quadraticVotingDisabled.upperLookupRecent(SafeCast.toUint48(roundStartBlock));
-
     // Check if quadratic voting is enabled or disabled for the current round.
-    return currentStatus == 1; // 0: enabled, 1: disabled
+    return self.quadraticVotingDisabled.upperLookupRecent(SafeCast.toUint48(roundStartBlock)) == 1; // 0: enabled, 1: disabled
   }
 }
