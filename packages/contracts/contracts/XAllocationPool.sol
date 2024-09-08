@@ -497,23 +497,24 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
       return (0, 0);
     }
 
-    uint256 relativeTotalVotes;
-    uint256 relativeAppVotes;
+    uint256 totalVotes; // The total votes in the round
+    uint256 appVotes; // The votes of the app in the round
+
     if (isQuadraticFundingDisabledForRound(roundId)) {
-      relativeTotalVotes = _xAllocationVoting.totalVotes(roundId);
-      relativeAppVotes = _xAllocationVoting.getAppVotes(roundId, appId);
+      totalVotes = _xAllocationVoting.totalVotes(roundId);
+      appVotes = _xAllocationVoting.getAppVotes(roundId, appId);
     } else {
-      relativeTotalVotes = _xAllocationVoting.totalVotesQF(roundId);
+      totalVotes = _xAllocationVoting.totalVotesQF(roundId);
       uint256 appVotesQF = _xAllocationVoting.getAppVotesQF(roundId, appId);
 
-      relativeAppVotes = appVotesQF * appVotesQF;
+      appVotes = appVotesQF * appVotesQF;
     }
 
     // avoid division by zero
-    if (relativeTotalVotes == 0) return (0, 0);
+    if (totalVotes == 0) return (0, 0);
 
     // Calculate the app share
-    uint256 appShare = (relativeAppVotes * PERCENTAGE_PRECISION_SCALING_FACTOR) / relativeTotalVotes;
+    uint256 appShare = (appVotes * PERCENTAGE_PRECISION_SCALING_FACTOR) / totalVotes;
 
     // This is the amount unallocated if appShare is greater than max cap, this will be sent to treasury
     uint256 unallocatedShare;
