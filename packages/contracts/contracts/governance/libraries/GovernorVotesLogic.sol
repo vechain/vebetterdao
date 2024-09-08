@@ -79,6 +79,7 @@ library GovernorVotesLogic {
    * @param account The address of the voter.
    * @param support The support value of the vote.
    * @param weight The weight of the vote.
+   * @param power The voting power of the voter.
    */
   function _countVote(
     GovernorStorageTypes.GovernorStorage storage self,
@@ -95,11 +96,9 @@ library GovernorVotesLogic {
     }
     proposalVote.hasVoted[account] = true;
 
-    uint256 vote = power;
-    // If quadratic voting is disabled, use the weight directly
-    if (isQuadraticVotingDisabledForCurrentRound(self)) {
-      vote = weight;
-    }
+    // if quadratic voting is disabled, use the weight as the vote otherwise use the power as the vote
+    uint256 vote = isQuadraticVotingDisabledForCurrentRound(self) ? weight : power;
+
     if (support == uint8(GovernorTypes.VoteType.Against)) {
       proposalVote.againstVotes += vote;
     } else if (support == uint8(GovernorTypes.VoteType.For)) {
