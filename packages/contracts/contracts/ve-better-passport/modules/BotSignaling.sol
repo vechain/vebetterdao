@@ -12,11 +12,6 @@ import { IBotSignaling } from "../interfaces/IBotSignaling.sol";
 contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling {
   bytes32 public constant SIGNALER_ROLE = keccak256("SIGNALER_ROLE");
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
-
   // ---------- Storage ------------ //
 
   struct BotSignalingStorage {
@@ -36,6 +31,11 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     assembly {
       $.slot := BotSignalingStorageLocation
     }
+  }
+
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
   }
 
   /**
@@ -96,7 +96,17 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
   // ---------- Setters ---------- //
 
   /// @notice Signals a user
-  function signalUser(address _user) external override onlyRoleOrAdmin(SIGNALER_ROLE) {
+  function signalUser(address _user) external onlyRoleOrAdmin(SIGNALER_ROLE) {
+    _signalUser(_user, "");
+  }
+
+  /// @notice Signals a user with a reason
+  function signalUserWithReason(address _user, string memory reason) external onlyRoleOrAdmin(SIGNALER_ROLE) {
+    _signalUser(_user, reason);
+  }
+
+  /// @notice Internal function to signal a user
+  function _signalUser(address _user, string memory reason) internal virtual onlyRoleOrAdmin(SIGNALER_ROLE) {
     BotSignalingStorage storage $ = _getBotSignalingStorage();
     $._signaledCounter[_user]++;
 
@@ -104,7 +114,7 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     $._appSignalsCounter[app][_user]++;
     $._appTotalSignalsCounter[app]++;
 
-    emit UserSignaled(_user, msg.sender, app);
+    emit UserSignaled(_user, msg.sender, app, reason);
   }
 
   /// @notice Internal function to assign a signaler to an app

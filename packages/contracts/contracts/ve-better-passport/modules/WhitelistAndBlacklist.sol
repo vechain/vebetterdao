@@ -10,11 +10,6 @@ import { IWhitelistAndBlacklist } from "../interfaces/IWhitelistAndBlacklist.sol
 contract WhitelistAndBlacklist is Initializable, AccessControlUpgradeable, IWhitelistAndBlacklist {
   bytes32 public constant WHITELISTER_ROLE = keccak256("WHITELISTER_ROLE");
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
-
   // ---------- Storage ------------ //
 
   struct WhitelistAndBlacklistStorage {
@@ -30,6 +25,11 @@ contract WhitelistAndBlacklist is Initializable, AccessControlUpgradeable, IWhit
     assembly {
       $.slot := WhitelistAndBlacklistStorageLocation
     }
+  }
+
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
   }
 
   /**

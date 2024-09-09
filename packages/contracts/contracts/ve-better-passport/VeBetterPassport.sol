@@ -25,11 +25,6 @@ contract VeBetterPassport is
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant ROLE_GRANTER = keccak256("ROLE_GRANTER");
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
-
   // ---------- Storage ------------ //
 
   struct VeBetterPassportStorage {
@@ -59,6 +54,11 @@ contract VeBetterPassport is
     uint256 threshold;
     uint256 signalingThreshold;
     uint256 roundsForCumulativeScore;
+  }
+
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
   }
 
   /// @notice Initializes the contract

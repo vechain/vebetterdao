@@ -29,11 +29,6 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     HIGH
   }
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
-
   // ---------- Storage ------------ //
 
   struct ProofOfParticipationStorage {
@@ -64,6 +59,11 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     assembly {
       $.slot := ProofOfParticipationStorageLocation
     }
+  }
+
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
   }
 
   /**

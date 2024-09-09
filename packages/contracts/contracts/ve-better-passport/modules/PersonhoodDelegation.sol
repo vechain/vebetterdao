@@ -25,11 +25,6 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
   string private constant SIGNING_DOMAIN = "PersonhoodDelegation";
   string private constant SIGNATURE_VERSION = "1";
 
-  /// @custom:oz-upgrades-unsafe-allow constructor
-  constructor() {
-    _disableInitializers();
-  }
-
   // ---------- Storage ------------ //
 
   struct Delegation {
@@ -54,6 +49,11 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     assembly {
       $.slot := PersonhoodDelegationStorageLocation
     }
+  }
+
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
   }
 
   /**
