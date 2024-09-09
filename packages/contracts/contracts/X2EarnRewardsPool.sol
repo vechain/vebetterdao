@@ -111,8 +111,11 @@ contract X2EarnRewardsPool is
     $.x2EarnApps = _x2EarnApps;
   }
 
-  function initializeV2(address _impactKeyManager, string[] memory _initialImpactKeys, IVeBetterPassport _veBetterPassport) external reinitializer(2) {
-  function initializeV2(address _impactKeyManager, IVeBetterPassport _veBetterPassport) external reinitializer(2) {
+  function initializeV2(
+    address _impactKeyManager,
+    string[] memory _initialImpactKeys,
+    IVeBetterPassport _veBetterPassport
+  ) external reinitializer(2) {
     require(_impactKeyManager != address(0), "X2EarnRewardsPool: impactKeyManager is the zero address");
     require(_initialImpactKeys.length > 0, "X2EarnRewardsPool: initialImpactKeys is empty");
     require(address(_veBetterPassport) != address(0), "X2EarnRewardsPool: veBetterPassport is the zero address");
