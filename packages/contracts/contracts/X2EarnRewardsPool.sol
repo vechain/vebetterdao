@@ -256,17 +256,19 @@ contract X2EarnRewardsPool is
     ProofDataTypes.Impact memory impact,
     string memory description
   ) internal {
-    // buildJsonProof
-    string memory jsonProof = _buildJsonProof(proof, impact, description);
+    // Build the JSON proof string from the proof and impact data
+    string memory jsonProof = _buildProof(proof, impact, description);
 
     // emit event
     emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
   }
 
   /**
-   * @dev Builds the JSON proof string.
+   * @dev Builds the JSON proof string from the proof and impact data.
+   * @param proof the proof data to build the JSON from composed of types and values
+   * @param impact the impact data to build the JSON from composed of codes and values
    */
-  function _buildJsonProof(
+  function _buildProof(
     ProofDataTypes.Proof memory proof,
     ProofDataTypes.Impact memory impact,
     string memory description
