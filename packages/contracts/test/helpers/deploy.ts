@@ -29,6 +29,8 @@ import {
   B3TRGovernorV1,
   X2EarnRewardsPoolV1,
   VeBetterPassport,
+  XAllocationVotingV1,
+  B3TRGovernorV2,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -42,6 +44,7 @@ interface DeployInstance {
   timeLock: TimeLock
   governor: B3TRGovernor
   governorV1: B3TRGovernorV1
+  governorV2: B3TRGovernorV2
   galaxyMember: GalaxyMember
   x2EarnApps: X2EarnApps
   xAllocationVoting: XAllocationVoting
@@ -298,7 +301,7 @@ export const getOrDeployContractInstances = async ({
   await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
 
   // Deploy XAllocationVoting
-  const xAllocationVoting = (await deployProxy("XAllocationVoting", [
+  let xAllocationVotingV1 = (await deployProxy("XAllocationVotingV1", [
     {
       vot3Token: await vot3.getAddress(),
       quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
@@ -314,7 +317,17 @@ export const getOrDeployContractInstances = async ({
       appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
       votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
     },
-  ])) as XAllocationVoting
+  ])) as XAllocationVotingV1
+
+  const xAllocationVoting = (await upgradeProxy(
+    "XAllocationVotingV1",
+    "XAllocationVoting",
+    await xAllocationVotingV1.getAddress(),
+    [veBetterPassportAddress],
+    {
+      version: 2,
+    },
+  )) as XAllocationVoting
 
   const veBetterPassport = (await initializeProxy(veBetterPassportAddress, "VeBetterPassport", [
     {
@@ -328,7 +341,7 @@ export const getOrDeployContractInstances = async ({
       actionRegistrar: await x2EarnRewardsPool.getAddress(), // _actionRegistrar
       actionScoreManager: owner.address, // _actionScoreManager
       threshold: 0, //threshold
-      roundsForCumulativeScore: 5, //roundsForCumulativeScore}
+      roundsForCumulativeScore: 0, //roundsForCumulativeScore
     },
   ])) as VeBetterPassport
 
@@ -368,7 +381,7 @@ export const getOrDeployContractInstances = async ({
     },
   )) as B3TRGovernorV1
 
-  const governor = (await upgradeProxy("B3TRGovernorV1", "B3TRGovernor", await governorV1.getAddress(), [], {
+  const governorV2 = (await upgradeProxy("B3TRGovernorV1", "B3TRGovernorV2", await governorV1.getAddress(), [], {
     version: 2,
     libraries: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -380,7 +393,27 @@ export const getOrDeployContractInstances = async ({
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
       GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
     },
-  })) as B3TRGovernor
+  })) as B3TRGovernorV2
+
+  const governor = (await upgradeProxy(
+    "B3TRGovernorV2",
+    "B3TRGovernorV3",
+    await governorV1.getAddress(),
+    [veBetterPassportAddress],
+    {
+      version: 3,
+      libraries: {
+        GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+        GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
+        GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
+        GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+        GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
+        GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
+        GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
+        GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+      },
+    },
+  )) as B3TRGovernor
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
@@ -476,6 +509,7 @@ export const getOrDeployContractInstances = async ({
     timeLock,
     governor,
     governorV1,
+    governorV2,
     galaxyMember,
     x2EarnApps,
     xAllocationVoting,
