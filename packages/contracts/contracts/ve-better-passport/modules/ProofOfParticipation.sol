@@ -22,7 +22,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
   /// @notice Security level indicates how secure the app is
   /// @dev App security is used to calculate the overall score of a sustainable action
   enum APP_SECURITY {
-    // TODO: UNDEFINED, -> Then set low as default for new apps
+    UNDEFINED, // For new apps that have not been set yet
     NONE,
     LOW,
     MEDIUM,
@@ -43,9 +43,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     // Multipliers
     mapping(APP_SECURITY security => uint256 multiplier) securityMultiplier; // Multiplier of the base action score based on the app security
     // Security level of an app
-    // By default all app ids are accepted but the security is none.
-    // VBD team must set the security level of the apps in order to enable the scoring.
-    mapping(bytes32 appId => APP_SECURITY security) appSecurity;
+    mapping(bytes32 appId => APP_SECURITY security) appSecurity; // Will be UNDEFINED and set to LOW by default
     // User scores
     mapping(address user => uint256 totalScore) userTotalScore; // all-time total score of a user
     mapping(address user => mapping(bytes32 appId => uint256 totalScore)) userAppTotalScore; // all-time total score of a user for a specific app
@@ -112,6 +110,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     _grantRole(ACTION_REGISTRAR_ROLE, _actionRegistrar);
     _grantRole(ACTION_SCORE_MANAGER_ROLE, _actionScoreManager);
 
+    $.securityMultiplier[APP_SECURITY.UNDEFINED] = 0;
     $.securityMultiplier[APP_SECURITY.NONE] = 0;
     $.securityMultiplier[APP_SECURITY.LOW] = 100;
     $.securityMultiplier[APP_SECURITY.MEDIUM] = 300;
@@ -237,6 +236,11 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
     require($.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
+
+    // If app was just added and the security level is not set, set it to LOW by default
+    if ($.appSecurity[appId] == APP_SECURITY.UNDEFINED) {
+      $.appSecurity[appId] = APP_SECURITY.LOW;
+    }
 
     // Calculate the action score, can be min 0, max 6
     uint256 actionScore = $.securityMultiplier[$.appSecurity[appId]];
