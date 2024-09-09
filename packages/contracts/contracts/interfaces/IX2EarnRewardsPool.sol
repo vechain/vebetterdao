@@ -131,7 +131,7 @@ interface IX2EarnRewardsPool {
    * @param impact the impact of the sustainable action
    * @param description the description of the sustainable action
    */
-  function buildJsonProof(
+  function buildProof(
     ProofDataTypes.Proof memory proof,
     ProofDataTypes.Impact memory impact,
     string memory description

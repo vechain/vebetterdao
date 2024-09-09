@@ -111,26 +111,18 @@ contract X2EarnRewardsPool is
     $.x2EarnApps = _x2EarnApps;
   }
 
+  function initializeV2(address _impactKeyManager, string[] memory _initialImpactKeys, IVeBetterPassport _veBetterPassport) external reinitializer(2) {
   function initializeV2(address _impactKeyManager, IVeBetterPassport _veBetterPassport) external reinitializer(2) {
     require(_impactKeyManager != address(0), "X2EarnRewardsPool: impactKeyManager is the zero address");
+    require(_initialImpactKeys.length > 0, "X2EarnRewardsPool: initialImpactKeys is empty");
     require(address(_veBetterPassport) != address(0), "X2EarnRewardsPool: veBetterPassport is the zero address");
 
     _grantRole(IMPACT_KEY_MANAGER_ROLE, _impactKeyManager);
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    string[8] memory initialImpactKeys = [
-      "carbon",
-      "water",
-      "energy",
-      "waste_mass",
-      "learning_time",
-      "timber",
-      "plastic",
-      "trees_planted"
-    ];
 
-    for (uint256 i; i < initialImpactKeys.length; i++) {
-      _addImpactKey(initialImpactKeys[i], $);
+    for (uint256 i; i < _initialImpactKeys.length; i++) {
+      _addImpactKey(_initialImpactKeys[i], $);
     }
 
     $.veBetterPassport = _veBetterPassport;
@@ -285,17 +277,17 @@ contract X2EarnRewardsPool is
     ProofDataTypes.Impact memory impact,
     string memory description
   ) internal {
-    // buildJsonProof
-    string memory jsonProof = buildJsonProof(proof, impact, description);
+    // Build the JSON proof string from the proof and impact data
+    string memory jsonProof = buildProof(proof, impact, description);
 
     // emit event
     emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
   }
 
   /**
-   * @dev Builds the JSON proof string.
+   * @dev see {IX2EarnRewardsPool-buildProof}
    */
-  function buildJsonProof(
+  function buildProof(
     ProofDataTypes.Proof memory proof,
     ProofDataTypes.Impact memory impact,
     string memory description
@@ -319,31 +311,16 @@ contract X2EarnRewardsPool is
 
     // Add proof if available
     if (hasProof) {
-      json = abi.encodePacked(json, ',"proof": {');
+      bytes memory jsonProof = _buildProofJson(proof);
 
-      for (uint256 i; i < proof.types.length; i++) {
-        require(_isValidProofType(proof.types[i]), "X2EarnRewardsPool: Invalid proof type");
-
-        json = abi.encodePacked(json, '"', proof.types[i], '": "', proof.values[i], '"');
-
-        if (i < proof.types.length - 1) {
-          json = abi.encodePacked(json, ",");
-        }
-      }
-
-      json = abi.encodePacked(json, "}");
+      json = abi.encodePacked(json, ',"proof": ', jsonProof);
     }
 
     // Add impact if available
     if (hasImpact) {
       bytes memory jsonImpact = _buildImpactJson(impact);
 
-      if (hasProof || hasDescription) {
-        // Add a comma if proof or description was already added
-        json = abi.encodePacked(json, ",");
-      }
-
-      json = abi.encodePacked(json, '"impact": ', jsonImpact);
+      json = abi.encodePacked(json, ',"impact": ', jsonImpact);
     }
 
     // Close the JSON object
@@ -353,11 +330,36 @@ contract X2EarnRewardsPool is
   }
 
   /**
-   * @dev Builds the impact JSON string.
-   * @param impact an array of integers that represent the impact of the action. Each index of the array
+   * @dev Builds the proof JSON string from the proof data.
+   * @param proof the proof data to build the JSON from composed of types and values
+   */
+  function _buildProofJson(ProofDataTypes.Proof memory proof) internal pure returns (bytes memory) {
+    require(proof.types.length == proof.values.length, "Mismatched input lengths for ProofDataTypes.Proof");
+
+    bytes memory json = abi.encodePacked("{");
+
+    for (uint256 i; i < proof.types.length; i++) {
+      if (_isValidProofType(proof.types[i])) {
+        json = abi.encodePacked(json, '"', proof.types[i], '":', '"', proof.values[i], '"');
+        if (i < proof.types.length - 1) {
+          json = abi.encodePacked(json, ",");
+        }
+      } else {
+        revert("X2EarnRewardsPool: Invalid proof type");
+      }
+    }
+
+    json = abi.encodePacked(json, "}");
+
+    return json;
+  }
+
+  /**
+   * @dev Builds the impact JSON string from the impact data.
+   * @param impact the impact data to build the JSON from composed of codes and values
    */
   function _buildImpactJson(ProofDataTypes.Impact memory impact) internal view returns (bytes memory) {
-    require(impact.codes.length == impact.values.length, "Mismatched input lengths");
+    require(impact.codes.length == impact.values.length, "Mismatched input lengths for ProofDataTypes.Impact");
 
     bytes memory json = abi.encodePacked("{");
 
@@ -373,6 +375,7 @@ contract X2EarnRewardsPool is
     }
 
     json = abi.encodePacked(json, "}");
+
     return json;
   }
 
