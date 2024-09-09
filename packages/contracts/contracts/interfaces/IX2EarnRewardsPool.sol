@@ -114,4 +114,18 @@ interface IX2EarnRewardsPool {
     ProofDataTypes.Impact memory impact,
     string memory description
   ) external;
+
+  /**
+   * @dev Builds the JSON proof string that will be stored
+   * on chain regarding the proofs, impacts and description of the sustainable action.
+   *
+   * @param proof the proof of the sustainable action
+   * @param impact the impact of the sustainable action
+   * @param description the description of the sustainable action
+   */
+  function buildProof(
+    ProofDataTypes.Proof memory proof,
+    ProofDataTypes.Impact memory impact,
+    string memory description
+  ) external returns (string memory);
 }
