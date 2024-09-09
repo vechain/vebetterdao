@@ -384,7 +384,7 @@ export async function deployAll(config: ContractsConfig) {
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
-    vechainNodesMock: await vechainNodesMock.getAddress(),
+    vechainNodesManagement: await nodeManagement.getAddress(),
   }
 
   const libraries: {
@@ -843,7 +843,7 @@ export async function deployAll(config: ContractsConfig) {
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
     vechainNodesMock: vechainNodesMock,
-    nodeManagement: nodeManagement,
+    vechainNodeManagement: nodeManagement,
     libraries: {
       governorClockLogic: GovernorClockLogicLib,
       governorConfigurator: GovernorConfiguratorLib,

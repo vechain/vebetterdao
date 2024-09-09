@@ -17,6 +17,7 @@ const config: AppConfig = {
   nodeManagementContractAddress: "",
   x2EarnAppsContractAddress: "0x352231d77224Af6503Fe7aae65d7De2C27923E14",
   x2EarnRewardsPoolContractAddress: "0xf5BF817c2508Bf032235B6D4aeB8995A216Ed630",
+  nodeManagementContractAddress: "",
   mixPanelProjectToken: "e03f4f5f6a753dae2dac30a69dfe21f7",
   nodeUrl: "https://thor-solo.dev.b3tr.vechain.org",
   network: {
