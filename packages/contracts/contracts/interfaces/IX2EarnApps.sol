@@ -505,4 +505,18 @@ interface IX2EarnApps {
    * @dev Remove an XApps submission.
    */
   function removeXAppSubmission(bytes32 _appId) external;
+
+  /**
+   * @notice this function returns the app that a node ID is endorsing
+   * @param nodeId The unique identifier of the node ID.
+   * @return bytes32 The unique identifier of the app that the node ID is endorsing.
+   */
+  function nodeToEndorsedApp(uint256 nodeId) external view returns (bytes32);
+
+  /**
+   * @notice this function returns the endorsement score of a node ID
+   * @param nodeId The unique identifier of the node ID.
+   * @return uint256 The endorsement score of the node ID.
+   */
+  function nodeEndorsementScore(uint256 nodeId) external view returns (uint256);
 }
