@@ -1410,7 +1410,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "time_spent",
+        "learning_time",
         "timber",
         "plastic",
         "trees_planted",
@@ -1431,7 +1431,15 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
       const impactCodes = await x2EarnRewardsPool.getAllowedImpactKeys()
 
-      expect(impactCodes).to.eql(["trees_planted", "water", "energy", "waste_mass", "time_spent", "timber", "plastic"])
+      expect(impactCodes).to.eql([
+        "trees_planted",
+        "water",
+        "energy",
+        "waste_mass",
+        "learning_time",
+        "timber",
+        "plastic",
+      ])
 
       await x2EarnRewardsPool
         .connect(owner)
@@ -1441,7 +1449,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
       const impactCodes2 = await x2EarnRewardsPool.getAllowedImpactKeys()
 
-      expect(impactCodes2).to.eql(["trees_planted", "plastic", "energy", "waste_mass", "time_spent", "timber"])
+      expect(impactCodes2).to.eql(["trees_planted", "plastic", "energy", "waste_mass", "learning_time", "timber"])
     })
 
     it("IMPACT_KEY_MANAGER_ROLE and DEFAULT_ADMIN can add an impact code", async function () {
@@ -1463,7 +1471,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "time_spent",
+        "learning_time",
         "timber",
         "plastic",
         "trees_planted",
@@ -1483,7 +1491,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "time_spent",
+        "learning_time",
         "timber",
         "plastic",
         "trees_planted",

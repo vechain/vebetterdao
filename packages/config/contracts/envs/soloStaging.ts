@@ -119,7 +119,7 @@ export function createSoloStagingConfig() {
       "water",
       "energy",
       "waste_mass",
-      "time_spent",
+      "learning_time",
       "timber",
       "plastic",
       "trees_planted",
