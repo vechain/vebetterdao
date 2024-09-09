@@ -1,13 +1,6 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import {
-  ZERO_ADDRESS,
-  catchRevert,
-  decodeEvents,
-  filterEventsByName,
-  getOrDeployContractInstances,
-  parseRegisteredActionEvent,
-} from "./helpers"
+import { ZERO_ADDRESS, catchRevert, filterEventsByName, getOrDeployContractInstances } from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
@@ -1681,7 +1674,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
     expect(registeredActionEvent?.args[3]).to.equal(multiplier)
 
     // check that the user score is correct
-    expect(await veBetterPassport.userTotalScoreApp(user.address, appId)).to.equal(multiplier)
+    expect(await veBetterPassport.userAppTotalScore(user.address, appId)).to.equal(multiplier)
     expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(multiplier)
     expect(await veBetterPassport.userTotalScore(user.address)).to.equal(multiplier)
     expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
@@ -1724,7 +1717,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
     expect(registeredActionEvent2?.args[3]).to.equal(supposedScore)
 
     // check that the user score is correct
-    expect(await veBetterPassport.userTotalScoreApp(user.address, appId)).to.equal(supposedScore)
+    expect(await veBetterPassport.userAppTotalScore(user.address, appId)).to.equal(supposedScore)
     expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(supposedScore)
     expect(await veBetterPassport.userTotalScore(user.address)).to.equal(supposedScore)
     expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(supposedScore)
@@ -1760,12 +1753,12 @@ describe("X2EarnRewardsPool - @shard3", function () {
     expect(registeredActionEvent3?.args[3]).to.equal(supposedScore2)
 
     // check that the user score is correct
-    expect(await veBetterPassport.userTotalScoreApp(user.address, appId)).to.equal(supposedScore2)
+    expect(await veBetterPassport.userAppTotalScore(user.address, appId)).to.equal(supposedScore2)
     expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(supposedScore2)
     expect(await veBetterPassport.userTotalScore(user.address)).to.equal(supposedScore2)
     expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(supposedScore2)
 
-    console.log(await veBetterPassport.userTotalScoreApp(user.address, appId))
+    console.log(await veBetterPassport.userAppTotalScore(user.address, appId))
     console.log(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId))
     console.log(await veBetterPassport.userTotalScore(user.address))
     console.log(await veBetterPassport.userRoundScore(user.address, roundId))
