@@ -172,6 +172,44 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
+   * @notice Retrieves information for multiple applications in a paginated manner.
+   * @dev This function is an internal view function that overrides a virtual function.
+   * It fetches data from storage and constructs an array of App objects.
+   * @param appIds An array of application IDs for which details are to be retrieved.
+   * @param startIndex The index from which to start retrieving applications.
+   * @param count The number of applications to retrieve.
+   * @return paginatedApps An array of App containing information about each application.
+   */
+  function _getPaginatedAppsInfo(
+    bytes32[] memory appIds,
+    uint startIndex,
+    uint count
+  ) internal view virtual override returns (X2EarnAppsDataTypes.App[] memory) {
+    AppsStorageStorage storage $ = _getAppsStorageStorage();
+
+    uint256 length = appIds.length;
+    if (length <= startIndex) {
+      revert X2EarnInvalidStartIndex();
+    }
+
+    // Calculate the end index
+    uint256 endIndex = startIndex + count;
+    if (endIndex > length) {
+      endIndex = length;
+    }
+
+    // Create an array to hold the paginated apps
+    X2EarnAppsDataTypes.App[] memory paginatedApps = new X2EarnAppsDataTypes.App[](endIndex - startIndex);
+
+    // Populate the paginated array
+    for (uint i = startIndex; i < endIndex; i++) {
+      paginatedApps[i - startIndex] = $._apps[appIds[i]];
+    }
+
+    return paginatedApps;
+  }
+
+  /**
    * @dev Check if the apps registration has been submitted.
    *
    * @param appId the id of the app
@@ -232,27 +270,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
-
-    uint256 length = $._appIds.length;
-    if (length <= startIndex) {
-      revert X2EarnInvalidStartIndex();
-    }
-
-    // Calculate the end index
-    uint256 endIndex = startIndex + count;
-    if (endIndex > length) {
-      endIndex = length;
-    }
-
-    // Create an array to hold the paginated apps
-    X2EarnAppsDataTypes.App[] memory paginatedApps = new X2EarnAppsDataTypes.App[](endIndex - startIndex);
-
-    // Populate the paginated array
-    for (uint i = startIndex; i < endIndex; i++) {
-      paginatedApps[i - startIndex] = $._apps[$._appIds[i]];
-    }
-
-    return paginatedApps;
+    return _getPaginatedAppsInfo($._appIds, startIndex, count);
   }
 
   /**

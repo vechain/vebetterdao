@@ -519,6 +519,14 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     return _getAppsInfo(appIds);
   }
 
+    /**
+   * @dev See {IX2EarnApps-getPaginatedApps}.
+   */
+  function getPaginatedUnendorsedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory) {
+    bytes32[] memory appIds = unendorsedAppIds();
+    return _getPaginatedAppsInfo(appIds, startIndex, count);
+  }
+
   /**
    * @dev See {IX2EarnApps-getScore}.
    */

@@ -212,6 +212,16 @@ interface IX2EarnApps {
   function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory);
 
   /**
+   * @dev Get a paginated list of unendorsed apps
+   * @param startIndex The starting index of the pagination
+   * @param count The number of items to return
+   */
+  function getPaginatedUnendorsedApps(
+    uint startIndex,
+    uint count
+  ) external view returns (X2EarnAppsDataTypes.App[] memory);
+
+  /**
    * @notice Get all the apps that exist in the VeBetter DAO ecosystem.
    * @dev An XApp must have been included in at least one allocation round to be considered an existing app.
    */

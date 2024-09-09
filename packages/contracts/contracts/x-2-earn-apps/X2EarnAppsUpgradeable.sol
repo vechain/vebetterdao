@@ -180,10 +180,21 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @dev Function to get the apps info.
    */
-  function _getAppsInfo(bytes32[] memory appIds) internal view virtual returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
+  function _getAppsInfo(
+    bytes32[] memory appIds
+  ) internal view virtual returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
 
   /**
    * @dev Function to check if an apo is registered.
    */
-   function _appSubmitted(bytes32 appId) internal view virtual returns (bool);
+  function _appSubmitted(bytes32 appId) internal view virtual returns (bool);
+
+  /**
+   * @dev Function to get the paginated apps info.
+   */
+  function _getPaginatedAppsInfo(
+    bytes32[] memory appIds,
+    uint startIndex,
+    uint count
+  ) internal view virtual returns (X2EarnAppsDataTypes.App[] memory);
 }
