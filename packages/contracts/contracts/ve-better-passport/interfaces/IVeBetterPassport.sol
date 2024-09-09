@@ -4,10 +4,11 @@ pragma solidity 0.8.20;
 import { IBotSignaling } from "./IBotSignaling.sol";
 import { IProofOfParticipation } from "./IProofOfParticipation.sol";
 import { IPersonhoodDelegation } from "./IPersonhoodDelegation.sol";
+import { IWhitelistAndBlacklist } from "./IWhitelistAndBlacklist.sol";
 
 /// @title IVeBetterPassport
 /// @notice Interface for the VeBetterPassport contract.
-interface IVeBetterPassport is IBotSignaling, IProofOfParticipation, IPersonhoodDelegation {
+interface IVeBetterPassport is IWhitelistAndBlacklist, IBotSignaling, IProofOfParticipation, IPersonhoodDelegation {
   error VeBetterPassportUnauthorizedUser(address user);
 
   /// @notice Getter to know if an address can be considered a person.

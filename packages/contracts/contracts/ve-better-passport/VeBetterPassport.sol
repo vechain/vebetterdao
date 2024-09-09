@@ -8,6 +8,7 @@ import { BotSignaling } from "./modules/BotSignaling.sol";
 import { ProofOfParticipation } from "./modules/ProofOfParticipation.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { PersonhoodDelegation } from "./modules/PersonhoodDelegation.sol";
+import { WhitelistAndBlacklist } from "./modules/WhitelistAndBlacklist.sol";
 
 /// @title VeBetterPassport
 /// @notice Contract to manage the VeBetterPassport, a system to determine if a wallet is a person or not
@@ -18,6 +19,7 @@ contract VeBetterPassport is
   PersonhoodDelegation,
   ProofOfParticipation,
   BotSignaling,
+  WhitelistAndBlacklist,
   IVeBetterPassport
 {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -74,8 +76,9 @@ contract VeBetterPassport is
       data.threshold,
       data.roundsForCumulativeScore
     );
-    __BotSignaling_init(data.blacklisters, data.whitelisters);
+    __BotSignaling_init(data.blacklisters);
     __PersonhoodDelegation_init();
+    __WhitelistAndBlacklist_init(data.whitelisters);
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
     $.xAllocationVoting = data.xAllocationVoting;
@@ -98,7 +101,8 @@ contract VeBetterPassport is
 
   /// @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
   /// @param role - the role to check
-  modifier onlyRoleOrAdmin(bytes32 role) override(BotSignaling, ProofOfParticipation, PersonhoodDelegation) {
+  modifier onlyRoleOrAdmin(bytes32 role)
+    override(BotSignaling, ProofOfParticipation, PersonhoodDelegation, WhitelistAndBlacklist) {
     if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
       revert VeBetterPassportUnauthorizedUser(msg.sender);
     }
@@ -119,6 +123,9 @@ contract VeBetterPassport is
   function isPerson(address _user) public view returns (bool) {
     // If a wallet is whitelisted, it is a person
     if (isWhitelisted(_user)) return true;
+
+    // If a wallet is blacklisted, it is not a person
+    if (isBlacklisted(_user)) return false;
 
     // If a wallet is not whitelisted and has been signaled more than 2 times
     if (signaledCounter(_user) > 2) {

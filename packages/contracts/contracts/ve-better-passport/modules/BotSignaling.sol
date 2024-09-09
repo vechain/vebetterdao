@@ -10,7 +10,6 @@ import { IBotSignaling } from "../interfaces/IBotSignaling.sol";
 /// Only addresses with the SIGNALER_ROLE can signal users.
 contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling {
   bytes32 public constant SIGNALER_ROLE = keccak256("SIGNALER_ROLE");
-  bytes32 public constant WHITELISTER_ROLE = keccak256("WHITELISTER_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -20,8 +19,6 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
   // ---------- Storage ------------ //
 
   struct BotSignalingStorage {
-    // Mapping to store blacklist status
-    mapping(address user => bool) _whitelisted;
     mapping(address user => uint256) _signaledCounter;
     // App signals counter
     mapping(address signaler => bytes32 app) _appOfSignaler;
@@ -42,22 +39,14 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
   /**
    * @dev Initializes the contract
    */
-  function __BotSignaling_init(address[] memory _signalers, address[] memory _whitelisters) internal onlyInitializing {
-    __BotSignaling_init_unchained(_signalers, _whitelisters);
+  function __BotSignaling_init(address[] memory _signalers) internal onlyInitializing {
+    __BotSignaling_init_unchained(_signalers);
   }
 
-  function __BotSignaling_init_unchained(
-    address[] memory _signalers,
-    address[] memory _whitelisters
-  ) internal onlyInitializing {
+  function __BotSignaling_init_unchained(address[] memory _signalers) internal onlyInitializing {
     for (uint256 i; i < _signalers.length; i++) {
       require(_signalers[i] != address(0), "BotSignaling: signaler address cannot be zero");
       _grantRole(SIGNALER_ROLE, _signalers[i]);
-    }
-
-    for (uint256 i; i < _whitelisters.length; i++) {
-      require(_whitelisters[i] != address(0), "BotSignaling: whitelister address cannot be zero");
-      _grantRole(WHITELISTER_ROLE, _whitelisters[i]);
     }
   }
 
@@ -73,11 +62,6 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
   }
 
   // ---------- Getters ---------- //
-
-  /// @notice Returns if a user is whitelisted
-  function isWhitelisted(address _user) public view returns (bool) {
-    return _getBotSignalingStorage()._whitelisted[_user];
-  }
 
   /// @notice Returns the number of times a user has been signaled
   function signaledCounter(address _user) public view returns (uint256) {
@@ -135,17 +119,5 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     $._appOfSignaler[user] = bytes32(0);
 
     emit SignalerRemovedFromApp(user, app);
-  }
-
-  /// @notice user can be whitelisted but the counter will not be reset
-  function whitelistUser(address _user) external override onlyRoleOrAdmin(WHITELISTER_ROLE) {
-    _getBotSignalingStorage()._whitelisted[_user] = true;
-    emit UserWhitelisted(_user, msg.sender);
-  }
-
-  /// @notice Removes a user from the whitelist
-  function removeWhitelistedUser(address _user) external override onlyRoleOrAdmin(WHITELISTER_ROLE) {
-    _getBotSignalingStorage()._whitelisted[_user] = false;
-    emit RemovedUserFromWhitelist(_user, msg.sender);
   }
 }
