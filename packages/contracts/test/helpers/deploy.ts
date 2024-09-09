@@ -66,6 +66,7 @@ interface DeployInstance {
   voterRewards: VoterRewards
   voterRewardsV1: VoterRewardsV1
   treasury: Treasury
+  nodeManagement: NodeManagement
   x2EarnRewardsPool: X2EarnRewardsPool
   nodeManagement: NodeManagement
   owner: HardhatEthersSigner
@@ -528,6 +529,7 @@ export const getOrDeployContractInstances = async ({
     galaxyMemberV1,
     x2EarnApps,
     xAllocationVoting,
+    nodeManagement,
     xAllocationPool,
     emissions,
     voterRewards,
@@ -557,7 +559,7 @@ export const getOrDeployContractInstances = async ({
     governorVotesLogicLibV1: GovernorVotesLogicLibV1,
     myErc721: myErc721,
     myErc1155: myErc1155,
-    vechainNodesMock: vechainNodesMock,
+    vechainNodesMock,
   }
   return cachedDeployInstance
 }

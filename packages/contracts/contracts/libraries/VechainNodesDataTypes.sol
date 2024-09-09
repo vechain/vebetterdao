@@ -2,7 +2,7 @@
 pragma solidity 0.8.20;
 
 library VechainNodesDataTypes {
-    /**
+  /**
    * @dev The strength level of each node.
    */
   enum NodeStrengthLevel {
@@ -30,5 +30,4 @@ library VechainNodesDataTypes {
     uint256 thunderX;
     uint256 mjolnirX;
   }
-
 }

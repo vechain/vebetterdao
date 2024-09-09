@@ -19,25 +19,25 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
 
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
-  /// @custom:storage-location erc7201:b3tr.storage.NodeDelegation
-  struct NodeDelegationStorage {
+  /// @custom:storage-location erc7201:b3tr.storage.NodeManagement
+  struct NodeManagementStorage {
     ITokenAuction vechainNodesContract; // The token auction contract
     mapping(address => EnumerableSet.UintSet) delegateeToNodeIds; // Map delegatee address to set of node IDs
     mapping(uint256 => address) nodeIdToDelegatee; // Map node ID to delegatee address
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.NodeDelegation")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant NodeDelegationStorageLocation =
-    0x7b5bf20ba5f4b867b37b67e3c96a3ee71f9136cfd5c3839dabd1106f8d4dc000;
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.NodeManagement")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant NodeManagementStorageLocation =
+    0x895b04a03424f581b1c6717e3715bbb5ceb9c40a4e5b61a13e84096251cf8f00;
 
   /**
    * @notice Retrieve the storage reference for node delegation data.
    * @dev Internal pure function to get the storage slot for node delegation data using inline assembly.
    * @return $ The storage reference for node delegation data.
    */
-  function _getNodeDelegationStorage() internal pure returns (NodeDelegationStorage storage $) {
+  function _getNodeManagementStorage() internal pure returns (NodeManagementStorage storage $) {
     assembly {
-      $.slot := NodeDelegationStorageLocation
+      $.slot := NodeManagementStorageLocation
     }
   }
 
@@ -56,7 +56,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, _upgrader);
 
-    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
     $.vechainNodesContract = ITokenAuction(_vechainNodesContract);
     emit VechainNodeContractSet(address(0), _vechainNodesContract);
   }
@@ -69,7 +69,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    * @param delegatee The address to delegate the node to.
    */
   function delegateNode(address delegatee) public virtual {
-    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
 
     // Check if the delegatee address is the zero address
     if (delegatee == address(0)) {
@@ -110,7 +110,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    * @dev This function allows a node owner to remove the delegation of their node, effectively revoking the delegatee's access to the node.
    */
   function removeNodeDelegation() public virtual {
-    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
 
     // Get the node ID of the caller
     uint256 nodeId = $.vechainNodesContract.ownerToId(msg.sender);
@@ -142,7 +142,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   function setVechainNodesContract(address vechainNodesContract) external onlyRole(DEFAULT_ADMIN_ROLE) {
     require(vechainNodesContract != address(0), "NodeManagement: vechainNodesContract cannot be the zero address");
 
-    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
 
     emit VechainNodeContractSet(address($.vechainNodesContract), vechainNodesContract);
     $.vechainNodesContract = ITokenAuction(vechainNodesContract);
@@ -157,7 +157,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    * @return The address of the manager of the specified node.
    */
   function getNodeManager(uint256 nodeId) public view returns (address) {
-    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
 
     // Get the address of the delegatee for the given nodeId
     address user = $.nodeIdToDelegatee[nodeId];
@@ -172,7 +172,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    * @return uint256[] The node IDs associated with the user.
    */
   function getNodeIds(address user) public view returns (uint256[] memory) {
-    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
 
     // Get the set of node IDs delegated to the user
     EnumerableSet.UintSet storage nodeIdsSet = $.delegateeToNodeIds[user];
@@ -205,7 +205,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    * @return bool True if the user is holding the node ID and it is a valid node.
    */
   function isNodeManager(address user, uint256 nodeId) public view virtual returns (bool) {
-    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
 
     // Check if the user has the node ID delegated to them and if it is valid
     if ($.nodeIdToDelegatee[nodeId] == user) {
@@ -229,7 +229,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    * @return The node level of the specified token ID as a VechainNodesDataTypes.NodeStrengthLevel enum.
    */
   function getNodeLevel(uint256 nodeId) public view returns (VechainNodesDataTypes.NodeStrengthLevel) {
-    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
 
     // Retrieve the metadata for the specified node ID
     (, uint8 nodeLevel, , , , , ) = $.vechainNodesContract.getMetadata(nodeId);
@@ -267,7 +267,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    * @return ITokenAuction The instance of the Vechain node contract.
    */
   function getVechainNodesContract() external view returns (ITokenAuction) {
-    NodeDelegationStorage storage $ = _getNodeDelegationStorage();
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
     return $.vechainNodesContract;
   }
 
