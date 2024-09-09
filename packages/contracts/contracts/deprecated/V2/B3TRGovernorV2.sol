@@ -25,7 +25,7 @@ pragma solidity 0.8.20;
 
 import { GovernorProposalLogic } from "../../governance/libraries/GovernorProposalLogic.sol";
 import { GovernorStateLogic } from "../../governance/libraries/GovernorStateLogic.sol";
-import { GovernorVotesLogicV1 } from "./governance/libraries/GovernorVotesLogicV1.sol";
+import { GovernorVotesLogicV1 } from "../V1/governance/libraries/GovernorVotesLogicV1.sol";
 import { GovernorQuorumLogic } from "../../governance/libraries/GovernorQuorumLogic.sol";
 import { GovernorDepositLogic } from "../../governance/libraries/GovernorDepositLogic.sol";
 import { GovernorStorageTypes } from "../../governance/libraries/GovernorStorageTypes.sol";

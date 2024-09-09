@@ -75,7 +75,16 @@ export async function deployAll(config: ContractsConfig) {
   const GovernorQuorumLogicLib = await GovernorQuorumLogic.deploy()
   await GovernorQuorumLogicLib.waitForDeployment()
 
-  // Deploy Governor Proposal Logic
+  // Deploy Governor Votes Logic V1
+  const GovernorVotesLogicV1 = await ethers.getContractFactory("GovernorVotesLogicV1", {
+    libraries: {
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+    },
+  })
+  const GovernorVotesLogicLibV1 = await GovernorVotesLogicV1.deploy()
+  await GovernorVotesLogicLibV1.waitForDeployment()
+
+  // Deploy Governor Proposal Logic Latest Version
   const GovernorProposalLogic = await ethers.getContractFactory("GovernorProposalLogic", {
     libraries: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -369,7 +378,17 @@ export async function deployAll(config: ContractsConfig) {
           GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
           GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
           GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+          GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
+        },
+        {
+          GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+          GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
+          GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
         },
         {
           GovernorClockLogic: await GovernorClockLogicLib.getAddress(),

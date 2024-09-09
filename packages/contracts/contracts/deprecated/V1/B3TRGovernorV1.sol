@@ -25,7 +25,7 @@ pragma solidity 0.8.20;
 
 import { GovernorProposalLogic } from "../../governance/libraries/GovernorProposalLogic.sol";
 import { GovernorStateLogic } from "../../governance/libraries/GovernorStateLogic.sol";
-import { GovernorVotesLogic } from "../../governance/libraries/GovernorVotesLogic.sol";
+import { GovernorVotesLogicV1 } from "./governance/libraries/GovernorVotesLogicV1.sol";
 import { GovernorQuorumLogic } from "../../governance/libraries/GovernorQuorumLogic.sol";
 import { GovernorDepositLogic } from "../../governance/libraries/GovernorDepositLogic.sol";
 import { GovernorStorageTypes } from "../../governance/libraries/GovernorStorageTypes.sol";
@@ -299,7 +299,7 @@ contract B3TRGovernorV1 is
    */
   function getVotes(address account, uint256 timepoint) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorVotesLogic.getVotes($, account, timepoint);
+    return GovernorVotesLogicV1.getVotes($, account, timepoint);
   }
 
   /**
@@ -310,7 +310,7 @@ contract B3TRGovernorV1 is
    */
   function getQuadraticVotingPower(address account, uint256 timepoint) external view returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorVotesLogic.getQuadraticVotingPower($, account, timepoint);
+    return GovernorVotesLogicV1.getQuadraticVotingPower($, account, timepoint);
   }
 
   /**
@@ -415,7 +415,7 @@ contract B3TRGovernorV1 is
    */
   function hasVotedOnce(address user) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorVotesLogic.userVotedOnce($, user);
+    return GovernorVotesLogicV1.userVotedOnce($, user);
   }
 
   /**
@@ -449,7 +449,7 @@ contract B3TRGovernorV1 is
     uint256 proposalId
   ) external view returns (uint256 againstVotes, uint256 forVotes, uint256 abstainVotes) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorVotesLogic.getProposalVotes($, proposalId);
+    return GovernorVotesLogicV1.getProposalVotes($, proposalId);
   }
 
   /**
@@ -469,7 +469,7 @@ contract B3TRGovernorV1 is
    */
   function hasVoted(uint256 proposalId, address account) external view returns (bool) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorVotesLogic.hasVoted($, proposalId, account);
+    return GovernorVotesLogicV1.hasVoted($, proposalId, account);
   }
 
   /**
@@ -722,7 +722,7 @@ contract B3TRGovernorV1 is
    */
   function castVote(uint256 proposalId, uint8 support) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorVotesLogic.castVote($, proposalId, _msgSender(), support, "");
+    return GovernorVotesLogicV1.castVote($, proposalId, _msgSender(), support, "");
   }
 
   /**
@@ -734,7 +734,7 @@ contract B3TRGovernorV1 is
    */
   function castVoteWithReason(uint256 proposalId, uint8 support, string calldata reason) external returns (uint256) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
-    return GovernorVotesLogic.castVote($, proposalId, _msgSender(), support, reason);
+    return GovernorVotesLogicV1.castVote($, proposalId, _msgSender(), support, reason);
   }
 
   /**

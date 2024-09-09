@@ -30,7 +30,7 @@ import { GovernorConfigurator } from "../../../../governance/libraries/GovernorC
 import { GovernorProposalLogic } from "../../../../governance/libraries/GovernorProposalLogic.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
-/// @title GovernorVotesLogicV1
+/// @title GovernorVotesLogic
 /// @notice Library for handling voting logic in the Governor contract.
 library GovernorVotesLogicV1 {
   /// @dev Thrown when a vote has already been cast by the voter.
@@ -217,16 +217,7 @@ library GovernorVotesLogicV1 {
       GovernorStateLogic.encodeStateBitmap(GovernorTypes.ProposalState.Active)
     );
 
-    uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(self, proposalId);
-
-    bool isDelegatee = self.veBetterPassport.isDelegateeInTimepoint(voter, proposalSnapshot);
-    address personhoodAddress = isDelegatee
-      ? self.veBetterPassport.getDelegatorInTimepoint(voter, proposalSnapshot)
-      : voter;
-
-    require(self.veBetterPassport.isPerson(personhoodAddress), "GovernorVotesLogic: voter is not a person");
-
-    uint256 weight = self.vot3.getPastVotes(voter, proposalSnapshot);
+    uint256 weight = self.vot3.getPastVotes(voter, GovernorProposalLogic._proposalSnapshot(self, proposalId));
     uint256 power = Math.sqrt(weight) * 1e9;
 
     if (weight < GovernorConfigurator.getVotingThreshold(self)) {
@@ -235,7 +226,12 @@ library GovernorVotesLogicV1 {
 
     _countVote(self, proposalId, voter, support, weight, power);
 
-    self.voterRewards.registerVote(proposalSnapshot, voter, weight, Math.sqrt(weight));
+    self.voterRewards.registerVote(
+      GovernorProposalLogic._proposalSnapshot(self, proposalId),
+      voter,
+      weight,
+      Math.sqrt(weight)
+    );
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 

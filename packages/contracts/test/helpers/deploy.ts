@@ -31,6 +31,7 @@ import {
   VeBetterPassport,
   XAllocationVotingV1,
   B3TRGovernorV2,
+  GovernorVotesLogicV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -69,6 +70,7 @@ interface DeployInstance {
   governorQuorumLogicLib: GovernorQuorumLogic
   governorStateLogicLib: GovernorStateLogic
   governorVotesLogicLib: GovernorVotesLogic
+  governorVotesLogicLibV1: GovernorVotesLogicV1
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
 }
@@ -134,6 +136,15 @@ export const getOrDeployContractInstances = async ({
   })
   const GovernorProposalLogicLib = await GovernorProposalLogic.deploy()
   await GovernorProposalLogicLib.waitForDeployment()
+
+  // Deploy Governor Votes Logic V1
+  const GovernorVotesLogicV1 = await ethers.getContractFactory("GovernorVotesLogicV1", {
+    libraries: {
+      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+    },
+  })
+  const GovernorVotesLogicLibV1 = await GovernorVotesLogicV1.deploy()
+  await GovernorVotesLogicLibV1.waitForDeployment()
 
   // Deploy Governor Votes Logic
   const GovernorVotesLogic = await ethers.getContractFactory("GovernorVotesLogic", {
@@ -377,7 +388,7 @@ export const getOrDeployContractInstances = async ({
       GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
       GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
-      GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+      GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
     },
   )) as B3TRGovernorV1
 
@@ -391,14 +402,14 @@ export const getOrDeployContractInstances = async ({
       GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
       GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
-      GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+      GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
     },
   })) as B3TRGovernorV2
 
   const governor = (await upgradeProxy(
     "B3TRGovernorV2",
-    "B3TRGovernorV3",
-    await governorV1.getAddress(),
+    "B3TRGovernor",
+    await governorV2.getAddress(),
     [veBetterPassportAddress],
     {
       version: 3,
@@ -534,6 +545,7 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLib: GovernorQuorumLogicLib,
     governorStateLogicLib: GovernorStateLogicLib,
     governorVotesLogicLib: GovernorVotesLogicLib,
+    governorVotesLogicLibV1: GovernorVotesLogicLibV1,
     myErc721: myErc721,
     myErc1155: myErc1155,
   }
