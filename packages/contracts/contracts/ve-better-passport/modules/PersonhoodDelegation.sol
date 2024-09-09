@@ -69,6 +69,8 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
 
   // ---------- Modifiers ------------ //
 
+  /// @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
+  /// @param role - the role to check
   modifier onlyRoleOrAdmin(bytes32 role) virtual {
     if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
       revert PersonhoodDelegationUnauthorizedUser(msg.sender);
@@ -78,10 +80,15 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
 
   // ---------- Getters ---------- //
 
+  /// @notice Returns the delegatee address for a delegator
+  /// @param delegator - the delegator address
   function getDelegatee(address delegator) external view returns (address) {
     return _addressFromUint160(_getPersonhoodDelegationStorage().delegatorToDelegatee[delegator].latest());
   }
 
+  /// @notice Returns the delegatee address for a delegator at a specific timepoint
+  /// @param delegator - the delegator address
+  /// @param timepoint - the timepoint to query
   function getDelegateeInTimepoint(address delegator, uint256 timepoint) external view returns (address) {
     return
       _addressFromUint160(
@@ -91,10 +98,15 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
       );
   }
 
+  /// @notice Returns the delegator address for a delegatee
+  /// @param delegatee - the delegatee address
   function getDelegator(address delegatee) external view returns (address) {
     return _addressFromUint160(_getPersonhoodDelegationStorage().delegateeToDelegator[delegatee].latest());
   }
 
+  /// @notice Returns the delegator address for a delegatee at a specific timepoint
+  /// @param delegatee - the delegatee address
+  /// @param timepoint - the timepoint to query
   function getDelegatorInTimepoint(address delegatee, uint256 timepoint) external view returns (address) {
     return
       _addressFromUint160(
@@ -104,19 +116,29 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
       );
   }
 
+  /// @notice Returns if a user is a delegator
+  /// @param user - the user address
   function isDelegator(address user) external view returns (bool) {
     return _getPersonhoodDelegationStorage().delegatorToDelegatee[user].latest() != 0;
   }
 
+  /// @notice Returns if a user is a delegator at a specific timepoint
+  /// @param user - the user address
+  /// @param timepoint - the timepoint to query
   function isDelegatorInTimepoint(address user, uint256 timepoint) external view returns (bool) {
     return
       _getPersonhoodDelegationStorage().delegatorToDelegatee[user].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
   }
 
+  /// @notice Returns if a user is a delegatee
+  /// @param user - the user address
   function isDelegatee(address user) external view returns (bool) {
     return _getPersonhoodDelegationStorage().delegateeToDelegator[user].latest() != 0;
   }
 
+  /// @notice Returns if a user is a delegatee at a specific timepoint
+  /// @param user - the user address
+  /// @param timepoint - the timepoint to query
   function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool) {
     return
       _getPersonhoodDelegationStorage().delegateeToDelegator[user].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
@@ -124,6 +146,15 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
 
   // ---------- Signatures and Delegation ------------ //
 
+  /// @notice Delegate the personhood to another address
+  /// The delegator must sign a message where he authorizes the delegatee to request the delegation:
+  /// this is done to avoid that a malicious user delegates the personhood to another user without his consent.
+  /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
+  /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
+  /// @param delegator - the delegator address
+  /// @param nonce - the nonce of the delegation
+  /// @param deadline - the deadline for the signature
+  /// @param signature - the signature of the delegation
   function delegateWithSignature(address delegator, uint256 nonce, uint256 deadline, bytes memory signature) external {
     require(block.timestamp <= deadline, "Signature expired");
 
@@ -150,7 +181,8 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     emit DelegationCreated(delegator, msg.sender);
   }
 
-  // Revoke the delegation (can be done by the delegator or the delegatee)
+  /// @notice Revoke the delegation (can be done by the delegator or the delegatee)
+  /// @param delegator - the delegator address
   function revokeDelegation(address delegator) external {
     PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
 
@@ -172,20 +204,24 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
 
   // ---------- Checkpoint Logic ------------ //
 
+  /// @notice Push a new checkpoint for the delegator and delegatee
   function _pushCheckpoint(Checkpoints.Trace160 storage store, address value) private {
     store.push(clock(), uint160(value));
   }
 
+  // ---------- Utility ------------ //
+
+  /// @notice Convert a uint160 value to an address
   function _addressFromUint160(uint160 value) internal pure returns (address) {
     return address(uint160(value));
   }
 
-  // ---------- Utility ------------ //
-
+  /// @notice Get the current block number
   function clock() public view virtual returns (uint48) {
     return Time.blockNumber();
   }
 
+  /// @notice Get the clock mode
   function CLOCK_MODE() external view virtual returns (string memory) {
     return "mode=blocknumber&from=default";
   }

@@ -6,7 +6,7 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
 import { IWhitelistAndBlacklist } from "../interfaces/IWhitelistAndBlacklist.sol";
 
 /// @title WhitelistAndBlacklist
-/// @notice Contract to whitelist and blacklist users
+/// @notice Contract to whitelist and blacklist users.
 contract WhitelistAndBlacklist is Initializable, AccessControlUpgradeable, IWhitelistAndBlacklist {
   bytes32 public constant WHITELISTER_ROLE = keccak256("WHITELISTER_ROLE");
 

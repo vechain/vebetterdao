@@ -8,6 +8,7 @@ import { IBotSignaling } from "../interfaces/IBotSignaling.sol";
 /// @title BotSignaling
 /// @notice Contract to handle the signaling of users that apps consider as bots or malicious actors.
 /// Only addresses with the SIGNALER_ROLE can signal users.
+/// There is a threshold of signals that a user must reach to be considered a bot.
 contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling {
   bytes32 public constant SIGNALER_ROLE = keccak256("SIGNALER_ROLE");
 
@@ -20,7 +21,7 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
 
   struct BotSignalingStorage {
     mapping(address user => uint256) _signaledCounter;
-    uint256 threshold;
+    uint256 signalsThreshold;
     // App signals counter
     mapping(address signaler => bytes32 app) _appOfSignaler;
     mapping(bytes32 app => mapping(address user => uint256)) _appSignalsCounter;
@@ -51,7 +52,7 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     }
 
     BotSignalingStorage storage $ = _getBotSignalingStorage();
-    $.threshold = _threshold;
+    $.signalsThreshold = _threshold;
   }
 
   // ---------- Modifiers ------------ //
@@ -87,8 +88,9 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     return _getBotSignalingStorage()._appTotalSignalsCounter[_app];
   }
 
+  /// @notice Returns the signaling threshold
   function signalingThreshold() public view returns (uint256) {
-    return _getBotSignalingStorage().threshold;
+    return _getBotSignalingStorage().signalsThreshold;
   }
 
   // ---------- Setters ---------- //
@@ -129,8 +131,9 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     emit SignalerRemovedFromApp(user, app);
   }
 
+  /// @notice Sets the signaling threshold
   function setSignalingThreshold(uint256 _threshold) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
     BotSignalingStorage storage $ = _getBotSignalingStorage();
-    $.threshold = _threshold;
+    $.signalsThreshold = _threshold;
   }
 }

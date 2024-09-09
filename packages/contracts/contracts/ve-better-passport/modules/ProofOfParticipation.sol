@@ -11,7 +11,9 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 /// @title ProofOfParticipation
 /// @notice This contract is used to track the actions of users in the VeBetterDAO ecosystem.
 /// The contract calculates the score of a user based on the actions performed by him inside
-/// a specific range of rounds.
+/// a specific range of rounds. The score is used to determine the personhood of a user.
+/// The score is calculated based on the security level of the app and the number of actions performed.
+/// The score is decayed over time to prevent users from performing actions only in the last rounds.
 contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProofOfParticipation {
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
   bytes32 public constant ACTION_REGISTRAR_ROLE = keccak256("ACTION_REGISTRAR_ROLE");
@@ -210,10 +212,17 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
 
   // ---------- Setters ---------- //
 
+  /// @notice Registers an action for a user
+  /// @param user - the user that performed the action
+  /// @param appId - the app id of the action
   function registerAction(address user, bytes32 appId) external onlyRole(ACTION_REGISTRAR_ROLE) {
     _registerAction(user, appId, _getProofOfParticipationStorage().xAllocationVoting.currentRoundId());
   }
 
+  /// @notice Registers an action for a user in a round
+  /// @param user - the user that performed the action
+  /// @param appId - the app id of the action
+  /// @param round - the round id of the action
   function registerActionForRound(address user, bytes32 appId, uint256 round) external onlyRole(ACTION_REGISTRAR_ROLE) {
     _registerAction(user, appId, round);
   }
@@ -221,7 +230,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
   /// @notice Registers an action for a user in a round
   /// @param user - the user that performed the action
   /// @param appId - the app id of the action
-  /// @param round - the round of the action
+  /// @param round - the round id of the action
   function _registerAction(address user, bytes32 appId, uint256 round) public virtual {
     require(user != address(0), "ProofOfParticipation: user is the zero address");
 
