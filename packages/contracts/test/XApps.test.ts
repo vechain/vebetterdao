@@ -610,7 +610,7 @@ describe("X-Apps - @shard3", function () {
 
       await x2EarnApps
         .connect(owner)
-        .registerApp(otherAccounts[4].address, otherAccounts[4].address, "My app 4", "metadataURI")
+        .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app 4", "metadataURI")
 
       const apps1 = await x2EarnApps.getPaginatedApps(0, 2)
       expect(apps1.length).to.eql(2)
@@ -629,28 +629,28 @@ describe("X-Apps - @shard3", function () {
 
       await x2EarnApps
         .connect(owner)
-        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await endorseApp(app1Id, otherAccounts[0])
 
       await x2EarnApps
         .connect(owner)
-        .registerApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
 
       await x2EarnApps
         .connect(owner)
-        .registerApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
 
       await x2EarnApps
         .connect(owner)
-        .registerApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
+        .submitApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
       const app4Id = ethers.keccak256(ethers.toUtf8Bytes("My app #4"))
 
       await x2EarnApps
         .connect(owner)
-        .registerApp(otherAccounts[4].address, otherAccounts[4].address, "My app #5", "metadataURI")
+        .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app #5", "metadataURI")
 
       const app5Id = ethers.keccak256(ethers.toUtf8Bytes("My app #5"))
 
@@ -716,9 +716,9 @@ describe("X-Apps - @shard3", function () {
 
       // const limit = 1000
 
-      // let registerAppsPromises = []
+      // let submitAppsPromises = []
       // for (let i = 1; i <= limit; i++) {
-      //   registerAppsPromises.push(
+      //   submitAppsPromises.push(
       //     x2EarnApps
       //       .connect(owner)
       //       .submitApp(otherAccounts[1].address, otherAccounts[1].address, "My app" + i, "metadataURI"),
@@ -727,7 +727,7 @@ describe("X-Apps - @shard3", function () {
       //   await endorseApp(appId, otherAccounts[i])
       // }
 
-      // await Promise.all(registerAppsPromises)
+      // await Promise.all(submitAppsPromises)
 
       // const apps = await x2EarnApps.apps()
       // expect(apps.length).to.eql(limit)
