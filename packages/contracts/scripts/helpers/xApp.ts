@@ -30,7 +30,7 @@ export const registerXDapps = async (contractAddress: string, account: TestPk, a
       clauses.push(
         clauseBuilder.functionInteraction(
           contractAddress,
-          coder.createInterface(JSON.stringify(X2EarnApps__factory.abi)).getFunction("registerApp") as FunctionFragment,
+          coder.createInterface(JSON.stringify(X2EarnApps__factory.abi)).getFunction("submitApp") as FunctionFragment,
           [app.teamWalletAddress, app.admin, app.name, app.metadataURI],
         ),
       )
