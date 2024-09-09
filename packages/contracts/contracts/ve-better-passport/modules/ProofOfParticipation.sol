@@ -136,10 +136,11 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
   /// @param user - the user address
   /// @param lastRound - the round to consider as a starting point for the cumulative score
   function getCumulativeScoreWithDecay(address user, uint256 lastRound) public view virtual returns (uint256) {
-    uint256 scalingFactor = 1e18;
-
     ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
+    require(lastRound > $.roundsForCumulativeScore, "ProofOfParticipation: not enough existing rounds");
+
+    uint256 scalingFactor = 1e18;
     uint256 decayFactor = ((100 - $.decayRate) * scalingFactor) / 100;
 
     // Calculate the cumulative score with exponential decay

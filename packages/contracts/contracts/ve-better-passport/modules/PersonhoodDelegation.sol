@@ -45,7 +45,6 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
   struct PersonhoodDelegationStorage {
     mapping(address => Checkpoints.Trace160) delegatorToDelegatee;
     mapping(address => Checkpoints.Trace160) delegateeToDelegator;
-    mapping(address => Checkpoints.Trace160) isDelegated;
   }
 
   bytes32 private constant PersonhoodDelegationStorageLocation =
@@ -106,19 +105,21 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
   }
 
   function isDelegator(address user) external view returns (bool) {
-    return _getPersonhoodDelegationStorage().isDelegated[user].latest() == 1;
+    return _getPersonhoodDelegationStorage().delegatorToDelegatee[user].latest() != 0;
   }
 
   function isDelegatorInTimepoint(address user, uint256 timepoint) external view returns (bool) {
-    return _getPersonhoodDelegationStorage().isDelegated[user].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
+    return
+      _getPersonhoodDelegationStorage().delegatorToDelegatee[user].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
   }
 
   function isDelegatee(address user) external view returns (bool) {
-    return _getPersonhoodDelegationStorage().isDelegated[user].latest() == 0;
+    return _getPersonhoodDelegationStorage().delegateeToDelegator[user].latest() != 0;
   }
 
   function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool) {
-    return _getPersonhoodDelegationStorage().isDelegated[user].upperLookupRecent(SafeCast.toUint48(timepoint)) == 0;
+    return
+      _getPersonhoodDelegationStorage().delegateeToDelegator[user].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
   }
 
   // ---------- Signatures and Delegation ------------ //
@@ -146,9 +147,6 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     _pushCheckpoint($.delegatorToDelegatee[delegator], msg.sender);
     _pushCheckpoint($.delegateeToDelegator[msg.sender], delegator);
 
-    _pushCheckpoint($.isDelegated[msg.sender], address(1)); // Mark as true
-    _pushCheckpoint($.isDelegated[delegator], address(0)); // Mark as false
-
     emit DelegationCreated(delegator, msg.sender);
   }
 
@@ -168,9 +166,6 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
 
     _pushCheckpoint($.delegatorToDelegatee[delegator], address(0));
     _pushCheckpoint($.delegateeToDelegator[delegatee], address(0));
-
-    _pushCheckpoint($.isDelegated[delegator], address(0)); // Mark as false
-    _pushCheckpoint($.isDelegated[delegatee], address(0)); // Mark as false
 
     emit DelegationRevoked(delegator, delegatee);
   }
