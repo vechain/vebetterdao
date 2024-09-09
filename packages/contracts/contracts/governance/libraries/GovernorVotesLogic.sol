@@ -219,7 +219,8 @@ library GovernorVotesLogic {
 
     uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(self, proposalId);
 
-    address personhoodAddress = self.veBetterPassport.isDelegateeInTimepoint(voter, proposalSnapshot)
+    bool isDelegatee = self.veBetterPassport.isDelegateeInTimepoint(voter, proposalSnapshot);
+    address personhoodAddress = isDelegatee
       ? self.veBetterPassport.getDelegatorInTimepoint(voter, proposalSnapshot)
       : voter;
 

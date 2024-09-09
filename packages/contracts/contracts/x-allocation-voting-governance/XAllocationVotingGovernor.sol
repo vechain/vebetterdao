@@ -123,7 +123,8 @@ abstract contract XAllocationVotingGovernor is
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
 
     // Only addresses with a valid passport can vote, if the sender is a delegatee, we need to check the delegator address
-    address personhoodAddress = $._veBetterPassport.isDelegateeInTimepoint(msg.sender, _currentRoundSnapshot)
+    bool isDelegatee = $._veBetterPassport.isDelegateeInTimepoint(msg.sender, _currentRoundSnapshot);
+    address personhoodAddress = isDelegatee
       ? $._veBetterPassport.getDelegatorInTimepoint(msg.sender, _currentRoundSnapshot)
       : _msgSender();
 
