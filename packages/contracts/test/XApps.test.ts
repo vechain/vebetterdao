@@ -608,6 +608,10 @@ describe("X-Apps - @shard3", function () {
       const app4Id = ethers.keccak256(ethers.toUtf8Bytes("My app #4"))
       await endorseApp(app4Id, otherAccounts[3])
 
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[4].address, otherAccounts[4].address, "My app 4", "metadataURI")
+
       const apps1 = await x2EarnApps.getPaginatedApps(0, 2)
       expect(apps1.length).to.eql(2)
 
@@ -618,6 +622,53 @@ describe("X-Apps - @shard3", function () {
 
       const allApps = await x2EarnApps.getPaginatedApps(0, 4)
       expect(allApps).to.eql([...apps1, ...apps2])
+    })
+
+    it("Can paginate unendorsed apps", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await endorseApp(app1Id, otherAccounts[0])
+
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
+
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
+      const app4Id = ethers.keccak256(ethers.toUtf8Bytes("My app #4"))
+
+      await x2EarnApps
+        .connect(owner)
+        .registerApp(otherAccounts[4].address, otherAccounts[4].address, "My app #5", "metadataURI")
+
+      const app5Id = ethers.keccak256(ethers.toUtf8Bytes("My app #5"))
+
+      const apps1 = await x2EarnApps.getPaginatedUnendorsedApps(0, 2)
+      expect(apps1.length).to.eql(2)
+
+      const apps2 = await x2EarnApps.getPaginatedUnendorsedApps(2, 5)
+      expect(apps2.length).to.eql(2)
+
+      expect(apps1).to.not.eql(apps2)
+
+      const allApps = await x2EarnApps.getPaginatedUnendorsedApps(0, 4)
+      expect(allApps).to.eql([...apps1, ...apps2])
+
+      expect(allApps[0].id).to.eql(app2Id)
+      expect(allApps[1].id).to.eql(app3Id)
+      expect(allApps[2].id).to.eql(app4Id)
+      expect(allApps[3].id).to.eql(app5Id)
     })
 
     it("Can get number of apps", async function () {
