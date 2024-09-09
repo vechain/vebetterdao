@@ -6,6 +6,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import { X2EarnRewardsPool } from "../typechain-types"
 import { X2EarnRewardsPoolV1 } from "../typechain-types/contracts/depreceated/V1"
+import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 describe("X2EarnRewardsPool - @shard3", function () {
   // deployment
@@ -129,8 +130,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
     })
 
     it("Storage should be preserved after upgrade", async () => {
+      const config = createLocalConfig()
       const { owner, b3tr, x2EarnApps, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
@@ -166,7 +169,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "X2EarnRewardsPoolV1",
         "X2EarnRewardsPool",
         await x2EarnRewardsPoolV1.getAddress(),
-        [owner.address],
+        [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS],
         {
           version: 2,
         },
@@ -175,6 +178,54 @@ describe("X2EarnRewardsPool - @shard3", function () {
       expect(await x2EarnRewardsPoolV2.version()).to.equal("2")
       expect(await x2EarnRewardsPoolV2.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPoolV2.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
+    })
+
+    it("Should not be able to upgrade if initial impact keys is empty", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr, x2EarnApps, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
+        owner.address,
+        owner.address,
+        owner.address,
+        await b3tr.getAddress(),
+        await x2EarnApps.getAddress(),
+      ])) as X2EarnRewardsPoolV1
+
+      expect(await x2EarnRewardsPoolV1.version()).to.equal("1")
+
+      // update x2EarnApps address
+      await x2EarnRewardsPoolV1.connect(owner).setX2EarnApps(await x2EarnApps.getAddress())
+
+      // deposit some funds
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      // create app
+      await x2EarnApps.addApp(owner.address, owner.address, "My app", "metadataURI")
+      await x2EarnApps.addApp(owner.address, owner.address, "My app #2", "metadataURI")
+
+      await b3tr.connect(owner).approve(await x2EarnRewardsPoolV1.getAddress(), amount)
+      await x2EarnRewardsPoolV1.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
+
+      expect(await b3tr.balanceOf(await x2EarnRewardsPoolV1.getAddress())).to.equal(amount)
+
+      // upgrade to new version
+      await expect(
+        upgradeProxy(
+          "X2EarnRewardsPoolV1",
+          "X2EarnRewardsPool",
+          await x2EarnRewardsPoolV1.getAddress(),
+          [owner.address, []],
+          {
+            version: 2,
+          },
+        ),
+      ).to.be.reverted
     })
   })
 
@@ -1359,7 +1410,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "learning_time",
+        "time_spent",
         "timber",
         "plastic",
         "trees_planted",
@@ -1380,15 +1431,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
       const impactCodes = await x2EarnRewardsPool.getAllowedImpactKeys()
 
-      expect(impactCodes).to.eql([
-        "trees_planted",
-        "water",
-        "energy",
-        "waste_mass",
-        "learning_time",
-        "timber",
-        "plastic",
-      ])
+      expect(impactCodes).to.eql(["trees_planted", "water", "energy", "waste_mass", "time_spent", "timber", "plastic"])
 
       await x2EarnRewardsPool
         .connect(owner)
@@ -1398,7 +1441,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
       const impactCodes2 = await x2EarnRewardsPool.getAllowedImpactKeys()
 
-      expect(impactCodes2).to.eql(["trees_planted", "plastic", "energy", "waste_mass", "learning_time", "timber"])
+      expect(impactCodes2).to.eql(["trees_planted", "plastic", "energy", "waste_mass", "time_spent", "timber"])
     })
 
     it("IMPACT_KEY_MANAGER_ROLE and DEFAULT_ADMIN can add an impact code", async function () {
@@ -1420,7 +1463,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "learning_time",
+        "time_spent",
         "timber",
         "plastic",
         "trees_planted",
@@ -1440,7 +1483,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "learning_time",
+        "time_spent",
         "timber",
         "plastic",
         "trees_planted",

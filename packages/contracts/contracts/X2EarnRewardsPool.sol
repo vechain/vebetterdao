@@ -105,25 +105,16 @@ contract X2EarnRewardsPool is
     $.x2EarnApps = _x2EarnApps;
   }
 
-  function initializeV2(address _impactKeyManager) external reinitializer(2) {
+  function initializeV2(address _impactKeyManager, string[] memory _initialImpactKeys) external reinitializer(2) {
     require(_impactKeyManager != address(0), "X2EarnRewardsPool: impactKeyManager is the zero address");
+    require(_initialImpactKeys.length > 0, "X2EarnRewardsPool: initialImpactKeys is empty");
 
     _grantRole(IMPACT_KEY_MANAGER_ROLE, _impactKeyManager);
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    string[8] memory initialImpactKeys = [
-      "carbon",
-      "water",
-      "energy",
-      "waste_mass",
-      "learning_time",
-      "timber",
-      "plastic",
-      "trees_planted"
-    ];
 
-    for (uint256 i; i < initialImpactKeys.length; i++) {
-      _addImpactKey(initialImpactKeys[i], $);
+    for (uint256 i; i < _initialImpactKeys.length; i++) {
+      _addImpactKey(_initialImpactKeys[i], $);
     }
   }
 
