@@ -352,6 +352,7 @@ export const getOrDeployContractInstances = async ({
       actionRegistrar: await x2EarnRewardsPool.getAddress(), // _actionRegistrar
       actionScoreManager: owner.address, // _actionScoreManager
       threshold: 0, //threshold
+      signalingThreshold: 2, //signalingThreshold
       roundsForCumulativeScore: 0, //roundsForCumulativeScore
     },
   ])) as VeBetterPassport

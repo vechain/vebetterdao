@@ -20,6 +20,7 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
 
   struct BotSignalingStorage {
     mapping(address user => uint256) _signaledCounter;
+    uint256 threshold;
     // App signals counter
     mapping(address signaler => bytes32 app) _appOfSignaler;
     mapping(bytes32 app => mapping(address user => uint256)) _appSignalsCounter;
@@ -39,15 +40,18 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
   /**
    * @dev Initializes the contract
    */
-  function __BotSignaling_init(address[] memory _signalers) internal onlyInitializing {
-    __BotSignaling_init_unchained(_signalers);
+  function __BotSignaling_init(address[] memory _signalers, uint256 _threshold) internal onlyInitializing {
+    __BotSignaling_init_unchained(_signalers, _threshold);
   }
 
-  function __BotSignaling_init_unchained(address[] memory _signalers) internal onlyInitializing {
+  function __BotSignaling_init_unchained(address[] memory _signalers, uint256 _threshold) internal onlyInitializing {
     for (uint256 i; i < _signalers.length; i++) {
       require(_signalers[i] != address(0), "BotSignaling: signaler address cannot be zero");
       _grantRole(SIGNALER_ROLE, _signalers[i]);
     }
+
+    BotSignalingStorage storage $ = _getBotSignalingStorage();
+    $.threshold = _threshold;
   }
 
   // ---------- Modifiers ------------ //
@@ -81,6 +85,10 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
   /// @notice Returns the total number of signals for an app
   function appTotalSignalsCounter(bytes32 _app) public view returns (uint256) {
     return _getBotSignalingStorage()._appTotalSignalsCounter[_app];
+  }
+
+  function signalingThreshold() public view returns (uint256) {
+    return _getBotSignalingStorage().threshold;
   }
 
   // ---------- Setters ---------- //
@@ -119,5 +127,10 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     $._appOfSignaler[user] = bytes32(0);
 
     emit SignalerRemovedFromApp(user, app);
+  }
+
+  function setSignalingThreshold(uint256 _threshold) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+    BotSignalingStorage storage $ = _getBotSignalingStorage();
+    $.threshold = _threshold;
   }
 }

@@ -336,6 +336,7 @@ export async function deployAll(config: ContractsConfig) {
       actionRegistrar: config.CONTRACTS_ADMIN_ADDRESS, // _actionRegistrar
       actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS, // _actionScoreManager
       threshold: 0, //threshold
+      signalingThreshold: 2, //signalingThreshold
       roundsForCumulativeScore: 5, //roundsForCumulativeScore}
     },
   ])) as VeBetterPassport

@@ -57,6 +57,7 @@ contract VeBetterPassport is
     address actionRegistrar;
     address actionScoreManager;
     uint256 threshold;
+    uint256 signalingThreshold;
     uint256 roundsForCumulativeScore;
   }
 
@@ -76,7 +77,7 @@ contract VeBetterPassport is
       data.threshold,
       data.roundsForCumulativeScore
     );
-    __BotSignaling_init(data.blacklisters);
+    __BotSignaling_init(data.blacklisters, data.signalingThreshold);
     __PersonhoodDelegation_init();
     __WhitelistAndBlacklist_init(data.whitelisters);
 
@@ -127,13 +128,12 @@ contract VeBetterPassport is
     // If a wallet is blacklisted, it is not a person
     if (isBlacklisted(_user)) return false;
 
-    // If a wallet is not whitelisted and has been signaled more than 2 times
-    if (signaledCounter(_user) > 2) {
+    // If a wallet is not whitelisted and has been signaled more than X times
+    if (signaledCounter(_user) >= signalingThreshold()) {
       return false;
     }
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
-
     // If the user's cumulated score in the last rounds is greater than or equal to the threshold
     uint256 participationScore = getCumulativeScoreWithDecay(_user, $.xAllocationVoting.currentRoundId());
     if (participationScore >= thresholdParticipationScore()) return true;
