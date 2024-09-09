@@ -351,6 +351,7 @@ export async function deployAll(config: ContractsConfig) {
     {
       x2EarnApps: await x2EarnApps.getAddress(),
       xAllocationVoting: await xAllocationVoting.getAddress(),
+      nodeManagement: await nodeManagement.getAddress(),
       upgrader: config.CONTRACTS_ADMIN_ADDRESS, // upgrader
       admins: [config.CONTRACTS_ADMIN_ADDRESS], // admins
       roleGranters: [config.CONTRACTS_ADMIN_ADDRESS], // roleGranters

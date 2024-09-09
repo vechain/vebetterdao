@@ -9,6 +9,7 @@ import { ProofOfParticipation } from "./modules/ProofOfParticipation.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { PersonhoodDelegation } from "./modules/PersonhoodDelegation.sol";
 import { WhitelistAndBlacklist } from "./modules/WhitelistAndBlacklist.sol";
+import { INodeManagement } from "../interfaces/INodeManagement.sol";
 
 /// @title VeBetterPassport
 /// @notice Contract to manage the VeBetterPassport, a system to determine if a wallet is a person or not
@@ -29,6 +30,7 @@ contract VeBetterPassport is
 
   struct VeBetterPassportStorage {
     IXAllocationVotingGovernor xAllocationVoting;
+    INodeManagement nodeManagement;
   }
 
   // keccak256(abi.encode(uint256(keccak256("storage.VeBetterPassport")) - 1)) & ~bytes32(uint256(0xff))
@@ -44,6 +46,7 @@ contract VeBetterPassport is
   struct InitializationData {
     IXAllocationVotingGovernor xAllocationVoting;
     address x2EarnApps;
+    address nodeManagement;
     address upgrader;
     address[] admins;
     address[] roleGranters;
@@ -66,6 +69,7 @@ contract VeBetterPassport is
     require(address(data.xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
     require(data.x2EarnApps != address(0), "VeBetterPassport: x2EarnApps is the zero address");
     require(data.upgrader != address(0), "VeBetterPassport: upgrader is the zero address");
+    require(data.nodeManagement != address(0), "VeBetterPassport: nodeManagement is the zero address");
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
@@ -83,6 +87,7 @@ contract VeBetterPassport is
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
     $.xAllocationVoting = data.xAllocationVoting;
+    $.nodeManagement = INodeManagement(data.nodeManagement);
 
     // Grant roles
     _grantRole(UPGRADER_ROLE, data.upgrader);
@@ -138,9 +143,10 @@ contract VeBetterPassport is
     uint256 participationScore = getCumulativeScoreWithDecay(_user, $.xAllocationVoting.currentRoundId());
     if (participationScore >= thresholdParticipationScore()) return true;
 
-    // TODO: gm
+    // Check if user owns an economic or xnode
+    if ($.nodeManagement.getNodeIds(_user).length > 0) return true;
 
-    // TODO: check xnode
+    // TODO: Check if user owns a gm level > 1
 
     return false;
   }

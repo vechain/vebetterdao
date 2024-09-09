@@ -371,6 +371,7 @@ export const getOrDeployContractInstances = async ({
     {
       x2EarnApps: await x2EarnApps.getAddress(),
       xAllocationVoting: await xAllocationVoting.getAddress(),
+      nodeManagement: await nodeManagement.getAddress(),
       upgrader: owner.address, // upgrader
       admins: [owner.address], // admins
       roleGranters: [owner.address], // roleGranters
