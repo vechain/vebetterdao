@@ -20,6 +20,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
   /// @notice Security level indicates how secure the app is
   /// @dev App security is used to calculate the overall score of a sustainable action
   enum APP_SECURITY {
+    // TODO: UNDEFINED, -> Then set low as default for new apps
     NONE,
     LOW,
     MEDIUM,

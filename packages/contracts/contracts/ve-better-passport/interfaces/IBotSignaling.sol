@@ -46,6 +46,7 @@ interface IBotSignaling {
   /// @notice Assigns a signaler to an app.
   function isWhitelisted(address _user) external view returns (bool);
 
+  //TODO: add reason
   /// @notice Returns the number of times a user has been signaled.
   function signaledCounter(address _user) external view returns (uint256);
 }
