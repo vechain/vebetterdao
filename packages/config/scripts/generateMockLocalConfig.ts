@@ -41,7 +41,7 @@ export const generateMockLocalConfig = () => {
       "governorQuorumLogicAddress": "0xAD2765a76243CcDB4b49e7957CF3C5F5a68F388C",
       "governorStateLogicAddress": "0x64378225012ABA6569Bf20643561fac66BB69e99",
       "governorVotesLogicAddress": "0x45290a8969f2E5396a7770a21a90aE6B7708ef8F"
-    }
+    },
     "nodeUrl": "http://localhost:8669",
     "network": {
       "id": "solo",
