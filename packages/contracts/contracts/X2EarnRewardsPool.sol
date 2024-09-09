@@ -266,7 +266,7 @@ contract X2EarnRewardsPool is
     string memory description
   ) internal {
     // buildJsonProof
-    string memory jsonProof = _buildJsonProof(proof, impact, description);
+    string memory jsonProof = buildJsonProof(proof, impact, description);
 
     // emit event
     emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
@@ -275,11 +275,11 @@ contract X2EarnRewardsPool is
   /**
    * @dev Builds the JSON proof string.
    */
-  function _buildJsonProof(
+  function buildJsonProof(
     ProofDataTypes.Proof memory proof,
     ProofDataTypes.Impact memory impact,
     string memory description
-  ) internal view returns (string memory) {
+  ) public view virtual returns (string memory) {
     bool hasProof = proof.types.length > 0 && proof.values.length > 0;
     bool hasImpact = impact.codes.length > 0 && impact.values.length > 0;
     bool hasDescription = bytes(description).length > 0;
