@@ -8,7 +8,7 @@ import { X2EarnRewardsPool } from "../typechain-types"
 import { X2EarnRewardsPoolV1 } from "../typechain-types/contracts/depreceated/V1"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
-describe("X2EarnRewardsPool - @shard3", function () {
+describe.only("X2EarnRewardsPool - @shard3", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {
@@ -1565,6 +1565,45 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
       expect(emittedProof).to.have.property("mycustomproof")
       expect(emittedProof.mycustomproof).to.equal("https://image.png")
+    })
+
+    it("I should be able to preview the proof and impact of a reward distribution", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccounts[10]
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.addApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
+
+      // fill the pool
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      const onchainGeneratedProof = JSON.parse(
+        await x2EarnRewardsPool.buildProof(
+          { types: ["image"], values: ["https://image.png"] },
+          { codes: ["carbon", "water"], values: [100, 200] },
+          "The description of the action",
+        ),
+      )
+
+      expect(onchainGeneratedProof).to.have.property("version")
+      expect(onchainGeneratedProof.version).to.equal(2)
+      expect(onchainGeneratedProof).to.have.deep.property("proof", {
+        image: "https://image.png",
+      })
+      expect(onchainGeneratedProof).to.have.property("description")
+      expect(onchainGeneratedProof).to.have.deep.property("impact", { carbon: 100, water: 200 })
     })
   })
 })
