@@ -27,9 +27,10 @@ import {
   MyERC1155,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { deployProxy } from "../../scripts/helpers"
+import { deployProxy, upgradeProxy } from "../../scripts/helpers"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deploy"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
+import { X2EarnRewardsPoolV1 } from "../../typechain-types/contracts/depreceated/V1"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -214,14 +215,23 @@ export const getOrDeployContractInstances = async ({
     owner.address,
   ])) as X2EarnApps
 
-  // Deploy X2EarnRewardsPool
-  const x2EarnRewardsPool = (await deployProxy("X2EarnRewardsPool", [
+  const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
     owner.address,
     owner.address,
     owner.address,
     await b3tr.getAddress(),
     await x2EarnApps.getAddress(),
-  ])) as X2EarnRewardsPool
+  ])) as X2EarnRewardsPoolV1
+
+  const x2EarnRewardsPool = (await upgradeProxy(
+    "X2EarnRewardsPoolV1",
+    "X2EarnRewardsPool",
+    await x2EarnRewardsPoolV1.getAddress(),
+    [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS],
+    {
+      version: 2,
+    },
+  )) as X2EarnRewardsPool
 
   // Deploy XAllocationPool
   const xAllocationPool = (await deployProxy("XAllocationPool", [
