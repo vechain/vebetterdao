@@ -1,50 +1,14 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import {
-  ZERO_ADDRESS,
-  bootstrapEmissions,
-  catchRevert,
-  filterEventsByName,
-  getOrDeployContractInstances,
-  getVot3Tokens,
-  startNewAllocationRound,
-} from "./helpers"
+import { bootstrapEmissions, getOrDeployContractInstances, getVot3Tokens, startNewAllocationRound } from "./helpers"
 import { describe, it } from "mocha"
-import { getImplementationAddress } from "@openzeppelin/upgrades-core"
-import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { X2EarnRewardsPool } from "../typechain-types"
-import { X2EarnRewardsPoolV1 } from "../typechain-types/contracts/deprecated/V1"
 
 describe("VeBetterPassport - @shard3", function () {
   // deployment
-  describe("Deployment", function () {
-    it("Contract deployment and initialization should succeed", async function () {
-      const { owner, veBetterPassport } = await getOrDeployContractInstances({
-        forceDeploy: false,
-      })
-    })
-  })
+  describe("Deployment", function () {})
 
   // role management
-  describe("Role Management", function () {
-    it("Cannot grant role to zero address", async function () {
-      const { owner, veBetterPassport } = await getOrDeployContractInstances({
-        forceDeploy: false,
-      })
-    })
-
-    it("Cannot set role granter to zero address", async function () {
-      const { owner } = await getOrDeployContractInstances({
-        forceDeploy: false,
-      })
-    })
-
-    it("Cannot set role granter to zero address", async function () {
-      const { owner } = await getOrDeployContractInstances({
-        forceDeploy: false,
-      })
-    })
-  })
+  describe("Role Management", function () {})
 
   describe("PersonhoodDelegation", function () {
     it("Should be able to delegate personhood", async function () {
@@ -79,9 +43,6 @@ describe("VeBetterPassport - @shard3", function () {
       await x2EarnApps
         .connect(owner)
         .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
-
-      console.log("owner", owner.address)
-      console.log("delegatee", delegatee.address)
 
       // await veBetterPassport.delegateWithSignature(other)
       // Set up EIP-712 domain

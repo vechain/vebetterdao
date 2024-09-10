@@ -137,7 +137,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
     it("Storage should be preserved after upgrade", async () => {
       const config = createLocalConfig()
-      const { owner, b3tr, x2EarnApps, minterAccount } = await getOrDeployContractInstances({
+      const { owner, b3tr, x2EarnApps, minterAccount, veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -175,7 +175,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "X2EarnRewardsPoolV1",
         "X2EarnRewardsPool",
         await x2EarnRewardsPoolV1.getAddress(),
-        [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS],
+        [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS, await veBetterPassport.getAddress()],
         {
           version: 2,
         },
@@ -188,7 +188,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
     it("Should not be able to upgrade if initial impact keys is empty", async () => {
       const config = createLocalConfig()
-      const { owner, b3tr, x2EarnApps, minterAccount } = await getOrDeployContractInstances({
+      const { owner, b3tr, x2EarnApps, minterAccount, veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -226,7 +226,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
           "X2EarnRewardsPoolV1",
           "X2EarnRewardsPool",
           await x2EarnRewardsPoolV1.getAddress(),
-          [owner.address, []],
+          [owner.address, [], await veBetterPassport.getAddress()],
           {
             version: 2,
           },
@@ -1702,10 +1702,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
     // check that the action score is correct
 
     const appSecurity = await veBetterPassport.appSecurity(appId)
-    console.log(appSecurity)
-
     const multiplier = await veBetterPassport.securityMultiplier(appSecurity)
-    console.log(multiplier)
 
     expect(registeredActionEvent?.args[3]).to.equal(multiplier)
 
@@ -1761,15 +1758,8 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
     // check that the user score is correct
     expect(await veBetterPassport.userAppTotalScore(user.address, appId)).to.equal(supposedScore)
-    console.log(await veBetterPassport.userAppTotalScore(user.address, appId))
-
-    console.log(await veBetterPassport.userTotalScore(user.address))
     expect(await veBetterPassport.userTotalScore(user.address)).to.equal(supposedScore)
-    console.log(roundId)
-
     expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
-    console.log(await veBetterPassport.userRoundScore(user.address, roundId))
-
     expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(multiplier)
 
     // start round
@@ -1812,10 +1802,6 @@ describe("X2EarnRewardsPool - @shard3", function () {
     expect(await veBetterPassport.userTotalScore(user.address)).to.equal(supposedScore2)
     expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
 
-    // console.log(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId))
-    // console.log(await veBetterPassport.userTotalScore(user.address))
-    // console.log(await veBetterPassport.userRoundScore(user.address, roundId))
-
     await veBetterPassport.setRoundsForCumulativeScore(4)
 
     await waitForRoundToEnd(roundId)
@@ -1841,7 +1827,5 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
     // event is emitted when using depraceted distributeReward function
     await x2EarnRewardsPool.connect(owner).distributeRewardDeprecated(appId, ethers.parseEther("1"), user.address, "")
-
-    console.log(await veBetterPassport.getCumulativeScoreWithDecay(user.address, roundId))
   })
 })
