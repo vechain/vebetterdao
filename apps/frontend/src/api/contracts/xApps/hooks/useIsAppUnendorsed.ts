@@ -9,13 +9,15 @@ const method = "isAppUnendorsed"
 
 /**
  * Get the query key for a boolean value indicating if the app is unendorsed
+ * @param appId  the app id
  */
-export const getIsAppUnendorsedQueryKey = () => {
-  getCallKey({ method, keyArgs: [] })
+export const getIsAppUnendorsedQueryKey = (appId: string) => {
+  getCallKey({ method, keyArgs: [appId] })
 }
 
 /**
  *  Hook to get a boolean value indicating if the app is unendorsed
+ * @param appId  the app id
  * @returns a boolean value indicating if the app is unendorsed
  */
 export const useIsAppUnendorsed = (appId: string): UseQueryResult<boolean, Error> => {
