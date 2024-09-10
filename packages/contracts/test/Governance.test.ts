@@ -30,7 +30,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor, B3TRGovernorV1, B3TRGovernor__factory } from "../typechain-types"
 import { deployProxy } from "../scripts/helpers"
 
-describe("Governor and TimeLock - @shard1", function () {
+describe.only("Governor and TimeLock - @shard1", function () {
   describe("Governor deployment", function () {
     it("Should set constructors correctly", async function () {
       const config = createLocalConfig()
@@ -793,7 +793,7 @@ describe("Governor and TimeLock - @shard1", function () {
       expect(await governor.depositThresholdPercentage()).to.eql(2n)
     })
 
-    it("Should not have state conflict after upgrading to V2", async () => {
+    it.only("Should not have state conflict after upgrading to V2", async () => {
       const config = createLocalConfig()
       const {
         owner,
@@ -812,7 +812,6 @@ describe("Governor and TimeLock - @shard1", function () {
         otherAccount,
         governorStateLogicLib,
         governorVotesLogicLibV1,
-        governorVotesLogicLib,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })

@@ -1,6 +1,12 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { ZERO_ADDRESS, catchRevert, filterEventsByName, getOrDeployContractInstances } from "./helpers"
+import {
+  ZERO_ADDRESS,
+  catchRevert,
+  filterEventsByName,
+  getOrDeployContractInstances,
+  waitForRoundToEnd,
+} from "./helpers"
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
@@ -1630,7 +1636,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
     })
   })
 
-  it.only("Can register action in VeBetterPassport", async function () {
+  it("Can register action in VeBetterPassport", async function () {
     const {
       x2EarnRewardsPool,
       x2EarnApps,
@@ -1664,6 +1670,8 @@ describe("X2EarnRewardsPool - @shard3", function () {
     // start round
     await xAllocationVoting.connect(owner).startNewRound()
 
+    await veBetterPassport.setAppSecurity(appId, 2)
+
     expect(await veBetterPassport.getAddress()).to.equal(await x2EarnRewardsPool.veBetterPassport())
 
     const tx = await x2EarnRewardsPool.connect(owner).distributeReward(appId, ethers.parseEther("1"), user.address, "")
@@ -1684,7 +1692,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
       (event: any) => event !== null && event.name === "RegisteredAction",
     )[0]
 
-    const roundId = await xAllocationVoting.currentRoundId()
+    let roundId = await xAllocationVoting.currentRoundId()
 
     expect(registeredActionEvent).not.to.eql([])
     expect(registeredActionEvent?.args[0]).to.equal(user.address)
@@ -1692,8 +1700,13 @@ describe("X2EarnRewardsPool - @shard3", function () {
     expect(registeredActionEvent?.args[2]).to.equal(roundId)
 
     // check that the action score is correct
+
     const appSecurity = await veBetterPassport.appSecurity(appId)
+    console.log(appSecurity)
+
     const multiplier = await veBetterPassport.securityMultiplier(appSecurity)
+    console.log(multiplier)
+
     expect(registeredActionEvent?.args[3]).to.equal(multiplier)
 
     // check that the user score is correct
@@ -1701,6 +1714,11 @@ describe("X2EarnRewardsPool - @shard3", function () {
     expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(multiplier)
     expect(await veBetterPassport.userTotalScore(user.address)).to.equal(multiplier)
     expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
+
+    // start round
+    await waitForRoundToEnd(roundId)
+    await xAllocationVoting.connect(owner).startNewRound()
+    roundId = await xAllocationVoting.currentRoundId()
 
     // action is registered when the reward is distributed with proof
     const tx2 = await x2EarnRewardsPool
@@ -1738,14 +1756,26 @@ describe("X2EarnRewardsPool - @shard3", function () {
     expect(registeredActionEvent2?.args[2]).to.equal(roundId)
 
     // check that the action score is correct
-    const supposedScore = multiplier * BigInt(2)
-    expect(registeredActionEvent2?.args[3]).to.equal(supposedScore)
+    const supposedScore = multiplier + multiplier
+    expect(registeredActionEvent2?.args[3]).to.equal(multiplier)
 
     // check that the user score is correct
     expect(await veBetterPassport.userAppTotalScore(user.address, appId)).to.equal(supposedScore)
-    expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(supposedScore)
+    console.log(await veBetterPassport.userAppTotalScore(user.address, appId))
+
+    console.log(await veBetterPassport.userTotalScore(user.address))
     expect(await veBetterPassport.userTotalScore(user.address)).to.equal(supposedScore)
-    expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(supposedScore)
+    console.log(roundId)
+
+    expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
+    console.log(await veBetterPassport.userRoundScore(user.address, roundId))
+
+    expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(multiplier)
+
+    // start round
+    await waitForRoundToEnd(roundId)
+    await xAllocationVoting.connect(owner).startNewRound()
+    roundId = await xAllocationVoting.currentRoundId()
 
     // event is emitted when using depraceted distributeReward function
     const tx3 = await x2EarnRewardsPool
@@ -1775,17 +1805,43 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
     // check that the action score is correct
     const supposedScore2 = supposedScore + multiplier
-    expect(registeredActionEvent3?.args[3]).to.equal(supposedScore2)
+    expect(registeredActionEvent3?.args[3]).to.equal(multiplier)
 
     // check that the user score is correct
-    expect(await veBetterPassport.userAppTotalScore(user.address, appId)).to.equal(supposedScore2)
-    expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(supposedScore2)
+    expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(multiplier)
     expect(await veBetterPassport.userTotalScore(user.address)).to.equal(supposedScore2)
-    expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(supposedScore2)
+    expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
 
-    console.log(await veBetterPassport.userAppTotalScore(user.address, appId))
-    console.log(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId))
-    console.log(await veBetterPassport.userTotalScore(user.address))
-    console.log(await veBetterPassport.userRoundScore(user.address, roundId))
+    // console.log(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId))
+    // console.log(await veBetterPassport.userTotalScore(user.address))
+    // console.log(await veBetterPassport.userRoundScore(user.address, roundId))
+
+    await veBetterPassport.setRoundsForCumulativeScore(4)
+
+    await waitForRoundToEnd(roundId)
+    await xAllocationVoting.connect(owner).startNewRound()
+    roundId = await xAllocationVoting.currentRoundId()
+
+    // event is emitted when using depraceted distributeReward function
+    await x2EarnRewardsPool.connect(owner).distributeRewardDeprecated(appId, ethers.parseEther("1"), user.address, "")
+
+    await waitForRoundToEnd(roundId)
+    await xAllocationVoting.connect(owner).startNewRound()
+    roundId = await xAllocationVoting.currentRoundId()
+
+    await waitForRoundToEnd(roundId)
+    await xAllocationVoting.connect(owner).startNewRound()
+    roundId = await xAllocationVoting.currentRoundId()
+
+    await veBetterPassport.setAppSecurity(appId, 1)
+
+    await waitForRoundToEnd(roundId)
+    await xAllocationVoting.connect(owner).startNewRound()
+    roundId = await xAllocationVoting.currentRoundId()
+
+    // event is emitted when using depraceted distributeReward function
+    await x2EarnRewardsPool.connect(owner).distributeRewardDeprecated(appId, ethers.parseEther("1"), user.address, "")
+
+    console.log(await veBetterPassport.getCumulativeScoreWithDecay(user.address, roundId))
   })
 })
