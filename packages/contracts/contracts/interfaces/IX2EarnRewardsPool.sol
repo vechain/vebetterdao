@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.20;
 
-import { ProofDataTypes } from "../libraries/ProofDataTypes.sol";
-
 /**
  * @title IX2EarnRewardsPool
  * @dev Interface designed to be used by a contract that allows x2Earn apps to reward users that performed sustainable actions.
@@ -92,7 +90,7 @@ interface IX2EarnRewardsPool {
    * @param appId the app id that is emitting the reward
    * @param amount the amount of B3TR token the user is rewarded with
    * @param receiver the address of the user that performed the sustainable action and is rewarded
-   * @param proof deprecated argument, use the new function that accepts a ProofDataTypes.Proof argument
+   * @param proof deprecated argument, use the new function that accepts a proofs and impacts arrays
    */
   function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory proof) external;
 
@@ -102,16 +100,20 @@ interface IX2EarnRewardsPool {
    * @param appId the app id that is emitting the reward
    * @param amount the amount of B3TR token the user is rewarded with
    * @param receiver the address of the user that performed the sustainable action and is rewarded
-   * @param proof a type and value pair that adds information on the type of action that was performed
-   * @param impact a list of codes and values that represent the impact of the sustainable action
-   * @param description a description of the sustainable action that was performed
+   * @param proofTypes the types of the proof of the sustainable action
+   * @param proofValues the values of the proof of the sustainable action
+   * @param impactCodes the codes of the impacts of the sustainable action
+   * @param impactValues the values of the impacts of the sustainable action
+   * @param description the description of the sustainable action
    */
   function distributeRewardWithProof(
     bytes32 appId,
     uint256 amount,
     address receiver,
-    ProofDataTypes.Proof memory proof,
-    ProofDataTypes.Impact memory impact,
+    string[] memory proofTypes, // link, photo, video, text, etc.
+    string[] memory proofValues, // "https://...", "Qm...", etc.,
+    string[] memory impactCodes, // carbon, water, etc.
+    uint256[] memory impactValues, // 100, 200, etc.,
     string memory description
   ) external;
 
@@ -119,13 +121,17 @@ interface IX2EarnRewardsPool {
    * @dev Builds the JSON proof string that will be stored
    * on chain regarding the proofs, impacts and description of the sustainable action.
    *
-   * @param proof the proof of the sustainable action
-   * @param impact the impact of the sustainable action
+   * @param proofTypes the types of the proof of the sustainable action
+   * @param proofValues the values of the proof of the sustainable action
+   * @param impactCodes the codes of the impacts of the sustainable action
+   * @param impactValues the values of the impacts of the sustainable action
    * @param description the description of the sustainable action
    */
   function buildProof(
-    ProofDataTypes.Proof memory proof,
-    ProofDataTypes.Impact memory impact,
+    string[] memory proofTypes, // link, photo, video, text, etc.
+    string[] memory proofValues, // "https://...", "Qm...", etc.,
+    string[] memory impactCodes, // carbon, water, etc.
+    uint256[] memory impactValues, // 100, 200, etc.,
     string memory description
   ) external returns (string memory);
 }
