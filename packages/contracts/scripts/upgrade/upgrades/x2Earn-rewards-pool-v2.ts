@@ -19,7 +19,7 @@ async function main() {
     "X2EarnRewardsPoolV1",
     "X2EarnRewardsPool",
     config.x2EarnRewardsPoolContractAddress,
-    [contractsConfig.CONTRACTS_ADMIN_ADDRESS],
+    [contractsConfig.CONTRACTS_ADMIN_ADDRESS, contractsConfig.X_2_EARN_INITIAL_IMPACT_KEYS],
     {
       version: 2,
     },
