@@ -95,8 +95,8 @@ function renameContractsAndInterfaces(
 
           // Only update `contract`, `interface` or `library` declarations in the code (ignore comments)
           content = content.replace(
-            /(^\s*)(contract|interface|library|abstract contract)\s+(\w+)/gm, // Ensuring it doesn't happen inside a comment
-            (match: string, prefix: string, type: string, name: string) => {
+            /^[ \t]*(contract|interface|library|abstract contract)\s+(\w+)/gm, // Optimized to avoid backtracking
+            (match: string, type: string, name: string) => {
               if (interfacesWhitelist.includes(name)) {
                 return match
               }
@@ -104,7 +104,7 @@ function renameContractsAndInterfaces(
               // Add to import renames
               importRenames.push({ originalName: name, newName: `${name}V${version}` })
 
-              return `${prefix}${type} ${name}V${version}`
+              return `${type} ${name}V${version}`
             },
           )
 
