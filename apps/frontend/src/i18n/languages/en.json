@@ -17,7 +17,7 @@
   "Know more about Apps": "Know more about Apps",
   "Your App is almost ready!": "Your App is almost ready!",
   "The allocation rounds determine the resources and support your dApp receives from the ecosystem community.": "The allocation rounds determine the resources and support your dApp receives from the ecosystem community.",
-  "X Node Holders will use their NFTs to endorse your dApp. Once it reaches 100 points, it becomes eligible for allocations.": "X Node Holders will use their NFTs to endorse your dApp. Once it reaches 100 points, it becomes eligible for allocations.",
+  "X Node Holders will use their NFTs to endorse your dApp. Once it reaches {{value}} points, it becomes eligible for allocations.": "X Node Holders will use their NFTs to endorse your dApp. Once it reaches {{value}} points, it becomes eligible for allocations.",
   "Submit your app into the ecosystem with all the necessary information, including logo, creator bio, and social media links.": "Submit your app into the ecosystem with all the necessary information, including logo, creator bio, and social media links.",
   "STEP {{value}}": "STEP {{value}}",
   "Endorsement": "Endorsement",

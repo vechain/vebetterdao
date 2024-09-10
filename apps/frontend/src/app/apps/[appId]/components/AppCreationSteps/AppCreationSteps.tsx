@@ -1,14 +1,25 @@
+import { useEndorsementScoreThreshold, useIsAppUnendorsed } from "@/api"
 import { Handshake } from "@/components"
 import { SignIcon } from "@/components/Icons/SignIcon"
 import { VoteCheckmarkIcon } from "@/components/Icons/VoteCheckmarkIcon"
 import { XAppsCreationSteps, XAppsCreationStepStatus } from "@/types/appDetails"
-import { Box, Card, CardBody, Circle, Grid, Heading, HStack, Icon, Stack, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Card,
+  CardBody,
+  Circle,
+  Grid,
+  Heading,
+  HStack,
+  Icon,
+  Skeleton,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { UilCheck, UilInfoCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
-
-type AppCreationStepsProps = {
-  currentStep: XAppsCreationSteps
-}
+import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 
 type StepBoxesProps = {
   title: string
@@ -87,8 +98,13 @@ const StepBoxes = ({
   )
 }
 
-export const AppCreationSteps = ({ currentStep }: AppCreationStepsProps) => {
+export const AppCreationSteps = () => {
   const { t } = useTranslation()
+
+  const { app } = useCurrentAppInfo()
+  const { data: isAppUnendorsed, isLoading } = useIsAppUnendorsed(app?.id ?? "")
+  const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
+  const currentStep = isAppUnendorsed ? XAppsCreationSteps.ENDORSEMENT : XAppsCreationSteps.ALLOCATION
 
   const getXAppsCreationStepStatus = (step: XAppsCreationSteps): XAppsCreationStepStatus => {
     if (step < currentStep) return XAppsCreationStepStatus.COMPLETED
@@ -120,36 +136,40 @@ export const AppCreationSteps = ({ currentStep }: AppCreationStepsProps) => {
               </Text>
               {t("while waiting!")}
             </Text>
+
             <Box w="full" maxW={"100%"} overflowX="auto">
-              <Grid gridTemplateColumns="repeat(3,  1fr)" gap={4} w="full">
-                <StepBoxes
-                  stepText={t("STEP {{value}}", { value: XAppsCreationSteps.SUBMISSION + 1 })}
-                  title={t("App submission")}
-                  type={XAppsCreationSteps.SUBMISSION}
-                  status={getXAppsCreationStepStatus(XAppsCreationSteps.SUBMISSION)}
-                  description={t(
-                    "Submit your app into the ecosystem with all the necessary information, including logo, creator bio, and social media links.",
-                  )}
-                />
-                <StepBoxes
-                  stepText={t("STEP {{value}}", { value: XAppsCreationSteps.ENDORSEMENT + 1 })}
-                  title={t("Endorsement")}
-                  type={XAppsCreationSteps.ENDORSEMENT}
-                  status={getXAppsCreationStepStatus(XAppsCreationSteps.ENDORSEMENT)}
-                  description={t(
-                    "X Node Holders will use their NFTs to endorse your dApp. Once it reaches 100 points, it becomes eligible for allocations.",
-                  )}
-                />
-                <StepBoxes
-                  stepText={t("STEP {{value}}", { value: XAppsCreationSteps.ALLOCATION + 1 })}
-                  title={t("Allocation voting")}
-                  type={XAppsCreationSteps.ALLOCATION}
-                  status={getXAppsCreationStepStatus(XAppsCreationSteps.ALLOCATION)}
-                  description={t(
-                    "The allocation rounds determine the resources and support your dApp receives from the ecosystem community.",
-                  )}
-                />
-              </Grid>
+              <Skeleton isLoaded={!isLoading}>
+                <Grid gridTemplateColumns="repeat(3,  1fr)" gap={4} w="full">
+                  <StepBoxes
+                    stepText={t("STEP {{value}}", { value: XAppsCreationSteps.SUBMISSION + 1 })}
+                    title={t("App submission")}
+                    type={XAppsCreationSteps.SUBMISSION}
+                    status={getXAppsCreationStepStatus(XAppsCreationSteps.SUBMISSION)}
+                    description={t(
+                      "Submit your app into the ecosystem with all the necessary information, including logo, creator bio, and social media links.",
+                    )}
+                  />
+                  <StepBoxes
+                    stepText={t("STEP {{value}}", { value: XAppsCreationSteps.ENDORSEMENT + 1 })}
+                    title={t("Endorsement")}
+                    type={XAppsCreationSteps.ENDORSEMENT}
+                    status={getXAppsCreationStepStatus(XAppsCreationSteps.ENDORSEMENT)}
+                    description={t(
+                      "X Node Holders will use their NFTs to endorse your dApp. Once it reaches {{value}} points, it becomes eligible for allocations.",
+                      { value: endorsementScoreThreshold },
+                    )}
+                  />
+                  <StepBoxes
+                    stepText={t("STEP {{value}}", { value: XAppsCreationSteps.ALLOCATION + 1 })}
+                    title={t("Allocation voting")}
+                    type={XAppsCreationSteps.ALLOCATION}
+                    status={getXAppsCreationStepStatus(XAppsCreationSteps.ALLOCATION)}
+                    description={t(
+                      "The allocation rounds determine the resources and support your dApp receives from the ecosystem community.",
+                    )}
+                  />
+                </Grid>
+              </Skeleton>
             </Box>
           </VStack>
         </CardBody>
