@@ -149,7 +149,7 @@ export const ClaimXAppAllocations = () => {
                       isDisabled={isLoading}
                       onChange={e => setAppId(e.target.value)}
                       value={appId}>
-                      {xApps?.map(item => {
+                      {xApps?.active.map(item => {
                         return (
                           <option key={item.id} value={item.id}>
                             {item.name + " - id: " + item.id}
