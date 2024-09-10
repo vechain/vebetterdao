@@ -28,12 +28,10 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IB3TR } from "../V1/interfaces/IB3TR.sol";
 import { IX2EarnApps } from "../V1/interfaces/IX2EarnApps.sol";
-import { IX2EarnRewardsPool } from "../V1/interfaces/IX2EarnRewardsPool.sol";
+import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
-import { ProofDataTypes } from "../../libraries/ProofDataTypes.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -214,11 +212,13 @@ contract X2EarnRewardsPoolV2 is
     bytes32 appId,
     uint256 amount,
     address receiver,
-    ProofDataTypes.Proof memory proof,
-    ProofDataTypes.Impact memory impact,
+    string[] memory proofTypes,
+    string[] memory proofValues,
+    string[] memory impactCodes,
+    uint256[] memory impactValues,
     string memory description
   ) external {
-    _emitProof(appId, amount, receiver, proof, impact, description);
+    _emitProof(appId, amount, receiver, proofTypes, proofValues, impactCodes, impactValues, description);
     _distributeReward(appId, amount, receiver);
   }
 
@@ -252,12 +252,14 @@ contract X2EarnRewardsPoolV2 is
     bytes32 appId,
     uint256 amount,
     address receiver,
-    ProofDataTypes.Proof memory proof,
-    ProofDataTypes.Impact memory impact,
+    string[] memory proofTypes,
+    string[] memory proofValues,
+    string[] memory impactCodes,
+    uint256[] memory impactValues,
     string memory description
   ) internal {
     // Build the JSON proof string from the proof and impact data
-    string memory jsonProof = buildProof(proof, impact, description);
+    string memory jsonProof = buildProof(proofTypes, proofValues, impactCodes, impactValues, description);
 
     // emit event
     emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
@@ -267,12 +269,14 @@ contract X2EarnRewardsPoolV2 is
    * @dev see {IX2EarnRewardsPool-buildProof}
    */
   function buildProof(
-    ProofDataTypes.Proof memory proof,
-    ProofDataTypes.Impact memory impact,
+    string[] memory proofTypes,
+    string[] memory proofValues,
+    string[] memory impactCodes,
+    uint256[] memory impactValues,
     string memory description
   ) public view virtual returns (string memory) {
-    bool hasProof = proof.types.length > 0 && proof.values.length > 0;
-    bool hasImpact = impact.codes.length > 0 && impact.values.length > 0;
+    bool hasProof = proofTypes.length > 0 && proofValues.length > 0;
+    bool hasImpact = impactCodes.length > 0 && impactValues.length > 0;
     bool hasDescription = bytes(description).length > 0;
 
     // If neither proof nor impact is provided, return an empty string
@@ -290,14 +294,14 @@ contract X2EarnRewardsPoolV2 is
 
     // Add proof if available
     if (hasProof) {
-      bytes memory jsonProof = _buildProofJson(proof);
+      bytes memory jsonProof = _buildProofJson(proofTypes, proofValues);
 
       json = abi.encodePacked(json, ',"proof": ', jsonProof);
     }
 
     // Add impact if available
     if (hasImpact) {
-      bytes memory jsonImpact = _buildImpactJson(impact);
+      bytes memory jsonImpact = _buildImpactJson(impactCodes, impactValues);
 
       json = abi.encodePacked(json, ',"impact": ', jsonImpact);
     }
@@ -310,17 +314,21 @@ contract X2EarnRewardsPoolV2 is
 
   /**
    * @dev Builds the proof JSON string from the proof data.
-   * @param proof the proof data to build the JSON from composed of types and values
+   * @param proofTypes the proof types
+   * @param proofValues the proof values
    */
-  function _buildProofJson(ProofDataTypes.Proof memory proof) internal pure returns (bytes memory) {
-    require(proof.types.length == proof.values.length, "Mismatched input lengths for ProofDataTypes.Proof");
+  function _buildProofJson(
+    string[] memory proofTypes,
+    string[] memory proofValues
+  ) internal pure returns (bytes memory) {
+    require(proofTypes.length == proofValues.length, "X2EarnRewardsPool: Mismatched input lengths for Proof");
 
     bytes memory json = abi.encodePacked("{");
 
-    for (uint256 i; i < proof.types.length; i++) {
-      if (_isValidProofType(proof.types[i])) {
-        json = abi.encodePacked(json, '"', proof.types[i], '":', '"', proof.values[i], '"');
-        if (i < proof.types.length - 1) {
+    for (uint256 i; i < proofTypes.length; i++) {
+      if (_isValidProofType(proofTypes[i])) {
+        json = abi.encodePacked(json, '"', proofTypes[i], '":', '"', proofValues[i], '"');
+        if (i < proofTypes.length - 1) {
           json = abi.encodePacked(json, ",");
         }
       } else {
@@ -335,17 +343,22 @@ contract X2EarnRewardsPoolV2 is
 
   /**
    * @dev Builds the impact JSON string from the impact data.
-   * @param impact the impact data to build the JSON from composed of codes and values
+   *
+   * @param impactCodes the impact codes
+   * @param impactValues the impact values
    */
-  function _buildImpactJson(ProofDataTypes.Impact memory impact) internal view returns (bytes memory) {
-    require(impact.codes.length == impact.values.length, "Mismatched input lengths for ProofDataTypes.Impact");
+  function _buildImpactJson(
+    string[] memory impactCodes,
+    uint256[] memory impactValues
+  ) internal view returns (bytes memory) {
+    require(impactCodes.length == impactValues.length, "X2EarnRewardsPool: Mismatched input lengths for Impact");
 
     bytes memory json = abi.encodePacked("{");
 
-    for (uint256 i; i < impact.values.length; i++) {
-      if (_isAllowedImpactKey(impact.codes[i])) {
-        json = abi.encodePacked(json, '"', impact.codes[i], '":', Strings.toString(impact.values[i]));
-        if (i < impact.values.length - 1) {
+    for (uint256 i; i < impactValues.length; i++) {
+      if (_isAllowedImpactKey(impactCodes[i])) {
+        json = abi.encodePacked(json, '"', impactCodes[i], '":', Strings.toString(impactValues[i]));
+        if (i < impactValues.length - 1) {
           json = abi.encodePacked(json, ",");
         }
       } else {
