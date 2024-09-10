@@ -112,7 +112,7 @@ export function createTestConfig() {
       "water",
       "energy",
       "waste_mass",
-      "learning_time",
+      "education_time",
       "timber",
       "plastic",
       "trees_planted",
