@@ -1,9 +1,8 @@
-import { getProposalsEventsQueryKey, getProposalUserDepositQueryKey } from "@/api"
+import { getProposalsEventsQueryKey, getProposalUserDepositQueryKey, getVot3BalanceQueryKey } from "@/api"
 import { UseSendTransactionReturnValue } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import { removingExcessDecimals } from "@/utils/MathUtils"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
@@ -44,23 +43,20 @@ export const useProposalVot3Deposit = ({
   const { account } = useWallet()
 
   const clauseBuilder = useCallback(({ amount, proposalId }: { amount: string | number; proposalId: string }) => {
-    const contractAmount = removingExcessDecimals(amount)
-    const amountWithDecimals = ethers.parseEther(contractAmount).toString()
-
     return [
       buildClause({
         contractInterface: Vot3Interface,
         to: VOT3_CONTRACT,
         method: "approve",
-        args: [GOVERNANCE_CONTRACT, amountWithDecimals],
-        comment: `Approve to transfer ${amount} VOT3`,
+        args: [GOVERNANCE_CONTRACT, amount],
+        comment: `Approve to transfer ${ethers.formatEther(amount)} VOT3`,
       }),
       buildClause({
         contractInterface: GovernorInterface,
         to: GOVERNANCE_CONTRACT,
         method: "deposit",
-        args: [amountWithDecimals, proposalId],
-        comment: `${amountWithDecimals} Vot3 deposited to proposal ${proposalId}`,
+        args: [amount, proposalId],
+        comment: `${ethers.formatEther(amount)} Vot3 deposited to proposal ${proposalId}`,
       }),
     ]
   }, [])
@@ -71,6 +67,7 @@ export const useProposalVot3Deposit = ({
       getProposalDepositQueryKey(proposalId),
       getIsDepositReachedQueryKey(proposalId),
       getProposalsEventsQueryKey(),
+      getVot3BalanceQueryKey(account ?? ""),
     ],
     [account, proposalId],
   )
