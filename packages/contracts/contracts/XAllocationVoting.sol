@@ -32,8 +32,12 @@ import "./x-allocation-voting-governance/modules/RoundEarningsSettingsUpgradeabl
 import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/ExternalContractsUpgradeable.sol";
+import "./interfaces/IX2EarnApps.sol";
+import "./interfaces/IEmissions.sol";
+import "./interfaces/IVoterRewards.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/governance/utils/IVotes.sol";
 
 /**
  * @title XAllocationVoting
@@ -111,7 +115,7 @@ contract XAllocationVoting is
     require(address(data.vot3Token) != address(0), "XAllocationVoting: invalid VOT3 token address");
     require(address(data.voterRewards) != address(0), "XAllocationVoting: invalid VoterRewards address");
     require(address(data.emissions) != address(0), "XAllocationVoting: invalid Emissions address");
-    
+
     __XAllocationVotingGovernor_init("XAllocationVoting");
     __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions, data.voterRewards);
     __VotingSettings_init(data.initialVotingPeriod);
