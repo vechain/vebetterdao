@@ -861,8 +861,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
           appId,
           ethers.parseEther("1"),
           user.address,
-          { types: ["image"], values: ["https://image.png"] },
-          { codes: ["carbon", "water"], values: [100, 200] },
+          ["image"],
+          ["https://image.png"],
+          ["carbon", "water"],
+          [100, 200],
           "The description of the action",
         )
 
@@ -922,8 +924,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
           appId,
           ethers.parseEther("1"),
           user.address,
-          { types: ["image", "link"], values: ["https://image.png", "https://twitter.com/tweet/1"] },
-          { codes: ["carbon", "water"], values: [100, 200] },
+          ["image", "link"],
+          ["https://image.png", "https://twitter.com/tweet/1"],
+          ["carbon", "water"],
+          [100, 200],
           "The description of the action",
         )
 
@@ -985,8 +989,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
           appId,
           ethers.parseEther("1"),
           user.address,
-          { types: ["image", "link"], values: ["https://image.png", "https://twitter.com/tweet/1"] },
-          { codes: [], values: [] },
+          ["image", "link"],
+          ["https://image.png", "https://twitter.com/tweet/1"],
+          [],
+          [],
           "The description of the action",
         )
 
@@ -1048,8 +1054,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
           appId,
           ethers.parseEther("1"),
           user.address,
-          { types: [], values: [] },
-          { codes: ["carbon", "water"], values: [100, 200] },
+          [],
+          [],
+          ["carbon", "water"],
+          [100, 200],
           "The description of the action",
         )
 
@@ -1108,8 +1116,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
           appId,
           ethers.parseEther("1"),
           user.address,
-          { types: [], values: [] },
-          { codes: [], values: [] },
+          [],
+          [],
+          [],
+          [],
           "The description of the action",
         )
 
@@ -1159,8 +1169,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
           appId,
           ethers.parseEther("1"),
           user.address,
-          { types: ["image", "link"], values: ["https://image.png", "https://twitter.com/tweet/1"] },
-          { codes: ["carbon", "water"], values: [100, 200] },
+          ["image", "link"],
+          ["https://image.png", "https://twitter.com/tweet/1"],
+          ["carbon", "water"],
+          [100, 200],
           "",
         )
 
@@ -1215,14 +1227,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
       const tx = await x2EarnRewardsPool
         .connect(owner)
-        .distributeRewardWithProof(
-          appId,
-          ethers.parseEther("1"),
-          user.address,
-          { types: [], values: [] },
-          { codes: [], values: [] },
-          "",
-        )
+        .distributeRewardWithProof(appId, ethers.parseEther("1"), user.address, [], [], [], [], "")
 
       const receipt = await tx.wait()
 
@@ -1254,8 +1259,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
             await x2EarnApps.hashAppName("My app"),
             ethers.parseEther("1"),
             owner.address,
-            { types: ["invalid"], values: ["https://image.png"] },
-            { codes: ["carbon", "water"], values: [100, 200] },
+            ["invalid"],
+            ["https://image.png"],
+            ["carbon", "water"],
+            [100, 200],
             "The description of the action",
           ),
       )
@@ -1291,8 +1298,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
             appId,
             ethers.parseEther("1"),
             user.address,
-            { types: ["invalid"], values: ["https://image.png"] },
-            { codes: ["carbon", "water"], values: [100, 200] },
+            ["invalid"],
+            ["https://image.png"],
+            ["carbon", "water"],
+            [100, 200],
             "The description of the action",
           ),
       )
@@ -1304,8 +1313,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
             appId,
             ethers.parseEther("1"),
             user.address,
-            { types: ["video"], values: ["https://image.png"] },
-            { codes: ["carbon", "water"], values: [100, 200] },
+            ["video"],
+            ["https://image.png"],
+            ["carbon", "water"],
+            [100, 200],
             "The description of the action",
           ),
       ).not.to.be.reverted
@@ -1317,8 +1328,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
             appId,
             ethers.parseEther("1"),
             user.address,
-            { types: ["image"], values: ["https://image.png"] },
-            { codes: ["carbon", "water"], values: [100, 200] },
+            ["image"],
+            ["https://image.png"],
+            ["carbon", "water"],
+            [100, 200],
             "The description of the action",
           ),
       ).not.to.be.reverted
@@ -1330,8 +1343,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
             appId,
             ethers.parseEther("1"),
             user.address,
-            { types: ["link"], values: ["https://image.png"] },
-            { codes: ["carbon", "water"], values: [100, 200] },
+            ["link"],
+            ["https://image.png"],
+            ["carbon", "water"],
+            [100, 200],
             "The description of the action",
           ),
       ).not.to.be.reverted
@@ -1350,8 +1365,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
             await x2EarnApps.hashAppName("My app"),
             ethers.parseEther("1"),
             owner.address,
-            { types: ["image"], values: ["https://image.png"] },
-            { codes: ["invalid"], values: [100, 200] },
+            ["image"],
+            ["https://image.png"],
+            ["invalid"],
+            [100, 200],
             "The description of the action",
           ),
       )
@@ -1370,8 +1387,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
             await x2EarnApps.hashAppName("My app"),
             ethers.parseEther("1"),
             owner.address,
-            { types: ["image"], values: ["https://image.png"] },
-            { codes: ["carbon"], values: [100, 200] },
+            ["image"],
+            ["https://image.png"],
+            ["carbon"],
+            [100, 200],
             "The description of the action",
           ),
       )
@@ -1390,8 +1409,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
             await x2EarnApps.hashAppName("My app"),
             ethers.parseEther("1"),
             owner.address,
-            { types: ["image", "link"], values: ["https://image.png"] },
-            { codes: ["carbon", "water"], values: [100, 200] },
+            ["image", "link"],
+            ["https://image.png"],
+            ["carbon", "water"],
+            [100, 200],
             "The description of the action",
           ),
       )
@@ -1410,7 +1431,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "learning_time",
+        "education_time",
         "timber",
         "plastic",
         "trees_planted",
@@ -1436,7 +1457,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "learning_time",
+        "education_time",
         "timber",
         "plastic",
       ])
@@ -1449,7 +1470,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
       const impactCodes2 = await x2EarnRewardsPool.getAllowedImpactKeys()
 
-      expect(impactCodes2).to.eql(["trees_planted", "plastic", "energy", "waste_mass", "learning_time", "timber"])
+      expect(impactCodes2).to.eql(["trees_planted", "plastic", "energy", "waste_mass", "education_time", "timber"])
     })
 
     it("IMPACT_KEY_MANAGER_ROLE and DEFAULT_ADMIN can add an impact code", async function () {
@@ -1471,7 +1492,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "learning_time",
+        "education_time",
         "timber",
         "plastic",
         "trees_planted",
@@ -1491,7 +1512,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "learning_time",
+        "education_time",
         "timber",
         "plastic",
         "trees_planted",
@@ -1591,8 +1612,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
       const onchainGeneratedProof = JSON.parse(
         await x2EarnRewardsPool.buildProof(
-          { types: ["image"], values: ["https://image.png"] },
-          { codes: ["carbon", "water"], values: [100, 200] },
+          ["image"],
+          ["https://image.png"],
+          ["carbon", "water"],
+          [100, 200],
           "The description of the action",
         ),
       )

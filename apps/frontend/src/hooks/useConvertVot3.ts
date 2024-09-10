@@ -63,11 +63,11 @@ export const useConvertVot3 = ({
 
       // vot3 balance
       await queryClient.cancelQueries({
-        queryKey: getVot3BalanceQueryKey(account ?? undefined),
+        queryKey: getVot3BalanceQueryKey(account ?? ""),
       })
 
       await queryClient.refetchQueries({
-        queryKey: getVot3BalanceQueryKey(account ?? undefined),
+        queryKey: getVot3BalanceQueryKey(account ?? ""),
       })
 
       //user votes

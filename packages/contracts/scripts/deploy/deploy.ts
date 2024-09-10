@@ -220,6 +220,7 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [
         config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
+        config.X_2_EARN_INITIAL_IMPACT_KEYS, // impact keys
         veBetterPassportAddress,
       ],
     ],
