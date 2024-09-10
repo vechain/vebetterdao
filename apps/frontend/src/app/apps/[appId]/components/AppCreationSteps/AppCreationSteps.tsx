@@ -1,102 +1,10 @@
 import { useEndorsementScoreThreshold, useIsAppUnendorsed } from "@/api"
-import { Handshake } from "@/components"
-import { SignIcon } from "@/components/Icons/SignIcon"
-import { VoteCheckmarkIcon } from "@/components/Icons/VoteCheckmarkIcon"
 import { XAppsCreationSteps, XAppsCreationStepStatus } from "@/types/appDetails"
-import {
-  Box,
-  Card,
-  CardBody,
-  Circle,
-  Grid,
-  Heading,
-  HStack,
-  Icon,
-  Skeleton,
-  Stack,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
-import { UilCheck, UilInfoCircle } from "@iconscout/react-unicons"
+import { Box, Card, CardBody, Grid, Heading, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
-
-type StepBoxesProps = {
-  title: string
-  description: string
-  type: XAppsCreationSteps
-  status: XAppsCreationStepStatus
-  stepText: string
-}
-const statusIcon = {
-  [XAppsCreationStepStatus.PENDING]: null,
-  [XAppsCreationStepStatus.ACTIVE]: <Circle size="80%" bg="#004CFC" />,
-  [XAppsCreationStepStatus.COMPLETED]: <UilCheck size={20} color="#004CFC" />,
-}
-
-const stepIcon = {
-  [XAppsCreationSteps.SUBMISSION]: SignIcon,
-  [XAppsCreationSteps.ENDORSEMENT]: Handshake,
-  [XAppsCreationSteps.ALLOCATION]: VoteCheckmarkIcon,
-}
-
-const StepBoxes = ({
-  stepText,
-  title,
-  type,
-  description,
-  status = XAppsCreationStepStatus.PENDING,
-}: StepBoxesProps) => {
-  const borderColor = status === XAppsCreationStepStatus.ACTIVE ? "#004CFC" : "transparent"
-  const IconComponent = stepIcon[type]
-  const iconColor = status === XAppsCreationStepStatus.COMPLETED ? "#004CFC" : "#000000"
-
-  return (
-    <Stack
-      minW={["60vw", "45vw", "15vw", "5vw"]}
-      w="full"
-      h="full"
-      position="relative"
-      borderRadius="24px"
-      borderWidth="2px"
-      borderColor={borderColor}>
-      <Stack
-        position="absolute"
-        borderRadius="25px"
-        borderWidth="2px"
-        borderColor="#004CFC"
-        top={4}
-        right={4}
-        w="25px"
-        h="25px"
-        display="flex"
-        alignItems="center"
-        justifyContent="center">
-        {statusIcon[status]}
-      </Stack>
-      <Stack
-        w="full"
-        h="full"
-        p={3}
-        backgroundColor={"#F7F7F7"}
-        borderRadius="24px"
-        opacity={status === XAppsCreationStepStatus.PENDING ? 0.5 : 1}>
-        <HStack w="full" h="full" alignItems="center">
-          <IconComponent size={124} color={iconColor} />
-        </HStack>
-        <VStack alignItems="start" w="full">
-          <Text fontSize="12px" color="#6A6A6A" lineHeight={"1px"}>
-            {stepText}
-          </Text>
-          <Heading size={["md", "sm", "sm"]}>{title}</Heading>
-        </VStack>
-        <Text fontSize="14px" color="#6A6A6A" w="full">
-          {description}
-        </Text>
-      </Stack>
-    </Stack>
-  )
-}
+import { StepBoxes } from "./components/StepBoxes"
 
 export const AppCreationSteps = () => {
   const { t } = useTranslation()
