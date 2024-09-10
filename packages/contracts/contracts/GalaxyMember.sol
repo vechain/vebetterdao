@@ -207,7 +207,6 @@ contract GalaxyMember is
     }
 
     $.MAX_LEVEL = data.maxLevel;
-    $._nextTokenId = 1;
 
     $.b3tr = IB3TR(data.b3tr);
     $.treasury = data.treasury;
@@ -234,6 +233,8 @@ contract GalaxyMember is
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     $.vechainNodes = ITokenAuction(_vechainNodes);
+
+    $._nextTokenId = $._nextTokenId == 0 ? 1 : $._nextTokenId;
 
     for (uint8 i; i < _nodeFreeLevels.length; i++) {
       require(_nodeFreeLevels[i] >= 1, "GalaxyMember: invalid node free level");
