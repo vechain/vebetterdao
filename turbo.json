@@ -70,6 +70,22 @@
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
+    "upgrade:contract": {
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": []
+    },
+    "upgrade:contract:local": {
+      "dependsOn": ["upgrade:contract"]
+    },
+    "upgrade:contract:solo-staging": {
+      "dependsOn": ["upgrade:contract"]
+    },
+    "upgrade:contract:testnet": {
+      "dependsOn": ["upgrade:contract"]
+    },
+    "upgrade:contract:mainnet": {
+      "dependsOn": ["upgrade:contract"]
+    },
     "clean": {
       "cache": false
     },

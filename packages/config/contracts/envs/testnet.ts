@@ -77,5 +77,17 @@ export function createTestnetConfig() {
     TREASURY_TRANSFER_LIMIT_B3TR: BigInt("0"),
     TREASURY_TRANSFER_LIMIT_VTHO: BigInt("0"),
     TREASURY_TRANSFER_LIMIT_VOT3: BigInt("0"),
+
+    // X 2 Earn Rewards Pool
+    X_2_EARN_INITIAL_IMPACT_KEYS: [
+      "carbon",
+      "water",
+      "energy",
+      "waste_mass",
+      "education_time",
+      "timber",
+      "plastic",
+      "trees_planted",
+    ],
   })
 }

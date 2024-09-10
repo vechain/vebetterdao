@@ -26,7 +26,8 @@
     "clean": "rm -rf dist artifacts typechain-types cache node_modules",
     "lint": "eslint . --ext .ts",
     "format": "eslint . --ext .ts --fix",
-    "generate-docs": "npx hardhat docgen"
+    "generate-docs": "npx hardhat docgen",
+    "upgrade:contract": "npx hardhat run scripts/upgrade/upgrades/\"$CONTRACT_TO_UPGRADE\"-\"$CONTRACT_VERSION\".ts"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
