@@ -29,7 +29,7 @@ import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/Co
 import { IXAllocationVotingGovernor, IERC6372 } from "../../../interfaces/IXAllocationVotingGovernor.sol";
 import { IXAllocationPool } from "../../../interfaces/IXAllocationPool.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { IX2EarnAppsV1 } from "../interfaces/IX2EarnAppsV1.sol";
+import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { IEmissions } from "../../../interfaces/IEmissions.sol";
 import { IVoterRewards } from "../../../interfaces/IVoterRewards.sol";
 
@@ -297,7 +297,7 @@ abstract contract XAllocationVotingGovernor is
   /**
    * @dev Returns the X2EarnApps contract.
    */
-  function x2EarnApps() public view virtual returns (IX2EarnAppsV1);
+  function x2EarnApps() public view virtual returns (IX2EarnApps);
 
   /**
    * @dev Returns the Emissions contract.

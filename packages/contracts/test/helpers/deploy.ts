@@ -43,7 +43,6 @@ import {
   GovernorQuorumLogic,
   GovernorStateLogic,
   GovernorVotesLogic,
-  X2EarnRewardsPoolV2,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, upgradeProxy, deployLibraries } from "../../scripts/helpers"
