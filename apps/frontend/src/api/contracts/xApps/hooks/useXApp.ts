@@ -1,5 +1,4 @@
 import { useMemo } from "react"
-import { useUnendorsedApps } from "./useUnendorsedApps"
 import { useXApps } from "./useXApps"
 
 /**
@@ -9,20 +8,12 @@ import { useXApps } from "./useXApps"
  */
 export const useXApp = (appId: string) => {
   const { data: xApps, ...props } = useXApps()
-  const { data: unendorsedApps, ...unendorsedProps } = useUnendorsedApps()
 
-  const allApps = useMemo(() => [...(xApps ?? []), ...(unendorsedApps ?? [])], [xApps, unendorsedApps])
+  const allApps = useMemo(() => [...(xApps?.active ?? []), ...(xApps?.unendorsed ?? [])], [xApps])
   const app = allApps.find(xa => xa.id === appId)
-
-  const isLoading = props.isLoading || unendorsedProps.isLoading
-  const isError = props.isError || unendorsedProps.isError
-  const error = props.error || unendorsedProps.error
 
   return {
     data: app,
     ...props,
-    isLoading,
-    isError,
-    error,
   }
 }

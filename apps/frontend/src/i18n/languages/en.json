@@ -31,7 +31,7 @@
   "New dApp score": "New dApp score",
   "Endorse now": "Endorse now",
   "Users endorsing": "Users endorsing",
-  "{{first}} of {{second}}": "{{first}} of {{second}}",
+  "of {{value}}": "of {{value}}",
   "New": "New",
   "Submitted on {{date}}": "Submitted on {{date}}",
   "{{value}} new apps": "{{value}} new apps",

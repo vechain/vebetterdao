@@ -7,7 +7,6 @@ import { AppDetailPage } from "./AppDetailPage"
 import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
 import { getXApps } from "@/api/contracts/xApps/getXApps"
 
-import { getUnendorsedXApps } from "@/api/contracts/xApps/getUnendorsedXApps"
 import { getXAppsMetadataBaseUri } from "@/api/contracts/xApps/getXAppsMetadataBaseUri"
 import { getIpfsMetadata } from "@/api/ipfs"
 import { compareAddresses } from "@repo/utils/AddressUtils"
@@ -23,10 +22,7 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
 
   const xApps = await getXApps(connex.thor)
 
-  const unendorsedXApps = await getUnendorsedXApps(connex.thor)
-
-  const allApps = xApps.concat(unendorsedXApps)
-
+  const allApps = xApps.active.concat(xApps.unendorsed)
   const app = allApps.find(app => compareAddresses(app.id, id))
 
   if (!app) throw new Error(`App ${id} not found`)

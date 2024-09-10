@@ -1,4 +1,4 @@
-import { useUnendorsedApps, useUserEndorsementScore, useXApps } from "@/api"
+import { useUserEndorsementScore, useXApps } from "@/api"
 import { HStack, VStack, Grid, Spinner, Button, useDisclosure, Text, Skeleton, Box, Heading } from "@chakra-ui/react"
 import { AppCard } from "./AppCard"
 import { AddNewAppCard } from "./AddNewAppCard"
@@ -11,8 +11,7 @@ export const AppsPageContent = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
-  const { data: xApps, isLoading: isLoadingXApps } = useXApps()
-  const { data: unendorsedApps, isLoading: unendorsedAppsLoading } = useUnendorsedApps()
+  const { data: xApps, isLoading: isXAppsLoading } = useXApps()
 
   const userEndorsementScore = useUserEndorsementScore(account)
 
@@ -28,7 +27,7 @@ export const AppsPageContent = () => {
     if (isActiveSection)
       return (
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={6} w="full">
-          {xApps?.map(xApp => <AppCard key={xApp.id} xApp={xApp} />)}
+          {xApps?.active.map(xApp => <AppCard key={xApp.id} xApp={xApp} />)}
 
           <AddNewAppCard />
         </Grid>
@@ -36,19 +35,17 @@ export const AppsPageContent = () => {
 
     return (
       <Grid templateColumns={"repeat(1, 1fr)"} gap={6} w="full">
-        {unendorsedApps?.map(xApp => <UnendorsedAppCard key={xApp.id} xApp={xApp} />)}
+        {xApps?.unendorsed.map(xApp => <UnendorsedAppCard key={xApp.id} xApp={xApp} />)}
       </Grid>
     )
-  }, [isActiveSection, xApps, unendorsedApps])
+  }, [isActiveSection, xApps])
 
-  if (isLoadingXApps)
+  if (isXAppsLoading)
     return (
       <VStack w="full" spacing={12} h="80vh" justify="center" data-testid="apps-page-loading">
         <Spinner size={"lg"} />
       </VStack>
     )
-
-  if (!xApps?.length) return null
 
   //TODO: Pagination, search, filters
   return (
@@ -64,9 +61,9 @@ export const AppsPageContent = () => {
         <Button onClick={onUnendorsedSection} borderRadius={"24px"} bg={!isActiveSection ? "#E0E9FE" : "transparent"}>
           <HStack spacing={2}>
             <Text>{t("Looking for endorsement")}</Text>
-            <Skeleton isLoaded={!unendorsedAppsLoading}>
+            <Skeleton isLoaded={!isXAppsLoading}>
               <Text bg="#B1F16C" py="10px" px="4px" borderRadius={"38px"} fontSize={"12px"} fontWeight={700}>
-                {t("{{value}} new apps", { value: unendorsedApps?.length })}
+                {t("{{value}} new apps", { value: xApps?.unendorsed?.length })}
               </Text>
             </Skeleton>
           </HStack>
