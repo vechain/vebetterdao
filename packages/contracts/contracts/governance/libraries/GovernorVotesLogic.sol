@@ -256,7 +256,7 @@ library GovernorVotesLogic {
     bool isQuadraticDisabled = isQuadraticVotingDisabledForCurrentRound(self);
 
     // If quadratic voting is disabled, set the new status to enabled, otherwise set it to disabled.
-    uint208 newStatus = isQuadraticDisabled ? SafeCast.toUint208(0) : SafeCast.toUint208(1);
+    uint208 newStatus = isQuadraticDisabled ? 0 : 1;
 
     // Toggle the status -> 0: enabled, 1: disabled
     self.quadraticVotingDisabled.push(GovernorClockLogic.clock(self), newStatus);

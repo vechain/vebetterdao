@@ -432,6 +432,10 @@ describe("X-Allocation Pool - @shard3", async function () {
           [app1Id, app2Id, app3Id],
           [ethers.parseEther("0"), ethers.parseEther("100"), ethers.parseEther("100")],
         )
+
+      // Turn off quadratic funding mid round
+      await xAllocationPool.connect(owner).toggleQuadraticFunding()
+
       await xAllocationVoting
         .connect(otherAccounts[5])
         .castVote(
@@ -439,9 +443,6 @@ describe("X-Allocation Pool - @shard3", async function () {
           [app1Id, app2Id, app3Id],
           [ethers.parseEther("1000"), ethers.parseEther("0"), ethers.parseEther("100")],
         )
-
-      // Turn off quadratic funding
-      await xAllocationPool.connect(owner).toggleQuadraticFunding()
 
       await waitForRoundToEnd(round3)
 
@@ -451,7 +452,7 @@ describe("X-Allocation Pool - @shard3", async function () {
 
       expect(app1round3Earnings[0]).to.eql(1144n)
       expect(app2round3Earnings[0]).to.eql(5993n)
-      expect(app3round3Earnings[0]).to.eql(2861n)
+      expect(app3round3Earnings[0]).to.eql(2861n) // remains quadratic
 
       //Start allocation round
       const round4 = await startNewAllocationRound()

@@ -201,7 +201,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     bool isQuadraticDisabled = isQuadraticFundingDisabledForCurrentRound();
 
     // If the current status is disabled, then the new status will be enabled and vice versa
-    uint208 newStatus = isQuadraticDisabled ? SafeCast.toUint208(0) : SafeCast.toUint208(1);
+    uint208 newStatus = isQuadraticDisabled ? 0 : 1;
 
     // Toggle the status -> 0: enabled, 1: disabled
     $.quadraticFundingDisabled.push(clock(), newStatus);
