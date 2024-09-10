@@ -415,6 +415,10 @@ describe("Galaxy Member - @shard2", () => {
 
       await galaxyMember.connect(otherAccount).freeMint()
 
+      await galaxyMember.connect(otherAccount).burn(0)
+
+      await galaxyMember.connect(otherAccount).freeMint()
+
       // Upgrade to level 2
       await upgradeNFTtoLevel(1, 2, galaxyMember, b3tr, otherAccount, minterAccount)
 
@@ -568,6 +572,8 @@ describe("Galaxy Member - @shard2", () => {
       const participated = await galaxyMember.connect(owner).participatedInGovernance(owner)
       expect(participated).to.equal(true)
 
+      await galaxyMember.connect(owner).freeMint()
+      await galaxyMember.connect(owner).burn(0)
       await galaxyMember.connect(owner).freeMint()
       await galaxyMember.connect(owner).freeMint()
       await galaxyMember.connect(owner).freeMint()
