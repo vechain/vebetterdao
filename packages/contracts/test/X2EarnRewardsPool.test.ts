@@ -1431,7 +1431,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "learning_time",
+        "education_time",
         "timber",
         "plastic",
         "trees_planted",
@@ -1457,7 +1457,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "learning_time",
+        "education_time",
         "timber",
         "plastic",
       ])
@@ -1470,7 +1470,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
       const impactCodes2 = await x2EarnRewardsPool.getAllowedImpactKeys()
 
-      expect(impactCodes2).to.eql(["trees_planted", "plastic", "energy", "waste_mass", "learning_time", "timber"])
+      expect(impactCodes2).to.eql(["trees_planted", "plastic", "energy", "waste_mass", "education_time", "timber"])
     })
 
     it("IMPACT_KEY_MANAGER_ROLE and DEFAULT_ADMIN can add an impact code", async function () {
@@ -1492,7 +1492,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "learning_time",
+        "education_time",
         "timber",
         "plastic",
         "trees_planted",
@@ -1512,7 +1512,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
         "water",
         "energy",
         "waste_mass",
-        "learning_time",
+        "education_time",
         "timber",
         "plastic",
         "trees_planted",
