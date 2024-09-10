@@ -266,7 +266,7 @@ export const getOrDeployContractInstances = async ({
     "X2EarnRewardsPoolV1",
     "X2EarnRewardsPoolV2",
     await x2EarnRewardsPoolV1.getAddress(),
-    [owner.address],
+    [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS],
     {
       version: 2,
     },
