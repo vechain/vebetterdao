@@ -32,6 +32,7 @@ import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import { IVeBetterPassport } from "./ve-better-passport/interfaces/IVeBetterPassport.sol";
 
 /**
  * @title X2EarnRewardsPool

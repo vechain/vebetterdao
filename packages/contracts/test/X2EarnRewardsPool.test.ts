@@ -1709,8 +1709,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
         appId,
         ethers.parseEther("1"),
         user.address,
-        { types: ["image"], values: ["https://image.png"] },
-        { codes: ["carbon", "water"], values: [100, 200] },
+        ["image"],
+        ["https://image.png"],
+        ["carbon", "water"],
+        [100, 200],
         "The description of the action",
       )
 
