@@ -166,8 +166,10 @@ async function run(): Promise<void> {
   // Whitelist of contract names that should not be renamed (without ".sol" extension)
   const contractsWhitelist: string[] = ["B3TR", "B3TRProxy"]
 
+  // Whitelist of interface names that should not be renamed
   const interfacesWhitelist: string[] = ["IERC6372", "Checkpoints"]
 
+  // List of contract/interface names that should be updated in the codebase even if they are not renamed through imports
   const usagesToUpdate: string[] = ["IVoterRewards", "IEmissions", "IX2EarnApps"]
 
   await renameContractsAndInterfaces(directoryPath, version, contractsWhitelist, interfacesWhitelist, usagesToUpdate)
