@@ -2,8 +2,8 @@ import {
   UnendorsedApp,
   useAppEndorsementScore,
   useEndorsementScoreThreshold,
-  useUserDelegatedNodes,
   useUserEndorsementScore,
+  useUserXNodes,
 } from "@/api"
 import { CustomModalContent, TransactionModal } from "@/components"
 import { useEndorseApp } from "@/hooks"
@@ -24,9 +24,9 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const endorsementScore = useAppEndorsementScore(xApp.id)
   const endorsementScoreThreshold = useEndorsementScoreThreshold()
 
-  const userDelegatedNodes = useUserDelegatedNodes(account)
+  const userDelegatedNodes = useUserXNodes(account ?? undefined)
 
-  const nodeId = userDelegatedNodes.data?.[0] ?? "0"
+  const nodeId = userDelegatedNodes.data?.[0]?.id ?? "0"
 
   console.log({ nodeId })
 
