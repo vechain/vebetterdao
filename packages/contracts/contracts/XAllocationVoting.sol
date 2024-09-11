@@ -111,7 +111,7 @@ contract XAllocationVoting is
     require(address(data.vot3Token) != address(0), "XAllocationVoting: invalid VOT3 token address");
     require(address(data.voterRewards) != address(0), "XAllocationVoting: invalid VoterRewards address");
     require(address(data.emissions) != address(0), "XAllocationVoting: invalid Emissions address");
-
+    
     __XAllocationVotingGovernor_init("XAllocationVoting");
     __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions, data.voterRewards);
     __VotingSettings_init(data.initialVotingPeriod);
