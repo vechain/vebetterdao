@@ -28,7 +28,8 @@
     "lint": "eslint . --ext .ts",
     "format": "eslint . --ext .ts --fix",
     "generate-docs": "npx hardhat docgen",
-    "upgrade:contract": "npx hardhat run scripts/upgrade/upgrades/\"$CONTRACT_TO_UPGRADE\"-\"$CONTRACT_VERSION\".ts"
+    "upgrade:contract": "npx hardhat run scripts/upgrade/upgrades/\"$CONTRACT_TO_UPGRADE\"-\"$CONTRACT_VERSION\".ts",
+    "rename-contracts": "ts-node scripts/renameContracts.ts"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
