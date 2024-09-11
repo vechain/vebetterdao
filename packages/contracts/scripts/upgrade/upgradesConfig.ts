@@ -27,4 +27,11 @@ export const upgradeConfig = {
       v2: "Add onchain impacts and proof generation",
     },
   },
+  "Node Management": {
+    name: "node-management",
+    versions: ["v1"],
+    descriptions: {
+      v1: "Deploy the initial version of the NodeManagement contract",
+    },
+  },
 } as const
