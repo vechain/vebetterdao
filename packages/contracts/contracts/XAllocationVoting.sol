@@ -32,9 +32,6 @@ import "./x-allocation-voting-governance/modules/RoundEarningsSettingsUpgradeabl
 import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol";
 import "./x-allocation-voting-governance/modules/ExternalContractsUpgradeable.sol";
-import "./interfaces/IX2EarnApps.sol";
-import "./interfaces/IEmissions.sol";
-import "./interfaces/IVoterRewards.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/governance/utils/IVotes.sol";
