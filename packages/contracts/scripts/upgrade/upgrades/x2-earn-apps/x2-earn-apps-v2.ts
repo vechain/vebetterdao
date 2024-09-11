@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
-import { upgradeProxy } from "../../helpers"
+import { upgradeProxy } from "../../../helpers"
 import { EnvConfig, getContractsConfig } from "@repo/config/contracts"
-import { X2EarnApps, NodeManagement } from "../../../typechain-types"
+import { X2EarnApps } from "../../../../typechain-types"
 import { ethers } from "hardhat"
 
 async function main() {

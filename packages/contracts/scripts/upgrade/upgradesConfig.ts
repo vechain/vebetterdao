@@ -1,40 +1,40 @@
 export const upgradeConfig = {
-  "Voter Rewards": {
+  VoterRewards: {
     name: "voter-rewards",
     versions: ["v2"],
     descriptions: {
       v2: "Add the ability to toggle quadratic rewarding on and off.",
     },
   },
-  "B3TR Governor": {
+  B3TRGovernor: {
     name: "b3tr-governor",
     versions: ["v2"],
     descriptions: {
       v2: "Give ability to contract admins to can call governance only functions",
     },
   },
-  "XAllocation Voting": {
+  XAllocationVoting: {
     name: "x-allocation-voting",
     versions: ["v2"],
     descriptions: {
       v2: "Fix XAllocation voting so that a user cannot vote for an XApp with a vote weight less than 1",
     },
   },
-  "X2Earn Rewards Pool": {
+  X2EarnRewardsPool: {
     name: "x2earn-rewards-pool",
     versions: ["v2"],
     descriptions: {
       v2: "Add onchain impacts and proof generation",
     },
   },
-  "X2Earn Apps": {
+  X2EarnApps: {
     name: "x2-earn-apps",
     versions: ["v2"],
     descriptions: {
       v2: "Add xapp endorsment module",
     },
   },
-  "XAllocation Pool": {
+  XAllocationPool: {
     name: "x-allocation-pool",
     versions: ["v2"],
     descriptions: {
