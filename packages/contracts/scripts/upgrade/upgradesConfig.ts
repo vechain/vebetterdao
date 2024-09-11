@@ -1,4 +1,10 @@
-export const upgradeConfig = {
+export interface UpgradeContract {
+  name: string
+  versions: readonly string[]
+  descriptions: Record<string, string>
+}
+
+export const upgradeConfig: Record<string, UpgradeContract> = {
   VoterRewards: {
     name: "voter-rewards",
     versions: ["v2"],
@@ -15,9 +21,10 @@ export const upgradeConfig = {
   },
   XAllocationVoting: {
     name: "x-allocation-voting",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Fix XAllocation voting so that a user cannot vote for an XApp with a vote weight less than 1",
+      v3: "Update X2Earn interface to include new endorsement feature",
     },
   },
   X2EarnRewardsPool: {
