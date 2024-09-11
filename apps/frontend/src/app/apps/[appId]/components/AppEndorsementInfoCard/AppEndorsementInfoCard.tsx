@@ -39,21 +39,21 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
         </Text>
       </CardHeader>
       <CardBody p={0}>
-        <Stack spacing={5} w="full">
+        <Stack spacing={3} w="full">
           <Box>
-            <Text fontSize="lg">{t("Current score")}</Text>
+            <Text fontSize="16px">{t("Current score")}</Text>
             <Box display="flex" alignItems="center">
-              <Text fontSize="4xl" mb={2} fontWeight="bold" color="orange.400">
+              <Text fontSize="36px" fontWeight="700" color="#F29B32">
                 {appEndorsementScore}
               </Text>
-              <Text fontSize="lg" color="gray.600" ml={1}>
+              <Text fontSize="14px" color="#6A6A6A" pt={4} pl={1}>
                 {t("of {{value}}", { value: endorsementScoreThreshold })}
               </Text>
             </Box>
           </Box>
           <Divider />
-          <Box pt={3}>
-            <Text fontWeight="600" textAlign="center">
+          <Box py={2}>
+            <Text fontSize="14px" fontWeight="600" textAlign="center">
               {t("Nobody is endorsing your app")}
             </Text>
           </Box>

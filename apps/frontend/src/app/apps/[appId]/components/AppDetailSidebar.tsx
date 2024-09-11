@@ -13,7 +13,7 @@ export const AppDetailsSidebar = () => {
 
   return (
     (isAppModerator || isAppAdmin) && (
-      <Stack direction={"column"} flex={1.5}>
+      <Stack spacing={8} direction={"column"} flex={1.5}>
         <AppBalanceCard />
         <AppEndorsementInfoCard appId={app?.id} />
       </Stack>
