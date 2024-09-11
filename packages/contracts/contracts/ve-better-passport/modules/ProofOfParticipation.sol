@@ -19,6 +19,9 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
   bytes32 public constant ACTION_REGISTRAR_ROLE = keccak256("ACTION_REGISTRAR_ROLE");
   bytes32 public constant ACTION_SCORE_MANAGER_ROLE = keccak256("ACTION_SCORE_MANAGER_ROLE");
 
+  // Scaling factor for the exponential decay
+  uint256 private constant scalingFactor = 1e18;
+
   /// @notice Security level indicates how secure the app is
   /// @dev App security is used to calculate the overall score of a sustainable action
   enum APP_SECURITY {
@@ -70,7 +73,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
    * @dev Initializes the contract
    */
   function __ProofOfParticipation_init(
-    address _x2EarnApps,
+    IX2EarnApps _x2EarnApps,
     IXAllocationVotingGovernor _xAllocationVoting,
     address _actionRegistrar,
     address _actionScoreManager,
@@ -88,21 +91,21 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
   }
 
   function __ProofOfParticipation_init_unchained(
-    address _x2EarnApps,
+    IX2EarnApps _x2EarnApps,
     IXAllocationVotingGovernor _xAllocationVoting,
     address _actionRegistrar,
     address _actionScoreManager,
     uint256 _threshold,
     uint256 _roundsForCumulativeScore
   ) internal onlyInitializing {
-    require(_x2EarnApps != address(0), "ProofOfParticipation: x2EarnApps is the zero address");
+    require(address(_x2EarnApps) != address(0), "ProofOfParticipation: x2EarnApps is the zero address");
     require(address(_xAllocationVoting) != address(0), "ProofOfParticipation: xAllocationVoting is the zero address");
     require(_actionRegistrar != address(0), "ProofOfParticipation: actionRegistrar is the zero address");
     require(_actionScoreManager != address(0), "ProofOfParticipation: actionScoreManager is the zero address");
 
     ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
-    $.x2EarnApps = IX2EarnApps(_x2EarnApps);
+    $.x2EarnApps = _x2EarnApps;
     $.xAllocationVoting = _xAllocationVoting;
     $.threshold = _threshold;
     $.roundsForCumulativeScore = _roundsForCumulativeScore;
@@ -140,14 +143,14 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
   function getCumulativeScoreWithDecay(address user, uint256 lastRound) public view virtual returns (uint256) {
     ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
-    require(lastRound > $.roundsForCumulativeScore, "ProofOfParticipation: not enough existing rounds");
+    // Calculate the starting round for the cumulative score. If the last round is less than the rounds for cumulative score, start from the first round
+    uint256 startingRound = lastRound <= $.roundsForCumulativeScore ? 1 : lastRound - $.roundsForCumulativeScore + 1;
 
-    uint256 scalingFactor = 1e18;
     uint256 decayFactor = ((100 - $.decayRate) * scalingFactor) / 100;
 
     // Calculate the cumulative score with exponential decay
     uint256 cumulativeScore = 0;
-    for (uint256 round = lastRound - $.roundsForCumulativeScore + 1; round <= lastRound; round++) {
+    for (uint256 round = startingRound; round <= lastRound; round++) {
       cumulativeScore = $.userRoundScore[user][round] + (cumulativeScore * decayFactor) / scalingFactor;
     }
 

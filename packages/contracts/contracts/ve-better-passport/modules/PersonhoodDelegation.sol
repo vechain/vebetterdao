@@ -20,6 +20,7 @@ import { EIP712Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/cry
 contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPersonhoodDelegation, EIP712Upgradeable {
   // Ethereum addresses are uint160, we can store addresses as uint160 values within the Checkpoints.Trace160
   using Checkpoints for Checkpoints.Trace160;
+  // Extends the bytes32 type to support ECDSA signatures
   using ECDSA for bytes32;
 
   string private constant SIGNING_DOMAIN = "PersonhoodDelegation";

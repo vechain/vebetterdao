@@ -10,6 +10,7 @@ import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGove
 import { PersonhoodDelegation } from "./modules/PersonhoodDelegation.sol";
 import { WhitelistAndBlacklist } from "./modules/WhitelistAndBlacklist.sol";
 import { INodeManagement } from "../interfaces/INodeManagement.sol";
+import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 
 /// @title VeBetterPassport
 /// @notice Contract to manage the VeBetterPassport, a system to determine if a wallet is a person or not
@@ -45,7 +46,7 @@ contract VeBetterPassport is
 
   struct InitializationData {
     IXAllocationVotingGovernor xAllocationVoting;
-    address x2EarnApps;
+    IX2EarnApps x2EarnApps;
     address nodeManagement;
     address upgrader;
     address[] admins;
@@ -67,7 +68,7 @@ contract VeBetterPassport is
   /// @notice Initializes the contract
   function initialize(InitializationData memory data) external initializer {
     require(address(data.xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
-    require(data.x2EarnApps != address(0), "VeBetterPassport: x2EarnApps is the zero address");
+    require(address(data.x2EarnApps) != address(0), "VeBetterPassport: x2EarnApps is the zero address");
     require(data.upgrader != address(0), "VeBetterPassport: upgrader is the zero address");
     require(data.nodeManagement != address(0), "VeBetterPassport: nodeManagement is the zero address");
 
@@ -81,7 +82,7 @@ contract VeBetterPassport is
       data.threshold,
       data.roundsForCumulativeScore
     );
-    __BotSignaling_init(data.blacklisters, data.signalingThreshold);
+    __BotSignaling_init(data.blacklisters, data.signalingThreshold, data.x2EarnApps);
     __PersonhoodDelegation_init();
     __WhitelistAndBlacklist_init(data.whitelisters);
 

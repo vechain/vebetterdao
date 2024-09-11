@@ -128,6 +128,7 @@ abstract contract XAllocationVotingGovernor is
       ? $._veBetterPassport.getDelegatorInTimepoint(msg.sender, _currentRoundSnapshot)
       : _msgSender();
 
+    // Check if the voter or the delegator of personhood to the voter is a person
     require($._veBetterPassport.isPerson(personhoodAddress), "XAllocationVotingGovernor: voter is not a person");
 
     address voter = _msgSender();

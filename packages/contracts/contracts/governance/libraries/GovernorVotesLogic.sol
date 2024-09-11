@@ -219,11 +219,13 @@ library GovernorVotesLogic {
 
     uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(self, proposalId);
 
+    // Only addresses with a valid passport can vote, if the sender is a delegatee, we need to check the delegator address
     bool isDelegatee = self.veBetterPassport.isDelegateeInTimepoint(voter, proposalSnapshot);
     address personhoodAddress = isDelegatee
       ? self.veBetterPassport.getDelegatorInTimepoint(voter, proposalSnapshot)
       : voter;
 
+    // Check if the voter or the delegator of personhood to the voter is a person
     require(self.veBetterPassport.isPerson(personhoodAddress), "GovernorVotesLogic: voter is not a person");
 
     uint256 weight = self.vot3.getPastVotes(voter, proposalSnapshot);

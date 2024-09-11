@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IBotSignaling } from "../interfaces/IBotSignaling.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 
 /// @title BotSignaling
 /// @notice Contract to handle the signaling of users that apps consider as bots or malicious actors.
@@ -15,12 +16,13 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
   // ---------- Storage ------------ //
 
   struct BotSignalingStorage {
+    IX2EarnApps x2EarnApps;
     mapping(address user => uint256) _signaledCounter;
     uint256 signalsThreshold;
     // App signals counter
-    mapping(address signaler => bytes32 app) _appOfSignaler;
-    mapping(bytes32 app => mapping(address user => uint256)) _appSignalsCounter;
-    mapping(bytes32 app => uint256) _appTotalSignalsCounter;
+    mapping(address signaler => bytes32 app) _appOfSignaler; // Mapping of signaler to app
+    mapping(bytes32 app => mapping(address user => uint256)) _appSignalsCounter; // Mapping of apps to signaled users
+    mapping(bytes32 app => uint256) _appTotalSignalsCounter; // Mapping of apps to total signals
   }
 
   // keccak256(abi.encode(uint256(keccak256("storage.BotSignaling")) - 1)) & ~bytes32(uint256(0xff))
@@ -41,18 +43,30 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
   /**
    * @dev Initializes the contract
    */
-  function __BotSignaling_init(address[] memory _signalers, uint256 _threshold) internal onlyInitializing {
-    __BotSignaling_init_unchained(_signalers, _threshold);
+  function __BotSignaling_init(
+    address[] memory _signalers,
+    uint256 _threshold,
+    IX2EarnApps _x2earnApps
+  ) internal onlyInitializing {
+    __BotSignaling_init_unchained(_signalers, _threshold, _x2earnApps);
   }
 
-  function __BotSignaling_init_unchained(address[] memory _signalers, uint256 _threshold) internal onlyInitializing {
+  function __BotSignaling_init_unchained(
+    address[] memory _signalers,
+    uint256 _threshold,
+    IX2EarnApps _x2earnApps
+  ) internal onlyInitializing {
+    require(address(_x2earnApps) != address(0), "BotSignaling: x2EarnApps address cannot be zero");
+
     for (uint256 i; i < _signalers.length; i++) {
       require(_signalers[i] != address(0), "BotSignaling: signaler address cannot be zero");
       _grantRole(SIGNALER_ROLE, _signalers[i]);
     }
 
     BotSignalingStorage storage $ = _getBotSignalingStorage();
+
     $.signalsThreshold = _threshold;
+    $.x2EarnApps = _x2earnApps;
   }
 
   // ---------- Modifiers ------------ //
@@ -117,6 +131,17 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     emit UserSignaled(_user, msg.sender, app, reason);
   }
 
+  /// @notice this method allows an app admin to assign a signaler to an app
+  /// @param _app - the app to assign the signaler to
+  /// @param _user - the signaler to assign to the app
+  function assignSignalerToAppByAppAdmin(bytes32 _app, address _user) external {
+    BotSignalingStorage storage $ = _getBotSignalingStorage();
+
+    require($.x2EarnApps.isAppAdmin(_app, msg.sender), "BotSignaling: caller is not an admin of the app");
+
+    _assignSignalerToApp(_app, _user);
+  }
+
   /// @notice Internal function to assign a signaler to an app
   function _assignSignalerToApp(bytes32 _app, address _user) internal virtual {
     require(_app != bytes32(0), "BotSignaling: app cannot be zero");
@@ -125,6 +150,17 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     BotSignalingStorage storage $ = _getBotSignalingStorage();
     $._appOfSignaler[_user] = _app;
     emit SignalerAssignedToApp(_user, _app);
+  }
+
+  /// @notice this method allows an app admin to remove a signaler from an app
+  /// @param _user - the signaler to remove from the app
+  function removeSignalerFromAppByAppAdmin(address _user) external {
+    BotSignalingStorage storage $ = _getBotSignalingStorage();
+
+    bytes32 app = $._appOfSignaler[_user];
+    require($.x2EarnApps.isAppAdmin(app, msg.sender), "BotSignaling: caller is not an admin of the app");
+
+    _removeSignalerFromApp(_user);
   }
 
   /// @notice Internal function to remove a signaler from an app
