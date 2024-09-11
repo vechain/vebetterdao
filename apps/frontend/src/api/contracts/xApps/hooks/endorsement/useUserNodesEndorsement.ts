@@ -1,84 +1,68 @@
-import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 import { getConfig } from "@repo/config"
-import { NodeManagement__factory } from "@repo/contracts"
+import { X2EarnApps__factory } from "@repo/contracts"
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { abi } from "thor-devkit"
-const NODEMANAGEMENT_CONTRACT = getConfig().nodeManagementContractAddress
-const getNodeIdsFragment = NodeManagement__factory.createInterface().getFunction("getNodeIds").format("json")
-const getNodeLevelsFragment = NodeManagement__factory.createInterface().getFunction("getUsersNodeLevels").format("json")
-const getNodeIdsAbi = new abi.Function(JSON.parse(getNodeIdsFragment))
-const getNodeLevelsAbi = new abi.Function(JSON.parse(getNodeLevelsFragment))
 
-/**
- * UserXNode type for the xNodes owned by a user
- * @property id  the xNode id
- * @property level  the xNode level
- * @property image  the xNode image
- * @property name  the xNode name
- */
-export type UserXNode = {
+const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
+const nodeToEndorsementAppFragment = X2EarnApps__factory.createInterface()
+  .getFunction("nodeToEndorsedApp")
+  .format("json")
+
+const nodeToEndorsementAppFragmentAbi = new abi.Function(JSON.parse(nodeToEndorsementAppFragment))
+
+type NodeEndorsedApp = {
   id: string
-  level: number
-  image: string
-  name: string
+  endorsedApp?: string | null
 }
 
 /**
- * Returns all the available (owned and delegated) xNodes from the NodeManagement contract
+ * Returns a mappaing between node ids and the endorsed apps from the contract
  * @param thor  the thor client
- * @returns  all the available xNodes for an user
+ * @param nodeIds  the node ids to fetch the endorsed apps for
+ * @returns  the endorsed apps for the nodes
  */
-export const getUserXNodes = async (thor: Connex.Thor, user?: string): Promise<UserXNode[]> => {
-  if (!user) throw new Error("User address is required")
-  const clauses = [
-    {
-      to: NODEMANAGEMENT_CONTRACT,
-      value: 0,
-      data: getNodeIdsAbi.encode(user),
-    },
-    {
-      to: NODEMANAGEMENT_CONTRACT,
-      value: 0,
-      data: getNodeLevelsAbi.encode(user),
-    },
-  ]
+export const getNodesEndorsedApps = async (thor: Connex.Thor, nodeIds: string[]): Promise<NodeEndorsedApp[]> => {
+  console.log("nodeIds", nodeIds)
+  const clauses = nodeIds.map(nodeId => ({
+    to: X2EARNAPPS_CONTRACT,
+    value: 0,
+    data: nodeToEndorsementAppFragmentAbi.encode(nodeId),
+  }))
 
   const res = await thor.explain(clauses).execute()
 
   const error = res.find(r => r.reverted)?.revertReason
 
-  if (error) throw new Error(error ?? "Error fetching xApps")
+  if (error) throw new Error(error ?? "Error fetching endorsed apps")
 
-  if (!res[0] || !res[1]) throw new Error("Error fetching xNodes - Data is missing")
-  let nodeIds: string[] = getNodeIdsAbi.decode(res[0]?.data)[0]
-  let levels: string[] = getNodeLevelsAbi.decode(res[1]?.data)[0]
+  if (res.length !== nodeIds.length) throw new Error("Error fetching endorsed apps")
 
-  if (nodeIds.length !== levels.length) throw new Error("Error fetching xNodes - Data is corrupted")
+  return res.map((r, index) => {
+    let decoded = nodeToEndorsementAppFragmentAbi.decode(r.data)[0]
+    // if not endorsed app, address is 0x0
+    if (decoded === "0x0000000000000000000000000000000000000000000000000000000000000000") decoded = null
 
-  return nodeIds.map((id, index) => {
     return {
-      id,
-      level: Number(levels[index]),
-      image: NodeStrengthLevelToImage[Number(levels[index])] as string,
-      name: allNodeStrengthLevelToName[Number(levels[index])] as string,
+      id: nodeIds[index] as string,
+      endorsedApp: decoded as string | null,
     }
   })
 }
 
-export const getUserXNodesQueryKey = (user?: string) => ["XNodes", user]
+export const getNodesEndorsedAppsQueryKey = (nodeIds: string[]) => ["XNodes", ...nodeIds, "ENDORSED_APPS"]
 
 /**
  *  Hook to get the owned or delegated xNodes for a user from the NodeManagement contract
  * @param user  the user address
  * @returns  the xNodes for the user
  */
-export const useUserXNodes = (user?: string) => {
+export const useNodesEndorsedApps = (nodeIds: string[]) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getUserXNodesQueryKey(user),
-    queryFn: async () => await getUserXNodes(thor, user),
-    enabled: !!thor && !!user,
+    queryKey: getNodesEndorsedAppsQueryKey(nodeIds),
+    queryFn: async () => await getNodesEndorsedApps(thor, nodeIds),
+    enabled: !!thor,
   })
 }

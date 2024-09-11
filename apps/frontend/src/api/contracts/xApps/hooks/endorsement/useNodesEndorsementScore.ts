@@ -10,13 +10,6 @@ const getNodeScoreFragment = X2EarnApps__factory.createInterface()
   .format("json")
 const getNodeScoreAbi = new abi.Function(JSON.parse(getNodeScoreFragment))
 
-/**
- * UserXNode type for the xNodes owned by a user
- * @property id  the xNode id
- * @property level  the xNode level
- * @property image  the xNode image
- * @property name  the xNode name
- */
 export type NodeEndorsementScore = Record<number, number>
 
 /**
@@ -41,12 +34,13 @@ export const getNodesEndorsementScore = async (thor: Connex.Thor): Promise<NodeE
 
   if (error) throw new Error(error ?? "Error fetching nods endorsement score")
 
-  if (!res[0]) throw new Error("Error fetching nods endorsement score")
-  const endorsementScore: string[] = getNodeScoreAbi.decode(res[0]?.data)[0]
+  if (res.length !== nodeStrengthLevelArray.length) throw new Error("Error fetching nodes endorsement score")
 
   const levelToScore: NodeEndorsementScore = {}
-  nodeStrengthLevelArray.forEach((level, index) => {
-    levelToScore[level] = Number(endorsementScore[index])
+  res.forEach((score, index) => {
+    const decoded = getNodeScoreAbi.decode(score.data)[0]
+    const level = nodeStrengthLevelArray[index] as number
+    levelToScore[level] = Number(decoded)
   })
 
   return levelToScore
@@ -59,7 +53,7 @@ export const getNodesEndorsementScoreQueryKey = () => ["XNodes", "ENDORSEMENT_SC
  * @returns an object with the endorsement score for each node level
  *
  */
-export const useNodesLevelsEndorsementScore = () => {
+export const useNodesEndorsementScore = () => {
   const { thor } = useConnex()
 
   return useQuery({

@@ -1,4 +1,6 @@
 {
+  "As {{nodeType}} holder, you have {{value}} available points to endorse Apps": "As {{nodeType}} holder, you have {{value}} available points to endorse Apps",
+  "Help a project to reach {{value}} points and join the next allocations to get funding.": "Help a project to reach {{value}} points and join the next allocations to get funding.",
   "Endorsement score": "Endorsement score",
   "Endorse app": "Endorse app",
   "Current endorsement score": "Current endorsement score",
