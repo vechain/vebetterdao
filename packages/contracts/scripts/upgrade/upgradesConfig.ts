@@ -28,10 +28,11 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
     },
   },
   X2EarnRewardsPool: {
-    name: "x2earn-rewards-pool",
-    versions: ["v2"],
+    name: "x2-earn-rewards-pool",
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Add onchain impacts and proof generation",
+      v3: "Update X2Earn interface to include new endorsement feature",
     },
   },
   X2EarnApps: {
