@@ -48,7 +48,7 @@ export const EndorsementPointsBanner = () => {
           <Heading fontSize={"16px"} fontWeight={700} color="white">
             {t("As {{nodeType}} holder, you have {{value}} available points to endorse Apps", {
               nodeType,
-              availablePoints,
+              value: availablePoints,
             })}
           </Heading>
         </Skeleton>

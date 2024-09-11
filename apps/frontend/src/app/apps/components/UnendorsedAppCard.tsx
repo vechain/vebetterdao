@@ -68,7 +68,11 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
           h="full"
           justify={"space-between"}>
           <VStack spacing={4} align="flex-start" flex={5} my={[0, 0, 4]}>
-            <Stack direction={["column", "column", "row"]} spacing={8} align={["flex-start", "flex-start", "center"]}>
+            <Stack
+              w="full"
+              direction={["column", "column", "row"]}
+              spacing={4}
+              align={["flex-start", "flex-start", "center"]}>
               <HStack w={["full", "full", "auto"]} align="flex-start" justify={"space-between"}>
                 <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
                   <Image src={logo?.image ?? notFoundImage} alt={"logo"} h={"72px"} w="full" borderRadius="9px" />
