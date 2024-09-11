@@ -49,4 +49,11 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v2: "Update X2Earn interface to include new endorsement feature",
     },
   },
+  GalaxyMember: {
+    name: "galaxy-member",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Vechain Nodes x GM upgrades feature",
+    },
+  },
 } as const
