@@ -10,6 +10,7 @@ import path from "path"
  * @param {string} version - The version to append to the contract/interface names (e.g., "1" for V1).
  * @param {string[]} contractsWhitelist - Array of contract names to skip from renaming (without file extensions, e.g., ["B3TR"]).
  * @param {string[]} interfacesWhitelist - Array of interface names to skip from renaming (without file extensions, e.g., ["IERC6372"]).
+ * @param {string[]} usagesToUpdate - Array of contract/interface names that should be updated in the codebase (e.g., ["IVoterRewards"]) even if they are not renamed through imports.
  *
  * @throws Will throw an error if the directory does not exist or if a file read/write fails.
  */
@@ -18,6 +19,7 @@ export async function renameContractsAndInterfaces(
   version: string,
   contractsWhitelist: string[],
   interfacesWhitelist: string[],
+  usagesToUpdate: string[],
 ): Promise<void> {
   try {
     const contractsPath = path.join(__dirname, "..", "contracts", directoryPath)
@@ -47,8 +49,11 @@ export async function renameContractsAndInterfaces(
             // Define the new file name with version
             const newName = file.replace(".sol", `V${version}.sol`)
 
-            // Gather import names to update occurrences
-            const importRenames: { originalName: string; newName: string }[] = []
+            // Gather import names to update occurrences starting with the usages to update
+            const importRenames: { originalName: string; newName: string }[] = usagesToUpdate.map(name => ({
+              originalName: name,
+              newName: `${name}V${version}`,
+            }))
 
             // Update imports (ignore imports starting with '@')
             content = content.replace(
@@ -163,7 +168,9 @@ async function run(): Promise<void> {
 
   const interfacesWhitelist: string[] = ["IERC6372", "Checkpoints"]
 
-  await renameContractsAndInterfaces(directoryPath, version, contractsWhitelist, interfacesWhitelist)
+  const usagesToUpdate: string[] = ["IVoterRewards", "IEmissions", "IX2EarnApps"]
+
+  await renameContractsAndInterfaces(directoryPath, version, contractsWhitelist, interfacesWhitelist, usagesToUpdate)
 }
 
 run()
