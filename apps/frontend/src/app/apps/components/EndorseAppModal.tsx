@@ -30,7 +30,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
   console.log({ nodeId })
 
-  //TODO: Get the nodeId
+  //TODO: Multiple nodes
   const endorseAppMutation = useEndorseApp({
     appId: xApp.id,
     nodeId,
@@ -99,12 +99,16 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 <Text>{"TODO: Node Name"}</Text>
                 <Text color={"#6A6A6A"}>{t("Your node")}</Text>
               </Box>
-              <Heading size="lg">
-                {t("{{first}} of {{second}}", {
-                  first: userEndorsementScore.data,
-                  second: endorsementScoreThreshold.data,
-                })}
-              </Heading>
+              <HStack spacing={1} align={"flex-end"}>
+                <Heading fontSize={"36px"} fontWeight={700} color={"#F29B32"} lineHeight={"36px"}>
+                  {endorsementScore.data}
+                </Heading>
+                <Text fontSize={"14px"} color={"#6A6A6A"} fontWeight={400} lineHeight={"24px"}>
+                  {t("of {{value}}", {
+                    value: endorsementScoreThreshold.data,
+                  })}
+                </Text>
+              </HStack>
             </HStack>
             <HStack
               spacing={3}

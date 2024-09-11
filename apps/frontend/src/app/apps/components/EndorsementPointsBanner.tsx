@@ -19,7 +19,7 @@ export const EndorsementPointsBanner = () => {
 
     const availableNodes = userXNodes.data?.filter((_node, index) => !endorsedApps.data[index]?.endorsedApp)
     return availableNodes?.reduce((acc, node) => acc + Number(nodesEndorsementScore.data[Number(node.id)]), 0) ?? 0
-  }, [nodesEndorsementScore.data, endorsedApps.data])
+  }, [nodesEndorsementScore.data, endorsedApps.data, userXNodes.data])
 
   //TODO: SUpport multiple nodes
   const nodeToDisplay = userXNodes.data?.[0]

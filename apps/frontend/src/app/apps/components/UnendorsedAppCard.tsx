@@ -49,7 +49,7 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
 
   const onCardClick = useCallback(() => {
     router.push(`/apps/${xApp.id}`)
-  }, [router])
+  }, [router, xApp.id])
 
   return (
     <Card

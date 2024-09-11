@@ -1,11 +1,10 @@
 import { useXApps } from "@/api"
-import { HStack, VStack, Grid, Spinner, Button, useDisclosure, Text, Skeleton, Box, Heading } from "@chakra-ui/react"
+import { HStack, VStack, Grid, Spinner, Button, useDisclosure, Text, Skeleton, Heading } from "@chakra-ui/react"
 import { AppCard } from "./AppCard"
 import { AddNewAppCard } from "./AddNewAppCard"
 import { useTranslation } from "react-i18next"
 import { useMemo } from "react"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
 
 export const AppsPageContent = () => {

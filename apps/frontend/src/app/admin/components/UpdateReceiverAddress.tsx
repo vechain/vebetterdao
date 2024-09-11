@@ -59,12 +59,13 @@ export const UpdateReceiverAddress = () => {
     onClose()
   }, [resetStatus, onClose])
 
+  const allApps = useMemo(() => [...(xApps?.active ?? []), ...(xApps?.unendorsed ?? [])], [xApps])
+
   const currentAddress = useMemo(() => {
     if (appId === undefined) return ""
-
-    const app = xApps?.find(item => item.id === appId)
+    const app = allApps.find(item => item.id === appId)
     return app?.teamWalletAddress
-  }, [appId, xApps])
+  }, [appId, allApps])
 
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(newAddress)
@@ -95,7 +96,7 @@ export const UpdateReceiverAddress = () => {
                     isDisabled={isLoading}
                     onChange={e => setAppId(e.target.value)}
                     value={appId}>
-                    {xApps?.map(item => {
+                    {allApps?.map(item => {
                       return (
                         <option key={"Select" + item.name} value={item.id}>
                           {item.name}
