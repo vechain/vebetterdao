@@ -1,7 +1,7 @@
 import { useAppEndorsementScore, useEndorsementScoreThreshold } from "@/api"
 import { VeBetterIcon } from "@/components"
-import { Box, Button, Card, CardBody, CardHeader, Divider, Heading, Stack, Text } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
+import { Box, Button, Card, CardBody, CardHeader, Divider, Heading, Link, Stack, Text } from "@chakra-ui/react"
+import { Trans, useTranslation } from "react-i18next"
 
 type Props = {
   appId: string | undefined
@@ -14,21 +14,31 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
   const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
 
   return (
-    <Card h="full" w="100%" borderRadius="12px" boxShadow="0px 0px 7.9px 0px #F29B3280">
-      <CardHeader>
+    <Card
+      h="full"
+      w="100%"
+      p="24px"
+      gap="24px"
+      border="1px"
+      borderColor="#FFE4C3"
+      borderRadius="12px"
+      boxShadow="0px 0px 7.9px 0px #F29B3280">
+      <CardHeader p={0}>
         <Heading fontSize="24px" fontWeight="bold">
           {t("Endorsement")}
         </Heading>
-        <Text pt={2} color="gray.600">
-          {t("A dApp has to reach <strong> {{value}} endorsement points</strong> to join allocations.", {
-            value: endorsementScoreThreshold,
-          })}
-          <Text as="span" color="blue.500" cursor="pointer">
+        <Text pt={3} fontSize="14px" color="#6A6A6A">
+          <Trans
+            i18nKey="A dApp has to reach {{value}} endorsement points to join allocations."
+            values={{ value: endorsementScoreThreshold }}
+            t={t}
+          />
+          <Link pl={0.5} color="#004CFC">
             {t("Know more")}
-          </Text>
+          </Link>
         </Text>
       </CardHeader>
-      <CardBody>
+      <CardBody p={0}>
         <Stack spacing={5} w="full">
           <Box>
             <Text fontSize="lg">{t("Current score")}</Text>
