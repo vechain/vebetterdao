@@ -6,7 +6,7 @@ import {
   useXAppMetadata,
 } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
+import { NEW_APP_MAX_DAYS, notFoundImage } from "@/constants"
 import {
   Box,
   Card,
@@ -44,6 +44,8 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
   const endorsers = useAppEndorsers(xApp.id)
   const endorsementScore = useAppEndorsementScore(xApp.id)
   const endorsementScoreThreshold = useEndorsementScoreThreshold()
+
+  const isAppNew = dayjs.unix(xApp.createdAtTimestamp).add(NEW_APP_MAX_DAYS, "days").isAfter(dayjs())
 
   const onCardClick = useCallback(() => {
     router.push(`/apps/${xApp.id}`)
@@ -89,19 +91,21 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
                       {t("Looking for support")}
                     </Text>
                   </HStack>
-                  <HStack
-                    bg="#B1F16C"
-                    borderRadius={"12px"}
-                    color={"#3B3B3B"}
-                    fontWeight={600}
-                    py="4px"
-                    px={"10px"}
-                    spacing={"4px"}>
-                    <Icon as={UilStar} boxSize={"14px"} color={"#3B3B3B"} />
-                    <Text fontSize={"14px"} fontWeight={600}>
-                      {t("New")}
-                    </Text>
-                  </HStack>
+                  {isAppNew && (
+                    <HStack
+                      bg="#B1F16C"
+                      borderRadius={"12px"}
+                      color={"#3B3B3B"}
+                      fontWeight={600}
+                      py="4px"
+                      px={"10px"}
+                      spacing={"4px"}>
+                      <Icon as={UilStar} boxSize={"14px"} color={"#3B3B3B"} />
+                      <Text fontSize={"14px"} fontWeight={600}>
+                        {t("New")}
+                      </Text>
+                    </HStack>
+                  )}
                 </HStack>
                 <Box>
                   <Skeleton isLoaded={!appMetadataLoading}>
