@@ -15,9 +15,10 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   },
   B3TRGovernor: {
     name: "b3tr-governor",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Give ability to contract admins to can call governance only functions",
+      v3: "Vechain Nodes x GM upgrades feature",
     },
   },
   XAllocationVoting: {
