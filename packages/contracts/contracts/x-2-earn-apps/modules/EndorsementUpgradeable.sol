@@ -411,9 +411,6 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param appId The unique identifier of the app that wishes to be removed.
    */
   function _removeXAppSubmission(bytes32 appId) internal virtual {
-    // Get the endorsement storage
-    EndorsementStorage storage $ = _getEndorsementStorage();
-
     // Check if the app has been submitted
     if (!_appSubmitted(appId)) {
       revert X2EarnNonexistentApp(appId);
