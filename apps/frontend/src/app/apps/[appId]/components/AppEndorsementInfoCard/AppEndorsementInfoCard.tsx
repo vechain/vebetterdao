@@ -1,14 +1,18 @@
+import { useAppEndorsementScore, useEndorsementScoreThreshold } from "@/api"
 import { VeBetterIcon } from "@/components"
 import { Box, Button, Card, CardBody, CardHeader, Divider, Heading, Stack, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
-type AppEndorsementInfoCardProps = {
-  endorsementThreshold: number
-  currentScore: number
+type Props = {
+  appId: string | undefined
 }
 
-export const AppEndorsementInfoCard = ({ endorsementThreshold, currentScore }: AppEndorsementInfoCardProps) => {
+export const AppEndorsementInfoCard = ({ appId }: Props) => {
   const { t } = useTranslation()
+
+  const { data: appEndorsementScore } = useAppEndorsementScore(appId ?? "")
+  const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
+
   return (
     <Card h="full" w="100%" borderRadius="12px" boxShadow="0px 0px 7.9px 0px #F29B3280">
       <CardHeader>
@@ -17,7 +21,7 @@ export const AppEndorsementInfoCard = ({ endorsementThreshold, currentScore }: A
         </Heading>
         <Text pt={2} color="gray.600">
           {t("A dApp has to reach <strong> {{value}} endorsement points</strong> to join allocations.", {
-            value: endorsementThreshold,
+            value: endorsementScoreThreshold,
           })}
           <Text as="span" color="blue.500" cursor="pointer">
             {t("Know more")}
@@ -30,10 +34,10 @@ export const AppEndorsementInfoCard = ({ endorsementThreshold, currentScore }: A
             <Text fontSize="lg">{t("Current score")}</Text>
             <Box display="flex" alignItems="center">
               <Text fontSize="4xl" mb={2} fontWeight="bold" color="orange.400">
-                {currentScore}
+                {appEndorsementScore}
               </Text>
               <Text fontSize="lg" color="gray.600" ml={1}>
-                {t("of {{value}}", { value: endorsementThreshold })}
+                {t("of {{value}}", { value: endorsementScoreThreshold })}
               </Text>
             </Box>
           </Box>
