@@ -19,14 +19,17 @@ async function main() {
 
   // Check if the node management contract is deployed
   if (!config.nodeManagementContractAddress) {
-    throw new Error("NodeManagement contract not deployed, please deploy it first")
+    console.log("NodeManagement contract not deployed, please deploy it first")
+    process.exit(1)
   }
 
   const nodeManagementContract = await ethers.getContractAt("NodeManagement", config.nodeManagementContractAddress)
   try {
     await nodeManagementContract.version()
   } catch (e) {
-    throw new Error("NodeManagement contract is not deployed")
+    console.log("NodeManagement contract is not deployed")
+    console.log("Please deploy the NodeManagement contract first")
+    process.exit(1)
   }
 
   const x2EarnAppsV2 = (await upgradeProxy(
