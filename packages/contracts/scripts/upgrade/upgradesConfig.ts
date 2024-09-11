@@ -27,4 +27,11 @@ export const upgradeConfig = {
       v2: "Add onchain impacts and proof generation",
     },
   },
+  "X2Earn Apps": {
+    name: "x2-earn-apps",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Add xapp endorsment module",
+    },
+  },
 } as const
