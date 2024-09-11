@@ -67,7 +67,7 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
           w={"full"}
           h="full"
           justify={"space-between"}>
-          <VStack spacing={4} align="flex-start" flex={5}>
+          <VStack spacing={4} align="flex-start" flex={5} my={[0, 0, 4]}>
             <Stack direction={["column", "column", "row"]} spacing={8} align={["flex-start", "flex-start", "center"]}>
               <HStack w={["full", "full", "auto"]} align="flex-start" justify={"space-between"}>
                 <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
@@ -80,8 +80,8 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
               <Stack direction={["column-reverse", "column-reverse", "column"]} spacing={2} align="flex-start">
                 <HStack spacing={3} align="center">
                   <HStack color="#F29B32" bg="#FFF3E5" borderRadius={"12px"} py="4px" px={"10px"} spacing={"4px"}>
-                    <Icon as={UilStar} boxSize={"16px"} />
-                    <Text fontSize={"16px"} fontWeight={600}>
+                    <Icon as={UilStar} boxSize={"14px"} />
+                    <Text fontSize={"14px"} fontWeight={600}>
                       {t("Looking for support")}
                     </Text>
                   </HStack>
@@ -93,8 +93,8 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
                     py="4px"
                     px={"10px"}
                     spacing={"4px"}>
-                    <Icon as={UilStar} boxSize={"16px"} color={"#3B3B3B"} />
-                    <Text fontSize={"16px"} fontWeight={600}>
+                    <Icon as={UilStar} boxSize={"14px"} color={"#3B3B3B"} />
+                    <Text fontSize={"14px"} fontWeight={600}>
                       {t("New")}
                     </Text>
                   </HStack>
@@ -125,7 +125,13 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
           <Show below="md">
             <Divider orientation="horizontal" h="full" />
           </Show>
-          <Stack direction={["row", "row", "column"]} flex={1} spacing={3} align="flex-start" justify={"space-between"}>
+          <Stack
+            direction={["row", "row", "column"]}
+            flex={1}
+            spacing={3}
+            align="flex-start"
+            justify={"space-between"}
+            my={[0, 0, 4]}>
             <VStack spacing={1} align="flex-start" w="full">
               <HStack spacing={1} align={"flex-end"}>
                 <Heading fontSize={"36px"} fontWeight={700} color={"#F29B32"} lineHeight={"36px"}>
