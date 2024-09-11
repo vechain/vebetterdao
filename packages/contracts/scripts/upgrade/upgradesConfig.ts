@@ -7,9 +7,10 @@ export interface UpgradeContract {
 export const upgradeConfig: Record<string, UpgradeContract> = {
   VoterRewards: {
     name: "voter-rewards",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Add the ability to toggle quadratic rewarding on and off.",
+      v3: "Vechain Nodes x GM upgrades feature",
     },
   },
   B3TRGovernor: {
