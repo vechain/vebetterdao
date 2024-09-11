@@ -113,6 +113,8 @@ export function createSoloStagingConfig() {
     MIGRATION_ADDRESS: "0x865306084235Bf804c8Bba8a8d56890940ca8F0b", // 10th account from mnemonic of solo network
     MIGRATION_AMOUNT: BigInt("3750000000000000000000000"), // 3.75 million B3TR tokens from pilot show
 
+    VECHAIN_NODES_CONTRACT_ADDRESS: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302", // The contract address of the VeChainNodes contract on mainnet
+
     // X 2 Earn Rewards Pool
     X_2_EARN_INITIAL_IMPACT_KEYS: [
       "carbon",

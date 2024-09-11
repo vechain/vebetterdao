@@ -45,6 +45,8 @@ export type ContractsConfig = {
   MIGRATION_ADDRESS: string
   MIGRATION_AMOUNT: bigint
 
+  VECHAIN_NODES_CONTRACT_ADDRESS: string
+
   // X 2 Earn Rewards Pool
   X_2_EARN_INITIAL_IMPACT_KEYS: string[]
 }
