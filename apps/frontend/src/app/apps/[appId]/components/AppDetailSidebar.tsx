@@ -1,4 +1,4 @@
-import { useIsAppAdmin, useIsAppModerator, useIsAppUnendorsed } from "@/api"
+import { useAppExists, useIsAppAdmin, useIsAppModerator, useIsAppUnendorsed } from "@/api"
 import { Stack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCurrentAppInfo } from "../hooks/useCurrentAppInfo"
@@ -8,14 +8,19 @@ import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementI
 export const AppDetailsSidebar = () => {
   const { app } = useCurrentAppInfo()
   const { account } = useWallet()
-  const { data: isAppUnendorsed } = useIsAppUnendorsed(app?.id ?? "")
+
+  // Conditional rendering based on user role
   const { data: isAppModerator } = useIsAppModerator(app?.id ?? "", account ?? "")
   const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account ?? "")
+
+  // Conditional rendering based on xApp state
+  const { data: appExists } = useAppExists(app?.id ?? "")
+  const { data: isAppUnendorsed } = useIsAppUnendorsed(app?.id ?? "")
 
   return (
     (isAppModerator || isAppAdmin) && (
       <Stack spacing={8} direction={"column"} flex={1.5}>
-        <AppBalanceCard />
+        {appExists && <AppBalanceCard />}
         {isAppUnendorsed && <AppEndorsementInfoCard appId={app?.id} />}
       </Stack>
     )
