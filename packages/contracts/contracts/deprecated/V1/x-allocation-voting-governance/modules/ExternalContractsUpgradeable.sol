@@ -26,7 +26,7 @@ pragma solidity 0.8.20;
 import { XAllocationVotingGovernor } from "../XAllocationVotingGovernor.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { IEmissions } from "../../../../interfaces/IEmissions.sol";
-import { IX2EarnAppsV1 } from "../../interfaces/IX2EarnAppsV1.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IVoterRewards } from "../../../../interfaces/IVoterRewards.sol";
 
 /**
@@ -36,7 +36,7 @@ import { IVoterRewards } from "../../../../interfaces/IVoterRewards.sol";
 abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVotingGovernor {
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.ExternalContracts
   struct ExternalContractsStorage {
-    IX2EarnAppsV1 _x2EarnApps;
+    IX2EarnApps _x2EarnApps;
     IEmissions _emissions;
     IVoterRewards _voterRewards;
   }
@@ -65,7 +65,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
    * @param initialVoterRewards The initial VoterRewards contract address
    */
   function __ExternalContracts_init(
-    IX2EarnAppsV1 initialX2EarnApps,
+    IX2EarnApps initialX2EarnApps,
     IEmissions initialEmissions,
     IVoterRewards initialVoterRewards
   ) internal onlyInitializing {
@@ -73,7 +73,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
   }
 
   function __ExternalContracts_init_unchained(
-    IX2EarnAppsV1 initialX2EarnApps,
+    IX2EarnApps initialX2EarnApps,
     IEmissions initialEmissions,
     IVoterRewards initialVoterRewards
   ) internal onlyInitializing {
@@ -87,7 +87,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
   /**
    * @dev The X2EarnApps contract.
    */
-  function x2EarnApps() public view override returns (IX2EarnAppsV1) {
+  function x2EarnApps() public view override returns (IX2EarnApps) {
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
     return $._x2EarnApps;
   }
@@ -129,7 +129,7 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
    *
    * Emits a {X2EarnAppsSet} event
    */
-  function _setX2EarnApps(IX2EarnAppsV1 newX2EarnApps) internal virtual {
+  function _setX2EarnApps(IX2EarnApps newX2EarnApps) internal virtual {
     require(address(newX2EarnApps) != address(0), "XAllocationVotingGovernor: new X2EarnApps is the zero address");
 
     ExternalContractsStorage storage $ = _getExternalContractsStorage();

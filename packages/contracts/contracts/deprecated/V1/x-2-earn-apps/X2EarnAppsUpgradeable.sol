@@ -24,7 +24,7 @@
 pragma solidity 0.8.20;
 
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
-import { IX2EarnAppsV1 } from "../interfaces/IX2EarnAppsV1.sol";
+import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsDataTypes } from "../../../libraries/X2EarnAppsDataTypes.sol";
 
@@ -38,7 +38,7 @@ import { X2EarnAppsDataTypes } from "../../../libraries/X2EarnAppsDataTypes.sol"
  * - a module to handle the administration of the app (handle moderators, admin, metadata, team address and percentage)
  * - a module to handle the settings of the contract
  */
-abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnAppsV1 {
+abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @dev Initializes the contract
    */
@@ -84,7 +84,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnAppsV1 {
   }
 
   /**
-   * @dev See {IX2EarnAppsV1-hashAppName}.
+   * @dev See {IX2EarnApps-hashAppName}.
    */
   function hashAppName(string memory appName) public pure returns (bytes32) {
     return keccak256(abi.encodePacked(appName));
@@ -93,27 +93,27 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnAppsV1 {
   // --- To be implemented by the inheriting contract --- //
 
   /**
-   * @inheritdoc IX2EarnAppsV1
+   * @inheritdoc IX2EarnApps
    */
   function appExists(bytes32 appId) public view virtual returns (bool);
 
   /**
-   * @inheritdoc IX2EarnAppsV1
+   * @inheritdoc IX2EarnApps
    */
   function baseURI() public view virtual returns (string memory);
 
   /**
-   * @inheritdoc IX2EarnAppsV1
+   * @inheritdoc IX2EarnApps
    */
   function teamWalletAddress(bytes32 appId) public view virtual returns (address);
 
   /**
-   * @dev See {IX2EarnAppsV1-appAdmin}
+   * @dev See {IX2EarnApps-appAdmin}
    */
   function appAdmin(bytes32 appId) public view virtual returns (address);
 
   /**
-   * @dev See {IX2EarnAppsV1-teamAllocationPercentage}
+   * @dev See {IX2EarnApps-teamAllocationPercentage}
    */
   function teamAllocationPercentage(bytes32 appId) public view virtual returns (uint256);
 

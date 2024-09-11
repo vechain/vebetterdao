@@ -34,7 +34,7 @@ import { IEmissions } from "../../interfaces/IEmissions.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IB3TR } from "../../interfaces/IB3TR.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { IX2EarnAppsV1 } from "./interfaces/IX2EarnAppsV1.sol";
+import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
 
 /**
@@ -58,7 +58,7 @@ contract XAllocationPoolV1 is IXAllocationPool, AccessControlUpgradeable, Reentr
     IEmissions _emissions;
     IB3TR b3tr;
     ITreasury treasury;
-    IX2EarnAppsV1 x2EarnApps;
+    IX2EarnApps x2EarnApps;
     IX2EarnRewardsPool x2EarnRewardsPool;
     mapping(bytes32 appId => mapping(uint256 => bool)) claimedRewards; // Mapping to store the claimed rewards for each app in each round
   }
@@ -110,7 +110,7 @@ contract XAllocationPoolV1 is IXAllocationPool, AccessControlUpgradeable, Reentr
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     $.b3tr = IB3TR(_b3trAddress);
     $.treasury = ITreasury(_treasury);
-    $.x2EarnApps = IX2EarnAppsV1(_x2EarnApps);
+    $.x2EarnApps = IX2EarnApps(_x2EarnApps);
     $.x2EarnRewardsPool = IX2EarnRewardsPool(_x2EarnRewardsPool);
 
     require(_admin != address(0), "XAllocationPool: new admin is the zero address");
@@ -177,7 +177,7 @@ contract XAllocationPoolV1 is IXAllocationPool, AccessControlUpgradeable, Reentr
     require(x2EarnApps_ != address(0), "XAllocationPool: new x2EarnApps is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    $.x2EarnApps = IX2EarnAppsV1(x2EarnApps_);
+    $.x2EarnApps = IX2EarnApps(x2EarnApps_);
 
     emit X2EarnAppsContractSet(address($.x2EarnApps), x2EarnApps_);
   }
@@ -561,7 +561,7 @@ contract XAllocationPoolV1 is IXAllocationPool, AccessControlUpgradeable, Reentr
   /**
    * @dev Returns the x2EarnApp contract.
    */
-  function x2EarnApps() external view returns (IX2EarnAppsV1) {
+  function x2EarnApps() external view returns (IX2EarnApps) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $.x2EarnApps;
   }
