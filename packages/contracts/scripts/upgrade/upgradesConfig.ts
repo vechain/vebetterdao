@@ -34,4 +34,11 @@ export const upgradeConfig = {
       v2: "Add xapp endorsment module",
     },
   },
+  "XAllocation Pool": {
+    name: "x-allocation-pool",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Update X2Earn interface to include new endorsement feature",
+    },
+  },
 } as const
