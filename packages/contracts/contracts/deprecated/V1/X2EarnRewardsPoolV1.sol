@@ -26,14 +26,14 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IB3TR } from "../../interfaces/IB3TR.sol";
-import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
+import { IB3TRV1 } from "./interfaces/IB3TRV1.sol";
+import { IX2EarnAppsV1 } from "./interfaces/IX2EarnAppsV1.sol";
 import { IX2EarnRewardsPoolV1 } from "./interfaces/IX2EarnRewardsPoolV1.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 /**
- * @title X2EarnRewardsPool
+ * @title X2EarnRewardsPoolV1
  * @dev This contract is used by x2Earn apps to reward users that performed sustainable actions.
  * The XAllocationPool contract or other contracts/users can deposit funds into this contract by specifying the app
  * that can access the funds.
@@ -58,8 +58,8 @@ contract X2EarnRewardsPoolV1 is
 
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnRewardsPool
   struct X2EarnRewardsPoolStorage {
-    IB3TR b3tr;
-    IX2EarnApps x2EarnApps;
+    IB3TRV1 b3tr;
+    IX2EarnAppsV1 x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
   }
 
@@ -77,14 +77,14 @@ contract X2EarnRewardsPoolV1 is
     address _admin,
     address _contractsManagerAdmin,
     address _upgrader,
-    IB3TR _b3tr,
-    IX2EarnApps _x2EarnApps
+    IB3TRV1 _b3tr,
+    IX2EarnAppsV1 _x2EarnApps
   ) external initializer {
-    require(_admin != address(0), "X2EarnRewardsPool: admin is the zero address");
-    require(_contractsManagerAdmin != address(0), "X2EarnRewardsPool: contracts manager admin is the zero address");
-    require(_upgrader != address(0), "X2EarnRewardsPool: upgrader is the zero address");
-    require(address(_b3tr) != address(0), "X2EarnRewardsPool: b3tr is the zero address");
-    require(address(_x2EarnApps) != address(0), "X2EarnRewardsPool: x2EarnApps is the zero address");
+    require(_admin != address(0), "X2EarnRewardsPoolV1: admin is the zero address");
+    require(_contractsManagerAdmin != address(0), "X2EarnRewardsPoolV1: contracts manager admin is the zero address");
+    require(_upgrader != address(0), "X2EarnRewardsPoolV1: upgrader is the zero address");
+    require(address(_b3tr) != address(0), "X2EarnRewardsPoolV1: b3tr is the zero address");
+    require(address(_x2EarnApps) != address(0), "X2EarnRewardsPoolV1: x2EarnApps is the zero address");
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
@@ -106,19 +106,19 @@ contract X2EarnRewardsPoolV1 is
   // ---------- Setters ---------- //
 
   /**
-   * @dev See {IX2EarnRewardsPool-deposit}
+   * @dev See {IX2EarnRewardsPoolV1-deposit}
    */
   function deposit(uint256 amount, bytes32 appId) external returns (bool) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     // check that app exists
-    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
+    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPoolV1: app does not exist");
 
     // increase available amount for the app
     $.availableFunds[appId] += amount;
 
     // transfer tokens to this contract
-    require($.b3tr.transferFrom(msg.sender, address(this), amount), "X2EarnRewardsPool: deposit transfer failed");
+    require($.b3tr.transferFrom(msg.sender, address(this), amount), "X2EarnRewardsPoolV1: deposit transfer failed");
 
     emit NewDeposit(amount, appId, msg.sender);
 
@@ -126,36 +126,36 @@ contract X2EarnRewardsPoolV1 is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-withdraw}
+   * @dev See {IX2EarnRewardsPoolV1-withdraw}
    */
   function withdraw(uint256 amount, bytes32 appId, string memory reason) external nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
-    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
+    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPoolV1: app does not exist");
 
     require(
       $.x2EarnApps.isAppAdmin(appId, msg.sender) || $.x2EarnApps.isRewardDistributor(appId, msg.sender),
-      "X2EarnRewardsPool: not an app admin nor a reward distributor"
+      "X2EarnRewardsPoolV1: not an app admin nor a reward distributor"
     );
 
     // check if the app has enough available funds to withdraw
-    require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
+    require($.availableFunds[appId] >= amount, "X2EarnRewardsPoolV1: app has insufficient funds");
 
     // check if the contract has enough funds
-    require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
+    require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPoolV1: insufficient funds on contract");
 
     // Get the team wallet address
     address teamWalletAddress = $.x2EarnApps.teamWalletAddress(appId);
 
     // transfer the rewards to the team wallet
     $.availableFunds[appId] -= amount;
-    require($.b3tr.transfer(teamWalletAddress, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
+    require($.b3tr.transfer(teamWalletAddress, amount), "X2EarnRewardsPoolV1: Allocation transfer to app failed");
 
     emit TeamWithdrawal(amount, appId, teamWalletAddress, msg.sender, reason);
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-distributeReward}
+   * @dev See {IX2EarnRewardsPoolV1-distributeReward}
    */
   function distributeReward(
     bytes32 appId,
@@ -165,19 +165,19 @@ contract X2EarnRewardsPoolV1 is
   ) external nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
-    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
+    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPoolV1: app does not exist");
 
-    require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
+    require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPoolV1: not a reward distributor");
 
     // check if the app has enough available funds to reward users
-    require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
+    require($.availableFunds[appId] >= amount, "X2EarnRewardsPoolV1: app has insufficient funds");
 
     // check if the contract has enough funds
-    require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
+    require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPoolV1: insufficient funds on contract");
 
     // transfer the rewards to the receiver
     $.availableFunds[appId] -= amount;
-    require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
+    require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPoolV1: Allocation transfer to app failed");
 
     // emit event
     emit RewardDistributed(amount, appId, receiver, proof, msg.sender);
@@ -188,8 +188,8 @@ contract X2EarnRewardsPoolV1 is
    *
    * @param _x2EarnApps the new X2EarnApps contract
    */
-  function setX2EarnApps(IX2EarnApps _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
-    require(address(_x2EarnApps) != address(0), "X2EarnRewardsPool: x2EarnApps is the zero address");
+  function setX2EarnApps(IX2EarnAppsV1 _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    require(address(_x2EarnApps) != address(0), "X2EarnRewardsPoolV1: x2EarnApps is the zero address");
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.x2EarnApps = _x2EarnApps;
@@ -198,7 +198,7 @@ contract X2EarnRewardsPoolV1 is
   // ---------- Getters ---------- //
 
   /**
-   * @dev See {IX2EarnRewardsPool-availableFunds}
+   * @dev See {IX2EarnRewardsPoolV1-availableFunds}
    */
   function availableFunds(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
@@ -206,7 +206,7 @@ contract X2EarnRewardsPoolV1 is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-version}
+   * @dev See {IX2EarnRewardsPoolV1-version}
    */
   function version() external pure virtual returns (string memory) {
     return "1";
@@ -215,7 +215,7 @@ contract X2EarnRewardsPoolV1 is
   /**
    * @dev Retrieves the B3TR token contract.
    */
-  function b3tr() external view returns (IB3TR) {
+  function b3tr() external view returns (IB3TRV1) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.b3tr;
   }
@@ -223,7 +223,7 @@ contract X2EarnRewardsPoolV1 is
   /**
    * @dev Retrieves the X2EarnApps contract.
    */
-  function x2EarnApps() external view returns (IX2EarnApps) {
+  function x2EarnApps() external view returns (IX2EarnAppsV1) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.x2EarnApps;
   }
@@ -234,14 +234,14 @@ contract X2EarnRewardsPoolV1 is
    * @dev Transfers of VET to this contract are not allowed.
    */
   receive() external payable virtual {
-    revert("X2EarnRewardsPool: contract does not accept VET");
+    revert("X2EarnRewardsPoolV1: contract does not accept VET");
   }
 
   /**
    * @dev Contract does not accept calls/data.
    */
   fallback() external payable {
-    revert("X2EarnRewardsPool: contract does not accept calls/data");
+    revert("X2EarnRewardsPoolV1: contract does not accept calls/data");
   }
 
   /**
@@ -250,14 +250,14 @@ contract X2EarnRewardsPoolV1 is
    * @notice supported only when safeTransferFrom is used
    */
   function onERC721Received(address, address, uint256, bytes memory) public virtual returns (bytes4) {
-    revert("X2EarnRewardsPool: contract does not accept ERC721 tokens");
+    revert("X2EarnRewardsPoolV1: contract does not accept ERC721 tokens");
   }
 
   /**
    * @dev Transfers of ERC1155 tokens to this contract are not allowed.
    */
   function onERC1155Received(address, address, uint256, uint256, bytes memory) public virtual returns (bytes4) {
-    revert("X2EarnRewardsPool: contract does not accept ERC1155 tokens");
+    revert("X2EarnRewardsPoolV1: contract does not accept ERC1155 tokens");
   }
 
   /**
@@ -270,6 +270,6 @@ contract X2EarnRewardsPoolV1 is
     uint256[] memory,
     bytes memory
   ) public virtual returns (bytes4) {
-    revert("X2EarnRewardsPool: contract does not accept batch transfers of ERC1155 tokens");
+    revert("X2EarnRewardsPoolV1: contract does not accept batch transfers of ERC1155 tokens");
   }
 }
