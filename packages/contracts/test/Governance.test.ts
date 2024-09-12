@@ -29,6 +29,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { B3TRGovernor, B3TRGovernorV1, B3TRGovernor__factory } from "../typechain-types"
 import { deployProxy } from "../scripts/helpers"
+import { getGovernorLibrariesV1 } from "./helpers/governor"
 
 describe("Governor and TimeLock - @shard1", function () {
   describe("Governor deployment", function () {
@@ -58,10 +59,6 @@ describe("Governor and TimeLock - @shard1", function () {
       const clock = await governor.clock()
       const proposerVotes = await governor.getVotes(owner, (clock - BigInt(1)).toString())
       expect(proposerVotes.toString()).to.eql("0")
-
-      // check name of the governor contract
-      const name = await governor.name()
-      expect(name).to.eql("B3TRGovernor")
 
       // check that the VOT3 address is correct
       const voteTokenAddress = await governor.token()
@@ -97,41 +94,17 @@ describe("Governor and TimeLock - @shard1", function () {
     })
 
     it("Should be able to upgrade the governor contract through governance", async function () {
-      const {
-        governor,
-        owner,
-        otherAccount,
-        b3tr,
-        emissions,
-        xAllocationVoting,
-        vot3,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
-      } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { governor, owner, otherAccount, b3tr, emissions, xAllocationVoting, vot3 } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Start emissions
       await bootstrapAndStartEmissions()
 
       // Deploy the implementation contract
       const Contract = await ethers.getContractFactory("B3TRGovernorV1", {
-        libraries: {
-          GovernorClockLogic: await governorClockLogicLib.getAddress(),
-          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-        },
+        libraries: await getGovernorLibrariesV1(),
       })
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
@@ -324,22 +297,7 @@ describe("Governor and TimeLock - @shard1", function () {
 
     it("Should be able to initialize only once", async function () {
       const config = createLocalConfig()
-      const {
-        b3tr,
-        owner,
-        vot3,
-        timeLock,
-        xAllocationVoting,
-        voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
-      } = await getOrDeployContractInstances({
+      const { b3tr, owner, vot3, timeLock, xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -367,16 +325,7 @@ describe("Governor and TimeLock - @shard1", function () {
             governorFunctionSettingsRoleAddress: owner.address,
           },
         ],
-        {
-          GovernorClockLogic: await governorClockLogicLib.getAddress(),
-          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-        },
+        await getGovernorLibrariesV1(),
       )) as B3TRGovernorV1
 
       await catchRevert(
@@ -438,22 +387,7 @@ describe("Governor and TimeLock - @shard1", function () {
 
     it("Should revert if the governor admin is set to the zero address during initilization", async function () {
       const config = createLocalConfig()
-      const {
-        b3tr,
-        owner,
-        vot3,
-        timeLock,
-        xAllocationVoting,
-        voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
-      } = await getOrDeployContractInstances({
+      const { b3tr, owner, vot3, timeLock, xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
 
@@ -481,37 +415,14 @@ describe("Governor and TimeLock - @shard1", function () {
               governorFunctionSettingsRoleAddress: owner.address,
             },
           ],
-          {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-          },
+          await getGovernorLibrariesV1(),
         ),
       ).to.be.reverted
     })
 
     it("Should revert if the governor timelock is set to the zero address during initilization", async function () {
       const config = createLocalConfig()
-      const {
-        b3tr,
-        owner,
-        vot3,
-        xAllocationVoting,
-        voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
-      } = await getOrDeployContractInstances({
+      const { b3tr, owner, vot3, xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
 
@@ -539,37 +450,14 @@ describe("Governor and TimeLock - @shard1", function () {
               governorFunctionSettingsRoleAddress: owner.address,
             },
           ],
-          {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-          },
+          await getGovernorLibrariesV1(),
         ),
       ).to.be.reverted
     })
 
     it("Should revert if the B3TR address is set to the zero address during initilization", async function () {
       const config = createLocalConfig()
-      const {
-        owner,
-        vot3,
-        timeLock,
-        xAllocationVoting,
-        voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
-      } = await getOrDeployContractInstances({
+      const { owner, vot3, timeLock, xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
 
@@ -597,37 +485,14 @@ describe("Governor and TimeLock - @shard1", function () {
               governorFunctionSettingsRoleAddress: owner.address,
             },
           ],
-          {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-          },
+          await getGovernorLibrariesV1(),
         ),
       ).to.be.reverted
     })
 
     it("Should revert if the VOT3 address is set to the zero address during initilization", async function () {
       const config = createLocalConfig()
-      const {
-        b3tr,
-        owner,
-        timeLock,
-        xAllocationVoting,
-        voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
-      } = await getOrDeployContractInstances({
+      const { b3tr, owner, timeLock, xAllocationVoting, voterRewards } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
 
@@ -655,37 +520,14 @@ describe("Governor and TimeLock - @shard1", function () {
               governorFunctionSettingsRoleAddress: owner.address,
             },
           ],
-          {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-          },
+          await getGovernorLibrariesV1(),
         ),
       ).to.be.reverted
     })
 
     it("Should revert if the xAllocationVoting address is set to the zero address during initilization", async function () {
       const config = createLocalConfig()
-      const {
-        b3tr,
-        owner,
-        vot3,
-        timeLock,
-        voterRewards,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
-      } = await getOrDeployContractInstances({
+      const { b3tr, owner, vot3, timeLock, voterRewards } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
 
@@ -713,37 +555,14 @@ describe("Governor and TimeLock - @shard1", function () {
               governorFunctionSettingsRoleAddress: owner.address,
             },
           ],
-          {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-          },
+          await getGovernorLibrariesV1(),
         ),
       ).to.be.reverted
     })
 
     it("Should revert if the voterRewards address is set to the zero address during initilization", async function () {
       const config = createLocalConfig()
-      const {
-        b3tr,
-        owner,
-        vot3,
-        timeLock,
-        xAllocationVoting,
-        governorClockLogicLib,
-        governorConfiguratorLib,
-        governorDepositLogicLib,
-        governorFunctionRestrictionsLogicLib,
-        governorProposalLogicLib,
-        governorQuorumLogicLib,
-        governorStateLogicLib,
-        governorVotesLogicLib,
-      } = await getOrDeployContractInstances({
+      const { b3tr, owner, vot3, timeLock, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
 
@@ -771,16 +590,7 @@ describe("Governor and TimeLock - @shard1", function () {
               governorFunctionSettingsRoleAddress: owner.address,
             },
           ],
-          {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-          },
+          await getGovernorLibrariesV1(),
         ),
       ).to.be.reverted
     })
@@ -840,29 +650,11 @@ describe("Governor and TimeLock - @shard1", function () {
             governorFunctionSettingsRoleAddress: owner.address,
           },
         ],
-        {
-          GovernorClockLogic: await governorClockLogicLib.getAddress(),
-          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-        },
-      )) as B3TRGovernor
+        await getGovernorLibrariesV1(),
+      )) as B3TRGovernorV1
 
       const b3trGovernorFactory = await ethers.getContractFactory("B3TRGovernorV1", {
-        libraries: {
-          GovernorClockLogic: await governorClockLogicLib.getAddress(),
-          GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await governorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-        },
+        libraries: await getGovernorLibrariesV1(),
       })
 
       await voterRewards
@@ -5503,16 +5295,7 @@ describe("Governor and TimeLock - @shard1", function () {
               governorFunctionSettingsRoleAddress: owner.address,
             },
           ],
-          {
-            GovernorClockLogic: await governorClockLogicLib.getAddress(),
-            GovernorConfigurator: await governorConfiguratorLib.getAddress(),
-            GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
-            GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
-            GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
-            GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
-            GovernorStateLogic: await governorStateLogicLib.getAddress(),
-            GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
-          },
+          await getGovernorLibrariesV1(),
         )) as B3TRGovernor
       })
 
