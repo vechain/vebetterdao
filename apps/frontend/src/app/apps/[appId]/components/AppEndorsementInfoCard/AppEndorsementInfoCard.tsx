@@ -1,4 +1,4 @@
-import { useAppEndorsementScore, useEndorsementScoreThreshold } from "@/api"
+import { useAppEndorsementScore, useAppEndorsers, useEndorsementScoreThreshold } from "@/api"
 import { VeBetterIcon } from "@/components"
 import { Box, Button, Card, CardBody, CardHeader, Divider, Heading, Link, Stack, Text } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
@@ -12,6 +12,7 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
 
   const { data: appEndorsementScore } = useAppEndorsementScore(appId ?? "")
   const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
+  const { data: appEndorsers } = useAppEndorsers(appId ?? "")
 
   return (
     <Card
@@ -33,7 +34,7 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
             values={{ value: endorsementScoreThreshold }}
             t={t}
           />
-          <Link pl={0.5} color="#004CFC">
+          <Link pl={1} color="#004CFC">
             {t("Know more")}
           </Link>
         </Text>
@@ -52,14 +53,26 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
             </Box>
           </Box>
           <Divider />
-          <Box py={2}>
-            <Text fontSize="14px" fontWeight="600" textAlign="center">
-              {t("Nobody is endorsing your app")}
-            </Text>
-          </Box>
           <Box textAlign="center">
-            <Button leftIcon={<VeBetterIcon size={25} />} w="full" borderRadius="full" py={6} fontSize="md">
-              {t("Look for endorsers")}
+            {appEndorsers && appEndorsers.length ? (
+              appEndorsers
+            ) : (
+              <Text fontSize="14px" fontWeight="bold">
+                {t("Nobody is endorsing your app")}
+              </Text>
+            )}
+          </Box>
+          <Box textAlign="center" py={6}>
+            <Button
+              leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
+              w="full"
+              borderRadius="full"
+              color="#E0E9FE"
+              display="flex"
+              alignItems="center">
+              <Text fontSize="18px" fontWeight="500" color="#004CFC">
+                {t("Look for endorsers")}
+              </Text>
             </Button>
           </Box>
         </Stack>
