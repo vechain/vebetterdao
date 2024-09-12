@@ -825,6 +825,16 @@ describe("Galaxy Member - @shard2", () => {
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.ownerOf(0)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
+
+      const tokenId = await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)
+
+      await galaxyMember.setMaxLevel(10)
+      const tokenInfo = await galaxyMember.getTokenInfoByTokenId(tokenId)
+
+      expect(tokenInfo?.tokenId).to.equal(0)
+      expect(tokenInfo?.tokenURI.includes("ipfs://")).to.equal(true)
+      expect(tokenInfo?.tokenLevel).to.equal(1)
+      expect(tokenInfo?.b3trToUpgrade).to.equal(10000000000000000000000n)
     })
 
     it("User can free mint if he participated in B3TR Governance", async () => {
@@ -965,6 +975,45 @@ describe("Galaxy Member - @shard2", () => {
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(2) // Other account has 2 NFTs
 
       expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(otherAccount))).to.equal(1) // Level 1
+    })
+
+    it("Should be able to free mint multiple NFTs and retrieve them with pagination", async () => {
+      const { galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(otherAccount)
+
+      // Mint 12 NFTs
+      await galaxyMember.connect(otherAccount).freeMint()
+      await galaxyMember.connect(otherAccount).freeMint()
+      await galaxyMember.connect(otherAccount).freeMint()
+      await galaxyMember.connect(otherAccount).freeMint()
+      await galaxyMember.connect(otherAccount).freeMint()
+      await galaxyMember.connect(otherAccount).freeMint()
+      await galaxyMember.connect(otherAccount).freeMint()
+      await galaxyMember.connect(otherAccount).freeMint()
+      await galaxyMember.connect(otherAccount).freeMint()
+      await galaxyMember.connect(otherAccount).freeMint()
+      await galaxyMember.connect(otherAccount).freeMint()
+      await galaxyMember.connect(otherAccount).freeMint()
+
+      expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(12) // Other account has 12 NFTs
+
+      // Retrieve NFTs with 3 pages of size 5
+      const page1 = await galaxyMember.getTokensInfoByOwner(otherAccount, 0, 5)
+      const page2 = await galaxyMember.getTokensInfoByOwner(otherAccount, 1, 5)
+      const page3 = await galaxyMember.getTokensInfoByOwner(otherAccount, 2, 5)
+      const page4 = await galaxyMember.getTokensInfoByOwner(otherAccount, 3, 5)
+
+      expect(page1.length).to.equal(5)
+      expect(page2.length).to.equal(5)
+      expect(page3.length).to.equal(2) // last page
+      expect(page4.length).to.equal(0) // should be empty
     })
 
     it("Should handle multiple mints from different accounts correctly", async () => {
@@ -1572,6 +1621,33 @@ describe("Galaxy Member - @shard2", () => {
         await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await otherAccount.getAddress())),
       ).to.equal(1) // Level 1
       expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(await owner.getAddress()))).to.equal(1) // Level 1
+    })
+
+    it("Should retrieve selected token info", async () => {
+      const { galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(otherAccount, true)
+
+      let tx = await galaxyMember.connect(otherAccount).freeMint() // Token id 1
+
+      let receipt = await tx.wait()
+
+      if (!receipt?.blockNumber) throw new Error("No receipt block number")
+
+      await galaxyMember.setMaxLevel(10)
+
+      const selectedTokenInfo = await galaxyMember.getSelectedTokenInfoByOwner(await otherAccount.getAddress())
+
+      expect(selectedTokenInfo?.tokenId).to.equal(0)
+      expect(selectedTokenInfo?.tokenURI.includes("ipfs://")).to.equal(true)
+      expect(selectedTokenInfo?.tokenLevel).to.equal(1)
+      expect(selectedTokenInfo?.b3trToUpgrade).to.equal(10000000000000000000000n)
     })
   })
 
