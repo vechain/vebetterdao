@@ -8,7 +8,6 @@ import path from "path"
  *
  * @param {string} directoryPath - Relative path to the directory containing the contracts/interfaces.
  * @param {string} version - The version to append to the contract/interface names (e.g., "1" for V1).
- * @param {string[]} contractsWhitelist - Array of contract names to skip from renaming (without file extensions, e.g., ["B3TR"]).
  * @param {string[]} interfacesWhitelist - Array of interface names to skip from renaming (without file extensions, e.g., ["IERC6372"]).
  * @param {string[]} usagesToUpdate - Array of contract/interface names that should be updated in the codebase (e.g., ["IVoterRewards"]) even if they are not renamed through imports.
  *
@@ -17,7 +16,6 @@ import path from "path"
 export async function renameContractsAndInterfaces(
   directoryPath: string,
   version: string,
-  contractsWhitelist: string[],
   interfacesWhitelist: string[],
   usagesToUpdate: string[],
 ): Promise<void> {
@@ -36,14 +34,6 @@ export async function renameContractsAndInterfaces(
           if (stat.isDirectory()) {
             await renameFilesRecursively(fullPath)
           } else if (file.endsWith(".sol")) {
-            const fileNameWithoutExt = file.replace(".sol", "")
-
-            // Skip files in the whitelist
-            if (contractsWhitelist.includes(fileNameWithoutExt)) {
-              console.log(`Skipping whitelist file: ${file}`)
-              return
-            }
-
             let content: string = await fs.readFile(fullPath, "utf8")
 
             // Define the new file name with version
@@ -163,16 +153,13 @@ async function run(): Promise<void> {
     process.exit(1)
   }
 
-  // Whitelist of contract names that should not be renamed (without ".sol" extension)
-  const contractsWhitelist: string[] = ["B3TR", "B3TRProxy"]
-
   // Whitelist of interface names that should not be renamed
   const interfacesWhitelist: string[] = ["IERC6372", "Checkpoints"]
 
   // List of contract/interface names that should be updated in the codebase even if they are not renamed through imports
   const usagesToUpdate: string[] = ["IVoterRewards", "IEmissions", "IX2EarnApps"]
 
-  await renameContractsAndInterfaces(directoryPath, version, contractsWhitelist, interfacesWhitelist, usagesToUpdate)
+  await renameContractsAndInterfaces(directoryPath, version, interfacesWhitelist, usagesToUpdate)
 }
 
 run()
