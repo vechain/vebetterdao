@@ -1,6 +1,7 @@
 export * from "./useAppAdmin"
 export * from "./useAppEndorsementScore"
 export * from "./useAppEndorsers"
+export * from "./useAppExists"
 export * from "./useAppModerators"
 export * from "./useAppRewardDistributors"
 export * from "./useAppsEligibleInNextRound"
