@@ -6,7 +6,7 @@ import {
   useXAppMetadata,
 } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
-import { notFoundImage } from "@/constants"
+import { NEW_APP_MAX_DAYS, notFoundImage } from "@/constants"
 import {
   Box,
   Card,
@@ -45,9 +45,11 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
   const endorsementScore = useAppEndorsementScore(xApp.id)
   const endorsementScoreThreshold = useEndorsementScoreThreshold()
 
+  const isAppNew = dayjs.unix(xApp.createdAtTimestamp).add(NEW_APP_MAX_DAYS, "days").isAfter(dayjs())
+
   const onCardClick = useCallback(() => {
     router.push(`/apps/${xApp.id}`)
-  }, [router])
+  }, [router, xApp.id])
 
   return (
     <Card
@@ -67,8 +69,12 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
           w={"full"}
           h="full"
           justify={"space-between"}>
-          <VStack spacing={4} align="flex-start" flex={5}>
-            <Stack direction={["column", "column", "row"]} spacing={8} align={["flex-start", "flex-start", "center"]}>
+          <VStack spacing={4} align="flex-start" flex={5} my={[0, 0, 4]}>
+            <Stack
+              w="full"
+              direction={["column", "column", "row"]}
+              spacing={4}
+              align={["flex-start", "flex-start", "center"]}>
               <HStack w={["full", "full", "auto"]} align="flex-start" justify={"space-between"}>
                 <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
                   <Image src={logo?.image ?? notFoundImage} alt={"logo"} h={"72px"} w="full" borderRadius="9px" />
@@ -80,24 +86,26 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
               <Stack direction={["column-reverse", "column-reverse", "column"]} spacing={2} align="flex-start">
                 <HStack spacing={3} align="center">
                   <HStack color="#F29B32" bg="#FFF3E5" borderRadius={"12px"} py="4px" px={"10px"} spacing={"4px"}>
-                    <Icon as={UilStar} boxSize={"16px"} />
-                    <Text fontSize={"16px"} fontWeight={600}>
+                    <Icon as={UilStar} boxSize={"14px"} />
+                    <Text fontSize={"14px"} fontWeight={600}>
                       {t("Looking for support")}
                     </Text>
                   </HStack>
-                  <HStack
-                    bg="#B1F16C"
-                    borderRadius={"12px"}
-                    color={"#3B3B3B"}
-                    fontWeight={600}
-                    py="4px"
-                    px={"10px"}
-                    spacing={"4px"}>
-                    <Icon as={UilStar} boxSize={"16px"} color={"#3B3B3B"} />
-                    <Text fontSize={"16px"} fontWeight={600}>
-                      {t("New")}
-                    </Text>
-                  </HStack>
+                  {isAppNew && (
+                    <HStack
+                      bg="#B1F16C"
+                      borderRadius={"12px"}
+                      color={"#3B3B3B"}
+                      fontWeight={600}
+                      py="4px"
+                      px={"10px"}
+                      spacing={"4px"}>
+                      <Icon as={UilStar} boxSize={"14px"} color={"#3B3B3B"} />
+                      <Text fontSize={"14px"} fontWeight={600}>
+                        {t("New")}
+                      </Text>
+                    </HStack>
+                  )}
                 </HStack>
                 <Box>
                   <Skeleton isLoaded={!appMetadataLoading}>
@@ -125,7 +133,13 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
           <Show below="md">
             <Divider orientation="horizontal" h="full" />
           </Show>
-          <Stack direction={["row", "row", "column"]} flex={1} spacing={3} align="flex-start" justify={"space-between"}>
+          <Stack
+            direction={["row", "row", "column"]}
+            flex={1}
+            spacing={3}
+            align="flex-start"
+            justify={"space-between"}
+            my={[0, 0, 4]}>
             <VStack spacing={1} align="flex-start" w="full">
               <HStack spacing={1} align={"flex-end"}>
                 <Heading fontSize={"36px"} fontWeight={700} color={"#F29B32"} lineHeight={"36px"}>

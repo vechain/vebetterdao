@@ -50,4 +50,6 @@ export type ContractsConfig = {
   VECHAIN_NODES_CONTRACT_ADDRESS: string
 
   XAPP_GRACE_PERIOD: number
+  // X 2 Earn Rewards Pool
+  X_2_EARN_INITIAL_IMPACT_KEYS: string[]
 }

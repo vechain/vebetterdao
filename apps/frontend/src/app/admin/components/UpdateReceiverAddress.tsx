@@ -27,7 +27,6 @@ export const UpdateReceiverAddress = () => {
   const { isOpen, onClose, onOpen } = useDisclosure()
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
-  const allApps = (xApps?.active || []).concat(xApps?.unendorsed || [])
 
   const {
     sendTransaction,
@@ -60,9 +59,10 @@ export const UpdateReceiverAddress = () => {
     onClose()
   }, [resetStatus, onClose])
 
+  const allApps = useMemo(() => [...(xApps?.active ?? []), ...(xApps?.unendorsed ?? [])], [xApps])
+
   const currentAddress = useMemo(() => {
     if (appId === undefined) return ""
-
     const app = allApps.find(item => item.id === appId)
     return app?.teamWalletAddress
   }, [appId, allApps])
@@ -96,7 +96,7 @@ export const UpdateReceiverAddress = () => {
                     isDisabled={isLoading}
                     onChange={e => setAppId(e.target.value)}
                     value={appId}>
-                    {allApps.map(item => {
+                    {allApps?.map(item => {
                       return (
                         <option key={"Select" + item.name} value={item.id}>
                           {item.name}

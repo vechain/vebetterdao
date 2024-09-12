@@ -514,9 +514,9 @@ interface IX2EarnApps {
   function nodeToEndorsedApp(uint256 nodeId) external view returns (bytes32);
 
   /**
-   * @notice this function returns the endorsement score of a node ID
-   * @param nodeId The unique identifier of the node ID.
-   * @return uint256 The endorsement score of the node ID.
+   * @notice this function returns the endorsement score of a node level
+   * @param nodeLevel The strength level of the node.
+   * @return uint256 The endorsement score of the node level.
    */
-  function nodeEndorsementScore(uint256 nodeId) external view returns (uint256);
+  function nodeLevelEndorsementScore(VechainNodesDataTypes.NodeStrengthLevel nodeLevel) external view returns (uint256);
 }

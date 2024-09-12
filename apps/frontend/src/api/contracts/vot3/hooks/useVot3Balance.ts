@@ -37,12 +37,12 @@ export const getVot3Balance = async (thor: Connex.Thor, address?: string): Promi
   }
 }
 
-export const getVot3BalanceQueryKey = (address?: string) => ["balance", "vot3", address]
+export const getVot3BalanceQueryKey = (address: string) => ["balance", "vot3", address]
 export const useVot3Balance = (address?: string) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getVot3BalanceQueryKey(address),
+    queryKey: getVot3BalanceQueryKey(address ?? ""),
     queryFn: () => getVot3Balance(thor, address),
     enabled: !!address,
   })

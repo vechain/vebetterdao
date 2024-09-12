@@ -5,6 +5,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { ethers } from "ethers"
 
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 
@@ -19,8 +20,25 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
     [proposal.communityDeposits, proposal.depositThreshold],
   )
 
+  const parsedAmount = useMemo(() => {
+    if (!amount || !ethers) return "0"
+
+    try {
+      return `${ethers.parseEther(amount)}`
+    } catch (e) {
+      return "0"
+    }
+  }, [amount])
+
   const depositMax = useCallback(() => {
-    setAmount(Math.min(Number(vot3Balance?.scaled ?? 0), missingSupport || 0).toString())
+    if (!vot3Balance) return "0"
+
+    if (missingSupport < Number(vot3Balance?.scaled)) {
+      setAmount(`${missingSupport.toLocaleString("fullwide", { useGrouping: false })}`) // "fullwide" and "useGrouping" are used to display without scientific notation
+      return
+    }
+
+    setAmount(vot3Balance?.original)
   }, [vot3Balance, missingSupport])
 
   const handleChange = useCallback(
@@ -31,11 +49,12 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
-      onSubmit(amount)
+      onSubmit(parsedAmount)
       e.preventDefault()
     },
-    [amount, onSubmit],
+    [onSubmit, parsedAmount],
   )
+
   const userDepositsForecasted = useMemo(() => Number(amount) + proposal.userSupport, [amount, proposal.userSupport])
 
   const isDepositThresholdReached = useMemo(
@@ -71,7 +90,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
             variant="unstyled"
             _placeholder={{ color: "black" }}
           />
-          {Number(vot3Balance?.scaled) !== Number(amount) && (
+          {Number(vot3Balance?.original) !== Number(amount) && (
             <Box>
               <Button
                 isDisabled={!vot3Balance?.scaled}
