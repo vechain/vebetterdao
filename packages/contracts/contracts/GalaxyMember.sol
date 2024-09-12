@@ -606,7 +606,10 @@ contract GalaxyMember is
   /// @notice Gets the token info by token ID
   /// @param tokenId Token ID to get the info for
   /// @return TokenInfo The token info
-  function getTokenInfoByTokenId(uint256 tokenId) public view returns (TokenInfo memory) {
+  function getTokenInfoByTokenId(uint256 tokenId) public view virtual returns (TokenInfo memory) {
+    // Check if the token ID exists
+    require(_ownerOf(tokenId) != address(0), "GalaxyMember: tokenId doesn't exist");
+
     TokenInfo memory tokenInfo;
     tokenInfo.tokenId = tokenId;
     tokenInfo.tokenURI = tokenURI(tokenId);
@@ -626,14 +629,26 @@ contract GalaxyMember is
   /// @notice Gets the tokens owned by an address
   /// @param owner The address of the owner to check
   /// @param page The page number to fetch
-  /// @param size The number of tokens to fetch
+  /// @param size The number of tokens to fetch (cannot exceed 100)
   /// @return TokenInfo[] The tokens owned by the address
   function getTokensInfoByOwner(address owner, uint256 page, uint256 size) public view returns (TokenInfo[] memory) {
     uint256 balance = balanceOf(owner); // Get the number of tokens owned by the address
 
-    // If page and size are both zero, return all tokens
-    if (page == 0 && size == 0) {
-      size = balance;
+    // Maximum number of tokens to fetch per page
+    uint256 MAX_PAGINATION_SIZE = 100;
+
+    // Ensure size is not 0
+    if (size == 0) {
+      revert("GalaxyMember: Invalid size, cannot be 0");
+    }
+
+    // Ensure size is not greater than the maximum allowed value
+    if (size > MAX_PAGINATION_SIZE) {
+      revert(
+        string(
+          abi.encodePacked("GalaxyMember: Invalid size, cannot be greater than ", Strings.toString(MAX_PAGINATION_SIZE))
+        )
+      );
     }
 
     // Calculate the starting index for the current page

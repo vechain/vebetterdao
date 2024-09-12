@@ -1014,11 +1014,6 @@ describe("Galaxy Member - @shard1", () => {
       expect(page2.length).to.equal(5)
       expect(page3.length).to.equal(2) // last page
       expect(page4.length).to.equal(0) // should be empty
-
-      // Retrieve all tokens with (0,0)
-      const allTokens = await galaxyMember.getTokensInfoByOwner(otherAccount, 0, 0)
-
-      expect(allTokens.length).to.equal(12) // All tokens
     })
 
     it("Should handle multiple mints from different accounts correctly", async () => {
