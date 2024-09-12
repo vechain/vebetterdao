@@ -1,7 +1,20 @@
 import { useAppEndorsementScore, useAppEndorsers, useEndorsementScoreThreshold } from "@/api"
 import { VeBetterIcon } from "@/components"
-import { Box, Button, Card, CardBody, CardHeader, Divider, Heading, Link, Stack, Text } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Divider,
+  Heading,
+  Link,
+  Stack,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
+import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 
 type Props = {
   appId: string | undefined
@@ -13,6 +26,16 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
   const { data: appEndorsementScore } = useAppEndorsementScore(appId ?? "")
   const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
   const { data: appEndorsers } = useAppEndorsers(appId ?? "")
+
+  // Modal
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
+  const defaultEndorsements = [
+    { name: "Mark", date: "2023-01-01", points: 90, address: "0x1234567890" },
+    { name: "John", date: "2023-01-02", points: 80, address: "0x1234567890" },
+    { name: "Jane", date: "2023-01-03", points: 85, address: "0x1234567890" },
+  ]
+  const XApps = [{ scoreTotal: 100 }]
 
   return (
     <Card
@@ -64,6 +87,7 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
           </Box>
           <Box textAlign="center" py={6}>
             <Button
+              onClick={onOpen}
               leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
               w="full"
               borderRadius="full"
@@ -74,6 +98,12 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
                 {t("Look for endorsers")}
               </Text>
             </Button>
+            <AppEndorsementInfoCardModal
+              isOpen={isOpen}
+              onClose={onClose}
+              listOfEndorsements={defaultEndorsements}
+              XApps={XApps}
+            />
           </Box>
         </Stack>
       </CardBody>
