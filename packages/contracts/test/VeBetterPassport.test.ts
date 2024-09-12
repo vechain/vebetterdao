@@ -1,9 +1,15 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { bootstrapEmissions, getOrDeployContractInstances, getVot3Tokens, startNewAllocationRound } from "./helpers"
+import {
+  bootstrapEmissions,
+  getOrDeployContractInstances,
+  getVot3Tokens,
+  startNewAllocationRound,
+  waitForRoundToEnd,
+} from "./helpers"
 import { describe, it } from "mocha"
 
-describe("VeBetterPassport - @shard3", function () {
+describe.only("VeBetterPassport - @shard3", function () {
   // deployment
   describe("Deployment", function () {})
 
@@ -32,8 +38,19 @@ describe("VeBetterPassport - @shard3", function () {
       await getVot3Tokens(delegatee, "10000")
       await getVot3Tokens(owner, "10000")
 
-      //Add apps
+      // Whitelist owner
+      await veBetterPassport.connect(owner).whitelist(owner.address)
 
+      // Enable whitelist check
+      await veBetterPassport.connect(owner).toggleWhitelistCheck()
+
+      // whitelist check should be enabled
+      expect(await veBetterPassport.whitelistCheckEnabled()).to.be.true
+
+      // expect owner tp be person
+      expect(await veBetterPassport.isPerson(owner.address)).to.be.true
+
+      //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))

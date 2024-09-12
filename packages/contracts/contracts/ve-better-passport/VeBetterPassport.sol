@@ -9,7 +9,9 @@ import { ProofOfParticipation } from "./modules/ProofOfParticipation.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { PersonhoodDelegation } from "./modules/PersonhoodDelegation.sol";
 import { WhitelistAndBlacklist } from "./modules/WhitelistAndBlacklist.sol";
+import { PersonhoodSettings } from "./modules/PersonhoodSettings.sol";
 import { INodeManagement } from "../interfaces/INodeManagement.sol";
+import { IGalaxyMember } from "../interfaces/IGalaxyMember.sol";
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 
 /// @title VeBetterPassport
@@ -22,6 +24,7 @@ contract VeBetterPassport is
   ProofOfParticipation,
   BotSignaling,
   WhitelistAndBlacklist,
+  PersonhoodSettings,
   IVeBetterPassport
 {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -32,6 +35,7 @@ contract VeBetterPassport is
   struct VeBetterPassportStorage {
     IXAllocationVotingGovernor xAllocationVoting;
     INodeManagement nodeManagement;
+    IGalaxyMember galaxyMember;
   }
 
   // keccak256(abi.encode(uint256(keccak256("storage.VeBetterPassport")) - 1)) & ~bytes32(uint256(0xff))
@@ -48,8 +52,10 @@ contract VeBetterPassport is
     IXAllocationVotingGovernor xAllocationVoting;
     IX2EarnApps x2EarnApps;
     address nodeManagement;
+    address galaxyMember;
     address upgrader;
     address[] admins;
+    address[] settingsManagers;
     address[] roleGranters;
     address[] blacklisters;
     address[] whitelisters;
@@ -71,6 +77,7 @@ contract VeBetterPassport is
     require(address(data.x2EarnApps) != address(0), "VeBetterPassport: x2EarnApps is the zero address");
     require(data.upgrader != address(0), "VeBetterPassport: upgrader is the zero address");
     require(data.nodeManagement != address(0), "VeBetterPassport: nodeManagement is the zero address");
+    require(data.galaxyMember != address(0), "VeBetterPassport: galaxyMember is the zero address");
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
@@ -85,10 +92,12 @@ contract VeBetterPassport is
     __BotSignaling_init(data.blacklisters, data.signalingThreshold, data.x2EarnApps);
     __PersonhoodDelegation_init();
     __WhitelistAndBlacklist_init(data.whitelisters);
+    __PersonhoodSettings_init(data.settingsManagers);
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
     $.xAllocationVoting = data.xAllocationVoting;
     $.nodeManagement = INodeManagement(data.nodeManagement);
+    $.galaxyMember = IGalaxyMember(data.galaxyMember);
 
     // Grant roles
     _grantRole(UPGRADER_ROLE, data.upgrader);
@@ -129,25 +138,24 @@ contract VeBetterPassport is
    */
   function isPerson(address _user) public view returns (bool) {
     // If a wallet is whitelisted, it is a person
-    if (isWhitelisted(_user)) return true;
+    if (isWhitelisted(_user) && whitelistCheckEnabled()) return true;
 
     // If a wallet is blacklisted, it is not a person
-    if (isBlacklisted(_user)) return false;
+    if (isBlacklisted(_user) && blacklistCheckEnabled()) return false;
 
     // If a wallet is not whitelisted and has been signaled more than X times
-    if (signaledCounter(_user) >= signalingThreshold()) {
-      return false;
-    }
+    if ((signaledCounter(_user) >= signalingThreshold()) && signalingCheckEnabled()) return false;
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
     // If the user's cumulated score in the last rounds is greater than or equal to the threshold
     uint256 participationScore = getCumulativeScoreWithDecay(_user, $.xAllocationVoting.currentRoundId());
-    if (participationScore >= thresholdParticipationScore()) return true;
+    if ((participationScore >= thresholdParticipationScore()) && participationScoreCheckEnabled()) return true;
 
     // Check if user owns an economic or xnode
-    if ($.nodeManagement.getNodeIds(_user).length > 0) return true;
+    if (($.nodeManagement.getNodeIds(_user).length > 0) && nodeOwnershipCheckEnabled()) return true;
 
-    // TODO: Check if user owns a gm level > 1
+    // Check if user has a GM with a level greater than 0
+    if (($.galaxyMember.getHighestLevel(_user) > 0) && gmOwnershipCheckEnabled()) return true;
 
     return false;
   }

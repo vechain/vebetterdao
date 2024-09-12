@@ -372,9 +372,11 @@ export const getOrDeployContractInstances = async ({
       x2EarnApps: await x2EarnApps.getAddress(),
       xAllocationVoting: await xAllocationVoting.getAddress(),
       nodeManagement: await nodeManagement.getAddress(),
+      galaxyMember: await galaxyMember.getAddress(),
       upgrader: owner.address, // upgrader
       admins: [owner.address], // admins
       roleGranters: [owner.address], // roleGranters
+      settingsManagers: [owner.address], // settingsManagers
       blacklisters: [owner.address], // _blacklisters
       whitelisters: [owner.address], // _whitelisters
       actionRegistrar: await x2EarnRewardsPool.getAddress(), // _actionRegistrar
