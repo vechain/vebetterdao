@@ -35,6 +35,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, upgradeProxy } from "../../scripts/helpers"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deploy"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
+import { deployGovernorAdminUpgradeable } from "./governor"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -338,55 +339,46 @@ export const getOrDeployContractInstances = async ({
     },
   ])) as XAllocationVoting
 
-  // Deploy Governor
-  const governorV1 = (await deployProxy(
-    "B3TRGovernorV1",
-    [
-      {
-        vot3Token: await vot3.getAddress(),
-        timelock: await timeLock.getAddress(),
-        xAllocationVoting: await xAllocationVoting.getAddress(),
-        b3tr: await b3tr.getAddress(),
-        quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-        initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
-        initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
-        initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
-        voterRewards: await voterRewards.getAddress(),
-        isFunctionRestrictionEnabled: true,
-      },
-      {
-        governorAdmin: owner.address,
-        pauser: owner.address,
-        contractsAddressManager: owner.address,
-        proposalExecutor: owner.address,
-        governorFunctionSettingsRoleAddress: owner.address,
-      },
-    ],
+  const governorAdminUpgradeable = await deployGovernorAdminUpgradeable(
     {
-      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
-      GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
-      GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
-      GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
-      GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
-      GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
-      GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
-      GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+      vot3Token: await vot3.getAddress(),
+      timelock: await timeLock.getAddress(),
+      xAllocationVoting: await xAllocationVoting.getAddress(),
+      b3tr: await b3tr.getAddress(),
+      quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+      initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
+      initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+      initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
+      voterRewards: await voterRewards.getAddress(),
+      isFunctionRestrictionEnabled: true,
     },
-  )) as B3TRGovernorV1
+    {
+      governorAdmin: owner.address,
+      pauser: owner.address,
+      contractsAddressManager: owner.address,
+      proposalExecutor: owner.address,
+      governorFunctionSettingsRoleAddress: owner.address,
+    },
+  )
 
-  const governor = (await upgradeProxy("B3TRGovernorV1", "B3TRGovernor", await governorV1.getAddress(), [], {
-    version: 2,
-    libraries: {
-      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
-      GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
-      GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
-      GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
-      GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
-      GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
-      GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
-      GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+  const governor = (await upgradeProxy(
+    "B3TRGovernorV1AdminUpgradeable",
+    "B3TRGovernor",
+    await governorAdminUpgradeable.getAddress(),
+    [],
+    {
+      libraries: {
+        GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+        GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
+        GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
+        GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+        GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
+        GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
+        GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
+        GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+      },
     },
-  })) as B3TRGovernor
+  )) as B3TRGovernor
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
@@ -480,7 +472,7 @@ export const getOrDeployContractInstances = async ({
     vot3,
     timeLock,
     governor,
-    governorV1,
+    governorV1: governorAdminUpgradeable,
     galaxyMember,
     x2EarnApps,
     xAllocationVoting,
