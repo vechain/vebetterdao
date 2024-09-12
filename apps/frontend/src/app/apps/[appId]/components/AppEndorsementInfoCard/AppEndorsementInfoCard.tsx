@@ -1,71 +1,102 @@
+import { useAppEndorsementScore, useAppEndorsers, useEndorsementScoreThreshold } from "@/api"
 import { VeBetterIcon } from "@/components"
-import { Box, Button, Card, CardBody, CardHeader, Divider, Heading, Stack, Text, useDisclosure } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
+import {
+  Box,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Divider,
+  Heading,
+  Link,
+  Stack,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react"
+import { Trans, useTranslation } from "react-i18next"
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 
-type AppEndorsementInfoCardProps = {
-  endorsementThreshold: number
-  currentScore: number
+type Props = {
+  appId: string | undefined
 }
 
-// type AppEndorsementInfoCardModalProps = AppEndorsementInfoCardProps & {
-//   listOfEndorsements: string[]
-// }
-
-const defaultEndorsements = [
-  { name: "Mark", date: "2023-01-01", points: 90, address: "0x1234567890" },
-  { name: "John", date: "2023-01-02", points: 80, address: "0x1234567890" },
-  { name: "Jane", date: "2023-01-03", points: 85, address: "0x1234567890" },
-]
-
-const XApps = [{ scoreTotal: 100 }]
-
-export const AppEndorsementInfoCard = ({ endorsementThreshold, currentScore }: AppEndorsementInfoCardProps) => {
+export const AppEndorsementInfoCard = ({ appId }: Props) => {
   const { t } = useTranslation()
+
+  const { data: appEndorsementScore } = useAppEndorsementScore(appId ?? "")
+  const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
+  const { data: appEndorsers } = useAppEndorsers(appId ?? "")
+
+  // Modal
   const { isOpen, onOpen, onClose } = useDisclosure()
+
+  const defaultEndorsements = [
+    { name: "Mark", date: "2023-01-01", points: 90, address: "0x1234567890" },
+    { name: "John", date: "2023-01-02", points: 80, address: "0x1234567890" },
+    { name: "Jane", date: "2023-01-03", points: 85, address: "0x1234567890" },
+  ]
+  const XApps = [{ scoreTotal: 100 }]
+
   return (
-    <Card h="full" w="100%" borderRadius="12px" boxShadow="0px 0px 7.9px 0px #F29B3280">
-      <CardHeader>
+    <Card
+      h="full"
+      w="100%"
+      p="24px"
+      gap="24px"
+      border="1px"
+      borderColor="#FFE4C3"
+      borderRadius="12px"
+      boxShadow="0px 0px 7.9px 0px #F29B3280">
+      <CardHeader p={0}>
         <Heading fontSize="24px" fontWeight="bold">
           {t("Endorsement")}
         </Heading>
-        <Text pt={2} color="gray.600">
-          {t("A dApp has to reach <strong> {{value}} endorsement points</strong> to join allocations.", {
-            value: endorsementThreshold,
-          })}
-          <Text as="span" color="blue.500" cursor="pointer">
-            {t("Know more.")}
-          </Text>
+        <Text pt={3} fontSize="14px" color="#6A6A6A">
+          <Trans
+            i18nKey="A dApp has to reach {{value}} endorsement points to join allocations."
+            values={{ value: endorsementScoreThreshold }}
+            t={t}
+          />
+          <Link pl={1} color="#004CFC">
+            {t("Know more")}
+          </Link>
         </Text>
       </CardHeader>
-      <CardBody>
-        <Stack spacing={5} w="full">
+      <CardBody p={0}>
+        <Stack spacing={3} w="full">
           <Box>
-            <Text fontSize="lg">{t("Current score")}</Text>
+            <Text fontSize="16px">{t("Current score")}</Text>
             <Box display="flex" alignItems="center">
-              <Text fontSize="4xl" mb={2} fontWeight="bold" color="orange.400">
-                {currentScore}
+              <Text fontSize="36px" fontWeight="700" color="#F29B32">
+                {appEndorsementScore}
               </Text>
-              <Text fontSize="lg" color="gray.600" ml={1}>
-                {t("of {{value}}", { value: endorsementThreshold })}
+              <Text fontSize="14px" color="#6A6A6A" pt={4} pl={1}>
+                {t("of {{value}}", { value: endorsementScoreThreshold })}
               </Text>
             </Box>
           </Box>
           <Divider />
-          <Box pt={3}>
-            <Text fontWeight="600" textAlign="center">
-              {t("Nobody is endorsing your app")}
-            </Text>
-          </Box>
           <Box textAlign="center">
+            {appEndorsers && appEndorsers.length ? (
+              appEndorsers
+            ) : (
+              <Text fontSize="14px" fontWeight="bold">
+                {t("Nobody is endorsing your app")}
+              </Text>
+            )}
+          </Box>
+          <Box textAlign="center" py={6}>
             <Button
               onClick={onOpen}
-              leftIcon={<VeBetterIcon size={25} />}
+              leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
               w="full"
               borderRadius="full"
-              py={6}
-              fontSize="md">
-              {t("Look for endorsers")}
+              color="#E0E9FE"
+              display="flex"
+              alignItems="center">
+              <Text fontSize="18px" fontWeight="500" color="#004CFC">
+                {t("Look for endorsers")}
+              </Text>
             </Button>
             <AppEndorsementInfoCardModal
               isOpen={isOpen}
