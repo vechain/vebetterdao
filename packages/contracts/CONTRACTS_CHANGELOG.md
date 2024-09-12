@@ -16,8 +16,7 @@ A snapshot of the contract(s) at the time of the upgrade is stored in the `depre
 - **New Features:**
   - All functions which required a governance proposal through the `onlyGovernance` modifier have been updated to use the `onlyRoleOrGovernance` modifier. This allows the `DEFAULT_ADMIN_ROLE` to execute these functions without requiring a proposal.
 - **Bug Fixes:** No bug fixes in this version.
-- **Backward Compatibility:**
-  - Fully backward compatible with previous versions with the introduction of `distributeRewardDeprecated` function. This function is planned to be made obsolete in future versions.
+- **Backward Compatibility:** Fully backward compatible.
 - **Migration Details:**
   - All prior contract versions moved to `deprecated/V1` directory.
   - Import statements updated to reflect the new contract versions.
