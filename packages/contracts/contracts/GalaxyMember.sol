@@ -632,15 +632,13 @@ contract GalaxyMember is
   /// @param size The number of tokens to fetch (cannot exceed 100)
   /// @return TokenInfo[] The tokens owned by the address
   function getTokensInfoByOwner(address owner, uint256 page, uint256 size) public view returns (TokenInfo[] memory) {
-    uint256 balance = balanceOf(owner); // Get the number of tokens owned by the address
-
-    // Maximum number of tokens to fetch per page
-    uint256 MAX_PAGINATION_SIZE = 100;
-
     // Ensure size is not 0
     if (size == 0) {
       revert("GalaxyMember: Invalid size, cannot be 0");
     }
+
+    // Maximum number of tokens to fetch per page
+    uint256 MAX_PAGINATION_SIZE = 100;
 
     // Ensure size is not greater than the maximum allowed value
     if (size > MAX_PAGINATION_SIZE) {
@@ -650,6 +648,8 @@ contract GalaxyMember is
         )
       );
     }
+
+    uint256 balance = balanceOf(owner); // Get the number of tokens owned by the address
 
     // Calculate the starting index for the current page
     uint256 start = page * size;
