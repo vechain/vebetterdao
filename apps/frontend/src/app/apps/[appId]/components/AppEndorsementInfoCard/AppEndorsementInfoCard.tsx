@@ -34,7 +34,7 @@ export const AppEndorsementInfoCard = ({ endorsementThreshold, currentScore }: A
             value: endorsementThreshold,
           })}
           <Text as="span" color="blue.500" cursor="pointer">
-            {t("Know more")}
+            {t("Know more.")}
           </Text>
         </Text>
       </CardHeader>
