@@ -25,7 +25,7 @@ pragma solidity 0.8.20;
 
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 
-library WhitelistAndBlacklistLogic {
+library PassportWhitelistAndBlacklistLogic {
   // ---------- Events ---------- //
   /// @notice Emitted when a user is whitelisted
   /// @param user - the user that is whitelisted

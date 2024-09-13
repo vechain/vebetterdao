@@ -25,7 +25,7 @@ pragma solidity 0.8.20;
 
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 
-library PersonhoodSettingsLogic {
+library PassportChecksLogic {
   // ---------- Consants ---------- //
   uint256 constant WHITELIST_CHECK = 1 << 0; // Bitwise shift to the left by 0
   uint256 constant BLACKLIST_CHECK = 1 << 1; // Bitwise shift to the left by 1
