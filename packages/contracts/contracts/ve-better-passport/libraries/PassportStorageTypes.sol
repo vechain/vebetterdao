@@ -32,9 +32,8 @@ import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 library PassportStorageTypes {
   struct PassportStorage {
     // ------------------ Passport Settings ------------------ //
-     // Bitmask of enabled checks (e.g. whitelist, blacklist, signaling, etc.)
+    // Bitmask of enabled checks (e.g. whitelist, blacklist, signaling, etc.)
     uint256 personhoodChecks;
-    
     // ---------- External Contracts ---------- //
     // Address of the xAllocationVoting contract
     IXAllocationVotingGovernor xAllocationVoting;
@@ -42,5 +41,10 @@ library PassportStorageTypes {
     INodeManagement nodeManagement;
     // Address of the galaxy member contract
     IGalaxyMember galaxyMember;
+    // ---------- Blacklisted and Whitelisted info ---------- //
+    // Mapping of whitelisted users
+    mapping(address user => bool) whitelisted; 
+    // Mapping of blacklisted users
+    mapping(address user => bool) blacklisted;
   }
 }
