@@ -64,6 +64,7 @@ contract VeBetterPassport is
     uint256 threshold;
     uint256 signalingThreshold;
     uint256 roundsForCumulativeScore;
+    uint256 minimumGalaxyMemberLevel;
   }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -78,6 +79,7 @@ contract VeBetterPassport is
     require(data.upgrader != address(0), "VeBetterPassport: upgrader is the zero address");
     require(data.nodeManagement != address(0), "VeBetterPassport: nodeManagement is the zero address");
     require(data.galaxyMember != address(0), "VeBetterPassport: galaxyMember is the zero address");
+    require(data.minimumGalaxyMemberLevel > 0, "VeBetterPassport: minimumGalaxyMemberLevel is 0");
 
     __UUPSUpgradeable_init();
     __AccessControl_init();
@@ -92,7 +94,7 @@ contract VeBetterPassport is
     __BotSignaling_init(data.blacklisters, data.signalingThreshold, data.x2EarnApps);
     __PersonhoodDelegation_init();
     __WhitelistAndBlacklist_init(data.whitelisters);
-    __PersonhoodSettings_init(data.settingsManagers);
+    __PersonhoodSettings_init(data.settingsManagers, data.minimumGalaxyMemberLevel);
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
     $.xAllocationVoting = data.xAllocationVoting;
@@ -135,29 +137,45 @@ contract VeBetterPassport is
 
   /**
    * @dev Checks if a wallet is a person or not based on the participation score, blacklisting, and xnode and GM holdings
+   * @return isPerson bool representing if the user is considered a person
+   * @return reason string representing the reason for the result
    */
-  function isPerson(address _user) public view returns (bool) {
+  function isPerson(address _user) public view returns (bool, string memory) {
     // If a wallet is whitelisted, it is a person
-    if (isWhitelisted(_user) && whitelistCheckEnabled()) return true;
+    if (whitelistCheckEnabled() && isWhitelisted(_user)) {
+      return (true, "User is whitelisted");
+    }
 
     // If a wallet is blacklisted, it is not a person
-    if (isBlacklisted(_user) && blacklistCheckEnabled()) return false;
+    if (blacklistCheckEnabled() && isBlacklisted(_user)) {
+      return (false, "User is blacklisted");
+    }
 
     // If a wallet is not whitelisted and has been signaled more than X times
-    if ((signaledCounter(_user) >= signalingThreshold()) && signalingCheckEnabled()) return false;
+    if ((signalingCheckEnabled() && signaledCounter(_user) >= signalingThreshold())) {
+      return (false, "User has been signaled too many times");
+    }
 
     VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
-    // If the user's cumulated score in the last rounds is greater than or equal to the threshold
-    uint256 participationScore = getCumulativeScoreWithDecay(_user, $.xAllocationVoting.currentRoundId());
-    if ((participationScore >= thresholdParticipationScore()) && participationScoreCheckEnabled()) return true;
+
+    if (participationScoreCheckEnabled()) {
+      uint256 participationScore = getCumulativeScoreWithDecay(_user, $.xAllocationVoting.currentRoundId());
+
+      // If the user's cumulated score in the last rounds is greater than or equal to the threshold
+      if ((participationScore >= thresholdParticipationScore())) {
+        return (true, "User's participation score is above the threshold");
+      }
+    }
 
     // Check if user owns an economic or xnode
-    if (($.nodeManagement.getNodeIds(_user).length > 0) && nodeOwnershipCheckEnabled()) return true;
+    if (nodeOwnershipCheckEnabled() && ($.nodeManagement.getNodeIds(_user).length > 0)) {
+      return (true, "User owns an economic or xnode");
+    }
 
-    // Check if user has a GM with a level greater than 0
-    if (($.galaxyMember.getHighestLevel(_user) > 0) && gmOwnershipCheckEnabled()) return true;
+    // TODO: With `GalaxyMember` version 2, Check if user's selected `GalaxyMember` `tokenId` is greater than `getMinimumGalaxyMemberLevel()`
 
-    return false;
+    // If none of the conditions are met, return false with the default reason
+    return (false, "User does not meet the criteria to be considered a person");
   }
 
   /// @notice Returns the version of the contract

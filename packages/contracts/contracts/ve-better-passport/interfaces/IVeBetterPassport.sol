@@ -12,7 +12,7 @@ interface IVeBetterPassport is IWhitelistAndBlacklist, IBotSignaling, IProofOfPa
   error VeBetterPassportUnauthorizedUser(address user);
 
   /// @notice Getter to know if an address can be considered a person.
-  function isPerson(address _user) external view returns (bool);
+  function isPerson(address _user) external view returns (bool, string memory);
 
   /// @notice Assigns a signaler to an app.
   function assignSignalerToApp(bytes32 app, address user) external;
