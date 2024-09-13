@@ -21,32 +21,66 @@ type Props = {
   appId: string | undefined
 }
 
-function getAppEndorsementScoreColor(
-  appExists: boolean | undefined,
-  appEndorsementScore: string | undefined,
-  endorsementScoreThreshold: string | undefined,
-): string {
-  const DEFAULT_COLOR = "#6A6A6A"
-  const FAILURE_COLOR = "#C84968" // Red
-  const WARNING_COLOR = "#F29B32" // Orange
-  const SUCCESS_COLOR = "#3DBA67" // Green
+enum AppEndorsementStatus {
+  NEW_UNENDORSED = "NEW_UNENDORSED",
+  ENDORSED = "ENDORSED",
+  ENDORSEMENT_LOST = "ENDORSEMENT_LOST",
+  UNKNOWN = "UNKNOWN",
+}
 
+function getAppEndorsementStatus(
+  appExists?: boolean,
+  appEndorsementScore?: string,
+  endorsementScoreThreshold?: string,
+): AppEndorsementStatus {
   if (appExists === undefined || appEndorsementScore === undefined || endorsementScoreThreshold === undefined) {
-    return DEFAULT_COLOR
+    return AppEndorsementStatus.UNKNOWN
   }
 
   const appEndorsementScoreNumber = parseInt(appEndorsementScore, 10)
   const endorsementScoreThresholdNumber = parseInt(endorsementScoreThreshold, 10)
 
   if (isNaN(appEndorsementScoreNumber) || isNaN(endorsementScoreThresholdNumber)) {
-    return DEFAULT_COLOR
+    return AppEndorsementStatus.UNKNOWN
   }
 
   if (appEndorsementScoreNumber < endorsementScoreThresholdNumber) {
-    return appExists ? FAILURE_COLOR : WARNING_COLOR
+    return appExists ? AppEndorsementStatus.ENDORSEMENT_LOST : AppEndorsementStatus.NEW_UNENDORSED
   }
 
-  return SUCCESS_COLOR
+  return AppEndorsementStatus.ENDORSED
+}
+
+type scoreColorScheme = {
+  cardBorderColor: string
+  cardBoxShadow?: string
+  textColor: string
+}
+
+function getScoreColorScheme(appEndorsementStatus: string): scoreColorScheme {
+  // Gray
+  const DEFAULT_STYLE = { cardBorderColor: "#D5D5D5", textColor: "#6A6A6A" }
+  // Red
+  const FAILURE_STYLE = { cardBorderColor: "#C84968", cardBoxShadow: "0px 0px 5px 0px #D23F6366", textColor: "#C84968" }
+  // Yellow
+  const WARNING_STYLE = {
+    cardBorderColor: "#FFE4C3",
+    cardBoxShadow: "0px 0px 7.9px 0px #F29B3280",
+    textColor: "#F29B32",
+  }
+  // Green
+  const SUCCESS_STYLE = { cardBorderColor: "#D5D5D5", textColor: "#3DBA67" }
+
+  switch (appEndorsementStatus) {
+    case AppEndorsementStatus.NEW_UNENDORSED:
+      return WARNING_STYLE
+    case AppEndorsementStatus.ENDORSEMENT_LOST:
+      return FAILURE_STYLE
+    case AppEndorsementStatus.ENDORSED:
+      return SUCCESS_STYLE
+    default:
+      return DEFAULT_STYLE
+  }
 }
 
 export const AppEndorsementInfoCard = ({ appId }: Props) => {
@@ -57,7 +91,9 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
   const { data: appEndorsers } = useAppEndorsers(appId ?? "")
   const { data: appExists } = useAppExists(appId ?? "")
 
-  const scoreColor = getAppEndorsementScoreColor(appExists, appEndorsementScore, endorsementScoreThreshold)
+  // Figure out the current endorsement status to determine the color scheme
+  const appEndorsementStatus = getAppEndorsementStatus(appExists, appEndorsementScore, endorsementScoreThreshold)
+  const scoreColorScheme = getScoreColorScheme(appEndorsementStatus)
 
   // Modal
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -76,9 +112,9 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
       p="24px"
       gap="24px"
       border="1px"
-      borderColor="#FFE4C3"
       borderRadius="12px"
-      boxShadow={`0px 0px 7.9px 0px ${scoreColor}80`}>
+      borderColor={scoreColorScheme.cardBorderColor}
+      boxShadow={scoreColorScheme.cardBoxShadow}>
       <CardHeader p={0}>
         <Heading fontSize="24px" fontWeight="bold">
           {t("Endorsement")}
@@ -99,7 +135,7 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
           <Box>
             <Text fontSize="16px">{t("Current score")}</Text>
             <Box display="flex" alignItems="center">
-              <Text fontSize="36px" fontWeight="700" color={scoreColor}>
+              <Text fontSize="36px" fontWeight="700" color={scoreColorScheme.textColor}>
                 {appEndorsementScore}
               </Text>
               <Text fontSize="14px" color="#6A6A6A" pt={4} pl={1}>
