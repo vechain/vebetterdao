@@ -13,7 +13,8 @@ contract PersonhoodSettings is Initializable, AccessControlUpgradeable, IPersonh
   // ---------- Storage ---------- //
 
   struct PersonhoodSettingsStorage {
-    uint256 checks;
+    uint256 checks; // Bitmask to store the enabled checks
+    uint256 minimumGalaxyMemberLevel; // Minimum galaxy member level required for personhood
   }
 
   // keccak256(abi.encode(uint256(keccak256("storage.PersonhoodSettings")) - 1)) & ~bytes32(uint256(0xff))
@@ -49,17 +50,25 @@ contract PersonhoodSettings is Initializable, AccessControlUpgradeable, IPersonh
     _disableInitializers();
   }
 
- 
   /// @dev Initializes the contract.
-  function __PersonhoodSettings_init(address[] memory settingsManagers) internal onlyInitializing {
-    __PersonhoodSettings_init_unchained(settingsManagers);
+  function __PersonhoodSettings_init(
+    address[] memory settingsManagers,
+    uint256 minimumGalaxyMemberLevel
+  ) internal onlyInitializing {
+    __PersonhoodSettings_init_unchained(settingsManagers, minimumGalaxyMemberLevel);
   }
 
-  function __PersonhoodSettings_init_unchained(address[] memory settingsManagers) internal onlyInitializing {
+  function __PersonhoodSettings_init_unchained(
+    address[] memory settingsManagers,
+    uint256 minimumGalaxyMemberLevel
+  ) internal onlyInitializing {
     for (uint256 i; i < settingsManagers.length; i++) {
       require(settingsManagers[i] != address(0), "PersonhoodSettings: settings manager address cannot be zero");
       _grantRole(SETTINGS_MANAGER_ROLE, settingsManagers[i]);
     }
+
+    PersonhoodSettingsStorage storage $ = _getPersonhoodSettingsStorage();
+    $.minimumGalaxyMemberLevel = minimumGalaxyMemberLevel;
   }
 
   // ---------- Internal Functions ---------- //
@@ -112,6 +121,12 @@ contract PersonhoodSettings is Initializable, AccessControlUpgradeable, IPersonh
     return _isCheckEnabled(GM_OWNERSHIP_CHECK);
   }
 
+  /// @notice Returns the minimum galaxy member level
+  function getMinimumGalaxyMemberLevel() public view returns (uint256) {
+    PersonhoodSettingsStorage storage $ = _getPersonhoodSettingsStorage();
+    return $.minimumGalaxyMemberLevel;
+  }
+
   // ---------- External Functions (Restricted) ---------- //
 
   /// @notice Toggles the whitelist check
@@ -142,5 +157,16 @@ contract PersonhoodSettings is Initializable, AccessControlUpgradeable, IPersonh
   /// @notice Toggles the GM ownership check
   function toggleGMOwnershipCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
     _toggleCheck(GM_OWNERSHIP_CHECK, GM_OWNERSHIP_CHECK_NAME);
+  }
+
+  /// @notice Sets the minimum galaxy member level
+  /// @param minimumGalaxyMemberLevel The new minimum galaxy member level
+  function setMinimumGalaxyMemberLevel(uint256 minimumGalaxyMemberLevel) external onlyRole(SETTINGS_MANAGER_ROLE) {
+    require(minimumGalaxyMemberLevel > 0, "PersonhoodSettings: minimum galaxy member level must be greater than 0");
+
+    PersonhoodSettingsStorage storage $ = _getPersonhoodSettingsStorage();
+
+    $.minimumGalaxyMemberLevel = minimumGalaxyMemberLevel;
+    emit MinimumGalaxyMemberLevelSet(minimumGalaxyMemberLevel);
   }
 }

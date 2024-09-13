@@ -11,6 +11,10 @@ interface IPersonhoodSettings {
   /// @param enabled True if the check is enabled, false if disabled.
   event CheckToggled(string indexed checkName, bool enabled);
 
+  /// @notice Emitted when the minimum galaxy member level is set.
+  /// @param minimumGalaxyMemberLevel The new minimum galaxy member level.
+  event MinimumGalaxyMemberLevelSet(uint256 minimumGalaxyMemberLevel);
+
   // ---------- View Functions ---------- //
 
   /// @notice Returns if the whitelist check is enabled.
