@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - testnet
+      - quadratic-voting-removal
   push:
     branches:
       - main
