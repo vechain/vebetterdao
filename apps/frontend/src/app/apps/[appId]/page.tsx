@@ -22,7 +22,8 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
 
   const xApps = await getXApps(connex.thor)
 
-  const app = xApps.find(app => compareAddresses(app.id, id))
+  const allApps = xApps.active.concat(xApps.unendorsed)
+  const app = allApps.find(app => compareAddresses(app.id, id))
 
   if (!app) throw new Error(`App ${id} not found`)
 

@@ -67,6 +67,7 @@ interface DeployInstance {
   treasury: Treasury
   nodeManagement: NodeManagement
   x2EarnRewardsPool: X2EarnRewardsPool
+  nodeManagement: NodeManagement
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner

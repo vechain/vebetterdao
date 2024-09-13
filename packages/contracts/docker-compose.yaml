@@ -34,6 +34,17 @@ services:
     networks:
       - vechain-thor
 
+  inspector:
+    image: ghcr.io/vechain/inspector-app:master
+    hostname: inspector
+    container_name: inspector
+    environment:
+      - VUE_APP_SOLO_URL=http://localhost:8669
+    ports:
+      - "8081:80"
+    networks:
+      - vechain-thor
+
 networks:
   vechain-thor:
     driver: bridge
