@@ -1,11 +1,15 @@
 import inquirer from "inquirer"
 import { execSync } from "child_process"
+import { EnvConfig } from "@repo/config/contracts"
 import { upgradeConfig } from "./upgradesConfig"
+import { getConfig } from "@repo/config"
 
 async function upgradeContract() {
   try {
     const env = process.env.NEXT_PUBLIC_APP_ENV
     if (!env) throw new Error("Environment variable NEXT_PUBLIC_APP_ENV is not set.")
+
+    const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
     // Prompt the user to select a contract to upgrade
     const { contract } = await inquirer.prompt<{ contract: keyof typeof upgradeConfig }>({
@@ -33,6 +37,7 @@ async function upgradeContract() {
 
     console.log(`You are about to upgrade the following contract:`)
     console.log(`\nContract: ${selectedContract.name}`)
+    console.log(`Contract address: ${(config as any)[selectedContract.configAddressField]}`)
     console.log(`Version: ${version}`)
     console.log(`Upgrade description: ${selectedContract.descriptions[version]}`)
     console.log(`Environment: ${env}\n`)
