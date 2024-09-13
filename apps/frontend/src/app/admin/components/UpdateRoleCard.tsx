@@ -3,6 +3,7 @@ import { TransactionModal } from "@/components"
 import { CONTRACT_LIST } from "@/constants"
 import { useAccessControl } from "@/hooks"
 import {
+  Badge,
   Button,
   Card,
   CardBody,
@@ -11,11 +12,14 @@ import {
   FormErrorMessage,
   FormLabel,
   Heading,
+  HStack,
   Input,
   Select,
+  Text,
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
+import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useMemo, useState } from "react"
@@ -69,7 +73,7 @@ export const UpdateRoleCard = () => {
       accessControlAction.sendTransaction()
       onOpen()
     },
-    [accessControlAction?.status, userAlreadyHasRole, onOpen],
+    [accessControlAction, userAlreadyHasRole, onOpen],
   )
 
   const handleClose = useCallback(() => {
@@ -77,12 +81,21 @@ export const UpdateRoleCard = () => {
     onClose()
   }, [accessControlAction, userAlreadyHasRole, onClose])
 
+  const ellipsisAddress = (address: string, startLength = 6, endLength = 4) => {
+    if (!address) return ""
+    const start = address.slice(0, startLength)
+    const end = address.slice(-endLength)
+    return `${start}...${end}`
+  }
+
   return (
     <>
       <Card w={"full"}>
         <CardHeader>
           <Heading size="lg">{t("Update Address Role")}</Heading>
+          <Text fontSize="sm">{t("Grant or revoke a role to a wallet address on a smart contract")}</Text>
         </CardHeader>
+
         <CardBody>
           <form onSubmit={handleSubmit}>
             <VStack spacing={4} alignItems={"start"}>
@@ -90,7 +103,10 @@ export const UpdateRoleCard = () => {
                 <FormLabel>{t("Select Contract")}</FormLabel>
                 <Select
                   placeholder={t("Select Contract")}
-                  onChange={e => setSelectedContractAddress(e.target.value)}
+                  onChange={e => {
+                    setSelectedContractAddress(e.target.value)
+                    setSelectedRole("")
+                  }}
                   value={selectedContractAddress}>
                   {CONTRACT_LIST.map(contract => (
                     <option key={contract.contractAddress} value={contract.contractAddress}>
@@ -129,7 +145,28 @@ export const UpdateRoleCard = () => {
                 <FormErrorMessage>{t("Invalid address")}</FormErrorMessage>
               </FormControl>
 
-              <Button isDisabled={!isFormValid} colorScheme="blue" type="submit">
+              {isFormValid ? (
+                <HStack w="full">
+                  {userAlreadyHasRole ? (
+                    <UilCheckCircle size={20} color="green" />
+                  ) : (
+                    <UilExclamationCircle size={20} color="red" />
+                  )}
+                  <Badge textTransform={"none"} fontSize={"sm"} colorScheme={userAlreadyHasRole ? "green" : "red"}>
+                    {userAlreadyHasRole
+                      ? t("Wallet '{{ellipsisAddress}}' already has '{{selectedRole}}' role", {
+                          ellipsisAddress: ellipsisAddress(walletAddress),
+                          selectedRole,
+                        })
+                      : t("Wallet '{{ellipsisAddress}}' doesn't have '{{selectedRole}}' role", {
+                          ellipsisAddress: ellipsisAddress(walletAddress),
+                          selectedRole,
+                        })}
+                  </Badge>
+                </HStack>
+              ) : null}
+
+              <Button isDisabled={!isFormValid} colorScheme={userAlreadyHasRole ? "red" : "green"} type="submit">
                 {userAlreadyHasRole ? t("Revoke Role") : t("Grant Role")}
               </Button>
             </VStack>

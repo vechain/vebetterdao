@@ -1,4 +1,7 @@
 {
+  "Wallet '{{ellipsisAddress}}' doesn't have '{{selectedRole}}' role": "Wallet '{{ellipsisAddress}}' doesn't have '{{selectedRole}}' role",
+  "Wallet '{{ellipsisAddress}}' already has '{{selectedRole}}' role": "Wallet '{{ellipsisAddress}}' already has '{{selectedRole}}' role",
+  "Grant or revoke a role to a wallet address on a smart contract": "Grant or revoke a role to a wallet address on a smart contract",
   "Update Address Role": "Update Address Role",
   "Select Contract": "Select Contract",
   "Select Role": "Select Role",
