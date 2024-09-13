@@ -1,4 +1,4 @@
-import { useAppEndorsementScore, useAppEndorsers, useEndorsementScoreThreshold } from "@/api"
+import { useAppEndorsementScore, useAppEndorsers, useAppExists, useEndorsementScoreThreshold } from "@/api"
 import { VeBetterIcon } from "@/components"
 import {
   Box,
@@ -15,9 +15,38 @@ import {
 } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
+import { AddressIcon } from "@/components/AddressIcon"
 
 type Props = {
   appId: string | undefined
+}
+
+function getAppEndorsementScoreColor(
+  appExists: boolean | undefined,
+  appEndorsementScore: string | undefined,
+  endorsementScoreThreshold: string | undefined,
+): string {
+  const DEFAULT_COLOR = "#6A6A6A"
+  const FAILURE_COLOR = "#C84968" // Red
+  const WARNING_COLOR = "#F29B32" // Orange
+  const SUCCESS_COLOR = "#3DBA67" // Green
+
+  if (appExists === undefined || appEndorsementScore === undefined || endorsementScoreThreshold === undefined) {
+    return DEFAULT_COLOR
+  }
+
+  const appEndorsementScoreNumber = parseInt(appEndorsementScore, 10)
+  const endorsementScoreThresholdNumber = parseInt(endorsementScoreThreshold, 10)
+
+  if (isNaN(appEndorsementScoreNumber) || isNaN(endorsementScoreThresholdNumber)) {
+    return DEFAULT_COLOR
+  }
+
+  if (appEndorsementScoreNumber < endorsementScoreThresholdNumber) {
+    return appExists ? FAILURE_COLOR : WARNING_COLOR
+  }
+
+  return SUCCESS_COLOR
 }
 
 export const AppEndorsementInfoCard = ({ appId }: Props) => {
@@ -26,6 +55,9 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
   const { data: appEndorsementScore } = useAppEndorsementScore(appId ?? "")
   const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
   const { data: appEndorsers } = useAppEndorsers(appId ?? "")
+  const { data: appExists } = useAppExists(appId ?? "")
+
+  const scoreColor = getAppEndorsementScoreColor(appExists, appEndorsementScore, endorsementScoreThreshold)
 
   // Modal
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -46,7 +78,7 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
       border="1px"
       borderColor="#FFE4C3"
       borderRadius="12px"
-      boxShadow="0px 0px 7.9px 0px #F29B3280">
+      boxShadow={`0px 0px 7.9px 0px ${scoreColor}80`}>
       <CardHeader p={0}>
         <Heading fontSize="24px" fontWeight="bold">
           {t("Endorsement")}
@@ -67,7 +99,7 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
           <Box>
             <Text fontSize="16px">{t("Current score")}</Text>
             <Box display="flex" alignItems="center">
-              <Text fontSize="36px" fontWeight="700" color="#F29B32">
+              <Text fontSize="36px" fontWeight="700" color={scoreColor}>
                 {appEndorsementScore}
               </Text>
               <Text fontSize="14px" color="#6A6A6A" pt={4} pl={1}>
@@ -78,7 +110,11 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
           <Divider />
           <Box textAlign="center">
             {appEndorsers && appEndorsers.length ? (
-              appEndorsers
+              appEndorsers.map((endorser, index) => (
+                <Box key={index}>
+                  <AddressIcon address={endorser} rounded="full" h="20px" w="20px" />
+                </Box>
+              ))
             ) : (
               <Text fontSize="14px" fontWeight="bold">
                 {t("Nobody is endorsing your app")}
