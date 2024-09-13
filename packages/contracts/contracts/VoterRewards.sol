@@ -150,6 +150,53 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     _disableInitializers();
   }
 
+  /// @notice Initialize the VoterRewards contract.
+  /// @param admin - The address of the admin.
+  /// @param upgrader - The address of the upgrader.
+  /// @param contractsAddressManager - The address of the contract address manager.
+  /// @param _emissions - The address of the emissions contract.
+  /// @param _galaxyMember - The address of the Galaxy Member contract.
+  /// @param _b3tr - The address of the B3TR token contract.
+  /// @param levels - The levels of the Galaxy Member NFTs.
+  /// @param multipliers  - The multipliers for the levels of the Galaxy Member NFTs.
+  function initialize(
+    address admin,
+    address upgrader,
+    address contractsAddressManager,
+    address _emissions,
+    address _galaxyMember,
+    address _b3tr,
+    uint256[] memory levels,
+    uint256[] memory multipliers
+  ) external initializer {
+    require(_galaxyMember != address(0), "VoterRewards: _galaxyMember cannot be the zero address");
+    require(_emissions != address(0), "VoterRewards: emissions cannot be the zero address");
+    require(_b3tr != address(0), "VoterRewards: _b3tr cannot be the zero address");
+
+    require(levels.length > 0, "VoterRewards: levels must have at least one element");
+    require(levels.length == multipliers.length, "VoterRewards: levels and multipliers must have the same length");
+
+    __AccessControl_init();
+    __ReentrancyGuard_init();
+    __UUPSUpgradeable_init();
+
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    $.galaxyMember = IGalaxyMember(_galaxyMember);
+    $.b3tr = IB3TR(_b3tr);
+    $.emissions = IEmissions(_emissions);
+
+    // Set the level to multiplier mapping.
+    for (uint256 i; i < levels.length; i++) {
+      $.levelToMultiplier[levels[i]] = multipliers[i];
+    }
+
+    require(admin != address(0), "VoterRewards: admin cannot be the zero address");
+    _grantRole(DEFAULT_ADMIN_ROLE, admin);
+    _grantRole(UPGRADER_ROLE, upgrader);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, contractsAddressManager);
+  }
+
   /// @notice Upgrade the implementation of the VoterRewards contract.
   /// @dev Only the address with the UPGRADER_ROLE can call this function.
   /// @param newImplementation - The address of the new implementation contract.
