@@ -24,7 +24,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const endorsementScore = useAppEndorsementScore(xApp.id)
   const endorsementScoreThreshold = useEndorsementScoreThreshold()
 
-  const userDelegatedNodes = useUserXNodes(account ?? undefined)
+  const userDelegatedNodes = useUserXNodes()
 
   const nodeId = userDelegatedNodes.data?.[0]?.id ?? "0"
 

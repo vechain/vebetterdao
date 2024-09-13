@@ -2,7 +2,7 @@ import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constant
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { abi } from "thor-devkit"
 const NODEMANAGEMENT_CONTRACT = getConfig().nodeManagementContractAddress
 const getNodeIdsFragment = NodeManagement__factory.createInterface().getFunction("getNodeIds").format("json")
@@ -73,7 +73,7 @@ export const getUserXNodesQueryKey = (user?: string) => ["XNodes", user]
  * @param user  the user address
  * @returns  the xNodes for the user
  */
-export const useUserXNodes = (user?: string) => {
+export const useXNodes = (user?: string) => {
   const { thor } = useConnex()
 
   return useQuery({
@@ -81,4 +81,13 @@ export const useUserXNodes = (user?: string) => {
     queryFn: async () => await getUserXNodes(thor, user),
     enabled: !!thor && !!user,
   })
+}
+
+/**
+ *  Hook to get the owned or delegated xNodes for a user from the NodeManagement contract
+ * @returns  the xNodes for the user
+ */
+export const useUserXNodes = () => {
+  const { account } = useWallet()
+  return useXNodes(account || undefined)
 }
