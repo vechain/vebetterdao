@@ -1,4 +1,11 @@
-import { useAppEndorsementScore, useAppEndorsers, useAppExists, useEndorsementScoreThreshold } from "@/api"
+import {
+  useAppEndorsementScore,
+  useAppEndorsers,
+  useAppExists,
+  useEndorsementScoreThreshold,
+  useIsAppAdmin,
+  useIsAppModerator,
+} from "@/api"
 import { VeBetterIcon } from "@/components"
 import {
   Box,
@@ -17,10 +24,6 @@ import {
 import { Trans, useTranslation } from "react-i18next"
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 import { AddressIcon } from "@/components/AddressIcon"
-
-type Props = {
-  appId: string | undefined
-}
 
 enum AppEndorsementStatus {
   NEW_UNENDORSED = "NEW_UNENDORSED",
@@ -84,13 +87,22 @@ function getScoreColorScheme(appEndorsementStatus: string): scoreColorScheme {
   }
 }
 
-export const AppEndorsementInfoCard = ({ appId }: Props) => {
+type Props = {
+  appId: string
+  account: string
+}
+
+export const AppEndorsementInfoCard = ({ appId, account }: Props) => {
   const { t } = useTranslation()
 
-  const { data: appEndorsementScore } = useAppEndorsementScore(appId ?? "")
+  const { data: appEndorsementScore } = useAppEndorsementScore(appId)
   const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
-  const { data: appEndorsers } = useAppEndorsers(appId ?? "")
-  const { data: appExists } = useAppExists(appId ?? "")
+  const { data: appEndorsers } = useAppEndorsers(appId)
+  const { data: appExists } = useAppExists(appId)
+
+  // Conditional rendering based on user role
+  const { data: isAppModerator } = useIsAppModerator(appId, account)
+  const { data: isAppAdmin } = useIsAppAdmin(appId, account)
 
   // Figure out the current endorsement status to determine the color scheme
   const appEndorsementStatus = getAppEndorsementStatus(appExists, appEndorsementScore, endorsementScoreThreshold)
@@ -166,31 +178,33 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
               </HStack>
             ) : (
               <Text fontSize="14px" fontWeight="bold">
-                {t("Nobody is endorsing your app")}
+                {isAppModerator || isAppAdmin ? t("Nobody is endorsing your app") : t("Not endorsed by anyone")}
               </Text>
             )}
           </Box>
           <Box textAlign="center" py={6}>
-            <Button
-              leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
-              w="full"
-              borderRadius="full"
-              color="#E0E9FE"
-              display="flex"
-              alignItems="center">
-              <Text fontSize="18px" fontWeight="500" color="#004CFC">
-                {t("Look for endorsers")}
-              </Text>
-            </Button>
-            <AppEndorsementInfoCardModal
-              isOpen={isOpen}
-              onClose={onClose}
-              listOfEndorsements={defaultEndorsements}
-              XApps={XApps}
-            />
+            {(isAppModerator || isAppAdmin) && (
+              <Button
+                leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
+                w="full"
+                borderRadius="full"
+                color="#E0E9FE"
+                display="flex"
+                alignItems="center">
+                <Text fontSize="18px" fontWeight="500" color="#004CFC">
+                  {t("Look for endorsers")}
+                </Text>
+              </Button>
+            )}
           </Box>
         </Stack>
       </CardBody>
+      <AppEndorsementInfoCardModal
+        isOpen={isOpen}
+        onClose={onClose}
+        listOfEndorsements={defaultEndorsements}
+        XApps={XApps}
+      />
     </Card>
   )
 }
