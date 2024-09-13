@@ -1,4 +1,4 @@
-import { useSelectedGmNft, useXNode } from "@/api"
+import { useSelectedGmNft } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { Box, Button, Card, CardBody, Flex, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle, UilLink, UilLinkBroken } from "@iconscout/react-unicons"
@@ -9,8 +9,7 @@ import { FaChevronRight } from "react-icons/fa6"
 
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
-  const { isXNodeAttachedToGM } = useXNode()
-  const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel } = useSelectedGmNft()
+  const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, isXNodeAttachedToGM } = useSelectedGmNft()
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {

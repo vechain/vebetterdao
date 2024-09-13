@@ -1,4 +1,4 @@
-import { useXNode } from "@/api"
+import { useSelectedGmNft, useXNode } from "@/api"
 import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle, UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
@@ -8,7 +8,8 @@ import { FaChevronRight } from "react-icons/fa6"
 
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeAttachedToGM } = useXNode()
+  const { isXNodeAttachedToGM } = useSelectedGmNft()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder } = useXNode()
 
   const router = useRouter()
   const goToXnodePage = useCallback(() => {

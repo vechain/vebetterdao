@@ -8,6 +8,8 @@ import { useIpfsImage, useIpfsMetadata } from "@/api/ipfs"
 import { useLevelOfToken } from "./useLevelOfToken"
 import { useLevelMultiplier } from "./useLevelMultiplier"
 import { useB3trToUpgradeToLevel } from "./useB3trToUpgradeToLevel"
+import { useGetNodeIdAttached } from "./useGetNodeIdAttached"
+import { useXNode } from "../../xNodes"
 
 /**
  * Custom hook for retrieving data related to a Galaxy Member NFT.
@@ -20,6 +22,7 @@ import { useB3trToUpgradeToLevel } from "./useB3trToUpgradeToLevel"
  *   - isGMLoading: A boolean indicating whether the Galaxy Member NFT data is currently being loaded.
  *   - isGMOwned: A boolean indicating whether the user owns the Galaxy Member NFT.
  *   - isGMClaimable: A boolean indicating whether the Galaxy Member NFT is claimable.
+ *   - attachedNodeId: The ID of the node attached to the Galaxy Member NFT.
  */
 export const useSelectedGmNft = () => {
   const { isOwned: isGMOwned, isClaimable: isGMClaimable } = useIsGMclaimable()
@@ -81,6 +84,13 @@ export const useSelectedGmNft = () => {
     error: errorImageData,
   } = useIpfsImage(nftMetadata?.image ?? null)
 
+  const {
+    data: attachedNodeId,
+    isLoading: isLoadingAttachedNodeId,
+    isError: isErrorAttachedNodeId,
+    error: errorAttachedNodeId,
+  } = useGetNodeIdAttached(selectedTokenId)
+
   const isLoading =
     isGMLoading ||
     isSelectedTokenIdLoading ||
@@ -90,7 +100,8 @@ export const useSelectedGmNft = () => {
     isLevelOfTokenLoading ||
     isGMLoadingMultiplier ||
     isB3trToUpgradeGMToNextLevelLoading ||
-    isNextLevelGMRewardMultiplierLoading
+    isNextLevelGMRewardMultiplierLoading ||
+    isLoadingAttachedNodeId
   const isError =
     isErrorSelectedTokenId ||
     isErrorMetadataUri ||
@@ -99,7 +110,8 @@ export const useSelectedGmNft = () => {
     isErrorLevelOfToken ||
     isErrorGMLoadingMultiplier ||
     isErrorB3trToUpgradeGMToNextLevel ||
-    isErrorNextLevelGMRewardMultiplier
+    isErrorNextLevelGMRewardMultiplier ||
+    isErrorAttachedNodeId
   const error =
     errorSelectedTokenIdError ||
     errorMetadataURI ||
@@ -108,10 +120,14 @@ export const useSelectedGmNft = () => {
     errorLevelOfToken ||
     errorGMLoadingMultiplier ||
     errorB3trToUpgradeGMToNextLevel ||
-    errorNextLevelGMRewardMultiplier
+    errorNextLevelGMRewardMultiplier ||
+    errorAttachedNodeId
 
   const isEnoughBalanceToUpgradeGM = b3trBalance && Number(b3trBalance?.scaled || 0) >= b3trToUpgradeGMToNextLevel
   const missingB3trToUpgrade = b3trToUpgradeGMToNextLevel - Number(b3trBalance?.scaled || 0)
+
+  const { xNodeId } = useXNode()
+  const isXNodeAttachedToGM = attachedNodeId === xNodeId
 
   return {
     gmImage: gmImage?.image || notFoundImage,
@@ -125,8 +141,10 @@ export const useSelectedGmNft = () => {
     b3trToUpgradeGMToNextLevel,
     isEnoughBalanceToUpgradeGM,
     missingB3trToUpgrade,
+    attachedNodeId,
     isLoading,
     isError,
     error,
+    isXNodeAttachedToGM,
   }
 }

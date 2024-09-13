@@ -31,8 +31,9 @@ export const GMUpgradeButton = () => {
     b3trToUpgradeGMToNextLevel,
     missingB3trToUpgrade,
     isEnoughBalanceToUpgradeGM,
+    isXNodeAttachedToGM,
   } = useSelectedGmNft()
-  const { isXNodeHolder, isXNodeAttachedToGM } = useXNode()
+  const { isXNodeHolder } = useXNode()
 
   const { isLoading: isB3trBalanceLoading } = useUserB3trBalance()
 
