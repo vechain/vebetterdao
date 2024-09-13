@@ -232,4 +232,19 @@ contract VeBetterPassport is
   function removeSignalerFromApp(address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
     _removeSignalerFromApp(user);
   }
+
+  /// @notice Resets the signals of a user
+  /// @dev assigns the signals of a user to zero
+  /// @param _user - the address of the user
+  function resetUserSignals(address _user) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    _resetUserSignals(_user, "");
+  }
+
+  /// @notice Resets the signals of a user with a given reason
+  /// @dev assigns the signals of a user to zero
+  /// @param _user - the address of the user
+  /// @param _reason - the reason for resetting the signals
+  function resetUserSignalsWithReason(address _user, string memory _reason) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    _resetUserSignals(_user, _reason);
+  }
 }

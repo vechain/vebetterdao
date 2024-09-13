@@ -20,6 +20,15 @@ interface IVeBetterPassport is IWhitelistAndBlacklist, IBotSignaling, IProofOfPa
   /// @notice Removes a signaler from an app.
   function removeSignalerFromApp(address user) external;
 
+  /// @notice Resets the signals of a user.
+  /// @param user The address of the user.
+  function resetUserSignals(address user) external;
+
+  /// @notice Resets the signals of a user with a reason.
+  /// @param user The address of the user.
+  /// @param reason The reason for resetting the signals.
+  function resetUserSignalsWithReason(address user, string memory reason) external;
+
   /// @notice Grants a role to a user.
   function grantRole(bytes32 role, address user) external;
 

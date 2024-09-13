@@ -11,6 +11,11 @@ interface IBotSignaling {
   /// @param reason  The reason for signaling the user.
   event UserSignaled(address indexed user, address indexed signaler, bytes32 indexed app, string reason);
 
+  /// @notice Emitted when a user's signals are reset.
+  /// @param user  The address of the user that had their signals reset.
+  /// @param reason - The reason for resetting the signals.
+  event UserSignalsReset(address indexed user, string reason);
+
   /// @notice Emited when an address is associated with an app.
   /// @param signaler  The address of the signaler.
   /// @param app  The app that the signaler was associated with.
@@ -27,6 +32,14 @@ interface IBotSignaling {
 
   /// @notice Signals a user.
   function signalUser(address user) external;
+
+  /// @notice Assigns a signaler to an app.
+  /// @dev Only the app admin can assign a signaler to an app.
+  function assignSignalerToAppByAppAdmin(bytes32 _app, address _user) external;
+
+  /// @notice Removes a signaler from an app.
+  /// @dev Only the app admin can remove a signaler from an app.
+  function removeSignalerFromAppByAppAdmin(address _user) external;
 
   /// @notice Signals a user with a reason.
   function signalUserWithReason(address user, string memory reason) external;

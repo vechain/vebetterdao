@@ -131,6 +131,16 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     emit UserSignaled(_user, msg.sender, app, reason);
   }
 
+  /// @notice Resets the signals of a user
+  /// @param _user - the user to reset the signals of
+  /// @param _reason - the reason for resetting the signals
+  function _resetUserSignals(address _user, string memory _reason) internal virtual {
+    BotSignalingStorage storage $ = _getBotSignalingStorage();
+    $._signaledCounter[_user] = 0;
+
+    emit UserSignalsReset(_user, _reason);
+  }
+
   /// @notice this method allows an app admin to assign a signaler to an app
   /// @param _app - the app to assign the signaler to
   /// @param _user - the signaler to assign to the app
