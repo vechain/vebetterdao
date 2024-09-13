@@ -1,4 +1,11 @@
 {
+  "Update Address Role": "Update Address Role",
+  "Select Contract": "Select Contract",
+  "Select Role": "Select Role",
+  "Grant Role": "Grant Role",
+  "Revoke Role": "Revoke Role",
+  "Enter wallet address to grant or revoke role": "Enter wallet address to grant or revoke role",
+  "Wallet Address": "Wallet Address",
   "Proposal canceled by creator or VeBetter": "Proposal canceled by creator or VeBetter",
   "Defeated": "Defeated",
   "Succeeded": "Succeeded",
