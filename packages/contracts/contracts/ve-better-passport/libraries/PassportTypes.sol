@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: MIT
+
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
+pragma solidity 0.8.20;
+
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
+import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
+import { INodeManagement } from "../../interfaces/INodeManagement.sol";
+
+library PassportTypes {
+  /**
+   * @dev Struct containing data to initialize the contract
+   * @param xAllocationVoting The address of the xAllocationVoting
+   * @param x2EarnApps The address of the x2EarnApps
+   * @param nodeManagement The address of the node management contract
+   * @param galaxyMember The address of the galaxy member contract
+   * @param upgrader The address of the upgrader
+   * @param admins The addresses of the admins
+   * @param settingsManagers The addresses of the settings managers
+   * @param roleGranters The addresses of the role granters
+   * @param blacklisters The addresses of the blacklisters
+   * @param whitelisters The addresses of the whitelisters
+   * @param actionRegistrar The address of the action registrar
+   * @param actionScoreManager The address of the action score manager
+   * @param threshold The threshold for a proposal to be active
+   * @param signalingThreshold The threshold for a proposal to be active
+   * @param roundsForCumulativeScore The number of rounds for cumulative score
+   */
+  struct InitializationData {
+    IXAllocationVotingGovernor xAllocationVoting;
+    IX2EarnApps x2EarnApps;
+    IGalaxyMember galaxyMember;
+    INodeManagement nodeManagement;
+    address upgrader;
+    address settingsManagers;
+    address[] admins;
+    address[] roleGranters;
+    address[] blacklisters;
+    address[] whitelisters;
+    address actionRegistrar;
+    address actionScoreManager;
+    uint256 threshold;
+    uint256 signalingThreshold;
+    uint256 roundsForCumulativeScore;
+  }
+}
