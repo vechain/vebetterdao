@@ -107,18 +107,6 @@
     "upgrade:contract:mainnet": {
       "dependsOn": ["upgrade:contract"]
     },
-    "upgrade:xallocation-pool": {
-      "dependsOn": ["^upgrade:xallocation-pool", "@repo/config#check-or-generate-local-config"]
-    },
-    "upgrade:xallocation-pool:solo-staging": {
-      "dependsOn": ["^upgrade:xallocation-pool:solo-staging"]
-    },
-    "upgrade:xallocation-pool:testnet": {
-      "dependsOn": ["^upgrade:xallocation-pool:testnet"]
-    },
-    "upgrade:xallocation-pool:mainnet": {
-      "dependsOn": ["^upgrade:xallocation-pool:mainnet"]
-    },
     "start-round:testnet": {
       "dependsOn": ["@repo/config#check-or-generate-local-config"],
       "cache": false
