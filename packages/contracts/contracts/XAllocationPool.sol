@@ -647,4 +647,11 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   function clock() public view virtual returns (uint48) {
     return Time.blockNumber();
   }
+
+  /**
+   * @dev Returns the mode of the clock.
+   */
+  function CLOCK_MODE() public view virtual returns (string memory) {
+    return "mode=blocknumber&from=default";
+  }
 }
