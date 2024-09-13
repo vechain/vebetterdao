@@ -8,6 +8,7 @@ import {
   CardHeader,
   Divider,
   Heading,
+  HStack,
   Link,
   Stack,
   Text,
@@ -146,11 +147,23 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
           <Divider />
           <Box textAlign="center">
             {appEndorsers && appEndorsers.length ? (
-              appEndorsers.map((endorser, index) => (
-                <Box key={index}>
-                  <AddressIcon address={endorser} rounded="full" h="20px" w="20px" />
+              <HStack justify={"space-between"}>
+                <Box>
+                  {appEndorsers.map((endorser: string, index: number) => (
+                    <Box key={index}>
+                      <AddressIcon address={endorser} rounded="full" h="20px" w="20px" />
+                    </Box>
+                  ))}
                 </Box>
-              ))
+                <Text as="span" fontSize="14px" fontWeight="bold">
+                  {appEndorsers.length > 1
+                    ? t("{{value}}-x-node-users", { value: appEndorsers.length })
+                    : t("1-x-node-user")}
+                </Text>
+                <Link fontSize="14px" color="#004CFC">
+                  {t("See all")}
+                </Link>
+              </HStack>
             ) : (
               <Text fontSize="14px" fontWeight="bold">
                 {t("Nobody is endorsing your app")}

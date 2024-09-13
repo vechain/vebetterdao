@@ -1,5 +1,7 @@
 {
   "{{value}} pts in total.": "{{value}} pts in total.",
+  "{{value}}-x-node-users": "{{value}}-x-node-users",
+  "1-x-node-user": "1-x-node-user",
   "Endorsers": "Endorsers",
   "Status": "Status",
   "X-Node Endorsement": "X-Node Endorsement",
