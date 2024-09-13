@@ -28,8 +28,6 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
   const nodeId = userDelegatedNodes.data?.[0]?.id ?? "0"
 
-  console.log({ nodeId })
-
   //TODO: Multiple nodes
   const endorseAppMutation = useEndorseApp({
     appId: xApp.id,

@@ -23,7 +23,6 @@ type NodeEndorsedApp = {
  * @returns  the endorsed apps for the nodes
  */
 export const getNodesEndorsedApps = async (thor: Connex.Thor, nodeIds: string[]): Promise<NodeEndorsedApp[]> => {
-  console.log("nodeIds", nodeIds)
   const clauses = nodeIds.map(nodeId => ({
     to: X2EARNAPPS_CONTRACT,
     value: 0,
