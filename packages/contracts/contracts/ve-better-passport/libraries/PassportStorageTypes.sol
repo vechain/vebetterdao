@@ -28,6 +28,7 @@ import { INodeManagement } from "../../interfaces/INodeManagement.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { PassportTypes } from "./PassportTypes.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title PassportStorageTypes
 /// @notice Library for defining storage types used in the Passport contract.
@@ -55,16 +56,35 @@ library PassportStorageTypes {
     mapping(PassportTypes.APP_SECURITY security => uint256 multiplier) securityMultiplier;
     // Security level of an app -> will be UNDEFINED and set to LOW by default
     mapping(bytes32 appId => PassportTypes.APP_SECURITY security) appSecurity;
-    // User scores
-    mapping(address user => uint256 totalScore) userTotalScore; // all-time total score of a user
-    mapping(address user => mapping(bytes32 appId => uint256 totalScore)) userAppTotalScore; // all-time total score of a user for a specific app
-    mapping(address user => mapping(uint256 round => uint256 score)) userRoundScore; // score of a user in a specific round
-    mapping(address user => mapping(uint256 round => mapping(bytes32 appId => uint256 score))) userAppRoundScore; // score of a user for a specific app in a specific round
+    // All-time total score of a user
+    mapping(address user => uint256 totalScore) userTotalScore;
+    // All-time total score of a user for a specific app
+    mapping(address user => mapping(bytes32 appId => uint256 totalScore)) userAppTotalScore;
+    // Score of a user in a specific round
+    mapping(address user => mapping(uint256 round => uint256 score)) userRoundScore;
+    // Score of a user for a specific app in a specific round
+    mapping(address user => mapping(uint256 round => mapping(bytes32 appId => uint256 score))) userAppRoundScore;
     // Threshold for a user to be considered a person in a round //threshold can be 0
     uint256 threshold;
     // Number of rounds to consider for the cumulative score
     uint256 roundsForCumulativeScore;
     // Decay rate for the exponential decay
     uint256 decayRate;
+    // ---------- Passport Delegation ---------- //
+    // Mapping of delegator to delegatee
+    mapping(address => Checkpoints.Trace160) delegatorToDelegatee;
+    // Mapping of delegatee to delegator
+    mapping(address => Checkpoints.Trace160) delegateeToDelegator;
+    // ---------- Bot Signaling ---------- //
+    // Counter for the number of signals per user
+    mapping(address user => uint256) signaledCounter;
+    // Threshold for a user to be considered a bot
+    uint256 signalsThreshold;
+    // Mapping of signaler to app
+    mapping(address signaler => bytes32 app) appOfSignaler;
+    // Mapping of apps to signaled users
+    mapping(bytes32 app => mapping(address user => uint256)) appSignalsCounter;
+    // Mapping of apps to total signals
+    mapping(bytes32 app => uint256) appTotalSignalsCounter;
   }
 }
