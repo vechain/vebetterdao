@@ -160,7 +160,7 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
                     ? t("{{value}}-x-node-users", { value: appEndorsers.length })
                     : t("1-x-node-user")}
                 </Text>
-                <Link fontSize="14px" color="#004CFC">
+                <Link fontSize="14px" color="#004CFC" onClick={onOpen}>
                   {t("See all")}
                 </Link>
               </HStack>
@@ -172,7 +172,6 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
           </Box>
           <Box textAlign="center" py={6}>
             <Button
-              onClick={onOpen}
               leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
               w="full"
               borderRadius="full"
