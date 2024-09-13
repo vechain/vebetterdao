@@ -1,4 +1,10 @@
-export const upgradeConfig = {
+export interface UpgradeContract {
+  name: string
+  versions: readonly string[]
+  descriptions: Record<string, string>
+}
+
+export const upgradeConfig: Record<string, UpgradeContract> = {
   "Voter Rewards": {
     name: "voter-rewards",
     versions: ["v2"],
