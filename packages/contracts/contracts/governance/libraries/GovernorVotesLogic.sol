@@ -225,8 +225,10 @@ library GovernorVotesLogic {
       ? self.veBetterPassport.getDelegatorInTimepoint(voter, proposalSnapshot)
       : voter;
 
-    // Check if the voter or the delegator of personhood to the voter is a person
-    require(self.veBetterPassport.isPerson(personhoodAddress), "GovernorVotesLogic: voter is not a person");
+    (bool isPerson, string memory explanation) = self.veBetterPassport.isPerson(personhoodAddress);
+
+    // Check if the voter or the delegator of personhood to the voter is a person with explanation
+    require(isPerson, string(abi.encodePacked("GovernorVotesLogic: voter is not a person: ", explanation)));
 
     uint256 weight = self.vot3.getPastVotes(voter, proposalSnapshot);
     uint256 power = Math.sqrt(weight) * 1e9;
