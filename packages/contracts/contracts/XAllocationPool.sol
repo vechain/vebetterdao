@@ -198,8 +198,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
 
     // Get the current status
-    bool isQuadraticDisabled = isQuadraticFundingDisabledForCurrentRound();
-
+    bool isQuadraticDisabled = $.quadraticFundingDisabled.upperLookupRecent(clock()) == 1;
     // If the current status is disabled, then the new status will be enabled and vice versa
     uint208 newStatus = isQuadraticDisabled ? 0 : 1;
 
