@@ -97,7 +97,7 @@ async function main() {
   console.log("Libraries", libraries)
 
   console.log(
-    `Upgrading B3TRGovernor contract at address: ${config.xAllocationPoolContractAddress} on network: ${config.network.name}`,
+    `Upgrading B3TRGovernor contract at address: ${config.b3trGovernorAddress} on network: ${config.network.name}`,
   )
 
   const governor = (await upgradeProxy("B3TRGovernorV2", "B3TRGovernor", config.b3trGovernorAddress, [], {
