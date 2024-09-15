@@ -7,6 +7,7 @@ import {
   useIsAppModerator,
   useNodesEndorsedApps,
   useNodesEndorsementScore,
+  useUserEndorsementScore,
   useUserXNodes,
 } from "@/api"
 import { VeBetterIcon } from "@/components"
@@ -104,6 +105,7 @@ export const AppEndorsementInfoCard = () => {
   const { data: appHasBeenIntoAllocationRounds } = useAppExists(app?.id ?? "")
   const { data: appEndorsementScore } = useAppEndorsementScore(app?.id ?? "")
   const { data: appEndorsers } = useAppEndorsers(app?.id ?? "")
+  const formattedAppEndorsers = appEndorsers?.map(endorser => endorser.toLowerCase()) ?? []
   const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
 
   // Figure out the app current endorsement status to determine the color scheme
@@ -120,9 +122,7 @@ export const AppEndorsementInfoCard = () => {
   const { data: userXNodes } = useUserXNodes(account ?? undefined)
   const { data: nodesLevelToEndorsementScore } = useNodesEndorsementScore()
   const { data: endorsedApps } = useNodesEndorsedApps(userXNodes?.map(node => node.id) ?? [])
-  console.log("userXNodes", userXNodes)
-  console.log("nodesLevelToEndorsementScore", nodesLevelToEndorsementScore)
-  console.log("endorsedApps", endorsedApps)
+  const { data: userEndorsementScore } = useUserEndorsementScore(account)
 
   //TODO: Support multiple nodes
   const availablePoints = useMemo(() => {
@@ -131,7 +131,11 @@ export const AppEndorsementInfoCard = () => {
     const availableNodes = userXNodes.filter((_node, index) => !endorsedApps[index]?.endorsedApp)
     return availableNodes.reduce((acc, node) => acc + Number(nodesLevelToEndorsementScore[Number(node.level)]), 0) ?? 0
   }, [userXNodes, nodesLevelToEndorsementScore, endorsedApps])
-  console.log("availablePoints", availablePoints, typeof availablePoints)
+
+  const isUserAppEndorser = useMemo(() => {
+    if (!account || !formattedAppEndorsers) return false
+    return formattedAppEndorsers.includes(account.toLowerCase())
+  }, [account, formattedAppEndorsers])
 
   // Modals
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -173,33 +177,48 @@ export const AppEndorsementInfoCard = () => {
           </Link>
         </Text>
       </CardHeader>
+
       <CardBody p={0}>
         <Stack spacing={3} w="full">
-          <Box>
-            <Text fontSize="16px">{t("Current score")}</Text>
-            <Box display="flex" alignItems="center">
-              <Text fontSize="36px" fontWeight="700" color={scoreColorScheme.textColor}>
-                {appEndorsementScore}
-              </Text>
-              <Text fontSize="14px" color="#6A6A6A" pt={4} pl={1}>
-                {t("of {{value}}", { value: endorsementScoreThreshold })}
-              </Text>
+          <HStack spacing={3}>
+            <Box>
+              <Text fontSize="16px">{t("Current score")}</Text>
+              <Box display="flex" alignItems="center">
+                <Text fontSize="36px" fontWeight="700" color={scoreColorScheme.textColor}>
+                  {appEndorsementScore}
+                </Text>
+                <Text fontSize="14px" color="#6A6A6A" pt={4} pl={1}>
+                  {t("of {{value}}", { value: endorsementScoreThreshold })}
+                </Text>
+              </Box>
             </Box>
-          </Box>
+            {isUserAppEndorser && (
+              <Box>
+                <Text fontSize="16px">{t("Your endorsement")}</Text>
+                <Box display="flex" alignItems="center">
+                  <Text fontSize="36px" fontWeight="700" color="#004CFC">
+                    {userEndorsementScore}
+                  </Text>
+                </Box>
+              </Box>
+            )}
+          </HStack>
+
           <Divider />
+
           <Box textAlign="center">
-            {appEndorsers && appEndorsers.length ? (
+            {formattedAppEndorsers && formattedAppEndorsers.length ? (
               <HStack justify={"space-between"}>
-                <Box>
-                  {appEndorsers.map((endorser: string, index: number) => (
+                <HStack>
+                  {formattedAppEndorsers.map((endorser: string, index: number) => (
                     <Box key={index}>
                       <AddressIcon address={endorser} rounded="full" h="20px" w="20px" />
                     </Box>
                   ))}
-                </Box>
+                </HStack>
                 <Text as="span" fontSize="14px" fontWeight="bold">
-                  {appEndorsers.length > 1
-                    ? t("{{value}}-x-node-users", { value: appEndorsers.length })
+                  {formattedAppEndorsers.length > 1
+                    ? t("{{value}}-x-node-users", { value: formattedAppEndorsers.length })
                     : t("1-x-node-user")}
                 </Text>
                 <Link fontSize="14px" color="#004CFC" onClick={onOpen}>
@@ -212,6 +231,7 @@ export const AppEndorsementInfoCard = () => {
               </Text>
             )}
           </Box>
+
           <Box textAlign="center" py={6}>
             {(isAppModerator || isAppAdmin) && (
               <Button
@@ -234,6 +254,7 @@ export const AppEndorsementInfoCard = () => {
           </Box>
         </Stack>
       </CardBody>
+
       <AppEndorsementInfoCardModal
         isOpen={isOpen}
         onClose={onClose}
