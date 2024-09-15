@@ -5,6 +5,9 @@ import {
   useEndorsementScoreThreshold,
   useIsAppAdmin,
   useIsAppModerator,
+  useNodesEndorsedApps,
+  useNodesEndorsementScore,
+  useUserXNodes,
 } from "@/api"
 import { VeBetterIcon } from "@/components"
 import {
@@ -24,6 +27,10 @@ import {
 import { Trans, useTranslation } from "react-i18next"
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 import { AddressIcon } from "@/components/AddressIcon"
+import { useMemo } from "react"
+import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
+import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 enum AppEndorsementStatus {
   NEW_UNENDORSED = "NEW_UNENDORSED",
@@ -87,29 +94,52 @@ function getScoreColorScheme(appEndorsementStatus: string): scoreColorScheme {
   }
 }
 
-type Props = {
-  appId: string
-  account: string
-}
-
-export const AppEndorsementInfoCard = ({ appId, account }: Props) => {
+export const AppEndorsementInfoCard = () => {
   const { t } = useTranslation()
 
-  const { data: appEndorsementScore } = useAppEndorsementScore(appId)
+  const { app } = useCurrentAppInfo()
+  const { account } = useWallet()
+
+  // App endorsement data
+  const { data: appHasBeenIntoAllocationRounds } = useAppExists(app?.id ?? "")
+  const { data: appEndorsementScore } = useAppEndorsementScore(app?.id ?? "")
+  const { data: appEndorsers } = useAppEndorsers(app?.id ?? "")
   const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
-  const { data: appEndorsers } = useAppEndorsers(appId)
-  const { data: appExists } = useAppExists(appId)
 
-  // Conditional rendering based on user role
-  const { data: isAppModerator } = useIsAppModerator(appId, account)
-  const { data: isAppAdmin } = useIsAppAdmin(appId, account)
-
-  // Figure out the current endorsement status to determine the color scheme
-  const appEndorsementStatus = getAppEndorsementStatus(appExists, appEndorsementScore, endorsementScoreThreshold)
+  // Figure out the app current endorsement status to determine the color scheme
+  const appEndorsementStatus = useMemo(() => {
+    return getAppEndorsementStatus(appHasBeenIntoAllocationRounds, appEndorsementScore, endorsementScoreThreshold)
+  }, [appHasBeenIntoAllocationRounds, appEndorsementScore, endorsementScoreThreshold])
   const scoreColorScheme = getScoreColorScheme(appEndorsementStatus)
 
-  // Modal
+  // User data
+  const { data: isAppModerator } = useIsAppModerator(app?.id ?? "", account ?? "")
+  const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account ?? "")
+
+  // User x-nodes, endorsements and score
+  const { data: userXNodes } = useUserXNodes(account ?? undefined)
+  const { data: nodesLevelToEndorsementScore } = useNodesEndorsementScore()
+  const { data: endorsedApps } = useNodesEndorsedApps(userXNodes?.map(node => node.id) ?? [])
+  console.log("userXNodes", userXNodes)
+  console.log("nodesLevelToEndorsementScore", nodesLevelToEndorsementScore)
+  console.log("endorsedApps", endorsedApps)
+
+  //TODO: Support multiple nodes
+  const availablePoints = useMemo(() => {
+    if (!userXNodes || !nodesLevelToEndorsementScore || !endorsedApps) return 0
+
+    const availableNodes = userXNodes.filter((_node, index) => !endorsedApps[index]?.endorsedApp)
+    return availableNodes.reduce((acc, node) => acc + Number(nodesLevelToEndorsementScore[Number(node.level)]), 0) ?? 0
+  }, [userXNodes, nodesLevelToEndorsementScore, endorsedApps])
+  console.log("availablePoints", availablePoints, typeof availablePoints)
+
+  // Modals
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const {
+    isOpen: isEndorsementModalOpen,
+    onOpen: onOpenEndorsementModal,
+    onClose: onCloseEndorsementModal,
+  } = useDisclosure()
 
   const defaultEndorsements = [
     { name: "Mark", date: "2023-01-01", points: 90, address: "0x1234567890" },
@@ -196,6 +226,11 @@ export const AppEndorsementInfoCard = ({ appId, account }: Props) => {
                 </Text>
               </Button>
             )}
+            {availablePoints > 0 && (
+              <Button variant={"primaryAction"} onClick={onOpenEndorsementModal}>
+                {t("Endorse with your {{value}} points", { value: availablePoints })}
+              </Button>
+            )}
           </Box>
         </Stack>
       </CardBody>
@@ -205,6 +240,7 @@ export const AppEndorsementInfoCard = ({ appId, account }: Props) => {
         listOfEndorsements={defaultEndorsements}
         XApps={XApps}
       />
+      <EndorseAppModal isOpen={isEndorsementModalOpen} onClose={onCloseEndorsementModal} xApp={app} />
     </Card>
   )
 }
