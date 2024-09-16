@@ -20,7 +20,7 @@ export const AppDetailsSidebar = () => {
   return (
     <Stack spacing={8} direction={"column"} flex={1.5}>
       {appHasBeenIntoAllocationRounds && <AppBalanceCard />}
-      <AppEndorsementInfoCard />
+      <AppEndorsementInfoCard appId={app?.id ?? ""} />
     </Stack>
   )
 }
