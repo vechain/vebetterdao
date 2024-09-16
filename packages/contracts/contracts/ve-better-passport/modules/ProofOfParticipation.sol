@@ -212,6 +212,11 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     return _getProofOfParticipationStorage().x2EarnApps;
   }
 
+  /// @notice Gets the xAllocationVoting contract address
+  function xAllocationVoting() public view virtual returns (IXAllocationVotingGovernor) {
+    return _getProofOfParticipationStorage().xAllocationVoting;
+  }
+
   // ---------- Setters ---------- //
 
   /// @notice Registers an action for a user
@@ -267,6 +272,12 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     require(address(_x2EarnApps) != address(0), "ProofOfParticipation: x2EarnApps is the zero address");
 
     _getProofOfParticipationStorage().x2EarnApps = _x2EarnApps;
+  }
+
+  function setXAllocationVoting(IXAllocationVotingGovernor _xAllocationVoting) public virtual onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    require(address(_xAllocationVoting) != address(0), "ProofOfParticipation: xAllocationVoting is the zero address");
+
+    _getProofOfParticipationStorage().xAllocationVoting = _xAllocationVoting;
   }
 
   /// @notice Sets the threshold for a user to be considered a person

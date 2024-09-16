@@ -57,7 +57,7 @@ contract VeBetterPassport is
     address[] admins;
     address[] settingsManagers;
     address[] roleGranters;
-    address[] blacklisters;
+    address[] botSignalers;
     address[] whitelisters;
     address actionRegistrar;
     address actionScoreManager;
@@ -91,7 +91,7 @@ contract VeBetterPassport is
       data.threshold,
       data.roundsForCumulativeScore
     );
-    __BotSignaling_init(data.blacklisters, data.signalingThreshold, data.x2EarnApps);
+    __BotSignaling_init(data.botSignalers, data.signalingThreshold, data.x2EarnApps);
     __PersonhoodDelegation_init();
     __WhitelistAndBlacklist_init(data.whitelisters);
     __PersonhoodSettings_init(data.settingsManagers, data.minimumGalaxyMemberLevel);
@@ -183,15 +183,21 @@ contract VeBetterPassport is
     return "1";
   }
 
-  // ---------- Setters ---------- //
+  // ---------- Getters ---------- //
 
-  /// @dev Sets the xAllocationVoting contract
-  /// @param xAllocationVoting - the xAllocationVoting contract address
-  function setXAllocationVoting(
-    IXAllocationVotingGovernor xAllocationVoting
-  ) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
-    VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
-    $.xAllocationVoting = xAllocationVoting;
+  /// @notice Returns the xAllocationVoting contract
+  function getXallocationVoting() external view returns (IXAllocationVotingGovernor) {
+    return _getVeBetterPassportStorage().xAllocationVoting;
+  }
+
+  /// @notice Returns the nodeManagement contract
+  function getNodeManagement() external view returns (INodeManagement) {
+    return _getVeBetterPassportStorage().nodeManagement;
+  }
+
+  /// @notice Returns the galaxyMember contract
+  function getGalaxyMember() external view returns (IGalaxyMember) {
+    return _getVeBetterPassportStorage().galaxyMember;
   }
 
   // ---------- Overrides ---------- //

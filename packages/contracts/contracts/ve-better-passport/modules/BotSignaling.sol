@@ -107,6 +107,11 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     return _getBotSignalingStorage().signalsThreshold;
   }
 
+  /// @notice Returns the x2EarnApps contract
+  function getX2earnApps() public view returns (IX2EarnApps) {
+    return _getBotSignalingStorage().x2EarnApps;
+  }
+
   // ---------- Setters ---------- //
 
   /// @notice Signals a user
