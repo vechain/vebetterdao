@@ -1,4 +1,7 @@
 {
+  "Endorsing since {{date}}": "Endorsing since {{date}}",
+  "{{date}}": "{{date}}",
+  "Not endorsed": "Not endorsed",
   "{{value}} pts in total.": "{{value}} pts in total.",
   "Endorsers": "Endorsers",
   "Status": "Status",
