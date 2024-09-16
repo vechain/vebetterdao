@@ -1,8 +1,8 @@
 import { useEndorsementScoreThreshold, useIsAppUnendorsed } from "@/api"
 import { XAppsCreationSteps, XAppsCreationStepStatus } from "@/types/appDetails"
-import { Box, Card, CardBody, Grid, Heading, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, CardBody, Grid, Heading, HStack, Icon, Link, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { StepBoxes } from "./components/StepBoxes"
 
@@ -31,18 +31,19 @@ export const AppCreationSteps = () => {
               </HStack>
               <HStack w="full" justify="end" alignItems="center" display={{ base: "none", md: "flex" }}>
                 <Icon as={UilInfoCircle} color="rgba(0, 76, 252, 1)" />
-                <Text color="rgba(0, 76, 252, 1)">{t("Know more about Apps")}</Text>
+                <Link color="#004CFC">{t("Know more about Apps")}</Link>
               </HStack>
             </HStack>
             <Text fontSize="md" color="#6A6A6A">
               {t(
-                "Before adding your App to the public listing and seeing stats and updates, it has to go through these three steps. You can",
+                "Before adding your App to the public listing and seeing stats and updates, it has to go through these three steps.",
               )}
-              <Text as="span" color="rgba(0, 76, 252, 1)">
-                {" "}
-                {t("fill the App information")}{" "}
-              </Text>
-              {t("while waiting!")}
+              <Trans
+                i18nKey="You can fill the App information while waiting!"
+                components={{
+                  Link: <Link href={`${app?.id}/edit`} color="#004CFC" />,
+                }}
+              />
             </Text>
 
             <Box w="full" maxW={"100%"} overflowX="auto">
