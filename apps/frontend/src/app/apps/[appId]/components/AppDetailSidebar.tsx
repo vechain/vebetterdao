@@ -6,6 +6,8 @@ import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementI
 
 export const AppDetailsSidebar = () => {
   const { app } = useCurrentAppInfo()
+  // NB: All the commented code below should be enabled later,
+  // it is now disabled to work on the different versions of `AppEndorsementInfoCard`
   // const { account } = useWallet()
 
   // Conditional rendering based on user role
