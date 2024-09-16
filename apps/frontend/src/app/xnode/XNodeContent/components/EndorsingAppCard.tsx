@@ -1,4 +1,4 @@
-import { useXNode } from "@/api"
+import { useAppEndorsementScore, useAppEndorsers, useXNode } from "@/api"
 import {
   Button,
   Card,
@@ -20,13 +20,15 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 export const EndorsingAppCard = () => {
+  // TODO: add real data
+  const endorsingSince = "Lorem" + dayjs()
+
   const { t } = useTranslation()
   const { isEndorsingApp, endorsedApp, xNodePoints } = useXNode()
-
-  // TODO: add real data
-  const appScore = "Lorem 300"
-  const endorsingUsers = "Lorem 4"
-  const endorsingSince = "Lorem" + dayjs()
+  // get the number of endorsers for the endorsed app
+  const endorsersCount = useAppEndorsers(endorsedApp?.id ?? "")?.data?.length ?? 0
+  // get app total endorsement score
+  const appScore = useAppEndorsementScore(endorsedApp?.id ?? "")?.data ?? 0
 
   const stopEndorsingButton = useMemo(() => {
     return <Button variant="dangerGhost">{t("Stop endorsing")}</Button>
@@ -79,13 +81,15 @@ export const EndorsingAppCard = () => {
                 <Divider />
                 <HStack justify={"space-between"} flexWrap={"wrap"}>
                   <VStack align="flex-start" gap={0} my={"3"}>
-                    <Text>{appScore}</Text>
+                    <Text>
+                      {appScore} {t("points")}
+                    </Text>
                     <Text fontSize="xs" color="#6A6A6A">
                       {t("Current score")}
                     </Text>
                   </VStack>
                   <VStack align="flex-start" gap={0} my={"3"}>
-                    <Text>{endorsingUsers}</Text>
+                    <Text>{endorsersCount}</Text>
                     <Text fontSize="xs" color="#6A6A6A">
                       {t("Endorsing users")}
                     </Text>

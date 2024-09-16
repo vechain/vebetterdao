@@ -24,5 +24,6 @@ export const useAppEndorsers = (appId: string): UseQueryResult<string[], Error> 
     contractAddress,
     method,
     args: [appId],
+    enabled: !!appId,
   })
 }
