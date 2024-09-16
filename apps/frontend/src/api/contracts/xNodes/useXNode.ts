@@ -1,13 +1,14 @@
 import { useUserXNodes } from "./useUserXNodes"
-import { useNodesEndorsedApps, useNodesEndorsementScore } from "../xApps"
+import { useNodeEndorsedApp, useNodesEndorsementScore, useXApp, useXAppMetadata } from "../xApps"
 import { notFoundImage } from "@/constants"
 import { useGetTokenIdAttachedToNode } from "../galaxyMember/hooks/useGetTokenIdAttachedToNode"
+import { useIpfsImage } from "@/api/ipfs"
 
 /**
  * Custom hook for retrieving data related to an X-Node.
  *
  * @returns An object containing the following properties:
- *  - xNodeName: The name of the X-Node.
+ * - xNodeName: The name of the X-Node.
  * - xNodeImage: The image URL of the X-Node.
  * - xNodePoints: The points of the X-Node.
  * - isXNodeHolder: A boolean indicating whether the user is an X-Node holder.
@@ -16,20 +17,36 @@ import { useGetTokenIdAttachedToNode } from "../galaxyMember/hooks/useGetTokenId
 
 export const useXNode = () => {
   const xNodes = useUserXNodes()
+  // TODO: in the future we will have multiple xNodes
+  // For now, we will use the first xNode as wont' consider delegated xnodes
   const firstXNode = xNodes.data?.[0]
   const firstXNodeId = firstXNode?.id
-
   const isXNodeHolder = !!firstXNode
-  const endorsedApps = useNodesEndorsedApps(firstXNodeId ? [firstXNodeId] : [])
-  const nodesEndorsementScore = useNodesEndorsementScore()
 
-  const xNodePoints = endorsedApps.data?.[0]?.endorsedApp
-    ? "0"
-    : Number(nodesEndorsementScore?.data?.[Number(firstXNodeId)] || "0")
+  // get xNode name, image and level
   const xNodeName = firstXNode?.name ?? "N.A."
   const xNodeImage = firstXNode?.image ?? notFoundImage
-  const isXNodeLoading = xNodes.isLoading
+  const xNodeLevel = firstXNode?.level ?? 0
 
+  // get endorsed app for the xnode
+  const endorsedAppId = useNodeEndorsedApp(firstXNodeId).data
+  const endorsedAppBriefInfo = useXApp(endorsedAppId ?? "")
+  const endorsedAppMetadata = useXAppMetadata(endorsedAppId ?? "")
+  const { data: logo } = useIpfsImage(endorsedAppMetadata?.data?.logo)
+  const endorsedApp = endorsedAppId
+    ? {
+        ...endorsedAppBriefInfo.data,
+        ...endorsedAppMetadata.data,
+        logo: logo?.image,
+      }
+    : undefined
+  const isEndorsingApp = endorsedAppId
+
+  // get xNode score points
+  const nodesEndorsementScore = useNodesEndorsementScore()
+  const xNodePoints = Number(nodesEndorsementScore?.data?.[firstXNode?.level ?? 0] ?? 0)
+
+  // get attached GM token id
   const {
     data: attachedGMTokenId,
     isLoading: isLoadingAttachedGMTokenId,
@@ -37,12 +54,36 @@ export const useXNode = () => {
     error: errorAttachedGMTokenId,
   } = useGetTokenIdAttachedToNode(firstXNodeId)
 
+  const isXNodeLoading =
+    xNodes.isLoading ||
+    endorsedAppBriefInfo.isLoading ||
+    endorsedAppMetadata.isLoading ||
+    nodesEndorsementScore.isLoading ||
+    isLoadingAttachedGMTokenId
+  const isXNodeError =
+    xNodes.isError ||
+    endorsedAppBriefInfo.isError ||
+    endorsedAppMetadata.isError ||
+    nodesEndorsementScore.isError ||
+    isErrorAttachedGMTokenId
+  const xNodeError =
+    xNodes.error ||
+    endorsedAppBriefInfo.error ||
+    endorsedAppMetadata.error ||
+    nodesEndorsementScore.error ||
+    errorAttachedGMTokenId
+
   return {
     isXNodeLoading,
+    isXNodeError,
+    xNodeError,
     xNodeId: firstXNodeId,
     xNodeName,
     xNodeImage,
+    xNodeLevel,
     xNodePoints,
+    endorsedApp,
+    isEndorsingApp,
     isXNodeHolder,
     attachedGMTokenId,
     isLoadingAttachedGMTokenId,

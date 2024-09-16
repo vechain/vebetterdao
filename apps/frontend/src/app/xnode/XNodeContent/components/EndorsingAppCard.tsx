@@ -1,4 +1,4 @@
-import { notFoundImage } from "@/constants"
+import { useXNode } from "@/api"
 import {
   Button,
   Card,
@@ -21,15 +21,12 @@ import { useTranslation } from "react-i18next"
 
 export const EndorsingAppCard = () => {
   const { t } = useTranslation()
+  const { isEndorsingApp, endorsedApp, xNodePoints } = useXNode()
 
   // TODO: add real data
-  const appImage = notFoundImage
-  const appName = "Cleanify"
-  const appScore = "300"
-  const endorsingUsers = "4"
-  const endorsementPoints = "6"
-  const endorsingSince = dayjs()
-  const isEndorsingApp = true
+  const appScore = "Lorem 300"
+  const endorsingUsers = "Lorem 4"
+  const endorsingSince = "Lorem" + dayjs()
 
   const stopEndorsingButton = useMemo(() => {
     return <Button variant="dangerGhost">{t("Stop endorsing")}</Button>
@@ -64,7 +61,7 @@ export const EndorsingAppCard = () => {
               <VStack align="stretch" spacing={6}>
                 <HStack justify={"space-between"}>
                   <HStack>
-                    <Image src={appImage} alt="endorsed-app" w="12" h="12" rounded="xl" />
+                    <Image src={endorsedApp?.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
                     <VStack align="stretch">
                       <HStack bg="#E9FDF1" p={"4px 10px"} rounded="12px">
                         <UilCheckCircle color="#3DBA67" size={"1rem"} />
@@ -73,7 +70,7 @@ export const EndorsingAppCard = () => {
                         </Text>
                       </HStack>
                       <Heading fontSize="lg" fontWeight={"600"}>
-                        {appName}
+                        {endorsedApp?.name}
                       </Heading>
                     </VStack>
                   </HStack>
@@ -95,7 +92,7 @@ export const EndorsingAppCard = () => {
                   </VStack>
                   <VStack align="flex-start" gap={0} my={"3"}>
                     <Text>
-                      {endorsementPoints} {t("points")}
+                      {xNodePoints} {t("points")}
                     </Text>
                     <Text fontSize="xs" color="#6A6A6A">
                       {t("My endorsement")}
