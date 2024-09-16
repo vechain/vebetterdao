@@ -107,7 +107,7 @@ This command relies on a turbo pipeline which:
 - check if the contracts specified under `./packages/config/testnet-staging` have been deployed, possibly deploying them if they weren't (config is updated automatically);
 - run the frontend using the updated config;
 
-It also does not require the solo node to be running locally, as it will point to the staging environment.
+We are using the testnet network for our staging environment.
 
 If you need to redeploy the contracts, you will first need to change the `b3trContractAddress` in `./packages/config/testnet-staging.ts` to `0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc`, stop the frontend from running and then run again the command above.
 
