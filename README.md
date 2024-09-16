@@ -100,16 +100,16 @@ yarn dev:staging
 ```
 
 If contracts are not deployed, the script will deploy them automatically. In order to this to work, the `MNEMONIC` variable need to be set in the `.env` file.
-Ensure that the urls in `./packages/config/solo-staging.ts` are pointing to the correct solo node.
+Ensure that the urls in `./packages/config/testnet-staging.ts` are pointing to the correct solo node.
 
 This command relies on a turbo pipeline which:
 
-- check if the contracts specified under `./packages/config/solo-staging` have been deployed, possibly deploying them if they weren't (config is updated automatically);
+- check if the contracts specified under `./packages/config/testnet-staging` have been deployed, possibly deploying them if they weren't (config is updated automatically);
 - run the frontend using the updated config;
 
 It also does not require the solo node to be running locally, as it will point to the staging environment.
 
-If you need to redeploy the contracts, you will first need to change the `b3trContractAddress` in `./packages/config/solo-staging.ts` to `0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc`, stop the frontend from running and then run again the command above.
+If you need to redeploy the contracts, you will first need to change the `b3trContractAddress` in `./packages/config/testnet-staging.ts` to `0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc`, stop the frontend from running and then run again the command above.
 
 ### Spin up the project pointing to the testnet environment
 
@@ -193,7 +193,7 @@ make solo-clean
 Each environment has its own configuration file under `./packages/config/contracts/envs` folder:
 
 - `local`: used for local development with thor solo;
-- `solo-staging`: used for testing against self hosted solo node;
+- `testnet-staging`: used for testing against self hosted solo node;
 - `testnet`: used for testing against vechain testnet;
 
 ### Compile
@@ -277,12 +277,12 @@ The addresses will be outputted in the console. If you want the frontend to use 
 
 #### Deploy to self hosted solo
 
-First browse to `./packages/config/solo-staging.ts` and set the url of your solo node in the `nodeUrl` and `urls` fields.
+First browse to `./packages/config/testnet-staging.ts` and set the url of your solo node in the `nodeUrl` and `urls` fields.
 Then run the following command:
 
 ```
 
-yarn contracts:deploy:solo-staging
+yarn contracts:deploy:testnet-staging
 
 ```
 

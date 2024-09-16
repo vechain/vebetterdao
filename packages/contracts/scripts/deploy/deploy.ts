@@ -34,6 +34,7 @@ export async function deployAll(config: ContractsConfig) {
     `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations `,
   )
   const [deployer] = await ethers.getSigners()
+  console.log(`deployer address: ${deployer.address}`)
 
   console.log(`================  Address used to deploy: ${deployer.address}`)
 
@@ -481,12 +482,15 @@ export async function deployAll(config: ContractsConfig) {
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
+  const appEnv = process.env.NEXT_PUBLIC_APP_ENV
   switch (network.name) {
     case "vechain_mainnet":
       await setupMainnetEnvironment(emissions, x2EarnApps)
       break
     case "vechain_testnet":
-      await setupTestEnvironment(emissions, x2EarnApps)
+      if (appEnv === "testnet-staging") {
+        await setupLocalEnvironment(emissions, treasury, x2EarnApps)
+      } else await setupTestEnvironment(emissions, x2EarnApps)
       break
     case "vechain_solo":
       await setupLocalEnvironment(emissions, treasury, x2EarnApps)
@@ -498,9 +502,11 @@ export async function deployAll(config: ContractsConfig) {
     await simulateRounds(b3tr, vot3, xAllocationVoting, emissions, voterRewards, treasury)
   }
 
+  console.log(`appEnv: ${appEnv}`)
+
   // ---------- Role updates ---------- //
-  // Do not update roles on solo network since we are already using the predifined address and it would just increase dev time
-  if (network.name === "vechain_testnet" || network.name === "vechain_mainnet") {
+  // Do not update roles on solo network or staging network since we are already using the predifined address and it would just increase dev time
+  if (appEnv === "testnet" || network.name === "mainnet") {
     console.log("================ Updating contract roles after setup ")
     console.log("New admin address: ", config.CONTRACTS_ADMIN_ADDRESS)
 

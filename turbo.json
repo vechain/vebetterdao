@@ -99,7 +99,7 @@
     "upgrade:contract:local": {
       "dependsOn": ["upgrade:contract"]
     },
-    "upgrade:contract:solo-staging": {
+    "upgrade:contract:testnet-staging": {
       "dependsOn": ["upgrade:contract"]
     },
     "upgrade:contract:testnet": {
