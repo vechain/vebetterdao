@@ -26,7 +26,7 @@ interface IPersonhoodDelegation {
   event DelegationRevoked(address indexed delegator, address indexed delegatee);
 
   /// @notice Delegates personhood, must be called by the delegatee providing the delegator signature.
-  function delegateWithSignature(address delegator, uint256 nonce, uint256 deadline, bytes memory signature) external;
+  function delegateWithSignature(address delegator, uint256 deadline, bytes memory signature) external;
 
   /// @notice Revokes the delegation of personhood to another user.
   function revokeDelegation(address delegator) external;

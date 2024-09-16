@@ -31,12 +31,11 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
   struct Delegation {
     address delegator;
     address delegatee;
-    uint256 nonce;
     uint256 deadline;
   }
 
   bytes32 private constant DELEGATION_TYPEHASH =
-    keccak256("Delegation(address delegator,address delegatee,uint256 nonce,uint256 deadline)");
+    keccak256("Delegation(address delegator,address delegatee,uint256 deadline)");
 
   struct PersonhoodDelegationStorage {
     mapping(address => Checkpoints.Trace160) delegatorToDelegatee;
@@ -153,16 +152,15 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
   /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
   /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
   /// @param delegator - the delegator address
-  /// @param nonce - the nonce of the delegation
   /// @param deadline - the deadline for the signature
   /// @param signature - the signature of the delegation
-  function delegateWithSignature(address delegator, uint256 nonce, uint256 deadline, bytes memory signature) external {
+  function delegateWithSignature(address delegator, uint256 deadline, bytes memory signature) external {
     require(block.timestamp <= deadline, "Signature expired");
 
     PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
 
     // Recover the signer address from the signature
-    bytes32 structHash = keccak256(abi.encode(DELEGATION_TYPEHASH, delegator, msg.sender, nonce, deadline));
+    bytes32 structHash = keccak256(abi.encode(DELEGATION_TYPEHASH, delegator, msg.sender, deadline));
     bytes32 digest = _hashTypedDataV4(structHash);
     address signer = digest.recover(signature);
 
