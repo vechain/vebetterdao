@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import { X2EarnAppsDataTypesV1 } from "../libraries/X2EarnAppsDataTypesV1.sol";
+import { X2EarnAppsDataTypes } from "../../../libraries/X2EarnAppsDataTypes.sol";
 
 /**
  * @title IX2EarnApps
@@ -148,7 +148,7 @@ interface IX2EarnApps {
    *
    * @param appId the id of the app
    */
-  function app(bytes32 appId) external view returns (X2EarnAppsDataTypesV1.AppWithDetailsReturnType memory);
+  function app(bytes32 appId) external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType memory);
 
   /**
    * @dev Function to get the number of apps.
@@ -160,12 +160,12 @@ interface IX2EarnApps {
    * @param startIndex The starting index of the pagination
    * @param count The number of items to return
    */
-  function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypesV1.App[] memory);
+  function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory);
 
   /**
    * @dev Get all apps
    */
-  function apps() external view returns (X2EarnAppsDataTypesV1.AppWithDetailsReturnType[] memory);
+  function apps() external view returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
 
   /**
    * @dev Add a new moderator to the app.

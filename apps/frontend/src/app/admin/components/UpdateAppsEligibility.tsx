@@ -19,19 +19,18 @@ import { useCallback, useMemo } from "react"
 
 export const UpdateAppsEligibility = () => {
   const { data: eligibleAppsIds } = useAppsEligibleInNextRound()
-  const { data: xApps } = useXApps()
-  const allApps = (xApps?.active || []).concat(xApps?.unendorsed || [])
+  const { data: x2EarnApps } = useXApps()
 
   // loop through x2EarnApps and check if appIds are in x2EarnApps,
   // if they are in then put eligible true, otherwise eligible false
   let x2EarnAppsEligible = useMemo(() => {
-    return allApps.map(app => {
+    return x2EarnApps?.active.map(app => {
       return {
         ...app,
         eligible: eligibleAppsIds?.includes(app.id),
       }
     })
-  }, [eligibleAppsIds, allApps])
+  }, [eligibleAppsIds, x2EarnApps])
 
   return (
     <Card>

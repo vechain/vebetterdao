@@ -27,7 +27,7 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IB3TR } from "../../interfaces/IB3TR.sol";
-import { IX2EarnAppsV1 } from "./interfaces/IX2EarnAppsV1.sol";
+import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
@@ -59,7 +59,7 @@ contract X2EarnRewardsPoolV1 is
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnRewardsPool
   struct X2EarnRewardsPoolStorage {
     IB3TR b3tr;
-    IX2EarnAppsV1 x2EarnApps;
+    IX2EarnApps x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
   }
 
@@ -78,7 +78,7 @@ contract X2EarnRewardsPoolV1 is
     address _contractsManagerAdmin,
     address _upgrader,
     IB3TR _b3tr,
-    IX2EarnAppsV1 _x2EarnApps
+    IX2EarnApps _x2EarnApps
   ) external initializer {
     require(_admin != address(0), "X2EarnRewardsPool: admin is the zero address");
     require(_contractsManagerAdmin != address(0), "X2EarnRewardsPool: contracts manager admin is the zero address");
@@ -188,7 +188,7 @@ contract X2EarnRewardsPoolV1 is
    *
    * @param _x2EarnApps the new X2EarnApps contract
    */
-  function setX2EarnApps(IX2EarnAppsV1 _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setX2EarnApps(IX2EarnApps _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(address(_x2EarnApps) != address(0), "X2EarnRewardsPool: x2EarnApps is the zero address");
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
@@ -223,7 +223,7 @@ contract X2EarnRewardsPoolV1 is
   /**
    * @dev Retrieves the X2EarnApps contract.
    */
-  function x2EarnApps() external view returns (IX2EarnAppsV1) {
+  function x2EarnApps() external view returns (IX2EarnApps) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.x2EarnApps;
   }

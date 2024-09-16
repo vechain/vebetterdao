@@ -2,8 +2,9 @@ import {
   UnendorsedApp,
   useAppEndorsementScore,
   useEndorsementScoreThreshold,
-  useUserDelegatedNodes,
   useUserEndorsementScore,
+  useUserXNodes,
+  XApp,
 } from "@/api"
 import { CustomModalContent, TransactionModal } from "@/components"
 import { useEndorseApp } from "@/hooks"
@@ -15,24 +16,24 @@ import { useCallback } from "react"
 type Props = {
   isOpen: boolean
   onClose: () => void
-  xApp: UnendorsedApp
+  xApp: XApp | UnendorsedApp | undefined
 }
 
 //TODO: Polish everything and align with figma
 export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { account } = useWallet()
-  const endorsementScore = useAppEndorsementScore(xApp.id)
+  const endorsementScore = useAppEndorsementScore(xApp?.id ?? "")
   const endorsementScoreThreshold = useEndorsementScoreThreshold()
 
-  const userDelegatedNodes = useUserDelegatedNodes(account)
+  const userDelegatedNodes = useUserXNodes(account ?? undefined)
 
-  const nodeId = userDelegatedNodes.data?.[0] ?? "0"
+  const nodeId = userDelegatedNodes.data?.[0]?.id ?? "0"
 
   console.log({ nodeId })
 
-  //TODO: Get the nodeId
+  //TODO: Multiple nodes
   const endorseAppMutation = useEndorseApp({
-    appId: xApp.id,
+    appId: xApp?.id ?? "",
     nodeId,
     onSuccess: onClose,
   })
@@ -80,7 +81,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
               p="16px"
               rounded={"md"}>
               <Box>
-                <Text>{xApp.name}</Text>
+                <Text>{xApp?.name ?? ""}</Text>
                 <Text color={"#6A6A6A"}>{t("Current endorsement score")}</Text>
               </Box>
               <Heading size="lg">
@@ -99,12 +100,16 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 <Text>{"TODO: Node Name"}</Text>
                 <Text color={"#6A6A6A"}>{t("Your node")}</Text>
               </Box>
-              <Heading size="lg">
-                {t("{{first}} of {{second}}", {
-                  first: userEndorsementScore.data,
-                  second: endorsementScoreThreshold.data,
-                })}
-              </Heading>
+              <HStack spacing={1} align={"flex-end"}>
+                <Heading fontSize={"36px"} fontWeight={700} color={"#F29B32"} lineHeight={"36px"}>
+                  {endorsementScore.data}
+                </Heading>
+                <Text fontSize={"14px"} color={"#6A6A6A"} fontWeight={400} lineHeight={"24px"}>
+                  {t("of {{value}}", {
+                    value: endorsementScoreThreshold.data,
+                  })}
+                </Text>
+              </HStack>
             </HStack>
             <HStack
               spacing={3}

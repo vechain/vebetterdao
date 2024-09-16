@@ -207,12 +207,13 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
   /**
    * @notice this function returns the endorsement score of a node ID
-   * @param nodeId The unique identifier of the node ID.
+   * @param nodeLevel The node level of the node ID.
    * @return uint256 The endorsement score of the node ID.
    */
-  function nodeEndorsementScore(uint256 nodeId) external view returns (uint256) {
+  function nodeLevelEndorsementScore(
+    VechainNodesDataTypes.NodeStrengthLevel nodeLevel
+  ) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    VechainNodesDataTypes.NodeStrengthLevel nodeLevel = $._nodeManagementContract.getNodeLevel(nodeId);
     return $._nodeEnodorsmentScore[nodeLevel];
   }
 

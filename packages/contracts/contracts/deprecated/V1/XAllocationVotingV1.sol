@@ -92,7 +92,7 @@ contract XAllocationVotingV1 is
     address[] admins;
     address upgrader;
     address contractsAddressManager;
-    IX2EarnAppsV1 x2EarnAppsAddress;
+    IX2EarnApps x2EarnAppsAddress;
     uint256 baseAllocationPercentage;
     uint256 appSharesCap;
     uint256 votingThreshold;
@@ -138,7 +138,7 @@ contract XAllocationVotingV1 is
   /**
    * @dev Set the address of the X2EarnApps contract
    */
-  function setX2EarnAppsAddress(IX2EarnAppsV1 newX2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setX2EarnAppsAddress(IX2EarnApps newX2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setX2EarnApps(newX2EarnApps);
   }
 

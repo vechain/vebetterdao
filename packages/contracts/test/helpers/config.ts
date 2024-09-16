@@ -106,5 +106,16 @@ export function createTestConfig() {
     // version 2
     XAPP_GRACE_PERIOD: 120960, // 120960 blocks = 2 weeks
     VECHAIN_NODES_CONTRACT_ADDRESS: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302", // The contract address of the VeChainNodes contract on mainnet
+    // X 2 Earn Rewards Pool
+    X_2_EARN_INITIAL_IMPACT_KEYS: [
+      "carbon",
+      "water",
+      "energy",
+      "waste_mass",
+      "education_time",
+      "timber",
+      "plastic",
+      "trees_planted",
+    ],
   })
 }

@@ -1,2 +1,2 @@
 export * from "./useXNode"
-export * from "./useUserDelegatedNodes"
+export * from "./useUserXNodes"
