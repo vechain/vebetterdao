@@ -51,7 +51,7 @@ export function createTestnetStagingConfig() {
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // max % votes an app can receive in a round
 
     CONTRACTS_ADMIN_ADDRESS: "0x66E9709bc01B8c0AfC99a7dC513f501821306E85", //1st account from mnemonic of testnet staging wallet
-    VOTE_2_EARN_POOL_ADDRESS: "0x0da407056673Fc0477441d7c47FBE008b6aD7D32", //2nd account from mnemonic of testnet staging wallet
+    VOTE_2_EARN_POOL_ADDRESS: "0xeaE35dfE902C5D1a44e6b4080224a6621319A671", //2nd account from mnemonic of testnet staging wallet
 
     INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M B3TR
 
