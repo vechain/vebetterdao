@@ -1,10 +1,12 @@
-import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
-import { XAllocationVoting__factory } from "@repo/contracts"
+import { XAllocationVotingGovernor__factory } from "@repo/contracts"
+import { getCallKey, useCall } from "@/hooks"
 import { ethers } from "ethers"
 
-const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
+const ALLOCATION_VOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
+const allocationVotingInterface = XAllocationVotingGovernor__factory.createInterface()
+
+const method = "getAppVotes"
 
 /**
  *  Get the number of votes for a xApp in an allocation round
@@ -13,33 +15,35 @@ const XALLOCATIONVOTING_CONTRACT = getConfig().xAllocationVotingContractAddress
  * @param roundId  the round id to get the votes for
  * @returns  the number of votes for the xApp in the round
  */
-export const getXAppVotes = async (thor: Connex.Thor, xAppId: string, roundId: string): Promise<string> => {
-  const functionFragment = XAllocationVoting__factory.createInterface().getFunction("getAppVotes").format("json")
-  const res = await thor.account(XALLOCATIONVOTING_CONTRACT).method(JSON.parse(functionFragment)).call(roundId, xAppId)
+export const getXAppVotes = async (thor: Connex.Thor, roundId: string, xAppId: string): Promise<string> => {
+  const functionFragment = allocationVotingInterface.getFunction(method).format("json")
+  const res = await thor.account(ALLOCATION_VOTING_CONTRACT).method(JSON.parse(functionFragment)).call(roundId, xAppId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
   return ethers.formatEther(res.decoded[0])
 }
 
-export const getXAppVotesQueryKey = (xAppId?: string, roundId?: string) => [
-  "allocationsRound",
-  roundId,
-  "votes",
-  ...(xAppId ? [xAppId] : []),
-]
+/**
+ *  Returns the query key for fetching the number of  votes for a given app in a roundId.
+ * @param roundId  the roundId the get the votes for
+ */
+export const getXAppVotesQueryKey = (roundId: number | string, appId?: string) =>
+  getCallKey({ method, keyArgs: [roundId, ...(appId ? [appId] : [])] })
 
 /**
- * Get the number of votes for a xApp in a round (allocation round)
- * @param xAppId the xApp id to get the votes for
- * @param roundId the round id to get the votes for
- * @returns the number of votes for the xApp in the round
+ *  Hook to get the number of votes for a given app in a roundId
+ *
+ * @param roundId  the roundId the get the votes for
+ * @returns  the number of votes for a given roundId
  */
-export const useXAppVotes = (xAppId: string, roundId: string) => {
-  const { thor } = useConnex()
-  return useQuery({
-    queryKey: getXAppVotesQueryKey(xAppId, roundId),
-    queryFn: async () => await getXAppVotes(thor, xAppId, roundId),
-    enabled: !!thor,
+export const useXAppVotes = (roundId?: number | string, appId?: string) => {
+  return useCall({
+    contractInterface: allocationVotingInterface,
+    contractAddress: ALLOCATION_VOTING_CONTRACT,
+    method,
+    args: [roundId, appId],
+    enabled: !!roundId && !!appId,
+    // mapResponse: res => ethers.formatEther(res.decoded[0]),
   })
 }
