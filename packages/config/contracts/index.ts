@@ -1,7 +1,7 @@
 export * from "./type"
 
 import { createLocalConfig } from "./envs/local"
-import { createTestnetStagingConfig } from "./envs/TestnetStaging"
+import { createTestnetStagingConfig } from "./envs/testnetStaging"
 import { createE2EConfig } from "./envs/e2e"
 import { createTestnetConfig } from "./envs/testnet"
 import { createMainnetConfig } from "./envs/mainnet"
