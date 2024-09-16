@@ -17,7 +17,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 
 type Props = {
-  appId: string | undefined
+  appId: string
 }
 
 export const AppEndorsementInfoCard = ({ appId }: Props) => {
@@ -29,13 +29,6 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
 
   // Modal
   const { isOpen, onOpen, onClose } = useDisclosure()
-
-  const defaultEndorsements = [
-    { name: "Mark", date: "2023-01-01", points: 90, address: "0x1234567890" },
-    { name: "John", date: "2023-01-02", points: 80, address: "0x1234567890" },
-    { name: "Jane", date: "2023-01-03", points: 85, address: "0x1234567890" },
-  ]
-  const XApps = [{ scoreTotal: 100 }]
 
   return (
     <Card
@@ -98,12 +91,7 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
                 {t("Look for endorsers")}
               </Text>
             </Button>
-            <AppEndorsementInfoCardModal
-              isOpen={isOpen}
-              onClose={onClose}
-              listOfEndorsements={defaultEndorsements}
-              XApps={XApps}
-            />
+            <AppEndorsementInfoCardModal isOpen={isOpen} onClose={onClose} appId={appId} />
           </Box>
         </Stack>
       </CardBody>
