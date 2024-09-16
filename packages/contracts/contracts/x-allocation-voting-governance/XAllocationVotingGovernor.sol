@@ -122,11 +122,30 @@ abstract contract XAllocationVotingGovernor is
     uint256 _currentRoundSnapshot = currentRoundSnapshot();
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
 
-    // Only addresses with a valid passport can vote, if the sender is a delegatee, we need to check the delegator address
-    bool isDelegatee = $._veBetterPassport.isDelegateeInTimepoint(msg.sender, _currentRoundSnapshot);
-    address personhoodAddress = isDelegatee
-      ? $._veBetterPassport.getDelegatorInTimepoint(msg.sender, _currentRoundSnapshot)
-      : _msgSender();
+    // Delegatee and delegator logic compacted
+    bool isDelegatee;
+    bool isDelegator;
+    address personhoodAddress = msg.sender; // Pre-assign the personhoodAddress to the voter
+
+    {
+      address delegateeOfDelegator = $._veBetterPassport.getDelegateeInTimepoint(msg.sender, _currentRoundSnapshot);
+      address delegatorOfDelegatee = $._veBetterPassport.getDelegatorInTimepoint(msg.sender, _currentRoundSnapshot);
+
+      // If the voter is a delegatee (has received delegation of personhood from a delegator at the timepoint).
+      isDelegatee = delegatorOfDelegatee != address(0);
+      if (isDelegatee) {
+        personhoodAddress = delegatorOfDelegatee; // Assign the delegator as the personhoodAddress
+      }
+
+      // If the voter is a delegator (has delegated their personhood to a delegatee at the timepoint).
+      isDelegator = delegateeOfDelegator != address(0);
+    }
+
+    // Allow the voter to vote if they are either the delegatee or not a delegator
+    require(
+      !isDelegator || isDelegatee,
+      "GovernorVotesLogic: voter has delegated their VeBetterPassport and cannot vote"
+    );
 
     (bool isPerson, string memory explanation) = $._veBetterPassport.isPerson(personhoodAddress);
 
