@@ -21,6 +21,7 @@ import {
   Heading,
   HStack,
   Link,
+  Skeleton,
   Stack,
   Text,
   useDisclosure,
@@ -103,10 +104,14 @@ export const AppEndorsementInfoCard = () => {
 
   // App endorsement data
   const { data: appHasBeenIntoAllocationRounds } = useAppExists(app?.id ?? "")
-  const { data: appEndorsementScore } = useAppEndorsementScore(app?.id ?? "")
-  const { data: appEndorsers } = useAppEndorsers(app?.id ?? "")
-  const formattedAppEndorsers = appEndorsers?.map(endorser => endorser.toLowerCase()) ?? []
-  const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
+  const { data: appEndorsementScore, isLoading: appEndorsementScoreLoading } = useAppEndorsementScore(app?.id ?? "")
+  const { data: appEndorsers, isLoading: appEndorsersLoading } = useAppEndorsers(app?.id ?? "")
+  const formattedAppEndorsers = useMemo(
+    () => appEndorsers?.map(endorser => endorser.toLowerCase()) ?? [],
+    [appEndorsers],
+  )
+  const { data: endorsementScoreThreshold, isLoading: endorsementScoreThresholdLoading } =
+    useEndorsementScoreThreshold()
 
   // Figure out the app current endorsement status to determine the color scheme
   const appEndorsementStatus = useMemo(() => {
@@ -122,7 +127,7 @@ export const AppEndorsementInfoCard = () => {
   const { data: userXNodes } = useUserXNodes(account ?? undefined)
   const { data: nodesLevelToEndorsementScore } = useNodesEndorsementScore()
   const { data: endorsedApps } = useNodesEndorsedApps(userXNodes?.map(node => node.id) ?? [])
-  const { data: userEndorsementScore } = useUserEndorsementScore(account)
+  const { data: userEndorsementScore, isLoading: userEndorsementScoreLoading } = useUserEndorsementScore(account)
 
   //TODO: Support multiple nodes
   const availablePoints = useMemo(() => {
@@ -166,91 +171,108 @@ export const AppEndorsementInfoCard = () => {
         <Heading fontSize="24px" fontWeight="bold">
           {t("Endorsement")}
         </Heading>
-        <Text pt={3} fontSize="14px" color="#6A6A6A">
-          <Trans
-            i18nKey="A dApp has to reach {{value}} endorsement points to join allocations."
-            values={{ value: endorsementScoreThreshold }}
-            t={t}
-          />
-          <Link pl={1} color="#004CFC">
-            {t("Know more")}
-          </Link>
-        </Text>
+        <Skeleton isLoaded={!endorsementScoreThresholdLoading}>
+          <Text pt={3} fontSize="14px" color="#6A6A6A">
+            <Trans
+              i18nKey="A dApp has to reach {{value}} endorsement points to join allocations."
+              values={{ value: endorsementScoreThreshold }}
+              t={t}
+            />
+            <Link pl={1} color="#004CFC">
+              {t("Know more")}
+            </Link>
+          </Text>
+        </Skeleton>
       </CardHeader>
 
       <CardBody p={0}>
         <Stack spacing={3} w="full">
-          <HStack spacing={3}>
-            <Box>
-              <Text fontSize="16px">{t("Current score")}</Text>
-              <Box display="flex" alignItems="center">
-                <Text fontSize="36px" fontWeight="700" color={scoreColorScheme.textColor}>
-                  {appEndorsementScore}
-                </Text>
-                <Text fontSize="14px" color="#6A6A6A" pt={4} pl={1}>
-                  {t("of {{value}}", { value: endorsementScoreThreshold })}
-                </Text>
-              </Box>
-            </Box>
-            {isUserAppEndorser && (
+          <Skeleton
+            isLoaded={
+              !appEndorsementScoreLoading &&
+              !endorsementScoreThresholdLoading &&
+              !appEndorsersLoading &&
+              !userEndorsementScoreLoading
+            }>
+            <HStack spacing={3}>
               <Box>
-                <Text fontSize="16px">{t("Your endorsement")}</Text>
+                <Text fontSize="16px">{t("Current score")}</Text>
                 <Box display="flex" alignItems="center">
-                  <Text fontSize="36px" fontWeight="700" color="#004CFC">
-                    {userEndorsementScore}
+                  <Text fontSize="36px" fontWeight="700" color={scoreColorScheme.textColor}>
+                    {appEndorsementScore}
+                  </Text>
+                  <Text fontSize="14px" color="#6A6A6A" pt={4} pl={1}>
+                    {t("of {{value}}", { value: endorsementScoreThreshold })}
                   </Text>
                 </Box>
               </Box>
-            )}
-          </HStack>
+
+              {isUserAppEndorser && (
+                <Box>
+                  <Text fontSize="16px">{t("Your endorsement")}</Text>
+                  <Box display="flex" alignItems="center">
+                    <Text fontSize="36px" fontWeight="700" color="#004CFC">
+                      {userEndorsementScore}
+                    </Text>
+                  </Box>
+                </Box>
+              )}
+            </HStack>
+          </Skeleton>
 
           <Divider />
 
-          <Box textAlign="center">
-            {formattedAppEndorsers && formattedAppEndorsers.length ? (
-              <HStack justify={"space-between"}>
-                <HStack>
-                  {formattedAppEndorsers.map((endorser: string, index: number) => (
-                    <Box key={index}>
-                      <AddressIcon address={endorser} rounded="full" h="20px" w="20px" />
-                    </Box>
-                  ))}
+          <Skeleton isLoaded={!appEndorsersLoading}>
+            <Box textAlign="center">
+              {formattedAppEndorsers && formattedAppEndorsers.length ? (
+                <HStack justify={"space-between"}>
+                  <HStack>
+                    {formattedAppEndorsers.map((endorser: string, index: number) => (
+                      <Box key={index}>
+                        <AddressIcon address={endorser} rounded="full" h="20px" w="20px" />
+                      </Box>
+                    ))}
+                  </HStack>
+                  <Text as="span" fontSize="14px" fontWeight="bold">
+                    {formattedAppEndorsers.length > 1
+                      ? t("{{value}}-x-node-users", { value: formattedAppEndorsers.length })
+                      : t("1-x-node-user")}
+                  </Text>
+                  <Link fontSize="14px" color="#004CFC" onClick={onOpen}>
+                    {t("See all")}
+                  </Link>
                 </HStack>
-                <Text as="span" fontSize="14px" fontWeight="bold">
-                  {formattedAppEndorsers.length > 1
-                    ? t("{{value}}-x-node-users", { value: formattedAppEndorsers.length })
-                    : t("1-x-node-user")}
+              ) : (
+                <Text fontSize="14px" fontWeight="bold">
+                  {isAppModerator || isAppAdmin ? t("Nobody is endorsing your app") : t("Not endorsed by anyone")}
                 </Text>
-                <Link fontSize="14px" color="#004CFC" onClick={onOpen}>
-                  {t("See all")}
-                </Link>
-              </HStack>
-            ) : (
-              <Text fontSize="14px" fontWeight="bold">
-                {isAppModerator || isAppAdmin ? t("Nobody is endorsing your app") : t("Not endorsed by anyone")}
-              </Text>
-            )}
-          </Box>
+              )}
+            </Box>
+          </Skeleton>
 
           <Box textAlign="center" py={6}>
-            {(isAppModerator || isAppAdmin) && (
-              <Button
-                leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
-                w="full"
-                borderRadius="full"
-                color="#E0E9FE"
-                display="flex"
-                alignItems="center">
-                <Text fontSize="18px" fontWeight="500" color="#004CFC">
-                  {t("Look for endorsers")}
-                </Text>
-              </Button>
-            )}
-            {availablePoints > 0 && (
-              <Button variant={"primaryAction"} onClick={onOpenEndorsementModal}>
-                {t("Endorse with your {{value}} points", { value: availablePoints })}
-              </Button>
-            )}
+            <Stack spacing={4} align="center">
+              {(isAppModerator || isAppAdmin) &&
+                (appEndorsementStatus === AppEndorsementStatus.NEW_UNENDORSED ||
+                  appEndorsementStatus === AppEndorsementStatus.ENDORSEMENT_LOST) && (
+                  <Button
+                    leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
+                    w="full"
+                    borderRadius="full"
+                    color="#E0E9FE"
+                    display="flex"
+                    alignItems="center">
+                    <Text fontSize="18px" fontWeight="500" color="#004CFC">
+                      {t("Look for endorsers")}
+                    </Text>
+                  </Button>
+                )}
+              {availablePoints > 0 && (
+                <Button variant={"primaryAction"} onClick={onOpenEndorsementModal}>
+                  {t("Endorse with your {{value}} points", { value: availablePoints })}
+                </Button>
+              )}
+            </Stack>
           </Box>
         </Stack>
       </CardBody>
