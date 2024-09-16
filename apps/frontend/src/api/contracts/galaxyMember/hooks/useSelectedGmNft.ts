@@ -54,14 +54,14 @@ export const useSelectedGmNft = () => {
     isLoading: isNextLevelGMRewardMultiplierLoading,
     isError: isErrorNextLevelGMRewardMultiplier,
     error: errorNextLevelGMRewardMultiplier,
-  } = useLevelMultiplier(String(Number(gmLevel) + 1))
+  } = useLevelMultiplier(gmLevel && String(Number(gmLevel) + 1))
 
   const {
     data: b3trToUpgradeGMToNextLevel,
     isLoading: isB3trToUpgradeGMToNextLevelLoading,
     isError: isErrorB3trToUpgradeGMToNextLevel,
     error: errorB3trToUpgradeGMToNextLevel,
-  } = useB3trToUpgradeToLevel(String(Number(gmLevel) + 1))
+  } = useB3trToUpgradeToLevel(gmLevel && String(Number(gmLevel) + 1))
 
   const {
     data: metadataURI,

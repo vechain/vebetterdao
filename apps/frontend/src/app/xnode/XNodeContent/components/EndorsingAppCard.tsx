@@ -21,7 +21,7 @@ import { useTranslation } from "react-i18next"
 
 export const EndorsingAppCard = () => {
   // TODO: add real data
-  const endorsingSince = "Lorem" + dayjs()
+  const endorsingSince = "Lorem ipsum" + dayjs().format("YYYY-MM-DD")
 
   const { t } = useTranslation()
   const { isEndorsingApp, endorsedApp, xNodePoints } = useXNode()
@@ -103,7 +103,7 @@ export const EndorsingAppCard = () => {
                     </Text>
                   </VStack>
                   <VStack align="flex-start" gap={0} my={"3"}>
-                    <Text>{dayjs(endorsingSince).format("YYYY-MM-DD")}</Text>
+                    <Text>{endorsingSince}</Text>
                     <Text fontSize="xs" color="#6A6A6A">
                       {t("Endorsing since")}
                     </Text>
