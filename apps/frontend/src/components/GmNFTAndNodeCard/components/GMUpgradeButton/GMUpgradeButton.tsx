@@ -178,14 +178,11 @@ export const GMUpgradeButton = () => {
   }, [currentRoundId, handleMintGM, hasUserVoted, isGMClaimable, isGMOwned, isXNodeAttachedToGM, isXNodeHolder, router])
 
   const isActionDisabled = useMemo(() => {
-    if (!isGMClaimable && !isGMOwned) {
-      return true
-    }
     if ((isXNodeHolder && !isXNodeAttachedToGM) || !isGMOwned) {
       return false
     }
     return !isEnoughBalanceToUpgradeGM
-  }, [isEnoughBalanceToUpgradeGM, isGMClaimable, isGMOwned, isXNodeAttachedToGM, isXNodeHolder])
+  }, [isEnoughBalanceToUpgradeGM, isGMOwned, isXNodeAttachedToGM, isXNodeHolder])
 
   return (
     <Stack
