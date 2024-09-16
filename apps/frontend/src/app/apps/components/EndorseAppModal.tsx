@@ -4,6 +4,7 @@ import {
   useEndorsementScoreThreshold,
   useUserEndorsementScore,
   useUserXNodes,
+  XApp,
 } from "@/api"
 import { CustomModalContent, TransactionModal } from "@/components"
 import { useEndorseApp } from "@/hooks"
@@ -15,13 +16,13 @@ import { useCallback } from "react"
 type Props = {
   isOpen: boolean
   onClose: () => void
-  xApp: UnendorsedApp
+  xApp: XApp | UnendorsedApp | undefined
 }
 
 //TODO: Polish everything and align with figma
 export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { account } = useWallet()
-  const endorsementScore = useAppEndorsementScore(xApp.id)
+  const endorsementScore = useAppEndorsementScore(xApp?.id ?? "")
   const endorsementScoreThreshold = useEndorsementScoreThreshold()
 
   const userDelegatedNodes = useUserXNodes(account ?? undefined)
@@ -32,7 +33,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
   //TODO: Multiple nodes
   const endorseAppMutation = useEndorseApp({
-    appId: xApp.id,
+    appId: xApp?.id ?? "",
     nodeId,
     onSuccess: onClose,
   })
@@ -80,7 +81,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
               p="16px"
               rounded={"md"}>
               <Box>
-                <Text>{xApp.name}</Text>
+                <Text>{xApp?.name ?? ""}</Text>
                 <Text color={"#6A6A6A"}>{t("Current endorsement score")}</Text>
               </Box>
               <Heading size="lg">
