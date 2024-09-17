@@ -1,15 +1,9 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import {
-  bootstrapEmissions,
-  getOrDeployContractInstances,
-  getVot3Tokens,
-  startNewAllocationRound,
-  waitForRoundToEnd,
-} from "./helpers"
+import { bootstrapEmissions, getOrDeployContractInstances, getVot3Tokens, startNewAllocationRound } from "./helpers"
 import { describe, it } from "mocha"
 
-describe.only("VeBetterPassport - @shard3", function () {
+describe("VeBetterPassport - @shard3", function () {
   // deployment
   describe("Deployment", function () {})
 
@@ -151,7 +145,7 @@ describe.only("VeBetterPassport - @shard3", function () {
         veBetterPassport,
         otherAccount,
       } = await getOrDeployContractInstances({
-        forceDeploy: false,
+        forceDeploy: true,
       })
       await expect(veBetterPassport.connect(otherAccount).toggleWhitelistCheck()).to.be.reverted
 
@@ -178,7 +172,7 @@ describe.only("VeBetterPassport - @shard3", function () {
 
     it("Should be able to toggle whitelist check", async function () {
       const { owner: settingsManager, veBetterPassport } = await getOrDeployContractInstances({
-        forceDeploy: false,
+        forceDeploy: true,
       })
 
       // Whitelist check should be disabled by default
@@ -195,7 +189,7 @@ describe.only("VeBetterPassport - @shard3", function () {
 
     it("Should be able to toggle blacklist check", async function () {
       const { owner: settingsManager, veBetterPassport } = await getOrDeployContractInstances({
-        forceDeploy: false,
+        forceDeploy: true,
       })
 
       // Blacklist check should be disabled by default
@@ -212,7 +206,7 @@ describe.only("VeBetterPassport - @shard3", function () {
 
     it("Should be able to toggle signaling check", async function () {
       const { owner: settingsManager, veBetterPassport } = await getOrDeployContractInstances({
-        forceDeploy: false,
+        forceDeploy: true,
       })
 
       // Signaling check should be disabled by default
@@ -229,7 +223,7 @@ describe.only("VeBetterPassport - @shard3", function () {
 
     it("Should be able to toggle participation check", async function () {
       const { owner: settingsManager, veBetterPassport } = await getOrDeployContractInstances({
-        forceDeploy: false,
+        forceDeploy: true,
       })
 
       // Participation check should be disabled by default
@@ -246,7 +240,7 @@ describe.only("VeBetterPassport - @shard3", function () {
 
     it("Should be able to toggle node ownership check", async function () {
       const { owner: settingsManager, veBetterPassport } = await getOrDeployContractInstances({
-        forceDeploy: false,
+        forceDeploy: true,
       })
 
       // Node ownership check should be disabled by default
@@ -263,7 +257,7 @@ describe.only("VeBetterPassport - @shard3", function () {
 
     it("Should be able to toggle gm ownership check", async function () {
       const { owner: settingsManager, veBetterPassport } = await getOrDeployContractInstances({
-        forceDeploy: false,
+        forceDeploy: true,
       })
 
       // Whitelist check should be disabled by default

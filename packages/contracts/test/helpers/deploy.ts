@@ -381,9 +381,10 @@ export const getOrDeployContractInstances = async ({
       whitelisters: [owner.address], // _whitelisters
       actionRegistrar: await x2EarnRewardsPool.getAddress(), // _actionRegistrar
       actionScoreManager: owner.address, // _actionScoreManager
-      threshold: 0, //threshold
-      signalingThreshold: 2, //signalingThreshold
-      roundsForCumulativeScore: 0, //roundsForCumulativeScore
+      threshold: config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD, //threshold
+      signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
+      roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
+      minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
     },
   ])) as VeBetterPassport
 
