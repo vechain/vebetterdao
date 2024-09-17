@@ -71,26 +71,32 @@ contract WhitelistAndBlacklist is Initializable, AccessControlUpgradeable, IWhit
 
   // ---------- Setters ---------- //
 
-  /// @notice user can be whitelisted but the counter will not be reset
+  /// @notice whitelists a user
   function whitelist(address _user) external override onlyRoleOrAdmin(WHITELISTER_ROLE) {
     _getWhitelistAndBlacklistStorage()._whitelisted[_user] = true;
+
+    if (isBlacklisted(_user)) removeFromBlacklist(_user);
+
     emit UserWhitelisted(_user, msg.sender);
   }
 
   /// @notice Removes a user from the whitelist
-  function removeFromWhitelist(address _user) external onlyRoleOrAdmin(WHITELISTER_ROLE) {
+  function removeFromWhitelist(address _user) public onlyRoleOrAdmin(WHITELISTER_ROLE) {
     _getWhitelistAndBlacklistStorage()._whitelisted[_user] = false;
     emit RemovedUserFromWhitelist(_user, msg.sender);
   }
 
-  /// @notice user can be blacklisted but the counter will not be reset
+  /// @notice blacklists a user
   function blacklist(address _user) external override onlyRoleOrAdmin(WHITELISTER_ROLE) {
     _getWhitelistAndBlacklistStorage()._blacklisted[_user] = true;
+
+    if (isWhitelisted(_user)) removeFromWhitelist(_user);
+
     emit UserBlacklisted(_user, msg.sender);
   }
 
   /// @notice Removes a user from the blacklist
-  function removeFromBlacklist(address _user) external onlyRoleOrAdmin(WHITELISTER_ROLE) {
+  function removeFromBlacklist(address _user) public onlyRoleOrAdmin(WHITELISTER_ROLE) {
     _getWhitelistAndBlacklistStorage()._blacklisted[_user] = false;
     emit RemovedUserFromBlacklist(_user, msg.sender);
   }
