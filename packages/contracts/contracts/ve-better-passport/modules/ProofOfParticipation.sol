@@ -116,8 +116,8 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     $.securityMultiplier[APP_SECURITY.UNDEFINED] = 0;
     $.securityMultiplier[APP_SECURITY.NONE] = 0;
     $.securityMultiplier[APP_SECURITY.LOW] = 100;
-    $.securityMultiplier[APP_SECURITY.MEDIUM] = 300;
-    $.securityMultiplier[APP_SECURITY.HIGH] = 600;
+    $.securityMultiplier[APP_SECURITY.MEDIUM] = 200;
+    $.securityMultiplier[APP_SECURITY.HIGH] = 400;
 
     $.decayRate = 20; // 20% decay rate
 
