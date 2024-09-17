@@ -1,15 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
+import { PassportTypes } from "./libraries/PassportTypes.sol";
+import { PassportStorageTypes } from "./libraries/PassportStorageTypes.sol";
+import { PassportChecksLogic } from "./libraries/PassportChecksLogic.sol";
+import { PassportWhitelistAndBlacklistLogic } from "./libraries/PassportWhitelistAndBlacklistLogic.sol";
+import { PassportPoPScoreLogic } from "./libraries/PassportPoPScoreLogic.sol";
+import { PassportDelegationLogic } from "./libraries/PassportDelegationLogic.sol";
+import { PassportClockLogic } from "./libraries/PassportClockLogic.sol";
+import { PassportSignalingLogic } from "./libraries/PassportSignalingLogic.sol";
+import { PassportPersonhoodLogic } from "./libraries/PassportPersonhoodLogic.sol";
+import { PassportEIP712SigningLogic } from "./libraries/PassportEIP712SigningLogic.sol";
+import { PassportConfigurator } from "./libraries/PassportConfigurator.sol";
+import { PassportStorage } from "./modules/PassportStorage.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
-import { BotSignaling } from "./modules/BotSignaling.sol";
-import { ProofOfParticipation } from "./modules/ProofOfParticipation.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
-import { PersonhoodDelegation } from "./modules/PersonhoodDelegation.sol";
-import { WhitelistAndBlacklist } from "./modules/WhitelistAndBlacklist.sol";
-import { PersonhoodSettings } from "./modules/PersonhoodSettings.sol";
 import { INodeManagement } from "../interfaces/INodeManagement.sol";
 import { IGalaxyMember } from "../interfaces/IGalaxyMember.sol";
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
@@ -17,54 +24,14 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 /// @title VeBetterPassport
 /// @notice Contract to manage the VeBetterPassport, a system to determine if a wallet is a person or not
 /// based on the participation score, blacklisting, and xnode, GM holdings and much more that can be added in the future.
-contract VeBetterPassport is
-  AccessControlUpgradeable,
-  UUPSUpgradeable,
-  PersonhoodDelegation,
-  ProofOfParticipation,
-  BotSignaling,
-  WhitelistAndBlacklist,
-  PersonhoodSettings,
-  IVeBetterPassport
-{
+contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, PassportStorage, IVeBetterPassport {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant ROLE_GRANTER = keccak256("ROLE_GRANTER");
-
-  // ---------- Storage ------------ //
-
-  struct VeBetterPassportStorage {
-    IXAllocationVotingGovernor xAllocationVoting;
-    INodeManagement nodeManagement;
-    IGalaxyMember galaxyMember;
-  }
-
-  // keccak256(abi.encode(uint256(keccak256("storage.VeBetterPassport")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant VeBetterPassportStorageLocation =
-    0x525c75e32ceef242f2da07b664b7c31005134df413b2946d2db9b8715bb6b900;
-
-  function _getVeBetterPassportStorage() private pure returns (VeBetterPassportStorage storage $) {
-    assembly {
-      $.slot := VeBetterPassportStorageLocation
-    }
-  }
-
-  struct InitializationData {
-    IXAllocationVotingGovernor xAllocationVoting;
-    IX2EarnApps x2EarnApps;
-    address nodeManagement;
-    address galaxyMember;
-    address upgrader;
-    address[] admins;
-    address[] settingsManagers;
-    address[] roleGranters;
-    address[] blacklisters;
-    address[] whitelisters;
-    address actionRegistrar;
-    address actionScoreManager;
-    uint256 threshold;
-    uint256 signalingThreshold;
-    uint256 roundsForCumulativeScore;
-  }
+  bytes32 public constant SETTINGS_MANAGER_ROLE = keccak256("SETTINGS_MANAGER_ROLE");
+  bytes32 public constant WHITELISTER_ROLE = keccak256("WHITELISTER_ROLE");
+  bytes32 public constant ACTION_REGISTRAR_ROLE = keccak256("ACTION_REGISTRAR_ROLE");
+  bytes32 public constant ACTION_SCORE_MANAGER_ROLE = keccak256("ACTION_SCORE_MANAGER_ROLE");
+  bytes32 public constant SIGNALER_ROLE = keccak256("SIGNALER_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -72,53 +39,26 @@ contract VeBetterPassport is
   }
 
   /// @notice Initializes the contract
-  function initialize(InitializationData memory data) external initializer {
-    require(address(data.xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
-    require(address(data.x2EarnApps) != address(0), "VeBetterPassport: x2EarnApps is the zero address");
-    require(data.upgrader != address(0), "VeBetterPassport: upgrader is the zero address");
-    require(data.nodeManagement != address(0), "VeBetterPassport: nodeManagement is the zero address");
-    require(data.galaxyMember != address(0), "VeBetterPassport: galaxyMember is the zero address");
-
+  function initialize(PassportTypes.InitializationData memory data, PassportTypes.InitializationRoleData memory roles) external initializer {
     __UUPSUpgradeable_init();
     __AccessControl_init();
-    __ProofOfParticipation_init(
-      data.x2EarnApps,
-      data.xAllocationVoting,
-      data.actionRegistrar,
-      data.actionScoreManager,
-      data.threshold,
-      data.roundsForCumulativeScore
-    );
-    __BotSignaling_init(data.blacklisters, data.signalingThreshold, data.x2EarnApps);
-    __PersonhoodDelegation_init();
-    __WhitelistAndBlacklist_init(data.whitelisters);
-    __PersonhoodSettings_init(data.settingsManagers);
-
-    VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
-    $.xAllocationVoting = data.xAllocationVoting;
-    $.nodeManagement = INodeManagement(data.nodeManagement);
-    $.galaxyMember = IGalaxyMember(data.galaxyMember);
-
+    __PassportStorage_init(data);
     // Grant roles
-    _grantRole(UPGRADER_ROLE, data.upgrader);
-
-    for (uint256 i; i < data.admins.length; i++) {
-      require(data.admins[i] != address(0), "VeBetterPassport: admin address cannot be zero");
-      _grantRole(DEFAULT_ADMIN_ROLE, data.admins[i]);
-    }
-
-    for (uint256 i; i < data.roleGranters.length; i++) {
-      require(data.roleGranters[i] != address(0), "VeBetterPassport: role granter address cannot be zero");
-      _grantRole(ROLE_GRANTER, data.roleGranters[i]);
-    }
+    _grantRole(DEFAULT_ADMIN_ROLE, roles.admin);
+    _grantRole(UPGRADER_ROLE, roles.upgrader);
+    _grantRole(SIGNALER_ROLE, roles.botSignaler);
+    _grantRole(ROLE_GRANTER, roles.roleGranter);
+    _grantRole(SETTINGS_MANAGER_ROLE, roles.settingsManager);
+    _grantRole(WHITELISTER_ROLE, roles.whitelister);
+    _grantRole(ACTION_REGISTRAR_ROLE, roles.actionRegistrar);
+    _grantRole(ACTION_SCORE_MANAGER_ROLE, roles.actionScoreManager);
   }
 
   // ---------- Modifiers ------------ //
 
   /// @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
   /// @param role - the role to check
-  modifier onlyRoleOrAdmin(bytes32 role)
-    override(BotSignaling, ProofOfParticipation, PersonhoodDelegation, WhitelistAndBlacklist) {
+  modifier onlyRoleOrAdmin(bytes32 role) {
     if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
       revert VeBetterPassportUnauthorizedUser(msg.sender);
     }
@@ -133,31 +73,252 @@ contract VeBetterPassport is
 
   // ---------- Getters ---------- //
 
-  /**
-   * @dev Checks if a wallet is a person or not based on the participation score, blacklisting, and xnode and GM holdings
-   */
-  function isPerson(address _user) public view returns (bool) {
-    // If a wallet is whitelisted, it is a person
-    if (isWhitelisted(_user) && whitelistCheckEnabled()) return true;
+    /// @notice Checks if a user is a person
+  /// @dev Checks if a wallet is a person or not based on the participation score, blacklisting, and xnode and GM holdings
+  /// @param user - the user address
+  /// @return person - true if the user is a person
+  /// @return reason - the reason why the user is not a person
+  function isPerson(address user) external view returns (bool person, string memory reason) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPersonhoodLogic.isPerson($, user);
+  }
 
-    // If a wallet is blacklisted, it is not a person
-    if (isBlacklisted(_user) && blacklistCheckEnabled()) return false;
+  /// @notice Returns if the whitelist check is enabled
+  function whitelistCheckEnabled() external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportChecksLogic.whitelistCheckEnabled($);
+  }
 
-    // If a wallet is not whitelisted and has been signaled more than X times
-    if ((signaledCounter(_user) >= signalingThreshold()) && signalingCheckEnabled()) return false;
+  /// @notice Returns if the blacklist check is enabled
+  function blacklistCheckEnabled() external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportChecksLogic.blacklistCheckEnabled($);
+  }
 
-    VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
-    // If the user's cumulated score in the last rounds is greater than or equal to the threshold
-    uint256 participationScore = getCumulativeScoreWithDecay(_user, $.xAllocationVoting.currentRoundId());
-    if ((participationScore >= thresholdParticipationScore()) && participationScoreCheckEnabled()) return true;
+  /// @notice Returns if the signaling check is enabled
+  function signalingCheckEnabled() external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportChecksLogic.signalingCheckEnabled($);
+  }
 
-    // Check if user owns an economic or xnode
-    if (($.nodeManagement.getNodeIds(_user).length > 0) && nodeOwnershipCheckEnabled()) return true;
+  /// @notice Returns if the participation score check is enabled
+  function participationScoreCheckEnabled() external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportChecksLogic.participationScoreCheckEnabled($);
+  }
 
-    // Check if user has a GM with a level greater than 0
-    if (($.galaxyMember.getHighestLevel(_user) > 0) && gmOwnershipCheckEnabled()) return true;
+  /// @notice Returns if the node ownership check is enabled
+  function nodeOwnershipCheckEnabled() external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportChecksLogic.nodeOwnershipCheckEnabled($);
+  }
 
-    return false;
+  /// @notice Returns if the GM ownership check is enabled
+  function gmOwnershipCheckEnabled() external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportChecksLogic.gmOwnershipCheckEnabled($);
+  }
+
+  /// @notice Returns if a user is whitelisted
+  function isWhitelisted(address _user) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportWhitelistAndBlacklistLogic.isWhitelisted($, _user);
+  }
+
+  /// @notice Returns if a user is blacklisted
+  function isBlacklisted(address _user) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportWhitelistAndBlacklistLogic.isBlacklisted($, _user);
+  }
+
+  /// @notice Gets the cumulative score of a user based on exponential decay for a number of last rounds
+  /// @dev This function calculates the decayed score f(t) = a * (1 - r)^t
+  /// @param user - the user address
+  /// @param lastRound - the round to consider as a starting point for the cumulative score
+  function getCumulativeScoreWithDecay(address user, uint256 lastRound) public view virtual returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.getCumulativeScoreWithDecay($, user, lastRound);
+  }
+
+  /// @notice Gets the round score of a user
+  /// @param user - the user address
+  /// @param round - the round
+  function userRoundScore(address user, uint256 round) public view virtual returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.userRoundScore($, user, round);
+  }
+
+  /// @notice Gets the total score of a user
+  /// @param user - the user address
+  function userTotalScore(address user) public view virtual returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.userTotalScore($, user);
+  }
+
+  /// @notice Gets the score of a user for an app in a round
+  /// @param user - the user address
+  /// @param round - the round
+  /// @param appId - the app id
+  function userRoundScoreApp(address user, uint256 round, bytes32 appId) public view virtual returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.userRoundScoreApp($, user, round, appId);
+  }
+
+  /// @notice Gets the total score of a user for an app
+  /// @param user - the user address
+  /// @param appId - the app id
+  function userAppTotalScore(address user, bytes32 appId) public view virtual returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.userAppTotalScore($, user, appId);
+  }
+
+  /// @notice Gets the threshold for a user to be considered a person
+  function thresholdParticipationScore() public view virtual returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.thresholdParticipationScore($);
+  }
+
+  /// @notice Gets the security multiplier for an app security
+  /// @param security - the app security between LOW, MEDIUM, HIGH
+  function securityMultiplier(PassportTypes.APP_SECURITY security) public view virtual returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.securityMultiplier($, security);
+  }
+
+  /// @notice Gets the security level of an app
+  /// @param appId - the app id
+  function appSecurity(bytes32 appId) public view virtual returns (PassportTypes.APP_SECURITY) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.appSecurity($, appId);
+  }
+
+  /// @notice Gets the round threshold for a user to be considered a person
+  function roundsForCumulativeScore() public view virtual returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.roundsForCumulativeScore($);
+  }
+
+  /// @notice Returns the delegatee address for a delegator
+  /// @param delegator - the delegator address
+  function getDelegatee(address delegator) external view returns (address) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportDelegationLogic.getDelegatee($, delegator);
+  }
+
+  /// @notice Returns the delegatee address for a delegator at a specific timepoint
+  /// @param delegator - the delegator address
+  /// @param timepoint - the timepoint to query
+  function getDelegateeInTimepoint(address delegator, uint256 timepoint) external view returns (address) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportDelegationLogic.getDelegateeInTimepoint($, delegator, timepoint);
+  }
+
+  /// @notice Returns the delegator address for a delegatee
+  /// @param delegatee - the delegatee address
+  function getDelegator(address delegatee) external view returns (address) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportDelegationLogic.getDelegator($, delegatee);
+  }
+
+  /// @notice Returns the delegator address for a delegatee at a specific timepoint
+  /// @param delegatee - the delegatee address
+  /// @param timepoint - the timepoint to query
+  function getDelegatorInTimepoint(address delegatee, uint256 timepoint) external view returns (address) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportDelegationLogic.getDelegatorInTimepoint($, delegatee, timepoint);
+  }
+
+  /// @notice Returns if a user is a delegator
+  /// @param user - the user address
+  function isDelegator(address user) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportDelegationLogic.isDelegator($, user);
+  }
+
+  /// @notice Returns if a user is a delegator at a specific timepoint
+  /// @param user - the user address
+  /// @param timepoint - the timepoint to query
+  function isDelegatorInTimepoint(address user, uint256 timepoint) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportDelegationLogic.isDelegatorInTimepoint($, user, timepoint);
+  }
+
+  /// @notice Returns if a user is a delegatee
+  /// @param user - the user address
+  function isDelegatee(address user) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportDelegationLogic.isDelegatee($, user);
+  }
+
+  /// @notice Returns if a user is a delegatee at a specific timepoint
+  /// @param user - the user address
+  /// @param timepoint - the timepoint to query
+  function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportDelegationLogic.isDelegateeInTimepoint($, user, timepoint);
+  }
+
+  /// @notice Returns the number of times a user has been signaled
+  function signaledCounter(address _user) public view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportSignalingLogic.signaledCounter($, _user);
+  }
+
+  /// @notice Returns the belonging app of a signaler
+  function appOfSignaler(address _signaler) public view returns (bytes32) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportSignalingLogic.appOfSignaler($, _signaler);
+  }
+
+  /// @notice Returns the number of times a user has been signaled by an app
+  function appSignalsCounter(bytes32 _app, address _user) public view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportSignalingLogic.appSignalsCounter($, _app, _user);
+  }
+
+  /// @notice Returns the total number of signals for an app
+  function appTotalSignalsCounter(bytes32 _app) public view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportSignalingLogic.appTotalSignalsCounter($, _app);
+  }
+
+  /// @notice Returns the signaling threshold
+  function signalingThreshold() public view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportSignalingLogic.signalingThreshold($);
+  }
+
+  /// @notice Gets the x2EarnApps contract address
+  function x2EarnApps() public view virtual returns (IX2EarnApps) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportConfigurator.x2EarnApps($);
+  }
+
+  /// @notice Get the current block number
+  function clock() external view returns (uint48) {
+    return PassportClockLogic.clock();
+  }
+
+  /// @notice Get the clock mode
+  function CLOCK_MODE() external pure returns (string memory) {
+    return PassportClockLogic.CLOCK_MODE();
+  }
+
+  ///@dev returns the fields and values that describe the domain separator used by this contract for EIP-712 signature.
+  function eip712Domain()
+    external
+    view
+    returns (
+      bytes1 fields,
+      string memory name,
+      string memory signatureVersion,
+      uint256 chainId,
+      address verifyingContract,
+      bytes32 salt,
+      uint256[] memory extensions
+    )
+  {
+    return PassportEIP712SigningLogic.eip712Domain();
   }
 
   /// @notice Returns the version of the contract
@@ -166,14 +327,228 @@ contract VeBetterPassport is
   }
 
   // ---------- Setters ---------- //
+  /// @notice Toggles the whitelist check
+  function toggleWhitelistCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportChecksLogic.toggleWhitelistCheck($);
+  }
+
+  /// @notice Toggles the blacklist check
+  function toggleBlacklistCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportChecksLogic.toggleBlacklistCheck($);
+  }
+
+  /// @notice Toggles the signaling check
+  function toggleSignalingCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportChecksLogic.toggleSignalingCheck($);
+  }
+
+  /// @notice Toggles the participation score check
+  function toggleParticipationScoreCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportChecksLogic.toggleParticipationScoreCheck($);
+  }
+
+  /// @notice Toggles the node ownership check
+  function toggleNodeOwnershipCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportChecksLogic.toggleNodeOwnershipCheck($);
+  }
+
+  /// @notice Toggles the GM ownership check
+  function toggleGMOwnershipCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportChecksLogic.toggleGMOwnershipCheck($);
+  }
+
+  /// @notice user can be whitelisted but the counter will not be reset
+  function whitelist(address _user) external onlyRoleOrAdmin(WHITELISTER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportWhitelistAndBlacklistLogic.whitelist($, _user);
+  }
+
+  /// @notice Removes a user from the whitelist
+  function removeFromWhitelist(address _user) external onlyRoleOrAdmin(WHITELISTER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportWhitelistAndBlacklistLogic.removeFromWhitelist($, _user);
+  }
+
+  /// @notice user can be blacklisted but the counter will not be reset
+  function blacklist(address _user) external onlyRoleOrAdmin(WHITELISTER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportWhitelistAndBlacklistLogic.blacklist($, _user);
+  }
+
+  /// @notice Removes a user from the blacklist
+  function removeFromBlacklist(address _user) external onlyRoleOrAdmin(WHITELISTER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportWhitelistAndBlacklistLogic.removeFromBlacklist($, _user);
+  }
+
+  /// @notice Registers an action for a user
+  /// @param user - the user that performed the action
+  /// @param appId - the app id of the action
+  function registerAction(address user, bytes32 appId) external onlyRole(ACTION_REGISTRAR_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportPoPScoreLogic.registerAction($, user, appId);
+  }
+
+  /// @notice Registers an action for a user in a round
+  /// @param user - the user that performed the action
+  /// @param appId - the app id of the action
+  /// @param round - the round id of the action
+  function registerActionForRound(address user, bytes32 appId, uint256 round) external onlyRole(ACTION_REGISTRAR_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportPoPScoreLogic.registerActionForRound($, user, appId, round);
+  }
+
+  /// @notice Sets the threshold for a user to be considered a person
+  /// @param threshold - the round threshold
+  function setThreshold(uint256 threshold) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportPoPScoreLogic.setThreshold($, threshold);
+  }
+
+  /// @notice Sets the number of rounds to consider for the cumulative score
+  /// @param rounds - the number of rounds
+  function setRoundsForCumulativeScore(uint256 rounds) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportPoPScoreLogic.setRoundsForCumulativeScore($, rounds);
+  }
+
+  /// @notice Sets the  security multiplier
+  /// @param security - the app security between LOW, MEDIUM, HIGH
+  /// @param multiplier - the multiplier
+  function setSecurityMultiplier(
+    PassportTypes.APP_SECURITY security,
+    uint256 multiplier
+  ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportPoPScoreLogic.setSecurityMultiplier($, security, multiplier);
+  }
+
+  /// @dev Sets the security level of an app
+  /// @param appId - the app id
+  /// @param security  - the security level
+  function setAppSecurity(
+    bytes32 appId,
+    PassportTypes.APP_SECURITY security
+  ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportPoPScoreLogic.setAppSecurity($, appId, security);
+  }
+
+  /// @notice Sets the decay rate for the exponential decay
+  /// @param decayRate - the decay rate
+  function setDecayRate(uint256 decayRate) public virtual onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportPoPScoreLogic.setDecayRate($, decayRate);
+  }
+
+  /// @notice Sets the X2EarnApps contract address
+  /// @dev The X2EarnApps contract address can be modified by the DEFAULT_ADMIN_ROLE
+  /// @param _x2EarnApps - the X2EarnApps contract address
+  function setX2EarnApps(IX2EarnApps _x2EarnApps) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportConfigurator.setX2EarnApps($, _x2EarnApps);
+  }
+
+  /// @notice Delegate the personhood to another address
+  /// The delegator must sign a message where he authorizes the delegatee to request the delegation:
+  /// this is done to avoid that a malicious user delegates the personhood to another user without his consent.
+  /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
+  /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
+  /// @param delegator - the delegator address
+  /// @param deadline - the deadline for the signature
+  /// @param signature - the signature of the delegation
+  function delegateWithSignature(address delegator, uint256 deadline, bytes memory signature) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportDelegationLogic.delegateWithSignature($, delegator, deadline, signature);
+  }
+
+  /// @notice Revoke the delegation (can be done by the delegator or the delegatee)
+  /// @param delegator - the delegator address
+  function revokeDelegation(address delegator) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportDelegationLogic.revokeDelegation($, delegator);
+  }
+
+  /// @notice Signals a user
+  function signalUser(address _user) external onlyRoleOrAdmin(SIGNALER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.signalUser($, _user);
+  }
+
+  /// @notice Signals a user with a reason
+  function signalUserWithReason(address _user, string memory reason) external onlyRoleOrAdmin(SIGNALER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.signalUserWithReason($, _user, reason);
+  }
+
+  /// @notice this method allows an app admin to assign a signaler to an app
+  /// @param app - the app to assign the signaler to
+  /// @param user - the signaler to assign to the app
+  function assignSignalerToAppByAppAdmin(bytes32 app, address user) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.assignSignalerToAppByAppAdmin($, app, user);
+  }
+
+  /// @notice this method allows an app admin to remove a signaler from an app
+  /// @param user - the signaler to remove from the app
+  function removeSignalerFromAppByAppAdmin(address user) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.removeSignalerFromAppByAppAdmin($, user);
+  }
+
+  /// @notice Sets the signaling threshold
+  /// @param threshold - the signaling threshold
+  function setSignalingThreshold(uint256 threshold) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.setSignalingThreshold($, threshold);
+  }
+
+  /// @dev Assigns a signaler to an app, allowing us to track the amount of signals from a specific app
+  /// @notice to be used together with grantRole
+  /// @param app - the app ID
+  /// @param user - the signaler address
+  function assignSignalerToApp(bytes32 app, address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.assignSignalerToApp($, app, user);
+  }
+
+  /// @dev Removes a signaler from an app
+  /// @notice to be used together with revokeRole
+  /// @param user - the signaler address
+  function removeSignalerFromApp(address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.removeSignalerFromApp($, user);
+  }
+
+  /// @notice Resets the signals of a user with a given reason
+  /// @dev assigns the signals of a user to zero
+  /// @param user - the address of the user
+  /// @param reason - the reason for resetting the signals
+  function resetUserSignalsWithReason(address user, string memory reason) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.resetUserSignals($, user, reason);
+  }
+
+    /// @notice Sets the minimum galaxy member level
+  /// @param minimumGalaxyMemberLevel The new minimum galaxy member level
+  function setMinimumGalaxyMemberLevel(uint256 minimumGalaxyMemberLevel) external onlyRole(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportChecksLogic.setMinimumGalaxyMemberLevel($, minimumGalaxyMemberLevel);
+  }
 
   /// @dev Sets the xAllocationVoting contract
   /// @param xAllocationVoting - the xAllocationVoting contract address
   function setXAllocationVoting(
     IXAllocationVotingGovernor xAllocationVoting
   ) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
-    VeBetterPassportStorage storage $ = _getVeBetterPassportStorage();
-    $.xAllocationVoting = xAllocationVoting;
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportConfigurator.setXAllocationVoting($, xAllocationVoting);
   }
 
   // ---------- Overrides ---------- //
@@ -198,20 +573,5 @@ contract VeBetterPassport is
     address account
   ) public override(AccessControlUpgradeable, IVeBetterPassport) onlyRoleOrAdmin(ROLE_GRANTER) {
     _revokeRole(role, account);
-  }
-
-  /// @dev Assigns a signaler to an app, allowing us to track the amount of signals from a specific app
-  /// @notice to be used together with grantRole
-  /// @param _app - the app ID
-  /// @param user - the signaler address
-  function assignSignalerToApp(bytes32 _app, address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
-    _assignSignalerToApp(_app, user);
-  }
-
-  /// @dev Removes a signaler from an app
-  /// @notice to be used together with revokeRole
-  /// @param user - the signaler address
-  function removeSignalerFromApp(address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
-    _removeSignalerFromApp(user);
   }
 }
