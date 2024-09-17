@@ -525,6 +525,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   function assignSignalerToApp(bytes32 app, address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.assignSignalerToApp($, app, user);
+    _grantRole(SIGNALER_ROLE, user);
   }
 
   /// @dev Removes a signaler from an app
@@ -533,6 +534,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   function removeSignalerFromApp(address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.removeSignalerFromApp($, user);
+    _revokeRole(SIGNALER_ROLE, user);
   }
 
   /// @notice Resets the signals of a user with a given reason

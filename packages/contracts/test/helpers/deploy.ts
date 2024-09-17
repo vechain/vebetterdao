@@ -377,7 +377,7 @@ export const getOrDeployContractInstances = async ({
       admins: [owner.address], // admins
       roleGranters: [owner.address], // roleGranters
       settingsManagers: [owner.address], // settingsManagers
-      blacklisters: [owner.address], // _blacklisters
+      botSignalers: [owner.address], // _blacklisters
       whitelisters: [owner.address], // _whitelisters
       actionRegistrar: await x2EarnRewardsPool.getAddress(), // _actionRegistrar
       actionScoreManager: owner.address, // _actionScoreManager

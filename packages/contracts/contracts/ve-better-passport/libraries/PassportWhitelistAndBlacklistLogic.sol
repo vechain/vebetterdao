@@ -64,11 +64,14 @@ library PassportWhitelistAndBlacklistLogic {
   /// @notice user can be whitelisted but the counter will not be reset
   function whitelist(PassportStorageTypes.PassportStorage storage self, address user) external {
     self.whitelisted[user] = true;
+
+    if (isWhitelisted(self, user)) removeFromWhitelist(self, user);
+
     emit UserWhitelisted(user, msg.sender);
   }
 
   /// @notice Removes a user from the whitelist
-  function removeFromWhitelist(PassportStorageTypes.PassportStorage storage self, address user) external {
+  function removeFromWhitelist(PassportStorageTypes.PassportStorage storage self, address user) public {
     self.whitelisted[user] = false;
     emit RemovedUserFromWhitelist(user, msg.sender);
   }
@@ -76,11 +79,14 @@ library PassportWhitelistAndBlacklistLogic {
   /// @notice user can be blacklisted but the counter will not be reset
   function blacklist(PassportStorageTypes.PassportStorage storage self, address user) external {
     self.blacklisted[user] = true;
+
+    if (isBlacklisted(self, user)) removeFromBlacklist(self, user);
+
     emit UserBlacklisted(user, msg.sender);
   }
 
   /// @notice Removes a user from the blacklist
-  function removeFromBlacklist(PassportStorageTypes.PassportStorage storage self, address user) external {
+  function removeFromBlacklist(PassportStorageTypes.PassportStorage storage self, address user) public {
     self.blacklisted[user] = false;
     emit RemovedUserFromBlacklist(user, msg.sender);
   }

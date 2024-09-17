@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { B3TR, GalaxyMember } from "../../typechain-types"
+import { B3TR, GalaxyMember, VeBetterPassport } from "../../typechain-types"
 import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
@@ -9,6 +9,7 @@ import { type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
 import { ZERO_ADDRESS } from "./const"
 import { buildTxBody, signAndSendTx } from "../../scripts/helpers/txHelper"
 import { getTestKeys } from "../../scripts/helpers/seedAccounts"
+import { veBetterPassport } from "../../typechain-types/contracts"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -612,4 +613,47 @@ export const upgradeNFTtoNextLevel = async (
   await b3tr.connect(owner).approve(await nft.getAddress(), b3trToUpgrade)
 
   await nft.connect(owner).upgrade(tokenId)
+}
+
+export const delegateWithSignature = async (
+  veBetterPassport: VeBetterPassport,
+  delegator: HardhatEthersSigner,
+  delegatee: HardhatEthersSigner,
+  deadlineFromNow: number, // seconds from now
+) => {
+  const blockNumber = await ethers.provider.getBlockNumber()
+  const currentBlockTimestamp = (await ethers.provider.getBlock(blockNumber))?.timestamp
+
+  if (!currentBlockTimestamp) throw new Error("Could not get current block timestamp")
+
+  // Calculate the deadline
+  const deadline = currentBlockTimestamp + deadlineFromNow
+
+  // Set up EIP-712 domain
+  const domain = {
+    name: "PersonhoodDelegation",
+    version: "1",
+    chainId: 1337,
+    verifyingContract: await veBetterPassport.getAddress(),
+  }
+  let types = {
+    Delegation: [
+      { name: "delegator", type: "address" },
+      { name: "delegatee", type: "address" },
+      { name: "deadline", type: "uint256" },
+    ],
+  }
+
+  // Prepare the struct to sign
+  const delegationData = {
+    delegator: delegator.address,
+    delegatee: delegatee.address,
+    deadline,
+  }
+
+  // Create the EIP-712 signature for the delegator
+  const signature = await delegator.signTypedData(domain, types, delegationData)
+
+  // Perform the delegation using the signature
+  await veBetterPassport.connect(delegatee).delegateWithSignature(delegator.address, deadline, signature)
 }
