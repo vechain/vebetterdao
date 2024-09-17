@@ -155,7 +155,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
   /// @param deadline - the deadline for the signature
   /// @param signature - the signature of the delegation
   function delegateWithSignature(address delegator, uint256 deadline, bytes memory signature) external {
-    require(block.timestamp <= deadline, "Signature expired");
+    require(block.timestamp <= deadline, "PersonhoodDelegation: Signature expired");
 
     PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
 
@@ -164,7 +164,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     bytes32 digest = _hashTypedDataV4(structHash);
     address signer = digest.recover(signature);
 
-    require(signer == delegator, "Invalid signature");
+    require(signer == delegator, "PersonhoodDelegation: Invalid signature");
 
     if (signer == msg.sender) {
       revert CannotDelegateToSelf(signer);
