@@ -1,5 +1,5 @@
 import { useUserXNodes } from "./useUserXNodes"
-import { useNodeEndorsedApp, useNodesEndorsementScore, useXApp, useXAppMetadata } from "../xApps"
+import { useNodeEndorsedApp, useNodesEndorsementScore, useXAppMetadata } from "../xApps"
 import { notFoundImage } from "@/constants"
 import { useGetTokenIdAttachedToNode } from "../galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import { useIpfsImage } from "@/api/ipfs"
@@ -30,12 +30,10 @@ export const useXNode = () => {
 
   // get endorsed app for the xnode
   const endorsedAppId = useNodeEndorsedApp(firstXNodeId).data
-  const endorsedAppBriefInfo = useXApp(endorsedAppId ?? "")
   const endorsedAppMetadata = useXAppMetadata(endorsedAppId ?? "")
   const { data: logo } = useIpfsImage(endorsedAppMetadata?.data?.logo)
   const endorsedApp = endorsedAppId
     ? {
-        ...endorsedAppBriefInfo.data,
         ...endorsedAppMetadata.data,
         logo: logo?.image,
       }
@@ -55,23 +53,10 @@ export const useXNode = () => {
   } = useGetTokenIdAttachedToNode(firstXNodeId)
 
   const isXNodeLoading =
-    xNodes.isLoading ||
-    endorsedAppBriefInfo.isLoading ||
-    endorsedAppMetadata.isLoading ||
-    nodesEndorsementScore.isLoading ||
-    isLoadingAttachedGMTokenId
+    xNodes.isLoading || endorsedAppMetadata.isLoading || nodesEndorsementScore.isLoading || isLoadingAttachedGMTokenId
   const isXNodeError =
-    xNodes.isError ||
-    endorsedAppBriefInfo.isError ||
-    endorsedAppMetadata.isError ||
-    nodesEndorsementScore.isError ||
-    isErrorAttachedGMTokenId
-  const xNodeError =
-    xNodes.error ||
-    endorsedAppBriefInfo.error ||
-    endorsedAppMetadata.error ||
-    nodesEndorsementScore.error ||
-    errorAttachedGMTokenId
+    xNodes.isError || endorsedAppMetadata.isError || nodesEndorsementScore.isError || isErrorAttachedGMTokenId
+  const xNodeError = xNodes.error || endorsedAppMetadata.error || nodesEndorsementScore.error || errorAttachedGMTokenId
 
   return {
     isXNodeLoading,

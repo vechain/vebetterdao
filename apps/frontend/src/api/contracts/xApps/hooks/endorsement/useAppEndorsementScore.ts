@@ -22,5 +22,6 @@ export const useAppEndorsementScore = (appId: string): UseQueryResult<string, Er
     contractAddress,
     method,
     args: [appId],
+    enabled: !!appId,
   })
 }

@@ -2,7 +2,7 @@ import { Flex, Stack, VStack } from "@chakra-ui/react"
 import { XNodePageHeader } from "./components/XNodePageHeader"
 import { AttachGMNFTCard } from "./components/AttachGMNFTCard"
 import { EndorsingAppCard } from "./components/EndorsingAppCard"
-import { EndorsementHistoryCard } from "./components/EndorsementHistoryCard"
+import { EndorsementHistoryList } from "./components/EndorsementHistoryList/EndorsementHistoryList"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { useXNode } from "@/api"
@@ -27,7 +27,7 @@ export const XNodeContent = () => {
         </Flex>
         <VStack flex={1.5} align={"stretch"}>
           <AttachGMNFTCard />
-          <EndorsementHistoryCard />
+          <EndorsementHistoryList />
         </VStack>
       </Stack>
     </VStack>
