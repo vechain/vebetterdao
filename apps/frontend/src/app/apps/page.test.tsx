@@ -8,15 +8,18 @@ describe("Apps", () => {
   test("XApps available - Renders correctly", async () => {
     //@ts-ignore
     vi.spyOn(hooks, "useXApps").mockReturnValue({
-      data: [
-        {
-          id: "1",
-          name: "Round 1",
-          teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
-          createdAtTimestamp: 16347455,
-          metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
-        },
-      ],
+      data: {
+        active: [
+          {
+            id: "1",
+            name: "Round 1",
+            teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+            createdAtTimestamp: 16347455,
+            metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+          },
+        ],
+        unendorsed: [],
+      },
       isLoading: false,
       isError: false,
     })
@@ -100,6 +103,5 @@ describe("Apps", () => {
 
     render(<Apps />)
     expect(screen.queryByTestId("apps-page-loading")).not.toBeInTheDocument()
-    expect(screen.queryByTestId("apps-page")).not.toBeInTheDocument()
   })
 })

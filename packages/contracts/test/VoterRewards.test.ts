@@ -1619,10 +1619,6 @@ describe("VoterRewards - @shard2", () => {
       // GM NFT token mint and upgrade
       await galaxyMember.connect(voter1).freeMint()
 
-      await galaxyMember.connect(voter1).burn(0)
-
-      await galaxyMember.connect(voter1).freeMint()
-
       await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
 
       expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(voter1.address))).to.equal(5)
@@ -1762,9 +1758,6 @@ describe("VoterRewards - @shard2", () => {
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
       // GM NFT token mint and upgrade
-      await galaxyMember.connect(voter1).freeMint()
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint()
 
@@ -1908,9 +1901,6 @@ describe("VoterRewards - @shard2", () => {
       await waitForNextCycle()
 
       // GM NFT token mint and upgrade
-      await galaxyMember.connect(voter1).freeMint()
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint()
 
@@ -2082,9 +2072,6 @@ describe("VoterRewards - @shard2", () => {
       await waitForNextCycle()
 
       // GM NFT token mint and upgrade
-      await galaxyMember.connect(voter1).freeMint()
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint()
 
@@ -2226,9 +2213,6 @@ describe("VoterRewards - @shard2", () => {
       await waitForNextCycle()
 
       // GM NFT token mint and upgrade
-      await galaxyMember.connect(voter1).freeMint()
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint()
 
@@ -2567,9 +2551,6 @@ describe("VoterRewards - @shard2", () => {
       await emissions.connect(voter1).distribute() // Anyone can distribute the cycle
 
       // GM NFT token mint and upgrade
-      await galaxyMember.connect(voter1).freeMint()
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint()
 
@@ -2603,7 +2584,7 @@ describe("VoterRewards - @shard2", () => {
     const description = "Test Proposal: testing propsal with random description!"
     const functionToCall = "tokenDetails"
 
-    it.skip("QUADRATIC REWARDING ENABLED: Should calculate rewards correctly for governance voting and x allocation voting", async () => {
+    it("QUADRATIC REWARDING ENABLED: Should calculate rewards correctly for governance voting and x allocation voting", async () => {
       const config = createTestConfig()
       const {
         otherAccounts,
@@ -2702,10 +2683,6 @@ describe("VoterRewards - @shard2", () => {
       expect(await xAllocationVoting.roundDeadline(xAllocationsRoundID)).to.lt(await emissions.getNextCycleBlock())
 
       // Upgrading GM NFT
-      await galaxyMember.connect(voter1).freeMint()
-
-      await galaxyMember.connect(voter1).burn(0)
-
       await galaxyMember.connect(voter1).freeMint()
 
       await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
@@ -2941,7 +2918,7 @@ describe("VoterRewards - @shard2", () => {
       expect(await voterRewards.getReward(xAllocationsRoundID, voter3.address)).to.equal(400000000000000000000000n) // 20%
     })
 
-    it.skip("QUADRATIC REWARDING DISABLED MID ROUND: Should calculate rewards correctly for governance voting and x allocation voting and Quadratic rewarding should only be removed from following round", async () => {
+    it("QUADRATIC REWARDING DISABLED MID ROUND: Should calculate rewards correctly for governance voting and x allocation voting and Quadratic rewarding should only be removed from following round", async () => {
       const config = createTestConfig()
       const {
         otherAccounts,
@@ -3042,9 +3019,6 @@ describe("VoterRewards - @shard2", () => {
       // Upgrading GM NFT
       await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
-      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(voter1.address))).to.equal(5) // Level 5
-
       // Disable quadratic rewarding mid round
       await voterRewards.toggleQuadraticRewarding()
 
@@ -3087,6 +3061,9 @@ describe("VoterRewards - @shard2", () => {
       tx = await createProposal(b3tr, B3trContract, proposar, description + "1", functionToCall, [], nextCycle)
       proposalId = await getProposalIdFromTx(tx)
 
+      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(voter1.address))).to.equal(5) // Level 5
+
       await waitForProposalToBeActive(proposalId) // we are in round 3 now
 
       // Vote on the proposal
@@ -3121,7 +3098,7 @@ describe("VoterRewards - @shard2", () => {
       expect(await voterRewards.getReward(xAllocationsRoundID, voter3.address)).to.equal(285714285714285714285714n)
     })
 
-    it.skip("QUADRATIC REWARDING ENABLED MID ROUND: Should calculate rewards correctly for governance voting and x allocation voting and Quadratic rewarding should only be enabled from following round", async () => {
+    it("QUADRATIC REWARDING ENABLED MID ROUND: Should calculate rewards correctly for governance voting and x allocation voting and Quadratic rewarding should only be enabled from following round", async () => {
       const config = createTestConfig()
       const {
         otherAccounts,
@@ -3224,9 +3201,6 @@ describe("VoterRewards - @shard2", () => {
       // Upgrading GM NFT
       await galaxyMember.connect(voter1).freeMint()
 
-      await upgradeNFTtoLevel(0, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
-      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(voter1.address))).to.equal(5) // Level 5
-
       // Disable quadratic rewarding mid round
       await voterRewards.toggleQuadraticRewarding()
 
@@ -3259,7 +3233,7 @@ describe("VoterRewards - @shard2", () => {
         voter3 allocation = 31.62 / 158.10 * 100 = 20% (400000 B3TR)
       */
 
-      expect(await voterRewards.getReward(xAllocationsRoundID, voter1.address)).to.equal(800000000000000000000000n) // 40% (Notice that voter1 has a level 5 NFT but didn't increase the rewards, this is because the snapshot of the proposal was taken before the NFT upgrade)
+      expect(await voterRewards.getReward(xAllocationsRoundID, voter1.address)).to.equal(800000000000000000000000n) // 40%
       expect(await voterRewards.getReward(xAllocationsRoundID, voter2.address)).to.equal(800000000000000000000000n) // 40%
       expect(await voterRewards.getReward(xAllocationsRoundID, voter3.address)).to.equal(400000000000000000000000n) // 20%
 
@@ -3268,6 +3242,9 @@ describe("VoterRewards - @shard2", () => {
       // Now we can create a new proposal and the GM NFT upgrade will be taken into account
       tx = await createProposal(b3tr, B3trContract, proposar, description + "1", functionToCall, [], nextCycle)
       proposalId = await getProposalIdFromTx(tx)
+
+      await upgradeNFTtoLevel(1, 5, galaxyMember, b3tr, voter1, minterAccount) // Upgrading to level 5
+      expect(await galaxyMember.levelOf(await galaxyMember.getSelectedTokenId(voter1.address))).to.equal(5) // Level 5
 
       await waitForProposalToBeActive(proposalId) // we are in round 3 now
 
@@ -3363,10 +3340,6 @@ describe("VoterRewards - @shard2", () => {
       await addNodeToken(3, voter3)
 
       await participateInAllocationVoting(voter1)
-
-      await galaxyMember.connect(voter1).freeMint() // Token Id 0
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint() // Token Id 1
 
@@ -3568,10 +3541,6 @@ describe("VoterRewards - @shard2", () => {
         BigInt(roundId),
       )
 
-      await galaxyMember.connect(voter1).freeMint() // Token Id 0
-
-      await galaxyMember.connect(voter1).burn(0)
-
       await galaxyMember.connect(voter1).freeMint() // Token Id 1
 
       await galaxyMember.setMaxLevel(10)
@@ -3761,10 +3730,6 @@ describe("VoterRewards - @shard2", () => {
         ],
         BigInt(roundId),
       )
-
-      await galaxyMember.connect(voter1).freeMint() // Token Id 0
-
-      await galaxyMember.connect(voter1).burn(0)
 
       await galaxyMember.connect(voter1).freeMint() // Token Id 1
 

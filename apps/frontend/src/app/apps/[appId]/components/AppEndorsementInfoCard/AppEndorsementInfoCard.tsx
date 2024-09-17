@@ -96,7 +96,11 @@ function getScoreColorScheme(appEndorsementStatus: string): scoreColorScheme {
   }
 }
 
-export const AppEndorsementInfoCard = () => {
+type Props = {
+  appId: string
+}
+
+export const AppEndorsementInfoCard = ({ appId }: Props) => {
   const { t } = useTranslation()
 
   const { app } = useCurrentAppInfo()
@@ -143,19 +147,16 @@ export const AppEndorsementInfoCard = () => {
   }, [account, formattedAppEndorsers])
 
   // Modals
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const {
+    isOpen: isEndorsementInfoOpen,
+    onOpen: onOpenEndorsementInfoModal,
+    onClose: onCloseEndorsementInfoModal,
+  } = useDisclosure()
   const {
     isOpen: isEndorsementModalOpen,
     onOpen: onOpenEndorsementModal,
     onClose: onCloseEndorsementModal,
   } = useDisclosure()
-
-  const defaultEndorsements = [
-    { name: "Mark", date: "2023-01-01", points: 90, address: "0x1234567890" },
-    { name: "John", date: "2023-01-02", points: 80, address: "0x1234567890" },
-    { name: "Jane", date: "2023-01-03", points: 85, address: "0x1234567890" },
-  ]
-  const XApps = [{ scoreTotal: 100 }]
 
   return (
     <Card
@@ -238,7 +239,7 @@ export const AppEndorsementInfoCard = () => {
                       ? t("{{value}}-x-node-users", { value: formattedAppEndorsers.length })
                       : t("1-x-node-user")}
                   </Text>
-                  <Link fontSize="14px" color="#004CFC" onClick={onOpen}>
+                  <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
                     {t("See all")}
                   </Link>
                 </HStack>
@@ -277,12 +278,8 @@ export const AppEndorsementInfoCard = () => {
         </Stack>
       </CardBody>
 
-      <AppEndorsementInfoCardModal
-        isOpen={isOpen}
-        onClose={onClose}
-        listOfEndorsements={defaultEndorsements}
-        XApps={XApps}
-      />
+      <AppEndorsementInfoCardModal isOpen={isEndorsementInfoOpen} onClose={onCloseEndorsementInfoModal} appId={appId} />
+
       <EndorseAppModal isOpen={isEndorsementModalOpen} onClose={onCloseEndorsementModal} xApp={app} />
     </Card>
   )

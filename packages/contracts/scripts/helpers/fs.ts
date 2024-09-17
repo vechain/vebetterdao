@@ -105,4 +105,36 @@ async function saveContractsToFile(
   console.log(`Contracts and libraries addresses saved to ${OUTPUT_PATH}`)
 }
 
-export { readFilesFromDirectory, formData, getFolderName, zipFolder, copyImages, saveContractsToFile }
+/**
+ * Save new libraries deployed to a file
+ * @param contracts - The deployed contracts
+ * @param libraries - The deployed libraries
+ */
+async function saveLibrariesToFile(libraries: { B3TRGovernor: Record<string, string> }): Promise<void> {
+  const OUTPUT_PATH = path.join(__dirname, `../../deploy_output`)
+  const LIBRARY_FILE_PATH = path.join(OUTPUT_PATH, "libraries.txt")
+
+  // Ensure the output directory exists
+  if (!fs.existsSync(OUTPUT_PATH)) {
+    fs.mkdirSync(OUTPUT_PATH)
+  }
+
+  // Remove the existing libraries file if it exists
+  if (fs.existsSync(LIBRARY_FILE_PATH)) {
+    fs.unlinkSync(LIBRARY_FILE_PATH)
+  }
+
+  // Write the new libraries file
+  await fs.promises.writeFile(LIBRARY_FILE_PATH, JSON.stringify(libraries, null, 2))
+  console.log(`Libraries addresses saved to ${LIBRARY_FILE_PATH}`)
+}
+
+export {
+  readFilesFromDirectory,
+  formData,
+  getFolderName,
+  zipFolder,
+  copyImages,
+  saveContractsToFile,
+  saveLibrariesToFile,
+}

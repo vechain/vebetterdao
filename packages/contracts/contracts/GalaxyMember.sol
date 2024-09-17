@@ -148,6 +148,77 @@ contract GalaxyMember is
     _disableInitializers();
   }
 
+  /// @notice Data for initializing the contract
+  /// @param name Name of the ERC721 token
+  /// @param symbol Symbol of the ERC721 token
+  /// @param admin Address to grant the admin role
+  /// @param upgrader Address to grant the upgrader role
+  /// @param pauser Address to grant the pauser role
+  /// @param minter Address to grant the minter role
+  /// @param contractsAddressManager Address that can update external contracts address
+  /// @param maxLevel Maximum level tokens can achieve
+  /// @param baseTokenURI Base URI for computing {tokenURI}
+  /// @param b3trToUpgradeToLevel Mapping of B3TR requirements per level
+  /// @param _b3tr B3TR token contract address
+  /// @param _treasury Address of the treasury
+  struct InitializationData {
+    string name;
+    string symbol;
+    address admin;
+    address upgrader;
+    address pauser;
+    address minter;
+    address contractsAddressManager;
+    uint256 maxLevel;
+    string baseTokenURI;
+    uint256[] b3trToUpgradeToLevel;
+    address b3tr;
+    address treasury;
+  }
+
+  /// @notice Initializes a new GalaxyMember contract
+  /// @dev Sets initial values for all relevant contract properties and state variables.
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  function initialize(InitializationData memory data) external initializer {
+    require(data.maxLevel > 0, "Galaxy Member: Max level must be greater than 0");
+    require(bytes(data.baseTokenURI).length > 0, "Galaxy Member: Base URI must be set");
+    require(data.b3tr != address(0), "Galaxy Member: B3TR token address cannot be the zero address");
+    require(data.treasury != address(0), "Galaxy Member: Treasury address cannot be the zero address");
+    require(
+      data.b3trToUpgradeToLevel.length >= data.maxLevel - 1,
+      "Galaxy Member: B3TR to upgrade must be set for all unlocked levels"
+    );
+
+    __ERC721_init(data.name, data.symbol);
+    __ERC721Enumerable_init();
+    __ERC721Pausable_init();
+    __ERC721Burnable_init();
+    __AccessControl_init();
+    __ReentrancyGuard_init();
+    __UUPSUpgradeable_init();
+
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+
+    $._baseTokenURI = data.baseTokenURI;
+
+    for (uint256 i = 0; i < data.b3trToUpgradeToLevel.length; i++) {
+      require(data.b3trToUpgradeToLevel[i] > 0, "Galaxy Member: B3TR to upgrade must be greater than 0");
+      $._b3trToUpgradeToLevel[i + 2] = data.b3trToUpgradeToLevel[i]; // First Level that requires B3TR is level 2
+    }
+
+    $.MAX_LEVEL = data.maxLevel;
+
+    $.b3tr = IB3TR(data.b3tr);
+    $.treasury = data.treasury;
+
+    require(data.admin != address(0), "Galaxy Member: Admin address cannot be the zero address");
+    _grantRole(DEFAULT_ADMIN_ROLE, data.admin);
+    _grantRole(UPGRADER_ROLE, data.upgrader);
+    _grantRole(PAUSER_ROLE, data.pauser);
+    _grantRole(MINTER_ROLE, data.minter);
+    _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
+  }
+
   /// @notice Initializes a new GalaxyMember contract
   /// @dev Sets initial values for all relevant contract properties and state variables.
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -162,6 +233,8 @@ contract GalaxyMember is
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     $.vechainNodes = ITokenAuction(_vechainNodes);
+
+    $._nextTokenId = $._nextTokenId == 0 ? 1 : $._nextTokenId;
 
     for (uint8 i; i < _nodeFreeLevels.length; i++) {
       require(_nodeFreeLevels[i] >= 1, "GalaxyMember: invalid node free level");
@@ -594,6 +667,89 @@ contract GalaxyMember is
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
     return "2";
+  }
+
+  struct TokenInfo {
+    uint256 tokenId;
+    string tokenURI;
+    uint256 tokenLevel;
+    uint256 b3trToUpgrade;
+  }
+
+  /// @notice Gets the token info by token ID
+  /// @param tokenId Token ID to get the info for
+  /// @return TokenInfo The token info
+  function getTokenInfoByTokenId(uint256 tokenId) public view virtual returns (TokenInfo memory) {
+    // Check if the token ID exists
+    require(_ownerOf(tokenId) != address(0), "GalaxyMember: tokenId doesn't exist");
+
+    TokenInfo memory tokenInfo;
+    tokenInfo.tokenId = tokenId;
+    tokenInfo.tokenURI = tokenURI(tokenId);
+    tokenInfo.tokenLevel = levelOf(tokenId);
+    tokenInfo.b3trToUpgrade = getB3TRtoUpgrade(tokenId);
+    return tokenInfo;
+  }
+
+  /// @notice Gets the selected token info for an address
+  /// @param owner The address of the owner to check
+  /// @return TokenInfo The selected token info
+  function getSelectedTokenInfoByOwner(address owner) public view returns (TokenInfo memory) {
+    uint256 tokenId = getSelectedTokenId(owner);
+    return getTokenInfoByTokenId(tokenId);
+  }
+
+  /// @notice Gets the tokens owned by an address
+  /// @param owner The address of the owner to check
+  /// @param page The page number to fetch
+  /// @param size The number of tokens to fetch (cannot exceed 100)
+  /// @return TokenInfo[] The tokens owned by the address
+  function getTokensInfoByOwner(address owner, uint256 page, uint256 size) public view returns (TokenInfo[] memory) {
+    // Ensure size is not 0
+    if (size == 0) {
+      revert("GalaxyMember: Invalid size, cannot be 0");
+    }
+
+    // Maximum number of tokens to fetch per page
+    uint256 MAX_PAGINATION_SIZE = 100;
+
+    // Ensure size is not greater than the maximum allowed value
+    if (size > MAX_PAGINATION_SIZE) {
+      revert(
+        string(
+          abi.encodePacked("GalaxyMember: Invalid size, cannot be greater than ", Strings.toString(MAX_PAGINATION_SIZE))
+        )
+      );
+    }
+
+    uint256 balance = balanceOf(owner); // Get the number of tokens owned by the address
+
+    // Calculate the starting index for the current page
+    uint256 start = page * size;
+
+    // If start index is greater than or equal to balance, return an empty array
+    if (start >= balance) {
+      return new TokenInfo[](0);
+    }
+
+    // Calculate the end index (exclusive)
+    uint256 end = start + size;
+    if (end > balance) {
+      end = balance; // Ensure the end index doesn't exceed the owner's balance
+    }
+
+    // Calculate the number of tokens to return
+    uint256 numTokens = end - start;
+
+    TokenInfo[] memory tokens = new TokenInfo[](numTokens);
+
+    for (uint256 i = 0; i < numTokens; i++) {
+      uint256 tokenIndex = start + i;
+      uint256 tokenId = tokenOfOwnerByIndex(owner, tokenIndex);
+      tokens[i] = getTokenInfoByTokenId(tokenId);
+    }
+
+    return tokens;
   }
 
   // ---------- Overrides ---------- //
