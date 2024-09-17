@@ -74,6 +74,38 @@ contract X2EarnApps is
     __Endorsement_init(_gracePeriod, _nodeManagementContract);
   }
 
+  /**
+   * @notice Initialize the contract
+   * @param _baseURI the base URI for the contract
+   * @param _admins the addresses of the admins
+   * @param _upgrader the address of the upgrader
+   * @param _governor the address that will be granted the governance role
+   *
+   * @dev This function is called only once during the contract deployment
+   */
+  function initialize(
+    string memory _baseURI,
+    address[] memory _admins,
+    address _upgrader,
+    address _governor
+  ) external initializer {
+    __X2EarnApps_init();
+    __Administration_init();
+    __AppsStorage_init();
+    __ContractSettings_init(_baseURI);
+    __VoteEligibility_init();
+    __UUPSUpgradeable_init();
+    __AccessControl_init();
+
+    for (uint256 i; i < _admins.length; i++) {
+      require(_admins[i] != address(0), "X2EarnApps: admin address cannot be zero");
+      _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
+    }
+
+    _grantRole(UPGRADER_ROLE, _upgrader);
+    _grantRole(GOVERNANCE_ROLE, _governor);
+  }
+
   // ---------- Modifiers ------------ //
 
   /**
@@ -269,7 +301,10 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-removeNodeEndorsement}.
    */
-  function removeNodeEndorsement(bytes32 _appId, uint256 _nodeId) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+  function removeNodeEndorsement(
+    bytes32 _appId,
+    uint256 _nodeId
+  ) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _removeNodeEndorsement(_appId, _nodeId);
   }
 
@@ -278,5 +313,5 @@ contract X2EarnApps is
    */
   function removeXAppSubmission(bytes32 _appId) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _removeXAppSubmission(_appId);
-  } 
+  }
 }

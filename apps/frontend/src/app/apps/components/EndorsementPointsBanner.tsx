@@ -1,14 +1,12 @@
 import { useEndorsementScoreThreshold, useNodesEndorsedApps, useNodesEndorsementScore, useUserXNodes } from "@/api"
 import { MinXNodeLevel } from "@/constants/XNode"
 import { Heading, Image, Skeleton, Stack, Text, VStack } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 export const EndorsementPointsBanner = () => {
   const { t } = useTranslation()
-  const { account } = useWallet()
-  const userXNodes = useUserXNodes(account ?? undefined)
+  const userXNodes = useUserXNodes()
   const nodesEndorsementScore = useNodesEndorsementScore()
   const endorsedApps = useNodesEndorsedApps(userXNodes.data?.map(node => node.id) ?? [])
   const requiredPoints = useEndorsementScoreThreshold()

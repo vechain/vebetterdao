@@ -77,7 +77,7 @@ describe("Governor and TimeLock - @shard1", function () {
 
       // check version
       const version = await governor.version()
-      expect(version).to.eql("2")
+      expect(version).to.eql("3")
 
       // deposit threshold is set correctly
       const depositThreshold = await governor.depositThresholdPercentage()

@@ -17,13 +17,12 @@ type NodeEndorsedApp = {
 }
 
 /**
- * Returns a mappaing between node ids and the endorsed apps from the contract
+ * Returns a mapping between node ids and the endorsed apps from the contract
  * @param thor  the thor client
  * @param nodeIds  the node ids to fetch the endorsed apps for
  * @returns  the endorsed apps for the nodes
  */
 export const getNodesEndorsedApps = async (thor: Connex.Thor, nodeIds: string[]): Promise<NodeEndorsedApp[]> => {
-  console.log("nodeIds", nodeIds)
   const clauses = nodeIds.map(nodeId => ({
     to: X2EARNAPPS_CONTRACT,
     value: 0,
@@ -53,9 +52,9 @@ export const getNodesEndorsedApps = async (thor: Connex.Thor, nodeIds: string[])
 export const getNodesEndorsedAppsQueryKey = (nodeIds: string[]) => ["XNodes", ...nodeIds, "ENDORSED_APPS"]
 
 /**
- *  Hook to get the owned or delegated xNodes for a user from the NodeManagement contract
- * @param user  the user address
- * @returns  the xNodes for the user
+ *  Hook to get the endorsed apps for a user's nodes
+ * @param nodeIds  the node ids to fetch the endorsed apps for
+ * @returns  the endorsed apps for the nodes
  */
 export const useNodesEndorsedApps = (nodeIds: string[]) => {
   const { thor } = useConnex()
