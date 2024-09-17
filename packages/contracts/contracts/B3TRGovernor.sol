@@ -48,7 +48,7 @@ import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { IVeBetterPassport } from "./ve-better-passport/interfaces/IVeBetterPassport.sol";
+import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
 
 /**
  * @title B3TRGovernor

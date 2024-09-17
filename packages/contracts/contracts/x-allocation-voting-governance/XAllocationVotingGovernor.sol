@@ -32,7 +32,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { IEmissions } from "../interfaces/IEmissions.sol";
 import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
-import { IVeBetterPassport } from "../ve-better-passport/interfaces/IVeBetterPassport.sol";
+import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 
 /**
  * @title XAllocationVotingGovernor
@@ -129,8 +129,10 @@ abstract contract XAllocationVotingGovernor is
       : _msgSender();
 
     // Check if the voter or the delegator of personhood to the voter is a person
-    require($._veBetterPassport.isPerson(personhoodAddress), "XAllocationVotingGovernor: voter is not a person");
-
+    (bool isPerson, ) = $._veBetterPassport.isPerson(personhoodAddress);
+    if (!isPerson) {
+      revert XAllocationVotingPersonhoodVerificationFailed(personhoodAddress);
+    }
     address voter = _msgSender();
 
     _countVote(roundId, voter, appIds, voteWeights);
