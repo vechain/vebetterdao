@@ -107,6 +107,11 @@ library PassportChecksLogic {
     return _isCheckEnabled(self, GM_OWNERSHIP_CHECK);
   }
 
+  /// @notice Returns the minimum galaxy member level
+  function getMinimumGalaxyMemberLevel(PassportStorageTypes.PassportStorage storage self) internal view returns (uint256) {
+    return self.minimumGalaxyMemberLevel;
+  }
+
   // ---------- Setters ---------- //
 
   /// @notice Toggles the whitelist check

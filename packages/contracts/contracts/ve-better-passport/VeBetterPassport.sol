@@ -15,7 +15,7 @@ import { PassportConfigurator } from "./libraries/PassportConfigurator.sol";
 import { PassportStorage } from "./modules/PassportStorage.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
+import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
 import { INodeManagement } from "../interfaces/INodeManagement.sol";
 import { IGalaxyMember } from "../interfaces/IGalaxyMember.sol";
@@ -39,7 +39,10 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   }
 
   /// @notice Initializes the contract
-  function initialize(PassportTypes.InitializationData memory data, PassportTypes.InitializationRoleData memory roles) external initializer {
+  function initialize(
+    PassportTypes.InitializationData memory data,
+    PassportTypes.InitializationRoleData memory roles
+  ) external initializer {
     __UUPSUpgradeable_init();
     __AccessControl_init();
     __PassportStorage_init(data);
@@ -73,7 +76,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
 
   // ---------- Getters ---------- //
 
-    /// @notice Checks if a user is a person
+  /// @notice Checks if a user is a person
   /// @dev Checks if a wallet is a person or not based on the participation score, blacklisting, and xnode and GM holdings
   /// @param user - the user address
   /// @return person - true if the user is a person
@@ -117,6 +120,12 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   function gmOwnershipCheckEnabled() external view returns (bool) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportChecksLogic.gmOwnershipCheckEnabled($);
+  }
+
+  /// @notice Returns the minimum galaxy member level
+  function getMinimumGalaxyMemberLevel() external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportChecksLogic.getMinimumGalaxyMemberLevel($);
   }
 
   /// @notice Returns if a user is whitelisted
@@ -535,7 +544,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
     PassportSignalingLogic.resetUserSignals($, user, reason);
   }
 
-    /// @notice Sets the minimum galaxy member level
+  /// @notice Sets the minimum galaxy member level
   /// @param minimumGalaxyMemberLevel The new minimum galaxy member level
   function setMinimumGalaxyMemberLevel(uint256 minimumGalaxyMemberLevel) external onlyRole(SETTINGS_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
