@@ -43,7 +43,7 @@ library PassportTypes {
    * @param whitelisters The addresses of the whitelisters
    * @param actionRegistrar The address of the action registrar
    * @param actionScoreManager The address of the action score manager
-   * @param threshold The threshold for a proposal to be active
+   * @param popScoreThreshold The threshold proof of participation score for a wallet to be considered a person
    * @param signalingThreshold The threshold for a proposal to be active
    * @param roundsForCumulativeScore The number of rounds for cumulative score
    */
@@ -52,17 +52,24 @@ library PassportTypes {
     IX2EarnApps x2EarnApps;
     IGalaxyMember galaxyMember;
     INodeManagement nodeManagement;
-    address upgrader;
-    address settingsManagers;
-    address[] admins;
-    address[] roleGranters;
-    address[] blacklisters;
-    address[] whitelisters;
     address actionRegistrar;
     address actionScoreManager;
-    uint256 threshold;
+    uint256 popScoreThreshold;
     uint256 signalingThreshold;
     uint256 roundsForCumulativeScore;
+    uint256 minimumGalaxyMemberLevel;
+  }
+
+  struct InitializationRoleData{
+    address admin;
+    address botSignaler;
+    address upgrader;
+    address settingsManager;
+    address roleGranter;
+    address blacklister;
+    address whitelister;
+    address actionRegistrar;
+    address actionScoreManager;
   }
 
   /// @notice Security level indicates how secure the app is

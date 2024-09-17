@@ -54,14 +54,35 @@ contract PassportStorage is Initializable {
   ) internal onlyInitializing {
     PassportStorageTypes.PassportStorage storage self = getPassportStorage();
 
-    require(address(initializationData.xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
+    // Initialize the external contracts
+    require(
+      address(initializationData.xAllocationVoting) != address(0),
+      "VeBetterPassport: xAllocationVoting is the zero address"
+    );
     require(address(initializationData.x2EarnApps) != address(0), "VeBetterPassport: x2EarnApps is the zero address");
-    require(address(initializationData.nodeManagement) != address(0), "VeBetterPassport: nodeManagement is the zero address");
-    require(address(initializationData.galaxyMember) != address(0), "VeBetterPassport: galaxyMember is the zero address");
+    require(
+      address(initializationData.nodeManagement) != address(0),
+      "VeBetterPassport: nodeManagement is the zero address"
+    );
+    require(
+      address(initializationData.galaxyMember) != address(0),
+      "VeBetterPassport: galaxyMember is the zero address"
+    );
 
     self.xAllocationVoting = initializationData.xAllocationVoting;
-    //self.x2EarnApps = initializationData.x2EarnApps;
+    self.x2EarnApps = initializationData.x2EarnApps;
     self.nodeManagement = initializationData.nodeManagement;
     self.galaxyMember = initializationData.galaxyMember;
+
+    // Initialize the bot signals threshold
+    self.signalsThreshold = initializationData.signalingThreshold;
+
+    // Initialize the minimum Galaxy Member level to be considered human by Personhood checks
+    self.minimumGalaxyMemberLevel = initializationData.minimumGalaxyMemberLevel;
+
+    // Initialize the participant score threshold to be considered human by Personhood checks
+    self.popScoreThreshold = initializationData.popScoreThreshold;
+    // Initialize the number of rounds for cumulative score
+    self.roundsForCumulativeScore = initializationData.roundsForCumulativeScore;
   }
 }
