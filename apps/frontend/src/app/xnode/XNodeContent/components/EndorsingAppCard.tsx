@@ -1,5 +1,6 @@
 import { useAppEndorsementScore, useAppEndorsers, useXNode } from "@/api"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import {
   Button,
@@ -13,6 +14,7 @@ import {
   Show,
   Text,
   useBreakpointValue,
+  useDisclosure,
   VStack,
 } from "@chakra-ui/react"
 import { UilCheckCircle, UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
@@ -36,12 +38,20 @@ export const EndorsingAppCard = () => {
     endorsed: true,
   })
 
+  const unendorseAppModal = useDisclosure()
+
+  console.log("unendorseAppModal", unendorseAppModal)
+
   const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber: appEndorsedEvents?.[0]?.blockNumber })
   const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
 
   const stopEndorsingButton = useMemo(() => {
-    return <Button variant="dangerGhost">{t("Stop endorsing")}</Button>
-  }, [t])
+    return (
+      <Button variant="dangerGhost" onClick={unendorseAppModal.onOpen}>
+        {t("Stop endorsing")}
+      </Button>
+    )
+  }, [t, unendorseAppModal.onOpen])
 
   const router = useRouter()
   const goToApps = useCallback(() => {
@@ -141,6 +151,7 @@ export const EndorsingAppCard = () => {
           )}
         </VStack>
       </CardBody>
+      <UnendorseAppModal isOpen={unendorseAppModal.isOpen} onClose={unendorseAppModal.onClose} />
     </Card>
   )
 }

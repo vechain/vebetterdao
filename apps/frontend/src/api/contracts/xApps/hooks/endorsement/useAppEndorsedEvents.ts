@@ -82,9 +82,14 @@ export const getAppEndorsedEventsQueryKey = (filterOptions?: {
 export const useAppEndorsedEvents = (filterOptions?: { appId?: string; nodeId?: string; endorsed?: boolean }) => {
   const { thor } = useConnex()
 
-  return useQuery({
+  const result = useQuery({
     queryKey: getAppEndorsedEventsQueryKey(filterOptions),
     queryFn: async () => await getAppEndorsedEvents(thor, filterOptions),
     enabled: !!thor,
   })
+
+  // sort events by blockNumber in descending order
+  const sortedEvents = result.data?.sort((a, b) => b.blockNumber - a.blockNumber)
+
+  return { ...result, data: sortedEvents }
 }

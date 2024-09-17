@@ -10,7 +10,7 @@ const method = "getScore"
 /**
  * Get the query key the app endorsement score
  */
-export const getAppEndorsementScore = (appId: string) => getCallKey({ method, keyArgs: [appId] })
+export const getAppEndorsementScoreQueryKey = (appId?: string) => getCallKey({ method, keyArgs: [appId] })
 
 /**
  *  Hook to get the endorsement score threshold
