@@ -27,9 +27,9 @@ export const getAppEndorsedEvents = async (
   const appEndorsedEvent = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
 
   const topics = appEndorsedEvent.encode({
-    endorsed: filterOptions?.endorsed,
-    id: filterOptions?.appId,
-    nodeId: filterOptions?.nodeId,
+    endorsed: filterOptions?.endorsed ?? undefined,
+    id: filterOptions?.appId ?? undefined,
+    nodeId: filterOptions?.nodeId ?? undefined,
   })
 
   const filterCriteria = [

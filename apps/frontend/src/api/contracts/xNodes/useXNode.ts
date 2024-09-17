@@ -34,6 +34,7 @@ export const useXNode = () => {
   const { data: logo } = useIpfsImage(endorsedAppMetadata?.data?.logo)
   const endorsedApp = endorsedAppId
     ? {
+        id: endorsedAppId,
         ...endorsedAppMetadata.data,
         logo: logo?.image,
       }

@@ -16,7 +16,7 @@ export const getAppEndorsementScore = (appId: string) => getCallKey({ method, ke
  *  Hook to get the endorsement score threshold
  * @returns The endorsement score threshold
  */
-export const useAppEndorsementScore = (appId: string): UseQueryResult<string, Error> => {
+export const useAppEndorsementScore = (appId?: string): UseQueryResult<string, Error> => {
   return useCall({
     contractInterface,
     contractAddress,

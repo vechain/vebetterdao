@@ -9,7 +9,7 @@ const blockTime = getConfig().network.blockTime
  * @param blockNumber - The block number to estimate the timestamp for.
  * @returns The estimated timestamp in milliseconds.
  */
-export const useEstimateBlockTimestamp = ({ blockNumber }: { blockNumber: number }) => {
+export const useEstimateBlockTimestamp = ({ blockNumber }: { blockNumber?: number }) => {
   const { data: currentBlock } = useCurrentBlock()
 
   if (!blockNumber || !blockTime || !currentBlock) return 0

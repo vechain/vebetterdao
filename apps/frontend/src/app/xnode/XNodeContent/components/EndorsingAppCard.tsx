@@ -1,4 +1,6 @@
 import { useAppEndorsementScore, useAppEndorsers, useXNode } from "@/api"
+import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import {
   Button,
   Card,
@@ -20,15 +22,22 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 export const EndorsingAppCard = () => {
-  // TODO: add real data
-  const endorsingSince = "Lorem ipsum" + dayjs().format("YYYY-MM-DD")
-
   const { t } = useTranslation()
-  const { isEndorsingApp, endorsedApp, xNodePoints } = useXNode()
+  const { isEndorsingApp, endorsedApp, xNodePoints, xNodeId } = useXNode()
   // get the number of endorsers for the endorsed app
-  const endorsersCount = useAppEndorsers(endorsedApp?.id ?? "")?.data?.length ?? 0
+  const endorsersCount = useAppEndorsers(endorsedApp?.id)?.data?.length ?? 0
   // get app total endorsement score
-  const appScore = useAppEndorsementScore(endorsedApp?.id ?? "")?.data ?? 0
+  const appScore = useAppEndorsementScore(endorsedApp?.id)?.data ?? 0
+
+  // get the last endorsement event for the endorsed app
+  const { data: appEndorsedEvents } = useAppEndorsedEvents({
+    nodeId: xNodeId,
+    appId: endorsedApp?.id,
+    endorsed: true,
+  })
+
+  const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber: appEndorsedEvents?.[0]?.blockNumber })
+  const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
 
   const stopEndorsingButton = useMemo(() => {
     return <Button variant="dangerGhost">{t("Stop endorsing")}</Button>
