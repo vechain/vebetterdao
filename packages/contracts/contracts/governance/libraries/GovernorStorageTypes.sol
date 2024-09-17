@@ -87,6 +87,11 @@ library GovernorStorageTypes {
     uint256 votingThreshold;
     // ------------------------------- Version 3 -------------------------------
 
+    // ------------------------------- Voting Storage -------------------------------
+    // checkpoints for the quadratic voting status for each round
+    Checkpoints.Trace208 quadraticVotingDisabled;
+    // ------------------------------- Version 2 -------------------------------
+
     // ------------------------------- Passport -------------------------------
     IVeBetterPassport veBetterPassport;
   }

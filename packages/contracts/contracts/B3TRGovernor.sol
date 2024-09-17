@@ -71,9 +71,10 @@ import { IVeBetterPassport } from "./ve-better-passport/interfaces/IVeBetterPass
  *
  * ------------------ VERSION 2 ------------------
  * - Replaced onlyGovernance modifier with onlyRoleOrGovernance which checks if the caller has the DEFAULT_ADMIN_ROLE role or if the function is called through a governance proposal
- *
  * ------------------ VERSION 3 ------------------
- * - Integrated VeBetterPassport
+ * - Added the ability to toggle the quadratic voting mechanism on and off
+ * ------------------ VERSION 4 ------------------
+ * - Integrated VeBetterPassport contract
  */
 contract B3TRGovernor is
   IB3TRGovernor,
@@ -162,8 +163,8 @@ contract B3TRGovernor is
     _grantRole(PROPOSAL_EXECUTOR_ROLE, rolesData.proposalExecutor);
   }
 
-  function initializeV3(IVeBetterPassport _veBetterPassport) public reinitializer(3) {
-    __GovernorStorage_init_v3(_veBetterPassport);
+  function initializeV4(IVeBetterPassport _veBetterPassport) public reinitializer(4) {
+    __GovernorStorage_init_v4(_veBetterPassport);
   }
 
   /**
@@ -549,11 +550,30 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Check if quadratic voting is disabled for the current round.
+   * @return true if quadratic voting is disabled, false otherwise.
+   */
+  function isQuadraticVotingDisabledForCurrentRound() external view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorVotesLogic.isQuadraticVotingDisabledForCurrentRound($);
+  }
+
+  /**
+   * @notice Check if quadratic voting is disabled at a specific round.
+   * @param roundId - The round ID for which to check if quadratic voting is disabled.
+   * @return true if quadratic voting is disabled, false otherwise.
+   */
+  function isQuadraticVotingDisabledForRound(uint256 roundId) external view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorVotesLogic.isQuadraticVotingDisabledForRound($, roundId);
+  }
+
+  /**
    * @notice See {IB3TRGovernor-version}.
    * @return string The version of the governor
    */
   function version() external pure returns (string memory) {
-    return "3";
+    return "4";
   }
 
   /**
@@ -782,6 +802,16 @@ contract B3TRGovernor is
   function updateQuorumNumerator(uint256 newQuorumNumerator) external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorQuorumLogic.updateQuorumNumerator($, newQuorumNumerator);
+  }
+
+  /**
+   * @notice Toggle quadratic voting for next round.
+   * @dev This function toggles the state of quadratic votingstarting from the next round.
+   * The state will flip between enabled and disabled each time the function is called.
+   */
+  function toggleQuadraticVoting() external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorVotesLogic.toggleQuadraticVoting($);
   }
 
   /**
