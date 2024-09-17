@@ -43,7 +43,7 @@ library PassportClockLogic {
    * @return The clock mode as a string.
    */
   // solhint-disable-next-line func-name-mixedcase
-  function CLOCK_MODE() internal view returns (string memory) {
+  function CLOCK_MODE() internal pure returns (string memory) {
     return "mode=blocknumber&from=default";
   }
 }

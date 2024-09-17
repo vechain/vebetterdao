@@ -25,6 +25,7 @@ pragma solidity 0.8.20;
 
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 
 /// @title PassportConfigurator Library
 /// @notice Library for managing the configuration of a Passport contract.
@@ -44,5 +45,17 @@ library PassportConfigurator {
     require(address(_x2EarnApps) != address(0), "VeBetterPassport: x2EarnApps is the zero address");
 
     self.x2EarnApps = _x2EarnApps;
+  }
+
+  /// @dev Sets the xAllocationVoting contract
+  /// @param self - the PassportStorage struct
+  /// @param _xAllocationVoting - the xAllocationVoting contract address
+  function setXAllocationVoting(
+    PassportStorageTypes.PassportStorage storage self, 
+    IXAllocationVotingGovernor _xAllocationVoting
+  ) external {
+    require(address(_xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
+
+    self.xAllocationVoting = _xAllocationVoting;
   }
 }

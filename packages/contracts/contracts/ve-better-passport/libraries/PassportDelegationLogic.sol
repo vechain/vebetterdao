@@ -41,7 +41,7 @@ library PassportDelegationLogic {
   string private constant SIGNING_DOMAIN = "PersonhoodDelegation";
   string private constant SIGNATURE_VERSION = "1";
   bytes32 private constant DELEGATION_TYPEHASH =
-    keccak256("Delegation(address delegator,address delegatee,uint256 nonce,uint256 deadline)");
+    keccak256("Delegation(address delegator,address delegatee,uint256 deadline)");
 
   // ---------- Errors ---------- //
   /// @notice Emitted when a user does not have permission to delegate personhood.
@@ -150,20 +150,18 @@ library PassportDelegationLogic {
   /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
   /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
   /// @param delegator - the delegator address
-  /// @param nonce - the nonce of the delegation
   /// @param deadline - the deadline for the signature
   /// @param signature - the signature of the delegation
   function delegateWithSignature(
     PassportStorageTypes.PassportStorage storage self,
     address delegator,
-    uint256 nonce,
     uint256 deadline,
     bytes memory signature
   ) external {
     require(block.timestamp <= deadline, "Signature expired");
 
     // Recover the signer address from the signature
-    bytes32 structHash = keccak256(abi.encode(DELEGATION_TYPEHASH, delegator, msg.sender, nonce, deadline));
+    bytes32 structHash = keccak256(abi.encode(DELEGATION_TYPEHASH, delegator, msg.sender, deadline));
     bytes32 digest = PassportEIP712SigningLogic.hashTypedDataV4(structHash);
     address signer = digest.recover(signature);
 

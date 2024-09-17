@@ -99,7 +99,7 @@ library PassportPoPScoreLogic {
   function thresholdParticipationScore(
     PassportStorageTypes.PassportStorage storage self
   ) internal view returns (uint256) {
-    return self.threshold;
+    return self.popScoreThreshold;
   }
 
   /// @notice Gets the security multiplier for an app security
@@ -152,7 +152,7 @@ library PassportPoPScoreLogic {
   function setThreshold(PassportStorageTypes.PassportStorage storage self, uint256 threshold) external {
     require(threshold > 0, "ProofOfParticipation: threshold is zero");
 
-    self.threshold = threshold;
+    self.popScoreThreshold = threshold;
   }
 
   /// @notice Sets the number of rounds to consider for the cumulative score

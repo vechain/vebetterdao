@@ -69,7 +69,7 @@ library PassportEIP712SigningLogic {
     returns (
       bytes1 fields,
       string memory name,
-      string memory version,
+      string memory signatureVersion,
       uint256 chainId,
       address verifyingContract,
       bytes32 salt,

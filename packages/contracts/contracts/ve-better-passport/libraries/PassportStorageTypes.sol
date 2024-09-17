@@ -37,6 +37,8 @@ library PassportStorageTypes {
     // ------------------ Passport Settings ------------------ //
     // Bitmask of enabled checks (e.g. whitelist, blacklist, signaling, etc.)
     uint256 personhoodChecks;
+    // Minimum galaxy member level required for personhood
+    uint256 minimumGalaxyMemberLevel;
     // ---------- External Contracts ---------- //
     // Address of the xAllocationVoting contract
     IXAllocationVotingGovernor xAllocationVoting;
@@ -65,7 +67,7 @@ library PassportStorageTypes {
     // Score of a user for a specific app in a specific round
     mapping(address user => mapping(uint256 round => mapping(bytes32 appId => uint256 score))) userAppRoundScore;
     // Threshold for a user to be considered a person in a round //threshold can be 0
-    uint256 threshold;
+    uint256 popScoreThreshold;
     // Number of rounds to consider for the cumulative score
     uint256 roundsForCumulativeScore;
     // Decay rate for the exponential decay

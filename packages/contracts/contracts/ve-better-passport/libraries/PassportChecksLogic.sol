@@ -47,6 +47,10 @@ library PassportChecksLogic {
   /// @param enabled True if the check is enabled, false if disabled.
   event CheckToggled(string indexed checkName, bool enabled);
 
+  /// @notice Emitted when the minimum galaxy member level is set.
+  /// @param minimumGalaxyMemberLevel The new minimum galaxy member level.
+  event MinimumGalaxyMemberLevelSet(uint256 minimumGalaxyMemberLevel);
+
   // ---------- Private Functions ---------- //
   /// @notice Toggles the specified check using XOR
   /// @param check The check to toggle (bitmask constant)
@@ -133,5 +137,14 @@ library PassportChecksLogic {
   /// @notice Toggles the GM ownership check
   function toggleGMOwnershipCheck(PassportStorageTypes.PassportStorage storage self) external {
     _toggleCheck(self, GM_OWNERSHIP_CHECK, GM_OWNERSHIP_CHECK_NAME);
+  }
+
+  /// @notice Sets the minimum galaxy member level
+  /// @param minimumGalaxyMemberLevel The new minimum galaxy member level
+  function setMinimumGalaxyMemberLevel(PassportStorageTypes.PassportStorage storage self, uint256 minimumGalaxyMemberLevel) external {
+    require(minimumGalaxyMemberLevel > 0, "VeBetterPassport: minimum galaxy member level must be greater than 0");
+
+    self.minimumGalaxyMemberLevel = minimumGalaxyMemberLevel;
+    emit MinimumGalaxyMemberLevelSet(minimumGalaxyMemberLevel);
   }
 }

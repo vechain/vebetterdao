@@ -45,6 +45,10 @@ library GovernorVotesLogic {
   /// @param votes The actual votes received.
   error GovernorVotingThresholdNotMet(uint256 threshold, uint256 votes);
 
+  /// @dev Thrown when an address is not identified as a person via the VeBetterPassport.
+  /// @param person The address of the person.
+  error GovernorPersonhoodVerificationFailed(address person);
+
   /// @notice Emitted when a vote is cast without parameters.
   /// @param voter The address of the voter.
   /// @param proposalId The ID of the proposal being voted on.
@@ -226,7 +230,10 @@ library GovernorVotesLogic {
       : voter;
 
     // Check if the voter or the delegator of personhood to the voter is a person
-    require(self.veBetterPassport.isPerson(personhoodAddress), "GovernorVotesLogic: voter is not a person");
+    (bool isPerson, ) = self.veBetterPassport.isPerson(personhoodAddress);
+    if (!isPerson) {
+      revert GovernorPersonhoodVerificationFailed(personhoodAddress);
+    }
 
     uint256 weight = self.vot3.getPastVotes(voter, proposalSnapshot);
     uint256 power = Math.sqrt(weight) * 1e9;

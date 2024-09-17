@@ -50,6 +50,11 @@ library PassportSignalingLogic {
   /// @param app  The app that the signaler was removed from.
   event SignalerRemovedFromApp(address indexed signaler, bytes32 indexed app);
 
+  /// @notice Emitted when a user's signals are reset.
+  /// @param user  The address of the user that had their signals reset.
+  /// @param reason  The reason for resetting the signals.
+  event UserSignalsReset(address indexed user, string reason);
+
   // ---------- Getters ---------- //
 
   /// @notice Returns the number of times a user has been signaled
@@ -152,6 +157,20 @@ library PassportSignalingLogic {
 
     self.appOfSignaler[user] = app;
     emit SignalerAssignedToApp(user, app);
+  }
+
+  /// @notice Resets the signals of a user
+  ///@param self - the passport storage
+  /// @param user - the user to reset the signals of
+  /// @param reason - the reason for resetting the signals
+  function resetUserSignals(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    string memory reason
+  ) external {
+    self.signaledCounter[user] = 0;
+
+    emit UserSignalsReset(user, reason);
   }
 
   // ---------- Private ---------- //
