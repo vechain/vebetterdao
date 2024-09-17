@@ -164,6 +164,9 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
 
     BotSignalingStorage storage $ = _getBotSignalingStorage();
     $._appOfSignaler[_user] = _app;
+
+    _grantRole(SIGNALER_ROLE, _user);
+
     emit SignalerAssignedToApp(_user, _app);
   }
 
@@ -188,6 +191,8 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     bytes32 app = $._appOfSignaler[user];
 
     $._appOfSignaler[user] = bytes32(0);
+
+    _revokeRole(SIGNALER_ROLE, user);
 
     emit SignalerRemovedFromApp(user, app);
   }
