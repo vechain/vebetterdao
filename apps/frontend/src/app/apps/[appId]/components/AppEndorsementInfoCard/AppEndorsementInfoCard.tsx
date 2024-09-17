@@ -96,11 +96,7 @@ function getScoreColorScheme(appEndorsementStatus: string): scoreColorScheme {
   }
 }
 
-type Props = {
-  appId: string
-}
-
-export const AppEndorsementInfoCard = ({ appId }: Props) => {
+export const AppEndorsementInfoCard = () => {
   const { t } = useTranslation()
 
   const { app } = useCurrentAppInfo()
@@ -128,7 +124,7 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
   const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account ?? "")
 
   // User x-nodes, endorsements and score
-  const { data: userXNodes } = useUserXNodes(account ?? undefined)
+  const { data: userXNodes } = useUserXNodes()
   const { data: nodesLevelToEndorsementScore } = useNodesEndorsementScore()
   const { data: endorsedApps } = useNodesEndorsedApps(userXNodes?.map(node => node.id) ?? [])
   const { data: userEndorsementScore, isLoading: userEndorsementScoreLoading } = useUserEndorsementScore(account)
@@ -278,7 +274,11 @@ export const AppEndorsementInfoCard = ({ appId }: Props) => {
         </Stack>
       </CardBody>
 
-      <AppEndorsementInfoCardModal isOpen={isEndorsementInfoOpen} onClose={onCloseEndorsementInfoModal} appId={appId} />
+      <AppEndorsementInfoCardModal
+        isOpen={isEndorsementInfoOpen}
+        onClose={onCloseEndorsementInfoModal}
+        appId={app?.id || ""}
+      />
 
       <EndorseAppModal isOpen={isEndorsementModalOpen} onClose={onCloseEndorsementModal} xApp={app} />
     </Card>
