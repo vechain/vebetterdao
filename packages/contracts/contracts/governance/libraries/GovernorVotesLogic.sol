@@ -231,7 +231,7 @@ library GovernorVotesLogic {
 
     uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(self, proposalId);
 
-    // Delegatee and delegator logic compacted
+    /* // Delegatee and delegator logic compacted
     bool isDelegatee;
     bool isDelegator;
     address personhoodAddress = voter; // Pre-assign the personhoodAddress to the voter
@@ -240,7 +240,7 @@ library GovernorVotesLogic {
       address delegateeOfDelegator = self.veBetterPassport.getDelegateeInTimepoint(voter, proposalSnapshot);
       address delegatorOfDelegatee = self.veBetterPassport.getDelegatorInTimepoint(voter, proposalSnapshot);
 
-      // If the voter is a delegatee (has received delegation of personhood from a delegator at the timepoint).
+     // If the voter is a delegatee (has received delegation of personhood from a delegator at the timepoint).
       isDelegatee = delegatorOfDelegatee != address(0);
       if (isDelegatee) {
         personhoodAddress = delegatorOfDelegatee; // Assign the delegator as the personhoodAddress
@@ -258,7 +258,7 @@ library GovernorVotesLogic {
 
     // Check if the personhoodAddress is a valid person
     _checkPersonhood(self, personhoodAddress);
-
+ */
     uint256 weight = self.vot3.getPastVotes(voter, proposalSnapshot);
     uint256 power = Math.sqrt(weight) * 1e9;
 

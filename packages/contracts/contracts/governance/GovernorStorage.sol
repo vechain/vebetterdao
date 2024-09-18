@@ -91,7 +91,7 @@ contract GovernorStorage is Initializable {
     governorStorage.votingThreshold = initializationData.initialVotingThreshold;
   }
 
-  function __GovernorStorage_init_v3(IVeBetterPassport veBetterPassport) internal onlyInitializing {
+  function __GovernorStorage_init_v4(IVeBetterPassport veBetterPassport) internal onlyInitializing {
     GovernorStorageTypes.GovernorStorage storage governorStorage = getGovernorStorage();
     governorStorage.veBetterPassport = veBetterPassport;
   }
