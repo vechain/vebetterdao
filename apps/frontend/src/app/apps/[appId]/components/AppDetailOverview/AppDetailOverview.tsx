@@ -1,4 +1,5 @@
 import { notFoundImage } from "@/constants"
+import { EndorsementStatus } from "@/types"
 import {
   Badge,
   Button,
@@ -10,6 +11,7 @@ import {
   Image,
   Show,
   Skeleton,
+  Stack,
   Text,
   VStack,
 } from "@chakra-ui/react"
@@ -17,7 +19,12 @@ import { UilArrowUpRight, UilCheckCircle, UilExclamationCircle } from "@iconscou
 import dayjs from "dayjs"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
+import {
+  useCurrentAppBanner,
+  useCurrentAppEndorsementStatus,
+  useCurrentAppLogo,
+  useCurrentAppMetadata,
+} from "../../hooks"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { AdminAppPageButton } from "./components/AdminAppPageButton"
 import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
@@ -33,11 +40,13 @@ export const AppDetailOverview = () => {
   const { appMetadata, appMetadataLoading, appMetadataError } = useCurrentAppMetadata()
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
-
-  //TODO: Fetch these values from the blockchain
-  const endorsementMaxDate = dayjs().subtract(1, "hour")
-  const endorsementPoints = 0
-  const endorsementThreshold = 100
+  const {
+    status: endorsementStatus,
+    score: endorsementScore,
+    threshold: endorsementThreshold,
+    maxDate: endorsementMaxDate,
+    isLoading: isEndorsementStatusLoading,
+  } = useCurrentAppEndorsementStatus()
 
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {
@@ -45,47 +54,37 @@ export const AppDetailOverview = () => {
     }
   }, [appMetadata?.external_url])
 
-  const determineStatus = () => {
-    const ENDORSEMENT_STATUS = {
-      LOST: {
-        badgeText: t("Endorsement lost"),
-        badgeTextColor: "#C84968",
-        badgeBgColor: "#FCEEF1",
-        badgeIcon: UilExclamationCircle,
-      },
-      PENDING: {
-        badgeText: t("Pending endorsement"),
-        badgeTextColor: "#AF5F00",
-        badgeBgColor: "#FFF3E5",
-        badgeIcon: UilExclamationCircle,
-      },
-      SUCCESS: {
-        badgeText: t("Endorsed"),
-        badgeTextColor: "#3DBA67",
-        badgeBgColor: "#E9FDF1",
-        badgeIcon: UilCheckCircle,
-      },
-    }
-    const endorsementFailed = endorsementPoints < endorsementThreshold && dayjs().isAfter(endorsementMaxDate)
-
-    if (endorsementFailed) {
-      return ENDORSEMENT_STATUS.LOST
-    }
-    if (endorsementPoints >= endorsementThreshold) {
-      return ENDORSEMENT_STATUS.SUCCESS
-    }
-    return ENDORSEMENT_STATUS.PENDING
+  const BADGE_INFORMATION = {
+    LOST: {
+      badgeText: t("Endorsement lost"),
+      badgeTextColor: "#C84968",
+      badgeBgColor: "#FCEEF1",
+      badgeIcon: UilExclamationCircle,
+    },
+    PENDING: {
+      badgeText: t("Pending endorsement"),
+      badgeTextColor: "#AF5F00",
+      badgeBgColor: "#FFF3E5",
+      badgeIcon: UilExclamationCircle,
+    },
+    SUCCESS: {
+      badgeText: t("Endorsed"),
+      badgeTextColor: "#3DBA67",
+      badgeBgColor: "#E9FDF1",
+      badgeIcon: UilCheckCircle,
+    },
   }
 
-  const { badgeText, badgeTextColor, badgeBgColor, badgeIcon: BadgeIconComponent } = determineStatus()
+  const endorsementLost = endorsementStatus === EndorsementStatus.LOST
+  const StatusBadgeIcon = BADGE_INFORMATION[endorsementStatus].badgeIcon
 
   return (
     <>
-      {endorsementThreshold > endorsementPoints ? (
+      {endorsementScore && endorsementThreshold && endorsementScore < endorsementThreshold ? (
         <EndorsementInfoBadge
-          endorsementPoints={endorsementPoints}
-          endorsementThreshold={endorsementThreshold}
+          endorsementThreshold={Number(endorsementThreshold)}
           endorsementMaxDate={endorsementMaxDate}
+          endorsementLost={endorsementLost}
         />
       ) : null}
       <Card variant="baseWithBorder">
@@ -109,24 +108,28 @@ export const AppDetailOverview = () => {
                     <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
                       <Image src={logo ?? notFoundImage} alt={"logo"} boxSize={"64px"} borderRadius="16px" />
                     </Skeleton>
-                    <Skeleton isLoaded={!appMetadataLoading}>
-                      <Badge
-                        color={badgeTextColor}
-                        bg={badgeBgColor}
-                        alignItems="center"
-                        justifyContent="center"
-                        textTransform="none"
-                        py="5px"
-                        px="10px"
-                        borderRadius="12px">
-                        <HStack w="full" align="center" justifyContent="center">
-                          <BadgeIconComponent size={14} color={badgeTextColor} />
-                          <Text fontWeight="600">{badgeText}</Text>
-                        </HStack>
-                      </Badge>
-                      <Heading fontSize={"28px"} fontWeight={700}>
-                        {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
-                      </Heading>
+
+                    <Skeleton isLoaded={!appMetadataLoading && !isEndorsementStatusLoading}>
+                      <Stack flexDir={["column-reverse", "column-reverse", "column"]}>
+                        <Badge
+                          maxW={"fit-content"}
+                          color={BADGE_INFORMATION[endorsementStatus].badgeTextColor}
+                          bg={BADGE_INFORMATION[endorsementStatus].badgeBgColor}
+                          textTransform="none"
+                          justifyContent={"center"}
+                          alignItems={"center"}
+                          display={"flex"}
+                          gap={1}
+                          py={"4px"}
+                          px={"8px"}
+                          borderRadius="12px">
+                          <StatusBadgeIcon size={14} color={BADGE_INFORMATION[endorsementStatus].badgeTextColor} />
+                          <Text fontWeight="600">{BADGE_INFORMATION[endorsementStatus].badgeText}</Text>
+                        </Badge>
+                        <Heading fontSize={"28px"} fontWeight={700}>
+                          {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
+                        </Heading>
+                      </Stack>
                     </Skeleton>
                   </HStack>
                   <AppDetailSocials socialUrls={appMetadata?.social_urls || []} />
