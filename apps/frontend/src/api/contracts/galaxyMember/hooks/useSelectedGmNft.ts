@@ -130,6 +130,7 @@ export const useSelectedGmNft = () => {
   const isXNodeAttachedToGM = attachedNodeId === xNodeId
 
   return {
+    gmId: selectedTokenId,
     gmImage: gmImage?.image || notFoundImage,
     gmName: nftMetadata?.name,
     gmLevel,

@@ -17,11 +17,13 @@ type Props = {
  * This hook prepares and executes a transaction to attach an XNode to a GM NFT,
  * potentially upgrading the NFT based on the XNode's level.
  *
+ * @param {Props} props - The properties for the hook.
  * @param {Function} [props.onSuccess] - Optional callback function to be called on successful transaction.
+ * @returns {Object} An object containing the transaction builder and related data.
  */
 export const useAttachGMToXNode = ({ onSuccess }: Props) => {
   const { xNodeId } = useXNode()
-  const { gmLevel } = useSelectedGmNft()
+  const { gmId } = useSelectedGmNft()
 
   const clauseBuilder = useCallback(() => {
     if (!xNodeId) {
@@ -33,11 +35,11 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
         to: getConfig().galaxyMemberContractAddress,
         contractInterface: GalaxyMemberInterface,
         method: "attachNode",
-        args: [xNodeId, gmLevel],
-        comment: `Attach XNode ${xNodeId} to GM NFT level ${gmLevel}`,
+        args: [xNodeId, gmId],
+        comment: `Attach XNode ${xNodeId} to GM NFT id ${gmId}`,
       }),
     ]
-  }, [xNodeId, gmLevel])
+  }, [xNodeId, gmId])
 
   const refetchQueryKeys = useMemo(() => [], [])
 
