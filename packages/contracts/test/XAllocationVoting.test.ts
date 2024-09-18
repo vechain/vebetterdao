@@ -2665,5 +2665,42 @@ describe("X-Allocation Voting - @shard3", function () {
       expect(appShare3.toFixed(6)).to.equal(expectedAppShare3.toFixed(6))
       expect(appShare3.toFixed(4)).to.equal("0.2862") // 28.61% of the total votes
     })
+
+    it("If a user votes for an XApp with a vote wieght < 1 we do not get the square of the number ", async function () {
+      const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+
+      //Add apps
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      //Start allocation round
+      const round1 = await startNewAllocationRound()
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(round1, [app1Id, app2Id], [ethers.parseEther("0.5"), ethers.parseEther("0.5")])
+
+      await waitForRoundToEnd(round1)
+
+      const app1VotesQF = await xAllocationVoting.getAppVotesQF(round1, app1Id)
+      // sqrt of 10^18 is 10^9 hence we need to divide by 10^9
+      expect(app1VotesQF).to.equal(ethers.parseEther("0.5") / 1000000000n)
+    })
   })
 })
