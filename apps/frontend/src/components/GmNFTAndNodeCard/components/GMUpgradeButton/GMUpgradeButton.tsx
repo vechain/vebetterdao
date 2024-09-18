@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useClaimNFT } from "@/hooks"
 import { MintNFTModal } from "./components/MintNFTModal"
+import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -162,6 +163,8 @@ export const GMUpgradeButton = () => {
     mintNftModal.onOpen()
   }, [freeMint, mintNftModal])
 
+  const attachGmToXNodeModal = useDisclosure()
+
   const action = useCallback(() => {
     if (!hasUserVoted && !isGMOwned && !isGMClaimable) {
       router.push(`/rounds/${currentRoundId}/vote`)
@@ -171,11 +174,21 @@ export const GMUpgradeButton = () => {
       return handleMintGM()
     }
     if (isXNodeHolder && !isXNodeAttachedToGM) {
-      // TODO: add action
+      attachGmToXNodeModal.onOpen()
       return
     }
     return
-  }, [currentRoundId, handleMintGM, hasUserVoted, isGMClaimable, isGMOwned, isXNodeAttachedToGM, isXNodeHolder, router])
+  }, [
+    attachGmToXNodeModal,
+    currentRoundId,
+    handleMintGM,
+    hasUserVoted,
+    isGMClaimable,
+    isGMOwned,
+    isXNodeAttachedToGM,
+    isXNodeHolder,
+    router,
+  ])
 
   const isActionDisabled = useMemo(() => {
     if ((isXNodeHolder && !isXNodeAttachedToGM) || !isGMOwned) {
@@ -212,6 +225,7 @@ export const GMUpgradeButton = () => {
         isTxReceiptLoading={isTxReceiptLoading}
         sendTransactionPending={sendTransactionPending}
       />
+      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
     </Stack>
   )
 }
