@@ -161,7 +161,7 @@ describe("isAddressInListOfAddresses", () => {
 
 describe("leftPadWithZeros", () => {
   test("no padding needed", () => {
-    expect(leftPadWithZeros("0x1234", 5)).toBe("0x1234")
+    expect(leftPadWithZeros("0x1234", 4)).toBe("0x1234")
   })
 
   test("padding needed", () => {
