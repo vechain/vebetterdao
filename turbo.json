@@ -35,6 +35,11 @@
       "cache": false,
       "dependsOn": ["^setup-contracts"]
     },
+    "dev:staging": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^setup-contracts:staging"]
+    },
     "dev:testnet": {
       "cache": false,
       "persistent": true,
@@ -50,6 +55,11 @@
       "persistent": true,
       "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment"]
     },
+    "setup-contracts:staging": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:staging"]
+    },
     "setup-contracts:testnet": {
       "cache": false,
       "persistent": true,
@@ -64,6 +74,10 @@
       "cache": false
     },
     "@repo/contracts#check-contracts-deployment": {
+      "cache": false,
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
+    },
+    "@repo/contracts#check-contracts-deployment:staging": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
