@@ -1,4 +1,4 @@
-import { ProposalState, useUserSingleProposalVoteEvent } from "@/api"
+import { ProposalState, useUserSingleProposalVoteEvent, useIsQuadraticVotingDisabled } from "@/api"
 import { AbstainedIcon, VoteIcon } from "@/components"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
@@ -61,6 +61,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
   const { isOpen, onClose, onOpen } = useDisclosure()
   const router = useRouter()
   const { account } = useWallet()
+  const { data: isQuadraticVotingDisabled } = useIsQuadraticVotingDisabled()
 
   const { data: userVote } = useUserSingleProposalVoteEvent(proposalId)
 
@@ -136,44 +137,58 @@ export const ProposalVote = ({ proposalId }: Props) => {
                     {t("VOT3 BALANCE ON SNAPSHOT")}
                   </Text>
                 </Stack>
-                <HStack w="full" justify="center">
-                  <Divider flex={0.8} />
-                  <Text fontSize={"12px"}>{t("equal to")}</Text>
-                  <Divider flex={0.8} />
-                </HStack>
-                <Stack
-                  spacing={[0, 0, 2]}
-                  alignItems={"baseline"}
-                  direction={["column", "column", "row"]}
-                  align={["flex-start", "flex-start", "center"]}>
-                  <VoteIcon boxSize={"36px"} color="#004CFC" />
-                  <Text fontSize={"36px"} fontWeight={700} color="#004CFC">
-                    {compactFormatter.format(Number(proposal.userVotingPowerOnSnapshot || 0))}
-                  </Text>
-                  <Text fontSize={"14px"} fontWeight={600}>
-                    {t("VOTING POWER")}
-                  </Text>
-                </Stack>
-                <HStack alignItems={"flex-start"}>
-                  <Box>
-                    <UilInfoCircle size={14} color="#969696" />
-                  </Box>
-                  <VStack alignItems={"stretch"}>
-                    <Text fontSize={"14px"} color="#6A6A6A" fontWeight={600}>
-                      {t("How is the voting power calculated?")}
-                    </Text>
-                    <Text fontSize={"14px"} color="#6A6A6A" fontWeight={400} as="span">
-                      {t(
-                        "To aim for the equality and quality of the voting process, we use quadratic voting, which divide your total amount of VOT3 for the square root.",
-                      )}
-                    </Text>
-                    <Link href={QUADRATIC_DOCS_URL} target="_blank">
-                      <Text fontSize={"14px"} fontWeight={400} as="span" textDecoration={"underline"} color="#004CFC">
-                        {t("Learn more")}
+
+                {!isQuadraticVotingDisabled && ( // Show "equal to" only when quadratic voting is disabled
+                  <HStack w="full" justify="center">
+                    <Divider flex={0.8} />
+                    <Text fontSize={"12px"}>{t("equal to")}</Text>
+                    <Divider flex={0.8} />
+                  </HStack>
+                )}
+
+                {!isQuadraticVotingDisabled && ( // Conditionally render voting power and related information when quadratic voting is enabled
+                  <>
+                    <Stack
+                      spacing={[0, 0, 2]}
+                      alignItems={"baseline"}
+                      direction={["column", "column", "row"]}
+                      align={["flex-start", "flex-start", "center"]}>
+                      <VoteIcon boxSize={"36px"} color="#004CFC" />
+                      <Text fontSize={"36px"} fontWeight={700} color="#004CFC">
+                        {compactFormatter.format(Number(proposal.userVotingPowerOnSnapshot || 0))}
                       </Text>
-                    </Link>
-                  </VStack>
-                </HStack>
+                      <Text fontSize={"14px"} fontWeight={600}>
+                        {t("VOTING POWER")}
+                      </Text>
+                    </Stack>
+
+                    <HStack alignItems={"flex-start"}>
+                      <Box>
+                        <UilInfoCircle size={14} color="#969696" />
+                      </Box>
+                      <VStack alignItems={"stretch"}>
+                        <Text fontSize={"14px"} color="#6A6A6A" fontWeight={600}>
+                          {t("How is the voting power calculated?")}
+                        </Text>
+                        <Text fontSize={"14px"} color="#6A6A6A" fontWeight={400} as="span">
+                          {t(
+                            "To aim for the equality and quality of the voting process, we use quadratic voting, which divide your total amount of VOT3 for the square root.",
+                          )}
+                        </Text>
+                        <Link href={QUADRATIC_DOCS_URL} target="_blank">
+                          <Text
+                            fontSize={"14px"}
+                            fontWeight={400}
+                            as="span"
+                            textDecoration={"underline"}
+                            color="#004CFC">
+                            {t("Learn more")}
+                          </Text>
+                        </Link>
+                      </VStack>
+                    </HStack>
+                  </>
+                )}
               </VStack>
             </Card>
           </VStack>
