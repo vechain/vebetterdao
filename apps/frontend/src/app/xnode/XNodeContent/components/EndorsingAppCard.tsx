@@ -1,4 +1,7 @@
-import { notFoundImage } from "@/constants"
+import { useAppEndorsementScore, useAppEndorsers, useXNode } from "@/api"
+import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import {
   Button,
   Card,
@@ -11,6 +14,7 @@ import {
   Show,
   Text,
   useBreakpointValue,
+  useDisclosure,
   VStack,
 } from "@chakra-ui/react"
 import { UilCheckCircle, UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
@@ -21,19 +25,31 @@ import { useTranslation } from "react-i18next"
 
 export const EndorsingAppCard = () => {
   const { t } = useTranslation()
+  const { isEndorsingApp, endorsedApp, xNodePoints, xNodeId } = useXNode()
+  // get the number of endorsers for the endorsed app
+  const endorsersCount = useAppEndorsers(endorsedApp?.id)?.data?.length ?? 0
+  // get app total endorsement score
+  const appScore = useAppEndorsementScore(endorsedApp?.id)?.data ?? 0
 
-  // TODO: add real data
-  const appImage = notFoundImage
-  const appName = "Cleanify"
-  const appScore = "300"
-  const endorsingUsers = "4"
-  const endorsementPoints = "6"
-  const endorsingSince = dayjs()
-  const isEndorsingApp = true
+  // get the last endorsement event for the endorsed app
+  const { data: appEndorsedEvents } = useAppEndorsedEvents({
+    nodeId: xNodeId,
+    appId: endorsedApp?.id,
+    endorsed: true,
+  })
+
+  const unendorseAppModal = useDisclosure()
+
+  const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber: appEndorsedEvents?.[0]?.blockNumber })
+  const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
 
   const stopEndorsingButton = useMemo(() => {
-    return <Button variant="dangerGhost">{t("Stop endorsing")}</Button>
-  }, [t])
+    return (
+      <Button variant="dangerGhost" onClick={unendorseAppModal.onOpen}>
+        {t("Stop endorsing")}
+      </Button>
+    )
+  }, [t, unendorseAppModal.onOpen])
 
   const router = useRouter()
   const goToApps = useCallback(() => {
@@ -64,7 +80,7 @@ export const EndorsingAppCard = () => {
               <VStack align="stretch" spacing={6}>
                 <HStack justify={"space-between"}>
                   <HStack>
-                    <Image src={appImage} alt="endorsed-app" w="12" h="12" rounded="xl" />
+                    <Image src={endorsedApp?.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
                     <VStack align="stretch">
                       <HStack bg="#E9FDF1" p={"4px 10px"} rounded="12px">
                         <UilCheckCircle color="#3DBA67" size={"1rem"} />
@@ -73,7 +89,7 @@ export const EndorsingAppCard = () => {
                         </Text>
                       </HStack>
                       <Heading fontSize="lg" fontWeight={"600"}>
-                        {appName}
+                        {endorsedApp?.name}
                       </Heading>
                     </VStack>
                   </HStack>
@@ -82,27 +98,29 @@ export const EndorsingAppCard = () => {
                 <Divider />
                 <HStack justify={"space-between"} flexWrap={"wrap"}>
                   <VStack align="flex-start" gap={0} my={"3"}>
-                    <Text>{appScore}</Text>
+                    <Text>
+                      {appScore} {t("points")}
+                    </Text>
                     <Text fontSize="xs" color="#6A6A6A">
                       {t("Current score")}
                     </Text>
                   </VStack>
                   <VStack align="flex-start" gap={0} my={"3"}>
-                    <Text>{endorsingUsers}</Text>
+                    <Text>{endorsersCount}</Text>
                     <Text fontSize="xs" color="#6A6A6A">
                       {t("Endorsing users")}
                     </Text>
                   </VStack>
                   <VStack align="flex-start" gap={0} my={"3"}>
                     <Text>
-                      {endorsementPoints} {t("points")}
+                      {xNodePoints} {t("points")}
                     </Text>
                     <Text fontSize="xs" color="#6A6A6A">
                       {t("My endorsement")}
                     </Text>
                   </VStack>
                   <VStack align="flex-start" gap={0} my={"3"}>
-                    <Text>{dayjs(endorsingSince).format("YYYY-MM-DD")}</Text>
+                    <Text>{endorsingSince}</Text>
                     <Text fontSize="xs" color="#6A6A6A">
                       {t("Endorsing since")}
                     </Text>
@@ -131,6 +149,7 @@ export const EndorsingAppCard = () => {
           )}
         </VStack>
       </CardBody>
+      <UnendorseAppModal isOpen={unendorseAppModal.isOpen} onClose={unendorseAppModal.onClose} />
     </Card>
   )
 }

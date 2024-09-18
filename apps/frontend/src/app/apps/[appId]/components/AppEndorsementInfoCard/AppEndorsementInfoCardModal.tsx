@@ -15,7 +15,6 @@ import {
   VStack,
   HStack,
   Text,
-  Heading,
   Flex,
   Stack,
 } from "@chakra-ui/react"
@@ -45,6 +44,8 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
     return `${address.slice(0, 6)}...${address.slice(-4)}`
   }
 
+  //  styled components of the data instead of always using the same components
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={["xl", "xxl"]}>
       <ModalOverlay />
@@ -55,36 +56,39 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
           </Flex>
         </ModalHeader>
         <ModalCloseButton />
-        <ModalBody rounded={"md"} w={"full"} p={10}>
+        <ModalBody rounded={"md"} w={"full"}>
           <Stack direction={["column", "column", "row"]} w={"full"} alignItems={"stretch"} spacing={8}>
-            <VStack flex={1} h="full" p={5} maxH="50vh">
+            <VStack flex={1.5} h="full" p={4} maxH="50vh">
               <HStack w="full" justify="space-between">
                 <VStack alignItems={"flex-start"}>
                   <Text>{t("Current score")}</Text>
-                  <Heading>{endorsementScore}</Heading>
+                  <Text fontSize="xx-large" fontWeight="800" color="#444AD1">
+                    {endorsementScore}
+                  </Text>
                 </VStack>
 
                 <VStack alignItems={"flex-start"}>
                   <Text>{t("Users endorsing")}</Text>
-                  <Heading>{endorsers?.length}</Heading>
+                  <Text fontSize="xx-large" fontWeight="800" color="#444AD1">
+                    {endorsers?.length}
+                  </Text>
                 </VStack>
 
                 <VStack alignItems={"flex-start"}>
                   <Text>{t("Status")}</Text>
-                  <Heading color={isUnendorsed ? "red" : "green"}>
+                  <Text fontSize="xx-large" fontWeight="800" color={isUnendorsed ? "#C84968" : "#3DBA67"}>
                     {isUnendorsed ? t("Not endorsed") : t("Endorsed")}
-                  </Heading>
+                  </Text>
                 </VStack>
               </HStack>
-              <VStack
-                flex={1}
-                bg="#FAFAFA"
-                justify={"space-between"}
-                rounded={"16px"}
-                p={2}
-                w={"full"}
-                overflowY="auto">
-                <Heading alignSelf="flex-start">{t("Endorsers")}</Heading>
+              <VStack bg="#FAFAFA" justify={"space-between"} rounded={"16px"} p={2} w={"full"} overflowY="auto">
+                <Text
+                  style={{ fontFamily: "Instrument Sans, sans-serif" }}
+                  fontSize="x-large"
+                  fontWeight="600"
+                  alignSelf="flex-start">
+                  {t("Endorsers")}
+                </Text>
                 <VStack flex={1} w="full" overflowY="auto">
                   {endorsersInfo.map((endorser, index) => (
                     <HStack
@@ -100,7 +104,9 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                         <AddressIcon address={endorser.address} rounded="full" h="28px" w="28px" />
                         <VStack align="start" justify={"center"} spacing={0}>
                           <Text>{truncateAddress(endorser.address)}</Text>
-                          <Text>{t("Endorsing since {{date}}", { date: formatDate(endorser.timestamp) })}</Text>
+                          <Text fontSize="xs" color="#6A6A6A">
+                            {t("Endorsing since {{date}}", { date: formatDate(endorser.timestamp) })}
+                          </Text>
                         </VStack>
                       </HStack>
                       <UserEndorsementInfo address={endorser.address} />
@@ -119,7 +125,13 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
               justify={"space-between"}
               overflowY="auto"
               maxH="50vh">
-              <Heading alignSelf={"flex-start"}>{t("Endorsement history")}</Heading>
+              <Text
+                style={{ fontFamily: "Instrument Sans, sans-serif" }}
+                fontSize="x-large"
+                fontWeight="600"
+                alignSelf={"flex-start"}>
+                {t("Endorsement history")}
+              </Text>
               <VStack flex={1} w="full" overflowY="auto">
                 {endorsementHistory.map((blockMeta, index) => (
                   <HStack
@@ -132,7 +144,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                     justify={"space-between"}>
                     <VStack align="start" justifyContent={"flex-start"} spacing={0}>
                       <Text>{truncateAddress(blockMeta.txOrigin)}</Text>
-                      <Text>
+                      <Text fontSize="xs" color="#6A6A6A">
                         {t("{{date}}", {
                           date: formatDate(blockMeta.blockTimestamp),
                         })}
@@ -140,7 +152,9 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                     </VStack>
                     <VStack align="end" spacing={0}>
                       <Text color={"green.500"}>{`+${t("{{value}} pts.", { value: "TBD" })}`}</Text>
-                      <Text>{t("{{value}} pts in total.", { value: "TBD" })}</Text>
+                      <Text fontSize="xs" color="#6A6A6A">
+                        {t("{{value}} pts in total.", { value: "TBD" })}
+                      </Text>
                     </VStack>
                   </HStack>
                 ))}

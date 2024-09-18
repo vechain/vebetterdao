@@ -10,11 +10,12 @@ const compactFormatter = getCompactFormatter(4)
 
 export const GmNFTPageHeader = () => {
   const { t } = useTranslation()
-  const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, b3trToUpgradeGMToNextLevel } = useSelectedGmNft()
+  const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, b3trToUpgradeGMToNextLevel, isXNodeAttachedToGM } =
+    useSelectedGmNft()
 
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
-  const { isXNodeHolder, isXNodeAttachedToGM } = useXNode()
+  const { isXNodeHolder } = useXNode()
   const actionLabel = useMemo(() => {
     if (isXNodeHolder && !isXNodeAttachedToGM) {
       return t("Attach and Upgrade!")

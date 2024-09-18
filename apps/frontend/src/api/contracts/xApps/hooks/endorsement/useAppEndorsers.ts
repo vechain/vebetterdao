@@ -18,11 +18,12 @@ export const getEndorsersQueryKey = (appId: string) => {
  *  Hook to get the list of endorsers for an app
  * @returns The endorsers for an app
  */
-export const useAppEndorsers = (appId: string): UseQueryResult<string[], Error> => {
+export const useAppEndorsers = (appId?: string): UseQueryResult<string[], Error> => {
   return useCall({
     contractInterface,
     contractAddress,
     method,
     args: [appId],
+    enabled: !!appId,
   })
 }

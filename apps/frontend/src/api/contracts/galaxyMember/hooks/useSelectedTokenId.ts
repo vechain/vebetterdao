@@ -1,11 +1,13 @@
 import { getConfig } from "@repo/config"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { GalaxyMember__factory } from "@repo/contracts"
-import { useCall } from "@/hooks"
+import { getCallKey, useCall } from "@/hooks"
 
 const contractAddress = getConfig().galaxyMemberContractAddress
 const contractInterface = GalaxyMember__factory.createInterface()
 const method = "getSelectedTokenId"
+
+export const getSelectedTokenIdQueryKey = (account?: string | null) => getCallKey({ method, keyArgs: [account] })
 
 /**
  * Custom hook that retrieves the selected token ID for the selected galaxy member.
