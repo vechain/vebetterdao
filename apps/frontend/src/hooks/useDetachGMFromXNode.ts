@@ -50,9 +50,6 @@ export const useDetachGMFromXNode = ({ onSuccess }: Props) => {
 
   const { account } = useWallet()
 
-  console.log("now xNodeId", xNodeId)
-  console.log("now gmId", gmId)
-
   const refetchQueryKeys = useMemo(
     () => [
       getSelectedTokenIdQueryKey(account),

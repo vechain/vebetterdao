@@ -54,8 +54,6 @@ export const useXNode = () => {
     isError: isErrorAttachedGMTokenId,
     error: errorAttachedGMTokenId,
   } = useGetTokenIdAttachedToNode(firstXNodeId)
-  console.log("firstXNodeId", firstXNodeId)
-  console.log("attachedGMTokenId", attachedGMTokenId, typeof attachedGMTokenId)
 
   const isXNodeLoading =
     xNodes.isLoading || endorsedAppMetadata.isLoading || nodesEndorsementScore.isLoading || isLoadingAttachedGMTokenId
