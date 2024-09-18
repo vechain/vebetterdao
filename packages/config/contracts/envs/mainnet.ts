@@ -84,5 +84,17 @@ export function createMainnetConfig() {
     TREASURY_TRANSFER_LIMIT_B3TR: BigInt("200000000000000000000000"), // 200,000 B3TR
     TREASURY_TRANSFER_LIMIT_VTHO: BigInt("3000000000000000000000000"), // 3,000,000 VTHO
     TREASURY_TRANSFER_LIMIT_VOT3: BigInt("500000000000000000000000"), // 50,000 VOT3
+
+    // X 2 Earn Rewards Pool
+    X_2_EARN_INITIAL_IMPACT_KEYS: [
+      "carbon",
+      "water",
+      "energy",
+      "waste_mass",
+      "education_time",
+      "timber",
+      "plastic",
+      "trees_planted",
+    ],
   })
 }

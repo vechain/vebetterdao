@@ -1,11 +1,11 @@
 import { useRoundXApps } from "./useRoundXApps"
-import { useXAppsVotesQf } from "./useXAppsVotesQf"
 import { useXApps } from "./useXApps"
 import { useQuery } from "@tanstack/react-query"
 import { XApp } from "../getXApps"
+import { useXAppsShares } from "./useXAppsShares"
 
 type MostVotedAppsInRoundReturnType = {
-  votes: string
+  percentage: number
   id: string
   app: XApp
 }
@@ -26,20 +26,20 @@ export const useMostVotedAppsInRound = (roundId: string) => {
   const { data: allXApps } = useXApps()
   const apps = roundId === "0" ? allXApps : roundXApps
 
-  const { data: xAppsVotes, isLoading: xAppsVotesLoading } = useXAppsVotesQf(apps?.map(app => app.id) ?? [], roundId)
+  const xAppsShares = useXAppsShares(apps?.map(app => app.id) ?? [], roundId)
 
   return useQuery({
     queryKey: getMostVotedAppsInRoundQueryKey(roundId),
     queryFn: async (): Promise<MostVotedAppsInRoundReturnType[]> => {
-      if (!xAppsVotes || !apps) return []
-      return xAppsVotes
-        .map(appVotes => ({
-          votes: appVotes.votes ?? "0",
-          id: apps?.find(xa => xa.id === appVotes.app)?.id ?? "",
-          app: apps?.find(xa => xa.id === appVotes.app) ?? ({} as XApp),
+      if (!xAppsShares.data || !apps) return []
+      return xAppsShares.data
+        .map(appShares => ({
+          percentage: appShares.share + appShares.unallocatedShare,
+          id: apps?.find(xa => xa.id === appShares.app)?.id ?? "",
+          app: apps?.find(xa => xa.id === appShares.app) ?? ({} as XApp),
         }))
-        .sort((a, b) => Number(b.votes) - Number(a.votes))
+        .sort((a, b) => Number(b.percentage) - Number(a.percentage))
     },
-    enabled: !xAppsVotesLoading && !!roundId && !!apps && !!xAppsVotes,
+    enabled: xAppsShares.data && !!roundId && !!apps,
   })
 }

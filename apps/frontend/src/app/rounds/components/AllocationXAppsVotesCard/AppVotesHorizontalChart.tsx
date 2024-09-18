@@ -7,7 +7,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 
 type AppVotesData = {
-  votes: string | number
+  percentage: number
   app: string
 }
 
@@ -28,7 +28,6 @@ const compactFormatter = getCompactFormatter(2)
 export const AppVotesHorizontalChart = ({
   data,
   roundId,
-  totalVotes,
   showReceived = false,
   maxAllocation,
   maxAllocationPercentage,
@@ -58,8 +57,6 @@ export const AppVotesHorizontalChart = ({
   //     )
   //   }, [roundVotes, data.app])
 
-  const votesPercentage = Number(totalVotes) === 0 ? 0 : (Number(data.votes) / Number(totalVotes)) * 100
-
   const baseProgressColor = "rgba(208, 248, 164, 1)"
   const trackProgressColor = "rgba(154, 222, 78, 1)"
 
@@ -80,7 +77,7 @@ export const AppVotesHorizontalChart = ({
             <VStack spacing={0} align={"flex-start"} justify={"flex-start"}>
               <Heading size={["16px"]} fontWeight={600} color="#6DCB09">
                 {t("{{percentage}}%", {
-                  percentage: votesPercentage.toLocaleString("en", { minimumFractionDigits: 2 }),
+                  percentage: data.percentage.toLocaleString("en", { minimumFractionDigits: 2 }),
                 })}
               </Heading>
               {/* {showTotalVoters && (
@@ -116,7 +113,7 @@ export const AppVotesHorizontalChart = ({
       </HStack>
       <VStack spacing={1} w="full">
         <Box w="full" h={2} bg={baseProgressColor} borderRadius={"xl"} pos="relative">
-          <Box pos="absolute" w={`${votesPercentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
+          <Box pos="absolute" w={`${data.percentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
           <Box
             pos="absolute"
             left={`${maxAllocationPercentage}%`}

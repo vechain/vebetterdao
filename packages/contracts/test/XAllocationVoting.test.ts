@@ -1724,6 +1724,7 @@ describe("X-Allocation Voting - @shard3", function () {
         voteWeights,
         roundId: votedRoundId,
       } = parseAllocationVoteCastEvent(allocationVoteCast[0], xAllocationVoting)
+
       expect(voter).to.eql(otherAccount.address)
       expect(votedRoundId).to.eql(roundId)
       expect(votedApps).to.eql([app1])
