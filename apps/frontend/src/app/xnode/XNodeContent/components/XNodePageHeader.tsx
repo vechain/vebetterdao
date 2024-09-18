@@ -18,7 +18,9 @@ import { useTranslation } from "react-i18next"
 
 export const XNodePageHeader = () => {
   const { t } = useTranslation()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeLoading, isXNodeHolder, isXNodeAttachedToGM } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeLoading, isXNodeHolder, attachedGMTokenId } = useXNode()
+
+  const isXNodeAttachedToGM = !!attachedGMTokenId
 
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 

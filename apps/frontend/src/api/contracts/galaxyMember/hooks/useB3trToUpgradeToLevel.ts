@@ -14,7 +14,7 @@ const contractAddress = getConfig().galaxyMemberContractAddress
 const contractInterface = GalaxyMember__factory.createInterface()
 const method = "getB3TRtoUpgradeToLevel"
 
-export const useB3trToUpgradeToLevel = (level: string, enabled = true) => {
+export const useB3trToUpgradeToLevel = (level?: string, enabled = true) => {
   return useCall({
     contractInterface,
     contractAddress,
