@@ -1,8 +1,8 @@
 import { defineConfig } from "../defineConfig"
 
-export function createSoloStagingConfig() {
+export function createTestnetStagingConfig() {
   return defineConfig({
-    NEXT_PUBLIC_APP_ENV: "solo-staging",
+    NEXT_PUBLIC_APP_ENV: "testnet-staging",
 
     B3TR_GOVERNOR_QUORUM_PERCENTAGE: 51, // Need 51% of voters to pass
     TIMELOCK_MIN_DELAY: 30, //time to wait before you can execute a queued proposal, 0 for immediate execution
@@ -50,8 +50,8 @@ export function createSoloStagingConfig() {
     X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE: 30, // % of tokens from each round that are equally distributed to all apps
     X_ALLOCATION_POOL_APP_SHARES_MAX_CAP: 20, // max % votes an app can receive in a round
 
-    CONTRACTS_ADMIN_ADDRESS: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa", //1st account from mnemonic of solo network
-    VOTE_2_EARN_POOL_ADDRESS: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68", //2nd account from mnemonic of solo network
+    CONTRACTS_ADMIN_ADDRESS: "0x66E9709bc01B8c0AfC99a7dC513f501821306E85", //1st account from mnemonic of testnet staging wallet
+    VOTE_2_EARN_POOL_ADDRESS: "0xeaE35dfE902C5D1a44e6b4080224a6621319A671", //2nd account from mnemonic of testnet staging wallet
 
     INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M B3TR
 

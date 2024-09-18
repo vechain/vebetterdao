@@ -5,6 +5,7 @@
   "globalEnv": [
     "NEXT_PUBLIC_APP_ENV",
     "MNEMONIC",
+    "TESTNET_STAGING_MNEMONIC",
     "NEXT_PUBLIC_DATADOG_APP_TOKEN",
     "NEXT_PUBLIC_DATADOG_CLIENT_TOKEN",
     "NEXT_PUBLIC_IPFS_PINNING_SERVICE",
@@ -35,6 +36,11 @@
       "cache": false,
       "dependsOn": ["^setup-contracts"]
     },
+    "dev:staging": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^setup-contracts:staging"]
+    },
     "dev:testnet": {
       "cache": false,
       "persistent": true,
@@ -50,6 +56,11 @@
       "persistent": true,
       "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment"]
     },
+    "setup-contracts:staging": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:staging"]
+    },
     "setup-contracts:testnet": {
       "cache": false,
       "persistent": true,
@@ -64,6 +75,10 @@
       "cache": false
     },
     "@repo/contracts#check-contracts-deployment": {
+      "cache": false,
+      "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
+    },
+    "@repo/contracts#check-contracts-deployment:staging": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
     },
@@ -99,7 +114,7 @@
     "upgrade:contract:local": {
       "dependsOn": ["upgrade:contract"]
     },
-    "upgrade:contract:solo-staging": {
+    "upgrade:contract:testnet-staging": {
       "dependsOn": ["upgrade:contract"]
     },
     "upgrade:contract:testnet": {

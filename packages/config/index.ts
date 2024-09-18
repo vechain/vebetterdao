@@ -1,5 +1,5 @@
 import localConfig from "./local"
-import stagingConfig from "./solo-staging"
+import stagingConfig from "./testnet-staging"
 import testnetConfig from "./testnet"
 import mainnetConfig from "./mainnet"
 import { EnvConfig, getContractsConfig } from "./contracts"
@@ -46,7 +46,7 @@ export const getConfig = (env?: EnvConfig): AppConfig => {
   if (!appEnv) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set or a type must be passed to getConfig()")
   if (appEnv === "local") return localConfig
   if (appEnv === "e2e") return localConfig
-  if (appEnv === "solo-staging") return stagingConfig
+  if (appEnv === "testnet-staging") return stagingConfig
   if (appEnv === "testnet") return testnetConfig
   if (appEnv === "mainnet") return mainnetConfig
   throw new Error(`Unsupported NEXT_PUBLIC_APP_ENV ${appEnv}`)
