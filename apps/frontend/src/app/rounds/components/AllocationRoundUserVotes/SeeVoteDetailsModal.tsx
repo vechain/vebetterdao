@@ -40,14 +40,17 @@ export const SeeVoteDetailsModal = ({ roundId, votes, isOpen, onClose }: Props) 
             />
           </Text>
           <VStack spacing={6} mt={2} w="full" align="flex-start">
-            {sortedVotes.map((vote, index) => (
-              <AppVotesHorizontalChart
-                key={index}
-                roundId={roundId}
-                data={{ votes: vote.value, app: vote.appId }}
-                totalVotes={totalVotesCast.toString()}
-              />
-            ))}
+            {sortedVotes.map((vote, index) => {
+              const percentage = (vote.rawValue / totalVotesCast) * 100
+              return (
+                <AppVotesHorizontalChart
+                  key={index}
+                  roundId={roundId}
+                  data={{ percentage, app: vote.appId }}
+                  totalVotes={totalVotesCast.toString()}
+                />
+              )
+            })}
           </VStack>
         </VStack>
       </CustomModalContent>

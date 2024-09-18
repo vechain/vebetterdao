@@ -1,9 +1,7 @@
-import { AppConfig, getConfig } from "@repo/config"
-import { deployProxy } from "../../helpers"
+import { getConfig } from "@repo/config"
+import { deployProxy, updateConfig } from "../../helpers"
 import { EnvConfig, getContractsConfig } from "@repo/config/contracts"
 import { NodeManagement } from "../../../typechain-types"
-import path from "path"
-import fs from "fs"
 
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -35,7 +33,8 @@ async function main() {
 
   console.log(`Updating the config file with the new NodeManagement contract address`)
   try {
-    await updateConfig(config, await nodeManagement.getAddress())
+    Object.assign(config, { nodeManagementContractAddress: await nodeManagement.getAddress() })
+    await updateConfig(config, "nodeManagementContract")
     console.log("Config file updated successfully")
   } catch (e) {
     console.error("Failed to update config file, update it manually")
@@ -47,35 +46,6 @@ async function main() {
 
   console.log("Execution completed")
   process.exit(0)
-}
-
-async function updateConfig(config: AppConfig, nodeManagementContractAddress: string) {
-  Object.assign(config, { nodeManagementContractAddress })
-
-  const toWrite = `import { AppConfig } from \".\" \n const config: AppConfig = ${JSON.stringify(config, null, 2)};
-    export default config;`
-
-  let fileToWrite: string
-  switch (config.network.name) {
-    case "solo":
-      fileToWrite = "local.ts"
-      break
-    case "solo-staging":
-      fileToWrite = "solo-staging.ts"
-      break
-    case "testnet":
-      fileToWrite = "testnet.ts"
-      break
-    case "main":
-      fileToWrite = "mainnet.ts"
-      break
-    default:
-      throw new Error("Invalid network name")
-  }
-
-  const localConfigPath = path.resolve(`../config/${fileToWrite}`)
-  console.log(`Adding nodeManagementContractAddress to config file: ${localConfigPath}`)
-  fs.writeFileSync(localConfigPath, toWrite)
 }
 
 // Execute the main function
