@@ -33,6 +33,7 @@ import { useMemo } from "react"
 import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { isAddressInListOfAddresses } from "@repo/utils/AddressUtils"
 
 enum AppEndorsementStatus {
   NEW_UNENDORSED = "NEW_UNENDORSED",
@@ -106,10 +107,6 @@ export const AppEndorsementInfoCard = () => {
   const { data: appHasBeenIntoAllocationRounds } = useAppExists(app?.id ?? "")
   const { data: appEndorsementScore, isLoading: appEndorsementScoreLoading } = useAppEndorsementScore(app?.id ?? "")
   const { data: appEndorsers, isLoading: appEndorsersLoading } = useAppEndorsers(app?.id ?? "")
-  const formattedAppEndorsers = useMemo(
-    () => appEndorsers?.map(endorser => endorser.toLowerCase()) ?? [],
-    [appEndorsers],
-  )
   const { data: endorsementScoreThreshold, isLoading: endorsementScoreThresholdLoading } =
     useEndorsementScoreThreshold()
 
@@ -138,9 +135,9 @@ export const AppEndorsementInfoCard = () => {
   }, [userXNodes, nodesLevelToEndorsementScore, endorsedApps])
 
   const isUserAppEndorser = useMemo(() => {
-    if (!account || !formattedAppEndorsers) return false
-    return formattedAppEndorsers.includes(account.toLowerCase())
-  }, [account, formattedAppEndorsers])
+    if (!account || !appEndorsers) return false
+    return isAddressInListOfAddresses(account, appEndorsers)
+  }, [account, appEndorsers])
 
   // Modals
   const {
@@ -221,18 +218,18 @@ export const AppEndorsementInfoCard = () => {
 
           <Skeleton isLoaded={!appEndorsersLoading}>
             <Box textAlign="center">
-              {formattedAppEndorsers && formattedAppEndorsers.length ? (
+              {appEndorsers && appEndorsers.length ? (
                 <HStack justify={"space-between"}>
                   <HStack>
-                    {formattedAppEndorsers.map((endorser: string, index: number) => (
+                    {appEndorsers.map((endorser: string, index: number) => (
                       <Box key={index}>
                         <AddressIcon address={endorser} rounded="full" h="20px" w="20px" />
                       </Box>
                     ))}
                   </HStack>
                   <Text as="span" fontSize="14px" fontWeight="bold">
-                    {formattedAppEndorsers.length > 1
-                      ? t("{{value}}-x-node-users", { value: formattedAppEndorsers.length })
+                    {appEndorsers.length > 1
+                      ? t("{{value}}-x-node-users", { value: appEndorsers.length })
                       : t("1-x-node-user")}
                   </Text>
                   <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
