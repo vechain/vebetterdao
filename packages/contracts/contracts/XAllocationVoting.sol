@@ -44,7 +44,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * @dev Interacts with the VotingRewards contract to save the user from casting a vote.
  * @dev The contract is using AccessControl to handle roles for admin, governance, and round-starting operations.
  * ----------------------------- V2 UPDATES -----------------------------------
- * Added check to ensure that the vote weigth for an XApp cast by a user is greater than the voting threshold
+ * Added check to ensure that the vote weight for an XApp cast by a user is greater than the voting threshold
  */
 contract XAllocationVoting is
   XAllocationVotingGovernor,
