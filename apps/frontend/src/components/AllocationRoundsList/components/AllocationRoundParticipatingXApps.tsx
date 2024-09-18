@@ -16,9 +16,6 @@ export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, ma
   // Apps are listed based on the rank in the round
   const { data: xApps, isLoading: isLoadingXApps } = useMostVotedAppsInRound(roundId)
 
-  console.log("xApps", xApps)
-  console.log("roundId", roundId)
-
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
 
   const appsToRender = xApps?.slice(0, maxAppsToShow)

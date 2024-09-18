@@ -3,6 +3,7 @@ import { useNodeEndorsedApp, useNodesEndorsementScore, useXAppMetadata } from ".
 import { notFoundImage } from "@/constants"
 import { useGetTokenIdAttachedToNode } from "../galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import { useIpfsImage } from "@/api/ipfs"
+import { useTranslation } from "react-i18next"
 
 /**
  * Custom hook for retrieving data related to an X-Node.
@@ -16,6 +17,7 @@ import { useIpfsImage } from "@/api/ipfs"
  * */
 
 export const useXNode = () => {
+  const { t } = useTranslation()
   const xNodes = useUserXNodes()
   // TODO: in the future we will have multiple xNodes
   // For now, we will use the first xNode as wont' consider delegated xnodes
@@ -24,7 +26,7 @@ export const useXNode = () => {
   const isXNodeHolder = !!firstXNode
 
   // get xNode name, image and level
-  const xNodeName = firstXNode?.name ?? "N.A."
+  const xNodeName = firstXNode?.name ?? t("Not available")
   const xNodeImage = firstXNode?.image ?? notFoundImage
   const xNodeLevel = firstXNode?.level ?? 0
 
@@ -52,6 +54,8 @@ export const useXNode = () => {
     isError: isErrorAttachedGMTokenId,
     error: errorAttachedGMTokenId,
   } = useGetTokenIdAttachedToNode(firstXNodeId)
+  console.log("firstXNodeId", firstXNodeId)
+  console.log("attachedGMTokenId", attachedGMTokenId, typeof attachedGMTokenId)
 
   const isXNodeLoading =
     xNodes.isLoading || endorsedAppMetadata.isLoading || nodesEndorsementScore.isLoading || isLoadingAttachedGMTokenId

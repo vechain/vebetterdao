@@ -1,10 +1,12 @@
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
-import { useCall } from "@/hooks"
+import { getCallKey, useCall } from "@/hooks"
 
 const contractAddress = getConfig().galaxyMemberContractAddress
 const contractInterface = GalaxyMember__factory.createInterface()
 const method = "getIdAttachedToNode"
+
+export const getGetTokenIdAttachedToNodeQueryKey = (nodeId?: string) => getCallKey({ method, keyArgs: [nodeId] })
 
 /**
  * Custom hook that retrieves the GM Token ID attached to the given Vechain Node ID.

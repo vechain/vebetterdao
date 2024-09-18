@@ -4,8 +4,8 @@ import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getLevelOfTokenQueryKey, useSelectedGmNft, useXNode } from "@/api"
 import { buildClause } from "@/utils/buildClause"
-import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import { getNodeIdAttachedQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetNodeIdAttached"
 
@@ -16,16 +16,15 @@ type Props = {
 }
 
 /**
- * Custom hook for attaching a Galaxy Member (GM) NFT to an XNode.
+ * Custom hook for detaching a Galaxy Member (GM) NFT from an XNode.
  *
- * This hook prepares and executes a transaction to attach an XNode to a GM NFT,
- * potentially upgrading the NFT based on the XNode's level.
+ * This hook prepares and executes a transaction to detach an XNode from a GM NFT.
  *
  * @param {Props} props - The properties for the hook.
  * @param {Function} [props.onSuccess] - Optional callback function to be called on successful transaction.
  * @returns {Object} An object containing the transaction builder and related data.
  */
-export const useAttachGMToXNode = ({ onSuccess }: Props) => {
+export const useDetachGMFromXNode = ({ onSuccess }: Props) => {
   const { xNodeId } = useXNode()
   const { gmId } = useSelectedGmNft()
 
@@ -33,6 +32,7 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
     if (!xNodeId) {
       throw new Error("XNode ID is not available")
     }
+
     if (!gmId) {
       throw new Error("GM NFT ID is not available")
     }
@@ -41,14 +41,17 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
       buildClause({
         to: getConfig().galaxyMemberContractAddress,
         contractInterface: GalaxyMemberInterface,
-        method: "attachNode",
+        method: "detachNode",
         args: [xNodeId, gmId],
-        comment: `Attach XNode ${xNodeId} to GM NFT id ${gmId}`,
+        comment: `Detach XNode ${xNodeId} from GM NFT id ${gmId}`,
       }),
     ]
   }, [xNodeId, gmId])
 
   const { account } = useWallet()
+
+  console.log("now xNodeId", xNodeId)
+  console.log("now gmId", gmId)
 
   const refetchQueryKeys = useMemo(
     () => [

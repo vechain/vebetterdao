@@ -1,5 +1,7 @@
 import { useSelectedGmNft, useXNode } from "@/api"
-import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, VStack } from "@chakra-ui/react"
+import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
+import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilInfoCircle, UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
@@ -15,6 +17,9 @@ export const AttachXNodeCard = () => {
   const goToXnodePage = useCallback(() => {
     router.push("/xnode")
   }, [router])
+
+  const attachGmToXNodeModal = useDisclosure()
+  const detachGmToXNodeModal = useDisclosure()
 
   if (!isXNodeHolder) {
     return null
@@ -74,16 +79,25 @@ export const AttachXNodeCard = () => {
             </HStack>
           </Flex>
           {isXNodeAttachedToGM ? (
-            <Button leftIcon={<UilLinkBroken color="#C84968" />} color="#C84968" variant={"link"}>
+            <Button
+              leftIcon={<UilLinkBroken color="#C84968" />}
+              color="#C84968"
+              variant={"link"}
+              onClick={detachGmToXNodeModal.onOpen}>
               {t("Detach")}
             </Button>
           ) : (
-            <Button leftIcon={<UilLinkBroken color="#004CFC" />} variant={"primarySubtle"}>
+            <Button
+              leftIcon={<UilLinkBroken color="#004CFC" />}
+              variant={"primarySubtle"}
+              onClick={attachGmToXNodeModal.onOpen}>
               {t("Attach now!")}
             </Button>
           )}
         </VStack>
       </CardBody>
+      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
+      <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.isOpen} onClose={detachGmToXNodeModal.onClose} />
     </Card>
   )
 }

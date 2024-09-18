@@ -40,8 +40,6 @@ export const EndorsingAppCard = () => {
 
   const unendorseAppModal = useDisclosure()
 
-  console.log("unendorseAppModal", unendorseAppModal)
-
   const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber: appEndorsedEvents?.[0]?.blockNumber })
   const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
 
