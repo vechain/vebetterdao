@@ -16,7 +16,9 @@ const config: HardhatUserConfig = {
 }
 
 const getEnvMnemonic = () => {
-  const mnemonic = process.env.MNEMONIC
+  const isStagingEnv = process.env.NEXT_PUBLIC_APP_ENV === "testnet-staging"
+
+  const mnemonic = isStagingEnv ? process.env.TESTNET_STAGING_MNEMONIC : process.env.MNEMONIC
 
   return mnemonic ?? ""
 }
@@ -68,7 +70,7 @@ module.exports = {
       gas: 10000000,
     },
     vechain_testnet: {
-      url: VECHAIN_URL_TESTNET,
+      url: getConfig().nodeUrl,
       accounts: {
         mnemonic: getEnvMnemonic(),
         count: 20,
@@ -78,7 +80,7 @@ module.exports = {
       gas: 10000000,
     },
     vechain_mainnet: {
-      url: VECHAIN_URL_MAINNET,
+      url: getConfig().nodeUrl,
       accounts: {
         mnemonic: getEnvMnemonic(),
         count: 20,
