@@ -1,3 +1,4 @@
+import { VECHAIN_DEFAULT_MNEMONIC } from "@vechain/hardhat-vechain"
 import { unitsUtils, addressUtils, mnemonic } from "@vechain/sdk-core"
 
 export type TestPk = {
@@ -19,7 +20,9 @@ export enum SeedStrategy {
 
 const isStagingEnv = process.env.NEXT_PUBLIC_APP_ENV === "testnet-staging"
 
-const PHRASE = (isStagingEnv ? process.env.TESTNET_STAGING_MNEMONIC : process.env.MNEMONIC)?.split(" ")
+const PHRASE = (
+  isStagingEnv ? process.env.TESTNET_STAGING_MNEMONIC : process.env.MNEMONIC || VECHAIN_DEFAULT_MNEMONIC
+)?.split(" ")
 
 export const TEST_DERIVATION_PATH = "m"
 
