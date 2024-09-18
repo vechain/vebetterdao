@@ -18,7 +18,7 @@ const functionAbi = new abi.Function(JSON.parse(functionFragment))
  * @param roundId  the round id to get the votes for
  * @returns  the clauses to get the votes for the xApps in the round
  */
-export const getAppsShareClauses = (apps: string[], roundId: string): Connex.VM.Clause[] => {
+export const getAppsShareClauses = (apps: string[], roundId?: string): Connex.VM.Clause[] => {
   const clauses: Connex.VM.Clause[] = apps.map(app => ({
     to: ALLOCATION_POOL_CONTRACT,
     value: 0,
@@ -31,7 +31,7 @@ export const getAppsShareClauses = (apps: string[], roundId: string): Connex.VM.
  *  Returns the query key for the shares of multiple xApps in an allocation round.
  * @param roundId  the roundId the get the shares for
  */
-export const getXAppsSharesQueryKey = (roundId: number | string) => getCallKey({ method, keyArgs: [roundId, "ALL"] })
+export const getXAppsSharesQueryKey = (roundId?: number | string) => getCallKey({ method, keyArgs: [roundId, "ALL"] })
 
 /**
  * Fetch shares of multiple xApps in an allocation round
@@ -40,7 +40,7 @@ export const getXAppsSharesQueryKey = (roundId: number | string) => getCallKey({
  * @returns  the shares (% of allocation pool) for the xApps in the round { allocated: number, unallocated: number }
  *
  */
-export const useXAppsShares = (apps: string[], roundId: string) => {
+export const useXAppsShares = (apps: string[], roundId?: string) => {
   const { thor } = useConnex()
   return useQuery({
     queryKey: getXAppsSharesQueryKey(roundId),
