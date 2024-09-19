@@ -10,6 +10,7 @@ export enum XAppsCreationStepStatus {
 }
 
 export enum EndorsementStatus {
+  UNKNOWN = "UNKNOWN",
   LOST = "LOST",
   PENDING = "PENDING",
   SUCCESS = "SUCCESS",

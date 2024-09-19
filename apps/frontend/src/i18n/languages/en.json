@@ -1,4 +1,5 @@
 {
+  "Unknown endorsement status": "Unknown endorsement status",
   "Pending endorsement": "Pending endorsement",
   "Endorsement lost": "Endorsement lost",
   "This dApp won’t join next allocation round. The app will have to reach more than {{endorsementThreshold}} Endorsement score to be included on Allocations rounds. Know more.": "<strong>This dApp won’t join next allocation round.</strong> The app will have to reach more than {{endorsementThreshold}} Endorsement score to be included on Allocations rounds. <Link>Know more</Link>.",

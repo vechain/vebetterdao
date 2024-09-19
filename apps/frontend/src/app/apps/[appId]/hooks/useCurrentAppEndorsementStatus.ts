@@ -1,53 +1,54 @@
-import { useAppEndorsementScore, useEndorsementScoreThreshold } from "@/api"
+import { useAppEndorsementScore, useEndorsementScoreThreshold, useIsAppUnendorsed } from "@/api"
+import { useIsAppEligible } from "@/api/contracts/xApps/hooks/endorsement/useIsAppEligible"
 import { EndorsementStatus } from "@/types"
-import dayjs from "dayjs"
 import { useParams } from "next/navigation"
 
 /**
- * Determine the endorsement status of the current app.
- * @param score The endorsement score of the current app.
- * @param threshold The endorsement threshold of the current app.
- * @param maxDate The maximum date for endorsement.
- * @returns The endorsement status of the current app.
+ * Determine the current app endorsement status
+ * @param isAppUnendorsed Whether the app is unendorsed
+ * @param isEligibleNow Whether the app is eligible now
+ * @param score The app endorsement score
+ * @param threshold The endorsement score threshold
+ * @returns The current app endorsement status
  */
-const determineStatus = (score?: number, threshold?: number, maxDate?: dayjs.ConfigType) => {
-  //Fallback to pending if any of the required values are missing
-  if (!score || !threshold || !maxDate) {
-    return EndorsementStatus.PENDING
+const determineStatus = (isAppUnendorsed?: boolean, isEligibleNow?: boolean, score: number = 0, threshold?: number) => {
+  if (typeof isAppUnendorsed === "undefined" || typeof isEligibleNow === "undefined" || !threshold) {
+    return EndorsementStatus.UNKNOWN
   }
 
-  const endorsementFailed = score < threshold && dayjs().isAfter(maxDate)
-
-  if (endorsementFailed) {
-    return EndorsementStatus.LOST
-  }
-  if (score >= threshold) {
+  if (!isAppUnendorsed && isEligibleNow && score >= threshold) {
     return EndorsementStatus.SUCCESS
   }
 
-  //Fallback to pending if any condition fails
-  return EndorsementStatus.PENDING
+  //App in the grace period
+  if (!isAppUnendorsed && isEligibleNow) {
+    return EndorsementStatus.LOST
+  }
+
+  if (isAppUnendorsed && !isEligibleNow) {
+    return EndorsementStatus.PENDING
+  }
+
+  return EndorsementStatus.UNKNOWN
 }
 
 /**
- * Custom hook to fetch and manage the current app's endorsement status.
- * @returns An object containing the endorsement threshold, endorsement score, loading state, and error state.
+ * Hook to get the current app endorsement status
+ * @returns The current app endorsement status
  */
 export const useCurrentAppEndorsementStatus = () => {
   const { appId } = useParams<{ appId: string }>()
   const { data: threshold, isLoading: isEndorsementThresholdLoading } = useEndorsementScoreThreshold()
   const { data: score, isLoading: isEndorsementScoreLoading } = useAppEndorsementScore(appId)
-
-  //TODO: Calculate max date based on the grace period
-  // const { data: gracePeriod } = useEndorsementGracePeriod()
-  const maxDate = dayjs().add(1, "hour")
-
-  const status = determineStatus(Number(score), Number(threshold), maxDate)
+  const { data: isEligibleNow, isLoading: isEligibleNowLoading } = useIsAppEligible(appId)
+  const { data: isUnendorsed, isLoading: isUnendorsedLoading } = useIsAppUnendorsed(appId)
+  const isLoading =
+    isEndorsementThresholdLoading || isEndorsementScoreLoading || isEligibleNowLoading || isUnendorsedLoading
+  const status = determineStatus(isUnendorsed, isEligibleNow, Number(score), Number(threshold))
   return {
     threshold,
     score,
     status,
-    maxDate,
-    isLoading: isEndorsementThresholdLoading || isEndorsementScoreLoading,
+    isLoading,
   }
 }
