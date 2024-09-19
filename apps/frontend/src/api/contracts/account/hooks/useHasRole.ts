@@ -40,7 +40,7 @@ export const getHasRole = async (thor: Connex.Thor, role: string, contractAddres
 
   if (res.reverted) throw new Error(res.revertReason)
 
-  return res.decoded[0]
+  return Boolean(res.decoded[0])
 }
 
 export const hasRoleQueryKey = (role: string, contractAddress: string, address?: string) => [
