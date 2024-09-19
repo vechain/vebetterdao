@@ -16,6 +16,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useClaimNFT } from "@/hooks"
 import { MintNFTModal } from "./components/MintNFTModal"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
+import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -33,6 +34,7 @@ export const GMUpgradeButton = () => {
     missingB3trToUpgrade,
     isEnoughBalanceToUpgradeGM,
     isXNodeAttachedToGM,
+    gmId,
   } = useSelectedGmNft()
   const { isXNodeHolder } = useXNode()
 
@@ -156,9 +158,7 @@ export const GMUpgradeButton = () => {
     router.push(`/rounds/${currentRoundId}/vote`)
   }, [currentRoundId, router])
 
-  const handleUpgradeGM = useCallback(() => {
-    // TODO: Implement upgrade GM
-  }, [])
+  const upgradeGMModal = useDisclosure()
 
   const actionButton = useMemo(() => {
     if (!hasUserVoted && !isGMOwned && !isGMClaimable) {
@@ -184,7 +184,7 @@ export const GMUpgradeButton = () => {
     }
 
     return (
-      <Button variant={"tertiaryAction"} isDisabled={!isEnoughBalanceToUpgradeGM} onClick={handleUpgradeGM}>
+      <Button variant={"tertiaryAction"} isDisabled={!isEnoughBalanceToUpgradeGM} onClick={upgradeGMModal.onOpen}>
         {t("Upgrade now!")}
       </Button>
     )
@@ -192,7 +192,6 @@ export const GMUpgradeButton = () => {
     attachGmToXNodeModal.onOpen,
     goToVote,
     handleMintGM,
-    handleUpgradeGM,
     hasUserVoted,
     isEnoughBalanceToUpgradeGM,
     isGMClaimable,
@@ -200,6 +199,7 @@ export const GMUpgradeButton = () => {
     isXNodeAttachedToGM,
     isXNodeHolder,
     t,
+    upgradeGMModal.onOpen,
   ])
 
   return (
@@ -227,6 +227,7 @@ export const GMUpgradeButton = () => {
         sendTransactionPending={sendTransactionPending}
       />
       <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
+      <UpgradeGMModal tokenId={gmId} upgradeGMModal={upgradeGMModal} />
     </Stack>
   )
 }
