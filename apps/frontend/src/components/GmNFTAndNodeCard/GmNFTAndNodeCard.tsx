@@ -27,10 +27,11 @@ import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 export const GmNFTAndNodeCard = () => {
   const { t } = useTranslation()
 
-  const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned } = useSelectedGmNft()
+  const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
+    useSelectedGmNft()
 
   //node
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeAttachedToGM } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder } = useXNode()
 
   const nodeAttachedColor = isXNodeAttachedToGM ? "#B1F16C" : "#FFFFFF80"
 

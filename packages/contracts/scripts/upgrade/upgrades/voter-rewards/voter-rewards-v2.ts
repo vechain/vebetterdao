@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
-import { upgradeProxy } from "../../helpers"
+import { upgradeProxy } from "../../../helpers"
 import { EnvConfig } from "@repo/config/contracts"
-import { VoterRewards } from "../../../typechain-types"
+import { VoterRewards } from "../../../../typechain-types"
 
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {

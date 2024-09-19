@@ -374,7 +374,7 @@ export async function deployAll(config: ContractsConfig) {
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
-    B3TRGovernorV1: await governor.getAddress(),
+    B3TRGovernor: await governor.getAddress(),
     Emissions: await emissions.getAddress(),
     GalaxyMember: await galaxyMember.getAddress(),
     TimeLock: await timelock.getAddress(),
@@ -1098,7 +1098,7 @@ async function deployB3trToken(admin: string, minter: string, pauser: string): P
 export const setWhitelistedFunctions = async (
   contractAddresses: Record<string, string>,
   config: ContractsConfig,
-  governor: B3TRGovernorV1,
+  governor: B3TRGovernor,
   admin: HardhatEthersSigner,
   libraries: Record<string, Record<string, string>>,
   logOutput = false,
