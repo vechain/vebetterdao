@@ -8,6 +8,7 @@ import { EnhancedClause } from "@/hooks"
 import { getConfig } from "@repo/config"
 
 import { GalaxyMember__factory } from "@repo/contracts"
+import { getTokensInfoByOwnerQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokensInfoByOwner"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
@@ -55,6 +56,12 @@ export const useClaimNFT = ({
       })
       await queryClient.refetchQueries({
         queryKey: getGMbalanceQueryKey(account),
+      })
+      await queryClient.cancelQueries({
+        queryKey: getTokensInfoByOwnerQueryKey(account),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getTokensInfoByOwnerQueryKey(account),
       })
     }
 

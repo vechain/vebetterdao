@@ -14,8 +14,7 @@ const method = "getTokensInfoByOwner"
  * @param size - The number of tokens to fetch per page.
  * @returns An array representing the query key.
  */
-export const getTokensInfoByOwnerQueryKey = (owner?: string | null, size?: number) =>
-  getCallKey({ method, keyArgs: [owner, size] })
+export const getTokensInfoByOwnerQueryKey = (owner?: string | null) => getCallKey({ method, keyArgs: [owner] })
 
 /**
  * Custom hook to fetch token information for a specific owner with infinite scrolling support.
@@ -23,7 +22,7 @@ export const getTokensInfoByOwnerQueryKey = (owner?: string | null, size?: numbe
  * @param size - The number of tokens to fetch per page.
  * @returns An infinite query result containing the token information and pagination controls.
  */
-export const useGetTokensInfoByOwner = (owner: string | null, size: number) => {
+export const useGetTokensInfoByOwner = (owner: string | null, size: number = 10) => {
   const { thor } = useConnex()
 
   const fetchTokens = async ({ pageParam = 0 }) => {
@@ -42,11 +41,14 @@ export const useGetTokensInfoByOwner = (owner: string | null, size: number) => {
       b3trToUpgrade,
     }))
 
+    console.log("fetched gms", data)
+    console.log("pageParam", pageParam)
+
     return { data, nextPage: pageParam + 1 }
   }
 
   return useInfiniteQuery({
-    queryKey: getTokensInfoByOwnerQueryKey(owner, size),
+    queryKey: getTokensInfoByOwnerQueryKey(owner),
     queryFn: fetchTokens,
     getNextPageParam: lastPage => (lastPage.data.length === size ? lastPage.nextPage : undefined),
     enabled: !!owner,
