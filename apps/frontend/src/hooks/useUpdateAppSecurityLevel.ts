@@ -4,7 +4,7 @@ import { VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { APP_SECURITY_LEVELS, getAppSecurityLevelQueryKey, getIsPersonQueryKey } from "@/api"
+import { APP_SECURITY_LEVELS, getAppSecurityLevelQueryKey } from "@/api"
 
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
 
