@@ -137,19 +137,6 @@ export const GMUpgradeButton = () => {
     t,
   ])
 
-  const actionLabel = useMemo(() => {
-    if (!hasUserVoted && !isGMOwned && !isGMClaimable) {
-      return t("Vote now!")
-    }
-    if (!isGMOwned) {
-      return t("Mint now!")
-    }
-    if (isXNodeHolder && !isXNodeAttachedToGM) {
-      return t("Attach and Upgrade!")
-    }
-    return t("Upgrade now!")
-  }, [hasUserVoted, isGMClaimable, isGMOwned, isXNodeAttachedToGM, isXNodeHolder, t])
-
   const router = useRouter()
   const mintNftModal = useDisclosure()
   const {
@@ -165,37 +152,55 @@ export const GMUpgradeButton = () => {
 
   const attachGmToXNodeModal = useDisclosure()
 
-  const action = useCallback(() => {
+  const goToVote = useCallback(() => {
+    router.push(`/rounds/${currentRoundId}/vote`)
+  }, [currentRoundId, router])
+
+  const handleUpgradeGM = useCallback(() => {
+    // TODO: Implement upgrade GM
+  }, [])
+
+  const actionButton = useMemo(() => {
     if (!hasUserVoted && !isGMOwned && !isGMClaimable) {
-      router.push(`/rounds/${currentRoundId}/vote`)
-      return
+      return (
+        <Button variant={"tertiaryAction"} onClick={goToVote}>
+          {t("Vote now!")}
+        </Button>
+      )
     }
     if (!isGMOwned && isGMClaimable) {
-      return handleMintGM()
+      return (
+        <Button variant={"tertiaryAction"} onClick={handleMintGM}>
+          {t("Mint now!")}
+        </Button>
+      )
     }
     if (isXNodeHolder && !isXNodeAttachedToGM) {
-      attachGmToXNodeModal.onOpen()
-      return
+      return (
+        <Button variant={"tertiaryAction"} onClick={attachGmToXNodeModal.onOpen}>
+          {t("Attach and Upgrade!")}
+        </Button>
+      )
     }
-    return
+
+    return (
+      <Button variant={"tertiaryAction"} isDisabled={!isEnoughBalanceToUpgradeGM} onClick={handleUpgradeGM}>
+        {t("Upgrade now!")}
+      </Button>
+    )
   }, [
-    attachGmToXNodeModal,
-    currentRoundId,
+    attachGmToXNodeModal.onOpen,
+    goToVote,
     handleMintGM,
+    handleUpgradeGM,
     hasUserVoted,
+    isEnoughBalanceToUpgradeGM,
     isGMClaimable,
     isGMOwned,
     isXNodeAttachedToGM,
     isXNodeHolder,
-    router,
+    t,
   ])
-
-  const isActionDisabled = useMemo(() => {
-    if ((isXNodeHolder && !isXNodeAttachedToGM) || !isGMOwned) {
-      return false
-    }
-    return !isEnoughBalanceToUpgradeGM
-  }, [isEnoughBalanceToUpgradeGM, isGMOwned, isXNodeAttachedToGM, isXNodeHolder])
 
   return (
     <Stack
@@ -215,11 +220,7 @@ export const GMUpgradeButton = () => {
           {upgradeMessage}
         </HStack>
       </Skeleton>
-      <Skeleton isLoaded={!isB3trBalanceLoading}>
-        <Button variant={"tertiaryAction"} isDisabled={isActionDisabled} w="full" onClick={action}>
-          {actionLabel}
-        </Button>
-      </Skeleton>
+      <Skeleton isLoaded={!isB3trBalanceLoading}>{actionButton}</Skeleton>
       <MintNFTModal
         mintNftModal={mintNftModal}
         isTxReceiptLoading={isTxReceiptLoading}
