@@ -1,22 +1,11 @@
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
-import {
-  Box,
-  Button,
-  Card,
-  CardBody,
-  HStack,
-  Image,
-  Skeleton,
-  Stack,
-  Text,
-  useMediaQuery,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Card, CardBody, HStack, Image, Skeleton, Stack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { NFTMetadata } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
 import { useIpfsImage, useIpfsMetadata } from "@/api/ipfs"
 import { useSelectedTokenId } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
+import { SelectGMButton } from "./SelectGMButton"
 
 interface GMNFTListItemProps {
   token: {
@@ -36,12 +25,8 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   const isGMSelected = useMemo(() => selectedTokenId === token.tokenId, [selectedTokenId, token.tokenId])
 
   const actionButton = useMemo(() => {
-    return (
-      <Button variant="primarySubtle" w={"full"} isDisabled={isGMSelected}>
-        {t(isGMSelected ? "Active NFT" : "Select as active")}
-      </Button>
-    )
-  }, [isGMSelected, t])
+    return <SelectGMButton tokenId={token.tokenId} isSelected={isGMSelected} />
+  }, [isGMSelected, token.tokenId])
 
   const { data: nftMetadata } = useIpfsMetadata<NFTMetadata>(token.tokenURI)
 
