@@ -34,6 +34,7 @@ import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { isAddressInListOfAddresses } from "@repo/utils/AddressUtils"
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 
 enum AppEndorsementStatus {
   NEW_UNENDORSED = "NEW_UNENDORSED",
@@ -149,6 +150,11 @@ export const AppEndorsementInfoCard = () => {
     isOpen: isEndorsementModalOpen,
     onOpen: onOpenEndorsementModal,
     onClose: onCloseEndorsementModal,
+  } = useDisclosure()
+  const {
+    isOpen: isUnendorsementModalOpen,
+    onOpen: onOpenUnendorsementModal,
+    onClose: onCloseUnendorsementModal,
   } = useDisclosure()
 
   return (
@@ -266,6 +272,11 @@ export const AppEndorsementInfoCard = () => {
                   {t("Endorse with your {{value}} points", { value: availablePoints })}
                 </Button>
               )}
+              {isUserAppEndorser && (
+                <Button variant={"ghost"} fontWeight="500" color="#C84968" onClick={onOpenUnendorsementModal}>
+                  {t("Remove endorsement")}
+                </Button>
+              )}
             </Stack>
           </Box>
         </Stack>
@@ -278,6 +289,8 @@ export const AppEndorsementInfoCard = () => {
       />
 
       <EndorseAppModal isOpen={isEndorsementModalOpen} onClose={onCloseEndorsementModal} xApp={app} />
+
+      <UnendorseAppModal isOpen={isUnendorsementModalOpen} onClose={onCloseUnendorsementModal} />
     </Card>
   )
 }
