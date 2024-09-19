@@ -28,7 +28,6 @@ interface GMNFTListItemProps {
 }
 
 export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
-  console.log("token", token)
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
