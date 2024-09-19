@@ -8,7 +8,9 @@ import {
   Flex,
   HStack,
   Heading,
+  Icon,
   Image,
+  Link,
   Show,
   Skeleton,
   Stack,
@@ -18,7 +20,7 @@ import {
 import { UilArrowUpRight, UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useCallback } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import {
   useCurrentAppBanner,
   useCurrentAppEndorsementStatus,
@@ -29,10 +31,10 @@ import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { AdminAppPageButton } from "./components/AdminAppPageButton"
 import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
 import { AppDetailSocials } from "./components/AppDetailSocials"
-import { EndorsementInfoBadge } from "./components/AppEndorsementInfoBadge"
 import { AppID } from "./components/AppID"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
+import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
 
 export const AppDetailOverview = () => {
   const { t } = useTranslation()
@@ -42,11 +44,12 @@ export const AppDetailOverview = () => {
   const { banner, isBannerLoading } = useCurrentAppBanner()
   const {
     status: endorsementStatus,
-    score: endorsementScore,
     threshold: endorsementThreshold,
-    maxDate: endorsementMaxDate,
     isLoading: isEndorsementStatusLoading,
   } = useCurrentAppEndorsementStatus()
+
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: nextRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {
@@ -73,19 +76,56 @@ export const AppDetailOverview = () => {
       badgeBgColor: "#E9FDF1",
       badgeIcon: UilCheckCircle,
     },
+    UNKNOWN: {
+      badgeText: t("Unknown endorsement status"),
+      badgeTextColor: "#AF5F00",
+      badgeBgColor: "#FFF3E5",
+      badgeIcon: UilExclamationCircle,
+    },
   }
-
+  const uknownStatus = endorsementStatus === EndorsementStatus.UNKNOWN
   const endorsementLost = endorsementStatus === EndorsementStatus.LOST
   const StatusBadgeIcon = BADGE_INFORMATION[endorsementStatus].badgeIcon
 
   return (
     <>
-      {endorsementScore && endorsementThreshold && endorsementScore < endorsementThreshold ? (
-        <EndorsementInfoBadge
-          endorsementThreshold={Number(endorsementThreshold)}
-          endorsementMaxDate={endorsementMaxDate}
-          endorsementLost={endorsementLost}
-        />
+      {endorsementStatus !== EndorsementStatus.SUCCESS ? (
+        <HStack w="full" flexWrap="wrap">
+          <Badge w="full" bg={BADGE_INFORMATION[endorsementStatus].badgeBgColor} borderRadius="12px">
+            <HStack p={2}>
+              <Icon
+                as={UilExclamationCircle}
+                boxSize={30}
+                color={BADGE_INFORMATION[endorsementStatus].badgeTextColor}
+              />
+              <Text
+                as="span"
+                color={BADGE_INFORMATION[endorsementStatus].badgeTextColor}
+                textTransform="none"
+                fontWeight="normal"
+                whiteSpace="normal"
+                wordBreak="break-word"
+                flexWrap="wrap"
+                fontSize="sm">
+                <Trans
+                  i18nKey={
+                    uknownStatus
+                      ? "Unknown endorsement status"
+                      : endorsementLost
+                        ? "This app lost the endorsement and will not join next allocation. The App will have to reach more than {{endorsementThreshold}} Endorsement score before {{date}} to be included on Allocations rounds. Know more."
+                        : "This dApp won’t join next allocation round. The app will have to reach more than {{endorsementThreshold}} Endorsement score to be included on Allocations rounds. Know more."
+                  }
+                  values={{ date: nextRound?.voteStartTimestamp, endorsementThreshold }}
+                  components={{
+                    Link: (
+                      <Link color={BADGE_INFORMATION[endorsementStatus].badgeTextColor} textDecoration="underline" />
+                    ),
+                  }}
+                />
+              </Text>
+            </HStack>
+          </Badge>
+        </HStack>
       ) : null}
       <Card variant="baseWithBorder">
         <CardBody>
