@@ -309,19 +309,22 @@ export async function deployAll(config: ContractsConfig) {
 
   const veBetterPassport = (await initializeProxy(veBetterPassportAddress, "VeBetterPassport", [
     {
-      x2EarnApps: await x2EarnApps.getAddress(),
       xAllocationVoting: await xAllocationVoting.getAddress(),
+      x2EarnApps: await x2EarnApps.getAddress(),
       nodeManagement: await nodeManagement.getAddress(),
+      galaxyMember: await galaxyMember.getAddress(),
       upgrader: config.CONTRACTS_ADMIN_ADDRESS, // upgrader
       admins: [config.CONTRACTS_ADMIN_ADDRESS], // admins
+      settingsManagers: [config.CONTRACTS_ADMIN_ADDRESS], // settingsManagers
       roleGranters: [config.CONTRACTS_ADMIN_ADDRESS], // roleGranters
-      blacklisters: [config.CONTRACTS_ADMIN_ADDRESS], // _blacklisters
+      botSignalers: [config.CONTRACTS_ADMIN_ADDRESS], // _blacklisters
       whitelisters: [config.CONTRACTS_ADMIN_ADDRESS], // _whitelisters
       actionRegistrar: config.CONTRACTS_ADMIN_ADDRESS, // _actionRegistrar
       actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS, // _actionScoreManager
-      threshold: 0, //threshold
-      signalingThreshold: 2, //signalingThreshold
-      roundsForCumulativeScore: 5, //roundsForCumulativeScore}
+      threshold: config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD, //threshold
+      signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
+      roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
+      minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
     },
   ])) as VeBetterPassport
 
