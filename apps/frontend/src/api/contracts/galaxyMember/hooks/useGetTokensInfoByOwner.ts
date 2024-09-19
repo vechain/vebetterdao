@@ -41,9 +41,6 @@ export const useGetTokensInfoByOwner = (owner: string | null, size: number = 10)
       b3trToUpgrade,
     }))
 
-    console.log("fetched gms", data)
-    console.log("pageParam", pageParam)
-
     return { data, nextPage: pageParam + 1 }
   }
 
