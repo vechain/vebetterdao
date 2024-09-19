@@ -8,3 +8,10 @@ export enum XAppsCreationStepStatus {
   ACTIVE = "ACTIVE",
   PENDING = "PENDING",
 }
+
+export enum EndorsementStatus {
+  UNKNOWN = "UNKNOWN",
+  LOST = "LOST",
+  PENDING = "PENDING",
+  SUCCESS = "SUCCESS",
+}
