@@ -14,6 +14,7 @@ import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
 import { ContractsDetails } from "./components/ContractsDetails"
 import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
 import { useCurrentAllocationsRoundId } from "@/api"
+import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -21,12 +22,31 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const { isAdminOfX2EarnApps, isAdminOfVot3, isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfB3TRGovernor } =
-    useAccountPermissions(account ?? "")
+  const {
+    isAdminOfX2EarnApps,
+    isAdminOfVot3,
+    isAdminOfB3tr,
+    isAdminOfGalaxyMember,
+    isAdminOfB3TRGovernor,
+    isAdminOfVeBetterPassport,
+    isPassportSettingsManager,
+    isPassportBotSignaler,
+    isPassportActionRegistrar,
+    isPassportScoreManager,
+    isPassportWhitelister,
+  } = useAccountPermissions(account ?? "")
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const canSeePauseTab = isAdminOfB3tr || isAdminOfGalaxyMember || isAdminOfVot3 || isAdminOfB3TRGovernor
+
+  const canSeeVeBetterPassportTab =
+    isAdminOfVeBetterPassport ||
+    isPassportSettingsManager ||
+    isPassportBotSignaler ||
+    isPassportActionRegistrar ||
+    isPassportScoreManager ||
+    isPassportWhitelister
 
   return (
     <Stack spacing={12} w={"full"} data-testid="admin-page">
@@ -45,6 +65,7 @@ export const AdminPageContent = () => {
           <Tab>{"Utils"}</Tab>
           <Tab>{"Contracts"}</Tab>
           {canSeePauseTab && <Tab>{"Pausing"}</Tab>}
+          {canSeeVeBetterPassportTab && <Tab>{"VeBetter Passport"}</Tab>}
         </TabList>
 
         <TabPanels>
@@ -85,6 +106,12 @@ export const AdminPageContent = () => {
           {canSeePauseTab && (
             <TabPanel>
               <Pause />
+            </TabPanel>
+          )}
+
+          {canSeeVeBetterPassportTab && (
+            <TabPanel>
+              <VeBetterPassport />
             </TabPanel>
           )}
         </TabPanels>
