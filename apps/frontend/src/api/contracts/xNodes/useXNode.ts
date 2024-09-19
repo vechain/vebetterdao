@@ -16,9 +16,9 @@ import { useTranslation } from "react-i18next"
  * - attachedGMTokenId: The token ID of the GM NFT attached to the X-Node.
  * */
 
-export const useXNode = () => {
+export const useXNode = (address?: string) => {
   const { t } = useTranslation()
-  const xNodes = useUserXNodes()
+  const xNodes = useUserXNodes(address)
   // TODO: in the future we will have multiple xNodes
   // For now, we will use the first xNode as wont' consider delegated xnodes
   const firstXNode = xNodes.data?.[0]
