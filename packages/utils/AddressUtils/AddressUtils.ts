@@ -35,6 +35,16 @@ export const compareListOfAddresses = (add1: string[], add2: string[]) => {
   return true
 }
 
+/**
+ * Checks if the given address is in the list of addresses
+ * @param address - The address to check
+ * @param addresses - The list of addresses to check against
+ * @returns - True if the address is in the list of addresses, false otherwise
+ */
+export const isAddressInListOfAddresses = (address: string, addresses: string[]) => {
+  return addresses.some(addr => compareAddresses(address, addr))
+}
+
 export const regexPattern = () => {
   return /^0x[a-fA-F0-9]{40}$/
 }
@@ -50,6 +60,10 @@ export const isValid = (addr: string | undefined | null): boolean => {
 }
 
 export const leftPadWithZeros = (str: string, length: number): string => {
+  if (typeof str !== "string") {
+    throw new TypeError("Input must be a string")
+  }
+
   // Remove '0x' prefix if it exists
   const cleanStr = str.startsWith("0x") ? str.slice(2) : str
   if (cleanStr.length > length) {
