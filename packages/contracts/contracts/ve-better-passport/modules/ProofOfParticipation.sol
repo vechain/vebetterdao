@@ -25,10 +25,10 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
   /// @notice Security level indicates how secure the app is
   /// @dev App security is used to calculate the overall score of a sustainable action
   enum APP_SECURITY {
+    NONE,
     LOW,
     MEDIUM,
-    HIGH,
-    NONE
+    HIGH
   }
 
   // ---------- Storage ------------ //
@@ -40,7 +40,7 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
     // Multipliers
     mapping(APP_SECURITY security => uint256 multiplier) securityMultiplier; // Multiplier of the base action score based on the app security
     // Security level of an app
-    mapping(bytes32 appId => APP_SECURITY security) appSecurity; // Will be LOW as the zero value
+    mapping(bytes32 appId => APP_SECURITY security) appSecurity; // Will be NONE as the zero value
     // User scores
     mapping(address user => uint256 totalScore) userTotalScore; // all-time total score of a user
     mapping(address user => mapping(bytes32 appId => uint256 totalScore)) userAppTotalScore; // all-time total score of a user for a specific app
@@ -245,6 +245,10 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
 
     // Calculate the action score based on the security level of the app
     uint256 actionScore = $.securityMultiplier[$.appSecurity[appId]];
+
+    if (actionScore == 0) {
+      return;
+    }
 
     // Update the user's score for the round
     $.userRoundScore[user][round] += actionScore;
