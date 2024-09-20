@@ -39,6 +39,14 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v2: "Add the abilty to toggle quadratic funding on and off.",
     },
   },
+  "XAllocation Pool": {
+    name: "x-allocation-pool",
+    configAddressField: "xAllocationPoolContractAddress",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Add the abilty to toggle quadratic funding on and off.",
+    },
+  },
   "X2Earn Rewards Pool": {
     name: "x2earn-rewards-pool",
     configAddressField: "x2EarnRewardsPoolContractAddress",
