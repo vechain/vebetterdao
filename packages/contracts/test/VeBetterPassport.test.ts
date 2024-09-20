@@ -881,7 +881,7 @@ describe.only("VeBetterPassport - @shard3", function () {
         forceDeploy: true,
       })
 
-      await expect(veBetterPassport.revokeDelegation(owner)).to.be.reverted
+      await expect(veBetterPassport.revokeDelegation()).to.be.reverted
     })
 
     it("Should not be able to delegate with signature if signature expired", async function () {
@@ -950,6 +950,42 @@ describe.only("VeBetterPassport - @shard3", function () {
       await expect(
         delegateWithSignature(veBetterPassport, otherAccounts[0], otherAccount, 3600),
       ).to.be.revertedWithCustomError(veBetterPassport, "AlreadyDelegatee")
+    })
+
+    it.only("Should be able to revoke delegation as delegatee", async function () {
+      const { veBetterPassport, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await delegateWithSignature(veBetterPassport, owner, otherAccount, 3600)
+
+      await expect(veBetterPassport.revokeDelegation()).to.emit(veBetterPassport, "DelegationRevoked")
+      expect(await veBetterPassport.getDelegatee(owner.address)).to.equal(ethers.ZeroAddress)
+      expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(ethers.ZeroAddress)
+    })
+
+    it.only("Should be able to revoke delegation as delegator", async function () {
+      const { veBetterPassport, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await delegateWithSignature(veBetterPassport, owner, otherAccount, 3600)
+
+      await expect(veBetterPassport.revokeDelegation()).to.emit(veBetterPassport, "DelegationRevoked")
+      expect(await veBetterPassport.getDelegatee(owner.address)).to.equal(ethers.ZeroAddress)
+      expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(ethers.ZeroAddress)
+    })
+
+    it.only("Should not be able to revoke delegation if not delegator nor delegatee", async function () {
+      const { veBetterPassport, owner, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await delegateWithSignature(veBetterPassport, owner, otherAccount, 3600)
+
+      await expect(veBetterPassport.connect(otherAccounts[0]).revokeDelegation()).to.be.reverted
+      expect(await veBetterPassport.getDelegatee(owner.address)).to.equal(otherAccount.address)
+      expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(owner.address)
     })
   })
 

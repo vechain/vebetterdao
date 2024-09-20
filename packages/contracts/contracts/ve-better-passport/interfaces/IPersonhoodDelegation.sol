@@ -31,8 +31,8 @@ interface IPersonhoodDelegation {
   /// @notice Delegates personhood, must be called by the delegatee providing the delegator signature.
   function delegateWithSignature(address delegator, uint256 deadline, bytes memory signature) external;
 
-  /// @notice Revokes the delegation of personhood to another user.
-  function revokeDelegation(address delegator) external;
+  /// @notice Revokes the delegation of personhood (can be done by the delegator or the delegatee).
+  function revokeDelegation() external virtual;
 
   /// @notice Checks if a user is a delegator.
   function isDelegator(address user) external view returns (bool);
