@@ -2,7 +2,7 @@ import { useSelectedGmNft, useUserB3trBalance, useXNode } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { GmActionButton } from "@/components/GmActionButton"
 import { Box, Card, Flex, HStack, Image, Skeleton, Stack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
-import { UilArrowCircleUp } from "@iconscout/react-unicons"
+import { UilArrowCircleUp, UilTimesCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -17,7 +17,7 @@ export const GmNFTPageHeader = () => {
 
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useUserB3trBalance()
 
-  const { isXNodeAttachedToGM } = useSelectedGmNft()
+  const { isXNodeAttachedToGM, isMaxGmLevelReached } = useSelectedGmNft()
   const { isXNodeHolder } = useXNode()
 
   const actionDescription = useMemo(() => {
@@ -27,30 +27,62 @@ export const GmNFTPageHeader = () => {
           <HStack>
             <UilArrowCircleUp size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
             <HStack gap={0} alignItems={"baseline"}>
-              <Skeleton isLoaded={!isB3trBalanceLoading}>
-                <Text color="#B1F16C" fontSize="lg" fontWeight={700}>
-                  {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
-                </Text>
-              </Skeleton>
               <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                {"/"}
-                {compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}
-                {" B3TR"}
+                {t("You can attach GM NFT to this node")}
               </Text>
             </HStack>
           </HStack>
           <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-            {t("B3TR needed to upgrade your GM level")}
+            {t("Attach GM NFT to XNode")}
           </Text>
         </>
       )
     }
-    return <></>
+    if (isMaxGmLevelReached) {
+      return (
+        <>
+          <HStack>
+            <UilTimesCircle size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
+            <HStack gap={0} alignItems={"baseline"}>
+              <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+                {t("You reached the max GM NFT level")}
+              </Text>
+            </HStack>
+          </HStack>
+          <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+            {t("You can't upgrade your GM NFT anymore")}
+          </Text>
+        </>
+      )
+    }
+    return (
+      <>
+        <HStack>
+          <UilArrowCircleUp size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
+          <HStack gap={0} alignItems={"baseline"}>
+            <Skeleton isLoaded={!isB3trBalanceLoading}>
+              <Text color="#B1F16C" fontSize="lg" fontWeight={700}>
+                {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
+              </Text>
+            </Skeleton>
+            <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+              {"/"}
+              {compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}
+              {" B3TR"}
+            </Text>
+          </HStack>
+        </HStack>
+        <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+          {t("B3TR needed to upgrade your GM level")}
+        </Text>
+      </>
+    )
   }, [
     b3trBalance?.scaled,
     b3trToUpgradeGMToNextLevel,
     isAbove800,
     isB3trBalanceLoading,
+    isMaxGmLevelReached,
     isXNodeAttachedToGM,
     isXNodeHolder,
     t,

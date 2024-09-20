@@ -14,7 +14,7 @@ export const XNodePageHeader = () => {
 
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account)
-  const { isGMOwned, isXNodeAttachedToGM } = useSelectedGmNft()
+  const { isGMOwned, isXNodeAttachedToGM, isMaxGmLevelReached } = useSelectedGmNft()
 
   const [actionTitle, actionDescription] = useMemo(() => {
     if (!hasUserVoted && !isGMOwned) {
@@ -24,10 +24,13 @@ export const XNodePageHeader = () => {
       return [t("Mint GM NFT"), t("Mint now and get more rewards")]
     }
     if (isXNodeHolder && !isXNodeAttachedToGM) {
-      return [t("You can upgrade this node"), t("GM NFT attached to XNode")]
+      return [t("You can attach GM NFT to this node"), t("Attach GM NFT to XNode")]
     }
-    return [t("You can upgrade this node"), t("GM NFT attached to XNode")]
-  }, [hasUserVoted, isGMOwned, isXNodeAttachedToGM, isXNodeHolder, t])
+    if (isMaxGmLevelReached) {
+      return [t("You reached the max GM NFT level"), t("You can't upgrade your GM NFT anymore")]
+    }
+    return [t("You can upgrade your GM NFT"), t("Upgrade the GM NFT")]
+  }, [hasUserVoted, isGMOwned, isMaxGmLevelReached, isXNodeAttachedToGM, isXNodeHolder, t])
 
   return (
     <Card>
