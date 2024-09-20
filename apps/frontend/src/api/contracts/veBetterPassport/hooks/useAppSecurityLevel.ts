@@ -7,7 +7,7 @@ const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
 
 const VE_BETTER_PASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
 
-export const APP_SECURITY_LEVELS = ["UNDEFINED", "NONE", "LOW", "MEDIUM", "HIGH"]
+export const APP_SECURITY_LEVELS = ["LOW", "MEDIUM", "HIGH", "NONE"]
 
 /**
  * Get the security level of an app
