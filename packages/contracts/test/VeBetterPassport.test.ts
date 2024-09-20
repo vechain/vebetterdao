@@ -18,7 +18,7 @@ import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
-describe("VeBetterPassport - @shard3", function () {
+describe.only("VeBetterPassport - @shard3", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, nodeManagement, galaxyMember } =
@@ -622,8 +622,14 @@ describe("VeBetterPassport - @shard3", function () {
       }
 
       // Define a deadline timestamp
-      const deadline = 3600 // 1 hour from now
+      const currentBlock = await ethers.provider.getBlockNumber()
+      const block = await ethers.provider.getBlock(currentBlock)
 
+      if (!block) {
+        throw new Error("Block not found")
+      }
+
+      const deadline = block.timestamp + 3600 // 1 hour from
       // Prepare the struct to sign
       const delegationData = {
         delegator: owner.address,
@@ -904,18 +910,25 @@ describe("VeBetterPassport - @shard3", function () {
         Delegation: [
           { name: "wrong_field_1", type: "address" },
           { name: "wrong_field_2", type: "address" },
-          { name: "wrong_field_3", type: "uint256" },
+          { name: "wrong_field_3", type: "address" },
         ],
       }
 
       // Define a deadline timestamp
-      const deadline = 3600 // 1 hour from now
+      const currentBlock = await ethers.provider.getBlockNumber()
+      const block = await ethers.provider.getBlock(currentBlock)
+
+      if (!block) {
+        throw new Error("Block not found")
+      }
+
+      const deadline = block.timestamp + 3600 // 1 hour from
 
       // Prepare the struct to sign
       const delegationData = {
         wrong_field_1: owner.address,
         wrong_field_2: otherAccount.address,
-        wrong_field_3: deadline,
+        wrong_field_3: otherAccount.address,
       }
 
       // Create the EIP-712 signature for the delegator
@@ -1018,9 +1031,9 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
 
       // Sets APP_SECURITY.LOW multiplier to 1000
-      await veBetterPassport.connect(owner).setSecurityMultiplier(2, 1000)
+      await veBetterPassport.connect(owner).setSecurityMultiplier(0, 1000)
 
-      expect(await veBetterPassport.securityMultiplier(2)).to.equal(1000)
+      expect(await veBetterPassport.securityMultiplier(0)).to.equal(1000)
 
       await veBetterPassport.registerActionForRound(otherAccount, app1Id, 1)
 
@@ -1047,9 +1060,9 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
 
       // Sets app's security to APP_SECURITY.MEDIUM
-      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 3)
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
 
-      expect(await veBetterPassport.appSecurity(app1Id)).to.equal(3)
+      expect(await veBetterPassport.appSecurity(app1Id)).to.equal(1)
 
       await veBetterPassport.registerActionForRound(otherAccount, app1Id, 1)
 
@@ -1085,13 +1098,13 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
 
       // Sets app1 security to APP_SECURITY.LOW
-      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 2)
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 0)
 
       // Sets app2 security to APP_SECURITY.MEDIUM
-      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 3)
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 1)
 
       // Sets app3 security to APP_SECURITY.HIGH
-      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 4)
+      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 2)
 
       await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
       await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 2)
@@ -1182,9 +1195,9 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner.address)).to.be
         .true
 
-      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 3)
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
 
-      expect(await veBetterPassport.appSecurity(app1Id)).to.equal(3)
+      expect(await veBetterPassport.appSecurity(app1Id)).to.equal(1)
     })
 
     it("Should be able to change decay rate with DEFAULT_ADMIN_ROLE", async function () {
@@ -1438,9 +1451,9 @@ describe("VeBetterPassport - @shard3", function () {
         .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       // Set app security levels
-      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 2)
-      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 3)
-      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 4)
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 0)
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 1)
+      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 2)
 
       // Grant action registrar role
       await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
