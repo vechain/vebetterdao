@@ -10,6 +10,9 @@ interface IPersonhoodDelegation {
   /// @notice Emitted when a user tries to delegate personhood to a user that has already been delegated to.
   error AlreadyDelegated(address delegator);
 
+  /// @notice Emitted when a user tries to delegate personhood to a user that has already been delegated to.
+  error AlreadyDelegatee(address delegatee);
+
   /// @notice Emitted when a user tries to delegate personhood to themselves.
   error CannotDelegateToSelf(address user);
 

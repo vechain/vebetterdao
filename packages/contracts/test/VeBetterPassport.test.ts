@@ -939,6 +939,18 @@ describe.only("VeBetterPassport - @shard3", function () {
         veBetterPassport.connect(otherAccount).delegateWithSignature(owner.address, deadline, signature),
       ).to.be.revertedWith("PersonhoodDelegation: Invalid signature")
     })
+
+    it("Delegatee should not be able to have more than one delegator", async function () {
+      const { veBetterPassport, owner, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await delegateWithSignature(veBetterPassport, owner, otherAccount, 3600)
+
+      await expect(
+        delegateWithSignature(veBetterPassport, otherAccounts[0], otherAccount, 3600),
+      ).to.be.revertedWithCustomError(veBetterPassport, "AlreadyDelegatee")
+    })
   })
 
   describe("ProofOfParticipation", function () {

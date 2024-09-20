@@ -174,6 +174,10 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
       revert AlreadyDelegated(delegator);
     }
 
+    if($.delegateeToDelegator[msg.sender].latest() != 0) {
+      revert AlreadyDelegatee(msg.sender);
+    }
+
     _pushCheckpoint($.delegatorToDelegatee[delegator], msg.sender);
     _pushCheckpoint($.delegateeToDelegator[msg.sender], delegator);
 
