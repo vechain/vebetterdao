@@ -82,7 +82,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
 
   /// @notice Returns the delegatee address for a delegator
   /// @param delegator - the delegator address
-  function getDelegatee(address delegator) external view returns (address) {
+  function getDelegatee(address delegator) public view returns (address) {
     return _addressFromUint160(_getPersonhoodDelegationStorage().delegatorToDelegatee[delegator].latest());
   }
 
@@ -100,7 +100,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
 
   /// @notice Returns the delegator address for a delegatee
   /// @param delegatee - the delegatee address
-  function getDelegator(address delegatee) external view returns (address) {
+  function getDelegator(address delegatee) public view returns (address) {
     return _addressFromUint160(_getPersonhoodDelegationStorage().delegateeToDelegator[delegatee].latest());
   }
 
@@ -118,7 +118,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
 
   /// @notice Returns if a user is a delegator
   /// @param user - the user address
-  function isDelegator(address user) external view returns (bool) {
+  function isDelegator(address user) public view returns (bool) {
     return _getPersonhoodDelegationStorage().delegatorToDelegatee[user].latest() != 0;
   }
 
@@ -132,7 +132,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
 
   /// @notice Returns if a user is a delegatee
   /// @param user - the user address
-  function isDelegatee(address user) external view returns (bool) {
+  function isDelegatee(address user) public view returns (bool) {
     return _getPersonhoodDelegationStorage().delegateeToDelegator[user].latest() != 0;
   }
 
@@ -174,6 +174,10 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
       revert AlreadyDelegated(delegator);
     }
 
+    if($.delegateeToDelegator[msg.sender].latest() != 0) {
+      revert AlreadyDelegatee(msg.sender);
+    }
+
     _pushCheckpoint($.delegatorToDelegatee[delegator], msg.sender);
     _pushCheckpoint($.delegateeToDelegator[msg.sender], delegator);
 
@@ -181,18 +185,29 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
   }
 
   /// @notice Revoke the delegation (can be done by the delegator or the delegatee)
-  /// @param delegator - the delegator address
-  function revokeDelegation(address delegator) external {
+  /// @dev The delegator can revoke the delegation to the delegatee, or the delegatee can revoke the delegation to the delegator
+  function revokeDelegation() public virtual {
     PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
 
-    if ($.delegatorToDelegatee[delegator].latest() == 0) {
-      revert NotDelegated(delegator);
+    address user = msg.sender;
+
+    if (!isDelegator(user) && !isDelegatee(user)) {
+      revert NotDelegated(user);
     }
 
-    address delegatee = _addressFromUint160($.delegatorToDelegatee[delegator].latest());
+    address delegatee;
+    address delegator;
 
-    if (msg.sender != delegator && msg.sender != delegatee) {
-      revert PersonhoodDelegationUnauthorizedUser(msg.sender);
+    if(isDelegator(user)) {
+      delegatee = getDelegatee(user);
+      delegator = user;
+    } else {
+      delegatee = user;
+      delegator = getDelegator(user);
+    }
+
+    if (user != delegator && user != delegatee) {
+      revert PersonhoodDelegationUnauthorizedUser(user);
     }
 
     _pushCheckpoint($.delegatorToDelegatee[delegator], address(0));
