@@ -18,8 +18,8 @@ import { useGetTokensInfoByOwner } from "@/api/contracts/galaxyMember/hooks/useG
 import { useWallet } from "@vechain/dapp-kit-react"
 import { GMNFTListItem } from "./GMNFTListItem"
 import { useCallback, useMemo } from "react"
-import { MintNFTModal } from "@/components/GmActionButton/components/MintNFTModal"
 import { useClaimNFT } from "@/hooks"
+import { MintNFTModal } from "@/components/MintNFTModal"
 
 export const GMNFTList = () => {
   const { t } = useTranslation()

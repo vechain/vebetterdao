@@ -2,12 +2,12 @@ import { useCallback, useMemo } from "react"
 import { Button, ButtonProps, useDisclosure } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useClaimNFT } from "@/hooks"
-import { MintNFTModal } from "@/components/GmActionButton/components/MintNFTModal"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import { useCurrentAllocationsRoundId, useParticipatedInGovernance, useSelectedGmNft, useXNode } from "@/api"
 import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { MintNFTModal } from "./MintNFTModal"
 
 export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) => {
   const { t } = useTranslation()
