@@ -122,7 +122,7 @@ abstract contract XAllocationVotingGovernor is
     uint256 _currentRoundSnapshot = currentRoundSnapshot();
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
 
-    // Delegatee and delegator logic compacted
+    /* // Delegatee and delegator logic compacted
     bool isDelegatee;
     bool isDelegator;
     address personhoodAddress = msg.sender; // Pre-assign the personhoodAddress to the voter
@@ -151,7 +151,7 @@ abstract contract XAllocationVotingGovernor is
 
     // Check if the voter or the delegator of personhood to the voter is a person and returning error with the reason
     require(isPerson, string(abi.encodePacked("XAllocationVoting: voter is not a person: ", explanation)));
-
+ */
     address voter = _msgSender();
 
     _countVote(roundId, voter, appIds, voteWeights);
