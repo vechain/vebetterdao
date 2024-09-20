@@ -16,6 +16,12 @@ interface IBotSignaling {
   /// @param reason - The reason for resetting the signals.
   event UserSignalsReset(address indexed user, string reason);
 
+  /// @notice Emitted when a user's signals are reset for an app.
+  /// @param user  The address of the user that had their signals reset.
+  /// @param app  The app that the user had their signals reset for.
+  /// @param reason - The reason for resetting the signals.
+  event UserSignalsResetForApp(address indexed user, bytes32 indexed app, string reason);
+
   /// @notice Emited when an address is associated with an app.
   /// @param signaler  The address of the signaler.
   /// @param app  The app that the signaler was associated with.

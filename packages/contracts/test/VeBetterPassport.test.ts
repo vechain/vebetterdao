@@ -557,6 +557,60 @@ describe.only("VeBetterPassport - @shard3", function () {
           .resetUserSignalsWithReason(owner.address, "User demonstrated erroneous signaling"),
       ).to.be.reverted
     })
+
+    it("App admin should be able to reset signals of a user and total signals should be tracked correctly", async function () {
+      const { veBetterPassport, otherAccount, owner, otherAccounts, x2EarnApps } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccount, otherAccounts[0].address, "metadataURI")
+
+      await x2EarnApps.connect(owner).addApp(otherAccounts[1].address, owner, otherAccounts[1].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+
+      await expect(veBetterPassport.connect(otherAccount).assignSignalerToAppByAppAdmin(app1Id, otherAccount.address))
+        .to.emit(veBetterPassport, "SignalerAssignedToApp")
+        .withArgs(otherAccount.address, app1Id)
+      expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), otherAccount.address)).to.be.true
+
+      await expect(veBetterPassport.connect(owner).assignSignalerToAppByAppAdmin(app2Id, owner.address))
+        .to.emit(veBetterPassport, "SignalerAssignedToApp")
+        .withArgs(owner.address, app2Id)
+      expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), owner.address)).to.be.true
+
+      // Signal user with app1Id
+      await expect(veBetterPassport.connect(otherAccount).signalUser(owner.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(owner.address, otherAccount.address, app1Id, "")
+      await expect(veBetterPassport.connect(otherAccount).signalUser(owner.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(owner.address, otherAccount.address, app1Id, "")
+
+      // Signal user with app2Id
+      await expect(veBetterPassport.connect(owner).signalUser(owner.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(owner.address, owner.address, app2Id, "")
+
+      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(3) // 2 signals from app1Id and 1 signal from app2Id
+      expect(await veBetterPassport.appSignalsCounter(app1Id, owner.address)).to.equal(2) // 2 signals from app1Id
+      expect(await veBetterPassport.appSignalsCounter(app2Id, owner.address)).to.equal(1) // 1 signal from app2Id
+
+      // Reset signals of user by app1Id
+      await expect(
+        veBetterPassport
+          .connect(otherAccount)
+          .resetUserSignalsByAppAdminWithReason(owner.address, "User demonstrated erroneous signaling"),
+      )
+        .to.emit(veBetterPassport, "UserSignalsResetForApp")
+        .withArgs(owner.address, app1Id, "User demonstrated erroneous signaling")
+
+      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1) // 1 signal from app2Id
+      expect(await veBetterPassport.appSignalsCounter(app1Id, owner.address)).to.equal(0) // 0 signals from app1Id
+    })
   })
 
   describe("PersonhoodDelegation", function () {

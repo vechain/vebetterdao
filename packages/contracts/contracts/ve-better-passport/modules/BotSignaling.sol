@@ -146,6 +146,35 @@ contract BotSignaling is Initializable, AccessControlUpgradeable, IBotSignaling 
     emit UserSignalsReset(_user, _reason);
   }
 
+  /// @notice Resets the signals of a user
+  /// @param _user - the user to reset the signals of
+  /// @param _reason - the reason for resetting the signals
+  function resetUserSignalsByAppAdminWithReason(address _user, string memory _reason) external {
+    BotSignalingStorage storage $ = _getBotSignalingStorage();
+
+    bytes32 app = $._appOfSignaler[msg.sender];
+    require($.x2EarnApps.isAppAdmin(app, msg.sender), "BotSignaling: caller is not an admin of the app");
+
+    _resetUserSignalsOfApp(_user, app, _reason);
+  }
+
+  /// @notice Resets the signals of a user for an app
+  /// @param _user - the user to reset the signals of
+  /// @param _app - the app to reset the signals for
+  /// @param _reason - the reason for resetting the signals
+  function _resetUserSignalsOfApp(address _user, bytes32 _app, string memory _reason) internal virtual {
+    BotSignalingStorage storage $ = _getBotSignalingStorage();
+
+    uint256 signals = $._appSignalsCounter[_app][_user];
+
+    $._appSignalsCounter[_app][_user] = 0;
+    $._appTotalSignalsCounter[_app] -= signals;
+    $._signaledCounter[_user] -= signals;
+
+
+    emit UserSignalsResetForApp(_user, _app, _reason);
+  }
+
   /// @notice this method allows an app admin to assign a signaler to an app
   /// @param _app - the app to assign the signaler to
   /// @param _user - the signaler to assign to the app
