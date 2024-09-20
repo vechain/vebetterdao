@@ -16,12 +16,12 @@ const determineStatus = (isAppUnendorsed?: boolean, isEligibleNow?: boolean, sco
     return EndorsementStatus.UNKNOWN
   }
 
-  if (!isAppUnendorsed && isEligibleNow && score >= threshold) {
+  if (!isAppUnendorsed && score >= threshold) {
     return EndorsementStatus.SUCCESS
   }
 
   //App in the grace period
-  if (!isAppUnendorsed && isEligibleNow) {
+  if (isAppUnendorsed && isEligibleNow) {
     return EndorsementStatus.LOST
   }
 
