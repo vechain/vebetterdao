@@ -237,8 +237,8 @@ library PassportPoPScoreLogic {
     require(self.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
 
     // If app was just added and the security level is not set, set it to LOW by default
-    if (self.appSecurity[appId] == PassportTypes.APP_SECURITY.UNDEFINED) {
-      self.appSecurity[appId] = PassportTypes.APP_SECURITY.LOW;
+    if (self.appSecurity[appId] == PassportTypes.APP_SECURITY.NONE) {
+      return;
     }
 
     // Calculate the action score, can be min 0, max 6
