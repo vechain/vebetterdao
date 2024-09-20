@@ -1,6 +1,8 @@
 import { useIsAppUnendorsed, useAppEndorsementScore, useAppEndorsers } from "@/api"
-// import { useEndorsementInfos, useEndorsementHistory } from "@/hooks/useEndorsementData"
-import { UserEndorsementInfo } from "./UserEndorsementInfo"
+import { EndorsementInfo } from "./EndorsementInfo"
+import { EndorsementHistory } from "./EndorsementHistory"
+import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { useMemo } from "react"
 
 import {
   Modal,
@@ -28,10 +30,23 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
   const { data: isUnendorsed } = useIsAppUnendorsed(appId)
   const { data: endorsementScore } = useAppEndorsementScore(appId)
   const { data: endorsers } = useAppEndorsers(appId)
+  const { data: endorsementEvents } = useAppEndorsedEvents({ appId })
 
-  // const endorsementHistory = useEndorsementHistory(appId)
+  const processedEndorsementEvents = useMemo(() => {
+    if (!endorsementEvents) return []
 
- 
+    const addressOccurrences: Record<string, boolean> = {}
+    return endorsementEvents.map(event => {
+      const { txOrigin } = event
+      const isUnendorsing = addressOccurrences[txOrigin] !== undefined ? !addressOccurrences[txOrigin] : false
+      addressOccurrences[txOrigin] = isUnendorsing
+
+      return {
+        ...event,
+        isUnendorsing,
+      }
+    })
+  }, [endorsementEvents])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={["xl", "xxl"]}>
@@ -78,9 +93,8 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                 </Text>
                 <VStack flex={1} w="full" overflowY="auto">
                   {endorsers?.map((endorser, index) => (
-                    <UserEndorsementInfo key={index} appId={appId} address={endorser} />
+                    <EndorsementInfo key={index} appId={appId} endorserAddress={endorser} />
                   ))}
-                
                 </VStack>
               </VStack>
             </VStack>
@@ -102,31 +116,9 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                 {t("Endorsement history")}
               </Text>
               <VStack flex={1} w="full" overflowY="auto">
-                {/* {endorsementHistory.map((blockMeta, index) => (
-                  <HStack
-                    key={index}
-                    p={2}
-                    borderRadius={"16px"}
-                    borderBottom={"1px solid #EFEFEF"}
-                    w={"full"}
-                    alignItems={"center"}
-                    justify={"space-between"}>
-                    <VStack align="start" justifyContent={"flex-start"} spacing={0}>
-                      <Text>{truncateAddress(blockMeta.txOrigin)}</Text>
-                      <Text fontSize="xs" color="#6A6A6A">
-                        {t("{{date}}", {
-                          date: formatDate(blockMeta.blockTimestamp),
-                        })}
-                      </Text>
-                    </VStack>
-                    <VStack align="end" spacing={0}>
-                      <Text color={"green.500"}>{`+${t("{{value}} pts.", { value: "TBD" })}`}</Text>
-                      <Text fontSize="xs" color="#6A6A6A">
-                        {t("{{value}} pts in total.", { value: "TBD" })}
-                      </Text>
-                    </VStack>
-                  </HStack>
-                ))} */}
+                {processedEndorsementEvents?.map((endorsementEvent, index) => (
+                  <EndorsementHistory key={index} event={endorsementEvent} />
+                ))}
               </VStack>
             </VStack>
           </Stack>
