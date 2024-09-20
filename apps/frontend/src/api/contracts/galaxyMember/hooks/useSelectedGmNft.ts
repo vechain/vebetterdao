@@ -143,28 +143,6 @@ export const useSelectedGmNft = () => {
 
   const isMaxGmLevelReached = !!maxGmLevel && !!gmLevel && Number(gmLevel) === Number(maxGmLevel)
 
-  console.log({
-    metadataURI,
-    nftMetadata,
-    gmId: selectedTokenId,
-    gmImage: gmImage?.image || gmNfts[Number(gmLevel) - 1]?.image || notFoundImage,
-    gmName: nftMetadata?.name,
-    gmLevel,
-    gmRewardMultiplier,
-    nextLevelGMRewardMultiplier,
-    isGMLoading,
-    isGMOwned,
-    b3trToUpgradeGMToNextLevel,
-    isEnoughBalanceToUpgradeGM,
-    missingB3trToUpgrade,
-    attachedNodeId,
-    isLoading,
-    isError,
-    error,
-    isXNodeAttachedToGM,
-    maxGmLevel,
-    isMaxGmLevelReached,
-  })
   return {
     gmId: selectedTokenId,
     gmImage: gmImage?.image || gmNfts[Number(gmLevel) - 1]?.image || notFoundImage,
