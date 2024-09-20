@@ -26,6 +26,8 @@ pragma solidity 0.8.20;
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { INodeManagement } from "../../interfaces/INodeManagement.sol";
+import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 
 /// @title PassportConfigurator Library
 /// @notice Library for managing the configuration of a Passport contract.
@@ -33,8 +35,27 @@ import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingG
 library PassportConfigurator {
   // ---------- Getters ---------- //
   /// @notice Gets the x2EarnApps contract address
-  function x2EarnApps(PassportStorageTypes.PassportStorage storage self) internal view returns (IX2EarnApps) {
+  function getX2EarnApps(PassportStorageTypes.PassportStorage storage self) internal view returns (IX2EarnApps) {
     return self.x2EarnApps;
+  }
+
+  /// @notice Gets the xAllocationVoting contract address
+  function getXAllocationVoting(PassportStorageTypes.PassportStorage storage self)
+    internal
+    view
+    returns (IXAllocationVotingGovernor)
+  {
+    return self.xAllocationVoting;
+  }
+
+  /// @notice Gets the node management contract address
+  function getNodeManagement(PassportStorageTypes.PassportStorage storage self) internal view returns (INodeManagement) {
+    return self.nodeManagement;
+  }
+
+  /// @notice Gets the galaxy member contract address
+  function getGalaxyMember(PassportStorageTypes.PassportStorage storage self) internal view returns (IGalaxyMember) {
+    return self.galaxyMember;
   }
 
   // ---------- Setters ---------- //
@@ -51,11 +72,29 @@ library PassportConfigurator {
   /// @param self - the PassportStorage struct
   /// @param _xAllocationVoting - the xAllocationVoting contract address
   function setXAllocationVoting(
-    PassportStorageTypes.PassportStorage storage self, 
+    PassportStorageTypes.PassportStorage storage self,
     IXAllocationVotingGovernor _xAllocationVoting
   ) external {
     require(address(_xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
 
     self.xAllocationVoting = _xAllocationVoting;
+  }
+
+  /// @notice Sets the node management contract address
+  /// @param self - the PassportStorage struct
+  /// @param _nodeManagement - the node management contract address
+  function setNodeManagement(PassportStorageTypes.PassportStorage storage self, INodeManagement _nodeManagement) external {
+    require(address(_nodeManagement) != address(0), "VeBetterPassport: nodeManagement is the zero address");
+
+    self.nodeManagement = _nodeManagement;
+  }
+
+  /// @notice Sets the galaxy member contract address
+  /// @param self - the PassportStorage struct
+  /// @param _galaxyMember - the galaxy member contract address
+  function setGalaxyMember(PassportStorageTypes.PassportStorage storage self, IGalaxyMember _galaxyMember) external {
+    require(address(_galaxyMember) != address(0), "VeBetterPassport: galaxyMember is the zero address");
+
+    self.galaxyMember = _galaxyMember;
   }
 }

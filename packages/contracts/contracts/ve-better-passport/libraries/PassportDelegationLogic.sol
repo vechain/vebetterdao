@@ -59,6 +59,12 @@ library PassportDelegationLogic {
   /// @notice Emitted when a user tries to delegate personhood to more than one user.
   error OnlyOneUserAllowed();
 
+  /// @notice Emitted when a user tries to delegate with a
+  error SignatureExpired();
+
+  /// @notice Emitted when a user tries to delegate with a
+  error InvaliedSignature();
+
   // ---------- Events ---------- //
   /// @notice Emitted when a user delegates personhood to another user.
   event DelegationCreated(address indexed delegator, address indexed delegatee);
@@ -171,14 +177,18 @@ library PassportDelegationLogic {
     uint256 deadline,
     bytes memory signature
   ) external {
-    require(block.timestamp <= deadline, "Signature expired");
+    if (block.timestamp > deadline) {
+      revert SignatureExpired();
+    }
 
     // Recover the signer address from the signature
     bytes32 structHash = keccak256(abi.encode(DELEGATION_TYPEHASH, delegator, msg.sender, deadline));
     bytes32 digest = PassportEIP712SigningLogic.hashTypedDataV4(structHash);
     address signer = digest.recover(signature);
 
-    require(signer == delegator, "Invalid signature");
+    if (signer != delegator) {
+      revert InvaliedSignature();
+    }
 
     if (signer == msg.sender) {
       revert CannotDelegateToSelf(signer);

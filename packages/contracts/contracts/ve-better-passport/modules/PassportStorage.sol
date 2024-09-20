@@ -89,5 +89,8 @@ contract PassportStorage is Initializable {
     self.securityMultiplier[PassportTypes.APP_SECURITY.LOW] = 100;
     self.securityMultiplier[PassportTypes.APP_SECURITY.MEDIUM] = 200;
     self.securityMultiplier[PassportTypes.APP_SECURITY.HIGH] = 400;
+
+    // Decay
+    self.decayRate = 20;
   }
 }

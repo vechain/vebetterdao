@@ -232,6 +232,7 @@ library PassportPoPScoreLogic {
     bytes32 appId,
     uint256 round
   ) private {
+
     require(user != address(0), "ProofOfParticipation: user is the zero address");
 
     require(self.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
@@ -240,7 +241,6 @@ library PassportPoPScoreLogic {
     if (self.appSecurity[appId] == PassportTypes.APP_SECURITY.NONE) {
       return;
     }
-
     // Calculate the action score, can be min 0, max 6
     uint256 actionScore = self.securityMultiplier[self.appSecurity[appId]];
 

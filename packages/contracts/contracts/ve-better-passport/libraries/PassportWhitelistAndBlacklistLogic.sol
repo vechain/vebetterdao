@@ -24,6 +24,7 @@
 pragma solidity 0.8.20;
 
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
+import "hardhat/console.sol";
 
 library PassportWhitelistAndBlacklistLogic {
   // ---------- Events ---------- //
@@ -63,9 +64,11 @@ library PassportWhitelistAndBlacklistLogic {
 
   /// @notice user can be whitelisted but the counter will not be reset
   function whitelist(PassportStorageTypes.PassportStorage storage self, address user) external {
-    self.whitelisted[user] = true;
+    // Check if the user is blacklisted and remove them from the blacklist
+    if (isBlacklisted(self, user)) removeFromBlacklist(self, user);
 
-    if (isWhitelisted(self, user)) removeFromWhitelist(self, user);
+    // Whitelist the user
+    self.whitelisted[user] = true;
 
     emit UserWhitelisted(user, msg.sender);
   }
@@ -78,9 +81,10 @@ library PassportWhitelistAndBlacklistLogic {
 
   /// @notice user can be blacklisted but the counter will not be reset
   function blacklist(PassportStorageTypes.PassportStorage storage self, address user) external {
-    self.blacklisted[user] = true;
+    // Check if the user is whitelisted and remove them from the whitelist
+    if (isWhitelisted(self, user)) removeFromWhitelist(self, user);
 
-    if (isBlacklisted(self, user)) removeFromBlacklist(self, user);
+    self.blacklisted[user] = true;
 
     emit UserBlacklisted(user, msg.sender);
   }

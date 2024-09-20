@@ -94,6 +94,12 @@ interface IVeBetterPassport {
   /// @notice Emitted when a user tries to call a function that they are not authorized to call.
   error VeBetterPassportUnauthorizedUser(address user);
 
+  /// @notice Emitted when a user tries to delegate with a
+  error SignatureExpired();
+
+  /// @notice Emitted when a user tries to delegate with a
+  error InvaliedSignature();
+
   // ---------- Functions ---------- //
   /// @notice Initializes the contract with the required data and roles
   /// @param data The initialization data for the contract

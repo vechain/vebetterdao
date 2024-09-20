@@ -52,8 +52,6 @@ library PassportTypes {
     IX2EarnApps x2EarnApps;
     IGalaxyMember galaxyMember;
     INodeManagement nodeManagement;
-    address actionRegistrar;
-    address actionScoreManager;
     uint256 popScoreThreshold;
     uint256 signalingThreshold;
     uint256 roundsForCumulativeScore;

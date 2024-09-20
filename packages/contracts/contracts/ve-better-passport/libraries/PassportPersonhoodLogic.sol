@@ -27,6 +27,7 @@ import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { PassportChecksLogic } from "./PassportChecksLogic.sol";
 import { PassportSignalingLogic } from "./PassportSignalingLogic.sol";
 import { PassportPoPScoreLogic} from "./PassportPoPScoreLogic.sol";
+import { PassportDelegationLogic } from "./PassportDelegationLogic.sol";
 import { PassportWhitelistAndBlacklistLogic } from "./PassportWhitelistAndBlacklistLogic.sol";
 import { PassportTypes } from "./PassportTypes.sol";
 
@@ -37,6 +38,13 @@ library PassportPersonhoodLogic {
    * @return reason string representing the reason for the result
    */
   function isPerson(PassportStorageTypes.PassportStorage storage self, address user) external view returns (bool person, string memory reason) {
+    // Check if the user has delegated their personhood to another wallet
+    if (PassportDelegationLogic.isDelegator(self, user)){
+      return (false, "User has delegated their personhood");
+    }
+    
+    // Check if a person has a personhood delegated to them
+
     // If a wallet is whitelisted, it is a person
     if (PassportChecksLogic.whitelistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isWhitelisted(self, user)) {
       return (true, "User is whitelisted");
@@ -71,5 +79,9 @@ library PassportPersonhoodLogic {
 
     // If none of the conditions are met, return false with the default reason
     return (false, "User does not meet the criteria to be considered a person");
+  }
+
+  function isPersonhoodDelegated(PassportStorageTypes.PassportStorage storage self, address user) external view returns (bool) {
+    return PassportDelegationLogic.isDelegator(self, user);
   }
 }

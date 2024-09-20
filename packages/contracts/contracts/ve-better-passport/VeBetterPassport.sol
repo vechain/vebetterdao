@@ -306,9 +306,27 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   }
 
   /// @notice Gets the x2EarnApps contract address
-  function x2EarnApps() public view virtual returns (IX2EarnApps) {
+  function getX2EarnApps() public view virtual returns (IX2EarnApps) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportConfigurator.x2EarnApps($);
+    return PassportConfigurator.getX2EarnApps($);
+  }
+
+  /// @notice Gets the xAllocationVoting contract address
+  function getXAllocationVoting() public view virtual returns (IXAllocationVotingGovernor) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportConfigurator.getXAllocationVoting($);
+  }
+
+  /// @notice Gets the node management contract address
+  function getNodeManagement() public view virtual returns (INodeManagement) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportConfigurator.getNodeManagement($);
+  }
+
+  /// @notice Gets the galaxy member contract address
+  function getGalaxyMember() public view virtual returns (IGalaxyMember) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportConfigurator.getGalaxyMember($);
   }
 
   /// @notice Get the current block number
@@ -464,14 +482,6 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
     PassportPoPScoreLogic.setDecayRate($, decayRate);
   }
 
-  /// @notice Sets the X2EarnApps contract address
-  /// @dev The X2EarnApps contract address can be modified by the DEFAULT_ADMIN_ROLE
-  /// @param _x2EarnApps - the X2EarnApps contract address
-  function setX2EarnApps(IX2EarnApps _x2EarnApps) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportConfigurator.setX2EarnApps($, _x2EarnApps);
-  }
-
   /// @notice Delegate the personhood to another address
   /// The delegator must sign a message where he authorizes the delegatee to request the delegation:
   /// this is done to avoid that a malicious user delegates the personhood to another user without his consent.
@@ -525,6 +535,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   function assignSignalerToAppByAppAdmin(bytes32 app, address user) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.assignSignalerToAppByAppAdmin($, app, user);
+    _grantRole(SIGNALER_ROLE, user);
   }
 
   /// @notice this method allows an app admin to remove a signaler from an app
@@ -532,6 +543,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   function removeSignalerFromAppByAppAdmin(address user) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.removeSignalerFromAppByAppAdmin($, user);
+    _revokeRole(SIGNALER_ROLE, user);
   }
 
   /// @notice Sets the signaling threshold
@@ -583,6 +595,27 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   ) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportConfigurator.setXAllocationVoting($, xAllocationVoting);
+  }
+
+  /// @dev Sets the node management contract
+  /// @param nodeManagement - the node management contract address
+  function setNodeManagement(INodeManagement nodeManagement) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportConfigurator.setNodeManagement($, nodeManagement);
+  }
+
+  /// @dev Sets the galaxy member contract
+  /// @param galaxyMember - the galaxy member contract address
+  function setGalaxyMember(IGalaxyMember galaxyMember) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportConfigurator.setGalaxyMember($, galaxyMember);
+  }
+
+  /// @notice Sets the x2EarnApps contract address
+  /// @param _x2EarnApps - the X2EarnApps contract address
+  function setX2EarnApps(IX2EarnApps _x2EarnApps) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportConfigurator.setX2EarnApps($, _x2EarnApps);
   }
 
   // ---------- Overrides ---------- //
