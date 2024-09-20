@@ -37,9 +37,18 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
   bytes32 private constant DELEGATION_TYPEHASH =
     keccak256("Delegation(address delegator,address delegatee,uint256 deadline)");
 
+  struct PendingDelegation {
+    address delegator;
+    address delegatee;
+    uint256 timestamp;
+  }
+
   struct PersonhoodDelegationStorage {
     mapping(address => Checkpoints.Trace160) delegatorToDelegatee;
     mapping(address => Checkpoints.Trace160) delegateeToDelegator;
+    PendingDelegation[] pendingDelegations; // Array to store pending delegations
+    mapping(address => uint256) pendingDelegationIndex; // Mapping to track index of pending delegations for each delegator
+    mapping(address => uint256[]) pendingDelegationsForDelegatee; // Mapping to track pending delegations for each delegatee
   }
 
   bytes32 private constant PersonhoodDelegationStorageLocation =
@@ -65,6 +74,11 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
 
   function __PersonhoodDelegation_init_unchained() internal onlyInitializing {
     __EIP712_init(SIGNING_DOMAIN, SIGNATURE_VERSION);
+
+    PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
+
+    // Push empty PendingDelegation to avoid index 0
+    $.pendingDelegations.push(PendingDelegation({ delegator: address(0), delegatee: address(0), timestamp: 0 }));
   }
 
   // ---------- Modifiers ------------ //
@@ -144,6 +158,23 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
       _getPersonhoodDelegationStorage().delegateeToDelegator[user].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
   }
 
+  /// @notice Get all pending delegations for a specific delegatee
+  /// @param delegatee - the address of the delegatee
+  /// @return An array of PendingDelegation structs
+  function getPendingDelegationsForDelegatee(address delegatee) external view returns (PendingDelegation[] memory) {
+    PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
+
+    uint256[] memory indices = $.pendingDelegationsForDelegatee[delegatee];
+
+    PendingDelegation[] memory result = new PendingDelegation[](indices.length);
+
+    for (uint256 i = 0; i < indices.length; i++) {
+      result[i] = $.pendingDelegations[indices[i]];
+    }
+
+    return result;
+  }
+
   // ---------- Signatures and Delegation ------------ //
 
   /// @notice Delegate the personhood to another address
@@ -174,7 +205,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
       revert AlreadyDelegated(delegator);
     }
 
-    if($.delegateeToDelegator[msg.sender].latest() != 0) {
+    if ($.delegateeToDelegator[msg.sender].latest() != 0) {
       revert AlreadyDelegatee(msg.sender);
     }
 
@@ -198,7 +229,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     address delegatee;
     address delegator;
 
-    if(isDelegator(user)) {
+    if (isDelegator(user)) {
       delegatee = getDelegatee(user);
       delegator = user;
     } else {
@@ -214,6 +245,143 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     _pushCheckpoint($.delegateeToDelegator[delegatee], address(0));
 
     emit DelegationRevoked(delegator, delegatee);
+  }
+
+  /// @notice Propose a delegation to another address
+  /// @param proposedDelegatee - the address to delegate to
+  function proposeDelegation(address proposedDelegatee) external {
+    PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
+
+    if (msg.sender == proposedDelegatee) {
+      revert CannotDelegateToSelf(msg.sender);
+    }
+
+    if ($.delegatorToDelegatee[msg.sender].latest() != 0) {
+      revert AlreadyDelegated(msg.sender);
+    }
+
+    if ($.delegateeToDelegator[proposedDelegatee].latest() != 0) {
+      revert AlreadyDelegatee(proposedDelegatee);
+    }
+
+    // Check if there's already a pending delegation for this delegator
+    if ($.pendingDelegationIndex[msg.sender] != 0) {
+      revert AlreadyPendingDelegation(msg.sender);
+    }
+
+    uint256 index = $.pendingDelegations.length;
+
+    $.pendingDelegations.push(
+      PendingDelegation({ delegator: msg.sender, delegatee: proposedDelegatee, timestamp: block.timestamp })
+    );
+
+    $.pendingDelegationIndex[msg.sender] = index;
+    $.pendingDelegationsForDelegatee[proposedDelegatee].push(index);
+
+    emit DelegationProposed(msg.sender, proposedDelegatee, index);
+  }
+
+  /// @notice Accept a proposed delegation
+  /// @param delegator - the address of the delegator who proposed the delegation
+  function acceptDelegation(address delegator) external {
+    PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
+
+    uint256 index = $.pendingDelegationIndex[delegator];
+
+    if (index == 0) {
+      revert DelegationNotPending(delegator);
+    }
+
+    PendingDelegation memory delegation = $.pendingDelegations[index];
+    require(delegation.delegatee == msg.sender, "Not the proposed delegatee");
+
+    _pushCheckpoint($.delegatorToDelegatee[delegator], msg.sender);
+    _pushCheckpoint($.delegateeToDelegator[msg.sender], delegator);
+
+    // Remove the pending delegation
+    _removePendingDelegation(index);
+
+    emit DelegationAccepted(delegator, msg.sender, index);
+    emit DelegationCreated(delegator, msg.sender);
+  }
+
+  /// @notice Reject a proposed delegation
+  /// @param delegator - the address of the delegator who proposed the delegation
+  function rejectDelegation(address delegator) external {
+    PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
+
+    uint256 index = $.pendingDelegationIndex[delegator];
+
+    if (index == 0) {
+      revert DelegationNotPending(delegator);
+    }
+
+    PendingDelegation memory delegation = $.pendingDelegations[index];
+    require(delegation.delegatee == msg.sender, "Not the proposed delegatee");
+
+    // Remove the pending delegation
+    _removePendingDelegation(index);
+
+    emit DelegationRejected(delegator, msg.sender, index);
+  }
+
+  /// @notice removes the pending delegation from the delegator
+  function removePendingDelegation() external {
+    PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
+
+    uint256 index = $.pendingDelegationIndex[msg.sender];
+
+    if (index == 0) {
+      revert DelegationNotPending(msg.sender);
+    }
+
+    PendingDelegation memory delegation = $.pendingDelegations[index];
+
+    // Remove the pending delegation
+    _removePendingDelegation(index);
+
+    emit DelegationRejected(delegation.delegator, delegation.delegatee, index);
+  }
+
+  /// @notice Remove a pending delegation from the array
+  /// @param index - the index of the pending delegation to remove
+  function _removePendingDelegation(uint256 index) internal {
+    PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
+
+    require(index < $.pendingDelegations.length, "Invalid delegation index");
+
+    PendingDelegation memory delegationToRemove = $.pendingDelegations[index];
+
+    // Move the last element to the position of the element to delete
+    $.pendingDelegations[index] = $.pendingDelegations[$.pendingDelegations.length - 1];
+
+    // Update the index for the moved delegation
+    $.pendingDelegationIndex[$.pendingDelegations[index].delegator] = index;
+
+    // Remove the last element
+    $.pendingDelegations.pop();
+
+    // Clear the index for the original delegator
+    delete $.pendingDelegationIndex[delegationToRemove.delegator];
+
+    // Remove the index from pendingDelegationsForDelegatee
+    _removeFromPendingDelegationsForDelegatee(delegationToRemove.delegatee, index);
+  }
+
+  /// @notice Remove an index from pendingDelegationsForDelegatee
+  /// @param delegatee - the address of the delegatee
+  /// @param indexToRemove - the index to remove
+  function _removeFromPendingDelegationsForDelegatee(address delegatee, uint256 indexToRemove) internal {
+    PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
+
+    uint256[] storage indices = $.pendingDelegationsForDelegatee[delegatee];
+    for (uint256 i = 0; i < indices.length; i++) {
+      if (indices[i] == indexToRemove) {
+        indices[i] = indices[indices.length - 1];
+        indices.pop();
+        break;
+      }
+    }
   }
 
   // ---------- Checkpoint Logic ------------ //

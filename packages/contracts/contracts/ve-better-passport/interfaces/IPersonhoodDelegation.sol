@@ -13,6 +13,12 @@ interface IPersonhoodDelegation {
   /// @notice Emitted when a user tries to delegate personhood to a user that has already been delegated to.
   error AlreadyDelegatee(address delegatee);
 
+  /// @notice Emitted when a user tries to delegate personhood to a user that has already been delegated to.
+  error AlreadyPendingDelegation(address delegator);
+
+  /// @notice Emitted when a delegation is trying to be accepted but it is not pending.
+  error DelegationNotPending(address delegator);
+
   /// @notice Emitted when a user tries to delegate personhood to themselves.
   error CannotDelegateToSelf(address user);
 
@@ -27,6 +33,15 @@ interface IPersonhoodDelegation {
 
   /// @notice Emitted when a user revokes the delegation of personhood to another user.
   event DelegationRevoked(address indexed delegator, address indexed delegatee);
+
+  /// @notice Emitted when a user proposes to delegate personhood to another user.
+  event DelegationProposed(address indexed delegator, address indexed proposedDelegatee, uint256 indexed index);
+
+  /// @notice Emitted when a user accepts the delegation of personhood from another user.
+  event DelegationAccepted(address indexed delegator, address indexed delegatee, uint256 indexed index);
+
+  /// @notice Emitted when a user rejects the delegation of personhood from another user.
+  event DelegationRejected(address indexed delegator, address indexed proposedDelegatee, uint256 indexed index);
 
   /// @notice Delegates personhood, must be called by the delegatee providing the delegator signature.
   function delegateWithSignature(address delegator, uint256 deadline, bytes memory signature) external;
