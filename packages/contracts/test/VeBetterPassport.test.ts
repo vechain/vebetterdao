@@ -18,7 +18,7 @@ import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
-describe.only("VeBetterPassport - @shard3", function () {
+describe("VeBetterPassport - @shard3", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, nodeManagement, galaxyMember } =
@@ -612,6 +612,60 @@ describe.only("VeBetterPassport - @shard3", function () {
           .resetUserSignalsWithReason(owner.address, "User demonstrated erroneous signaling"),
       ).to.be.reverted
     })
+
+    it.only("App admin should be able to reset signals of a user and total signals should be tracked correctly", async function () {
+      const { veBetterPassport, otherAccount, owner, otherAccounts, x2EarnApps } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccount, otherAccounts[0].address, "metadataURI")
+
+      await x2EarnApps.connect(owner).addApp(otherAccounts[1].address, owner, otherAccounts[1].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+
+      await expect(veBetterPassport.connect(otherAccount).assignSignalerToAppByAppAdmin(app1Id, otherAccount.address))
+        .to.emit(veBetterPassport, "SignalerAssignedToApp")
+        .withArgs(otherAccount.address, app1Id)
+      expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), otherAccount.address)).to.be.true
+
+      await expect(veBetterPassport.connect(owner).assignSignalerToAppByAppAdmin(app2Id, owner.address))
+        .to.emit(veBetterPassport, "SignalerAssignedToApp")
+        .withArgs(owner.address, app2Id)
+      expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), owner.address)).to.be.true
+
+      // Signal user with app1Id
+      await expect(veBetterPassport.connect(otherAccount).signalUser(owner.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(owner.address, otherAccount.address, app1Id, "")
+      await expect(veBetterPassport.connect(otherAccount).signalUser(owner.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(owner.address, otherAccount.address, app1Id, "")
+
+      // Signal user with app2Id
+      await expect(veBetterPassport.connect(owner).signalUser(owner.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(owner.address, owner.address, app2Id, "")
+
+      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(3) // 2 signals from app1Id and 1 signal from app2Id
+      expect(await veBetterPassport.appSignalsCounter(app1Id, owner.address)).to.equal(2) // 2 signals from app1Id
+      expect(await veBetterPassport.appSignalsCounter(app2Id, owner.address)).to.equal(1) // 1 signal from app2Id
+
+      // Reset signals of user by app1Id
+      await expect(
+        veBetterPassport
+          .connect(otherAccount)
+          .resetUserSignalsByAppAdminWithReason(owner.address, "User demonstrated erroneous signaling"),
+      )
+        .to.emit(veBetterPassport, "UserSignalsResetForApp")
+        .withArgs(owner.address, app1Id, "User demonstrated erroneous signaling")
+
+      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1) // 1 signal from app2Id
+      expect(await veBetterPassport.appSignalsCounter(app1Id, owner.address)).to.equal(0) // 0 signals from app1Id
+    })
   })
 
   describe("PersonhoodDelegation", function () {
@@ -682,9 +736,14 @@ describe.only("VeBetterPassport - @shard3", function () {
       }
 
       // Define a deadline timestamp
-      const time = Date.now()
-      const deadline = time + 3600 // 1 hour from now -> change from ms to s
+      const currentBlock = await ethers.provider.getBlockNumber()
+      const block = await ethers.provider.getBlock(currentBlock)
 
+      if (!block) {
+        throw new Error("Block not found")
+      }
+
+      const deadline = block.timestamp + 3600 // 1 hour from
       // Prepare the struct to sign
       const delegationData = {
         delegator: owner.address,
@@ -942,11 +1001,11 @@ describe.only("VeBetterPassport - @shard3", function () {
     })
 
     it("Should not be able to revoke delegation if not delegated", async function () {
-      const { veBetterPassport, owner } = await getOrDeployContractInstances({
+      const { veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      await expect(veBetterPassport.revokeDelegation(owner)).to.be.reverted
+      await expect(veBetterPassport.revokeDelegation()).to.be.reverted
     })
 
     it("Should not be able to delegate with signature if signature expired", async function () {
@@ -976,19 +1035,25 @@ describe.only("VeBetterPassport - @shard3", function () {
         Delegation: [
           { name: "wrong_field_1", type: "address" },
           { name: "wrong_field_2", type: "address" },
-          { name: "wrong_field_3", type: "uint256" },
+          { name: "wrong_field_3", type: "address" },
         ],
       }
 
       // Define a deadline timestamp
-      const time = Date.now()
-      const deadline = time + 3600 // 1 hour from now -> change from ms to s
+      const currentBlock = await ethers.provider.getBlockNumber()
+      const block = await ethers.provider.getBlock(currentBlock)
+
+      if (!block) {
+        throw new Error("Block not found")
+      }
+
+      const deadline = block.timestamp + 3600 // 1 hour from
 
       // Prepare the struct to sign
       const delegationData = {
         wrong_field_1: owner.address,
         wrong_field_2: otherAccount.address,
-        wrong_field_3: deadline,
+        wrong_field_3: otherAccount.address,
       }
 
       // Create the EIP-712 signature for the delegator
@@ -998,6 +1063,54 @@ describe.only("VeBetterPassport - @shard3", function () {
       await expect(
         veBetterPassport.connect(otherAccount).delegateWithSignature(owner.address, deadline, signature),
       ).to.be.revertedWithCustomError(veBetterPassport, "InvaliedSignature")
+    })
+
+    it("Delegatee should not be able to have more than one delegator", async function () {
+      const { veBetterPassport, owner, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await delegateWithSignature(veBetterPassport, owner, otherAccount, 3600)
+
+      await expect(
+        delegateWithSignature(veBetterPassport, otherAccounts[0], otherAccount, 3600),
+      ).to.be.revertedWithCustomError(veBetterPassport, "AlreadyDelegated")
+    })
+
+    it("Should be able to revoke delegation as delegatee", async function () {
+      const { veBetterPassport, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await delegateWithSignature(veBetterPassport, owner, otherAccount, 3600)
+
+      await expect(veBetterPassport.revokeDelegation()).to.emit(veBetterPassport, "DelegationRevoked")
+      expect(await veBetterPassport.getDelegatee(owner.address)).to.equal(ethers.ZeroAddress)
+      expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(ethers.ZeroAddress)
+    })
+
+    it("Should be able to revoke delegation as delegator", async function () {
+      const { veBetterPassport, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await delegateWithSignature(veBetterPassport, owner, otherAccount, 3600)
+
+      await expect(veBetterPassport.revokeDelegation()).to.emit(veBetterPassport, "DelegationRevoked")
+      expect(await veBetterPassport.getDelegatee(owner.address)).to.equal(ethers.ZeroAddress)
+      expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(ethers.ZeroAddress)
+    })
+
+    it("Should not be able to revoke delegation if not delegator nor delegatee", async function () {
+      const { veBetterPassport, owner, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await delegateWithSignature(veBetterPassport, owner, otherAccount, 3600)
+
+      await expect(veBetterPassport.connect(otherAccounts[0]).revokeDelegation()).to.be.reverted
+      expect(await veBetterPassport.getDelegatee(owner.address)).to.equal(otherAccount.address)
+      expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(owner.address)
     })
   })
 
@@ -1245,7 +1358,7 @@ describe.only("VeBetterPassport - @shard3", function () {
         .connect(owner)
         .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
 
-      await expect(veBetterPassport.connect(otherAccount).registerAction(otherAccount, app1Id)).to.be.reverted
+      await expect(veBetterPassport.connect(otherAccounts[3]).registerAction(otherAccount, app1Id)).to.be.reverted
     })
 
     it("Should be able to change app's security multiplier with ACTION_SCORE_MANAGER_ROLE", async function () {
@@ -1604,7 +1717,7 @@ describe.only("VeBetterPassport - @shard3", function () {
 
       expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
 
-      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1) // APP_SECURITY.LOW
 
       await veBetterPassport.connect(owner).registerAction(otherAccount, app1Id)
 
@@ -1685,9 +1798,9 @@ describe.only("VeBetterPassport - @shard3", function () {
         .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       // Set app security levels
-      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 2)
-      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 3)
-      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 4)
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 2)
+      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 3)
 
       // Grant action registrar role
       await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
