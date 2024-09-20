@@ -12,6 +12,7 @@ export type AppEndorsedEvent = {
   nodeId: string
   endorsed: boolean
   blockNumber: number
+  txOrigin: string
 }
 
 /**
@@ -53,6 +54,7 @@ export const getAppEndorsedEvents = async (
         nodeId: decoded[1].toString(),
         endorsed: decoded[2],
         blockNumber: event.meta.blockNumber,
+        txOrigin: event.meta.txOrigin,
       }
     })
     .filter(event => {
@@ -91,5 +93,6 @@ export const useAppEndorsedEvents = (filterOptions?: { appId?: string; nodeId?: 
   // sort events by blockNumber in descending order
   const sortedEvents = result.data?.sort((a, b) => b.blockNumber - a.blockNumber)
 
+  console.log("sortedEvents", sortedEvents)
   return { ...result, data: sortedEvents }
 }
