@@ -933,7 +933,7 @@ describe("X-Apps - @shard3", function () {
       await waitForRoundToEnd(round1)
       let round2 = await startNewAllocationRound()
 
-      // app should not be eligible from this round
+      // app should be eligible from this round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
       expect(isEligibleForVote).to.eql(true)
 
@@ -1893,11 +1893,11 @@ describe("X-Apps - @shard3", function () {
       await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
 
       // Endorse XAPP with both Mjolnir node holders
-      expect(await x2EarnApps.nodeEndorsementScore(1)).to.eql(50n) // Node ID 1 has an endorsement score is 50
+      expect(await x2EarnApps.getNodeEndorsementScore(1)).to.eql(50n) // Node ID 1 has an endorsement score is 50
       await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Endorse with node holder 1
       expect(await x2EarnApps.getScore(app1Id)).to.eql(50n) // XAPP endorsement score is 50
 
-      expect(await x2EarnApps.nodeEndorsementScore(2)).to.eql(50n) // Node Id 2 has an endorsement score is 50
+      expect(await x2EarnApps.getNodeEndorsementScore(2)).to.eql(50n) // Node Id 2 has an endorsement score is 50
       await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, 2) // Endorse with node holder 2
       expect(await x2EarnApps.getScore(app1Id)).to.eql(100n) // XAPP endorsement score is now 100
 
@@ -2762,13 +2762,13 @@ describe("X-Apps - @shard3", function () {
       expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[6].address)).to.eql(35n)
       expect(await x2EarnApps.getUsersEndorsementScore(otherAccounts[7].address)).to.eql(100n)
 
-      expect(await x2EarnApps.nodeEndorsementScore(1)).to.eql(2n)
-      expect(await x2EarnApps.nodeEndorsementScore(2)).to.eql(13n)
-      expect(await x2EarnApps.nodeEndorsementScore(3)).to.eql(50n)
-      expect(await x2EarnApps.nodeEndorsementScore(4)).to.eql(3n)
-      expect(await x2EarnApps.nodeEndorsementScore(5)).to.eql(9n)
-      expect(await x2EarnApps.nodeEndorsementScore(6)).to.eql(35n)
-      expect(await x2EarnApps.nodeEndorsementScore(7)).to.eql(100n)
+      expect(await x2EarnApps.getNodeEndorsementScore(1)).to.eql(2n)
+      expect(await x2EarnApps.getNodeEndorsementScore(2)).to.eql(13n)
+      expect(await x2EarnApps.getNodeEndorsementScore(3)).to.eql(50n)
+      expect(await x2EarnApps.getNodeEndorsementScore(4)).to.eql(3n)
+      expect(await x2EarnApps.getNodeEndorsementScore(5)).to.eql(9n)
+      expect(await x2EarnApps.getNodeEndorsementScore(6)).to.eql(35n)
+      expect(await x2EarnApps.getNodeEndorsementScore(7)).to.eql(100n)
 
       const newEndorsementScores = {
         strength: 1,
