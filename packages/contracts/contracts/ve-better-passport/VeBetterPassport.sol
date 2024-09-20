@@ -86,6 +86,20 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
     return PassportPersonhoodLogic.isPerson($, user);
   }
 
+  /// @notice Checks if a user is a person
+  /// @dev Checks if a wallet is a person or not at a specific timepoint based on the participation score, blacklisting, and xnode and GM holdings
+  /// @param user - the user address
+  /// @param timepoint - the timepoint to query
+  /// @return person - true if the user is a person
+  /// @return reason - the reason why the user is not a person
+  function isPersonAtTimepoint(
+    address user,
+    uint48 timepoint
+  ) external view returns (bool person, string memory reason) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPersonhoodLogic.isPersonAtTimepoint($, user, timepoint);
+  }
+
   /// @notice Returns if the whitelist check is enabled
   function whitelistCheckEnabled() external view returns (bool) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();

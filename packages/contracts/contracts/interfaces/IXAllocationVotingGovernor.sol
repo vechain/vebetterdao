@@ -75,6 +75,11 @@ interface IXAllocationVotingGovernor is IERC165, IERC6372 {
    */
   error GovernorInsufficientVotingPower();
 
+  /**
+    * The `voter` is not identified as a person via the VeBetterPassport.
+    */
+  error GovernorPersonhoodVerificationFailed(address person, string reason);
+
 
   /**
    * @dev The `person` is not identified as a person via the VeBetterPassport.

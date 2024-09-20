@@ -23,7 +23,7 @@ interface IVeBetterPassport {
   /// @notice Emitted when a user revokes the delegation of personhood to another user.
   event DelegationRevoked(address indexed delegator, address indexed delegatee);
 
-    /// @notice Emitted when a user delegates personhood to another user pending acceptance.
+  /// @notice Emitted when a user delegates personhood to another user pending acceptance.
   event DelegationPending(address indexed delegator, address indexed delegatee);
 
   /// @notice Emitted when a user registers an action
@@ -114,6 +114,17 @@ interface IVeBetterPassport {
   /// @return person True if the user is a valid person
   /// @return reason Reason why the user is not a person
   function isPerson(address user) external view returns (bool person, string memory reason);
+
+  /// @notice Checks if a user is a person
+  /// @dev Checks if a wallet is a person or not at a specific timepoint based on the participation score, blacklisting, and xnode and GM holdings
+  /// @param user - the user address
+  /// @param timepoint - the timepoint to query
+  /// @return person - true if the user is a person
+  /// @return reason - the reason why the user is not a person
+  function isPersonAtTimepoint(
+    address user,
+    uint48 timepoint
+  ) external view returns (bool person, string memory reason);
 
   /// @notice Checks if a user is whitelisted
   /// @param _user The user to check
