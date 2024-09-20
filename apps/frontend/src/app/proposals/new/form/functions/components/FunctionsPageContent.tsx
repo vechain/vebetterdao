@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next"
 import { EnvConfig, EnvConfigValues } from "@repo/config/contracts"
 import { ContractsWithFunctions, SelectedFunction } from "./ContractsWithFunctions"
 
-const devEnvs: EnvConfig[] = ["local", "e2e", "solo-staging"]
+const devEnvs: EnvConfig[] = ["local", "e2e", "testnet-staging"]
 
 export const FunctionsPageContent = () => {
   const env = getConfig().environment
