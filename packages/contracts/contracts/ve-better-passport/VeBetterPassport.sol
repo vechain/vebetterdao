@@ -267,6 +267,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
     return PassportDelegationLogic.isDelegateeInTimepoint($, user, timepoint);
   }
 
+  /// @notice Returns the pending delegations for a delegatee
+  /// @param delegatee - the delegatee address
+  /// @return the delegator address
+  function getPendingDelegations(address delegatee) external view returns (address) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportDelegationLogic.getPendingDelegations($, delegatee);
+  }
+
   /// @notice Returns the number of times a user has been signaled
   function signaledCounter(address _user) public view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
@@ -477,11 +485,26 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
     PassportDelegationLogic.delegateWithSignature($, delegator, deadline, signature);
   }
 
-  /// @notice Revoke the delegation (can be done by the delegator or the delegatee)
-  /// @param delegator - the delegator address
-  function revokeDelegation(address delegator) external {
+  /// @notice Delegate the personhood to another address
+  /// @dev The delegatee must accept the delegation
+  /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
+  /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
+  function delegatePersonhood(address delegatee) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportDelegationLogic.revokeDelegation($, delegator);
+    PassportDelegationLogic.delegatePersonhood($, delegatee);
+  }
+
+  /// @notice Allow the delegatee to accept the delegation
+  /// @param delegator - the delegator address
+  function acceptDelegation(address delegator) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportDelegationLogic.acceptDelegation($, delegator);
+  }
+
+  /// @notice Revoke the delegation (can be done by the delegator or the delegatee)
+  function revokeDelegation() external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportDelegationLogic.revokeDelegation($);
   }
 
   /// @notice Signals a user

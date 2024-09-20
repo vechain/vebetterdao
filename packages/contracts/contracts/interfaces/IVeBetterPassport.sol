@@ -23,6 +23,9 @@ interface IVeBetterPassport {
   /// @notice Emitted when a user revokes the delegation of personhood to another user.
   event DelegationRevoked(address indexed delegator, address indexed delegatee);
 
+    /// @notice Emitted when a user delegates personhood to another user pending acceptance.
+  event DelegationPending(address indexed delegator, address indexed delegatee);
+
   /// @notice Emitted when a user registers an action
   /// @param user - the user that registered the action
   /// @param appId - the app id of the action
@@ -138,6 +141,11 @@ interface IVeBetterPassport {
   /// @param delegator The delegator's address
   /// @return The address of the delegatee
   function getDelegatee(address delegator) external view returns (address);
+
+  /// @notice Returns the pending delegations for a delegatee
+  /// @param delegatee - the delegatee address
+  /// @return the delegator address
+  function getPendingDelegations(address delegatee) external view returns (address);
 
   /// @notice Returns the delegatee address for a delegator at a specific timepoint
   /// @param delegator The delegator's address
@@ -350,9 +358,18 @@ interface IVeBetterPassport {
   /// @param signature The signature of the delegation
   function delegateWithSignature(address delegator, uint256 deadline, bytes memory signature) external;
 
+  /// @notice Delegate the personhood to another address
+  /// @dev The delegatee must accept the delegation
+  /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
+  /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
+  function delegatePersonhood(address delegatee) external;
+
+  /// @notice Allow the delegatee to accept the delegation
+  /// @param delegator - the delegator address
+  function acceptDelegation(address delegator) external;
+
   /// @notice Revoke personhood delegation
-  /// @param delegator The delegator's address
-  function revokeDelegation(address delegator) external;
+  function revokeDelegation() external;
 
   /// @notice Registers an action for a user
   /// @param user - the user that performed the action
