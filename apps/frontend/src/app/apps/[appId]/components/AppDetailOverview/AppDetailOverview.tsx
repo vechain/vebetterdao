@@ -21,12 +21,7 @@ import { UilArrowUpRight, UilCheckCircle, UilExclamationCircle } from "@iconscou
 import dayjs from "dayjs"
 import { useCallback } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import {
-  useCurrentAppBanner,
-  useCurrentAppEndorsementStatus,
-  useCurrentAppLogo,
-  useCurrentAppMetadata,
-} from "../../hooks"
+import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { AdminAppPageButton } from "./components/AdminAppPageButton"
 import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
@@ -34,7 +29,7 @@ import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppID } from "./components/AppID"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
-import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
+import { useAllocationsRound, useCurrentAllocationsRoundId, useCurrentAppEndorsementStatus } from "@/api"
 
 export const AppDetailOverview = () => {
   const { t } = useTranslation()
@@ -83,7 +78,7 @@ export const AppDetailOverview = () => {
       badgeIcon: UilExclamationCircle,
     },
   }
-  const uknownStatus = endorsementStatus === EndorsementStatus.UNKNOWN
+  const unknownStatus = endorsementStatus === EndorsementStatus.UNKNOWN
   const endorsementLost = endorsementStatus === EndorsementStatus.LOST
   const StatusBadgeIcon = BADGE_INFORMATION[endorsementStatus].badgeIcon
 
@@ -109,7 +104,7 @@ export const AppDetailOverview = () => {
                 fontSize="sm">
                 <Trans
                   i18nKey={
-                    uknownStatus
+                    unknownStatus
                       ? "Unknown endorsement status"
                       : endorsementLost
                         ? "This app lost the endorsement and will not join next allocation. The App will have to reach more than {{endorsementThreshold}} Endorsement score before {{date}} to be included on Allocations rounds. Know more."
