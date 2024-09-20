@@ -39,8 +39,9 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   }, [image, token.tokenLevel])
 
   const gmName = useMemo(() => {
-    return nftMetadata?.name || gmNfts[Number(token.tokenLevel) - 1]?.name
-  }, [nftMetadata, token.tokenLevel])
+    const nftName = nftMetadata?.name || gmNfts[Number(token.tokenLevel) - 1]?.name
+    return `${nftName} #${token.tokenId}`
+  }, [nftMetadata, token.tokenId, token.tokenLevel])
 
   return (
     <Card variant={isGMSelected ? "primaryBoxShadow" : "baseWithBorder"} rounded="8px">

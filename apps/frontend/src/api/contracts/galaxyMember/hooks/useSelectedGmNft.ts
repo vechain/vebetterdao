@@ -143,10 +143,12 @@ export const useSelectedGmNft = () => {
 
   const isMaxGmLevelReached = !!maxGmLevel && !!gmLevel && Number(gmLevel) === Number(maxGmLevel)
 
+  const nftName = nftMetadata?.name || gmNfts[Number(gmLevel) - 1]?.name
+  const gmName = `${nftName} #${selectedTokenId}`
   return {
     gmId: selectedTokenId,
     gmImage: gmImage?.image || gmNfts[Number(gmLevel) - 1]?.image || notFoundImage,
-    gmName: nftMetadata?.name || gmNfts[Number(gmLevel) - 1]?.name,
+    gmName,
     gmLevel,
     gmRewardMultiplier,
     nextLevelGMRewardMultiplier,
