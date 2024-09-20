@@ -18,7 +18,7 @@ import { useGetTokensInfoByOwner } from "@/api/contracts/galaxyMember/hooks/useG
 import { useWallet } from "@vechain/dapp-kit-react"
 import { GMNFTListItem } from "./GMNFTListItem"
 import { useCallback, useMemo } from "react"
-import { MintNFTModal } from "@/components/GmNFTAndNodeCard/components/GMUpgradeButton/components/MintNFTModal"
+import { MintNFTModal } from "@/components/GmActionButton/components/MintNFTModal"
 import { useClaimNFT } from "@/hooks"
 
 export const GMNFTList = () => {

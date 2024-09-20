@@ -1,47 +1,35 @@
-import { Box, Button, Circle, HStack, Skeleton, Stack, Text, useDisclosure, useMediaQuery } from "@chakra-ui/react"
+import { Box, Circle, HStack, Skeleton, Stack, Text, useMediaQuery } from "@chakra-ui/react"
 import { UilArrowCircleUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import {
-  useCurrentAllocationsRoundId,
-  useSelectedGmNft,
-  useParticipatedInGovernance,
-  useUserB3trBalance,
-  useXNode,
-} from "@/api"
-import { useCallback, useMemo } from "react"
+import { useSelectedGmNft, useParticipatedInGovernance, useUserB3trBalance, useXNode } from "@/api"
+import { useMemo } from "react"
 import { SparklesIcon } from "@/components/Icons"
-import { useRouter } from "next/navigation"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useClaimNFT } from "@/hooks"
-import { MintNFTModal } from "./components/MintNFTModal"
-import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
-import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
+import { GmActionButton } from "@/components/GmActionButton"
 
 const compactFormatter = getCompactFormatter(4)
 
-export const GMUpgradeButton = () => {
+export const GmNFTAndNodeFooter = () => {
   const { t } = useTranslation()
   const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account)
   const {
     nextLevelGMRewardMultiplier,
     isGMOwned,
-    isGMClaimable,
     b3trToUpgradeGMToNextLevel,
     missingB3trToUpgrade,
     isEnoughBalanceToUpgradeGM,
     isXNodeAttachedToGM,
-    gmId,
+    isMaxGmLevelReached,
   } = useSelectedGmNft()
   const { isXNodeHolder } = useXNode()
 
   const { isLoading: isB3trBalanceLoading } = useUserB3trBalance()
 
   const upgradeMessage = useMemo(() => {
-    if (!hasUserVoted && !isGMOwned && !isGMClaimable) {
+    if (!hasUserVoted && !isGMOwned) {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
@@ -50,7 +38,7 @@ export const GMUpgradeButton = () => {
         </Box>
       )
     }
-    if (!isGMClaimable && !isGMOwned) {
+    if (!isGMOwned) {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
@@ -87,9 +75,19 @@ export const GMUpgradeButton = () => {
           </Text>
           <Text as="strong" fontSize={"14px"} fontWeight={600}>
             {t("upgrade")}
-          </Text>{" "}
+          </Text>
           <Text as="span" fontSize={"14px"}>
-            {t("it to Venus for free!")}
+            {t("it for free!")}
+          </Text>
+        </Box>
+      )
+    }
+
+    if (isMaxGmLevelReached) {
+      return (
+        <Box>
+          <Text as="span" fontSize={"14px"}>
+            {t("You have reached the maximum level for your GM NFT")}
           </Text>
         </Box>
       )
@@ -130,76 +128,13 @@ export const GMUpgradeButton = () => {
     b3trToUpgradeGMToNextLevel,
     hasUserVoted,
     isEnoughBalanceToUpgradeGM,
-    isGMClaimable,
     isGMOwned,
+    isMaxGmLevelReached,
     isXNodeAttachedToGM,
     isXNodeHolder,
     missingB3trToUpgrade,
     nextLevelGMRewardMultiplier,
     t,
-  ])
-
-  const router = useRouter()
-  const mintNftModal = useDisclosure()
-  const {
-    sendTransaction: freeMint,
-    isTxReceiptLoading,
-    sendTransactionPending,
-  } = useClaimNFT({ onFailure: mintNftModal.onClose })
-
-  const handleMintGM = useCallback(() => {
-    freeMint()
-    mintNftModal.onOpen()
-  }, [freeMint, mintNftModal])
-
-  const attachGmToXNodeModal = useDisclosure()
-
-  const goToVote = useCallback(() => {
-    router.push(`/rounds/${currentRoundId}/vote`)
-  }, [currentRoundId, router])
-
-  const upgradeGMModal = useDisclosure()
-
-  const actionButton = useMemo(() => {
-    if (!hasUserVoted && !isGMOwned && !isGMClaimable) {
-      return (
-        <Button variant={"tertiaryAction"} onClick={goToVote}>
-          {t("Vote now!")}
-        </Button>
-      )
-    }
-    if (!isGMOwned && isGMClaimable) {
-      return (
-        <Button variant={"tertiaryAction"} onClick={handleMintGM}>
-          {t("Mint now!")}
-        </Button>
-      )
-    }
-    if (isXNodeHolder && !isXNodeAttachedToGM) {
-      return (
-        <Button variant={"tertiaryAction"} onClick={attachGmToXNodeModal.onOpen}>
-          {t("Attach and Upgrade!")}
-        </Button>
-      )
-    }
-
-    return (
-      <Button variant={"tertiaryAction"} isDisabled={!isEnoughBalanceToUpgradeGM} onClick={upgradeGMModal.onOpen}>
-        {t("Upgrade now!")}
-      </Button>
-    )
-  }, [
-    attachGmToXNodeModal.onOpen,
-    goToVote,
-    handleMintGM,
-    hasUserVoted,
-    isEnoughBalanceToUpgradeGM,
-    isGMClaimable,
-    isGMOwned,
-    isXNodeAttachedToGM,
-    isXNodeHolder,
-    t,
-    upgradeGMModal.onOpen,
   ])
 
   return (
@@ -220,14 +155,9 @@ export const GMUpgradeButton = () => {
           {upgradeMessage}
         </HStack>
       </Skeleton>
-      <Skeleton isLoaded={!isB3trBalanceLoading}>{actionButton}</Skeleton>
-      <MintNFTModal
-        mintNftModal={mintNftModal}
-        isTxReceiptLoading={isTxReceiptLoading}
-        sendTransactionPending={sendTransactionPending}
-      />
-      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
-      <UpgradeGMModal tokenId={gmId} upgradeGMModal={upgradeGMModal} />
+      <Skeleton isLoaded={!isB3trBalanceLoading}>
+        <GmActionButton buttonProps={{ variant: "tertiaryAction" }} />
+      </Skeleton>
     </Stack>
   )
 }

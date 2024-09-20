@@ -1,33 +1,33 @@
-import { useXNode } from "@/api"
-import {
-  Button,
-  Card,
-  Flex,
-  Heading,
-  HStack,
-  Image,
-  Skeleton,
-  Stack,
-  Text,
-  useMediaQuery,
-  VStack,
-} from "@chakra-ui/react"
+import { useParticipatedInGovernance, useSelectedGmNft, useXNode } from "@/api"
+import { GmActionButton } from "@/components/GmActionButton"
+import { Card, Flex, Heading, HStack, Image, Skeleton, Stack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { UilArrowCircleUp } from "@iconscout/react-unicons"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 export const XNodePageHeader = () => {
   const { t } = useTranslation()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeLoading, isXNodeHolder, isXNodeAttachedToGM } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeLoading, isXNodeHolder } = useXNode()
 
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
-  const actionLabel = useMemo(() => {
-    if (isXNodeHolder && !isXNodeAttachedToGM) {
-      return t("Attach and Upgrade!")
+  const { account } = useWallet()
+  const { data: hasUserVoted } = useParticipatedInGovernance(account)
+  const { isGMOwned, isXNodeAttachedToGM } = useSelectedGmNft()
+
+  const [actionTitle, actionDescription] = useMemo(() => {
+    if (!hasUserVoted && !isGMOwned) {
+      return [t("Vote to mint GM NFT"), t("Vote now and mint your GM NFT for free")]
     }
-    return t("Upgrade now!")
-  }, [isXNodeAttachedToGM, isXNodeHolder, t])
+    if (!isGMOwned) {
+      return [t("Mint GM NFT"), t("Mint now and get more rewards")]
+    }
+    if (isXNodeHolder && !isXNodeAttachedToGM) {
+      return [t("You can upgrade this node"), t("GM NFT attached to XNode")]
+    }
+    return [t("You can upgrade this node"), t("GM NFT attached to XNode")]
+  }, [hasUserVoted, isGMOwned, isXNodeAttachedToGM, isXNodeHolder, t])
 
   return (
     <Card>
@@ -94,23 +94,23 @@ export const XNodePageHeader = () => {
           <HStack>
             <UilArrowCircleUp size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
             <Heading color="#FFFFFF" fontSize={isAbove800 ? "xl" : "md"} fontWeight={400}>
-              {t("You can upgrade this node")}
+              {actionTitle}
             </Heading>
           </HStack>
           <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-            {t("GM NFT attached to XNode")}
+            {actionDescription}
           </Text>
-          <Button
-            variant={"tertiaryAction"}
-            w="full"
-            onClick={() => {}}
-            mt={2}
-            boxShadow={"0px 0px 9.4px 0px #B1F16C"}
-            color="#080F1E"
-            fontSize="sm"
-            h="30px">
-            {actionLabel}
-          </Button>
+          <GmActionButton
+            buttonProps={{
+              variant: "tertiaryAction",
+              w: "full",
+              boxShadow: "0px 0px 9.4px 0px #B1F16C",
+              color: "#080F1E",
+              fontSize: "sm",
+              h: "30px",
+              mt: 2,
+            }}
+          />
         </VStack>
       </Stack>
     </Card>

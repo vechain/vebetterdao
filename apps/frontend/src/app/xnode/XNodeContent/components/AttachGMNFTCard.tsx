@@ -24,7 +24,7 @@ import { FaChevronRight } from "react-icons/fa6"
 
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
-  const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, isXNodeAttachedToGM } = useSelectedGmNft()
+  const { gmId, gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, isXNodeAttachedToGM } = useSelectedGmNft()
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
@@ -33,6 +33,10 @@ export const AttachGMNFTCard = () => {
 
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()
+
+  if (!Number(gmId)) {
+    return null
+  }
 
   return (
     <Card variant="baseWithBorder">

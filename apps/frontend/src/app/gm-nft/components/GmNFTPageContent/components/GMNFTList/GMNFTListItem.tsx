@@ -6,6 +6,8 @@ import { NFTMetadata } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
 import { useIpfsImage, useIpfsMetadata } from "@/api/ipfs"
 import { useSelectedTokenId } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { SelectGMButton } from "./SelectGMButton"
+import { gmNfts } from "@/constants/gmNfts"
+import { notFoundImage } from "@/constants"
 
 interface GMNFTListItemProps {
   token: {
@@ -30,7 +32,15 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
 
   const { data: nftMetadata } = useIpfsMetadata<NFTMetadata>(token.tokenURI)
 
-  const { data: gmImage } = useIpfsImage(nftMetadata?.image ?? null)
+  const { data: image } = useIpfsImage(nftMetadata?.image ?? null)
+
+  const gmImage = useMemo(() => {
+    return image?.image || gmNfts[Number(token.tokenLevel) - 1]?.image || notFoundImage
+  }, [image, token.tokenLevel])
+
+  const gmName = useMemo(() => {
+    return nftMetadata?.name || gmNfts[Number(token.tokenLevel) - 1]?.name
+  }, [nftMetadata, token.tokenLevel])
 
   return (
     <Card variant={isGMSelected ? "primaryBoxShadow" : "baseWithBorder"} rounded="8px">
@@ -54,7 +64,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                 display="flex"
                 alignItems="center"
                 justifyContent="center">
-                <Image src={gmImage?.image} alt="gm" w={"64px"} h={"64px"} rounded="7px" />
+                <Image src={gmImage} alt="gm" w={"64px"} h={"64px"} rounded="7px" />
               </Box>
             </Skeleton>
             <Stack
@@ -68,7 +78,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                   {isGMSelected ? t("Active") : ""}
                 </Text>
                 <Text fontWeight={700} noOfLines={1} fontSize={"md"}>
-                  {nftMetadata?.name}
+                  {gmName}
                 </Text>
               </VStack>
               <HStack gap={6}>

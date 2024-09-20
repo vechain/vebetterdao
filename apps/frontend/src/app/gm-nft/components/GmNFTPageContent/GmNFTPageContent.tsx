@@ -3,8 +3,21 @@ import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
 import { AttachXNodeCard } from "./components/AttachXNodeCard"
 import { GMNFTList } from "./components/GMNFTList/GMNFTList"
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
+import { useSelectedGmNft } from "@/api"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 export const GmNFTPageContent = () => {
+  const { gmId } = useSelectedGmNft()
+  const router = useRouter()
+
+  // Redirect to the previous page if the user is not a GM NFT holder
+  useEffect(() => {
+    if (!Number(gmId)) {
+      router.back()
+    }
+  }, [gmId, router])
+
   return (
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader />
