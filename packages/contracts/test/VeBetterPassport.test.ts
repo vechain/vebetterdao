@@ -952,7 +952,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       ).to.be.revertedWithCustomError(veBetterPassport, "AlreadyDelegatee")
     })
 
-    it.only("Should be able to revoke delegation as delegatee", async function () {
+    it("Should be able to revoke delegation as delegatee", async function () {
       const { veBetterPassport, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -964,7 +964,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(ethers.ZeroAddress)
     })
 
-    it.only("Should be able to revoke delegation as delegator", async function () {
+    it("Should be able to revoke delegation as delegator", async function () {
       const { veBetterPassport, owner, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -976,7 +976,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(ethers.ZeroAddress)
     })
 
-    it.only("Should not be able to revoke delegation if not delegator nor delegatee", async function () {
+    it("Should not be able to revoke delegation if not delegator nor delegatee", async function () {
       const { veBetterPassport, owner, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
