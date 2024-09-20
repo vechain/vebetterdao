@@ -236,14 +236,14 @@ contract ProofOfParticipation is Initializable, AccessControlUpgradeable, IProof
   /// @param user - the user that performed the action
   /// @param appId - the app id of the action
   /// @param round - the round id of the action
-  function _registerAction(address user, bytes32 appId, uint256 round) public virtual {
+  function _registerAction(address user, bytes32 appId, uint256 round) internal virtual {
     require(user != address(0), "ProofOfParticipation: user is the zero address");
 
     ProofOfParticipationStorage storage $ = _getProofOfParticipationStorage();
 
     require($.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
 
-    // Calculate the action score, can be min 0, max 6
+    // Calculate the action score based on the security level of the app
     uint256 actionScore = $.securityMultiplier[$.appSecurity[appId]];
 
     // Update the user's score for the round
