@@ -595,6 +595,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
     PassportSignalingLogic.resetUserSignals($, user, reason);
   }
 
+  /// @notice Resets the signals of a user by app admin
+  /// @param user - the user to reset the signals of
+  /// @param reason - the reason for resetting the signals
+  function resetUserSignalsByAppAdminWithReason(address user, string memory reason) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.resetUserSignalsByAppAdminWithReason($, user, reason);
+  }
+
   /// @notice Sets the minimum galaxy member level
   /// @param minimumGalaxyMemberLevel The new minimum galaxy member level
   function setMinimumGalaxyMemberLevel(uint256 minimumGalaxyMemberLevel) external onlyRole(SETTINGS_MANAGER_ROLE) {

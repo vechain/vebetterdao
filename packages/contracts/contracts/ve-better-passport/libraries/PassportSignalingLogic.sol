@@ -55,6 +55,12 @@ library PassportSignalingLogic {
   /// @param reason  The reason for resetting the signals.
   event UserSignalsReset(address indexed user, string reason);
 
+  /// @notice Emitted when a user's signals are reset for an app.
+  /// @param user  The address of the user that had their signals reset.
+  /// @param app  The app that the user had their signals reset for.
+  /// @param reason - The reason for resetting the signals.
+  event UserSignalsResetForApp(address indexed user, bytes32 indexed app, string reason);
+
   // ---------- Getters ---------- //
 
   /// @notice Returns the number of times a user has been signaled
@@ -173,6 +179,16 @@ library PassportSignalingLogic {
     emit UserSignalsReset(user, reason);
   }
 
+  /// @notice Resets the signals of a user
+  /// @param user - the user to reset the signals of
+  /// @param reason - the reason for resetting the signals
+  function resetUserSignalsByAppAdminWithReason(PassportStorageTypes.PassportStorage storage self, address user, string memory reason) external {
+    bytes32 app = self.appOfSignaler[msg.sender];
+    require(self.x2EarnApps.isAppAdmin(app, msg.sender), "BotSignaling: caller is not an admin of the app");
+
+    _resetUserSignalsOfApp(self, user, app, reason);
+  }
+
   // ---------- Private ---------- //
 
   /// @notice Private function to signal a user
@@ -184,5 +200,20 @@ library PassportSignalingLogic {
     self.appTotalSignalsCounter[app]++;
 
     emit UserSignaled(user, msg.sender, app, reason);
+  }
+
+  /// @notice Resets the signals of a user for an app
+  /// @param user - the user to reset the signals of
+  /// @param app - the app to reset the signals for
+  /// @param reason - the reason for resetting the signals
+  function _resetUserSignalsOfApp(PassportStorageTypes.PassportStorage storage self, address user, bytes32 app, string memory reason) private {
+   uint256 signals = self.appSignalsCounter[app][user];
+
+    self.appSignalsCounter[app][user] = 0;
+    self.appTotalSignalsCounter[app] -= signals;
+    self.signaledCounter[user] -= signals;
+
+
+    emit UserSignalsResetForApp(user, app, reason);
   }
 }
