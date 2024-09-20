@@ -86,8 +86,6 @@ contract PassportStorage is Initializable {
     self.roundsForCumulativeScore = initializationData.roundsForCumulativeScore;
 
     // Initialize the secuirty multiplier
-    self.securityMultiplier[PassportTypes.APP_SECURITY.UNDEFINED] = 0;
-    self.securityMultiplier[PassportTypes.APP_SECURITY.NONE] = 0;
     self.securityMultiplier[PassportTypes.APP_SECURITY.LOW] = 100;
     self.securityMultiplier[PassportTypes.APP_SECURITY.MEDIUM] = 200;
     self.securityMultiplier[PassportTypes.APP_SECURITY.HIGH] = 400;

@@ -75,7 +75,6 @@ library PassportTypes {
   /// @notice Security level indicates how secure the app is
   /// @dev App security is used to calculate the overall score of a sustainable action
   enum APP_SECURITY {
-    UNDEFINED, // For new apps that have not been set yet
     NONE,
     LOW,
     MEDIUM,
