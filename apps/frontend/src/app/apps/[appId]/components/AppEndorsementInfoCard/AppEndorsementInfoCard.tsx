@@ -1,13 +1,6 @@
-import {
-  useAppEndorsers,
-  useIsAppAdmin,
-  useIsAppModerator,
-  useNodesEndorsedApps,
-  useNodesEndorsementScore,
-  useUserEndorsementScore,
-  useUserXNodes,
-} from "@/api"
+import { useAppEndorsers, useCurrentAppEndorsementStatus, useIsAppAdmin, useIsAppModerator, useXNode } from "@/api"
 import { VeBetterIcon } from "@/components"
+import { AddressIcon } from "@/components/AddressIcon"
 import { EndorsementStatus } from "@/types"
 import {
   Box,
@@ -24,16 +17,13 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
+import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
-import { AddressIcon } from "@/components/AddressIcon"
-import { useMemo } from "react"
 import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { isAddressInListOfAddresses } from "@repo/utils/AddressUtils"
-import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
-import { useCurrentAppEndorsementStatus } from "../../hooks"
 
 export const AppEndorsementInfoCard = () => {
   const SCORE_COLOR_SCHEME = {
@@ -65,7 +55,7 @@ export const AppEndorsementInfoCard = () => {
   const { account } = useWallet()
 
   // App endorsement data
-  const { data: appEndorsers, isLoading: appEndorsersLoading } = useAppEndorsers(app?.id ?? "")
+  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
   const {
     isLoading: isEndorsementStatusLoading,
     score: endorsementScore,
@@ -73,28 +63,18 @@ export const AppEndorsementInfoCard = () => {
     threshold: endorsementThreshold,
   } = useCurrentAppEndorsementStatus()
 
-  // User data
-  const { data: isAppModerator } = useIsAppModerator(app?.id ?? "", account ?? "")
-  const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account ?? "")
+  // User roles data
+  const { data: isAppModerator, isLoading: isAppModeratorLoading } = useIsAppModerator(app?.id ?? "", account ?? "")
+  const { data: isAppAdmin, isLoading: isAppAdminLoading } = useIsAppAdmin(app?.id ?? "", account ?? "")
+  const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
-  // User x-nodes, endorsements and score
-  const { data: userXNodes } = useUserXNodes()
-  const { data: nodesLevelToEndorsementScore } = useNodesEndorsementScore()
-  const { data: endorsedApps } = useNodesEndorsedApps(userXNodes?.map(node => node.id) ?? [])
-  const { data: userEndorsementScore, isLoading: userEndorsementScoreLoading } = useUserEndorsementScore(account)
-
-  //TODO: Support multiple nodes
-  const availablePoints = useMemo(() => {
-    if (!userXNodes || !nodesLevelToEndorsementScore || !endorsedApps) return 0
-
-    const availableNodes = userXNodes.filter((_node, index) => !endorsedApps[index]?.endorsedApp)
-    return availableNodes.reduce((acc, node) => acc + Number(nodesLevelToEndorsementScore[Number(node.level)]), 0) ?? 0
-  }, [userXNodes, nodesLevelToEndorsementScore, endorsedApps])
+  // User xnodes, TODO support multiple xnodes
+  const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints } = useXNode()
 
   const isUserAppEndorser = useMemo(() => {
-    if (!account || !appEndorsers) return false
-    return isAddressInListOfAddresses(account, appEndorsers)
-  }, [account, appEndorsers])
+    if (!app || isXNodeLoading) return false
+    return isXNodeHolder && isEndorsingApp && endorsedApp?.id === app.id
+  }, [app, isXNodeLoading, isXNodeHolder, isEndorsingApp, endorsedApp])
 
   // Modals
   const {
@@ -143,7 +123,7 @@ export const AppEndorsementInfoCard = () => {
 
       <CardBody p={0}>
         <Stack spacing={3} w="full">
-          <Skeleton isLoaded={!isEndorsementStatusLoading && !appEndorsersLoading && !userEndorsementScoreLoading}>
+          <Skeleton isLoaded={!isEndorsementStatusLoading && !isXNodeLoading}>
             <HStack spacing={3}>
               <Box>
                 <Text fontSize="16px">{t("Current score")}</Text>
@@ -162,7 +142,7 @@ export const AppEndorsementInfoCard = () => {
                   <Text fontSize="16px">{t("Your endorsement")}</Text>
                   <Box display="flex" alignItems="center">
                     <Text fontSize="36px" fontWeight="700" color="#004CFC">
-                      {userEndorsementScore}
+                      {xNodePoints}
                     </Text>
                   </Box>
                 </Box>
@@ -172,7 +152,7 @@ export const AppEndorsementInfoCard = () => {
 
           <Divider />
 
-          <Skeleton isLoaded={!appEndorsersLoading}>
+          <Skeleton isLoaded={!isAppEndorsersLoading && !isUserRolesDataLoading}>
             <Box textAlign="center">
               {appEndorsers && appEndorsers.length ? (
                 <HStack justify={"space-between"}>
@@ -201,32 +181,34 @@ export const AppEndorsementInfoCard = () => {
           </Skeleton>
 
           <Box textAlign="center" py={6}>
-            <Stack spacing={4} align="center">
-              {(isAppModerator || isAppAdmin) &&
-                (endorsementStatus === EndorsementStatus.PENDING || endorsementStatus === EndorsementStatus.LOST) && (
-                  <Button
-                    leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
-                    w="full"
-                    borderRadius="full"
-                    color="#E0E9FE"
-                    display="flex"
-                    alignItems="center">
-                    <Text fontSize="18px" fontWeight="500" color="#004CFC">
-                      {t("Look for endorsers")}
-                    </Text>
+            <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading}>
+              <Stack spacing={4} align="center">
+                {(isAppModerator || isAppAdmin) &&
+                  (endorsementStatus === EndorsementStatus.PENDING || endorsementStatus === EndorsementStatus.LOST) && (
+                    <Button
+                      leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
+                      w="full"
+                      borderRadius="full"
+                      color="#E0E9FE"
+                      display="flex"
+                      alignItems="center">
+                      <Text fontSize="18px" fontWeight="500" color="#004CFC">
+                        {t("Look for endorsers")}
+                      </Text>
+                    </Button>
+                  )}
+                {isXNodeHolder && !isEndorsingApp && (
+                  <Button variant={"primaryAction"} onClick={onOpenEndorsementModal}>
+                    {t("Endorse with your {{value}} points", { value: xNodePoints })}
                   </Button>
                 )}
-              {availablePoints > 0 && (
-                <Button variant={"primaryAction"} onClick={onOpenEndorsementModal}>
-                  {t("Endorse with your {{value}} points", { value: availablePoints })}
-                </Button>
-              )}
-              {isUserAppEndorser && (
-                <Button variant={"ghost"} fontWeight="500" color="#C84968" onClick={onOpenUnendorsementModal}>
-                  {t("Remove endorsement")}
-                </Button>
-              )}
-            </Stack>
+                {isUserAppEndorser && (
+                  <Button variant={"dangerGhost"} onClick={onOpenUnendorsementModal}>
+                    {t("Remove endorsement")}
+                  </Button>
+                )}
+              </Stack>
+            </Skeleton>
           </Box>
         </Stack>
       </CardBody>
