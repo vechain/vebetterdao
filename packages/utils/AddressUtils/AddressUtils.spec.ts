@@ -1,14 +1,7 @@
 /* eslint-disable max-len */
 /* eslint-disable no-console */
 import { HDNode, mnemonic } from "thor-devkit"
-import {
-  compareAddresses,
-  compareListOfAddresses,
-  isValid,
-  leftPadWithZeros,
-  regexPattern,
-  isAddressInListOfAddresses,
-} from "./AddressUtils"
+import { compareAddresses, compareListOfAddresses, isValid, leftPadWithZeros, regexPattern } from "./AddressUtils"
 
 const address1 = "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa"
 const address1NoHex = "f077b491b355E64048cE21E3A6Fc4751eEeA77fa"
@@ -137,25 +130,6 @@ describe("Is Valid Address", () => {
 describe("regexPattern", () => {
   test("returns the correct result", () => {
     expect(regexPattern()).toStrictEqual(/^0x[a-fA-F0-9]{40}$/)
-  })
-})
-
-describe("isAddressInListOfAddresses", () => {
-  test("address in list", () => {
-    expect(isAddressInListOfAddresses(address1, [address1, address2])).toBe(true)
-  })
-
-  test("address not in list", () => {
-    expect(isAddressInListOfAddresses(address1, [address2])).toBe(false)
-  })
-
-  test("empty list", () => {
-    expect(isAddressInListOfAddresses(address1, [])).toBe(false)
-  })
-
-  test("address not a string", () => {
-    // @ts-ignore
-    expect(isAddressInListOfAddresses(1234, [address1])).toBe(false)
   })
 })
 

@@ -35,16 +35,6 @@ export const compareListOfAddresses = (add1: string[], add2: string[]) => {
   return true
 }
 
-/**
- * Checks if the given address is in the list of addresses
- * @param address - The address to check
- * @param addresses - The list of addresses to check against
- * @returns - True if the address is in the list of addresses, false otherwise
- */
-export const isAddressInListOfAddresses = (address: string, addresses: string[]) => {
-  return addresses.some(addr => compareAddresses(address, addr))
-}
-
 export const regexPattern = () => {
   return /^0x[a-fA-F0-9]{40}$/
 }
