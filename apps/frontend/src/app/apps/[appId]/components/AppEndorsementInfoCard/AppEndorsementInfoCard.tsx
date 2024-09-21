@@ -185,16 +185,8 @@ export const AppEndorsementInfoCard = () => {
               <Stack spacing={4} align="center">
                 {(isAppModerator || isAppAdmin) &&
                   (endorsementStatus === EndorsementStatus.PENDING || endorsementStatus === EndorsementStatus.LOST) && (
-                    <Button
-                      leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
-                      w="full"
-                      borderRadius="full"
-                      color="#E0E9FE"
-                      display="flex"
-                      alignItems="center">
-                      <Text fontSize="18px" fontWeight="500" color="#004CFC">
-                        {t("Look for endorsers")}
-                      </Text>
+                    <Button leftIcon={<VeBetterIcon color="#004CFC" size={16} />} variant={"primarySubtle"}>
+                      {t("Look for endorsers")}
                     </Button>
                   )}
                 {isXNodeHolder && !isEndorsingApp && (
