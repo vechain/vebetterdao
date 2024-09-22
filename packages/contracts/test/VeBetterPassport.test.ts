@@ -18,7 +18,7 @@ import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
-describe("VeBetterPassport - @shard3", function () {
+describe.only("VeBetterPassport - @shard3", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, nodeManagement, galaxyMember } =
@@ -613,7 +613,7 @@ describe("VeBetterPassport - @shard3", function () {
       ).to.be.reverted
     })
 
-    it.only("App admin should be able to reset signals of a user and total signals should be tracked correctly", async function () {
+    it("App admin should be able to reset signals of a user and total signals should be tracked correctly", async function () {
       const { veBetterPassport, otherAccount, owner, otherAccounts, x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1496,7 +1496,7 @@ describe("VeBetterPassport - @shard3", function () {
         .connect(owner)
         .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
 
-      await expect(veBetterPassport.connect(owner).registerAction(otherAccount, app1Id)).to.be.reverted
+      await expect(veBetterPassport.connect(otherAccount).registerAction(otherAccount, app1Id)).to.be.reverted
     })
 
     it("Should be able to change app security with ACTION_SCORE_MANAGER_ROLE", async function () {
@@ -1855,12 +1855,11 @@ describe("VeBetterPassport - @shard3", function () {
             [app1Id, app2Id, app3Id],
             [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
           ),
-      ).to.be.revertedWith(
-        "XAllocationVoting: voter is not a person: User does not meet the criteria to be considered a person",
-      )
+      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorPersonhoodVerificationFailed")
 
-      await expect(governor.connect(otherAccount).castVote(proposalId, 2)).to.be.revertedWith(
-        "GovernorVotesLogic: voter is not a person: User does not meet the criteria to be considered a person",
+      await expect(governor.connect(otherAccount).castVote(proposalId, 2)).to.be.revertedWithCustomError(
+        xAllocationVoting,
+        "GovernorPersonhoodVerificationFailed",
       )
 
       // Register actions for round 2
@@ -1903,9 +1902,7 @@ describe("VeBetterPassport - @shard3", function () {
             [app1Id, app2Id, app3Id],
             [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
           ),
-      ).to.be.revertedWith(
-        "XAllocationVoting: voter is not a person: User does not meet the criteria to be considered a person",
-      )
+      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorPersonhoodVerificationFailed")
 
       // Register action for round 3
       await veBetterPassport.connect(owner).registerAction(otherAccount, app1Id)
@@ -1927,9 +1924,7 @@ describe("VeBetterPassport - @shard3", function () {
             [app1Id, app2Id, app3Id],
             [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
           ),
-      ).to.be.revertedWith(
-        "XAllocationVoting: voter is not a person: User does not meet the criteria to be considered a person",
-      )
+      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorPersonhoodVerificationFailed")
 
       // register more actions for round 3
       await veBetterPassport.connect(owner).registerAction(otherAccount, app2Id)
@@ -1966,10 +1961,7 @@ describe("VeBetterPassport - @shard3", function () {
             [app1Id, app2Id, app3Id],
             [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
           ),
-      ).to.be.revertedWith(
-        "XAllocationVoting: voter is not a person: User does not meet the criteria to be considered a person",
-      )
-
+      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorPersonhoodVerificationFailed")
       await waitForNextCycle()
 
       await startNewAllocationRound()

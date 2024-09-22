@@ -194,7 +194,7 @@ library PassportDelegationLogic {
       revert CannotDelegateToSelf(signer);
     }
 
-    if (self.delegatorToDelegatee[delegator].latest() != 0) {
+    if (self.delegateeToDelegator[msg.sender].latest() != 0) {
       revert AlreadyDelegated(delegator);
     }
 
