@@ -5,27 +5,32 @@ import { useParams } from "next/navigation"
 
 /**
  * Determine the current app endorsement status
- * @param isAppUnendorsed Whether the app is unendorsed
+ * @param isUnendorsed Whether the app is unendorsed
  * @param isEligibleNow Whether the app is eligible now
  * @param score The app endorsement score
  * @param threshold The endorsement score threshold
  * @returns The current app endorsement status
  */
-const determineStatus = (isAppUnendorsed?: boolean, isEligibleNow?: boolean, score: number = 0, threshold?: number) => {
-  if (typeof isAppUnendorsed === "undefined" || typeof isEligibleNow === "undefined" || !threshold) {
+const determineAppStatus = (
+  isUnendorsed: boolean | undefined,
+  isEligibleNow: boolean | undefined,
+  score: number,
+  threshold: number,
+) => {
+  if (typeof isUnendorsed === "undefined" || typeof isEligibleNow === "undefined" || isNaN(score) || isNaN(threshold)) {
     return EndorsementStatus.UNKNOWN
   }
 
-  if (!isAppUnendorsed && score >= threshold) {
+  if (!isUnendorsed && score >= threshold) {
     return EndorsementStatus.SUCCESS
   }
 
   //App in the grace period
-  if (isAppUnendorsed && isEligibleNow) {
+  if (isUnendorsed && isEligibleNow) {
     return EndorsementStatus.LOST
   }
 
-  if (isAppUnendorsed && !isEligibleNow) {
+  if (isUnendorsed && !isEligibleNow) {
     return EndorsementStatus.PENDING
   }
 
@@ -34,7 +39,11 @@ const determineStatus = (isAppUnendorsed?: boolean, isEligibleNow?: boolean, sco
 
 /**
  * Hook to get the current app endorsement status
- * @returns The current app endorsement status
+ * @returns {Object} An object containing the following properties:
+ * - `threshold`: The endorsement score threshold
+ * - `score`: The current endorsement score of the app
+ * - `status`: The computed endorsement status based on the threshold, score, eligibility, and unendorsement status
+ * - `isLoading`: A boolean indicating if any of the data fetching operations are still in progress
  */
 export const useCurrentAppEndorsementStatus = () => {
   const { appId } = useParams<{ appId: string }>()
@@ -44,7 +53,7 @@ export const useCurrentAppEndorsementStatus = () => {
   const { data: isUnendorsed, isLoading: isUnendorsedLoading } = useIsAppUnendorsed(appId)
   const isLoading =
     isEndorsementThresholdLoading || isEndorsementScoreLoading || isEligibleNowLoading || isUnendorsedLoading
-  const status = determineStatus(isUnendorsed, isEligibleNow, Number(score), Number(threshold))
+  const status = determineAppStatus(isUnendorsed, isEligibleNow, Number(score), Number(threshold))
   return {
     threshold,
     score,
