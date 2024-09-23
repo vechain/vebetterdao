@@ -395,7 +395,8 @@ interface IVeBetterPassport {
   function revokeDelegation() external;
 
   /// @notice Allows a delegator to remove their pending delegation to a delegatee.
-  function removePendingDelegation() external;
+  /// @param delegator - the delegator address
+  function removePendingDelegation(address delegator) external;
 
   /// @notice Registers an action for a user
   /// @param user - the user that performed the action

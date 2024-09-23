@@ -12,7 +12,6 @@ import { PassportSignalingLogic } from "./libraries/PassportSignalingLogic.sol";
 import { PassportPersonhoodLogic } from "./libraries/PassportPersonhoodLogic.sol";
 import { PassportEIP712SigningLogic } from "./libraries/PassportEIP712SigningLogic.sol";
 import { PassportConfigurator } from "./libraries/PassportConfigurator.sol";
-import { PassportStorage } from "./modules/PassportStorage.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
@@ -24,7 +23,7 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 /// @title VeBetterPassport
 /// @notice Contract to manage the VeBetterPassport, a system to determine if a wallet is a person or not
 /// based on the participation score, blacklisting, and xnode, GM holdings and much more that can be added in the future.
-contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, PassportStorage, IVeBetterPassport {
+contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBetterPassport {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant ROLE_GRANTER = keccak256("ROLE_GRANTER");
   bytes32 public constant SETTINGS_MANAGER_ROLE = keccak256("SETTINGS_MANAGER_ROLE");
@@ -32,6 +31,16 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   bytes32 public constant ACTION_REGISTRAR_ROLE = keccak256("ACTION_REGISTRAR_ROLE");
   bytes32 public constant ACTION_SCORE_MANAGER_ROLE = keccak256("ACTION_SCORE_MANAGER_ROLE");
   bytes32 public constant SIGNALER_ROLE = keccak256("SIGNALER_ROLE");
+
+  // keccak256(abi.encode(uint256(keccak256("PassportStorageLocation")) - 1)) & ~bytes32(uint256(0xff))
+  bytes32 private constant PassportStorageLocation = 0x273c9387b78d9b22e6f3371bb3aa3a918f53507e8cacc54e4831933cbb844100;
+
+  /// @dev Internal function to access the passport storage slot.
+  function getPassportStorage() internal pure returns (PassportStorageTypes.PassportStorage storage $) {
+    assembly {
+      $.slot := PassportStorageLocation
+    }
+  }
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -45,7 +54,9 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   ) external initializer {
     __UUPSUpgradeable_init();
     __AccessControl_init();
-    __PassportStorage_init(data);
+
+    PassportConfigurator.initializePassportStorage(getPassportStorage(), data);
+
     // Grant roles
     _grantRole(DEFAULT_ADMIN_ROLE, roles.admin);
     _grantRole(UPGRADER_ROLE, roles.upgrader);
@@ -284,7 +295,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   /// @notice Returns the pending delegations for a delegatee
   /// @param delegatee - the delegatee address
   /// @return the delegator address
-  function getPendingDelegations(address delegatee) external view returns (address) {
+  function getPendingDelegations(address delegatee) external view returns (address[] memory) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportDelegationLogic.getPendingDelegations($, delegatee);
   }
@@ -529,6 +540,13 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, Passport
   function revokeDelegation() external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportDelegationLogic.revokeDelegation($);
+  }
+
+  /// @notice Allows a delegator to remove their pending delegation to a delegatee.
+  /// @param delegator - the delegator address
+  function removePendingDelegation(address delegator) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportDelegationLogic.removePendingDelegation($, delegator);
   }
 
   /// @notice Signals a user

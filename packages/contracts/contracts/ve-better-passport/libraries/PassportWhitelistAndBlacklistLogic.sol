@@ -24,7 +24,6 @@
 pragma solidity 0.8.20;
 
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
-import "hardhat/console.sol";
 
 library PassportWhitelistAndBlacklistLogic {
   // ---------- Events ---------- //

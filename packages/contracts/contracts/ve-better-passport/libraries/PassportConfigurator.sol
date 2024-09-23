@@ -24,6 +24,7 @@
 pragma solidity 0.8.20;
 
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
+import { PassportTypes } from "./PassportTypes.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { INodeManagement } from "../../interfaces/INodeManagement.sol";
@@ -49,7 +50,9 @@ library PassportConfigurator {
   }
 
   /// @notice Gets the node management contract address
-  function getNodeManagement(PassportStorageTypes.PassportStorage storage self) internal view returns (INodeManagement) {
+  function getNodeManagement(
+    PassportStorageTypes.PassportStorage storage self
+  ) internal view returns (INodeManagement) {
     return self.nodeManagement;
   }
 
@@ -59,10 +62,42 @@ library PassportConfigurator {
   }
 
   // ---------- Setters ---------- //
+
+  /// @notice Initializes the PassportStorage struct with the provided initialization data
+  function initializePassportStorage(
+    PassportStorageTypes.PassportStorage storage self,
+    PassportTypes.InitializationData memory initializationData
+  ) external {
+    // Initialize the external contracts
+    setX2EarnApps(self, initializationData.x2EarnApps);
+    setXAllocationVoting(self, initializationData.xAllocationVoting);
+    setNodeManagement(self, initializationData.nodeManagement);
+    setGalaxyMember(self, initializationData.galaxyMember);
+
+    // Initialize the bot signals threshold
+    self.signalsThreshold = initializationData.signalingThreshold;
+
+    // Initialize the minimum Galaxy Member level to be considered human by Personhood checks
+    self.minimumGalaxyMemberLevel = initializationData.minimumGalaxyMemberLevel;
+
+    // Initialize the participant score threshold to be considered human by Personhood checks
+    self.popScoreThreshold = initializationData.popScoreThreshold;
+    // Initialize the number of rounds for cumulative score
+    self.roundsForCumulativeScore = initializationData.roundsForCumulativeScore;
+
+    // Initialize the secuirty multiplier
+    self.securityMultiplier[PassportTypes.APP_SECURITY.LOW] = 100;
+    self.securityMultiplier[PassportTypes.APP_SECURITY.MEDIUM] = 200;
+    self.securityMultiplier[PassportTypes.APP_SECURITY.HIGH] = 400;
+
+    // Decay
+    self.decayRate = 20;
+  }
+
   /// @notice Sets the X2EarnApps contract address
   /// @dev The X2EarnApps contract address can be modified by the CONTRACTS_ADDRESS_MANAGER_ROLE
   /// @param _x2EarnApps - the X2EarnApps contract address
-  function setX2EarnApps(PassportStorageTypes.PassportStorage storage self, IX2EarnApps _x2EarnApps) external {
+  function setX2EarnApps(PassportStorageTypes.PassportStorage storage self, IX2EarnApps _x2EarnApps) public {
     require(address(_x2EarnApps) != address(0), "VeBetterPassport: x2EarnApps is the zero address");
 
     self.x2EarnApps = _x2EarnApps;
@@ -74,7 +109,7 @@ library PassportConfigurator {
   function setXAllocationVoting(
     PassportStorageTypes.PassportStorage storage self,
     IXAllocationVotingGovernor _xAllocationVoting
-  ) external {
+  ) public {
     require(address(_xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
 
     self.xAllocationVoting = _xAllocationVoting;
@@ -83,7 +118,10 @@ library PassportConfigurator {
   /// @notice Sets the node management contract address
   /// @param self - the PassportStorage struct
   /// @param _nodeManagement - the node management contract address
-  function setNodeManagement(PassportStorageTypes.PassportStorage storage self, INodeManagement _nodeManagement) external {
+  function setNodeManagement(
+    PassportStorageTypes.PassportStorage storage self,
+    INodeManagement _nodeManagement
+  ) public {
     require(address(_nodeManagement) != address(0), "VeBetterPassport: nodeManagement is the zero address");
 
     self.nodeManagement = _nodeManagement;
@@ -92,7 +130,7 @@ library PassportConfigurator {
   /// @notice Sets the galaxy member contract address
   /// @param self - the PassportStorage struct
   /// @param _galaxyMember - the galaxy member contract address
-  function setGalaxyMember(PassportStorageTypes.PassportStorage storage self, IGalaxyMember _galaxyMember) external {
+  function setGalaxyMember(PassportStorageTypes.PassportStorage storage self, IGalaxyMember _galaxyMember) public {
     require(address(_galaxyMember) != address(0), "VeBetterPassport: galaxyMember is the zero address");
 
     self.galaxyMember = _galaxyMember;
