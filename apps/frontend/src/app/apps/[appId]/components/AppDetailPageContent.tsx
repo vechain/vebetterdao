@@ -28,7 +28,6 @@ export const AppDetailPageContent = () => {
   const shouldRenderBalance = useMemo(() => {
     return appHasBeenIntoAllocationRounds
   }, [appHasBeenIntoAllocationRounds])
-
   function generateTemplateAreas(hasAllocationRounds?: boolean, isGovernanceUser: boolean = false) {
     let baseLayout = `
       "main-content"
@@ -39,7 +38,7 @@ export const AppDetailPageContent = () => {
          "main-content side-content"
          "main-content endorsement-card"
     `
-    const lgLayoutWithoutBalance = `
+    let lgLayoutWithoutBalance = `
       "main-content endorsement-card"
       "main-content endorsement-card"
     `
@@ -54,6 +53,11 @@ export const AppDetailPageContent = () => {
        "endorsement-card side-content"
        "main-content     side-content"
      `
+
+      lgLayoutWithoutBalance = `
+     "endorsement-card endorsement-card"
+     "main-content main-content"
+   `
     }
 
     return {
