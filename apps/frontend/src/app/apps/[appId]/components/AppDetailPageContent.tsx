@@ -1,5 +1,4 @@
-import { useIsAppAdmin, useIsAppModerator } from "@/api"
-import { useCheckAppExistence } from "@/api/contracts/xApps/hooks/useCheckAppExistence"
+import { useAppExists, useIsAppAdmin, useIsAppModerator } from "@/api"
 import { Stack, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
@@ -15,7 +14,7 @@ export const AppDetailPageContent = () => {
   const { account } = useWallet()
   const { data: isAppModerator } = useIsAppModerator(app?.id ?? "", account ?? "")
   const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account ?? "")
-  const { data: appHasBeenIntoAllocationRounds } = useCheckAppExistence(app?.id ?? "")
+  const { data: appHasBeenIntoAllocationRounds } = useAppExists(app?.id ?? "")
   const shouldRenderCreationSteps = useMemo(() => {
     return !appHasBeenIntoAllocationRounds && (isAppModerator || isAppAdmin)
   }, [appHasBeenIntoAllocationRounds, isAppModerator, isAppAdmin])

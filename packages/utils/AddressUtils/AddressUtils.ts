@@ -50,6 +50,10 @@ export const isValid = (addr: string | undefined | null): boolean => {
 }
 
 export const leftPadWithZeros = (str: string, length: number): string => {
+  if (typeof str !== "string") {
+    throw new TypeError("Input must be a string")
+  }
+
   // Remove '0x' prefix if it exists
   const cleanStr = str.startsWith("0x") ? str.slice(2) : str
   if (cleanStr.length > length) {
