@@ -39,15 +39,6 @@ export const GmNFTAndNodeFooter = () => {
       )
     }
     if (!isGMOwned) {
-      return (
-        <Box>
-          <Text as="span" fontSize={"14px"}>
-            {t("Wait for the next round to mint the GM NFT")}
-          </Text>
-        </Box>
-      )
-    }
-    if (!isGMOwned) {
       if (isXNodeHolder) {
         return (
           <Box>

@@ -28,7 +28,7 @@ export const AttachGMNFTCard = () => {
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
-    router.push("/gm-nft")
+    router.push("/galaxy-member")
   }, [router])
 
   const attachGmToXNodeModal = useDisclosure()
