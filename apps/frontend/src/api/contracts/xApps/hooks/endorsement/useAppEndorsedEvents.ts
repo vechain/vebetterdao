@@ -12,6 +12,7 @@ export type AppEndorsedEvent = {
   nodeId: string
   endorsed: boolean
   blockNumber: number
+  txOrigin: string
 }
 
 /**
@@ -53,6 +54,7 @@ export const getAppEndorsedEvents = async (
         nodeId: decoded[1].toString(),
         endorsed: decoded[2],
         blockNumber: event.meta.blockNumber,
+        txOrigin: event.meta.txOrigin,
       }
     })
     .filter(event => {

@@ -87,7 +87,7 @@ export const useXNodes = (user?: string) => {
  *  Hook to get the owned or delegated xNodes for a user from the NodeManagement contract
  * @returns  the xNodes for the user
  */
-export const useUserXNodes = () => {
+export const useUserXNodes = (address?: string) => {
   const { account } = useWallet()
-  return useXNodes(account || undefined)
+  return useXNodes(address || account || undefined)
 }

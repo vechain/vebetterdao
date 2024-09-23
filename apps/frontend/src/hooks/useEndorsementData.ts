@@ -1,68 +1,57 @@
-import { useEndorsementEvents, useAppEndorsers } from "@/api"
-import { useEffect, useState } from "react"
+import { useAppEndorsedEvents, AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { useUserEndorsementScore } from "@/api"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import dayjs from "dayjs"
 
-export type EndorsersInfo = {
-  address: string
-  score: string | undefined
-  timestamp: number
+type EndorsersInfo = {
+  endorserAddress: string
+  endorserTotalPoint?: string
+  dateOfFirstEndorsement: string
 }
 
-type BlockMeta = {
-  blockID: string
-  blockNumber: number
-  blockTimestamp: number
-  txID: string
-  txOrigin: string
-  clauseIndex: number
+type EndorsementHistory = {
+  endorserAddress: string
+  endorserPoint?: string
+  endorserTotalPoint?: string
+  dateOfEndorsement: string
+  endorsed: boolean
 }
 
-export const useEndorsementHistory = (appId: string) => {
-  const [endorsementHistory, setEndorsementHistory] = useState<BlockMeta[]>([])
-  const { data: endorsementEvents } = useEndorsementEvents(appId)
-  const { data: endorsers } = useAppEndorsers(appId)
+export const useEndorsementInfos = (appId: string, endorserAddress: string) => {
+  const { data: endorsementTotalPoint } = useUserEndorsementScore(endorserAddress)
+  const { data: appEndorsedEvents } = useAppEndorsedEvents({
+    appId: appId,
+  })
 
-  useEffect(() => {
-    if (endorsers) {
-      const filteredEvents = endorsementEvents?.endorsed.filter(event => event.appId === appId) || []
+  // Find the event where the txOrigin matches the endorserAddress
+  const matchedEvent = appEndorsedEvents?.find(event => event.txOrigin.toLowerCase() === endorserAddress.toLowerCase())
 
-      const history = filteredEvents
-        .map(event => event.blockMeta)
-        .filter((blockMeta: BlockMeta) => endorsers.includes(blockMeta.txOrigin))
+  const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber: matchedEvent?.blockNumber })
+  const endorsingSince = dayjs(lastEndorsementTimestamp).format("DD-MM-YYYY")
 
-      setEndorsementHistory(history)
-    }
-  }, [endorsers, endorsementEvents, appId])
+  const endorserInfo: EndorsersInfo = {
+    endorserAddress: endorserAddress,
+    endorserTotalPoint: endorsementTotalPoint,
+    dateOfFirstEndorsement: endorsingSince,
+  }
+  return endorserInfo
+}
+
+export const useEndorsementHistory = (event: AppEndorsedEvent) => {
+  const { txOrigin, blockNumber } = event
+  const endorserTotalPoint = useUserEndorsementScore(txOrigin).data
+
+  const endorserPoint = endorserTotalPoint
+  const dateOfEndorsement = useEstimateBlockTimestamp({ blockNumber })
+  const endorseTime = dayjs(dateOfEndorsement).format("MMM D, YYYY")
+
+  const endorsementHistory: EndorsementHistory = {
+    endorserAddress: txOrigin,
+    endorserPoint: endorserPoint,
+    endorserTotalPoint: endorserTotalPoint,
+    dateOfEndorsement: endorseTime,
+    endorsed: event.endorsed,
+  }
 
   return endorsementHistory
-}
-
-export const useEndorsementInfos = (appId: string) => {
-  const [endorsersInfo, setEndorsersInfo] = useState<EndorsersInfo[]>([])
-  const endorsementHistory = useEndorsementHistory(appId)
-
-  useEffect(() => {
-    if (endorsementHistory.length > 0) {
-      const infoMap: { [key: string]: EndorsersInfo } = {}
-
-      endorsementHistory.forEach(blockMeta => {
-        const { txOrigin, blockTimestamp } = blockMeta
-
-        if (!infoMap[txOrigin]) {
-          infoMap[txOrigin] = {
-            address: txOrigin,
-            score: "",
-            timestamp: blockTimestamp,
-          }
-        }
-
-        if (blockTimestamp < infoMap[txOrigin].timestamp) {
-          infoMap[txOrigin].timestamp = blockTimestamp
-        }
-      })
-
-      setEndorsersInfo(Object.values(infoMap))
-    }
-  }, [endorsementHistory])
-
-  return endorsersInfo
 }
