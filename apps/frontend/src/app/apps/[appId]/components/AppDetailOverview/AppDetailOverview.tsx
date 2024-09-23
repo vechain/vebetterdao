@@ -29,8 +29,7 @@ import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppID } from "./components/AppID"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
-import { useCurrentAppEndorsementStatus } from "@/api"
-import { useGracePeriodEvent } from "@/api/contracts/xApps/hooks/useGracePeriodEvent"
+import { useCurrentAppEndorsementStatus, useGracePeriodEvent } from "@/api"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 
 export const AppDetailOverview = () => {
