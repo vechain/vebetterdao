@@ -93,6 +93,5 @@ export const useAppEndorsedEvents = (filterOptions?: { appId?: string; nodeId?: 
   // sort events by blockNumber in descending order
   const sortedEvents = result.data?.sort((a, b) => b.blockNumber - a.blockNumber)
 
-  console.log("sortedEvents", sortedEvents)
   return { ...result, data: sortedEvents }
 }
