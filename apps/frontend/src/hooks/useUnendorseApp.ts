@@ -5,6 +5,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import {
   getAppEndorsementScoreQueryKey,
   getEndorsersQueryKey,
+  getIsAppEligibleNowQueryKey,
   getIsAppUnendorsedQueryKey,
   getNodesEndorsedAppsQueryKey,
 } from "@/api"
@@ -35,6 +36,7 @@ export const useUnendorseApp = ({ appId, nodeId, onSuccess }: Props) => {
 
   const refetchQueryKeys = useMemo(
     () => [
+      getIsAppEligibleNowQueryKey(appId ?? ""),
       getIsAppUnendorsedQueryKey(appId ?? ""),
       getAppEndorsementScoreQueryKey(appId),
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
