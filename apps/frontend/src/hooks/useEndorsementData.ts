@@ -14,11 +14,7 @@ type EndorsementHistory = {
   endorserPoint?: string
   endorserTotalPoint?: string
   dateOfEndorsement: string
-  isUnendorsing: boolean
-}
-
-export type AppEndorsedHistoryEvent = AppEndorsedEvent & {
-  isUnendorsing: boolean
+  endorsed: boolean
 }
 
 export const useEndorsementInfos = (appId: string, endorserAddress: string) => {
@@ -41,7 +37,7 @@ export const useEndorsementInfos = (appId: string, endorserAddress: string) => {
   return endorserInfo
 }
 
-export const useEndorsementHistory = (event: AppEndorsedHistoryEvent) => {
+export const useEndorsementHistory = (event: AppEndorsedEvent) => {
   const { txOrigin, blockNumber } = event
   const endorserTotalPoint = useUserEndorsementScore(txOrigin).data
 
@@ -51,10 +47,10 @@ export const useEndorsementHistory = (event: AppEndorsedHistoryEvent) => {
 
   const endorsementHistory: EndorsementHistory = {
     endorserAddress: txOrigin,
-    endorserPoint,
-    endorserTotalPoint,
+    endorserPoint: endorserPoint,
+    endorserTotalPoint: endorserTotalPoint,
     dateOfEndorsement: endorseTime,
-    isUnendorsing: event.isUnendorsing,
+    endorsed: event.endorsed,
   }
 
   return endorsementHistory

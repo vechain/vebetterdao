@@ -2,7 +2,6 @@ import { useIsAppUnendorsed, useAppEndorsementScore, useAppEndorsers } from "@/a
 import { EndorsementInfo } from "./EndorsementInfo"
 import { EndorsementHistory } from "./EndorsementHistory"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { useMemo } from "react"
 
 import {
   Modal,
@@ -31,22 +30,6 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
   const { data: endorsementScore } = useAppEndorsementScore(appId)
   const { data: endorsers } = useAppEndorsers(appId)
   const { data: endorsementEvents } = useAppEndorsedEvents({ appId })
-
-  const processedEndorsementEvents = useMemo(() => {
-    if (!endorsementEvents) return []
-
-    const addressOccurrences: Record<string, boolean> = {}
-    return endorsementEvents.map(event => {
-      const { txOrigin } = event
-      const isUnendorsing = addressOccurrences[txOrigin] !== undefined ? !addressOccurrences[txOrigin] : false
-      addressOccurrences[txOrigin] = isUnendorsing
-
-      return {
-        ...event,
-        isUnendorsing,
-      }
-    })
-  }, [endorsementEvents])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size={["xl", "xxl"]}>
@@ -92,9 +75,10 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                   {t("Endorsers")}
                 </Text>
                 <VStack flex={1} w="full" overflowY="auto">
-                  {endorsers?.map((endorser, index) => (
-                    <EndorsementInfo key={index} appId={appId} endorserAddress={endorser} />
-                  ))}
+                  {endorsers
+                    ?.slice()
+                    .reverse()
+                    .map((endorser, index) => <EndorsementInfo key={index} appId={appId} endorserAddress={endorser} />)}
                 </VStack>
               </VStack>
             </VStack>
@@ -116,7 +100,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                 {t("Endorsement history")}
               </Text>
               <VStack flex={1} w="full" overflowY="auto">
-                {processedEndorsementEvents?.map((endorsementEvent, index) => (
+                {endorsementEvents?.map((endorsementEvent, index) => (
                   <EndorsementHistory key={index} event={endorsementEvent} />
                 ))}
               </VStack>

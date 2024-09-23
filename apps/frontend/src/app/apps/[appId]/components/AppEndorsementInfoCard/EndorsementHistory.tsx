@@ -1,12 +1,14 @@
-import { useEndorsementHistory, AppEndorsedHistoryEvent } from "@/hooks/useEndorsementData"
+import { useEndorsementHistory } from "@/hooks/useEndorsementData"
+import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+
 import { Text, HStack, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
-type EndorsementHistoryProps = {
-  event: AppEndorsedHistoryEvent
+type Props = {
+  event: AppEndorsedEvent
 }
 
-export const EndorsementHistory = ({ event }: EndorsementHistoryProps) => {
+export const EndorsementHistory = ({ event }: Props) => {
   const { t } = useTranslation()
   const endorsementHistory = useEndorsementHistory(event)
 
@@ -31,8 +33,8 @@ export const EndorsementHistory = ({ event }: EndorsementHistoryProps) => {
         </Text>
       </VStack>
       <VStack align="end" spacing={0}>
-        <Text fontWeight={600} color={endorsementHistory.isUnendorsing ? "#C84968" : "#3DBA67"}>
-          {`${endorsementHistory.isUnendorsing ? "-" : "+"}${t("{{value}} pts.", { value: endorsementHistory.endorserPoint })}`}
+        <Text fontWeight={600} color={endorsementHistory.endorsed ? "#3DBA67" : "#C84968"}>
+          {`${endorsementHistory.endorsed ? "+" : "-"}${t("{{value}} pts.", { value: endorsementHistory.endorserPoint })}`}
         </Text>
         <Text fontSize="xs" color="#6A6A6A">
           {t("{{value}} pts in total.", { value: endorsementHistory.endorserTotalPoint })}
