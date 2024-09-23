@@ -338,7 +338,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     // Remove the pending delegation
     _removePendingDelegation(index);
 
-    emit DelegationRejected(delegation.delegator, delegation.delegatee);
+    emit DelegationRevoked(delegation.delegator, delegation.delegatee);
   }
 
   /// @notice Remove a pending delegation from the array
@@ -375,8 +375,13 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     uint256[] storage indices = $.pendingDelegationsForDelegatee[delegatee];
     for (uint256 i = 0; i < indices.length; i++) {
       if (indices[i] == indexToRemove) {
+        // Move the last element to the position of the element to delete
         indices[i] = indices[indices.length - 1];
+
+        // Remove the last element
         indices.pop();
+
+        // Exit the loop
         break;
       }
     }
