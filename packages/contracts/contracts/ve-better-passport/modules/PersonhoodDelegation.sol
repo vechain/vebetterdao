@@ -40,7 +40,6 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
   struct PendingDelegation {
     address delegator;
     address delegatee;
-    uint256 timestamp;
   }
 
   struct PersonhoodDelegationStorage {
@@ -51,8 +50,9 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     mapping(address => uint256[]) pendingDelegationsForDelegatee; // Mapping to track pending delegations for each delegatee
   }
 
+  // keccak256(abi.encode(uint256(keccak256("storage.PersonhoodDelegation")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant PersonhoodDelegationStorageLocation =
-    0x91f40f78b5c3e5d39cc1c761de58fd46b47234f93fe10426a471a629784f6c00;
+    0xbf5618f8e5c3454f6c5472527c4c0c7964b63a408ea4de6cb7d64edf5267eb00;
 
   function _getPersonhoodDelegationStorage() private pure returns (PersonhoodDelegationStorage storage $) {
     assembly {
@@ -78,7 +78,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     PersonhoodDelegationStorage storage $ = _getPersonhoodDelegationStorage();
 
     // Push empty PendingDelegation to avoid index 0
-    $.pendingDelegations.push(PendingDelegation({ delegator: address(0), delegatee: address(0), timestamp: 0 }));
+    $.pendingDelegations.push(PendingDelegation({ delegator: address(0), delegatee: address(0) }));
   }
 
   // ---------- Modifiers ------------ //
@@ -271,14 +271,12 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
 
     uint256 index = $.pendingDelegations.length;
 
-    $.pendingDelegations.push(
-      PendingDelegation({ delegator: msg.sender, delegatee: proposedDelegatee, timestamp: block.timestamp })
-    );
+    $.pendingDelegations.push(PendingDelegation({ delegator: msg.sender, delegatee: proposedDelegatee }));
 
     $.pendingDelegationIndex[msg.sender] = index;
     $.pendingDelegationsForDelegatee[proposedDelegatee].push(index);
 
-    emit DelegationProposed(msg.sender, proposedDelegatee, index);
+    emit DelegationProposed(msg.sender, proposedDelegatee);
   }
 
   /// @notice Accept a proposed delegation
@@ -301,7 +299,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     // Remove the pending delegation
     _removePendingDelegation(index);
 
-    emit DelegationAccepted(delegator, msg.sender, index);
+    emit DelegationAccepted(delegator, msg.sender);
     emit DelegationCreated(delegator, msg.sender);
   }
 
@@ -322,7 +320,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     // Remove the pending delegation
     _removePendingDelegation(index);
 
-    emit DelegationRejected(delegator, msg.sender, index);
+    emit DelegationRejected(delegator, msg.sender);
   }
 
   /// @notice removes the pending delegation from the delegator
@@ -340,7 +338,7 @@ contract PersonhoodDelegation is Initializable, AccessControlUpgradeable, IPerso
     // Remove the pending delegation
     _removePendingDelegation(index);
 
-    emit DelegationRejected(delegation.delegator, delegation.delegatee, index);
+    emit DelegationRejected(delegation.delegator, delegation.delegatee);
   }
 
   /// @notice Remove a pending delegation from the array

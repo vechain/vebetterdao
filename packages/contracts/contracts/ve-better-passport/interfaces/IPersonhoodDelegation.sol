@@ -35,13 +35,13 @@ interface IPersonhoodDelegation {
   event DelegationRevoked(address indexed delegator, address indexed delegatee);
 
   /// @notice Emitted when a user proposes to delegate personhood to another user.
-  event DelegationProposed(address indexed delegator, address indexed proposedDelegatee, uint256 indexed index);
+  event DelegationProposed(address indexed delegator, address indexed proposedDelegatee);
 
   /// @notice Emitted when a user accepts the delegation of personhood from another user.
-  event DelegationAccepted(address indexed delegator, address indexed delegatee, uint256 indexed index);
+  event DelegationAccepted(address indexed delegator, address indexed delegatee);
 
   /// @notice Emitted when a user rejects the delegation of personhood from another user.
-  event DelegationRejected(address indexed delegator, address indexed proposedDelegatee, uint256 indexed index);
+  event DelegationRejected(address indexed delegator, address indexed proposedDelegatee);
 
   /// @notice Delegates personhood, must be called by the delegatee providing the delegator signature.
   function delegateWithSignature(address delegator, uint256 deadline, bytes memory signature) external;
