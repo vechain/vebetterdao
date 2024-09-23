@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react"
 import { Button, ButtonProps, useDisclosure } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useClaimNFT } from "@/hooks"
+import { useMintNFT } from "@/hooks"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import { useCurrentAllocationsRoundId, useParticipatedInGovernance, useSelectedGmNft, useXNode } from "@/api"
@@ -23,10 +23,10 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     sendTransaction: freeMint,
     isTxReceiptLoading,
     sendTransactionPending,
-  } = useClaimNFT({ onFailure: mintNftModal.onClose })
+  } = useMintNFT({ onFailure: mintNftModal.onClose })
 
   const handleMintGM = useCallback(() => {
-    freeMint()
+    freeMint({})
     mintNftModal.onOpen()
   }, [freeMint, mintNftModal])
 
