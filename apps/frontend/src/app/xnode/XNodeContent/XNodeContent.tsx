@@ -8,15 +8,17 @@ import { useEffect } from "react"
 import { useXNode } from "@/api"
 
 export const XNodeContent = () => {
-  const { isXNodeHolder } = useXNode()
+  const { isXNodeHolder, isXNodeLoading } = useXNode()
   const router = useRouter()
 
   // Redirect to the dashboard if the user is not an X-Node holder
   useEffect(() => {
-    if (!isXNodeHolder) {
+    if (!isXNodeHolder && !isXNodeLoading) {
       router.back()
     }
-  }, [isXNodeHolder, router])
+  }, [isXNodeHolder, isXNodeLoading, router])
+
+  if (!isXNodeHolder) return null
 
   return (
     <VStack align="stretch" flex="1" gap="4">

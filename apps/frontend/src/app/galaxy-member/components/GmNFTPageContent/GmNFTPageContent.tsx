@@ -8,15 +8,17 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 export const GmNFTPageContent = () => {
-  const { gmId } = useSelectedGmNft()
+  const { gmId, isLoading } = useSelectedGmNft()
   const router = useRouter()
 
   // Redirect to the previous page if the user is not a GM NFT holder
   useEffect(() => {
-    if (!Number(gmId)) {
+    if (!Number(gmId) && !isLoading) {
       router.back()
     }
-  }, [gmId, router])
+  }, [gmId, isLoading, router])
+
+  if (!Number(gmId)) return null
 
   return (
     <VStack align="stretch" flex="1" gap="4">
