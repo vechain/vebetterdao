@@ -2,6 +2,7 @@ import { useEndorsementInfos } from "@/hooks/useEndorsementData"
 import { Text, HStack, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 
 type EndorsementInfoProps = {
   appId: string
@@ -11,11 +12,6 @@ type EndorsementInfoProps = {
 export const EndorsementInfo = ({ appId, endorserAddress }: EndorsementInfoProps) => {
   const endorsementInfos = useEndorsementInfos(appId, endorserAddress)
   const { t } = useTranslation()
-
-  const truncateAddress = (address: string) => {
-    if (!address) return ""
-    return `${address.slice(0, 6)}...${address.slice(-4)}`
-  }
 
   return (
     <HStack
@@ -29,7 +25,7 @@ export const EndorsementInfo = ({ appId, endorserAddress }: EndorsementInfoProps
       <HStack alignItems={"center"} gap={4}>
         <AddressIcon address={endorserAddress} rounded="full" h="28px" w="28px" />
         <VStack align="start" justify={"center"} spacing={0}>
-          <Text>{truncateAddress(endorsementInfos.endorserAddress)}</Text>
+          <Text>{humanAddress(endorsementInfos.endorserAddress, 6, 3)}</Text>
           <Text fontSize="xs" color="#6A6A6A">
             {t("Endorsing since {{date}}", { date: endorsementInfos.dateOfFirstEndorsement })}
           </Text>

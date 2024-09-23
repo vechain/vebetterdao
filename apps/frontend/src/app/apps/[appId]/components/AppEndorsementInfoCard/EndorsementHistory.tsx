@@ -1,6 +1,6 @@
 import { useEndorsementHistory } from "@/hooks/useEndorsementData"
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-
+import { humanAddress } from "@repo/utils/FormattingUtils"
 import { Text, HStack, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
@@ -12,10 +12,6 @@ export const EndorsementHistory = ({ event }: Props) => {
   const { t } = useTranslation()
   const endorsementHistory = useEndorsementHistory(event)
 
-  const truncateAddress = (address: string) => {
-    if (!address) return ""
-    return `${address.slice(0, 6)}...${address.slice(-4)}`
-  }
   return (
     <HStack
       p={2}
@@ -25,7 +21,7 @@ export const EndorsementHistory = ({ event }: Props) => {
       alignItems={"center"}
       justify={"space-between"}>
       <VStack align="start" justifyContent={"flex-start"} spacing={0}>
-        <Text>{truncateAddress(endorsementHistory.endorserAddress)}</Text>
+        <Text>{humanAddress(endorsementHistory.endorserAddress, 6, 3)}</Text>
         <Text fontSize="xs" color="#6A6A6A">
           {t("{{date}}", {
             date: endorsementHistory.dateOfEndorsement,
