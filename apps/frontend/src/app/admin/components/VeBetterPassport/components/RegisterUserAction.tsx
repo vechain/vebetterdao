@@ -32,7 +32,7 @@ export const RegisterUserAction = () => {
   const [userFieldIsDirty, setUserFieldIsDirty] = useState<boolean>(false)
   const [appId, setAppId] = useState<string | undefined>()
   const [round, setRound] = useState<number | undefined>()
-  const [roundFieldIsDirty, setRoundFirldDirty] = useState<boolean>(false)
+  const [roundFieldIsDirty, setRoundFieldIsDirty] = useState<boolean>(false)
   const { isOpen, onClose, onOpen } = useDisclosure()
 
   const isValidAddress = useMemo(() => {
@@ -144,7 +144,7 @@ export const RegisterUserAction = () => {
                     isDisabled={isLoading}
                     onChange={value => {
                       setRound(parseInt(value))
-                      setRoundFirldDirty(true)
+                      setRoundFieldIsDirty(true)
                     }}>
                     <NumberInputField />
                     <NumberInputStepper>
