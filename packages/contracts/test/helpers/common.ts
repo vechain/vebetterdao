@@ -236,12 +236,15 @@ export const createProposalAndExecuteIt = async (
   args: any[] = [],
   roundId?: string | bigint | number,
 ) => {
-  const { governor } = await getOrDeployContractInstances({})
+  const { governor, veBetterPassport } = await getOrDeployContractInstances({})
 
   // load votes
   // console.log("Loading votes");
   await getVot3Tokens(voter, "30000")
   await waitForNextBlock()
+
+  await veBetterPassport.whitelist(voter.address)
+  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await veBetterPassport.toggleWhitelistCheck()
 
   // create a new proposal
   // console.log("Creating proposal");
@@ -295,7 +298,10 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
   args: any[][],
   roundId?: string,
 ) => {
-  const { governor, emissions, xAllocationVoting } = await getOrDeployContractInstances({})
+  const { governor, emissions, xAllocationVoting, veBetterPassport } = await getOrDeployContractInstances({})
+
+  await veBetterPassport.whitelist(voter.address)
+  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await veBetterPassport.toggleWhitelistCheck()
 
   // load votes
   // console.log("Loading votes");
