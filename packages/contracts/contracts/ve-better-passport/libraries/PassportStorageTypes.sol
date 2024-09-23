@@ -77,8 +77,12 @@ library PassportStorageTypes {
     mapping(address => Checkpoints.Trace160) delegatorToDelegatee;
     // Mapping of delegatee to delegator
     mapping(address => Checkpoints.Trace160) delegateeToDelegator;
-    // Mapping of pending delegations to be accepted
-    mapping(address delagatee => address delegator) pendingDelegations;
+    // Mapping to track index of pending delegations for each delegator
+    mapping(address => uint256) pendingDelegationsIndexes;
+    // Mapping to track pending delegations for each delegatee
+    mapping(address => address[]) pendingDelegationsDelegateeToDelegators;
+    // Mapping to map delagator to delegatee for pending delegations
+    mapping(address => address) pendingDelegationsDelegatorToDelegatee;
     // ---------- Bot Signaling ---------- //
     // Counter for the number of signals per user
     mapping(address user => uint256) signaledCounter;

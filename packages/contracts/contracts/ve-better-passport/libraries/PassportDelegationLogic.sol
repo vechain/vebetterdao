@@ -157,8 +157,8 @@ library PassportDelegationLogic {
   function getPendingDelegations(
     PassportStorageTypes.PassportStorage storage self,
     address delegatee
-  ) internal view returns (address) {
-    return self.pendingDelegations[delegatee];
+  ) internal view returns (address[] memory) {
+    return self.pendingDelegationsDelegateeToDelegators[delegatee];
   }
 
   // ---------- Setters ------------ //
@@ -203,12 +203,13 @@ library PassportDelegationLogic {
 
     emit DelegationCreated(delegator, msg.sender);
   }
+
   /// @notice Delegate the personhood to another address
   /// @dev The delegatee must accept the delegation
   /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
   /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
   function delegatePersonhood(PassportStorageTypes.PassportStorage storage self, address delegatee) external {
-    if (self.delegatorToDelegatee[msg.sender].latest() != 0) {
+    if (self.delegatorToDelegatee[msg.sender].latest() != 0 || self.pendingDelegationsIndexes[msg.sender] != 0) {
       revert AlreadyDelegated(msg.sender);
     }
 
@@ -217,14 +218,15 @@ library PassportDelegationLogic {
       revert CannotDelegateToSelf(msg.sender);
     }
 
-    if (self.delegateeToDelegator[delegatee].latest() != 0) {
-      revert OnlyOneUserAllowed();
-    }
+    // Get the length of the pending delegations
+    uint256 length = self.pendingDelegationsDelegateeToDelegators[delegatee].length;
 
-    _pushCheckpoint(self.delegatorToDelegatee[msg.sender], delegatee);
+    // Add the delegator to the pending delegations indexes
+    self.pendingDelegationsIndexes[msg.sender] = length + 1;
 
     // Add the delegator to the pending delegations of the delegatee
-    self.pendingDelegations[delegatee] = msg.sender;
+    self.pendingDelegationsDelegateeToDelegators[delegatee].push(msg.sender);
+    self.pendingDelegationsDelegatorToDelegatee[msg.sender] = delegatee;
 
     emit DelegationPending(msg.sender, delegatee);
   }
@@ -232,22 +234,31 @@ library PassportDelegationLogic {
   /// @notice Allow the delegatee to accept the delegation
   /// @param delegator - the delegator address
   function acceptDelegation(PassportStorageTypes.PassportStorage storage self, address delegator) external {
-    address delegatorToAccept = self.pendingDelegations[msg.sender];
+    uint256 index = self.pendingDelegationsIndexes[delegator];
 
-    // Check if the delegation exists
-    if (delegatorToAccept == address(0)) {
-      revert NotDelegated(msg.sender);
+    // Check if the pending delegation exists
+    if (index == 0) {
+      revert NotDelegated(msg.sender); // Delegator not found in the pending delegations
     }
 
-    // Check if the delegatee is accepting the correct delegator
+    // Correct the index (since we store index + 1)
+    index -= 1;
+
+    // Get the length of pending delegations for the delegatee
+    uint256 pendingDelegationsLength = self.pendingDelegationsDelegateeToDelegators[msg.sender].length;
+
+    // Check if the delegation is valid
+    address delegatorToAccept = self.pendingDelegationsDelegateeToDelegators[msg.sender][index];
     if (delegatorToAccept != delegator) {
-      revert PersonhoodDelegationUnauthorizedUser(msg.sender);
+      revert PersonhoodDelegationUnauthorizedUser(msg.sender); // Delegation does not match
     }
 
-    // Add the delegator to the delegatee
+    // Add the delegator to the delegatee and the delegatee to the delegator
     _pushCheckpoint(self.delegateeToDelegator[msg.sender], delegator);
+    _pushCheckpoint(self.delegatorToDelegatee[delegator], msg.sender);
+
     // Remove the pending delegation
-    self.pendingDelegations[msg.sender] = address(0);
+    _removePendingDelegation(self, delegator, msg.sender);
 
     emit DelegationCreated(delegator, msg.sender);
   }
@@ -279,10 +290,63 @@ library PassportDelegationLogic {
     emit DelegationRevoked(delegator, delegatee);
   }
 
+  ///@notice Allows a delegator to remove their pending delegation to a delegatee.
+  function removePendingDelegation(PassportStorageTypes.PassportStorage storage self, address delegator) external {
+    address delegatee = self.pendingDelegationsDelegatorToDelegatee[delegator];
+
+    // Check if the pending delegation exists
+    if (delegatee == address(0)) {
+      revert NotDelegated(delegator);
+    }
+
+    // Check caller is the delegator or the delegatee
+    if (msg.sender != delegator && msg.sender != delegatee) {
+      revert PersonhoodDelegationUnauthorizedUser(msg.sender);
+    }
+
+    // Use the _removePendingDelegation function to handle the deletion logic
+    _removePendingDelegation(self, delegator, delegatee);
+
+    emit DelegationRevoked(delegator, delegatee);
+  }
+
   // ---------- Private ---------- //
   /// @notice Push a new checkpoint for the delegator and delegatee
   function _pushCheckpoint(Checkpoints.Trace160 storage store, address value) private {
     store.push(PassportClockLogic.clock(), uint160(value));
+  }
+
+  /// @notice Removes a pending delegation between a delegator and a delegatee.
+  /// @dev This function removes the delegator from the delegatee's pending delegation list and updates the pendingDelegationsIndexes for the delegator.
+  ///     The function swaps the last element in the pending delegation array with the one being removed and pops the last element to avoid leaving gaps.
+  /// @param self The PassportStorage structure containing delegation mappings and lists.
+  /// @param delegator The address of the delegator who initiated the pending delegation.
+  /// @param delegatee The address of the delegatee to whom the delegator is delegating.
+  function _removePendingDelegation(
+    PassportStorageTypes.PassportStorage storage self,
+    address delegator,
+    address delegatee
+  ) private {
+    uint256 index = self.pendingDelegationsIndexes[delegator];
+
+    uint256 pendingDelegationsLength = self.pendingDelegationsDelegateeToDelegators[delegatee].length;
+
+    // Adjust index (since it's stored as index + 1)
+    index -= 1;
+
+    // Swap the last element with the element to delete
+    if (index != pendingDelegationsLength - 1) {
+      address lastDelegator = self.pendingDelegationsDelegateeToDelegators[delegatee][pendingDelegationsLength - 1];
+      self.pendingDelegationsDelegateeToDelegators[delegatee][index] = lastDelegator;
+      self.pendingDelegationsIndexes[lastDelegator] = index + 1; // Update the index
+    }
+
+    // Pop the last element (removes the duplicate or the swapped one)
+    self.pendingDelegationsDelegateeToDelegators[delegatee].pop();
+
+    // Clear the pending delegation index for the removed delegator
+    delete self.pendingDelegationsIndexes[delegator];
+    delete self.pendingDelegationsDelegatorToDelegatee[delegator];
   }
 
   /// @notice Convert a uint160 value to an address

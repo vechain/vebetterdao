@@ -168,7 +168,7 @@ interface IVeBetterPassport {
   /// @notice Returns the pending delegations for a delegatee
   /// @param delegatee - the delegatee address
   /// @return the delegator address
-  function getPendingDelegations(address delegatee) external view returns (address);
+  function getPendingDelegations(address delegatee) external view returns (address[] memory);
 
   /// @notice Returns the delegatee address for a delegator at a specific timepoint
   /// @param delegator The delegator's address
@@ -393,6 +393,9 @@ interface IVeBetterPassport {
 
   /// @notice Revoke personhood delegation
   function revokeDelegation() external;
+
+  /// @notice Allows a delegator to remove their pending delegation to a delegatee.
+  function removePendingDelegation() external;
 
   /// @notice Registers an action for a user
   /// @param user - the user that performed the action
