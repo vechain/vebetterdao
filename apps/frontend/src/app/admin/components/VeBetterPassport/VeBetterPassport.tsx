@@ -16,39 +16,6 @@ export const VeBetterPassport: React.FC = () => {
       {isPassportActionRegistrar && <RegisterUserAction />}
       {isPassportScoreManager && <ParticipationScoreThreshold />}
       {isPassportScoreManager && <AppSecurity />}
-
-      {/*    {isAdminOfB3tr && (
-            <>
-              <Show above="sm">
-                <HStack>{pauseVOT3}</HStack>
-              </Show>
-              <Show below="sm">
-                <VStack align={"flex-start"}>{pauseVOT3}</VStack>
-              </Show>
-            </>
-          )}
-
-          {isAdminOfGalaxyMember && (
-            <>
-              <Show above="sm">
-                <HStack>{pauseGalaxyMember}</HStack>
-              </Show>
-              <Show below="sm">
-                <VStack align={"flex-start"}>{pauseGalaxyMember}</VStack>
-              </Show>
-            </>
-          )}
-
-          {isAdminOfB3TRGovernor && (
-            <>
-              <Show above="sm">
-                <HStack>{pauseB3TRGovernor}</HStack>
-              </Show>
-              <Show below="sm">
-                <VStack align={"flex-start"}>{pauseB3TRGovernor}</VStack>
-              </Show>
-            </>
-          )} */}
     </Grid>
   )
 }
