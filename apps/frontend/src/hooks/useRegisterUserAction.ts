@@ -29,26 +29,18 @@ type Props = {
  */
 export const useRegisterUserAction = ({ address, appId, roundId, onSuccess }: Props): UseSendTransactionReturnValue => {
   const clauseBuilder = useCallback(() => {
-    let clauses = roundId
-      ? buildClause({
-          contractInterface: VeBetterPassportInterface,
-          to: VE_BETTER_PASSPORT_ADDRESS,
-          method: "registerActionForRound",
-          args: [address, appId, roundId],
-          comment: `Register action for ${address} for app ${appId} in round ${roundId}`,
-        })
-      : buildClause({
-          contractInterface: VeBetterPassportInterface,
-          to: VE_BETTER_PASSPORT_ADDRESS,
-          method: "registerAction",
-          args: [address, appId],
-          comment: `Register action for ${address} for app ${appId} in current round`,
-        })
+    const clauses = buildClause({
+      contractInterface: VeBetterPassportInterface,
+      to: VE_BETTER_PASSPORT_ADDRESS,
+      method: roundId ? "registerActionForRound" : "registerAction",
+      args: roundId ? [address, appId, roundId] : [address, appId],
+      comment: `Register action for ${address} for app ${appId} in ${roundId ? `round ${roundId}` : "current round"}`,
+    })
 
     return [clauses]
   }, [address, appId, roundId])
 
-  const refetchQueryKeys = useMemo(() => [getIsPersonQueryKey(address)], [])
+  const refetchQueryKeys = useMemo(() => [getIsPersonQueryKey(address)], [address])
 
   return useBuildTransaction({
     clauseBuilder,
