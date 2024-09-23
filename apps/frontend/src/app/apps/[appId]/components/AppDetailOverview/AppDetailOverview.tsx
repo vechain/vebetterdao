@@ -29,7 +29,9 @@ import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppID } from "./components/AppID"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
-import { useAllocationsRound, useCurrentAllocationsRoundId, useCurrentAppEndorsementStatus } from "@/api"
+import { useCurrentAppEndorsementStatus } from "@/api"
+import { useGracePeriodEvent } from "@/api/contracts/xApps/hooks/useGracePeriodEvent"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 
 export const AppDetailOverview = () => {
   const { t } = useTranslation()
@@ -43,8 +45,11 @@ export const AppDetailOverview = () => {
     isLoading: isEndorsementStatusLoading,
   } = useCurrentAppEndorsementStatus()
 
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { data: nextRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
+  const { data: gracePeriod } = useGracePeriodEvent(app?.id)
+
+  const gracePeriodEndsAt = useEstimateBlockTimestamp({
+    blockNumber: Number(gracePeriod?.gracePeriodEvent[0]?.endBlock),
+  })
 
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {
@@ -81,7 +86,6 @@ export const AppDetailOverview = () => {
   const unknownStatus = endorsementStatus === EndorsementStatus.UNKNOWN
   const endorsementLost = endorsementStatus === EndorsementStatus.LOST
   const StatusBadgeIcon = BADGE_INFORMATION[endorsementStatus].badgeIcon
-
   return (
     <>
       {endorsementStatus !== EndorsementStatus.SUCCESS ? (
@@ -110,7 +114,7 @@ export const AppDetailOverview = () => {
                         ? "This app lost the endorsement and will not join next allocation. The App will have to reach more than {{endorsementThreshold}} Endorsement score before {{date}} to be included on Allocations rounds. Know more."
                         : "This dApp won’t join next allocation round. The app will have to reach more than {{endorsementThreshold}} Endorsement score to be included on Allocations rounds. Know more."
                   }
-                  values={{ date: nextRound?.voteStartTimestamp, endorsementThreshold }}
+                  values={{ date: dayjs(gracePeriodEndsAt).format("MMMM D"), endorsementThreshold }}
                   components={{
                     Link: (
                       <Link color={BADGE_INFORMATION[endorsementStatus].badgeTextColor} textDecoration="underline" />
