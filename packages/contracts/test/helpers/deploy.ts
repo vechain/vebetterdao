@@ -574,6 +574,11 @@ export const getOrDeployContractInstances = async ({
   await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(owner).setEmissionsAddress(await emissions.getAddress())
 
+  // Set up veBetterPassport
+  await veBetterPassport
+    .connect(owner)
+    .grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), await x2EarnRewardsPool.getAddress())
+
   //Set the emissions address and the admin as the ROUND_STARTER_ROLE in XAllocationVoting
   const roundStarterRole = await xAllocationVoting.ROUND_STARTER_ROLE()
   await xAllocationVoting

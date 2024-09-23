@@ -556,9 +556,10 @@ describe("X-Apps - @shard3", function () {
     })
 
     it("App needs to wait next round if added during an ongoing round", async function () {
-      const { otherAccounts, x2EarnApps, owner, xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { otherAccounts, x2EarnApps, owner, xAllocationVoting, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -569,6 +570,9 @@ describe("X-Apps - @shard3", function () {
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
       let round1 = await startNewAllocationRound()
+
+      await veBetterPassport.whitelist(voter.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       await x2EarnApps
         .connect(owner)
