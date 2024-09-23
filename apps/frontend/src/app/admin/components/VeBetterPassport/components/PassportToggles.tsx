@@ -1,4 +1,4 @@
-import { TogglePassportCheck, useIsPassportCheckEnabled } from "@/api/contracts/veBetterPassport"
+import { TogglePassportCheck, usePassportChecks } from "@/api"
 import { TransactionModal } from "@/components"
 import { TogglePassportFunction, useTogglePassportCheck } from "@/hooks"
 import {
@@ -18,12 +18,14 @@ import {
 import { useCallback } from "react"
 
 export const PassportToggles = () => {
-  const { data: isWhiteListCheckEnabled } = useIsPassportCheckEnabled("whitelistCheckEnabled")
-  const { data: isBlackListCheckEnabled } = useIsPassportCheckEnabled("blacklistCheckEnabled")
-  const { data: isSignalingCheckEnabled } = useIsPassportCheckEnabled("signalingCheckEnabled")
-  const { data: isParticipationScoreCheckEnabled } = useIsPassportCheckEnabled("participationScoreCheckEnabled")
-  const { data: isNodeOwnershipCheckEnabled } = useIsPassportCheckEnabled("nodeOwnershipCheckEnabled")
-  const { data: isGMOwnershipCheckEnabled } = useIsPassportCheckEnabled("gmOwnershipCheckEnabled")
+  const {
+    isWhiteListCheckEnabled,
+    isBlackListCheckEnabled,
+    isSignalingCheckEnabled,
+    isParticipationScoreCheckEnabled,
+    isNodeOwnershipCheckEnabled,
+    isGMOwnershipCheckEnabled,
+  } = usePassportChecks()
 
   return (
     <Card>
