@@ -22,7 +22,7 @@ export const SustainabilityActionsResponseSchema = z.object({
 
         proof: z
           .object({
-            version: z.string(),
+            version: z.number(),
             description: z.string(),
             proof: z.object({
               image: z.string().optional(),
@@ -49,17 +49,17 @@ export const SustainabilityActionsResponseSchema = z.object({
           .optional(),
       }),
     )
-    .optional(),
+    .default([]),
 })
 
 export type SustainabilityActionsResponse = z.infer<typeof SustainabilityActionsResponseSchema>
 
 type SustainabilityActionsRequest = {
   appId?: string
-  wallet?: number
+  wallet?: string
   page?: number
   size?: number
-  direction: "asc" | "desc"
+  direction?: "asc" | "desc"
 }
 
 /**
@@ -99,10 +99,14 @@ export const getSustainabilitActionsQueryKey = (data: Omit<SustainabilityActions
  * @param data the request data @see SustainabilityUserOverviewRequest
  * @returns the query object with the data @see SustainabilityActionsResponse
  */
-export const useSustainabilityActionsOverview = (data: Omit<SustainabilityActionsRequest, "page" | "size">) => {
+export const useSustainabilityActions = ({
+  wallet,
+  appId,
+  direction = "asc",
+}: Omit<SustainabilityActionsRequest, "page" | "size">) => {
   return useInfiniteQuery({
-    queryKey: getSustainabilitActionsQueryKey(data),
-    queryFn: ({ pageParam = 0 }) => getSustainabilityActions({ ...data, page: pageParam }),
+    queryKey: getSustainabilitActionsQueryKey({ wallet, appId, direction }),
+    queryFn: ({ pageParam = 0 }) => getSustainabilityActions({ page: pageParam, wallet, appId, direction }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,

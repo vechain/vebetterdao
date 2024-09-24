@@ -4,6 +4,7 @@ import { DashboardSideBar } from "./DashboardSideBar"
 import { DashboardXApps } from "./DashboardXApps"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 import { LowOnVthoCard, CastYourVoteCard } from "./Banners"
+import { YourBetterActionsCard } from "./YourBetterActionsCard"
 
 export const HomePageContent = () => {
   return (
@@ -17,6 +18,7 @@ export const HomePageContent = () => {
           <LowOnVthoCard />
           <CastYourVoteCard />
           <SupplyBreakdownCard />
+          <YourBetterActionsCard />
           <DashboardAllocationRounds />
           <DashboardXApps />
         </VStack>
