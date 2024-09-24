@@ -34,6 +34,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const endorseAppMutation = useEndorseApp({
     appId: xApp?.id ?? "",
     nodeId,
+    userAddress: account ?? "",
     onSuccess: onClose,
   })
 

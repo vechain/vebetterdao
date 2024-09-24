@@ -19,6 +19,7 @@ import {
   AlertIcon,
   AlertDescription,
 } from "@chakra-ui/react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -31,10 +32,12 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { endorsedApp, xNodeId, xNodePoints } = useXNode()
   const { data: logo } = useIpfsImage(endorsedApp?.logo)
+  const { account } = useWallet()
 
   const unendorseAppMutation = useUnendorseApp({
     appId: endorsedApp?.id,
     nodeId: xNodeId,
+    userAddress: account ?? "",
     onSuccess: onClose,
   })
 
