@@ -3,6 +3,28 @@
 pragma solidity 0.8.20;
 
 interface IEmissions {
+  struct Emission {
+    uint256 xAllocations;
+    uint256 vote2Earn;
+    uint256 treasury;
+  }
+
+  struct InitializationData {
+    address minter;
+    address admin;
+    address upgrader;
+    address contractsAddressManager;
+    address decaySettingsManager;
+    address b3trAddress;
+    address[4] destinations;
+    uint256 migrationAmount;
+    uint256 initialXAppAllocation;
+    uint256 cycleDuration;
+    uint256[4] decaySettings;
+    uint256 treasuryPercentage;
+    uint256 maxVote2EarnDecay;
+  }
+
   error AccessControlBadConfirmation();
 
   error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
@@ -81,7 +103,7 @@ interface IEmissions {
 
   function distribute() external;
 
-  function emissions(uint256 cycle) external view returns (Emissions.Emission memory);
+  function emissions(uint256 cycle) external view returns (Emission memory);
 
   function getCurrentCycle() external view returns (uint256);
 
@@ -103,7 +125,7 @@ interface IEmissions {
 
   function initialXAppAllocation() external view returns (uint256);
 
-  function initialize(Emissions.InitializationData memory data) external;
+  function initialize(InitializationData memory data) external;
 
   function initializeV2(bool _isEmissionsNotAligned) external;
 
@@ -176,28 +198,4 @@ interface IEmissions {
   function xAllocationsDecayPeriod() external view returns (uint256);
 
   function xAllocationsGovernor() external view returns (address);
-}
-
-interface Emissions {
-  struct Emission {
-    uint256 xAllocations;
-    uint256 vote2Earn;
-    uint256 treasury;
-  }
-
-  struct InitializationData {
-    address minter;
-    address admin;
-    address upgrader;
-    address contractsAddressManager;
-    address decaySettingsManager;
-    address b3trAddress;
-    address[4] destinations;
-    uint256 migrationAmount;
-    uint256 initialXAppAllocation;
-    uint256 cycleDuration;
-    uint256[4] decaySettings;
-    uint256 treasuryPercentage;
-    uint256 maxVote2EarnDecay;
-  }
 }
