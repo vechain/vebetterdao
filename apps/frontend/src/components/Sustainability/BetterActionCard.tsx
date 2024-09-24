@@ -19,14 +19,15 @@ export const BetterActionCard = ({ action }: Props) => {
         <HStack spacing={4} w="full" justify="space-between">
           <HStack spacing={4}>
             <B3TRIcon />
-            <VStack spacing={2} align="stretch">
+            <VStack spacing={0} align="stretch">
               <Heading size="xs">{`Better action in ${getAppName(action?.appId ?? "")}`}</Heading>
               <Text>{dayjs.unix(action?.blockTimestamp ?? 0).fromNow()}</Text>
             </VStack>
           </HStack>
           <HStack spacing={2}>
-            <Text>{action.amount}</Text>
-            <B3TRIcon />
+            <Text>
+              {action.amount} {"B3TR"}
+            </Text>
           </HStack>
         </HStack>
       </CardBody>

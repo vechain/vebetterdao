@@ -19,15 +19,19 @@ export const YourBetterActionsCard = () => {
   return (
     <Card w={"full"} variant={"baseWithBorder"}>
       <CardHeader>
-        <Heading size="lg">{t("Your better actions")}</Heading>
+        <Heading size="md">{t("Your better actions")}</Heading>
       </CardHeader>
       <CardBody>
-        <VStack spacing={4} align="stretch">
+        <VStack spacing={12} align="stretch">
           <UserSustainabilityOverviewStats />
-          <Heading size="sm">{t("Last actions")}</Heading>
-          {lastActionsData.map((action, index) => (
-            <BetterActionCard key={index} action={action} />
-          ))}
+          <VStack spacing={4} align="stretch">
+            <Heading size="md" fontWeight={400}>
+              {t("Last actions")}
+            </Heading>
+            {lastActionsData.map((action, index) => (
+              <BetterActionCard key={index} action={action} />
+            ))}
+          </VStack>
         </VStack>
       </CardBody>
     </Card>
