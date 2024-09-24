@@ -21,6 +21,8 @@ import {
 } from "@chakra-ui/react"
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import { AddressUtils } from "@repo/utils"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -38,7 +40,6 @@ export const UpdateRoleCard = () => {
   const isValidAddress = useMemo(() => {
     //Do not allow empty address or same address as the current wallet
     if (!walletAddress || !account) return false
-    if (walletAddress.toLowerCase() === account?.toLowerCase()) return false
 
     return AddressUtils.isValid(walletAddress)
   }, [walletAddress])
@@ -49,7 +50,7 @@ export const UpdateRoleCard = () => {
   )
 
   const selectedContractObject = useMemo(
-    () => CONTRACT_LIST.find(contract => contract.contractAddress === selectedContractAddress),
+    () => CONTRACT_LIST.find(contract => compareAddresses(contract.contractAddress, selectedContractAddress)),
     [selectedContractAddress],
   )
 
@@ -69,7 +70,7 @@ export const UpdateRoleCard = () => {
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
-      if (event) event.preventDefault()
+      if (event) event?.preventDefault()
       accessControlAction.sendTransaction()
       onOpen()
     },
@@ -80,13 +81,6 @@ export const UpdateRoleCard = () => {
     accessControlAction.resetStatus()
     onClose()
   }, [accessControlAction, userAlreadyHasRole, onClose])
-
-  const ellipsisAddress = (address: string, startLength = 6, endLength = 4) => {
-    if (!address) return ""
-    const start = address.slice(0, startLength)
-    const end = address.slice(-endLength)
-    return `${start}...${end}`
-  }
 
   return (
     <>
@@ -154,12 +148,12 @@ export const UpdateRoleCard = () => {
                   )}
                   <Badge textTransform={"none"} fontSize={"sm"} colorScheme={userAlreadyHasRole ? "green" : "red"}>
                     {userAlreadyHasRole
-                      ? t("Wallet '{{ellipsisAddress}}' already has '{{selectedRole}}' role", {
-                          ellipsisAddress: ellipsisAddress(walletAddress),
+                      ? t("Wallet '{{humanAddress}}' already has '{{selectedRole}}' role", {
+                          humanAddress: humanAddress(walletAddress),
                           selectedRole,
                         })
-                      : t("Wallet '{{ellipsisAddress}}' doesn't have '{{selectedRole}}' role", {
-                          ellipsisAddress: ellipsisAddress(walletAddress),
+                      : t("Wallet '{{humanAddress}}' doesn't have '{{selectedRole}}' role", {
+                          humanAddress: humanAddress(walletAddress),
                           selectedRole,
                         })}
                   </Badge>
@@ -167,7 +161,11 @@ export const UpdateRoleCard = () => {
               ) : null}
 
               <Button isDisabled={!isFormValid} colorScheme={userAlreadyHasRole ? "red" : "green"} type="submit">
-                {userAlreadyHasRole ? t("Revoke Role") : t("Grant Role")}
+                {userAlreadyHasRole
+                  ? compareAddresses(account ?? "", walletAddress)
+                    ? t("Renounce Role")
+                    : t("Revoke Role")
+                  : t("Grant Role")}
               </Button>
             </VStack>
           </form>
@@ -178,13 +176,13 @@ export const UpdateRoleCard = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={accessControlAction.error ? "error" : accessControlAction.status}
-        successTitle={"Wallet address roles updated successfully"}
+        successTitle={t("Wallet address roles updated successfully")}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
         txId={accessControlAction.txReceipt?.meta?.txID ?? accessControlAction.sendTransactionTx?.txid}
-        pendingTitle={"Updating wallet address role..."}
-        errorTitle={"Error updating role"}
+        pendingTitle={t("Updating wallet address role...")}
+        errorTitle={t("Error updating role")}
         errorDescription={accessControlAction.error?.reason}
       />
     </>

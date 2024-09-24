@@ -17,7 +17,12 @@ type Props = {
 const accessControlInterface = AccessControl__factory.createInterface()
 
 /**
- * useAccessControl is a custom hook that handles granting and revoking roles in a contract.
+ * Hook to grant or revoke roles to a wallet address
+ * @param contractAddress address of the contract
+ * @param walletAddress address to be granted or revoked
+ * @param role role to be granted or revoked
+ * @param onSuccess callback function to be called after a successful transaction
+ * @param invalidateCache boolean to determine if cache should be invalidated after a successful transaction
  */
 export const useAccessControl = ({
   contractAddress,
