@@ -80,11 +80,20 @@ export const getSustainabilityUserOverviewQueryKey = (
  * @param data the request data @see SustainabilityUserOverviewRequest
  * @returns the query object with the data @see SustainabilityUserOverviewResponse
  */
-export const useSustainabilityUserOverview = (data: Omit<SustainabilityUserOverviewRequest, "page" | "size">) => {
+export const useSustainabilityUserOverview = ({
+  wallet,
+  roundId,
+  direction = "asc",
+}: Omit<SustainabilityUserOverviewRequest, "page" | "size">) => {
   return useInfiniteQuery({
-    queryKey: getSustainabilityUserOverviewQueryKey(data),
-    queryFn: ({ pageParam = 1 }) => getSustainabilityUserOverview({ ...data, page: pageParam }),
-    initialPageParam: 1,
+    queryKey: getSustainabilityUserOverviewQueryKey({
+      wallet,
+      roundId,
+      direction,
+    }),
+    queryFn: ({ pageParam = 0 }) =>
+      getSustainabilityUserOverview({ page: pageParam, size: 100, wallet, roundId, direction }),
+    initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,
   })

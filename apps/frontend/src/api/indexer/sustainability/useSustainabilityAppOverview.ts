@@ -55,8 +55,8 @@ export const getSustainabilityAppOverviewQueryKey = (data: Omit<SustainabilityAp
 export const useSustainabilityAppOverview = (data: Omit<SustainabilityAppOverviewRequest, "page" | "size">) => {
   return useInfiniteQuery({
     queryKey: getSustainabilityAppOverviewQueryKey(data),
-    queryFn: ({ pageParam = 1 }) => getSustainabilityAppOverview({ ...data, page: pageParam }),
-    initialPageParam: 1,
+    queryFn: ({ pageParam = 0 }) => getSustainabilityAppOverview({ ...data, page: pageParam }),
+    initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,
   })
