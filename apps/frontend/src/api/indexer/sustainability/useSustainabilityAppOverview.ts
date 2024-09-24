@@ -32,6 +32,10 @@ export const getSustainabilityAppOverview = async (
     method: "GET",
   })
 
+  if (!response.ok) {
+    throw new Error(`Failed to fetch sustainability app overview: ${response.statusText}`)
+  }
+
   return SustainabilityUserOverviewResponseSchema.parse(await response.json())
 }
 

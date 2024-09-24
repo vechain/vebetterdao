@@ -79,6 +79,10 @@ export const getSustainabilityActions = async (
     method: "GET",
   })
 
+  if (!response.ok) {
+    throw new Error(`Failed to fetch sustainability actions: ${response.statusText}`)
+  }
+
   return SustainabilityActionsResponseSchema.parse(await response.json())
 }
 

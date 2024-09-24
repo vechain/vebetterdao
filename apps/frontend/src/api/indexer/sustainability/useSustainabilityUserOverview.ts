@@ -17,19 +17,21 @@ export const SustainabilityUserOverviewResponseSchema = z.object({
         roundId: z.number(),
         actionsRewarded: z.number(),
         totalRewardAmount: z.number(),
-        totalImpact: z.object({
-          carbon: z.number().optional(),
-          water: z.number().optional(),
-          energy: z.number().optional(),
-          waste_mass: z.number().optional(),
-          waste_items: z.number().optional(),
-          waste_reduction: z.number().optional(),
-          biodiversity: z.number().optional(),
-          people: z.number().optional(),
-          timber: z.number().optional(),
-          plastic: z.number().optional(),
-          learning_time: z.number().optional(),
-        }),
+        totalImpact: z
+          .object({
+            carbon: z.number().optional(),
+            water: z.number().optional(),
+            energy: z.number().optional(),
+            waste_mass: z.number().optional(),
+            waste_items: z.number().optional(),
+            waste_reduction: z.number().optional(),
+            biodiversity: z.number().optional(),
+            people: z.number().optional(),
+            timber: z.number().optional(),
+            plastic: z.number().optional(),
+            learning_time: z.number().optional(),
+          })
+          .optional(),
       }),
     )
     .optional(),
@@ -38,11 +40,11 @@ export const SustainabilityUserOverviewResponseSchema = z.object({
 export type SustainabilityUserOverviewResponse = z.infer<typeof SustainabilityUserOverviewResponseSchema>
 
 type SustainabilityUserOverviewRequest = {
-  wallet: string
+  wallet?: string
   roundId?: number
-  page: number
-  size: number
-  direction: "asc" | "desc"
+  page?: number
+  size?: number
+  direction?: "asc" | "desc"
 }
 
 /**
@@ -54,12 +56,17 @@ export const getSustainabilityUserOverview = async (
   data: SustainabilityUserOverviewRequest,
 ): Promise<SustainabilityUserOverviewResponse> => {
   if (!indexerUrl) throw new Error("Indexer URL not found")
+  if (!data.wallet) throw new Error("Wallet is required")
 
   const queryString = buildQueryString(data)
 
   const response = await fetch(`${indexerUrl}/sustainability/user/overviews?${queryString}`, {
     method: "GET",
   })
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch sustainability user overview: ${response.statusText}`)
+  }
 
   return SustainabilityUserOverviewResponseSchema.parse(await response.json())
 }
@@ -83,6 +90,6 @@ export const useSustainabilityUserOverview = (data: SustainabilityUserOverviewRe
   return useQuery({
     queryKey: getSustainabilityUserOverviewQueryKey(data),
     queryFn: async () => await getSustainabilityUserOverview(data),
-    enabled: !!data,
+    enabled: !!data && !!data.wallet,
   })
 }
