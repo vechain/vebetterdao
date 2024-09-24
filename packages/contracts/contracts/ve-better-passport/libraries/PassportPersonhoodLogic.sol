@@ -28,9 +28,10 @@ import { PassportChecksLogic } from "./PassportChecksLogic.sol";
 import { PassportSignalingLogic } from "./PassportSignalingLogic.sol";
 import { PassportPoPScoreLogic } from "./PassportPoPScoreLogic.sol";
 import { PassportClockLogic } from "./PassportClockLogic.sol";
-import { PassportDelegationLogic } from "./PassportDelegationLogic.sol";
+import { PassportEntityLogic } from "./PassportEntityLogic.sol";
 import { PassportWhitelistAndBlacklistLogic } from "./PassportWhitelistAndBlacklistLogic.sol";
 import { PassportTypes } from "./PassportTypes.sol";
+import "hardhat/console.sol";
 
 library PassportPersonhoodLogic {
   /**
@@ -45,6 +46,8 @@ library PassportPersonhoodLogic {
     // Resolve the address of the person based on the delegation status
     user = _resolvePersonhoodAddress(self, user, PassportClockLogic.clock());
 
+    console.log("User: %s", user);
+    console.log("Timepoint: %s", PassportClockLogic.clock());
     // Check if the user has delegated their personhood to another wallet
     if (user == address(0)) {
       return (false, "User has delegated their personhood");
@@ -110,6 +113,9 @@ library PassportPersonhoodLogic {
   ) external view returns (bool person, string memory reason) {
     // Resolve the address of the person based on the delegation status
     user = _resolvePersonhoodAddress(self, user, timepoint);
+
+    console.log("User: %s", user);
+    console.log("Timepoint: %s", timepoint);
 
     // Check if the user has delegated their personhood to another wallet
     if (user == address(0)) {
@@ -180,10 +186,8 @@ library PassportPersonhoodLogic {
     address user,
     uint256 timepoint
   ) private view returns (address) {
-    if (PassportDelegationLogic.isDelegateeInTimepoint(self, user, timepoint)) {
-      return PassportDelegationLogic.getDelegatorInTimepoint(self, user, timepoint); // Return the delegator's address
-    } else if (PassportDelegationLogic.isDelegatorInTimepoint(self, user, timepoint)) {
-      return address(0); // Return zero address if they delegated their personhood
+    if (PassportEntityLogic.wasEntityLinkedToPassportAtTimepoint(self, user, timepoint)) {
+       return address(0); // Return zero address if they delegated their personhood
     } else {
       return user; // Return the user's own address if no delegation exists
     }

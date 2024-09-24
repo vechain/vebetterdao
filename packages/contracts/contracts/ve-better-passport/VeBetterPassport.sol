@@ -6,7 +6,7 @@ import { PassportStorageTypes } from "./libraries/PassportStorageTypes.sol";
 import { PassportChecksLogic } from "./libraries/PassportChecksLogic.sol";
 import { PassportWhitelistAndBlacklistLogic } from "./libraries/PassportWhitelistAndBlacklistLogic.sol";
 import { PassportPoPScoreLogic } from "./libraries/PassportPoPScoreLogic.sol";
-import { PassportDelegationLogic } from "./libraries/PassportDelegationLogic.sol";
+import { PassportEntityLogic } from "./libraries/PassportEntityLogic.sol";
 import { PassportClockLogic } from "./libraries/PassportClockLogic.sol";
 import { PassportSignalingLogic } from "./libraries/PassportSignalingLogic.sol";
 import { PassportPersonhoodLogic } from "./libraries/PassportPersonhoodLogic.sol";
@@ -232,72 +232,64 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportPoPScoreLogic.roundsForCumulativeScore($);
   }
 
-  /// @notice Returns the delegatee address for a delegator
-  /// @param delegator - the delegator address
-  function getDelegatee(address delegator) external view returns (address) {
+  /// @notice Returns the passport address for a entity
+  /// @param entity - the entity address
+  function getPassportForEntity(address entity) external view returns (address) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportDelegationLogic.getDelegatee($, delegator);
+    return PassportEntityLogic.getPassportForEntity($, entity);
   }
 
-  /// @notice Returns the delegatee address for a delegator at a specific timepoint
-  /// @param delegator - the delegator address
+  /// @notice Returns the passport address for a entity at a specific timepoint
+  /// @param entity - the entity address
   /// @param timepoint - the timepoint to query
-  function getDelegateeInTimepoint(address delegator, uint256 timepoint) external view returns (address) {
+  function getPassportForEntityAtTimepoint(address entity, uint256 timepoint) external view returns (address) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportDelegationLogic.getDelegateeInTimepoint($, delegator, timepoint);
+    return PassportEntityLogic.getPassportForEntityAtTimepoint($, entity, timepoint);
   }
 
-  /// @notice Returns the delegator address for a delegatee
-  /// @param delegatee - the delegatee address
-  function getDelegator(address delegatee) external view returns (address) {
+  /// @notice Returns the entity address for a passport
+  /// @param passport - the passport address
+  function getEntitiesLinkedToPassport(address passport) external view returns (address[] memory) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportDelegationLogic.getDelegator($, delegatee);
+    return PassportEntityLogic.getEntitiesLinkedToPassport($, passport);
   }
 
-  /// @notice Returns the delegator address for a delegatee at a specific timepoint
-  /// @param delegatee - the delegatee address
-  /// @param timepoint - the timepoint to query
-  function getDelegatorInTimepoint(address delegatee, uint256 timepoint) external view returns (address) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportDelegationLogic.getDelegatorInTimepoint($, delegatee, timepoint);
-  }
-
-  /// @notice Returns if a user is a delegator
+  /// @notice Returns if a user is a entity
   /// @param user - the user address
-  function isDelegator(address user) external view returns (bool) {
+  function isEntityLinkedToPassport(address user) external view returns (bool) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportDelegationLogic.isDelegator($, user);
+    return PassportEntityLogic.isEntityLinkedToPassport($, user);
   }
 
-  /// @notice Returns if a user is a delegator at a specific timepoint
+  /// @notice Returns if a user is a entity at a specific timepoint
   /// @param user - the user address
   /// @param timepoint - the timepoint to query
-  function isDelegatorInTimepoint(address user, uint256 timepoint) external view returns (bool) {
+  function wasEntityLinkedToPassportAtTimepoint(address user, uint256 timepoint) external view returns (bool) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportDelegationLogic.isDelegatorInTimepoint($, user, timepoint);
+    return PassportEntityLogic.wasEntityLinkedToPassportAtTimepoint($, user, timepoint);
   }
 
-  /// @notice Returns if a user is a delegatee
+  /// @notice Returns if a user is a passport
   /// @param user - the user address
-  function isDelegatee(address user) external view returns (bool) {
+  function isPassport(address user) external view returns (bool) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportDelegationLogic.isDelegatee($, user);
+    return PassportEntityLogic.isPassport($, user);
   }
 
-  /// @notice Returns if a user is a delegatee at a specific timepoint
+  /// @notice Returns if a user is a passport at a specific timepoint
   /// @param user - the user address
   /// @param timepoint - the timepoint to query
-  function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool) {
+  function isPassportInTimepoint(address user, uint256 timepoint) external view returns (bool) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportDelegationLogic.isDelegateeInTimepoint($, user, timepoint);
+    return PassportEntityLogic.isPassportInTimepoint($, user, timepoint);
   }
 
-  /// @notice Returns the pending delegations for a delegatee
-  /// @param delegatee - the delegatee address
-  /// @return the delegator address
-  function getPendingDelegations(address delegatee) external view returns (address[] memory) {
+  /// @notice Returns the pending delegations for a passport
+  /// @param passport - the passport address
+  /// @return the entity address
+  function getPendingEntitiesForPassport(address passport) external view returns (address[] memory) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportDelegationLogic.getPendingDelegations($, delegatee);
+    return PassportEntityLogic.getPendingEntitiesForPassport($, passport);
   }
 
   /// @notice Returns the number of times a user has been signaled
@@ -508,45 +500,46 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Delegate the personhood to another address
-  /// The delegator must sign a message where he authorizes the delegatee to request the delegation:
+  /// The entity must sign a message where he authorizes the passport to request the delegation:
   /// this is done to avoid that a malicious user delegates the personhood to another user without his consent.
   /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
   /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
-  /// @param delegator - the delegator address
+  /// @param entity - the entity address
   /// @param deadline - the deadline for the signature
   /// @param signature - the signature of the delegation
-  function delegateWithSignature(address delegator, uint256 deadline, bytes memory signature) external {
+  function linkEntityToPassportWithSignature(address entity, uint256 deadline, bytes memory signature) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportDelegationLogic.delegateWithSignature($, delegator, deadline, signature);
+    PassportEntityLogic.linkEntityToPassportWithSignature($, entity, deadline, signature);
   }
 
   /// @notice Delegate the personhood to another address
-  /// @dev The delegatee must accept the delegation
+  /// @dev The passport must accept the delegation
   /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
   /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
-  function delegatePersonhood(address delegatee) external {
+  function linkEntityToPassport(address passport) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportDelegationLogic.delegatePersonhood($, delegatee);
+    PassportEntityLogic.linkEntityToPassport($, passport);
   }
 
-  /// @notice Allow the delegatee to accept the delegation
-  /// @param delegator - the delegator address
-  function acceptDelegation(address delegator) external {
+  /// @notice Allow the passport to accept the delegation
+  /// @param entity - the entity address
+  function acceptEntityLink(address entity) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportDelegationLogic.acceptDelegation($, delegator);
+    PassportEntityLogic.acceptEntityLink($, entity);
   }
 
-  /// @notice Revoke the delegation (can be done by the delegator or the delegatee)
-  function revokeDelegation() external {
+  /// @notice Revoke the delegation (can be done by the entity or the passport)
+  /// @param entity - the entity address
+  function removeEntityLink(address entity) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportDelegationLogic.revokeDelegation($);
+    PassportEntityLogic.removeEntityLink($, entity);
   }
 
-  /// @notice Allows a delegator to remove their pending delegation to a delegatee.
-  /// @param delegator - the delegator address
-  function removePendingDelegation(address delegator) external {
+  /// @notice Allows a entity to remove their pending delegation to a passport.
+  /// @param entity - the entity address
+  function removePendingEntityLinkFromPassport(address entity) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportDelegationLogic.removePendingDelegation($, delegator);
+    PassportEntityLogic.removePendingEntityLinkFromPassport($, entity);
   }
 
   /// @notice Signals a user
