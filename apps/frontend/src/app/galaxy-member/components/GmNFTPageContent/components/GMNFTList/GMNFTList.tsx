@@ -18,8 +18,8 @@ import { useGetTokensInfoByOwner } from "@/api/contracts/galaxyMember/hooks/useG
 import { useWallet } from "@vechain/dapp-kit-react"
 import { GMNFTListItem } from "./GMNFTListItem"
 import { useCallback, useMemo } from "react"
-import { MintNFTModal } from "@/components/GmNFTAndNodeCard/components/GMUpgradeButton/components/MintNFTModal"
-import { useClaimNFT } from "@/hooks"
+import { useMintNFT } from "@/hooks"
+import { MintNFTModal } from "@/components/MintNFTModal"
 
 export const GMNFTList = () => {
   const { t } = useTranslation()
@@ -44,10 +44,10 @@ export const GMNFTList = () => {
     sendTransaction: freeMint,
     isTxReceiptLoading,
     sendTransactionPending,
-  } = useClaimNFT({ onFailure: mintNftModal.onClose })
+  } = useMintNFT({ onFailure: mintNftModal.onClose })
 
   const handleMintGM = useCallback(() => {
-    freeMint()
+    freeMint({})
     mintNftModal.onOpen()
   }, [freeMint, mintNftModal])
 

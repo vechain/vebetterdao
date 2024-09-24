@@ -61,6 +61,8 @@ export const useXNode = () => {
     xNodes.isError || endorsedAppMetadata.isError || nodesEndorsementScore.isError || isErrorAttachedGMTokenId
   const xNodeError = xNodes.error || endorsedAppMetadata.error || nodesEndorsementScore.error || errorAttachedGMTokenId
 
+  const isXNodeAttachedToGM = !!Number(attachedGMTokenId)
+
   return {
     isXNodeLoading,
     isXNodeError,
@@ -74,6 +76,7 @@ export const useXNode = () => {
     isEndorsingApp,
     isXNodeHolder,
     attachedGMTokenId,
+    isXNodeAttachedToGM,
     isLoadingAttachedGMTokenId,
     isErrorAttachedGMTokenId,
     errorAttachedGMTokenId,

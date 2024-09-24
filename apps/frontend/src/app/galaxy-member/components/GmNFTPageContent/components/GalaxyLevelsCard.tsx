@@ -6,22 +6,22 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 export const GalaxyLevelsCard = () => {
-  const { gmLevel } = useSelectedGmNft()
+  const { gmLevel, maxGmLevel } = useSelectedGmNft()
   const { t } = useTranslation()
   const [showShortened, setShowShortened] = useState(true)
   const gmNftsShortened = useMemo(() => {
     const level = Number(gmLevel)
     if (level === 1) {
-      return gmNfts.slice(0, 4)
+      return gmNfts.slice(0, Math.min(4, maxGmLevel))
     }
-    if (level >= 2 && level <= 8) {
-      return gmNfts.slice(level - 1, level + 3)
+    if (level >= 2 && level <= maxGmLevel - 2) {
+      return gmNfts.slice(level - 1, Math.min(level + 3, maxGmLevel))
     }
-    if (level === 9) {
-      return gmNfts.slice(5, 9)
+    if (level === maxGmLevel - 1) {
+      return gmNfts.slice(maxGmLevel - 5, maxGmLevel - 1)
     }
-    return gmNfts.slice(6, 10)
-  }, [gmLevel])
+    return gmNfts.slice(maxGmLevel - 4, maxGmLevel)
+  }, [gmLevel, maxGmLevel])
 
   return (
     <Card variant="baseWithBorder">
@@ -33,7 +33,7 @@ export const GalaxyLevelsCard = () => {
               {t("Earn enough B3TR to upgrade your level and get multipliers for all your voting rewards!")}
             </Text>
           </VStack>
-          {(showShortened ? gmNftsShortened : gmNfts).map(gmNft => {
+          {(showShortened ? gmNftsShortened : gmNfts.slice(0, maxGmLevel)).map(gmNft => {
             const isCurrentLevel = gmNft.level === gmLevel
             return (
               <HStack key={gmNft.level} justify="space-between">
@@ -51,7 +51,7 @@ export const GalaxyLevelsCard = () => {
                       {gmNft.name}
                     </Text>
                     <Text fontSize="sm" color="#6A6A6A">
-                      {gmNft.level === "9"
+                      {gmNft.level === maxGmLevel
                         ? t("Max Level")
                         : t("{{b3trToUpgrade}} B3TR to upgrade", { b3trToUpgrade: gmNft.b3trToUpgrade })}
                     </Text>

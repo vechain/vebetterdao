@@ -1,6 +1,6 @@
 import { useGMbalance, useIsGMclaimable, useParticipatedInGovernance } from "@/api"
 import { useNFTImage } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
-import { useClaimNFT } from "@/hooks"
+import { useMintNFT } from "@/hooks"
 import {
   Box,
   Button,
@@ -47,12 +47,12 @@ export const GmNFT = () => {
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
-  const { sendTransaction: freeMint, isTxReceiptLoading, sendTransactionPending } = useClaimNFT({ onFailure: onClose })
+  const { sendTransaction: freeMint, isTxReceiptLoading, sendTransactionPending } = useMintNFT({ onFailure: onClose })
 
   const { imageData, tokenID, isLoading: isLoadingNFT } = useNFTImage()
 
   const handleFreeMint = useCallback(() => {
-    freeMint()
+    freeMint({})
     onOpen()
   }, [freeMint, onOpen])
 
