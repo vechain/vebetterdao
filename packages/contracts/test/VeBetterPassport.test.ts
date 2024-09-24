@@ -669,7 +669,7 @@ describe("VeBetterPassport - @shard3", function () {
   })
 
   describe("PersonhoodDelegation", function () {
-    it("Should be able to delegate personhood", async function () {
+    it("Should be able to delegate personhood with signature", async function () {
       const {
         xAllocationVoting,
         x2EarnApps,
@@ -786,6 +786,183 @@ describe("VeBetterPassport - @shard3", function () {
           [app1Id, app2Id, app3Id],
           [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
         )
+    })
+
+    it("Should be able to delegate personhood", async function () {
+      const {
+        xAllocationVoting,
+        x2EarnApps,
+        otherAccounts,
+        owner,
+        veBetterPassport,
+        otherAccount: delegatee,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+      await getVot3Tokens(delegatee, "10000")
+      await getVot3Tokens(owner, "10000")
+
+      // Whitelist owner
+      await expect(veBetterPassport.connect(owner).whitelist(owner.address))
+        .to.emit(veBetterPassport, "UserWhitelisted")
+        .withArgs(owner.address, owner.address)
+      await veBetterPassport.connect(owner).whitelist(otherAccounts[1].address)
+
+      // Expect owner to be whitelisted
+      expect(await veBetterPassport.isWhitelisted(owner.address)).to.be.true
+
+      // Enable whitelist check
+      await veBetterPassport.connect(owner).toggleWhitelistCheck()
+
+      // whitelist check should be enabled
+      expect(await veBetterPassport.whitelistCheckEnabled()).to.be.true
+
+      // expect owner to be person
+      expect(await veBetterPassport.isPerson(owner.address)).to.deep.equal([true, "User is whitelisted"])
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      // delegate personhood
+      await expect(veBetterPassport.connect(owner).delegatePersonhood(delegatee.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(owner.address, delegatee.address)
+
+      // Check the pending delegation
+      const pendingDelegation = await veBetterPassport.getPendingDelegations(delegatee.address)
+      expect(pendingDelegation[0]).to.equal(owner.address)
+
+      // Perform the delegation using the signature
+      await expect(veBetterPassport.connect(delegatee).acceptDelegation(owner.address))
+        .to.emit(veBetterPassport, "DelegationCreated")
+        .withArgs(owner.address, delegatee.address)
+
+      // Check the pending delegation
+      const pendingDelegation2 = await veBetterPassport.getPendingDelegations(delegatee.address)
+      expect(pendingDelegation2.length).to.equal(0)
+
+      // Verify that the delegatee has been assigned the delegator
+      const storedDelegatee = await veBetterPassport.getDelegatee(owner.address)
+      expect(storedDelegatee).to.equal(delegatee.address)
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+
+      //Start allocation round
+      const round1 = await startNewAllocationRound()
+      // Vote
+      await xAllocationVoting
+        .connect(delegatee)
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+
+      // Otheraccounts[1] has not delegated his passport and can vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+    })
+
+    it("Should be able to reject delegation request", async function () {
+      const {
+        xAllocationVoting,
+        x2EarnApps,
+        otherAccounts,
+        owner,
+        veBetterPassport,
+        otherAccount: delegatee,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+      await getVot3Tokens(delegatee, "10000")
+      await getVot3Tokens(owner, "10000")
+
+      // Whitelist owner
+      await expect(veBetterPassport.connect(owner).whitelist(owner.address))
+        .to.emit(veBetterPassport, "UserWhitelisted")
+        .withArgs(owner.address, owner.address)
+      await veBetterPassport.connect(owner).whitelist(otherAccounts[1].address)
+
+      // Expect owner to be whitelisted
+      expect(await veBetterPassport.isWhitelisted(owner.address)).to.be.true
+
+      // Enable whitelist check
+      await veBetterPassport.connect(owner).toggleWhitelistCheck()
+
+      // whitelist check should be enabled
+      expect(await veBetterPassport.whitelistCheckEnabled()).to.be.true
+
+      // expect owner to be person
+      expect(await veBetterPassport.isPerson(owner.address)).to.deep.equal([true, "User is whitelisted"])
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      // delegate personhood
+      await expect(veBetterPassport.connect(owner).delegatePersonhood(delegatee.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(owner.address, delegatee.address)
+
+      // Check the pending delegation
+      const pendingDelegation = await veBetterPassport.getPendingDelegations(delegatee.address)
+      expect(pendingDelegation[0]).to.equal(owner.address)
+
+      // Perform the delegation using the signature
+      await expect(veBetterPassport.connect(delegatee).removePendingDelegation(owner.address))
+        .to.emit(veBetterPassport, "DelegationRevoked")
+        .withArgs(owner.address, delegatee.address)
+
+      // Check the pending delegation
+      const pendingDelegation2 = await veBetterPassport.getPendingDelegations(delegatee.address)
+      expect(pendingDelegation2.length).to.equal(0)
+
+      // Owner can vote
+      await expect(
+        xAllocationVoting
+          .connect(owner)
+          .castVote(
+            await startNewAllocationRound(),
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+          ),
+      ).to.be.reverted
     })
 
     it("Should not be able to vote if delegating and not delegatee with allocation voting", async function () {
