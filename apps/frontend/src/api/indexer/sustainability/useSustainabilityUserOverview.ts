@@ -6,7 +6,7 @@ import { z } from "zod"
 
 const indexerUrl = getConfig().indexerUrl
 
-const SustainabilityUserOverviewResponseSchema = z.object({
+export const SustainabilityUserOverviewResponseSchema = z.object({
   pagination: z.object({
     hasNext: z.boolean(),
   }),
@@ -46,7 +46,7 @@ type SustainabilityUserOverviewRequest = {
 }
 
 /**
- * Get the sustainability overview for a user
+ * Get the sustainability overview for a user with the given request data
  * @param data  the request data @see SustainabilityUserOverviewRequest
  * @returns the response data @see SustainabilityUserOverviewResponse
  */
@@ -75,7 +75,7 @@ export const getSustainabilityUserOverviewQueryKey = (data: SustainabilityUserOv
 ]
 
 /**
- *
+ * Get the sustainability overview for a user, with the given request data
  * @param data the request data @see SustainabilityUserOverviewRequest
  * @returns the query object with the data @see SustainabilityUserOverviewResponse
  */
