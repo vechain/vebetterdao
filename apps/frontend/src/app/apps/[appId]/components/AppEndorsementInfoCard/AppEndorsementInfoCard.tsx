@@ -14,6 +14,7 @@ import {
   Link,
   Skeleton,
   Stack,
+  VStack,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
@@ -173,9 +174,15 @@ export const AppEndorsementInfoCard = () => {
                   </Link>
                 </HStack>
               ) : (
-                <Text fontSize="14px" fontWeight="bold">
-                  {isAppModerator || isAppAdmin ? t("Nobody is endorsing your app") : t("Not endorsed by anyone")}
-                </Text>
+                <VStack>
+                  <Text fontSize="14px" fontWeight="bold">
+                    {isAppModerator || isAppAdmin ? t("Nobody is endorsing your app") : t("Not endorsed by anyone")}
+                    <br />
+                    <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
+                      {t("See endorsement history")}
+                    </Link>
+                  </Text>
+                </VStack>
               )}
             </Box>
           </Skeleton>
