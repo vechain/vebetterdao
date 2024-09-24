@@ -16,7 +16,7 @@ import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import Lottie from "react-lottie"
-import voteAnimation from "../../../public/animations/vote.json"
+import voteAnimation from "../../../../public/animations/vote.json"
 
 export const CastYourVoteCard: React.FC = () => {
   const router = useRouter()

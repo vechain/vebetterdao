@@ -5,7 +5,7 @@ import { useMemo } from "react"
 import BigNumber from "bignumber.js"
 import { getConfig } from "@repo/config"
 import { motion } from "framer-motion"
-import { BaseTooltip } from "./BaseTooltip"
+import { BaseTooltip } from "../../components/BaseTooltip"
 import { FiInfo } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 

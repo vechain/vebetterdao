@@ -1,10 +1,10 @@
 import { VStack } from "@chakra-ui/react"
-import { BalanceCard } from "./BalanceCard"
-import { GmNFT } from "./GmNFT"
-import { VoterRewards } from "./VoterRewards"
+import { BalanceCard } from "../../components/BalanceCard"
+import { GmNFT } from "../../components/GmNFT"
+import { VoterRewards } from "../../components/VoterRewards"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { WalletNotConnectedOverlay } from "./WalletNotConnectedOverlay"
-import { ManagedAppsCard } from "./ManagedAppsCard"
+import { WalletNotConnectedOverlay } from "../../components/WalletNotConnectedOverlay"
+import { ManagedAppsCard } from "../../components/ManagedAppsCard"
 
 export const DashboardSideBar = () => {
   const { account } = useWallet()

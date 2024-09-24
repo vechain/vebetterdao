@@ -6,7 +6,7 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const HomePageContent = dynamic(() => import("@/components/HomepageContent").then(mod => mod.HomePageContent), {
+const HomePageContent = dynamic(() => import("@/app/components/HomepageContent").then(mod => mod.HomePageContent), {
   ssr: false,
   loading: () => (
     <VStack w="full" spacing={12} h="80vh" justify="center">

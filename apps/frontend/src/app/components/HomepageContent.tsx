@@ -3,8 +3,7 @@ import { Grid, GridItem, VStack } from "@chakra-ui/react"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { DashboardXApps } from "./DashboardXApps"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
-import { LowOnVthoCard } from "./Banners"
-import { CastYourVoteCard } from "./Banners/CastYourVoteCard"
+import { LowOnVthoCard, CastYourVoteCard } from "./Banners"
 
 export const HomePageContent = () => {
   return (
