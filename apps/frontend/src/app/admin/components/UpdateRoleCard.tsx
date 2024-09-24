@@ -13,6 +13,7 @@ import {
   FormLabel,
   Heading,
   HStack,
+  Icon,
   Input,
   Select,
   Text,
@@ -140,24 +141,35 @@ export const UpdateRoleCard = () => {
               </FormControl>
 
               {isFormValid ? (
-                <HStack w="full">
-                  {userAlreadyHasRole ? (
-                    <UilCheckCircle size={20} color="green" />
-                  ) : (
-                    <UilExclamationCircle size={20} color="red" />
-                  )}
-                  <Badge textTransform={"none"} fontSize={"sm"} colorScheme={userAlreadyHasRole ? "green" : "red"}>
-                    {userAlreadyHasRole
-                      ? t("Wallet '{{humanAddress}}' already has '{{selectedRole}}' role", {
-                          humanAddress: humanAddress(walletAddress),
-                          selectedRole,
-                        })
-                      : t("Wallet '{{humanAddress}}' doesn't have '{{selectedRole}}' role", {
-                          humanAddress: humanAddress(walletAddress),
-                          selectedRole,
-                        })}
+                <VStack w="full" align="stretch" flexWrap="wrap">
+                  <Badge
+                    textTransform="none"
+                    fontSize="sm"
+                    colorScheme={userAlreadyHasRole ? "green" : "red"}
+                    display="flex"
+                    alignItems="center"
+                    borderRadius="12px"
+                    p={2}>
+                    <HStack align="start" spacing={2}>
+                      <Icon
+                        as={userAlreadyHasRole ? UilCheckCircle : UilExclamationCircle}
+                        color={userAlreadyHasRole ? "green" : "red"}
+                        alignSelf={"center"}
+                      />
+                      <Text as="span" wordBreak="break-word" whiteSpace="normal">
+                        {userAlreadyHasRole
+                          ? t("Wallet '{{humanAddress}}' already has '{{selectedRole}}' role", {
+                              humanAddress: humanAddress(walletAddress),
+                              selectedRole,
+                            })
+                          : t("Wallet '{{humanAddress}}' doesn't have '{{selectedRole}}' role", {
+                              humanAddress: humanAddress(walletAddress),
+                              selectedRole,
+                            })}
+                      </Text>
+                    </HStack>
                   </Badge>
-                </HStack>
+                </VStack>
               ) : null}
 
               <Button isDisabled={!isFormValid} colorScheme={userAlreadyHasRole ? "red" : "green"} type="submit">
