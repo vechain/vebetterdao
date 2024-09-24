@@ -29,6 +29,7 @@ const config: AppConfig = {
     governorStateLogicAddress: "",
     governorVotesLogicAddress: "",
   },
+  indexerUrl: "https://b3tr.testnet.vechain.org",
   nodeUrl: "https://testnet.vechain.org",
   network: {
     id: "testnet",

@@ -38,6 +38,7 @@ export type AppConfig = {
   nodeManagementContractAddress: string
   b3trGovernorLibraries: B3TRGovernorLibraries
   nodeUrl: string
+  indexerUrl?: string
   network: Network
 }
 

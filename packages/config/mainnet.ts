@@ -18,6 +18,7 @@ const config: AppConfig = {
   treasuryContractAddress: "0xD5903BCc66e439c753e525F8AF2FeC7be2429593",
   x2EarnAppsContractAddress: "0x8392B7CCc763dB03b47afcD8E8f5e24F9cf0554D",
   x2EarnRewardsPoolContractAddress: "0x6Bee7DDab6c99d5B2Af0554EaEA484CE18F52631",
+  indexerUrl: "https://b3tr.mainnet.vechain.org",
   nodeManagementContractAddress: "",
   b3trGovernorLibraries: {
     governorClockLogicAddress: "0xaAD03b8561aDD749c7f8B9F819e40A6D4D5E6dD0",
