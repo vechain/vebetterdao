@@ -236,12 +236,15 @@ export const createProposalAndExecuteIt = async (
   args: any[] = [],
   roundId?: string | bigint | number,
 ) => {
-  const { governor } = await getOrDeployContractInstances({})
+  const { governor, veBetterPassport } = await getOrDeployContractInstances({})
 
   // load votes
   // console.log("Loading votes");
   await getVot3Tokens(voter, "30000")
   await waitForNextBlock()
+
+  await veBetterPassport.whitelist(voter.address)
+  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await veBetterPassport.toggleWhitelistCheck()
 
   // create a new proposal
   // console.log("Creating proposal");
@@ -295,7 +298,10 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
   args: any[][],
   roundId?: string,
 ) => {
-  const { governor, emissions, xAllocationVoting } = await getOrDeployContractInstances({})
+  const { governor, emissions, xAllocationVoting, veBetterPassport } = await getOrDeployContractInstances({})
+
+  await veBetterPassport.whitelist(voter.address)
+  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await veBetterPassport.toggleWhitelistCheck()
 
   // load votes
   // console.log("Loading votes");
@@ -432,9 +438,12 @@ export const voteOnApps = async (
   votes: Array<Array<bigint>>,
   roundId: bigint,
 ) => {
-  const { xAllocationVoting } = await getOrDeployContractInstances({})
+  const { xAllocationVoting, veBetterPassport } = await getOrDeployContractInstances({})
+
+  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await veBetterPassport.toggleWhitelistCheck()
 
   for (const voter of voters) {
+    await veBetterPassport.whitelist(voter.address)
     await xAllocationVoting.connect(voter).castVote(roundId, apps, votes[voters.indexOf(voter)])
   }
 }
@@ -516,10 +525,13 @@ export const calculateUnallocatedAppAllocationOffChain = async (roundId: number,
 }
 
 export const participateInAllocationVoting = async (user: HardhatEthersSigner, waitRoundToEnd: boolean = false) => {
-  const { xAllocationVoting, x2EarnApps, owner } = await getOrDeployContractInstances({})
+  const { xAllocationVoting, x2EarnApps, owner, veBetterPassport } = await getOrDeployContractInstances({})
 
   await getVot3Tokens(user, "1")
   await getVot3Tokens(owner, "1000")
+
+  await veBetterPassport.whitelist(user.address)
+  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await veBetterPassport.toggleWhitelistCheck()
 
   const appName = "App" + Math.random()
 
@@ -546,10 +558,13 @@ export const participateInGovernanceVoting = async (
   args: any[] = [],
   waitProposalToEnd: boolean = false,
 ) => {
-  const { governor } = await getOrDeployContractInstances({})
+  const { governor, veBetterPassport } = await getOrDeployContractInstances({})
 
   await getVot3Tokens(user, "1")
   await getVot3Tokens(admin, "1000")
+
+  await veBetterPassport.connect(admin).whitelist(user.address)
+  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await governor.toggleWhitelistCheck()
 
   const tx = await createProposal(contractToCall, Contract, admin, description, functionToCall, args)
   const proposalId = await getProposalIdFromTx(tx)

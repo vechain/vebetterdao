@@ -98,7 +98,7 @@ describe("X-Allocation Voting - @shard3", function () {
       })
 
       expect(await xAllocationVoting.name()).to.eql("XAllocationVoting")
-      expect(await xAllocationVoting.version()).to.eql("1")
+      expect(await xAllocationVoting.version()).to.eql("2")
     })
 
     it("Counting mode is set correctly", async function () {
@@ -352,10 +352,11 @@ describe("X-Allocation Voting - @shard3", function () {
     it("should be able to upgrade the xAllocationVoting contract through governance", async function () {
       const config = createLocalConfig()
       config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD = 0
-      const { xAllocationVoting, timeLock, governor, owner, otherAccount, vot3 } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
+      const { xAllocationVoting, timeLock, governor, owner, otherAccount, vot3, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
 
       await getVot3Tokens(otherAccount, "1000")
       await vot3.connect(otherAccount).approve(await governor.getAddress(), "1000")
@@ -370,6 +371,10 @@ describe("X-Allocation Voting - @shard3", function () {
       await implementation.waitForDeployment()
 
       await bootstrapAndStartEmissions()
+
+      // Whitelist user
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       // V1 Contract
       const V1Contract = await ethers.getContractAt("XAllocationVoting", await xAllocationVoting.getAddress())
@@ -440,7 +445,7 @@ describe("X-Allocation Voting - @shard3", function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationVoting.version()).to.equal("1")
+      expect(await xAllocationVoting.version()).to.equal("2")
     })
   })
 
@@ -606,9 +611,13 @@ describe("X-Allocation Voting - @shard3", function () {
           governorQuorumLogicLib,
           governorStateLogicLib,
           governorVotesLogicLib,
+          veBetterPassport,
         } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+        await veBetterPassport.whitelist(owner.address)
+        await veBetterPassport.toggleWhitelistCheck()
 
         const newThreshold = 10n
         await createProposalAndExecuteIt(
@@ -652,10 +661,13 @@ describe("X-Allocation Voting - @shard3", function () {
 
     describe("Quorum", function () {
       it("Governance can change quorum percentage", async function () {
-        const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+        const { xAllocationVoting, owner, veBetterPassport } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
         await bootstrapAndStartEmissions()
+
+        await veBetterPassport.whitelist(owner.address)
+        await veBetterPassport.toggleWhitelistCheck()
 
         await createProposalAndExecuteIt(
           owner,
@@ -679,10 +691,13 @@ describe("X-Allocation Voting - @shard3", function () {
       })
 
       it("Cannot set the quorum nominator higher than the denominator", async function () {
-        const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+        const { xAllocationVoting, owner, veBetterPassport } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
         await bootstrapAndStartEmissions()
+
+        await veBetterPassport.whitelist(owner.address)
+        await veBetterPassport.toggleWhitelistCheck()
 
         await expect(
           createProposalAndExecuteIt(
@@ -698,7 +713,7 @@ describe("X-Allocation Voting - @shard3", function () {
       })
 
       it("Can get quorum of round successfully", async function () {
-        const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+        const { xAllocationVoting, otherAccount, veBetterPassport } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
 
@@ -706,6 +721,10 @@ describe("X-Allocation Voting - @shard3", function () {
 
         // Bootstrap emissions
         await bootstrapEmissions()
+
+        // whitelist user
+        await veBetterPassport.whitelist(otherAccount.address)
+        await veBetterPassport.toggleWhitelistCheck()
 
         let round1 = await startNewAllocationRound()
         await waitForRoundToEnd(round1)
@@ -719,11 +738,15 @@ describe("X-Allocation Voting - @shard3", function () {
       })
 
       it("Returns the quorum numerator correctly at a specific timepoint", async function () {
-        const { xAllocationVoting, otherAccount } = await getOrDeployContractInstances({
+        const { xAllocationVoting, otherAccount, veBetterPassport } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
 
         await getVot3Tokens(otherAccount, "1000")
+
+        // whitelist user
+        await veBetterPassport.whitelist(otherAccount.address)
+        await veBetterPassport.toggleWhitelistCheck()
 
         // @ts-ignore
         let initialQuorumNumerator = await xAllocationVoting.quorumNumerator()
@@ -756,12 +779,16 @@ describe("X-Allocation Voting - @shard3", function () {
       })
 
       it("Can set voting period if less than emissions cycle duration", async function () {
-        const { xAllocationVoting, owner, emissions, governor, otherAccount } = await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+        const { xAllocationVoting, owner, emissions, governor, otherAccount, veBetterPassport } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
         await bootstrapAndStartEmissions()
         await getVot3Tokens(otherAccount, "30000")
         const cycleDuration = await emissions.cycleDuration()
+
+        await veBetterPassport.whitelist(otherAccount.address)
+        await veBetterPassport.toggleWhitelistCheck()
 
         // Now we can create a proposal
         const encodedFunctionCall = xAllocationVoting.interface.encodeFunctionData("setVotingPeriod", [
@@ -801,10 +828,13 @@ describe("X-Allocation Voting - @shard3", function () {
       })
 
       it("Cannot set voting period to 0", async function () {
-        const { xAllocationVoting, owner } = await getOrDeployContractInstances({
+        const { xAllocationVoting, owner, veBetterPassport } = await getOrDeployContractInstances({
           forceDeploy: true,
         })
         await bootstrapAndStartEmissions()
+
+        await veBetterPassport.whitelist(owner.address)
+        await veBetterPassport.toggleWhitelistCheck()
 
         await expect(
           createProposalAndExecuteIt(
@@ -823,9 +853,14 @@ describe("X-Allocation Voting - @shard3", function () {
       })
 
       it("Cannot set voting period if not less than emissions cycle duration", async function () {
-        const { xAllocationVoting, owner, emissions, governor, otherAccount } = await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+        const { xAllocationVoting, owner, emissions, governor, otherAccount, veBetterPassport } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+          })
+
+        await veBetterPassport.whitelist(otherAccount.address)
+        await veBetterPassport.toggleWhitelistCheck()
+
         await bootstrapAndStartEmissions()
         await getVot3Tokens(otherAccount, "30000")
         const cycleDuration = await emissions.cycleDuration()
@@ -1203,12 +1238,16 @@ describe("X-Allocation Voting - @shard3", function () {
 
   describe("Allocation Voting", function () {
     it("I cannot cast a vote with higher balance than I have", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       await x2EarnApps
         .connect(owner)
@@ -1228,11 +1267,22 @@ describe("X-Allocation Voting - @shard3", function () {
       await catchRevert(xAllocationVoting.connect(otherAccount).castVote(roundId, [app1], [ethers.parseEther("1500")]))
     })
 
-    it("I should be able to cast a vote", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, emissions, minterAccount } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+    it("I should be able to cast a vote if I am considered a valid person", async function () {
+      const {
+        xAllocationVoting,
+        x2EarnApps,
+        veBetterPassport,
+        otherAccounts,
+        otherAccount,
+        owner,
+        emissions,
+        minterAccount,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1277,10 +1327,12 @@ describe("X-Allocation Voting - @shard3", function () {
       expect(totalVotes).to.eql(ethers.parseEther("1000"))
     })
 
-    it("I should not be able to cast vote if my total VOT3 holding is less than 1", async function () {
-      const { x2EarnApps, xAllocationVoting, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+    it("I should not be able to cast a vote if I am not considered a person", async function () {
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, emissions, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
       // Bootstrap emissions
       await bootstrapEmissions()
 
@@ -1288,6 +1340,34 @@ describe("X-Allocation Voting - @shard3", function () {
         .connect(owner)
         .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+
+      await getVot3Tokens(otherAccount, "1000")
+
+      await emissions.connect(minterAccount).start()
+
+      let roundId = await xAllocationVoting.currentRoundId()
+      expect(roundId).to.eql(1n)
+
+      // I should be able to cast a vote
+      await expect(xAllocationVoting.connect(otherAccount).castVote(roundId, [app1], [ethers.parseEther("1000")])).to.be
+        .reverted
+    })
+
+    it("I should not be able to cast vote if my total VOT3 holding is less than 1", async function () {
+      const { x2EarnApps, xAllocationVoting, otherAccounts, otherAccount, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       await getVot3Tokens(otherAccount, "0.1")
 
@@ -1305,11 +1385,15 @@ describe("X-Allocation Voting - @shard3", function () {
     })
 
     it("I should not be able to cast vote twice", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
       // Bootstrap emissions
       await bootstrapEmissions()
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       await x2EarnApps
         .connect(owner)
@@ -1334,9 +1418,13 @@ describe("X-Allocation Voting - @shard3", function () {
     })
 
     it("Cannot cast a vote if the allocation round ended", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1366,11 +1454,15 @@ describe("X-Allocation Voting - @shard3", function () {
     })
 
     it("I should be able to vote for multiple apps", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
       // Bootstrap emissions
       await bootstrapEmissions()
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       await x2EarnApps
         .connect(owner)
@@ -1440,9 +1532,10 @@ describe("X-Allocation Voting - @shard3", function () {
     })
 
     it("Votes should be tracked correctly", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1457,6 +1550,11 @@ describe("X-Allocation Voting - @shard3", function () {
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       await getVot3Tokens(otherAccount, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -1570,12 +1668,16 @@ describe("X-Allocation Voting - @shard3", function () {
     })
 
     it("I should be able to vote only for apps available in the allocation round", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       await x2EarnApps
         .connect(owner)
@@ -1612,10 +1714,13 @@ describe("X-Allocation Voting - @shard3", function () {
     })
 
     it("Allocation round should be successfull if quorum was reached", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, vot3 } =
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, vot3, veBetterPassport } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1660,10 +1765,13 @@ describe("X-Allocation Voting - @shard3", function () {
     }).timeout(18000000)
 
     it("Allocation round should be failed if quorum was not reached", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, vot3 } =
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, vot3, veBetterPassport } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1797,12 +1905,16 @@ describe("X-Allocation Voting - @shard3", function () {
     })
 
     it("Stores that a user voted at least once", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccount, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       // Check if user voted
       let voted = await xAllocationVoting.hasVotedOnce(otherAccount.address)
@@ -1827,9 +1939,13 @@ describe("X-Allocation Voting - @shard3", function () {
     })
 
     it("Cannot cast vote with apps and weights length mismatch", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       await x2EarnApps
         .connect(owner)
@@ -1853,9 +1969,13 @@ describe("X-Allocation Voting - @shard3", function () {
     })
 
     it("Cannot cast vote with no apps to vote for", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       await x2EarnApps
         .connect(owner)
@@ -1875,9 +1995,13 @@ describe("X-Allocation Voting - @shard3", function () {
 
     // quorumReached
     it("Quorum is reached correctly", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccount, otherAccounts, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccount, otherAccounts, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       // add apps
       await x2EarnApps
@@ -2120,9 +2244,18 @@ describe("X-Allocation Voting - @shard3", function () {
 
   describe("Quadratic Funding", function () {
     it("Can get the correct QF app votes", async function () {
-      const { xAllocationVoting, x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { xAllocationVoting, x2EarnApps, otherAccounts, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Whitelist voters
+      await veBetterPassport.whitelist(otherAccounts[1].address)
+      await veBetterPassport.whitelist(otherAccounts[2].address)
+      await veBetterPassport.whitelist(otherAccounts[3].address)
+      await veBetterPassport.whitelist(otherAccounts[4].address)
+      await veBetterPassport.whitelist(otherAccounts[5].address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -2132,7 +2265,6 @@ describe("X-Allocation Voting - @shard3", function () {
       })
 
       //Add apps
-
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))

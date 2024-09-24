@@ -73,10 +73,13 @@ export const initializeProxy = async (
   proxyAddress: string,
   contractName: string,
   args: any[],
+  libraries: { [libraryName: string]: string } = {},
   version?: number,
 ): Promise<BaseContract> => {
   // Get the ContractFactory
-  const Contract = await ethers.getContractFactory(contractName)
+  const Contract = await ethers.getContractFactory(contractName, {
+    libraries: libraries,
+  })
 
   // Prepare the initializer data using getInitializerData
   const initializerData = getInitializerData(Contract.interface, args, version)

@@ -1,6 +1,6 @@
 import { ethers } from "hardhat"
 
-export async function deployLibraries() {
+export async function governanceLibraries() {
   // ---------------------- Version 1 ----------------------
   // Deploy Governor Clock Logic
   const GovernorClockLogicV1 = await ethers.getContractFactory("GovernorClockLogicV1")

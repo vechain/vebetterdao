@@ -22,7 +22,7 @@ import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, saveContractsToFile } from "../helpers"
 import { shouldRunSimulation } from "@repo/config/contracts"
-import { deployLibraries } from "../helpers/deployLibraries"
+import { governanceLibraries, passportLibraries } from "../libraries"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -74,7 +74,20 @@ export async function deployAll(config: ContractsConfig) {
     GovernorQuorumLogicLib,
     GovernorVotesLogicLib,
     GovernorStateLogicLib,
-  } = await deployLibraries()
+  } = await governanceLibraries()
+
+  // Deploy Passport Libraries
+  const {
+    PassportChecksLogic,
+    PassportClockLogic,
+    PassportConfigurator,
+    PassportDelegationLogic,
+    PassportEIP712SigningLogic,
+    PassportPersonhoodLogic,
+    PassportPoPScoreLogic,
+    PassportSignalingLogic,
+    PassportWhitelistBlacklistLogic,
+  } = await passportLibraries()
 
   console.log("================ Deploying Vechain Nodes mock contracts =================")
 
@@ -161,7 +174,21 @@ export async function deployAll(config: ContractsConfig) {
   )) as X2EarnApps
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
-  const veBetterPassportAddress = await deployProxyOnly("VeBetterPassport", undefined, true)
+  const veBetterPassportAddress = await deployProxyOnly(
+    "VeBetterPassport",
+    {
+      PassportChecksLogic: await PassportChecksLogic.getAddress(),
+      PassportClockLogic: await PassportClockLogic.getAddress(),
+      PassportConfigurator: await PassportConfigurator.getAddress(),
+      PassportDelegationLogic: await PassportDelegationLogic.getAddress(),
+      PassportEIP712SigningLogic: await PassportEIP712SigningLogic.getAddress(),
+      PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
+      PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
+      PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
+      PassportWhitelistBlacklistLogic: await PassportWhitelistBlacklistLogic.getAddress(),
+    },
+    true,
+  )
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
     ["X2EarnRewardsPoolV1", "X2EarnRewardsPool"],
