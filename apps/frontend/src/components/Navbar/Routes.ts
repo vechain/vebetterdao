@@ -1,4 +1,4 @@
-import { FaGear, FaScaleBalanced, FaChartPie, FaHouse } from "react-icons/fa6"
+import { FaGear, FaScaleBalanced, FaChartPie, FaHouse, FaUser } from "react-icons/fa6"
 import { PiSquaresFourFill } from "react-icons/pi"
 
 export interface Route {
@@ -14,5 +14,6 @@ export const Routes: Route[] = [
   { name: "Apps", onClick: "/apps", isVisible: true, icon: PiSquaresFourFill },
   { name: "Allocations", onClick: "/rounds", isVisible: true, icon: FaChartPie },
   { name: "Governance", onClick: "/proposals", isVisible: true, icon: FaScaleBalanced },
+  { name: "Profile", onClick: "/profile", isVisible: true, icon: FaUser },
   { name: "Admin", onClick: "/admin", isVisible: true, icon: FaGear },
 ]

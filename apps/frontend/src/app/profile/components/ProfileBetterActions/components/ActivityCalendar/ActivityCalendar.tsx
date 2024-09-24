@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react"
-import { Box, Button, Card, CardBody, Flex, Grid, Heading, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, CardBody, Flex, Grid, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -66,12 +66,7 @@ export const ActivityCalendar = () => {
     <Card w="full" variant="baseWithBorder">
       <CardBody>
         <VStack align="stretch" gap={4}>
-          <HStack justify="space-between" align="center" gap={6}>
-            <Heading size="md">{t("Actions history")}</Heading>
-            <Button size="sm" variant="outline" mr={2}>
-              {t("CALENDAR")}
-            </Button>
-          </HStack>
+          <Heading size="md">{t("Actions history")}</Heading>
 
           <Flex justify="space-between" align="center" mb={4}>
             <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)}>
