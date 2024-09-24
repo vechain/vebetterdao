@@ -8,23 +8,25 @@ export const UserSustainabilityOverviewStats = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
-  const { data: userOverview, isLoading } = useSustainabilityUserOverview({
+  const { data, isLoading } = useSustainabilityUserOverview({
     wallet: account ?? undefined,
   })
 
+  //TOOD: Indexer should return aggregated data
   const parsedData = useMemo(() => {
     const defaultData = { totalActions: 0, totalRewards: 0, apps: new Set<string>() }
-    if (!userOverview?.data) return defaultData
+    const userOverview = data?.pages.map(page => page.data).flat() ?? []
+    if (!userOverview) return defaultData
 
-    return userOverview.data.reduce((acc, curr) => {
+    return userOverview.reduce((acc, curr) => {
       return {
         ...acc,
-        totalActions: acc.totalActions + curr.actionsRewarded,
-        totalRewards: acc.totalRewards + curr.totalRewardAmount,
-        totalApps: acc.apps.add(curr.entity),
+        totalActions: acc.totalActions + (curr?.actionsRewarded ?? 0),
+        totalRewards: acc.totalRewards + (curr?.totalRewardAmount ?? 0),
+        totalApps: acc.apps.add(curr?.entity ?? ""),
       }
     }, defaultData)
-  }, [userOverview])
+  }, [data])
 
   return (
     <HStack gap={8} justify="space-between">

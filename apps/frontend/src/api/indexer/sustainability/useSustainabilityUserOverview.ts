@@ -1,6 +1,6 @@
 import { buildQueryString } from "@/api/utils"
 import { getConfig } from "@repo/config"
-import { useQuery } from "@tanstack/react-query"
+import { useInfiniteQuery } from "@tanstack/react-query"
 
 import { z } from "zod"
 
@@ -71,25 +71,21 @@ export const getSustainabilityUserOverview = async (
   return SustainabilityUserOverviewResponseSchema.parse(await response.json())
 }
 
-export const getSustainabilityUserOverviewQueryKey = (data: SustainabilityUserOverviewRequest) => [
-  "SUSTAINABILITY",
-  "USER_OVERVIEW",
-  data.wallet,
-  data.roundId,
-  data.page,
-  data.size,
-  data.direction,
-]
+export const getSustainabilityUserOverviewQueryKey = (
+  data: Omit<SustainabilityUserOverviewRequest, "page" | "size">,
+) => ["SUSTAINABILITY", "USER_OVERVIEW", data.wallet, data.roundId, data.direction]
 
 /**
  * Get the sustainability overview for a user, with the given request data
  * @param data the request data @see SustainabilityUserOverviewRequest
  * @returns the query object with the data @see SustainabilityUserOverviewResponse
  */
-export const useSustainabilityUserOverview = (data: SustainabilityUserOverviewRequest) => {
-  return useQuery({
+export const useSustainabilityUserOverview = (data: Omit<SustainabilityUserOverviewRequest, "page" | "size">) => {
+  return useInfiniteQuery({
     queryKey: getSustainabilityUserOverviewQueryKey(data),
-    queryFn: async () => await getSustainabilityUserOverview(data),
-    enabled: !!data && !!data.wallet,
+    queryFn: ({ pageParam = 1 }) => getSustainabilityUserOverview({ ...data, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _pages, lastPageParam) =>
+      lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,
   })
 }

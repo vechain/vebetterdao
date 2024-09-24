@@ -1,6 +1,6 @@
 import { buildQueryString } from "@/api/utils"
 import { getConfig } from "@repo/config"
-import { useQuery } from "@tanstack/react-query"
+import { useInfiniteQuery } from "@tanstack/react-query"
 
 import { z } from "zod"
 
@@ -57,8 +57,8 @@ export type SustainabilityActionsResponse = z.infer<typeof SustainabilityActions
 type SustainabilityActionsRequest = {
   appId?: string
   wallet?: number
-  page: number
-  size: number
+  page?: number
+  size?: number
   direction: "asc" | "desc"
 }
 
@@ -86,13 +86,11 @@ export const getSustainabilityActions = async (
   return SustainabilityActionsResponseSchema.parse(await response.json())
 }
 
-export const getSustainabilitActionsQueryKey = (data: SustainabilityActionsRequest) => [
+export const getSustainabilitActionsQueryKey = (data: Omit<SustainabilityActionsRequest, "page" | "size">) => [
   "SUSTAINABILITY",
   "ACTIONS",
   data.appId,
   data.wallet,
-  data.page,
-  data.size,
   data.direction,
 ]
 
@@ -101,10 +99,12 @@ export const getSustainabilitActionsQueryKey = (data: SustainabilityActionsReque
  * @param data the request data @see SustainabilityUserOverviewRequest
  * @returns the query object with the data @see SustainabilityActionsResponse
  */
-export const useSustainabilityActionsOverview = (data: SustainabilityActionsRequest) => {
-  return useQuery({
+export const useSustainabilityActionsOverview = (data: Omit<SustainabilityActionsRequest, "page" | "size">) => {
+  return useInfiniteQuery({
     queryKey: getSustainabilitActionsQueryKey(data),
-    queryFn: async () => await getSustainabilityActions(data),
-    enabled: !!data,
+    queryFn: ({ pageParam = 1 }) => getSustainabilityActions({ ...data, page: pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _pages, lastPageParam) =>
+      lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,
   })
 }
