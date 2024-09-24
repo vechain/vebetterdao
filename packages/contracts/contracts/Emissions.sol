@@ -338,18 +338,18 @@ contract Emissions is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPS
     // Get emissions from the previous cycle
     uint256 lastCycleEmissions = $.emissions[$.nextCycle - 1].xAllocations * SCALING_FACTOR;
 
-    // Cycle 14 has a special case where the emissions are 1,840,000 B3TR to maintain the expected emissions with decays.
+    // Cycle 14 has a special case where the emissions are 1,840,000 B3TR to maintain the expected emissions with decays. Only applies if emissions are not aligned
     if ($._isEmissionsNotAligned && $.nextCycle == 14) {
-      // with 2,000,000 B3TR as lastCycleEmissions, the result is 1,920,000 - 80,000 = 1,840,000 B3TR
       lastCycleEmissions =
         ((lastCycleEmissions * (100 - $.xAllocationsDecay)) / 100) -
         (lastCycleEmissions * (4)) /
         100;
     }
 
+    // Emissions of cycle 13 are used to calculate the emissions of cycle 15. Only applies if emissions are not aligned
     if ($._isEmissionsNotAligned && $.nextCycle == 15) {
-      lastCycleEmissions = $.emissions[$.nextCycle - 2].xAllocations * SCALING_FACTOR; // Emissions of cycle 13 are used to calculate the emissions of cycle 15
-      lastCycleEmissions = (lastCycleEmissions * (100 - $.xAllocationsDecay)) / 100; // Apply the decay rate to the emissions of cycle 15, which are based on cycle 13 => 2,000,000 * 0.96 = 1,920,000 B3TR
+      lastCycleEmissions = $.emissions[$.nextCycle - 2].xAllocations * SCALING_FACTOR;
+      lastCycleEmissions = (lastCycleEmissions * (100 - $.xAllocationsDecay)) / 100;
     }
 
     // Check if we need to decay again by getting the modulus
