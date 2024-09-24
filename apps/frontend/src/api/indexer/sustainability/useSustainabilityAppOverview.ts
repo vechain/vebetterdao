@@ -10,7 +10,7 @@ const indexerUrl = getConfig().indexerUrl
 
 type SustainabilityAppOverviewRequest = {
   appId: string
-  roundId: number
+  roundId?: number
   page: number
   size: number
   direction: "asc" | "desc"

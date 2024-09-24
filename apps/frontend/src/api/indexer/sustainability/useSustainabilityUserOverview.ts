@@ -39,7 +39,7 @@ export type SustainabilityUserOverviewResponse = z.infer<typeof SustainabilityUs
 
 type SustainabilityUserOverviewRequest = {
   wallet: string
-  roundId: number
+  roundId?: number
   page: number
   size: number
   direction: "asc" | "desc"
