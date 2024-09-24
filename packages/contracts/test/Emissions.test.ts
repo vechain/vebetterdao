@@ -1640,6 +1640,13 @@ describe("Emissions - @shard1", () => {
         if ((await emissions.getCurrentCycle()) === BigInt(13)) {
           await emissions.setXAllocationsDecayPeriod(12)
         }
+
+        xAllocationsAmount = await emissions.getXAllocationAmount(allocations.cycle)
+        vote2EarnAmount = await emissions.getVote2EarnAmount(allocations.cycle)
+        treasuryAmount = await emissions.getTreasuryAmount(allocations.cycle)
+        expect(xAllocationsAmount).to.equal(allocations.xAllocation)
+        expect(vote2EarnAmount).to.equal(allocations.vote2EarnAllocation)
+        expect(treasuryAmount).to.equal(allocations.treasuryAllocation)
       }
 
       await catchRevert(emissions.connect(minterAccount).distribute()) // Should not be able to distribute more than the B3TR supply cap
