@@ -3,7 +3,7 @@
 pragma solidity 0.8.20;
 
 import "./IB3TR.sol";
-import "./IXAllocationVotingGovernor.sol";
+import "./IXAllocationVotingGovernorV1.sol";
 
 interface IEmissions {
   struct Emission {
