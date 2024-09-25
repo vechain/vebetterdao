@@ -24,6 +24,10 @@ export const BalanceInfo = ({ isB3TR, balanceScaled }: Props) => {
     return isB3TR ? "#E5EEFF" : "#E3FFC4"
   }, [isB3TR])
 
+  const dataTestId = useMemo(() => {
+    return isB3TR ? "B3TR-balance" : "VOT3-balance"
+  }, [isB3TR])
+
   return (
     <HStack bg={bgColor} py={6} px={6} h="full" w="full" borderRadius={"2xl"} align="flex-start" spacing={12}>
       <HStack align={"stretch"} justify={"stretch"} spacing={4}>
@@ -33,7 +37,11 @@ export const BalanceInfo = ({ isB3TR, balanceScaled }: Props) => {
           </Text>
           <HStack>
             <Image src={image} boxSize={"32px"} alt="B3TR Icon" />
-            <Text fontSize={28} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
+            <Text
+              fontSize={28}
+              fontWeight={700}
+              style={{ fontFamily: "Instrument Sans, sans-serif" }}
+              data-testid={dataTestId}>
               {compactFormatter.format(Number(balanceScaled))}
             </Text>
           </HStack>

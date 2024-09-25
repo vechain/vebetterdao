@@ -43,6 +43,10 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
     setIsB3TRToVOT3(isB3TRToVOT3)
   }, [isB3TRToVOT3, setIsB3TRToVOT3])
 
+  const dataTestId = useMemo(() => {
+    return isB3TRToVOT3 ? "get-VOT3-button" : "get-B3TR-button"
+  }, [isB3TRToVOT3])
+
   return (
     <VStack
       bg={bgColor}
@@ -65,7 +69,8 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
         rounded={"full"}
         size={{ base: "md", md: "lg" }}
         w={{ base: "full", md: "auto" }}
-        onClick={handleButtonClick}>
+        onClick={handleButtonClick}
+        data-testid={dataTestId}>
         {buttonText}
       </Button>
     </VStack>
