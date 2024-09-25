@@ -1,4 +1,4 @@
-import { useAppExists, useIsAppAdmin, useIsAppModerator } from "@/api"
+import { useAppEndorsementStatus, useAppExists, useIsAppAdmin, useIsAppModerator } from "@/api"
 import { Grid, GridItem, Stack, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
@@ -9,6 +9,7 @@ import { AppScreenshots } from "./AppScreenshots"
 import { AppTweets } from "./AppTweets"
 import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementInfoCard"
 import { AppBalanceCard } from "./AppBalanceCard"
+import { EndorsementStatus } from "@/types"
 
 export const AppDetailPageContent = () => {
   const { app } = useCurrentAppInfo()
@@ -16,6 +17,12 @@ export const AppDetailPageContent = () => {
   const { data: isAppModerator } = useIsAppModerator(app?.id ?? "", account ?? "")
   const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account ?? "")
   const { data: appHasBeenIntoAllocationRounds } = useAppExists(app?.id ?? "")
+  const {
+    score: endorsementScore,
+    status: endorsementStatus,
+    threshold: endorsementThreshold,
+    isLoading: isEndorsementStatusLoading,
+  } = useAppEndorsementStatus(app?.id ?? "")
 
   const shouldRenderCreationSteps = useMemo(() => {
     return !appHasBeenIntoAllocationRounds && (isAppModerator || isAppAdmin)
@@ -28,54 +35,62 @@ export const AppDetailPageContent = () => {
   const shouldRenderBalance = useMemo(() => {
     return appHasBeenIntoAllocationRounds
   }, [appHasBeenIntoAllocationRounds])
-  function generateTemplateAreas(hasAllocationRounds?: boolean, isGovernanceUser: boolean = false) {
-    let baseLayout = `
-      "main-content"
-      "endorsement-card"
-      ${hasAllocationRounds ? '"side-content"' : ""}
-    `
-    let lgLayoutWithBalance = `
-         "main-content side-content"
-         "main-content endorsement-card"
-    `
-    let lgLayoutWithoutBalance = `
-      "main-content endorsement-card"
-      "main-content endorsement-card"
-    `
 
+  const getTemplateAreas = (
+    hasAllocationRounds: boolean = false,
+    isGovernanceUser: boolean,
+    status: EndorsementStatus,
+  ) => {
     if (isGovernanceUser) {
-      baseLayout = `
-      "endorsement-card"
-      "main-content"
-      ${hasAllocationRounds ? '"side-content"' : ""}
-    `
-      lgLayoutWithBalance = `
-       "endorsement-card side-content"
-       "main-content     side-content"
-     `
+      if (status === EndorsementStatus.SUCCESS) {
+        return {
+          base: `"main-content" "endorsement-card"`,
+          lg: hasAllocationRounds
+            ? `"main-content side-content" "main-content endorsement-card"`
+            : `"main-content endorsement-card" "main-content endorsement-card"`,
+        }
+      }
+      return {
+        base: `"endorsement-card" "main-content"`,
+        lg: hasAllocationRounds
+          ? `"endorsement-card side-content" "main-content side-content"`
+          : `"endorsement-card endorsement-card" "main-content main-content"`,
+      }
+    }
 
-      lgLayoutWithoutBalance = `
-     "endorsement-card endorsement-card"
-     "main-content main-content"
-   `
+    if (status === EndorsementStatus.LOST) {
+      return {
+        base: `"main-content" "endorsement-card"`,
+        lg: hasAllocationRounds
+          ? `"endorsement-card side-content" "main-content side-content"`
+          : `"endorsement-card endorsement-card" "main-content endorsement-card"`,
+      }
     }
 
     return {
-      base: baseLayout,
-      lg: hasAllocationRounds ? lgLayoutWithBalance : lgLayoutWithoutBalance,
+      base: `"main-content" "endorsement-card"`,
+      lg: hasAllocationRounds
+        ? `"main-content side-content" "main-content endorsement-card"`
+        : `"main-content endorsement-card" "main-content endorsement-card"`,
     }
   }
 
+  const templateAreas = getTemplateAreas(appHasBeenIntoAllocationRounds, isGovernanceUser, endorsementStatus)
+
   return (
     <VStack w="full" alignItems="stretch" gap={8}>
-      <AppDetailOverview />
+      <AppDetailOverview
+        endorsementStatus={endorsementStatus}
+        endorsementThreshold={endorsementThreshold}
+        isEndorsementStatusLoading={isEndorsementStatusLoading}
+      />
       <Grid
-        templateColumns={{
-          base: "1fr",
-          lg: "2fr 1fr",
-        }}
+        templateColumns={{ base: "1fr", lg: "2fr 1fr" }}
         gap={8}
-        templateAreas={generateTemplateAreas(appHasBeenIntoAllocationRounds, isGovernanceUser)}>
+        templateAreas={{
+          base: templateAreas.base,
+          lg: templateAreas.lg,
+        }}>
         <GridItem area="main-content" w="full" alignSelf={"stretch"}>
           <Stack direction="column" spacing={8}>
             {shouldRenderCreationSteps ? <AppCreationSteps /> : null}
@@ -91,7 +106,12 @@ export const AppDetailPageContent = () => {
         ) : null}
 
         <GridItem area="endorsement-card" w="full">
-          <AppEndorsementInfoCard />
+          <AppEndorsementInfoCard
+            endorsementScore={endorsementScore}
+            endorsementStatus={endorsementStatus}
+            endorsementThreshold={endorsementThreshold}
+            isEndorsementStatusLoading={isEndorsementStatusLoading}
+          />
         </GridItem>
       </Grid>
     </VStack>
