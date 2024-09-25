@@ -26,6 +26,9 @@ pragma solidity 0.8.20;
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { PassportClockLogic } from "./PassportClockLogic.sol";
 import { PassportEIP712SigningLogic } from "./PassportEIP712SigningLogic.sol";
+import { PassportPoPScoreLogic } from "./PassportPoPScoreLogic.sol";
+import { PassportSignalingLogic } from "./PassportSignalingLogic.sol";
+import { PassportWhitelistAndBlacklistLogic } from "./PassportWhitelistAndBlacklistLogic.sol";
 import { PassportTypes } from "./PassportTypes.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -131,7 +134,7 @@ library PassportEntityLogic {
     PassportStorageTypes.PassportStorage storage self,
     address entity
   ) public view returns (address) {
-    return _addressFromUint160(self.entityToPassport[entity].latest());
+    return _getPassportForEntity(self, entity);
   }
 
   /**
@@ -156,7 +159,7 @@ library PassportEntityLogic {
   function getEntitiesLinkedToPassport(
     PassportStorageTypes.PassportStorage storage self,
     address passport
-  ) external view returns (address[] memory) {
+  ) internal view returns (address[] memory) {
     return self.passportToEntities[passport];
   }
 
@@ -332,10 +335,10 @@ library PassportEntityLogic {
    */
   function removeEntityLink(PassportStorageTypes.PassportStorage storage self, address entity) external {
     // Get the passport linked to the entity
-    address passport = getPassportForEntity(self, entity);
+    address passport = _getPassportForEntity(self, entity);
 
     // Revert if the entity is not linked to any passport
-    if (passport == address(0)) {
+    if (passport == entity) {
       revert NotLinked(entity);
     }
 
@@ -448,6 +451,10 @@ library PassportEntityLogic {
 
     delete self.passportEntitiesIndexes[entity];
     delete self.passportToEntities[entity];
+
+    PassportPoPScoreLogic.removeEntityScoreFromPassport(self, entity, passport);
+    PassportSignalingLogic.removeEntitySignalsFromPassport(self, entity, passport);
+    PassportWhitelistAndBlacklistLogic.removeEntitiesBlackAndWhiteListsFromPassport(self, entity, passport);
   }
 
   /**
@@ -465,10 +472,30 @@ library PassportEntityLogic {
     self.passportEntitiesIndexes[msg.sender] = length + 1;
     self.passportToEntities[passport].push(msg.sender);
 
+    PassportPoPScoreLogic.assignEntityScoreToPassport(self, entity, passport);
+    PassportSignalingLogic.attachEntitySignalsToPassport(self, entity, passport);
+    PassportWhitelistAndBlacklistLogic.attachEntitiesBlackAndWhiteListsToPassport(self, entity, passport);
+
     emit LinkCreated(entity, passport);
   }
 
   function _addressFromUint160(uint160 value) private pure returns (address) {
     return address(uint160(value));
+  }
+
+  /**
+   * @dev Internal function for getting the passport linked to an entity.
+   * @param entity The address of the entity whose linked passport is being retrieved.
+   * @return The address of the linked passport.
+   */
+  function _getPassportForEntity(
+    PassportStorageTypes.PassportStorage storage self,
+    address entity
+  ) internal view returns (address) {
+    address passport = _addressFromUint160(self.entityToPassport[entity].latest());
+    if (passport == address(0)) {
+      return entity;
+    }
+    return passport;
   }
 }
