@@ -92,6 +92,12 @@ library PassportConfigurator {
 
     // Decay
     self.decayRate = 20;
+
+    // Set rounds to consider for assigning an entity score to a passport
+    self.roundsForAssigningEntityScore = initializationData.roundsForAssigningEntityScore;
+
+    // Set the threshold percentage of blacklisted or whitelisted entities to consider a passport user as blacklisted or whitelisted
+    self.blackAndwhiteListThreshold = initializationData.blackAndwhiteListThreshold;
   }
 
   /// @notice Sets the X2EarnApps contract address

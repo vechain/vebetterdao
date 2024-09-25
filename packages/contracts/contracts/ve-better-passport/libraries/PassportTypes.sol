@@ -56,6 +56,8 @@ library PassportTypes {
     uint256 signalingThreshold;
     uint256 roundsForCumulativeScore;
     uint256 minimumGalaxyMemberLevel;
+    uint256 roundsForAssigningEntityScore;
+    uint256 blackAndwhiteListThreshold;
   }
 
   struct InitializationRoleData{

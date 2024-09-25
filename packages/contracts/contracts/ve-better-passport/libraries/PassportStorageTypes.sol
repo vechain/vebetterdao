@@ -53,6 +53,12 @@ library PassportStorageTypes {
     mapping(address user => bool) whitelisted;
     // Mapping of blacklisted users
     mapping(address user => bool) blacklisted;
+    // Track number of whitelisted entities
+    mapping(address => uint256) whitelistedEntitiesCounter;
+    // Track number of blacklisted entities
+    mapping(address => uint256) blacklistedEntitiesCounter;
+    // Threshold percentage of blacklisted or whitelisted entities to consider a passportuser as blacklisted or whitelisted
+    uint256 blackAndwhiteListThreshold;
     // ---------- Proof of Participation ---------- //
     // Multiplier of the base action score based on the app security
     mapping(PassportTypes.APP_SECURITY security => uint256 multiplier) securityMultiplier;
@@ -70,8 +76,16 @@ library PassportStorageTypes {
     uint256 popScoreThreshold;
     // Number of rounds to consider for the cumulative score
     uint256 roundsForCumulativeScore;
+    // Number of rounds to consider for assigning an enitity score to a passport
+    uint256 roundsForAssigningEntityScore;
     // Decay rate for the exponential decay
     uint256 decayRate;
+    // Track which apps a user has interacted with
+    mapping(address => mapping(bytes32 => bool)) userUniqueAppInteraction;
+    // Store the list of apps a user has interacted with
+    mapping(address => bytes32[]) userInteractedApps;
+    // Track when as user attached an entity to their passport
+    mapping(address => uint256) entityAttachRound;
     // ---------- Passport Delegation ---------- //
     // Mapping of entity to passport
     mapping(address => Checkpoints.Trace160) entityToPassport;
