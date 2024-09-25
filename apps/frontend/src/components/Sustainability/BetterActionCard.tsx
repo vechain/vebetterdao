@@ -1,7 +1,8 @@
-import { Card, CardBody, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import { Card, CardBody, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { B3TRIcon } from "../Icons"
 import { SustainabilityActionsResponse, useXApps } from "@/api"
 import dayjs from "dayjs"
+import { ActionModal } from "./ActionModal"
 
 type Props = {
   action: SustainabilityActionsResponse["data"][number]
@@ -13,8 +14,10 @@ export const BetterActionCard = ({ action }: Props) => {
     return apps?.find(app => app.id === appId)?.name ?? ""
   }
 
+  const actionModal = useDisclosure()
+
   return (
-    <Card variant={"filled"} w="full">
+    <Card variant={"filled"} w="full" onClick={actionModal.onOpen} cursor="pointer">
       <CardBody>
         <HStack spacing={4} w="full" justify="space-between">
           <HStack spacing={4}>
@@ -31,6 +34,7 @@ export const BetterActionCard = ({ action }: Props) => {
           </HStack>
         </HStack>
       </CardBody>
+      <ActionModal actionModal={actionModal} action={action} />
     </Card>
   )
 }
