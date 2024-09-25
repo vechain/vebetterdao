@@ -1,6 +1,7 @@
 import { Page } from "playwright"
-import { expect, test, Locator } from "@playwright/test"
+import { test, Locator } from "@playwright/test"
 import BigNumber from "bignumber.js"
+import { Currency } from "./types"
 
 /**
  * Swap dialog model
@@ -8,100 +9,33 @@ import BigNumber from "bignumber.js"
 export class SwapDialog {
   private page: Page
 
-  readonly firstTextBox: Locator
-  readonly secondTextBox: Locator
-  readonly maxButton: Locator
-  readonly swapButton: Locator
-  readonly switchTokensButton: Locator
+  readonly getCurrencyButton: (getCurrency: Currency) => Locator
+  readonly amountInput: (currency: Currency) => Locator
+  readonly convertAll: Locator
+  readonly confirmSwapButton: Locator
 
   constructor(page: Page) {
     this.page = page
 
-    this.firstTextBox = this.page.locator('section[role="dialog"] input').first()
-    this.secondTextBox = this.page.locator('section[role="dialog"] input').last()
-    this.maxButton = this.page
-      .locator('xpath=//section[@role="dialog"]/descendant::button[contains(text(),"Max")]')
-      .first()
-    this.swapButton = this.page
-      .locator('xpath=//section[@role="dialog"]/descendant::button[contains(text(),"Swap")]')
-      .first()
-    this.switchTokensButton = this.page
-      .locator('xpath=//section[@role="dialog"]/descendant::button[@aria-label="Switch Tokens"]')
-      .first()
+    this.getCurrencyButton = (getCurrency: Currency) => this.page.getByTestId(`get-${getCurrency}-button`)
+    this.amountInput = (currency: Currency) =>
+      this.page.locator(`[data-testid='${currency}'] [data-testid='amount-input']`)
+    this.convertAll = this.page.getByTestId("convert-all-button")
+    this.confirmSwapButton = this.page.getByTestId("confirm-swap-button")
   }
 
   /**
-   * Enters the first amount in the swap dialog
-   * i.e. first input field
-   * @param amount Decimal amount to enter
+   * Covers the flow of interacting with the swap modal.
+   * Mind that "Convert tokens" button on the dashboard has to be clicked to call up the modal first.
+   * @param amount
+   * @param from
+   * @param to
    */
-  async enterFirstAmount(amount: BigNumber) {
-    await test.step(`Entering first swap amount: ${amount}`, async () => {
-      await this.firstTextBox.fill(amount.toString())
-    })
-  }
-
-  /**
-   * Enters the second amount in the swap dialog
-   * i.e. second input field
-   * @param amount Decimal amount to enter
-   */
-  async enterSecondAmount(amount: BigNumber) {
-    await test.step(`Entering second swap amount: ${amount}`, async () => {
-      await this.secondTextBox.fill(amount.toString())
-    })
-  }
-
-  /**
-   * Gets the second amount in the swap dialog
-   * @returns Decimal amount
-   */
-  async getSecondAmount(): Promise<BigNumber> {
-    return await test.step(`Getting second swap amount`, async () => {
-      const text = await this.secondTextBox.textContent()
-      const amount =
-        text ??
-        (() => {
-          throw new Error("Second amount not found")
-        })()
-      return new BigNumber(amount)
-    })
-  }
-
-  /**
-   * Asserts the second amount in the swap dialog
-   * @param amount decimal amount to assert
-   */
-  async expectSecondAmount(amount: BigNumber) {
-    await test.step(`Expecting second swap amount to be: ${amount}`, async () => {
-      expect(this.secondTextBox).toHaveText(amount.toString())
-    })
-  }
-
-  /**
-   * Clicks the "Max" button in the swap dialog
-   */
-  async clickMax() {
-    await test.step("Clicking max swap button", async () => {
-      await this.maxButton.click()
-    })
-  }
-
-  /**
-   * Clicks the "Swap" button in the swap dialog
-   */
-  async clickSwap() {
-    await test.step("Clicking swap button", async () => {
-      await this.swapButton.click()
-    })
-  }
-
-  /**
-   * Clicks the "Switch Tokens" button in the swap dialog
-   */
-  async clickSwitchTokens() {
-    await test.step("Clicking switch tokens button", async () => {
-      await this.switchTokensButton.click()
+  async swap(amount: number | string | BigNumber, from: Currency, to: Currency) {
+    await test.step(`Swap ${amount} ${from} to ${to}`, async () => {
+      await this.getCurrencyButton(to).click()
+      await this.amountInput(from).fill(amount.toString())
+      await this.confirmSwapButton.click()
     })
   }
 }
