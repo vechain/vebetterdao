@@ -1,5 +1,4 @@
-import { useAppEndorsementScore, useEndorsementScoreThreshold, useIsAppUnendorsed } from "@/api"
-import { useIsAppEligibleNow } from "@/api/contracts/xApps/hooks/endorsement/useIsAppEligibleNow"
+import { useAppEndorsementScore, useEndorsementScoreThreshold, useIsAppEligibleNow, useIsAppUnendorsed } from "@/api"
 import { EndorsementStatus } from "@/types"
 import { useParams } from "next/navigation"
 
