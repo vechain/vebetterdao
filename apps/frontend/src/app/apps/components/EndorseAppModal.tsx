@@ -34,7 +34,6 @@ type Props = {
   xApp: XApp | UnendorsedApp | undefined
 }
 
-//TODO: Polish everything and align with figma
 export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { account } = useWallet()
 
@@ -65,7 +64,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
 
   const newScoreMetThreshold = useMemo(
     () => newScore >= endorsementThreshold && appScore < endorsementThreshold,
-    [newScore, endorsementThreshold, appScore, userEndorsementScore],
+    [newScore, endorsementThreshold, appScore],
   )
   const handleEndorsement = useCallback(() => {
     endorseAppMutation.resetStatus()
