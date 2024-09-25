@@ -25,6 +25,7 @@ pragma solidity 0.8.20;
 
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { PassportTypes } from "./PassportTypes.sol";
+import { PassportEntityLogic } from "./PassportEntityLogic.sol";
 
 library PassportPoPScoreLogic {
   // ---------- Events ---------- //
@@ -232,7 +233,6 @@ library PassportPoPScoreLogic {
     bytes32 appId,
     uint256 round
   ) private {
-
     require(user != address(0), "ProofOfParticipation: user is the zero address");
 
     require(self.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
@@ -241,18 +241,142 @@ library PassportPoPScoreLogic {
     if (self.appSecurity[appId] == PassportTypes.APP_SECURITY.NONE) {
       return;
     }
+
+    // Check if the user has attached their entity to a passport, if so, use the passport address
+    address passport = PassportEntityLogic._getPassportForEntity(self, user);
+
+    // Track unique apps core user has interacted with
+    if (!self.userUniqueAppInteraction[passport][appId]) {
+      updateUniqueAppInteractions(self, passport, appId);
+    }
+
+    // If the entity is not linked to a passport and the entity has not interacted with the app track interaction
+    if(passport != user && !self.userUniqueAppInteraction[user][appId]) {
+      updateUniqueAppInteractions(self, user, appId);
+    }
+
     // Calculate the action score, can be min 0, max 6
     uint256 actionScore = self.securityMultiplier[self.appSecurity[appId]];
 
     // Update the user's score for the round
-    self.userRoundScore[user][round] += actionScore;
+    self.userRoundScore[passport][round] += actionScore;
     // Update the user's total score
-    self.userTotalScore[user] += actionScore;
+    self.userTotalScore[passport] += actionScore;
     // Update the user's score for the app in the round
-    self.userAppRoundScore[user][round][appId] += actionScore;
+    self.userAppRoundScore[passport][round][appId] += actionScore;
     // Update the user's total score for the app
-    self.userAppTotalScore[user][appId] += actionScore;
+    self.userAppTotalScore[passport][appId] += actionScore;
 
-    emit RegisteredAction(user, appId, round, actionScore);
+    emit RegisteredAction(passport, appId, round, actionScore);
+  }
+
+  /**
+   * @notice Assigns an entity's score to a passport across specific rounds.
+   * @dev Loops through the relevant rounds and adds the entity's score to the passport's total and app scores.
+   * The function ensures the entity's score is assigned starting from the current round and going backward
+   * for a specified number of rounds.
+   * @param self The storage reference for PassportStorage.
+   * @param entity The address of the entity whose score will be assigned to the passport.
+   * @param passport The address of the passport whose scores will be updated.
+   */
+  function assignEntityScoreToPassport(
+    PassportStorageTypes.PassportStorage storage self,
+    address entity,
+    address passport
+  ) internal {
+    uint256 currentRound = self.xAllocationVoting.currentRoundId();
+
+    // Mark the round when the entity was attached to the passport
+    self.entityAttachRound[entity] = currentRound;
+
+    // Calculate the minimum round to consider (ensure no underflow)
+    uint256 minRound = currentRound >= self.roundsForAssigningEntityScore
+      ? currentRound - self.roundsForAssigningEntityScore
+      : 0;
+
+    // Loop through the rounds from current to minRound
+    for (uint256 round = currentRound; round > minRound; round--) {
+      // Check if the entity has any score in the round
+      if (self.userRoundScore[entity][round] > 0) {
+        // Update the passport's total score for the rounds considered
+        self.userTotalScore[passport] += self.userRoundScore[entity][round];
+
+        // Update the passport's round-specific score
+        self.userRoundScore[passport][round] += self.userRoundScore[entity][round];
+
+        // Update the passport's app-specific scores
+        for (uint256 i = 0; i < self.userInteractedApps[entity].length; i++) {
+          // Get the appId
+          bytes32 appId = self.userInteractedApps[entity][i];
+
+          // Update the passport's score for the app in the round
+          self.userAppRoundScore[passport][round][appId] += self.userAppRoundScore[entity][round][appId];
+
+          // Update the passport's total score for the app
+          self.userAppTotalScore[passport][appId] += self.userAppRoundScore[entity][round][appId];
+
+          // Update the passport's unique app interactions
+          if (!self.userUniqueAppInteraction[passport][appId]) {
+            updateUniqueAppInteractions(self, passport, appId);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * @notice Removes the entity's score from the passport's score, for specific rounds.
+   * @dev Loops through the relevant rounds and deducts the entity's score from the passport's total and app scores.
+   * @param self The storage reference for PassportStorage.
+   * @param entity The address of the entity whose score will be removed from the passport.
+   * @param passport The address of the passport whose scores will be updated.
+   */
+  function removeEntityScoreFromPassport(
+    PassportStorageTypes.PassportStorage storage self,
+    address entity,
+    address passport
+  ) internal {
+    // Calculate the rounds to consider for removing the entity's score
+    uint256 entityAttachRound = self.entityAttachRound[entity];
+
+    uint256 minRound = entityAttachRound >= self.roundsForAssigningEntityScore
+      ? entityAttachRound - self.roundsForAssigningEntityScore
+      : 0; // Ensure there's no underflow
+
+    // Loop through the rounds from when the entity was attached to the calculated round limit
+    for (uint256 round = entityAttachRound; round > minRound; round--) {
+      // Check if the entity has any score in the round
+      if (self.userRoundScore[entity][round] > 0) {
+        // Deduct the entity's score from the passport's total score
+        self.userTotalScore[passport] -= self.userRoundScore[entity][round];
+
+        // Deduct the entity's score from the passport's round-specific score
+        self.userRoundScore[passport][round] -= self.userRoundScore[entity][round];
+
+        // Loop through all apps the entity has interacted with and update the passport's app-specific scores
+        for (uint256 i = 0; i < self.userInteractedApps[entity].length; i++) {
+          // Get the appId
+          bytes32 appId = self.userInteractedApps[entity][i];
+
+          // Deduct the entity's app score from the passport's app score for the round
+          self.userAppRoundScore[passport][round][appId] -= self.userAppRoundScore[entity][round][appId];
+
+          // Deduct the entity's total app score from the passport's total app score
+          self.userAppTotalScore[passport][appId] -= self.userAppRoundScore[entity][round][appId];
+        }
+      }
+    }
+  }
+
+  function updateUniqueAppInteractions(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    bytes32 appId
+  ) internal {
+    // This is the first time the user interacts with this app
+    self.userUniqueAppInteraction[user][appId] = true;
+
+    // Add the appId to the user's interacted apps array
+    self.userInteractedApps[user].push(appId);
   }
 }
