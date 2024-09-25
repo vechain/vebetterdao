@@ -1,48 +1,126 @@
-import { Button, Icon } from "@chakra-ui/react"
+import { Box, Button, HStack, Icon, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { usePathname, useRouter } from "next/navigation"
 import { Route } from "./Routes"
+import { FaChevronRight } from "react-icons/fa6"
+import { useTranslation } from "react-i18next"
+import { motion } from "framer-motion"
 
 type Props = {
   onMenuClick?: () => void
   routesToRender: Route[]
 }
 
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, x: 50 },
+  visible: { opacity: 1, x: 0 },
+}
+
+const MotionHStack = motion(HStack)
+const MotionVStack = motion(VStack)
+
 export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
+  const { t } = useTranslation()
+  const [isLargerThan1200] = useMediaQuery("(min-width: 1200px)")
 
   return (
     <>
-      {routesToRender.map(route => {
-        if (route.component) return route.component
-        //check also subpaths
-        const isSelected = (() => {
-          if (route.onClick === "/") return pathname === "/"
-          if (typeof route.onClick === "string") return pathname.startsWith(route.onClick)
-          return false
-        })()
+      {isLargerThan1200 ? (
+        // Render desktop menu without animations
+        routesToRender.map(route => {
+          if (route.component) return route.component
 
-        const onClick = () => {
-          if (!route.onClick) return
-          if (typeof route.onClick === "string") {
-            router.push(route.onClick)
-          } else route.onClick()
-          onMenuClick?.()
-        }
+          const isSelected = (() => {
+            if (route.onClick === "/") return pathname === "/"
+            if (typeof route.onClick === "string") return pathname.startsWith(route.onClick)
+            return false
+          })()
 
-        return (
-          <Button
-            colorScheme={isSelected ? "primary" : "gray"}
-            rounded={"full"}
-            w={["full", "full", "auto"]}
-            leftIcon={<Icon as={route.icon} />}
-            key={route.name}
-            variant={isSelected ? "primaryAction" : "ghost"}
-            onClick={onClick}>
-            {route.name}
-          </Button>
-        )
-      })}
+          const onClick = () => {
+            if (!route.onClick) return
+            if (typeof route.onClick === "string") {
+              router.push(route.onClick)
+            } else route.onClick()
+            onMenuClick?.()
+          }
+
+          return (
+            <Button
+              colorScheme={isSelected ? "primary" : "gray"}
+              rounded={"full"}
+              w={["full", "full", "auto"]}
+              leftIcon={<Icon as={route.icon} />}
+              key={route.name}
+              variant={isSelected ? "primaryAction" : "ghost"}
+              onClick={onClick}>
+              {route.name}
+            </Button>
+          )
+        })
+      ) : (
+        <MotionVStack initial={"hidden"} animate="visible" variants={containerVariants} spacing={0}>
+          {routesToRender.map((route, index) => {
+            if (route.component) return route.component
+
+            const isSelected = (() => {
+              if (route.onClick === "/") return pathname === "/"
+              if (typeof route.onClick === "string") return pathname.startsWith(route.onClick)
+              return false
+            })()
+
+            const bgColor = isSelected ? "rgba(0, 76, 252, 1)" : "transparent"
+            const textColor = isSelected ? "white" : "inherit"
+
+            const onClick = () => {
+              if (!route.onClick) return
+              if (typeof route.onClick === "string") {
+                router.push(route.onClick)
+              } else route.onClick()
+              onMenuClick?.()
+            }
+
+            return (
+              <MotionHStack
+                key={route.name}
+                w={"full"}
+                borderRadius={9}
+                bgColor={bgColor}
+                p={4}
+                color={textColor}
+                mt={index === 0 ? 4 : 0}
+                justifyContent={"space-between"}
+                onClick={onClick}
+                // Apply animation variants
+                variants={itemVariants}>
+                <HStack alignItems={"flex-start"}>
+                  <Box p={0.5}>
+                    <Icon as={route.icon} />
+                  </Box>
+                  <VStack alignItems={"start"} spacing={0}>
+                    <Text fontSize={16} fontWeight={600}>
+                      {route.name}
+                    </Text>
+                    <Text fontSize={13} fontWeight={400}>
+                      {t(route.description as any)}
+                    </Text>
+                  </VStack>
+                </HStack>
+                {!isSelected && <FaChevronRight size={16} />}
+              </MotionHStack>
+            )
+          })}
+        </MotionVStack>
+      )}
     </>
   )
 }
