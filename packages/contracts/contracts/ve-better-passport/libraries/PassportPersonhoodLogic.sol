@@ -31,7 +31,6 @@ import { PassportClockLogic } from "./PassportClockLogic.sol";
 import { PassportEntityLogic } from "./PassportEntityLogic.sol";
 import { PassportWhitelistAndBlacklistLogic } from "./PassportWhitelistAndBlacklistLogic.sol";
 import { PassportTypes } from "./PassportTypes.sol";
-import "hardhat/console.sol";
 
 library PassportPersonhoodLogic {
   /**
@@ -46,8 +45,6 @@ library PassportPersonhoodLogic {
     // Resolve the address of the person based on the delegation status
     user = _resolvePersonhoodAddress(self, user, PassportClockLogic.clock());
 
-    console.log("User: %s", user);
-    console.log("Timepoint: %s", PassportClockLogic.clock());
     // Check if the user has delegated their personhood to another wallet
     if (user == address(0)) {
       return (false, "User has delegated their personhood");
@@ -55,14 +52,14 @@ library PassportPersonhoodLogic {
 
     // If a wallet is whitelisted, it is a person
     if (
-      PassportChecksLogic.whitelistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isWhitelisted(self, user)
+      PassportChecksLogic.whitelistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isPassportWhitelisted(self, user)
     ) {
       return (true, "User is whitelisted");
     }
 
     // If a wallet is blacklisted, it is not a person
     if (
-      PassportChecksLogic.blacklistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isBlacklisted(self, user)
+      PassportChecksLogic.blacklistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isPassportBlacklisted(self, user);
     ) {
       return (false, "User is blacklisted");
     }
@@ -114,9 +111,6 @@ library PassportPersonhoodLogic {
     // Resolve the address of the person based on the delegation status
     user = _resolvePersonhoodAddress(self, user, timepoint);
 
-    console.log("User: %s", user);
-    console.log("Timepoint: %s", timepoint);
-
     // Check if the user has delegated their personhood to another wallet
     if (user == address(0)) {
       return (false, "User has delegated their personhood");
@@ -125,7 +119,7 @@ library PassportPersonhoodLogic {
     // TODO: Add checkpointed check
     // If a wallet is whitelisted, it is a person
     if (
-      PassportChecksLogic.whitelistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isWhitelisted(self, user)
+      PassportChecksLogic.whitelistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isPassportWhitelisted(self, user)
     ) {
       return (true, "User is whitelisted");
     }
@@ -133,7 +127,7 @@ library PassportPersonhoodLogic {
     // TODO: Add checkpointed check
     // If a wallet is blacklisted, it is not a person
     if (
-      PassportChecksLogic.blacklistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isBlacklisted(self, user)
+      PassportChecksLogic.blacklistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isPassportBlacklisted(self, user)
     ) {
       return (false, "User is blacklisted");
     }
