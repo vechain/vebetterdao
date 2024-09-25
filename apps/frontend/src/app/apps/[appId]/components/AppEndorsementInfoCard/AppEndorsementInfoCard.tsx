@@ -1,4 +1,4 @@
-import { useAppEndorsers, useCurrentAppEndorsementStatus, useIsAppAdmin, useIsAppModerator, useXNode } from "@/api"
+import { useAppEndorsers, useIsAppAdmin, useIsAppModerator, useXNode } from "@/api"
 import { VeBetterIcon } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
 import { EndorsementStatus } from "@/types"
@@ -25,7 +25,17 @@ import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { useWallet } from "@vechain/dapp-kit-react"
 
-export const AppEndorsementInfoCard = () => {
+export const AppEndorsementInfoCard = ({
+  endorsementScore,
+  endorsementStatus,
+  endorsementThreshold,
+  isEndorsementStatusLoading,
+}: {
+  endorsementScore: string | undefined
+  endorsementStatus: EndorsementStatus
+  endorsementThreshold: string | undefined
+  isEndorsementStatusLoading: boolean
+}) => {
   const SCORE_COLOR_SCHEME = {
     LOST: {
       cardBorderColor: "#C84968",
@@ -56,12 +66,6 @@ export const AppEndorsementInfoCard = () => {
 
   // App endorsement data
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
-  const {
-    isLoading: isEndorsementStatusLoading,
-    score: endorsementScore,
-    status: endorsementStatus,
-    threshold: endorsementThreshold,
-  } = useCurrentAppEndorsementStatus()
 
   // User roles data
   const { data: isAppModerator, isLoading: isAppModeratorLoading } = useIsAppModerator(app?.id ?? "", account ?? "")
