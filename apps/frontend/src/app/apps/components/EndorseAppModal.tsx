@@ -8,10 +8,25 @@ import {
 } from "@/api"
 import { CustomModalContent, TransactionModal } from "@/components"
 import { useEndorseApp } from "@/hooks"
-import { Modal, ModalOverlay, ModalBody, VStack, Heading, HStack, Box, Text, Button } from "@chakra-ui/react"
+import {
+  Modal,
+  ModalOverlay,
+  ModalBody,
+  VStack,
+  Heading,
+  HStack,
+  Box,
+  Text,
+  Button,
+  Link,
+  ModalCloseButton,
+  Skeleton,
+} from "@chakra-ui/react"
+import { UilExclamationCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
+import { Trans } from "react-i18next"
 
 type Props = {
   isOpen: boolean
@@ -23,12 +38,16 @@ type Props = {
 export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { account } = useWallet()
 
-  const endorsementScore = useAppEndorsementScore(xApp?.id ?? "")
-  const endorsementScoreThreshold = useEndorsementScoreThreshold()
+  const { data: endorsementScore, isLoading: isAppScoreLoading } = useAppEndorsementScore(xApp?.id ?? "")
+  const { data: endorsementScoreThreshold, isLoading: isEndorsementThresholdLoading } = useEndorsementScoreThreshold()
 
-  const userDelegatedNodes = useUserXNodes()
+  const isEndorsementDataLoading = isAppScoreLoading || isEndorsementThresholdLoading
 
-  const nodeId = userDelegatedNodes.data?.[0]?.id ?? "0"
+  const { data: userDelegatedNodes, isLoading: isUserNodesLoading } = useUserXNodes()
+
+  const firstNode = userDelegatedNodes?.[0]
+
+  const nodeId = userDelegatedNodes?.[0]?.id ?? "0"
 
   //TODO: Multiple nodes
   const endorseAppMutation = useEndorseApp({
@@ -40,8 +59,14 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   //TODO: Handle multiple xNodes on UI
   const userEndorsementScore = useUserEndorsementScore(account)
 
-  const newScore = (Number(endorsementScore.data) ?? 0) + (Number(userEndorsementScore.data) ?? 0)
+  const appScore = useMemo(() => Number(endorsementScore) ?? 0, [endorsementScore])
+  const endorsementThreshold = useMemo(() => Number(endorsementScoreThreshold) ?? 0, [endorsementScoreThreshold])
+  const newScore = appScore + (Number(userEndorsementScore.data) ?? 0)
 
+  const newScoreMetThreshold = useMemo(
+    () => newScore >= endorsementThreshold && appScore < endorsementThreshold,
+    [newScore, endorsementThreshold, appScore, userEndorsementScore],
+  )
   const handleEndorsement = useCallback(() => {
     endorseAppMutation.resetStatus()
     endorseAppMutation.sendTransaction(undefined)
@@ -52,7 +77,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        successTitle={t("Endorse app")}
+        successTitle={t("Endorse dApp")}
         status={endorseAppMutation.error ? "error" : endorseAppMutation.status}
         errorDescription={endorseAppMutation.error?.reason}
         errorTitle={endorseAppMutation.error ? "Error endorsing" : undefined}
@@ -68,66 +93,142 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     <Modal isOpen={isOpen} onClose={onClose} size={"xl"}>
       <ModalOverlay />
       <CustomModalContent>
-        <ModalBody w={"full"}>
+        <ModalBody w={"full"} py={"24px"}>
+          <ModalCloseButton top={{ base: 5, md: 6 }} right={6} />
           <VStack spacing={6} align="flex-start" w="full">
-            <Heading size="lg">{t("Endorse app")}</Heading>
-            <HStack
-              spacing={3}
-              align={"center"}
-              w={"full"}
-              justify={"space-between"}
-              bg="#FAFAFA"
-              p="16px"
-              rounded={"md"}>
-              <Box>
-                <Text>{xApp?.name ?? ""}</Text>
-                <Text color={"#6A6A6A"}>{t("Current endorsement score")}</Text>
-              </Box>
-              <Heading size="lg">
-                {endorsementScore.data} {"/"} {endorsementScoreThreshold.data}
-              </Heading>
-            </HStack>
-            <HStack
-              spacing={3}
-              align={"center"}
-              w={"full"}
-              justify={"space-between"}
-              bg="#FAFAFA"
-              p="16px"
-              rounded={"md"}>
-              <Box>
-                <Text>{"TODO: Node Name"}</Text>
-                <Text color={"#6A6A6A"}>{t("Your node")}</Text>
-              </Box>
-              <HStack spacing={1} align={"flex-end"}>
-                <Heading fontSize={"36px"} fontWeight={700} color={"#F29B32"} lineHeight={"36px"}>
-                  {endorsementScore.data}
-                </Heading>
-                <Text fontSize={"14px"} color={"#6A6A6A"} fontWeight={400} lineHeight={"24px"}>
-                  {t("of {{value}}", {
-                    value: endorsementScoreThreshold.data,
+            <Heading size="lg">{t("Endorse dApp")}</Heading>
+            <Text
+              as="span"
+              textTransform="none"
+              fontWeight="normal"
+              whiteSpace="normal"
+              wordBreak="break-word"
+              flexWrap="wrap"
+              fontSize="sm">
+              <Trans
+                i18nKey={
+                  "As an X-Node holder, your unique NFT score can be used to endorse a single app of your choice within the ecosystem. <Link>Know more</Link>"
+                }
+                components={{
+                  Link: <Link href="" color="#004CFC" textDecoration="underline" />,
+                }}
+              />
+            </Text>
+
+            <Skeleton w="full" isLoaded={!isUserNodesLoading && !isEndorsementDataLoading}>
+              <HStack
+                spacing={3}
+                align={"center"}
+                w={"full"}
+                justify={"space-between"}
+                bg="#FAFAFA"
+                p="16px"
+                rounded={"md"}>
+                <Box>
+                  <Text color={"#000000"} fontWeight={600}>
+                    {xApp?.name ?? ""}
+                  </Text>
+                  <Text color={"#6A6A6A"}>{t("Current endorsement score")}</Text>
+                </Box>
+                <HStack spacing={1} align={"flex-end"}>
+                  <Heading fontSize={"36px"} fontWeight={700} color={"#F29B32"} lineHeight={"36px"}>
+                    {appScore}
+                  </Heading>
+                  <Text fontSize={"14px"} color={"#6A6A6A"} fontWeight={400} lineHeight={"24px"}>
+                    {t("of {{value}}", {
+                      value: endorsementScoreThreshold,
+                    })}
+                  </Text>
+                </HStack>
+              </HStack>
+            </Skeleton>
+
+            <Skeleton w="full" isLoaded={!isUserNodesLoading && !isEndorsementDataLoading}>
+              <HStack
+                spacing={3}
+                align={"center"}
+                w={"full"}
+                justify={"space-between"}
+                bg="#FAFAFA"
+                p="16px"
+                rounded={"md"}>
+                <Box>
+                  <Text color={"#000000"} fontWeight={600}>
+                    {firstNode?.name}
+                  </Text>
+                  <Text color={"#6A6A6A"}>{t("Your X-node score")}</Text>
+                </Box>
+                <HStack spacing={1} align={"flex-end"}>
+                  <Text
+                    as="span"
+                    textTransform="none"
+                    fontWeight="normal"
+                    whiteSpace="normal"
+                    wordBreak="break-word"
+                    flexWrap="wrap"
+                    fontSize="sm">
+                    <Trans
+                      i18nKey="<Text>{{value}}</Text> pts."
+                      values={{ value: userEndorsementScore?.data || 0 }}
+                      components={{
+                        Text: (
+                          <Heading as="span" fontSize={"36px"} fontWeight={700} color={"#F29B32"} lineHeight={"36px"} />
+                        ),
+                      }}
+                    />
+                  </Text>
+                </HStack>
+              </HStack>
+            </Skeleton>
+            <Skeleton w="full" isLoaded={!isUserNodesLoading && !isEndorsementDataLoading}>
+              <HStack
+                spacing={3}
+                align={"center"}
+                w={"full"}
+                justify={"space-between"}
+                bg="#E9FDF1"
+                p="16px"
+                rounded={"md"}>
+                <Box>
+                  <Text color={"#000000"} fontWeight={600}>
+                    {t("New dApp score")}
+                  </Text>
+                </Box>
+                <Text
+                  as="span"
+                  textTransform="none"
+                  fontWeight="normal"
+                  whiteSpace="normal"
+                  wordBreak="break-word"
+                  flexWrap="wrap"
+                  fontSize="sm">
+                  <Trans
+                    i18nKey="<Text>{{value}}</Text> pts."
+                    values={{ value: newScore }}
+                    components={{
+                      Text: <Heading as="span" size="lg" color="#3DBA67" />,
+                    }}
+                  />
+                </Text>
+              </HStack>
+            </Skeleton>
+            {newScoreMetThreshold ? (
+              <HStack spacing={3} align={"center"} w={"full"} p="16px" rounded={"md"}>
+                <Box>
+                  <UilExclamationCircle size="24" color="#252525" />
+                </Box>
+                <Text color="black">
+                  {t("With your endorsement, {{appName}} gets enough score to get into the next allocation round.", {
+                    appName: xApp?.name,
                   })}
                 </Text>
               </HStack>
-            </HStack>
-            <HStack
-              spacing={3}
-              align={"center"}
-              w={"full"}
-              justify={"space-between"}
-              bg="#E9FDF1"
-              p="16px"
-              rounded={"md"}>
-              <Box>
-                <Text color={"#6A6A6A"}>{t("New dApp score")}</Text>
-              </Box>
-              <Heading size="lg" color="#3DBA67">
-                {t("{{value}} pts.", { value: newScore })}
-              </Heading>
-            </HStack>
-            <Button variant={"primaryAction"} w={"full"} onClick={handleEndorsement}>
-              {t("Endorse now")}
-            </Button>
+            ) : null}
+            <Skeleton w="full" isLoaded={!isUserNodesLoading && !isEndorsementDataLoading}>
+              <Button variant={"primaryAction"} w={"full"} onClick={handleEndorsement}>
+                {t("Endorse now")}
+              </Button>
+            </Skeleton>
           </VStack>
         </ModalBody>
       </CustomModalContent>
