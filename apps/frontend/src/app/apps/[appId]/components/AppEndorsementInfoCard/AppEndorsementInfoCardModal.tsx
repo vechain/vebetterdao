@@ -47,28 +47,28 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
             direction={["column", "column", "row"]}
             w={"full"}
             alignItems={"stretch"}
-            spacing={8}
+            spacing={5}
             marginBottom={"3vh"}>
             <VStack flex={1.5} h="full" maxH="50vh" minH="50vh">
               <HStack w="full" justify="space-between">
                 <VStack alignItems={"flex-start"}>
-                  <Text fontSize={["x-small", "medium", "medium"]}>{t("Current score")}</Text>
-                  <Text fontSize={["medium", "large", "xx-large"]} fontWeight="800" color="#444AD1">
+                  <Text fontSize={["x-small", "x-small", "medium"]}>{t("Current score")}</Text>
+                  <Text fontSize={["medium", "medium", "xx-large"]} fontWeight="800" color="#444AD1">
                     {endorsementScore}
                   </Text>
                 </VStack>
 
                 <VStack alignItems={"flex-start"}>
-                  <Text fontSize={["x-small", "medium", "medium"]}>{t("Users endorsing")}</Text>
-                  <Text fontSize={["medium", "large", "xx-large"]} fontWeight="800" color="#444AD1">
+                  <Text fontSize={["x-small", "x-small", "medium"]}>{t("Users endorsing")}</Text>
+                  <Text fontSize={["medium", "medium", "xx-large"]} fontWeight="800" color="#444AD1">
                     {endorsers?.length}
                   </Text>
                 </VStack>
 
                 <VStack alignItems={"flex-start"}>
-                  <Text fontSize={["x-small", "medium", "medium"]}>{t("Status")}</Text>
+                  <Text fontSize={["x-small", "x-small", "medium"]}>{t("Status")}</Text>
                   <Text
-                    fontSize={["medium", "large", "xx-large"]}
+                    fontSize={["medium", "medium", "xx-large"]}
                     fontWeight="800"
                     color={isUnendorsed ? "#C84968" : "#3DBA67"}>
                     {isUnendorsed ? t("Not endorsed") : t("Endorsed")}
