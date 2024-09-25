@@ -25,6 +25,7 @@ pragma solidity 0.8.20;
 
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { PassportClockLogic } from "./PassportClockLogic.sol";
+import { PassportEntityLogic } from "./PassportEntityLogic.sol";
 import { PassportEIP712SigningLogic } from "./PassportEIP712SigningLogic.sol";
 import { PassportTypes } from "./PassportTypes.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
@@ -174,7 +175,17 @@ library PassportSignalingLogic {
     address user,
     string memory reason
   ) external {
+    // Get the signals
+    uint256 signals = self.signaledCounter[user];
+
+    // Reset the signals
     self.signaledCounter[user] = 0;
+
+    // Get the passport address if the user has attached their entity to a passport
+    address passport = PassportEntityLogic._getPassportForEntity(self, user);
+    if (user != passport) {
+      self.signaledCounter[passport] -= signals;
+    }
 
     emit UserSignalsReset(user, reason);
   }
@@ -182,7 +193,11 @@ library PassportSignalingLogic {
   /// @notice Resets the signals of a user
   /// @param user - the user to reset the signals of
   /// @param reason - the reason for resetting the signals
-  function resetUserSignalsByAppAdminWithReason(PassportStorageTypes.PassportStorage storage self, address user, string memory reason) external {
+  function resetUserSignalsByAppAdminWithReason(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    string memory reason
+  ) external {
     bytes32 app = self.appOfSignaler[msg.sender];
     require(self.x2EarnApps.isAppAdmin(app, msg.sender), "BotSignaling: caller is not an admin of the app");
 
@@ -199,6 +214,13 @@ library PassportSignalingLogic {
     self.appSignalsCounter[app][user]++;
     self.appTotalSignalsCounter[app]++;
 
+    // Check if the user has attached their entity to a passport, if so, also signal the passport
+    address passport = PassportEntityLogic._getPassportForEntity(self, user);
+    if (user != passport) {
+      self.signaledCounter[passport]++;
+      self.appSignalsCounter[app][passport]++;
+    }
+
     emit UserSignaled(user, msg.sender, app, reason);
   }
 
@@ -206,14 +228,60 @@ library PassportSignalingLogic {
   /// @param user - the user to reset the signals of
   /// @param app - the app to reset the signals for
   /// @param reason - the reason for resetting the signals
-  function _resetUserSignalsOfApp(PassportStorageTypes.PassportStorage storage self, address user, bytes32 app, string memory reason) private {
-   uint256 signals = self.appSignalsCounter[app][user];
+  function _resetUserSignalsOfApp(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    bytes32 app,
+    string memory reason
+  ) private {
+    // Get the passport address if the user has attached their entity to a passport
+    address passport = PassportEntityLogic._getPassportForEntity(self, user);
+
+    uint256 signals = self.appSignalsCounter[app][user];
 
     self.appSignalsCounter[app][user] = 0;
     self.appTotalSignalsCounter[app] -= signals;
     self.signaledCounter[user] -= signals;
 
+    if (user != passport) {
+      self.signaledCounter[passport] -= signals;
+      self.appSignalsCounter[app][passport] -= signals;
+    }
 
     emit UserSignalsResetForApp(user, app, reason);
+  }
+
+  function attachEntitySignalsToPassport(
+    PassportStorageTypes.PassportStorage storage self,
+    address entity,
+    address passport
+  ) internal {
+    // Attach the signals of the entity to the passport
+    self.signaledCounter[passport] += self.signaledCounter[entity];
+
+    // Get the unique apps that the entity has interacted with
+    bytes32[] memory apps = self.userInteractedApps[entity];
+    // Attach the signals of the entity to the passport for each app
+    for (uint256 i = 0; i < apps.length; i++) {
+      bytes32 appId = apps[i];
+      self.appSignalsCounter[appId][passport] += self.appSignalsCounter[appId][entity];
+    }
+  }
+
+  function removeEntitySignalsFromPassport(
+    PassportStorageTypes.PassportStorage storage self,
+    address entity,
+    address passport
+  ) internal {
+    // Remove the signals of the entity from the passport
+    self.signaledCounter[passport] -= self.signaledCounter[entity];
+
+    // Get the unique apps that the entity has interacted with
+    bytes32[] memory apps = self.userInteractedApps[entity];
+    // Remove the signals of the entity from the passport for each app
+    for (uint256 i = 0; i < apps.length; i++) {
+      bytes32 appId = apps[i];
+      self.appSignalsCounter[appId][passport] -= self.appSignalsCounter[appId][entity];
+    }
   }
 }
