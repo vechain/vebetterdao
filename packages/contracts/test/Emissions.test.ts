@@ -1613,10 +1613,10 @@ describe("Emissions - @shard1", () => {
 
         // Log the cycle and amounts for debugging
         // Uncomment to view the emissions for each cycle
-        console.log(
-          `Cycle ${allocations.cycle}: XAllocations = ${ethers.formatEther(xAllocationsAmount)}, Vote2Earn = ${ethers.formatEther(vote2EarnAmount)}`,
-          `Treasury = ${ethers.formatEther(treasuryAmount)} Total Emissions = ${ethers.formatEther(totalEmissionsFromContract)} Remaining Emissions = ${ethers.formatEther(remainingEmissionsFromContract)}`,
-        )
+        // console.log(
+        //   `Cycle ${allocations.cycle}: XAllocations = ${ethers.formatEther(xAllocationsAmount)}, Vote2Earn = ${ethers.formatEther(vote2EarnAmount)}`,
+        //   `Treasury = ${ethers.formatEther(treasuryAmount)} Total Emissions = ${ethers.formatEther(totalEmissionsFromContract)} Remaining Emissions = ${ethers.formatEther(remainingEmissionsFromContract)}`,
+        // )
 
         // Assert the calculated amounts match the expected amounts from the spreadsheet
         expect(xAllocationsAmount).to.equal(allocations.xAllocation)
