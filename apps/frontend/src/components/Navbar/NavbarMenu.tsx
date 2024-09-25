@@ -27,6 +27,22 @@ const itemVariants = {
 const MotionHStack = motion(HStack)
 const MotionVStack = motion(VStack)
 
+const isSelected = (route: Route, pathname: string) => {
+  if (route.onClick === "/") return pathname === "/"
+  if (typeof route.onClick === "string") return pathname.startsWith(route.onClick)
+  return false
+}
+
+const handleClick = (route: Route, router: any, onMenuClick?: () => void) => () => {
+  if (!route.onClick) return
+  if (typeof route.onClick === "string") {
+    router.push(route.onClick)
+  } else {
+    route.onClick()
+  }
+  onMenuClick?.()
+}
+
 export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
   const router = useRouter()
   const pathname = usePathname()
@@ -40,28 +56,17 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
         routesToRender.map(route => {
           if (route.component) return route.component
 
-          const isSelected = (() => {
-            if (route.onClick === "/") return pathname === "/"
-            if (typeof route.onClick === "string") return pathname.startsWith(route.onClick)
-            return false
-          })()
-
-          const onClick = () => {
-            if (!route.onClick) return
-            if (typeof route.onClick === "string") {
-              router.push(route.onClick)
-            } else route.onClick()
-            onMenuClick?.()
-          }
+          const selected = isSelected(route, pathname)
+          const onClick = handleClick(route, router, onMenuClick)
 
           return (
             <Button
-              colorScheme={isSelected ? "primary" : "gray"}
+              colorScheme={selected ? "primary" : "gray"}
               rounded={"full"}
               w={["full", "full", "auto"]}
               leftIcon={<Icon as={route.icon} />}
               key={route.name}
-              variant={isSelected ? "primaryAction" : "ghost"}
+              variant={selected ? "primaryAction" : "ghost"}
               onClick={onClick}>
               {route.name}
             </Button>
@@ -72,22 +77,10 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
           {routesToRender.map((route, index) => {
             if (route.component) return route.component
 
-            const isSelected = (() => {
-              if (route.onClick === "/") return pathname === "/"
-              if (typeof route.onClick === "string") return pathname.startsWith(route.onClick)
-              return false
-            })()
-
-            const bgColor = isSelected ? "rgba(0, 76, 252, 1)" : "transparent"
-            const textColor = isSelected ? "white" : "inherit"
-
-            const onClick = () => {
-              if (!route.onClick) return
-              if (typeof route.onClick === "string") {
-                router.push(route.onClick)
-              } else route.onClick()
-              onMenuClick?.()
-            }
+            const selected = isSelected(route, pathname)
+            const bgColor = selected ? "rgba(0, 76, 252, 1)" : "transparent"
+            const textColor = selected ? "white" : "inherit"
+            const onClick = handleClick(route, router, onMenuClick)
 
             return (
               <MotionHStack
@@ -115,7 +108,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
                     </Text>
                   </VStack>
                 </HStack>
-                {!isSelected && <FaChevronRight size={16} />}
+                {!selected && <FaChevronRight size={16} />}
               </MotionHStack>
             )
           })}
