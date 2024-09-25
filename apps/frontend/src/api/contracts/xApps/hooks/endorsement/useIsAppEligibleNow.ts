@@ -9,18 +9,16 @@ const method = "isEligibleNow"
 
 /**
  * Get the query key for a boolean value indicating if the app is eligible
- * @param appId  the app id
+ * @param appId  the query key
  */
-export const getIsAppEligibleQueryKey = (appId: string) => {
-  getCallKey({ method, keyArgs: [appId] })
-}
+export const getIsAppEligibleNowQueryKey = (appId: string) => getCallKey({ method, keyArgs: [appId] })
 
 /**
  *  Hook to get a boolean value indicating if the app is eligible
  * @param appId  the app id
  * @returns a boolean value indicating if the app is eligible
  */
-export const useIsAppEligible = (appId: string): UseQueryResult<boolean, Error> => {
+export const useIsAppEligibleNow = (appId: string): UseQueryResult<boolean, Error> => {
   return useCall({
     contractInterface,
     contractAddress,
