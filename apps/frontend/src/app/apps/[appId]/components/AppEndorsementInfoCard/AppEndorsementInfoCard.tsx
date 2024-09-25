@@ -112,8 +112,7 @@ export const AppEndorsementInfoCard = ({
   return (
     <>
       <Card
-        h="full"
-        w="100%"
+        align={"stretch"}
         p="24px"
         gap="24px"
         border="1px"
@@ -137,7 +136,6 @@ export const AppEndorsementInfoCard = ({
             </Text>
           </Skeleton>
         </CardHeader>
-
         <CardBody p={0}>
           <Stack spacing={3} w="full">
             <Skeleton isLoaded={!isEndorsementStatusLoading && !isXNodeLoading}>
