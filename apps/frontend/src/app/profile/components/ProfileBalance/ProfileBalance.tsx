@@ -5,6 +5,9 @@ import { useTranslation } from "react-i18next"
 import { useB3trBalance, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { ConvertModal } from "@/components/Convert/ConvertModal"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+
+const compactFormatter = getCompactFormatter(0)
 
 export const ProfileBalance = () => {
   const { t } = useTranslation()
@@ -22,7 +25,7 @@ export const ProfileBalance = () => {
           <Skeleton isLoaded={!isB3trBalanceLoading} w="100px" flex={1}>
             <Box bg="gray.100" p={3} borderRadius="md" flex={1} py={5} px={3}>
               <Text fontSize="md" fontWeight="bold">
-                {b3trBalance?.formatted} {t("B3TR")}
+                {compactFormatter.format(Number(b3trBalance?.scaled ?? 0))} {t("B3TR")}
               </Text>
             </Box>
           </Skeleton>
@@ -30,7 +33,7 @@ export const ProfileBalance = () => {
           <Skeleton isLoaded={!isV3BalanceLoading} w="100px" flex={1}>
             <Box bg="gray.100" p={3} borderRadius="md" flex={1} py={5} px={3} pl={6}>
               <Text fontSize="md" fontWeight="bold">
-                {v3Balance?.formatted} {t("VOT3")}
+                {compactFormatter.format(Number(v3Balance?.scaled ?? 0))} {t("VOT3")}
               </Text>
             </Box>
           </Skeleton>
