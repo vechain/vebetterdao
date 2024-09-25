@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react"
-import { Box, Button, Card, CardBody, Flex, Grid, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Card, CardBody, Flex, Grid, Heading, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
 import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -41,21 +41,22 @@ export const ActivityCalendar = () => {
       return "transparent"
     }
     if (level === 1) {
-      return "gray.100"
+      return "#dce8fd"
     }
-    if (level === 2) {
-      return "gray.200"
+    if (level === 2 || level === 3) {
+      return "#60a5fa"
     }
-    if (level === 3) {
-      return "gray.300"
+    if (level === 4 || level === 5) {
+      return "#225eec"
     }
-    if (level === 4) {
-      return "gray.400"
+    return "#203a87"
+  }, [])
+
+  const getActivityFontColor = useCallback((level: number) => {
+    if (level > 1) {
+      return "white"
     }
-    if (level === 5) {
-      return "gray.500"
-    }
-    return "gray.600"
+    return "black"
   }, [])
 
   const isDisabledNextMonth = useMemo(() => {
@@ -66,13 +67,18 @@ export const ActivityCalendar = () => {
     <Card w="full" variant="baseWithBorder">
       <CardBody>
         <VStack align="stretch" gap={4}>
-          <Heading size="md">{t("Actions history")}</Heading>
+          <HStack justify="space-between" align="center" mb={4}>
+            <Heading size="md">{t("Actions history")}</Heading>
+            <Button variant="primaryGhost" size="sm" m={0} p={0} h={"24px"}>
+              {t("Change to list view")}
+            </Button>
+          </HStack>
 
           <Flex justify="space-between" align="center" mb={4}>
             <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)}>
               <FaChevronLeft />
             </Button>
-            <Heading size="md">{currentDate.format("MMMM YYYY")}</Heading>
+            <Heading size="sm">{currentDate.format("MMMM YYYY").toUpperCase()}</Heading>
             <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} isDisabled={isDisabledNextMonth}>
               <FaChevronRight />
             </Button>
@@ -103,10 +109,11 @@ export const ActivityCalendar = () => {
                   align="center"
                   justify="center"
                   bg={getActivityColor(activityLevel)}
+                  color={getActivityFontColor(activityLevel)}
                   borderRadius="md"
                   opacity={isFutureDay ? 0.5 : 1}
-                  border={isToday ? "1px solid" : "none"}
-                  borderColor="gray.800">
+                  border={"1px solid"}
+                  borderColor={isToday ? "black" : "#dfdfdf"}>
                   <Text fontSize="sm" fontWeight="medium">
                     {day}
                   </Text>
