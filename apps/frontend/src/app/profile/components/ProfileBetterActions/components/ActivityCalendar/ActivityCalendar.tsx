@@ -69,7 +69,7 @@ export const ActivityCalendar = () => {
         <VStack align="stretch" gap={4}>
           <HStack justify="space-between" align="center" mb={4}>
             <Heading size="md">{t("Actions history")}</Heading>
-            <Button variant="primaryGhost" size="sm" m={0} p={0} h={"24px"}>
+            <Button variant="primaryLink" size="sm" h={"16px"}>
               {t("Change to list view")}
             </Button>
           </HStack>
