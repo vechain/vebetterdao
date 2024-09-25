@@ -45,24 +45,28 @@ export const ActivityList = ({ setIsCalendarView }: { setIsCalendarView: Dispatc
               {t("Change to calendar view")}
             </Button>
           </HStack>
-          <InfiniteScroll
-            dataLength={actions.length}
-            next={fetchNextPage}
-            hasMore={!!hasNextPage}
-            loader={<Spinner size="md" alignSelf="center" />}>
-            <VStack gap={6} align="stretch">
-              {Object.entries(groupedActions).map(([day, dayActions]) => (
-                <VStack key={day} spacing={3} align="stretch">
-                  <Text fontWeight="600" color="#848484">
-                    {dayjs(day).format("MMMM D YYYY").toUpperCase()}
-                  </Text>
-                  {dayActions.map((action, index) => (
-                    <BetterActionCard key={`${day}-${index}`} action={action} />
-                  ))}
-                </VStack>
-              ))}
-            </VStack>
-          </InfiniteScroll>
+          {actions.length === 0 ? (
+            <Text>{t("No better actions found")}</Text>
+          ) : (
+            <InfiniteScroll
+              dataLength={actions.length}
+              next={fetchNextPage}
+              hasMore={!!hasNextPage}
+              loader={<Spinner size="md" alignSelf="center" />}>
+              <VStack gap={6} align="stretch">
+                {Object.entries(groupedActions).map(([day, dayActions]) => (
+                  <VStack key={day} spacing={3} align="stretch">
+                    <Text fontWeight="600" color="#848484">
+                      {dayjs(day).format("MMMM D YYYY").toUpperCase()}
+                    </Text>
+                    {dayActions.map((action, index) => (
+                      <BetterActionCard key={`${day}-${index}`} action={action} />
+                    ))}
+                  </VStack>
+                ))}
+              </VStack>
+            </InfiniteScroll>
+          )}
         </VStack>
       </CardBody>
     </Card>
