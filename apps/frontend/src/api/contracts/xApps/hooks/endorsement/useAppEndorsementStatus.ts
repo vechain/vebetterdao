@@ -1,7 +1,5 @@
-import { useAppEndorsementScore, useEndorsementScoreThreshold, useIsAppUnendorsed } from "@/api"
-import { useIsAppEligible } from "@/api/contracts/xApps/hooks/endorsement/useIsAppEligible"
+import { useAppEndorsementScore, useEndorsementScoreThreshold, useIsAppEligibleNow, useIsAppUnendorsed } from "@/api"
 import { EndorsementStatus } from "@/types"
-import { useParams } from "next/navigation"
 
 /**
  * Determine the current app endorsement status
@@ -45,11 +43,10 @@ const determineAppStatus = (
  * - `status`: The computed endorsement status based on the threshold, score, eligibility, and unendorsement status
  * - `isLoading`: A boolean indicating if any of the data fetching operations are still in progress
  */
-export const useCurrentAppEndorsementStatus = () => {
-  const { appId } = useParams<{ appId: string }>()
+export const useAppEndorsementStatus = (appId: string) => {
   const { data: threshold, isLoading: isEndorsementThresholdLoading } = useEndorsementScoreThreshold()
   const { data: score, isLoading: isEndorsementScoreLoading } = useAppEndorsementScore(appId)
-  const { data: isEligibleNow, isLoading: isEligibleNowLoading } = useIsAppEligible(appId)
+  const { data: isEligibleNow, isLoading: isEligibleNowLoading } = useIsAppEligibleNow(appId)
   const { data: isUnendorsed, isLoading: isUnendorsedLoading } = useIsAppUnendorsed(appId)
   const isLoading =
     isEndorsementThresholdLoading || isEndorsementScoreLoading || isEligibleNowLoading || isUnendorsedLoading

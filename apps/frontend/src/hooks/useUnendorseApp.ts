@@ -5,22 +5,25 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import {
   getAppEndorsementScoreQueryKey,
   getEndorsersQueryKey,
+  getIsAppEligibleNowQueryKey,
   getIsAppUnendorsedQueryKey,
   getNodesEndorsedAppsQueryKey,
+  getUserXNodesQueryKey,
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
-type Props = { appId?: string; nodeId?: string; onSuccess?: () => void }
+type Props = { appId?: string; nodeId?: string; userAddress?: string; onSuccess?: () => void }
 
 /**
  * Hook to unendorse an app
  * @param appId  the app id to unendorse
  * @param nodeId  the node id to unendorse with
+ * @param userAddress  the user address
  * @param onSuccess  the callback to call after the app is unendorsed
  * @returns the unendorse transaction
  */
-export const useUnendorseApp = ({ appId, nodeId, onSuccess }: Props) => {
+export const useUnendorseApp = ({ appId, nodeId, userAddress, onSuccess }: Props) => {
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({
@@ -35,12 +38,14 @@ export const useUnendorseApp = ({ appId, nodeId, onSuccess }: Props) => {
 
   const refetchQueryKeys = useMemo(
     () => [
+      getUserXNodesQueryKey(userAddress ?? ""),
+      getIsAppEligibleNowQueryKey(appId ?? ""),
       getIsAppUnendorsedQueryKey(appId ?? ""),
       getAppEndorsementScoreQueryKey(appId),
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
       getEndorsersQueryKey(appId ?? ""),
     ],
-    [appId, nodeId],
+    [appId, nodeId, userAddress],
   )
 
   return useBuildTransaction({
