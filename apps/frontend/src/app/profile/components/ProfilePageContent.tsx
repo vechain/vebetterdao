@@ -15,13 +15,14 @@ export const ProfilePageContent = () => {
     <VStack gap={6} align="stretch">
       <ProfileHeader />
       <HStack>
-        <Button variant="ghost" onClick={() => setSelectedTab("balance")} isActive={selectedTab === "balance"}>
+        <Button
+          variant={selectedTab === "balance" ? "primaryAction" : "primarySubtle"}
+          onClick={() => setSelectedTab("balance")}>
           {t("Balance")}
         </Button>
         <Button
-          variant="ghost"
-          onClick={() => setSelectedTab("better-actions")}
-          isActive={selectedTab === "better-actions"}>
+          variant={selectedTab === "better-actions" ? "primaryAction" : "primarySubtle"}
+          onClick={() => setSelectedTab("better-actions")}>
           {t("Better Actions")}
         </Button>
       </HStack>

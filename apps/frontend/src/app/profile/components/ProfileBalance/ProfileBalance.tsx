@@ -18,24 +18,34 @@ export const ProfileBalance = () => {
         <Heading as="h6" size="md" mb={4}>
           {t("Your tokens")}
         </Heading>
-        <HStack align="center" justify="space-between">
-          <Skeleton isLoaded={!isB3trBalanceLoading} w="100px">
-            <Box bg="gray.100" p={3} borderRadius="md" flex={1} mr={2}>
-              <Text fontSize="sm" fontWeight="bold">
+        <HStack align="center">
+          <Skeleton isLoaded={!isB3trBalanceLoading} w="100px" flex={1}>
+            <Box bg="gray.100" p={3} borderRadius="md" flex={1} py={5} px={3}>
+              <Text fontSize="md" fontWeight="bold">
                 {b3trBalance?.formatted} {t("B3TR")}
               </Text>
             </Box>
           </Skeleton>
-          <Button variant="primaryAction" size="sm" p={2} minW="auto" onClick={onOpen}>
-            <FaRepeat />
-          </Button>
-          <Skeleton isLoaded={!isV3BalanceLoading} w="100px">
-            <Box bg="gray.100" p={3} borderRadius="md" flex={1} ml={2}>
-              <Text fontSize="sm" fontWeight="bold">
+
+          <Skeleton isLoaded={!isV3BalanceLoading} w="100px" flex={1}>
+            <Box bg="gray.100" p={3} borderRadius="md" flex={1} py={5} px={3} pl={6}>
+              <Text fontSize="md" fontWeight="bold">
                 {v3Balance?.formatted} {t("VOT3")}
               </Text>
             </Box>
           </Skeleton>
+          <Button
+            variant="primaryAction"
+            size="sm"
+            p={2}
+            minW="auto"
+            onClick={onOpen}
+            position="absolute"
+            left={"calc(50% - 20px)"}
+            w="40px"
+            h="40px">
+            <FaRepeat />
+          </Button>
         </HStack>
       </CardBody>
       <ConvertModal isOpen={isOpen} onClose={onClose} />
