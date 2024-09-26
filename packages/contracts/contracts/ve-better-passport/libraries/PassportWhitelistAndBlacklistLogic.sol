@@ -26,6 +26,11 @@ pragma solidity 0.8.20;
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { PassportEntityLogic } from "./PassportEntityLogic.sol";
 
+/**
+ * @title PassportWhitelistAndBlacklistLogic
+ * @dev This library manages the whitelisting and blacklisting of users and passports in the Passport system.
+ * It provides functionality to add or remove users from the whitelist/blacklist, and to check a passport's status based on linked entities.
+ */
 library PassportWhitelistAndBlacklistLogic {
   // ---------- Events ---------- //
   /// @notice Emitted when a user is whitelisted
@@ -73,30 +78,8 @@ library PassportWhitelistAndBlacklistLogic {
   function isPassportWhitelisted(
     PassportStorageTypes.PassportStorage storage self,
     address passport
-  ) internal view returns (bool) {
-    passport = PassportEntityLogic.getPassportForEntity(self, passport);
-
-    // Check if the passport itself is whitelisted
-    if (isWhitelisted(self, passport)) {
-      return true;
-    }
-
-    // Get the number of entities the passport has attached
-    uint256 totalEntities = PassportEntityLogic.getEntitiesLinkedToPassport(self, passport).length;
-
-    // If there are no entities, the passport can't be considered whitelisted based on app interactions
-    if (totalEntities == 0) {
-      return false;
-    }
-
-    // Get the number of whitelisted entities attached to the passport
-    uint256 whitelistedEntities = self.whitelistedEntitiesCounter[passport];
-
-    // Calculate the percentage of whitelisted entities
-    uint256 whitelistPercentage = (whitelistedEntities * 100) / totalEntities;
-
-    // Return true if the whitelist percentage exceeds the given threshold percentage
-    return whitelistPercentage >= self.blackAndwhiteListThreshold;
+  ) external view returns (bool) {
+    return _isPassportWhitelisted(self, passport);
   }
 
   /**
@@ -112,29 +95,8 @@ library PassportWhitelistAndBlacklistLogic {
   function isPassportBlacklisted(
     PassportStorageTypes.PassportStorage storage self,
     address passport
-  ) internal view returns (bool) {
-    passport = PassportEntityLogic.getPassportForEntity(self, passport);
-
-    // Check if the passport itself is blacklisted
-    if (isBlacklisted(self, passport)) {
-      return true;
-    }
-
-    // Get the number of entities the passport has interacted with
-    uint256 totalEntities = PassportEntityLogic.getEntitiesLinkedToPassport(self, passport).length;
-    if (totalEntities == 0) {
-      // If there are no entities, the passport can't be considered blacklisted based on app interactions
-      return false;
-    }
-
-    // Get the number of blacklisted entities attached to the passport
-    uint256 blacklistedEntities = self.blacklistedEntitiesCounter[passport];
-
-    // Calculate the percentage of blacklisted entities
-    uint256 blacklistPercentage = (blacklistedEntities * 100) / totalEntities;
-
-    // Return true if the blacklist percentage exceeds the given threshold percentage
-    return blacklistPercentage >= self.blackAndwhiteListThreshold;
+  ) external view returns (bool) {
+    return _isPassportBlacklisted(self, passport);
   }
 
   // ---------- Setters ---------- //
@@ -275,5 +237,82 @@ library PassportWhitelistAndBlacklistLogic {
     } else {
       self.whitelistedEntitiesCounter[passport] -= 1;
     }
+  }
+
+  /**
+   * @notice Checks if a passport is whitelisted based on a threshold percentage of linked entities.
+   * @dev This function checks if the passport itself is whitelisted or if the number of whitelisted entities
+   * linked to the passport exceeds the given threshold percentage of the total entities linked to the passport.
+   * It first checks if the passport is directly whitelisted. If not, it calculates the percentage of whitelisted
+   * entities linked to the passport and compares it to the threshold.
+   * @param self The storage reference for PassportStorage.
+   * @param passport The address of the passport being checked.
+   * @return True if the passport is whitelisted based on the threshold, otherwise false.
+   */
+  function _isPassportWhitelisted(
+    PassportStorageTypes.PassportStorage storage self,
+    address passport
+  ) internal view returns (bool) {
+    passport = PassportEntityLogic.getPassportForEntity(self, passport);
+
+    // Check if the passport itself is whitelisted
+    if (isWhitelisted(self, passport)) {
+      return true;
+    }
+
+    // Get the number of entities the passport has attached
+    uint256 totalEntities = PassportEntityLogic.getEntitiesLinkedToPassport(self, passport).length;
+
+    // If there are no entities, the passport can't be considered whitelisted based on app interactions
+    if (totalEntities == 0) {
+      return false;
+    }
+
+    // Get the number of whitelisted entities attached to the passport
+    uint256 whitelistedEntities = self.whitelistedEntitiesCounter[passport];
+
+    // Calculate the percentage of whitelisted entities
+    uint256 whitelistPercentage = (whitelistedEntities * 100) / totalEntities;
+
+    // Return true if the whitelist percentage exceeds the given threshold percentage
+    return whitelistPercentage >= self.blackAndwhiteListThreshold;
+  }
+
+  /**
+   * @notice Checks if a passport is blacklisted based on a threshold percentage of linked entities.
+   * @dev This function checks if the passport itself is blacklisted or if the number of blacklisted entities
+   * linked to the passport exceeds the given threshold percentage of the total entities linked to the passport.
+   * It first checks if the passport is directly blacklisted. If not, it calculates the percentage of blacklisted
+   * entities linked to the passport and compares it to the specified threshold.
+   * @param self The storage reference for PassportStorage.
+   * @param passport The address of the passport being checked.
+   * @return True if the passport is blacklisted based on the threshold, otherwise false.
+   */
+  function _isPassportBlacklisted(
+    PassportStorageTypes.PassportStorage storage self,
+    address passport
+  ) internal view returns (bool) {
+    passport = PassportEntityLogic.getPassportForEntity(self, passport);
+
+    // Check if the passport itself is blacklisted
+    if (isBlacklisted(self, passport)) {
+      return true;
+    }
+
+    // Get the number of entities the passport has interacted with
+    uint256 totalEntities = PassportEntityLogic.getEntitiesLinkedToPassport(self, passport).length;
+    if (totalEntities == 0) {
+      // If there are no entities, the passport can't be considered blacklisted based on app interactions
+      return false;
+    }
+
+    // Get the number of blacklisted entities attached to the passport
+    uint256 blacklistedEntities = self.blacklistedEntitiesCounter[passport];
+
+    // Calculate the percentage of blacklisted entities
+    uint256 blacklistPercentage = (blacklistedEntities * 100) / totalEntities;
+
+    // Return true if the blacklist percentage exceeds the given threshold percentage
+    return blacklistPercentage >= self.blackAndwhiteListThreshold;
   }
 }

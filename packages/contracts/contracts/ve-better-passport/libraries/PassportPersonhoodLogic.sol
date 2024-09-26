@@ -146,7 +146,7 @@ library PassportPersonhoodLogic {
     // If a wallet is whitelisted, it is a person
     if (
       PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.WHITELIST_CHECK) &&
-      PassportWhitelistAndBlacklistLogic.isPassportWhitelisted(self, user)
+      PassportWhitelistAndBlacklistLogic._isPassportWhitelisted(self, user)
     ) {
       return (true, "User is whitelisted");
     }
@@ -154,7 +154,7 @@ library PassportPersonhoodLogic {
     // If a wallet is blacklisted, it is not a person
     if (
       PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.BLACKLIST_CHECK) &&
-      PassportWhitelistAndBlacklistLogic.isPassportBlacklisted(self, user)
+      PassportWhitelistAndBlacklistLogic._isPassportBlacklisted(self, user)
     ) {
       return (false, "User is blacklisted");
     }
