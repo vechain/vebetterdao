@@ -112,40 +112,10 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportPersonhoodLogic.isPersonAtTimepoint($, user, timepoint);
   }
 
-  /// @notice Returns if the whitelist check is enabled
-  function whitelistCheckEnabled() external view returns (bool) {
+  /// @notice Returns if the specific check is enabled
+  function isCheckEnabled(PassportTypes.CheckType check) external view returns (bool) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.whitelistCheckEnabled($);
-  }
-
-  /// @notice Returns if the blacklist check is enabled
-  function blacklistCheckEnabled() external view returns (bool) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.blacklistCheckEnabled($);
-  }
-
-  /// @notice Returns if the signaling check is enabled
-  function signalingCheckEnabled() external view returns (bool) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.signalingCheckEnabled($);
-  }
-
-  /// @notice Returns if the participation score check is enabled
-  function participationScoreCheckEnabled() external view returns (bool) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.participationScoreCheckEnabled($);
-  }
-
-  /// @notice Returns if the node ownership check is enabled
-  function nodeOwnershipCheckEnabled() external view returns (bool) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.nodeOwnershipCheckEnabled($);
-  }
-
-  /// @notice Returns if the GM ownership check is enabled
-  function gmOwnershipCheckEnabled() external view returns (bool) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.gmOwnershipCheckEnabled($);
+    return PassportChecksLogic.isCheckEnabled($, check);
   }
 
   /// @notice Returns the minimum galaxy member level
@@ -164,6 +134,24 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   function isBlacklisted(address _user) external view returns (bool) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportWhitelistAndBlacklistLogic.isBlacklisted($, _user);
+  }
+
+  /// @notice Checks if a passport is whitelisted.
+  /// @dev If passport is an entity, it will check the passport of the entity.
+  /// @param passport The address of the passport to check.
+  /// @return True if the passport is whitelisted, false otherwise.
+  function isPassportWhitelisted(address passport) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportWhitelistAndBlacklistLogic.isPassportWhitelisted($, passport);
+  }
+
+  /// @notice Checks if a passport is blacklisted.
+  /// @dev If passport is an entity, it will check the passport of the entity.
+  /// @param passport The address of the passport to check.
+  /// @return True if the passport is blacklisted, false otherwise.
+  function isPassportBlacklisted(address passport) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportWhitelistAndBlacklistLogic.isPassportBlacklisted($, passport);
   }
 
   /// @notice Gets the cumulative score of a user based on exponential decay for a number of last rounds
@@ -448,40 +436,10 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   // ---------- Setters ---------- //
-  /// @notice Toggles the whitelist check
-  function toggleWhitelistCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
+  /// @notice Toggles the specified check
+  function toggleCheck(PassportTypes.CheckType check) external onlyRole(SETTINGS_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleWhitelistCheck($);
-  }
-
-  /// @notice Toggles the blacklist check
-  function toggleBlacklistCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleBlacklistCheck($);
-  }
-
-  /// @notice Toggles the signaling check
-  function toggleSignalingCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleSignalingCheck($);
-  }
-
-  /// @notice Toggles the participation score check
-  function toggleParticipationScoreCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleParticipationScoreCheck($);
-  }
-
-  /// @notice Toggles the node ownership check
-  function toggleNodeOwnershipCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleNodeOwnershipCheck($);
-  }
-
-  /// @notice Toggles the GM ownership check
-  function toggleGMOwnershipCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleGMOwnershipCheck($);
+    PassportChecksLogic.toggleCheck($, check);
   }
 
   /// @notice user can be whitelisted but the counter will not be reset

@@ -81,6 +81,15 @@ interface IVeBetterPassport {
   /// @param reason - The reason for resetting the signals.
   event UserSignalsResetForApp(address indexed user, bytes32 indexed app, string reason);
 
+  /// @notice Emitted when a user delegates passport to another user.
+  event DelegationCreated(address indexed delegator, address indexed delegatee);
+
+  /// @notice Emitted when a user delegates passport to another user pending acceptance.
+  event DelegationPending(address indexed delegator, address indexed delegatee);
+
+  /// @notice Emitted when a user revokes the delegation of passport to another user.
+  event DelegationRevoked(address indexed delegator, address indexed delegatee);
+
   // ---------- Errors ---------- //
   /// @notice Emitted when a user does not have permission to delegate personhood.
   error UnauthorizedUser(address user);
@@ -91,20 +100,32 @@ interface IVeBetterPassport {
   /// @notice Emitted when a user tries to delegate personhood to themselves.
   error CannotLinkToSelf(address user);
 
-  /// @notice Emitted when a user tries to revoke a delegation that does not exist.
-  error NotDelegated(address user);
-
   /// @notice Emitted when a user tries to delegate personhood to more than one user.
   error OnlyOneLinkAllowed();
 
   /// @notice Emitted when a user tries to call a function that they are not authorized to call.
   error VeBetterPassportUnauthorizedUser(address user);
 
+  /// @notice Emitted when a user does not have permission to delegate passport.
+  error PassportDelegationUnauthorizedUser(address user);
+
+  /// @notice Emitted when a user tries to delegate passport to themselves.
+  error CannotDelegateToSelf(address user);
+
+  /// @notice Emitted when a user tries to revoke a delegation that does not exist.
+  error NotDelegated(address user);
+
+  /// @notice Emitted when a user tries to delegate passport to more than one user.
+  error OnlyOneUserAllowed();
+
+  /// @notice Emiited when a user tries to delegate a passport to another passport or entity.
+  error PassportDelegationToEntity();
+
   /// @notice Emitted when a user tries to delegate with a
   error SignatureExpired();
 
   /// @notice Emitted when a user tries to delegate with a
-  error InvalidSignature();
+  error InvaliedSignature();
 
   // ---------- Functions ---------- //
   /// @notice Initializes the contract with the required data and roles
@@ -142,23 +163,8 @@ interface IVeBetterPassport {
   /// @return True if the user is blacklisted
   function isBlacklisted(address _user) external view returns (bool);
 
-  /// @notice Toggles the whitelist check functionality
-  function toggleWhitelistCheck() external;
-
-  /// @notice Toggles the blacklist check functionality
-  function toggleBlacklistCheck() external;
-
-  /// @notice Toggles the signaling check functionality
-  function toggleSignalingCheck() external;
-
-  /// @notice Toggles the participation score check functionality
-  function toggleParticipationScoreCheck() external;
-
-  /// @notice Toggles the node ownership check functionality
-  function toggleNodeOwnershipCheck() external;
-
-  /// @notice Toggles the GM ownership check functionality
-  function toggleGMOwnershipCheck() external;
+  /// @notice Toggles the specified check
+  function toggleCheck(PassportTypes.CheckType check) external;
 
   /// @notice Returns the passport address for a entity
   /// @param entity The entity's address
@@ -187,7 +193,7 @@ interface IVeBetterPassport {
   /// @notice Returns if a user is a entity at a specific timepoint
   /// @param user The user address
   /// @param timepoint The timepoint to query
-  function wasEntityLinkedToPassportAtTimepoint(address user, uint256 timepoint) external view returns (bool);
+  function isEntityInTimepoint(address user, uint256 timepoint) external view returns (bool);
 
   /// @notice Returns if a user is a passport
   /// @param user The user address
@@ -250,23 +256,8 @@ interface IVeBetterPassport {
   /// @return The minimum galaxy member level
   function getMinimumGalaxyMemberLevel() external view returns (uint256);
 
-  /// @notice Returns if the whitelist check is enabled
-  function whitelistCheckEnabled() external view returns (bool);
-
-  /// @notice Returns if the blacklist check is enabled
-  function blacklistCheckEnabled() external view returns (bool);
-
-  /// @notice Returns if the signaling check is enabled
-  function signalingCheckEnabled() external view returns (bool);
-
-  /// @notice Returns if the participation score check is enabled
-  function participationScoreCheckEnabled() external view returns (bool);
-
-  /// @notice Returns if the node ownership check is enabled
-  function nodeOwnershipCheckEnabled() external view returns (bool);
-
-  /// @notice Returns if the GM ownership check is enabled
-  function gmOwnershipCheckEnabled() external view returns (bool);
+  /// @notice Returns if the specific check is enabled
+  function isCheckEnabled(PassportTypes.CheckType check) external view returns (bool);
 
   /// @notice Returns the signaling threshold
   /// @return The signaling threshold

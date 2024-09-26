@@ -133,7 +133,7 @@ library PassportEntityLogic {
   function getPassportForEntity(
     PassportStorageTypes.PassportStorage storage self,
     address entity
-  ) public view returns (address) {
+  ) external view returns (address) {
     return _getPassportForEntity(self, entity);
   }
 
