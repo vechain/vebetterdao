@@ -1,10 +1,19 @@
 import { VStack } from "@chakra-ui/react"
 import { ActivityCalendar } from "./components/ActivityCalendar"
+import { useState } from "react"
+import { ActivityList } from "./components/ActivityList"
+import { PendingActions } from "./components/PendingActions"
 
 export const ProfileBetterActions = () => {
+  const [isCalendarView, setIsCalendarView] = useState(true)
   return (
-    <VStack>
-      <ActivityCalendar />
+    <VStack gap={4}>
+      <PendingActions />
+      {isCalendarView ? (
+        <ActivityCalendar setIsCalendarView={setIsCalendarView} />
+      ) : (
+        <ActivityList setIsCalendarView={setIsCalendarView} />
+      )}
     </VStack>
   )
 }

@@ -1,5 +1,4 @@
 export * from "./AddressButton"
-export * from "./BalanceCard"
 export * from "./GenerateFunctionToCallParamsInput"
 export * from "./Navbar"
 export * from "./Convert/ConvertButton"

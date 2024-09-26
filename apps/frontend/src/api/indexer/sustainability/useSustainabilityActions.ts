@@ -1,8 +1,8 @@
 import { buildQueryString } from "@/api/utils"
 import { getConfig } from "@repo/config"
 import { useInfiniteQuery } from "@tanstack/react-query"
-
 import { z } from "zod"
+import dayjs from "dayjs"
 
 const indexerUrl = getConfig().indexerUrl
 
@@ -110,5 +110,51 @@ export const useSustainabilityActions = ({
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,
+  })
+}
+
+/**
+ * Mock version of useSustainabilityActions that returns 20 activities from the past 30 days
+ */
+export const useSustainabilityActionsMock = () => {
+  const generateMockData = (): SustainabilityActionsResponse => {
+    const now = dayjs()
+    const data = Array.from({ length: 20 }, (_, index) => ({
+      blockNumber: 1000000 + index,
+      blockTimestamp: now.subtract(index % 7, "day").unix(),
+      appId: "0x899de0d0f0b39e484c8835b2369194c4c102b230c813862db383d44a4efe14d3",
+      distributor: `0x${Math.random().toString(16).substr(2, 40)}`,
+      amount: Math.floor(Math.random() * 100) + 1,
+      receiver: `0x${Math.random().toString(16).substr(2, 40)}`,
+      proof: {
+        version: 1,
+        description: `Mock action ${index + 1}`,
+        proof: {
+          text: `This is a mock action ${index + 1}`,
+          image: "https://placehold.co/600x400",
+          video: "https://placehold.co/600x400",
+          link: "https://x.com/HEMJAPAN/status/1838129990677770276",
+        },
+        impact: {
+          carbon: Math.random() * 10,
+          water: Math.random() * 100,
+          energy: Math.random() * 50,
+        },
+      },
+    }))
+
+    return {
+      pagination: {
+        hasNext: false,
+      },
+      data,
+    }
+  }
+
+  return useInfiniteQuery({
+    queryKey: ["MOCK_SUSTAINABILITY_ACTIONS"],
+    queryFn: () => generateMockData(),
+    initialPageParam: 0,
+    getNextPageParam: () => undefined, // Only one page in this mock
   })
 }

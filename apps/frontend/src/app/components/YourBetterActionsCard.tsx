@@ -1,7 +1,7 @@
 import { useSustainabilityActions } from "@/api"
 import { UserSustainabilityOverviewStats } from "@/components"
 import { BetterActionCard } from "@/components/Sustainability/BetterActionCard"
-import { Card, CardBody, CardHeader, Heading, VStack } from "@chakra-ui/react"
+import { Card, CardBody, CardHeader, Heading, VStack, Text } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useTranslation } from "react-i18next"
 
@@ -28,9 +28,11 @@ export const YourBetterActionsCard = () => {
             <Heading size="md" fontWeight={400}>
               {t("Last actions")}
             </Heading>
-            {lastActionsData.map((action, index) => (
-              <BetterActionCard key={index} action={action} />
-            ))}
+            {lastActionsData.length > 0 ? (
+              lastActionsData.map((action, index) => <BetterActionCard key={index} action={action} />)
+            ) : (
+              <Text>{t("No better actions found")}</Text>
+            )}
           </VStack>
         </VStack>
       </CardBody>

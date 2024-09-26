@@ -3,7 +3,6 @@ import { Text, VStack, HStack, Card, CardBody } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
-import { UserSustainabilityOverviewStats } from "@/components"
 
 export const ProfileHeader = () => {
   const { account } = useWallet()
@@ -18,14 +17,8 @@ export const ProfileHeader = () => {
               <Text fontSize="xl" fontWeight="bold">
                 {humanAddress(account || "")}
               </Text>
-              <HStack spacing={2}>
-                {/* {tags.map(tag => (
-                  <Tag key={tag}>{tag}</Tag>
-                ))} */}
-              </HStack>
             </VStack>
           </HStack>
-          <UserSustainabilityOverviewStats />
         </VStack>
       </CardBody>
     </Card>
