@@ -27,15 +27,14 @@ type Props = {
 export const DoActionModal = ({ doActionModal }: Props) => {
   const { t } = useTranslation()
   const { data: userOverview, isLoading: isUserOverviewLoading } = useCurrentSustainabilityOverview()
-  const actionsPerformed = userOverview?.actionsRewarded ?? 0
+  const userScore = userOverview?.actionsRewarded ?? 0
   // TODO: get this from the backend
-  const totalActions = 10
-  const actionsNeeded = totalActions - actionsPerformed
+  const scoreThreshold = 10
   const router = useRouter()
   const goToApps = useCallback(() => {
     router.push("/apps")
   }, [router])
-  if (actionsPerformed >= totalActions || isUserOverviewLoading) return null
+  if (userScore >= scoreThreshold || isUserOverviewLoading) return null
 
   // TODO: understand where the Know more button should go
 
@@ -68,7 +67,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
                       top={0}
                       left={0}
                       bottom={0}
-                      w={`${(actionsPerformed / totalActions) * 100}%`}
+                      w={`${(userScore / scoreThreshold) * 100}%`}
                       bg="#F29B32"></Flex>
                     <Text fontWeight={700} fontSize={"xs"} zIndex={1}>
                       {t("YOU CANNOT VOTE YET")}
@@ -76,18 +75,21 @@ export const DoActionModal = ({ doActionModal }: Props) => {
                   </Flex>
                   <Flex justify="flex-end">
                     <Text color="#6A6A6A" fontWeight="400" fontSize="xs">
-                      {t("{{actionsPerformed}}/{{totalActions}} actions performed", { actionsPerformed, totalActions })}
+                      {t("{{userScore}}/{{scoreThreshold}} action score reached", {
+                        userScore,
+                        scoreThreshold,
+                      })}
                     </Text>
                   </Flex>
                 </VStack>
               </CardBody>
             </Card>
             <Heading fontSize={"2xl"} fontWeight={700}>
-              {t("You need {{actionsNeeded}} more actions to become able to vote on this round.", { actionsNeeded })}
+              {t("Increase your sustainable score to become eligible for voting.")}
             </Heading>
             <Text color="#6A6A6A" fontWeight={400}>
               {t(
-                "To be able to vote on this round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!",
+                "To be able to vote on the allocation rounds and proposals, you need to increase your sustainability score by doing more sustainable actions using the apps.",
               )}
             </Text>
             <Button variant="primaryAction" leftIcon={<IoGridOutline />} onClick={goToApps}>
