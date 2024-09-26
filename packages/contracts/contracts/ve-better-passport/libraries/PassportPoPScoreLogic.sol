@@ -242,6 +242,11 @@ library PassportPoPScoreLogic {
       return;
     }
 
+  // If user is blacklisted, do not register the action
+    if (self.blacklisted[user]){
+      return;
+    }
+
     // Check if the user has attached their entity to a passport, if so, use the passport address
     address passport = PassportEntityLogic._getPassportForEntity(self, user);
 
@@ -251,7 +256,7 @@ library PassportPoPScoreLogic {
     }
 
     // If the entity is not linked to a passport and the entity has not interacted with the app track interaction
-    if(passport != user && !self.userUniqueAppInteraction[user][appId]) {
+    if (passport != user && !self.userUniqueAppInteraction[user][appId]) {
       updateUniqueAppInteractions(self, user, appId);
     }
 
