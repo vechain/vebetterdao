@@ -45,55 +45,8 @@ library PassportPersonhoodLogic {
     // Resolve the address of the person based on the delegation status
     user = _resolvePersonhoodAddress(self, user, PassportClockLogic.clock());
 
-    // Check if the user has delegated their personhood to another wallet
-    if (user == address(0)) {
-      return (false, "User has delegated their personhood");
-    }
-
-    // If a wallet is whitelisted, it is a person
-    if (
-      PassportChecksLogic.whitelistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isPassportWhitelisted(self, user)
-    ) {
-      return (true, "User is whitelisted");
-    }
-
-    // If a wallet is blacklisted, it is not a person
-    if (
-      PassportChecksLogic.blacklistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isPassportBlacklisted(self, user);
-    ) {
-      return (false, "User is blacklisted");
-    }
-
-    // If a wallet is not whitelisted and has been signaled more than X times
-    if (
-      (PassportChecksLogic.signalingCheckEnabled(self) &&
-        PassportSignalingLogic.signaledCounter(self, user) >= PassportSignalingLogic.signalingThreshold(self))
-    ) {
-      return (false, "User has been signaled too many times");
-    }
-
-    if (PassportChecksLogic.participationScoreCheckEnabled(self)) {
-      uint256 participationScore = PassportPoPScoreLogic.getCumulativeScoreWithDecay(
-        self,
-        user,
-        self.xAllocationVoting.currentRoundId()
-      );
-
-      // If the user's cumulated score in the last rounds is greater than or equal to the threshold
-      if ((participationScore >= PassportPoPScoreLogic.thresholdParticipationScore(self))) {
-        return (true, "User's participation score is above the threshold");
-      }
-    }
-
-    // Check if user owns an economic or xnode
-    if (PassportChecksLogic.nodeOwnershipCheckEnabled(self) && (self.nodeManagement.getNodeIds(user).length > 0)) {
-      return (true, "User owns an economic or xnode");
-    }
-
-    // TODO: With `GalaxyMember` version 2, Check if user's selected `GalaxyMember` `tokenId` is greater than `getMinimumGalaxyMemberLevel(self)`
-
-    // If none of the conditions are met, return false with the default reason
-    return (false, "User does not meet the criteria to be considered a person");
+    // Check is the user is a person
+    return _checkPassport(self, user);
   }
 
   /**
@@ -111,28 +64,91 @@ library PassportPersonhoodLogic {
     // Resolve the address of the person based on the delegation status
     user = _resolvePersonhoodAddress(self, user, timepoint);
 
+    // Check is the user is a person
+    return _checkPassport(self, user);
+  }
+
+  // ---------- Internal & Private Functions ---------- //
+
+  /**
+   * @dev Resolves the address of the person based on their delegation status at a given timepoint.
+   * If the user is a delegatee at the given timepoint, it returns the delegator's passport address.
+   * If the user is neither a delegatee nor a delegator (or entity), it returns the user's own address,
+   * representing their passport.
+   *
+   * @param self The storage object for the Passport contract containing all delegation data.
+   * @param user The address of the user whose personhood is being resolved.
+   * @param timepoint The timepoint (block number or timestamp) at which the delegation status is checked.
+   *
+   * @return The address of the resolved passport.
+   * - Returns the delegator's passport if the user is a delegatee.
+   * - Returns `address(0)` if the user is either a delegator or an entity at that timepoint.
+   * - Returns the user's own address (passport) if no delegation is found.
+   */
+  function _resolvePersonhoodAddress(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    uint256 timepoint
+  ) private view returns (address) {
+    if (PassportDelegationLogic.isDelegateeInTimepoint(self, user, timepoint)) {
+      return PassportDelegationLogic.getDelegatorInTimepoint(self, user, timepoint); // Return the delegator's passport address
+    } else if (
+      PassportDelegationLogic.isDelegatorInTimepoint(self, user, timepoint) ||
+      PassportEntityLogic.isEntityInTimepoint(self, user, timepoint)
+    ) {
+      return address(0); // Return zero address if they delegated their personhood or entity
+    } else {
+      return user; // Return the user's own passport address
+    }
+  }
+
+  /**
+   * @dev Checks whether a user meets the criteria to be considered a person (i.e., a valid passport holder)
+   * based on various conditions such as delegation status, whitelist/blacklist status, signaling, participation score,
+   * and node ownership.
+   *
+   * @param self The storage object for the Passport contract containing all relevant data.
+   * @param user The address of the user whose passport status is being checked.
+   *
+   * @return bool indicating whether the user meets the criteria.
+   * @return string providing the reason or status for the result.
+   *
+   * Conditions checked:
+   * - Returns `(false, "User has delegated their personhood")` if the user has delegated their personhood.
+   * - Returns `(true, "User is whitelisted")` if the user is whitelisted.
+   * - Returns `(false, "User is blacklisted")` if the user is blacklisted.
+   * - Returns `(false, "User has been signaled too many times")` if the user has been signaled more than the threshold.
+   * - Returns `(true, "User's participation score is above the threshold")` if the user's participation score meets or exceeds the threshold.
+   * - Returns `(true, "User owns an economic or xnode")` if the user owns an economic or xnode.
+   * - Returns `(false, "User does not meet the criteria to be considered a person")` if none of the conditions are met.
+   *
+   * Additional considerations:
+   * - Checks for delegation status: If the user has delegated their personhood, they are not considered a valid passport holder.
+   * - Checks if the user is in the whitelist or blacklist, with priority given to whitelist status.
+   * - Evaluates the user's signaling status, participation score, and node ownership to determine validity.
+   */
+  function _checkPassport(PassportStorageTypes.PassportStorage storage self, address user) private {
     // Check if the user has delegated their personhood to another wallet
     if (user == address(0)) {
       return (false, "User has delegated their personhood");
     }
 
-    // TODO: Add checkpointed check
     // If a wallet is whitelisted, it is a person
     if (
-      PassportChecksLogic.whitelistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isPassportWhitelisted(self, user)
+      PassportChecksLogic.whitelistCheckEnabled(self) &&
+      PassportWhitelistAndBlacklistLogic.isPassportWhitelisted(self, user)
     ) {
       return (true, "User is whitelisted");
     }
 
-    // TODO: Add checkpointed check
     // If a wallet is blacklisted, it is not a person
     if (
-      PassportChecksLogic.blacklistCheckEnabled(self) && PassportWhitelistAndBlacklistLogic.isPassportBlacklisted(self, user)
+      PassportChecksLogic.blacklistCheckEnabled(self) &&
+      PassportWhitelistAndBlacklistLogic.isPassportBlacklisted(self, user)
     ) {
       return (false, "User is blacklisted");
     }
 
-    // TODO: Add checkpointed check
     // If a wallet is not whitelisted and has been signaled more than X times
     if (
       (PassportChecksLogic.signalingCheckEnabled(self) &&
@@ -141,7 +157,6 @@ library PassportPersonhoodLogic {
       return (false, "User has been signaled too many times");
     }
 
-    // TODO: Add checkpointed check
     if (PassportChecksLogic.participationScoreCheckEnabled(self)) {
       uint256 participationScore = PassportPoPScoreLogic.getCumulativeScoreWithDecay(
         self,
@@ -149,14 +164,12 @@ library PassportPersonhoodLogic {
         self.xAllocationVoting.currentRoundId()
       );
 
-      // TODO: Add checkpointed check
       // If the user's cumulated score in the last rounds is greater than or equal to the threshold
       if ((participationScore >= PassportPoPScoreLogic.thresholdParticipationScore(self))) {
         return (true, "User's participation score is above the threshold");
       }
     }
 
-    // TODO: Add checkpointed check
     // Check if user owns an economic or xnode
     if (PassportChecksLogic.nodeOwnershipCheckEnabled(self) && (self.nodeManagement.getNodeIds(user).length > 0)) {
       return (true, "User owns an economic or xnode");
@@ -166,24 +179,5 @@ library PassportPersonhoodLogic {
 
     // If none of the conditions are met, return false with the default reason
     return (false, "User does not meet the criteria to be considered a person");
-  }
-
-  // ---------- Internal & Private Functions ---------- //
-  /**
-   * @dev Resolves the address of a person based on the delegation status
-   * @param user address of the user
-   * @param timepoint uint256 of the timepoint
-   * @return address of the person
-   */
-  function _resolvePersonhoodAddress(
-    PassportStorageTypes.PassportStorage storage self,
-    address user,
-    uint256 timepoint
-  ) private view returns (address) {
-    if (PassportEntityLogic.wasEntityLinkedToPassportAtTimepoint(self, user, timepoint)) {
-       return address(0); // Return zero address if they delegated their personhood
-    } else {
-      return user; // Return the user's own address if no delegation exists
-    }
   }
 }
