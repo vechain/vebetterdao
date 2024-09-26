@@ -33,6 +33,12 @@ import { PassportEntityLogic } from "./PassportEntityLogic.sol";
 import { PassportWhitelistAndBlacklistLogic } from "./PassportWhitelistAndBlacklistLogic.sol";
 import { PassportTypes } from "./PassportTypes.sol";
 
+/**
+ * @title PassportPersonhoodLogic
+ * @dev A library that provides logic to determine whether a wallet is considered a "person" based on various checks.
+ * It evaluates factors such as participation score, blacklist status, xnode ownership, and delegation status.
+ * This library supports both real-time personhood checks and checks at specific timepoints.
+ */
 library PassportPersonhoodLogic {
   /**
    * @dev Checks if a wallet is a person or not based on the participation score, blacklisting, and xnode and GM holdings
@@ -139,7 +145,7 @@ library PassportPersonhoodLogic {
 
     // If a wallet is whitelisted, it is a person
     if (
-      PassportChecksLogic.whitelistCheckEnabled(self) &&
+      PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.WHITELIST_CHECK) &&
       PassportWhitelistAndBlacklistLogic.isPassportWhitelisted(self, user)
     ) {
       return (true, "User is whitelisted");
@@ -147,7 +153,7 @@ library PassportPersonhoodLogic {
 
     // If a wallet is blacklisted, it is not a person
     if (
-      PassportChecksLogic.blacklistCheckEnabled(self) &&
+      PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.BLACKLIST_CHECK) &&
       PassportWhitelistAndBlacklistLogic.isPassportBlacklisted(self, user)
     ) {
       return (false, "User is blacklisted");
@@ -155,13 +161,13 @@ library PassportPersonhoodLogic {
 
     // If a wallet is not whitelisted and has been signaled more than X times
     if (
-      (PassportChecksLogic.signalingCheckEnabled(self) &&
+      (PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.SIGNALING_CHECK) &&
         PassportSignalingLogic.signaledCounter(self, user) >= PassportSignalingLogic.signalingThreshold(self))
     ) {
       return (false, "User has been signaled too many times");
     }
 
-    if (PassportChecksLogic.participationScoreCheckEnabled(self)) {
+    if (PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.PARTICIPATION_SCORE_CHECK)) {
       uint256 participationScore = PassportPoPScoreLogic.getCumulativeScoreWithDecay(
         self,
         user,
@@ -175,7 +181,10 @@ library PassportPersonhoodLogic {
     }
 
     // Check if user owns an economic or xnode
-    if (PassportChecksLogic.nodeOwnershipCheckEnabled(self) && (self.nodeManagement.getNodeIds(user).length > 0)) {
+    if (
+      PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.NODE_OWNERSHIP_CHECK) &&
+      (self.nodeManagement.getNodeIds(user).length > 0)
+    ) {
       return (true, "User owns an economic or xnode");
     }
 
