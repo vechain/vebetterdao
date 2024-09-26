@@ -26,6 +26,7 @@ pragma solidity 0.8.20;
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { PassportChecksLogic } from "./PassportChecksLogic.sol";
 import { PassportSignalingLogic } from "./PassportSignalingLogic.sol";
+import { PassportDelegationLogic } from "./PassportDelegationLogic.sol";
 import { PassportPoPScoreLogic } from "./PassportPoPScoreLogic.sol";
 import { PassportClockLogic } from "./PassportClockLogic.sol";
 import { PassportEntityLogic } from "./PassportEntityLogic.sol";
@@ -110,8 +111,8 @@ library PassportPersonhoodLogic {
    * @param self The storage object for the Passport contract containing all relevant data.
    * @param user The address of the user whose passport status is being checked.
    *
-   * @return bool indicating whether the user meets the criteria.
-   * @return string providing the reason or status for the result.
+   * @return person bool indicating whether the user meets the criteria.
+   * @return reason string providing the reason or status for the result.
    *
    * Conditions checked:
    * - Returns `(false, "User has delegated their personhood")` if the user has delegated their personhood.
@@ -127,7 +128,10 @@ library PassportPersonhoodLogic {
    * - Checks if the user is in the whitelist or blacklist, with priority given to whitelist status.
    * - Evaluates the user's signaling status, participation score, and node ownership to determine validity.
    */
-  function _checkPassport(PassportStorageTypes.PassportStorage storage self, address user) private {
+  function _checkPassport(
+    PassportStorageTypes.PassportStorage storage self,
+    address user
+  ) private view returns (bool person, string memory reason) {
     // Check if the user has delegated their personhood to another wallet
     if (user == address(0)) {
       return (false, "User has delegated their personhood");
