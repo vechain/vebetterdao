@@ -692,7 +692,7 @@ describe("Galaxy Member - @shard2", () => {
       await getVot3Tokens(voter, "30000")
 
       await veBetterPassport.whitelist(voter.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
@@ -723,7 +723,7 @@ describe("Galaxy Member - @shard2", () => {
       const voter = otherAccounts[0]
 
       await veBetterPassport.whitelist(voter.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Should not be able to free mint
       await catchRevert(galaxyMember.connect(voter).freeMint())
