@@ -53,7 +53,7 @@ library PassportEIP712SigningLogic {
   bytes32 private constant TYPE_HASH =
     keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)");
 
-  string private constant SIGNING_DOMAIN = "EntityPassportLinking";
+  string private constant SIGNING_DOMAIN = "VeBetterPassport";
   string private constant SIGNATURE_VERSION = "1";
   bytes32 private constant SIGNING_DOMAIN_HASH = keccak256(bytes(SIGNING_DOMAIN));
   bytes32 private constant SIGNATURE_VERSION_HASH = keccak256(bytes(SIGNATURE_VERSION));
