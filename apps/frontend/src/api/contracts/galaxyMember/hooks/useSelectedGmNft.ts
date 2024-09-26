@@ -10,6 +10,8 @@ import { useLevelMultiplier } from "./useLevelMultiplier"
 import { useB3trToUpgradeToLevel } from "./useB3trToUpgradeToLevel"
 import { useGetNodeIdAttached } from "./useGetNodeIdAttached"
 import { useXNode } from "../../xNodes"
+import { useGMMaxLevel } from "./useGMMaxLevel"
+import { gmNfts } from "@/constants/gmNfts"
 
 /**
  * Custom hook for retrieving data related to a Galaxy Member NFT.
@@ -25,7 +27,7 @@ import { useXNode } from "../../xNodes"
  *   - attachedNodeId: The ID of the node attached to the Galaxy Member NFT.
  */
 export const useSelectedGmNft = () => {
-  const { isOwned: isGMOwned, isClaimable: isGMClaimable } = useIsGMclaimable()
+  const { isOwned: isGMOwned } = useIsGMclaimable()
   const { isLoading: isGMLoading } = useNFTImage()
   const { data: b3trBalance } = useUserB3trBalance()
   const {
@@ -91,6 +93,13 @@ export const useSelectedGmNft = () => {
     error: errorAttachedNodeId,
   } = useGetNodeIdAttached(selectedTokenId)
 
+  const {
+    data: maxGmLevel,
+    isLoading: isLoadingMaxGmLevel,
+    isError: isErrorMaxGmLevel,
+    error: errorMaxGmLevel,
+  } = useGMMaxLevel()
+
   const isLoading =
     isGMLoading ||
     isSelectedTokenIdLoading ||
@@ -101,7 +110,8 @@ export const useSelectedGmNft = () => {
     isGMLoadingMultiplier ||
     isB3trToUpgradeGMToNextLevelLoading ||
     isNextLevelGMRewardMultiplierLoading ||
-    isLoadingAttachedNodeId
+    isLoadingAttachedNodeId ||
+    isLoadingMaxGmLevel
   const isError =
     isErrorSelectedTokenId ||
     isErrorMetadataUri ||
@@ -111,7 +121,8 @@ export const useSelectedGmNft = () => {
     isErrorGMLoadingMultiplier ||
     isErrorB3trToUpgradeGMToNextLevel ||
     isErrorNextLevelGMRewardMultiplier ||
-    isErrorAttachedNodeId
+    isErrorAttachedNodeId ||
+    isErrorMaxGmLevel
   const error =
     errorSelectedTokenIdError ||
     errorMetadataURI ||
@@ -121,7 +132,8 @@ export const useSelectedGmNft = () => {
     errorGMLoadingMultiplier ||
     errorB3trToUpgradeGMToNextLevel ||
     errorNextLevelGMRewardMultiplier ||
-    errorAttachedNodeId
+    errorAttachedNodeId ||
+    errorMaxGmLevel
 
   const isEnoughBalanceToUpgradeGM = b3trBalance && Number(b3trBalance?.scaled || 0) >= b3trToUpgradeGMToNextLevel
   const missingB3trToUpgrade = b3trToUpgradeGMToNextLevel - Number(b3trBalance?.scaled || 0)
@@ -129,16 +141,19 @@ export const useSelectedGmNft = () => {
   const { xNodeId } = useXNode()
   const isXNodeAttachedToGM = attachedNodeId === xNodeId
 
+  const isMaxGmLevelReached = !!maxGmLevel && !!gmLevel && Number(gmLevel) === Number(maxGmLevel)
+
+  const nftName = nftMetadata?.name || gmNfts[Number(gmLevel) - 1]?.name
+  const gmName = `${nftName} #${selectedTokenId}`
   return {
     gmId: selectedTokenId,
-    gmImage: gmImage?.image || notFoundImage,
-    gmName: nftMetadata?.name,
+    gmImage: gmImage?.image || gmNfts[Number(gmLevel) - 1]?.image || notFoundImage,
+    gmName,
     gmLevel,
     gmRewardMultiplier,
     nextLevelGMRewardMultiplier,
     isGMLoading,
     isGMOwned,
-    isGMClaimable,
     b3trToUpgradeGMToNextLevel,
     isEnoughBalanceToUpgradeGM,
     missingB3trToUpgrade,
@@ -147,5 +162,7 @@ export const useSelectedGmNft = () => {
     isError,
     error,
     isXNodeAttachedToGM,
+    maxGmLevel,
+    isMaxGmLevelReached,
   }
 }

@@ -16,7 +16,7 @@ import {
 import { UilPolygon } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
-import { GMUpgradeButton } from "./components/GMUpgradeButton"
+import { GmNFTAndNodeFooter } from "./components/GmNFTAndNodeFooter"
 import { useCallback, useMemo } from "react"
 import { NotConnectedWallet } from "./components/NotConnectedWallet"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -66,7 +66,7 @@ export const GmNFTAndNodeCard = () => {
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
-    router.push("/gm-nft")
+    router.push("/galaxy-member")
   }, [router])
   const goToXNodePage = useCallback(() => {
     router.push("/xnode")
@@ -205,7 +205,7 @@ export const GmNFTAndNodeCard = () => {
               </>
             )}
           </Stack>
-          <GMUpgradeButton />
+          <GmNFTAndNodeFooter />
         </VStack>
         <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />
         <SwapB3trVot3 />

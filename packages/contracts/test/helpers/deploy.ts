@@ -97,7 +97,7 @@ interface DeployInstance {
 
 export const NFT_NAME = "GalaxyMember"
 export const NFT_SYMBOL = "GM"
-export const DEFAULT_MAX_MINTABLE_LEVEL = 1
+export const DEFAULT_MAX_MINTABLE_LEVEL = 10
 
 // // Voter Rewards
 export const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Galaxy Member contract levels
