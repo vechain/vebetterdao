@@ -184,7 +184,7 @@ library PassportEntityLogic {
    * @param timepoint The timepoint (block number) at which to check the linkage.
    * @return True if the entity was linked to the passport at the specified timepoint, false otherwise.
    */
-  function wasEntityLinkedToPassportAtTimepoint(
+  function isEntityInTimepoint(
     PassportStorageTypes.PassportStorage storage self,
     address entity,
     uint256 timepoint
