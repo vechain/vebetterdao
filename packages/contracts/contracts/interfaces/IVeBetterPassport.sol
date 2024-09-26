@@ -424,4 +424,48 @@ interface IVeBetterPassport {
   /// @notice Sets the maximum number of entities that can be linked to a passport
   /// @param maxEntities - the maximum number of entities
   function setMaxEntitiesPerPassport(uint256 maxEntities) external;
+
+  /// @notice Returns the delegatee address for a delegator
+  /// @param delegator The delegator's address
+  /// @return The address of the delegatee
+  function getDelegatee(address delegator) external view returns (address);
+
+  /// @notice Returns the pending delegations for a delegatee
+  /// @param delegatee - the delegatee address
+  /// @return the delegator address
+  function getPendingDelegations(address delegatee) external view returns (address[] memory);
+
+  /// @notice Returns the delegatee address for a delegator at a specific timepoint
+  /// @param delegator The delegator's address
+  /// @param timepoint The timepoint to query
+  function getDelegateeInTimepoint(address delegator, uint256 timepoint) external view returns (address);
+
+  /// @notice Returns the delegator address for a delegatee
+  /// @param delegatee The delegatee's address
+  /// @return The address of the delegator
+  function getDelegator(address delegatee) external view returns (address);
+
+  /// @notice Returns the delegator address for a delegatee at a specific timepoint
+  /// @param delegatee The delegatee's address
+  /// @param timepoint The timepoint to query
+  function getDelegatorInTimepoint(address delegatee, uint256 timepoint) external view returns (address);
+
+  /// @notice Returns if a user is a delegator
+  /// @param user The user address
+  function isDelegator(address user) external view returns (bool);
+
+  /// @notice Returns if a user is a delegator at a specific timepoint
+  /// @param user The user address
+  /// @param timepoint The timepoint to query
+  function isDelegatorInTimepoint(address user, uint256 timepoint) external view returns (bool);
+
+  /// @notice Returns if a user is a delegatee
+  /// @param user The user address
+  function isDelegatee(address user) external view returns (bool);
+
+  /// @notice Returns if a user is a delegatee at a specific timepoint
+  /// @param user The user address
+  /// @param timepoint The timepoint to query
+  function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool);
+
 }
