@@ -1,3 +1,4 @@
+import { useCurrentSustainabilityOverview } from "@/api"
 import { CustomModalContent } from "@/components"
 import {
   Modal,
@@ -11,6 +12,7 @@ import {
   Text,
   Heading,
   Button,
+  Image,
 } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
@@ -24,16 +26,16 @@ type Props = {
 
 export const DoActionModal = ({ doActionModal }: Props) => {
   const { t } = useTranslation()
+  const { data: userOverview, isLoading: isUserOverviewLoading } = useCurrentSustainabilityOverview()
+  const actionsPerformed = userOverview?.actionsRewarded ?? 0
   // TODO: get this from the backend
-  const { actionsPerformed, totalActions } = {
-    actionsPerformed: 6,
-    totalActions: 10,
-  }
+  const totalActions = 10
   const actionsNeeded = totalActions - actionsPerformed
   const router = useRouter()
   const goToApps = useCallback(() => {
     router.push("/apps")
   }, [router])
+  if (actionsPerformed >= totalActions || isUserOverviewLoading) return null
 
   // TODO: understand where the Know more button should go
 
@@ -44,8 +46,15 @@ export const DoActionModal = ({ doActionModal }: Props) => {
         <ModalBody p={6}>
           <VStack align="stretch" spacing={4}>
             <Card bg="#FFD979" borderRadius="xl" maxW="400px">
-              <CardBody pb={2}>
-                <VStack align="stretch">
+              <CardBody pb={2} position="relative" overflow="hidden" borderRadius="xl">
+                <Image
+                  src="/images/cloud-background-orange.png"
+                  alt="cloud-background-orange"
+                  position="absolute"
+                  right={"-50%"}
+                  top={"-50%"}
+                />
+                <VStack align="stretch" zIndex={1} position="relative">
                   <Flex
                     bg="white"
                     justify="center"

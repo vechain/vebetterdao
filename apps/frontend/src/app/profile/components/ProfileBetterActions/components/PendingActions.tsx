@@ -1,21 +1,26 @@
+import { useCurrentSustainabilityOverview } from "@/api"
 import { Heading, Text, Flex, VStack, Card, CardBody, HStack, Image } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export const PendingActions = () => {
   const { t } = useTranslation()
+  const { data: userOverview, isLoading: isUserOverviewLoading } = useCurrentSustainabilityOverview()
+  const actionsPerformed = userOverview?.actionsRewarded ?? 0
   // TODO: get this from the backend
-  const { actionsPerformed, totalActions } = {
-    actionsPerformed: 6,
-    totalActions: 10,
-  }
-
-  if (actionsPerformed >= totalActions) return null
+  const totalActions = 10
+  if (actionsPerformed >= totalActions || isUserOverviewLoading) return null
   const actionsNeeded = totalActions - actionsPerformed
-  // TODO: add background image
   return (
     <Card bg="#FFD979" borderRadius="xl" maxW="400px">
-      <CardBody pb={2}>
-        <VStack align="stretch">
+      <CardBody pb={2} position="relative" overflow="hidden" borderRadius="xl">
+        <Image
+          src="/images/cloud-background-orange.png"
+          alt="cloud-background-orange"
+          position="absolute"
+          right={"-50%"}
+          top={"-50%"}
+        />
+        <VStack align="stretch" zIndex={1} position="relative">
           <HStack align="flex-start">
             <VStack spacing={4} align="stretch" gap={0.5}>
               <Text size="xs" color="#8D6602" fontWeight="600">

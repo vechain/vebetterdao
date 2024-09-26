@@ -1,6 +1,8 @@
+import { useCurrentAllocationsRoundId } from "@/api/contracts"
 import { buildQueryString } from "@/api/utils"
 import { getConfig } from "@repo/config"
 import { useInfiniteQuery } from "@tanstack/react-query"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 import { z } from "zod"
 
@@ -41,7 +43,7 @@ export type SustainabilityUserOverviewResponse = z.infer<typeof SustainabilityUs
 
 type SustainabilityUserOverviewRequest = {
   wallet?: string
-  roundId?: number
+  roundId?: number | string
   page?: number
   size?: number
   direction?: "asc" | "desc"
@@ -97,4 +99,38 @@ export const useSustainabilityUserOverview = ({
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,
   })
+}
+
+/**
+ * Get the sustainability overview for the current user in the current round
+ * @returns the query object with the data @see SustainabilityUserOverviewResponse
+ */
+export const useCurrentSustainabilityOverview = () => {
+  const { account } = useWallet()
+  const {
+    data: currentRound,
+    isLoading: isCurrentRoundLoading,
+    isError: isCurrentRoundError,
+    error: currentRoundError,
+  } = useCurrentAllocationsRoundId()
+
+  const {
+    data: rawResults,
+    isLoading: isRawResultsLoading,
+    isError: isRawResultsError,
+    error: rawResultsError,
+  } = useSustainabilityUserOverview({
+    wallet: account ?? undefined,
+    roundId: currentRound ?? undefined,
+    direction: "desc",
+  })
+
+  const userOverview = rawResults?.pages.map(page => page.data).flat()?.[0] ?? undefined
+
+  return {
+    data: userOverview,
+    isLoading: isCurrentRoundLoading || isRawResultsLoading,
+    isError: isCurrentRoundError || isRawResultsError,
+    error: currentRoundError || rawResultsError,
+  }
 }
