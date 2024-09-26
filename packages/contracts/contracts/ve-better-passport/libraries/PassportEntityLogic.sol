@@ -101,6 +101,11 @@ library PassportEntityLogic {
    */
   error InvalidSignature();
 
+  /**
+   * @notice Thrown when a user tries to link a entity to a passport that has reached the maximum number of entities.
+   */
+  error MaxEntitiesPerPassportReached();
+
   // ---------- Events ---------- //
   /**
    * @notice Emitted when a link between an entity and a passport is successfully created.
@@ -242,6 +247,15 @@ library PassportEntityLogic {
     return self.pendingLinksPassportToEntities[passport];
   }
 
+  /**
+   * @notice Returns the maximum number of entities that can be linked to a passport.
+   */
+  function getMaxEntitiesPerPassport(
+    PassportStorageTypes.PassportStorage storage self
+  ) internal view returns (uint256) {
+    return self.maxEntitiesPerPassport;
+  }
+
   // ---------- Setters ------------ //
 
   /**
@@ -274,6 +288,11 @@ library PassportEntityLogic {
 
     if (self.entityToPassport[entity].latest() != 0 || self.pendingLinksEntityToPassport[entity] != address(0)) {
       revert AlreadyLinked(msg.sender);
+    }
+
+    // Check if the passport has reached the maximum number of entities
+    if (self.passportToEntities[msg.sender].length >= self.maxEntitiesPerPassport) {
+      revert MaxEntitiesPerPassportReached();
     }
 
     _linkEntity(self, entity, msg.sender);
@@ -319,6 +338,11 @@ library PassportEntityLogic {
     // Ensure that the caller is the passport that the entity is trying to link to
     if (passport != msg.sender) {
       revert UnauthorizedUser(msg.sender);
+    }
+
+    // Check if the passport has reached the maximum number of entities
+    if (self.passportToEntities[msg.sender].length >= self.maxEntitiesPerPassport) {
+      revert MaxEntitiesPerPassportReached();
     }
 
     // Remove the pending link
@@ -381,6 +405,14 @@ library PassportEntityLogic {
     _removePendingEntityLink(self, entity, passport);
 
     emit LinkRemoved(entity, passport);
+  }
+
+  /**
+   * @notice Sets the maximum number of entities that can be linked to a passport.
+   * @param maxEntities The maximum number of entities that can be linked to a passport.
+   */
+  function setMaxEntitiesPerPassport(PassportStorageTypes.PassportStorage storage self, uint256 maxEntities) external {
+    self.maxEntitiesPerPassport = maxEntities;
   }
 
   // ---------- Private Helper Functions ---------- //
@@ -511,5 +543,4 @@ library PassportEntityLogic {
   ) internal view returns (bool) {
     return self.entityToPassport[entity].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
   }
-
 }

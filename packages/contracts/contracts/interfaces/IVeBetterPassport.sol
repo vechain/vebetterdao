@@ -395,4 +395,23 @@ interface IVeBetterPassport {
   /// @param appId - the app id of the action
   /// @param round - the round id of the action
   function registerActionForRound(address user, bytes32 appId, uint256 round) external;
+
+  /// @notice Gets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
+  function blacklistThreshold() external view returns (uint256);
+
+  // @notice Gets the threshold percentage of whitelisted entities for a passport to be considered whitelisted
+  function whitelistThreshold() external view returns (uint256);
+
+  /// @notice Returns the maximum number of entities per passport
+  function maxEntitiesPerPassport() external view returns (uint256);
+
+  /// @notice Sets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
+  function setBlacklistThreshold(uint256 _threshold) external;
+
+  /// @notice Sets the threshold percentage of whitelisted entities for a passport to be considered whitelisted
+  function setWhitelistThreshold(uint256 _threshold) external;
+
+    /// @notice Sets the maximum number of entities that can be linked to a passport
+  /// @param maxEntities - the maximum number of entities
+  function setMaxEntitiesPerPassport(uint256 maxEntities) external;
 }

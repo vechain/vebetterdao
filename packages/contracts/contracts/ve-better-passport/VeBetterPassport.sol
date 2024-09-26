@@ -154,11 +154,23 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportWhitelistAndBlacklistLogic.isPassportBlacklisted($, passport);
   }
 
+  /// @notice Gets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
+  function blacklistThreshold() external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportWhitelistAndBlacklistLogic.blacklistThreshold($);
+  }
+
+  /// @notice Gets the threshold percentage of whitelisted entities for a passport to be considered whitelisted
+  function whitelistThreshold() external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportWhitelistAndBlacklistLogic.whitelistThreshold($);
+  }
+
   /// @notice Gets the cumulative score of a user based on exponential decay for a number of last rounds
   /// @dev This function calculates the decayed score f(t) = a * (1 - r)^t
   /// @param user - the user address
   /// @param lastRound - the round to consider as a starting point for the cumulative score
-  function getCumulativeScoreWithDecay(address user, uint256 lastRound) public view virtual returns (uint256) {
+  function getCumulativeScoreWithDecay(address user, uint256 lastRound) external view  returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.getCumulativeScoreWithDecay($, user, lastRound);
   }
@@ -166,14 +178,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   /// @notice Gets the round score of a user
   /// @param user - the user address
   /// @param round - the round
-  function userRoundScore(address user, uint256 round) public view virtual returns (uint256) {
+  function userRoundScore(address user, uint256 round) external view  returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.userRoundScore($, user, round);
   }
 
   /// @notice Gets the total score of a user
   /// @param user - the user address
-  function userTotalScore(address user) public view virtual returns (uint256) {
+  function userTotalScore(address user) external view  returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.userTotalScore($, user);
   }
@@ -182,7 +194,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   /// @param user - the user address
   /// @param round - the round
   /// @param appId - the app id
-  function userRoundScoreApp(address user, uint256 round, bytes32 appId) public view virtual returns (uint256) {
+  function userRoundScoreApp(address user, uint256 round, bytes32 appId) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.userRoundScoreApp($, user, round, appId);
   }
@@ -190,35 +202,41 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   /// @notice Gets the total score of a user for an app
   /// @param user - the user address
   /// @param appId - the app id
-  function userAppTotalScore(address user, bytes32 appId) public view virtual returns (uint256) {
+  function userAppTotalScore(address user, bytes32 appId) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.userAppTotalScore($, user, appId);
   }
 
   /// @notice Gets the threshold for a user to be considered a person
-  function thresholdParticipationScore() public view virtual returns (uint256) {
+  function thresholdParticipationScore() external view  returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.thresholdParticipationScore($);
   }
 
   /// @notice Gets the security multiplier for an app security
   /// @param security - the app security between LOW, MEDIUM, HIGH
-  function securityMultiplier(PassportTypes.APP_SECURITY security) public view virtual returns (uint256) {
+  function securityMultiplier(PassportTypes.APP_SECURITY security) external view  returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.securityMultiplier($, security);
   }
 
   /// @notice Gets the security level of an app
   /// @param appId - the app id
-  function appSecurity(bytes32 appId) public view virtual returns (PassportTypes.APP_SECURITY) {
+  function appSecurity(bytes32 appId) external view  returns (PassportTypes.APP_SECURITY) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.appSecurity($, appId);
   }
 
   /// @notice Gets the round threshold for a user to be considered a person
-  function roundsForCumulativeScore() public view virtual returns (uint256) {
+  function roundsForCumulativeScore() external view  returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.roundsForCumulativeScore($);
+  }
+
+  /// @notice Returns the maximum number of entities per passport
+  function maxEntitiesPerPassport() external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportEntityLogic.getMaxEntitiesPerPassport($);
   }
 
   /// @notice Returns the passport address for a entity
@@ -350,55 +368,55 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Returns the number of times a user has been signaled
-  function signaledCounter(address _user) public view returns (uint256) {
+  function signaledCounter(address _user) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportSignalingLogic.signaledCounter($, _user);
   }
 
   /// @notice Returns the belonging app of a signaler
-  function appOfSignaler(address _signaler) public view returns (bytes32) {
+  function appOfSignaler(address _signaler) external view returns (bytes32) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportSignalingLogic.appOfSignaler($, _signaler);
   }
 
   /// @notice Returns the number of times a user has been signaled by an app
-  function appSignalsCounter(bytes32 _app, address _user) public view returns (uint256) {
+  function appSignalsCounter(bytes32 _app, address _user) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportSignalingLogic.appSignalsCounter($, _app, _user);
   }
 
   /// @notice Returns the total number of signals for an app
-  function appTotalSignalsCounter(bytes32 _app) public view returns (uint256) {
+  function appTotalSignalsCounter(bytes32 _app) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportSignalingLogic.appTotalSignalsCounter($, _app);
   }
 
   /// @notice Returns the signaling threshold
-  function signalingThreshold() public view returns (uint256) {
+  function signalingThreshold() external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportSignalingLogic.signalingThreshold($);
   }
 
   /// @notice Gets the x2EarnApps contract address
-  function getX2EarnApps() public view virtual returns (IX2EarnApps) {
+  function getX2EarnApps() external view  returns (IX2EarnApps) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportConfigurator.getX2EarnApps($);
   }
 
   /// @notice Gets the xAllocationVoting contract address
-  function getXAllocationVoting() public view virtual returns (IXAllocationVotingGovernor) {
+  function getXAllocationVoting() external view  returns (IXAllocationVotingGovernor) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportConfigurator.getXAllocationVoting($);
   }
 
   /// @notice Gets the node management contract address
-  function getNodeManagement() public view virtual returns (INodeManagement) {
+  function getNodeManagement() external view  returns (INodeManagement) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportConfigurator.getNodeManagement($);
   }
 
   /// @notice Gets the galaxy member contract address
-  function getGalaxyMember() public view virtual returns (IGalaxyMember) {
+  function getGalaxyMember() external view  returns (IGalaxyMember) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportConfigurator.getGalaxyMember($);
   }
@@ -431,7 +449,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Returns the version of the contract
-  function version() public pure virtual returns (string memory) {
+  function version() external pure  returns (string memory) {
     return "1";
   }
 
@@ -466,6 +484,18 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     PassportWhitelistAndBlacklistLogic.removeFromBlacklist($, _user);
   }
 
+  /// @notice Sets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
+  function setBlacklistThreshold(uint256 _threshold) external onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportWhitelistAndBlacklistLogic.setBlacklistThreshold($, _threshold);
+  }
+
+  /// @notice Sets the threshold percentage of whitelisted entities for a passport to be considered whitelisted
+  function setWhitelistThreshold(uint256 _threshold) external onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportWhitelistAndBlacklistLogic.setWhitelistThreshold($, _threshold);
+  }
+
   /// @notice Registers an action for a user
   /// @param user - the user that performed the action
   /// @param appId - the app id of the action
@@ -485,14 +515,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
 
   /// @notice Sets the threshold for a user to be considered a person
   /// @param threshold - the round threshold
-  function setThreshold(uint256 threshold) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+  function setThreshold(uint256 threshold) external  onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportPoPScoreLogic.setThreshold($, threshold);
   }
 
   /// @notice Sets the number of rounds to consider for the cumulative score
   /// @param rounds - the number of rounds
-  function setRoundsForCumulativeScore(uint256 rounds) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+  function setRoundsForCumulativeScore(uint256 rounds) external  onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportPoPScoreLogic.setRoundsForCumulativeScore($, rounds);
   }
@@ -503,7 +533,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   function setSecurityMultiplier(
     PassportTypes.APP_SECURITY security,
     uint256 multiplier
-  ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+  ) external  onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportPoPScoreLogic.setSecurityMultiplier($, security, multiplier);
   }
@@ -514,14 +544,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   function setAppSecurity(
     bytes32 appId,
     PassportTypes.APP_SECURITY security
-  ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+  ) external  onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportPoPScoreLogic.setAppSecurity($, appId, security);
   }
 
   /// @notice Sets the decay rate for the exponential decay
   /// @param decayRate - the decay rate
-  function setDecayRate(uint256 decayRate) public virtual onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+  function setDecayRate(uint256 decayRate) external  onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportPoPScoreLogic.setDecayRate($, decayRate);
   }
@@ -567,6 +597,13 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   function removePendingEntityLinkFromPassport(address entity) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportEntityLogic.removePendingEntityLinkFromPassport($, entity);
+  }
+
+  /// @notice Sets the maximum number of entities that can be linked to a passport
+  /// @param maxEntities - the maximum number of entities
+  function setMaxEntitiesPerPassport(uint256 maxEntities) external onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportEntityLogic.setMaxEntitiesPerPassport($, maxEntities);
   }
 
   /// @notice Delegate the passport to another address

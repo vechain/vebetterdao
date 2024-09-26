@@ -57,8 +57,10 @@ library PassportStorageTypes {
     mapping(address => uint256) whitelistedEntitiesCounter;
     // Track number of blacklisted entities
     mapping(address => uint256) blacklistedEntitiesCounter;
-    // Threshold percentage of blacklisted or whitelisted entities to consider a passportuser as blacklisted or whitelisted
-    uint256 blackAndwhiteListThreshold;
+    // Threshold percentage of whitelisted entities for a passport to be considered whitelisted
+    uint256 whitelistThreshold;
+    // Threshold percentage of blacklisted entities for a passport to be considered blacklisted
+    uint256 blacklistThreshold;
     // ---------- Proof of Participation ---------- //
     // Multiplier of the base action score based on the app security
     mapping(PassportTypes.APP_SECURITY security => uint256 multiplier) securityMultiplier;
@@ -99,6 +101,8 @@ library PassportStorageTypes {
     mapping(address => address[]) pendingLinksPassportToEntities;
     // Mapping of pending entities to passport
     mapping(address => address) pendingLinksEntityToPassport;
+    // Limit of entities that can be attached to a passport
+    uint256 maxEntitiesPerPassport;
     // ---------- Passport Delegation ---------- //
     // Mapping of delegator to delegatee
     mapping(address => Checkpoints.Trace160) delegatorToDelegatee;

@@ -97,7 +97,11 @@ library PassportConfigurator {
     self.roundsForAssigningEntityScore = initializationData.roundsForAssigningEntityScore;
 
     // Set the threshold percentage of blacklisted or whitelisted entities to consider a passport user as blacklisted or whitelisted
-    self.blackAndwhiteListThreshold = initializationData.blackAndwhiteListThreshold;
+    self.blacklistThreshold = initializationData.blacklistThreshold;
+    self.whitelistThreshold = initializationData.whitelistThreshold;
+
+    // Set the maximum number of entities per passport
+    self.maxEntitiesPerPassport = initializationData.maxEntitiesPerPassport;
   }
 
   /// @notice Sets the X2EarnApps contract address

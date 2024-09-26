@@ -65,6 +65,16 @@ library PassportWhitelistAndBlacklistLogic {
     return self.blacklisted[user];
   }
 
+  /// @notice return the blacklist threshold
+  function blacklistThreshold(PassportStorageTypes.PassportStorage storage self) internal view returns (uint256) {
+    return self.blacklistThreshold;
+  }
+
+  /// @notice return the whitelist threshold
+  function whitelistThreshold(PassportStorageTypes.PassportStorage storage self) internal view returns (uint256) {
+    return self.whitelistThreshold;
+  }
+
   /**
    * @notice Checks if a passport is whitelisted based on a threshold percentage of linked entities.
    * @dev This function checks if the passport itself is whitelisted or if the number of whitelisted entities
@@ -146,6 +156,16 @@ library PassportWhitelistAndBlacklistLogic {
     _updatePassportBlacklistCounter(self, user, false);
 
     emit RemovedUserFromBlacklist(user, msg.sender);
+  }
+
+  /// @notice Sets the threshold percentage of whitelisted entities for a passport to be considered whitelisted
+  function setWhitelistThreshold(PassportStorageTypes.PassportStorage storage self, uint256 threshold) external {
+    self.whitelistThreshold = threshold;
+  }
+
+  /// @notice Sets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
+  function setBlacklistThreshold(PassportStorageTypes.PassportStorage storage self, uint256 threshold) external {
+    self.blacklistThreshold = threshold;
   }
 
   // ---------- Internal & Private ---------- //
@@ -275,7 +295,7 @@ library PassportWhitelistAndBlacklistLogic {
     uint256 whitelistPercentage = (whitelistedEntities * 100) / totalEntities;
 
     // Return true if the whitelist percentage exceeds the given threshold percentage
-    return whitelistPercentage >= self.blackAndwhiteListThreshold;
+    return whitelistPercentage >= self.whitelistThreshold;
   }
 
   /**
@@ -313,6 +333,6 @@ library PassportWhitelistAndBlacklistLogic {
     uint256 blacklistPercentage = (blacklistedEntities * 100) / totalEntities;
 
     // Return true if the blacklist percentage exceeds the given threshold percentage
-    return blacklistPercentage >= self.blackAndwhiteListThreshold;
+    return blacklistPercentage >= self.blacklistThreshold;
   }
 }
