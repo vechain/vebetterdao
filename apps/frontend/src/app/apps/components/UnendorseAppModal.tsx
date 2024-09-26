@@ -1,6 +1,7 @@
 import { useXNode } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { CustomModalContent, TransactionModal } from "@/components"
+
 import { useUnendorseApp } from "@/hooks"
 import {
   Modal,
@@ -27,6 +28,13 @@ type Props = {
   onClose: () => void
 }
 
+export type PropsEndorsement = {
+  isUnendorsing?: boolean
+  isEndorsing?: boolean
+  points?: number | string
+  endorsedAppName?: string
+}
+
 export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { endorsedApp, xNodeId, xNodePoints } = useXNode()
@@ -43,6 +51,12 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
     unendorseAppMutation.sendTransaction(undefined)
   }, [unendorseAppMutation])
 
+  const endorsementInfo: PropsEndorsement = {
+    isUnendorsing: true,
+    isEndorsing: false,
+    points: xNodePoints,
+    endorsedAppName: endorsedApp?.name,
+  }
   if (unendorseAppMutation.status !== "ready")
     return (
       <TransactionModal
@@ -57,6 +71,7 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
         pendingTitle={"Unendorsing app..."}
         showExplorerButton
         txId={unendorseAppMutation.txReceipt?.meta.txID ?? unendorseAppMutation.sendTransactionTx?.txid}
+        endorsementInfo={endorsementInfo}
       />
     )
 

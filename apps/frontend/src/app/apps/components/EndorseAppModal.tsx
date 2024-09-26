@@ -9,6 +9,7 @@ import {
 import { CustomModalContent, TransactionModal } from "@/components"
 import { useEndorseApp } from "@/hooks"
 import { Modal, ModalOverlay, ModalBody, VStack, Heading, HStack, Box, Text, Button } from "@chakra-ui/react"
+import { PropsEndorsement } from "./UnendorseAppModal"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
 import { useCallback } from "react"
@@ -23,8 +24,8 @@ type Props = {
 export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { account } = useWallet()
 
-  const endorsementScore = useAppEndorsementScore(xApp?.id ?? "")
-  const endorsementScoreThreshold = useEndorsementScoreThreshold()
+  const { data: endorsementScore } = useAppEndorsementScore(xApp?.id ?? "")
+  const { data: endorsementScoreThreshold } = useEndorsementScoreThreshold()
 
   const userDelegatedNodes = useUserXNodes()
 
@@ -38,14 +39,22 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   })
 
   //TODO: Handle multiple xNodes on UI
-  const userEndorsementScore = useUserEndorsementScore(account)
-
-  const newScore = (Number(endorsementScore.data) ?? 0) + (Number(userEndorsementScore.data) ?? 0)
+  const { data: userEndorsementScore } = useUserEndorsementScore(account)
+  console.log("userEndorsementScore", userEndorsementScore)
+  console.log("endorsementScore", endorsementScore)
+  const newScore = (Number(endorsementScore) ?? 0) + (Number(userEndorsementScore) ?? 0)
 
   const handleEndorsement = useCallback(() => {
     endorseAppMutation.resetStatus()
     endorseAppMutation.sendTransaction(undefined)
   }, [endorseAppMutation])
+
+  const endorsementInfo: PropsEndorsement = {
+    isUnendorsing: false,
+    isEndorsing: true,
+    points: userEndorsementScore,
+    endorsedAppName: xApp?.name,
+  }
 
   if (endorseAppMutation.status !== "ready")
     return (
@@ -61,6 +70,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         pendingTitle={"Endorsing app..."}
         showExplorerButton
         txId={endorseAppMutation.txReceipt?.meta.txID ?? endorseAppMutation.sendTransactionTx?.txid}
+        endorsementInfo={endorsementInfo}
       />
     )
 
@@ -84,7 +94,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 <Text color={"#6A6A6A"}>{t("Current endorsement score")}</Text>
               </Box>
               <Heading size="lg">
-                {endorsementScore.data} {"/"} {endorsementScoreThreshold.data}
+                {endorsementScore} {"/"} {endorsementScoreThreshold}
               </Heading>
             </HStack>
             <HStack
@@ -101,11 +111,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
               </Box>
               <HStack spacing={1} align={"flex-end"}>
                 <Heading fontSize={"36px"} fontWeight={700} color={"#F29B32"} lineHeight={"36px"}>
-                  {endorsementScore.data}
+                  {endorsementScore}
                 </Heading>
                 <Text fontSize={"14px"} color={"#6A6A6A"} fontWeight={400} lineHeight={"24px"}>
                   {t("of {{value}}", {
-                    value: endorsementScoreThreshold.data,
+                    value: endorsementScoreThreshold,
                   })}
                 </Text>
               </HStack>
