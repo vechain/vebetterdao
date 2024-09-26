@@ -57,9 +57,9 @@ library PassportEntityLogic {
   using ECDSA for bytes32;
 
   // ---------- Constants ---------- //
-  string private constant SIGNING_DOMAIN = "EntityPassportLinking";
+  string private constant SIGNING_DOMAIN = "VeBetterPassport";
   string private constant SIGNATURE_VERSION = "1";
-  bytes32 private constant LINK_TYPEHASH = keccak256("Link(address entity,address passport,uint256 deadline)");
+  bytes32 private constant LINK_TYPEHASH = keccak256("LinkEntity(address entity,address passport,uint256 deadline)");
 
   // ---------- Errors ---------- //
   /**
@@ -173,7 +173,7 @@ library PassportEntityLogic {
    * @param entity The address of the entity being checked.
    * @return True if the entity is linked to a passport, false otherwise.
    */
-  function isEntityLinkedToPassport(
+  function isEntity(
     PassportStorageTypes.PassportStorage storage self,
     address entity
   ) internal view returns (bool) {
@@ -209,7 +209,7 @@ library PassportEntityLogic {
     PassportStorageTypes.PassportStorage storage self,
     address passport
   ) internal view returns (bool) {
-    return self.passportEntitiesIndexes[passport] != 0;
+    return self.passportEntitiesIndexes[passport] == 0;
   }
 
   /**
@@ -501,8 +501,8 @@ library PassportEntityLogic {
 
     uint256 length = self.passportToEntities[passport].length;
 
-    self.passportEntitiesIndexes[msg.sender] = length + 1;
-    self.passportToEntities[passport].push(msg.sender);
+    self.passportEntitiesIndexes[entity] = length + 1;
+    self.passportToEntities[passport].push(entity);
 
     PassportPoPScoreLogic.assignEntityScoreToPassport(self, entity, passport);
     PassportSignalingLogic.attachEntitySignalsToPassport(self, entity, passport);

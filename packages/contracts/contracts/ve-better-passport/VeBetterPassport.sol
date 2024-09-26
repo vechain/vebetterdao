@@ -263,9 +263,9 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
 
   /// @notice Returns if a user is a entity
   /// @param user - the user address
-  function isEntityLinkedToPassport(address user) external view returns (bool) {
+  function isEntity(address user) external view returns (bool) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportEntityLogic.isEntityLinkedToPassport($, user);
+    return PassportEntityLogic.isEntity($, user);
   }
 
   /// @notice Returns if a user is a entity at a specific timepoint

@@ -28,10 +28,17 @@ interface IVeBetterPassport {
 
   /// @notice Emitted when a user registers an action
   /// @param user - the user that registered the action
+  /// @param passport - the passport address of the user
   /// @param appId - the app id of the action
   /// @param round - the round of the action
   /// @param actionScore - the score of the action
-  event RegisteredAction(address indexed user, bytes32 indexed appId, uint256 indexed round, uint256 actionScore);
+  event RegisteredAction(
+    address indexed user,
+    address passport,
+    bytes32 indexed appId,
+    uint256 indexed round,
+    uint256 actionScore
+  );
 
   /// @notice Emitted when a user is signaled.
   /// @param user  The address of the user that was signaled.
@@ -63,7 +70,7 @@ interface IVeBetterPassport {
   /// @notice Emitted when a user is removed from the whitelist
   /// @param user - the user that is removed from the whitelist
   /// @param removedBy - the user that removed the user from the whitelist
-  event RemovedUserFromWhitelist(address indexed user, address indexed removedBy);
+  event RemovedUserFromWhitelist(address indexed user, address indexed passport, address indexed removedBy);
 
   /// @notice Emitted when a user is blacklisted
   /// @param user - the user that is blacklisted
@@ -89,6 +96,9 @@ interface IVeBetterPassport {
 
   /// @notice Emitted when a user revokes the delegation of passport to another user.
   event DelegationRevoked(address indexed delegator, address indexed delegatee);
+
+  /// @notice Emitted when an an entity is linked to a passport
+  error AlreadyLinked(address entity);
 
   // ---------- Errors ---------- //
   /// @notice Emitted when a user does not have permission to delegate personhood.
@@ -188,7 +198,7 @@ interface IVeBetterPassport {
 
   /// @notice Returns if a user is a entity
   /// @param user The user address
-  function isEntityLinkedToPassport(address user) external view returns (bool);
+  function isEntity(address user) external view returns (bool);
 
   /// @notice Returns if a user is a entity at a specific timepoint
   /// @param user The user address
@@ -411,7 +421,7 @@ interface IVeBetterPassport {
   /// @notice Sets the threshold percentage of whitelisted entities for a passport to be considered whitelisted
   function setWhitelistThreshold(uint256 _threshold) external;
 
-    /// @notice Sets the maximum number of entities that can be linked to a passport
+  /// @notice Sets the maximum number of entities that can be linked to a passport
   /// @param maxEntities - the maximum number of entities
   function setMaxEntitiesPerPassport(uint256 maxEntities) external;
 }

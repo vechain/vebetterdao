@@ -37,10 +37,17 @@ library PassportPoPScoreLogic {
   // ---------- Events ---------- //
   /// @notice Emitted when a user registers an action
   /// @param user - the user that registered the action
+  /// @param passport - the passport address of the user
   /// @param appId - the app id of the action
   /// @param round - the round of the action
   /// @param actionScore - the score of the action
-  event RegisteredAction(address indexed user, bytes32 indexed appId, uint256 indexed round, uint256 actionScore);
+  event RegisteredAction(
+    address indexed user,
+    address passport,
+    bytes32 indexed appId,
+    uint256 indexed round,
+    uint256 actionScore
+  );
   // ---------- Constants ---------- //
 
   /// @dev Scaling factor for the exponential decay
@@ -282,7 +289,7 @@ library PassportPoPScoreLogic {
     // Update the user's total score for the app
     self.userAppTotalScore[passport][appId] += actionScore;
 
-    emit RegisteredAction(passport, appId, round, actionScore);
+    emit RegisteredAction(user, passport, appId, round, actionScore);
   }
 
   /**

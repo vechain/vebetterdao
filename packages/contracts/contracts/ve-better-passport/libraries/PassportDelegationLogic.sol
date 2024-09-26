@@ -52,14 +52,11 @@ library PassportDelegationLogic {
   string private constant SIGNING_DOMAIN = "VeBetterPassport";
   string private constant SIGNATURE_VERSION = "1";
   bytes32 private constant DELEGATION_TYPEHASH =
-    keccak256("Delegation(address passport,address delegatee,uint256 deadline)");
+    keccak256("Delegation(address delegator,address delegatee,uint256 deadline)");
 
   // ---------- Errors ---------- //
   /// @notice Emitted when a user does not have permission to delegate passport.
   error PassportDelegationUnauthorizedUser(address user);
-
-  /// @notice Emitted when a user tries to delegate passport to a user that has already been delegated to.
-  error AlreadyDelegated(address delegator);
 
   /// @notice Emitted when a user tries to delegate passport to themselves.
   error CannotDelegateToSelf(address user);
@@ -248,7 +245,7 @@ library PassportDelegationLogic {
     }
 
     // Cannot delegate enitity attached to passport
-    if (PassportEntityLogic.isEntityLinkedToPassport(self, msg.sender)) {
+    if (PassportEntityLogic.isEntity(self, msg.sender)) {
       revert PassportDelegationToEntity();
     }
 
@@ -258,7 +255,7 @@ library PassportDelegationLogic {
     }
 
     // Check if the passport is already pending delegation
-    if (self.pendingDelegationsDelegatorToDelegatee[delegator] == address(0)) {
+    if (self.pendingDelegationsDelegatorToDelegatee[delegator] != address(0)) {
       _removePendingDelegation(self, delegator, msg.sender);
     }
 
@@ -288,7 +285,7 @@ library PassportDelegationLogic {
     }
 
     // Check if the delegator is an entity linked to a passport
-    if (PassportEntityLogic.isEntityLinkedToPassport(self, msg.sender)) {
+    if (PassportEntityLogic.isEntity(self, msg.sender)) {
       revert PassportDelegationToEntity();
     }
 
@@ -298,7 +295,7 @@ library PassportDelegationLogic {
     }
 
     // Check if the passport is already pending delegation
-    if (self.pendingDelegationsDelegatorToDelegatee[msg.sender] == address(0)) {
+    if (self.pendingDelegationsDelegatorToDelegatee[msg.sender] != address(0)) {
       _removePendingDelegation(self, msg.sender, self.pendingDelegationsDelegatorToDelegatee[msg.sender]);
     }
 
@@ -321,7 +318,7 @@ library PassportDelegationLogic {
    * @param delegator The address of the delegator.
    */
   function acceptDelegation(PassportStorageTypes.PassportStorage storage self, address delegator) external {
-    address delegatee = getDelegatee(self, delegator);
+    address delegatee = self.pendingDelegationsDelegatorToDelegatee[delegator];
 
     // Check if the pending delegation exists
     if (delegatee == address(0)) {
@@ -333,7 +330,7 @@ library PassportDelegationLogic {
       revert PassportDelegationUnauthorizedUser(msg.sender); // Delegation does not match
     }
 
-    // Check if the delegatee has already delegated
+    // Check if the delegatee has already accepted a delegation
     if (isDelegatee(self, msg.sender)) {
       _removeDelegation(self, _addressFromUint160(self.delegateeToDelegator[msg.sender].latest()), msg.sender);
     }
