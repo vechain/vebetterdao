@@ -32,6 +32,12 @@ import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.s
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
+/**
+ * @title PassportSignalingLogic
+ * @dev A library that manages the signaling system within the Passport ecosystem.
+ * Signaling is used to track negative or positive behavior for users based on interactions in specific apps.
+ * This library allows for signaling users, assigning signalers to apps, resetting signals, and managing app-specific signals.
+ */
 library PassportSignalingLogic {
   // ---------- Events ---------- //
   /// @notice Emitted when a user is signaled.
@@ -251,6 +257,14 @@ library PassportSignalingLogic {
     emit UserSignalsResetForApp(user, app, reason);
   }
 
+  /**
+   * @dev Attaches the signals of an entity to its corresponding passport. If an entity has interacted with apps
+   * and accumulated signals, this function aggregates those signals and assigns them to the passport.
+   * This includes both the total signal count and the signals for each app the entity has interacted with.
+   * @param self The storage object for the Passport contract.
+   * @param entity The address of the entity whose signals are being attached to the passport.
+   * @param passport The address of the passport to which the entity's signals will be attached.
+   */
   function attachEntitySignalsToPassport(
     PassportStorageTypes.PassportStorage storage self,
     address entity,
@@ -268,6 +282,14 @@ library PassportSignalingLogic {
     }
   }
 
+  /**
+   * @dev Removes the signals of an entity from the corresponding passport. This function deducts
+   * all signal data from the entity that was previously transferred to the passport, including both the total signal count
+   * and app-specific signals.
+   * @param self The storage object for the Passport contract.
+   * @param entity The address of the entity whose signals will be removed from the passport.
+   * @param passport The address of the passport that will have the signals removed.
+   */
   function removeEntitySignalsFromPassport(
     PassportStorageTypes.PassportStorage storage self,
     address entity,
