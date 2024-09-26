@@ -27,6 +27,12 @@ import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { PassportTypes } from "./PassportTypes.sol";
 import { PassportEntityLogic } from "./PassportEntityLogic.sol";
 
+/**
+ * @title PassportPoPScoreLogic
+ * @dev This library manages the Proof of Participation (PoP) score system for the Passport system.
+ * Users gain PoP scores by performing actions in XApps. The scores are influenced by the security level of the app,
+ * exponential decay, and various other factors. The PoP score can determine if a user qualifies as a person in the Passport system.
+ */
 library PassportPoPScoreLogic {
   // ---------- Events ---------- //
   /// @notice Emitted when a user registers an action
@@ -223,10 +229,14 @@ library PassportPoPScoreLogic {
     return cumulativeScore;
   }
 
-  /// @dev Registers an action for a user in a round
-  /// @param user - the user that performed the action
-  /// @param appId - the app id of the action
-  /// @param round - the round id of the action
+  /**
+   * @dev Registers an action for a user in a specific round. If the user is an entity attached to a passport,
+   * the passport will receive the score instead of the entity. The score is calculated based on the security level of the app.
+   * @param self The storage object for the Passport contract.
+   * @param user The address of the user (or entity) that performed the action.
+   * @param appId The ID of the app where the action took place.
+   * @param round The round or timepoint in which the action occurred.
+   */
   function _registerAction(
     PassportStorageTypes.PassportStorage storage self,
     address user,
@@ -242,12 +252,12 @@ library PassportPoPScoreLogic {
       return;
     }
 
-  // If user is blacklisted, do not register the action
-    if (self.blacklisted[user]){
+    // If user is blacklisted, do not register the action
+    if (self.blacklisted[user]) {
       return;
     }
 
-    // Check if the user has attached their entity to a passport, if so, use the passport address
+    // Check if the user has attached their entity to a passport, if so, use the passport address, else use the users address (passport)
     address passport = PassportEntityLogic._getPassportForEntity(self, user);
 
     // Track unique apps core user has interacted with
@@ -373,6 +383,14 @@ library PassportPoPScoreLogic {
     }
   }
 
+  /**
+   * @dev Updates the record of unique app interactions for a user. If this is the user's first interaction
+   * with the specified app, the function marks the interaction as unique and stores the app ID in the user's
+   * list of interacted apps.
+   * @param self The storage object for the Passport contract.
+   * @param user The address of the user whose app interactions are being tracked.
+   * @param appId The ID of the app that the user has interacted with.
+   */
   function updateUniqueAppInteractions(
     PassportStorageTypes.PassportStorage storage self,
     address user,
