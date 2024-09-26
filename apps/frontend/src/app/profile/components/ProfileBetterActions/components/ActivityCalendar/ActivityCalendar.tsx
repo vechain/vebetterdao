@@ -115,7 +115,7 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
                   bg={getActivityColor(activityLevel)}
                   color={getActivityFontColor(activityLevel)}
                   borderRadius="md"
-                  opacity={isFutureDay ? 0.5 : 1}
+                  opacity={isFutureDay ? 0.3 : 1}
                   border={"1px solid"}
                   borderColor={isToday ? "black" : "#dfdfdf"}>
                   <Text fontSize="sm" fontWeight="medium">
