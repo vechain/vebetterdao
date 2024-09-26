@@ -207,12 +207,12 @@ library PassportDelegationLogic {
 
     // Check if the passport has already delegated
     if (isDelegator(self, delegator)) {
-      _removeDelegation(self, delegator, self.delegatorToDelegatee[delegator].latest());
+      _removeDelegation(self, delegator, _addressFromUint160(self.delegatorToDelegatee[delegator].latest()));
     }
 
     // Check if the delegatee has already been delegated
     if (isDelegatee(self, msg.sender)) {
-      _removeDelegation(self, self.delegateeToDelegator[msg.sender].latest(), msg.sender);
+      _removeDelegation(self, _addressFromUint160(self.delegateeToDelegator[msg.sender].latest()), msg.sender);
     }
 
     _pushCheckpoint(self.delegatorToDelegatee[delegator], msg.sender);
@@ -242,8 +242,8 @@ library PassportDelegationLogic {
     }
 
     // Check if the passport has already delegated removing the previous delegation
-    if (isDelegator(self, delegator)) {
-      _removeDelegation(self, delegator, self.delegatorToDelegatee[delegator].latest());
+    if (isDelegator(self, msg.sender)) {
+      _removeDelegation(self, msg.sender, _addressFromUint160(self.delegatorToDelegatee[msg.sender].latest()));
     }
 
     // Get the length of the pending delegations
@@ -262,28 +262,21 @@ library PassportDelegationLogic {
   /// @notice Allow the delegatee to accept the delegation
   /// @param delegator - the delegator address
   function acceptDelegation(PassportStorageTypes.PassportStorage storage self, address delegator) external {
-    uint256 index = self.pendingDelegationsIndexes[delegator];
+    address delegatee = getDelegatee(self, delegator);
 
     // Check if the pending delegation exists
-    if (index == 0) {
+    if (delegatee == address(0)) {
       revert NotDelegated(msg.sender); // Delegator not found in the pending delegations
     }
 
-    // Correct the index (since we store index + 1)
-    index -= 1;
-
-    // Get the length of pending delegations for the delegatee
-    uint256 pendingDelegationsLength = self.pendingDelegationsDelegateeToDelegators[msg.sender].length;
-
-    // Check if the delegation is valid
-    address delegatorToAccept = self.pendingDelegationsDelegateeToDelegators[msg.sender][index];
-    if (delegatorToAccept != delegator) {
+    // Check if the caller is the delegatee
+    if (delegatee != msg.sender) {
       revert PassportDelegationUnauthorizedUser(msg.sender); // Delegation does not match
     }
 
     // Check if the delegatee has already delegated
     if (isDelegatee(self, msg.sender)) {
-      _removeDelegation(self, self.delegateeToDelegator[msg.sender].latest(), msg.sender);
+      _removeDelegation(self, _addressFromUint160(self.delegateeToDelegator[msg.sender].latest()), msg.sender);
     }
 
     // Add the delegator to the delegatee and the delegatee to the delegator
