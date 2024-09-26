@@ -189,7 +189,7 @@ library PassportEntityLogic {
     address entity,
     uint256 timepoint
   ) external view returns (bool) {
-    return self.entityToPassport[entity].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
+    return _isEntityInTimepoint(self, entity, timepoint);
   }
 
   /**
@@ -498,4 +498,18 @@ library PassportEntityLogic {
     }
     return passport;
   }
+
+  /**
+   * @notice Checks if an entity is linked to a passport.
+   * @param entity The address of the entity being checked.
+   * @return True if the entity is linked to a passport, false otherwise.
+   */
+  function _isEntityInTimepoint(
+    PassportStorageTypes.PassportStorage storage self,
+    address entity,
+    uint256 timepoint
+  ) internal view returns (bool) {
+    return self.entityToPassport[entity].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
+  }
+
 }

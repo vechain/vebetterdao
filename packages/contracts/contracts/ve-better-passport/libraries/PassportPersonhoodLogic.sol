@@ -97,11 +97,11 @@ library PassportPersonhoodLogic {
     address user,
     uint256 timepoint
   ) private view returns (address) {
-    if (PassportDelegationLogic.isDelegateeInTimepoint(self, user, timepoint)) {
-      return PassportDelegationLogic.getDelegatorInTimepoint(self, user, timepoint); // Return the delegator's passport address
+    if (PassportDelegationLogic._isDelegateeInTimepoint(self, user, timepoint)) {
+      return PassportDelegationLogic._getDelegatorInTimepoint(self, user, timepoint); // Return the delegator's passport address
     } else if (
-      PassportDelegationLogic.isDelegatorInTimepoint(self, user, timepoint) ||
-      PassportEntityLogic.isEntityInTimepoint(self, user, timepoint)
+      PassportDelegationLogic._isDelegatorInTimepoint(self, user, timepoint) ||
+      PassportEntityLogic._isEntityInTimepoint(self, user, timepoint)
     ) {
       return address(0); // Return zero address if they delegated their personhood or entity
     } else {

@@ -202,7 +202,7 @@ library PassportWhitelistAndBlacklistLogic {
     address user,
     bool increment
   ) private {
-    address passport = PassportEntityLogic.getPassportForEntity(self, user);
+    address passport = PassportEntityLogic._getPassportForEntity(self, user);
 
     // If the user is the passport, no need to update the counter
     if (passport == user) {
@@ -227,7 +227,7 @@ library PassportWhitelistAndBlacklistLogic {
     address user,
     bool increment
   ) private {
-    address passport = PassportEntityLogic.getPassportForEntity(self, user);
+    address passport = PassportEntityLogic._getPassportForEntity(self, user);
 
     // If the user is the passport, no need to update the counter
     if (passport == user) {
@@ -253,7 +253,7 @@ library PassportWhitelistAndBlacklistLogic {
     PassportStorageTypes.PassportStorage storage self,
     address passport
   ) internal view returns (bool) {
-    passport = PassportEntityLogic.getPassportForEntity(self, passport);
+    passport = PassportEntityLogic._getPassportForEntity(self, passport);
 
     // Check if the passport itself is whitelisted
     if (isWhitelisted(self, passport)) {
@@ -292,7 +292,7 @@ library PassportWhitelistAndBlacklistLogic {
     PassportStorageTypes.PassportStorage storage self,
     address passport
   ) internal view returns (bool) {
-    passport = PassportEntityLogic.getPassportForEntity(self, passport);
+    passport = PassportEntityLogic._getPassportForEntity(self, passport);
 
     // Check if the passport itself is blacklisted
     if (isBlacklisted(self, passport)) {

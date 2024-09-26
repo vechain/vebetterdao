@@ -144,7 +144,7 @@ library PassportDelegationLogic {
     address delegatee,
     uint256 timepoint
   ) external view returns (address) {
-    return _addressFromUint160(self.delegateeToDelegator[delegatee].upperLookupRecent(SafeCast.toUint48(timepoint)));
+    return _getDelegatorInTimepoint(self, delegatee, timepoint);
   }
 
   /**
@@ -169,7 +169,7 @@ library PassportDelegationLogic {
     address user,
     uint256 timepoint
   ) external view returns (bool) {
-    return self.delegatorToDelegatee[user].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
+    return _isDelegatorInTimepoint(self, user, timepoint);
   }
 
   /**
@@ -194,7 +194,7 @@ library PassportDelegationLogic {
     address user,
     uint256 timepoint
   ) external view returns (bool) {
-    return self.delegateeToDelegator[user].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
+    return _isDelegateeInTimepoint(self, user, timepoint);
   }
 
   /**
@@ -452,5 +452,32 @@ library PassportDelegationLogic {
   /// @notice Convert a uint160 value to an address
   function _addressFromUint160(uint160 value) private pure returns (address) {
     return address(uint160(value));
+  }
+
+  /// @notice Checks if user is a delegatee at a specific timepoint
+  function _isDelegateeInTimepoint(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    uint256 timepoint
+  ) internal view returns (bool) {
+    return self.delegateeToDelegator[user].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
+  }
+
+  /// @notice Returns the delegator for a given delegatee.
+  function _getDelegatorInTimepoint(
+    PassportStorageTypes.PassportStorage storage self,
+    address delegatee,
+    uint256 timepoint
+  ) internal view returns (address) {
+    return _addressFromUint160(self.delegateeToDelegator[delegatee].upperLookupRecent(SafeCast.toUint48(timepoint)));
+  }
+
+  /// @notice Checks if the given user is a delegator at a specific timepoint.
+  function _isDelegatorInTimepoint(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    uint256 timepoint
+  ) internal view returns (bool) {
+    return self.delegatorToDelegatee[user].upperLookupRecent(SafeCast.toUint48(timepoint)) != 0;
   }
 }
