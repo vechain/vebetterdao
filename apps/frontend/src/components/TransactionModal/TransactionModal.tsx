@@ -129,8 +129,6 @@ export const TransactionModal = ({
           />
         )
 
-      // TODO : add if tx success for endorsement
-
       return (
         <SuccessModalContent
           title={successTitle}
@@ -138,6 +136,7 @@ export const TransactionModal = ({
           socialDescriptionEncoded={socialDescriptionEncoded}
           showExplorerButton={showExplorerButton}
           txId={txId}
+          endorsementInfo={endorsementInfo}
         />
       )
     }
