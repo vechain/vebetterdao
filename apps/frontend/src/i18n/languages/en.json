@@ -1,4 +1,9 @@
 {
+  "You are endorsing": "You are endorsing",
+  "Removing your endorsement from": "Removing your endorsement from",
+  "{{value}} points": "{{value}} points",
+  "There is nothing to show here !": "There is nothing to show here !",
+  "See endorsement history": "See endorsement history",
   "With your endorsement, {{appName}} gets enough score to get into the next allocation round.": "With your endorsement, {{appName}} gets enough score to get into the next allocation round.",
   "Error switching endorsement": "Error switching endorsement",
   "Withdrawing your endorsement from an app may result in it <strong>no longer being selected for allocations</strong>.": "Withdrawing your endorsement from an app may result in it <strong>no longer being selected for allocations</strong>.",

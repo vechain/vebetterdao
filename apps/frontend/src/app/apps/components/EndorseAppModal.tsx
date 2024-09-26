@@ -23,6 +23,7 @@ import {
   Skeleton,
 } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
+import { PropsEndorsement } from "./UnendorseAppModal"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
 import { useCallback, useMemo } from "react"
@@ -72,6 +73,13 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     endorseAppMutation.sendTransaction(undefined)
   }, [endorseAppMutation])
 
+  const endorsementInfo: PropsEndorsement = {
+    isUnendorsing: false,
+    isEndorsing: true,
+    points: userEndorsementScore.data,
+    endorsedAppName: xApp?.name,
+  }
+
   if (endorseAppMutation.status !== "ready")
     return (
       <TransactionModal
@@ -86,6 +94,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         pendingTitle={"Endorsing app..."}
         showExplorerButton
         txId={endorseAppMutation.txReceipt?.meta.txID ?? endorseAppMutation.sendTransactionTx?.txid}
+        endorsementInfo={endorsementInfo}
       />
     )
 
