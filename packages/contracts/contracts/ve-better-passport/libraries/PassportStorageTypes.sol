@@ -86,7 +86,7 @@ library PassportStorageTypes {
     mapping(address => bytes32[]) userInteractedApps;
     // Track when as user attached an entity to their passport
     mapping(address => uint256) entityAttachRound;
-    // ---------- Passport Delegation ---------- //
+    // ---------- Passport Entities ---------- //
     // Mapping of entity to passport
     mapping(address => Checkpoints.Trace160) entityToPassport;
     // Mapping to track index of entities for each passport
@@ -99,6 +99,17 @@ library PassportStorageTypes {
     mapping(address => address[]) pendingLinksPassportToEntities;
     // Mapping of pending entities to passport
     mapping(address => address) pendingLinksEntityToPassport;
+    // ---------- Passport Delegation ---------- //
+    // Mapping of delegator to delegatee
+    mapping(address => Checkpoints.Trace160) delegatorToDelegatee;
+    // Mapping of delegatee to delegator
+    mapping(address => Checkpoints.Trace160) delegateeToDelegator;
+    // Mapping to track index of pending delegations for each delegator
+    mapping(address => uint256) pendingDelegationsIndexes;
+    // Mapping to track pending delegations for each delegatee
+    mapping(address => address[]) pendingDelegationsDelegateeToDelegators;
+    // Mapping to map delagator to delegatee for pending delegations
+    mapping(address => address) pendingDelegationsDelegatorToDelegatee;
     // ---------- Bot Signaling ---------- //
     // Counter for the number of signals per user
     mapping(address user => uint256) signaledCounter;

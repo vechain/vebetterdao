@@ -60,7 +60,7 @@ library PassportTypes {
     uint256 blackAndwhiteListThreshold;
   }
 
-  struct InitializationRoleData{
+  struct InitializationRoleData {
     address admin;
     address botSignaler;
     address upgrader;
@@ -70,6 +70,16 @@ library PassportTypes {
     address whitelister;
     address actionRegistrar;
     address actionScoreManager;
+  }
+
+  enum CheckType {
+    UNDEFINED, // Default value for invalid or uninitialized checks
+    WHITELIST_CHECK, // Check if the user is whitelisted
+    BLACKLIST_CHECK, // Check if the user is blacklisted
+    SIGNALING_CHECK, // Check if the user has been signaled too many times
+    PARTICIPATION_SCORE_CHECK, // Check the user's participation score
+    NODE_OWNERSHIP_CHECK, // Check if the user owns an economic or xnode
+    GM_OWNERSHIP_CHECK // Check if the user owns a GM token
   }
 
   /// @notice Security level indicates how secure the app is
