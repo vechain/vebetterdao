@@ -22,17 +22,23 @@ export const ActivityList = ({ setIsCalendarView }: { setIsCalendarView: Dispatc
   }
 
   const groupActionsByDay = (actions: SustainabilityActionsResponse["data"]) => {
-    const grouped: Record<string, SustainabilityActionsResponse["data"][number][]> = {}
-    actions.forEach(action => {
-      const day = dayjs.unix(action.blockTimestamp).format("YYYY-MM-DD")
-      if (!grouped[day]) {
-        grouped[day] = []
-      }
-      grouped[day].push(action)
-    })
-    return grouped
-  }
+    return actions.reduce<Record<string, SustainabilityActionsResponse["data"]>>(
+      (grouped, action) => {
+        const day = dayjs.unix(action.blockTimestamp).format("YYYY-MM-DD")
 
+        // Ensure the group for this day is initialized
+        if (!grouped[day]) {
+          grouped[day] = [] // This guarantees grouped[day] is always an array
+        }
+
+        // Now safely push into grouped[day]
+        ;(grouped[day] as SustainabilityActionsResponse["data"]).push(action)
+
+        return grouped
+      },
+      {} as Record<string, SustainabilityActionsResponse["data"]>,
+    )
+  }
   const groupedActions = groupActionsByDay(actions)
 
   return (
