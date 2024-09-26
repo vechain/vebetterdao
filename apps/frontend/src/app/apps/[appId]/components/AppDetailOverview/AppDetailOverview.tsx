@@ -29,20 +29,23 @@ import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppID } from "./components/AppID"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
-import { useCurrentAppEndorsementStatus, useGracePeriodEvent } from "@/api"
+import { useGracePeriodEvent } from "@/api"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 
-export const AppDetailOverview = () => {
+export const AppDetailOverview = ({
+  endorsementStatus,
+  endorsementThreshold,
+  isEndorsementStatusLoading,
+}: {
+  endorsementStatus: EndorsementStatus
+  endorsementThreshold: string | undefined
+  isEndorsementStatusLoading: boolean
+}) => {
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
   const { appMetadata, appMetadataLoading, appMetadataError } = useCurrentAppMetadata()
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
-  const {
-    status: endorsementStatus,
-    threshold: endorsementThreshold,
-    isLoading: isEndorsementStatusLoading,
-  } = useCurrentAppEndorsementStatus()
 
   const { data: gracePeriod } = useGracePeriodEvent(app?.id)
 
