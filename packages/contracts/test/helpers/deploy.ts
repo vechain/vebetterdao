@@ -51,12 +51,13 @@ import {
   GovernorVotesLogicV3,
   GovernorStateLogicV3,
   PassportChecksLogic,
-  PassportDelegationLogic,
+  PassportEntityLogic,
   PassportPoPScoreLogic,
   PassportSignalingLogic,
   PassportWhitelistAndBlacklistLogic,
   PassportConfigurator,
   PassportPersonhoodLogic,
+  PassportDelegationLogic,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -115,6 +116,7 @@ interface DeployInstance {
   passportChecksLogic: PassportChecksLogic
   passportConfigurator: PassportConfigurator
   passportDelegationLogic: PassportDelegationLogic
+  passportEntityLogic: PassportEntityLogic
   passportPersonhoodLogic: PassportPersonhoodLogic
   passportPoPScoreLogic: PassportPoPScoreLogic
   passportSignalingLogic: PassportSignalingLogic
@@ -179,6 +181,7 @@ export const getOrDeployContractInstances = async ({
   const {
     PassportChecksLogic,
     PassportConfigurator,
+    PassportEntityLogic,
     PassportDelegationLogic,
     PassportPersonhoodLogic,
     PassportPoPScoreLogic,
@@ -275,6 +278,7 @@ export const getOrDeployContractInstances = async ({
   const veBetterPassportAddress = await deployProxyOnly("VeBetterPassport", {
     PassportChecksLogic: await PassportChecksLogic.getAddress(),
     PassportConfigurator: await PassportConfigurator.getAddress(),
+    PassportEntityLogic: await PassportEntityLogic.getAddress(),
     PassportDelegationLogic: await PassportDelegationLogic.getAddress(),
     PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
     PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
@@ -407,6 +411,10 @@ export const getOrDeployContractInstances = async ({
         signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
         roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
         minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
+        roundsForAssigningEntityScore: config.VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE, //roundsForAssigningEntityScore
+        blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD, //blacklistThreshold
+        whitelistThreshold: config.VEBETTER_WHITELIST_THRESHOLD, //whitelistThreshold
+        maxEntitiesPerPassport: config.VEBETTER_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
       },
       {
         admin: owner.address, // admin
@@ -423,6 +431,7 @@ export const getOrDeployContractInstances = async ({
     {
       PassportChecksLogic: await PassportChecksLogic.getAddress(),
       PassportConfigurator: await PassportConfigurator.getAddress(),
+      PassportEntityLogic: await PassportEntityLogic.getAddress(),
       PassportDelegationLogic: await PassportDelegationLogic.getAddress(),
       PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
       PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
@@ -658,6 +667,7 @@ export const getOrDeployContractInstances = async ({
     passportChecksLogic: PassportChecksLogic,
     passportConfigurator: PassportConfigurator,
     passportDelegationLogic: PassportDelegationLogic,
+    passportEntityLogic: PassportEntityLogic,
     passportPersonhoodLogic: PassportPersonhoodLogic,
     passportPoPScoreLogic: PassportPoPScoreLogic,
     passportSignalingLogic: PassportSignalingLogic,
