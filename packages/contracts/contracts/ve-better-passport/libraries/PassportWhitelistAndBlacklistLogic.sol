@@ -74,6 +74,8 @@ library PassportWhitelistAndBlacklistLogic {
     PassportStorageTypes.PassportStorage storage self,
     address passport
   ) internal view returns (bool) {
+    passport = PassportEntityLogic.getPassportForEntity(self, passport);
+
     // Check if the passport itself is whitelisted
     if (isWhitelisted(self, passport)) {
       return true;
@@ -111,6 +113,8 @@ library PassportWhitelistAndBlacklistLogic {
     PassportStorageTypes.PassportStorage storage self,
     address passport
   ) internal view returns (bool) {
+    passport = PassportEntityLogic.getPassportForEntity(self, passport);
+
     // Check if the passport itself is blacklisted
     if (isBlacklisted(self, passport)) {
       return true;
