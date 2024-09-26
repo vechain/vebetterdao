@@ -26,12 +26,16 @@ export const ProfilePageContent = () => {
       <ProfileHeader />
       <HStack>
         <Button
-          variant={selectedTab === "balance" ? "primaryAction" : "primarySubtle"}
+          variant={"primaryGhost"}
+          borderBottom={selectedTab === "balance" ? "2px solid #004CFC" : "none"}
+          rounded="none"
           onClick={() => setSelectedTab("balance")}>
           {t("Balance")}
         </Button>
         <Button
-          variant={selectedTab === "better-actions" ? "primaryAction" : "primarySubtle"}
+          variant={"primaryGhost"}
+          borderBottom={selectedTab === "better-actions" ? "2px solid #004CFC" : "none"}
+          rounded="none"
           onClick={() => setSelectedTab("better-actions")}>
           {t("Better Actions")}
         </Button>

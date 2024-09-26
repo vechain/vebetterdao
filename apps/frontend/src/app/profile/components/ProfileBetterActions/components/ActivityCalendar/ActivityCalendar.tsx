@@ -45,19 +45,19 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
       return "transparent"
     }
     if (level === 1) {
-      return "#dce8fd"
+      return "#D0F7A7"
     }
     if (level === 2 || level === 3) {
-      return "#60a5fa"
+      return "#B1F16C"
     }
     if (level === 4 || level === 5) {
-      return "#225eec"
+      return "#93CB57"
     }
-    return "#203a87"
+    return "#577E2E"
   }, [])
 
   const getActivityFontColor = useCallback((level: number) => {
-    if (level > 1) {
+    if (level > 5) {
       return "white"
     }
     return "black"
