@@ -27,6 +27,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { SwitchEndorsementAppModal } from "@/app/apps/components/SwitchEndorsementAppModal"
 
+
 export const AppEndorsementInfoCard = ({
   endorsementScore,
   endorsementStatus,
