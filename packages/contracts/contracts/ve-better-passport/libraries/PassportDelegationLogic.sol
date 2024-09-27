@@ -74,7 +74,7 @@ library PassportDelegationLogic {
   error SignatureExpired();
 
   /// @notice Emitted when a user tries to delegate with a
-  error InvaliedSignature();
+  error InvalidSignature();
 
   // ---------- Events ---------- //
   /// @notice Emitted when a user delegates passport to another user.
@@ -236,7 +236,7 @@ library PassportDelegationLogic {
 
     // Check if the signer is the delegator
     if (signer != delegator) {
-      revert InvaliedSignature();
+      revert InvalidSignature();
     }
 
     // Cannot delegate passport to owner
@@ -245,7 +245,7 @@ library PassportDelegationLogic {
     }
 
     // Cannot delegate enitity attached to passport
-    if (PassportEntityLogic.isEntity(self, msg.sender)) {
+    if (PassportEntityLogic.isEntity(self, delegator)) {
       revert PassportDelegationToEntity();
     }
 

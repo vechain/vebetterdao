@@ -173,10 +173,7 @@ library PassportEntityLogic {
    * @param entity The address of the entity being checked.
    * @return True if the entity is linked to a passport, false otherwise.
    */
-  function isEntity(
-    PassportStorageTypes.PassportStorage storage self,
-    address entity
-  ) internal view returns (bool) {
+  function isEntity(PassportStorageTypes.PassportStorage storage self, address entity) internal view returns (bool) {
     return self.entityToPassport[entity].latest() != 0;
   }
 
@@ -278,23 +275,27 @@ library PassportEntityLogic {
     bytes32 digest = PassportEIP712SigningLogic.hashTypedDataV4(structHash);
     address signer = digest.recover(signature);
 
+    // Ensure the signature is valid
     if (signer != entity) {
       revert InvalidSignature();
     }
 
+    // Ensure the entity trying to link is not the passport itself
     if (signer == msg.sender) {
       revert CannotLinkToSelf(signer);
     }
 
+    // Check if the entity is already linked, if so revert
     if (self.entityToPassport[entity].latest() != 0 || self.pendingLinksEntityToPassport[entity] != address(0)) {
       revert AlreadyLinked(msg.sender);
     }
 
-    // Check if the passport has reached the maximum number of entities
+    // Check if the passport has reached the maximum number of entities, if so, revert
     if (self.passportToEntities[msg.sender].length >= self.maxEntitiesPerPassport) {
       revert MaxEntitiesPerPassportReached();
     }
 
+    // Add the entity to the list of links for the passport
     _linkEntity(self, entity, msg.sender);
   }
 
@@ -438,20 +439,26 @@ library PassportEntityLogic {
     address entity,
     address passport
   ) private {
+    // Get the index of the entity in the pending links array
     uint256 index = self.pendingLinksIndexes[entity];
 
+    // Get the length of the pending links array
     uint256 pendingLinksLength = self.pendingLinksPassportToEntities[passport].length;
 
+    // Decrement the index to match the array index
     index -= 1;
 
+    // If the entity is not the last in the array, move the last entity to the removed entity's position
     if (index != pendingLinksLength - 1) {
       address lastEntity = self.pendingLinksPassportToEntities[passport][pendingLinksLength - 1];
       self.pendingLinksPassportToEntities[passport][index] = lastEntity;
       self.pendingLinksIndexes[lastEntity] = index + 1;
     }
 
+    // Remove the entity from the pending links array
     self.pendingLinksPassportToEntities[passport].pop();
 
+    // Remove the entity from the pending links indexes
     delete self.pendingLinksIndexes[entity];
     delete self.pendingLinksEntityToPassport[entity];
   }
@@ -467,23 +474,30 @@ library PassportEntityLogic {
     address entity,
     address passport
   ) private {
+    // Get the index of the entity in the passport's entities array
     uint256 index = self.passportEntitiesIndexes[entity];
 
+    // Get the length of the entities array
     uint256 linksLength = self.passportToEntities[passport].length;
 
+    // Decrement the index to match the array index
     index -= 1;
 
+    // If the entity is not the last in the array, move the last entity to the removed entity's position
     if (index != linksLength - 1) {
       address lastEntity = self.passportToEntities[passport][linksLength - 1];
       self.passportToEntities[passport][index] = lastEntity;
       self.passportEntitiesIndexes[lastEntity] = index + 1;
     }
 
+    // Remove the entity from the passport's entities array
     self.passportToEntities[passport].pop();
 
+    // Remove the entity from the passport's entities indexes
     delete self.passportEntitiesIndexes[entity];
     delete self.passportToEntities[entity];
 
+    // Remove the entity's score, signals, and black/white lists from the passport
     PassportPoPScoreLogic.removeEntityScoreFromPassport(self, entity, passport);
     PassportSignalingLogic.removeEntitySignalsFromPassport(self, entity, passport);
     PassportWhitelistAndBlacklistLogic.removeEntitiesBlackAndWhiteListsFromPassport(self, entity, passport);
@@ -499,11 +513,14 @@ library PassportEntityLogic {
     // Push a checkpoint to mark the entity as linked to the passport
     _pushCheckpoint(self.entityToPassport[entity], passport);
 
+    // Get the index of the entity in the passport's entities array
     uint256 length = self.passportToEntities[passport].length;
 
+    // Increment the index to match the array index
     self.passportEntitiesIndexes[entity] = length + 1;
     self.passportToEntities[passport].push(entity);
 
+    // Assign the entity score, signals, and black/white lists to the passport
     PassportPoPScoreLogic.assignEntityScoreToPassport(self, entity, passport);
     PassportSignalingLogic.attachEntitySignalsToPassport(self, entity, passport);
     PassportWhitelistAndBlacklistLogic.attachEntitiesBlackAndWhiteListsToPassport(self, entity, passport);
@@ -525,9 +542,11 @@ library PassportEntityLogic {
     address entity
   ) internal view returns (address) {
     address passport = _addressFromUint160(self.entityToPassport[entity].latest());
+    // If the entity is not linked to a passport, return the entity itself
     if (passport == address(0)) {
       return entity;
     }
+    // Otherwise, return the linked passport
     return passport;
   }
 

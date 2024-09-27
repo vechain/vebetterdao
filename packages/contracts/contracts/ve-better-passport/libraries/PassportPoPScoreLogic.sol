@@ -317,7 +317,7 @@ library PassportPoPScoreLogic {
       : 0;
 
     // Loop through the rounds from current to minRound
-    for (uint256 round = currentRound; round > minRound; round--) {
+    for (uint256 round = currentRound; round >= minRound; round--) {
       // Check if the entity has any score in the round
       if (self.userRoundScore[entity][round] > 0) {
         // Update the passport's total score for the rounds considered
@@ -343,6 +343,11 @@ library PassportPoPScoreLogic {
           }
         }
       }
+
+      // Stop when round hits 0 to prevent underflow
+      if (round == 0) {
+        break;
+      }
     }
   }
 
@@ -366,7 +371,7 @@ library PassportPoPScoreLogic {
       : 0; // Ensure there's no underflow
 
     // Loop through the rounds from when the entity was attached to the calculated round limit
-    for (uint256 round = entityAttachRound; round > minRound; round--) {
+    for (uint256 round = entityAttachRound; round >= minRound; round--) {
       // Check if the entity has any score in the round
       if (self.userRoundScore[entity][round] > 0) {
         // Deduct the entity's score from the passport's total score
@@ -386,6 +391,11 @@ library PassportPoPScoreLogic {
           // Deduct the entity's total app score from the passport's total app score
           self.userAppTotalScore[passport][appId] -= self.userAppRoundScore[entity][round][appId];
         }
+      }
+
+      // Stop when round hits 0 to prevent underflow
+      if (round == 0) {
+        break;
       }
     }
   }

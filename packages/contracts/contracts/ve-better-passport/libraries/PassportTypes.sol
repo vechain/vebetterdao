@@ -28,6 +28,12 @@ import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 import { INodeManagement } from "../../interfaces/INodeManagement.sol";
 
+/**
+ * @title PassportTypes
+ * @notice This library defines various data types, enumerations, and initialization parameters used within the Passport contract.
+ * It includes the `InitializationData` struct, which contains references to external contracts and configurations for personhood checks,
+ * proof of participation, signaling, and passport delegation. It also includes role-based configuration settings.
+ */
 library PassportTypes {
   /**
    * @dev Struct containing data to initialize the contract

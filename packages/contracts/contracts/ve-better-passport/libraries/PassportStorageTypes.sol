@@ -30,8 +30,18 @@ import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { PassportTypes } from "./PassportTypes.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
-/// @title PassportStorageTypes
-/// @notice Library for defining storage types used in the Passport contract.
+/**
+ * @title PassportStorageTypes
+ * @notice This library defines the primary storage types used within the Passport contract.
+ * It uses the ERC-7201 Storage Namespaces standard to separate storage concerns efficiently.
+ *
+ * The storage includes configurations for personhood checks, external contract references,
+ * whitelisting/blacklisting, proof of participation, passport delegation, bot signaling,
+ * and entity linkage to passports.
+ *
+ * @dev This library manages complex contract state by grouping mappings and settings into
+ * distinct storage types. It leverages the ERC-7201 standard for organizing these namespaces.
+ */
 library PassportStorageTypes {
   struct PassportStorage {
     // ------------------ Passport Settings ------------------ //

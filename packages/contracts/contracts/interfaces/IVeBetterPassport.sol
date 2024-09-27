@@ -131,11 +131,14 @@ interface IVeBetterPassport {
   /// @notice Emiited when a user tries to delegate a passport to another passport or entity.
   error PassportDelegationToEntity();
 
-  /// @notice Emitted when a user tries to delegate with a
+  /// @notice Emitted when a user tries to sign a message with an expired signature
   error SignatureExpired();
 
-  /// @notice Emitted when a user tries to delegate with a
-  error InvaliedSignature();
+  /// @notice Emitted when a user tries to sign a message with an invalid signature
+  error InvalidSignature();
+
+  ///  @notice Thrown when a user tries to link a entity to a passport that has reached the maximum number of entities.
+  error MaxEntitiesPerPassportReached();
 
   // ---------- Functions ---------- //
   /// @notice Initializes the contract with the required data and roles
@@ -467,5 +470,4 @@ interface IVeBetterPassport {
   /// @param user The user address
   /// @param timepoint The timepoint to query
   function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool);
-
 }
