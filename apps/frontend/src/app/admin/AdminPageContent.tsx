@@ -7,13 +7,16 @@ import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { B3trAllowance } from "./components/B3trAllowance"
 import { BulkClaimXAppsAllocations } from "./components/BulkClaimXAppsAllocations"
-import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
+import { XAppCheckEndorsement } from "./components/XAppCheckEndorsement"
 import { Pause } from "./components/Pause"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
 import { ContractsDetails } from "./components/ContractsDetails"
 import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
 import { useCurrentAllocationsRoundId } from "@/api"
+import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
+
+const isLocalhost = process.env.NODE_ENV === "development"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -68,6 +71,7 @@ export const AdminPageContent = () => {
               <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
                 <UpdateReceiverAddress />
                 <UpdateAppsEligibility />
+                {isLocalhost ? <XAppCheckEndorsement /> : null}
               </Grid>
             </TabPanel>
           )}
