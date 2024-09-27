@@ -79,26 +79,24 @@ export const SuccessModalContent = ({
             <ShareButtons descriptionEncoded={socialDescriptionEncoded} />
           </VStack>
         )}
-        <HStack align="center">
-          <HStack bg="#F8F8F8" justify="space-around" p="16px" rounded="8px" height={"full"}>
-            <HStack>
-              <Text fontSize="small">
-                {t(
-                  endorsementInfo?.isEndorsing && !endorsementInfo?.isUnendorsing
-                    ? "You are endorsing"
-                    : "Removing your endorsement from",
-                )}{" "}
-                <Text as="strong" display="inline">
-                  {endorsementInfo?.endorsedAppName}
+        {endorsementInfo?.isEndorsing || endorsementInfo?.isUnendorsing ? (
+          <HStack align="center">
+            <HStack bg="#F8F8F8" justify="space-around" p="16px" rounded="8px" height={"full"}>
+              <HStack>
+                <Text fontSize="small">
+                  {t(endorsementInfo?.isEndorsing ? "You are endorsing" : "Removing your endorsement from")}{" "}
+                  <Text as="strong" display="inline">
+                    {endorsementInfo?.endorsedAppName}
+                  </Text>
+                </Text>{" "}
+                <Image src="/images/xnode-strength.svg" alt="xnode-strength-icon" />
+                <Text fontSize="small" fontWeight={800}>
+                  {t("{{value}} points", { value: endorsementInfo?.points })}
                 </Text>
-              </Text>{" "}
-              <Image src="/images/xnode-strength.svg" alt="xnode-strength-icon" />
-              <Text fontSize="small" fontWeight={800}>
-                {t("{{value}} points", { value: endorsementInfo?.points })}
-              </Text>
+              </HStack>
             </HStack>
           </HStack>
-        </HStack>
+        ) : null}
       </VStack>
     </ModalAnimation>
   )

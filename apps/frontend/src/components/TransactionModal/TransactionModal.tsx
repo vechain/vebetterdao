@@ -89,8 +89,9 @@ export const TransactionModal = ({
           />
         )
 
-      if (endorsementInfo?.isUnendorsing || endorsementInfo?.isEndorsing)
+      if (endorsementInfo?.isUnendorsing || endorsementInfo?.isEndorsing) {
         return <ConfirmationEndorsementModalContent endorsementInfo={endorsementInfo} />
+      }
 
       return <ConfirmationModalContent title={confirmationTitle} />
     }
@@ -128,7 +129,7 @@ export const TransactionModal = ({
             onClose={onClose}
           />
         )
-      if (endorsementInfo?.isUnendorsing || endorsementInfo?.isEndorsing)
+      if (endorsementInfo?.isUnendorsing || endorsementInfo?.isEndorsing) {
         return (
           <SuccessModalContent
             title={successTitle}
@@ -139,6 +140,7 @@ export const TransactionModal = ({
             endorsementInfo={endorsementInfo}
           />
         )
+      }
 
       return (
         <SuccessModalContent

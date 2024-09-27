@@ -19,11 +19,7 @@ export const ConfirmationEndorsementModalContent = ({
   const EndorsementDetails = () => (
     <HStack align="center">
       <Text fontSize="small">
-        {t(
-          endorsementInfo?.isEndorsing && !endorsementInfo?.isUnendorsing
-            ? "You are endorsing"
-            : "Removing your endorsement from",
-        )}{" "}
+        {t(endorsementInfo?.isEndorsing ? "You are endorsing" : "Removing your endorsement from")}{" "}
         <Text as="strong" display="inline">
           {endorsementInfo?.endorsedAppName}
         </Text>
