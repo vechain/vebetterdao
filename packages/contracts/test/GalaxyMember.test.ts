@@ -675,7 +675,7 @@ describe("Galaxy Member - @shard2", () => {
     })
 
     it("User can free mint if he participated in B3TR Governance", async () => {
-      const { galaxyMember, otherAccount, b3tr, otherAccounts, governor, B3trContract } =
+      const { galaxyMember, otherAccount, b3tr, otherAccounts, governor, B3trContract, veBetterPassport } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -690,6 +690,9 @@ describe("Galaxy Member - @shard2", () => {
 
       // we do it here but will use in the next test
       await getVot3Tokens(voter, "30000")
+
+      await veBetterPassport.whitelist(voter.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
@@ -709,7 +712,7 @@ describe("Galaxy Member - @shard2", () => {
     })
 
     it("User can free mint if he participated both in B3TR Governance and in x-allocation voting", async () => {
-      const { galaxyMember, otherAccount, b3tr, otherAccounts, governor, B3trContract } =
+      const { galaxyMember, otherAccount, b3tr, otherAccounts, governor, B3trContract, veBetterPassport } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -718,6 +721,9 @@ describe("Galaxy Member - @shard2", () => {
       await bootstrapAndStartEmissions()
 
       const voter = otherAccounts[0]
+
+      await veBetterPassport.whitelist(voter.address)
+      await veBetterPassport.toggleWhitelistCheck()
 
       // Should not be able to free mint
       await catchRevert(galaxyMember.connect(voter).freeMint())
