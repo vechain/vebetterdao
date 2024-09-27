@@ -1,14 +1,16 @@
 import { useB3trBalance, useVot3Balance } from "@/api"
 import { ConvertModal } from "@/components/Convert/ConvertModal"
 import { Box, Button, Heading, HStack, Image, Skeleton, Stack, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import { UilExchangeAlt } from "@iconscout/react-unicons"
+import { UilArrowUpRight, UilExchangeAlt } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { useRouter } from "next/navigation"
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(4)
 
-export const TokensBalance = () => {
+export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: boolean }) => {
   const { t } = useTranslation()
 
   const { account } = useWallet()
@@ -21,6 +23,11 @@ export const TokensBalance = () => {
   const isLoading = isB3trBalanceLoading || isVot3BalanceLoading
 
   const isSwapDisabled = isLoading || hasNoBalance
+
+  const router = useRouter()
+  const goToBalance = useCallback(() => {
+    router.push("/profile")
+  }, [router])
 
   return (
     <VStack
@@ -36,6 +43,15 @@ export const TokensBalance = () => {
       <Box position="absolute" top={"-140%"} left={"-30%"} w={"150%"} h="auto" zIndex="2">
         <Image src={"/images/cloud-background.png"} alt="cloud" objectFit={"contain"} />
       </Box>
+      <HStack color="white" zIndex={2} justifyContent={"space-between"}>
+        <Heading fontSize="xl">{t("Your token balance")}</Heading>
+        {showGoToBalance && (
+          <HStack _hover={{ cursor: "pointer", textDecoration: "underline" }} gap={1} onClick={goToBalance}>
+            <Text fontWeight={500}>{t("Go to balance")}</Text>
+            <UilArrowUpRight size={"16px"} />
+          </HStack>
+        )}
+      </HStack>
       <Stack gap="24px" direction={"row"} zIndex={2}>
         <VStack
           align={"stretch"}
