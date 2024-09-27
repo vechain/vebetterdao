@@ -1,11 +1,19 @@
 import { useState } from "react"
-import { DoActionBanner } from "../DoActionBanner"
+import { DoActionBanner } from "./components/DoActionBanner"
 import { motion, AnimatePresence } from "framer-motion"
-import { Text, HStack, Flex, Icon } from "@chakra-ui/react"
+import { Text, HStack, Flex, Icon, Box } from "@chakra-ui/react"
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6"
+import { ClaimB3trBanner } from "./components/ClaimB3trBanner"
+import { useCurrentRoundReward } from "@/api"
 
 export const ActionBanner = () => {
   const [isVisible, setIsVisible] = useState(true)
+
+  const { rewards, isLoading: isRoundRewardLoading } = useCurrentRoundReward()
+  const showClaimB3trBanner = !isRoundRewardLoading && rewards > 0
+  const showDoActionBanner = true
+
+  if (!showClaimB3trBanner && !showDoActionBanner) return null
 
   return (
     <>
@@ -19,7 +27,10 @@ export const ActionBanner = () => {
             exit={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             transition={{ duration: 0.3 }}>
-            <DoActionBanner />
+            <Box overflowX={"auto"}>
+              {showClaimB3trBanner && <ClaimB3trBanner />}
+              {showDoActionBanner && <DoActionBanner />}
+            </Box>
           </motion.div>
         )}
       </AnimatePresence>

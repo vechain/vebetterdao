@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@repo/contracts"
 import { ethers } from "ethers"
 import { RoundReward } from "../utils"
+import { useCurrentAllocationsRoundId } from "../../xAllocations"
 
 // Get the voter rewards contract address from the configuration
 const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
@@ -54,4 +55,19 @@ export const useRoundReward = (address: string, roundId: string) => {
     queryFn: async () => await getRoundReward(thor, address, roundId),
     enabled: !!thor && !!address && !!roundId,
   })
+}
+
+/**
+ * useCurrentRoundReward is a custom hook that fetches the reward for the current round and voter.
+ *
+ * @returns {object} An object containing the status and data of the query. Refer to the react-query documentation for more details.
+ */
+export const useCurrentRoundReward = () => {
+  const { account } = useWallet()
+  const { data: roundId } = useCurrentAllocationsRoundId()
+  const result = useRoundReward(account ?? "", roundId ?? "")
+  return {
+    ...result,
+    rewards: Number(result.data?.rewards ?? 0),
+  }
 }
