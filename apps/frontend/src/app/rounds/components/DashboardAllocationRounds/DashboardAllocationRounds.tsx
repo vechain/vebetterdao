@@ -1,35 +1,26 @@
-import { ProposalState, useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
-import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
 import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 import { useBreakpoints } from "@/hooks"
-import { ProposalFilter } from "@/store"
 import { Button, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
+import { NoActiveProposalCard } from "../NoActiveProposalCard"
+import { useRoundProposals } from "../../hooks/useRoundProposals"
 
 export const DashboardAllocationRounds = () => {
   const { t } = useTranslation()
+  const router = useRouter()
   const { isDesktop } = useBreakpoints()
 
-  const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
 
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(selectedRoundId)
-
-  const currentRoundIdProposals = useFilteredProposals([ProposalFilter.InThisRound, ProposalFilter.LookingForSupport])
-
-  const otherProposals = useMemo(() => {
-    if (selectedRoundId === currentRoundId) return []
-    return currentRoundIdProposals.allProposals.filter(
-      proposal => proposal.roundIdVoteStart === selectedRoundId && proposal.state !== ProposalState.Canceled,
-    )
-  }, [currentRoundIdProposals, selectedRoundId, currentRoundId])
 
   useEffect(() => {
     if (currentRoundId && !selectedRoundId) {
@@ -37,19 +28,11 @@ export const DashboardAllocationRounds = () => {
     }
   }, [currentRoundId, selectedRoundId])
 
-  const selectedRound = useMemo(() => {
-    if (!allocationRoundsEvents || !selectedRoundId) return
-    return allocationRoundsEvents.created.find(round => round.roundId === selectedRoundId)
-  }, [allocationRoundsEvents, selectedRoundId])
-
-  const isLastRound = selectedRoundId === allocationRoundsEvents?.created.length.toString()
-  const isFirstRound = selectedRoundId === "1"
-
   const onRoundChange = (roundId: string) => () => {
     setSelectedRoundId(roundId)
   }
 
-  const router = useRouter()
+  const { allocationRound, proposalsToRender } = useRoundProposals(selectedRoundId ?? "1")
 
   return (
     <ResponsiveCard>
@@ -60,7 +43,7 @@ export const DashboardAllocationRounds = () => {
               variant="link"
               colorScheme="primary"
               leftIcon={<FaAngleLeft />}
-              isDisabled={isFirstRound}
+              isDisabled={allocationRound.isFirstRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
               {t("Previous round")}
             </Button>
@@ -71,7 +54,7 @@ export const DashboardAllocationRounds = () => {
               variant="link"
               colorScheme="primary"
               icon={<Icon as={FaAngleLeft} boxSize={5} />}
-              isDisabled={isFirstRound}
+              isDisabled={allocationRound.isFirstRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
             />
           )}
@@ -102,7 +85,7 @@ export const DashboardAllocationRounds = () => {
               variant="link"
               colorScheme="primary"
               rightIcon={<FaAngleRight />}
-              isDisabled={isLastRound}
+              isDisabled={allocationRound.isLastRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
               {t("Next round")}
             </Button>
@@ -113,26 +96,27 @@ export const DashboardAllocationRounds = () => {
               variant="link"
               colorScheme="primary"
               icon={<Icon as={FaAngleRight} boxSize={5} />}
-              isDisabled={isLastRound}
+              isDisabled={allocationRound.isLastRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
             />
           )}
         </HStack>
-        {selectedRound && <AllocationRoundCard round={selectedRound} />}
-        {!!(currentRoundIdProposals.filteredProposals.length || otherProposals.length) && (
-          <VStack spacing={4} w="full">
-            <Heading fontSize="24px" fontWeight={400}>
-              {t("Proposals in this round")}
-            </Heading>
-            {selectedRound?.roundId === currentRoundId &&
-              currentRoundIdProposals.filteredProposals.map(proposal => (
+        {currentRoundId && <AllocationRoundCard roundId={currentRoundId} />}
+        <VStack spacing={4} w="full">
+          <Heading fontSize="24px" fontWeight={400}>
+            {t("Proposals in this round")}
+          </Heading>
+
+          {!!proposalsToRender.length ? (
+            <VStack spacing={4} w="full">
+              {proposalsToRender.map(proposal => (
                 <ProposalCompactCard key={proposal.proposalId} proposal={proposal} />
               ))}
-            {otherProposals.map(proposal => (
-              <ProposalCompactCard key={proposal.proposalId} proposal={proposal} />
-            ))}
-          </VStack>
-        )}
+            </VStack>
+          ) : (
+            <NoActiveProposalCard />
+          )}
+        </VStack>
         <Button onClick={() => router.push("/proposals")} variant="link" colorScheme="primary">
           {t("View all proposals")}
         </Button>

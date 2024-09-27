@@ -69,7 +69,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
 
   return (
     <Card
-      variant={["baseWithBorder", "baseWithBorder", "filled"]}
+      variant={["filledSmall", "filledSmall", "filled"]}
       onClick={goToProposal}
       _hover={{ bg: "#F8F8F8" }}
       cursor={"pointer"}
@@ -85,17 +85,19 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
                 px: 2,
               }}
             />
-            <SkeletonText
-              isLoaded={proposalMetadata.data !== undefined}
-              noOfLines={3}
-              flex={2.5}
-              mr={{ base: 0, md: 10 }}
-              alignSelf={"flex-start"}>
-              <Text fontSize={"14px"} fontWeight={600}>
-                {proposalMetadata.data?.title}
-              </Text>
-            </SkeletonText>
-            {!!account && hasVotedText}
+            <VStack w="full" spacing={1} align={"flex-start"}>
+              <SkeletonText
+                isLoaded={proposalMetadata.data !== undefined}
+                noOfLines={3}
+                flex={2.5}
+                mr={{ base: 0, md: 10 }}
+                alignSelf={"flex-start"}>
+                <Text fontSize={"14px"} fontWeight={600}>
+                  {proposalMetadata.data?.title}
+                </Text>
+              </SkeletonText>
+              {!!account && hasVotedText}
+            </VStack>
           </VStack>
           <IconButton
             aria-label="Go to proposal"
