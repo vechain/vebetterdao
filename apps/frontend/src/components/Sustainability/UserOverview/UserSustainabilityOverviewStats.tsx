@@ -1,7 +1,7 @@
 import { useSustainabilityUserOverview } from "@/api"
 import { B3TRIcon } from "@/components/Icons"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
-import { Heading, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Heading, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -34,34 +34,41 @@ export const UserSustainabilityOverviewStats = () => {
   return (
     <HStack gap={8} justify="space-between">
       <VStack align="flex-start" gap={1}>
-        <LeafIcon color="#6DCB09" size="1rem" />
-        <Skeleton isLoaded={!isLoading}>
-          <Heading size="md" fontWeight="700" color="#004CFC">
-            {parsedData.totalActions}
-          </Heading>
-          <Text fontSize={["xs", "sm"]} fontWeight={400} color="#6A6A6A">
-            {t("total actions")}
-          </Text>
-        </Skeleton>
+        <HStack>
+          <Icon as={LeafIcon} color="#6DCB09" boxSize={4} />
+          <Skeleton isLoaded={!isLoading}>
+            <Heading size="md" fontWeight="700" color="#004CFC">
+              {parsedData.totalActions}
+            </Heading>
+          </Skeleton>
+        </HStack>
+
+        <Text fontSize={["xs", "sm"]} fontWeight={400} color="#6A6A6A">
+          {t("total actions")}
+        </Text>
       </VStack>
       <VStack align="flex-start" gap={1}>
-        <B3TRIcon w="4" h="4" />
-        <Skeleton isLoaded={!isLoading}>
-          <Heading size="md" fontWeight="700" color="#004CFC">
-            {parsedData.totalRewards}
-          </Heading>
-          <Text fontSize={["xs", "sm"]} fontWeight={400} color="#6A6A6A">
-            {t("total b3tr earn")}
-          </Text>
-        </Skeleton>
+        <HStack>
+          <B3TRIcon boxSize={4} />
+          <Skeleton isLoaded={!isLoading}>
+            <Heading size="md" fontWeight="700" color="#004CFC">
+              {parsedData.totalRewards}
+            </Heading>
+          </Skeleton>
+        </HStack>
+        <Text fontSize={["xs", "sm"]} fontWeight={400} color="#6A6A6A">
+          {t("total b3tr earn")}
+        </Text>
       </VStack>
       <VStack align="flex-start" gap={1}>
-        <IoGridOutline color="#6DCB09" size="1rem" />
-        <Skeleton isLoaded={!isLoading}>
-          <Heading size="md" fontWeight="700" color="#004CFC">
-            {parsedData.apps.size}
-          </Heading>
-        </Skeleton>
+        <HStack>
+          <Icon as={IoGridOutline} color="#6DCB09" boxSize={4} />
+          <Skeleton isLoaded={!isLoading}>
+            <Heading size="md" fontWeight="700" color="#004CFC">
+              {parsedData.apps.size}
+            </Heading>
+          </Skeleton>
+        </HStack>
         <Text fontSize={["xs", "sm"]} fontWeight={400} color="#6A6A6A">
           {t("used apps")}
         </Text>

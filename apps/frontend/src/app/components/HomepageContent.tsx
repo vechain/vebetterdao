@@ -18,6 +18,7 @@ export const HomePageContent = () => {
         templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
         gap={"32px"}
         w="full"
+        alignItems={"flex-start"}
         overflowY={"auto"}
         data-testid="form-proposal-layout">
         <GridItem colSpan={[1, 1, 3]}>
@@ -25,11 +26,11 @@ export const HomePageContent = () => {
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
           <VStack flex={4.5} justifyContent="stretch" alignItems={"stretch"} spacing={"32px"} data-testid="homepage">
+            <LowOnVthoCard />
+            <CastYourVoteCard />
             <Show above="md">
               <TokensBalance showGoToBalance />
             </Show>
-            <LowOnVthoCard />
-            <CastYourVoteCard />
             <SupplyBreakdownCard />
             <Show above="md">
               <DashboardAllocationRounds />

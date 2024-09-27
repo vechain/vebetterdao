@@ -40,7 +40,7 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
       padding="4"
       position={"relative"}
       overflow={"hidden"}>
-      <Box position="absolute" top={"-140%"} left={"-30%"} w={"150%"} h="auto" zIndex="2">
+      <Box position="absolute" top={"-140%"} left={"-30%"} w={"150%"} h="auto" zIndex={1}>
         <Image src={"/images/cloud-background.png"} alt="cloud" objectFit={"contain"} />
       </Box>
       <HStack color="white" zIndex={2} justifyContent={"space-between"}>
@@ -52,7 +52,7 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
           </HStack>
         )}
       </HStack>
-      <Stack gap="24px" direction={"row"} zIndex={2}>
+      <Stack gap="24px" direction={"row"} zIndex={1}>
         <VStack
           align={"stretch"}
           flex="1"
@@ -99,7 +99,7 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
         rounded={"full"}
         fontWeight={500}
         px="24px"
-        zIndex={2}>
+        zIndex={1}>
         {t("Swap tokens")}
       </Button>
       <ConvertModal isOpen={isOpen} onClose={onClose} />
