@@ -4,8 +4,8 @@ import { DashboardSideBar } from "./DashboardSideBar"
 import { DashboardXApps } from "./DashboardXApps"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 import { LowOnVthoCard, CastYourVoteCard } from "./Banners"
-import { YourBetterActionsCard } from "./YourBetterActionsCard"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
+import { TokensBalance } from "./TokensBalance"
 
 export const HomePageContent = () => {
   return (
@@ -18,14 +18,15 @@ export const HomePageContent = () => {
         templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
         gap={"32px"}
         w="full"
+        alignItems={"flex-start"}
         overflowY={"auto"}
         data-testid="form-proposal-layout">
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
           <VStack flex={4.5} justifyContent="stretch" alignItems={"stretch"} spacing={"32px"} data-testid="homepage">
             <LowOnVthoCard />
             <CastYourVoteCard />
+            <TokensBalance />
             <SupplyBreakdownCard />
-            <YourBetterActionsCard />
             <Show above="md">
               <DashboardAllocationRounds />
             </Show>
