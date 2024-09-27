@@ -14,12 +14,13 @@ import {
   waitForNextCycle,
   waitForProposalToBeActive,
   delegateWithSignature,
+  moveToCycle,
 } from "./helpers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
-describe.only("VeBetterPassport - @shard3", function () {
+describe("VeBetterPassport - @shard3", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, nodeManagement, galaxyMember } =
@@ -678,7 +679,7 @@ describe.only("VeBetterPassport - @shard3", function () {
     })
   })
 
-  describe.only("Passport Entities", function () {
+  describe("Passport Entities", function () {
     it("Should be able to register an entity by function calls", async function () {
       const {
         veBetterPassport,
@@ -859,6 +860,54 @@ describe.only("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.isPassport(passport.address)).to.be.true
     })
 
+    it("Only passport or entity should be able to unlink an entity from a passport", async function () {
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const randomWallet = otherAccounts[0]
+
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.false
+      // Check if passport is linked to an entity
+      expect(await veBetterPassport.isPassport(passport.address)).to.be.true
+
+      // Approve the entity
+      await expect(veBetterPassport.connect(entity).linkEntityToPassport(passport.address))
+        .to.emit(veBetterPassport, "LinkPending")
+        .withArgs(entity.address, passport.address)
+
+      await expect(veBetterPassport.connect(randomWallet).removePendingEntityLinkFromPassport(entity.address)).to.be
+        .reverted
+
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.false
+      // Expect pending link
+      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(1)
+
+      // Approve the entity
+      await expect(veBetterPassport.connect(passport).acceptEntityLink(entity.address))
+        .to.emit(veBetterPassport, "LinkCreated")
+        .withArgs(entity.address, passport.address)
+
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.true
+      // Check if passport is linked to an entity
+      expect(await veBetterPassport.isPassport(passport.address)).to.equal(true)
+      // Expect no pending link
+      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(0)
+
+      // Unlink the entity
+      await expect(
+        veBetterPassport.connect(randomWallet).removeEntityLink(entity.address),
+      ).to.be.revertedWithCustomError(veBetterPassport, "UnauthorizedUser")
+    })
+
     it("Should be able to unlink multiple entities from a passport", async function () {
       const {
         veBetterPassport,
@@ -1000,6 +1049,840 @@ describe.only("VeBetterPassport - @shard3", function () {
       await expect(
         veBetterPassport.connect(entity).linkEntityToPassport(passport2.address),
       ).to.be.revertedWithCustomError(veBetterPassport, "AlreadyLinked")
+    })
+
+    it("Should not be able to assign an entity to a passport if the entity is already linked to another passport", async function () {
+      const { veBetterPassport, owner: passport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      // Try to link the entity to another passport
+      await expect(
+        veBetterPassport.connect(passport).linkEntityToPassport(passport.address),
+      ).to.be.revertedWithCustomError(veBetterPassport, "CannotLinkToSelf")
+    })
+
+    it("Should not be able to assign an entity to a passport if the signature is invalid", async function () {
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.false
+      // Check if passport is linked to an entity
+      expect(await veBetterPassport.isPassport(passport.address)).to.be.true
+      // No entity is linked to the passport
+      expect(await veBetterPassport.getEntitiesLinkedToPassport(passport.address)).to.be.empty
+
+      // Approve the entity
+      // await veBetterPassport.linkEntityToPassportWithSignature(other)
+      // Set up EIP-712 domain
+      const domain = {
+        name: "VeBetterPassport",
+        version: "1",
+        chainId: 1337,
+        verifyingContract: await veBetterPassport.getAddress(),
+      }
+
+      // Make the signature invalid
+      let types = {
+        INVALID: [
+          { name: "entity", type: "address" },
+          { name: "passport", type: "address" },
+          { name: "deadline", type: "uint256" },
+        ],
+      }
+
+      // Define a deadline timestamp
+      const currentBlock = await ethers.provider.getBlockNumber()
+      const block = await ethers.provider.getBlock(currentBlock)
+
+      if (!block) {
+        throw new Error("Block not found")
+      }
+
+      const deadline = block.timestamp + 3600 // 1 hour from
+      // Prepare the struct to sign
+      const linkData = {
+        entity: entity.address,
+        passport: passport.address,
+        deadline: deadline,
+      }
+
+      // Create the EIP-712 signature for the delegator
+      const signature = await entity.signTypedData(domain, types, linkData)
+
+      // Perform the delegation using the signature
+      await expect(
+        veBetterPassport.connect(passport).linkEntityToPassportWithSignature(entity.address, deadline, signature),
+      ).to.be.revertedWithCustomError(veBetterPassport, "InvalidSignature")
+    })
+
+    it("Should not be able to assign an entity to a passport if the signature is expired", async function () {
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.false
+      // Check if passport is linked to an entity
+      expect(await veBetterPassport.isPassport(passport.address)).to.be.true
+      // No entity is linked to the passport
+      expect(await veBetterPassport.getEntitiesLinkedToPassport(passport.address)).to.be.empty
+
+      // Approve the entity
+      // await veBetterPassport.linkEntityToPassportWithSignature(other)
+      // Set up EIP-712 domain
+      const domain = {
+        name: "VeBetterPassport",
+        version: "1",
+        chainId: 1337,
+        verifyingContract: await veBetterPassport.getAddress(),
+      }
+
+      let types = {
+        LinkEntity: [
+          { name: "entity", type: "address" },
+          { name: "passport", type: "address" },
+          { name: "deadline", type: "uint256" },
+        ],
+      }
+
+      // Define a deadline timestamp
+      const currentBlock = await ethers.provider.getBlockNumber()
+      const block = await ethers.provider.getBlock(currentBlock)
+
+      if (!block) {
+        throw new Error("Block not found")
+      }
+
+      const deadline = block.timestamp - 1 // Ensure the deadline is in the past
+      // Prepare the struct to sign
+      const linkData = {
+        entity: entity.address,
+        passport: passport.address,
+        deadline: deadline,
+      }
+
+      // Create the EIP-712 signature for the delegator
+      const signature = await entity.signTypedData(domain, types, linkData)
+
+      // Perform the delegation using the expired signature
+      await expect(
+        veBetterPassport.connect(passport).linkEntityToPassportWithSignature(entity.address, deadline, signature),
+      ).to.be.revertedWithCustomError(veBetterPassport, "SignatureExpired")
+    })
+
+    it("Should not be able to assign an entity to a passport if it is linked to another passport", async function () {
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const passport2 = otherAccounts[0]
+
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.false
+      // Check if passport is linked to an entity
+      expect(await veBetterPassport.isPassport(passport.address)).to.be.true
+      // No entity is linked to the passport
+      expect(await veBetterPassport.getEntitiesLinkedToPassport(passport.address)).to.be.empty
+
+      // Link the entity to the passport
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 1000)
+
+      // Entity is linked to the passport
+      expect(await veBetterPassport.getEntitiesLinkedToPassport(passport.address)).to.not.be.empty
+      // Check entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.true
+
+      await expect(
+        linkEntityToPassportWithSignature(veBetterPassport, passport2, entity, 1000),
+      ).to.be.revertedWithCustomError(veBetterPassport, "AlreadyLinked")
+    })
+
+    it("Should not be able to assign an entity to a passport if passport has the max number of entities already assigned", async function () {
+      const config = createLocalConfig()
+
+      config.VEBETTER_PASSPORT_MAX_ENTITIES = 2
+
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const entity1 = otherAccounts[0]
+      const entity2 = otherAccounts[1]
+      const entity3 = otherAccounts[2]
+
+      // Ensure max number of entities per passport is 2
+      expect(await veBetterPassport.maxEntitiesPerPassport()).to.be.equal(2)
+
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity1.address)).to.be.false
+      // Check if passport is linked to an entity
+      expect(await veBetterPassport.isPassport(passport.address)).to.be.true
+      // No entity is linked to the passport
+      expect(await veBetterPassport.getEntitiesLinkedToPassport(passport.address)).to.be.empty
+
+      // Link the entities to the passport
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity1, 1000)
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity2, 1000)
+
+      // Entity is linked to the passport
+      expect(await veBetterPassport.getEntitiesLinkedToPassport(passport.address)).to.lengthOf(2)
+
+      await expect(
+        linkEntityToPassportWithSignature(veBetterPassport, passport, entity3, 1000),
+      ).to.be.revertedWithCustomError(veBetterPassport, "MaxEntitiesPerPassportReached")
+    })
+
+    it("Should assign an enities score correctly", async function () {
+      const config = createLocalConfig()
+
+      config.VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE = 2
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts, emissions } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions()
+
+      const passport = otherAccounts[0]
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner.address)).to.be
+        .true
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
+
+      // Sets app1 security to APP_SECURITY.LOW
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+
+      // Sets app2 security to APP_SECURITY.MEDIUM
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 2)
+
+      // Sets app3 security to APP_SECURITY.HIGH
+      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 3)
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+
+      // Move through 5 rounds
+      await moveToCycle(6)
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 2)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app2Id, 3)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app2Id, 4)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app3Id, 5)
+
+      expect(await veBetterPassport.userRoundScore(otherAccount, 1)).to.equal(100)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 2)).to.equal(100)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 3)).to.equal(200)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 4)).to.equal(200)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 5)).to.equal(400)
+
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, otherAccount, 1000)
+
+      /*
+
+        The entitys score should remain the same for the same when first assigned
+
+        Round 1 score: 100
+        Round 2 score: 100
+        Round 3 score: 200
+        Round 4 score: 200
+        Round 5 score: 400
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        round 1 = 100 + (0 * 0.8) = 100
+        round 2 = 100 + (100 * 0.8) = 180
+        round 3 = 200 + (180 * 0.8) = 344
+        round 4 = 200 + (344 * 0.8) = 475,2 => 475 
+        round 5 = 400 + (475 * 0.8) = 780
+      */
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 5)).to.equal(780)
+
+      /*
+
+        The passports score should take into account the entitys score over the past VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE (3) rounds
+        
+        Round 3 score: 200
+        Round 4 score: 200
+        Round 5 score: 400
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        round 3 = 200 * 0.8^2 = 128
+        round 4 = 200 * 0.8 = 160
+        round 5 = 400
+      */
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 5)).to.equal(688)
+
+      // The entitys score for APP1 should not be the same as the passport score (interactions with app1 happended in round 1 and 2)
+      expect(await veBetterPassport.userAppTotalScore(otherAccount, app1Id)).to.not.equal(
+        await veBetterPassport.userAppTotalScore(passport, app1Id),
+      )
+
+      // The entitys score for APP2 should be the same as the passport score (interactions with app2 happended in round 3 and 4)
+      expect(await veBetterPassport.userAppTotalScore(otherAccount, app2Id)).to.equal(
+        await veBetterPassport.userAppTotalScore(passport, app2Id),
+      )
+
+      // The entitys score for APP3 should be the same as the passport score (interactions with app3 happended in round 5)
+      expect(await veBetterPassport.userAppTotalScore(otherAccount, app3Id)).to.equal(
+        await veBetterPassport.userAppTotalScore(passport, app3Id),
+      )
+
+      // If we move to the next round and the entity earns more points, the passport score should increase and not the entity score
+      await moveToCycle(7)
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 6)
+
+      expect(await veBetterPassport.userRoundScore(otherAccount, 6)).to.equal(0)
+      expect(await veBetterPassport.userRoundScore(passport, 6)).to.equal(100)
+    })
+
+    it("Should remove an enities score correctly", async function () {
+      const config = createLocalConfig()
+
+      config.VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE = 2
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions()
+
+      const passport = otherAccounts[0]
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner.address)).to.be
+        .true
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
+
+      // Sets app1 security to APP_SECURITY.LOW
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+
+      // Sets app2 security to APP_SECURITY.MEDIUM
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 2)
+
+      // Sets app3 security to APP_SECURITY.HIGH
+      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 3)
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+
+      // Move through 5 rounds
+      await moveToCycle(6)
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 2)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app2Id, 3)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app2Id, 4)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app3Id, 5)
+
+      expect(await veBetterPassport.userRoundScore(otherAccount, 1)).to.equal(100)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 2)).to.equal(100)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 3)).to.equal(200)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 4)).to.equal(200)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 5)).to.equal(400)
+
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, otherAccount, 1000)
+
+      /*
+
+        The entitys score should remain the same for the same when first assigned
+
+        Round 1 score: 100
+        Round 2 score: 100
+        Round 3 score: 200
+        Round 4 score: 200
+        Round 5 score: 400
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        round 1 = 100 + (0 * 0.8) = 100
+        round 2 = 100 + (100 * 0.8) = 180
+        round 3 = 200 + (180 * 0.8) = 344
+        round 4 = 200 + (344 * 0.8) = 475,2 => 475 
+        round 5 = 400 + (475 * 0.8) = 780
+      */
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 5)).to.equal(780)
+      expect(await veBetterPassport.userTotalScore(otherAccount)).to.equal(1000)
+
+      /*
+
+        The passports score should take into account the entitys score over the past VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE (3) rounds
+        
+        Round 3 score: 200
+        Round 4 score: 200
+        Round 5 score: 400
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        round 3 = 200 * 0.8^2 = 128
+        round 4 = 200 * 0.8 = 160
+        round 5 = 400
+      */
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 5)).to.equal(688)
+      expect(await veBetterPassport.userTotalScore(passport)).to.equal(800) // Sum of the scores of the entities linked to the passport for last 3 rounds
+
+      // The entitys score for APP1 should not be the same as the passport score (interactions with app1 happended in round 1 and 2)
+      expect(await veBetterPassport.userAppTotalScore(otherAccount, app1Id)).to.not.equal(
+        await veBetterPassport.userAppTotalScore(passport, app1Id),
+      )
+
+      // The entitys score for APP2 should be the same as the passport score (interactions with app2 happended in round 3 and 4)
+      expect(await veBetterPassport.userAppTotalScore(otherAccount, app2Id)).to.equal(
+        await veBetterPassport.userAppTotalScore(passport, app2Id),
+      )
+
+      // The entitys score for APP3 should be the same as the passport score (interactions with app3 happended in round 5)
+      expect(await veBetterPassport.userAppTotalScore(otherAccount, app3Id)).to.equal(
+        await veBetterPassport.userAppTotalScore(passport, app3Id),
+      )
+
+      // If we move to the next round and the entity earns more points, the passport score should increase and not the entity score
+      await moveToCycle(7)
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app3Id, 6)
+
+      expect(await veBetterPassport.userRoundScore(otherAccount, 6)).to.equal(0)
+      expect(await veBetterPassport.userRoundScore(passport, 6)).to.equal(400)
+
+      /*
+
+        The passports score should take into account the entitys score over the past VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE (3) rounds
+        
+        Round 4 score: 200
+        Round 5 score: 400
+        Round 6 score: 400
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        round 4 = 200 * 0.8 * 0.8 = 128
+        round 5 = 400 * 0.8 = 320
+        round 6 = 400
+      */
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 6)).to.equal(950)
+
+      // Remove the entity from the passport
+      await veBetterPassport.connect(passport).removeEntityLink(otherAccount)
+
+      /*
+
+        The entitys score should remain the same for the same when first assigned (did not earn any points in round 6)
+
+        Round 1 score: 100
+        Round 2 score: 100
+        Round 3 score: 200
+        Round 4 score: 200
+        Round 5 score: 400
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        round 1 = 100 * 0.5^5 = 3.125 => 32.76 => 32 -> Not included as this is more than 5 rounds ago (roundsForCumulativeScore)
+        round 2 = 100 * 0.8^4 = 40.96 => 40
+        round 3 = 200 * 0.8^3 = 102.4 => 102
+        round 4 = 200 * 0.8^2 = 128
+        round 5 = 400 * 0.8 = 320
+        round 6 = 0
+      */
+
+      expect(await veBetterPassport.userTotalScore(otherAccount)).to.equal(1000)
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 6)).to.equal(591) // Entities cumulative score should be decyaed by 0.8
+
+      /*
+
+        The passports score only have the score of the entity for round 6 which is 400 that went straight to the passport
+        
+        Round 4 score: 0
+        Round 5 score: 0
+        Round 6 score: 400
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        ....
+        round 4 = 0
+        round 5 = 0
+        round 6 = 400
+      */
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 6)).to.equal(400)
+      expect(await veBetterPassport.userTotalScore(passport)).to.equal(400) // Score earned by the entity in the last round
+    })
+
+    it("Should assign an enities signals correctly", async function () {
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const appAdmin = otherAccounts[0]
+      const passport = otherAccounts[1]
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, appAdmin, otherAccounts[0].address, "metadataURI")
+
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+
+      await expect(veBetterPassport.connect(appAdmin).assignSignalerToAppByAppAdmin(appId, otherAccount.address))
+        .to.emit(veBetterPassport, "SignalerAssignedToApp")
+        .withArgs(otherAccount.address, appId)
+
+      await veBetterPassport.connect(owner).setAppSecurity(appId, 1)
+
+      // Register action for entity so that it is assigned a score
+      await veBetterPassport.connect(owner).registerActionForRound(owner, appId, 2)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), otherAccount.address)).to.be.true
+
+      await expect(veBetterPassport.connect(otherAccount).signalUser(owner.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(owner.address, otherAccount.address, appId, "")
+
+      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1)
+      expect(await veBetterPassport.appSignalsCounter(appId, owner.address)).to.equal(1)
+
+      // Passport should inherit the signals from the entity
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, owner, 1000)
+
+      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1)
+      expect(await veBetterPassport.appSignalsCounter(appId, owner.address)).to.equal(1)
+
+      // Passport should inherit the signals from the entity
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(1)
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(1)
+
+      await expect(veBetterPassport.connect(otherAccount).signalUser(owner.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(owner.address, otherAccount.address, appId, "")
+
+      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(2)
+      expect(await veBetterPassport.appSignalsCounter(appId, owner.address)).to.equal(2)
+
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(2)
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(2)
+    })
+
+    it("Should remove enity signals correctly when entity detaches from passport", async function () {
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const appAdmin = otherAccounts[0]
+      const passport = otherAccounts[1]
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[0].address, appAdmin, otherAccounts[0].address, "metadataURI")
+
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+
+      await expect(veBetterPassport.connect(appAdmin).assignSignalerToAppByAppAdmin(appId, otherAccount.address))
+        .to.emit(veBetterPassport, "SignalerAssignedToApp")
+        .withArgs(otherAccount.address, appId)
+
+      await veBetterPassport.connect(owner).setAppSecurity(appId, 1)
+
+      // Register action for entity so that it is assigned a score
+      await veBetterPassport.connect(owner).registerActionForRound(owner, appId, 2)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), otherAccount.address)).to.be.true
+
+      await expect(veBetterPassport.connect(otherAccount).signalUser(owner.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(owner.address, otherAccount.address, appId, "")
+
+      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1)
+      expect(await veBetterPassport.appSignalsCounter(appId, owner.address)).to.equal(1)
+
+      // Passport should inherit the signals from the entity
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, owner, 1000)
+
+      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1)
+      expect(await veBetterPassport.appSignalsCounter(appId, owner.address)).to.equal(1)
+
+      // Passport should inherit the signals from the entity
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(1)
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(1)
+
+      await expect(veBetterPassport.connect(otherAccount).signalUser(owner.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(owner.address, otherAccount.address, appId, "")
+
+      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(2)
+      expect(await veBetterPassport.appSignalsCounter(appId, owner.address)).to.equal(2)
+
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(2)
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(2)
+
+      // Remove the entity from the passport
+      await veBetterPassport.connect(owner).removeEntityLink(owner)
+
+      // Entity signals should remain the same
+      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(2)
+      expect(await veBetterPassport.appSignalsCounter(appId, owner.address)).to.equal(2)
+
+      // Passport signals should be removed
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(0)
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(0)
+    })
+
+    it("Should assign an enities blacklists and whitelists correctly", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_BLACKLIST_THRESHOLD = 0
+      config.VEBETTER_WHITELIST_THRESHOLD = 0
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.false
+
+      // Blacklist the entity
+      await veBetterPassport.blacklist(entity.address)
+
+      // Check if entity is blacklisted
+      expect(await veBetterPassport.isBlacklisted(entity.address)).to.be.true
+
+      expect(await veBetterPassport.isPassportBlacklisted(passport.address)).to.be.false
+
+      // Passport should inherit the signals from the entity
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 1000)
+
+      // Passport should be blacklisted
+      expect(await veBetterPassport.isPassportBlacklisted(passport.address)).to.be.true
+
+      // Passport account is not blacklisted
+      expect(await veBetterPassport.isBlacklisted(passport.address)).to.be.false
+
+      // whitelist the entity
+      await veBetterPassport.whitelist(entity.address)
+
+      // Check if entity is whitelisted
+      expect(await veBetterPassport.isWhitelisted(entity.address)).to.be.true
+      expect(await veBetterPassport.isBlacklisted(entity.address)).to.be.false
+
+      // Passport should inherit the lisitngs from the entity
+      expect(await veBetterPassport.isPassportWhitelisted(passport.address)).to.be.true
+      expect(await veBetterPassport.isPassportBlacklisted(passport.address)).to.be.false
+    })
+
+    it("Should remove any blacklists and whitelists an entity may have when it detaches", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_BLACKLIST_THRESHOLD = 0
+      config.VEBETTER_WHITELIST_THRESHOLD = 0
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.false
+
+      // Blacklist the entity
+      await veBetterPassport.blacklist(entity.address)
+
+      // Check if entity is blacklisted
+      expect(await veBetterPassport.isBlacklisted(entity.address)).to.be.true
+
+      expect(await veBetterPassport.isPassportBlacklisted(passport.address)).to.be.false
+
+      // Passport should inherit the signals from the entity
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 1000)
+
+      // Passport should be blacklisted
+      expect(await veBetterPassport.isPassportBlacklisted(passport.address)).to.be.true
+
+      // Passport account is not blacklisted
+      expect(await veBetterPassport.isBlacklisted(passport.address)).to.be.false
+
+      // whitelist the entity
+      await veBetterPassport.whitelist(entity.address)
+
+      // Check if entity is whitelisted
+      expect(await veBetterPassport.isWhitelisted(entity.address)).to.be.true
+      expect(await veBetterPassport.isBlacklisted(entity.address)).to.be.false
+
+      // Passport should inherit the lisitngs from the entity
+      expect(await veBetterPassport.isPassportWhitelisted(passport.address)).to.be.true
+      expect(await veBetterPassport.isPassportBlacklisted(passport.address)).to.be.false
+
+      // Remove the entity from the passport
+      await veBetterPassport.connect(passport).removeEntityLink(entity)
+
+      // Entity should be whitelisted
+      expect(await veBetterPassport.isWhitelisted(entity.address)).to.be.true
+
+      // Entity should not be blacklisted
+      expect(await veBetterPassport.isBlacklisted(entity.address)).to.be.false
+
+      // Passport should not be blacklisted
+      expect(await veBetterPassport.isPassportBlacklisted(passport.address)).to.be.false
+
+      // Passport should not be whitelisted
+      expect(await veBetterPassport.isPassportWhitelisted(passport.address)).to.be.false
+    })
+
+    it("Should be able to assign multiple entites to a passport and use the combintation to meet personhood status", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD = 500
+      const { veBetterPassport, x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const enity1 = otherAccounts[0]
+      const enity2 = otherAccounts[1]
+      const passport = otherAccounts[2]
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions()
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner.address)).to.be
+        .true
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
+
+      // Sets app1 security to APP_SECURITY.LOW
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+
+      // Sets app2 security to APP_SECURITY.MEDIUM
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 2)
+
+      await veBetterPassport.connect(owner).registerActionForRound(enity1, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity1, app2Id, 1)
+
+      await veBetterPassport.connect(owner).registerActionForRound(enity2, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity2, app2Id, 1)
+
+      // Move through 1 round
+      await moveToCycle(2)
+
+      // Entity 1 should have a score of 300
+      expect(await veBetterPassport.userTotalScore(enity1)).to.equal(300)
+      expect(await veBetterPassport.userTotalScore(enity2)).to.equal(300)
+
+      // Cumulative score for entity 1 should be 300
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(enity1, 1)).to.equal(300)
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(enity2, 1)).to.equal(300)
+
+      // Score threshold should be 500
+      expect(await veBetterPassport.thresholdParticipationScore()).to.equal(500)
+
+      // Enable PoP score check
+      await veBetterPassport.connect(owner).toggleCheck(4)
+      expect(await veBetterPassport.isCheckEnabled(4)).to.be.true
+
+      // Entity 1 should not be a person
+      expect(await veBetterPassport.isPerson(enity1.address)).to.deep.equal([
+        false,
+        "User does not meet the criteria to be considered a person",
+      ])
+
+      // Entity 2 should not be a person
+      expect(await veBetterPassport.isPerson(enity2.address)).to.deep.equal([
+        false,
+        "User does not meet the criteria to be considered a person",
+      ])
+
+      // Assign entity 1 to passport
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, enity1, 1000)
+
+      // Passport should not be a person
+      expect(await veBetterPassport.isPerson(passport.address)).to.deep.equal([
+        false,
+        "User does not meet the criteria to be considered a person",
+      ])
+
+      // Assign entity 2 to passport
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, enity2, 1000)
+
+      // Passport should be a person
+      expect(await veBetterPassport.isPerson(passport.address)).to.deep.equal([
+        true,
+        "User's participation score is above the threshold",
+      ])
+
+      // Entity 1 should not be a person
+      expect(await veBetterPassport.isPerson(enity1.address)).to.deep.equal([
+        false,
+        "User has delegated their personhood",
+      ])
+
+      // Entity 2 should not be a person
+      expect(await veBetterPassport.isPerson(enity2.address)).to.deep.equal([
+        false,
+        "User has delegated their personhood",
+      ])
     })
   })
 
@@ -1574,7 +2457,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Perform the delegation using the signature
       await expect(
         veBetterPassport.connect(otherAccount).delegateWithSignature(owner.address, deadline, signature),
-      ).to.be.revertedWithCustomError(veBetterPassport, "InvaliedSignature")
+      ).to.be.revertedWithCustomError(veBetterPassport, "InvalidSignature")
     })
 
     it("If a delegator re-delegates its passport or delegatee accepts delegation of new passport it should update mappings", async function () {
@@ -1628,6 +2511,162 @@ describe.only("VeBetterPassport - @shard3", function () {
       await expect(veBetterPassport.connect(otherAccounts[0]).revokeDelegation()).to.be.reverted
       expect(await veBetterPassport.getDelegatee(owner.address)).to.equal(otherAccount.address)
       expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(owner.address)
+    })
+
+    it("Should not be able to delegate an entity of a passport to a user", async function () {
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const delegatee = otherAccounts[0]
+
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 1000)
+
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.true
+
+      // Should not be able to delegate an entity
+      await expect(delegateWithSignature(veBetterPassport, entity, delegatee, 3600)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "PassportDelegationToEntity",
+      )
+
+      // Should not be able to delegate an entity
+      await expect(veBetterPassport.connect(entity).delegatePassport(delegatee.address)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "PassportDelegationToEntity",
+      )
+
+      // detach entity
+      await veBetterPassport.connect(passport).removeEntityLink(entity)
+
+      // Should be able to delegate
+      await expect(delegateWithSignature(veBetterPassport, entity, delegatee, 3600)).to.not.be.reverted
+    })
+
+    it("Should be able to assign multiple entites to a passport and use the combintation to meet personhood status", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD = 500
+      const {
+        veBetterPassport,
+        x2EarnApps,
+        owner,
+        otherAccount: delegatee,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const enity1 = otherAccounts[0]
+      const enity2 = otherAccounts[1]
+      const passport = otherAccounts[2]
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions()
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner.address)).to.be
+        .true
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
+
+      // Sets app1 security to APP_SECURITY.LOW
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+
+      // Sets app2 security to APP_SECURITY.MEDIUM
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 2)
+
+      await veBetterPassport.connect(owner).registerActionForRound(enity1, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity1, app2Id, 1)
+
+      await veBetterPassport.connect(owner).registerActionForRound(enity2, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity2, app2Id, 1)
+
+      // Move through 1 round
+      await moveToCycle(2)
+
+      // Entity 1 should have a score of 300
+      expect(await veBetterPassport.userTotalScore(enity1)).to.equal(300)
+      expect(await veBetterPassport.userTotalScore(enity2)).to.equal(300)
+
+      // Cumulative score for entity 1 should be 300
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(enity1, 1)).to.equal(300)
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(enity2, 1)).to.equal(300)
+
+      // Score threshold should be 500
+      expect(await veBetterPassport.thresholdParticipationScore()).to.equal(500)
+
+      // Enable PoP score check
+      await veBetterPassport.connect(owner).toggleCheck(4)
+      expect(await veBetterPassport.isCheckEnabled(4)).to.be.true
+
+      // Entity 1 should not be a person
+      expect(await veBetterPassport.isPerson(enity1.address)).to.deep.equal([
+        false,
+        "User does not meet the criteria to be considered a person",
+      ])
+
+      // Entity 2 should not be a person
+      expect(await veBetterPassport.isPerson(enity2.address)).to.deep.equal([
+        false,
+        "User does not meet the criteria to be considered a person",
+      ])
+
+      // Assign entity 1 to passport
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, enity1, 1000)
+
+      // Passport should not be a person
+      expect(await veBetterPassport.isPerson(passport.address)).to.deep.equal([
+        false,
+        "User does not meet the criteria to be considered a person",
+      ])
+
+      // Assign entity 2 to passport
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, enity2, 1000)
+
+      // Passport should be a person
+      expect(await veBetterPassport.isPerson(passport.address)).to.deep.equal([
+        true,
+        "User's participation score is above the threshold",
+      ])
+
+      // Delegate is not a person
+      expect(await veBetterPassport.isPerson(delegatee.address)).to.deep.equal([
+        false,
+        "User does not meet the criteria to be considered a person",
+      ])
+
+      // Delegate passport to delegatee
+      await delegateWithSignature(veBetterPassport, passport, delegatee, 3600)
+
+      // Delegatee should be a person
+      expect(await veBetterPassport.isPerson(delegatee.address)).to.deep.equal([
+        true,
+        "User's participation score is above the threshold",
+      ])
+
+      // Passport should not be a person
+      expect(await veBetterPassport.isPerson(passport.address)).to.deep.equal([
+        false,
+        "User has delegated their personhood",
+      ])
     })
   })
 
@@ -2227,6 +3266,93 @@ describe.only("VeBetterPassport - @shard3", function () {
 
       await expect(veBetterPassport.connect(otherAccount).whitelist(owner.address)).to.be.reverted
       await expect(veBetterPassport.connect(otherAccount).blacklist(owner.address)).to.be.reverted
+    })
+
+    it("If passport is whitelisted and enities are blacklisted, should return whitelisted", async function () {
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 1000)
+
+      await veBetterPassport.whitelist(passport.address)
+      await veBetterPassport.blacklist(entity.address)
+
+      expect(await veBetterPassport.isWhitelisted(passport.address)).to.be.true
+      expect(await veBetterPassport.isBlacklisted(entity.address)).to.be.true
+
+      // Passport is whitelisted, entity is blacklisted, should return whitelisted
+      expect(await veBetterPassport.isPassportWhitelisted(passport.address)).to.be.true
+      // Passport is whitelisted, entity is blacklisted, should return whitelisted
+      expect(await veBetterPassport.isPassportWhitelisted(entity.address)).to.be.true
+    })
+
+    it("If passport is blacklisted and enities are whitelisted, should return blacklisted", async function () {
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 1000)
+
+      await veBetterPassport.blacklist(passport.address)
+      await veBetterPassport.whitelist(entity.address)
+
+      expect(await veBetterPassport.isBlacklisted(passport.address)).to.be.true
+      expect(await veBetterPassport.isWhitelisted(entity.address)).to.be.true
+
+      // Passport is whitelisted, entity is blacklisted, should return whitelisted
+      expect(await veBetterPassport.isPassportBlacklisted(passport.address)).to.be.true
+      // Passport is whitelisted, entity is blacklisted, should return whitelisted
+      expect(await veBetterPassport.isPassportBlacklisted(entity.address)).to.be.true
+    })
+
+    it("If over the threshold amount of entities are blacklisted, passport should return blacklisted", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_BLACKLIST_THRESHOLD = 60 // 60% of entities are blacklisted
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity1,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const entity2 = otherAccounts[2]
+
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity1, 1000)
+
+      // 100% of entities are blacklisted
+      await veBetterPassport.blacklist(entity1.address)
+
+      expect(await veBetterPassport.isBlacklisted(passport.address)).to.be.false
+      expect(await veBetterPassport.isBlacklisted(entity1.address)).to.be.true
+      expect(await veBetterPassport.isPassportBlacklisted(passport.address)).to.be.true
+
+      // 50% of entities are blacklisted
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity2, 1000)
+
+      expect(await veBetterPassport.isBlacklisted(passport.address)).to.be.false
+      expect(await veBetterPassport.isBlacklisted(entity1.address)).to.be.true
+      expect(await veBetterPassport.isBlacklisted(entity2.address)).to.be.false
+      expect(await veBetterPassport.isPassportBlacklisted(passport.address)).to.be.false
+
+      // Blacklist entity2
+      await veBetterPassport.blacklist(entity2.address)
+
+      expect(await veBetterPassport.isBlacklisted(passport.address)).to.be.false
+      expect(await veBetterPassport.isBlacklisted(entity1.address)).to.be.true
+      expect(await veBetterPassport.isBlacklisted(entity2.address)).to.be.true
+      expect(await veBetterPassport.isPassportBlacklisted(passport.address)).to.be.true
     })
   })
 

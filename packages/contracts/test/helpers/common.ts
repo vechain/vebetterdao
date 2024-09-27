@@ -244,7 +244,7 @@ export const createProposalAndExecuteIt = async (
   await waitForNextBlock()
 
   await veBetterPassport.whitelist(voter.address)
-  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await veBetterPassport.toggleCheck(1)
+  if ((await veBetterPassport.isCheckEnabled(1)) === false) await veBetterPassport.toggleCheck(1)
 
   // create a new proposal
   // console.log("Creating proposal");
@@ -301,7 +301,7 @@ export const createProposalWithMultipleFunctionsAndExecuteIt = async (
   const { governor, emissions, xAllocationVoting, veBetterPassport } = await getOrDeployContractInstances({})
 
   await veBetterPassport.whitelist(voter.address)
-  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await veBetterPassport.toggleCheck(1)
+  if ((await veBetterPassport.isCheckEnabled(1)) === false) await veBetterPassport.toggleCheck(1)
 
   // load votes
   // console.log("Loading votes");
@@ -440,7 +440,7 @@ export const voteOnApps = async (
 ) => {
   const { xAllocationVoting, veBetterPassport } = await getOrDeployContractInstances({})
 
-  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await veBetterPassport.toggleCheck(1)
+  if ((await veBetterPassport.isCheckEnabled(1)) === false) await veBetterPassport.toggleCheck(1)
 
   for (const voter of voters) {
     await veBetterPassport.whitelist(voter.address)
@@ -531,7 +531,7 @@ export const participateInAllocationVoting = async (user: HardhatEthersSigner, w
   await getVot3Tokens(owner, "1000")
 
   await veBetterPassport.whitelist(user.address)
-  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await veBetterPassport.toggleCheck(1)
+  if ((await veBetterPassport.isCheckEnabled(1)) === false) await veBetterPassport.toggleCheck(1)
 
   const appName = "App" + Math.random()
 
@@ -564,7 +564,7 @@ export const participateInGovernanceVoting = async (
   await getVot3Tokens(admin, "1000")
 
   await veBetterPassport.connect(admin).whitelist(user.address)
-  if ((await veBetterPassport.whitelistCheckEnabled()) === false) await governor.toggleCheck(1)
+  if ((await veBetterPassport.isCheckEnabled(1)) === false) await governor.toggleCheck(1)
 
   const tx = await createProposal(contractToCall, Contract, admin, description, functionToCall, args)
   const proposalId = await getProposalIdFromTx(tx)
