@@ -1,4 +1,11 @@
 {
+  "Vote now": "Vote now",
+  "Total to distribute": "Total to distribute",
+  "#{{round}} allocation round": "#{{round}} allocation round",
+  "Allocations voting": "Allocations voting",
+  "Each week, you can vote for your favorite apps to help distribute resources among them!": "Each week, you can vote for your favorite apps to help distribute resources among them!",
+  "Proposals shape the ecosystem. Vote on ideas and build our community together!": "Proposals shape the ecosystem. Vote on ideas and build our community together!",
+  "There are no active proposals in this round": "There are no active proposals in this round",
   "Last actions": "Last actions",
   "Your better actions": "Your better actions",
   "Proposal canceled by creator or VeBetter": "Proposal canceled by creator or VeBetter",

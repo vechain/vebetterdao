@@ -1,17 +1,29 @@
 "use client"
 
-import { Box, VStack, Text, Heading, Flex, Button, Badge, useDisclosure, HStack, Skeleton } from "@chakra-ui/react"
+import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton } from "@chakra-ui/react"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { AllocationRoundParticipatingXApps } from "@/components/AllocationRoundsList/components/AllocationRoundParticipatingXApps"
-import { useAllocationsRound, useAllocationsRoundsEvents, useCurrentAllocationsRoundId } from "@/api"
+import { useAllocationAmount, useCurrentAllocationsRoundId } from "@/api"
+import { useRoundProposals } from "../rounds/hooks/useRoundProposals"
+import { Trans, useTranslation } from "react-i18next"
+import { AllocationStateBadge, B3TRIcon, ProposalCompactCard } from "@/components"
+import { useRouter } from "next/navigation"
+import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 export const RoundInfoBottomSheet = () => {
+  const { t } = useTranslation()
+  const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
-  const { data: allocationRound, isLoading } = useAllocationsRound(currentRoundId)
+  const { allocationRound, roundLoading, proposalsToRender } = useRoundProposals(currentRoundId ?? "")
+
+  const { data: amounts, isLoading: amountsLoading } = useAllocationAmount(currentRoundId)
+
+  const totalAmount =
+    Number(amounts?.treasury ?? 0) + Number(amounts?.voteX2Earn ?? 0) + Number(amounts?.voteXAllocations ?? 0)
 
   return (
     <>
@@ -32,71 +44,124 @@ export const RoundInfoBottomSheet = () => {
           cursor="pointer"
           zIndex={3}>
           <Box>
-            <Skeleton isLoaded={!!currentRoundId}>
+            <Skeleton isLoaded={!roundLoading}>
               <Heading fontSize={"20px"} fontWeight={400}>
-                We're on <b>Round #{currentRoundId}</b>
+                <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
               </Heading>
             </Skeleton>
             <Text fontSize={"14px"} fontWeight={400}>
-              {allocationRound.voteStartTimestamp?.format("MMM D")} to{" "}
-              {allocationRound.voteEndTimestamp?.format("MMM D")}
+              {t("{{from}} to {{to}}", {
+                from: allocationRound.voteStartTimestamp?.format("MMM D"),
+                to: allocationRound.voteEndTimestamp?.format("MMM D"),
+              })}
             </Text>
           </Box>
           {currentRoundId && <AllocationRoundParticipatingXApps roundId={currentRoundId} iconSize={36} />}
         </HStack>
       )}
 
-      <BaseBottomSheet isOpen={isOpen} onClose={onClose} height="70vh">
-        <VStack spacing={4} align="stretch" mx="auto">
+      <BaseBottomSheet isOpen={isOpen} onClose={onClose} height="95vh">
+        <VStack spacing={6} align="stretch" mx="auto">
           <HStack spacing={4} justify="space-between" w="full">
             <Box>
-              <Skeleton isLoaded={!!currentRoundId}>
+              <Skeleton isLoaded={!roundLoading}>
                 <Heading fontSize={"20px"} fontWeight={400}>
-                  We're on <b>Round #{currentRoundId}</b>
+                  <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
                 </Heading>
               </Skeleton>
               <Text fontSize={"14px"} fontWeight={400}>
-                {allocationRound.voteStartTimestamp?.format("MMM D")} to{" "}
-                {allocationRound.voteEndTimestamp?.format("MMM D")}
+                {t("{{from}} to {{to}}", {
+                  from: allocationRound.voteStartTimestamp?.format("MMM D"),
+                  to: allocationRound.voteEndTimestamp?.format("MMM D"),
+                })}
               </Text>
             </Box>
             {currentRoundId && <AllocationRoundParticipatingXApps roundId={currentRoundId} iconSize={36} />}
           </HStack>
-          <Badge colorScheme="red" alignSelf="flex-start">
-            Active session
-          </Badge>
-          <Heading size="md">Allocations voting</Heading>
-          <Text color="gray.600">
-            Each week, you can vote for your favorite apps to help distribute resources among them!
-          </Text>
-          <Box bg="gray.100" p={4} borderRadius="lg">
-            <Flex justify="space-between" align="center" mb={2}>
-              <Text fontWeight="semibold">#15 Allocation round</Text>
-              <Text color="blue.600" fontWeight="semibold">
-                4.8M
+          <VStack spacing={4} w="full" align="flex-start">
+            <VStack spacing={2} w="full" align="flex-start">
+              <Heading fontSize="18px" fontWeight={700}>
+                {t("Allocations voting")}
+              </Heading>
+              <Text fontSize="12px" fontWeight={400} color="#6A6A6A">
+                {t("Each week, you can vote for your favorite apps to help distribute resources among them!")}
               </Text>
-            </Flex>
-            <Text color="gray.500" mb={4}>
-              total to distribute
-            </Text>
-            <Flex justify="space-between">
-              <Button variant="outline">See more</Button>
-              <Button colorScheme="blackAlpha">Vote now</Button>
-            </Flex>
-          </Box>
-          <Heading size="md">Proposals</Heading>
-          <Text color="gray.600">Proposals shape the ecosystem. Vote on ideas and build our community together!</Text>
-          <Box bg="gray.100" p={4} borderRadius="lg">
-            <Text fontWeight="semibold" mb={2}>
-              This is a proposal name, a long title about what is the proposal about
-            </Text>
-            <Text color="gray.500" mb={4}>
-              You didn't vote yet
-            </Text>
-            <Flex justify="flex-end">
-              <Button colorScheme="blackAlpha">Vote now</Button>
-            </Flex>
-          </Box>
+            </VStack>
+            <VStack
+              w="full"
+              border="1px #D5D5D5 solid"
+              align={"flex-start"}
+              bg="#FAFAFA"
+              p="12px"
+              borderRadius={"md"}
+              spacing={4}>
+              <HStack w="full" justify="space-between">
+                <VStack spacing={2} align={"flex-start"}>
+                  <AllocationStateBadge
+                    roundId={allocationRound.roundId ?? ""}
+                    data-testid={"round-#" + allocationRound.roundId + "-status"}
+                    renderBadge={false}
+                    renderIcon={true}
+                  />
+                  <Text fontSize="14px" fontWeight={600}>
+                    {t("#{{round}} allocation round", { round: allocationRound.roundId })}
+                  </Text>
+                </VStack>
+                <VStack align={"flex-end"} spacing={0}>
+                  <HStack spacing={1} align="center">
+                    <B3TRIcon boxSize="16px" colorVariant="dark" />
+                    <Skeleton isLoaded={!amountsLoading}>
+                      <Heading fontSize="16x" fontWeight={700}>
+                        {getCompactFormatter(2).format(totalAmount)}
+                      </Heading>
+                    </Skeleton>
+                  </HStack>
+                  <Text fontSize="10px" color="#6A6A6A">
+                    {t("Total to distribute")}
+                  </Text>
+                </VStack>
+              </HStack>
+              <HStack w="full" justify="space-between">
+                <Button
+                  onClick={() => router.push(`/rounds/${allocationRound.roundId}`)}
+                  variant="primarySubtle"
+                  w="full"
+                  rounded={"full"}>
+                  {t("See More")}
+                </Button>
+                <Button
+                  onClick={() => router.push(`/rounds/${allocationRound.roundId}/vote`)}
+                  colorScheme="primary"
+                  w="full"
+                  rounded={"full"}>
+                  {t("Vote now")}
+                </Button>
+              </HStack>
+            </VStack>
+          </VStack>
+          <VStack spacing={4} w="full" align="flex-start">
+            <VStack spacing={2} w="full" align="flex-start">
+              <Heading fontSize="18px" fontWeight={700}>
+                {t("Proposals in this round")}
+              </Heading>
+              <Text fontSize="12px" fontWeight={400} color="#6A6A6A">
+                {t("Proposals shape the ecosystem. Vote on ideas and build our community together!")}
+              </Text>
+            </VStack>
+
+            {!!proposalsToRender.length ? (
+              <VStack spacing={4} w="full">
+                {proposalsToRender.map(proposal => (
+                  <ProposalCompactCard key={proposal.proposalId} proposal={proposal} />
+                ))}
+              </VStack>
+            ) : (
+              <NoActiveProposalCard />
+            )}
+          </VStack>
+          <Button onClick={() => router.push("/proposals")} variant="link" colorScheme="primary">
+            {t("View all proposals")}
+          </Button>
         </VStack>
       </BaseBottomSheet>
     </>
