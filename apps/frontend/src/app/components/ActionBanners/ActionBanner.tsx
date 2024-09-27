@@ -1,19 +1,31 @@
-import { useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { DoActionBanner } from "./components/DoActionBanner"
 import { motion, AnimatePresence } from "framer-motion"
-import { Text, HStack, Flex, Icon } from "@chakra-ui/react"
+import { Text, HStack, Flex, Icon, IconButton, Show, Box } from "@chakra-ui/react"
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6"
 import { ClaimB3trBanner } from "./components/ClaimB3trBanner"
 import { useCurrentRoundReward } from "@/api"
 import { CastVoteBanner } from "./components/CastVoteBanner"
+import { UilArrowLeft, UilArrowRight } from "@iconscout/react-unicons"
 
 export const ActionBanner = () => {
   const [isVisible, setIsVisible] = useState(true)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   const { rewards, isLoading: isRoundRewardLoading } = useCurrentRoundReward()
   const showClaimB3trBanner = (!isRoundRewardLoading && rewards > 0) || true
   const showDoActionBanner = true
   const showCastVoteBanner = true
+
+  const scroll = useCallback((direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = scrollContainerRef.current.clientWidth + 16
+      scrollContainerRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      })
+    }
+  }, [])
 
   if (!showClaimB3trBanner && !showDoActionBanner && !showCastVoteBanner) return null
 
@@ -21,35 +33,69 @@ export const ActionBanner = () => {
     <>
       <AnimatePresence>
         {isVisible && (
-          <motion.div
-            style={{
-              overflow: "hidden",
-              maxWidth: "100%",
-              width: "100%",
-              minWidth: "100%",
-            }}
-            initial={{ height: 0, opacity: 0 }}
-            exit={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            transition={{ duration: 0.3 }}>
-            <Flex gap={4} pb={2} overflowX="auto" maxW="full" w="full" minW="full">
-              {showDoActionBanner && (
-                <Flex minW="full" w="full" maxW="full">
-                  <DoActionBanner />
-                </Flex>
-              )}
-              {showClaimB3trBanner && (
-                <Flex minW="full" w="full" maxW="full">
-                  <ClaimB3trBanner />
-                </Flex>
-              )}
-              {showCastVoteBanner && (
-                <Flex minW="full" w="full" maxW="full">
-                  <CastVoteBanner />
-                </Flex>
-              )}
-            </Flex>
-          </motion.div>
+          <Box position="relative" minW="full">
+            <Show above="md">
+              <IconButton
+                variant="primaryIconButton"
+                zIndex={2}
+                position="absolute"
+                left={-50}
+                top={"calc(50% - 20px)"}
+                aria-label="Scroll left"
+                icon={<UilArrowLeft />}
+                onClick={() => scroll("left")}
+              />
+            </Show>
+            <motion.div
+              style={{
+                overflow: "hidden",
+                minWidth: "100%",
+              }}
+              initial={{ height: 0, opacity: 0 }}
+              exit={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              transition={{ duration: 0.3 }}>
+              <Flex
+                gap={4}
+                pb={2}
+                overflowX="auto"
+                minW="full"
+                ref={scrollContainerRef}
+                sx={{
+                  "&::-webkit-scrollbar": {
+                    display: "none",
+                  },
+                }}>
+                {showDoActionBanner && (
+                  <Flex minW="full">
+                    <DoActionBanner />
+                  </Flex>
+                )}
+                {showClaimB3trBanner && (
+                  <Flex minW="full">
+                    <ClaimB3trBanner />
+                  </Flex>
+                )}
+                {showCastVoteBanner && (
+                  <Flex minW="full">
+                    <CastVoteBanner />
+                  </Flex>
+                )}
+              </Flex>
+            </motion.div>
+            <Show above="md">
+              <IconButton
+                variant="primaryIconButton"
+                zIndex={2}
+                position="absolute"
+                right={-50}
+                top={"calc(50% - 20px)"}
+                aria-label="Scroll right"
+                icon={<UilArrowRight />}
+                onClick={() => scroll("right")}
+              />
+            </Show>
+          </Box>
         )}
       </AnimatePresence>
       <HStack
