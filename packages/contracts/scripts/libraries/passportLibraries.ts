@@ -37,9 +37,9 @@ export async function passportLibraries() {
   await PassportPersonhoodLogicLib.waitForDeployment()
 
   // Deploy Passport Whitelist and Blacklist Logic
-  const PassportWhitelistBlacklistLogic = await ethers.getContractFactory("PassportWhitelistAndBlacklistLogic")
-  const PassportWhitelistBlacklistLogicLib = await PassportWhitelistBlacklistLogic.deploy()
-  await PassportWhitelistBlacklistLogicLib.waitForDeployment()
+  const PassportWhitelistAndBlacklistLogic = await ethers.getContractFactory("PassportWhitelistAndBlacklistLogic")
+  const PassportWhitelistAndBlacklistLogicLib = await PassportWhitelistAndBlacklistLogic.deploy()
+  await PassportWhitelistAndBlacklistLogicLib.waitForDeployment()
 
   return {
     PassportChecksLogic: PassportChecksLogicLib,
@@ -48,6 +48,6 @@ export async function passportLibraries() {
     PassportPersonhoodLogic: PassportPersonhoodLogicLib,
     PassportPoPScoreLogic: PassportPoPScoreLogicLib,
     PassportSignalingLogic: PassportSignalingLogicLib,
-    PassportWhitelistBlacklistLogic: PassportWhitelistBlacklistLogicLib,
+    PassportWhitelistAndBlacklistLogic: PassportWhitelistAndBlacklistLogicLib,
   }
 }
