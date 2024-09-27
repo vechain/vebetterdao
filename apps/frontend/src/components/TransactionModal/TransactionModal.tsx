@@ -128,6 +128,17 @@ export const TransactionModal = ({
             onClose={onClose}
           />
         )
+      if (endorsementInfo?.isUnendorsing || endorsementInfo?.isEndorsing)
+        return (
+          <SuccessModalContent
+            title={successTitle}
+            showSocialButtons={showSocialButtons}
+            socialDescriptionEncoded={socialDescriptionEncoded}
+            showExplorerButton={showExplorerButton}
+            txId={txId}
+            endorsementInfo={endorsementInfo}
+          />
+        )
 
       return (
         <SuccessModalContent
@@ -136,7 +147,6 @@ export const TransactionModal = ({
           socialDescriptionEncoded={socialDescriptionEncoded}
           showExplorerButton={showExplorerButton}
           txId={txId}
-          endorsementInfo={endorsementInfo}
         />
       )
     }
