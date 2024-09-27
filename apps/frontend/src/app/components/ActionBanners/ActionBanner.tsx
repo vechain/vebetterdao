@@ -1,19 +1,21 @@
 import { useState } from "react"
 import { DoActionBanner } from "./components/DoActionBanner"
 import { motion, AnimatePresence } from "framer-motion"
-import { Text, HStack, Flex, Icon, Box } from "@chakra-ui/react"
+import { Text, HStack, Flex, Icon } from "@chakra-ui/react"
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6"
 import { ClaimB3trBanner } from "./components/ClaimB3trBanner"
 import { useCurrentRoundReward } from "@/api"
+import { CastVoteBanner } from "./components/CastVoteBanner"
 
 export const ActionBanner = () => {
   const [isVisible, setIsVisible] = useState(true)
 
   const { rewards, isLoading: isRoundRewardLoading } = useCurrentRoundReward()
-  const showClaimB3trBanner = !isRoundRewardLoading && rewards > 0
+  const showClaimB3trBanner = (!isRoundRewardLoading && rewards > 0) || true
   const showDoActionBanner = true
+  const showCastVoteBanner = true
 
-  if (!showClaimB3trBanner && !showDoActionBanner) return null
+  if (!showClaimB3trBanner && !showDoActionBanner && !showCastVoteBanner) return null
 
   return (
     <>
@@ -22,15 +24,31 @@ export const ActionBanner = () => {
           <motion.div
             style={{
               overflow: "hidden",
+              maxWidth: "100%",
+              width: "100%",
+              minWidth: "100%",
             }}
             initial={{ height: 0, opacity: 0 }}
             exit={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             transition={{ duration: 0.3 }}>
-            <Box overflowX={"auto"}>
-              {showClaimB3trBanner && <ClaimB3trBanner />}
-              {showDoActionBanner && <DoActionBanner />}
-            </Box>
+            <Flex gap={4} pb={2} overflowX="auto" maxW="full" w="full" minW="full">
+              {showDoActionBanner && (
+                <Flex minW="full" w="full" maxW="full">
+                  <DoActionBanner />
+                </Flex>
+              )}
+              {showClaimB3trBanner && (
+                <Flex minW="full" w="full" maxW="full">
+                  <ClaimB3trBanner />
+                </Flex>
+              )}
+              {showCastVoteBanner && (
+                <Flex minW="full" w="full" maxW="full">
+                  <CastVoteBanner />
+                </Flex>
+              )}
+            </Flex>
           </motion.div>
         )}
       </AnimatePresence>

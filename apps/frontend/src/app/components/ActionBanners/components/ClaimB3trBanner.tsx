@@ -78,7 +78,7 @@ export const ClaimB3trBanner = () => {
           </HStack>
         </Show>
         <Show below="md">
-          <HStack align="stretch" zIndex={1} position="relative" w="full">
+          <HStack align="stretch" zIndex={1} position="relative" h="full">
             <VStack gap={2} align="stretch" justify={"space-between"}>
               <Text size="xs" color="#3A5798" fontWeight="600">
                 {t("CLAIM YOUR REWARDS")}
@@ -87,19 +87,14 @@ export const ClaimB3trBanner = () => {
                 {t("You have B3TR to claim as rewards for voting in governance")}
               </Heading>
               <Button
+                variant="primaryAction"
                 onClick={handleClaim}
                 borderRadius="full"
-                bg="transparent"
-                border="1px solid #5F4400"
-                _hover={{
-                  bg: "#5F440020",
-                }}>
-                <Text color="#5F4400" fontWeight="500">
-                  {t("Claim your {{b3trToClaim}} B3TR", { b3trToClaim })}
-                </Text>
+                leftIcon={<UilGift color="white" />}>
+                <Text fontWeight="500">{t("Claim your {{b3trToClaim}} B3TR", { b3trToClaim })}</Text>
               </Button>
             </VStack>
-            <Image src="/images/info-bell.png" alt="Pending actions" w={24} h={24} />
+            <Image src="/images/claim-b3tr-icon.png" alt="Claim B3TR" w={24} h={24} />
           </HStack>
         </Show>
       </CardBody>

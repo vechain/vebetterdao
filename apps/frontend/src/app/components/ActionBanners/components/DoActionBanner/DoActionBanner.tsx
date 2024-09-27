@@ -18,7 +18,7 @@ export const DoActionBanner = () => {
   if (actionsPerformed >= totalActions || isUserOverviewLoading || userOverviewError) return null
 
   return (
-    <Card bg="#FFD979" borderRadius="xl">
+    <Card bg="#FFD979" borderRadius="xl" w="full">
       <CardBody position="relative" overflow="hidden" borderRadius="xl">
         <Image
           src="/images/cloud-background-orange.png"
@@ -57,7 +57,7 @@ export const DoActionBanner = () => {
         </Show>
         <Show below="md">
           <HStack align="stretch" zIndex={1} position="relative" w="full">
-            <VStack gap={2} align="stretch" justify={"space-between"}>
+            <VStack gap={2} align="stretch" justify={"space-between"} h="full">
               <Text size="xs" color="#8D6602" fontWeight="600">
                 {t("YOU ARE LAZY THIS WEEK!")}
               </Text>

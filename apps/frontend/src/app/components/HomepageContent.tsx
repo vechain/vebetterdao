@@ -18,10 +18,11 @@ export const HomePageContent = () => {
         templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
         gap={"32px"}
         w="full"
+        maxW="full"
         alignItems={"flex-start"}
         overflowY={"auto"}
         data-testid="form-proposal-layout">
-        <GridItem colSpan={[1, 1, 3]}>
+        <GridItem colSpan={[1, 1, 3]} display="grid">
           <ActionBanner />
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
