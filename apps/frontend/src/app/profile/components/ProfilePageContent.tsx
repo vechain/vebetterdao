@@ -22,7 +22,7 @@ export const ProfilePageContent = () => {
     )
 
   return (
-    <VStack gap={6} align="stretch">
+    <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
       <ProfileHeader />
       <HStack>
         <Button
