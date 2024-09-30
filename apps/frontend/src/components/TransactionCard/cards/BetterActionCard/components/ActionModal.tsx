@@ -6,7 +6,7 @@ import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { EmbeddedTweet, useTweet } from "react-tweet"
-import { CustomModalContent } from "../CustomModalContent"
+import { CustomModalContent } from "@/components/CustomModalContent"
 
 const compactFormatter = getCompactFormatter(2)
 

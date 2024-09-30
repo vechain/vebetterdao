@@ -57,7 +57,7 @@ export const UserSustainabilityOverviewStats = () => {
           </Skeleton>
         </HStack>
         <Text fontSize={["xs", "sm"]} fontWeight={400} color="#6A6A6A">
-          {t("total b3tr earn")}
+          {t("total b3tr earnt")}
         </Text>
       </VStack>
       <VStack align="flex-start" gap={1}>

@@ -1,9 +1,9 @@
 import { Card, CardBody, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { SustainabilityActionsResponse, useXApps } from "@/api"
 import dayjs from "dayjs"
-import { ActionModal } from "./ActionModal"
-import { LeafIcon } from "../Icons/LeafIcon"
+import { LeafIcon } from "../../../Icons/LeafIcon"
 import { useTranslation } from "react-i18next"
+import { ActionModal } from "./components/ActionModal"
 
 type Props = {
   action: SustainabilityActionsResponse["data"][number]

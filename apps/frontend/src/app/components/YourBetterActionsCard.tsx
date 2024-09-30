@@ -1,11 +1,11 @@
 import { useSustainabilityActions } from "@/api"
 import { UserSustainabilityOverviewStats } from "@/components"
-import { BetterActionCard } from "@/components/Sustainability/BetterActionCard"
 import { Card, CardBody, Heading, VStack, Text, Button } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useTranslation } from "react-i18next"
 import { NoActionsCard } from "./NoActionsCard"
 import { useRouter } from "next/navigation"
+import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
 
 type Props = {
   renderActions?: boolean
