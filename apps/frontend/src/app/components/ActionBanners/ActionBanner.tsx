@@ -30,8 +30,8 @@ export const ActionBanner = () => {
   const visibleBanners = useMemo(() => {
     const banners = []
     if (showDoActionBanner) banners.push(<DoActionBanner />)
-    if (showClaimB3trBanner) banners.push(<ClaimB3trBanner />)
     if (showCastVoteBanner) banners.push(<CastVoteBanner />)
+    if (showClaimB3trBanner) banners.push(<ClaimB3trBanner />)
     return banners
   }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner])
 
