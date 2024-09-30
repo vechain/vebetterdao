@@ -20,7 +20,13 @@ import { EditAppSocialUrls } from "./components/EditAppSocialUrls"
 import { EditScreenshots } from "./components/EditScreenshots"
 import { useParams, useRouter } from "next/navigation"
 import { EditAppLogo } from "./components/EditAppLogo"
-import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata, useCurrentAppRole } from "../../../hooks"
+import {
+  useCurrentAppBanner,
+  useCurrentAppLogo,
+  useCurrentAppMetadata,
+  useCurrentAppRole,
+  useCurrentAppVeWorldBanner,
+} from "../../../hooks"
 import { EditAppBanner } from "./components/EditAppBanner"
 import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
@@ -44,7 +50,7 @@ export type EditAppForm = {
   screenshots: string[]
   logoImage: string
   bannerImage: string
-  ve_world_banner: string
+  ve_world_bannerImage: string
 }
 
 const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
@@ -57,6 +63,7 @@ export const EditAppPageContent = () => {
   const { logo } = useCurrentAppLogo()
   const { banner } = useCurrentAppBanner()
   const { screenshots } = useCurrentAppScreenshots()
+  const { veWorldBanner } = useCurrentAppVeWorldBanner()
   const { app } = useCurrentAppInfo()
   const router = useRouter()
   const transactionModal = useDisclosure()
@@ -78,7 +85,7 @@ export const EditAppPageContent = () => {
       telegramUrl: findUrlByName(appMetadata?.social_urls, "Telegram"),
       youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
       mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
-      ve_world_banner: appMetadata?.ve_world?.banner || "",
+      ve_world_bannerImage: veWorldBanner || "",
     },
   })
   const {
@@ -116,7 +123,7 @@ export const EditAppPageContent = () => {
         social_urls: socialUrls,
         tweets: appMetadata?.tweets ?? [],
         ve_world: {
-          banner: data.ve_world_banner,
+          banner: data.ve_world_bannerImage,
         },
       })
       if (!metadataUri) return
