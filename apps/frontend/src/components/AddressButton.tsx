@@ -10,6 +10,8 @@ interface IAddressButton extends ButtonProps {
   showCopyIcon?: boolean
   addressFontSize?: string
   buttonSize?: string
+  digitsBeforeEllipsis?: number
+  digitsAfterEllipsis?: number
 }
 export const AddressButton: React.FC<IAddressButton> = ({
   address,
@@ -17,6 +19,8 @@ export const AddressButton: React.FC<IAddressButton> = ({
   showCopyIcon = true,
   addressFontSize = "md",
   buttonSize = "md",
+  digitsBeforeEllipsis = 6,
+  digitsAfterEllipsis = 4,
   ...props
 }) => {
   const { onCopy, hasCopied, setValue } = useClipboard(address)
@@ -32,7 +36,7 @@ export const AddressButton: React.FC<IAddressButton> = ({
     setValue(address)
   }, [address, setValue])
 
-  const spacing = ["xs", "sm"].includes(buttonSize) ? 2 : 4
+  const spacing = ["xs", "sm"].includes(buttonSize) ? 1 : 2
 
   return (
     <Button
@@ -44,11 +48,16 @@ export const AddressButton: React.FC<IAddressButton> = ({
       paddingY={0}
       variant="outline"
       {...otherProps}>
-      <HStack justify={"flex-start"} spacing={spacing} h="full" roundedLeft={"md"}>
+      <HStack justify={"flex-start"} spacing={spacing} roundedLeft={"md"}>
         {showAddressIcon && <AddressIcon address={address} roundedLeft={"md"} />}
-        <Text fontSize={addressFontSize}>{humanAddress(address, 6, 4)}</Text>
+        <Text fontSize={addressFontSize}>{humanAddress(address, digitsBeforeEllipsis, digitsAfterEllipsis)}</Text>
         {showCopyIcon && (
-          <Icon data-cy="address-button-copy-icon" aria-label="Copy Address" as={hasCopied ? FaCheck : FaCopy} />
+          <Icon
+            data-cy="address-button-copy-icon"
+            boxSize={3}
+            aria-label="Copy Address"
+            as={hasCopied ? FaCheck : FaCopy}
+          />
         )}
       </HStack>
     </Button>

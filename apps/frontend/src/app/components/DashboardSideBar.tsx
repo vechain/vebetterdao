@@ -6,6 +6,7 @@ import { WalletNotConnectedOverlay } from "../../components/WalletNotConnectedOv
 import { ManagedAppsCard } from "../../components/ManagedAppsCard"
 import { YourBetterActionsCard } from "./YourBetterActionsCard"
 import { TokensBalance } from "./TokensBalance"
+import { Leaderboard } from "./Leaderboard"
 
 export const DashboardSideBar = () => {
   const { account } = useWallet()
@@ -16,6 +17,7 @@ export const DashboardSideBar = () => {
         <TokensBalance showGoToBalance />
       </Show>
       <YourBetterActionsCard />
+      <Leaderboard />
       <VoterRewards />
       <GmNFT />
       <ManagedAppsCard />
