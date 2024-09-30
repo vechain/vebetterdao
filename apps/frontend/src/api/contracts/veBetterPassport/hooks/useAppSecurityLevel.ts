@@ -9,7 +9,7 @@ const method = "appSecurity"
 export const APP_SECURITY_LEVELS = ["NONE", "LOW", "MEDIUM", "HIGH"]
 
 export const getAppSecurityLevelQueryKey = (appId: string) => {
-  getCallKey({ method, keyArgs: [appId] })
+  return getCallKey({ method, keyArgs: [appId] })
 }
 
 /**
