@@ -102,11 +102,11 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
 
   return (
     <Card
-      variant={isYourRanking ? "baseWithBorder" : "filled"}
-      bg={isYourRanking ? "#004CFC" : "auto"}
+      variant={isYourRanking ? "baseWithBorder" : "filledSmall"}
+      {...(isYourRanking && { bg: "#004CFC" })}
       pos="relative"
       overflow={"hidden"}>
-      <CardBody p={2} color={whiteColor}>
+      <CardBody color={whiteColor} p="12px">
         {isYourRanking && (
           <Image
             src="/images/your-ranking-bg.svg"

@@ -19,8 +19,8 @@ export const BetterActionCard = ({ action }: Props) => {
   const actionModal = useDisclosure()
 
   return (
-    <Card variant={"filled"} w="full" onClick={actionModal.onOpen} cursor="pointer" rounded={"lg"}>
-      <CardBody p={3}>
+    <Card variant={"filledSmall"} w="full" onClick={actionModal.onOpen} cursor="pointer">
+      <CardBody>
         <HStack spacing={3} w="full" justify="space-between">
           <HStack spacing={4}>
             <Flex w={8} h={8} bg="#CDFF9F" align="center" justify="center" borderRadius={"full"}>

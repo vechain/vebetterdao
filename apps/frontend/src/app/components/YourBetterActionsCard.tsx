@@ -1,13 +1,19 @@
 import { useSustainabilityActions } from "@/api"
 import { UserSustainabilityOverviewStats } from "@/components"
 import { BetterActionCard } from "@/components/Sustainability/BetterActionCard"
-import { Card, CardBody, Heading, VStack, Text } from "@chakra-ui/react"
+import { Card, CardBody, Heading, VStack, Text, Button } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useTranslation } from "react-i18next"
+import { NoActionsCard } from "./NoActionsCard"
+import { useRouter } from "next/navigation"
 
-export const YourBetterActionsCard = () => {
+type Props = {
+  maxActions?: number
+}
+export const YourBetterActionsCard = ({ maxActions = 3 }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const router = useRouter()
 
   const { data } = useSustainabilityActions({
     wallet: account ?? undefined,
@@ -15,7 +21,8 @@ export const YourBetterActionsCard = () => {
   })
 
   const lastActions = data?.pages.map(page => page.data).flat() ?? []
-  const lastActionsData = lastActions.slice(0, 3)
+  const lastActionsData = lastActions.slice(0, maxActions)
+
   return (
     <Card w={"full"} variant={"baseWithBorder"}>
       <CardBody>
@@ -35,7 +42,13 @@ export const YourBetterActionsCard = () => {
               {lastActionsData.length > 0 ? (
                 lastActionsData.map((action, index) => <BetterActionCard key={index} action={action} />)
               ) : (
-                <Text>{t("No better actions found")}</Text>
+                <NoActionsCard />
+              )}
+
+              {lastActionsData.length > maxActions && (
+                <Button variant={"primaryLink"} size={"sm"} onClick={() => router.push("/profile")}>
+                  {t("See all")}
+                </Button>
               )}
             </VStack>
           </VStack>
