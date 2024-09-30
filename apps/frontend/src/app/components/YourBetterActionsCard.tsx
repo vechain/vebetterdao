@@ -8,9 +8,10 @@ import { NoActionsCard } from "./NoActionsCard"
 import { useRouter } from "next/navigation"
 
 type Props = {
+  renderActions?: boolean
   maxActions?: number
 }
-export const YourBetterActionsCard = ({ maxActions = 3 }: Props) => {
+export const YourBetterActionsCard = ({ renderActions = true, maxActions = 3 }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const router = useRouter()
@@ -35,22 +36,24 @@ export const YourBetterActionsCard = ({ maxActions = 3 }: Props) => {
           </VStack>
           <VStack spacing={6} align="stretch">
             <UserSustainabilityOverviewStats />
-            <VStack spacing={4} align="stretch">
-              <Heading size="sm" fontWeight={600}>
-                {t("Last actions")}
-              </Heading>
-              {lastActionsData.length > 0 ? (
-                lastActionsData.map((action, index) => <BetterActionCard key={index} action={action} />)
-              ) : (
-                <NoActionsCard />
-              )}
+            {renderActions && (
+              <VStack spacing={4} align="stretch">
+                <Heading size="sm" fontWeight={600}>
+                  {t("Last actions")}
+                </Heading>
+                {lastActionsData.length > 0 ? (
+                  lastActionsData.map((action, index) => <BetterActionCard key={index} action={action} />)
+                ) : (
+                  <NoActionsCard />
+                )}
 
-              {lastActionsData.length > maxActions && (
-                <Button variant={"primaryLink"} size={"sm"} onClick={() => router.push("/profile")}>
-                  {t("See all")}
-                </Button>
-              )}
-            </VStack>
+                {lastActionsData.length > maxActions && (
+                  <Button variant={"primaryLink"} size={"sm"} onClick={() => router.push("/profile")}>
+                    {t("See all")}
+                  </Button>
+                )}
+              </VStack>
+            )}
           </VStack>
         </VStack>
       </CardBody>

@@ -10,7 +10,7 @@ export const PendingActions = () => {
   const scoreThreshold = 10
   if (userScore >= scoreThreshold || isUserOverviewLoading) return null
   return (
-    <Card bg="#FFD979" borderRadius="xl" maxW="400px">
+    <Card bg="#FFD979" borderRadius="xl" w="full">
       <CardBody pb={2} position="relative" overflow="hidden" borderRadius="xl">
         <Image
           src="/images/cloud-background-orange.png"
@@ -20,7 +20,7 @@ export const PendingActions = () => {
           top={"-50%"}
         />
         <VStack align="stretch" zIndex={1} position="relative">
-          <HStack align="flex-start">
+          <HStack align="flex-start" justify={"space-between"}>
             <VStack spacing={4} align="stretch" gap={0.5}>
               <Text size="xs" color="#8D6602" fontWeight="600">
                 {t("PENDING ACTIONS")}

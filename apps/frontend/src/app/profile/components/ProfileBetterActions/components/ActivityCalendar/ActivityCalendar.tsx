@@ -41,19 +41,11 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
   )
 
   const getActivityColor = useCallback((level: number) => {
-    if (level === 0) {
-      return "transparent"
-    }
-    if (level === 1) {
-      return "#D0F7A7"
-    }
-    if (level === 2 || level === 3) {
-      return "#B1F16C"
-    }
-    if (level === 4 || level === 5) {
-      return "#93CB57"
-    }
-    return "#577E2E"
+    if (level > 5) return "#577E2E"
+    if (level >= 4) return "#93CB57"
+    if (level >= 2) return "#B1F16C"
+    if (level >= 1) return "#D0F7A7"
+    return "transparent"
   }, [])
 
   const getActivityFontColor = useCallback((level: number) => {
@@ -107,21 +99,22 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
                 return <Skeleton key={day} h="10" />
               }
               return (
-                <Flex
+                <Button
+                  w="auto"
+                  h="auto"
+                  isDisabled={isFutureDay || !activityLevel}
+                  variant={"unstyled"}
+                  fontSize="sm"
+                  fontWeight="medium"
                   key={day}
-                  h="10"
-                  align="center"
-                  justify="center"
+                  p={4}
                   bg={getActivityColor(activityLevel)}
                   color={getActivityFontColor(activityLevel)}
                   borderRadius="md"
-                  opacity={isFutureDay ? 0.3 : 1}
                   border={"1px solid"}
                   borderColor={isToday ? "black" : "#dfdfdf"}>
-                  <Text fontSize="sm" fontWeight="medium">
-                    {day}
-                  </Text>
-                </Flex>
+                  {day}
+                </Button>
               )
             })}
           </Grid>
