@@ -1,11 +1,11 @@
 import { SustainabilityActionsResponse, useSustainabilityActions } from "@/api"
-import { BetterActionCard } from "@/components/Sustainability/BetterActionCard"
 import { useWallet } from "@vechain/dapp-kit-react"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { VStack, Spinner, HStack, Heading, Button, Card, CardBody, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { Dispatch, SetStateAction } from "react"
 import dayjs from "dayjs"
+import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
 
 export const ActivityList = ({ setIsCalendarView }: { setIsCalendarView: Dispatch<SetStateAction<boolean>> }) => {
   const { t } = useTranslation()
