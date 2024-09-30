@@ -15,7 +15,7 @@ export const ActionBanner = () => {
 
   const showDoActionBanner = !isPersonLoading && !isPerson
   const showClaimB3trBanner = !isRoundRewardLoading && rewards > 0
-  const showCastVoteBanner = !canUserVoteLoading && !canUserVote
+  const showCastVoteBanner = !canUserVoteLoading && canUserVote
 
   const scroll = useCallback((direction: "left" | "right") => {
     if (scrollContainerRef.current) {
