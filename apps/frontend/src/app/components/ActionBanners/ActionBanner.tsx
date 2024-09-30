@@ -70,7 +70,10 @@ export const ActionBanner = () => {
             },
           }}>
           {visibleBanners.map((banner, index) => (
-            <Flex key={index} minW={["93%", "93%", "100%"]} w={["93%", "93%", "full"]}>
+            <Flex
+              key={index}
+              minW={moreThanOneBanner ? ["93%", "93%", "100%"] : "100%"}
+              w={moreThanOneBanner ? ["93%", "93%", "full"] : "100%"}>
               {banner}
             </Flex>
           ))}
