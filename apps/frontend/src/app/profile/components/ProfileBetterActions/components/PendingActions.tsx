@@ -1,14 +1,13 @@
-import { useCurrentSustainabilityOverview } from "@/api"
 import { Heading, Text, Flex, VStack, Card, CardBody, HStack, Image } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+import { useThresholdParticipationScore, useUserRoundScore } from "@/api"
 
 export const PendingActions = () => {
   const { t } = useTranslation()
-  const { data: userOverview, isLoading: isUserOverviewLoading } = useCurrentSustainabilityOverview()
-  const userScore = userOverview?.actionsRewarded ?? 0
-  // TODO: get this from the backend
-  const scoreThreshold = 10
-  if (userScore >= scoreThreshold || isUserOverviewLoading) return null
+  const { data: scoreThreshold, isLoading: isScoreThresholdLoading } = useThresholdParticipationScore()
+  const { data: userScore, isLoading: isUserRoundScoreLoading } = useUserRoundScore()
+  if (userScore >= scoreThreshold || isUserRoundScoreLoading || isScoreThresholdLoading) return null
+
   return (
     <Card bg="#FFD979" borderRadius="xl" maxW="400px">
       <CardBody pb={2} position="relative" overflow="hidden" borderRadius="xl">
@@ -29,7 +28,7 @@ export const PendingActions = () => {
                 {t("Increase your sustainable score to become eligible for voting.")}
               </Heading>
             </VStack>
-            <Image src="/images/robot-alert.png" alt="Pending actions" w={24} h={24} />
+            <Image src="/images/info-bell.png" alt="Pending actions" w={24} h={24} />
           </HStack>
           <Flex
             bg="white"
@@ -53,8 +52,8 @@ export const PendingActions = () => {
           <Flex justify="flex-end">
             <Text color="#6A6A6A" fontWeight="400" fontSize="xs">
               {t("{{userScore}}/{{scoreThreshold}} action score reached", {
-                userScore,
-                scoreThreshold,
+                userScore: userScore ?? 0,
+                scoreThreshold: scoreThreshold ?? 0,
               })}
             </Text>
           </Flex>

@@ -1,15 +1,7 @@
 "use client"
-import {
-  useAllocationsRound,
-  useAllocationsRoundState,
-  useGetVotesOnBlock,
-  useHasVotedInRound,
-  useRoundXApps,
-  useVotingThreshold,
-} from "@/api"
+import { useCanUserVote, useRoundXApps } from "@/api"
 import { Heading, Text, VStack } from "@chakra-ui/react"
-import { useCallback, useLayoutEffect, useMemo, useState } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useCallback, useLayoutEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
@@ -23,28 +15,10 @@ type Props = {
 
 export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
-  const { account } = useWallet()
-
   const router = useRouter()
 
   const { data: selectedApps, setData: onSelectedAppsChange } = useCastAllocationFormStore()
-  const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
   const xAppsQuery = useRoundXApps(roundId)
-
-  const { data: roundInfo } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(roundInfo.voteStart),
-    account ?? undefined,
-  )
-
-  const { data: threshold } = useVotingThreshold()
-
-  const hasVotesAtSnapshot = useMemo(() => {
-    return Number(votesAtSnapshot) >= (threshold ?? 0)
-  }, [votesAtSnapshot, threshold])
-
-  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
-  const isVotingConcluded = [1, 2].includes(state ?? 0)
 
   const [onContinueError, setOnContinueError] = useState<string | null>(null)
 
@@ -61,22 +35,17 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
     router.push(`/rounds/${roundId}/vote/percentages`)
   }, [router, roundId, selectedApps, t])
 
-  const shouldSeeThePage = useMemo(() => {
-    return {
-      value: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot,
-      loading: hasVotedLoading || stateLoading || votesAtSnapshotLoading,
-    }
-  }, [hasVotedLoading, hasVoted, isVotingConcluded, hasVotesAtSnapshot, stateLoading, votesAtSnapshotLoading])
+  const shouldSeeThePage = useCanUserVote()
 
   //   redirect to round page if user already voted or voting is concluded
   useLayoutEffect(() => {
-    if (shouldSeeThePage.loading) return
-    if (!shouldSeeThePage.value) {
+    if (shouldSeeThePage.isLoading) return
+    if (!shouldSeeThePage.data) {
       router.push(`/rounds/${roundId}`)
     }
   }, [shouldSeeThePage, roundId, router])
 
-  if (!shouldSeeThePage) return null
+  if (!shouldSeeThePage.data) return null
 
   return (
     <ResponsiveCard>

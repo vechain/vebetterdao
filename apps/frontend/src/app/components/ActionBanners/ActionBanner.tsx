@@ -4,18 +4,21 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Text, HStack, Flex, Icon, IconButton, Show, Box } from "@chakra-ui/react"
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6"
 import { ClaimB3trBanner } from "./components/ClaimB3trBanner"
-import { useCurrentRoundReward } from "@/api"
+import { useCanUserVote, useCurrentRoundReward } from "@/api"
 import { CastVoteBanner } from "./components/CastVoteBanner"
 import { UilArrowLeft, UilArrowRight } from "@iconscout/react-unicons"
+import { useIsPerson } from "@/api/contracts/vePassport/hooks/useIsPerson"
 
 export const ActionBanner = () => {
   const [isVisible, setIsVisible] = useState(true)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-
   const { rewards, isLoading: isRoundRewardLoading } = useCurrentRoundReward()
-  const showClaimB3trBanner = (!isRoundRewardLoading && rewards > 0) || true
-  const showDoActionBanner = true
-  const showCastVoteBanner = true
+  const { data: isPerson, isLoading: isPersonLoading } = useIsPerson()
+  const { data: canUserVote, isLoading: canUserVoteLoading } = useCanUserVote()
+
+  const showDoActionBanner = !isPersonLoading && !isPerson
+  const showClaimB3trBanner = !isRoundRewardLoading && rewards > 0
+  const showCastVoteBanner = !canUserVoteLoading && !canUserVote
 
   const scroll = useCallback((direction: "left" | "right") => {
     if (scrollContainerRef.current) {

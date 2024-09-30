@@ -1,4 +1,4 @@
-import { VStack, HStack, Button, Heading } from "@chakra-ui/react"
+import { VStack, HStack, Button, Heading, Container } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
 import { useState } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
@@ -22,25 +22,27 @@ export const ProfilePageContent = () => {
     )
 
   return (
-    <VStack gap={6} align="stretch">
-      <ProfileHeader />
-      <HStack>
-        <Button
-          variant={"primaryGhost"}
-          borderBottom={selectedTab === "balance" ? "2px solid #004CFC" : "none"}
-          rounded="none"
-          onClick={() => setSelectedTab("balance")}>
-          {t("Balance")}
-        </Button>
-        <Button
-          variant={"primaryGhost"}
-          borderBottom={selectedTab === "better-actions" ? "2px solid #004CFC" : "none"}
-          rounded="none"
-          onClick={() => setSelectedTab("better-actions")}>
-          {t("Better Actions")}
-        </Button>
-      </HStack>
-      {selectedTabContent}
-    </VStack>
+    <Container maxW="container.lg">
+      <VStack gap={6} align="stretch" w="full">
+        <ProfileHeader />
+        <HStack>
+          <Button
+            variant={"primaryGhost"}
+            borderBottom={selectedTab === "balance" ? "2px solid #004CFC" : "none"}
+            rounded="none"
+            onClick={() => setSelectedTab("balance")}>
+            {t("Balance")}
+          </Button>
+          <Button
+            variant={"primaryGhost"}
+            borderBottom={selectedTab === "better-actions" ? "2px solid #004CFC" : "none"}
+            rounded="none"
+            onClick={() => setSelectedTab("better-actions")}>
+            {t("Better Actions")}
+          </Button>
+        </HStack>
+        {selectedTabContent}
+      </VStack>
+    </Container>
   )
 }

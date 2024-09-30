@@ -1,4 +1,4 @@
-import { useCurrentSustainabilityOverview } from "@/api"
+import { useThresholdParticipationScore, useUserRoundScore } from "@/api"
 import { CustomModalContent } from "@/components"
 import {
   Modal,
@@ -26,15 +26,13 @@ type Props = {
 
 export const DoActionModal = ({ doActionModal }: Props) => {
   const { t } = useTranslation()
-  const { data: userOverview, isLoading: isUserOverviewLoading } = useCurrentSustainabilityOverview()
-  const userScore = userOverview?.actionsRewarded ?? 0
-  // TODO: get this from the backend
-  const scoreThreshold = 10
+  const { data: scoreThreshold, isLoading: isScoreThresholdLoading } = useThresholdParticipationScore()
+  const { data: userScore, isLoading: isUserRoundScoreLoading } = useUserRoundScore()
   const router = useRouter()
   const goToApps = useCallback(() => {
     router.push("/apps")
   }, [router])
-  if (userScore >= scoreThreshold || isUserOverviewLoading) return null
+  if (userScore >= scoreThreshold || isUserRoundScoreLoading || isScoreThresholdLoading) return null
 
   // TODO: understand where the Know more button should go
 
@@ -76,8 +74,8 @@ export const DoActionModal = ({ doActionModal }: Props) => {
                   <Flex justify="flex-end">
                     <Text color="#6A6A6A" fontWeight="400" fontSize="xs">
                       {t("{{userScore}}/{{scoreThreshold}} action score reached", {
-                        userScore,
-                        scoreThreshold,
+                        userScore: userScore ?? 0,
+                        scoreThreshold: scoreThreshold ?? 0,
                       })}
                     </Text>
                   </Flex>
