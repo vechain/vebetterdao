@@ -22,7 +22,7 @@ import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, saveContractsToFile } from "../helpers"
 import { shouldRunSimulation } from "@repo/config/contracts"
-import { deployLibraries } from "../helpers/deployLibraries"
+import { governanceLibraries, passportLibraries } from "../libraries"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -74,7 +74,18 @@ export async function deployAll(config: ContractsConfig) {
     GovernorQuorumLogicLib,
     GovernorVotesLogicLib,
     GovernorStateLogicLib,
-  } = await deployLibraries()
+  } = await governanceLibraries()
+
+  // Deploy Passport Libraries
+  const {
+    PassportChecksLogic,
+    PassportConfigurator,
+    PassportDelegationLogic,
+    PassportPersonhoodLogic,
+    PassportPoPScoreLogic,
+    PassportSignalingLogic,
+    PassportWhitelistAndBlacklistLogic,
+  } = await passportLibraries()
 
   console.log("================ Deploying Vechain Nodes mock contracts =================")
 
@@ -161,7 +172,19 @@ export async function deployAll(config: ContractsConfig) {
   )) as X2EarnApps
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
-  const veBetterPassportAddress = await deployProxyOnly("VeBetterPassport", undefined, true)
+  const veBetterPassportAddress = await deployProxyOnly(
+    "VeBetterPassport",
+    {
+      PassportChecksLogic: await PassportChecksLogic.getAddress(),
+      PassportConfigurator: await PassportConfigurator.getAddress(),
+      PassportDelegationLogic: await PassportDelegationLogic.getAddress(),
+      PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
+      PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
+      PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
+      PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
+    },
+    true,
+  )
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
     ["X2EarnRewardsPoolV1", "X2EarnRewardsPool"],
@@ -307,26 +330,42 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as XAllocationVoting
 
-  const veBetterPassport = (await initializeProxy(veBetterPassportAddress, "VeBetterPassport", [
+  const veBetterPassport = (await initializeProxy(
+    veBetterPassportAddress,
+    "VeBetterPassport",
+    [
+      {
+        x2EarnApps: await x2EarnApps.getAddress(),
+        xAllocationVoting: await xAllocationVoting.getAddress(),
+        nodeManagement: await nodeManagement.getAddress(),
+        galaxyMember: await galaxyMember.getAddress(),
+        popScoreThreshold: config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD, //threshold
+        signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
+        roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
+        minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
+      },
+      {
+        admin: config.CONTRACTS_ADMIN_ADDRESS, // admins
+        botSignaler: config.CONTRACTS_ADMIN_ADDRESS, // botSignaler
+        upgrader: config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        settingsManager: config.CONTRACTS_ADMIN_ADDRESS, // settingsManager
+        roleGranter: config.CONTRACTS_ADMIN_ADDRESS, // roleGranter
+        blacklister: config.CONTRACTS_ADMIN_ADDRESS, // blacklister
+        whitelister: config.CONTRACTS_ADMIN_ADDRESS, // whitelistManager
+        actionRegistrar: config.CONTRACTS_ADMIN_ADDRESS, // actionRegistrar
+        actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS, // actionScoreManager
+      },
+    ],
     {
-      xAllocationVoting: await xAllocationVoting.getAddress(),
-      x2EarnApps: await x2EarnApps.getAddress(),
-      nodeManagement: await nodeManagement.getAddress(),
-      galaxyMember: await galaxyMember.getAddress(),
-      upgrader: config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-      admins: [config.CONTRACTS_ADMIN_ADDRESS], // admins
-      settingsManagers: [config.CONTRACTS_ADMIN_ADDRESS], // settingsManagers
-      roleGranters: [config.CONTRACTS_ADMIN_ADDRESS], // roleGranters
-      botSignalers: [config.CONTRACTS_ADMIN_ADDRESS], // _blacklisters
-      whitelisters: [config.CONTRACTS_ADMIN_ADDRESS], // _whitelisters
-      actionRegistrar: config.CONTRACTS_ADMIN_ADDRESS, // _actionRegistrar
-      actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS, // _actionScoreManager
-      threshold: config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD, //threshold
-      signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
-      roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
-      minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
+      PassportChecksLogic: await PassportChecksLogic.getAddress(),
+      PassportConfigurator: await PassportConfigurator.getAddress(),
+      PassportDelegationLogic: await PassportDelegationLogic.getAddress(),
+      PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
+      PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
+      PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
+      PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
     },
-  ])) as VeBetterPassport
+  )) as VeBetterPassport
 
   const governor = (await deployAndUpgrade(
     ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernor"],

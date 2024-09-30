@@ -32,7 +32,8 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { IEmissions } from "../interfaces/IEmissions.sol";
 import { IVoterRewards } from "../interfaces/IVoterRewards.sol";
-import { IVeBetterPassport } from "../ve-better-passport/interfaces/IVeBetterPassport.sol";
+import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
+import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
 /**
  * @title XAllocationVotingGovernor
@@ -122,36 +123,16 @@ abstract contract XAllocationVotingGovernor is
     uint256 _currentRoundSnapshot = currentRoundSnapshot();
     XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
 
-    /* // Delegatee and delegator logic compacted
-    bool isDelegatee;
-    bool isDelegator;
-    address personhoodAddress = msg.sender; // Pre-assign the personhoodAddress to the voter
-
-    {
-      address delegateeOfDelegator = $._veBetterPassport.getDelegateeInTimepoint(msg.sender, _currentRoundSnapshot);
-      address delegatorOfDelegatee = $._veBetterPassport.getDelegatorInTimepoint(msg.sender, _currentRoundSnapshot);
-
-      // If the voter is a delegatee (has received delegation of personhood from a delegator at the timepoint).
-      isDelegatee = delegatorOfDelegatee != address(0);
-      if (isDelegatee) {
-        personhoodAddress = delegatorOfDelegatee; // Assign the delegator as the personhoodAddress
-      }
-
-      // If the voter is a delegator (has delegated their personhood to a delegatee at the timepoint).
-      isDelegator = delegateeOfDelegator != address(0);
-    }
-
-    // Allow the voter to vote if they are either the delegatee or not a delegator
-    require(
-      !isDelegator || isDelegatee,
-      "GovernorVotesLogic: voter has delegated their VeBetterPassport and cannot vote"
+    (bool isPerson, string memory explanation) = $._veBetterPassport.isPersonAtTimepoint(
+      _msgSender(),
+      SafeCast.toUint48(_currentRoundSnapshot)
     );
 
-    (bool isPerson, string memory explanation) = $._veBetterPassport.isPerson(personhoodAddress);
-
     // Check if the voter or the delegator of personhood to the voter is a person and returning error with the reason
-    require(isPerson, string(abi.encodePacked("XAllocationVoting: voter is not a person: ", explanation)));
- */
+    if (!isPerson) {
+      revert GovernorPersonhoodVerificationFailed(_msgSender(), explanation);
+    }
+
     address voter = _msgSender();
 
     _countVote(roundId, voter, appIds, voteWeights);

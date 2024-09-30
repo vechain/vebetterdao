@@ -6,7 +6,7 @@ on:
     branches:
       - main
       - testnet
-      - quadratic-voting-removal
+      - dan/ve-better-passport
   push:
     branches:
       - main

@@ -1670,7 +1670,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
     // start round
     await xAllocationVoting.connect(owner).startNewRound()
 
-    await veBetterPassport.setAppSecurity(appId, 2)
+    await veBetterPassport.setAppSecurity(appId, 1)
 
     expect(await veBetterPassport.getAddress()).to.equal(await x2EarnRewardsPool.veBetterPassport())
 
@@ -1700,7 +1700,6 @@ describe("X2EarnRewardsPool - @shard3", function () {
     expect(registeredActionEvent?.args[2]).to.equal(roundId)
 
     // check that the action score is correct
-
     const appSecurity = await veBetterPassport.appSecurity(appId)
     const multiplier = await veBetterPassport.securityMultiplier(appSecurity)
 

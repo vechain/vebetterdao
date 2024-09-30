@@ -50,6 +50,11 @@ library GovernorVotesLogic {
   /// @param votes The actual votes received.
   error GovernorVotingThresholdNotMet(uint256 threshold, uint256 votes);
 
+  /// @dev Thrown when the personhood verification fails.
+  /// @param voter The address of the voter.
+  /// @param explanation The reason for the failure.
+  error GovernorPersonhoodVerificationFailed(address voter, string explanation);
+
   /// @notice Emitted when a vote is cast without parameters.
   /// @param voter The address of the voter.
   /// @param proposalId The ID of the proposal being voted on.
@@ -231,34 +236,16 @@ library GovernorVotesLogic {
 
     uint256 proposalSnapshot = GovernorProposalLogic._proposalSnapshot(self, proposalId);
 
-    /* // Delegatee and delegator logic compacted
-    bool isDelegatee;
-    bool isDelegator;
-    address personhoodAddress = voter; // Pre-assign the personhoodAddress to the voter
-
-    {
-      address delegateeOfDelegator = self.veBetterPassport.getDelegateeInTimepoint(voter, proposalSnapshot);
-      address delegatorOfDelegatee = self.veBetterPassport.getDelegatorInTimepoint(voter, proposalSnapshot);
-
-     // If the voter is a delegatee (has received delegation of personhood from a delegator at the timepoint).
-      isDelegatee = delegatorOfDelegatee != address(0);
-      if (isDelegatee) {
-        personhoodAddress = delegatorOfDelegatee; // Assign the delegator as the personhoodAddress
-      }
-
-      // If the voter is a delegator (has delegated their personhood to a delegatee at the timepoint).
-      isDelegator = delegateeOfDelegator != address(0);
-    }
-
-    // Allow the voter to vote if they are either the delegatee or not a delegator
-    require(
-      !isDelegator || isDelegatee,
-      "GovernorVotesLogic: voter has delegated their VeBetterPassport and cannot vote"
+    (bool isPerson, string memory explanation) = self.veBetterPassport.isPersonAtTimepoint(
+      voter,
+      SafeCast.toUint48(proposalSnapshot)
     );
 
-    // Check if the personhoodAddress is a valid person
-    _checkPersonhood(self, personhoodAddress);
- */
+    // Check if the voter or the delegator of personhood to the voter is a person and returning error with the reason
+    if (!isPerson) {
+      revert GovernorPersonhoodVerificationFailed(voter, explanation);
+    }
+
     uint256 weight = self.vot3.getPastVotes(voter, proposalSnapshot);
     uint256 power = Math.sqrt(weight) * 1e9;
 
@@ -271,16 +258,6 @@ library GovernorVotesLogic {
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 
     return weight;
-  }
-
-  /**
-   * @notice Checks if the voter is a valid person in the VeBetterPassport.
-   * @param self - GovernorStorage
-   * @param voter - The address of the voter.
-   */
-  function _checkPersonhood(GovernorStorageTypes.GovernorStorage storage self, address voter) private view {
-    (bool isPerson, string memory explanation) = self.veBetterPassport.isPerson(voter);
-    require(isPerson, string(abi.encodePacked("GovernorVotesLogic: voter is not a person: ", explanation)));
   }
 
   /**
