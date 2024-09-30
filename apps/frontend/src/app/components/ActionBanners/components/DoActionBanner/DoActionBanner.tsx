@@ -1,21 +1,11 @@
 import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, useDisclosure, Show } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { DoActionModal } from "./components/DoActionModal"
-import { useCurrentSustainabilityOverview } from "@/api"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 
 export const DoActionBanner = () => {
   const { t } = useTranslation()
   const doActionModal = useDisclosure()
-  const {
-    data: userOverview,
-    isLoading: isUserOverviewLoading,
-    error: userOverviewError,
-  } = useCurrentSustainabilityOverview()
-  const actionsPerformed = userOverview?.actionsRewarded ?? 0
-  // TODO: get this from the backend
-  const totalActions = 10
-  if (actionsPerformed >= totalActions || isUserOverviewLoading || userOverviewError) return null
 
   return (
     <Card bg="#FFD979" borderRadius="xl" w="full">
