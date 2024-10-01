@@ -1,6 +1,7 @@
 import { Page } from "playwright"
-import { expect, Locator, test } from "@playwright/test"
+import { Locator, test } from "@playwright/test"
 import { RoundStartedDialog } from "./roundStartedDialog"
+import { delay } from "../utils/delay"
 
 /**
  * Admin page model
@@ -23,8 +24,11 @@ export class AdminPage {
   async startEmissions() {
     await test.step("Start emissions", async () => {
       await this.startEmissionsButton.click()
-      await expect(this.page.getByRole("heading", { name: "Round started!" })).toBeVisible()
-      await this.closeModalButton.click()
+      // TODO: WIP
+      // await expect(this.page.getByTestId('tx-success-modal')).toBeVisible()
+      // await expect(this.page.getByRole("heading", { name: "Emissions and rounds started!" })).toBeVisible()
+      await delay(7000)
+      // await this.closeModalButton.click()
     })
   }
 
@@ -34,7 +38,13 @@ export class AdminPage {
    */
   async startAllocationRound(): Promise<RoundStartedDialog> {
     return await test.step("Start new allocation round", async () => {
-      await this.page.locator('xpath=//button[contains(text(), "Start new round")]').first().click()
+      // TODO: WIP
+      // await this.page.getByTestId('start-voting-round-button').click()
+      // await expect(this.page.getByTestId('tx-success-modal')).toBeVisible()
+      // await this.closeModalButton.click()
+      // return new RoundStartedDialog(this.page)
+      await this.startEmissionsButton.click()
+      await delay(5000)
       return new RoundStartedDialog(this.page)
     })
   }

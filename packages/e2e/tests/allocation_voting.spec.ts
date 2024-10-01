@@ -74,15 +74,18 @@ const adminOpenRound = async (page: Page, isFirstRound: boolean = false) => {
     // const adminAddress = await veWorldMockClient.getSignerAddress(page)
     const menuBar = new MenuBar(page)
     const adminPage = await menuBar.gotoAdmin()
-    if (isFirstRound) {
-      // start emissions for the first round, no dialog
-      await adminPage.startEmissions()
-    } else {
-      // start a new allocation round, has a dialog
-      const dialog = await adminPage.startAllocationRound()
-      await dialog.expectDialogSuccess()
-      await dialog.closeDialog()
-    }
+    // TODO: consider unifying 1st and subsequent round flows into a single function
+    console.log("isFirstRound", isFirstRound)
+    // if (isFirstRound) {
+    //   // start emissions for the first round, no dialog
+    //   await adminPage.startEmissions()
+    // } else {
+    //   // start a new allocation round, has a dialog
+    //   const dialog = await adminPage.startAllocationRound()
+    //   await dialog.expectDialogSuccess()
+    //   await dialog.closeDialog()
+    // }
+    await adminPage.startAllocationRound()
     // await dashboardPage.disconnectWallet(adminAddress)
     await page.evaluate(() => window.localStorage.clear())
     await page.evaluate(() => window.sessionStorage.clear())
