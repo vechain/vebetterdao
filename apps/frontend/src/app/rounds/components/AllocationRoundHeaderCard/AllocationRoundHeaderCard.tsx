@@ -96,14 +96,17 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
         <Stack direction={["column", "row"]} justify="space-between" spacing={12} w="full" alignItems={"stretch"}>
           <VStack spacing={4} align="flex-start" flex={2}>
             <VStack spacing={2} align="flex-start">
-              <Text color="#6A6A6A" fontSize={["md"]} textTransform={"uppercase"} fontWeight={600}>
+              <Text
+                color="#6A6A6A"
+                fontSize={["md"]}
+                textTransform={"uppercase"}
+                fontWeight={600}
+                data-testid="round-title">
                 {t("Round #{{round}}", {
                   round: roundId,
                 })}
               </Text>
-              <Heading size={["lg", "xl"]} data-testid="round-title">
-                {t("Allocations")}
-              </Heading>
+              <Heading size={["lg", "xl"]}>{t("Allocations")}</Heading>
               <AllocationStateBadge roundId={roundId} />
             </VStack>
 

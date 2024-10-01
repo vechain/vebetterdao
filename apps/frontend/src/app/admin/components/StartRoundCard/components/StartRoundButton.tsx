@@ -52,7 +52,8 @@ export const StartRoundButton = () => {
             colorScheme="blue"
             isDisabled={isCurrentRoundActive}
             onClick={handleSubmit}
-            isLoading={distributionLoading}>
+            isLoading={distributionLoading}
+            data-testid={"start-voting-round-button"}>
             {t("Start new round")}
           </Button>
         </VStack>

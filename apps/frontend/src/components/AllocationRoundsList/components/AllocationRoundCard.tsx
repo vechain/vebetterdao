@@ -75,14 +75,14 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}
-      data-testid={"round-#" + round.roundId + "-card"}>
+      data-testid={`round-card-#${round.roundId}`}>
       <CardBody py="20px">
         <HStack justify={"space-between"} w="full">
           <Stack w="full" spacing={1} flex={2}>
             <HStack spacing={2} w="fit-content" justify="space-between">
               <AllocationStateBadge
                 roundId={round.roundId}
-                data-testid={"round-#" + round.roundId + "-status"}
+                data-testid={`round-card-#${round.roundId}`}
                 renderBadge={false}
                 renderIcon={isActive}
               />
@@ -99,7 +99,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
             </HStack>
 
             <HStack mt={0.5} w="full" justify="space-between" color={cardTextColor}>
-              <Heading as="h3" fontSize="20px" fontWeight={700}>
+              <Heading as="h3" fontSize="20px" fontWeight={700} data-testid={"round-title"}>
                 {t("Round #{{round}}", {
                   round: round.roundId,
                 })}
@@ -142,7 +142,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
               as={FaAngleRight}
               boxSize={"24px"}
               color={cardTextColor}
-              data-testid={"round-#" + round.roundId + "-link"}
+              data-testid={`round-link-#${round.roundId}`}
             />
           </HStack>
         </HStack>
