@@ -128,6 +128,13 @@ test.describe("Allocation voting", () => {
     await veWorldMockClient.installMock(page)
   })
 
+  test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status !== "passed") {
+      const lastTxId = await veWorldMockClient.getSenderTxId(page)
+      console.log(`Last tx id: ${lastTxId}`)
+    }
+  })
+
   test("Admin user can open the first allocation round", async ({ page }) => {
     await adminOpenRound(page, true)
   })
