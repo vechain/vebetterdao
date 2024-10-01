@@ -8,7 +8,7 @@ export const DoActionBanner = () => {
   const doActionModal = useDisclosure()
 
   return (
-    <Card bg="#FFD979" borderRadius="xl" w="full">
+    <Card bg="#FFD979" borderRadius="xl" w="full" h="full">
       <CardBody position="relative" overflow="hidden" borderRadius="xl">
         <Image
           src="/images/cloud-background-orange.png"

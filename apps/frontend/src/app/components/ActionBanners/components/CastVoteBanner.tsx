@@ -15,7 +15,7 @@ export const CastVoteBanner = () => {
   }, [router, roundId])
 
   return (
-    <Card bg="#B1F16C" borderRadius="xl" w="full">
+    <Card bg="#B1F16C" borderRadius="xl" w="full" h="full">
       <CardBody position="relative" overflow="hidden" borderRadius="xl">
         <Image
           src="/images/community-green-blob.png"

@@ -46,7 +46,7 @@ export const ClaimB3trBanner = () => {
   if (isRoundRewardLoading) return null
 
   return (
-    <Card bg="#C8DDFF" borderRadius="xl" w="full">
+    <Card bg="#C8DDFF" borderRadius="xl" w="full" h="full">
       <CardBody position="relative" overflow="hidden" borderRadius="xl">
         <Image
           src="/images/cloud-background.png"
