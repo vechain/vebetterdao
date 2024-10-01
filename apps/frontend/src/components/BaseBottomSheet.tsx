@@ -40,6 +40,7 @@ export const BaseBottomSheet = ({
         />
         <Drawer.Content
           aria-description={ariaDescription}
+          aria-describedby={ariaTitle}
           style={{
             zIndex: 3,
             backgroundColor: "#F9FAFB",
