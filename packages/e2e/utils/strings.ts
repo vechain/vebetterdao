@@ -14,3 +14,7 @@ export const compact = (number: number | bigint): string => {
 
   return getCompactFormatter(4).format(number)
 }
+
+export const trimAddress = (fullAddress: string): string => {
+  return `${fullAddress.slice(0, 4)}…${fullAddress.slice(-6)}`
+}
