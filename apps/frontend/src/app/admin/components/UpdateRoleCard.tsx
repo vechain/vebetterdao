@@ -43,7 +43,7 @@ export const UpdateRoleCard = () => {
     if (!walletAddress || !account) return false
 
     return AddressUtils.isValid(walletAddress)
-  }, [walletAddress])
+  }, [walletAddress, account])
 
   const isFormValid = useMemo(
     () => selectedContractAddress && selectedRole && isValidAddress,
@@ -75,13 +75,13 @@ export const UpdateRoleCard = () => {
       accessControlAction.sendTransaction()
       onOpen()
     },
-    [accessControlAction, userAlreadyHasRole, onOpen],
+    [accessControlAction, onOpen],
   )
 
   const handleClose = useCallback(() => {
     accessControlAction.resetStatus()
     onClose()
-  }, [accessControlAction, userAlreadyHasRole, onClose])
+  }, [accessControlAction, onClose])
 
   return (
     <>
