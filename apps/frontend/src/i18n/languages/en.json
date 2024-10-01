@@ -1,4 +1,8 @@
 {
+  "Something went wrong. Let’s try that again!": "Something went wrong. Let’s try that again!",
+  "Error 404": "Error 404",
+  "We can't find what you're looking for. Let's head back and try again!": "We can't find what you're looking for. Let's head back and try again!",
+  "Go back home": "Go back home",
   "Error updating role": "Error updating role",
   "Updating wallet address role...": "Updating wallet address role...",
   "Wallet address roles updated successfully": "Wallet address roles updated successfully",
