@@ -1,3 +1,4 @@
+import { useCurrentAllocationsRoundId, useSustainabilityUserOverview } from "@/api"
 import { AddressButton } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
 import { Box, Card, CardBody, Divider, Heading, HStack, Image, Text, VStack } from "@chakra-ui/react"
@@ -11,46 +12,34 @@ type LeaderboardRanking = {
   address: string
   score: number
 }
-const LeaderboardRankings: LeaderboardRanking[] = [
-  {
-    position: 1,
-    address: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
-    score: 100,
-  },
-  {
-    position: 2,
-    address: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68",
-    score: 98,
-  },
-  {
-    position: 3,
-    address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5",
-    score: 86,
-  },
-  {
-    position: 4,
-    address: "0xF370940aBDBd2583bC80bfc19d19bc216C88Ccf0",
-    score: 72,
-  },
-  {
-    position: 5,
-    address: "0x99602e4Bbc0503b8ff4432bB1857F916c3653B85",
-    score: 60,
-  },
-]
 
 const YourRanking = {
   position: 20,
   address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5",
   score: 51,
 }
+
+//TODO: Connected user ranking
 export const Leaderboard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { data: roundId } = useCurrentAllocationsRoundId()
 
-  const isRankingInTop5 = LeaderboardRankings.some(ranking =>
-    AddressUtils.compareAddresses(ranking.address, account ?? ""),
-  )
+  const { data } = useSustainabilityUserOverview({ roundId, direction: "desc" })
+
+  const flatLeaderboard =
+    data?.pages
+      .map(page => page.data)
+      .flat()
+      .slice(0, 5) ?? []
+
+  const rankings = flatLeaderboard.map((entry, index) => ({
+    position: index + 1,
+    address: entry?.entity as string,
+    score: entry?.actionsRewarded as number,
+  }))
+
+  const isRankingInTop5 = rankings.some(ranking => AddressUtils.compareAddresses(ranking.address, account ?? ""))
   return (
     <Card w="full" variant={"baseWithBorder"}>
       <CardBody>
@@ -62,7 +51,7 @@ export const Leaderboard = () => {
             </Text>
           </VStack>
           <VStack spacing={4} align="stretch">
-            {LeaderboardRankings.map(ranking => (
+            {rankings.map(ranking => (
               <LeaderboardRankingComponent
                 ranking={ranking}
                 key={ranking.position}
