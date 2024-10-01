@@ -18,6 +18,7 @@ import updateLocale from "dayjs/plugin/updateLocale"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 import { useActivities } from "./useActivities"
+import { ActivityDayModal } from "../../ActivityDayModal"
 
 // configure dayjs to start the week on Monday
 dayjs.extend(updateLocale)
@@ -35,6 +36,8 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
   const daysInMonth = currentDate.daysInMonth()
   const firstDayOfMonth = currentDate.startOf("month").day()
 
+  const [selectedDate, setSelectedDate] = useState<string>()
+
   const handleSetListView = useCallback(() => {
     setIsCalendarView(false)
   }, [setIsCalendarView])
@@ -46,7 +49,7 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
     [currentDate],
   )
 
-  const getActivityLevel = useCallback(
+  const getActivityNumber = useCallback(
     (day: number) => {
       const dateString = currentDate.date(day).format("YYYY-MM-DD")
       return activitiesPerDay[dateString] || 0
@@ -83,85 +86,89 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
   ]
 
   return (
-    <Card w="full" variant="baseWithBorder">
-      <CardBody>
-        <VStack align="stretch" spacing={4}>
-          <Flex justify="space-between" align="center">
-            <Heading size="md">{t("Actions History")}</Heading>
-            <Button variant="primaryLink" size="sm" onClick={handleSetListView}>
-              {t("List View")}
-            </Button>
-          </Flex>
+    <>
+      <ActivityDayModal isOpen={!!selectedDate} onClose={() => setSelectedDate(undefined)} date={selectedDate} />
+      <Card w="full" variant="baseWithBorder">
+        <CardBody>
+          <VStack align="stretch" spacing={4}>
+            <Flex justify="space-between" align="center">
+              <Heading size="md">{t("Actions History")}</Heading>
+              <Button variant="primaryLink" size="sm" onClick={handleSetListView}>
+                {t("List View")}
+              </Button>
+            </Flex>
 
-          <Flex justify="space-between" align="center">
-            <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)}>
-              <FaChevronLeft />
-            </Button>
-            <Heading size="sm" textAlign="center">
-              {currentDate.format("MMMM YYYY").toUpperCase()}
-            </Heading>
-            <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} isDisabled={isDisabledNextMonth}>
-              <FaChevronRight />
-            </Button>
-          </Flex>
+            <Flex justify="space-between" align="center">
+              <Button variant="ghost" size="sm" onClick={() => changeMonth(-1)}>
+                <FaChevronLeft />
+              </Button>
+              <Heading size="sm" textAlign="center">
+                {currentDate.format("MMMM YYYY").toUpperCase()}
+              </Heading>
+              <Button variant="ghost" size="sm" onClick={() => changeMonth(1)} isDisabled={isDisabledNextMonth}>
+                <FaChevronRight />
+              </Button>
+            </Flex>
 
-          <Grid templateColumns="repeat(7, 1fr)" gap={1}>
-            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
-              <Box key={day} textAlign="center">
-                <Text fontSize="xs" fontWeight="medium" color="gray.500">
-                  {day}
-                </Text>
-              </Box>
-            ))}
-            {Array.from({ length: (firstDayOfMonth + 6) % 7 }).map((_, index) => (
-              <Box key={`empty-${index}`} h="10" />
-            ))}
-            {Array.from({ length: daysInMonth }).map((_, index) => {
-              const day = index + 1
-              const activityLevel = getActivityLevel(day)
-              const isFutureDay = today.isBefore(currentDate.date(day), "day")
-              const isToday = today.isSame(currentDate.date(day), "day")
-              if (isLoading) {
-                return <Skeleton key={day} h="10" />
-              }
-              return (
-                <Box key={day}>
-                  <Button
-                    w="full"
-                    h="10"
-                    isDisabled={isFutureDay}
-                    variant="unstyled"
-                    fontSize="sm"
-                    fontWeight="medium"
-                    bg={getActivityColor(activityLevel)}
-                    color={getActivityFontColor(activityLevel)}
-                    borderRadius="md"
-                    border={isToday ? "2px solid #000" : "1px solid #dfdfdf"}
-                    _hover={{ opacity: 0.8 }}>
+            <Grid templateColumns="repeat(7, 1fr)" gap={1}>
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
+                <Box key={day} textAlign="center">
+                  <Text fontSize="xs" fontWeight="medium" color="gray.500">
                     {day}
-                  </Button>
+                  </Text>
                 </Box>
-              )
-            })}
-          </Grid>
-          <HStack justify="center" spacing={2} wrap="wrap">
-            {legendItems.map(item => (
-              <HStack key={item.label} spacing={1}>
-                <Box w={4} h={4} bg={item.color} borderRadius="md" border="1px solid #ccc" />
+              ))}
+              {Array.from({ length: (firstDayOfMonth + 6) % 7 }).map((_, index) => (
+                <Box key={`empty-${index}`} h="10" />
+              ))}
+              {Array.from({ length: daysInMonth }).map((_, index) => {
+                const day = index + 1
+                const activityNumber = getActivityNumber(day)
+                const isFutureDay = today.isBefore(currentDate.date(day), "day")
+                const isToday = today.isSame(currentDate.date(day), "day")
 
+                const isDisabled = isFutureDay || isLoading || activityNumber === 0
+
+                return (
+                  <Skeleton key={day} h="10" isLoaded={!isLoading}>
+                    <Button
+                      key={day}
+                      onClick={() => setSelectedDate(currentDate.date(day).format("YYYY-MM-DD"))}
+                      w="full"
+                      isDisabled={isDisabled}
+                      variant="unstyled"
+                      fontSize="sm"
+                      fontWeight="medium"
+                      bg={getActivityColor(activityNumber)}
+                      color={getActivityFontColor(activityNumber)}
+                      borderRadius="md"
+                      border={isToday ? "2px solid #000" : "1px solid #dfdfdf"}
+                      _hover={{ opacity: isDisabled ? 1 : 0.8 }}>
+                      {day}
+                    </Button>
+                  </Skeleton>
+                )
+              })}
+            </Grid>
+            <HStack justify="center" spacing={2} wrap="wrap">
+              {legendItems.map(item => (
+                <HStack key={item.label} spacing={1}>
+                  <Box w={4} h={4} bg={item.color} borderRadius="md" border="1px solid #ccc" />
+
+                  <Text fontSize="xs" color="gray.600">
+                    {item.label}
+                  </Text>
+                </HStack>
+              ))}
+              {!isMobile && (
                 <Text fontSize="xs" color="gray.600">
-                  {item.label}
+                  {t("activities")}
                 </Text>
-              </HStack>
-            ))}
-            {!isMobile && (
-              <Text fontSize="xs" color="gray.600">
-                {t("activities")}
-              </Text>
-            )}
-          </HStack>
-        </VStack>
-      </CardBody>
-    </Card>
+              )}
+            </HStack>
+          </VStack>
+        </CardBody>
+      </Card>
+    </>
   )
 }
