@@ -2,18 +2,87 @@ import { Page } from "playwright"
 import { test, expect, Locator } from "@playwright/test"
 import { RoundsPage } from "./roundsPage"
 import { delay } from "../utils/delay"
+import { RoundIndex, RoundStatus } from "./types"
+import { BasePage } from "./basePage"
 import { MenuBar } from "./menuBar"
 
 /**
  * Allocations page model
  */
-export class AllocationsPage {
-  private page: Page
+export class AllocationsPage extends BasePage {
   readonly pageTitleText: Locator
+  readonly latestRoundCard: Locator
+  readonly latestRoundStatus: Locator
+  readonly roundCardByIndex: (i: RoundIndex) => Locator
+  readonly roundStatusByIndex: (i: RoundIndex) => Locator
 
   constructor(page: Page) {
-    this.page = page
-    this.pageTitleText = this.page.locator('xpath=//h2[contains(text(), "Total Allocations")]')
+    super(page)
+
+    this.pageTitleText = this.page.locator('xpath=//h2[contains(text(), "Allocations")]')
+    this.latestRoundCard = this.page.locator('//div[contains(@data-testid, "round-card-#")]').first()
+    this.roundCardByIndex = (i: RoundIndex) => {
+      return i === "latest"
+        ? this.page.locator('//div[contains(@data-testid, "round-card-#")]').first()
+        : this.page.getByTestId(`round-card-#${i}`)
+    }
+    this.roundStatusByIndex = (i: RoundIndex) => {
+      return this.roundCardByIndex(i).getByTestId("round-status")
+    }
+    this.latestRoundStatus = this.latestRoundCard.getByTestId("round-status")
+  }
+
+  /**
+   * Wait for the round to have a specific status
+   * @param roundIndex
+   * @param status
+   */
+  async waitForRoundStatus(roundIndex: RoundIndex, status: RoundStatus) {
+    await test.step(`Wait for round #${roundIndex} state to be "${status}"`, async () => {
+      const maxAttempts: number = 10
+      let attemptsLeft: number = maxAttempts
+      let isExpectedStatus: boolean = false
+      let lastStatus: string = ""
+
+      // Retry until the expected status is reached or all refresh attempts are depleted
+      while (attemptsLeft > 0 && !isExpectedStatus) {
+        try {
+          attemptsLeft--
+          lastStatus = await this.roundStatusByIndex(roundIndex).textContent()
+          console.log(`\t Attempt #${maxAttempts - attemptsLeft}`)
+          await expect(this.roundStatusByIndex(roundIndex)).toContainText(status)
+          isExpectedStatus = true
+        } catch (error) {
+          console.log(
+            lastStatus === "" // empty lastStatus means the round isn't on the list yet
+              ? `\t Round #${roundIndex} isn't on the list yet. Waiting 5 sec then refreshing...\n\t Original error: ${error.message}`
+              : `\t Round #${roundIndex} state: "${lastStatus}"; Expected: "${status}". Waiting 5 sec then refreshing...\n\t Original error: ${error.message}`,
+          )
+          await delay(5000)
+          const menuBar = new MenuBar(this.page)
+          await menuBar.gotoDashbard()
+          await menuBar.gotoAllocations()
+        }
+      }
+
+      // if expected status is reached - return; otherwise - throw an error
+      if (isExpectedStatus) {
+        return
+      } else {
+        throw new Error(
+          `Round #${roundIndex} failed to turn into "${status}" state.\nLast status caught: "${lastStatus}"\nTotal refresh attempts used: ${maxAttempts - attemptsLeft}.`,
+        )
+      }
+    })
+  }
+
+  async openRound(roundIndex: RoundIndex): Promise<RoundsPage> {
+    return await test.step(`Open round #${roundIndex}`, async () => {
+      const roundsPage: RoundsPage = new RoundsPage(this.page)
+      await this.roundCardByIndex(roundIndex).click()
+      await roundsPage.expectOnPage(roundIndex)
+      return roundsPage
+    })
   }
 
   /**
@@ -32,40 +101,28 @@ export class AllocationsPage {
    * @param roundIndex index of the round
    * @returns RoundsPage
    */
-  async clickOnRound(roundIndex: number): Promise<RoundsPage> {
+  async clickOnRound(roundIndex: RoundIndex): Promise<RoundsPage> {
     return await test.step(`Click on round #${roundIndex}`, async () => {
       console.log(`Retry clicking on round #${roundIndex}`)
-      const id = `round-#${roundIndex}-link`
       const roundsPage = new RoundsPage(this.page)
-      let retry = 0
-      const maxRetries = 10
-      for (retry = 0; retry < maxRetries; retry++) {
-        console.log(`\t Attempt #${retry + 1}`)
+      const maxAttempts = 10
+      let attemptsLeft = maxAttempts
+      while (attemptsLeft > 0) {
         try {
-          const visible = await this.page.getByTestId(id).isVisible()
-          if (visible) {
-            if (retry > 4) {
-              console.log(`\t Attempting reloading page`)
-              const menuBar = new MenuBar(this.page)
-              await menuBar.gotoDashbard()
-              await menuBar.gotoAllocations()
-              await delay(5000)
-            }
-            await this.page.getByTestId(id).blur()
-            await this.page.getByTestId(id).hover()
-            await this.page.getByTestId(id).focus()
-            await this.page.getByTestId(id).click()
-          } else {
-            break
-          }
+          await this.expectRoundStatus(roundIndex, "Active now")
+          await this.roundCardByIndex(roundIndex).click()
         } catch (error) {
           console.log(`\t Error clicking on round #${roundIndex}: ${error}`)
+          const menuBar = new MenuBar(this.page)
+          await menuBar.gotoDashbard()
+          await menuBar.gotoAllocations()
+          attemptsLeft--
         } finally {
           await delay(5000)
         }
       }
-      if (retry >= maxRetries) {
-        console.log(`\t Failed to click on round #${roundIndex} after ${retry} attempts`)
+      if (attemptsLeft === 0) {
+        console.log(`\t Failed to click on round #${roundIndex} after ${maxAttempts} attempts`)
         throw new Error(`Failed to click on round #${roundIndex}`)
       }
       await roundsPage.expectOnPage(roundIndex)
@@ -74,14 +131,14 @@ export class AllocationsPage {
   }
 
   /**
-   * Expects the round to have displayed status
-   * @param roundIndex index of the round
-   * @param state expected status (e.g. Active, Succeeded, Quorum failed)
+   * Expects the round to have displayed status. If "latest" passed in as @i, it will check the latest round (top of the list).
+   * Otherwise, it will look for a round with a specific index, e.g. index "23" will make it look for a "Round #23" title.
+   * @param {RoundIndex} i - index of the round
+   * @param {RoundStatus} status - expected status (e.g. Active, Succeeded, Quorum failed)
    */
-  async expectRoundStatus(roundIndex: number, state: string) {
-    await test.step(`Expect round #${roundIndex} status to be ${state}`, async () => {
-      const id = `round-#${roundIndex}-status`
-      await expect(this.page.getByTestId(id)).toContainText(state)
+  async expectRoundStatus(i: RoundIndex, status: RoundStatus) {
+    await test.step(`Expect latest round status to be "${status}"`, async () => {
+      await expect(this.roundStatusByIndex(i)).toContainText(status)
     })
   }
 

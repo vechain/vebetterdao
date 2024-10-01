@@ -1,6 +1,5 @@
 import { Page } from "playwright"
-import { Locator, test } from "@playwright/test"
-import { expectToastToBeVisible } from "./toastNotification"
+import { expect, Locator, test } from "@playwright/test"
 import { RoundStartedDialog } from "./roundStartedDialog"
 
 /**
@@ -9,11 +8,13 @@ import { RoundStartedDialog } from "./roundStartedDialog"
 export class AdminPage {
   private page: Page
   readonly startEmissionsButton: Locator
+  readonly closeModalButton: Locator
 
   constructor(page: Page) {
     this.page = page
 
-    this.startEmissionsButton = this.page.locator('xpath=//button[contains(text(), "Start emissions")]')
+    this.startEmissionsButton = this.page.getByTestId("start-voting-round-button")
+    this.closeModalButton = this.page.getByLabel("Close")
   }
 
   /**
@@ -21,8 +22,9 @@ export class AdminPage {
    */
   async startEmissions() {
     await test.step("Start emissions", async () => {
-      await this.startEmissionsButton.first().click()
-      await expectToastToBeVisible(this.page, "Emissions started successfully", "success")
+      await this.startEmissionsButton.click()
+      await expect(this.page.getByRole("heading", { name: "Round started!" })).toBeVisible()
+      await this.closeModalButton.click()
     })
   }
 

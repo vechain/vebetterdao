@@ -1,7 +1,7 @@
 import { Page } from "playwright"
 import { Locator, test, expect } from "@playwright/test"
 import { VoteCastDialog } from "./voteCastDialog"
-import { AllocationVote } from "./types"
+import { AllocationVote, AppName } from "./types"
 
 /**
  * Allocation rounds page model
@@ -11,38 +11,83 @@ export class RoundsPage {
   readonly castVoteButton: Locator
   readonly roundTitleText: Locator
   readonly quorumFailedError: Locator
+  readonly castYourVoteButton: Locator
+  readonly voteAppCard: (appName: AppName) => Locator
+  readonly voteAppCheckbox: (appName: AppName) => Locator
+  readonly continueButton: Locator
+  readonly voteAppInput: (appName: AppName) => Locator
+  readonly pageTitle: Locator
 
   constructor(page: Page) {
     this.page = page
     this.castVoteButton = this.page.locator('xpath=//button[contains(text(), "Cast vote now")]')
     this.roundTitleText = this.page.getByTestId("round-title")
     this.quorumFailedError = this.page.locator('css=div[data-status="error"][role="alert"] div').first()
+    this.castYourVoteButton = this.page.getByTestId("cast-your-vote-button")
+    this.voteAppCheckbox = (appName: AppName) => this.page.getByTestId(`select-app-checkbox-${appName}`)
+    this.continueButton = this.page.getByTestId("continue")
+    this.voteAppInput = (appName: AppName) => this.page.getByTestId(`${appName}-vote-input`)
+    this.pageTitle = this.page.getByTestId("voting-confirmation-page-title")
+    this.voteAppCard = (appName: AppName) => this.page.getByTestId(`vote-app-card-${appName}`)
   }
 
   /**
    * Assert on rounds page for a specific round
    * @param roundIndex index of round
+   * @param timeout
    */
-  async expectOnPage(roundIndex: number, timeout?: number) {
-    await expect(this.roundTitleText).toBeVisible({ timeout })
-    await expect(this.roundTitleText).toHaveText(`Allocations | Round #${roundIndex}`, { timeout })
+  async expectOnPage(roundIndex: number | "latest", timeout?: number) {
+    await test.step(`Expect on round page: ${roundIndex}`, async () => {
+      await this.page.waitForURL("**/rounds/*", { timeout: 10000 })
+      await this.roundTitleText.waitFor({ state: "visible", timeout: 10000 })
+      roundIndex === "latest"
+        ? await expect(this.roundTitleText).toContainText("Round #", { timeout })
+        : await expect(this.roundTitleText).toHaveText(`Round #${roundIndex}`, { timeout })
+    })
   }
 
+  // TODO: finish refactoring this method
   /**
    * Casts a users vote
    * @param votes
    */
   async castVote(votes: Array<AllocationVote>) {
     await test.step("Cast vote", async () => {
+      // for (const vote of votes) {
+      //   const appName = vote.appName
+      //   const votePercentage = vote.votePercentage
+      //   const xpath = `xpath=//input[@data-testid="${appName}-vote-input"]`
+      //   // cast-your-vote-button
+      //   await expect(this.page.locator(xpath).first()).toBeEnabled()
+      //   await this.page.locator(xpath).first().scrollIntoViewIfNeeded()
+      //   await this.page.locator(xpath).first().fill(String(votePercentage))
+      // }
+      // await this.castVoteButton.first().click()
+      // const voteCastDialog = new VoteCastDialog(this.page)
+      // await voteCastDialog.expectDialogSuccess()
+      // await voteCastDialog.closeDialog()
+
+      // select apps on the list and click Continue
+      await this.castYourVoteButton.click()
       for (const vote of votes) {
-        const appName = vote.appName
-        const votePercentage = vote.votePercentage
-        const xpath = `xpath=//input[@data-testid="${appName}-vote-input"]`
-        await expect(this.page.locator(xpath).first()).toBeEnabled()
-        await this.page.locator(xpath).first().scrollIntoViewIfNeeded()
-        await this.page.locator(xpath).first().fill(String(votePercentage))
+        // await this.voteAppCheckbox(vote.appName).
+        // await this.voteAppCheckbox(vote.appName).click()
+        await this.voteAppCard(vote.appName).click()
       }
-      await this.castVoteButton.first().click()
+      await this.continueButton.click()
+
+      // allocate votes
+      for (const vote of votes) {
+        await this.voteAppInput(vote.appName).fill(String(vote.votePercentage))
+      }
+      await this.continueButton.click()
+
+      // confirm vote
+      await this.page.waitForURL("**/rounds/**/vote/confirm", { timeout: 10000 })
+      await this.pageTitle.waitFor({ state: "visible", timeout: 10000 })
+      await this.continueButton.click()
+
+      // expect vote casting to succeed
       const voteCastDialog = new VoteCastDialog(this.page)
       await voteCastDialog.expectDialogSuccess()
       await voteCastDialog.closeDialog()
