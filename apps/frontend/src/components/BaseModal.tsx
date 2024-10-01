@@ -5,8 +5,10 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   children: React.ReactNode
+  ariaTitle: string
+  ariaDescription: string
 }
-export const BaseModal = ({ isOpen, onClose, children }: Props) => {
+export const BaseModal = ({ isOpen, onClose, children, ariaTitle, ariaDescription }: Props) => {
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
 
   if (isDesktop)
@@ -15,13 +17,15 @@ export const BaseModal = ({ isOpen, onClose, children }: Props) => {
         <ModalOverlay />
         <ModalContent>
           <ModalCloseButton />
-          <ModalBody p={"40px"}>{children}</ModalBody>
+          <ModalBody p={"40px"} borderRadius="xl">
+            {children}
+          </ModalBody>
         </ModalContent>
       </Modal>
     )
 
   return (
-    <BaseBottomSheet isOpen={isOpen} onClose={onClose}>
+    <BaseBottomSheet isOpen={isOpen} onClose={onClose} ariaTitle={ariaTitle} ariaDescription={ariaDescription}>
       {children}
     </BaseBottomSheet>
   )

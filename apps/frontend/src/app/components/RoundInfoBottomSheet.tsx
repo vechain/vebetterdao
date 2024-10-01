@@ -60,7 +60,12 @@ export const RoundInfoBottomSheet = () => {
         </HStack>
       )}
 
-      <BaseBottomSheet isOpen={isOpen} onClose={onClose} height="95vh">
+      <BaseBottomSheet
+        isOpen={isOpen}
+        onClose={onClose}
+        height="95vh"
+        ariaTitle={t("Round #{{round}}", { round: allocationRound.roundId })}
+        ariaDescription={t("Round #{{round}}", { round: allocationRound.roundId })}>
         <VStack spacing={6} align="stretch" mx="auto">
           <HStack spacing={4} justify="space-between" w="full">
             <Box>

@@ -17,7 +17,11 @@ export const ActivityDayModal = ({ isOpen, onClose, date }: Props) => {
 
   const flatActions = data?.pages.map(page => page.data).flat() ?? []
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose}>
+    <BaseModal
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaTitle={`ActivityDayModal for ${date}`}
+      ariaDescription={`ActivityDayModal for ${date}`}>
       <VStack spacing={3} align="stretch">
         <Box>
           <Text fontWeight="600" color="#848484">
