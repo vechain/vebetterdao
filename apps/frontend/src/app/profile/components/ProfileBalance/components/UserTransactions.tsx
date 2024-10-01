@@ -1,8 +1,9 @@
 import { useSustainabilityActions } from "@/api"
 import { TransactionCard, TransactionType } from "@/components"
-import { Card, CardBody, Heading, VStack } from "@chakra-ui/react"
+import { Button, Card, CardBody, Flex, Heading, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useMemo } from "react"
+import { useRouter } from "next/navigation"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 export const UserTransactions = () => {
@@ -64,6 +65,11 @@ export const UserTransactions = () => {
     return _transactions
   }, [actions])
 
+  const router = useRouter()
+  const handleSeeAll = useCallback(() => {
+    router.push("/transactions")
+  }, [router])
+
   return (
     <Card w={"full"} variant={"baseWithBorder"}>
       <CardBody>
@@ -76,6 +82,11 @@ export const UserTransactions = () => {
               <TransactionCard key={transaction.id} type={transaction.type} data={transaction.data} />
             ))}
           </VStack>
+          <Flex justify="center">
+            <Button variant={"primaryGhost"} onClick={handleSeeAll}>
+              {t("See all")}
+            </Button>
+          </Flex>
         </VStack>
       </CardBody>
     </Card>
