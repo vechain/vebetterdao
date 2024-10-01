@@ -1,4 +1,5 @@
 import { useB3trBalance, useVot3Balance } from "@/api"
+import { WalletNotConnectedOverlay } from "@/components"
 import { ConvertModal } from "@/components/Convert/ConvertModal"
 import { Box, Button, Heading, HStack, Image, Skeleton, Stack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilArrowUpRight, UilExchangeAlt } from "@iconscout/react-unicons"
@@ -29,6 +30,8 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
     router.push("/profile")
   }, [router])
 
+  if (!account) return <WalletNotConnectedOverlay />
+
   return (
     <VStack
       w="full"
@@ -37,8 +40,8 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
       bg="#004CFC"
       rounded="xl"
       color="white"
-      padding="4"
       position={"relative"}
+      p={4}
       overflow={"hidden"}>
       <Box position="absolute" top={"-140%"} left={"-30%"} w={"150%"} h="auto" zIndex={1}>
         <Image src={"/images/cloud-background.png"} alt="cloud" objectFit={"contain"} />

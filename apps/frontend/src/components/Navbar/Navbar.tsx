@@ -45,7 +45,7 @@ export const Navbar: React.FC = () => {
       px={0}
       position={"sticky"}
       top={0}
-      zIndex={2}
+      zIndex={4}
       h={"auto"}
       w={"full"}
       transition="transform 0.3s ease-in-out"
