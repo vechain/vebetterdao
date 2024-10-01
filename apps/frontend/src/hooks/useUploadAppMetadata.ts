@@ -34,6 +34,11 @@ export const useUploadAppMetadata = () => {
           mediaFolder.file("banner.jpeg", bannerBlob)
         }
 
+        if (metadata.ve_world.banner) {
+          const veWorldBannerBlob = base64ToBlob(metadata.ve_world.banner.split(",")[1] ?? "", "image/jpeg")
+          mediaFolder.file("ve_world_banner.jpeg", veWorldBannerBlob)
+        }
+
         for (let i = 0; i < metadata.screenshots.length; i++) {
           const screenshot = metadata.screenshots[i]
           if (screenshot) {
@@ -55,6 +60,11 @@ export const useUploadAppMetadata = () => {
           logo: metadata.logo ? `ipfs://${imagesCid}/media/logo.jpeg` : metadata.logo,
           banner: metadata.banner ? `ipfs://${imagesCid}/media/banner.jpeg` : metadata.banner,
           screenshots: metadata.screenshots.map((_, index) => `ipfs://${imagesCid}/media/screenshot${index + 1}.jpeg`),
+          ve_world: {
+            banner: metadata.ve_world.banner
+              ? `ipfs://${imagesCid}/media/ve_world_banner.jpeg`
+              : metadata.ve_world.banner,
+          },
         }
 
         // Generate metadata Blob
