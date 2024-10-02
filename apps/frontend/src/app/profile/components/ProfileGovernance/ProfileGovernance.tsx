@@ -6,7 +6,7 @@ import {
 } from "@/api"
 import { useCallback, useMemo, useState } from "react"
 import {
-  EmptyStateProposals,
+  EmptyStateGovernance,
   PaginatedProposals,
   PaginatedTopVotedApps,
   PreviewCreatedProposals,
@@ -101,7 +101,7 @@ export const ProfileGovernance = () => {
               onSeeAllProposals={onSeeAllCreatedProposals}
             />
           ) : (
-            <EmptyStateProposals
+            <EmptyStateGovernance
               title="Created Proposals"
               description="Your created proposals will appear here."
               buttonText="Explore governance"
@@ -117,7 +117,7 @@ export const ProfileGovernance = () => {
               onSeeAllProposals={onSeeAllVotedProposals}
             />
           ) : (
-            <EmptyStateProposals
+            <EmptyStateGovernance
               title="Voted Proposals"
               description="Your voted proposals will appear here."
               buttonText="Explore governance"
@@ -133,7 +133,7 @@ export const ProfileGovernance = () => {
               onSeeAllAppsVoted={onSeeAllAppsVoted}
             />
           ) : (
-            <EmptyStateProposals
+            <EmptyStateGovernance
               title="Your Most Voted Apps"
               description="Your top voted apps will appear here."
               buttonText="Explore allocations"
