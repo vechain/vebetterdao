@@ -27,10 +27,10 @@ export const Navbar: React.FC = () => {
           (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
           (route.name === "Admin" ? isAdmin : true) &&
           (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true) &&
-          (route.name === "Profile" ? isLargerThan1200 : true)
+          (route.name === "Profile" ? isLargerThan1200 && !!account : true)
         )
       }),
-    [allocationRoundsEvents, isAdmin, isLargerThan1200],
+    [account, allocationRoundsEvents?.created?.length, isAdmin, isLargerThan1200],
   )
 
   const parsedRoutesToRender = useMemo(() => {
