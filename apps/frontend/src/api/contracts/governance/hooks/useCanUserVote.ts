@@ -7,7 +7,7 @@ import {
 } from "../../xAllocations"
 import { useGetVotesOnBlock } from "./useVotesOnBlock"
 import { useVotingThreshold } from "./useVotingThreshold"
-import { useIsPerson } from "../../vePassport"
+import { useIsUserPerson } from "../../vePassport"
 
 /**
  * Hook to check if a user can vote in a round.
@@ -27,7 +27,7 @@ export const useCanUserVote = () => {
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = [1, 2].includes(state ?? 0)
-  const { data: isPerson, isLoading: isPersonLoading } = useIsPerson()
+  const { data: isPerson, isLoading: isPersonLoading } = useIsUserPerson()
 
   return {
     data: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && isPerson,

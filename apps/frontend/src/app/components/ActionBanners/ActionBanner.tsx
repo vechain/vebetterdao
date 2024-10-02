@@ -4,7 +4,7 @@ import { DoActionBanner } from "./components/DoActionBanner"
 import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
 import { useCanUserVote, useVotingRewards } from "@/api"
 import { CastVoteBanner } from "./components/CastVoteBanner"
-import { useIsPerson } from "@/api/contracts/vePassport/hooks/useIsPerson"
+import { useIsUserPerson } from "@/api/contracts/vePassport/hooks/useIsPerson"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 
 export const ActionBanner = () => {
@@ -12,7 +12,7 @@ export const ActionBanner = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
 
   const votingRewardsQuery = useVotingRewards()
-  const { data: isPerson, isLoading: isPersonLoading } = useIsPerson()
+  const { data: isPerson, isLoading: isPersonLoading } = useIsUserPerson()
   const { data: canUserVote, isLoading: canUserVoteLoading } = useCanUserVote()
 
   const showDoActionBanner = !isPersonLoading && !isPerson
