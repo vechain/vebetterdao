@@ -4,6 +4,7 @@ import { ManagedAppsCard } from "../../components/ManagedAppsCard"
 import { YourBetterActionsCard } from "./YourBetterActionsCard"
 import { TokensBalance } from "./TokensBalance"
 import { Leaderboard } from "./Leaderboard"
+import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 
 export const DashboardSideBar = () => {
   return (
@@ -15,6 +16,7 @@ export const DashboardSideBar = () => {
       <Leaderboard />
       <GmNFT />
       <ManagedAppsCard />
+      <SupplyBreakdownCard />
     </VStack>
   )
 }

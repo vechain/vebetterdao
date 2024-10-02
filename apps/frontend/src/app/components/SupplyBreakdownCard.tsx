@@ -59,7 +59,7 @@ export const SupplyBreakdownCard = () => {
   }, [data])
 
   return (
-    <Card variant="baseWithBorder">
+    <Card variant="baseWithBorder" w="full">
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
           <Heading size="md">{t("Supply breakdown")}</Heading>
