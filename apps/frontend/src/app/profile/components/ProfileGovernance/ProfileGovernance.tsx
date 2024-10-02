@@ -39,8 +39,6 @@ export const ProfileGovernance = () => {
 
   const topVotedApps = useUserTopVotedApps(account ?? "")
 
-  console.log({ votedProposals, votedProposalsWithDescription, topVotedApps })
-
   const [listView, setListView] = useState<ListView>(ListView.ALL)
 
   const onSeeAllCreatedProposals = useCallback(() => {
