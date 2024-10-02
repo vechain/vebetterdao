@@ -1,4 +1,5 @@
-import config from "@repo/config/local"
+import { getConfig } from "@repo/config"
+const config = getConfig()
 
 export const CONTRACT_LIST = [
   {
@@ -79,6 +80,7 @@ export const CONTRACT_LIST = [
     contractAddress: config.x2EarnRewardsPoolContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE", "IMPACT_KEY_MANAGER_ROLE"],
   },
+  // TODO: Add node management contract when deployed
   // {
   //   name: "Node Management Contract",
   //   contractAddress: config.nodeManagementContractAddress,
