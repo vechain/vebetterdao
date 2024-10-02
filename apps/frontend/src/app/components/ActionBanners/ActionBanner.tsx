@@ -1,98 +1,110 @@
-import { useCallback, useMemo, useRef } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
+import { Box, Flex, Button, Circle } from "@chakra-ui/react"
 import { DoActionBanner } from "./components/DoActionBanner"
-import { Flex, IconButton, Show } from "@chakra-ui/react"
-import { ClaimB3trBanner } from "./components/ClaimB3trBanner"
-import { useCanUserVote, useCurrentRoundReward } from "@/api"
+import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
+import { useCanUserVote, useVotingRewards } from "@/api"
 import { CastVoteBanner } from "./components/CastVoteBanner"
-import { UilArrowLeft, UilArrowRight } from "@iconscout/react-unicons"
-import { useIsPerson } from "@/api/contracts/vePassport/hooks/useIsPerson"
+import { useIsUserPerson } from "@/api/contracts/vePassport/hooks/useIsPerson"
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 
 export const ActionBanner = () => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const { rewards, isLoading: isRoundRewardLoading } = useCurrentRoundReward()
-  const { data: isPerson, isLoading: isPersonLoading } = useIsPerson()
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+
+  const votingRewardsQuery = useVotingRewards()
+  const { data: isPerson, isLoading: isPersonLoading } = useIsUserPerson()
   const { data: canUserVote, isLoading: canUserVoteLoading } = useCanUserVote()
 
   const showDoActionBanner = !isPersonLoading && !isPerson
-  const showClaimB3trBanner = !isRoundRewardLoading && rewards > 0
+  const showClaimB3trBanner = votingRewardsQuery.data?.total && votingRewardsQuery.data.total !== 0
   const showCastVoteBanner = !canUserVoteLoading && canUserVote
 
-  const scroll = useCallback((direction: "left" | "right") => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = scrollContainerRef.current.clientWidth + 16
-      scrollContainerRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      })
-    }
-  }, [])
-
-  const visibleBanners = useMemo(() => {
-    const banners = []
-    if (showDoActionBanner) banners.push(<DoActionBanner />)
-    if (showCastVoteBanner) banners.push(<CastVoteBanner />)
-    if (showClaimB3trBanner) banners.push(<ClaimB3trBanner />)
-    return banners
+  const banners = useMemo(() => {
+    const bannerComponents = []
+    if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
+    if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
+    if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
+    return bannerComponents
   }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner])
 
-  const moreThanOneBanner = useMemo(() => {
-    return visibleBanners.length > 1
-  }, [visibleBanners])
+  const nextSlide = useCallback(() => {
+    setCurrentIndex(prevIndex => (prevIndex + 1) % banners.length)
+  }, [banners.length])
 
-  if (!visibleBanners.length) return null
+  const prevSlide = useCallback(() => {
+    setCurrentIndex(prevIndex => (prevIndex - 1 + banners.length) % banners.length)
+  }, [banners.length])
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout
+
+    if (isAutoPlaying && banners.length > 1) {
+      intervalId = setInterval(nextSlide, 10000)
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId)
+    }
+  }, [isAutoPlaying, nextSlide, banners.length])
+
+  if (banners.length === 0) return null
 
   return (
-    <Flex position="relative" minW="full">
-      {moreThanOneBanner && (
-        <Show above="md">
-          <IconButton
-            variant="primaryIconButton"
-            zIndex={2}
-            position="absolute"
-            left={-50}
-            top={"calc(50% - 20px)"}
-            aria-label="Scroll left"
-            icon={<UilArrowLeft />}
-            onClick={() => scroll("left")}
-          />
-        </Show>
-      )}
-      <Flex overflow="hidden" minW="full">
-        <Flex
-          gap={4}
-          pb={2}
-          overflowX="auto"
-          minW="full"
-          ref={scrollContainerRef}
-          sx={{
-            "&::-webkit-scrollbar": {
-              display: "none",
-            },
-          }}>
-          {visibleBanners.map((banner, index) => (
-            <Flex
-              key={index}
-              minW={moreThanOneBanner ? ["93%", "93%", "100%"] : "100%"}
-              w={moreThanOneBanner ? ["93%", "93%", "full"] : "100%"}>
-              {banner}
-            </Flex>
-          ))}
-        </Flex>
+    <Box position="relative" overflow="hidden" borderRadius="lg" w="full">
+      <Flex
+        transition="transform 0.5s ease-in-out"
+        transform={`translateX(-${currentIndex * 100}%)`}
+        onMouseEnter={() => setIsAutoPlaying(false)}
+        onMouseLeave={() => setIsAutoPlaying(true)}
+        h="full">
+        {banners.map((banner, index) => (
+          <Box key={index} width="100%" flexShrink={0} h="full">
+            {banner}
+          </Box>
+        ))}
       </Flex>
-      {moreThanOneBanner && (
-        <Show above="md">
-          <IconButton
-            variant="primaryIconButton"
-            zIndex={2}
+
+      {banners.length > 1 && (
+        <>
+          <Button
             position="absolute"
-            right={-50}
-            top={"calc(50% - 20px)"}
-            aria-label="Scroll right"
-            icon={<UilArrowRight />}
-            onClick={() => scroll("right")}
-          />
-        </Show>
+            top="50%"
+            left="4"
+            transform="translateY(-50%)"
+            bg="blackAlpha.100"
+            color="white"
+            borderRadius="full"
+            onClick={prevSlide}
+            _hover={{ bg: "blackAlpha.300" }}>
+            <FaChevronLeft size={12} />
+          </Button>
+
+          <Button
+            position="absolute"
+            top="50%"
+            right="4"
+            transform="translateY(-50%)"
+            bg="blackAlpha.100"
+            color="white"
+            borderRadius="full"
+            onClick={nextSlide}
+            _hover={{ bg: "blackAlpha.300" }}>
+            <FaChevronRight size={12} />
+          </Button>
+
+          <Flex position="absolute" bottom="4" left="50%" transform="translateX(-50%)" gap="2">
+            {banners.map((_, index) => (
+              <Circle
+                key={index}
+                size="3"
+                bg={index === currentIndex ? "white" : "gray.400"}
+                as="button"
+                onClick={() => setCurrentIndex(index)}
+              />
+            ))}
+          </Flex>
+        </>
       )}
-    </Flex>
+    </Box>
   )
 }

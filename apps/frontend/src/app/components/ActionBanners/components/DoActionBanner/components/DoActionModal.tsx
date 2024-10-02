@@ -1,4 +1,4 @@
-import { useThresholdParticipationScore, useUserRoundScore } from "@/api"
+import { useThresholdParticipationScore, useUserCurrentRoundScore } from "@/api"
 import { CustomModalContent } from "@/components"
 import {
   Modal,
@@ -27,7 +27,8 @@ type Props = {
 export const DoActionModal = ({ doActionModal }: Props) => {
   const { t } = useTranslation()
   const { data: scoreThreshold, isLoading: isScoreThresholdLoading } = useThresholdParticipationScore()
-  const { data: userScore, isLoading: isUserRoundScoreLoading } = useUserRoundScore()
+  const { data: userScore, isLoading: isUserRoundScoreLoading } = useUserCurrentRoundScore()
+
   const router = useRouter()
   const goToApps = useCallback(() => {
     router.push("/apps")

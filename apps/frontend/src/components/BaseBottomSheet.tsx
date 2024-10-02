@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react"
+import { Box, VisuallyHidden } from "@chakra-ui/react"
 import { Drawer } from "vaul"
 
 type Props = {
@@ -6,8 +6,17 @@ type Props = {
   onClose: () => void
   height?: string
   children: React.ReactNode
+  ariaTitle: string
+  ariaDescription: string
 }
-export const BaseBottomSheet = ({ isOpen, onClose, children, height }: Props) => {
+export const BaseBottomSheet = ({
+  isOpen,
+  onClose,
+  children,
+  height,
+  ariaTitle = "BottomSheet",
+  ariaDescription,
+}: Props) => {
   return (
     <Drawer.Root
       shouldScaleBackground
@@ -30,6 +39,8 @@ export const BaseBottomSheet = ({ isOpen, onClose, children, height }: Props) =>
           }}
         />
         <Drawer.Content
+          aria-description={ariaDescription}
+          aria-describedby={ariaTitle}
           style={{
             zIndex: 3,
             backgroundColor: "#F9FAFB",
@@ -40,6 +51,9 @@ export const BaseBottomSheet = ({ isOpen, onClose, children, height }: Props) =>
             right: 0,
             height,
           }}>
+          <VisuallyHidden>
+            <Drawer.Title>{ariaTitle}</Drawer.Title>
+          </VisuallyHidden>
           <div
             style={{
               backgroundColor: "#fff",

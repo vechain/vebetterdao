@@ -58,7 +58,7 @@ export const getSustainabilityUserOverview = async (
   data: SustainabilityUserOverviewRequest,
 ): Promise<SustainabilityUserOverviewResponse> => {
   if (!indexerUrl) throw new Error("Indexer URL not found")
-  if (!data.wallet) throw new Error("Wallet is required")
+  if (!data.wallet && !data.roundId) throw new Error("Wallet or roundId is required")
 
   const queryString = buildQueryString(data)
 
@@ -88,6 +88,7 @@ export const useSustainabilityUserOverview = ({
   direction = "asc",
 }: Omit<SustainabilityUserOverviewRequest, "page" | "size">) => {
   return useInfiniteQuery({
+    enabled: !!wallet || !!roundId,
     queryKey: getSustainabilityUserOverviewQueryKey({
       wallet,
       roundId,

@@ -1,10 +1,12 @@
 import { VStack, HStack, Button } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
-import { useMemo, useState } from "react"
+import { useMemo, useEffect, useState } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
 import { useTranslation } from "react-i18next"
 import { ProfileBalance } from "./ProfileBalance"
 import { ProfileGovernance } from "./ProfileGovernance"
+import { useRouter } from "next/navigation"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 enum Tab {
   Balance = "balance",
@@ -15,6 +17,9 @@ enum Tab {
 export const ProfilePageContent = () => {
   const { t } = useTranslation()
   const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Balance)
+
+  const router = useRouter()
+  const { account } = useWallet()
 
   const selectedTabContent = useMemo(() => {
     switch (selectedTab) {
@@ -28,6 +33,12 @@ export const ProfilePageContent = () => {
         return null
     }
   }, [selectedTab])
+
+  useEffect(() => {
+    if (!account) router.back()
+  }, [account, router])
+
+  if (!account) return <></>
 
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
