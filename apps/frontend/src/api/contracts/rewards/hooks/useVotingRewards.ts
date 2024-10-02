@@ -17,7 +17,7 @@ const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
 const DECIMAL_PLACES = 4
 /**
  * useVotingRewards is a custom hook that fetches the voting rewards for a given round and voter.
- * It uses the useQueries hook from react-query to fetch the data in parallel for all rounds up to the current one.
+ * It uses the mutli-clause reading to fetch the data in parallel for all rounds up to the current one.
  *
  * @param {string} currentRoundId - The id of the current round. If not provided, no queries will be made.
  * @param {string} voter - The address of the voter. If not provided, the rewards for all voters will be fetched.
