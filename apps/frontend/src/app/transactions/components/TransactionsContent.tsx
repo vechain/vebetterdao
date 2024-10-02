@@ -1,13 +1,25 @@
 import { TransactionType } from "@/components"
 import { useTranslation } from "react-i18next"
 import { useCallback, useMemo, useState } from "react"
-import { useSustainabilityActions } from "@/api"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { VStack, Heading, Card, CardBody, Text, HStack, Menu, MenuButton, MenuList, MenuItem } from "@chakra-ui/react"
+import { useTransactionsMock } from "@/api"
+import {
+  VStack,
+  Heading,
+  Card,
+  CardBody,
+  Text,
+  HStack,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Spinner,
+} from "@chakra-ui/react"
 import { TransactionCard } from "@/components"
 import { FaChevronDown, FaChevronLeft, FaChevronUp } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
 import dayjs from "dayjs"
+import InfiniteScroll from "react-infinite-scroll-component"
 
 export const TransactionsContent = () => {
   const { t } = useTranslation()
@@ -46,68 +58,19 @@ export const TransactionsContent = () => {
 
   const selectedFilter = useMemo(() => filters.find(filter => filter.id === filterId), [filterId, filters])
 
-  const { account } = useWallet()
-  const { data } = useSustainabilityActions({
-    wallet: account ?? undefined,
-    direction: "desc",
-  })
-
-  const actions = useMemo(() => data?.pages.map(page => page.data).flat() ?? [], [data])
+  const { data, fetchNextPage, hasNextPage } = useTransactionsMock({ kind: selectedFilter?.id || "all" })
 
   const transactions = useMemo(() => {
-    const _transactions: { id: string; type: TransactionType; data: any }[] = []
-    // add better actions
-    actions.forEach((action, index) => {
-      _transactions.push({
-        id: `better-action-${index}`,
-        type: "better-action" as TransactionType,
-        data: action,
-      })
-    })
-    // TODO: fetch transactions
-    // add mocked examples
-    _transactions.push({
-      id: "swap",
-      type: "swap" as TransactionType,
-      data: {
-        type: "swap",
-        amount: 100,
-        blockTimestamp: dayjs().subtract(1, "day").unix(),
-      },
-    })
-    _transactions.push({
-      id: "claim",
-      type: "claim" as TransactionType,
-      data: {
-        type: "claim",
-        amount: 100,
-        blockTimestamp: dayjs().subtract(1, "day").unix(),
-      },
-    })
-    _transactions.push({
-      id: "support",
-      type: "support" as TransactionType,
-      data: {
-        type: "support",
-        amount: 100,
-        blockTimestamp: dayjs().subtract(1, "day").unix(),
-      },
-    })
-    _transactions.push({
-      id: "gm-upgrade",
-      type: "gm-upgrade" as TransactionType,
-      data: {
-        type: "gm-upgrade",
-        amount: 100,
-        blockTimestamp: dayjs().subtract(1, "day").unix(),
-      },
-    })
-
-    return _transactions.filter(transaction => {
-      if (filterId === "all") return true
-      return transaction.type === filterId
-    })
-  }, [actions, filterId])
+    return (
+      data?.pages.flatMap(page =>
+        page.data.map(transaction => ({
+          id: transaction.id,
+          type: transaction.type as TransactionType,
+          data: transaction,
+        })),
+      ) ?? []
+    )
+  }, [data])
 
   const groupTransactionsByDay = (transactions: any[]) => {
     return transactions
@@ -165,22 +128,28 @@ export const TransactionsContent = () => {
               </>
             )}
           </Menu>
-          <VStack spacing={6} align="stretch">
-            {Object.entries(groupedTransactions).length === 0 ? (
-              <Text>{t("No transactions found")}</Text>
-            ) : (
-              Object.entries(groupedTransactions).map(([day, transactions]) => (
-                <VStack key={day} spacing={3} align="stretch">
-                  <Text fontWeight="600" color="#848484">
-                    {dayjs(day).format("MMMM D YYYY").toUpperCase()}
-                  </Text>
-                  {transactions.map((transaction: any) => (
-                    <TransactionCard key={transaction.id} type={transaction.type} data={transaction.data} />
-                  ))}
-                </VStack>
-              ))
-            )}
-          </VStack>
+          <InfiniteScroll
+            dataLength={transactions.length}
+            next={fetchNextPage}
+            hasMore={!!hasNextPage}
+            loader={<Spinner />}>
+            <VStack spacing={6} align="stretch">
+              {Object.entries(groupedTransactions).length === 0 ? (
+                <Text>{t("No transactions found")}</Text>
+              ) : (
+                Object.entries(groupedTransactions).map(([day, transactions]) => (
+                  <VStack key={day} spacing={3} align="stretch">
+                    <Text fontWeight="600" color="#848484">
+                      {dayjs(day).format("MMMM D YYYY").toUpperCase()}
+                    </Text>
+                    {transactions.map((transaction: any) => (
+                      <TransactionCard key={transaction.id} type={transaction.type} data={transaction.data} />
+                    ))}
+                  </VStack>
+                ))
+              )}
+            </VStack>
+          </InfiniteScroll>
         </VStack>
       </CardBody>
     </Card>
