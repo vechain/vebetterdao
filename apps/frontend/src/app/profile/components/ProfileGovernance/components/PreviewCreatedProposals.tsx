@@ -1,11 +1,10 @@
-import { ProposalCreatedEvent, ProposalMetadata } from "@/api"
+import { ProposalCreatedEvent, ProposalMetadata, useIpfsMetadatas } from "@/api"
 import { toIPFSURL, validateIpfsUri } from "@/utils"
 import { HStack, VStack, Text } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
 import { ProposalBox } from "."
-import { useIpfsMetadatas } from "@/api"
 
 type Props = {
   firstProposals?: ProposalCreatedEvent[]
