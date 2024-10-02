@@ -4,7 +4,7 @@ export const CONTRACT_LIST = [
   {
     name: "B3TR",
     contractAddress: config.b3trContractAddress,
-    roles: [],
+    roles: ["DEFAULT_ADMIN_ROLE", "MINTER_ROLE", "PAUSER_ROLE"],
   },
   {
     name: "B3TR Governor",
