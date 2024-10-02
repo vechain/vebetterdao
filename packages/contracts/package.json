@@ -17,6 +17,7 @@
     "check-contracts-deployment:staging": "npx hardhat run scripts/checkContractsDeployment.ts --network vechain_testnet",
     "check-contracts-deployment:testnet": "npx hardhat run scripts/checkContractsDeployment.ts --network vechain_testnet",
     "check-contracts-deployment:mainnet": "npx hardhat run scripts/checkContractsDeployment.ts --network vechain_mainnet",
+    "simulate-passport-score:mainnet": "npx hardhat run scripts/simulatePassportScore.ts --network vechain_mainnet",
     "generate-galaxy-member-metadata": "npx hardhat run scripts/metadata/GalaxyMember/generate.ts",
     "upload-galaxy-member-metadata": "yarn generate-galaxy-member-metadata && npx hardhat run scripts/metadata/GalaxyMember/upload.ts",
     "generate-xapp-metadata": "npx hardhat run scripts/metadata/xApps/generate.ts",

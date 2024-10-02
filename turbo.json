@@ -66,11 +66,8 @@
       "persistent": true,
       "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:testnet"]
     },
-    "setup-contracts:mainnet": {
-      "cache": false,
-      "persistent": true,
-      "dependsOn": ["^compile", "@repo/contracts#check-contracts-deployment:mainnet"]
-    },
+
+    "simulate-passport-score:mainnet": {},
     "@repo/config#check-or-generate-local-config": {
       "cache": false
     },

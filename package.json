@@ -42,6 +42,7 @@
     "contracts:generate-xapp-metadata:ipfs-prod": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run generate-xapp-metadata --filter=contracts",
     "contracts:upload-xapp-metadata:ipfs-prod": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run upload-xapp-metadata --filter=contracts",
     "contracts:generate-docs": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run generate-docs --filter=contracts",
+    "contracts:simulate-passport-score:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run simulate-passport-score:mainnet --filter=contracts",
     "solo-up": "make solo-up",
     "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo run playwright:e2e",
     "generate-translations": "dotenv -e .env -- turbo generate-translations",
