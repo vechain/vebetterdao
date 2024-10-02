@@ -16,7 +16,7 @@ export const ActionBanner = () => {
   const { data: canUserVote, isLoading: canUserVoteLoading } = useCanUserVote()
 
   const showDoActionBanner = !isPersonLoading && !isPerson
-  const showClaimB3trBanner = votingRewardsQuery.data?.total && !votingRewardsQuery.data.total.eq(0)
+  const showClaimB3trBanner = votingRewardsQuery.data?.total && votingRewardsQuery.data.total !== 0
   const showCastVoteBanner = !canUserVoteLoading && canUserVote
 
   const banners = useMemo(() => {

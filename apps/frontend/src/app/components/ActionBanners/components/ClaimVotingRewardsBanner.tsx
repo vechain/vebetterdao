@@ -1,6 +1,6 @@
 import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { useAllocationsRoundsEvents, useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
+import { useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
 import { UilGift } from "@iconscout/react-unicons"
 import { TransactionModal } from "@/components"
 import { useDisclosure } from "@chakra-ui/react"
@@ -14,7 +14,6 @@ export const ClaimVotingRewardsBanner = () => {
   const { account } = useWallet()
 
   const roundsRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
-  const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
@@ -37,7 +36,7 @@ export const ClaimVotingRewardsBanner = () => {
     handleClaim()
   }, [claimRewardsMutation, handleClaim])
 
-  if (allocationRoundsEvents?.created.length === 0) return null
+  if (roundsRewardsQuery.data?.total !== 0) return null
 
   return (
     <>
