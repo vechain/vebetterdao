@@ -17,7 +17,7 @@ const env = process.env.NEXT_PUBLIC_APP_ENV as EnvConfig
 if (!env) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set")
 
 // Configuration Constants
-const roundsForCumulativeScore = 1 // Number of rounds to consider for cumulative score
+const roundsForCumulativeScore = 5 // Number of rounds to consider for cumulative score
 const decayRate = 20 // Decay rate in percentage
 const scalingFactor = 1e18 // Scaling factor for score calculation
 const thresholds = [100, 200, 300, 400] // Thresholds to simulate against
@@ -42,7 +42,9 @@ async function main() {
     const userScoresPerRound = calculateUserScores(events, rounds)
     const userCumulativeScores = calculateCumulativeScores(userScoresPerRound, currentRoundId)
 
-    console.log(`---------------SIMULATION WITH THRESHOLD ${threshold} -----------------`)
+    console.log(
+      `---------------SIMULATION WITH THRESHOLD ${threshold} --- ${roundsForCumulativeScore} Round(s) -----------------`,
+    )
     displayResults(userCumulativeScores, threshold)
     console.log("-------------------------------END----------------------------")
     console.log("\n")
@@ -52,13 +54,16 @@ async function main() {
 }
 
 /**
- * Calculate the user scores for each round.
+ * Calculate the user scores and action count for each round.
  * @param events Reward events.
  * @param rounds Round information.
- * @returns Map of user addresses to round scores.
+ * @returns Map of user addresses to their scores and action counts.
  */
-function calculateUserScores(events: RewardDistributedEvent[], rounds: RoundInfo[]): Map<string, Map<number, number>> {
-  const userScores = new Map<string, Map<number, number>>()
+function calculateUserScores(
+  events: RewardDistributedEvent[],
+  rounds: RoundInfo[],
+): Map<string, { scores: Map<number, number>; actions: number }> {
+  const userScores = new Map<string, { scores: Map<number, number>; actions: number }>()
 
   for (const event of events) {
     const roundId = getRoundIdForBlock(Number(event.Log.meta.blockNumber), rounds)
@@ -76,20 +81,19 @@ function calculateUserScores(events: RewardDistributedEvent[], rounds: RoundInfo
 
 /**
  * Calculate the cumulative score for all users with decay applied.
- * @param userScores Map of user scores for each round.
+ * @param userScores Map of user scores and action counts for each round.
  * @param currentRound The current round.
- * @returns Map of user addresses to cumulative scores.
- *
+ * @returns Map of user addresses to cumulative scores and action counts.
  */
 function calculateCumulativeScores(
-  userScores: Map<string, Map<number, number>>,
+  userScores: Map<string, { scores: Map<number, number>; actions: number }>,
   currentRound: number,
-): Map<string, number> {
-  const cumulativeScores = new Map<string, number>()
+): Map<string, { cumulativeScore: number; actions: number }> {
+  const cumulativeScores = new Map<string, { cumulativeScore: number; actions: number }>()
 
-  userScores.forEach((roundScores, user) => {
-    const cumulativeScore = applyDecay(roundScores, currentRound)
-    cumulativeScores.set(user, cumulativeScore)
+  userScores.forEach(({ scores, actions }, user) => {
+    const cumulativeScore = applyDecay(scores, currentRound)
+    cumulativeScores.set(user, { cumulativeScore, actions })
   })
 
   return cumulativeScores
@@ -118,27 +122,53 @@ function applyDecay(roundScores: Map<number, number>, currentRound: number): num
 }
 
 /**
- * Update the score for a user and round in the Map.
+ * Update the score and action count for a user and round in the Map.
  */
-function updateScore(userScores: Map<string, Map<number, number>>, user: string, round: number, score: number) {
+function updateScore(
+  userScores: Map<string, { scores: Map<number, number>; actions: number }>,
+  user: string,
+  round: number,
+  score: number,
+) {
   if (!userScores.has(user)) {
-    userScores.set(user, new Map<number, number>())
+    userScores.set(user, { scores: new Map<number, number>(), actions: 0 })
   }
 
-  const roundScores = userScores.get(user)!
-  roundScores.set(round, (roundScores.get(round) || 0) + score)
+  const userData = userScores.get(user)!
+  userData.scores.set(round, (userData.scores.get(round) || 0) + score)
+
+  userData.actions += 1 // Increment the action count
 }
 
 /**
  * Display the simulation results in a table format.
  */
-function displayResults(userCumulativeScores: Map<string, number>, threshold: number) {
+function displayResults(
+  userCumulativeScores: Map<string, { cumulativeScore: number; actions: number }>,
+  threshold: number,
+) {
   const totalUsers = userCumulativeScores.size
-  const usersMeetingThreshold = Array.from(userCumulativeScores.values()).filter(score => score >= threshold)
+  const usersMeetingThreshold = Array.from(userCumulativeScores.values()).filter(
+    ({ cumulativeScore }) => cumulativeScore >= threshold,
+  )
+  const usersNotMeetingThreshold = Array.from(userCumulativeScores.entries()).filter(
+    ([, { cumulativeScore }]) => cumulativeScore < threshold,
+  )
+
+  const firstCloseUser = usersNotMeetingThreshold.sort(([, a], [, b]) => b.cumulativeScore - a.cumulativeScore)[0]
 
   const leaderboard = getLeaderboard(userCumulativeScores)
 
   console.table(leaderboard)
+
+  console.table([
+    {
+      Description: "Closest User to Threshold",
+      Address: firstCloseUser ? firstCloseUser[0] : "None",
+      Score: firstCloseUser ? firstCloseUser[1].cumulativeScore : "N/A",
+      Actions: firstCloseUser ? firstCloseUser[1].actions : "N/A",
+    },
+  ])
 
   console.table([
     {
@@ -159,18 +189,22 @@ function displayResults(userCumulativeScores: Map<string, number>, threshold: nu
 }
 
 /**
- *  Get the leaderboard of users with the highest cumulative scores.
- * @param userCumulativeScores Map of user addresses to cumulative scores.
+ * Get the leaderboard of users with the highest cumulative scores and action counts.
+ * @param userCumulativeScores Map of user addresses to cumulative scores and action counts.
  * @param leaderboardSize Number of users to include in the leaderboard.
- * @returns Array of user objects with address and score.
+ * @returns Array of user objects with address, score, and action count.
  */
-function getLeaderboard(userCumulativeScores: Map<string, number>, leaderboardSize: number = 10) {
+function getLeaderboard(
+  userCumulativeScores: Map<string, { cumulativeScore: number; actions: number }>,
+  leaderboardSize: number = 10,
+) {
   return Array.from(userCumulativeScores.entries())
-    .sort(([, a], [, b]) => b - a)
+    .sort(([, a], [, b]) => b.cumulativeScore - a.cumulativeScore)
     .slice(0, leaderboardSize)
-    .map(([address, score]) => ({
+    .map(([address, { cumulativeScore, actions }]) => ({
       address,
-      score,
+      cumulativeScore,
+      actions,
     }))
 }
 
