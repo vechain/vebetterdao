@@ -2,9 +2,9 @@ import config from "@repo/config/local"
 
 export const CONTRACT_LIST = [
   {
-    name: "B3TR Contract",
+    name: "B3TR",
     contractAddress: config.b3trContractAddress,
-    roles: ["DEFAULT_ADMIN_ROLE", "MINTER_ROLE", "PAUSER_ROLE"],
+    roles: [],
   },
   {
     name: "B3TR Governor",
@@ -18,7 +18,7 @@ export const CONTRACT_LIST = [
     ],
   },
   {
-    name: "Emissions Contract",
+    name: "Emissions",
     contractAddress: config.emissionsContractAddress,
     roles: [
       "DEFAULT_ADMIN_ROLE",
@@ -29,32 +29,32 @@ export const CONTRACT_LIST = [
     ],
   },
   {
-    name: "Galaxy Member Contract",
+    name: "Galaxy Member",
     contractAddress: config.galaxyMemberContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "PAUSER_ROLE", "UPGRADER_ROLE", "MINTER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE"],
   },
   {
-    name: "Timelock Contract",
+    name: "Timelock",
     contractAddress: config.timelockContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "Proposer", "Executor", "UPGRADER_ROLE"],
   },
   {
-    name: "Treasury Contract",
+    name: "Treasury",
     contractAddress: config.treasuryContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "PAUSER_ROLE", "UPGRADER_ROLE", "GOVERNANCE_ROLE"],
   },
   {
-    name: "VOT3 Contract",
+    name: "VOT3",
     contractAddress: config.vot3ContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "PAUSER_ROLE"],
   },
   {
-    name: "Voter Rewards Contract",
+    name: "Voter Rewards",
     contractAddress: config.voterRewardsContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "VOTE_REGISTRAR_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE"],
   },
   {
-    name: "X2Earn Apps Contract",
+    name: "X2Earn Apps",
     contractAddress: config.x2EarnAppsContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "GOVERNANCE_ROLE"],
   },
@@ -79,9 +79,9 @@ export const CONTRACT_LIST = [
     contractAddress: config.x2EarnRewardsPoolContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE", "IMPACT_KEY_MANAGER_ROLE"],
   },
-  {
-    name: "Node Management Contract",
-    contractAddress: config.nodeManagementContractAddress,
-    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE"],
-  },
+  // {
+  //   name: "Node Management Contract",
+  //   contractAddress: config.nodeManagementContractAddress,
+  //   roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE"],
+  // },
 ]
