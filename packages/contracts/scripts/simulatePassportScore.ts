@@ -164,7 +164,7 @@ function displayResults(userCumulativeScores: Map<string, number>, threshold: nu
  * @param leaderboardSize Number of users to include in the leaderboard.
  * @returns Array of user objects with address and score.
  */
-async function getLeaderboard(userCumulativeScores: Map<string, number>, leaderboardSize: number = 10) {
+function getLeaderboard(userCumulativeScores: Map<string, number>, leaderboardSize: number = 10) {
   return Array.from(userCumulativeScores.entries())
     .sort(([, a], [, b]) => b - a)
     .slice(0, leaderboardSize)
