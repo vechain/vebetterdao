@@ -45,27 +45,21 @@ export const getProposalsCreatedEvents = async (thor: Connex.Thor, proposer?: st
   const decodedCreateProposalEvents: ProposalCreatedEvent[] = []
 
   events.forEach(event => {
-    switch (event.topics[0]) {
-      case proposalCreatedEvent.signature: {
-        const decoded = proposalCreatedEvent.decode(event.data, event.topics)
+    if (event.topics[0] === proposalCreatedEvent.signature) {
+      const decoded = proposalCreatedEvent.decode(event.data, event.topics)
 
-        decodedCreateProposalEvents.push({
-          proposalId: decoded[0],
-          proposer: decoded[1],
-          targets: decoded[2],
-          values: decoded[3],
-          signatures: decoded[4],
-          callDatas: decoded[5],
-          description: decoded[6],
-          roundIdVoteStart: decoded[7],
-          depositThreshold: decoded[8],
-          blockMeta: event.meta,
-        })
-        break
-      }
-      default: {
-        throw new Error("Unknown event")
-      }
+      decodedCreateProposalEvents.push({
+        proposalId: decoded[0],
+        proposer: decoded[1],
+        targets: decoded[2],
+        values: decoded[3],
+        signatures: decoded[4],
+        callDatas: decoded[5],
+        description: decoded[6],
+        roundIdVoteStart: decoded[7],
+        depositThreshold: decoded[8],
+        blockMeta: event.meta,
+      })
     }
   })
 
