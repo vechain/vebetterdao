@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { Box, Flex, Button, Circle } from "@chakra-ui/react"
 import { DoActionBanner } from "./components/DoActionBanner"
-import { ClaimB3trBanner } from "./components/ClaimB3trBanner"
-import { useCanUserVote, useCurrentRoundReward } from "@/api"
+import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
+import { useCanUserVote, useVotingRewards } from "@/api"
 import { CastVoteBanner } from "./components/CastVoteBanner"
 import { useIsPerson } from "@/api/contracts/vePassport/hooks/useIsPerson"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -11,19 +11,19 @@ export const ActionBanner = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
 
-  const { rewards, isLoading: isRoundRewardLoading } = useCurrentRoundReward()
+  const votingRewardsQuery = useVotingRewards()
   const { data: isPerson, isLoading: isPersonLoading } = useIsPerson()
   const { data: canUserVote, isLoading: canUserVoteLoading } = useCanUserVote()
 
   const showDoActionBanner = !isPersonLoading && !isPerson
-  const showClaimB3trBanner = !isRoundRewardLoading && rewards > 0
+  const showClaimB3trBanner = votingRewardsQuery.data?.total && !votingRewardsQuery.data.total.eq(0)
   const showCastVoteBanner = !canUserVoteLoading && canUserVote
 
   const banners = useMemo(() => {
     const bannerComponents = []
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
-    if (showClaimB3trBanner) bannerComponents.push(<ClaimB3trBanner key="claim-b3tr" />)
+    if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
     return bannerComponents
   }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner])
 
