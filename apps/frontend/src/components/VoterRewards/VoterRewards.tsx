@@ -1,54 +1,28 @@
 import { useAllocationsRoundsEvents, useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
 import { Card, CardBody, Heading, VStack, Text, Button, Box, Image, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
-import React, { useCallback, useMemo } from "react"
-import BigNumber from "bignumber.js"
+import React, { useCallback } from "react"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 import { B3TRIcon } from "../Icons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { TransactionModal } from "../TransactionModal"
 import { Trans, useTranslation } from "react-i18next"
 
-const DECIMAL_PLACES = 4
-
 // Maximum precision of 4 decimals. Must also round down
-const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 
+const compactFormatter = getCompactFormatter(4)
 export const VoterRewards: React.FC = () => {
   const { t } = useTranslation()
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { account } = useWallet()
 
-  const rewardsPerRound = useVotingRewards(currentRoundId, account ?? undefined)
+  const roundsRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
-  const roundRewards = useMemo(() => {
-    if (!rewardsPerRound) return []
-
-    return rewardsPerRound.map(reward => {
-      return {
-        roundId: reward.data?.roundId ?? "",
-        rewards: reward.data?.rewards ?? "0",
-      }
-    })
-  }, [rewardsPerRound])
-
-  const totalRewards = useMemo(() => {
-    if (!rewardsPerRound) return new BigNumber("0")
-
-    return rewardsPerRound.reduce((acc, reward) => acc.plus(reward.data?.rewards ?? "0"), new BigNumber("0"))
-  }, [rewardsPerRound])
-
-  const totalRewardsFormatted = useMemo(() => {
-    if (!totalRewards) return "0"
-
-    return totalRewards.decimalPlaces(DECIMAL_PLACES, BigNumber.ROUND_DOWN).toString()
-  }, [totalRewards])
-
   const claimRewardsMutation = useClaimRewards({
-    roundRewards,
+    roundRewards: roundsRewardsQuery.data?.roundsRewards ?? [],
   })
 
   const handleClaim = useCallback(() => {
@@ -113,7 +87,7 @@ export const VoterRewards: React.FC = () => {
                   i18nKey="You have {{value}} B3TR rewards pending claim."
                   t={t}
                   values={{
-                    value: compactFormatter.format(Number(totalRewardsFormatted)),
+                    value: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
                   }}
                 />
               </Text>
@@ -122,7 +96,7 @@ export const VoterRewards: React.FC = () => {
             <Button
               zIndex={2}
               mt={2}
-              isDisabled={totalRewards?.eq(0)}
+              isDisabled={roundsRewardsQuery.data?.total.eq(0)}
               isLoading={isClaimRewardsLoading}
               onClick={handleClaim}
               variant={"primaryAction"}

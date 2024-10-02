@@ -1,6 +1,5 @@
 import { Show, VStack } from "@chakra-ui/react"
 import { GmNFT } from "../../components/GmNFT"
-import { VoterRewards } from "../../components/VoterRewards"
 import { ManagedAppsCard } from "../../components/ManagedAppsCard"
 import { YourBetterActionsCard } from "./YourBetterActionsCard"
 import { TokensBalance } from "./TokensBalance"
@@ -14,7 +13,6 @@ export const DashboardSideBar = () => {
       </Show>
       <YourBetterActionsCard />
       <Leaderboard />
-      <VoterRewards />
       <GmNFT />
       <ManagedAppsCard />
     </VStack>
