@@ -44,14 +44,14 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
 
       const res = await thor.explain(clauses).execute()
 
-      let total = new Bignumber(0)
+      let total = 0
       const roundsRewards = res.map((r, index) => {
         const decoded = getReward.decode(r.data)
         const roundId = rounds[index] as string
         const rewards = decoded[0]
         const formattedRewards = ethers.formatEther(rewards)
 
-        total = total.plus(formattedRewards)
+        total += parseFloat(formattedRewards)
 
         queryClient.setQueryData(getRoundRewardQueryKey(roundId, voter), state)
         return {
@@ -61,9 +61,11 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
         }
       })
 
+      const totalFormatted = new Bignumber(total).decimalPlaces(DECIMAL_PLACES, Bignumber.ROUND_DOWN).toString()
+
       return {
         total,
-        totalFormatted: total.decimalPlaces(DECIMAL_PLACES, Bignumber.ROUND_DOWN).toString(),
+        totalFormatted,
         roundsRewards,
       }
     },
