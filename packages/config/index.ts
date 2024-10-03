@@ -26,6 +26,7 @@ export type AppConfig = {
   b3trContractAddress: string
   vot3ContractAddress: string
   b3trGovernorAddress: string
+  veBetterPassportAddress: string
   timelockContractAddress: string
   xAllocationPoolContractAddress: string
   xAllocationVotingContractAddress: string
@@ -39,6 +40,7 @@ export type AppConfig = {
   veBetterPassportContractAddress: string
   b3trGovernorLibraries: B3TRGovernorLibraries
   nodeUrl: string
+  indexerUrl?: string
   network: Network
 }
 

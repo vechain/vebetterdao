@@ -47,7 +47,7 @@ export const AllocationRoundsList: React.FC<Props> = ({
 
   const renderRounds = useMemo(() => {
     return invertedCreatedRounds?.slice(0, totalRoundsToShow)?.map(round => {
-      return <AllocationRoundCard round={round} key={round.roundId} />
+      return <AllocationRoundCard roundId={round.roundId} key={round.roundId} />
     })
   }, [totalRoundsToShow, invertedCreatedRounds])
 
