@@ -1,11 +1,11 @@
 import { Heading, Text, Flex, VStack, Card, CardBody, HStack, Image } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { useThresholdParticipationScore, useUserRoundScore } from "@/api"
+import { useThresholdParticipationScore, useUserCurrentRoundScore } from "@/api"
 
 export const PendingActions = () => {
   const { t } = useTranslation()
   const { data: scoreThreshold, isLoading: isScoreThresholdLoading } = useThresholdParticipationScore()
-  const { data: userScore, isLoading: isUserRoundScoreLoading } = useUserRoundScore()
+  const { data: userScore, isLoading: isUserRoundScoreLoading } = useUserCurrentRoundScore()
   if (userScore >= scoreThreshold || isUserRoundScoreLoading || isScoreThresholdLoading) return null
 
   return (
