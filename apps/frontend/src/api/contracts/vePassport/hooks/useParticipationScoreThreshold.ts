@@ -7,7 +7,7 @@ const contractAddress = getConfig().veBetterPassportContractAddress
 const method = "thresholdParticipationScore"
 
 export const getParticipationScoreThresholdQueryKey = () => {
-  return getCallKey({ method: "vebetterpassport", keyArgs: ["participationScoreThreshold"] })
+  return getCallKey({ method, keyArgs: [] })
 }
 
 /**

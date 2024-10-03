@@ -14,7 +14,7 @@ export type TogglePassportCheck =
   | "gmOwnershipCheckEnabled"
 
 export const getPassportToggleQueryKey = (checkName: TogglePassportCheck) => {
-  return getCallKey({ method: "vebetterpassport", keyArgs: [checkName] })
+  return getCallKey({ method: checkName, keyArgs: [] })
 }
 /**
  * Hook to get the status of a passport check
