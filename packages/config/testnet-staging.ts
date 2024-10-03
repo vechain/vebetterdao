@@ -18,6 +18,7 @@ const config: AppConfig = {
   x2EarnAppsContractAddress: "0x4119b70F6e2bce1427F5d8C66C51cf514F9bb170",
   x2EarnRewardsPoolContractAddress: "0x62D4776CA53E9300b22E54eCf84f6955B29C9641",
   nodeManagementContractAddress: "0x801Def020DdceE44c9E0CeD6799385dC4a0cab38",
+  veBetterPassportContractAddress: "0x09E5e3aeC685cb5B6B105B13CECf6b63F6f86296",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   mixPanelProjectToken: "e03f4f5f6a753dae2dac30a69dfe21f7",
   nodeUrl: "https://testnet.vechain.org",
