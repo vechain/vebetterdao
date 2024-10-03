@@ -66,6 +66,7 @@
     "react-tweet": "^3.2.1",
     "recharts": "^2.12.3",
     "rehype-sanitize": "^6.0.0",
+    "swiper": "^11.1.14",
     "thor-devkit": "^2.0.9",
     "uuid": "^9.0.1",
     "vaul": "^0.9.6",
