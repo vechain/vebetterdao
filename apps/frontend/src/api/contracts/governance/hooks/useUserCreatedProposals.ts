@@ -19,6 +19,6 @@ export const useUserProposalsCreatedEvents = (user?: string) => {
 
       return created
     },
-    enabled: !!thor || !!user,
+    enabled: !!thor && !!user,
   })
 }

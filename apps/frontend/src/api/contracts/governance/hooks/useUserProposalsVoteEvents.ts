@@ -19,7 +19,7 @@ export const useUserProposalsVoteEvents = (user?: string) => {
 
       return votes
     },
-    enabled: !!thor || !!user,
+    enabled: !!thor && !!user,
   })
 }
 

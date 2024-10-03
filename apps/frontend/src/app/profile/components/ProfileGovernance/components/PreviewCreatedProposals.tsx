@@ -22,7 +22,7 @@ export const PreviewCreatedProposals = ({
   const { t } = useTranslation()
 
   const proposalsURIs = useMemo(() => {
-    if (!firstProposals) return null
+    if (!firstProposals) return []
 
     return firstProposals
       .map(proposal => {
@@ -31,7 +31,7 @@ export const PreviewCreatedProposals = ({
         // Add only if valid IPFS URI
         if (validateIpfsUri(ipfsURL)) return ipfsURL
       })
-      .filter(uri => uri !== undefined)
+      .filter(uri => uri !== undefined) as string[]
   }, [firstProposals])
 
   const proposalsMetadata = useIpfsMetadatas<ProposalMetadata>(proposalsURIs ?? [])
