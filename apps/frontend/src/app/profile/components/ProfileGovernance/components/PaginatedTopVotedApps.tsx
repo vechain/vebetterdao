@@ -1,7 +1,7 @@
-import { VStack, HStack, Text } from "@chakra-ui/react"
+import { VStack, HStack, Text, Box, Spinner } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { AppVotesGiven } from "@/api"
-import usePagination from "@/hooks/usePagination"
+import { usePagination, useInfiniteScroll } from "@/hooks"
 import { IoIosArrowBack } from "react-icons/io"
 import { AppVotedBox } from "./AppVotedBox"
 
@@ -14,7 +14,13 @@ type PaginatedProposalsProps = {
 export const PaginatedTopVotedApps = ({ topVotedApps, itemsPerPage = 6, goBack }: PaginatedProposalsProps) => {
   const { t } = useTranslation()
 
-  const { currentItems, hasMore, loadMore } = usePagination(topVotedApps ?? [], itemsPerPage)
+  const { currentItems, hasMore, loadMore, loading } = usePagination(topVotedApps ?? [], itemsPerPage)
+
+  useInfiniteScroll({
+    loading,
+    hasMore,
+    onLoadMore: loadMore,
+  })
 
   return (
     <VStack w={"full"}>
@@ -27,10 +33,11 @@ export const PaginatedTopVotedApps = ({ topVotedApps, itemsPerPage = 6, goBack }
       <VStack w={"full"} spacing={4}>
         {currentItems?.map(app => <AppVotedBox key={app.appId} appVoted={app} />)}
       </VStack>
+      {/* Sentinel Element */}
       {hasMore && (
-        <Text onClick={loadMore} mt={4} color={"#004CFC"} cursor={"pointer"}>
-          {t("Show More")}
-        </Text>
+        <Box id="infinite-scroll-sentinel" w="full" display="flex" justifyContent="center" mt={4}>
+          {loading && <Spinner color="#004CFC" />}
+        </Box>
       )}
     </VStack>
   )
