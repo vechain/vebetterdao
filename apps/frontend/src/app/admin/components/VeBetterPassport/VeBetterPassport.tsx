@@ -1,14 +1,25 @@
 import { useAccountPermissions } from "@/api/contracts/account"
 import { Grid } from "@chakra-ui/react"
 import React from "react"
-import { PassportToggles, ParticipationScoreThreshold, RegisterUserAction, AppSecurity } from "./components"
+import {
+  PassportToggles,
+  ParticipationScoreThreshold,
+  RegisterUserAction,
+  AppSecurity,
+  ManageUserStatus,
+  ManageUserSignals,
+} from "./components"
 import { useWallet } from "@vechain/dapp-kit-react"
 
 export const VeBetterPassport: React.FC = () => {
   const { account } = useWallet()
-  const { isPassportSettingsManager, isPassportActionRegistrar, isPassportScoreManager } = useAccountPermissions(
-    account ?? "",
-  )
+  const {
+    isPassportSettingsManager,
+    isPassportActionRegistrar,
+    isPassportScoreManager,
+    isPassportWhitelister,
+    isPassportBotSignaler,
+  } = useAccountPermissions(account ?? "")
 
   return (
     <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
@@ -16,6 +27,8 @@ export const VeBetterPassport: React.FC = () => {
       {isPassportActionRegistrar && <RegisterUserAction />}
       {isPassportScoreManager && <ParticipationScoreThreshold />}
       {isPassportScoreManager && <AppSecurity />}
+      {isPassportWhitelister && <ManageUserStatus />}
+      {isPassportBotSignaler && <ManageUserSignals />}
     </Grid>
   )
 }
