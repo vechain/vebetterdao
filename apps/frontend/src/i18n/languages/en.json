@@ -745,5 +745,20 @@
   "Change an app's security level": "Change an app's security level",
   "Select app security level": "Select app security level",
   "Update security level": "Update security level",
-  "Register an action for a user for a specific app. Optionally, for a specific round too": "Register an action for a user for a specific app. Optionally, for a specific round too"
+  "Register an action for a user for a specific app. Optionally, for a specific round too": "Register an action for a user for a specific app. Optionally, for a specific round too",
+  "Manage User Status": "Manage User Status",
+  "Manage user participation by adding them to a whitelist, blacklist, or removing their status": "Manage user participation by adding them to a whitelist, blacklist, or removing their status",
+  "Enter the user address": "Enter the user address",
+  "Action": "Action",
+  "Select action": "Select action",
+  "Whitelist User": "Whitelist User",
+  "Blacklist User": "Blacklist User",
+  "Remove Status": "Remove Status",
+  "Manage User Signals": "Manage User Signals",
+  "You can either reset the signals of a user or signal them. Please provide a reason and choose the appropriate action.": "You can either reset the signals of a user or signal them. Please provide a reason and choose the appropriate action.",
+  "Reset Signals": "Reset Signals",
+  "Current Signals": "Current Signals",
+  "Enter the reason for the action": "Enter the reason for the action",
+  "Reason": "Reason",
+  "Signal User": "Signal User"
 }
