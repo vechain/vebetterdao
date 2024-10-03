@@ -20,7 +20,7 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
+import { type Icon as IconType, UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import { AddressUtils } from "@repo/utils"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
@@ -29,9 +29,9 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 export const UpdateRoleCard = () => {
-  const [selectedContractAddress, setSelectedContractAddress] = useState("")
-  const [selectedRole, setSelectedRole] = useState("")
-  const [walletAddress, setWalletAddress] = useState("")
+  const [selectedContractAddress, setSelectedContractAddress] = useState<string | undefined>()
+  const [selectedRole, setSelectedRole] = useState<string | undefined>()
+  const [walletAddress, setWalletAddress] = useState<string | undefined>()
   const [newAddressFieldIsDirty, setNewAddressFieldIsDirty] = useState(false)
 
   const { t } = useTranslation()
@@ -39,11 +39,11 @@ export const UpdateRoleCard = () => {
   const { account } = useWallet()
 
   const isValidAddress = useMemo(() => {
-    //Do not allow empty address or same address as the current wallet
+    //Do not allow empty address or not connected account
     if (!walletAddress || !account) return false
 
     return AddressUtils.isValid(walletAddress)
-  }, [walletAddress])
+  }, [walletAddress, account])
 
   const isFormValid = useMemo(
     () => selectedContractAddress && selectedRole && isValidAddress,
@@ -54,12 +54,16 @@ export const UpdateRoleCard = () => {
     () => CONTRACT_LIST.find(contract => compareAddresses(contract.contractAddress, selectedContractAddress)),
     [selectedContractAddress],
   )
-
-  const { data: userAlreadyHasRole } = useHasRole(selectedRole, selectedContractAddress, walletAddress)
-  const { grantRole, revokeRole } = useAccessControl({
-    contractAddress: selectedContractAddress,
+  const { data: userAlreadyHasRole, error: hasRoleError } = useHasRole(
+    selectedRole ?? "",
+    selectedContractAddress ?? "",
     walletAddress,
-    role: selectedRole,
+  )
+
+  const { grantRole, revokeRole } = useAccessControl({
+    contractAddress: selectedContractAddress ?? "",
+    walletAddress: walletAddress ?? "",
+    role: selectedRole ?? "",
   })
 
   const accessControlAction = useMemo(() => {
@@ -75,13 +79,31 @@ export const UpdateRoleCard = () => {
       accessControlAction.sendTransaction()
       onOpen()
     },
-    [accessControlAction, userAlreadyHasRole, onOpen],
+    [accessControlAction, onOpen],
   )
 
   const handleClose = useCallback(() => {
     accessControlAction.resetStatus()
     onClose()
-  }, [accessControlAction, userAlreadyHasRole, onClose])
+  }, [accessControlAction, onClose])
+
+  const renderBadge = (colorScheme: string, icon: IconType, text: string) => (
+    <Badge
+      textTransform="none"
+      fontSize="sm"
+      colorScheme={colorScheme}
+      display="flex"
+      alignItems="center"
+      borderRadius="12px"
+      p={2}>
+      <HStack align="start" spacing={2}>
+        <Icon as={icon} color={colorScheme === "green" ? "green" : "red"} alignSelf={"center"} />
+        <Text as="span" wordBreak="break-word" whiteSpace="normal">
+          {text}
+        </Text>
+      </HStack>
+    </Badge>
+  )
 
   return (
     <>
@@ -100,7 +122,7 @@ export const UpdateRoleCard = () => {
                   placeholder={t("Select Contract")}
                   onChange={e => {
                     setSelectedContractAddress(e.target.value)
-                    setSelectedRole("")
+                    setSelectedRole(undefined)
                   }}
                   value={selectedContractAddress}>
                   {CONTRACT_LIST.map(contract => (
@@ -140,39 +162,29 @@ export const UpdateRoleCard = () => {
                 <FormErrorMessage>{t("Invalid address")}</FormErrorMessage>
               </FormControl>
 
-              {isFormValid ? (
+              {isFormValid && (
                 <VStack w="full" align="stretch" flexWrap="wrap">
-                  <Badge
-                    textTransform="none"
-                    fontSize="sm"
-                    colorScheme={userAlreadyHasRole ? "green" : "red"}
-                    display="flex"
-                    alignItems="center"
-                    borderRadius="12px"
-                    p={2}>
-                    <HStack align="start" spacing={2}>
-                      <Icon
-                        as={userAlreadyHasRole ? UilCheckCircle : UilExclamationCircle}
-                        color={userAlreadyHasRole ? "green" : "red"}
-                        alignSelf={"center"}
-                      />
-                      <Text as="span" wordBreak="break-word" whiteSpace="normal">
-                        {userAlreadyHasRole
+                  {!hasRoleError
+                    ? renderBadge(
+                        userAlreadyHasRole ? "green" : "red",
+                        userAlreadyHasRole ? UilCheckCircle : UilExclamationCircle,
+                        userAlreadyHasRole
                           ? t("Wallet '{{humanAddress}}' already has '{{selectedRole}}' role", {
-                              humanAddress: humanAddress(walletAddress),
+                              humanAddress: humanAddress(walletAddress ?? ""),
                               selectedRole,
                             })
                           : t("Wallet '{{humanAddress}}' doesn't have '{{selectedRole}}' role", {
-                              humanAddress: humanAddress(walletAddress),
+                              humanAddress: humanAddress(walletAddress ?? ""),
                               selectedRole,
-                            })}
-                      </Text>
-                    </HStack>
-                  </Badge>
+                            }),
+                      )
+                    : renderBadge("red", UilExclamationCircle, t("Error getting state"))}
                 </VStack>
-              ) : null}
-
-              <Button isDisabled={!isFormValid} colorScheme={userAlreadyHasRole ? "red" : "green"} type="submit">
+              )}
+              <Button
+                isDisabled={!isFormValid || !!hasRoleError}
+                colorScheme={userAlreadyHasRole ? "red" : "green"}
+                type="submit">
                 {userAlreadyHasRole
                   ? compareAddresses(account ?? "", walletAddress)
                     ? t("Renounce Role")

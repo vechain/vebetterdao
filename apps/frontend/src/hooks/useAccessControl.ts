@@ -1,4 +1,4 @@
-import { hasRoleQueryKey } from "@/api/contracts/account"
+import { DEFAULT_ADMIN_ROLE, hasRoleQueryKey } from "@/api/contracts/account"
 import { AccessControl__factory } from "@repo/contracts/typechain-types"
 import { useQueryClient } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -35,7 +35,7 @@ export const useAccessControl = ({
   const queryClient = useQueryClient()
 
   const bytes32Role = useMemo(
-    () => (role === "DEFAULT_ADMIN_ROLE" ? ethers.ZeroHash : ethers.solidityPackedKeccak256(["string"], [role])),
+    () => (role === "DEFAULT_ADMIN_ROLE" ? DEFAULT_ADMIN_ROLE : ethers.solidityPackedKeccak256(["string"], [role])),
     [role],
   )
 
