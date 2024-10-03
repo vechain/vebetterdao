@@ -1,130 +1,53 @@
-"use client"
 // app/layout.tsx
-import { Container, Flex, VStack } from "@chakra-ui/react"
-import { Providers } from "./providers"
 
-import dayjs from "dayjs"
-
-import relativeTime from "dayjs/plugin/relativeTime"
-import duration from "dayjs/plugin/duration"
-import { Footer } from "@/components"
+import { getConfig } from "@repo/config"
 import dynamic from "next/dynamic"
-import { AnalyticsUtils } from "@/utils"
-import { getConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "@repo/config"
-import "@/i18n"
-import { useEffect } from "react"
-import { t } from "i18next"
-import { datadogRum } from "@datadog/browser-rum"
 
-dayjs.extend(relativeTime)
-dayjs.extend(duration)
-
-const mixpanelToken = getConfig().mixPanelProjectToken
-const isProduction = process.env.NODE_ENV === "production"
-const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navbar), { ssr: false })
-const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").then(mod => mod.FreshDeskWidget), {
+const RootLayoutContent = dynamic(() => import("./RootLayoutContent").then(mod => mod.RootLayoutContent), {
   ssr: false,
 })
 
-//TODO: Is there a better place to initialise mixpanel? next/script?
-typeof window != "undefined" && mixpanelToken && AnalyticsUtils.initialise()
+// Set revalidation time
+export const revalidate = 3600 // Revalidate every hour
 
-// Initialise Datadog RUM - get the app token and client token from environment variables
-const datadog_app_token = getEnvDatadogApp()
-const datadog_client_token = getEnvDatadogClient()
-const datadog_env = getEnvDatadogEnv()
-
-datadogRum.init({
-  applicationId: datadog_app_token,
-  clientToken: datadog_client_token,
-  site: "datadoghq.eu",
-  service: "b3tr",
-  env: datadog_env,
-  sessionSampleRate: 100,
-  sessionReplaySampleRate: 20,
-  trackUserInteractions: true,
-  trackResources: true,
-  trackLongTasks: true,
-  defaultPrivacyLevel: "mask-user-input",
-})
-
-// workaround for "@iconscout/react-unicons
-const error = console.error
-console.error = (...args: any) => {
-  if (/defaultProps/.test(args[0])) return
-  error(...args)
+// Define metadata for your layout
+export const metadata = {
+  title: "VeBetterDAO",
+  description: "Vote for your favourite sustainability Apps in VeBetterDAO’s governance.",
+  openGraph: {
+    title: "VeBetterDAO",
+    type: "website",
+    url: getConfig().basePath,
+    description: "Vote for your favourite sustainability Apps in VeBetterDAO’s governance.",
+    site_name: "VeBetterDAO",
+    images: [
+      {
+        url: `${getConfig().basePath}/images/social_image.png`,
+        width: 1200,
+        height: 630,
+        alt: "VeBetterDAO",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VeBetterDAO",
+    description: "Vote for your favourite sustainability Apps in VeBetterDAO’s governance.",
+    image: `${getConfig().basePath}/images/social_image.png`,
+    imageAlt: "VeBetterDAO",
+  },
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  // set color mode of @uiw/react-md-editor
-  useEffect(() => {
-    document.documentElement.setAttribute("data-color-mode", "light")
-    return () => {
-      document.documentElement.removeAttribute("data-color-mode")
-    }
-  }, [])
-
   return (
-    <html
-      lang="en"
-      style={{
-        scrollBehavior: "smooth",
-      }}>
+    <html lang="en" style={{ scrollBehavior: "smooth" }}>
       <head>
-        <title>{t("VeBetterDAO")}</title>
-        <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance." />
         <link rel="icon" href="/images/favicon.png" />
         <link rel="apple-touch-icon" sizes="57x57" href="/images/favicon.png" />
         <meta name="msapplication-TileImage" content="/images/favicon.png" />
-
-        {/* Open Graph Metadata */}
-        <meta name="title" property="og:title" content="VeBetterDAO" />
-        <meta name="type" property="og:type" content="website" />
-        <meta name="url" property="og:url" content="%VITE_BASE_URL%" />
-        <meta
-          name="description"
-          property="og:description"
-          content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance."
-        />
-        <meta property="og:site_name" content="VeBetterDAO" />
-        <meta name="image" property="og:image" content={`${getConfig().basePath}/images/social_image.png`} />
-        <meta property="og:image:type" content="image/png" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content="VeBetterDAO" />
-
-        {/* Twitter Metadata */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="VeBetterDAO" />
-        <meta
-          name="twitter:description"
-          content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance."
-        />
-        <meta name="twitter:image" content={`${getConfig().basePath}/images/social_image.png`} />
-        <meta name="twitter:image:alt" content="VeBetterDAO" />
       </head>
       <body>
-        <Providers>
-          {isProduction && <FreshDeskWidget widgetId={103000007852} />}
-          <VStack minH="100vh" gap={0} align="stretch">
-            {/* <AlphaTestnetBanner /> */}
-            <Navbar />
-            <Flex flex={1}>
-              <Container
-                mt={{ base: 2, md: 10 }}
-                mb={[20, 20, 40]}
-                maxW={"container.xl"}
-                display={"flex"}
-                flex={1}
-                alignItems={"center"}
-                justifyContent={"flex-start"}
-                flexDirection={"column"}>
-                {children}
-              </Container>
-            </Flex>
-            <Footer />
-          </VStack>
-        </Providers>
+        <RootLayoutContent>{children}</RootLayoutContent>
       </body>
     </html>
   )
