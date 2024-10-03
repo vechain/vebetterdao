@@ -20,6 +20,7 @@ const config: AppConfig = {
   treasuryContractAddress: "",
   x2EarnRewardsPoolContractAddress: "",
   nodeManagementContractAddress: "",
+  veBetterPassportContractAddress: "",
   b3trGovernorLibraries: {
     governorClockLogicAddress: "",
     governorConfiguratorAddress: "",
