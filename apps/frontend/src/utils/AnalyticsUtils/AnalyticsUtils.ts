@@ -15,7 +15,7 @@ export interface Properties {
 export const initialise = () => {
   if (MIX_PANEL_TOKEN) {
     mixpanel.init(MIX_PANEL_TOKEN, {
-      // debug: true,
+      debug: true,
       track_pageview: true,
       ignore_dnt: true,
     })
@@ -39,6 +39,7 @@ export const trackEvent = (event: string, properties?: Properties): void => {
 
     if (isInitialized) {
       mixpanel.track(event, properties)
+      console.log("Event tracked", event, properties)
     } else {
       console.warn("Analytics not initialized or enabled")
     }
