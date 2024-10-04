@@ -345,12 +345,16 @@ export async function deployAll(config: ContractsConfig) {
         signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
         roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
         minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
+        roundsForAssigningEntityScore: config.VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE, //roundsForAssigningEntityScore
+        blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD, //blacklistThreshold
+        whitelistThreshold: config.VEBETTER_WHITELIST_THRESHOLD, //whitelistThreshold
+        maxEntitiesPerPassport: config.VEBETTER_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
       },
       {
         admin: config.CONTRACTS_ADMIN_ADDRESS, // admins
         botSignaler: config.CONTRACTS_ADMIN_ADDRESS, // botSignaler
         upgrader: config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-        settingsManager: config.CONTRACTS_ADMIN_ADDRESS, // settingsManager
+        settingsManager: TEMP_ADMIN, // settingsManager
         roleGranter: config.CONTRACTS_ADMIN_ADDRESS, // roleGranter
         blacklister: config.CONTRACTS_ADMIN_ADDRESS, // blacklister
         whitelister: config.CONTRACTS_ADMIN_ADDRESS, // whitelistManager
@@ -481,6 +485,12 @@ export async function deployAll(config: ContractsConfig) {
   }
 
   await setWhitelistedFunctions(contractAddresses, config, governor, deployer, libraries, true) // Set whitelisted functions for governor proposals
+
+  // Enable Participation Score for VeBetterPassport
+  await veBetterPassport
+    .connect(deployer)
+    .toggleCheck(4)
+    .then(async tx => await tx.wait())
 
   // ---------- Configure contract roles for setup ---------- //
 
@@ -644,9 +654,19 @@ export async function deployAll(config: ContractsConfig) {
 
     await transferAdminRole(timelock, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
+    await transferSettingsManagerRole(veBetterPassport, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+
     console.log("Roles updated successfully!")
 
     console.log("================ Validating roles")
+
+    await validateContractRole(
+      veBetterPassport,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await veBetterPassport.SETTINGS_MANAGER_ROLE(),
+    )
+
     // B3TR
     await validateContractRole(b3tr, await emissions.getAddress(), TEMP_ADMIN, await b3tr.MINTER_ROLE())
     await validateContractRole(b3tr, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await b3tr.MINTER_ROLE())
@@ -1212,7 +1232,8 @@ const validateContractRole = async (
     | TimeLock
     | B3TRGovernor
     | X2EarnRewardsPool
-    | X2EarnApps,
+    | X2EarnApps
+    | VeBetterPassport,
   expectedAddress: string,
   tempAdmin: string,
   role: string,
@@ -1223,4 +1244,28 @@ const validateContractRole = async (
 
   if (!roleSet || !roleRemoved)
     throw new Error("Role " + role + " not set correctly on " + (await contract.getAddress()))
+}
+
+const transferSettingsManagerRole = async (
+  contract: VeBetterPassport,
+  admin: HardhatEthersSigner,
+  newAddress: string,
+) => {
+  const settingsManagerRole = await contract.SETTINGS_MANAGER_ROLE()
+
+  await contract
+    .connect(admin)
+    .grantRole(settingsManagerRole, newAddress)
+    .then(async tx => await tx.wait())
+  await contract
+    .connect(admin)
+    .renounceRole(settingsManagerRole, admin.address)
+    .then(async tx => await tx.wait())
+
+  const newRoleSet = await contract.hasRole(settingsManagerRole, newAddress)
+  const oldRoleRemoved = !(await contract.hasRole(settingsManagerRole, admin.address))
+
+  if (!newRoleSet || !oldRoleRemoved) throw new Error("Role not set correctly on " + (await contract.getAddress()))
+
+  console.log("Settings Manager Role transferred successfully on " + (await contract.getAddress()))
 }
