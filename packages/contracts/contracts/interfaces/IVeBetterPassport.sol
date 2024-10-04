@@ -131,6 +131,9 @@ interface IVeBetterPassport {
   /// @notice Emiited when a user tries to delegate a passport to another passport or entity.
   error PassportDelegationFromEntity();
 
+  /// @notice Emitted when a user tries to delegate a passport to another entity.
+  error PassportDelegationToEntity();
+
   /// @notice Emitted when a user tries to sign a message with an expired signature
   error SignatureExpired();
 

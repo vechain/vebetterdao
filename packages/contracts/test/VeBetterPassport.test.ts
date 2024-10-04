@@ -2512,7 +2512,7 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(owner.address)
     })
 
-    it("Should not be able to delegate an entity of a passport to a user", async function () {
+    it("An entity should not be able to delegate a passport to a user", async function () {
       const {
         veBetterPassport,
         owner: passport,
@@ -2545,6 +2545,43 @@ describe("VeBetterPassport - @shard3", function () {
 
       // Should be able to delegate
       await expect(delegateWithSignature(veBetterPassport, entity, delegatee, 3600)).to.not.be.reverted
+    })
+
+    it("A passport cannot be delegated to an entity", async function () {
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const passport2 = otherAccounts[1]
+      const entity2 = otherAccounts[2]
+
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 1000)
+      await linkEntityToPassportWithSignature(veBetterPassport, passport2, entity2, 1000)
+
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.true
+
+      // Should not be able to delegate a passport
+      await expect(delegateWithSignature(veBetterPassport, passport, entity2, 3600)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "PassportDelegationToEntity",
+      )
+
+      // Should not be able to delegate a passport
+      await expect(veBetterPassport.connect(passport).delegatePassport(entity2.address)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "PassportDelegationToEntity",
+      )
+
+      // detach entity
+      await veBetterPassport.connect(passport2).removeEntityLink(entity2)
+
+      // Should be able to delegate
+      await expect(delegateWithSignature(veBetterPassport, passport, entity2, 3600)).to.not.be.reverted
     })
 
     it("Should be able to assign multiple entites to a passport and use the combintation to meet personhood status", async function () {
