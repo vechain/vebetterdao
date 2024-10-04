@@ -7,10 +7,14 @@ import {
   getRoundIdForBlock,
   getRounds,
   RewardDistributedEvent,
+  AllocationVoteCastEvent,
+  UserCumulativeScoreMap,
   RoundInfo,
   securityLevelMultiplier,
 } from "./helpers/passportSimulation"
-import { readFile } from "fs/promises"
+import { createReadStream } from "fs"
+import { parser } from "stream-json"
+import { streamArray } from "stream-json/streamers/StreamArray"
 
 // Define the environment variable
 const env = process.env.NEXT_PUBLIC_APP_ENV as EnvConfig
@@ -20,7 +24,9 @@ if (!env) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set")
 const roundsForCumulativeScore = 5 // Number of rounds to consider for cumulative score
 const decayRate = 20 // Decay rate in percentage
 const scalingFactor = 1e18 // Scaling factor for score calculation
-const thresholds = [100, 200, 300, 400] // Thresholds to simulate against
+const thresholds = [100, 150, 200, 300] // Thresholds to simulate against
+
+const userMapInfo = new Map<string, { scores: Map<number, number>; actions: number; votes: number }>()
 
 /**
  * Main execution function.
@@ -31,16 +37,20 @@ const thresholds = [100, 200, 300, 400] // Thresholds to simulate against
 async function main() {
   console.log(`[${env}] Simulating Passport Score...`)
 
-  const events = await readData("./rewardEvents.json")
+  // Fetch current round ID and relevant rounds
   const currentRoundId = await getCurrentRoundId()
   const rounds = await getRounds({ currentRoundId, amountOfRoundsToFetch: roundsForCumulativeScore })
 
   console.log(rounds)
 
-  //Simulating against multiple thresholds
+  // Process voting events using streaming
+  await processFileStream("./votingEvents.json", data => countVote(data, rounds))
+  // Process reward events using streaming
+  await processFileStream("./rewardEvents.json", data => countActions(data, rounds))
+
+  // Simulating against multiple thresholds
   for (const threshold of thresholds) {
-    const userScoresPerRound = calculateUserScores(events, rounds)
-    const userCumulativeScores = calculateCumulativeScores(userScoresPerRound, currentRoundId)
+    const userCumulativeScores = calculateCumulativeScores(userMapInfo, currentRoundId)
 
     console.log(
       `---------------SIMULATION WITH THRESHOLD ${threshold} --- ${roundsForCumulativeScore} Round(s) -----------------`,
@@ -54,46 +64,20 @@ async function main() {
 }
 
 /**
- * Calculate the user scores and action count for each round.
- * @param events Reward events.
- * @param rounds Round information.
- * @returns Map of user addresses to their scores and action counts.
- */
-function calculateUserScores(
-  events: RewardDistributedEvent[],
-  rounds: RoundInfo[],
-): Map<string, { scores: Map<number, number>; actions: number }> {
-  const userScores = new Map<string, { scores: Map<number, number>; actions: number }>()
-
-  for (const event of events) {
-    const roundId = getRoundIdForBlock(Number(event.Log.meta.blockNumber), rounds)
-    if (!roundId) continue
-
-    const appDetail = appDetails[convertBytesToAddress(event.Args.appId)]
-    if (!appDetail) throw new Error(`App details not found for id ${event?.Args?.appId}`)
-
-    const score = securityLevelMultiplier[appDetail.securityLevel]
-    updateScore(userScores, event.Args.receiver, roundId, score)
-  }
-
-  return userScores
-}
-
-/**
  * Calculate the cumulative score for all users with decay applied.
- * @param userScores Map of user scores and action counts for each round.
+ * @param _userMapInfo Map of user scores and action counts for each round.
  * @param currentRound The current round.
  * @returns Map of user addresses to cumulative scores and action counts.
  */
 function calculateCumulativeScores(
-  userScores: Map<string, { scores: Map<number, number>; actions: number }>,
+  _userMapInfo: Map<string, { scores: Map<number, number>; actions: number; votes: number }>,
   currentRound: number,
-): Map<string, { cumulativeScore: number; actions: number }> {
-  const cumulativeScores = new Map<string, { cumulativeScore: number; actions: number }>()
+): UserCumulativeScoreMap {
+  const cumulativeScores = new Map<string, { cumulativeScore: number; actions: number; votes: number }>()
 
-  userScores.forEach(({ scores, actions }, user) => {
+  _userMapInfo.forEach(({ scores, actions, votes }, user) => {
     const cumulativeScore = applyDecay(scores, currentRound)
-    cumulativeScores.set(user, { cumulativeScore, actions })
+    cumulativeScores.set(user, { cumulativeScore, actions, votes })
   })
 
   return cumulativeScores
@@ -122,32 +106,21 @@ function applyDecay(roundScores: Map<number, number>, currentRound: number): num
 }
 
 /**
- * Update the score and action count for a user and round in the Map.
- */
-function updateScore(
-  userScores: Map<string, { scores: Map<number, number>; actions: number }>,
-  user: string,
-  round: number,
-  score: number,
-) {
-  if (!userScores.has(user)) {
-    userScores.set(user, { scores: new Map<number, number>(), actions: 0 })
-  }
-
-  const userData = userScores.get(user)!
-  userData.scores.set(round, (userData.scores.get(round) || 0) + score)
-
-  userData.actions += 1 // Increment the action count
-}
-
-/**
  * Display the simulation results in a table format.
  */
-function displayResults(
-  userCumulativeScores: Map<string, { cumulativeScore: number; actions: number }>,
-  threshold: number,
-) {
+function displayResults(userCumulativeScores: UserCumulativeScoreMap, threshold: number) {
   const totalUsers = userCumulativeScores.size
+  const totalRewardsUsers = Array.from(userCumulativeScores.values()).filter(user => user.actions > 0)
+  const totalVoters = Array.from(userCumulativeScores.values()).filter(user => user.votes > 0)
+  const intersectionUsers = Array.from(userCumulativeScores.values()).filter(user => user.actions > 0 && user.votes > 0)
+  const percentageIntersectionOverRewards =
+    totalRewardsUsers.length > 0 ? ((intersectionUsers.length / totalRewardsUsers.length) * 100).toFixed(2) : "0.00"
+  const percentageIntersectionOverVoters =
+    totalVoters.length > 0 ? ((intersectionUsers.length / totalVoters.length) * 100).toFixed(2) : "0.00"
+
+  const intersectionMeetingThreshold = Array.from(intersectionUsers.values()).filter(
+    user => user.cumulativeScore >= threshold,
+  )
   const usersMeetingThreshold = Array.from(userCumulativeScores.values()).filter(
     ({ cumulativeScore }) => cumulativeScore >= threshold,
   )
@@ -157,16 +130,13 @@ function displayResults(
 
   const firstCloseUser = usersNotMeetingThreshold.sort(([, a], [, b]) => b.cumulativeScore - a.cumulativeScore)[0]
 
-  const leaderboard = getLeaderboard(userCumulativeScores)
-
-  console.table(leaderboard)
-
   console.table([
     {
       Description: "Closest User to Threshold",
       Address: firstCloseUser ? firstCloseUser[0] : "None",
       Score: firstCloseUser ? firstCloseUser[1].cumulativeScore : "N/A",
       Actions: firstCloseUser ? firstCloseUser[1].actions : "N/A",
+      Votes: firstCloseUser ? firstCloseUser[1].votes : "N/A",
     },
   ])
 
@@ -182,46 +152,125 @@ function displayResults(
       Percentage: `${(((totalUsers - usersMeetingThreshold.length) / totalUsers) * 100).toFixed(2)}%`,
     },
     {
-      Description: "Total Users",
+      Description: "Intersection (Users who have both Rewards and Voted)",
+      Value: intersectionUsers.length,
+      Percentage: `${((intersectionUsers.length / totalUsers) * 100).toFixed(2)}%`,
+    },
+    {
+      Description: `Intersection Meeting or Exceeding Threshold (${threshold})`,
+      Value: intersectionMeetingThreshold.length,
+      Percentage: `${((intersectionMeetingThreshold.length / totalUsers) * 100).toFixed(2)}%`,
+    },
+    {
+      Description: "Total Users (Rewards + Voters)",
       Value: totalUsers,
+    },
+    {
+      Description: "Total Rewards Users",
+      Value: totalRewardsUsers.length,
+    },
+    {
+      Description: "Total Voters",
+      Value: totalVoters.length,
+    },
+    {
+      Description: "Intersection / Total Rewards Users (%)",
+      Percentage: `${percentageIntersectionOverRewards}%`,
+    },
+    {
+      Description: "Intersection / Total Voters (%)",
+      Percentage: `${percentageIntersectionOverVoters}%`,
     },
   ])
 }
 
-/**
- * Get the leaderboard of users with the highest cumulative scores and action counts.
- * @param userCumulativeScores Map of user addresses to cumulative scores and action counts.
- * @param leaderboardSize Number of users to include in the leaderboard.
- * @returns Array of user objects with address, score, and action count.
- */
-function getLeaderboard(
-  userCumulativeScores: Map<string, { cumulativeScore: number; actions: number }>,
-  leaderboardSize: number = 10,
-) {
-  return Array.from(userCumulativeScores.entries())
-    .sort(([, a], [, b]) => b.cumulativeScore - a.cumulativeScore)
-    .slice(0, leaderboardSize)
-    .map(([address, { cumulativeScore, actions }]) => ({
-      address,
-      cumulativeScore,
-      actions,
-    }))
+async function countActions(event: RewardDistributedEvent, rounds: RoundInfo[]) {
+  const blockNumber = Number(event?.Log?.meta?.blockNumber)
+  const roundId = getRoundIdForBlock(blockNumber, rounds)
+  if (!roundId) return
+
+  const appId = convertBytesToAddress(event.Args.appId)
+  const appDetail = appDetails[appId]
+  if (!appDetail) throw new Error(`App details not found for id ${event.Args.appId}`)
+
+  const score = securityLevelMultiplier[appDetail.securityLevel]
+  const user = event.Args.receiver
+
+  if (!userMapInfo.has(user)) {
+    userMapInfo.set(user, { scores: new Map<number, number>(), actions: 0, votes: 0 })
+  }
+
+  const userData = userMapInfo.get(user)!
+  userData.scores.set(roundId, (userData.scores.get(roundId) || 0) + score)
+
+  userData.actions += 1 // Increment the action count
 }
 
 /**
- * Read reward events from a JSON file.
- * @param filePath Path to the JSON file.
- * @returns Array of reward events.
+ * Callback function to count votes from voting events.
  */
-async function readData(filePath: string): Promise<RewardDistributedEvent[]> {
-  const absolutePath = path.join(__dirname, filePath)
-  const fileData = await readFile(absolutePath, { encoding: "utf-8" })
-  if (!fileData) throw new Error("No data found in the file")
+async function countVote(event: AllocationVoteCastEvent, rounds: RoundInfo[]) {
+  const blockNumber = Number(event?.Log?.meta?.blockNumber)
+  const roundId = getRoundIdForBlock(blockNumber, rounds)
+  if (!roundId) return
 
-  const events: RewardDistributedEvent[] = JSON.parse(fileData)
-  console.info(`Loaded ${events.length} reward events.`)
+  const user = event.Args.voter
+  if (!userMapInfo.has(user)) {
+    userMapInfo.set(user, { scores: new Map<number, number>(), actions: 0, votes: 0 })
+  }
 
-  return events
+  const userData = userMapInfo.get(user)!
+  userData.votes += 1 // Increment the vote count
+}
+
+/**
+ * Processes a JSON file as a stream, invoking the callback for each data item.
+ *
+ * @param fileName - Name of the JSON file to process.
+ * @param callbackFn - Callback function to handle each data item.
+ * @param rounds - Optional RoundInfo array, if needed by the callback.
+ */
+function processFileStream(
+  fileName: string,
+  callbackFn: (data: any, rounds?: RoundInfo[]) => void,
+  rounds?: RoundInfo[],
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const filePath = path.join(__dirname, fileName)
+    console.log("Reading file from:", filePath)
+
+    const readStream = createReadStream(filePath, { encoding: "utf8" })
+
+    // Initialize the JSON parser and streamer
+    const jsonParser = parser()
+    const jsonStreamer = streamArray()
+
+    // Pipe the read stream into the JSON parser and streamer
+    readStream.pipe(jsonParser).pipe(jsonStreamer)
+
+    jsonStreamer.on("data", ({ key, value }) => {
+      try {
+        callbackFn(value, rounds)
+      } catch (callbackError) {
+        console.error(`Error processing item at index ${key}:`, callbackError)
+      }
+    })
+
+    jsonStreamer.on("end", () => {
+      console.log("All events processed successfully.")
+      resolve()
+    })
+
+    jsonStreamer.on("error", err => {
+      console.error("Error during stream processing:", err)
+      reject(err)
+    })
+
+    readStream.on("error", err => {
+      console.error("Error reading the file stream:", err)
+      reject(err)
+    })
+  })
 }
 
 // Execute the main function and handle errors

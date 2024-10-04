@@ -10,7 +10,7 @@ if (!env) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set")
 const config = getConfig()
 
 /** ------------------------ TYPES -------------------------- **/
-
+export type UserCumulativeScoreMap = Map<string, { cumulativeScore: number; actions: number; votes: number }>
 export enum XAppsSecurityLevel {
   NONE = "NONE",
   LOW = "LOW",
@@ -22,19 +22,29 @@ export type AppDetails = {
   name: string
   securityLevel: XAppsSecurityLevel
 }
-
-export type RewardDistributedEvent = {
-  Args: {
-    appId: number[]
-    amount: number
-    receiver: string
-  }
+export interface BaseEvent {
   Log: {
     meta: {
       blockID: string
       blockNumber: number
       blockTimestamp: number
+      txID: string
     }
+  }
+}
+export interface AllocationVoteCastEvent extends BaseEvent {
+  Args: {
+    appsIds: number[][]
+    roundId: number
+    voteWeights: number[]
+    voter: string
+  }
+}
+export interface RewardDistributedEvent extends BaseEvent {
+  Args: {
+    appId: number[]
+    amount: number
+    receiver: string
   }
 }
 
