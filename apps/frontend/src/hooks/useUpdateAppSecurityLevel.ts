@@ -20,7 +20,7 @@ type Props = {
 
 /**
  * Update the security level for an app in the VeBetterPassport contract
- * 
+ *
  * @param {string} props.appId - the app id to update the security level for
  * @param {number} props.securityLevel - the new security level
  * @returns the return value of the send transaction hook and the result of the transaction

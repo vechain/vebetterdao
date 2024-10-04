@@ -1,20 +1,38 @@
 import { VStack, HStack, Button } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
-import { useEffect, useState } from "react"
+import { useMemo, useEffect, useState } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
 import { useTranslation } from "react-i18next"
 import { ProfileBalance } from "./ProfileBalance"
+import { ProfileGovernance } from "./ProfileGovernance"
 import { useRouter } from "next/navigation"
 import { useWallet } from "@vechain/dapp-kit-react"
 
+enum Tab {
+  Balance = "balance",
+  BetterActions = "better-actions",
+  Governance = "governance",
+}
+
 export const ProfilePageContent = () => {
   const { t } = useTranslation()
-  const [selectedTab, setSelectedTab] = useState<"balance" | "better-actions">("balance")
-
-  const selectedTabContent = selectedTab === "balance" ? <ProfileBalance /> : <ProfileBetterActions />
+  const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Balance)
 
   const router = useRouter()
   const { account } = useWallet()
+
+  const selectedTabContent = useMemo(() => {
+    switch (selectedTab) {
+      case Tab.Balance:
+        return <ProfileBalance />
+      case Tab.BetterActions:
+        return <ProfileBetterActions />
+      case Tab.Governance:
+        return <ProfileGovernance />
+      default:
+        return null
+    }
+  }, [selectedTab])
 
   useEffect(() => {
     if (!account) router.back()
@@ -28,17 +46,24 @@ export const ProfilePageContent = () => {
       <HStack>
         <Button
           variant={"primaryGhost"}
-          borderBottom={selectedTab === "balance" ? "2px solid #004CFC" : "none"}
+          borderBottom={selectedTab === Tab.Balance ? "2px solid #004CFC" : "none"}
           rounded="none"
-          onClick={() => setSelectedTab("balance")}>
+          onClick={() => setSelectedTab(Tab.Balance)}>
           {t("Balance")}
         </Button>
         <Button
           variant={"primaryGhost"}
-          borderBottom={selectedTab === "better-actions" ? "2px solid #004CFC" : "none"}
+          borderBottom={selectedTab === Tab.BetterActions ? "2px solid #004CFC" : "none"}
           rounded="none"
-          onClick={() => setSelectedTab("better-actions")}>
+          onClick={() => setSelectedTab(Tab.BetterActions)}>
           {t("Better Actions")}
+        </Button>
+        <Button
+          variant={"primaryGhost"}
+          borderBottom={selectedTab === Tab.Governance ? "2px solid #004CFC" : "none"}
+          rounded="none"
+          onClick={() => setSelectedTab(Tab.Governance)}>
+          {t("Governance")}
         </Button>
       </HStack>
       {selectedTabContent}
