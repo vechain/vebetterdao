@@ -37,6 +37,7 @@ export type AppConfig = {
   x2EarnAppsContractAddress: string
   x2EarnRewardsPoolContractAddress: string
   nodeManagementContractAddress: string
+  veBetterPassportContractAddress: string
   b3trGovernorLibraries: B3TRGovernorLibraries
   nodeUrl: string
   indexerUrl?: string

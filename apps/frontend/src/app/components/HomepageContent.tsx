@@ -2,7 +2,6 @@ import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllo
 import { Grid, GridItem, Hide, Show, VStack } from "@chakra-ui/react"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { DashboardXApps } from "./DashboardXApps"
-import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 import { LowOnVthoCard } from "./Banners"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 import { TokensBalance } from "./TokensBalance"
@@ -30,7 +29,7 @@ export const HomePageContent = () => {
             <Show above="md">
               <TokensBalance showGoToBalance />
             </Show>
-            <SupplyBreakdownCard />
+
             <Show above="md">
               <DashboardAllocationRounds />
             </Show>

@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
-const compactFormatter = getCompactFormatter(4)
+const compactFormatter = getCompactFormatter(2)
 
 export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: boolean }) => {
   const { t } = useTranslation()
@@ -69,9 +69,11 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
             {t("B3TR Balance")}
           </Text>
           <HStack>
-            <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"30px"} alt="B3TR Icon" />
+            <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={["24px", "28px"]} alt="B3TR Icon" />
             <Skeleton isLoaded={!isB3trBalanceLoading}>
-              <Heading fontSize="1.75rem">{compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}</Heading>
+              <Heading fontSize={["24px", "28px"]}>
+                {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
+              </Heading>
             </Skeleton>
           </HStack>
         </VStack>
@@ -87,9 +89,11 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
             {t("VOT3 Balance")}
           </Text>
           <HStack>
-            <Image src={"/images/logo/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
+            <Image src={"/images/logo/vot3_logo_dark.svg"} boxSize={["24px", "28px"]} alt="VOT3 Icon" />
             <Skeleton isLoaded={!isVot3BalanceLoading}>
-              <Heading fontSize="1.75rem">{compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}</Heading>
+              <Heading fontSize={["24px", "28px"]}>
+                {compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}
+              </Heading>
             </Skeleton>
           </HStack>
         </VStack>
