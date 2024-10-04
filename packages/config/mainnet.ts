@@ -21,6 +21,7 @@ const config: AppConfig = {
   x2EarnRewardsPoolContractAddress: "0x6Bee7DDab6c99d5B2Af0554EaEA484CE18F52631",
   indexerUrl: "https://b3tr.mainnet.vechain.org/api/v1",
   nodeManagementContractAddress: "",
+  veBetterPassportContractAddress: "",
   b3trGovernorLibraries: {
     governorClockLogicAddress: "0xaAD03b8561aDD749c7f8B9F819e40A6D4D5E6dD0",
     governorConfiguratorAddress: "0xAdB833cc800c8EB3421469C79e6672c14597A8D6",

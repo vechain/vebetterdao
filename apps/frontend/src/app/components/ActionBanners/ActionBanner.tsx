@@ -1,15 +1,30 @@
-import { useState, useEffect, useCallback, useMemo } from "react"
-import { Box, Flex, Button, Circle } from "@chakra-ui/react"
+import { useState, useCallback, useMemo, useRef } from "react"
+import { IconButton, Hide } from "@chakra-ui/react"
 import { DoActionBanner } from "./components/DoActionBanner"
 import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
 import { useCanUserVote, useVotingRewards } from "@/api"
 import { CastVoteBanner } from "./components/CastVoteBanner"
 import { useIsUserPerson } from "@/api/contracts/vePassport/hooks/useIsPerson"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
+// Import Swiper React components
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
+// import Swiper core and required modules
+import { A11y } from "swiper/modules"
+
+// Import Swiper styles
+import "swiper/css"
+import "@/app/theme/swiper-custom.css"
 
 export const ActionBanner = () => {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
+  // store controlled swiper instance
+  const swiperRef = useRef<SwiperClass | null>(null) // Create a ref for the Swiper instance with type
+  const [isSliderEnd, setIsSliderEnd] = useState(false)
+  const [isSliderStart, setIsSliderStart] = useState(true)
+
+  const handleSliderChange = useCallback((_swiper: SwiperClass) => {
+    setIsSliderEnd(_swiper.isEnd)
+    setIsSliderStart(_swiper.isBeginning)
+  }, [])
 
   const votingRewardsQuery = useVotingRewards()
   const { data: isPerson, isLoading: isPersonLoading } = useIsUserPerson()
@@ -19,7 +34,7 @@ export const ActionBanner = () => {
   const showClaimB3trBanner = votingRewardsQuery.data?.total && votingRewardsQuery.data.total !== 0
   const showCastVoteBanner = !canUserVoteLoading && canUserVote
 
-  const banners = useMemo(() => {
+  const slides = useMemo(() => {
     const bannerComponents = []
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
@@ -27,84 +42,69 @@ export const ActionBanner = () => {
     return bannerComponents
   }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner])
 
-  const nextSlide = useCallback(() => {
-    setCurrentIndex(prevIndex => (prevIndex + 1) % banners.length)
-  }, [banners.length])
+  const slidesPerView = slides.length === 1 ? 1 : 1.1
 
-  const prevSlide = useCallback(() => {
-    setCurrentIndex(prevIndex => (prevIndex - 1 + banners.length) % banners.length)
-  }, [banners.length])
-
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout
-
-    if (isAutoPlaying && banners.length > 1) {
-      intervalId = setInterval(nextSlide, 10000)
-    }
-
-    return () => {
-      if (intervalId) clearInterval(intervalId)
-    }
-  }, [isAutoPlaying, nextSlide, banners.length])
-
-  if (banners.length === 0) return null
+  if (slides.length === 0) return null
 
   return (
-    <Box position="relative" overflow="hidden" borderRadius="lg" w="full">
-      <Flex
-        transition="transform 0.5s ease-in-out"
-        transform={`translateX(-${currentIndex * 100}%)`}
-        onMouseEnter={() => setIsAutoPlaying(false)}
-        onMouseLeave={() => setIsAutoPlaying(true)}
-        h="full">
-        {banners.map((banner, index) => (
-          <Box key={index} width="100%" flexShrink={0} h="full">
-            {banner}
-          </Box>
-        ))}
-      </Flex>
+    <Swiper
+      modules={[A11y]}
+      spaceBetween={20} // Space between slides
+      slidesPerView={slidesPerView} // Show 1.1 slides, allowing part of the next and previous slides to be visible
+      navigation={false} // Disable Swiper's built-in navigation
+      pagination={{ clickable: true }}
+      scrollbar={{ draggable: true }}
+      onSwiper={swiper => (swiperRef.current = swiper)} // Store swiper instance
+      onSlideChange={handleSliderChange}
+      style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }} // Ensure swiper itself takes full width
+    >
+      {slides.map((slide, index) => (
+        <SwiperSlide
+          key={index}
+          className="slide"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+            position: "relative",
+          }}>
+          {slide}
+        </SwiperSlide>
+      ))}
 
-      {banners.length > 1 && (
-        <>
-          <Button
-            position="absolute"
-            top="50%"
-            left="4"
-            transform="translateY(-50%)"
-            bg="blackAlpha.100"
-            color="white"
-            borderRadius="full"
-            onClick={prevSlide}
-            _hover={{ bg: "blackAlpha.300" }}>
-            <FaChevronLeft size={12} />
-          </Button>
-
-          <Button
-            position="absolute"
-            top="50%"
-            right="4"
-            transform="translateY(-50%)"
-            bg="blackAlpha.100"
-            color="white"
-            borderRadius="full"
-            onClick={nextSlide}
-            _hover={{ bg: "blackAlpha.300" }}>
-            <FaChevronRight size={12} />
-          </Button>
-
-          <Flex position="absolute" bottom="4" left="50%" transform="translateX(-50%)" gap="2">
-            {banners.map((_, index) => (
-              <Circle
-                key={index}
-                size="3"
-                bg={index === currentIndex ? "white" : "gray.400"}
-                as="button"
-                onClick={() => setCurrentIndex(index)}
-              />
-            ))}
-          </Flex>
-        </>
-      )}
-    </Box>
+      {/* Custom Navigation Buttons */}
+      <Hide below="md">
+        {!isSliderStart && (
+          <IconButton
+            pos={"absolute"}
+            zIndex={2} // Ensure it's above the slides
+            variant={"primarySubtle"}
+            left={5}
+            top={"50%"}
+            transform={"translateY(-50%)"}
+            icon={<FaChevronLeft />}
+            onClick={() => swiperRef.current?.slidePrev()}
+            aria-label="Prev slide"
+          />
+        )}
+      </Hide>
+      <Hide below="md">
+        {!isSliderEnd && slides.length > 1 && (
+          <IconButton
+            pos={"absolute"}
+            zIndex={2} // Ensure it's above the slides
+            variant={"primarySubtle"}
+            right={5}
+            top={"50%"}
+            transform={"translateY(-50%)"}
+            icon={<FaChevronRight />}
+            onClick={() => swiperRef.current?.slideNext()}
+            aria-label="Next slide"
+          />
+        )}
+      </Hide>
+    </Swiper>
   )
 }

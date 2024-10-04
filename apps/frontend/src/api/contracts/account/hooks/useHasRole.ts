@@ -23,6 +23,11 @@ export const DECAY_SETTINGS_MANAGER_ROLE = ethers.solidityPackedKeccak256(["stri
 export const Proposer = ethers.solidityPackedKeccak256(["string"], ["Proposer"])
 export const Executor = ethers.solidityPackedKeccak256(["string"], ["Executor"])
 export const ROUND_STARTER_ROLE = ethers.solidityPackedKeccak256(["string"], ["ROUND_STARTER_ROLE"])
+export const SETTINGS_MANAGER_ROLE = ethers.solidityPackedKeccak256(["string"], ["SETTINGS_MANAGER_ROLE"])
+export const SIGNALER_ROLE = ethers.solidityPackedKeccak256(["string"], ["SIGNALER_ROLE"])
+export const ACTION_REGISTRAR_ROLE = ethers.solidityPackedKeccak256(["string"], ["ACTION_REGISTRAR_ROLE"])
+export const WHITELISTER_ROLE = ethers.solidityPackedKeccak256(["string"], ["WHITELISTER_ROLE"])
+export const ACTION_SCORE_MANAGER_ROLE = ethers.solidityPackedKeccak256(["string"], ["ACTION_SCORE_MANAGER_ROLE"])
 
 /**
  *  Function to check if the user has a specific role in AccessControl
@@ -40,7 +45,7 @@ export const getHasRole = async (thor: Connex.Thor, role: string, contractAddres
 
   if (res.reverted) throw new Error(res.revertReason)
 
-  return res.decoded[0]
+  return Boolean(res.decoded[0])
 }
 
 export const hasRoleQueryKey = (role: string, contractAddress: string, address?: string) => [
