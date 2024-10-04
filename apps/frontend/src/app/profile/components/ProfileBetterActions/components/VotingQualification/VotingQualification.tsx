@@ -18,7 +18,7 @@ import { UilArrowUpRight, UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { DelegationModal } from "./components/DelegationModal"
-import { RevokeDelegationModal } from "./components/RevokeDelegationModal"
+import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
 
 export const VotingQualification = () => {
   const { t } = useTranslation()
@@ -157,7 +157,7 @@ export const VotingQualification = () => {
         </VStack>
       </CardBody>
       <DelegationModal modal={delegationModal} />
-      <RevokeDelegationModal modal={revokeDelegationModal} delegatee={delegateeAddress} />
+      <RevokeDelegationDelegatorPOVModal modal={revokeDelegationModal} delegatee={delegateeAddress} />
     </Card>
   )
 }

@@ -15,33 +15,33 @@ import {
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
-import { useRevokeDelegation } from "@/hooks"
+import { useAcceptDelegation } from "@/hooks"
 
-export const RevokeDelegationModal = ({ modal, delegatee }: { modal: UseDisclosureProps; delegatee: string }) => {
+export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
   const { t } = useTranslation()
 
-  const revokeDelegation = useRevokeDelegation({})
+  const acceptDelegation = useAcceptDelegation({})
 
   const handleDelegate = useCallback(() => {
-    revokeDelegation.sendTransaction({ delegatee })
-  }, [revokeDelegation, delegatee])
+    acceptDelegation.sendTransaction({ delegator })
+  }, [acceptDelegation, delegator])
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
-  if (revokeDelegation.status !== "ready") {
+  if (acceptDelegation.status !== "ready") {
     return (
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={modal.onClose ?? (() => {})}
-        successTitle={t("Delegation revoked!")}
-        status={revokeDelegation.status}
-        errorDescription={revokeDelegation.error?.reason}
-        errorTitle={revokeDelegation.error ? t("Error revoking delegation") : undefined}
+        successTitle={t("Delegation accepted!")}
+        status={acceptDelegation.status}
+        errorDescription={acceptDelegation.error?.reason}
+        errorTitle={acceptDelegation.error ? t("Error accepting delegation") : undefined}
         showTryAgainButton
-        onTryAgain={() => revokeDelegation.sendTransaction({ delegatee })}
-        pendingTitle={t("Revoking delegation...")}
+        onTryAgain={() => acceptDelegation.sendTransaction({ delegator })}
+        pendingTitle={t("Accepting delegation...")}
         showExplorerButton
-        txId={revokeDelegation.txReceipt?.meta.txID ?? revokeDelegation.sendTransactionTx?.txid}
+        txId={acceptDelegation.txReceipt?.meta.txID ?? acceptDelegation.sendTransactionTx?.txid}
       />
     )
   }
@@ -50,20 +50,20 @@ export const RevokeDelegationModal = ({ modal, delegatee }: { modal: UseDisclosu
     <BaseModal onClose={modal.onClose ?? (() => {})} isOpen={modal.isOpen ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
-          <ExclamationTriangle color="#C84968" size={triangleSize} />
+          <ExclamationTriangle size={triangleSize} />
           <Heading fontSize={["lg", "lg", "2xl"]} textAlign="center">
-            {t("Are you sure you want remove your Voting Qualification delegation?")}
+            {t("Are you sure you want to accept the Voting Qualification delegation?")}
           </Heading>
         </VStack>
         <VStack align="stretch">
-          <Text fontWeight="600">{t("You’re removing it from")}</Text>
-          <Text fontSize="sm">{delegatee}</Text>
+          <Text fontWeight="600">{t("You’re accepting it from")}</Text>
+          <Text fontSize="sm">{delegator}</Text>
         </VStack>
-        <Alert status="error" borderRadius="2xl">
+        <Alert status="warning" borderRadius="2xl">
           <AlertIcon w={9} h={9} />
-          <Box lineHeight={"1.20rem"} color="#C84968" fontSize="sm">
-            <AlertTitle as="span">{t("This address won’t be able to vote using your Voting Qualification")}</AlertTitle>
-            <AlertDescription as="span">{t("once you have removed the delegation.")}</AlertDescription>
+          <Box lineHeight={"1.20rem"} fontSize="sm">
+            <AlertTitle as="span">{t("You will be able to vote using delegator's Voting Qualification")}</AlertTitle>
+            <AlertDescription as="span">{t("once you have accepted the delegation.")}</AlertDescription>
           </Box>
         </Alert>
         <VStack>
