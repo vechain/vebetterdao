@@ -1,6 +1,8 @@
+import { ButtonClickProperties } from "@/constants"
 import { VStack, Image, Text, Button } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { AnalyticsUtils } from "@/utils"
 
 type Props = {
   isB3TRToVOT3: boolean
@@ -43,6 +45,11 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
     setIsB3TRToVOT3(isB3TRToVOT3)
   }, [isB3TRToVOT3, setIsB3TRToVOT3])
 
+  const buttonClickProperties = (isB3TRToVOT3: boolean) => {
+    const action = isB3TRToVOT3 ? ButtonClickProperties.GET_VOT3 : ButtonClickProperties.GET_B3TR
+    AnalyticsUtils.trackEvent("Button Clicked", { action })
+  }
+
   return (
     <VStack
       bg={bgColor}
@@ -65,7 +72,10 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
         rounded={"full"}
         size={{ base: "md", md: "lg" }}
         w={{ base: "full", md: "auto" }}
-        onClick={handleButtonClick}>
+        onClick={() => {
+          handleButtonClick
+          buttonClickProperties(isB3TRToVOT3)
+        }}>
         {buttonText}
       </Button>
     </VStack>

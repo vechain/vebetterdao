@@ -4,6 +4,8 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { MdArrowOutward } from "react-icons/md"
+import { ButtonClickProperties } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
 
 export type ConfirmationModalContentProps = {
   b3trBalanceAfter?: string
@@ -42,6 +44,11 @@ export const SuccessConvertModalContent = ({
   onClose,
 }: ConfirmationModalContentProps) => {
   const { t } = useTranslation()
+
+  const buttonClickProperties = {
+    action: ButtonClickProperties.SWAP_CONFIRMED,
+  }
+
   return (
     <VStack align={"center"} p={8} gap={2}>
       <MotionImage
@@ -110,7 +117,10 @@ export const SuccessConvertModalContent = ({
         rounded={"full"}
         size={{ base: "md", md: "lg" }}
         w={{ base: "full", md: "auto" }}
-        onClick={onClose}>
+        onClick={() => {
+          onClose
+          AnalyticsUtils.trackEvent("Button Clicked", buttonClickProperties)
+        }}>
         {t("Continue")}
       </Button>
     </VStack>

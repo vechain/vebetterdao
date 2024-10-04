@@ -8,6 +8,8 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { ButtonClickProperties } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
 
 const compactFormatter = getCompactFormatter(2)
 
@@ -29,6 +31,10 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
   const goToBalance = useCallback(() => {
     router.push("/profile")
   }, [router])
+
+  const buttonClickProperties = {
+    action: ButtonClickProperties.SWAP_TOKENS,
+  }
 
   if (!account) return <WalletNotConnectedOverlay />
 
@@ -100,7 +106,10 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
       </Stack>
       <Button
         isDisabled={isSwapDisabled}
-        onClick={onOpen}
+        onClick={() => {
+          onOpen()
+          AnalyticsUtils.trackEvent("Button Clicked", buttonClickProperties)
+        }}
         leftIcon={<UilExchangeAlt size={"16px"} />}
         variant={"whiteAction"}
         rounded={"full"}
