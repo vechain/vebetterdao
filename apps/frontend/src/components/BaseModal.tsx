@@ -1,23 +1,41 @@
-import { useMediaQuery, Modal, ModalOverlay, ModalContent, ModalCloseButton, ModalBody } from "@chakra-ui/react"
+import {
+  useMediaQuery,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalCloseButton,
+  ModalBody,
+  ModalProps,
+} from "@chakra-ui/react"
 import { BaseBottomSheet } from "./BaseBottomSheet"
 
 type Props = {
   isOpen: boolean
   onClose: () => void
   children: React.ReactNode
-  ariaTitle: string
-  ariaDescription: string
+  ariaTitle?: string
+  ariaDescription?: string
+  modalProps?: Partial<ModalProps>
+  closeButton?: boolean
 }
-export const BaseModal = ({ isOpen, onClose, children, ariaTitle, ariaDescription }: Props) => {
+export const BaseModal = ({
+  isOpen,
+  onClose,
+  children,
+  ariaTitle,
+  ariaDescription,
+  modalProps,
+  closeButton = true,
+}: Props) => {
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
 
   if (isDesktop)
     return (
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered {...modalProps}>
         <ModalOverlay />
-        <ModalContent>
-          <ModalCloseButton />
-          <ModalBody p={"40px"} borderRadius="xl">
+        <ModalContent rounded={"2xl"}>
+          {closeButton && <ModalCloseButton />}
+          <ModalBody p={10} rounded={"2xl"}>
             {children}
           </ModalBody>
         </ModalContent>
@@ -25,7 +43,11 @@ export const BaseModal = ({ isOpen, onClose, children, ariaTitle, ariaDescriptio
     )
 
   return (
-    <BaseBottomSheet isOpen={isOpen} onClose={onClose} ariaTitle={ariaTitle} ariaDescription={ariaDescription}>
+    <BaseBottomSheet
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaTitle={ariaTitle || ""}
+      ariaDescription={ariaDescription || ""}>
       {children}
     </BaseBottomSheet>
   )
