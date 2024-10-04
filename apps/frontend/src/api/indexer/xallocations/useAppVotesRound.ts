@@ -1,0 +1,54 @@
+import { getConfig } from "@repo/config"
+import { useQuery } from "@tanstack/react-query"
+import { z } from "zod"
+
+const indexerUrl = getConfig().indexerUrl
+
+export const RoundAppVotesSchema = z.object({
+  roundId: z.number(),
+  appId: z.string(),
+  voters: z.number(),
+  totalVotes: z.string(),
+})
+
+export const RoundAppVotesResponseSchema = z.array(RoundAppVotesSchema)
+
+export type RoundAppVotes = z.infer<typeof RoundAppVotesSchema>
+export type RoundAppVotesResponse = z.infer<typeof RoundAppVotesResponseSchema>
+
+type RoundAppVotesRequest = {
+  roundId: number
+}
+
+/**
+ * Fetches the voting results for a specific round.
+ *
+ * @param data - The request data containing the round ID.
+ * @throws Will throw an error if the indexer URL is not found or if the round ID is not provided.
+ * @throws Will throw an error if the fetch request fails.
+ * @returns A promise that resolves to the voting results for the specified round.
+ */
+export const getRoundAppVotes = async (data: RoundAppVotesRequest): Promise<RoundAppVotesResponse> => {
+  if (!indexerUrl) throw new Error("Indexer URL not found")
+  if (!data.roundId) throw new Error("roundId is required")
+
+  const response = await fetch(`${indexerUrl}/voting/xallocations/${data.roundId}/results`, {
+    method: "GET",
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch round votes: ${response.statusText}`)
+  }
+
+  return RoundAppVotesResponseSchema.parse(await response.json())
+}
+
+export const getRoundAppVotesQueryKey = (roundId: number) => ["ROUND", "APP", roundId]
+
+export const useRoundAppVotes = ({ roundId }: RoundAppVotesRequest) => {
+  return useQuery({
+    queryKey: getRoundAppVotesQueryKey(roundId),
+    queryFn: () => getRoundAppVotes({ roundId }),
+    enabled: !!roundId,
+  })
+}
