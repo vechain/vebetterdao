@@ -2531,13 +2531,13 @@ describe("VeBetterPassport - @shard3", function () {
       // Should not be able to delegate an entity
       await expect(delegateWithSignature(veBetterPassport, entity, delegatee, 3600)).to.be.revertedWithCustomError(
         veBetterPassport,
-        "PassportDelegationToEntity",
+        "PassportDelegationFromEntity",
       )
 
       // Should not be able to delegate an entity
       await expect(veBetterPassport.connect(entity).delegatePassport(delegatee.address)).to.be.revertedWithCustomError(
         veBetterPassport,
-        "PassportDelegationToEntity",
+        "PassportDelegationFromEntity",
       )
 
       // detach entity

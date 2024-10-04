@@ -68,7 +68,7 @@ library PassportDelegationLogic {
   error OnlyOneUserAllowed();
 
   /// @notice Emiited when a user tries to delegate a passport to another passport or entity.
-  error PassportDelegationToEntity();
+  error PassportDelegationFromEntity();
 
   /// @notice Emitted when a user tries to delegate with a
   error SignatureExpired();
@@ -246,7 +246,7 @@ library PassportDelegationLogic {
 
     // Cannot delegate enitity attached to passport
     if (PassportEntityLogic.isEntity(self, delegator)) {
-      revert PassportDelegationToEntity();
+      revert PassportDelegationFromEntity();
     }
 
     // Check if the passport has already delegated
@@ -286,7 +286,7 @@ library PassportDelegationLogic {
 
     // Check if the delegator is an entity linked to a passport
     if (PassportEntityLogic.isEntity(self, msg.sender)) {
-      revert PassportDelegationToEntity();
+      revert PassportDelegationFromEntity();
     }
 
     // Check if the passport has already delegated removing the previous delegation
