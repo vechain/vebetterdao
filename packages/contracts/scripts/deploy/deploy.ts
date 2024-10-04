@@ -339,7 +339,6 @@ export async function deployAll(config: ContractsConfig) {
       {
         x2EarnApps: await x2EarnApps.getAddress(),
         xAllocationVoting: await xAllocationVoting.getAddress(),
-        nodeManagement: await nodeManagement.getAddress(),
         galaxyMember: await galaxyMember.getAddress(),
         popScoreThreshold: config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD, //threshold
         signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold

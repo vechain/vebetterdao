@@ -159,7 +159,7 @@ interface IVeBetterPassport {
   function isPerson(address user) external view returns (bool person, string memory reason);
 
   /// @notice Checks if a user is a person
-  /// @dev Checks if a wallet is a person or not at a specific timepoint based on the participation score, blacklisting, and xnode and GM holdings
+  /// @dev Checks if a wallet is a person or not at a specific timepoint based on the participation score, blacklisting, and GM holdings
   /// @param user - the user address
   /// @param timepoint - the timepoint to query
   /// @return person - true if the user is a person

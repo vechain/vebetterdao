@@ -39,7 +39,6 @@ library PassportTypes {
    * @dev Struct containing data to initialize the contract
    * @param xAllocationVoting The address of the xAllocationVoting
    * @param x2EarnApps The address of the x2EarnApps
-   * @param nodeManagement The address of the node management contract
    * @param galaxyMember The address of the galaxy member contract
    * @param upgrader The address of the upgrader
    * @param admins The addresses of the admins
@@ -57,7 +56,6 @@ library PassportTypes {
     IXAllocationVotingGovernor xAllocationVoting;
     IX2EarnApps x2EarnApps;
     IGalaxyMember galaxyMember;
-    INodeManagement nodeManagement;
     uint256 popScoreThreshold;
     uint256 signalingThreshold;
     uint256 roundsForCumulativeScore;
@@ -86,7 +84,6 @@ library PassportTypes {
     BLACKLIST_CHECK, // Check if the user is blacklisted
     SIGNALING_CHECK, // Check if the user has been signaled too many times
     PARTICIPATION_SCORE_CHECK, // Check the user's participation score
-    NODE_OWNERSHIP_CHECK, // Check if the user owns an economic or xnode
     GM_OWNERSHIP_CHECK // Check if the user owns a GM token
   }
 

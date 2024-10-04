@@ -23,15 +23,13 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 describe("VeBetterPassport - @shard3", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
-      const { veBetterPassport, x2EarnApps, xAllocationVoting, nodeManagement, galaxyMember } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Verify contract addresses
       expect(await veBetterPassport.getXAllocationVoting()).to.equal(await xAllocationVoting.getAddress())
       expect(await veBetterPassport.getX2EarnApps()).to.equal(await x2EarnApps.getAddress())
-      expect(await veBetterPassport.getNodeManagement()).to.equal(await nodeManagement.getAddress())
       expect(await veBetterPassport.getGalaxyMember()).to.equal(await galaxyMember.getAddress())
     })
 
@@ -95,7 +93,7 @@ describe("VeBetterPassport - @shard3", function () {
   describe("Upgrades", function () {
     it("Should not be able to initialize twice", async function () {
       const config = createLocalConfig()
-      const { veBetterPassport, owner, x2EarnApps, xAllocationVoting, nodeManagement, galaxyMember } =
+      const { veBetterPassport, owner, x2EarnApps, xAllocationVoting, galaxyMember } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -105,7 +103,6 @@ describe("VeBetterPassport - @shard3", function () {
           {
             x2EarnApps: await x2EarnApps.getAddress(),
             xAllocationVoting: await xAllocationVoting.getAddress(),
-            nodeManagement: await nodeManagement.getAddress(),
             galaxyMember: await galaxyMember.getAddress(),
             popScoreThreshold: config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD, //threshold
             signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
@@ -399,38 +396,21 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.isCheckEnabled(4)).to.be.true
     })
 
-    it("Should be able to toggle node ownership check", async function () {
-      const { owner: settingsManager, veBetterPassport } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      // Node ownership check should be disabled by default
-      expect(await veBetterPassport.isCheckEnabled(5)).to.be.false
-
-      // Settings manager should be able to toggle the checks
-      await expect(veBetterPassport.connect(settingsManager).toggleCheck(5))
-        .to.emit(veBetterPassport, "CheckToggled")
-        .withArgs("Node Ownership Check", true)
-
-      // Node ownership check should be enabled
-      expect(await veBetterPassport.isCheckEnabled(5)).to.be.true
-    })
-
     it("Should be able to toggle gm ownership check", async function () {
       const { owner: settingsManager, veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       // Whitelist check should be disabled by default
-      expect(await veBetterPassport.isCheckEnabled(6)).to.be.false
+      expect(await veBetterPassport.isCheckEnabled(5)).to.be.false
 
       // Settings manager should be able to toggle the checks
-      await expect(veBetterPassport.connect(settingsManager).toggleCheck(6))
+      await expect(veBetterPassport.connect(settingsManager).toggleCheck(5))
         .to.emit(veBetterPassport, "CheckToggled")
         .withArgs("GM Ownership Check", true)
 
       // Whitelist check should be enabled
-      expect(await veBetterPassport.isCheckEnabled(6)).to.be.true
+      expect(await veBetterPassport.isCheckEnabled(5)).to.be.true
     })
 
     it("Should be able to set the minimum galaxy member level", async function () {
@@ -3453,22 +3433,6 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.isPerson(otherAccount.address)).to.deep.equal([
         true,
         "User's participation score is above the threshold",
-      ])
-    })
-
-    it("Should return true if user owns an x node", async function () {
-      const { veBetterPassport, owner, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      await veBetterPassport.connect(owner).toggleCheck(5)
-
-      // Mock node ownership and delegation
-      await createNodeHolder(2, otherAccount)
-
-      expect(await veBetterPassport.isPerson(otherAccount.address)).to.deep.equal([
-        true,
-        "User owns an economic or xnode",
       ])
     })
 

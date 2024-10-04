@@ -36,12 +36,12 @@ import { PassportTypes } from "./PassportTypes.sol";
 /**
  * @title PassportPersonhoodLogic
  * @dev A library that provides logic to determine whether a wallet is considered a "person" based on various checks.
- * It evaluates factors such as participation score, blacklist status, xnode ownership, and delegation status.
+ * It evaluates factors such as participation score, blacklist status, and delegation status.
  * This library supports both real-time personhood checks and checks at specific timepoints.
  */
 library PassportPersonhoodLogic {
   /**
-   * @dev Checks if a wallet is a person or not based on the participation score, blacklisting, and xnode and GM holdings
+   * @dev Checks if a wallet is a person or not based on the participation score, blacklisting, and GM holdings
    * @return person bool representing if the user is considered a person
    * @return reason string representing the reason for the result
    */
@@ -57,7 +57,7 @@ library PassportPersonhoodLogic {
   }
 
   /**
-   * @dev Checks if a wallet is a person or not at a specific timepoint based on the participation score, blacklisting, and xnode and GM holdings
+   * @dev Checks if a wallet is a person or not at a specific timepoint based on the participation score, blacklisting, and GM holdings
    * @param user address of the user
    * @param timepoint uint256 of the timepoint
    * @return person bool representing if the user is considered a person
@@ -126,7 +126,6 @@ library PassportPersonhoodLogic {
    * - Returns `(false, "User is blacklisted")` if the user is blacklisted.
    * - Returns `(false, "User has been signaled too many times")` if the user has been signaled more than the threshold.
    * - Returns `(true, "User's participation score is above the threshold")` if the user's participation score meets or exceeds the threshold.
-   * - Returns `(true, "User owns an economic or xnode")` if the user owns an economic or xnode.
    * - Returns `(false, "User does not meet the criteria to be considered a person")` if none of the conditions are met.
    *
    * Additional considerations:
@@ -178,14 +177,6 @@ library PassportPersonhoodLogic {
       if ((participationScore >= PassportPoPScoreLogic.thresholdParticipationScore(self))) {
         return (true, "User's participation score is above the threshold");
       }
-    }
-
-    // Check if user owns an economic or xnode
-    if (
-      PassportChecksLogic._isCheckEnabled(self, PassportTypes.CheckType.NODE_OWNERSHIP_CHECK) &&
-      (self.nodeManagement.getNodeIds(user).length > 0)
-    ) {
-      return (true, "User owns an economic or xnode");
     }
 
     // TODO: With `GalaxyMember` version 2, Check if user's selected `GalaxyMember` `tokenId` is greater than `getMinimumGalaxyMemberLevel(self)`

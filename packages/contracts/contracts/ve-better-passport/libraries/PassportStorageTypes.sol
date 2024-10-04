@@ -52,8 +52,6 @@ library PassportStorageTypes {
     // ---------- External Contracts ---------- //
     // Address of the xAllocationVoting contract
     IXAllocationVotingGovernor xAllocationVoting;
-    // Address of the node management contract
-    INodeManagement nodeManagement;
     // Address of the galaxy member contract
     IGalaxyMember galaxyMember;
     // Address of the x2EarnApps contract

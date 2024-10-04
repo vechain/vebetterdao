@@ -39,14 +39,12 @@ library PassportChecksLogic {
   uint256 constant BLACKLIST_CHECK = 1 << 1; // Bitwise shift to the left by 1
   uint256 constant SIGNALING_CHECK = 1 << 2; // Bitwise shift to the left by 2
   uint256 constant PARTICIPATION_SCORE_CHECK = 1 << 3; // Bitwise shift to the left by 3
-  uint256 constant NODE_OWNERSHIP_CHECK = 1 << 4; // Bitwise shift to the left by 4
-  uint256 constant GM_OWNERSHIP_CHECK = 1 << 5; // Bitwise shift to the left by 5
+  uint256 constant GM_OWNERSHIP_CHECK = 1 << 4; // Bitwise shift to the left by 4
 
   string constant WHITELIST_CHECK_NAME = "Whitelist Check";
   string constant BLACKLIST_CHECK_NAME = "Blacklist Check";
   string constant SIGNALING_CHECK_NAME = "Signaling Check";
   string constant PARTICIPATION_SCORE_CHECK_NAME = "Participation Score Check";
-  string constant NODE_OWNERSHIP_CHECK_NAME = "Node Ownership Check";
   string constant GM_OWNERSHIP_CHECK_NAME = "GM Ownership Check";
 
   // ---------- Events ---------- //
@@ -70,8 +68,6 @@ library PassportChecksLogic {
     if (checkType == PassportTypes.CheckType.SIGNALING_CHECK) return (SIGNALING_CHECK, SIGNALING_CHECK_NAME);
     if (checkType == PassportTypes.CheckType.PARTICIPATION_SCORE_CHECK)
       return (PARTICIPATION_SCORE_CHECK, PARTICIPATION_SCORE_CHECK_NAME);
-    if (checkType == PassportTypes.CheckType.NODE_OWNERSHIP_CHECK)
-      return (NODE_OWNERSHIP_CHECK, NODE_OWNERSHIP_CHECK_NAME);
     if (checkType == PassportTypes.CheckType.GM_OWNERSHIP_CHECK) return (GM_OWNERSHIP_CHECK, GM_OWNERSHIP_CHECK_NAME);
     revert("Invalid PassportTypes");
   }

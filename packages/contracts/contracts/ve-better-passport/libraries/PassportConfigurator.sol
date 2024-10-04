@@ -41,19 +41,10 @@ library PassportConfigurator {
   }
 
   /// @notice Gets the xAllocationVoting contract address
-  function getXAllocationVoting(PassportStorageTypes.PassportStorage storage self)
-    internal
-    view
-    returns (IXAllocationVotingGovernor)
-  {
-    return self.xAllocationVoting;
-  }
-
-  /// @notice Gets the node management contract address
-  function getNodeManagement(
+  function getXAllocationVoting(
     PassportStorageTypes.PassportStorage storage self
-  ) internal view returns (INodeManagement) {
-    return self.nodeManagement;
+  ) internal view returns (IXAllocationVotingGovernor) {
+    return self.xAllocationVoting;
   }
 
   /// @notice Gets the galaxy member contract address
@@ -71,7 +62,6 @@ library PassportConfigurator {
     // Initialize the external contracts
     setX2EarnApps(self, initializationData.x2EarnApps);
     setXAllocationVoting(self, initializationData.xAllocationVoting);
-    setNodeManagement(self, initializationData.nodeManagement);
     setGalaxyMember(self, initializationData.galaxyMember);
 
     // Initialize the bot signals threshold
@@ -123,18 +113,6 @@ library PassportConfigurator {
     require(address(_xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
 
     self.xAllocationVoting = _xAllocationVoting;
-  }
-
-  /// @notice Sets the node management contract address
-  /// @param self - the PassportStorage struct
-  /// @param _nodeManagement - the node management contract address
-  function setNodeManagement(
-    PassportStorageTypes.PassportStorage storage self,
-    INodeManagement _nodeManagement
-  ) public {
-    require(address(_nodeManagement) != address(0), "VeBetterPassport: nodeManagement is the zero address");
-
-    self.nodeManagement = _nodeManagement;
   }
 
   /// @notice Sets the galaxy member contract address
