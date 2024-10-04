@@ -18,11 +18,12 @@ import { UilArrowUpRight, UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { DelegationModal } from "./components/DelegationModal"
+import { RevokeDelegationModal } from "./components/RevokeDelegationModal"
 
 export const VotingQualification = () => {
   const { t } = useTranslation()
   // TODO: fill with real data
-  const isDelegated = false
+  const isDelegated = true
   const delegateeAddress = "0x1234567890123456789012345678901234567890"
   const delegationDate = "2024-01-01"
 
@@ -56,6 +57,7 @@ export const VotingQualification = () => {
   const lightColor = "#FCEEF1"
 
   const delegationModal = useDisclosure()
+  const revokeDelegationModal = useDisclosure()
 
   if (isUserRoundScoreLoading || isScoreThresholdLoading) return null
 
@@ -140,7 +142,11 @@ export const VotingQualification = () => {
                     </VStack>
                   </HStack>
                   <HStack>
-                    <Button variant={"dangerGhost"} p={3} leftIcon={<UilTimes color="#C84968" />}>
+                    <Button
+                      variant={"dangerGhost"}
+                      p={3}
+                      leftIcon={<UilTimes color="#C84968" />}
+                      onClick={revokeDelegationModal.onOpen}>
                       {t("Remove delegation")}
                     </Button>
                   </HStack>
@@ -151,6 +157,7 @@ export const VotingQualification = () => {
         </VStack>
       </CardBody>
       <DelegationModal modal={delegationModal} />
+      <RevokeDelegationModal modal={revokeDelegationModal} delegatee={delegateeAddress} />
     </Card>
   )
 }
