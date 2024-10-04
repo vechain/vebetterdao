@@ -2366,6 +2366,63 @@ describe("VeBetterPassport - @shard3", function () {
       )
     })
 
+    it("When voting delegation must have been done before the start of the proposal", async function () {
+      const {
+        governor,
+        b3tr,
+        B3trContract,
+        owner: X,
+        veBetterPassport,
+        otherAccount: Y,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const Z = otherAccounts[0]
+
+      await getVot3Tokens(X, "10000")
+      await getVot3Tokens(Y, "10000")
+      await getVot3Tokens(Z, "10000")
+
+      // Start emissions
+      await bootstrapAndStartEmissions()
+
+      // Whitelist owner
+      await veBetterPassport.connect(X).whitelist(X.address)
+      await veBetterPassport.connect(X).whitelist(Z.address)
+
+      // Enable whitelist check
+      await veBetterPassport.connect(X).toggleCheck(1)
+
+      // whitelist check should be enabled
+      expect(await veBetterPassport.isCheckEnabled(1)).to.be.true
+
+      // expect owner to be person
+      expect(await veBetterPassport.isPerson(X.address)).to.deep.equal([true, "User is whitelisted"])
+
+      // create a new proposal
+      const tx = await createProposal(b3tr, B3trContract, X, "Get b3tr token details", "tokenDetails", [])
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), X)
+
+      // Define a deadline timestamp
+      const time = Date.now()
+      const deadline = time + 3600 // 1 hour from now -> change from ms to s
+
+      // wait for proposal
+      await waitForProposalToBeActive(proposalId)
+
+      // delegate with signature X to Y
+      await delegateWithSignature(veBetterPassport, X, Y, deadline)
+
+      // Y cannot vote because he is not human since delegation was done after proposal was started
+      await expect(governor.connect(Y).castVote(proposalId, 2)).to.be.reverted
+    })
+
     it("Should not be able to delegate to self", async function () {
       const { veBetterPassport, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2683,6 +2740,23 @@ describe("VeBetterPassport - @shard3", function () {
         false,
         "User has delegated their personhood",
       ])
+    })
+
+    it("A user can have maximum on passport delegated to him per time", async function () {
+      const { veBetterPassport, owner, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const owner2 = otherAccounts[0]
+
+      await delegateWithSignature(veBetterPassport, owner, otherAccount, 3600)
+      expect(await veBetterPassport.getDelegatee(owner.address)).to.equal(otherAccount.address)
+      expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(owner.address)
+
+      await delegateWithSignature(veBetterPassport, owner2, otherAccount, 3600)
+      // now that owner2 has delegetated to otherAccount, otherAccount should be delegatee of owner2
+      expect(await veBetterPassport.getDelegatee(owner2.address)).to.equal(otherAccount.address)
+      expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(owner2.address)
     })
   })
 
