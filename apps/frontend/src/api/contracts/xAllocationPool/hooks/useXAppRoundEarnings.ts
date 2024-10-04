@@ -1,12 +1,15 @@
-import { useQueries, useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
 import { queryClient } from "@/api/QueryProvider"
 import { getRoundXApps, getRoundXAppsQueryKey } from "../../xApps"
 import { ethers } from "ethers"
+import { abi } from "thor-devkit"
 
 const XALLOCATIONPOOL_CONTRACT = getConfig().xAllocationPoolContractAddress
+const roundEarningsFragment = XAllocationPool__factory.createInterface().getFunction("roundEarnings").format("json")
+const roundEarningsAbi = new abi.Function(JSON.parse(roundEarningsFragment))
 
 type UseXAppRoundEarningsQueryResponse = {
   amount: string
@@ -77,20 +80,38 @@ export const useXAppRoundEarnings = (roundId: string, xAppId: string) => {
  */
 export const useMultipleXAppRoundEarnings = (roundId: string, xAppIds: string[]) => {
   const { thor } = useConnex()
-  return useQueries({
-    queries: xAppIds.map(xAppId => ({
-      queryKey: getXAppRoundEarningsQueryKey(roundId, xAppId),
-      queryFn: async () => {
-        const data = await queryClient.ensureQueryData({
-          queryFn: () => getRoundXApps(thor, roundId),
-          queryKey: getRoundXAppsQueryKey(roundId),
-        })
-        const isXAppInRound = data.some(app => app.id === xAppId)
-        if (!isXAppInRound) return { amount: "0", xAppId }
 
-        return await getXAppRoundEarnings(thor, roundId, xAppId)
-      },
-      enabled: !!thor && !!roundId && !!xAppId,
-    })),
+  return useQuery({
+    queryKey: getXAppRoundEarningsQueryKey(roundId, "ALL"),
+    queryFn: async () => {
+      const data = await queryClient.ensureQueryData({
+        queryFn: () => getRoundXApps(thor, roundId),
+        queryKey: getRoundXAppsQueryKey(roundId),
+      })
+
+      const xAppsInRound = data.filter(app => xAppIds.includes(app.id))
+
+      const clauses = xAppsInRound.map(app => ({
+        to: XALLOCATIONPOOL_CONTRACT,
+        value: 0,
+        data: roundEarningsAbi.encode(roundId, app.id),
+      }))
+      const res = await thor.explain(clauses).execute()
+
+      const decoded = res.map((r, index) => {
+        const decoded = roundEarningsAbi.decode(r.data)
+        const parsedAmount = ethers.formatEther(decoded[0])
+        const appId = xAppsInRound[index]?.id as string
+        // Update the cache with the new amount
+        queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundId, appId), {
+          amount: parsedAmount,
+          appId,
+        })
+        return { amount: parsedAmount, appId }
+      })
+
+      return decoded
+    },
+    enabled: !!thor && !!roundId && !!xAppIds.length,
   })
 }

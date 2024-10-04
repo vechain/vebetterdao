@@ -61,9 +61,17 @@ export const useAllocationsRound = (roundId?: string) => {
     return dayjs().add(durationLeftTimestamp, "milliseconds")
   }, [currentBlock, currentAllocationRound])
 
+  const isFirstRound = currentAllocationRound?.roundId === "1"
+  const isLastRound = currentAllocationRound?.roundId === allocationRoundsEvents?.data?.created.length.toString()
   return {
     ...allocationRoundsEvents,
-    data: { ...currentAllocationRound, voteStartTimestamp: estimatedStartTime, voteEndTimestamp: estimatedEndTime },
+    data: {
+      ...currentAllocationRound,
+      voteStartTimestamp: estimatedStartTime,
+      voteEndTimestamp: estimatedEndTime,
+      isFirstRound,
+      isLastRound,
+    },
     isLoading,
     isError,
     error,

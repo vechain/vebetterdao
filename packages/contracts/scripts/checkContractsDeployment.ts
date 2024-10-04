@@ -44,6 +44,7 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     b3trContractAddress: await contracts.b3tr.getAddress(),
     vot3ContractAddress: await contracts.vot3.getAddress(),
     b3trGovernorAddress: await contracts.governor.getAddress(),
+    veBetterPassportAddress: await contracts.veBetterPassport.getAddress(),
     timelockContractAddress: await contracts.timelock.getAddress(),
     xAllocationPoolContractAddress: await contracts.xAllocationPool.getAddress(),
     xAllocationVotingContractAddress: await contracts.xAllocationVoting.getAddress(),
@@ -54,6 +55,7 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     x2EarnAppsContractAddress: await contracts.x2EarnApps.getAddress(),
     x2EarnRewardsPoolContractAddress: await contracts.x2EarnRewardsPool.getAddress(),
     nodeManagementContractAddress: await contracts.vechainNodeManagement.getAddress(),
+    veBetterPassportContractAddress: await contracts.veBetterPassport.getAddress(),
     b3trGovernorLibraries: {
       governorClockLogicAddress: await contracts.libraries.governorClockLogic.getAddress(),
       governorConfiguratorAddress: await contracts.libraries.governorConfigurator.getAddress(),

@@ -186,7 +186,7 @@ export const getOrDeployContractInstances = async ({
     PassportPersonhoodLogic,
     PassportPoPScoreLogic,
     PassportSignalingLogic,
-    PassportWhitelistBlacklistLogic,
+    PassportWhitelistAndBlacklistLogic,
   } = await passportLibraries()
 
   // ---------------------- Deploy Mocks ----------------------
@@ -283,7 +283,7 @@ export const getOrDeployContractInstances = async ({
     PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
     PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
     PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
-    PassportWhitelistAndBlacklistLogic: await PassportWhitelistBlacklistLogic.getAddress(),
+    PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
   })
 
   const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
@@ -436,7 +436,7 @@ export const getOrDeployContractInstances = async ({
       PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
       PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
       PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
-      PassportWhitelistAndBlacklistLogic: await PassportWhitelistBlacklistLogic.getAddress(),
+      PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
     },
   )) as VeBetterPassport
 
@@ -671,7 +671,7 @@ export const getOrDeployContractInstances = async ({
     passportPersonhoodLogic: PassportPersonhoodLogic,
     passportPoPScoreLogic: PassportPoPScoreLogic,
     passportSignalingLogic: PassportSignalingLogic,
-    passportWhitelistBlacklistLogic: PassportWhitelistBlacklistLogic,
+    passportWhitelistBlacklistLogic: PassportWhitelistAndBlacklistLogic,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vechainNodesMock,

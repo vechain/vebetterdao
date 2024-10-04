@@ -9,6 +9,7 @@ const config: AppConfig = {
   b3trContractAddress: "0xaC0CA2a5148E15EF913F9f5Cf8Eb3cf763f5a43f",
   vot3ContractAddress: "0x9dF69AD8fF89063869E04164A11579c0a8532e84",
   b3trGovernorAddress: "0x102A7B7f771d904034471431b2F67e661f1bAB1e",
+  veBetterPassportAddress: "",
   timelockContractAddress: "0x27A36c16734Cf11EDA1bCc1dC78C1ee25d9dF7ed",
   xAllocationPoolContractAddress: "0x61Fe12d6218F2aA4BE527e38aAc2fAC6B529B6b6",
   xAllocationVotingContractAddress: "0x90c1a329e11CE6429eeF0ab9b8f7DAaB68694e7d",
@@ -19,6 +20,7 @@ const config: AppConfig = {
   treasuryContractAddress: "",
   x2EarnRewardsPoolContractAddress: "",
   nodeManagementContractAddress: "",
+  veBetterPassportContractAddress: "",
   b3trGovernorLibraries: {
     governorClockLogicAddress: "",
     governorConfiguratorAddress: "",
@@ -29,6 +31,7 @@ const config: AppConfig = {
     governorStateLogicAddress: "",
     governorVotesLogicAddress: "",
   },
+  indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
     id: "testnet",
