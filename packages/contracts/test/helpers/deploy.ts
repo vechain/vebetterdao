@@ -119,6 +119,7 @@ interface DeployInstance {
   passportPoPScoreLogic: PassportPoPScoreLogic
   passportSignalingLogic: PassportSignalingLogic
   passportWhitelistBlacklistLogic: PassportWhitelistAndBlacklistLogic
+  passportConfigurator: any // no abi for this library, which means a typechain is not generated
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
   vechainNodesMock: TokenAuction
@@ -669,6 +670,7 @@ export const getOrDeployContractInstances = async ({
     passportPoPScoreLogic: PassportPoPScoreLogic,
     passportSignalingLogic: PassportSignalingLogic,
     passportWhitelistBlacklistLogic: PassportWhitelistAndBlacklistLogic,
+    passportConfigurator: PassportConfigurator,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vechainNodesMock,

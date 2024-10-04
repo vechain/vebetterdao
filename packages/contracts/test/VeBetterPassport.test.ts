@@ -21,7 +21,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
 describe("VeBetterPassport - @shard3", function () {
-  describe.only("Contract parameters", function () {
+  describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, nodeManagement, galaxyMember } =
         await getOrDeployContractInstances({
@@ -1254,11 +1254,10 @@ describe("VeBetterPassport - @shard3", function () {
       const config = createLocalConfig()
 
       config.VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE = 2
-      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts, emissions } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-          config,
-        })
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions()
