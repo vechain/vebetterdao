@@ -798,5 +798,7 @@
   "Current Signals": "Current Signals",
   "Enter the reason for the action": "Enter the reason for the action",
   "Reason": "Reason",
-  "Signal User": "Signal User"
+  "Signal User": "Signal User",
+  "voted by": "voted by",
+  "wallets": "wallets"
 }
