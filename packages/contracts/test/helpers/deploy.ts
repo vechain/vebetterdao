@@ -55,7 +55,6 @@ import {
   PassportPoPScoreLogic,
   PassportSignalingLogic,
   PassportWhitelistAndBlacklistLogic,
-  PassportConfigurator,
   PassportPersonhoodLogic,
   PassportDelegationLogic,
 } from "../../typechain-types"
@@ -114,7 +113,6 @@ interface DeployInstance {
   governorStateLogicLibV3: GovernorStateLogicV3
   governorVotesLogicLibV3: GovernorVotesLogicV3
   passportChecksLogic: PassportChecksLogic
-  passportConfigurator: PassportConfigurator
   passportDelegationLogic: PassportDelegationLogic
   passportEntityLogic: PassportEntityLogic
   passportPersonhoodLogic: PassportPersonhoodLogic
@@ -665,7 +663,6 @@ export const getOrDeployContractInstances = async ({
     governorStateLogicLibV3: GovernorStateLogicLibV3,
     governorVotesLogicLibV3: GovernorVotesLogicLibV3,
     passportChecksLogic: PassportChecksLogic,
-    passportConfigurator: PassportConfigurator,
     passportDelegationLogic: PassportDelegationLogic,
     passportEntityLogic: PassportEntityLogic,
     passportPersonhoodLogic: PassportPersonhoodLogic,

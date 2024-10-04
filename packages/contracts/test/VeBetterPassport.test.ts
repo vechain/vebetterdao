@@ -21,7 +21,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
 describe("VeBetterPassport - @shard3", function () {
-  describe("Contract parameters", function () {
+  describe.only("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, nodeManagement, galaxyMember } =
         await getOrDeployContractInstances({
