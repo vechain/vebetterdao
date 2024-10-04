@@ -11,4 +11,4 @@ artifacts
 .vscode/*
 
 docs
-rewardEvents*.json
+*Events*.json
