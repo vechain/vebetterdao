@@ -1,3 +1,4 @@
+import { TogglePassportCheck } from "@/constants"
 import { useIsPassportCheckEnabled } from "."
 
 /**
@@ -5,19 +6,19 @@ import { useIsPassportCheckEnabled } from "."
  * @returns the status of all passport checks as booleans
  */
 export const usePassportChecks = () => {
-  const { data: isWhiteListCheckEnabled } = useIsPassportCheckEnabled("whitelistCheckEnabled")
-  const { data: isBlackListCheckEnabled } = useIsPassportCheckEnabled("blacklistCheckEnabled")
-  const { data: isSignalingCheckEnabled } = useIsPassportCheckEnabled("signalingCheckEnabled")
-  const { data: isParticipationScoreCheckEnabled } = useIsPassportCheckEnabled("participationScoreCheckEnabled")
-  const { data: isNodeOwnershipCheckEnabled } = useIsPassportCheckEnabled("nodeOwnershipCheckEnabled")
-  const { data: isGMOwnershipCheckEnabled } = useIsPassportCheckEnabled("gmOwnershipCheckEnabled")
+  const { data: isWhiteListCheckEnabled } = useIsPassportCheckEnabled(TogglePassportCheck.WhitelistCheck)
+  const { data: isBlackListCheckEnabled } = useIsPassportCheckEnabled(TogglePassportCheck.BlacklistCheck)
+  const { data: isSignalingCheckEnabled } = useIsPassportCheckEnabled(TogglePassportCheck.SignalingCheck)
+  const { data: isParticipationScoreCheckEnabled } = useIsPassportCheckEnabled(
+    TogglePassportCheck.ParticipationScoreCheck,
+  )
+  const { data: isGMOwnershipCheckEnabled } = useIsPassportCheckEnabled(TogglePassportCheck.GmOwnershipCheck)
 
   return {
     isWhiteListCheckEnabled,
     isBlackListCheckEnabled,
     isSignalingCheckEnabled,
     isParticipationScoreCheckEnabled,
-    isNodeOwnershipCheckEnabled,
     isGMOwnershipCheckEnabled,
   }
 }

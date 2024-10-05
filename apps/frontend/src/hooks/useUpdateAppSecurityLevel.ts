@@ -42,7 +42,7 @@ export const useUpdateAppSecurityLevel = ({
     return [clauses]
   }, [appId, securityLevel])
 
-  const refetchQueryKeys = useMemo(() => [getAppSecurityLevelQueryKey(appId)], [])
+  const refetchQueryKeys = useMemo(() => [getAppSecurityLevelQueryKey(appId)], [appId])
 
   return useBuildTransaction({
     clauseBuilder,
