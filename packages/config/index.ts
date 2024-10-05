@@ -26,7 +26,6 @@ export type AppConfig = {
   b3trContractAddress: string
   vot3ContractAddress: string
   b3trGovernorAddress: string
-  veBetterPassportAddress: string
   timelockContractAddress: string
   xAllocationPoolContractAddress: string
   xAllocationVotingContractAddress: string

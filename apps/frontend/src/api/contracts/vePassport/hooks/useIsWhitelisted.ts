@@ -2,7 +2,7 @@ import { getCallKey, useCall } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportAddress
+const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
 const vePassportInterface = VeBetterPassport__factory.createInterface()
 const method = "isWhitelisted"
 

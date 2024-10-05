@@ -274,7 +274,7 @@ export const getOrDeployContractInstances = async ({
   ])) as X2EarnApps
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
-  const veBetterPassportAddress = await deployProxyOnly("VeBetterPassport", {
+  const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassport", {
     PassportChecksLogic: await PassportChecksLogic.getAddress(),
     PassportConfigurator: await PassportConfigurator.getAddress(),
     PassportEntityLogic: await PassportEntityLogic.getAddress(),
@@ -297,7 +297,7 @@ export const getOrDeployContractInstances = async ({
     "X2EarnRewardsPoolV1",
     "X2EarnRewardsPool",
     await x2EarnRewardsPoolV1.getAddress(),
-    [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS, veBetterPassportAddress],
+    [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS, veBetterPassportContractAddress],
     {
       version: 2,
     },
@@ -391,14 +391,14 @@ export const getOrDeployContractInstances = async ({
     "XAllocationVotingV1",
     "XAllocationVoting",
     await xAllocationVotingV1.getAddress(),
-    [veBetterPassportAddress],
+    [veBetterPassportContractAddress],
     {
       version: 2,
     },
   )) as XAllocationVoting
 
   const veBetterPassport = (await initializeProxy(
-    veBetterPassportAddress,
+    veBetterPassportContractAddress,
     "VeBetterPassport",
     [
       {
@@ -534,7 +534,7 @@ export const getOrDeployContractInstances = async ({
     XAllocationPool: await xAllocationPool.getAddress(),
     B3TRGovernor: await governor.getAddress(),
     X2EarnApps: await x2EarnApps.getAddress(),
-    VeBetterPassport: veBetterPassportAddress,
+    VeBetterPassport: veBetterPassportContractAddress,
   }
 
   const libraries = {

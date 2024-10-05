@@ -7,7 +7,6 @@ const config: AppConfig = {
   b3trContractAddress: "0xc1d0a47a0Ff2d6c7cF3cF5Db8b935104fa9d3519",
   vot3ContractAddress: "0x71E03bEAae697d7ecb2C52EC1001b114FbD6f572",
   b3trGovernorAddress: "0x9a185419fbbc836a80632BEFfbeB34D839743D79",
-  veBetterPassportAddress: "0x84ad877811066FC1e30DF680279C68A18eBeFAE9",
   timelockContractAddress: "0xBA188aC5329f765AA8A0cc1809088f5b465C3b4d",
   xAllocationPoolContractAddress: "0x3B9F3dc8529d124Af6c51D62Bf6A01221FD93ecf",
   xAllocationVotingContractAddress: "0xB92A1dc2e98b69db5b13c2818DCD6bb59a6F67F5",

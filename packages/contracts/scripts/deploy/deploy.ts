@@ -173,7 +173,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as X2EarnApps
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
-  const veBetterPassportAddress = await deployProxyOnly(
+  const veBetterPassportContractAddress = await deployProxyOnly(
     "VeBetterPassport",
     {
       PassportChecksLogic: await PassportChecksLogic.getAddress(),
@@ -201,7 +201,7 @@ export async function deployAll(config: ContractsConfig) {
       [
         config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
         config.X_2_EARN_INITIAL_IMPACT_KEYS, // impact keys
-        veBetterPassportAddress,
+        veBetterPassportContractAddress,
       ],
     ],
     {
@@ -325,7 +325,7 @@ export async function deployAll(config: ContractsConfig) {
           votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
         },
       ],
-      [veBetterPassportAddress],
+      [veBetterPassportContractAddress],
     ],
     {
       versions: [undefined, 2],
@@ -333,7 +333,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as XAllocationVoting
 
   const veBetterPassport = (await initializeProxy(
-    veBetterPassportAddress,
+    veBetterPassportContractAddress,
     "VeBetterPassport",
     [
       {
@@ -399,7 +399,7 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [],
       [],
-      [veBetterPassportAddress],
+      [veBetterPassportContractAddress],
     ],
     {
       versions: [undefined, 2, 3, 4],
