@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next"
 import { useCallback, useLayoutEffect } from "react"
 import { TFunction } from "i18next"
 import { useNewProposalPageGuard } from "../form/hooks/useNewProposalPageGuard"
+import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
 
 const Steps: (t: TFunction<"translation", undefined>) => StepCardProps[] = t => [
   {
@@ -42,6 +44,7 @@ export const NewProposalPageContent = () => {
 
   const onContinue = useCallback(() => {
     router.push("/proposals/new/type")
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL))
   }, [router])
 
   const goBack = useCallback(() => {

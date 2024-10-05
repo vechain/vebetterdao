@@ -24,7 +24,22 @@ export enum ButtonClickProperties {
 
   // PROPOSALS / GOVERNANCE EVENTS
   CREATE_PROPOSAL = "Create Proposal",
-  PUBLISH_PROPOSAL = "Publish Proposal",
+  CONTINUE_CREATE_PROPOSAL = "Continue Create Proposal",
+  CONTINUE_CREATE_PROPOSAL_TYPE = "Continue Create Proposal Type",
+
+  CONTINUE_CREATE_PROPOSAL_FUNCTIONS = "Continue Create Proposal Functions",
+  CONTINUE_CREATE_PROPOSAL_DISCUSSION = "Continue Create Proposal Discussion",
+
+  CONTINUE_CREATE_PROPOSAL_DETAILS = "Continue Create Proposal Details",
+  CONTINUE_CREATE_PROPOSAL_CONTENT = "Continue Create Proposal Content",
+
+  CONTINUE_CREATE_PROPOSAL_ROUND_SELECTION = "Continue Create Proposal Round Selection",
+  CONTINUE_CREATE_PROPOSAL_SUPPORT = "Continue Create Proposal Support",
+  CREATE_PROPOSAL_SUBMITED = "Create Proposal Submited",
+  PUBLISHED_PROPOSAL = "Published Proposal",
+
+  // JOIN COMMUNITY
+  JOIN_COMMUNITY = "Join Community",
 }
 
 export const buttonClickActions = (property: ButtonClickProperties) => ({

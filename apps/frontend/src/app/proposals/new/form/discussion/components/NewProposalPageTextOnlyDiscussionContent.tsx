@@ -4,8 +4,14 @@ import { useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useProposalFormStore } from "@/store"
 import { useTranslation } from "react-i18next"
-import { updateMarkdownTemplatePlaceholders } from "@/constants"
+import {
+  buttonClickActions,
+  buttonClicked,
+  ButtonClickProperties,
+  updateMarkdownTemplatePlaceholders,
+} from "@/constants"
 import { useWallet } from "@vechain/dapp-kit-react"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
 export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
   const { account } = useWallet()
@@ -33,6 +39,10 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
       })
 
       router.push("/proposals/new/form/content")
+      AnalyticsUtils.trackEvent(
+        buttonClicked,
+        buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_DISCUSSION),
+      )
     },
     [setData, router, account],
   )

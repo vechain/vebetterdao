@@ -23,8 +23,15 @@ import dynamic from "next/dynamic"
 import rehypeSanitize from "rehype-sanitize"
 import { useTranslation } from "react-i18next"
 import { Controller, useForm } from "react-hook-form"
-import { updateMarkdownTemplatePlaceholders, validateProposalTemplate } from "@/constants"
+import {
+  buttonClickActions,
+  buttonClicked,
+  ButtonClickProperties,
+  updateMarkdownTemplatePlaceholders,
+  validateProposalTemplate,
+} from "@/constants"
 import { useWallet } from "@vechain/dapp-kit-react"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
@@ -53,6 +60,10 @@ export const NewProposalPageDiscussionContent = () => {
     (data: FormData) => {
       setData({ markdownDescription: data.markdownDescription })
       router.push("/proposals/new/form/round")
+      AnalyticsUtils.trackEvent(
+        buttonClicked,
+        buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_CONTENT),
+      )
     },
     [setData, router],
   )
