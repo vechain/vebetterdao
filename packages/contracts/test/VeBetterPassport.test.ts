@@ -3,7 +3,6 @@ import { expect } from "chai"
 import {
   bootstrapAndStartEmissions,
   bootstrapEmissions,
-  createNodeHolder,
   createProposal,
   linkEntityToPassportWithSignature,
   getOrDeployContractInstances,
@@ -15,6 +14,7 @@ import {
   waitForProposalToBeActive,
   delegateWithSignature,
   moveToCycle,
+  waitForCurrentRoundToEnd,
 } from "./helpers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
@@ -2741,6 +2741,103 @@ describe("VeBetterPassport - @shard3", function () {
       // now that owner2 has delegetated to otherAccount, otherAccount should be delegatee of owner2
       expect(await veBetterPassport.getDelegatee(owner2.address)).to.equal(otherAccount.address)
       expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(owner2.address)
+    })
+
+    it.only("After linking an entity to a passport, the entity should non be able to vote", async function () {
+      const { veBetterPassport, xAllocationVoting, x2EarnApps, owner, otherAccount, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      await getVot3Tokens(otherAccount, "10000")
+      await getVot3Tokens(owner, "10000")
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      await veBetterPassport.setAppSecurity(app1Id, 3) // APP_SECURITY.HIGH
+      await veBetterPassport.connect(owner).toggleCheck(4) // Enable PoP score check
+      await veBetterPassport.connect(owner).setThreshold(200)
+
+      //Start allocation round
+      const round1 = await startNewAllocationRound()
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+
+      // cumulative score of otherAccount should be 2000
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 1)).to.be.equal(2000)
+      // cumulative score of owner should be 0
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(owner, 1)).to.be.equal(0)
+
+      // Both should be considered passports at the start of the round
+      expect(
+        await veBetterPassport.isPassportInTimepoint(owner.address, await xAllocationVoting.currentRoundSnapshot()),
+      ).to.be.true
+      expect(
+        await veBetterPassport.isPassportInTimepoint(
+          otherAccount.address,
+          await xAllocationVoting.currentRoundSnapshot(),
+        ),
+      ).to.be.true
+
+      // Now we link the entity to the passport; for voting this shoould have effect from next round, but for actions it should be immediate
+      await linkEntityToPassportWithSignature(veBetterPassport, owner, otherAccount, 3600)
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+
+      // cumulative score of otherAccount should be 2000 (same as before)
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 1)).to.be.equal(2000)
+      // cumulative score of owner should be 2000 (because actions from otherAccount are now counted as owner's)
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(owner, 1)).to.be.equal(2000)
+
+      // Other account should not be considered a passport anymore now
+      expect(await veBetterPassport.isPassport(otherAccount.address)).to.be.false
+      // But it should be considered a passport at the start of the round
+      expect(
+        await veBetterPassport.isPassportInTimepoint(
+          otherAccount.address,
+          await xAllocationVoting.currentRoundSnapshot(),
+        ),
+      ).to.be.true
+
+      // Owner should be considered a passport both both now and at the start of the round
+      expect(await veBetterPassport.isPassport(owner.address)).to.be.true
+      expect(
+        await veBetterPassport.isPassportInTimepoint(owner.address, await xAllocationVoting.currentRoundSnapshot()),
+      ).to.be.true
+
+      // Since the the entity is considered a passport at the start of the round, and since it has enough score now, he can vote
+      await expect(xAllocationVoting.connect(otherAccount).castVote(round1, [app1Id], [ethers.parseEther("100")])).to
+        .not.be.reverted
+
+      // Since the owner is considered a passport at the start of the round, and since it has enough score now, he can vote
+      await expect(xAllocationVoting.connect(owner).castVote(round1, [app1Id], [ethers.parseEther("100")])).to.not.be
+        .reverted
+
+      // But when starting the next round only the owner should be able to vote, since otherAccount is now considered an enitity at 100%
+      await waitForCurrentRoundToEnd()
+      await startNewAllocationRound()
+
+      await expect(
+        xAllocationVoting.connect(otherAccount).castVote(2, [app1Id], [ethers.parseEther("100")]),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorPersonhoodVerificationFailed")
+
+      await expect(xAllocationVoting.connect(owner).castVote(2, [app1Id], [ethers.parseEther("100")])).to.not.be
+        .reverted
     })
   })
 
