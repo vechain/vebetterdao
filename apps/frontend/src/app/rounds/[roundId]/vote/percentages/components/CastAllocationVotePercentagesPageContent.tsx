@@ -18,7 +18,7 @@ import BigNumber from "bignumber.js"
 import { ResponsiveCard } from "@/components"
 import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
 import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties } from "@/constants"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 type Props = {
   roundId: string
@@ -86,14 +86,10 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
     if (totalVotes > 100) return "Total votes exceed 100"
   }, [votes])
 
-  const buttonClickProperties = {
-    action: ButtonClickProperties.CONTINUE_CASTING_VOTE_PERCENTAGE,
-  }
-
   const onContinue = useCallback(() => {
     if (error) return
     router.push(`/rounds/${roundId}/vote/confirm`)
-    AnalyticsUtils.trackEvent("Button Clicked", buttonClickProperties)
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CASTING_VOTE_PERCENTAGE))
   }, [router, roundId, error])
 
   const shouldSeeThePage = useMemo(() => {

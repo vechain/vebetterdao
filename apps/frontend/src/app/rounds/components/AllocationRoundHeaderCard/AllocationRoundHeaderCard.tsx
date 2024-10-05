@@ -32,8 +32,8 @@ import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
 import { useRouter } from "next/navigation"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import { ButtonClickProperties } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
@@ -91,10 +91,6 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
 
     return t("No votes to cast")
   }, [hasVoted, hasVotesAtSnapshot, totalVotesCast, isFinished, t])
-
-  const buttonClickProperties = {
-    action: ButtonClickProperties.CASTING_VOTE,
-  }
 
   return (
     <Card w="full" borderRadius={"3xl"} variant={"baseWithBorder"} data-testid="allocation-round-header-card">
@@ -184,7 +180,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                   variant={"primaryAction"}
                   onClick={() => {
                     navigateToVote()
-                    AnalyticsUtils.trackEvent("Button Clicked", buttonClickProperties)
+                    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CASTING_VOTE))
                   }}
                   size={"lg"}
                   colorScheme={"primary"}

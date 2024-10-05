@@ -4,7 +4,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { MdArrowOutward } from "react-icons/md"
-import { ButtonClickProperties } from "@/constants"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
 
 export type ConfirmationModalContentProps = {
@@ -44,14 +44,6 @@ export const SuccessConvertModalContent = ({
   onClose,
 }: ConfirmationModalContentProps) => {
   const { t } = useTranslation()
-
-  const buttonClickProperties = {
-    action: ButtonClickProperties.SWAP_CONFIRMED,
-  }
-
-  const linkClickProperties = {
-    action: ButtonClickProperties.SEE_DETAILS_TX,
-  }
 
   return (
     <VStack align={"center"} p={8} gap={2}>
@@ -106,7 +98,9 @@ export const SuccessConvertModalContent = ({
           color="gray.500"
           fontSize={"14px"}
           style={{ textDecoration: "none" }}
-          onClick={() => AnalyticsUtils.trackEvent("Button Clicked", linkClickProperties)}>
+          onClick={() =>
+            AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SEE_DETAILS_TX))
+          }>
           <HStack alignSelf={"center"}>
             <Text fontSize={14} fontWeight={500} color={"rgba(0, 76, 252, 1)"}>
               {t("See transaction information")}
@@ -124,7 +118,7 @@ export const SuccessConvertModalContent = ({
         w={{ base: "full", md: "auto" }}
         onClick={() => {
           onClose()
-          AnalyticsUtils.trackEvent("Button Clicked", buttonClickProperties)
+          AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SWAP_CONFIRMED))
         }}>
         {t("Continue")}
       </Button>

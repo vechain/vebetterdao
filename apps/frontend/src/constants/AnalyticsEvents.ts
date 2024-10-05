@@ -7,7 +7,7 @@ export enum ButtonClickProperties {
   SWAP_CONFIRMED = "Swap Confirmed",
   SEE_DETAILS_TX = "See Details Tx",
 
-  // PROPOSALS EVENTS
+  // VOTES EVENTS
   CASTING_VOTE = "Casting Vote",
   CONTINUE_CASTING_VOTE_SELECTION = "Continue Casting Vote Selection",
   CONTINUE_CASTING_VOTE_PERCENTAGE = "Continue Casting Vote Percentage",
@@ -18,4 +18,17 @@ export enum ButtonClickProperties {
 
   // CLAIMING REWARDS
   CLAIM_REWARDS = "Claim Rewards",
+
+  //MINT GM NFT
+  CLAIM_NFT = "Claim NFT",
+
+  // PROPOSALS / GOVERNANCE EVENTS
+  CREATE_PROPOSAL = "Create Proposal",
+  PUBLISH_PROPOSAL = "Publish Proposal",
 }
+
+export const buttonClickActions = (property: ButtonClickProperties) => ({
+  action: property,
+})
+
+export const buttonClicked: string = "Button Clicked"

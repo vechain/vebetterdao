@@ -1,4 +1,4 @@
-import { ButtonClickProperties } from "@/constants"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 import { VStack, Image, Text, Button } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -47,7 +47,7 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
 
   const buttonClickProperties = (isB3TRToVOT3: boolean) => {
     const action = isB3TRToVOT3 ? ButtonClickProperties.GET_VOT3 : ButtonClickProperties.GET_B3TR
-    AnalyticsUtils.trackEvent("Button Clicked", { action })
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(action))
   }
 
   return (

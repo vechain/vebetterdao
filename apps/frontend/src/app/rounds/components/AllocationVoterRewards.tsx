@@ -7,8 +7,8 @@ import { useClaimReward } from "@/hooks/useClaimReward"
 import { TransactionModal } from "@/components"
 import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { ButtonClickProperties } from "@/constants"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 type Props = {
   roundId: string
@@ -42,14 +42,10 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
-  const buttonClickProperties = {
-    action: ButtonClickProperties.CLAIM_REWARDS,
-  }
-
   const handleClaim = useCallback(() => {
     sendTransaction()
     onOpen()
-    AnalyticsUtils.trackEvent("Button Clicked", buttonClickProperties)
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CLAIM_REWARDS))
   }, [onOpen, sendTransaction])
 
   const handleClose = useCallback(() => {

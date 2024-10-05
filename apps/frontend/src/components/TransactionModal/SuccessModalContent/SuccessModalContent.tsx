@@ -8,7 +8,7 @@ import { motion } from "framer-motion"
 import { getConfig } from "@repo/config"
 import { useTranslation } from "react-i18next"
 import { AnalyticsUtils } from "@/utils"
-import { ButtonClickProperties } from "@/constants"
+import { ButtonClickProperties, buttonClickActions } from "@/constants"
 
 export type SuccessModalContentProps = {
   title?: ReactNode
@@ -39,12 +39,9 @@ export const SuccessModalContent = ({
   const { t } = useTranslation()
 
   const [isTracked, setIsTracked] = useState(isSuccessBeenTrack)
-  const buttonClickProperties = {
-    action: ButtonClickProperties.SUCCESS_TX,
-  }
 
   if (isTracked && typeof title === "string") {
-    AnalyticsUtils.trackEvent(title, buttonClickProperties)
+    AnalyticsUtils.trackEvent(title, buttonClickActions(ButtonClickProperties.SUCCESS_TX))
     setIsTracked(false)
   }
   return (
