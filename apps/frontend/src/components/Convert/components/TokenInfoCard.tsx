@@ -73,7 +73,7 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
         size={{ base: "md", md: "lg" }}
         w={{ base: "full", md: "auto" }}
         onClick={() => {
-          handleButtonClick
+          handleButtonClick()
           buttonClickProperties(isB3TRToVOT3)
         }}>
         {buttonText}
