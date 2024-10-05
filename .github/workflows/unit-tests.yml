@@ -6,7 +6,7 @@ on:
     branches:
       - main
       - testnet
-      - dan/ve-better-passport
+      - feature/vepassport
   push:
     branches:
       - main
@@ -57,7 +57,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: .nvmrc
-          cache: 'yarn'
+          cache: "yarn"
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -108,7 +108,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: .nvmrc
-          cache: 'yarn'
+          cache: "yarn"
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
