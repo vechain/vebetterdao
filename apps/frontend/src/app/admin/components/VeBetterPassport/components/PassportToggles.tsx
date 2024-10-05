@@ -116,7 +116,7 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? "error" : status}
-        successTitle={isEnabled ? `${name} is now active` : `${name} is not deactivated`}
+        successTitle={isEnabled ? `${name} is now active` : `${name} is now deactivated`}
         onTryAgain={handleToggle}
         showTryAgainButton
         showExplorerButton
