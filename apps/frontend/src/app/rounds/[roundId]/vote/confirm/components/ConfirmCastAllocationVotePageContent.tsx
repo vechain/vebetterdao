@@ -20,6 +20,8 @@ import { FiArrowUpRight } from "react-icons/fi"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { SeeVoteDetailsModal } from "@/app/rounds/components/AllocationRoundUserVotes/SeeVoteDetailsModal"
 import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties } from "@/constants"
 
 type Props = {
   roundId: string
@@ -67,6 +69,10 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
     return (votes.reduce((acc, vote) => acc + Number(vote.rawValue), 0) * Number(votesAtSnapshot)) / 100
   }, [votes, votesAtSnapshot])
 
+  const buttonClickProperties = {
+    action: ButtonClickProperties.CONTINUE_CASTING_VOTE_CONFIRM_TX,
+  }
+
   const onContinue = useCallback(() => {
     if (!votesAtSnapshot) throw new Error("Votes at snapshot not found")
     const appVotesPercentagesToValue: CastAllocationVotesProps = votes.map(vote => {
@@ -77,6 +83,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
       }
     })
 
+    AnalyticsUtils.trackEvent("Button Clicked", buttonClickProperties)
     transactionModal.onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
   }, [castAllocationVotes, transactionModal, votesAtSnapshot, votes])
@@ -120,6 +127,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
         showTryAgainButton
         showExplorerButton
         txId={castAllocationVotes.txReceipt?.meta.txID ?? castAllocationVotes.sendTransactionTx?.txid}
+        isSuccessBeenTrack={true}
       />
 
       <ResponsiveCard>

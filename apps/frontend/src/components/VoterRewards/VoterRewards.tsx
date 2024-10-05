@@ -7,6 +7,8 @@ import { B3TRIcon } from "../Icons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { TransactionModal } from "../TransactionModal"
 import { Trans, useTranslation } from "react-i18next"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties } from "@/constants"
 
 // Maximum precision of 4 decimals. Must also round down
 
@@ -25,9 +27,14 @@ export const VoterRewards: React.FC = () => {
     roundRewards: roundsRewardsQuery.data?.roundsRewards ?? [],
   })
 
+  const buttonClickProperties = {
+    action: ButtonClickProperties.CLAIM_REWARDS,
+  }
+
   const handleClaim = useCallback(() => {
     claimRewardsMutation.sendTransaction()
     onOpen()
+    AnalyticsUtils.trackEvent("Button Clicked", buttonClickProperties)
   }, [claimRewardsMutation, onOpen])
 
   const isClaimRewardsLoading = claimRewardsMutation.isTxReceiptLoading || claimRewardsMutation.sendTransactionPending
