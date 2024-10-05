@@ -2743,7 +2743,7 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(owner2.address)
     })
 
-    it.only("After linking an entity to a passport, the entity should non be able to vote", async function () {
+    it("After linking an entity to a passport, the entity should non be able to vote", async function () {
       const { veBetterPassport, xAllocationVoting, x2EarnApps, owner, otherAccount, otherAccounts } =
         await getOrDeployContractInstances({
           forceDeploy: true,
