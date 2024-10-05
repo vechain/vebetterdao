@@ -1314,33 +1314,22 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 5)).to.equal(780)
 
       /*
-
-        The passports score should take into account the entitys score over the past VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE (3) rounds
-        
-        Round 3 score: 200
-        Round 4 score: 200
-        Round 5 score: 400
-
-        round N = [round N score] + ([cumulative score] * [1 - decay factor])
-
-        round 3 = 200 * 0.8^2 = 128
-        round 4 = 200 * 0.8 = 160
-        round 5 = 400
+        The passports score should not take into account the entitys score over the past VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE (3) rounds
       */
-      expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 5)).to.equal(688)
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 5)).to.equal(0)
 
       // The entitys score for APP1 should not be the same as the passport score (interactions with app1 happended in round 1 and 2)
       expect(await veBetterPassport.userAppTotalScore(otherAccount, app1Id)).to.not.equal(
         await veBetterPassport.userAppTotalScore(passport, app1Id),
       )
 
-      // The entitys score for APP2 should be the same as the passport score (interactions with app2 happended in round 3 and 4)
-      expect(await veBetterPassport.userAppTotalScore(otherAccount, app2Id)).to.equal(
+      // The entitys score for APP2 should not be the same as the passport score (interactions with app2 happended in round 3 and 4)
+      expect(await veBetterPassport.userAppTotalScore(otherAccount, app2Id)).to.not.equal(
         await veBetterPassport.userAppTotalScore(passport, app2Id),
       )
 
-      // The entitys score for APP3 should be the same as the passport score (interactions with app3 happended in round 5)
-      expect(await veBetterPassport.userAppTotalScore(otherAccount, app3Id)).to.equal(
+      // The entitys score for APP3 should not be the same as the passport score (interactions with app3 happended in round 5)
+      expect(await veBetterPassport.userAppTotalScore(otherAccount, app3Id)).to.not.equal(
         await veBetterPassport.userAppTotalScore(passport, app3Id),
       )
 
@@ -1438,34 +1427,23 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.userTotalScore(otherAccount)).to.equal(1000)
 
       /*
-
-        The passports score should take into account the entitys score over the past VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE (3) rounds
-        
-        Round 3 score: 200
-        Round 4 score: 200
-        Round 5 score: 400
-
-        round N = [round N score] + ([cumulative score] * [1 - decay factor])
-
-        round 3 = 200 * 0.8^2 = 128
-        round 4 = 200 * 0.8 = 160
-        round 5 = 400
+        The passports score should not take into account the entitys score over the past VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE (3) rounds
       */
-      expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 5)).to.equal(688)
-      expect(await veBetterPassport.userTotalScore(passport)).to.equal(800) // Sum of the scores of the entities linked to the passport for last 3 rounds
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 5)).to.equal(0)
+      expect(await veBetterPassport.userTotalScore(passport)).to.equal(0)
 
       // The entitys score for APP1 should not be the same as the passport score (interactions with app1 happended in round 1 and 2)
       expect(await veBetterPassport.userAppTotalScore(otherAccount, app1Id)).to.not.equal(
         await veBetterPassport.userAppTotalScore(passport, app1Id),
       )
 
-      // The entitys score for APP2 should be the same as the passport score (interactions with app2 happended in round 3 and 4)
-      expect(await veBetterPassport.userAppTotalScore(otherAccount, app2Id)).to.equal(
+      // The entitys score for APP2 should not be the same as the passport score (interactions with app2 happended in round 3 and 4)
+      expect(await veBetterPassport.userAppTotalScore(otherAccount, app2Id)).to.not.equal(
         await veBetterPassport.userAppTotalScore(passport, app2Id),
       )
 
-      // The entitys score for APP3 should be the same as the passport score (interactions with app3 happended in round 5)
-      expect(await veBetterPassport.userAppTotalScore(otherAccount, app3Id)).to.equal(
+      // The entitys score for APP3 should not be the same as the passport score (interactions with app3 happended in round 5)
+      expect(await veBetterPassport.userAppTotalScore(otherAccount, app3Id)).to.not.equal(
         await veBetterPassport.userAppTotalScore(passport, app3Id),
       )
 
@@ -1479,19 +1457,11 @@ describe("VeBetterPassport - @shard3", function () {
 
       /*
 
-        The passports score should take into account the entitys score over the past VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE (3) rounds
-        
-        Round 4 score: 200
-        Round 5 score: 400
-        Round 6 score: 400
+        The passports score should take into account the entitys score over the last round
 
-        round N = [round N score] + ([cumulative score] * [1 - decay factor])
-
-        round 4 = 200 * 0.8 * 0.8 = 128
-        round 5 = 400 * 0.8 = 320
         round 6 = 400
       */
-      expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 6)).to.equal(950)
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 6)).to.equal(400)
 
       // Remove the entity from the passport
       await veBetterPassport.connect(passport).removeEntityLink(otherAccount)
@@ -1521,17 +1491,8 @@ describe("VeBetterPassport - @shard3", function () {
 
       /*
 
-        The passports score only have the score of the entity for round 6 which is 400 that went straight to the passport
+        The passports score should remain the same for the period the entity was linked to the passport
         
-        Round 4 score: 0
-        Round 5 score: 0
-        Round 6 score: 400
-
-        round N = [round N score] + ([cumulative score] * [1 - decay factor])
-
-        ....
-        round 4 = 0
-        round 5 = 0
         round 6 = 400
       */
       expect(await veBetterPassport.getCumulativeScoreWithDecay(passport, 6)).to.equal(400)
@@ -1758,7 +1719,7 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.isPassportWhitelisted(passport.address)).to.be.false
     })
 
-    it("Should be able to assign multiple entites to a passport and use the combintation to meet personhood status", async function () {
+    it("Should be able to assign multiple entites to a passport, do actions with entities and use the combintation to meet personhood status", async function () {
       const config = createLocalConfig()
       config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD = 500
       const { veBetterPassport, x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
@@ -1845,10 +1806,10 @@ describe("VeBetterPassport - @shard3", function () {
       // Assign entity 2 to passport
       await linkEntityToPassportWithSignature(veBetterPassport, passport, enity2, 1000)
 
-      // Passport should be a person
+      // Passport should not be a person
       expect(await veBetterPassport.isPerson(passport.address)).to.deep.equal([
-        true,
-        "User's participation score is above the threshold",
+        false,
+        "User does not meet the criteria to be considered a person",
       ])
 
       // Entity 1 should not be a person
@@ -1861,6 +1822,21 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.isPerson(enity2.address)).to.deep.equal([
         false,
         "User has delegated their personhood",
+      ])
+
+      // Make entities interact with apps
+      await veBetterPassport.connect(owner).registerActionForRound(enity1, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity1, app2Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity1, app2Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity2, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity2, app2Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity2, app2Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity2, app2Id, 1)
+
+      // Now passport should have enough score to be a person
+      expect(await veBetterPassport.isPerson(passport.address)).to.deep.equal([
+        true,
+        "User's participation score is above the threshold",
       ])
     })
   })
@@ -2621,7 +2597,7 @@ describe("VeBetterPassport - @shard3", function () {
       await expect(delegateWithSignature(veBetterPassport, passport, entity2, 3600)).to.not.be.reverted
     })
 
-    it("Should be able to assign multiple entites to a passport and use the combintation to meet personhood status", async function () {
+    it("Should be able to assign multiple entites to a passport, do actions and use the combintation to meet personhood status", async function () {
       const config = createLocalConfig()
       config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD = 500
       const {
@@ -2714,11 +2690,19 @@ describe("VeBetterPassport - @shard3", function () {
       // Assign entity 2 to passport
       await linkEntityToPassportWithSignature(veBetterPassport, passport, enity2, 1000)
 
-      // Passport should be a person
+      // Passport should not be a person
       expect(await veBetterPassport.isPerson(passport.address)).to.deep.equal([
-        true,
-        "User's participation score is above the threshold",
+        false,
+        "User does not meet the criteria to be considered a person",
       ])
+
+      // Now we do actions with enities 1 and 2 to make the passport a person
+      await veBetterPassport.connect(owner).registerActionForRound(passport, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity1, app2Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(enity2, app2Id, 1)
+
+      // Passport should not be a person
+      expect((await veBetterPassport.isPerson(passport.address))[0]).to.equal(true)
 
       // Delegate is not a person
       expect(await veBetterPassport.isPerson(delegatee.address)).to.deep.equal([
@@ -3710,8 +3694,26 @@ describe("VeBetterPassport - @shard3", function () {
           [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
         )
 
+      // "Before linking passport should have 0"
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(owner, 3)).to.equal(0)
+
+      // Before linking passport should not be considered person
+      expect(
+        (await veBetterPassport.isPersonAtTimepoint(owner.address, await xAllocationVoting.roundSnapshot(3)))[0],
+      ).to.be.equal(false)
+
       // Delegate passport to owner and try to vote
-      await linkEntityToPassportWithSignature(veBetterPassport, otherAccount, owner, 3600)
+      await linkEntityToPassportWithSignature(veBetterPassport, owner, otherAccount, 3600)
+      // After linking "other account" should be entity
+      expect(await veBetterPassport.isEntity(otherAccount.address)).to.be.true
+
+      // After linking owner should be passport
+      expect(await veBetterPassport.isPassport(owner.address)).to.be.true
+
+      // After linking passport should not be considered person at the beginning of the round
+      expect(
+        (await veBetterPassport.isPersonAtTimepoint(owner.address, await xAllocationVoting.roundSnapshot(3)))[0],
+      ).to.be.equal(false)
 
       expect(await veBetterPassport.isPassport(owner.address)).to.be.true
 
@@ -3730,6 +3732,28 @@ describe("VeBetterPassport - @shard3", function () {
       await startNewAllocationRound()
 
       expect(await xAllocationVoting.currentRoundId()).to.equal(4)
+
+      // During linking points are not brought over, so we need to register some actions
+      // on both the entity and the passport to see that they are grouped together and can vote
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 4)).to.equal(1097)
+
+      // register more actions for round 4 (mixing entity and passport)
+      await veBetterPassport.connect(owner).registerAction(otherAccount, app2Id)
+      await veBetterPassport.connect(owner).registerAction(owner, app3Id)
+      await veBetterPassport.connect(owner).registerAction(owner, app3Id)
+
+      // new points should be added to the passport, entity should not have any new points added
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 4)).to.equal(1097)
+      /*
+        Passport's cumulative score:
+        round 4 = 200 + 400 + 400
+        */
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(owner, 4)).to.equal(1000)
+
+      // Now that we reached threshold passport should be considered person
+      expect(
+        (await veBetterPassport.isPersonAtTimepoint(owner.address, await xAllocationVoting.roundSnapshot(4)))[0],
+      ).to.be.equal(true)
 
       // Owner can vote now
       await xAllocationVoting

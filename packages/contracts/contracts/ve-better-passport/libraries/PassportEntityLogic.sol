@@ -26,7 +26,6 @@ pragma solidity 0.8.20;
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { PassportClockLogic } from "./PassportClockLogic.sol";
 import { PassportEIP712SigningLogic } from "./PassportEIP712SigningLogic.sol";
-import { PassportPoPScoreLogic } from "./PassportPoPScoreLogic.sol";
 import { PassportSignalingLogic } from "./PassportSignalingLogic.sol";
 import { PassportWhitelistAndBlacklistLogic } from "./PassportWhitelistAndBlacklistLogic.sol";
 import { PassportTypes } from "./PassportTypes.sol";
@@ -47,6 +46,8 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
  *
  * The passport is the core identity, and all linked entities are secondary but critical components, each
  * contributing to the overall score and state of the passport.
+ *
+ * Linking entities to a passport won't move the past entitie's score to the passport, but only the score of the future actions.
  *
  * The linkage process is secured using signatures to ensure that the entities and passports are linked with consent.
  */
@@ -497,8 +498,7 @@ library PassportEntityLogic {
     delete self.passportEntitiesIndexes[entity];
     delete self.passportToEntities[entity];
 
-    // Remove the entity's score, signals, and black/white lists from the passport
-    PassportPoPScoreLogic.removeEntityScoreFromPassport(self, entity, passport);
+    // Remove signals, and black/white lists from the passport
     PassportSignalingLogic.removeEntitySignalsFromPassport(self, entity, passport);
     PassportWhitelistAndBlacklistLogic.removeEntitiesBlackAndWhiteListsFromPassport(self, entity, passport);
   }
@@ -520,8 +520,7 @@ library PassportEntityLogic {
     self.passportEntitiesIndexes[entity] = length + 1;
     self.passportToEntities[passport].push(entity);
 
-    // Assign the entity score, signals, and black/white lists to the passport
-    PassportPoPScoreLogic.assignEntityScoreToPassport(self, entity, passport);
+    // Assign the signals, and black/white lists to the passport
     PassportSignalingLogic.attachEntitySignalsToPassport(self, entity, passport);
     PassportWhitelistAndBlacklistLogic.attachEntitiesBlackAndWhiteListsToPassport(self, entity, passport);
 
