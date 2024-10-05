@@ -49,6 +49,10 @@ export const SuccessConvertModalContent = ({
     action: ButtonClickProperties.SWAP_CONFIRMED,
   }
 
+  const linkClickProperties = {
+    action: ButtonClickProperties.SEE_DETAILS_TX,
+  }
+
   return (
     <VStack align={"center"} p={8} gap={2}>
       <MotionImage
@@ -101,7 +105,8 @@ export const SuccessConvertModalContent = ({
           isExternal
           color="gray.500"
           fontSize={"14px"}
-          style={{ textDecoration: "none" }}>
+          style={{ textDecoration: "none" }}
+          onClick={() => AnalyticsUtils.trackEvent("Button Clicked", linkClickProperties)}>
           <HStack alignSelf={"center"}>
             <Text fontSize={14} fontWeight={500} color={"rgba(0, 76, 252, 1)"}>
               {t("See transaction information")}
@@ -118,7 +123,7 @@ export const SuccessConvertModalContent = ({
         size={{ base: "md", md: "lg" }}
         w={{ base: "full", md: "auto" }}
         onClick={() => {
-          onClose
+          onClose()
           AnalyticsUtils.trackEvent("Button Clicked", buttonClickProperties)
         }}>
         {t("Continue")}
