@@ -11,7 +11,7 @@ import {
   updateMarkdownTemplatePlaceholders,
 } from "@/constants"
 import { useWallet } from "@vechain/dapp-kit-react"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import { AnalyticsUtils } from "@/utils"
 
 export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
   const { account } = useWallet()

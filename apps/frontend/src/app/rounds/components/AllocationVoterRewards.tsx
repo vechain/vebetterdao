@@ -7,7 +7,7 @@ import { useClaimReward } from "@/hooks/useClaimReward"
 import { TransactionModal } from "@/components"
 import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 type Props = {

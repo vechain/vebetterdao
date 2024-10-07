@@ -31,7 +31,7 @@ import {
   validateProposalTemplate,
 } from "@/constants"
 import { useWallet } from "@vechain/dapp-kit-react"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import { AnalyticsUtils } from "@/utils"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 

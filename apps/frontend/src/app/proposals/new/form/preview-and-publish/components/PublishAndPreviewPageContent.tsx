@@ -15,7 +15,7 @@ import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadi
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 import { useDepositThreshold, useHashProposal } from "@/api"
 import { ethers } from "ethers"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import { AnalyticsUtils } from "@/utils"
 import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
 
 export const PublishAndPreviewPageContent = () => {
