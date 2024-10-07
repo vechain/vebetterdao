@@ -14,9 +14,7 @@ export const useInfiniteScroll = ({ loading, hasMore, onLoadMore }: UseInfiniteS
   const observerCallback = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const target = entries[0]
-      console.log(`Sentinel isIntersecting: ${target?.isIntersecting}, hasMore: ${hasMore}, loading: ${loading}`)
       if (target?.isIntersecting && hasMore && !loading) {
-        console.log("Triggering loadMore")
         onLoadMore()
       }
     },
