@@ -252,37 +252,42 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as GalaxyMember
 
-  const emissions = (await deployProxy(
-    "Emissions",
+  const emissions = (await deployAndUpgrade(
+    ["EmissionsV1", "Emissions"],
     [
-      {
-        minter: TEMP_ADMIN,
-        admin: TEMP_ADMIN,
-        upgrader: config.CONTRACTS_ADMIN_ADDRESS,
-        contractsAddressManager: TEMP_ADMIN,
-        decaySettingsManager: TEMP_ADMIN,
-        b3trAddress: await b3tr.getAddress(),
-        destinations: [
-          await xAllocationPool.getAddress(),
-          config.VOTE_2_EARN_POOL_ADDRESS,
-          await treasury.getAddress(),
-          config.MIGRATION_ADDRESS,
-        ],
-        initialXAppAllocation: config.INITIAL_X_ALLOCATION,
-        cycleDuration: config.EMISSIONS_CYCLE_DURATION,
-        decaySettings: [
-          config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
-          config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
-          config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
-          config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
-        ],
-        treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
-        maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
-        migrationAmount: config.MIGRATION_AMOUNT,
-      },
+      [
+        {
+          minter: TEMP_ADMIN,
+          admin: TEMP_ADMIN,
+          upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+          contractsAddressManager: TEMP_ADMIN,
+          decaySettingsManager: TEMP_ADMIN,
+          b3trAddress: await b3tr.getAddress(),
+          destinations: [
+            await xAllocationPool.getAddress(),
+            config.VOTE_2_EARN_POOL_ADDRESS,
+            await treasury.getAddress(),
+            config.MIGRATION_ADDRESS,
+          ],
+          initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+          cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+          decaySettings: [
+            config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+            config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+            config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+            config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+          ],
+          treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+          maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+          migrationAmount: config.MIGRATION_AMOUNT,
+        },
+      ],
+      [config.EMISSIONS_IS_NOT_ALIGNED],
     ],
-    undefined,
-    true,
+    {
+      versions: [undefined, 2],
+      logOutput: true,
+    },
   )) as Emissions
 
   const voterRewards = (await deployAndUpgrade(

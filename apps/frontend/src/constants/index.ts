@@ -1,3 +1,5 @@
+export * from "./animation"
+export * from "./contractList"
 export * from "./GovernanceFeaturedFunctions"
 export * from "./GovernanceProposalTemplate"
 export * from "./links"

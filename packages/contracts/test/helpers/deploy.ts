@@ -37,6 +37,7 @@ import {
   GovernorClockLogicV1,
   X2EarnRewardsPoolV1,
   NodeManagement,
+  EmissionsV1,
   VeBetterPassport,
   XAllocationVotingV1,
   B3TRGovernorV2,
@@ -328,7 +329,7 @@ export const getOrDeployContractInstances = async ({
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
 
-  const emissions = (await deployProxy("Emissions", [
+  const emissionsV1 = (await deployProxy("Emissions", [
     {
       minter: minterAccount.address,
       admin: owner.address,
@@ -349,7 +350,17 @@ export const getOrDeployContractInstances = async ({
       maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
       migrationAmount: config.MIGRATION_AMOUNT,
     },
-  ])) as Emissions
+  ])) as EmissionsV1
+
+  const emissions = (await upgradeProxy(
+    "EmissionsV1",
+    "Emissions",
+    await emissionsV1.getAddress(),
+    [config.EMISSIONS_IS_NOT_ALIGNED ?? false],
+    {
+      version: 2,
+    },
+  )) as Emissions
 
   const voterRewardsV1 = (await deployProxy("VoterRewardsV1", [
     owner.address, // admin

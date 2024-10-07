@@ -13,7 +13,7 @@ type Props = {
 }
 
 export const EditVeWorldBanner = ({ form }: Props) => {
-  const banner = form.watch("ve_world_banner")
+  const banner = form.watch("ve_world_bannerImage")
   const inputRef = useRef<HTMLInputElement>(null)
   const toast = useToast()
   const { t } = useTranslation()
@@ -27,7 +27,7 @@ export const EditVeWorldBanner = ({ form }: Props) => {
         if (file) {
           const compressedFile = await handleImageCompression(file)
           const base64File = await blobToBase64(compressedFile)
-          form.setValue("ve_world_banner", base64File)
+          form.setValue("ve_world_bannerImage", base64File)
         }
       } catch (error) {
         toast({
