@@ -46,6 +46,11 @@ export const getProposalVotesIndexer = async (data: ProposalVotesRequest): Promi
 
 export const getProposalVotesQueryKey = (proposalId: string) => ["PROPOSAL", "VOTES", proposalId]
 
+/**
+ * Hook to get the proposal votes from the indexer (i.e the number of votes for, against and abstain)
+ * @param proposalId the proposal id to get the votes for
+ * @returns the proposal votes {@link ProposalVotes}
+ */
 export const useProposalVotesIndexer = ({ proposalId }: ProposalVotesRequest) => {
   return useQuery({
     queryKey: getProposalVotesQueryKey(proposalId),

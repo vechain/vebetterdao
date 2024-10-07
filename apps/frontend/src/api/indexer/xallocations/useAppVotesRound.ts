@@ -43,8 +43,13 @@ export const getRoundAppVotes = async (data: RoundAppVotesRequest): Promise<Roun
   return RoundAppVotesResponseSchema.parse(await response.json())
 }
 
-export const getRoundAppVotesQueryKey = (roundId: number) => ["ROUND", "APP", roundId]
+export const getRoundAppVotesQueryKey = (roundId: number) => ["ROUND", roundId, "APP_VOTES"]
 
+/**
+ * Hook to get the voting results for a specific round.
+ * @param roundId the round ID to get the votes for
+ * @returns the voting results for the specified round {@link RoundAppVotes}
+ */
 export const useRoundAppVotes = ({ roundId }: RoundAppVotesRequest) => {
   return useQuery({
     queryKey: getRoundAppVotesQueryKey(roundId),
