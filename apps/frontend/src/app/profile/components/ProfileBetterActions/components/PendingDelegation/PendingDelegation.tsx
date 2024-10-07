@@ -1,15 +1,20 @@
 import { AddressIcon } from "@/components/AddressIcon"
-import { Card, CardBody, VStack, Heading, Text, HStack, Button, Stack } from "@chakra-ui/react"
+import { Card, CardBody, VStack, Heading, Text, HStack, Button, Stack, useDisclosure } from "@chakra-ui/react"
 import { UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { QualificationBadge } from "./QualificationBadges"
+import { QualificationBadge } from "../QualificationBadges"
+import { AcceptDelegationModal } from "./components/AcceptDelegationModal"
+import { RejectDelegationModal } from "./components/RejectDelegationModal"
 
 export const PendingDelegation = () => {
   const { t } = useTranslation()
   // TODO: get delegation address from contract
   const delegationAddress = "0x9239488390498394839483948394839483948394"
   const qualified = false
+
+  const acceptDelegationModal = useDisclosure()
+  const rejectDelegationModal = useDisclosure()
   return (
     <Card variant="baseWithBorder" w="full">
       <CardBody borderRadius="xl">
@@ -41,16 +46,26 @@ export const PendingDelegation = () => {
               </HStack>
             </HStack>
             <HStack gap={4}>
-              <Button variant={"dangerGhost"} p={3} leftIcon={<UilTimes color="#C84968" />}>
+              <Button
+                variant={"dangerGhost"}
+                p={3}
+                leftIcon={<UilTimes color="#C84968" />}
+                onClick={rejectDelegationModal.onOpen}>
                 {t("Reject")}
               </Button>
-              <Button variant={"primaryGhost"} p={3} leftIcon={<UilCheck color="#004CFC" />}>
+              <Button
+                variant={"primaryGhost"}
+                p={3}
+                leftIcon={<UilCheck color="#004CFC" />}
+                onClick={acceptDelegationModal.onOpen}>
                 {t("Accept")}
               </Button>
             </HStack>
           </Stack>
         </VStack>
       </CardBody>
+      <AcceptDelegationModal modal={acceptDelegationModal} delegator={delegationAddress} />
+      <RejectDelegationModal modal={rejectDelegationModal} delegator={delegationAddress} />
     </Card>
   )
 }
