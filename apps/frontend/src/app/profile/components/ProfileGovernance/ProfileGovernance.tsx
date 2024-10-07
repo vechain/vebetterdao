@@ -16,6 +16,8 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { FaScaleBalanced, FaChartPie } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
 import { HandPlantIcon, ProposalIcon, VoteBoxIcon } from "@/components"
+import { AnalyticsUtils } from "@/utils"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 
 enum ListView {
   ALL,
@@ -59,6 +61,7 @@ export const ProfileGovernance = () => {
 
   const onExploreGovernance = useCallback(() => {
     router.push("/proposals")
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.EXPLORE_GOVERNANCE_FROM_PROFILE))
   }, [router])
 
   const firstCreatedProposals = useMemo(() => createdProposals?.slice(0, PREVIEW_SIZE), [createdProposals])

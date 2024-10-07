@@ -7,6 +7,8 @@ import { ProfileBalance } from "./ProfileBalance"
 import { ProfileGovernance } from "./ProfileGovernance"
 import { useRouter } from "next/navigation"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { AnalyticsUtils } from "@/utils"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 
 enum Tab {
   Balance = "balance",
@@ -48,21 +50,39 @@ export const ProfilePageContent = () => {
           variant={"primaryGhost"}
           borderBottom={selectedTab === Tab.Balance ? "2px solid #004CFC" : "none"}
           rounded="none"
-          onClick={() => setSelectedTab(Tab.Balance)}>
+          onClick={() => {
+            setSelectedTab(Tab.Balance)
+            AnalyticsUtils.trackEvent(
+              buttonClicked,
+              buttonClickActions(ButtonClickProperties.EXPLORE_BALANCE_FROM_PROFILE),
+            )
+          }}>
           {t("Balance")}
         </Button>
         <Button
           variant={"primaryGhost"}
           borderBottom={selectedTab === Tab.BetterActions ? "2px solid #004CFC" : "none"}
           rounded="none"
-          onClick={() => setSelectedTab(Tab.BetterActions)}>
+          onClick={() => {
+            setSelectedTab(Tab.BetterActions)
+            AnalyticsUtils.trackEvent(
+              buttonClicked,
+              buttonClickActions(ButtonClickProperties.EXPLORE_BETTER_ACTIONS_FROM_PROFILE),
+            )
+          }}>
           {t("Better Actions")}
         </Button>
         <Button
           variant={"primaryGhost"}
           borderBottom={selectedTab === Tab.Governance ? "2px solid #004CFC" : "none"}
           rounded="none"
-          onClick={() => setSelectedTab(Tab.Governance)}>
+          onClick={() => {
+            setSelectedTab(Tab.Governance)
+            AnalyticsUtils.trackEvent(
+              buttonClicked,
+              buttonClickActions(ButtonClickProperties.EXPLORE_GOVERNANCE_FROM_PROFILE),
+            )
+          }}>
           {t("Governance")}
         </Button>
       </HStack>
