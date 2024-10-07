@@ -29,17 +29,24 @@ export enum ButtonClickProperties {
 
   CONTINUE_CREATE_PROPOSAL_FUNCTIONS = "Continue Create Proposal Functions",
   CONTINUE_CREATE_PROPOSAL_DISCUSSION = "Continue Create Proposal Discussion",
+  CONTINUE_CREATE_PROPOSAL_ABOUT = "Continue Create Proposal About",
 
-  CONTINUE_CREATE_PROPOSAL_DETAILS = "Continue Create Proposal Details",
   CONTINUE_CREATE_PROPOSAL_CONTENT = "Continue Create Proposal Content",
 
   CONTINUE_CREATE_PROPOSAL_ROUND_SELECTION = "Continue Create Proposal Round Selection",
   CONTINUE_CREATE_PROPOSAL_SUPPORT = "Continue Create Proposal Support",
   CREATE_PROPOSAL_SUBMITED = "Create Proposal Submited",
-  PUBLISHED_PROPOSAL = "Published Proposal",
 
   // JOIN COMMUNITY
   JOIN_COMMUNITY = "Join Community",
+  JOIN_DISCORD = "Join Discord",
+  JOIN_TELEGRAM = "Join Telegram",
+  HELP = "Help",
+
+  //Profile
+  EXPLORE_BALANCE_FROM_PROFILE = "Explore Balance From Profile",
+  EXPLORE_BETTER_ACTIONS_FROM_PROFILE = "Explore Better Actions From Profile",
+  EXPLORE_GOVERNANCE_FROM_PROFILE = "Explore Governance From Profile",
 }
 
 export const buttonClickActions = (property: ButtonClickProperties) => ({
