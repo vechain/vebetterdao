@@ -37,7 +37,7 @@ export const useResetUserBotSignals = ({ address, reason, onSuccess }: Props): U
     return [clauses]
   }, [address, reason])
 
-  const refetchQueryKeys = useMemo(() => [getUserBotSignalsQueryKey(address)], [])
+  const refetchQueryKeys = useMemo(() => [getUserBotSignalsQueryKey(address)], [address])
 
   return useBuildTransaction({
     clauseBuilder,

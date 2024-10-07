@@ -59,7 +59,7 @@ export const AppSecurity = () => {
   const isLoading = isTxReceiptLoading || sendTransactionPending
   const isFormValid = useMemo(
     () => appSecurityLevel && appSecurityLevel !== selectedAppSecurityLevel,
-    [appSecurityLevel],
+    [appSecurityLevel, selectedAppSecurityLevel],
   )
 
   return (
