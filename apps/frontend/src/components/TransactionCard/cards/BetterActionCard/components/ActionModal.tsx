@@ -44,12 +44,30 @@ export const ActionModal = ({ actionModal, action }: Props) => {
         </Box>
       )
     }
+    if (action?.proof?.proof?.image)
+      return (
+        <Image
+          src={action.proof.proof.image}
+          alt="proof-image"
+          borderRadius="md"
+          w={["auto", "50%"]}
+          objectFit={"contain"}
+        />
+      )
+
+    if (action?.proof?.proof?.video)
+      return (
+        <video width="320" height="240" controls>
+          <source src={action.proof.proof.video} type="video/mp4" />
+          {"Your browser does not support the video tag."}
+        </video>
+      )
     return (
       <Link href={action?.proof?.proof?.link} isExternal>
         <Text fontSize="sm">{action?.proof?.proof?.link}</Text>
       </Link>
     )
-  }, [action?.proof?.proof?.link, isTweet, tweet])
+  }, [action.proof, isTweet, tweet])
 
   return (
     <BaseModal
@@ -65,25 +83,25 @@ export const ActionModal = ({ actionModal, action }: Props) => {
           <CardBody p={4}>
             <VStack align="stretch" spacing={1}>
               <HStack>
-                <Text fontSize="3xl" fontWeight="bold">
+                <Heading fontSize="3xl" fontWeight="bold">
                   {"+"}
                   {compactFormatter.format(Number(action.amount))}
-                </Text>
+                </Heading>
                 <Image h="30px" w="30px" src="/images/b3tr-token.png" alt="b3tr-token" />
               </HStack>
               <HStack gap={1}>
-                <Text fontSize="md">{t("Better action on")}</Text>
-                <Text fontSize="md" fontWeight="600">
+                <Heading fontSize="md">{t("Better action on")}</Heading>
+                <Heading fontSize="md" fontWeight="600">
                   {app?.name}
-                </Text>
+                </Heading>
               </HStack>
             </VStack>
           </CardBody>
         </Card>
         <VStack align="stretch" spacing={2}>
           <Heading fontSize="lg">{t("Sustainability proof")}</Heading>
-          <VStack align="stretch" spacing={0}>
-            <Text fontSize="sm">{action?.proof?.proof?.text}</Text>
+          <VStack align="stretch" spacing={2}>
+            <Text fontSize="sm">{action?.proof?.description}</Text>
             {proof}
           </VStack>
         </VStack>
