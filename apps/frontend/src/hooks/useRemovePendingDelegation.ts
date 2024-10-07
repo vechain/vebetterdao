@@ -3,18 +3,12 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
-//import { B3TRDelegation__factory } from "@repo/contracts"
 import { isValid } from "@repo/utils/AddressUtils"
-import { B3TRGovernor__factory } from "@repo/contracts"
+import { VeBetterPassport__factory } from "@repo/contracts"
 
-// const DelegationInterface = B3TRDelegation__factory.createInterface()
-// const delegationAddress = getConfig().b3trDelegationAddress
-// const method = "removePendingDelegation"
-
-// TODO: change to delegation contract
-const DelegationInterface = B3TRGovernor__factory.createInterface()
-const delegationAddress = getConfig().b3trGovernorAddress
-const method = "removePendingDelegation" as any
+const PassportContractInterface = VeBetterPassport__factory.createInterface()
+const passportContractAddress = getConfig().veBetterPassportContractAddress
+const method = "removePendingDelegation"
 
 type UseRemovePendingDelegationProps = {
   onSuccess?: () => void
@@ -38,8 +32,8 @@ export const useRemovePendingDelegation = ({ onSuccess }: UseRemovePendingDelega
 
       return [
         buildClause({
-          to: delegationAddress,
-          contractInterface: DelegationInterface,
+          to: passportContractAddress,
+          contractInterface: PassportContractInterface,
           method,
           args: [delegator],
           comment: "remove pending delegation",

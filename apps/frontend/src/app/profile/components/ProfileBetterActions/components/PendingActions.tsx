@@ -1,13 +1,14 @@
-import { useUserActions } from "@/api"
+import { useIsUserPerson, useUserActions } from "@/api"
 import { Heading, Text, Flex, VStack, Card, CardBody, HStack, Image, Show } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export const PendingActions = () => {
   const { t } = useTranslation()
 
-  const { userActions, missingActions, totalActions, isLoading } = useUserActions()
+  const { userActions, missingActions, totalActions, isLoading: isUserActionsLoading } = useUserActions()
+  const { data: isPerson, isLoading: isPersonLoading } = useIsUserPerson()
 
-  if (isLoading) return null
+  if (isUserActionsLoading || isPersonLoading || isPerson) return null
 
   return (
     <Card bg="#FFD979" borderRadius="xl" w="full">

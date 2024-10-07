@@ -3,17 +3,11 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
-//import { B3TRDelegation__factory } from "@repo/contracts"
-import { B3TRGovernor__factory } from "@repo/contracts"
+import { VeBetterPassport__factory } from "@repo/contracts"
 
-// const DelegationInterface = B3TRDelegation__factory.createInterface()
-// const delegationAddress = getConfig().b3trDelegationAddress
-// const method = "revokeDelegation"
-
-// TODO: change to delegation contract
-const DelegationInterface = B3TRGovernor__factory.createInterface()
-const delegationAddress = getConfig().b3trGovernorAddress
-const method = "revokeDelegation" as any
+const PassportContractInterface = VeBetterPassport__factory.createInterface()
+const passportContractAddress = getConfig().veBetterPassportContractAddress
+const method = "revokeDelegation"
 
 type UseRevokeDelegationProps = {
   onSuccess?: () => void
@@ -31,8 +25,8 @@ export const useRevokeDelegation = ({ onSuccess }: UseRevokeDelegationProps) => 
 
     return [
       buildClause({
-        to: delegationAddress,
-        contractInterface: DelegationInterface,
+        to: passportContractAddress,
+        contractInterface: PassportContractInterface,
         method,
         args: [],
         comment: "revoke delegation",
