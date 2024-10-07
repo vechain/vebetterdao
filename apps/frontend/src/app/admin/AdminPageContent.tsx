@@ -15,7 +15,6 @@ import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
 import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { UpdateRoleCard } from "./components/UpdateRoleCard"
-import { useCurrentAllocationsRoundId } from "@/api"
 import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport"
 
 export const AdminPageContent = () => {
