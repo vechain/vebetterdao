@@ -1,18 +1,20 @@
 "use client"
 
-import { Stack, Tabs, TabList, Tab, TabPanels, TabPanel, Grid, GridItem } from "@chakra-ui/react"
-import { useEffect } from "react"
-import { AnalyticsUtils } from "@/utils"
+import { useCurrentAllocationsRoundId } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
+import { AnalyticsUtils } from "@/utils"
+import { Grid, GridItem, Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { useEffect } from "react"
 import { B3trAllowance } from "./components/B3trAllowance"
 import { BulkClaimXAppsAllocations } from "./components/BulkClaimXAppsAllocations"
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
-import { Pause } from "./components/Pause"
-import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
-import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
 import { ContractsDetails } from "./components/ContractsDetails"
+import { Pause } from "./components/Pause"
+import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
 import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
+import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
+import { UpdateRoleCard } from "./components/UpdateRoleCard"
 import { useCurrentAllocationsRoundId } from "@/api"
 import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport"
 
@@ -94,8 +96,9 @@ export const AdminPageContent = () => {
           )}
 
           <TabPanel>
-            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+            <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
               <B3trAllowance />
+              <UpdateRoleCard />
             </Grid>
           </TabPanel>
 

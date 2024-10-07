@@ -25,7 +25,7 @@
     "contracts:deploy:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run deploy:testnet --filter=contracts",
     "contracts:deploy:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run deploy:mainnet --filter=contracts",
     "contracts:upgrade": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- yarn workspace @repo/contracts ts-node scripts/upgrade/select-and-upgrade.ts",
-    "contracts:upgrade:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @repo/contracts ts-node scripts/deploy/upgrade/select-and-upgrade.ts",
+    "contracts:upgrade:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- yarn workspace @repo/contracts ts-node scripts/upgrade/select-and-upgrade.ts",
     "contracts:upgrade:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- yarn workspace @repo/contracts ts-node scripts/upgrade/select-and-upgrade.ts",
     "contracts:upgrade:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- yarn workspace @repo/contracts ts-node scripts/upgrade/select-and-upgrade.ts",
     "contracts:start-round:testnet": "dotenv -e .env.example -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run start-round:testnet --filter=contracts",

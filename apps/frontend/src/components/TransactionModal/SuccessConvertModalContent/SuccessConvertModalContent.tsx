@@ -52,7 +52,11 @@ export const SuccessConvertModalContent = ({
         initial="initial"
         animate="animate"
       />
-      <Text style={{ fontFamily: "Instrument Sans, sans-serif" }} fontSize={28} fontWeight={700}>
+      <Text
+        style={{ fontFamily: "Instrument Sans, sans-serif" }}
+        fontSize={28}
+        fontWeight={700}
+        data-testid={"swap-success-title"}>
         {t("Conversion complete!")}
       </Text>
       <Text fontSize={16} fontWeight={400} textAlign={"center"}>
@@ -110,7 +114,8 @@ export const SuccessConvertModalContent = ({
         rounded={"full"}
         size={{ base: "md", md: "lg" }}
         w={{ base: "full", md: "auto" }}
-        onClick={onClose}>
+        onClick={onClose}
+        data-testid={"close-swap-modal-button"}>
         {t("Continue")}
       </Button>
     </VStack>

@@ -240,7 +240,8 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
             w={"full"}
             rounded={"full"}
             isDisabled={invalidAmount}
-            size={"lg"}>
+            size={"lg"}
+            data-testid={"confirm-swap-button"}>
             <Text fontSize={{ base: 14, md: 18 }}>{t("Convert now")}</Text>
           </Button>
 
