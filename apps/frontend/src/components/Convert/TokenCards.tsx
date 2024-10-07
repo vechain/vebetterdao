@@ -95,6 +95,7 @@ export const TokenCards = ({
             onChange={e => onChange(filterAmount(e.target.value))}
             variant="unstyled"
             _placeholder={{ color: "black" }}
+            data-testid={"amount-input"}
           />
         )}
       />
@@ -111,7 +112,7 @@ export const TokenCards = ({
 
   const maxButton = useMemo(
     () => (
-      <Button onClick={() => setValue("amount", maxBalance)} variant={"secondary"}>
+      <Button onClick={() => setValue("amount", maxBalance)} variant={"secondary"} data-testid={"convert-all-button"}>
         <Text fontSize={14} fontWeight={500}>
           {t("Convert all")}
         </Text>
@@ -139,7 +140,7 @@ export const TokenCards = ({
                     {isB3trToVot3 ? t("You'll convert") : t("You'll receive")}
                   </Text>
                 </HStack>
-                <HStack w="full">
+                <HStack w="full" data-testid={"B3TR"}>
                   <HStack flex={1}>
                     <Image
                       src="/images/logo/b3tr_logo_dark.svg"
@@ -170,7 +171,7 @@ export const TokenCards = ({
                     {isB3trToVot3 ? t("You'll receive") : t("You'll convert")}
                   </Text>
                 </HStack>
-                <HStack w="full">
+                <HStack w="full" data-testid={"VOT3"}>
                   <HStack flex={1}>
                     <Image
                       src="/images/logo/vot3_logo_dark.svg"

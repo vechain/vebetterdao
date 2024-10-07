@@ -28,7 +28,13 @@ export const ConvertButton: React.FC<Props> = ({ isIconButton = false }) => {
           <FaRepeat />
         </Button>
       ) : (
-        <Button isDisabled={buttonDisabled} onClick={onOpen} borderRadius={"full"} variant={"primaryAction"} w="full">
+        <Button
+          isDisabled={buttonDisabled}
+          onClick={onOpen}
+          borderRadius={"full"}
+          variant={"primaryAction"}
+          w="full"
+          data-testid="convert-tokens-button">
           <Text fontSize={16} fontStyle={"normal"} fontWeight={500}>
             {t("Convert tokens")}
           </Text>
