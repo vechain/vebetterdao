@@ -344,7 +344,6 @@ export async function deployAll(config: ContractsConfig) {
         signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
         roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
         minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
-        roundsForAssigningEntityScore: config.VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE, //roundsForAssigningEntityScore
         blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD, //blacklistThreshold
         whitelistThreshold: config.VEBETTER_WHITELIST_THRESHOLD, //whitelistThreshold
         maxEntitiesPerPassport: config.VEBETTER_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport

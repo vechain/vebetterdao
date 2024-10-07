@@ -108,7 +108,6 @@ describe("VeBetterPassport - @shard3", function () {
             signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
             roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
             minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
-            roundsForAssigningEntityScore: config.VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE, //roundsForAssigningEntityScore
             blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD, //blacklistThreshold
             whitelistThreshold: config.VEBETTER_WHITELIST_THRESHOLD, //whitelistThreshold
             maxEntitiesPerPassport: config.VEBETTER_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
@@ -1233,7 +1232,6 @@ describe("VeBetterPassport - @shard3", function () {
     it("Should assign an enities score correctly", async function () {
       const config = createLocalConfig()
 
-      config.VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE = 2
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1345,7 +1343,6 @@ describe("VeBetterPassport - @shard3", function () {
     it("Should remove an enities score correctly", async function () {
       const config = createLocalConfig()
 
-      config.VEPASSPORT_ROUNDS_FOR_ASSIGNING_ENTITY_SCORE = 2
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,

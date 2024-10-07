@@ -86,8 +86,6 @@ library PassportStorageTypes {
     uint256 popScoreThreshold;
     // Number of rounds to consider for the cumulative score
     uint256 roundsForCumulativeScore;
-    // Number of rounds to consider for assigning an enitity score to a passport
-    uint256 roundsForAssigningEntityScore;
     // Decay rate for the exponential decay
     uint256 decayRate;
     // Track which apps a user has interacted with
