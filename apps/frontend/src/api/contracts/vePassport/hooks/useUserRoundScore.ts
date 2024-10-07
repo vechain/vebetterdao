@@ -4,7 +4,7 @@ import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCurrentAllocationsRoundId } from "../../xAllocations"
 
-const VEPASSPORT_CONTRACT = getConfig().veBetterPassportAddress
+const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
 const vePassportInterface = VeBetterPassport__factory.createInterface()
 
 /**

@@ -374,7 +374,7 @@ describe("X-Allocation Voting - @shard3", function () {
 
       // Whitelist user
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // V1 Contract
       const V1Contract = await ethers.getContractAt("XAllocationVoting", await xAllocationVoting.getAddress())
@@ -617,7 +617,7 @@ describe("X-Allocation Voting - @shard3", function () {
         })
 
         await veBetterPassport.whitelist(owner.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         const newThreshold = 10n
         await createProposalAndExecuteIt(
@@ -667,7 +667,7 @@ describe("X-Allocation Voting - @shard3", function () {
         await bootstrapAndStartEmissions()
 
         await veBetterPassport.whitelist(owner.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         await createProposalAndExecuteIt(
           owner,
@@ -697,7 +697,7 @@ describe("X-Allocation Voting - @shard3", function () {
         await bootstrapAndStartEmissions()
 
         await veBetterPassport.whitelist(owner.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         await expect(
           createProposalAndExecuteIt(
@@ -724,7 +724,7 @@ describe("X-Allocation Voting - @shard3", function () {
 
         // whitelist user
         await veBetterPassport.whitelist(otherAccount.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         let round1 = await startNewAllocationRound()
         await waitForRoundToEnd(round1)
@@ -746,7 +746,7 @@ describe("X-Allocation Voting - @shard3", function () {
 
         // whitelist user
         await veBetterPassport.whitelist(otherAccount.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         // @ts-ignore
         let initialQuorumNumerator = await xAllocationVoting.quorumNumerator()
@@ -788,7 +788,7 @@ describe("X-Allocation Voting - @shard3", function () {
         const cycleDuration = await emissions.cycleDuration()
 
         await veBetterPassport.whitelist(otherAccount.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         // Now we can create a proposal
         const encodedFunctionCall = xAllocationVoting.interface.encodeFunctionData("setVotingPeriod", [
@@ -834,7 +834,7 @@ describe("X-Allocation Voting - @shard3", function () {
         await bootstrapAndStartEmissions()
 
         await veBetterPassport.whitelist(owner.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         await expect(
           createProposalAndExecuteIt(
@@ -859,7 +859,7 @@ describe("X-Allocation Voting - @shard3", function () {
           })
 
         await veBetterPassport.whitelist(otherAccount.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         await bootstrapAndStartEmissions()
         await getVot3Tokens(otherAccount, "30000")
@@ -1247,7 +1247,7 @@ describe("X-Allocation Voting - @shard3", function () {
       await bootstrapEmissions()
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await x2EarnApps
         .connect(owner)
@@ -1282,7 +1282,7 @@ describe("X-Allocation Voting - @shard3", function () {
       })
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1367,7 +1367,7 @@ describe("X-Allocation Voting - @shard3", function () {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(otherAccount, "0.1")
 
@@ -1393,7 +1393,7 @@ describe("X-Allocation Voting - @shard3", function () {
       await bootstrapEmissions()
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await x2EarnApps
         .connect(owner)
@@ -1424,7 +1424,7 @@ describe("X-Allocation Voting - @shard3", function () {
         })
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1462,7 +1462,7 @@ describe("X-Allocation Voting - @shard3", function () {
       await bootstrapEmissions()
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await x2EarnApps
         .connect(owner)
@@ -1554,7 +1554,7 @@ describe("X-Allocation Voting - @shard3", function () {
       await veBetterPassport.whitelist(otherAccount.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(otherAccount, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -1677,7 +1677,7 @@ describe("X-Allocation Voting - @shard3", function () {
       await bootstrapEmissions()
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await x2EarnApps
         .connect(owner)
@@ -1720,7 +1720,7 @@ describe("X-Allocation Voting - @shard3", function () {
         })
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1771,7 +1771,7 @@ describe("X-Allocation Voting - @shard3", function () {
         })
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1914,7 +1914,7 @@ describe("X-Allocation Voting - @shard3", function () {
       await bootstrapEmissions()
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Check if user voted
       let voted = await xAllocationVoting.hasVotedOnce(otherAccount.address)
@@ -1945,7 +1945,7 @@ describe("X-Allocation Voting - @shard3", function () {
         })
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await x2EarnApps
         .connect(owner)
@@ -1975,7 +1975,7 @@ describe("X-Allocation Voting - @shard3", function () {
         })
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await x2EarnApps
         .connect(owner)
@@ -2001,7 +2001,7 @@ describe("X-Allocation Voting - @shard3", function () {
         })
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // add apps
       await x2EarnApps
@@ -2255,7 +2255,7 @@ describe("X-Allocation Voting - @shard3", function () {
       await veBetterPassport.whitelist(otherAccounts[3].address)
       await veBetterPassport.whitelist(otherAccounts[4].address)
       await veBetterPassport.whitelist(otherAccounts[5].address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()

@@ -18,20 +18,27 @@ interface IVeBetterPassport {
   event MinimumGalaxyMemberLevelSet(uint256 minimumGalaxyMemberLevel);
 
   /// @notice Emitted when a user delegates personhood to another user.
-  event DelegationCreated(address indexed delegator, address indexed delegatee);
+  event LinkCreated(address indexed entity, address indexed passport);
 
   /// @notice Emitted when a user revokes the delegation of personhood to another user.
-  event DelegationRevoked(address indexed delegator, address indexed delegatee);
+  event LinkRemoved(address indexed entity, address indexed passport);
 
   /// @notice Emitted when a user delegates personhood to another user pending acceptance.
-  event DelegationPending(address indexed delegator, address indexed delegatee);
+  event LinkPending(address indexed entity, address indexed passport);
 
   /// @notice Emitted when a user registers an action
   /// @param user - the user that registered the action
+  /// @param passport - the passport address of the user
   /// @param appId - the app id of the action
   /// @param round - the round of the action
   /// @param actionScore - the score of the action
-  event RegisteredAction(address indexed user, bytes32 indexed appId, uint256 indexed round, uint256 actionScore);
+  event RegisteredAction(
+    address indexed user,
+    address passport,
+    bytes32 indexed appId,
+    uint256 indexed round,
+    uint256 actionScore
+  );
 
   /// @notice Emitted when a user is signaled.
   /// @param user  The address of the user that was signaled.
@@ -63,7 +70,7 @@ interface IVeBetterPassport {
   /// @notice Emitted when a user is removed from the whitelist
   /// @param user - the user that is removed from the whitelist
   /// @param removedBy - the user that removed the user from the whitelist
-  event RemovedUserFromWhitelist(address indexed user, address indexed removedBy);
+  event RemovedUserFromWhitelist(address indexed user, address indexed passport, address indexed removedBy);
 
   /// @notice Emitted when a user is blacklisted
   /// @param user - the user that is blacklisted
@@ -81,30 +88,60 @@ interface IVeBetterPassport {
   /// @param reason - The reason for resetting the signals.
   event UserSignalsResetForApp(address indexed user, bytes32 indexed app, string reason);
 
+  /// @notice Emitted when a user delegates passport to another user.
+  event DelegationCreated(address indexed delegator, address indexed delegatee);
+
+  /// @notice Emitted when a user delegates passport to another user pending acceptance.
+  event DelegationPending(address indexed delegator, address indexed delegatee);
+
+  /// @notice Emitted when a user revokes the delegation of passport to another user.
+  event DelegationRevoked(address indexed delegator, address indexed delegatee);
+
+  /// @notice Emitted when an an entity is linked to a passport
+  error AlreadyLinked(address entity);
+
   // ---------- Errors ---------- //
   /// @notice Emitted when a user does not have permission to delegate personhood.
-  error PersonhoodDelegationUnauthorizedUser(address user);
+  error UnauthorizedUser(address user);
 
   /// @notice Emitted when a user tries to delegate personhood to a user that has already been delegated to.
-  error AlreadyDelegated(address delegator);
+  error AlreadyDelegated(address entity);
 
   /// @notice Emitted when a user tries to delegate personhood to themselves.
+  error CannotLinkToSelf(address user);
+
+  /// @notice Emitted when a user tries to delegate personhood to more than one user.
+  error OnlyOneLinkAllowed();
+
+  /// @notice Emitted when a user tries to call a function that they are not authorized to call.
+  error VeBetterPassportUnauthorizedUser(address user);
+
+  /// @notice Emitted when a user does not have permission to delegate passport.
+  error PassportDelegationUnauthorizedUser(address user);
+
+  /// @notice Emitted when a user tries to delegate passport to themselves.
   error CannotDelegateToSelf(address user);
 
   /// @notice Emitted when a user tries to revoke a delegation that does not exist.
   error NotDelegated(address user);
 
-  /// @notice Emitted when a user tries to delegate personhood to more than one user.
+  /// @notice Emitted when a user tries to delegate passport to more than one user.
   error OnlyOneUserAllowed();
 
-  /// @notice Emitted when a user tries to call a function that they are not authorized to call.
-  error VeBetterPassportUnauthorizedUser(address user);
+  /// @notice Emiited when a user tries to delegate a passport to another passport or entity.
+  error PassportDelegationFromEntity();
 
-  /// @notice Emitted when a user tries to delegate with a
+  /// @notice Emitted when a user tries to delegate a passport to another entity.
+  error PassportDelegationToEntity();
+
+  /// @notice Emitted when a user tries to sign a message with an expired signature
   error SignatureExpired();
 
-  /// @notice Emitted when a user tries to delegate with a
-  error InvaliedSignature();
+  /// @notice Emitted when a user tries to sign a message with an invalid signature
+  error InvalidSignature();
+
+  ///  @notice Thrown when a user tries to link a entity to a passport that has reached the maximum number of entities.
+  error MaxEntitiesPerPassportReached();
 
   // ---------- Functions ---------- //
   /// @notice Initializes the contract with the required data and roles
@@ -122,7 +159,7 @@ interface IVeBetterPassport {
   function isPerson(address user) external view returns (bool person, string memory reason);
 
   /// @notice Checks if a user is a person
-  /// @dev Checks if a wallet is a person or not at a specific timepoint based on the participation score, blacklisting, and xnode and GM holdings
+  /// @dev Checks if a wallet is a person or not at a specific timepoint based on the participation score, blacklisting, and GM holdings
   /// @param user - the user address
   /// @param timepoint - the timepoint to query
   /// @return person - true if the user is a person
@@ -142,66 +179,46 @@ interface IVeBetterPassport {
   /// @return True if the user is blacklisted
   function isBlacklisted(address _user) external view returns (bool);
 
-  /// @notice Toggles the whitelist check functionality
-  function toggleWhitelistCheck() external;
+  /// @notice Toggles the specified check
+  function toggleCheck(PassportTypes.CheckType check) external;
 
-  /// @notice Toggles the blacklist check functionality
-  function toggleBlacklistCheck() external;
+  /// @notice Returns the passport address for a entity
+  /// @param entity The entity's address
+  /// @return The address of the passport
+  function getPassportForEntity(address entity) external view returns (address);
 
-  /// @notice Toggles the signaling check functionality
-  function toggleSignalingCheck() external;
+  /// @notice Returns the pending delegations for a passport
+  /// @param passport - the passport address
+  /// @return the entity address
+  function getPendingEntitiesForPassport(address passport) external view returns (address[] memory);
 
-  /// @notice Toggles the participation score check functionality
-  function toggleParticipationScoreCheck() external;
-
-  /// @notice Toggles the node ownership check functionality
-  function toggleNodeOwnershipCheck() external;
-
-  /// @notice Toggles the GM ownership check functionality
-  function toggleGMOwnershipCheck() external;
-
-  /// @notice Returns the delegatee address for a delegator
-  /// @param delegator The delegator's address
-  /// @return The address of the delegatee
-  function getDelegatee(address delegator) external view returns (address);
-
-  /// @notice Returns the pending delegations for a delegatee
-  /// @param delegatee - the delegatee address
-  /// @return the delegator address
-  function getPendingDelegations(address delegatee) external view returns (address[] memory);
-
-  /// @notice Returns the delegatee address for a delegator at a specific timepoint
-  /// @param delegator The delegator's address
+  /// @notice Returns the passport address for a entity at a specific timepoint
+  /// @param entity The entity's address
   /// @param timepoint The timepoint to query
-  function getDelegateeInTimepoint(address delegator, uint256 timepoint) external view returns (address);
+  function getPassportForEntityAtTimepoint(address entity, uint256 timepoint) external view returns (address);
 
-  /// @notice Returns the delegator address for a delegatee
-  /// @param delegatee The delegatee's address
-  /// @return The address of the delegator
-  function getDelegator(address delegatee) external view returns (address);
+  /// @notice Returns the entity address for a passport
+  /// @param passport The passport's address
+  /// @return The address of the entity
+  function getEntitiesLinkedToPassport(address passport) external view returns (address[] memory);
 
-  /// @notice Returns the delegator address for a delegatee at a specific timepoint
-  /// @param delegatee The delegatee's address
-  /// @param timepoint The timepoint to query
-  function getDelegatorInTimepoint(address delegatee, uint256 timepoint) external view returns (address);
-
-  /// @notice Returns if a user is a delegator
+  /// @notice Returns if a user is a entity
   /// @param user The user address
-  function isDelegator(address user) external view returns (bool);
+  function isEntity(address user) external view returns (bool);
 
-  /// @notice Returns if a user is a delegator at a specific timepoint
+  /// @notice Returns if a user is a entity at a specific timepoint
   /// @param user The user address
   /// @param timepoint The timepoint to query
-  function isDelegatorInTimepoint(address user, uint256 timepoint) external view returns (bool);
+  function isEntityInTimepoint(address user, uint256 timepoint) external view returns (bool);
 
-  /// @notice Returns if a user is a delegatee
+  /// @notice Returns if a user is a passport
   /// @param user The user address
-  function isDelegatee(address user) external view returns (bool);
+  function isPassport(address user) external view returns (bool);
 
-  /// @notice Returns if a user is a delegatee at a specific timepoint
+  /// @notice Returns if a user is a passport at a specific timepoint
   /// @param user The user address
   /// @param timepoint The timepoint to query
-  function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool);
+  function isPassportInTimepoint(address user, uint256 timepoint) external view returns (bool);
 
   /// @notice Gets the cumulative score of a user based on exponential decay for a number of last rounds
   /// @param user The user address
@@ -255,23 +272,8 @@ interface IVeBetterPassport {
   /// @return The minimum galaxy member level
   function getMinimumGalaxyMemberLevel() external view returns (uint256);
 
-  /// @notice Returns if the whitelist check is enabled
-  function whitelistCheckEnabled() external view returns (bool);
-
-  /// @notice Returns if the blacklist check is enabled
-  function blacklistCheckEnabled() external view returns (bool);
-
-  /// @notice Returns if the signaling check is enabled
-  function signalingCheckEnabled() external view returns (bool);
-
-  /// @notice Returns if the participation score check is enabled
-  function participationScoreCheckEnabled() external view returns (bool);
-
-  /// @notice Returns if the node ownership check is enabled
-  function nodeOwnershipCheckEnabled() external view returns (bool);
-
-  /// @notice Returns if the GM ownership check is enabled
-  function gmOwnershipCheckEnabled() external view returns (bool);
+  /// @notice Returns if the specific check is enabled
+  function isCheckEnabled(PassportTypes.CheckType check) external view returns (bool);
 
   /// @notice Returns the signaling threshold
   /// @return The signaling threshold
@@ -376,27 +378,28 @@ interface IVeBetterPassport {
   function setXAllocationVoting(IXAllocationVotingGovernor xAllocationVoting) external;
 
   /// @notice Delegate personhood to another address
-  /// @param delegator The delegator's address
+  /// @param entity The entity's address
   /// @param deadline The deadline for the signature
   /// @param signature The signature of the delegation
-  function delegateWithSignature(address delegator, uint256 deadline, bytes memory signature) external;
+  function linkEntityToPassportWithSignature(address entity, uint256 deadline, bytes memory signature) external;
 
   /// @notice Delegate the personhood to another address
-  /// @dev The delegatee must accept the delegation
+  /// @dev The passport must accept the delegation
   /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
   /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
-  function delegatePersonhood(address delegatee) external;
+  function linkEntityToPassport(address passport) external;
 
-  /// @notice Allow the delegatee to accept the delegation
-  /// @param delegator - the delegator address
-  function acceptDelegation(address delegator) external;
+  /// @notice Allow the passport to accept the delegation
+  /// @param entity - the entity address
+  function acceptEntityLink(address entity) external;
 
-  /// @notice Revoke personhood delegation
-  function revokeDelegation() external;
+  /// @notice Remove the email link
+  /// @param entity - the entity address
+  function removeEntityLink(address entity) external;
 
-  /// @notice Allows a delegator to remove their pending delegation to a delegatee.
-  /// @param delegator - the delegator address
-  function removePendingDelegation(address delegator) external;
+  /// @notice Allows a entity to remove their pending delegation to a passport.
+  /// @param entity - the entity address
+  function removePendingEntityLinkFromPassport(address entity) external;
 
   /// @notice Registers an action for a user
   /// @param user - the user that performed the action
@@ -408,4 +411,66 @@ interface IVeBetterPassport {
   /// @param appId - the app id of the action
   /// @param round - the round id of the action
   function registerActionForRound(address user, bytes32 appId, uint256 round) external;
+
+  /// @notice Gets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
+  function blacklistThreshold() external view returns (uint256);
+
+  // @notice Gets the threshold percentage of whitelisted entities for a passport to be considered whitelisted
+  function whitelistThreshold() external view returns (uint256);
+
+  /// @notice Returns the maximum number of entities per passport
+  function maxEntitiesPerPassport() external view returns (uint256);
+
+  /// @notice Sets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
+  function setBlacklistThreshold(uint256 _threshold) external;
+
+  /// @notice Sets the threshold percentage of whitelisted entities for a passport to be considered whitelisted
+  function setWhitelistThreshold(uint256 _threshold) external;
+
+  /// @notice Sets the maximum number of entities that can be linked to a passport
+  /// @param maxEntities - the maximum number of entities
+  function setMaxEntitiesPerPassport(uint256 maxEntities) external;
+
+  /// @notice Returns the delegatee address for a delegator
+  /// @param delegator The delegator's address
+  /// @return The address of the delegatee
+  function getDelegatee(address delegator) external view returns (address);
+
+  /// @notice Returns the pending delegations for a delegatee
+  /// @param delegatee - the delegatee address
+  /// @return the delegator address
+  function getPendingDelegations(address delegatee) external view returns (address[] memory);
+
+  /// @notice Returns the delegatee address for a delegator at a specific timepoint
+  /// @param delegator The delegator's address
+  /// @param timepoint The timepoint to query
+  function getDelegateeInTimepoint(address delegator, uint256 timepoint) external view returns (address);
+
+  /// @notice Returns the delegator address for a delegatee
+  /// @param delegatee The delegatee's address
+  /// @return The address of the delegator
+  function getDelegator(address delegatee) external view returns (address);
+
+  /// @notice Returns the delegator address for a delegatee at a specific timepoint
+  /// @param delegatee The delegatee's address
+  /// @param timepoint The timepoint to query
+  function getDelegatorInTimepoint(address delegatee, uint256 timepoint) external view returns (address);
+
+  /// @notice Returns if a user is a delegator
+  /// @param user The user address
+  function isDelegator(address user) external view returns (bool);
+
+  /// @notice Returns if a user is a delegator at a specific timepoint
+  /// @param user The user address
+  /// @param timepoint The timepoint to query
+  function isDelegatorInTimepoint(address user, uint256 timepoint) external view returns (bool);
+
+  /// @notice Returns if a user is a delegatee
+  /// @param user The user address
+  function isDelegatee(address user) external view returns (bool);
+
+  /// @notice Returns if a user is a delegatee at a specific timepoint
+  /// @param user The user address
+  /// @param timepoint The timepoint to query
+  function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool);
 }

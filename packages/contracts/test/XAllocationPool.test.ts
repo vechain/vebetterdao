@@ -255,7 +255,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(account, "10000")
       })
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -780,7 +780,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -907,7 +907,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await emissions.connect(minterAccount).start()
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Start allocation round
         const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
@@ -992,7 +992,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await emissions.connect(minterAccount).start()
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         const round1 = await xAllocationVoting.currentRoundId()
 
@@ -1093,7 +1093,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         const round1 = await xAllocationVoting.currentRoundId()
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         // Vote
         await xAllocationVoting
@@ -1147,7 +1147,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -1226,7 +1226,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         const round1 = await xAllocationVoting.currentRoundId()
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         // Vote
         await xAllocationVoting
@@ -1302,7 +1302,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         const round1 = await xAllocationVoting.currentRoundId()
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         // Vote
         await xAllocationVoting
@@ -1373,7 +1373,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await emissions.connect(minterAccount).start()
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         const round1 = await xAllocationVoting.currentRoundId()
 
@@ -1475,7 +1475,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -1561,7 +1561,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await emissions.connect(minterAccount).start()
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Start allocation round
         const round1 = parseInt((await xAllocationVoting.currentRoundId()).toString())
@@ -1620,7 +1620,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -1689,7 +1689,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await x2EarnApps.connect(otherAccounts[4]).setTeamAllocationPercentage(app2Id, 100)
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         // Bootstrap emissions
         await bootstrapEmissions()
@@ -1740,7 +1740,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -1791,7 +1791,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -1859,7 +1859,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -1945,7 +1945,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -2031,7 +2031,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -2080,7 +2080,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         const GOVERNANCE_ROLE = await xAllocationVoting.GOVERNANCE_ROLE()
         await xAllocationVoting.grantRole(GOVERNANCE_ROLE, owner.address)
@@ -2138,7 +2138,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -2187,7 +2187,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -2232,7 +2232,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(otherAccounts[3], "10000")
 
         await veBetterPassport.whitelist(otherAccounts[3].address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -2292,7 +2292,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -2354,7 +2354,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         await getVot3Tokens(voter1, "1000")
 
         await veBetterPassport.whitelist(voter1.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -2414,7 +2414,7 @@ describe("X-Allocation Pool - @shard3", async function () {
           await getVot3Tokens(account, "10000")
         })
 
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         await x2EarnApps
@@ -2494,7 +2494,7 @@ describe("X-Allocation Pool - @shard3", async function () {
           await getVot3Tokens(account, "10000")
         })
 
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         // Turn off quadratic funding
         await xAllocationPool.connect(owner).toggleQuadraticFunding()
@@ -2597,7 +2597,7 @@ describe("X-Allocation Pool - @shard3", async function () {
           await getVot3Tokens(account, "10000")
         })
 
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -2681,7 +2681,7 @@ describe("X-Allocation Pool - @shard3", async function () {
           await getVot3Tokens(account, "10000")
         })
 
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -2779,7 +2779,7 @@ describe("X-Allocation Pool - @shard3", async function () {
           await getVot3Tokens(account, "10000")
         })
 
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
@@ -2864,7 +2864,7 @@ describe("X-Allocation Pool - @shard3", async function () {
           await getVot3Tokens(account, "10000")
         })
 
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         // Turn off quadratic funding
         await xAllocationPool.connect(owner).toggleQuadraticFunding()
@@ -2967,7 +2967,7 @@ describe("X-Allocation Pool - @shard3", async function () {
           await getVot3Tokens(account, "10000")
         })
 
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         //Add apps
         const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
