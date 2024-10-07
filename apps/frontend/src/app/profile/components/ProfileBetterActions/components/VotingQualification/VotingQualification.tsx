@@ -1,13 +1,28 @@
-import { Heading, VStack, Card, CardBody, HStack, Button, Text, Flex, Divider, Stack } from "@chakra-ui/react"
+import {
+  Heading,
+  VStack,
+  Card,
+  CardBody,
+  HStack,
+  Button,
+  Text,
+  Flex,
+  Divider,
+  Stack,
+  useDisclosure,
+} from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useThresholdParticipationScore, useUserCurrentRoundScore } from "@/api"
-import { useCallback, useMemo } from "react"
+import { useMemo } from "react"
 import { UilArrowUpRight, UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
+import { DelegationModal } from "./components/DelegationModal"
+import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
 
 export const VotingQualification = () => {
   const { t } = useTranslation()
+  // TODO: fill with real data
   const isDelegated = true
   const delegateeAddress = "0x1234567890123456789012345678901234567890"
   const delegationDate = "2024-01-01"
@@ -21,9 +36,6 @@ export const VotingQualification = () => {
   )
   const qualificationReached = userScore >= scoreThreshold
   const border = qualificationReached ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
-  const handleDelegate = useCallback(() => {
-    console.log("delegate")
-  }, [])
   const progressLabel = useMemo(() => {
     if (scorePercentage === 100) return t("QUALIFIED TO VOTE")
     return t("{{scorePercentage}}% QUALIFIED TO VOTE", { scorePercentage })
@@ -44,6 +56,9 @@ export const VotingQualification = () => {
 
   const lightColor = "#FCEEF1"
 
+  const delegationModal = useDisclosure()
+  const revokeDelegationModal = useDisclosure()
+
   if (isUserRoundScoreLoading || isScoreThresholdLoading) return null
 
   return (
@@ -57,7 +72,11 @@ export const VotingQualification = () => {
                   {t("Your Voting Qualification")}
                 </Heading>
                 {!isDelegated && qualificationReached && (
-                  <Button variant={"primaryGhost"} onClick={handleDelegate} leftIcon={<UilArrowUpRight />} size="sm">
+                  <Button
+                    variant={"primaryGhost"}
+                    onClick={delegationModal.onOpen}
+                    leftIcon={<UilArrowUpRight />}
+                    size="sm">
                     {t("Delegate")}
                   </Button>
                 )}
@@ -123,7 +142,11 @@ export const VotingQualification = () => {
                     </VStack>
                   </HStack>
                   <HStack>
-                    <Button variant={"dangerGhost"} p={3} leftIcon={<UilTimes color="#C84968" />}>
+                    <Button
+                      variant={"dangerGhost"}
+                      p={3}
+                      leftIcon={<UilTimes color="#C84968" />}
+                      onClick={revokeDelegationModal.onOpen}>
                       {t("Remove delegation")}
                     </Button>
                   </HStack>
@@ -133,6 +156,8 @@ export const VotingQualification = () => {
           )}
         </VStack>
       </CardBody>
+      <DelegationModal modal={delegationModal} />
+      <RevokeDelegationDelegatorPOVModal modal={revokeDelegationModal} delegatee={delegateeAddress} />
     </Card>
   )
 }
