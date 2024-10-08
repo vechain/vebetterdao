@@ -37,7 +37,7 @@ export const RemoveDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
     return (
       <TransactionModal
         isOpen={modal.isOpen ?? false}
-        onClose={modal.onClose ?? (() => {})}
+        onClose={handleClose}
         successTitle={t("Delegation request removed!")}
         status={removeDelegation.status}
         errorDescription={removeDelegation.error?.reason}

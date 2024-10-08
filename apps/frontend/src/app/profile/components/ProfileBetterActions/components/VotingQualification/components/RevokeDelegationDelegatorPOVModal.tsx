@@ -45,7 +45,7 @@ export const RevokeDelegationDelegatorPOVModal = ({
     return (
       <TransactionModal
         isOpen={modal.isOpen ?? false}
-        onClose={modal.onClose ?? (() => {})}
+        onClose={handleClose}
         successTitle={t("Delegation revoked!")}
         status={revokeDelegation.status}
         errorDescription={revokeDelegation.error?.reason}
