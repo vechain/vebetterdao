@@ -49,6 +49,7 @@ export async function deployAll(config: ContractsConfig) {
   // ---------- Contracts Deployment ---------- //
   console.log(`================  Contracts Deployment Initiated `)
   // ---------------------- Deploy Libraries ----------------------
+  console.log("================ Deploying Governance Libraries")
   const {
     GovernorClockLogicLibV1,
     GovernorConfiguratorLibV1,
@@ -76,6 +77,7 @@ export async function deployAll(config: ContractsConfig) {
     GovernorStateLogicLib,
   } = await governanceLibraries()
 
+  console.log("================ Deploying VeBetter Passport Libraries")
   // Deploy Passport Libraries
   const {
     PassportChecksLogic,
@@ -88,7 +90,7 @@ export async function deployAll(config: ContractsConfig) {
     PassportWhitelistAndBlacklistLogic,
   } = await passportLibraries()
 
-  console.log("================ Deploying Vechain Nodes mock contracts =================")
+  console.log("================ Deploying Vechain Nodes mock contracts")
 
   const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
   const vechainNodesMock = await TokenAuctionLock.deploy()
@@ -104,6 +106,7 @@ export async function deployAll(config: ContractsConfig) {
   console.log("Vechain Nodes Mock deployed at: ", await vechainNodesMock.getAddress())
 
   // ---------------------- Deploy Contracts ----------------------
+  console.log("================ Deploying VeBetter DAO contracts")
   const b3tr = await deployB3trToken(
     TEMP_ADMIN,
     TEMP_ADMIN, // Minter

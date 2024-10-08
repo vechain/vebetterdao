@@ -16,11 +16,12 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   },
   "B3TR Governor": {
     name: "b3tr-governor",
-    versions: ["v2", "v3"],
+    versions: ["v2", "v3", "v4"],
     configAddressField: "b3trGovernorAddress",
     descriptions: {
       v2: "Fix XAllocation voting so that a user cannot vote for an XApp with a vote weight less than 1",
       v3: "Add the ability to toggle quadratic voting on and off.",
+      v4: "Integrate VeBetterPassport contract",
     },
   },
   "XAllocation Voting": {
