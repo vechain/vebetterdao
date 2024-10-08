@@ -49,7 +49,7 @@ export async function deployAll(config: ContractsConfig) {
   // ---------- Contracts Deployment ---------- //
   console.log(`================  Contracts Deployment Initiated `)
   // ---------------------- Deploy Libraries ----------------------
-  console.log("================ Deploying Governance Libraries")
+  console.log("Deploying Governance Libraries")
   const {
     GovernorClockLogicLibV1,
     GovernorConfiguratorLibV1,
@@ -77,7 +77,7 @@ export async function deployAll(config: ContractsConfig) {
     GovernorStateLogicLib,
   } = await governanceLibraries()
 
-  console.log("================ Deploying VeBetter Passport Libraries")
+  console.log("Deploying VeBetter Passport Libraries")
   // Deploy Passport Libraries
   const {
     PassportChecksLogic,
@@ -90,23 +90,27 @@ export async function deployAll(config: ContractsConfig) {
     PassportWhitelistAndBlacklistLogic,
   } = await passportLibraries()
 
-  console.log("================ Deploying Vechain Nodes mock contracts")
+  let vechainNodesAddress = "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302" // this is the mainnet address
+  if (network.name !== "vechain_mainnet") {
+    console.log("Deploying Vechain Nodes mock contracts")
 
-  const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
-  const vechainNodesMock = await TokenAuctionLock.deploy()
-  await vechainNodesMock.waitForDeployment()
+    const TokenAuctionLock = await ethers.getContractFactory("TokenAuction")
+    const vechainNodesMock = await TokenAuctionLock.deploy()
+    await vechainNodesMock.waitForDeployment()
 
-  const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
-  const clockAuctionContract = await ClockAuctionLock.deploy(await vechainNodesMock.getAddress(), TEMP_ADMIN)
+    const ClockAuctionLock = await ethers.getContractFactory("ClockAuction")
+    const clockAuctionContract = await ClockAuctionLock.deploy(await vechainNodesMock.getAddress(), TEMP_ADMIN)
 
-  await vechainNodesMock.setSaleAuctionAddress(await clockAuctionContract.getAddress())
+    await vechainNodesMock.setSaleAuctionAddress(await clockAuctionContract.getAddress())
 
-  await vechainNodesMock.addOperator(TEMP_ADMIN)
+    await vechainNodesMock.addOperator(TEMP_ADMIN)
+    vechainNodesAddress = await vechainNodesMock.getAddress()
 
-  console.log("Vechain Nodes Mock deployed at: ", await vechainNodesMock.getAddress())
+    console.log("Vechain Nodes Mock deployed at: ", await vechainNodesMock.getAddress())
+  }
 
   // ---------------------- Deploy Contracts ----------------------
-  console.log("================ Deploying VeBetter DAO contracts")
+  console.log("Deploying VeBetter DAO contracts")
   const b3tr = await deployB3trToken(
     TEMP_ADMIN,
     TEMP_ADMIN, // Minter
@@ -157,11 +161,12 @@ export async function deployAll(config: ContractsConfig) {
   )) as Treasury
 
   // Deploy NodeManagement
-  const nodeManagement = (await deployProxy("NodeManagement", [
-    await vechainNodesMock.getAddress(),
-    config.CONTRACTS_ADMIN_ADDRESS,
-    config.CONTRACTS_ADMIN_ADDRESS,
-  ])) as NodeManagement
+  const nodeManagement = (await deployProxy(
+    "NodeManagement",
+    [vechainNodesAddress, config.CONTRACTS_ADMIN_ADDRESS, config.CONTRACTS_ADMIN_ADDRESS],
+    undefined,
+    true,
+  )) as NodeManagement
 
   const x2EarnApps = (await deployProxy(
     "X2EarnApps",
@@ -229,6 +234,7 @@ export async function deployAll(config: ContractsConfig) {
     ],
     {
       versions: [undefined, 2],
+      logOutput: true,
     },
   )) as XAllocationPool
 
@@ -310,6 +316,7 @@ export async function deployAll(config: ContractsConfig) {
     ],
     {
       versions: [undefined, 2],
+      logOutput: true,
     },
   )) as VoterRewards
 
@@ -337,6 +344,7 @@ export async function deployAll(config: ContractsConfig) {
     ],
     {
       versions: [undefined, 2],
+      logOutput: true,
     },
   )) as XAllocationVoting
 
@@ -452,6 +460,7 @@ export async function deployAll(config: ContractsConfig) {
           GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
         },
       ],
+      logOutput: true,
     },
   )) as B3TRGovernor
 
@@ -477,6 +486,7 @@ export async function deployAll(config: ContractsConfig) {
 
   const libraries: {
     B3TRGovernor: Record<string, string>
+    VeBetterPassport: Record<string, string>
   } = {
     B3TRGovernor: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -487,6 +497,16 @@ export async function deployAll(config: ContractsConfig) {
       GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
       GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+    },
+    VeBetterPassport: {
+      PassportChecksLogic: await PassportChecksLogic.getAddress(),
+      PassportConfigurator: await PassportConfigurator.getAddress(),
+      PassportEntityLogic: await PassportEntityLogic.getAddress(),
+      PassportDelegationLogic: await PassportDelegationLogic.getAddress(),
+      PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
+      PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
+      PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
+      PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
     },
   }
 
@@ -943,7 +963,7 @@ export async function deployAll(config: ContractsConfig) {
     treasury: treasury,
     x2EarnApps: x2EarnApps,
     x2EarnRewardsPool: x2EarnRewardsPool,
-    vechainNodesMock: vechainNodesMock,
+    vechainNodesMock: vechainNodesAddress,
     vechainNodeManagement: nodeManagement,
     veBetterPassport: veBetterPassport,
     libraries: {
