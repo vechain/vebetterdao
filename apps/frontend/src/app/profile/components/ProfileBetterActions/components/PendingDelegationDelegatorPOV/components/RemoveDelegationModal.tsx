@@ -26,6 +26,11 @@ export const RemoveDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
     removeDelegation.sendTransaction({ delegator })
   }, [removeDelegation, delegator])
 
+  const handleClose = useCallback(() => {
+    modal.onClose?.()
+    removeDelegation.resetStatus()
+  }, [modal, removeDelegation])
+
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
   if (removeDelegation.status !== "ready") {
@@ -47,7 +52,7 @@ export const RemoveDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
   }
 
   return (
-    <BaseModal onClose={modal.onClose ?? (() => {})} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />
@@ -72,7 +77,7 @@ export const RemoveDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
           <Button variant="primaryAction" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant={"primaryGhost"} onClick={modal.onClose}>
+          <Button variant={"primaryGhost"} onClick={handleClose}>
             {t("No, go back")}
           </Button>
         </VStack>

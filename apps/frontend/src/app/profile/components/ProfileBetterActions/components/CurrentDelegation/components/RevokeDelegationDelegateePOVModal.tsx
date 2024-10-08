@@ -34,6 +34,11 @@ export const RevokeDelegationDelegateePOVModal = ({
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
+  const handleClose = useCallback(() => {
+    modal.onClose?.()
+    revokeDelegation.resetStatus()
+  }, [modal, revokeDelegation])
+
   if (revokeDelegation.status !== "ready") {
     return (
       <TransactionModal
@@ -53,7 +58,7 @@ export const RevokeDelegationDelegateePOVModal = ({
   }
 
   return (
-    <BaseModal onClose={modal.onClose ?? (() => {})} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />
@@ -78,7 +83,7 @@ export const RevokeDelegationDelegateePOVModal = ({
           <Button variant="primaryAction" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant={"primaryGhost"} onClick={modal.onClose}>
+          <Button variant={"primaryGhost"} onClick={handleClose}>
             {t("No, go back")}
           </Button>
         </VStack>
