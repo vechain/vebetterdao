@@ -1,4 +1,4 @@
-import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show } from "@chakra-ui/react"
+import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
 import { UilGift } from "@iconscout/react-unicons"
@@ -16,6 +16,8 @@ export const ClaimVotingRewardsBanner = () => {
   const roundsRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
 
   const { isOpen, onClose, onOpen } = useDisclosure()
+
+  const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
 
   const claimRewardsMutation = useClaimRewards({
     roundRewards: roundsRewardsQuery.data?.roundsRewards ?? [],
@@ -56,8 +58,8 @@ export const ClaimVotingRewardsBanner = () => {
         txId={claimRewardsMutation.txReceipt?.meta.txID ?? claimRewardsMutation.sendTransactionTx?.txid}
         isClaimingRewards
       />
-      <Card bg="#C8DDFF" borderRadius="xl" w="full" h="full">
-        <CardBody position="relative" overflow="hidden" borderRadius="xl">
+      <Card bg="#C8DDFF" borderRadius="xl" w="full" h={"full"}>
+        <CardBody position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
           <Image
             src="/images/cloud-background.png"
             alt="cloud-background"
@@ -90,12 +92,12 @@ export const ClaimVotingRewardsBanner = () => {
             </HStack>
           </Show>
           <Show below="md">
-            <HStack align="stretch" zIndex={1} position="relative" h="full">
-              <VStack gap={2} align="stretch" justify={"space-between"}>
-                <Text size="xs" color="#3A5798" fontWeight="600">
+            <HStack align="stretch" zIndex={1} position="relative" h="full" w={"full"} alignItems={"center"}>
+              <VStack gap={2} align="stretch" justify={"space-between"} h={"full"}>
+                <Text fontSize={12} color="#3A5798" fontWeight="600">
                   {t("CLAIM YOUR REWARDS")}
                 </Text>
-                <Heading fontSize="lg" fontWeight="700" color="#0C2D75">
+                <Heading fontSize="18" fontWeight="700" color="#0C2D75">
                   {t("You have B3TR to claim as rewards for voting in governance")}
                 </Heading>
                 <Button
@@ -108,7 +110,13 @@ export const ClaimVotingRewardsBanner = () => {
                   </Text>
                 </Button>
               </VStack>
-              <Image src="/images/claim-b3tr-icon.png" alt="Claim B3TR" w={24} h={24} />
+              <Image
+                src="/images/claim-b3tr-icon.png"
+                alt="Claim B3TR"
+                w={isVerySmallMobile ? 24 : 32}
+                h={isVerySmallMobile ? 24 : 32}
+                transform={"translateX(-20%)"}
+              />
             </HStack>
           </Show>
         </CardBody>

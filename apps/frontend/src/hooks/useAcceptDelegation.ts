@@ -2,19 +2,15 @@ import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
-//import { B3TRDelegation__factory } from "@repo/contracts"
 import { isValid } from "@repo/utils/AddressUtils"
-import { B3TRGovernor__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
+import { VeBetterPassport__factory } from "@repo/contracts"
+import { getDelegatorQueryKey } from "@/api/contracts/vePassport/hooks/useGetDelegator"
+import { getPendingDelegationsQueryKeyDelegateePOV, getPendingDelegationsQueryKeyDelegatorPOV } from "@/api"
 
-// const DelegationInterface = B3TRDelegation__factory.createInterface()
-// const delegationAddress = getConfig().b3trDelegationAddress
-// const method = "acceptDelegation"
-
-// TODO: change to delegation contract
-const DelegationInterface = B3TRGovernor__factory.createInterface()
-const delegationAddress = getConfig().b3trGovernorAddress
-const method = "acceptDelegation" as any
+const PassportContractInterface = VeBetterPassport__factory.createInterface()
+const passportContractAddress = getConfig().veBetterPassportContractAddress
+const method = "acceptDelegation"
 
 type UseAcceptDelegationProps = {
   onSuccess?: () => void
@@ -38,8 +34,8 @@ export const useAcceptDelegation = ({ onSuccess }: UseAcceptDelegationProps) => 
 
       return [
         buildClause({
-          to: delegationAddress,
-          contractInterface: DelegationInterface,
+          to: passportContractAddress,
+          contractInterface: PassportContractInterface,
           method,
           args: [delegator],
           comment: "accept delegation",
@@ -49,7 +45,14 @@ export const useAcceptDelegation = ({ onSuccess }: UseAcceptDelegationProps) => 
     [account],
   )
 
-  const refetchQueryKeys = useMemo(() => [["delegations"]], [])
+  const refetchQueryKeys = useMemo(
+    () => [
+      getPendingDelegationsQueryKeyDelegatorPOV(account || ""),
+      getPendingDelegationsQueryKeyDelegateePOV(account || ""),
+      getDelegatorQueryKey(account || ""),
+    ],
+    [account],
+  )
 
   return useBuildTransaction<ClausesParams>({
     clauseBuilder,

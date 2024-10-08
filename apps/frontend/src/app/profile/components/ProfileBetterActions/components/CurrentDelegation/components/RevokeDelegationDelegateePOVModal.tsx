@@ -26,7 +26,7 @@ export const RevokeDelegationDelegateePOVModal = ({
 }) => {
   const { t } = useTranslation()
 
-  const revokeDelegation = useRevokeDelegation({})
+  const revokeDelegation = useRevokeDelegation({ isDelegator: false })
 
   const handleDelegate = useCallback(() => {
     revokeDelegation.sendTransaction({})

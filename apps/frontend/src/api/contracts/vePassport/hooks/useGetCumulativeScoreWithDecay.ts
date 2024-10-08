@@ -8,38 +8,41 @@ const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
 const vePassportInterface = VeBetterPassport__factory.createInterface()
 
 /**
- * Returns the query key for fetching the user round score.
+ * Returns the query key for fetching the cumulative score with decay.
  * @param user - The user address.
  * @param round - The round number.
- * @returns The query key for fetching the user round score.
+ * @returns The query key for fetching the cumulative score with decay.
  */
-export const getUserRoundScoreQueryKey = (user: string, round: number) => {
-  return getCallKey({ method: "userRoundScore", keyArgs: [user, round] })
+export const getGetCumulativeScoreWithDecayQueryKey = (user: string, round: number) => {
+  return getCallKey({ method: "getCumulativeScoreWithDecay", keyArgs: [user, round] })
 }
 
 /**
- * Hook to get the user round score from the VeBetterPassport contract.
+ * Hook to get the cumulative score with decay from the VeBetterPassport contract.
  * @param user - The user address.
  * @param round - The round number.
- * @returns The user round score.
+ * @returns The cumulative score with decay.
  */
-export const useUserRoundScore = (user?: string | null, round?: number) => {
+export const useGetCumulativeScoreWithDecay = (user?: string | null, round?: number) => {
   return useCall({
     contractInterface: vePassportInterface,
     contractAddress: VEPASSPORT_CONTRACT,
-    method: "userRoundScore",
+    method: "getCumulativeScoreWithDecay",
     args: [user, round],
     enabled: !!user && !!round,
   })
 }
 
 /**
- * Hook to get the user current round score from the VeBetterPassport contract.
- * @returns The user current round score.
+ * Hook to get the cumulative score with decay for the current user.
+ * @returns The cumulative score with decay for the current user.
  */
-export const useUserCurrentRoundScore = () => {
+export const useGetCurrentUserCumulativeScoreWithDecay = () => {
   const { account } = useWallet()
   const { data: roundId, isLoading: isRoundIdLoading } = useCurrentAllocationsRoundId()
-  const { data: userRoundScore, isLoading: isUserRoundScoreLoading } = useUserRoundScore(account, Number(roundId))
+  const { data: userRoundScore, isLoading: isUserRoundScoreLoading } = useGetCumulativeScoreWithDecay(
+    account,
+    Number(roundId),
+  )
   return { data: userRoundScore, isLoading: isUserRoundScoreLoading || isRoundIdLoading }
 }

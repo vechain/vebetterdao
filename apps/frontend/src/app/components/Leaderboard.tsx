@@ -35,6 +35,7 @@ export const Leaderboard = () => {
   const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId })
 
   const yourRaking = useMemo(() => {
+    if (!account) return undefined
     if (userRoundOverview.isLoading) return undefined
     if (userRoundOverview.isError) return undefined
     return {
@@ -83,11 +84,12 @@ export const Leaderboard = () => {
             w={"full"}
             justify={"center"}
             spacing={1}
+            p={4}
             h="full"
             zIndex={2}
             bg="rgba(255, 255, 255, 0.6)">
             <Heading size="sm">{t("Not enough data for the week")}</Heading>
-            <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
+            <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
               {t("Come back later to see how you are ranking 🥇")}
             </Text>
           </VStack>

@@ -2,19 +2,15 @@ import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
-//import { B3TRDelegation__factory } from "@repo/contracts"
 import { isValid } from "@repo/utils/AddressUtils"
-import { B3TRGovernor__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
+import { VeBetterPassport__factory } from "@repo/contracts"
+import { getPendingDelegationsQueryKeyDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
+import { getPendingDelegationsQueryKeyDelegateePOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegateePOV"
 
-// const DelegationInterface = B3TRDelegation__factory.createInterface()
-// const delegationAddress = getConfig().b3trDelegationAddress
-// const method = "delegatePassport"
-
-// TODO: change to delegation contract
-const DelegationInterface = B3TRGovernor__factory.createInterface()
-const delegationAddress = getConfig().b3trGovernorAddress
-const method = "delegatePassport" as any
+const PassportContractInterface = VeBetterPassport__factory.createInterface()
+const passportContractAddress = getConfig().veBetterPassportContractAddress
+const method = "delegatePassport"
 
 type UseDelegatePassportProps = {
   onSuccess?: () => void
@@ -38,8 +34,8 @@ export const useDelegatePassport = ({ onSuccess }: UseDelegatePassportProps) => 
 
       return [
         buildClause({
-          to: delegationAddress,
-          contractInterface: DelegationInterface,
+          to: passportContractAddress,
+          contractInterface: PassportContractInterface,
           method,
           args: [delegatee],
           comment: "propose delegation",
@@ -49,7 +45,13 @@ export const useDelegatePassport = ({ onSuccess }: UseDelegatePassportProps) => 
     [account],
   )
 
-  const refetchQueryKeys = useMemo(() => [["delegations"]], [])
+  const refetchQueryKeys = useMemo(
+    () => [
+      getPendingDelegationsQueryKeyDelegatorPOV(account ?? ""),
+      getPendingDelegationsQueryKeyDelegateePOV(account ?? ""),
+    ],
+    [account],
+  )
 
   return useBuildTransaction<ClausesParams>({
     clauseBuilder,

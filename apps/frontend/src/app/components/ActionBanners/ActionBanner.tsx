@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useRef } from "react"
 import { IconButton, Hide } from "@chakra-ui/react"
 import { DoActionBanner } from "./components/DoActionBanner"
 import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
-import { useCanUserVote, useVotingRewards } from "@/api"
+import { useAccountBalance, useB3trBalance, useCanUserVote, useVot3Balance, useVotingRewards } from "@/api"
 import { CastVoteBanner } from "./components/CastVoteBanner"
 import { useIsUserPerson } from "@/api/contracts/vePassport/hooks/useIsPerson"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -14,6 +14,11 @@ import { A11y } from "swiper/modules"
 // Import Swiper styles
 import "swiper/css"
 import "@/app/theme/swiper-custom.css"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { LowVthoBanner } from "./components/LowVthoBanner"
+
+// VTHO threshold for low VTHO that triggers the banner
+const VTHO_THRESHOLD = 5
 
 export const ActionBanner = () => {
   // store controlled swiper instance
@@ -30,17 +35,38 @@ export const ActionBanner = () => {
   const { data: isPerson, isLoading: isPersonLoading } = useIsUserPerson()
   const { data: canUserVote, isLoading: canUserVoteLoading } = useCanUserVote()
 
-  const showDoActionBanner = !isPersonLoading && !isPerson
-  const showClaimB3trBanner = votingRewardsQuery.data?.total && votingRewardsQuery.data.total !== 0
-  const showCastVoteBanner = !canUserVoteLoading && canUserVote
+  const { account } = useWallet()
+  const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
+  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account ?? undefined)
+  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account ?? undefined)
+
+  const ownsTokens = useMemo(() => {
+    if (!b3trBalance || !vot3Balance) return false
+
+    return b3trBalance.original !== "0" || vot3Balance.original !== "0"
+  }, [b3trBalance, vot3Balance])
+
+  const isLowOnVtho = useMemo(() => {
+    return Number(balance?.energy.scaled) < VTHO_THRESHOLD
+  }, [balance])
+
+  const isBalanceLoading = useMemo(() => {
+    return balanceLoading || b3trBalanceLoading || vot3BalanceLoading
+  }, [balanceLoading, b3trBalanceLoading, vot3BalanceLoading])
+
+  const showDoActionBanner = !!account && !isPersonLoading && !isPerson
+  const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && votingRewardsQuery.data.total !== 0
+  const showCastVoteBanner = !!account && !canUserVoteLoading && canUserVote
+  const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
 
   const slides = useMemo(() => {
     const bannerComponents = []
+    if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
     return bannerComponents
-  }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner])
+  }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner, showLowVthoBanner])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
 
