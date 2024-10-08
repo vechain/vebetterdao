@@ -35,8 +35,6 @@ export async function deployAll(config: ContractsConfig) {
     `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations `,
   )
   const [deployer] = await ethers.getSigners()
-  console.log(`deployer address: ${deployer.address}`)
-
   console.log(`================  Address used to deploy: ${deployer.address}`)
 
   // We use a temporary admin to deploy and initialize contracts then transfer role to the real admin
@@ -686,6 +684,7 @@ export async function deployAll(config: ContractsConfig) {
 
     console.log("================ Validating roles")
 
+    // VeBetterPassport
     await validateContractRole(
       veBetterPassport,
       config.CONTRACTS_ADMIN_ADDRESS,
@@ -1245,7 +1244,7 @@ export const setWhitelistedFunctions = async (
 }
 
 // Function that checks that roles are set correctly on the contracts
-const validateContractRole = async (
+export const validateContractRole = async (
   contract:
     | B3TR
     | VOT3
@@ -1272,7 +1271,7 @@ const validateContractRole = async (
     throw new Error("Role " + role + " not set correctly on " + (await contract.getAddress()))
 }
 
-const transferSettingsManagerRole = async (
+export const transferSettingsManagerRole = async (
   contract: VeBetterPassport,
   admin: HardhatEthersSigner,
   newAddress: string,
