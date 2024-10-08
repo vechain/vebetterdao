@@ -4,7 +4,7 @@ import { passportLibraries } from "../../libraries"
 import { deployProxyOnly, initializeProxy } from "../../helpers"
 import { VeBetterPassport } from "../../../typechain-types"
 import { ethers } from "hardhat"
-import { transferSettingsManagerRole, validateContractRole } from "../deployAll"
+import { transferSettingsManagerRole, validateContractRole } from "../../helpers/roles"
 
 export async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
