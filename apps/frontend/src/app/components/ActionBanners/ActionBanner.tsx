@@ -54,13 +54,13 @@ export const ActionBanner = () => {
     return balanceLoading || b3trBalanceLoading || vot3BalanceLoading
   }, [balanceLoading, b3trBalanceLoading, vot3BalanceLoading])
 
-  const showDoActionBanner = !isPersonLoading && !isPerson
-  const showClaimB3trBanner = votingRewardsQuery.data?.total && votingRewardsQuery.data.total !== 0
-  const showCastVoteBanner = !canUserVoteLoading && canUserVote
-  const showLowVthoBanner = isLowOnVtho && ownsTokens && !isBalanceLoading
+  const showDoActionBanner = !!account && !isPersonLoading && !isPerson
+  const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && votingRewardsQuery.data.total !== 0
+  const showCastVoteBanner = !!account && !canUserVoteLoading && canUserVote
+  const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
 
   const slides = useMemo(() => {
-    const bannerComponents = [<DoActionBanner key="do-action" />]
+    const bannerComponents = []
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
