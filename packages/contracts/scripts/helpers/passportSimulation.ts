@@ -8,9 +8,9 @@ const env = process.env.NEXT_PUBLIC_APP_ENV as EnvConfig
 if (!env) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set")
 
 const config = getConfig()
-
 /** ------------------------ TYPES -------------------------- **/
 export type UserCumulativeScoreMap = Map<string, { cumulativeScore: number; actions: number; votes: number }>
+export type UserCumulativeScoreArray = Array<[string, { cumulativeScore: number; actions: number; votes: number }]>
 export enum XAppsSecurityLevel {
   NONE = "NONE",
   LOW = "LOW",
@@ -34,7 +34,7 @@ export interface BaseEvent {
 }
 export interface AllocationVoteCastEvent extends BaseEvent {
   Args: {
-    appsIds: number[][]
+    appsIds: number[][] | string[]
     roundId: number
     voteWeights: number[]
     voter: string
@@ -42,7 +42,7 @@ export interface AllocationVoteCastEvent extends BaseEvent {
 }
 export interface RewardDistributedEvent extends BaseEvent {
   Args: {
-    appId: number[]
+    appId: number[] | string
     amount: number
     receiver: string
   }
@@ -114,10 +114,10 @@ let xAllocationVotingInstance: XAllocationVoting | null = null
 async function getXAllocationVoting(): Promise<XAllocationVoting> {
   if (!xAllocationVotingInstance) {
     try {
-      xAllocationVotingInstance = (await ethers.getContractAt(
+      xAllocationVotingInstance = await ethers.getContractAt(
         "XAllocationVoting",
         config.xAllocationVotingContractAddress,
-      )) as XAllocationVoting
+      )
       console.log("XAllocationVoting contract instance created.")
     } catch (error) {
       console.error("Failed to initialize XAllocationVoting contract:", error)
@@ -127,7 +127,7 @@ async function getXAllocationVoting(): Promise<XAllocationVoting> {
   return xAllocationVotingInstance
 }
 
-export function convertBytesToAddress(numbers: number[]): string {
+export function convertBytesToHex(numbers: number[]): string {
   const byteArray = Uint8Array.from(numbers)
   return ethers.hexlify(byteArray)
 }
@@ -185,4 +185,10 @@ export function getRoundIdForBlock(blockNumber: number, rounds: RoundInfo[]): nu
     }
   }
   return null
+}
+
+export function getUserWithMaxScore(usersNotMeetingThreshold: UserCumulativeScoreArray) {
+  return usersNotMeetingThreshold.reduce((maxUser, currentUser) => {
+    return currentUser[1].cumulativeScore > maxUser[1].cumulativeScore ? currentUser : maxUser
+  }, usersNotMeetingThreshold[0])
 }

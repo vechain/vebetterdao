@@ -2,7 +2,7 @@ import { EnvConfig } from "@repo/config/contracts"
 import * as path from "path"
 import {
   appDetails,
-  convertBytesToAddress,
+  convertBytesToHex,
   getCurrentRoundId,
   getRoundIdForBlock,
   getRounds,
@@ -11,8 +11,9 @@ import {
   UserCumulativeScoreMap,
   RoundInfo,
   securityLevelMultiplier,
+  getUserWithMaxScore,
 } from "./helpers/passportSimulation"
-import { createReadStream } from "fs"
+import { createReadStream, writeFileSync } from "fs"
 import { parser } from "stream-json"
 import { streamArray } from "stream-json/streamers/StreamArray"
 
@@ -24,8 +25,8 @@ if (!env) throw new Error("NEXT_PUBLIC_APP_ENV env variable must be set")
 const roundsForCumulativeScore = 5 // Number of rounds to consider for cumulative score
 const decayRate = 20 // Decay rate in percentage
 const scalingFactor = 1e18 // Scaling factor for score calculation
-const thresholds = [100, 150, 200, 300] // Thresholds to simulate against
-
+const thresholds = [100, 150, 175, 200, 250, 300] // Thresholds to simulate against
+const exportResults = false
 const userMapInfo = new Map<string, { scores: Map<number, number>; actions: number; votes: number }>()
 
 /**
@@ -41,17 +42,20 @@ async function main() {
   const currentRoundId = await getCurrentRoundId()
   const rounds = await getRounds({ currentRoundId, amountOfRoundsToFetch: roundsForCumulativeScore })
 
-  console.log(rounds)
-
   // Process voting events using streaming
   await processFileStream("./votingEvents.json", data => countVote(data, rounds))
   // Process reward events using streaming
   await processFileStream("./rewardEvents.json", data => countActions(data, rounds))
 
+  const userCumulativeScores = calculateCumulativeScores(userMapInfo, currentRoundId)
+
+  //Export the cumulative scores to a JSON file
+  if (exportResults) {
+    exportData(userCumulativeScores)
+  }
+
   // Simulating against multiple thresholds
   for (const threshold of thresholds) {
-    const userCumulativeScores = calculateCumulativeScores(userMapInfo, currentRoundId)
-
     console.log(
       `---------------SIMULATION WITH THRESHOLD ${threshold} --- ${roundsForCumulativeScore} Round(s) -----------------`,
     )
@@ -61,6 +65,16 @@ async function main() {
   }
   console.log("Simulation completed.")
   process.exit(0)
+}
+
+/*
+ * Export the cumulative scores to a JSON file.
+ * @param userCumulativeScores Map of user addresses to cumulative scores and action counts.
+ */
+function exportData(userCumulativeScores: UserCumulativeScoreMap) {
+  const data = JSON.stringify(Array.from(userCumulativeScores.entries()), null, 2)
+  writeFileSync(`./cumulativeScores.json`, data)
+  console.log(`Data exported to cumulativeScores.json`)
 }
 
 /**
@@ -90,14 +104,14 @@ function calculateCumulativeScores(
  * @returns The cumulative score for the user.
  */
 function applyDecay(roundScores: Map<number, number>, currentRound: number): number {
-  const startingRound = currentRound <= roundsForCumulativeScore ? 1 : currentRound - roundsForCumulativeScore
+  const startingRound = Math.max(1, currentRound - roundsForCumulativeScore)
   if (startingRound < 1) throw new Error("Invalid starting round")
 
   let cumulativeScore = 0
   const decayFactor = ((100 - decayRate) * scalingFactor) / 100
 
   for (let round = startingRound; round <= currentRound; round++) {
-    const roundScore = roundScores.get(round) || 0
+    const roundScore = roundScores.get(round) ?? 0
 
     cumulativeScore = roundScore + Math.floor((cumulativeScore * decayFactor) / scalingFactor)
   }
@@ -107,6 +121,8 @@ function applyDecay(roundScores: Map<number, number>, currentRound: number): num
 
 /**
  * Display the simulation results in a table format.
+ * @param userCumulativeScores Map of user addresses to cumulative scores and action counts.
+ * @param threshold The threshold to simulate against.
  */
 function displayResults(userCumulativeScores: UserCumulativeScoreMap, threshold: number) {
   const totalUsers = userCumulativeScores.size
@@ -128,15 +144,15 @@ function displayResults(userCumulativeScores: UserCumulativeScoreMap, threshold:
     ([, { cumulativeScore }]) => cumulativeScore < threshold,
   )
 
-  const firstCloseUser = usersNotMeetingThreshold.sort(([, a], [, b]) => b.cumulativeScore - a.cumulativeScore)[0]
+  const closestUserToThreshold = getUserWithMaxScore(usersNotMeetingThreshold)
 
   console.table([
     {
       Description: "Closest User to Threshold",
-      Address: firstCloseUser ? firstCloseUser[0] : "None",
-      Score: firstCloseUser ? firstCloseUser[1].cumulativeScore : "N/A",
-      Actions: firstCloseUser ? firstCloseUser[1].actions : "N/A",
-      Votes: firstCloseUser ? firstCloseUser[1].votes : "N/A",
+      Address: closestUserToThreshold ? closestUserToThreshold[0] : "None",
+      Score: closestUserToThreshold ? closestUserToThreshold[1].cumulativeScore : "N/A",
+      Actions: closestUserToThreshold ? closestUserToThreshold[1].actions : "N/A",
+      Votes: closestUserToThreshold ? closestUserToThreshold[1].votes : "N/A",
     },
   ])
 
@@ -184,14 +200,20 @@ function displayResults(userCumulativeScores: UserCumulativeScoreMap, threshold:
   ])
 }
 
-async function countActions(event: RewardDistributedEvent, rounds: RoundInfo[]) {
+/**
+ * Callback function to count actions from reward events.
+ * @param event RewardDistributedEvent object.
+ * @param rounds Array of RoundInfo objects.
+ */
+function countActions(event: RewardDistributedEvent, rounds: RoundInfo[]) {
   const blockNumber = Number(event?.Log?.meta?.blockNumber)
   const roundId = getRoundIdForBlock(blockNumber, rounds)
   if (!roundId) return
 
-  const appId = convertBytesToAddress(event.Args.appId)
+  const appId = typeof event.Args.appId === "string" ? event.Args.appId : convertBytesToHex(event.Args.appId)
+
   const appDetail = appDetails[appId]
-  if (!appDetail) throw new Error(`App details not found for id ${event.Args.appId}`)
+  if (!appDetail) throw new Error(`App details not found for id ${appId}`)
 
   const score = securityLevelMultiplier[appDetail.securityLevel]
   const user = event.Args.receiver
@@ -201,15 +223,17 @@ async function countActions(event: RewardDistributedEvent, rounds: RoundInfo[]) 
   }
 
   const userData = userMapInfo.get(user)!
-  userData.scores.set(roundId, (userData.scores.get(roundId) || 0) + score)
+  userData.scores.set(roundId, (userData.scores.get(roundId) ?? 0) + score)
 
-  userData.actions += 1 // Increment the action count
+  userData.actions += 1
 }
 
 /**
  * Callback function to count votes from voting events.
+ * @param event AllocationVoteCastEvent object.
+ * @param rounds Array of RoundInfo objects.
  */
-async function countVote(event: AllocationVoteCastEvent, rounds: RoundInfo[]) {
+function countVote(event: AllocationVoteCastEvent, rounds: RoundInfo[]) {
   const blockNumber = Number(event?.Log?.meta?.blockNumber)
   const roundId = getRoundIdForBlock(blockNumber, rounds)
   if (!roundId) return
@@ -220,7 +244,7 @@ async function countVote(event: AllocationVoteCastEvent, rounds: RoundInfo[]) {
   }
 
   const userData = userMapInfo.get(user)!
-  userData.votes += 1 // Increment the vote count
+  userData.votes += 1
 }
 
 /**
@@ -230,7 +254,7 @@ async function countVote(event: AllocationVoteCastEvent, rounds: RoundInfo[]) {
  * @param callbackFn - Callback function to handle each data item.
  * @param rounds - Optional RoundInfo array, if needed by the callback.
  */
-function processFileStream(
+async function processFileStream(
   fileName: string,
   callbackFn: (data: any, rounds?: RoundInfo[]) => void,
   rounds?: RoundInfo[],
@@ -263,7 +287,7 @@ function processFileStream(
 
     jsonStreamer.on("error", err => {
       console.error("Error during stream processing:", err)
-      reject(err)
+      reject(new Error(err?.message ?? err))
     })
 
     readStream.on("error", err => {
