@@ -36,6 +36,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
     handleSubmit,
     formState: { errors },
     watch,
+    reset,
   } = useForm<FormData>()
 
   const confirmationModal = useDisclosure()
@@ -54,11 +55,18 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
+  const handleClose = useCallback(() => {
+    modal.onClose?.()
+    confirmationModal.onClose?.()
+    delegatePassport.resetStatus()
+    reset()
+  }, [modal, confirmationModal, delegatePassport, reset])
+
   if (delegatePassport.status !== "ready") {
     return (
       <TransactionModal
         isOpen={modal.isOpen ?? false}
-        onClose={modal.onClose ?? (() => {})}
+        onClose={handleClose}
         successTitle={t("Delegation completed!")}
         status={delegatePassport.status}
         errorDescription={delegatePassport.error?.reason}
@@ -74,7 +82,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
 
   if (confirmationModal.isOpen) {
     return (
-      <BaseModal onClose={confirmationModal.onClose ?? (() => {})} isOpen={confirmationModal.isOpen ?? false}>
+      <BaseModal onClose={handleClose} isOpen={confirmationModal.isOpen ?? false}>
         <VStack align="stretch" gap={6}>
           <VStack justify="center" align="center" gap={10}>
             <ExclamationTriangle color="#C84968" size={triangleSize} />

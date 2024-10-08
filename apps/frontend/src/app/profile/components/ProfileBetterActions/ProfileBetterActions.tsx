@@ -5,7 +5,8 @@ import { ActivityList } from "./components/ActivityList"
 import { PendingActions } from "./components/PendingActions"
 import { YourBetterActionsCard } from "@/app/components/YourBetterActionsCard"
 import { VotingQualification } from "./components/VotingQualification"
-import { PendingDelegation } from "./components/PendingDelegation"
+import { PendingDelegationDelegateePOV } from "./components/PendingDelegationDelegateePOV"
+import { PendingDelegationDelegatorPOV } from "./components/PendingDelegationDelegatorPOV"
 import { CurrentDelegation } from "./components/CurrentDelegation"
 
 export const ProfileBetterActions = () => {
@@ -13,7 +14,8 @@ export const ProfileBetterActions = () => {
   return (
     <VStack gap={4} w="full">
       <PendingActions />
-      <PendingDelegation />
+      <PendingDelegationDelegateePOV />
+      <PendingDelegationDelegatorPOV />
       <CurrentDelegation />
       <VotingQualification />
       <YourBetterActionsCard renderActions={false} />
