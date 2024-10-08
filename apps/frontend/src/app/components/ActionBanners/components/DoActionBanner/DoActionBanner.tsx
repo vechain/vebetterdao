@@ -46,7 +46,7 @@ export const DoActionBanner = () => {
           </HStack>
         </Show>
         <Show below="md">
-          <HStack align="stretch" zIndex={1} position="relative" w="full">
+          <HStack align="center" zIndex={1} position="relative" w="full">
             <VStack gap={2} align="stretch" justify={"space-between"} h="full">
               <Text size="xs" color="#8D6602" fontWeight="600">
                 {t("YOU ARE LAZY THIS WEEK!")}
@@ -59,11 +59,12 @@ export const DoActionBanner = () => {
                 borderRadius="full"
                 bg="transparent"
                 border="1px solid #5F4400"
+                leftIcon={<UilInfoCircle />}
                 _hover={{
                   bg: "#5F440020",
                 }}>
                 <Text color="#5F4400" fontWeight="500">
-                  {t("Tell me more")}
+                  {t("Know more")}
                 </Text>
               </Button>
             </VStack>

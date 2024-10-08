@@ -29,7 +29,9 @@ export const ErrorModalContent = ({
     <ModalAnimation>
       <ModalCloseButton top={4} right={4} />
       <VStack align={"center"} p={6} gap={0}>
-        <Heading size="md">{title}</Heading>
+        <Heading size="md" data-testid={"swap-error-title"}>
+          {title}
+        </Heading>
         <motion.div
           transition={{
             duration: 4,

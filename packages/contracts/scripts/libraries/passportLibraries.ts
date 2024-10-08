@@ -12,6 +12,11 @@ export async function passportLibraries() {
   await PassportConfiguratorLib.waitForDeployment()
 
   // Deploy Passport Delegation Logic
+  const PassportEntityLogic = await ethers.getContractFactory("PassportEntityLogic")
+  const PassportEntityLogicLib = await PassportEntityLogic.deploy()
+  await PassportEntityLogicLib.waitForDeployment()
+
+  // Deploy Passport Delegation Logic
   const PassportDelegationLogic = await ethers.getContractFactory("PassportDelegationLogic")
   const PassportDelegationLogicLib = await PassportDelegationLogic.deploy()
   await PassportDelegationLogicLib.waitForDeployment()
@@ -30,7 +35,6 @@ export async function passportLibraries() {
   const PassportPersonhoodLogic = await ethers.getContractFactory("PassportPersonhoodLogic", {
     libraries: {
       PassportPoPScoreLogic: await PassportPoPScoreLogicLib.getAddress(),
-      PassportDelegationLogic: await PassportDelegationLogicLib.getAddress(),
     },
   })
   const PassportPersonhoodLogicLib = await PassportPersonhoodLogic.deploy()
@@ -44,6 +48,7 @@ export async function passportLibraries() {
   return {
     PassportChecksLogic: PassportChecksLogicLib,
     PassportConfigurator: PassportConfiguratorLib,
+    PassportEntityLogic: PassportEntityLogicLib,
     PassportDelegationLogic: PassportDelegationLogicLib,
     PassportPersonhoodLogic: PassportPersonhoodLogicLib,
     PassportPoPScoreLogic: PassportPoPScoreLogicLib,

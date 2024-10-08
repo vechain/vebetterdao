@@ -138,7 +138,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await implementation.waitForDeployment()
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // V1 Contract
       const V1Contract = await ethers.getContractAt("B3TRGovernor", await governor.getAddress())
@@ -249,7 +249,7 @@ describe("Governor and TimeLock - @shard1", function () {
         })
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -1857,7 +1857,7 @@ describe("Governor and TimeLock - @shard1", function () {
         await waitForNextBlock()
 
         await veBetterPassport.whitelist(voter.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         // create a new proposal
         const tx = await createProposal(
@@ -1928,7 +1928,7 @@ describe("Governor and TimeLock - @shard1", function () {
         await waitForNextBlock()
 
         await veBetterPassport.whitelist(voter.address)
-        await veBetterPassport.toggleWhitelistCheck()
+        await veBetterPassport.toggleCheck(1)
 
         // create a new proposal
         const tx = await createProposal(
@@ -2227,7 +2227,7 @@ describe("Governor and TimeLock - @shard1", function () {
       const depositThreshold = await governor.depositThreshold()
 
       await veBetterPassport.whitelist(proposer.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       const tx = await governor
         .connect(proposer)
@@ -2567,7 +2567,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await getVot3Tokens(voter, "30000")
 
       await veBetterPassport.whitelist(voter.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -3297,7 +3297,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter5.address)
       await veBetterPassport.whitelist(voter6.address)
       await veBetterPassport.whitelist(voter7.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Before trying to vote we need to mint some VOT3 tokens to the voter2
       await b3tr.connect(minterAccount).mint(voter2, ethers.parseEther("30000"))
@@ -3561,7 +3561,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await bootstrapAndStartEmissions()
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Should be able to free mint after participating in allocation voting
       await participateInGovernanceVoting(
@@ -3602,7 +3602,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Create a proposal
       const tx = await createProposal(
@@ -3663,7 +3663,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Create a proposal
       const tx = await createProposal(
@@ -3722,7 +3722,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Create a proposal
       const tx = await createProposal(
@@ -3782,7 +3782,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Create a proposal
       const tx = await createProposal(
@@ -3841,7 +3841,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Create a proposal
       const tx = await createProposal(
@@ -3901,7 +3901,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Create a proposal
       const tx = await createProposal(
@@ -3961,7 +3961,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Create a proposal
       const tx = await createProposal(
@@ -4022,7 +4022,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Create a proposal
       const tx = await createProposal(
@@ -4092,7 +4092,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Create a proposal
       const tx = await createProposal(
@@ -4141,7 +4141,7 @@ describe("Governor and TimeLock - @shard1", function () {
 
       await veBetterPassport.whitelist(voter.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -4188,7 +4188,7 @@ describe("Governor and TimeLock - @shard1", function () {
 
       await veBetterPassport.whitelist(voter.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -4251,7 +4251,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter.address)
       await veBetterPassport.whitelist(voter2.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -4328,7 +4328,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter.address)
       await veBetterPassport.whitelist(voter2.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Start emissions
       await bootstrapAndStartEmissions()
@@ -4386,7 +4386,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await veBetterPassport.whitelist(voter.address)
       await veBetterPassport.whitelist(voter2.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Only admin or governance can toggle quadratic voting
       await catchRevert(governor.connect(otherAccounts[0]).toggleQuadraticVoting())
@@ -4492,7 +4492,7 @@ describe("Governor and TimeLock - @shard1", function () {
       await waitForNextBlock()
 
       await veBetterPassport.whitelist(voter.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
     })
 
     it("cannot queue a proposal if not in succeeded state", async function () {
@@ -4760,7 +4760,7 @@ describe("Governor and TimeLock - @shard1", function () {
       } = await getOrDeployContractInstances({ forceDeploy: true, config })
 
       await veBetterPassport.whitelist(voter.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(voter, "30000")
 
@@ -4836,7 +4836,7 @@ describe("Governor and TimeLock - @shard1", function () {
 
       await veBetterPassport.whitelist(voter.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // create a new proposal
       const tx = await createProposal(
@@ -4919,7 +4919,7 @@ describe("Governor and TimeLock - @shard1", function () {
 
       await veBetterPassport.whitelist(voter.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // create a new proposal
       const tx = await createProposal(
@@ -5003,7 +5003,7 @@ describe("Governor and TimeLock - @shard1", function () {
 
       await veBetterPassport.whitelist(voter.address)
 
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // create a new proposal
       const tx = await createProposal(

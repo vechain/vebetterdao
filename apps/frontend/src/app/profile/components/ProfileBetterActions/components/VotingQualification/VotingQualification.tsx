@@ -23,7 +23,7 @@ import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegation
 export const VotingQualification = () => {
   const { t } = useTranslation()
   // TODO: fill with real data
-  const isDelegated = true
+  const isDelegated = false
   const delegateeAddress = "0x1234567890123456789012345678901234567890"
   const delegationDate = "2024-01-01"
 

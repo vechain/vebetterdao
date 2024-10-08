@@ -3,6 +3,8 @@ import { SustainabilityMultipleUsersOverviewObjectSchema } from "./useSustainabi
 import { buildQueryString } from "@/api/utils"
 import { useQuery } from "@tanstack/react-query"
 import { getConfig } from "@repo/config"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { useCurrentAllocationsRoundId } from "@/api/contracts"
 
 const indexerUrl = getConfig().indexerUrl
 
@@ -73,5 +75,25 @@ export const useSustainabilitySingleUserOverview = (data: SustainabilitySingleUs
     queryKey: getSustainabilitySingleUserOverviewQueryKey(data),
     queryFn: () => getSustainabilitySingleUserOverview(data),
     enabled: !!data.wallet,
+  })
+}
+
+/**
+ * Get the sustainability overview for the current user for the current round
+ */
+export const useSustainabilityCurrentUserOverview = () => {
+  const { account } = useWallet()
+  const { data: currentRound } = useCurrentAllocationsRoundId()
+  return useQuery({
+    queryKey: getSustainabilitySingleUserOverviewQueryKey({
+      wallet: account ?? "",
+      roundId: currentRound ?? "",
+    }),
+    queryFn: () =>
+      getSustainabilitySingleUserOverview({
+        wallet: account ?? "",
+        roundId: currentRound ?? "",
+      }),
+    enabled: !!account && !!currentRound,
   })
 }

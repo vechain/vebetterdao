@@ -47,4 +47,12 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v2: "Add onchain impacts and proof generation",
     },
   },
+  Emissions: {
+    name: "emissions",
+    configAddressField: "emissionsContractAddress",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Aligns the emissions with the expected B3TR emissions schedule",
+    },
+  },
 } as const

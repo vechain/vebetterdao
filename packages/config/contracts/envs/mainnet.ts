@@ -28,6 +28,7 @@ export function createMainnetConfig() {
     EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD: 50, // every 50 cycles
     EMISSIONS_TREASURY_PERCENTAGE: 2500, // 25% of the emissions go to the treasury
     EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE: 80,
+    EMISSIONS_IS_NOT_ALIGNED: true,
 
     X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: 40, // 40 -> Need 40% of total supply to succeed
     X_ALLOCATION_VOTING_VOTING_THRESHOLD: BigInt("1000000000000000000"), // 1 vote
@@ -102,5 +103,8 @@ export function createMainnetConfig() {
     VEPASSPORT_BOT_SIGNALING_THRESHOLD: 2, // TODO: Set the correct value
     VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE: 5, // TODO: Set the correct value
     VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL: 2, // TODO: Set the correct value
+    VEPASSPORT_BLACKLIST_THRESHOLD: 2, // TODO: Set the correct value
+    VEBETTER_WHITELIST_THRESHOLD: 2, // TODO: Set the correct value
+    VEBETTER_PASSPORT_MAX_ENTITIES: 5, // TODO: Set the correct value
   })
 }
