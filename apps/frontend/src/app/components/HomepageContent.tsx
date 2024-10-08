@@ -2,7 +2,6 @@ import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllo
 import { Grid, GridItem, Hide, Show, VStack } from "@chakra-ui/react"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { DashboardXApps } from "./DashboardXApps"
-import { LowOnVthoCard } from "./Banners"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 import { TokensBalance } from "./TokensBalance"
 import { ActionBanner } from "./ActionBanners"
@@ -25,7 +24,6 @@ export const HomePageContent = () => {
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
           <VStack flex={4.5} justifyContent="stretch" alignItems={"stretch"} spacing={"32px"} data-testid="homepage">
-            <LowOnVthoCard />
             <Show above="md">
               <TokensBalance showGoToBalance />
             </Show>
