@@ -2,25 +2,17 @@ import { UseSendTransactionReturnValue } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
-import { getPassportToggleQueryKey, TogglePassportCheck } from "@/api"
+import { getPassportToggleQueryKey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { TogglePassportCheck } from "@/constants"
 
 const VeBetterPassportInterface = VeBetterPassport__factory.createInterface()
-
 const VE_BETTER_PASSPORT_ADDRESS = getConfig().veBetterPassportContractAddress
-
-export type TogglePassportFunction =
-  | "toggleWhitelistCheck"
-  | "toggleBlacklistCheck"
-  | "toggleSignalingCheck"
-  | "toggleParticipationScoreCheck"
-  | "toggleNodeOwnershipCheck"
-  | "toggleGMOwnershipCheck"
+const method = "toggleCheck"
 
 type Props = {
-  toggleFunction: TogglePassportFunction
-  checkFunction: TogglePassportCheck
+  checkToToggle: TogglePassportCheck
   onSuccess?: () => void
   invalidateCache?: boolean
   onSuccessMessageTitle?: string
@@ -33,24 +25,20 @@ type Props = {
  * @param {string} props.checkFunction - the check function to invalidate
  * @returns the return value of the send transaction hook and the result of the transaction
  */
-export const useTogglePassportCheck = ({
-  toggleFunction,
-  checkFunction,
-  onSuccess,
-}: Props): UseSendTransactionReturnValue => {
+export const useTogglePassportCheck = ({ checkToToggle, onSuccess }: Props): UseSendTransactionReturnValue => {
   const clauseBuilder = useCallback(() => {
     const clauses = buildClause({
       contractInterface: VeBetterPassportInterface,
       to: VE_BETTER_PASSPORT_ADDRESS,
-      method: toggleFunction,
-      args: [],
-      comment: `${toggleFunction}`,
+      method: method,
+      args: [checkToToggle],
+      comment: `Toggle check with id ${checkToToggle}`,
     })
 
     return [clauses]
-  }, [toggleFunction])
+  }, [checkToToggle])
 
-  const refetchQueryKeys = useMemo(() => [getPassportToggleQueryKey(checkFunction)], [checkFunction])
+  const refetchQueryKeys = useMemo(() => [getPassportToggleQueryKey(checkToToggle)], [checkToToggle])
 
   return useBuildTransaction({
     clauseBuilder,

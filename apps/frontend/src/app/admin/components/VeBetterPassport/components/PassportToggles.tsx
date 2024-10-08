@@ -1,6 +1,7 @@
-import { TogglePassportCheck, usePassportChecks } from "@/api"
+import { usePassportChecks } from "@/api"
 import { TransactionModal } from "@/components"
-import { TogglePassportFunction, useTogglePassportCheck } from "@/hooks"
+import { TogglePassportCheck } from "@/constants"
+import { useTogglePassportCheck } from "@/hooks"
 import {
   Card,
   CardBody,
@@ -23,7 +24,6 @@ export const PassportToggles = () => {
     isBlackListCheckEnabled,
     isSignalingCheckEnabled,
     isParticipationScoreCheckEnabled,
-    isNodeOwnershipCheckEnabled,
     isGMOwnershipCheckEnabled,
   } = usePassportChecks()
 
@@ -37,38 +37,27 @@ export const PassportToggles = () => {
           <PassportCheck
             name={"Whitelist Check"}
             isEnabled={isWhiteListCheckEnabled === true}
-            toggleFunction={"toggleWhitelistCheck"}
-            checkFunction={"whitelistCheckEnabled"}
+            checkToToggle={TogglePassportCheck.WhitelistCheck}
           />
           <PassportCheck
             name={"Blacklist Check"}
             isEnabled={isBlackListCheckEnabled === true}
-            toggleFunction={"toggleBlacklistCheck"}
-            checkFunction={"blacklistCheckEnabled"}
+            checkToToggle={TogglePassportCheck.BlacklistCheck}
           />
           <PassportCheck
             name={"Signaling Check"}
             isEnabled={isSignalingCheckEnabled === true}
-            toggleFunction={"toggleSignalingCheck"}
-            checkFunction={"signalingCheckEnabled"}
+            checkToToggle={TogglePassportCheck.SignalingCheck}
           />
           <PassportCheck
             name={"Participation Score Check"}
             isEnabled={isParticipationScoreCheckEnabled === true}
-            toggleFunction={"toggleParticipationScoreCheck"}
-            checkFunction={"participationScoreCheckEnabled"}
-          />
-          <PassportCheck
-            name={"Node Ownership Check"}
-            isEnabled={isNodeOwnershipCheckEnabled === true}
-            toggleFunction={"toggleNodeOwnershipCheck"}
-            checkFunction={"nodeOwnershipCheckEnabled"}
+            checkToToggle={TogglePassportCheck.ParticipationScoreCheck}
           />
           <PassportCheck
             name={"GM Ownership Check"}
             isEnabled={isGMOwnershipCheckEnabled === true}
-            toggleFunction={"toggleGMOwnershipCheck"}
-            checkFunction={"gmOwnershipCheckEnabled"}
+            checkToToggle={TogglePassportCheck.GmOwnershipCheck}
           />
         </FormControl>
       </CardBody>
@@ -79,11 +68,10 @@ export const PassportToggles = () => {
 type PassportCheckProps = {
   name: string
   isEnabled: boolean
-  toggleFunction: TogglePassportFunction
-  checkFunction: TogglePassportCheck
+  checkToToggle: TogglePassportCheck
 }
 
-const PassportCheck = ({ name, isEnabled, toggleFunction, checkFunction }: PassportCheckProps) => {
+const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) => {
   const { isOpen, onClose, onOpen } = useDisclosure()
   const {
     sendTransaction,
@@ -95,8 +83,7 @@ const PassportCheck = ({ name, isEnabled, toggleFunction, checkFunction }: Passp
     txReceipt,
     sendTransactionTx,
   } = useTogglePassportCheck({
-    toggleFunction,
-    checkFunction,
+    checkToToggle,
   })
 
   const handleToggle = useCallback(
@@ -129,7 +116,7 @@ const PassportCheck = ({ name, isEnabled, toggleFunction, checkFunction }: Passp
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? "error" : status}
-        successTitle={isEnabled ? `${name} is now active` : `${name} is not deactivated`}
+        successTitle={isEnabled ? `${name} is now active` : `${name} is now deactivated`}
         onTryAgain={handleToggle}
         showTryAgainButton
         showExplorerButton

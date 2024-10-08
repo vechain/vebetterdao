@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from "react"
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from "react"
 import {
   Box,
   Button,
@@ -17,8 +17,9 @@ import dayjs from "dayjs"
 import updateLocale from "dayjs/plugin/updateLocale"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
-import { useActivities } from "./useActivities"
 import { ActivityDayModal } from "../../ActivityDayModal"
+import { useSustainabilitySingleUserOverviewByDay } from "@/api"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 // configure dayjs to start the week on Monday
 dayjs.extend(updateLocale)
@@ -27,16 +28,38 @@ dayjs.updateLocale("en", {
 })
 
 export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dispatch<SetStateAction<boolean>> }) => {
+  const { account } = useWallet()
   const { t } = useTranslation()
   const today = dayjs()
   const [currentDate, setCurrentDate] = useState(today)
-  const { activitiesPerDay, isLoading } = useActivities()
   const [isMobile] = useMediaQuery("(max-width: 600px)")
 
   const daysInMonth = currentDate.daysInMonth()
   const firstDayOfMonth = currentDate.startOf("month").day()
 
   const [selectedDate, setSelectedDate] = useState<string>()
+
+  const currentMonthOverviewQuery = useSustainabilitySingleUserOverviewByDay({
+    wallet: account ?? "",
+    startDate: currentDate.startOf("month").format("YYYY-MM-DD"),
+    endDate: currentDate.endOf("month").format("YYYY-MM-DD"),
+  })
+
+  useEffect(() => {
+    // Fetch until there are no more pages left
+    const fetchAllPages = async () => {
+      while (currentMonthOverviewQuery.hasNextPage && !currentMonthOverviewQuery.isFetchingNextPage) {
+        await currentMonthOverviewQuery.fetchNextPage()
+      }
+    }
+
+    fetchAllPages()
+  }, [currentMonthOverviewQuery])
+
+  const currentMonthOverview = useMemo(
+    () => currentMonthOverviewQuery.data?.pages.flatMap(page => page.data) ?? [],
+    [currentMonthOverviewQuery],
+  )
 
   const handleSetListView = useCallback(() => {
     setIsCalendarView(false)
@@ -52,9 +75,9 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
   const getActivityNumber = useCallback(
     (day: number) => {
       const dateString = currentDate.date(day).format("YYYY-MM-DD")
-      return activitiesPerDay[dateString] || 0
+      return currentMonthOverview.find(overview => overview.date === dateString)?.actionsRewarded ?? 0
     },
-    [activitiesPerDay, currentDate],
+    [currentMonthOverview, currentDate],
   )
 
   const getActivityColor = useCallback((level: number) => {
@@ -127,10 +150,10 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
                 const isFutureDay = today.isBefore(currentDate.date(day), "day")
                 const isToday = today.isSame(currentDate.date(day), "day")
 
-                const isDisabled = isFutureDay || isLoading || activityNumber === 0
+                const isDisabled = isFutureDay || currentMonthOverviewQuery.isLoading || activityNumber === 0
 
                 return (
-                  <Skeleton key={day} h="10" isLoaded={!isLoading}>
+                  <Skeleton key={day} h="10" isLoaded={!currentMonthOverviewQuery.isLoading}>
                     <Button
                       key={day}
                       onClick={() => setSelectedDate(currentDate.date(day).format("YYYY-MM-DD"))}

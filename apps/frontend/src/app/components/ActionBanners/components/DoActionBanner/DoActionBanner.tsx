@@ -1,4 +1,16 @@
-import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, useDisclosure, Show } from "@chakra-ui/react"
+import {
+  Heading,
+  Text,
+  VStack,
+  Card,
+  CardBody,
+  HStack,
+  Image,
+  Button,
+  useDisclosure,
+  Show,
+  useMediaQuery,
+} from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { DoActionModal } from "./components/DoActionModal"
 import { UilInfoCircle } from "@iconscout/react-unicons"
@@ -7,9 +19,11 @@ export const DoActionBanner = () => {
   const { t } = useTranslation()
   const doActionModal = useDisclosure()
 
+  const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
+
   return (
-    <Card bg="#FFD979" borderRadius="xl" w="full" h="full">
-      <CardBody position="relative" overflow="hidden" borderRadius="xl">
+    <Card bg="#FFD979" borderRadius="xl" w="full" h={"full"}>
+      <CardBody position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
         <Image
           src="/images/cloud-background-orange.png"
           alt="cloud-background-orange"
@@ -46,12 +60,12 @@ export const DoActionBanner = () => {
           </HStack>
         </Show>
         <Show below="md">
-          <HStack align="stretch" zIndex={1} position="relative" w="full">
+          <HStack align="center" zIndex={1} position="relative" w="full" h="full" alignItems={"center"}>
             <VStack gap={2} align="stretch" justify={"space-between"} h="full">
-              <Text size="xs" color="#8D6602" fontWeight="600">
+              <Text fontSize={12} color="#8D6602" fontWeight="600">
                 {t("YOU ARE LAZY THIS WEEK!")}
               </Text>
-              <Heading fontSize="lg" fontWeight="700" color="#5F4400">
+              <Heading fontSize="18" fontWeight="700" color="#5F4400">
                 {t("Do some Better Actions in our apps to become able to vote!")}
               </Heading>
               <Button
@@ -59,15 +73,21 @@ export const DoActionBanner = () => {
                 borderRadius="full"
                 bg="transparent"
                 border="1px solid #5F4400"
+                leftIcon={<UilInfoCircle />}
                 _hover={{
                   bg: "#5F440020",
                 }}>
-                <Text color="#5F4400" fontWeight="500">
-                  {t("Tell me more")}
+                <Text color="#5F4400" fontWeight="500" fontSize={16}>
+                  {t("Know more")}
                 </Text>
               </Button>
             </VStack>
-            <Image src="/images/info-bell.png" alt="Pending actions" w={24} h={24} />
+            <Image
+              src="/images/info-bell.png"
+              alt="Pending actions"
+              w={isVerySmallMobile ? 16 : 24}
+              h={isVerySmallMobile ? 16 : 24}
+            />
           </HStack>
         </Show>
       </CardBody>

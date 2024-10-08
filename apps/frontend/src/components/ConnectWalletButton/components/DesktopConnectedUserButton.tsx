@@ -17,7 +17,9 @@ export const DesktopConnectedUserButton = ({ account }: Props) => {
       <Button onClick={open} rounded={"full"} size="md" variant={"ghost"}>
         <HStack spacing={2}>
           <AddressIcon address={account} boxSize={"28px"} rounded={"full"} />
-          <Text fontWeight={"400"}>{name || humanAddress(account, 4, 6)}</Text>
+          <Text fontWeight={"400"} data-testid={"wallet-address"}>
+            {name || humanAddress(account, 4, 6)}
+          </Text>
         </HStack>
       </Button>
     </Fade>

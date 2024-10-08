@@ -1,0 +1,283 @@
+@repo/contracts:test:hardhat:   1) Emissions - @shard1
+@repo/contracts:test:hardhat:        Emissions distribution
+@repo/contracts:test:hardhat:          Should calculate emissions properly after first X-Alloc decay period:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   2) Emissions - @shard1
+@repo/contracts:test:hardhat:        Emissions distribution
+@repo/contracts:test:hardhat:          Should calculate emissions properly after first Rewards decay period:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   3) Emissions - @shard1
+@repo/contracts:test:hardhat:        Emissions distribution
+@repo/contracts:test:hardhat:          Should be able to perform all cycles till reaching B3TR supply cap:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   4) Galaxy Member - @shard2
+@repo/contracts:test:hardhat:        Should be able to upgrade to level 10:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   5) Galaxy Member - @shard2
+@repo/contracts:test:hardhat:        Should not be able to upgrade token not owned:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   6) Galaxy Member - @shard2
+@repo/contracts:test:hardhat:        Should not be able to upgrade above max level:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   7) Galaxy Member - @shard2
+@repo/contracts:test:hardhat:        Should correctly track highest level owned:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   8) Galaxy Member - @shard2
+@repo/contracts:test:hardhat:        Should be able to select the highest level owned manually:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   9) VoterRewards - @shard2
+@repo/contracts:test:hardhat:        X Allocation voting rewards
+@repo/contracts:test:hardhat:          Should calculate rewards correctly if users have different levels of NFTs:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   10) VoterRewards - @shard2
+@repo/contracts:test:hardhat:        X Allocation voting rewards
+@repo/contracts:test:hardhat:          Should have correct GM NFT level even if user transfers after voting round snapshot:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   11) VoterRewards - @shard2
+@repo/contracts:test:hardhat:        X Allocation voting rewards
+@repo/contracts:test:hardhat:          Should be able to use GM NFT received from transfer to increase voting rewards:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   12) VoterRewards - @shard2
+@repo/contracts:test:hardhat:        Governance voting rewards
+@repo/contracts:test:hardhat:          Should be able to vote with 0 VOT3 tokens and not receive rewards:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   13) VoterRewards - @shard2
+@repo/contracts:test:hardhat:        Governance voting rewards
+@repo/contracts:test:hardhat:          Should be able to increase voting rewards by upgrading GM NFT:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   14) VoterRewards - @shard2
+@repo/contracts:test:hardhat:        X allocation & governance voting rewards
+@repo/contracts:test:hardhat:          QUADRATIC REWARDING ENABLED: Should calculate rewards correctly for governance voting and x allocation voting:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   15) VoterRewards - @shard2
+@repo/contracts:test:hardhat:        X allocation & governance voting rewards
+@repo/contracts:test:hardhat:          QUADRATIC REWARDING DISABLED: Should calculate rewards correctly for governance voting and x allocation voting:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   16) VoterRewards - @shard2
+@repo/contracts:test:hardhat:        X allocation & governance voting rewards
+@repo/contracts:test:hardhat:          QUADRATIC REWARDING DISABLED MID ROUND: Should calculate rewards correctly for governance voting and x allocation voting and Quadratic rewarding should only be removed from following round:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   17) VoterRewards - @shard2
+@repo/contracts:test:hardhat:        X allocation & governance voting rewards
+@repo/contracts:test:hardhat:          QUADRATIC REWARDING ENABLED MID ROUND: Should calculate rewards correctly for governance voting and x allocation voting and Quadratic rewarding should only be enabled from following round:
+@repo/contracts:test:hardhat:      TypeError: invalid BigNumberish value (argument="value", value=null, code=INVALID_ARGUMENT, version=6.11.1)
+@repo/contracts:test:hardhat:       at makeError (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:687:21)
+@repo/contracts:test:hardhat:       at assert (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:715:25)
+@repo/contracts:test:hardhat:       at assertArgument (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/errors.ts:727:5)
+@repo/contracts:test:hardhat:       at getBigInt (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/utils/maths.ts:113:19)
+@repo/contracts:test:hardhat:       at NumberCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/number.ts:36:30)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat:       at Array.forEach (<anonymous>)
+@repo/contracts:test:hardhat:       at pack (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:47:12)
+@repo/contracts:test:hardhat:       at TupleCoder.encode (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/tuple.ts:62:20)
+@repo/contracts:test:hardhat:       at /Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/abi/coders/array.ts:64:19
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat:   18) X2EarnRewardsPool - @shard3
+@repo/contracts:test:hardhat:        Can register action in VeBetterPassport:
+@repo/contracts:test:hardhat:      Error: VM Exception while processing transaction: reverted with reason string 'Emissions: Can only bootstrap emissions when next cycle = 0'
+@repo/contracts:test:hardhat:     at Emissions.setTreasuryPercentage (contracts/Emissions.sol:674)
+@repo/contracts:test:hardhat:     at Emissions.bootstrap (contracts/Emissions.sol:242)
+@repo/contracts:test:hardhat:     at B3TRProxy._delegate (@openzeppelin/contracts/proxy/Proxy.sol:31)
+@repo/contracts:test:hardhat:     at B3TRProxy._fallback (@openzeppelin/contracts/proxy/Proxy.sol:59)
+@repo/contracts:test:hardhat:     at B3TRProxy.<fallback> (@openzeppelin/contracts/proxy/Proxy.sol:67)
+@repo/contracts:test:hardhat:     at EdrProviderWrapper.request (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:415:41)
+@repo/contracts:test:hardhat:     at async HardhatEthersSigner.sendTransaction (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/@nomicfoundation/hardhat-ethers/src/signers.ts:125:18)
+@repo/contracts:test:hardhat:     at async send (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/contract/contract.ts:313:20)
+@repo/contracts:test:hardhat:     at async Proxy.bootstrap (/Users/danrusnac/Work/vechain/b3tr/b3tr/node_modules/ethers/src.ts/contract/contract.ts:352:16)
+@repo/contracts:test:hardhat:     at async bootstrapEmissions (test/helpers/common.ts:591:3)
+@repo/contracts:test:hardhat:     at async bootstrapAndStartEmissions (test/helpers/common.ts:596:3)
+@repo/contracts:test:hardhat:     at async getOrDeployContractInstances (test/helpers/deploy.ts:602:5)
+@repo/contracts:test:hardhat:     at async Context.<anonymous> (test/X2EarnRewardsPool.test.ts:1649:9)
+@repo/contracts:test:hardhat:   
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat: 
+@repo/contracts:test:hardhat: 
+error Command failed with exit code 18.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+@repo/contracts:test:hardhat: ERROR: command finished with error: command (/Users/danrusnac/Work/vechain/b3tr/b3tr/packages/contracts) /var/folders/zn/kydwvlmx51zfzfwl1smjf66h0000gn/T/yarn--1728132200924-0.15703881998647629/yarn run test:hardhat exited (18)
+@repo/contracts#test:hardhat: command (/Users/danrusnac/Work/vechain/b3tr/b3tr/packages/contracts) /var/folders/zn/kydwvlmx51zfzfwl1smjf66h0000gn/T/yarn--1728132200924-0.15703881998647629/yarn run test:hardhat exited (18)
+
+ Tasks:    1 successful, 2 total
+Cached:    0 cached, 2 total
+  Time:    1h30m0.063s 
+Failed:    @repo/contracts#test:hardhat
+
+ ERROR  run failed: command  exited (18)
+error Command failed with exit code 18.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

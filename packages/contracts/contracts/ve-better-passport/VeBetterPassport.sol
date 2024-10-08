@@ -6,8 +6,9 @@ import { PassportStorageTypes } from "./libraries/PassportStorageTypes.sol";
 import { PassportChecksLogic } from "./libraries/PassportChecksLogic.sol";
 import { PassportWhitelistAndBlacklistLogic } from "./libraries/PassportWhitelistAndBlacklistLogic.sol";
 import { PassportPoPScoreLogic } from "./libraries/PassportPoPScoreLogic.sol";
-import { PassportDelegationLogic } from "./libraries/PassportDelegationLogic.sol";
+import { PassportEntityLogic } from "./libraries/PassportEntityLogic.sol";
 import { PassportClockLogic } from "./libraries/PassportClockLogic.sol";
+import { PassportDelegationLogic } from "./libraries/PassportDelegationLogic.sol";
 import { PassportSignalingLogic } from "./libraries/PassportSignalingLogic.sol";
 import { PassportPersonhoodLogic } from "./libraries/PassportPersonhoodLogic.sol";
 import { PassportEIP712SigningLogic } from "./libraries/PassportEIP712SigningLogic.sol";
@@ -22,7 +23,7 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 
 /// @title VeBetterPassport
 /// @notice Contract to manage the VeBetterPassport, a system to determine if a wallet is a person or not
-/// based on the participation score, blacklisting, and xnode, GM holdings and much more that can be added in the future.
+/// based on the participation score, blacklisting, GM holdings and much more that can be added in the future.
 contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBetterPassport {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant ROLE_GRANTER = keccak256("ROLE_GRANTER");
@@ -88,7 +89,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   // ---------- Getters ---------- //
 
   /// @notice Checks if a user is a person
-  /// @dev Checks if a wallet is a person or not based on the participation score, blacklisting, and xnode and GM holdings
+  /// @dev Checks if a wallet is a person or not based on the participation score, blacklisting, and GM holdings
   /// @param user - the user address
   /// @return person - true if the user is a person
   /// @return reason - the reason why the user is not a person
@@ -98,7 +99,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Checks if a user is a person
-  /// @dev Checks if a wallet is a person or not at a specific timepoint based on the participation score, blacklisting, and xnode and GM holdings
+  /// @dev Checks if a wallet is a person or not at a specific timepoint based on the participation score, blacklisting, and GM holdings
   /// @param user - the user address
   /// @param timepoint - the timepoint to query
   /// @return person - true if the user is a person
@@ -111,40 +112,10 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportPersonhoodLogic.isPersonAtTimepoint($, user, timepoint);
   }
 
-  /// @notice Returns if the whitelist check is enabled
-  function whitelistCheckEnabled() external view returns (bool) {
+  /// @notice Returns if the specific check is enabled
+  function isCheckEnabled(PassportTypes.CheckType check) external view returns (bool) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.whitelistCheckEnabled($);
-  }
-
-  /// @notice Returns if the blacklist check is enabled
-  function blacklistCheckEnabled() external view returns (bool) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.blacklistCheckEnabled($);
-  }
-
-  /// @notice Returns if the signaling check is enabled
-  function signalingCheckEnabled() external view returns (bool) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.signalingCheckEnabled($);
-  }
-
-  /// @notice Returns if the participation score check is enabled
-  function participationScoreCheckEnabled() external view returns (bool) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.participationScoreCheckEnabled($);
-  }
-
-  /// @notice Returns if the node ownership check is enabled
-  function nodeOwnershipCheckEnabled() external view returns (bool) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.nodeOwnershipCheckEnabled($);
-  }
-
-  /// @notice Returns if the GM ownership check is enabled
-  function gmOwnershipCheckEnabled() external view returns (bool) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportChecksLogic.gmOwnershipCheckEnabled($);
+    return PassportChecksLogic.isCheckEnabled($, check);
   }
 
   /// @notice Returns the minimum galaxy member level
@@ -165,11 +136,41 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportWhitelistAndBlacklistLogic.isBlacklisted($, _user);
   }
 
+  /// @notice Checks if a passport is whitelisted.
+  /// @dev If passport is an entity, it will check the passport of the entity.
+  /// @param passport The address of the passport to check.
+  /// @return True if the passport is whitelisted, false otherwise.
+  function isPassportWhitelisted(address passport) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportWhitelistAndBlacklistLogic.isPassportWhitelisted($, passport);
+  }
+
+  /// @notice Checks if a passport is blacklisted.
+  /// @dev If passport is an entity, it will check the passport of the entity.
+  /// @param passport The address of the passport to check.
+  /// @return True if the passport is blacklisted, false otherwise.
+  function isPassportBlacklisted(address passport) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportWhitelistAndBlacklistLogic.isPassportBlacklisted($, passport);
+  }
+
+  /// @notice Gets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
+  function blacklistThreshold() external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportWhitelistAndBlacklistLogic.blacklistThreshold($);
+  }
+
+  /// @notice Gets the threshold percentage of whitelisted entities for a passport to be considered whitelisted
+  function whitelistThreshold() external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportWhitelistAndBlacklistLogic.whitelistThreshold($);
+  }
+
   /// @notice Gets the cumulative score of a user based on exponential decay for a number of last rounds
   /// @dev This function calculates the decayed score f(t) = a * (1 - r)^t
   /// @param user - the user address
   /// @param lastRound - the round to consider as a starting point for the cumulative score
-  function getCumulativeScoreWithDecay(address user, uint256 lastRound) public view virtual returns (uint256) {
+  function getCumulativeScoreWithDecay(address user, uint256 lastRound) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.getCumulativeScoreWithDecay($, user, lastRound);
   }
@@ -177,14 +178,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   /// @notice Gets the round score of a user
   /// @param user - the user address
   /// @param round - the round
-  function userRoundScore(address user, uint256 round) public view virtual returns (uint256) {
+  function userRoundScore(address user, uint256 round) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.userRoundScore($, user, round);
   }
 
   /// @notice Gets the total score of a user
   /// @param user - the user address
-  function userTotalScore(address user) public view virtual returns (uint256) {
+  function userTotalScore(address user) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.userTotalScore($, user);
   }
@@ -193,7 +194,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   /// @param user - the user address
   /// @param round - the round
   /// @param appId - the app id
-  function userRoundScoreApp(address user, uint256 round, bytes32 appId) public view virtual returns (uint256) {
+  function userRoundScoreApp(address user, uint256 round, bytes32 appId) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.userRoundScoreApp($, user, round, appId);
   }
@@ -201,35 +202,101 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   /// @notice Gets the total score of a user for an app
   /// @param user - the user address
   /// @param appId - the app id
-  function userAppTotalScore(address user, bytes32 appId) public view virtual returns (uint256) {
+  function userAppTotalScore(address user, bytes32 appId) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.userAppTotalScore($, user, appId);
   }
 
   /// @notice Gets the threshold for a user to be considered a person
-  function thresholdParticipationScore() public view virtual returns (uint256) {
+  function thresholdParticipationScore() external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.thresholdParticipationScore($);
   }
 
   /// @notice Gets the security multiplier for an app security
   /// @param security - the app security between LOW, MEDIUM, HIGH
-  function securityMultiplier(PassportTypes.APP_SECURITY security) public view virtual returns (uint256) {
+  function securityMultiplier(PassportTypes.APP_SECURITY security) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.securityMultiplier($, security);
   }
 
   /// @notice Gets the security level of an app
   /// @param appId - the app id
-  function appSecurity(bytes32 appId) public view virtual returns (PassportTypes.APP_SECURITY) {
+  function appSecurity(bytes32 appId) external view returns (PassportTypes.APP_SECURITY) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.appSecurity($, appId);
   }
 
   /// @notice Gets the round threshold for a user to be considered a person
-  function roundsForCumulativeScore() public view virtual returns (uint256) {
+  function roundsForCumulativeScore() external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.roundsForCumulativeScore($);
+  }
+
+  /// @notice Returns the maximum number of entities per passport
+  function maxEntitiesPerPassport() external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportEntityLogic.getMaxEntitiesPerPassport($);
+  }
+
+  /// @notice Returns the passport address for a entity
+  /// @param entity - the entity address
+  function getPassportForEntity(address entity) external view returns (address) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportEntityLogic.getPassportForEntity($, entity);
+  }
+
+  /// @notice Returns the passport address for a entity at a specific timepoint
+  /// @param entity - the entity address
+  /// @param timepoint - the timepoint to query
+  function getPassportForEntityAtTimepoint(address entity, uint256 timepoint) external view returns (address) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportEntityLogic.getPassportForEntityAtTimepoint($, entity, timepoint);
+  }
+
+  /// @notice Returns the entity address for a passport
+  /// @param passport - the passport address
+  function getEntitiesLinkedToPassport(address passport) external view returns (address[] memory) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportEntityLogic.getEntitiesLinkedToPassport($, passport);
+  }
+
+  /// @notice Returns if a user is a entity
+  /// @param user - the user address
+  function isEntity(address user) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportEntityLogic.isEntity($, user);
+  }
+
+  /// @notice Returns if a user is a entity at a specific timepoint
+  /// @param user - the user address
+  /// @param timepoint - the timepoint to query
+  function isEntityInTimepoint(address user, uint256 timepoint) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportEntityLogic.isEntityInTimepoint($, user, timepoint);
+  }
+
+  /// @notice Returns if a user is a passport
+  /// @param user - the user address
+  function isPassport(address user) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportEntityLogic.isPassport($, user);
+  }
+
+  /// @notice Returns if a user is a passport at a specific timepoint
+  /// @param user - the user address
+  /// @param timepoint - the timepoint to query
+  function isPassportInTimepoint(address user, uint256 timepoint) external view returns (bool) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportEntityLogic.isPassportInTimepoint($, user, timepoint);
+  }
+
+  /// @notice Returns the pending delegations for a passport
+  /// @param passport - the passport address
+  /// @return the entity address
+  function getPendingEntitiesForPassport(address passport) external view returns (address[] memory) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportEntityLogic.getPendingEntitiesForPassport($, passport);
   }
 
   /// @notice Returns the delegatee address for a delegator
@@ -301,55 +368,49 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Returns the number of times a user has been signaled
-  function signaledCounter(address _user) public view returns (uint256) {
+  function signaledCounter(address _user) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportSignalingLogic.signaledCounter($, _user);
   }
 
   /// @notice Returns the belonging app of a signaler
-  function appOfSignaler(address _signaler) public view returns (bytes32) {
+  function appOfSignaler(address _signaler) external view returns (bytes32) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportSignalingLogic.appOfSignaler($, _signaler);
   }
 
   /// @notice Returns the number of times a user has been signaled by an app
-  function appSignalsCounter(bytes32 _app, address _user) public view returns (uint256) {
+  function appSignalsCounter(bytes32 _app, address _user) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportSignalingLogic.appSignalsCounter($, _app, _user);
   }
 
   /// @notice Returns the total number of signals for an app
-  function appTotalSignalsCounter(bytes32 _app) public view returns (uint256) {
+  function appTotalSignalsCounter(bytes32 _app) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportSignalingLogic.appTotalSignalsCounter($, _app);
   }
 
   /// @notice Returns the signaling threshold
-  function signalingThreshold() public view returns (uint256) {
+  function signalingThreshold() external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportSignalingLogic.signalingThreshold($);
   }
 
   /// @notice Gets the x2EarnApps contract address
-  function getX2EarnApps() public view virtual returns (IX2EarnApps) {
+  function getX2EarnApps() external view returns (IX2EarnApps) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportConfigurator.getX2EarnApps($);
   }
 
   /// @notice Gets the xAllocationVoting contract address
-  function getXAllocationVoting() public view virtual returns (IXAllocationVotingGovernor) {
+  function getXAllocationVoting() external view returns (IXAllocationVotingGovernor) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportConfigurator.getXAllocationVoting($);
   }
 
-  /// @notice Gets the node management contract address
-  function getNodeManagement() public view virtual returns (INodeManagement) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportConfigurator.getNodeManagement($);
-  }
-
   /// @notice Gets the galaxy member contract address
-  function getGalaxyMember() public view virtual returns (IGalaxyMember) {
+  function getGalaxyMember() external view returns (IGalaxyMember) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportConfigurator.getGalaxyMember($);
   }
@@ -382,45 +443,15 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Returns the version of the contract
-  function version() public pure virtual returns (string memory) {
+  function version() external pure returns (string memory) {
     return "1";
   }
 
   // ---------- Setters ---------- //
-  /// @notice Toggles the whitelist check
-  function toggleWhitelistCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
+  /// @notice Toggles the specified check
+  function toggleCheck(PassportTypes.CheckType check) external onlyRole(SETTINGS_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleWhitelistCheck($);
-  }
-
-  /// @notice Toggles the blacklist check
-  function toggleBlacklistCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleBlacklistCheck($);
-  }
-
-  /// @notice Toggles the signaling check
-  function toggleSignalingCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleSignalingCheck($);
-  }
-
-  /// @notice Toggles the participation score check
-  function toggleParticipationScoreCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleParticipationScoreCheck($);
-  }
-
-  /// @notice Toggles the node ownership check
-  function toggleNodeOwnershipCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleNodeOwnershipCheck($);
-  }
-
-  /// @notice Toggles the GM ownership check
-  function toggleGMOwnershipCheck() external onlyRole(SETTINGS_MANAGER_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.toggleGMOwnershipCheck($);
+    PassportChecksLogic.toggleCheck($, check);
   }
 
   /// @notice user can be whitelisted but the counter will not be reset
@@ -447,6 +478,18 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     PassportWhitelistAndBlacklistLogic.removeFromBlacklist($, _user);
   }
 
+  /// @notice Sets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
+  function setBlacklistThreshold(uint256 _threshold) external onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportWhitelistAndBlacklistLogic.setBlacklistThreshold($, _threshold);
+  }
+
+  /// @notice Sets the threshold percentage of whitelisted entities for a passport to be considered whitelisted
+  function setWhitelistThreshold(uint256 _threshold) external onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportWhitelistAndBlacklistLogic.setWhitelistThreshold($, _threshold);
+  }
+
   /// @notice Registers an action for a user
   /// @param user - the user that performed the action
   /// @param appId - the app id of the action
@@ -466,14 +509,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
 
   /// @notice Sets the threshold for a user to be considered a person
   /// @param threshold - the round threshold
-  function setThreshold(uint256 threshold) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+  function setThreshold(uint256 threshold) external onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportPoPScoreLogic.setThreshold($, threshold);
   }
 
   /// @notice Sets the number of rounds to consider for the cumulative score
   /// @param rounds - the number of rounds
-  function setRoundsForCumulativeScore(uint256 rounds) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+  function setRoundsForCumulativeScore(uint256 rounds) external onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportPoPScoreLogic.setRoundsForCumulativeScore($, rounds);
   }
@@ -484,7 +527,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   function setSecurityMultiplier(
     PassportTypes.APP_SECURITY security,
     uint256 multiplier
-  ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+  ) external onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportPoPScoreLogic.setSecurityMultiplier($, security, multiplier);
   }
@@ -495,19 +538,69 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   function setAppSecurity(
     bytes32 appId,
     PassportTypes.APP_SECURITY security
-  ) public virtual onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+  ) external onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportPoPScoreLogic.setAppSecurity($, appId, security);
   }
 
   /// @notice Sets the decay rate for the exponential decay
   /// @param decayRate - the decay rate
-  function setDecayRate(uint256 decayRate) public virtual onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+  function setDecayRate(uint256 decayRate) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportPoPScoreLogic.setDecayRate($, decayRate);
   }
 
   /// @notice Delegate the personhood to another address
+  /// The entity must sign a message where he authorizes the passport to request the delegation:
+  /// this is done to avoid that a malicious user delegates the personhood to another user without his consent.
+  /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
+  /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
+  /// @param entity - the entity address
+  /// @param deadline - the deadline for the signature
+  /// @param signature - the signature of the delegation
+  function linkEntityToPassportWithSignature(address entity, uint256 deadline, bytes memory signature) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportEntityLogic.linkEntityToPassportWithSignature($, entity, deadline, signature);
+  }
+
+  /// @notice Delegate the personhood to another address
+  /// @dev The passport must accept the delegation
+  /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
+  /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
+  function linkEntityToPassport(address passport) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportEntityLogic.linkEntityToPassport($, passport);
+  }
+
+  /// @notice Allow the passport to accept the delegation
+  /// @param entity - the entity address
+  function acceptEntityLink(address entity) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportEntityLogic.acceptEntityLink($, entity);
+  }
+
+  /// @notice Revoke the delegation (can be done by the entity or the passport)
+  /// @param entity - the entity address
+  function removeEntityLink(address entity) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportEntityLogic.removeEntityLink($, entity);
+  }
+
+  /// @notice Allows a entity to remove their pending delegation to a passport.
+  /// @param entity - the entity address
+  function removePendingEntityLinkFromPassport(address entity) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportEntityLogic.removePendingEntityLinkFromPassport($, entity);
+  }
+
+  /// @notice Sets the maximum number of entities that can be linked to a passport
+  /// @param maxEntities - the maximum number of entities
+  function setMaxEntitiesPerPassport(uint256 maxEntities) external onlyRoleOrAdmin(SETTINGS_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportEntityLogic.setMaxEntitiesPerPassport($, maxEntities);
+  }
+
+  /// @notice Delegate the passport to another address
   /// The delegator must sign a message where he authorizes the delegatee to request the delegation:
   /// this is done to avoid that a malicious user delegates the personhood to another user without his consent.
   /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
@@ -524,9 +617,9 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   /// @dev The delegatee must accept the delegation
   /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
   /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
-  function delegatePersonhood(address delegatee) external {
+  function delegatePassport(address delegatee) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportDelegationLogic.delegatePersonhood($, delegatee);
+    PassportDelegationLogic.delegatePassport($, delegatee);
   }
 
   /// @notice Allow the delegatee to accept the delegation
@@ -635,13 +728,6 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   ) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportConfigurator.setXAllocationVoting($, xAllocationVoting);
-  }
-
-  /// @dev Sets the node management contract
-  /// @param nodeManagement - the node management contract address
-  function setNodeManagement(INodeManagement nodeManagement) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportConfigurator.setNodeManagement($, nodeManagement);
   }
 
   /// @dev Sets the galaxy member contract

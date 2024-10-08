@@ -12,10 +12,10 @@ export const ProfileBetterActions = () => {
   const [isCalendarView, setIsCalendarView] = useState(true)
   return (
     <VStack gap={4} w="full">
+      <PendingActions />
       <PendingDelegation />
       <CurrentDelegation />
       <VotingQualification />
-      <PendingActions />
       <YourBetterActionsCard renderActions={false} />
       {isCalendarView ? (
         <ActivityCalendar setIsCalendarView={setIsCalendarView} />

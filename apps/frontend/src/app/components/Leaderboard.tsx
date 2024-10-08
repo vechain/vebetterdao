@@ -1,4 +1,8 @@
-import { useCurrentAllocationsRoundId, useSustainabilityUserOverview } from "@/api"
+import {
+  useCurrentAllocationsRoundId,
+  useSustainabilitySingleUserOverview,
+  useSustainabilityUserOverviewPerRound,
+} from "@/api"
 import { AddressButton } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
 import { Box, Card, CardBody, Divider, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
@@ -12,12 +16,6 @@ type LeaderboardRanking = {
   position: number
   address: string
   score: number
-}
-
-const YourRanking = {
-  position: 20,
-  address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5",
-  score: 51,
 }
 
 const MockLeaderboard = [
@@ -34,7 +32,20 @@ export const Leaderboard = () => {
   const { account } = useWallet()
   const { data: roundId } = useCurrentAllocationsRoundId()
 
-  const leaderboardQuery = useSustainabilityUserOverview({ roundId, direction: "desc" })
+  const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId })
+
+  const yourRaking = useMemo(() => {
+    if (!account) return undefined
+    if (userRoundOverview.isLoading) return undefined
+    if (userRoundOverview.isError) return undefined
+    return {
+      position: userRoundOverview.data?.rankByActionsRewarded ?? 0,
+      address: account ?? "",
+      score: userRoundOverview.data?.actionsRewarded ?? 0,
+    }
+  }, [userRoundOverview, account])
+
+  const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId, direction: "desc" })
 
   const flatLeaderboard = useMemo(
     () =>
@@ -73,11 +84,12 @@ export const Leaderboard = () => {
             w={"full"}
             justify={"center"}
             spacing={1}
+            p={4}
             h="full"
             zIndex={2}
             bg="rgba(255, 255, 255, 0.6)">
             <Heading size="sm">{t("Not enough data for the week")}</Heading>
-            <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
+            <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
               {t("Come back later to see how you are ranking 🥇")}
             </Text>
           </VStack>
@@ -115,7 +127,7 @@ export const Leaderboard = () => {
             {!isRankingInTop5 && (
               <>
                 <Divider w="full" h={1} />
-                <LeaderboardRankingComponent ranking={YourRanking} isYourRanking />
+                {yourRaking && <LeaderboardRankingComponent ranking={yourRaking} isYourRanking />}
               </>
             )}
           </VStack>
@@ -130,25 +142,47 @@ type LeaderboardRankingComponentProps = {
   isYourRanking?: boolean
 }
 export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
-  const positionText =
-    ranking.position === 1
-      ? "🥇"
-      : ranking.position === 2
-        ? "🥈"
-        : ranking.position === 3
-          ? "🥉"
-          : `#${ranking.position}`
-  const positionFontSize = [1, 2, 3].includes(ranking.position) ? "3xl" : "lg"
+  const positionStyles = useMemo(() => {
+    if (ranking.position === 1)
+      return {
+        text: "🥇",
+        borderColor: "#FFD700",
+        fontSize: "3xl",
+        boxShadow: "0px 0px 5px 0px rgba(255, 215, 0, 0.4)",
+      }
+    if (ranking.position === 2)
+      return {
+        text: "🥈",
+        borderColor: "#C0C0C0",
+        fontSize: "3xl",
+        boxShadow: "0px 0px 5px 0px rgba(192, 192, 192, 0.4)",
+      }
+    if (ranking.position === 3)
+      return {
+        text: "🥉",
+        borderColor: "#CD7F32",
+        fontSize: "3xl",
+        boxShadow: "0px 0px 5px 0px rgba(205, 127, 50, 0.4)",
+      }
+    return {
+      text: `#${ranking.position}`,
+      borderColor: "#EFEFEF",
+      fontSize: "xl",
+      boxShadow: "0px 0px 5px 0px rgba(0, 0, 0, 0.1)",
+    }
+  }, [ranking.position])
 
   const whiteColor = isYourRanking ? "white" : "auto"
   const grayColor = isYourRanking ? "white" : "#6A6A6A"
 
   return (
     <Card
-      variant={isYourRanking ? "baseWithBorder" : "filledSmall"}
+      boxShadow={positionStyles.boxShadow}
+      variant={"baseWithBorder"}
       {...(isYourRanking && { bg: "#004CFC" })}
       pos="relative"
-      overflow={"hidden"}>
+      overflow={"hidden"}
+      borderColor={positionStyles.borderColor}>
       <CardBody color={whiteColor} p="12px">
         {isYourRanking && (
           <Image
@@ -193,8 +227,8 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
               </Text>
             </Box>
           </HStack>
-          <Text fontSize={positionFontSize} fontWeight={500} zIndex={1}>
-            {positionText}
+          <Text fontSize={positionStyles.fontSize} fontWeight={600} zIndex={1}>
+            {positionStyles.text}
           </Text>
         </HStack>
       </CardBody>

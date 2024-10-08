@@ -1,9 +1,10 @@
 import { AddressIcon } from "@/components/AddressIcon"
-import { Card, CardBody, VStack, Heading, Text, HStack, Button, Stack } from "@chakra-ui/react"
+import { Card, CardBody, VStack, Heading, Text, HStack, Button, Stack, useDisclosure } from "@chakra-ui/react"
 import { UilTimes } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { QualificationBadge } from "./QualificationBadges"
+import { RevokeDelegationDelegateePOVModal } from "./components/RevokeDelegationDelegateePOVModal"
+import { QualificationBadge } from "../QualificationBadges"
 
 export const CurrentDelegation = () => {
   const { t } = useTranslation()
@@ -11,6 +12,8 @@ export const CurrentDelegation = () => {
   const delegatorAddress = "0x5234567890123456789012345678901234567890"
   const delegationSince = "2024-01-01"
   const delegatorQualified = false
+
+  const delegationModal = useDisclosure()
 
   return (
     <Card variant="baseWithBorder" w="full">
@@ -52,13 +55,18 @@ export const CurrentDelegation = () => {
               </HStack>
             </Stack>
             <HStack>
-              <Button variant={"dangerGhost"} p={3} leftIcon={<UilTimes color="#C84968" />}>
+              <Button
+                variant={"dangerGhost"}
+                p={3}
+                leftIcon={<UilTimes color="#C84968" />}
+                onClick={delegationModal.onOpen}>
                 {t("Remove delegation")}
               </Button>
             </HStack>
           </Stack>
         </VStack>
       </CardBody>
+      <RevokeDelegationDelegateePOVModal modal={delegationModal} delegator={delegatorAddress} />
     </Card>
   )
 }

@@ -55,7 +55,11 @@ export const SuccessConvertModalContent = ({
         initial="initial"
         animate="animate"
       />
-      <Text style={{ fontFamily: "Instrument Sans, sans-serif" }} fontSize={28} fontWeight={700}>
+      <Text
+        style={{ fontFamily: "Instrument Sans, sans-serif" }}
+        fontSize={28}
+        fontWeight={700}
+        data-testid={"swap-success-title"}>
         {t("Conversion complete!")}
       </Text>
       <Text fontSize={16} fontWeight={400} textAlign={"center"}>
@@ -119,7 +123,8 @@ export const SuccessConvertModalContent = ({
         onClick={() => {
           onClose()
           AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SWAP_CONFIRMED))
-        }}>
+        }}
+        data-testid={"close-swap-modal-button"}>
         {t("Continue")}
       </Button>
     </VStack>

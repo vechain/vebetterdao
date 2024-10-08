@@ -50,6 +50,10 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(action))
   }
 
+  const dataTestId = useMemo(() => {
+    return isB3TRToVOT3 ? "get-VOT3-button" : "get-B3TR-button"
+  }, [isB3TRToVOT3])
+
   return (
     <VStack
       bg={bgColor}
@@ -75,7 +79,8 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
         onClick={() => {
           handleButtonClick()
           buttonClickProperties(isB3TRToVOT3)
-        }}>
+        }}
+        data-testid={dataTestId}>
         {buttonText}
       </Button>
     </VStack>

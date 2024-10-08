@@ -572,7 +572,7 @@ describe("X-Apps - @shard3", function () {
       let round1 = await startNewAllocationRound()
 
       await veBetterPassport.whitelist(voter.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await x2EarnApps
         .connect(owner)
@@ -1463,7 +1463,7 @@ describe("X-Apps - @shard3", function () {
       await getVot3Tokens(voter, "1")
 
       await veBetterPassport.whitelist(voter.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps

@@ -37,6 +37,7 @@ import {
   GovernorClockLogicV1,
   X2EarnRewardsPoolV1,
   NodeManagement,
+  EmissionsV1,
   VeBetterPassport,
   XAllocationVotingV1,
   B3TRGovernorV2,
@@ -51,12 +52,12 @@ import {
   GovernorVotesLogicV3,
   GovernorStateLogicV3,
   PassportChecksLogic,
-  PassportDelegationLogic,
+  PassportEntityLogic,
   PassportPoPScoreLogic,
   PassportSignalingLogic,
   PassportWhitelistAndBlacklistLogic,
-  PassportConfigurator,
   PassportPersonhoodLogic,
+  PassportDelegationLogic,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -72,6 +73,7 @@ interface DeployInstance {
   governor: B3TRGovernor
   governorV1: B3TRGovernorV1
   governorV2: B3TRGovernorV2
+  governorV3: B3TRGovernorV3
   galaxyMember: GalaxyMember
   x2EarnApps: X2EarnApps
   xAllocationVoting: XAllocationVoting
@@ -113,12 +115,13 @@ interface DeployInstance {
   governorStateLogicLibV3: GovernorStateLogicV3
   governorVotesLogicLibV3: GovernorVotesLogicV3
   passportChecksLogic: PassportChecksLogic
-  passportConfigurator: PassportConfigurator
   passportDelegationLogic: PassportDelegationLogic
+  passportEntityLogic: PassportEntityLogic
   passportPersonhoodLogic: PassportPersonhoodLogic
   passportPoPScoreLogic: PassportPoPScoreLogic
   passportSignalingLogic: PassportSignalingLogic
   passportWhitelistBlacklistLogic: PassportWhitelistAndBlacklistLogic
+  passportConfigurator: any // no abi for this library, which means a typechain is not generated
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
   vechainNodesMock: TokenAuction
@@ -179,6 +182,7 @@ export const getOrDeployContractInstances = async ({
   const {
     PassportChecksLogic,
     PassportConfigurator,
+    PassportEntityLogic,
     PassportDelegationLogic,
     PassportPersonhoodLogic,
     PassportPoPScoreLogic,
@@ -272,9 +276,10 @@ export const getOrDeployContractInstances = async ({
   ])) as X2EarnApps
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
-  const veBetterPassportAddress = await deployProxyOnly("VeBetterPassport", {
+  const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassport", {
     PassportChecksLogic: await PassportChecksLogic.getAddress(),
     PassportConfigurator: await PassportConfigurator.getAddress(),
+    PassportEntityLogic: await PassportEntityLogic.getAddress(),
     PassportDelegationLogic: await PassportDelegationLogic.getAddress(),
     PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
     PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
@@ -294,7 +299,7 @@ export const getOrDeployContractInstances = async ({
     "X2EarnRewardsPoolV1",
     "X2EarnRewardsPool",
     await x2EarnRewardsPoolV1.getAddress(),
-    [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS, veBetterPassportAddress],
+    [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS, veBetterPassportContractAddress],
     {
       version: 2,
     },
@@ -324,7 +329,7 @@ export const getOrDeployContractInstances = async ({
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
 
-  const emissions = (await deployProxy("Emissions", [
+  const emissionsV1 = (await deployProxy("Emissions", [
     {
       minter: minterAccount.address,
       admin: owner.address,
@@ -345,7 +350,17 @@ export const getOrDeployContractInstances = async ({
       maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
       migrationAmount: config.MIGRATION_AMOUNT,
     },
-  ])) as Emissions
+  ])) as EmissionsV1
+
+  const emissions = (await upgradeProxy(
+    "EmissionsV1",
+    "Emissions",
+    await emissionsV1.getAddress(),
+    [config.EMISSIONS_IS_NOT_ALIGNED ?? false],
+    {
+      version: 2,
+    },
+  )) as Emissions
 
   const voterRewardsV1 = (await deployProxy("VoterRewardsV1", [
     owner.address, // admin
@@ -388,25 +403,27 @@ export const getOrDeployContractInstances = async ({
     "XAllocationVotingV1",
     "XAllocationVoting",
     await xAllocationVotingV1.getAddress(),
-    [veBetterPassportAddress],
+    [veBetterPassportContractAddress],
     {
       version: 2,
     },
   )) as XAllocationVoting
 
   const veBetterPassport = (await initializeProxy(
-    veBetterPassportAddress,
+    veBetterPassportContractAddress,
     "VeBetterPassport",
     [
       {
         x2EarnApps: await x2EarnApps.getAddress(),
         xAllocationVoting: await xAllocationVoting.getAddress(),
-        nodeManagement: await nodeManagement.getAddress(),
         galaxyMember: await galaxyMember.getAddress(),
         popScoreThreshold: config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD, //threshold
         signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
         roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
         minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
+        blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD, //blacklistThreshold
+        whitelistThreshold: config.VEBETTER_WHITELIST_THRESHOLD, //whitelistThreshold
+        maxEntitiesPerPassport: config.VEBETTER_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
       },
       {
         admin: owner.address, // admin
@@ -423,6 +440,7 @@ export const getOrDeployContractInstances = async ({
     {
       PassportChecksLogic: await PassportChecksLogic.getAddress(),
       PassportConfigurator: await PassportConfigurator.getAddress(),
+      PassportEntityLogic: await PassportEntityLogic.getAddress(),
       PassportDelegationLogic: await PassportDelegationLogic.getAddress(),
       PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
       PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
@@ -527,7 +545,7 @@ export const getOrDeployContractInstances = async ({
     XAllocationPool: await xAllocationPool.getAddress(),
     B3TRGovernor: await governor.getAddress(),
     X2EarnApps: await x2EarnApps.getAddress(),
-    VeBetterPassport: veBetterPassportAddress,
+    VeBetterPassport: veBetterPassportContractAddress,
   }
 
   const libraries = {
@@ -615,6 +633,7 @@ export const getOrDeployContractInstances = async ({
     governor,
     governorV1,
     governorV2,
+    governorV3,
     galaxyMember,
     x2EarnApps,
     xAllocationVoting,
@@ -656,12 +675,13 @@ export const getOrDeployContractInstances = async ({
     governorStateLogicLibV3: GovernorStateLogicLibV3,
     governorVotesLogicLibV3: GovernorVotesLogicLibV3,
     passportChecksLogic: PassportChecksLogic,
-    passportConfigurator: PassportConfigurator,
     passportDelegationLogic: PassportDelegationLogic,
+    passportEntityLogic: PassportEntityLogic,
     passportPersonhoodLogic: PassportPersonhoodLogic,
     passportPoPScoreLogic: PassportPoPScoreLogic,
     passportSignalingLogic: PassportSignalingLogic,
     passportWhitelistBlacklistLogic: PassportWhitelistAndBlacklistLogic,
+    passportConfigurator: PassportConfigurator,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vechainNodesMock,
