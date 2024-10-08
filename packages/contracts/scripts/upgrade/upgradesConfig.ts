@@ -29,7 +29,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
     configAddressField: "xAllocationVotingContractAddress",
     versions: ["v2"],
     descriptions: {
-      v2: "Fix XAllocation voting so that a user cannot vote for an XApp with a vote weight less than 1",
+      v2: "Integrate VeBetterPassport contract",
     },
   },
   "XAllocation Pool": {
