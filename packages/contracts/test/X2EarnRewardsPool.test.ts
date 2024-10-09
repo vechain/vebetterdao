@@ -10,7 +10,7 @@ import {
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { X2EarnRewardsPool } from "../typechain-types"
+import { X2EarnRewardsPool, X2EarnRewardsPoolV2 } from "../typechain-types"
 import { X2EarnRewardsPoolV1 } from "../typechain-types/contracts/deprecated/V1"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
@@ -54,8 +54,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
     })
 
     it("Version should be set correctly", async function () {
-      const { x2EarnRewardsPool } = await getOrDeployContractInstances({ forceDeploy: false })
-      expect(await x2EarnRewardsPool.version()).to.equal("2")
+      const { x2EarnRewardsPool } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+      expect(await x2EarnRewardsPool.version()).to.equal("3")
     })
 
     it("X2EarnApps should be set correctly", async function () {
@@ -173,22 +175,37 @@ describe("X2EarnRewardsPool - @shard3", function () {
       // upgrade to new version
       const x2EarnRewardsPoolV2 = (await upgradeProxy(
         "X2EarnRewardsPoolV1",
-        "X2EarnRewardsPool",
+        "X2EarnRewardsPoolV2",
         await x2EarnRewardsPoolV1.getAddress(),
-        [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS, await veBetterPassport.getAddress()],
+        [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS],
         {
           version: 2,
         },
-      )) as X2EarnRewardsPool
+      )) as X2EarnRewardsPoolV2
 
       expect(await x2EarnRewardsPoolV2.version()).to.equal("2")
       expect(await x2EarnRewardsPoolV2.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPoolV2.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
+
+      // upgrade to new version
+      const x2EarnRewardsPoolV3 = (await upgradeProxy(
+        "X2EarnRewardsPoolV2",
+        "X2EarnRewardsPool",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [await veBetterPassport.getAddress()],
+        {
+          version: 3,
+        },
+      )) as X2EarnRewardsPool
+
+      expect(await x2EarnRewardsPoolV3.version()).to.equal("3")
+      expect(await x2EarnRewardsPoolV3.x2EarnApps()).to.equal(x2EarnAppsAddress)
+      expect(await x2EarnRewardsPoolV3.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
     })
 
     it("Should not be able to upgrade if initial impact keys is empty", async () => {
       const config = createLocalConfig()
-      const { owner, b3tr, x2EarnApps, minterAccount, veBetterPassport } = await getOrDeployContractInstances({
+      const { owner, b3tr, x2EarnApps, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -224,14 +241,98 @@ describe("X2EarnRewardsPool - @shard3", function () {
       await expect(
         upgradeProxy(
           "X2EarnRewardsPoolV1",
-          "X2EarnRewardsPool",
+          "X2EarnRewardsPoolV2",
           await x2EarnRewardsPoolV1.getAddress(),
-          [owner.address, [], await veBetterPassport.getAddress()],
+          [owner.address, []],
           {
             version: 2,
           },
         ),
       ).to.be.reverted
+
+      await expect(
+        upgradeProxy(
+          "X2EarnRewardsPoolV1",
+          "X2EarnRewardsPoolV2",
+          await x2EarnRewardsPoolV1.getAddress(),
+          [owner.address, ["impact"]],
+          {
+            version: 2,
+          },
+        ),
+      ).to.not.be.reverted
+    })
+
+    it("Should not be able to upgrade to V3 if veBetterPassport address is empty", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr, x2EarnApps, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
+        owner.address,
+        owner.address,
+        owner.address,
+        await b3tr.getAddress(),
+        await x2EarnApps.getAddress(),
+      ])) as X2EarnRewardsPoolV1
+
+      expect(await x2EarnRewardsPoolV1.version()).to.equal("1")
+
+      // update x2EarnApps address
+      await x2EarnRewardsPoolV1.connect(owner).setX2EarnApps(await x2EarnApps.getAddress())
+
+      // deposit some funds
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      // create app
+      await x2EarnApps.addApp(owner.address, owner.address, "My app", "metadataURI")
+      await x2EarnApps.addApp(owner.address, owner.address, "My app #2", "metadataURI")
+
+      await b3tr.connect(owner).approve(await x2EarnRewardsPoolV1.getAddress(), amount)
+      await x2EarnRewardsPoolV1.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
+
+      expect(await b3tr.balanceOf(await x2EarnRewardsPoolV1.getAddress())).to.equal(amount)
+
+      // upgrade to new version
+      await expect(
+        upgradeProxy(
+          "X2EarnRewardsPoolV1",
+          "X2EarnRewardsPoolV2",
+          await x2EarnRewardsPoolV1.getAddress(),
+          [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS],
+          {
+            version: 2,
+          },
+        ),
+      ).to.not.be.reverted
+
+      await expect(
+        upgradeProxy(
+          "X2EarnRewardsPoolV2",
+          "X2EarnRewardsPool",
+          await x2EarnRewardsPoolV1.getAddress(),
+          [ZERO_ADDRESS],
+          {
+            version: 3,
+          },
+        ),
+      ).to.be.reverted
+
+      await expect(
+        upgradeProxy(
+          "X2EarnRewardsPoolV2",
+          "X2EarnRewardsPool",
+          await x2EarnRewardsPoolV1.getAddress(),
+          [owner.address],
+          {
+            version: 3,
+          },
+        ),
+      ).to.not.be.reverted
     })
   })
 

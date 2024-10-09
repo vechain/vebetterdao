@@ -205,7 +205,7 @@ export async function deployAll(config: ContractsConfig) {
   )
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
-    ["X2EarnRewardsPoolV1", "X2EarnRewardsPool"],
+    ["X2EarnRewardsPoolV1", "X2EarnRewardsPoolV2", "X2EarnRewardsPool"],
     [
       [
         config.CONTRACTS_ADMIN_ADDRESS, // admin
@@ -217,12 +217,12 @@ export async function deployAll(config: ContractsConfig) {
       [
         config.CONTRACTS_ADMIN_ADDRESS, // impact admin address
         config.X_2_EARN_INITIAL_IMPACT_KEYS, // impact keys
-        veBetterPassportContractAddress,
       ],
+      [veBetterPassportContractAddress],
     ],
     {
       logOutput: true,
-      versions: [undefined, 2],
+      versions: [undefined, 2, 3],
     },
   )) as X2EarnRewardsPool
 

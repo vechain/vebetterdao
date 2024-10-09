@@ -43,9 +43,10 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "X2Earn Rewards Pool": {
     name: "x2earn-rewards-pool",
     configAddressField: "x2EarnRewardsPoolContractAddress",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Add onchain impacts and proof generation",
+      v3: "Integrate VeBetterPassport contract",
     },
   },
   Emissions: {
