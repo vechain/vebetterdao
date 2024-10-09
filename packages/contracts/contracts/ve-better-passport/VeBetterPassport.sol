@@ -291,12 +291,13 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportEntityLogic.isPassportInTimepoint($, user, timepoint);
   }
 
-  /// @notice Returns the pending delegations for a passport
-  /// @param passport - the passport address
-  /// @return the entity address
-  function getPendingEntitiesForPassport(address passport) external view returns (address[] memory) {
+  /// @notice Returns the pending links for a user (both incoming and outgoing)
+  /// @param user The address of the user
+  /// @return incoming The addresss of users that want to link to the user.
+  /// @return outgoing The address that the user wants to link to.
+  function getPendingLinkings(address user) external view returns (address[] memory incoming, address outgoing) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportEntityLogic.getPendingEntitiesForPassport($, passport);
+    return PassportEntityLogic.getPendingLinkings($, user);
   }
 
   /// @notice Returns the delegatee address for a delegator
