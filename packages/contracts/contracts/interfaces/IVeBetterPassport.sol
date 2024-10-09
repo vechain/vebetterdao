@@ -441,6 +441,11 @@ interface IVeBetterPassport {
   /// @return the delegator address
   function getPendingDelegations(address delegatee) external view returns (address[] memory);
 
+  /// @notice Returns the pending delegations for a delegator
+  /// @param delegator - the delegator address
+  /// @return the delegatee address
+  function getPendingDelegatorDelegations(address delegator) external view returns (address);
+
   /// @notice Returns the delegatee address for a delegator at a specific timepoint
   /// @param delegator The delegator's address
   /// @param timepoint The timepoint to query

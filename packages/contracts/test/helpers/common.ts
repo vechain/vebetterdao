@@ -9,7 +9,6 @@ import { type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
 import { ZERO_ADDRESS } from "./const"
 import { buildTxBody, signAndSendTx } from "../../scripts/helpers/txHelper"
 import { getTestKeys } from "../../scripts/helpers/seedAccounts"
-import { veBetterPassport } from "../../typechain-types/contracts"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -442,9 +441,28 @@ export const voteOnApps = async (
 
   if ((await veBetterPassport.isCheckEnabled(1)) === false) await veBetterPassport.toggleCheck(1)
 
-  for (const voter of voters) {
+  for (let i = 0; i < voters.length; i++) {
+    const voter = voters[i]
+    const voterVotes = votes[i]
+
     await veBetterPassport.whitelist(voter.address)
-    await xAllocationVoting.connect(voter).castVote(roundId, apps, votes[voters.indexOf(voter)])
+
+    // Filter out both zero votes and their corresponding apps
+    const filteredData = apps
+      .map((app, index) => ({
+        app,
+        vote: voterVotes[index],
+      }))
+      .filter(data => data.vote !== BigInt(0))
+
+    // If there are any valid votes left, proceed with voting
+    if (filteredData.length > 0) {
+      const validApps = filteredData.map(data => data.app)
+      const validVotes = filteredData.map(data => data.vote)
+
+      // Execute the vote with the filtered non-zero votes and corresponding apps
+      await xAllocationVoting.connect(voter).castVote(roundId, validApps, validVotes)
+    }
   }
 }
 
@@ -564,7 +582,7 @@ export const participateInGovernanceVoting = async (
   await getVot3Tokens(admin, "1000")
 
   await veBetterPassport.connect(admin).whitelist(user.address)
-  if ((await veBetterPassport.isCheckEnabled(1)) === false) await governor.toggleCheck(1)
+  if ((await veBetterPassport.isCheckEnabled(1)) === false) await veBetterPassport.toggleCheck(1)
 
   const tx = await createProposal(contractToCall, Contract, admin, description, functionToCall, args)
   const proposalId = await getProposalIdFromTx(tx)

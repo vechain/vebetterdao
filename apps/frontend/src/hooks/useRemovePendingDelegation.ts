@@ -5,6 +5,7 @@ import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
 import { VeBetterPassport__factory } from "@repo/contracts"
+import { getPendingDelegationsQueryKeyDelegatorPOV, getPendingDelegationsQueryKeyDelegateePOV } from "@/api"
 
 const PassportContractInterface = VeBetterPassport__factory.createInterface()
 const passportContractAddress = getConfig().veBetterPassportContractAddress
@@ -43,7 +44,13 @@ export const useRemovePendingDelegation = ({ onSuccess }: UseRemovePendingDelega
     [account],
   )
 
-  const refetchQueryKeys = useMemo(() => [["delegations"]], [])
+  const refetchQueryKeys = useMemo(
+    () => [
+      getPendingDelegationsQueryKeyDelegatorPOV(account || ""),
+      getPendingDelegationsQueryKeyDelegateePOV(account || ""),
+    ],
+    [account],
+  )
 
   return useBuildTransaction<ClausesParams>({
     clauseBuilder,

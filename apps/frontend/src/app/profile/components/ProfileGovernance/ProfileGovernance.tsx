@@ -15,7 +15,7 @@ import {
 import { useWallet } from "@vechain/dapp-kit-react"
 import { FaScaleBalanced, FaChartPie } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
-import { HandPlantIcon, ProposalIcon, VoteBoxIcon } from "@/components"
+import { HandPlantIcon, VoteBoxIcon } from "@/components"
 import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 
@@ -94,21 +94,12 @@ export const ProfileGovernance = () => {
     case ListView.ALL:
       return (
         <>
-          {isFirstCreatedProposalsAvailable ? (
+          {isFirstCreatedProposalsAvailable && (
             <PreviewCreatedProposals
               firstProposals={firstCreatedProposals}
               isMoreProposals={isMoreCreatedProposals}
               isCreatedProposals
               onSeeAllProposals={onSeeAllCreatedProposals}
-            />
-          ) : (
-            <EmptyStateGovernance
-              title="Created Proposals"
-              description="Your created proposals will appear here."
-              buttonText="Explore governance"
-              illustration={<ProposalIcon color="rgba(117, 117, 117, 1)" />}
-              buttonIcon={FaScaleBalanced}
-              onClick={onExploreGovernance}
             />
           )}
           {isFirstVotedProposalsAvailable ? (

@@ -4,6 +4,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts"
+import { getDelegateeQueryKey, getDelegatorQueryKey } from "@/api"
 
 const PassportContractInterface = VeBetterPassport__factory.createInterface()
 const passportContractAddress = getConfig().veBetterPassportContractAddress
@@ -11,18 +12,16 @@ const method = "revokeDelegation"
 
 type UseRevokeDelegationProps = {
   onSuccess?: () => void
+  isDelegator: boolean
 }
 
 /**
  * Provides a React hook to revoke a delegation using a blockchain transaction.
  * This hook integrates with the blockchain wallet and manages transaction state.
  */
-export const useRevokeDelegation = ({ onSuccess }: UseRevokeDelegationProps) => {
+export const useRevokeDelegation = ({ onSuccess, isDelegator }: UseRevokeDelegationProps) => {
   const { account } = useWallet()
-
   const clauseBuilder = useCallback(() => {
-    if (!account) throw new Error("Account is required")
-
     return [
       buildClause({
         to: passportContractAddress,
@@ -32,9 +31,15 @@ export const useRevokeDelegation = ({ onSuccess }: UseRevokeDelegationProps) => 
         comment: "revoke delegation",
       }),
     ]
-  }, [account])
+  }, [])
 
-  const refetchQueryKeys = useMemo(() => [["delegations"]], [])
+  const refetchQueryKeys = useMemo(() => {
+    if (isDelegator) {
+      return [getDelegateeQueryKey(account || "")]
+    } else {
+      return [getDelegatorQueryKey(account || "")]
+    }
+  }, [isDelegator, account])
 
   return useBuildTransaction({
     clauseBuilder,

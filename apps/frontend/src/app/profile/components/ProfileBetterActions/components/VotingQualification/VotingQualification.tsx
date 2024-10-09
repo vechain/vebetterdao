@@ -12,54 +12,50 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { useThresholdParticipationScore, useUserCurrentRoundScore } from "@/api"
+import { useGetUserDelegatee, useUserScore } from "@/api"
 import { useMemo } from "react"
 import { UilArrowUpRight, UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { DelegationModal } from "./components/DelegationModal"
 import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
+import { useGetUserPendingDelegationsDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
 
 export const VotingQualification = () => {
   const { t } = useTranslation()
-  // TODO: fill with real data
-  const isDelegated = false
-  const delegateeAddress = "0x1234567890123456789012345678901234567890"
-  const delegationDate = "2024-01-01"
+  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetUserDelegatee()
+  const isDelegator = !isDelegateeLoading && !!Number(delegateeAddress)
 
-  const { data: scoreThreshold, isLoading: isScoreThresholdLoading } = useThresholdParticipationScore()
-  const { data: userScore, isLoading: isUserRoundScoreLoading } = useUserCurrentRoundScore()
+  const { data: pendingDelegations, isLoading: isPendingDelegationsLoading } =
+    useGetUserPendingDelegationsDelegatorPOV()
 
-  const scorePercentage = useMemo(
-    () => (Number(scoreThreshold) ? Math.min((Number(userScore || 0) / Number(scoreThreshold || 0)) * 100, 100) : 100),
-    [userScore, scoreThreshold],
-  )
-  const qualificationReached = userScore >= scoreThreshold
-  const border = qualificationReached ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
+  const { isUserQualified, scorePercentage, isLoading: isScoreLoading } = useUserScore()
+
+  const border = isUserQualified ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
   const progressLabel = useMemo(() => {
-    if (scorePercentage === 100) return t("QUALIFIED TO VOTE")
+    if (isUserQualified) return t("QUALIFIED TO VOTE")
     return t("{{scorePercentage}}% QUALIFIED TO VOTE", { scorePercentage })
-  }, [scorePercentage, t])
+  }, [isUserQualified, scorePercentage, t])
 
   const descriptionLabel = useMemo(() => {
-    if (scorePercentage === 100)
+    if (isUserQualified)
       return t(
         "Your are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens",
       )
     return t("To be availabe to vote on the platform, you must do more Better Actions on the Apps")
-  }, [scorePercentage, t])
+  }, [isUserQualified, t])
 
   const darkColor = useMemo(() => {
-    if (scorePercentage === 100) return "#3DBA67"
+    if (isUserQualified) return "#3DBA67"
     return "#C84968"
-  }, [scorePercentage])
+  }, [isUserQualified])
 
   const lightColor = "#FCEEF1"
 
   const delegationModal = useDisclosure()
   const revokeDelegationModal = useDisclosure()
 
-  if (isUserRoundScoreLoading || isScoreThresholdLoading) return null
+  if (isScoreLoading || isPendingDelegationsLoading) return null
 
   return (
     <Card borderRadius="xl" w="full" border={border}>
@@ -71,7 +67,7 @@ export const VotingQualification = () => {
                 <Heading fontSize="xl" fontWeight="700">
                   {t("Your Voting Qualification")}
                 </Heading>
-                {!isDelegated && qualificationReached && (
+                {!isDelegator && isUserQualified && pendingDelegations?.length === 0 && (
                   <Button
                     variant={"primaryGhost"}
                     onClick={delegationModal.onOpen}
@@ -109,7 +105,7 @@ export const VotingQualification = () => {
               </HStack>
             </VStack>
           </VStack>
-          {isDelegated && (
+          {isDelegator && (
             <>
               <Divider />
               <VStack align="stretch" gap={6}>
@@ -135,9 +131,6 @@ export const VotingQualification = () => {
                     <VStack align="start" gap={0}>
                       <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
                         {humanAddress(delegateeAddress, 4, 4)}
-                      </Text>
-                      <Text fontSize={["2xs", "2xs", "xs"]} color="#6A6A6A">
-                        {t("Delegating since {{date}}", { date: delegationDate })}
                       </Text>
                     </VStack>
                   </HStack>

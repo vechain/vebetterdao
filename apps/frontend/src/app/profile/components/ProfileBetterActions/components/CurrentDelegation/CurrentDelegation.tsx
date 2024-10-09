@@ -5,15 +5,17 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { RevokeDelegationDelegateePOVModal } from "./components/RevokeDelegationDelegateePOVModal"
 import { QualificationBadge } from "../QualificationBadges"
+import { useGetUserDelegator, useUserScore } from "@/api"
 
 export const CurrentDelegation = () => {
   const { t } = useTranslation()
-  // TODO: get delegation addresses from contract
-  const delegatorAddress = "0x5234567890123456789012345678901234567890"
-  const delegationSince = "2024-01-01"
-  const delegatorQualified = false
+  const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetUserDelegator()
+  const isDelegated = !isDelegatorLoading && !!Number(delegatorAddress)
+  const { isUserQualified: isDelegatorQualified, isLoading: isScoreLoading } = useUserScore(delegatorAddress)
 
   const delegationModal = useDisclosure()
+
+  if (isDelegatorLoading || isScoreLoading || !isDelegated) return null
 
   return (
     <Card variant="baseWithBorder" w="full">
@@ -28,7 +30,7 @@ export const CurrentDelegation = () => {
               </Heading>
             </HStack>
             <Text color="#6A6A6A" fontSize="md">
-              {delegatorQualified
+              {isDelegatorQualified
                 ? t("While this account keeps their qualification, you’ll be able to use it to vote.")
                 : t("This account is not currently qualified to vote.")}
             </Text>
@@ -47,11 +49,8 @@ export const CurrentDelegation = () => {
                   <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
                     {humanAddress(delegatorAddress, 4, 4)}
                   </Text>
-                  <Text color="#6A6A6A" fontSize={["2xs", "2xs", "xs"]}>
-                    {t("Delegated since {{date}}", { date: delegationSince })}
-                  </Text>
                 </VStack>
-                <QualificationBadge qualified={delegatorQualified} />
+                <QualificationBadge qualified={isDelegatorQualified} />
               </HStack>
             </Stack>
             <HStack>

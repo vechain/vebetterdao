@@ -17,62 +17,67 @@ import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
 import { useRemovePendingDelegation } from "@/hooks"
 
-export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
+export const RemoveDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
   const { t } = useTranslation()
 
-  const rejectDelegation = useRemovePendingDelegation({})
+  const removeDelegation = useRemovePendingDelegation({})
 
   const handleDelegate = useCallback(() => {
-    rejectDelegation.sendTransaction({ delegator })
-  }, [rejectDelegation, delegator])
+    removeDelegation.sendTransaction({ delegator })
+  }, [removeDelegation, delegator])
+
+  const handleClose = useCallback(() => {
+    modal.onClose?.()
+    removeDelegation.resetStatus()
+  }, [modal, removeDelegation])
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
-  if (rejectDelegation.status !== "ready") {
+  if (removeDelegation.status !== "ready") {
     return (
       <TransactionModal
         isOpen={modal.isOpen ?? false}
-        onClose={modal.onClose ?? (() => {})}
-        successTitle={t("Delegation rejected!")}
-        status={rejectDelegation.status}
-        errorDescription={rejectDelegation.error?.reason}
-        errorTitle={rejectDelegation.error ? t("Error rejecting delegation") : undefined}
+        onClose={handleClose}
+        successTitle={t("Delegation request removed!")}
+        status={removeDelegation.status}
+        errorDescription={removeDelegation.error?.reason}
+        errorTitle={removeDelegation.error ? t("Error removing delegation request") : undefined}
         showTryAgainButton
-        onTryAgain={() => rejectDelegation.sendTransaction({ delegator })}
-        pendingTitle={t("Rejecting delegation...")}
+        onTryAgain={() => removeDelegation.sendTransaction({ delegator })}
+        pendingTitle={t("Removing delegation request...")}
         showExplorerButton
-        txId={rejectDelegation.txReceipt?.meta.txID ?? rejectDelegation.sendTransactionTx?.txid}
+        txId={removeDelegation.txReceipt?.meta.txID ?? removeDelegation.sendTransactionTx?.txid}
       />
     )
   }
 
   return (
-    <BaseModal onClose={modal.onClose ?? (() => {})} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />
           <Heading fontSize={["lg", "lg", "2xl"]} textAlign="center">
-            {t("Are you sure you want to reject the Voting Qualification delegation?")}
+            {t("Are you sure you want to remove the voting qualification request?")}
           </Heading>
         </VStack>
         <VStack align="stretch">
-          <Text fontWeight="600">{t("You’re rejecting it from")}</Text>
+          <Text fontWeight="600">{t("You're removing it to")}</Text>
           <Text fontSize="sm">{delegator}</Text>
         </VStack>
         <Alert status="error" borderRadius="2xl">
           <AlertIcon w={9} h={9} />
           <Box lineHeight={"1.20rem"} color="#C84968" fontSize="sm">
             <AlertTitle as="span">
-              {t("You will not be able to vote using delegator's Voting Qualification")}
+              {t("The delegatee won't be able to vote using your voting qualification")}
             </AlertTitle>
-            <AlertDescription as="span">{t("once you have rejected the delegation.")}</AlertDescription>
+            <AlertDescription as="span">{t("once you have removed the delegation request.")}</AlertDescription>
           </Box>
         </Alert>
         <VStack>
           <Button variant="primaryAction" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant={"primaryGhost"} onClick={modal.onClose}>
+          <Button variant={"primaryGhost"} onClick={handleClose}>
             {t("No, go back")}
           </Button>
         </VStack>

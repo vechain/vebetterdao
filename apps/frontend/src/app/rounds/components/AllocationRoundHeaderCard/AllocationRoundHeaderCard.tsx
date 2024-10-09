@@ -1,6 +1,7 @@
 import {
   useAllocationsRound,
   useAllocationsRoundState,
+  useCanUserVote,
   useGetVotesOnBlock,
   useHasVotedInRound,
   useRoundXApps,
@@ -81,9 +82,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
     router.push(`/rounds/${roundId}/vote`)
   }, [router, roundId])
 
-  const shouldSeeVoteButton = useMemo(() => {
-    return !isFinished && !!account && hasVoted === false && hasVotesAtSnapshot
-  }, [isFinished, account, hasVoted, hasVotesAtSnapshot])
+  const { data: shouldSeeVoteButton, isLoading: shouldSeeVoteButtonLoading } = useCanUserVote()
 
   const yourVoteText = useMemo(() => {
     if (hasVoted) return compactFormatter.format(totalVotesCast)
@@ -174,7 +173,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                   </Box>
                 )}
               </Stack>
-              {shouldSeeVoteButton && (
+              {!shouldSeeVoteButtonLoading && shouldSeeVoteButton && (
                 <Button
                   data-testid="cast-your-vote-button"
                   variant={"primaryAction"}

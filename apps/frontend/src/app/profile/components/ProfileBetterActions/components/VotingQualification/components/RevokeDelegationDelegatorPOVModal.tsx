@@ -26,7 +26,9 @@ export const RevokeDelegationDelegatorPOVModal = ({
 }) => {
   const { t } = useTranslation()
 
-  const revokeDelegation = useRevokeDelegation({})
+  const revokeDelegation = useRevokeDelegation({
+    isDelegator: true,
+  })
 
   const handleDelegate = useCallback(() => {
     revokeDelegation.sendTransaction({})
@@ -34,11 +36,16 @@ export const RevokeDelegationDelegatorPOVModal = ({
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
+  const handleClose = useCallback(() => {
+    modal.onClose?.()
+    revokeDelegation.resetStatus()
+  }, [modal, revokeDelegation])
+
   if (revokeDelegation.status !== "ready") {
     return (
       <TransactionModal
         isOpen={modal.isOpen ?? false}
-        onClose={modal.onClose ?? (() => {})}
+        onClose={handleClose}
         successTitle={t("Delegation revoked!")}
         status={revokeDelegation.status}
         errorDescription={revokeDelegation.error?.reason}
@@ -53,7 +60,7 @@ export const RevokeDelegationDelegatorPOVModal = ({
   }
 
   return (
-    <BaseModal onClose={modal.onClose ?? (() => {})} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />
@@ -76,7 +83,7 @@ export const RevokeDelegationDelegatorPOVModal = ({
           <Button variant="primaryAction" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant={"primaryGhost"} onClick={modal.onClose}>
+          <Button variant={"primaryGhost"} onClick={handleClose}>
             {t("No, go back")}
           </Button>
         </VStack>

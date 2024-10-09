@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { deployAll } from "./deploy/deploy"
+import { deployAll } from "./deploy/deployAll"
 import { getConfig, getContractsConfig } from "@repo/config"
 import { AppConfig } from "@repo/config"
 import fs from "fs"

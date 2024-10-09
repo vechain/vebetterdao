@@ -19,8 +19,9 @@ import {
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
+import { ZeroAddress } from "ethers"
 
-describe("VeBetterPassport - @shard3", function () {
+describe.only("VeBetterPassport - @shard3", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await getOrDeployContractInstances({
@@ -2017,6 +2018,10 @@ describe("VeBetterPassport - @shard3", function () {
       const pendingDelegation = await veBetterPassport.getPendingDelegations(delegatee.address)
       expect(pendingDelegation[0]).to.equal(owner.address)
 
+      // Check the pending delegation from delegator POV
+      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
+      expect(pendingDelegationForDelegator).to.equal(delegatee.address)
+
       // Perform the delegation using the signature
       await expect(veBetterPassport.connect(delegatee).acceptDelegation(owner.address))
         .to.emit(veBetterPassport, "DelegationCreated")
@@ -2025,6 +2030,10 @@ describe("VeBetterPassport - @shard3", function () {
       // Check the pending delegation
       const pendingDelegation2 = await veBetterPassport.getPendingDelegations(delegatee.address)
       expect(pendingDelegation2.length).to.equal(0)
+
+      // Check the pending delegation from delegator POV
+      const pendingDelegation3 = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
+      expect(pendingDelegation3).to.equal(ZeroAddress)
 
       // Verify that the delegatee has been assigned the delegator
       const storedDelegatee = await veBetterPassport.getDelegatee(owner.address)
@@ -2114,6 +2123,10 @@ describe("VeBetterPassport - @shard3", function () {
       const pendingDelegation = await veBetterPassport.getPendingDelegations(delegatee.address)
       expect(pendingDelegation[0]).to.equal(owner.address)
 
+      // Check the pending delegation from delegator POV
+      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
+      expect(pendingDelegationForDelegator).to.equal(delegatee.address)
+
       // Perform the delegation using the signature
       await expect(veBetterPassport.connect(delegatee).removePendingDelegation(owner.address))
         .to.emit(veBetterPassport, "DelegationRevoked")
@@ -2122,6 +2135,10 @@ describe("VeBetterPassport - @shard3", function () {
       // Check the pending delegation
       const pendingDelegation2 = await veBetterPassport.getPendingDelegations(delegatee.address)
       expect(pendingDelegation2.length).to.equal(0)
+
+      // Check the pending delegation from delegator POV
+      const pendingDelegation3 = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
+      expect(pendingDelegation3).to.equal(ZeroAddress)
 
       // Owner can vote
       await expect(
