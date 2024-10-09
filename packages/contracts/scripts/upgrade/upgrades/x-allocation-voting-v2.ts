@@ -2,6 +2,7 @@ import { getConfig } from "@repo/config"
 import { upgradeProxy } from "../../helpers"
 import { EnvConfig } from "@repo/config/contracts"
 import { XAllocationVoting } from "../../../typechain-types"
+import { ethers } from "hardhat"
 
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -9,16 +10,19 @@ async function main() {
   }
 
   const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
+  const network = config.network.name
+  const env = config.environment
+  const deployer = (await ethers.getSigners())[0]
 
   console.log(
-    `Upgrading XAllocationVoting contract at address: ${config.xAllocationVotingContractAddress} on network: ${config.network.name}`,
+    `Upgrading XAllocationVoting contract at address: ${config.xAllocationVotingContractAddress} on network: ${network} (env: ${env}) with deployer: ${deployer.address}`,
   )
 
   const xAllocationVotingV2 = (await upgradeProxy(
     "XAllocationVotingV1",
     "XAllocationVoting",
     config.xAllocationVotingContractAddress,
-    [],
+    [config.veBetterPassportContractAddress],
     {
       version: 2,
     },
