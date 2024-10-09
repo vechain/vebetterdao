@@ -359,20 +359,13 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportDelegationLogic.isDelegateeInTimepoint($, user, timepoint);
   }
 
-  /// @notice Returns the pending delegations for a delegatee
-  /// @param delegatee - the delegatee address
-  /// @return the delegator address
-  function getPendingDelegations(address delegatee) external view returns (address[] memory) {
+  /// @notice Returns the pending incoming and outgoing delegations for a user
+  /// @param user - the user address
+  /// @return incoming The address[] memory of users that are delegating to the user.
+  /// @return outgoing The address that the user is delegating to.
+  function getPendingDelegations(address user) external view returns (address[] memory incoming, address outgoing) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportDelegationLogic.getPendingDelegations($, delegatee);
-  }
-
-  /// @notice Returns the pending delegations for a delegator
-  /// @param delegator - the delegator address
-  /// @return the delegatee address
-  function getPendingDelegatorDelegations(address delegator) external view returns (address) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportDelegationLogic.getPendingDelegatorDelegations($, delegator);
+    return PassportDelegationLogic.getPendingDelegations($, user);
   }
 
   /// @notice Returns the number of times a user has been signaled

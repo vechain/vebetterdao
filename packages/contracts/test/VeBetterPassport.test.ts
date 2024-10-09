@@ -2014,13 +2014,13 @@ describe.only("VeBetterPassport - @shard3", function () {
         .to.emit(veBetterPassport, "DelegationPending")
         .withArgs(owner.address, delegatee.address)
 
-      // Check the pending delegation
+      // Check the pending delegation: 1 incoming and 0 outgoing
       const pendingDelegation = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation[0]).to.equal(owner.address)
+      expect(pendingDelegation).to.deep.equal([[owner.address], ZeroAddress])
 
-      // Check the pending delegation from delegator POV
-      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegationForDelegator).to.equal(delegatee.address)
+      // Check the pending delegation from delegator POV: 0 incoming and 1 outgoing
+      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator).to.deep.equal([[], delegatee.address])
 
       // Perform the delegation using the signature
       await expect(veBetterPassport.connect(delegatee).acceptDelegation(owner.address))
@@ -2029,11 +2029,11 @@ describe.only("VeBetterPassport - @shard3", function () {
 
       // Check the pending delegation
       const pendingDelegation2 = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation2.length).to.equal(0)
+      expect(pendingDelegation2).to.deep.equal([[], ZeroAddress])
 
       // Check the pending delegation from delegator POV
-      const pendingDelegation3 = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegation3).to.equal(ZeroAddress)
+      const pendingDelegationForDelegator2 = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator2).to.deep.equal([[], ZeroAddress])
 
       // Verify that the delegatee has been assigned the delegator
       const storedDelegatee = await veBetterPassport.getDelegatee(owner.address)
@@ -2121,11 +2121,11 @@ describe.only("VeBetterPassport - @shard3", function () {
 
       // Check the pending delegation
       const pendingDelegation = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation[0]).to.equal(owner.address)
+      expect(pendingDelegation).to.deep.equal([[owner.address], ZeroAddress])
 
       // Check the pending delegation from delegator POV
-      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegationForDelegator).to.equal(delegatee.address)
+      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator).to.deep.equal([[], delegatee.address])
 
       // Perform the delegation using the signature
       await expect(veBetterPassport.connect(delegatee).removePendingDelegation(owner.address))
@@ -2134,11 +2134,11 @@ describe.only("VeBetterPassport - @shard3", function () {
 
       // Check the pending delegation
       const pendingDelegation2 = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation2.length).to.equal(0)
+      expect(pendingDelegation2).to.deep.equal([[], ZeroAddress])
 
       // Check the pending delegation from delegator POV
-      const pendingDelegation3 = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegation3).to.equal(ZeroAddress)
+      const pendingDelegationForDelegator2 = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator2).to.deep.equal([[], ZeroAddress])
 
       // Owner can vote
       await expect(
