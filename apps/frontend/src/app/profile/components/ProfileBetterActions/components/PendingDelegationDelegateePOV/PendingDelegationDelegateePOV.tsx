@@ -24,7 +24,7 @@ export const PendingDelegationDelegateePOV = () => {
             </Text>
           </VStack>
           <VStack align="stretch">
-            {pendingDelegations.map((delegationAddress: string) => (
+            {pendingDelegations?.map((delegationAddress: string) => (
               <PendingDelegationItemDelegateePOV key={delegationAddress} delegationAddress={delegationAddress} />
             ))}
           </VStack>
