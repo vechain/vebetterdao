@@ -652,9 +652,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter3.address)
       await veBetterPassport.toggleCheck(1)
 
-      await xAllocationVoting
-        .connect(voter1)
-        .castVote(roundId, [app1, app2], [ethers.parseEther("1000"), ethers.parseEther("0")])
+      await xAllocationVoting.connect(voter1).castVote(roundId, [app1], [ethers.parseEther("1000")])
       await xAllocationVoting
         .connect(voter2)
         .castVote(roundId, [app1, app2], [ethers.parseEther("200"), ethers.parseEther("100")])
@@ -768,9 +766,7 @@ describe("VoterRewards - @shard2", () => {
 
       expect(await xAllocationVoting.roundDeadline(roundId)).to.lt(await emissions.getNextCycleBlock())
 
-      await xAllocationVoting
-        .connect(voter1)
-        .castVote(roundId2, [app1, app2], [ethers.parseEther("0"), ethers.parseEther("1000")])
+      await xAllocationVoting.connect(voter1).castVote(roundId2, [app2], [ethers.parseEther("1000")])
       await xAllocationVoting
         .connect(voter2)
         .castVote(roundId2, [app1, app2], [ethers.parseEther("100"), ethers.parseEther("500")])
