@@ -28,11 +28,16 @@ export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
+  const handleClose = useCallback(() => {
+    modal.onClose?.()
+    rejectDelegation.resetStatus()
+  }, [modal, rejectDelegation])
+
   if (rejectDelegation.status !== "ready") {
     return (
       <TransactionModal
         isOpen={modal.isOpen ?? false}
-        onClose={modal.onClose ?? (() => {})}
+        onClose={handleClose}
         successTitle={t("Delegation rejected!")}
         status={rejectDelegation.status}
         errorDescription={rejectDelegation.error?.reason}
@@ -47,7 +52,7 @@ export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
   }
 
   return (
-    <BaseModal onClose={modal.onClose ?? (() => {})} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />
@@ -72,7 +77,7 @@ export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
           <Button variant="primaryAction" onClick={handleDelegate}>
             {t("Yes, I'm sure")}
           </Button>
-          <Button variant={"primaryGhost"} onClick={modal.onClose}>
+          <Button variant={"primaryGhost"} onClick={handleClose}>
             {t("No, go back")}
           </Button>
         </VStack>

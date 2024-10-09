@@ -15,21 +15,23 @@ export const EmptyStateGovernance = ({ title, description, illustration, buttonT
   const { t } = useTranslation()
 
   return (
-    <VStack w={"full"} borderRadius={8} bg={"#F8F8F8"}>
+    <VStack w={"full"}>
       <Text fontSize={{ base: 18, md: 20 }} fontWeight={"bold"} alignSelf={"start"}>
         {t(title as any)}
       </Text>
-      {illustration}
-      <Text>{description}</Text>
-      <Button
-        mt={2}
-        rounded={"full"}
-        variant={"outline"}
-        colorScheme="primary"
-        leftIcon={buttonIcon && <Icon as={buttonIcon} />}
-        onClick={onClick}>
-        {t(buttonText as any)}
-      </Button>
+      <VStack w={"full"} borderRadius={12} borderWidth={1} borderColor={"#D5D5D5"} p={10}>
+        {illustration}
+        <Text>{description}</Text>
+        <Button
+          mt={2}
+          rounded={"full"}
+          variant={"primaryAction"}
+          colorScheme="primary"
+          leftIcon={buttonIcon && <Icon as={buttonIcon} />}
+          onClick={onClick}>
+          {t(buttonText as any)}
+        </Button>
+      </VStack>
     </VStack>
   )
 }

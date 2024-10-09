@@ -2,9 +2,15 @@ import { useState, useCallback, useMemo, useRef } from "react"
 import { IconButton, Hide } from "@chakra-ui/react"
 import { DoActionBanner } from "./components/DoActionBanner"
 import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
-import { useAccountBalance, useB3trBalance, useCanUserVote, useVot3Balance, useVotingRewards } from "@/api"
+import {
+  useAccountBalance,
+  useB3trBalance,
+  useCanUserVote,
+  useUserScore,
+  useVot3Balance,
+  useVotingRewards,
+} from "@/api"
 import { CastVoteBanner } from "./components/CastVoteBanner"
-import { useIsUserPerson } from "@/api/contracts/vePassport/hooks/useIsPerson"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 // Import Swiper React components
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
@@ -32,7 +38,6 @@ export const ActionBanner = () => {
   }, [])
 
   const votingRewardsQuery = useVotingRewards()
-  const { data: isPerson, isLoading: isPersonLoading } = useIsUserPerson()
   const { data: canUserVote, isLoading: canUserVoteLoading } = useCanUserVote()
 
   const { account } = useWallet()
@@ -54,7 +59,9 @@ export const ActionBanner = () => {
     return balanceLoading || b3trBalanceLoading || vot3BalanceLoading
   }, [balanceLoading, b3trBalanceLoading, vot3BalanceLoading])
 
-  const showDoActionBanner = !!account && !isPersonLoading && !isPerson
+  const { isUserQualified, isLoading: isScoreLoading } = useUserScore()
+
+  const showDoActionBanner = !!account && !isScoreLoading && !isUserQualified
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && votingRewardsQuery.data.total !== 0
   const showCastVoteBanner = !!account && !canUserVoteLoading && canUserVote
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
