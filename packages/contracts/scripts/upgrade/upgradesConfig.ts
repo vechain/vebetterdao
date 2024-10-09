@@ -19,7 +19,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
     versions: ["v2", "v3", "v4"],
     configAddressField: "b3trGovernorAddress",
     descriptions: {
-      v2: "Fix XAllocation voting so that a user cannot vote for an XApp with a vote weight less than 1",
+      v2: "Give ability to contract admins to call governance only functions",
       v3: "Add the ability to toggle quadratic voting on and off.",
       v4: "Integrate VeBetterPassport contract",
     },
