@@ -67,7 +67,7 @@ export const ActionBanner = () => {
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
 
   const slides = useMemo(() => {
-    const bannerComponents = []
+    const bannerComponents = [<DoActionBanner key="do-action" />]
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
