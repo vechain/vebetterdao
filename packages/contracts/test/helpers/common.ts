@@ -9,7 +9,6 @@ import { type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
 import { ZERO_ADDRESS } from "./const"
 import { buildTxBody, signAndSendTx } from "../../scripts/helpers/txHelper"
 import { getTestKeys } from "../../scripts/helpers/seedAccounts"
-import { veBetterPassport } from "../../typechain-types/contracts"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -564,7 +563,7 @@ export const participateInGovernanceVoting = async (
   await getVot3Tokens(admin, "1000")
 
   await veBetterPassport.connect(admin).whitelist(user.address)
-  if ((await veBetterPassport.isCheckEnabled(1)) === false) await governor.toggleCheck(1)
+  if ((await veBetterPassport.isCheckEnabled(1)) === false) await veBetterPassport.toggleCheck(1)
 
   const tx = await createProposal(contractToCall, Contract, admin, description, functionToCall, args)
   const proposalId = await getProposalIdFromTx(tx)

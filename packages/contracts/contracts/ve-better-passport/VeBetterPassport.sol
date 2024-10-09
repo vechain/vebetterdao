@@ -367,6 +367,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportDelegationLogic.getPendingDelegations($, delegatee);
   }
 
+  /// @notice Returns the pending delegations for a delegator
+  /// @param delegator - the delegator address
+  /// @return the delegatee address
+  function getPendingDelegatorDelegations(address delegator) external view returns (address) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportDelegationLogic.getPendingDelegatorDelegations($, delegator);
+  }
+
   /// @notice Returns the number of times a user has been signaled
   function signaledCounter(address _user) external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
