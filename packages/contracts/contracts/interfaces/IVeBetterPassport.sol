@@ -401,7 +401,7 @@ interface IVeBetterPassport {
   /// @notice Cancel an outgoing pending entity link from the sender.
   function cancelOutgoingPendingEntityLink() external;
 
-  /// @notice Remove the email link
+  /// @notice Remove the linked enitity from the passport
   /// @param entity - the entity address
   function removeEntityLink(address entity) external;
 

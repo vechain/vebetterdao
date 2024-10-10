@@ -986,6 +986,37 @@ describe("VeBetterPassport - @shard3", function () {
       expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(0)
     })
 
+    it("Only the link target can deny an incoming link request", async function () {
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.false
+      // Check if passport is linked to an entity
+      expect(await veBetterPassport.isPassport(passport.address)).to.be.true
+
+      // Approve the entity
+      await expect(veBetterPassport.connect(entity).linkEntityToPassport(passport.address))
+        .to.emit(veBetterPassport, "LinkPending")
+        .withArgs(entity.address, passport.address)
+
+      // Try to deny the link request
+      await expect(
+        veBetterPassport.connect(otherAccounts[1]).denyIncomingPendingEntityLink(entity.address),
+      ).to.be.revertedWithCustomError(veBetterPassport, "UnauthorizedUser")
+
+      // The target of the link should be able to deny the link request
+      await expect(veBetterPassport.connect(passport).denyIncomingPendingEntityLink(entity.address))
+        .to.emit(veBetterPassport, "LinkRemoved")
+        .withArgs(entity.address, passport.address)
+    })
+
     it("If A wants to link to C, and B wants to link to C, A should be able to deny only B's link request", async function () {
       const { veBetterPassport, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2202,6 +2233,34 @@ describe("VeBetterPassport - @shard3", function () {
             [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
           ),
       ).to.be.reverted
+    })
+
+    it("Only the target delegatee can deny an incoming delegation request", async function () {
+      const {
+        otherAccounts,
+        owner,
+        veBetterPassport,
+        otherAccount: delegatee,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const delegator = owner
+
+      // Delegate to delegatee
+      await expect(veBetterPassport.connect(delegator).delegatePassport(delegatee.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(delegator.address, delegatee.address)
+
+      // Try to deny the link request
+      await expect(
+        veBetterPassport.connect(otherAccounts[1]).denyIncomingPendingDelegation(delegator.address),
+      ).to.be.revertedWithCustomError(veBetterPassport, "PassportDelegationUnauthorizedUser")
+
+      // The target of the link should be able to deny the link request
+      await expect(veBetterPassport.connect(delegatee).denyIncomingPendingDelegation(delegator.address))
+        .to.emit(veBetterPassport, "DelegationRevoked")
+        .withArgs(delegator.address, delegatee.address)
     })
 
     it("User with one incoming and one outgoing delegation should be able to cancel only one", async function () {
