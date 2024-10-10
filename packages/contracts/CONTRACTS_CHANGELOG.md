@@ -4,14 +4,16 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 ## Version History
 
-| Date                | Contract(s)                                                                                  | Summary                                                                          |
-| ------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| 9th October 2024    | `X2EarnRewardsPool` version `3`, `B3TRGovernor` version `4`, `XAllocationVoting` version `2` | Integrate with VeBetter Passport contract and fix weight during voting on rounds |
-| 27th September 2024 | `Emissions` version `2`                                                                      | Aligned emissions with the expected schedule                                     |
-| 13th September 2024 | `B3TRGovernor` version `3`, `XAllocationPool` version `2`                                    | Added toggling of quadratic voting and funding                                   |
-| 4th September 2024  | `X2EarnRewardsPool` version `2`                                                              | Added impact key management and proof building                                   |
-| 31st August 2024    | `VoterRewards` version `2`                                                                   | Added quadratic rewarding features                                               |
-| 29th August 2024    | `B3TRGovernor` version `2`                                                                   | Updated access control modifiers                                                 |
+| Date                | Contract(s)                                               | Summary                                                     |
+| ------------------- | --------------------------------------------------------- | ----------------------------------------------------------- |
+| 9th October 2024    | `XAllocationVoting` version `2`                           | Check isPerson when casting vote & fixed weight during vote |
+| 9th October 2024    | `B3TRGovernor` version `4`                                | Check isPerson when casting vote                            |
+| 9th October 2024    | `X2EarnRewardsPool` version `3`                           | Register action in VeBetter Passport contract               |
+| 27th September 2024 | `Emissions` version `2`                                   | Aligned emissions with the expected schedule                |
+| 13th September 2024 | `B3TRGovernor` version `3`, `XAllocationPool` version `2` | Added toggling of quadratic voting and funding              |
+| 4th September 2024  | `X2EarnRewardsPool` version `2`                           | Added impact key management and proof building              |
+| 31st August 2024    | `VoterRewards` version `2`                                | Added quadratic rewarding features                          |
+| 29th August 2024    | `B3TRGovernor` version `2`                                | Updated access control modifiers                            |
 
 ---
 
@@ -23,9 +25,7 @@ Another change in the `XAllocationVoting` contract is the fixed weight during th
 
 ### Changes 🚀
 
-- **Upgraded Contract(s):** `XAllocationVoting.sol` to version `2`
-- **Upgraded Contract(s):** `B3TRGovernor.sol` to version `4`
-- **Upgraded Contract(s):** `X2EarnRewardsPool.sol` to version `3`
+- **Upgraded Contract(s):** `XAllocationVoting.sol` to version `2`, `B3TRGovernor.sol` to version `4`, `X2EarnRewardsPool.sol` to version `3`
 
 ### Storage Changes 📦
 
