@@ -187,10 +187,11 @@ interface IVeBetterPassport {
   /// @return The address of the passport
   function getPassportForEntity(address entity) external view returns (address);
 
-  /// @notice Returns the pending delegations for a passport
-  /// @param passport - the passport address
-  /// @return the entity address
-  function getPendingEntitiesForPassport(address passport) external view returns (address[] memory);
+  /// @notice Returns the pending links for a user (both incoming and outgoing)
+  /// @param user The address of the user
+  /// @return incoming The addresss of users that want to link to the user.
+  /// @return outgoing The address that the user wants to link to.
+  function getPendingLinkings(address user) external view returns (address[] memory incoming, address outgoing);
 
   /// @notice Returns the passport address for a entity at a specific timepoint
   /// @param entity The entity's address
@@ -436,15 +437,11 @@ interface IVeBetterPassport {
   /// @return The address of the delegatee
   function getDelegatee(address delegator) external view returns (address);
 
-  /// @notice Returns the pending delegations for a delegatee
-  /// @param delegatee - the delegatee address
-  /// @return the delegator address
-  function getPendingDelegations(address delegatee) external view returns (address[] memory);
-
-  /// @notice Returns the pending delegations for a delegator
-  /// @param delegator - the delegator address
-  /// @return the delegatee address
-  function getPendingDelegatorDelegations(address delegator) external view returns (address);
+  /// @notice Returns the incoming and outgoing pending delegations for a user
+  /// @param user - the user address
+  /// @return incoming The address[] memory of users that are delegating to the user.
+  /// @return outgoing The address that the user is delegating to.
+  function getPendingDelegations(address user) external view returns (address[] memory incoming, address outgoing);
 
   /// @notice Returns the delegatee address for a delegator at a specific timepoint
   /// @param delegator The delegator's address

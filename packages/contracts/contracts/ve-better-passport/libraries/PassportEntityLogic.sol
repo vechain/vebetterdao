@@ -231,18 +231,16 @@ library PassportEntityLogic {
   }
 
   /**
-   * @notice Returns the list of pending entities waiting to be linked to a passport.
-   * @dev Pending entities are those that have been initiated for linking to a passport but are awaiting confirmation.
-   * This function returns an array of entity addresses that are in the pending state for the specified passport.
-   * @param self The storage reference for PassportStorage.
-   * @param passport The address of the passport for which pending entities are being retrieved.
-   * @return An array of addresses representing the entities pending linkage to the passport.
+   * @notice Returns the pending links for a user (both incoming and outgoing)
+   * @param user The address of the user
+   * @return incoming The addresss of users that want to link to the user.
+   * @return outgoing The address that the user wants to link to.
    */
-  function getPendingEntitiesForPassport(
+  function getPendingLinkings(
     PassportStorageTypes.PassportStorage storage self,
-    address passport
-  ) internal view returns (address[] memory) {
-    return self.pendingLinksPassportToEntities[passport];
+    address user
+  ) internal view returns (address[] memory incoming, address outgoing) {
+    return (self.pendingLinksPassportToEntities[user], self.pendingLinksEntityToPassport[user]);
   }
 
   /**

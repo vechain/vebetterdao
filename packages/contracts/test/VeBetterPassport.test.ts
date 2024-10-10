@@ -676,7 +676,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.false
       // Expect pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(1)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(1)
 
       // Approve the entity
       await expect(veBetterPassport.connect(passport).acceptEntityLink(entity.address))
@@ -688,7 +688,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if passport is linked to an entity
       expect(await veBetterPassport.isPassport(passport.address)).to.equal(true)
       // Expect no pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(0)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(0)
     })
 
     it("Should be able to register an entity by signature", async function () {
@@ -815,7 +815,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.false
       // Expect pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(1)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(1)
 
       // Approve the entity
       await expect(veBetterPassport.connect(passport).acceptEntityLink(entity.address))
@@ -827,7 +827,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if passport is linked to an entity
       expect(await veBetterPassport.isPassport(passport.address)).to.equal(true)
       // Expect no pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(0)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(0)
 
       // Unlink the entity
       await expect(veBetterPassport.connect(passport).removeEntityLink(entity.address))
@@ -868,7 +868,13 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.false
       // Expect pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(1)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(1)
+      // Expect no outgoing pending link
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[1]).to.equal(ZeroAddress)
+      // Expect an outgoing pending link from the random wallet to the entity
+      expect((await veBetterPassport.getPendingLinkings(entity.address))[1]).to.equal(passport.address)
+      // Expect no incoming pending link
+      expect((await veBetterPassport.getPendingLinkings(entity.address))[0].length).to.equal(0)
 
       // Approve the entity
       await expect(veBetterPassport.connect(passport).acceptEntityLink(entity.address))
@@ -880,7 +886,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if passport is linked to an entity
       expect(await veBetterPassport.isPassport(passport.address)).to.equal(true)
       // Expect no pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(0)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(0)
 
       // Unlink the entity
       await expect(
@@ -966,7 +972,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.false
       // Expect pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(1)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(1)
 
       // Cancel the pending link
       await expect(veBetterPassport.connect(passport).removePendingEntityLinkFromPassport(entity.address))
@@ -978,7 +984,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if passport is linked to an entity
       expect(await veBetterPassport.isPassport(passport.address)).to.be.true
       // Expect no pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(0)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(0)
     })
 
     it("Should not be able to assign an entity to a passport if the entity is already linked to another passport", async function () {
@@ -1010,7 +1016,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.false
       // Expect pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport1.address)).length).to.equal(1)
+      expect((await veBetterPassport.getPendingLinkings(passport1.address))[0].length).to.equal(1)
 
       // Approve the entity
       await expect(veBetterPassport.connect(passport1).acceptEntityLink(entity.address))
@@ -1023,7 +1029,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.isPassport(passport1.address)).to.be.true
       expect(await veBetterPassport.isPassport(passport2.address)).to.be.true
       // Expect no pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport1.address)).length).to.equal(0)
+      expect((await veBetterPassport.getPendingLinkings(passport1.address))[0].length).to.equal(0)
 
       // Try to link the entity to another passport
       await expect(
@@ -2014,13 +2020,13 @@ describe.only("VeBetterPassport - @shard3", function () {
         .to.emit(veBetterPassport, "DelegationPending")
         .withArgs(owner.address, delegatee.address)
 
-      // Check the pending delegation
+      // Check the pending delegation: 1 incoming and 0 outgoing
       const pendingDelegation = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation[0]).to.equal(owner.address)
+      expect(pendingDelegation).to.deep.equal([[owner.address], ZeroAddress])
 
-      // Check the pending delegation from delegator POV
-      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegationForDelegator).to.equal(delegatee.address)
+      // Check the pending delegation from delegator POV: 0 incoming and 1 outgoing
+      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator).to.deep.equal([[], delegatee.address])
 
       // Perform the delegation using the signature
       await expect(veBetterPassport.connect(delegatee).acceptDelegation(owner.address))
@@ -2029,11 +2035,11 @@ describe.only("VeBetterPassport - @shard3", function () {
 
       // Check the pending delegation
       const pendingDelegation2 = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation2.length).to.equal(0)
+      expect(pendingDelegation2).to.deep.equal([[], ZeroAddress])
 
       // Check the pending delegation from delegator POV
-      const pendingDelegation3 = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegation3).to.equal(ZeroAddress)
+      const pendingDelegationForDelegator2 = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator2).to.deep.equal([[], ZeroAddress])
 
       // Verify that the delegatee has been assigned the delegator
       const storedDelegatee = await veBetterPassport.getDelegatee(owner.address)
@@ -2121,11 +2127,11 @@ describe.only("VeBetterPassport - @shard3", function () {
 
       // Check the pending delegation
       const pendingDelegation = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation[0]).to.equal(owner.address)
+      expect(pendingDelegation).to.deep.equal([[owner.address], ZeroAddress])
 
       // Check the pending delegation from delegator POV
-      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegationForDelegator).to.equal(delegatee.address)
+      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator).to.deep.equal([[], delegatee.address])
 
       // Perform the delegation using the signature
       await expect(veBetterPassport.connect(delegatee).removePendingDelegation(owner.address))
@@ -2134,11 +2140,11 @@ describe.only("VeBetterPassport - @shard3", function () {
 
       // Check the pending delegation
       const pendingDelegation2 = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation2.length).to.equal(0)
+      expect(pendingDelegation2).to.deep.equal([[], ZeroAddress])
 
       // Check the pending delegation from delegator POV
-      const pendingDelegation3 = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegation3).to.equal(ZeroAddress)
+      const pendingDelegationForDelegator2 = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator2).to.deep.equal([[], ZeroAddress])
 
       // Owner can vote
       await expect(
