@@ -227,9 +227,11 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
               </Text>
             </Box>
           </HStack>
-          <Text fontSize={positionStyles.fontSize} fontWeight={600} zIndex={1}>
-            {positionStyles.text}
-          </Text>
+          {ranking.position !== 0 && (
+            <Text fontSize={positionStyles.fontSize} fontWeight={600} zIndex={1}>
+              {positionStyles.text}
+            </Text>
+          )}
         </HStack>
       </CardBody>
     </Card>

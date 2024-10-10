@@ -20,7 +20,7 @@ export const UserSustainabilityOverviewStats = () => {
     return {
       totalActions: data?.actionsRewarded ?? 0,
       totalRewards: data?.totalRewardAmount ?? 0,
-      apps: [],
+      apps: data?.uniqueXAppInteractions.length ?? 0,
     }
   }, [data])
 
@@ -58,7 +58,7 @@ export const UserSustainabilityOverviewStats = () => {
           <Icon as={IoGridOutline} color="#6DCB09" boxSize={4} />
           <Skeleton isLoaded={!isLoading}>
             <Heading size="md" fontWeight="700" color="#004CFC">
-              {parsedData.apps.length}
+              {parsedData.apps}
             </Heading>
           </Skeleton>
         </HStack>
