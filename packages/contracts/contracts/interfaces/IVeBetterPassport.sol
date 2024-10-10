@@ -394,13 +394,16 @@ interface IVeBetterPassport {
   /// @param entity - the entity address
   function acceptEntityLink(address entity) external;
 
-  /// @notice Remove the email link
+  /// @notice Deny an incoming pending entity link to the sender's passport.
+  /// @param entity - the entity address
+  function denyIncomingPendingEntityLink(address entity) external;
+
+  /// @notice Cancel an outgoing pending entity link from the sender.
+  function cancelOutgoingPendingEntityLink() external;
+
+  /// @notice Remove the linked enitity from the passport
   /// @param entity - the entity address
   function removeEntityLink(address entity) external;
-
-  /// @notice Allows a entity to remove their pending delegation to a passport.
-  /// @param entity - the entity address
-  function removePendingEntityLinkFromPassport(address entity) external;
 
   /// @notice Registers an action for a user
   /// @param user - the user that performed the action
@@ -431,6 +434,24 @@ interface IVeBetterPassport {
   /// @notice Sets the maximum number of entities that can be linked to a passport
   /// @param maxEntities - the maximum number of entities
   function setMaxEntitiesPerPassport(uint256 maxEntities) external;
+
+  /// @notice Delegate the personhood to another address
+  /// @param delegatee - the delegatee address
+  function delegatePassport(address delegatee) external;
+
+  /// @notice Allow the delegatee to accept the delegation
+  /// @param delegator - the delegator address
+  function acceptDelegation(address delegator) external;
+
+  /// @notice Revoke the delegation (can be done by the delegator or the delegatee)
+  function revokeDelegation() external;
+
+  /// @notice Allows a delegator to deny (and remove) an incoming pending delegation.
+  /// @param delegator - the user who is delegating to me (aka the delegator)
+  function denyIncomingPendingDelegation(address delegator) external;
+
+  /// @notice Allows a delegator to cancel (and remove) the outgoing pending delegation.
+  function cancelOutgoingPendingDelegation() external;
 
   /// @notice Returns the delegatee address for a delegator
   /// @param delegator The delegator's address

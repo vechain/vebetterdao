@@ -588,11 +588,17 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     PassportEntityLogic.removeEntityLink($, entity);
   }
 
-  /// @notice Allows a entity to remove their pending delegation to a passport.
+  /// @notice Deny an incoming pending entity link to the sender's passport.
   /// @param entity - the entity address
-  function removePendingEntityLinkFromPassport(address entity) external {
+  function denyIncomingPendingEntityLink(address entity) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportEntityLogic.removePendingEntityLinkFromPassport($, entity);
+    PassportEntityLogic.denyIncomingPendingEntityLink($, entity);
+  }
+
+  /// @notice Cancel an outgoing pending entity link from the sender.
+  function cancelOutgoingPendingEntityLink() external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportEntityLogic.cancelOutgoingPendingEntityLink($);
   }
 
   /// @notice Sets the maximum number of entities that can be linked to a passport
@@ -637,11 +643,17 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     PassportDelegationLogic.revokeDelegation($);
   }
 
-  /// @notice Allows a delegator to remove their pending delegation to a delegatee.
-  /// @param delegator - the delegator address
-  function removePendingDelegation(address delegator) external {
+  /// @notice Allows a user to deny (and remove) an incoming pending delegation.
+  /// @param delegator - the user who is delegating to me (aka the delegator)
+  function denyIncomingPendingDelegation(address delegator) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportDelegationLogic.removePendingDelegation($, delegator);
+    PassportDelegationLogic.denyIncomingPendingDelegation($, delegator);
+  }
+
+  /// @notice Allows a delegator to cancel (and remove) the outgoing pending delegation.
+  function cancelOutgoingPendingDelegation() external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportDelegationLogic.cancelOutgoingPendingDelegation($);
   }
 
   /// @notice Signals a user

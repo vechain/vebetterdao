@@ -1,27 +1,25 @@
-import { BetterActionCard } from "./cards/BetterActionCard/BetterActionCard"
+import { BetterActionTransactionCard } from "./cards/BetterActionTransactionCard"
 import { ClaimCard } from "./cards/ClaimCard"
 import { SupportCard } from "./cards/SupportCard"
 import { SwapCard } from "./cards/SwapCard"
 import { UpgradeGMCard } from "./cards/UpgradeGMCard"
-
-export type TransactionType = "better-action" | "swap" | "claim" | "support" | "gm-upgrade"
+import { B3trTransaction } from "@/api"
 
 type Props = {
-  type: TransactionType
-  data: any
+  transaction: B3trTransaction
 }
-export const TransactionCard = ({ type, data }: Props) => {
-  switch (type) {
-    case "better-action":
-      return <BetterActionCard action={data} />
-    case "swap":
-      return <SwapCard data={data} />
-    case "claim":
-      return <ClaimCard data={data} />
-    case "support":
-      return <SupportCard data={data} />
-    case "gm-upgrade":
-      return <UpgradeGMCard data={data} />
+export const TransactionCard = ({ transaction }: Props) => {
+  switch (transaction.txType) {
+    case "B3TR_ACTION":
+      return <BetterActionTransactionCard transaction={transaction} />
+    case "SWAP":
+      return <SwapCard transaction={transaction} />
+    case "CLAIM_REWARD":
+      return <ClaimCard transaction={transaction} />
+    case "PROPOSAL_SUPPORT":
+      return <SupportCard transaction={transaction} />
+    case "UPGRADE_GM":
+      return <UpgradeGMCard transaction={transaction} />
     default:
       return null
   }

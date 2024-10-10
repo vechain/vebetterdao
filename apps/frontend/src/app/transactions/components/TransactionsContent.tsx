@@ -1,7 +1,6 @@
-import { TransactionType } from "@/components"
 import { useTranslation } from "react-i18next"
 import { useCallback, useMemo, useState } from "react"
-import { useTransactionsMock } from "@/api"
+import { useTransactions } from "@/api"
 import {
   VStack,
   Heading,
@@ -20,34 +19,36 @@ import { FaChevronDown, FaChevronLeft, FaChevronUp } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
 import dayjs from "dayjs"
 import InfiniteScroll from "react-infinite-scroll-component"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { TransactionType } from "@/constants"
 
 export const TransactionsContent = () => {
   const { t } = useTranslation()
 
-  const filters = useMemo(
+  const filters: { id: TransactionType | "all"; label: string }[] = useMemo(
     () => [
       {
         id: "all",
         label: t("All transactions"),
       },
       {
-        id: "better-action",
+        id: TransactionType.B3TR_ACTION,
         label: t("Better Action"),
       },
       {
-        id: "swap",
+        id: TransactionType.SWAP,
         label: t("Token conversion"),
       },
       {
-        id: "claim",
+        id: TransactionType.CLAIM_REWARD,
         label: t("Rewards"),
       },
       {
-        id: "support",
+        id: TransactionType.PROPOSAL_SUPPORT,
         label: t("Proposal support"),
       },
       {
-        id: "gm-upgrade",
+        id: TransactionType.UPGRADE_GM,
         label: t("Galaxy member"),
       },
     ],
@@ -58,26 +59,20 @@ export const TransactionsContent = () => {
 
   const selectedFilter = useMemo(() => filters.find(filter => filter.id === filterId), [filterId, filters])
 
-  const { data, fetchNextPage, hasNextPage } = useTransactionsMock({ kind: selectedFilter?.id || "all" })
-
+  const { account } = useWallet()
+  const { data, fetchNextPage, hasNextPage } = useTransactions({
+    user: account ?? "",
+    txType: selectedFilter?.id === "all" ? undefined : (selectedFilter?.id as TransactionType),
+  })
   const transactions = useMemo(() => {
-    return (
-      data?.pages.flatMap(page =>
-        page.data.map(transaction => ({
-          id: transaction.id,
-          type: transaction.type as TransactionType,
-          data: transaction,
-        })),
-      ) ?? []
-    )
+    return data?.pages.flatMap(page => page.data) ?? []
   }, [data])
-
   const groupTransactionsByDay = (transactions: any[]) => {
     return transactions
-      .sort((a, b) => b.data.blockTimestamp - a.data.blockTimestamp)
+      .sort((a, b) => b.blockTimestamp - a.blockTimestamp)
       .reduce<Record<string, any>>(
         (grouped, transaction) => {
-          const day = dayjs.unix(transaction.data.blockTimestamp).format("YYYY-MM-DD")
+          const day = dayjs.unix(transaction.blockTimestamp).format("YYYY-MM-DD")
           // Ensure the group for this day is initialized
           if (!grouped[day]) {
             grouped[day] = [] // This guarantees grouped[day] is always an array
@@ -134,19 +129,19 @@ export const TransactionsContent = () => {
             hasMore={!!hasNextPage}
             loader={<Spinner />}>
             <VStack spacing={6} align="stretch">
-              {Object.entries(groupedTransactions).length === 0 ? (
-                <Text>{t("No transactions found")}</Text>
-              ) : (
+              {transactions.length > 0 ? (
                 Object.entries(groupedTransactions).map(([day, transactions]) => (
                   <VStack key={day} spacing={3} align="stretch">
                     <Text fontWeight="600" color="#848484">
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
                     {transactions.map((transaction: any) => (
-                      <TransactionCard key={transaction.id} type={transaction.type} data={transaction.data} />
+                      <TransactionCard key={transaction.txId} transaction={transaction} />
                     ))}
                   </VStack>
                 ))
+              ) : (
+                <Text>{t("No transactions found")}</Text>
               )}
             </VStack>
           </InfiniteScroll>

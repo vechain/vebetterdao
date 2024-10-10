@@ -1,8 +1,8 @@
 import { buildQueryString } from "@/api/utils"
+import { TransactionType } from "@/constants"
 import { getConfig } from "@repo/config"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { z } from "zod"
-import dayjs from "dayjs"
 
 const indexerUrl = getConfig().indexerUrl
 
@@ -13,27 +13,29 @@ export const TransactionsResponseSchema = z.object({
   data: z
     .array(
       z.object({
-        id: z.string(),
-        type: z.enum(["swap", "claim", "support", "gm-upgrade"]),
         blockNumber: z.number(),
         blockTimestamp: z.number(),
-        amount: z.number(),
-        from: z.string(),
-        to: z.string(),
-        data: z.object({}).passthrough(),
+        user: z.string(),
+        txId: z.string(),
+        amountB3TR: z.number(),
+        amountVOT3: z.number(),
+        txType: z.enum(["SWAP", "CLAIM_REWARD", "PROPOSAL_SUPPORT", "UPGRADE_GM", "B3TR_ACTION"]),
       }),
     )
     .default([]),
 })
 
 export type TransactionsResponse = z.infer<typeof TransactionsResponseSchema>
+export type B3trTransaction = z.infer<typeof TransactionsResponseSchema>["data"][number]
 
 type TransactionsRequest = {
-  wallet: string
+  user: string
+  txType?: TransactionType
+  before?: number
+  after?: number
   page?: number
   size?: number
   direction?: "asc" | "desc"
-  kind?: string
 }
 
 /**
@@ -43,11 +45,11 @@ type TransactionsRequest = {
  */
 export const getTransactions = async (data: TransactionsRequest): Promise<TransactionsResponse> => {
   if (!indexerUrl) throw new Error("Indexer URL not found")
-  if (!data.wallet) throw new Error("wallet is required")
+  if (!data.user) throw new Error("wallet is required")
 
   const queryString = buildQueryString(data)
 
-  const response = await fetch(`${indexerUrl}/transactions?${queryString}`, {
+  const response = await fetch(`${indexerUrl}/b3tr-txs?${queryString}`, {
     method: "GET",
   })
 
@@ -60,9 +62,9 @@ export const getTransactions = async (data: TransactionsRequest): Promise<Transa
 
 export const getTransactionsQueryKey = (data: Omit<TransactionsRequest, "page" | "size">) => [
   "TRANSACTIONS",
-  data.wallet,
+  data.user,
   data.direction,
-  data.kind,
+  data.txType,
 ]
 
 /**
@@ -70,52 +72,12 @@ export const getTransactionsQueryKey = (data: Omit<TransactionsRequest, "page" |
  * @param data the request data @see TransactionsRequest
  * @returns the query object with the data @see TransactionsResponse
  */
-export const useTransactions = ({ wallet, direction = "desc", kind }: Omit<TransactionsRequest, "page" | "size">) => {
+export const useTransactions = ({ user, direction = "desc", txType }: Omit<TransactionsRequest, "page" | "size">) => {
   return useInfiniteQuery({
-    queryKey: getTransactionsQueryKey({ wallet, direction, kind }),
-    queryFn: ({ pageParam = 0 }) => getTransactions({ page: pageParam, wallet, direction, kind }),
+    queryKey: getTransactionsQueryKey({ user, direction, txType }),
+    queryFn: ({ pageParam = 0 }) => getTransactions({ page: pageParam, user, direction, txType }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,
-  })
-}
-
-/**
- * Mock version of useTransactions that returns 20 transactions from the past 30 days
- */
-export const useTransactionsMock = ({ kind }: { kind?: string }) => {
-  const generateMockData = (): TransactionsResponse => {
-    const now = dayjs()
-    const data = Array.from({ length: 20 }, (_, index) => ({
-      id: `tx-${index + 1}`,
-      type:
-        kind && kind !== "all"
-          ? (kind as "swap" | "claim" | "support" | "gm-upgrade")
-          : (["swap", "claim", "support", "gm-upgrade"][Math.floor(Math.random() * 4)] as
-              | "swap"
-              | "claim"
-              | "support"
-              | "gm-upgrade"),
-      blockNumber: 1000000 + index,
-      blockTimestamp: now.subtract(index % 30, "day").unix(),
-      amount: Math.floor(Math.random() * 1000) + 1,
-      from: `0x${Math.random().toString(16).substr(2, 40)}`,
-      to: `0x${Math.random().toString(16).substr(2, 40)}`,
-      data: {},
-    }))
-
-    return {
-      pagination: {
-        hasNext: false,
-      },
-      data,
-    }
-  }
-
-  return useInfiniteQuery({
-    queryKey: ["MOCK_TRANSACTIONS", kind],
-    queryFn: () => generateMockData(),
-    initialPageParam: 0,
-    getNextPageParam: () => undefined, // Only one page in this mock
   })
 }

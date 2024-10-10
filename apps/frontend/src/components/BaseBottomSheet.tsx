@@ -60,7 +60,7 @@ export const BaseBottomSheet = ({ isOpen, onClose, children, ariaTitle = "Bottom
               borderRadius: "10px 10px 0 0",
               flex: 1,
               overflowY: "auto", // Only scroll if content overflows
-              padding: "1rem",
+              padding: "1rem 1rem 2rem 1rem",
             }}>
             <Box mx={"auto"} w={"34px"} h={"5px"} bg={"#D7D6D4"} mb={4} rounded={"full"} />
             {children}
