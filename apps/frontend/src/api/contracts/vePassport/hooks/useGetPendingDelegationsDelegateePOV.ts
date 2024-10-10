@@ -13,7 +13,7 @@ const method = "getPendingDelegations"
  * @returns The query key for fetching pending delegations.
  */
 export const getPendingDelegationsQueryKeyDelegateePOV = (delegatee: string) => {
-  return getCallKey({ method, keyArgs: [delegatee] })
+  return getCallKey({ method, keyArgs: ["incoming", delegatee] })
 }
 
 /**
@@ -26,7 +26,9 @@ export const useGetPendingDelegationsDelegateePOV = (delegatee?: string | null) 
     contractInterface: vePassportInterface,
     contractAddress: VEPASSPORT_CONTRACT,
     method,
+    keyArgs: ["incoming", delegatee],
     args: [delegatee],
+    mapResponse: response => response.decoded[0] ?? [],
     enabled: !!delegatee,
   })
 }

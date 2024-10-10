@@ -1,25 +1,12 @@
-import {
-  Heading,
-  VStack,
-  Card,
-  CardBody,
-  HStack,
-  Button,
-  Text,
-  Flex,
-  Divider,
-  Stack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Heading, VStack, Card, CardBody, HStack, Button, Text, Flex, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { useGetUserDelegatee, useUserScore } from "@/api"
+import { useGetUserDelegatee, useUserActions, useUserScore } from "@/api"
 import { useMemo } from "react"
-import { UilArrowUpRight, UilCheck, UilTimes } from "@iconscout/react-unicons"
-import { AddressIcon } from "@/components/AddressIcon"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+import { UilArrowUpRight, UilCheck } from "@iconscout/react-unicons"
 import { DelegationModal } from "./components/DelegationModal"
-import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
 import { useGetUserPendingDelegationsDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
+import { DelegatorDelegations } from "./components/DelegatorDelegations"
+import { PendingDelegationDelegatorPOV } from "./components/PendingDelegationDelegatorPOV"
 
 export const VotingQualification = () => {
   const { t } = useTranslation()
@@ -30,12 +17,16 @@ export const VotingQualification = () => {
     useGetUserPendingDelegationsDelegatorPOV()
 
   const { isUserQualified, scorePercentage, isLoading: isScoreLoading } = useUserScore()
+  const { userActions, totalActions, isLoading: isUserActionsLoading } = useUserActions()
 
   const border = isUserQualified ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
   const progressLabel = useMemo(() => {
     if (isUserQualified) return t("QUALIFIED TO VOTE")
-    return t("{{scorePercentage}}% QUALIFIED TO VOTE", { scorePercentage })
-  }, [isUserQualified, scorePercentage, t])
+    return t("{{userActions}}/{{totalActions}} actions performed", {
+      userActions,
+      totalActions,
+    })
+  }, [isUserQualified, t, totalActions, userActions])
 
   const descriptionLabel = useMemo(() => {
     if (isUserQualified)
@@ -53,9 +44,8 @@ export const VotingQualification = () => {
   const lightColor = "#FCEEF1"
 
   const delegationModal = useDisclosure()
-  const revokeDelegationModal = useDisclosure()
 
-  if (isScoreLoading || isPendingDelegationsLoading) return null
+  if (isScoreLoading || isPendingDelegationsLoading || isUserActionsLoading) return null
 
   return (
     <Card borderRadius="xl" w="full" border={border}>
@@ -67,7 +57,7 @@ export const VotingQualification = () => {
                 <Heading fontSize="xl" fontWeight="700">
                   {t("Your Voting Qualification")}
                 </Heading>
-                {!isDelegator && isUserQualified && pendingDelegations?.length === 0 && (
+                {!isDelegator && isUserQualified && Number(pendingDelegations) === 0 && (
                   <Button
                     variant={"primaryGhost"}
                     onClick={delegationModal.onOpen}
@@ -105,52 +95,11 @@ export const VotingQualification = () => {
               </HStack>
             </VStack>
           </VStack>
-          {isDelegator && (
-            <>
-              <Divider />
-              <VStack align="stretch" gap={6}>
-                <VStack align="stretch">
-                  <HStack justify="space-between">
-                    <Heading fontSize="xl" fontWeight="700">
-                      {t("You’ve delegated your qualification")}
-                    </Heading>
-                  </HStack>
-                  <Text color="#6A6A6A" fontSize="md">
-                    {t("You are not currently able to vote due other user is using your Voting Qualification.")}
-                  </Text>
-                </VStack>
-                <Stack
-                  direction={["column", "column", "row"]}
-                  justify={"space-between"}
-                  bg="#F8F8F8"
-                  rounded="xl"
-                  p={3}
-                  gap={[2, 2, 6]}>
-                  <HStack gap={4}>
-                    <AddressIcon address={delegateeAddress} w={12} h={12} rounded="full" />
-                    <VStack align="start" gap={0}>
-                      <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
-                        {humanAddress(delegateeAddress, 4, 4)}
-                      </Text>
-                    </VStack>
-                  </HStack>
-                  <HStack>
-                    <Button
-                      variant={"dangerGhost"}
-                      p={3}
-                      leftIcon={<UilTimes color="#C84968" />}
-                      onClick={revokeDelegationModal.onOpen}>
-                      {t("Remove delegation")}
-                    </Button>
-                  </HStack>
-                </Stack>
-              </VStack>
-            </>
-          )}
+          <DelegatorDelegations />
+          <PendingDelegationDelegatorPOV />
         </VStack>
       </CardBody>
       <DelegationModal modal={delegationModal} />
-      <RevokeDelegationDelegatorPOVModal modal={revokeDelegationModal} delegatee={delegateeAddress} />
     </Card>
   )
 }
