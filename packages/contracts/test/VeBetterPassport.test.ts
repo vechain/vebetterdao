@@ -2134,7 +2134,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       expect(pendingDelegationForDelegator).to.deep.equal([[], delegatee.address])
 
       // Perform the delegation using the signature
-      await expect(veBetterPassport.connect(delegatee).removePendingDelegation(owner.address))
+      await expect(veBetterPassport.connect(delegatee).denyIncomingPendingDelegation(owner.address))
         .to.emit(veBetterPassport, "DelegationRevoked")
         .withArgs(owner.address, delegatee.address)
 
@@ -2156,6 +2156,156 @@ describe.only("VeBetterPassport - @shard3", function () {
             [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
           ),
       ).to.be.reverted
+    })
+
+    it("User with one incoming and one outgoing delegation should be able to cancel only one", async function () {
+      const {
+        otherAccounts,
+        owner,
+        veBetterPassport,
+        otherAccount: delegatee,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Use case: A has a pending delegation to B, and B has a pending delegation to C.
+      // B should be able to cancel only the pending delegation to C or from A.
+      const A = owner
+      const B = delegatee
+      const C = otherAccounts[0]
+
+      // A delegate to B
+      await expect(veBetterPassport.connect(A).delegatePassport(B.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(A.address, B.address)
+
+      // B delegate to C
+      await expect(veBetterPassport.connect(B).delegatePassport(C.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(B.address, C.address)
+
+      // If we check now the pending delegations of A we should see 1 outgoing to B
+      const pendingDelegationsOfA = await veBetterPassport.getPendingDelegations(A.address)
+      expect(pendingDelegationsOfA).to.deep.equal([[], B.address])
+
+      // If we check now the pending delegations of B we should see 1 incoming from A and 1 outgoing to C
+      const pendingDelegationsOfB = await veBetterPassport.getPendingDelegations(B.address)
+      expect(pendingDelegationsOfB).to.deep.equal([[A.address], C.address])
+
+      // If we check now the pending delegations of C we should see 1 incoming from B
+      const pendingDelegationsOfC = await veBetterPassport.getPendingDelegations(C.address)
+      expect(pendingDelegationsOfC).to.deep.equal([[B.address], ZeroAddress])
+
+      // B should be able to cancel only the outgoing delegation to C
+      await veBetterPassport.connect(B).cancelOutgoingPendingDelegation()
+      // should still have 1 incoming and 0 outgoing
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[A.address], ZeroAddress])
+
+      // Now we return to original simulation with B trying to delegate again to C
+      await expect(veBetterPassport.connect(B).delegatePassport(C.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(B.address, C.address)
+
+      // should have 1 incoming and 1 outgoing
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[A.address], C.address])
+
+      // This time B wants to remove pending delegation from A
+      await veBetterPassport.connect(B).denyIncomingPendingDelegation(A.address)
+      // should have 0 incoming and 1 outgoing
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[], C.address])
+
+      const pendingDelegationsOfB2 = await veBetterPassport.getPendingDelegations(B.address)
+      expect(pendingDelegationsOfB2).to.deep.equal([[], C.address])
+
+      // If C want to delegate to A, B should not be able to remove it
+      await expect(veBetterPassport.connect(C).delegatePassport(A.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(C.address, A.address)
+
+      await expect(veBetterPassport.connect(B).denyIncomingPendingDelegation(A.address)).to.be.reverted
+    })
+
+    it("If A has a pending delegation to B, and B has a pending delegation to A, then A or B should be able to cancel only one", async function () {
+      const {
+        owner,
+        veBetterPassport,
+        otherAccount: delegatee,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const A = owner
+      const B = delegatee
+
+      // A delegate to B
+      await expect(veBetterPassport.connect(A).delegatePassport(B.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(A.address, B.address)
+
+      // B delegate to A
+      await expect(veBetterPassport.connect(B).delegatePassport(A.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(B.address, A.address)
+
+      // Get pending delegations of A
+      const pendingDelegationsOfA = await veBetterPassport.getPendingDelegations(A.address)
+      expect(pendingDelegationsOfA).to.deep.equal([[B.address], B.address])
+
+      // Get pending delegations of B
+      const pendingDelegationsOfB = await veBetterPassport.getPendingDelegations(B.address)
+      expect(pendingDelegationsOfB).to.deep.equal([[A.address], A.address])
+
+      // A should be able to cancel only the pending delegation to B
+      await veBetterPassport.connect(A).cancelOutgoingPendingDelegation()
+      // should still have 1 incoming and 0 outgoing
+      expect(await veBetterPassport.getPendingDelegations(A.address)).to.deep.equal([[B.address], ZeroAddress])
+
+      // Now we return to original simulation with A trying to delegate to B
+      await expect(veBetterPassport.connect(A).delegatePassport(B.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(A.address, B.address)
+
+      // should have 1 incoming and 1 outgoing
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[A.address], A.address])
+
+      // This time A wants to remove the incoming delegation from B
+      await veBetterPassport.connect(A).denyIncomingPendingDelegation(B.address)
+      // should have 0 incoming and 1 outgoing
+      expect(await veBetterPassport.getPendingDelegations(A.address)).to.deep.equal([[], B.address])
+    })
+
+    it("If A delegates to B, and C delegates to B (both pending), then B should be able to cancel only one", async function () {
+      const {
+        owner,
+        veBetterPassport,
+        otherAccount: delegatee,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const A = owner
+      const B = delegatee
+      const C = otherAccounts[0]
+
+      // A delegate to B
+      await expect(veBetterPassport.connect(A).delegatePassport(B.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(A.address, B.address)
+
+      // C delegate to B
+      await expect(veBetterPassport.connect(C).delegatePassport(B.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(C.address, B.address)
+
+      // Get pending delegations of B: should have 2 incoming delegations from A and C, and 0 outgoing
+      const pendingDelegationsOfB = await veBetterPassport.getPendingDelegations(B.address)
+      expect(pendingDelegationsOfB).to.deep.equal([[A.address, C.address], ZeroAddress])
+
+      // B should be able to cancel only the pending delegation from A
+      await veBetterPassport.connect(B).denyIncomingPendingDelegation(A.address)
+      // should still have 1 incoming and 0 outgoing
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[C.address], ZeroAddress])
     })
 
     it("Should not be able to vote if delegating and not delegatee with allocation voting", async function () {

@@ -432,6 +432,24 @@ interface IVeBetterPassport {
   /// @param maxEntities - the maximum number of entities
   function setMaxEntitiesPerPassport(uint256 maxEntities) external;
 
+  /// @notice Delegate the personhood to another address
+  /// @param delegatee - the delegatee address
+  function delegatePassport(address delegatee) external;
+
+  /// @notice Allow the delegatee to accept the delegation
+  /// @param delegator - the delegator address
+  function acceptDelegation(address delegator) external;
+
+  /// @notice Revoke the delegation (can be done by the delegator or the delegatee)
+  function revokeDelegation() external;
+
+  /// @notice Allows a delegator to deny (and remove) an incoming pending delegation.
+  /// @param delegator - the user who is delegating to me (aka the delegator)
+  function denyIncomingPendingDelegation(address delegator) external;
+
+  /// @notice Allows a delegator to cancel (and remove) the outgoing pending delegation.
+  function cancelOutgoingPendingDelegation() external;
+
   /// @notice Returns the delegatee address for a delegator
   /// @param delegator The delegator's address
   /// @return The address of the delegatee

@@ -637,11 +637,17 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     PassportDelegationLogic.revokeDelegation($);
   }
 
-  /// @notice Allows a delegator to remove their pending delegation to a delegatee.
-  /// @param delegator - the delegator address
-  function removePendingDelegation(address delegator) external {
+  /// @notice Allows a user to deny (and remove) an incoming pending delegation.
+  /// @param delegator - the user who is delegating to me (aka the delegator)
+  function denyIncomingPendingDelegation(address delegator) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportDelegationLogic.removePendingDelegation($, delegator);
+    PassportDelegationLogic.denyIncomingPendingDelegation($, delegator);
+  }
+
+  /// @notice Allows a delegator to cancel (and remove) the outgoing pending delegation.
+  function cancelOutgoingPendingDelegation() external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportDelegationLogic.cancelOutgoingPendingDelegation($);
   }
 
   /// @notice Signals a user
