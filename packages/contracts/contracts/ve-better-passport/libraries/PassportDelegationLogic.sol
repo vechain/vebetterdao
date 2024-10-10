@@ -198,29 +198,17 @@ library PassportDelegationLogic {
   }
 
   /**
-   * @notice Returns a list of pending delegations for the given delegatee.
+   * @notice Returns a list of pending delegations for the given user.
    * @param self The storage object for the Passport contract containing delegation data.
-   * @param delegatee The address of the delegatee whose pending delegations are being queried.
-   * @return An array of addresses representing delegators with pending delegations for the delegatee.
+   * @param user The address of the user whose pending delegations are being queried.
+   * @return incoming The addresses of users that are delegating to the user.
+   * @return outgoing The address that the user is delegating to.
    */
   function getPendingDelegations(
     PassportStorageTypes.PassportStorage storage self,
-    address delegatee
-  ) internal view returns (address[] memory) {
-    return self.pendingDelegationsDelegateeToDelegators[delegatee];
-  }
-
-  /**
-   * @notice Returns the pending delegatation for a given delegator.
-   * @param self The storage object for the Passport contract containing delegation data.
-   * @param delegator The address of the delegator whose pending delegation is being queried.
-   * @return The address that is pending delegation for the given delegator.
-   */
-  function getPendingDelegatorDelegations(
-    PassportStorageTypes.PassportStorage storage self,
-    address delegator
-  ) internal view returns (address) {
-    return self.pendingDelegationsDelegatorToDelegatee[delegator];
+    address user
+  ) internal view returns (address[] memory incoming, address outgoing) {
+    return (self.pendingDelegationsDelegateeToDelegators[user], self.pendingDelegationsDelegatorToDelegatee[user]);
   }
 
   // ---------- Setters ------------ //
