@@ -26,6 +26,8 @@ pragma solidity 0.8.20;
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { PassportTypes } from "./PassportTypes.sol";
 import { PassportEntityLogic } from "./PassportEntityLogic.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { PassportClockLogic } from "./PassportClockLogic.sol";
 
 /**
  * @title PassportPoPScoreLogic
@@ -34,6 +36,8 @@ import { PassportEntityLogic } from "./PassportEntityLogic.sol";
  * exponential decay, and various other factors. The PoP score can determine if a user qualifies as a person in the Passport system.
  */
 library PassportPoPScoreLogic {
+  using Checkpoints for Checkpoints.Trace208;
+
   // ---------- Events ---------- //
   /// @notice Emitted when a user registers an action
   /// @param user - the user that registered the action
@@ -110,10 +114,16 @@ library PassportPoPScoreLogic {
   }
 
   /// @notice Gets the threshold for a user to be considered a person
-  function thresholdParticipationScore(
-    PassportStorageTypes.PassportStorage storage self
-  ) internal view returns (uint256) {
-    return self.popScoreThreshold;
+  function thresholdPoPScore(PassportStorageTypes.PassportStorage storage self) internal view returns (uint256) {
+    return self.popScoreThreshold.latest();
+  }
+
+  /// @notice Gets the threshold for a user to be considered a person at a specific timepoint
+  function thresholdPoPScoreAtTimepoint(
+    PassportStorageTypes.PassportStorage storage self,
+    uint48 timepoint
+  ) external view returns (uint256) {
+    return _thresholdPoPScoreAtTimepoint(self, timepoint);
   }
 
   /// @notice Gets the security multiplier for an app security
@@ -163,10 +173,10 @@ library PassportPoPScoreLogic {
 
   /// @notice Sets the threshold for a user to be considered a person
   /// @param threshold - the round threshold
-  function setThreshold(PassportStorageTypes.PassportStorage storage self, uint256 threshold) external {
+  function setThresholdPoPScore(PassportStorageTypes.PassportStorage storage self, uint208 threshold) external {
     require(threshold > 0, "ProofOfParticipation: threshold is zero");
 
-    self.popScoreThreshold = threshold;
+    self.popScoreThreshold.push(PassportClockLogic.clock(), threshold);
   }
 
   /// @notice Sets the number of rounds to consider for the cumulative score
@@ -234,6 +244,16 @@ library PassportPoPScoreLogic {
     }
 
     return cumulativeScore;
+  }
+
+  /**
+   * @dev Internal funciton to get the threshold for a user to be considered a person at a specific timepoint
+   */
+  function _thresholdPoPScoreAtTimepoint(
+    PassportStorageTypes.PassportStorage storage self,
+    uint48 timepoint
+  ) internal view returns (uint256) {
+    return self.popScoreThreshold.upperLookupRecent(timepoint);
   }
 
   /**
