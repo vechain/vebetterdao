@@ -394,13 +394,16 @@ interface IVeBetterPassport {
   /// @param entity - the entity address
   function acceptEntityLink(address entity) external;
 
+  /// @notice Deny an incoming pending entity link to the sender's passport.
+  /// @param entity - the entity address
+  function denyIncomingPendingEntityLink(address entity) external;
+
+  /// @notice Cancel an outgoing pending entity link from the sender.
+  function cancelOutgoingPendingEntityLink() external;
+
   /// @notice Remove the email link
   /// @param entity - the entity address
   function removeEntityLink(address entity) external;
-
-  /// @notice Allows a entity to remove their pending delegation to a passport.
-  /// @param entity - the entity address
-  function removePendingEntityLinkFromPassport(address entity) external;
 
   /// @notice Registers an action for a user
   /// @param user - the user that performed the action

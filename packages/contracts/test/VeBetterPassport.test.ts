@@ -21,7 +21,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { ZeroAddress } from "ethers"
 
-describe.only("VeBetterPassport - @shard3", function () {
+describe("VeBetterPassport - @shard3", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await getOrDeployContractInstances({
@@ -862,8 +862,7 @@ describe.only("VeBetterPassport - @shard3", function () {
         .to.emit(veBetterPassport, "LinkPending")
         .withArgs(entity.address, passport.address)
 
-      await expect(veBetterPassport.connect(randomWallet).removePendingEntityLinkFromPassport(entity.address)).to.be
-        .reverted
+      await expect(veBetterPassport.connect(randomWallet).denyIncomingPendingDelegation(entity.address)).to.be.reverted
 
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.false
@@ -975,7 +974,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(1)
 
       // Cancel the pending link
-      await expect(veBetterPassport.connect(passport).removePendingEntityLinkFromPassport(entity.address))
+      await expect(veBetterPassport.connect(passport).denyIncomingPendingEntityLink(entity.address))
         .to.emit(veBetterPassport, "LinkRemoved")
         .withArgs(entity.address, passport.address)
 
@@ -985,6 +984,53 @@ describe.only("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.isPassport(passport.address)).to.be.true
       // Expect no pending link
       expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(0)
+    })
+
+    it("If A wants to link to C, and B wants to link to C, A should be able to deny only B's link request", async function () {
+      const { veBetterPassport, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const A = otherAccounts[0]
+      const B = otherAccounts[1]
+      const C = otherAccounts[2]
+
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(A.address)).to.be.false
+      expect(await veBetterPassport.isEntity(B.address)).to.be.false
+      expect(await veBetterPassport.isEntity(C.address)).to.be.false
+
+      // A wants to link to C
+      await expect(veBetterPassport.connect(A).linkEntityToPassport(C.address))
+        .to.emit(veBetterPassport, "LinkPending")
+        .withArgs(A.address, C.address)
+
+      // B wants to link to C
+      await expect(veBetterPassport.connect(B).linkEntityToPassport(C.address))
+        .to.emit(veBetterPassport, "LinkPending")
+        .withArgs(B.address, C.address)
+
+      // C should have 2 incoming pending links and 0 outgoing pending links
+      expect((await veBetterPassport.getPendingLinkings(C.address))[0]).to.deep.equal([A.address, B.address])
+      expect((await veBetterPassport.getPendingLinkings(C.address))[1]).to.equal(ZeroAddress)
+
+      // C denies A's link request
+      await expect(veBetterPassport.connect(C).denyIncomingPendingEntityLink(A.address))
+        .to.emit(veBetterPassport, "LinkRemoved")
+        .withArgs(A.address, C.address)
+
+      // C should have 1 incoming pending links and 0 outgoing pending links
+      expect((await veBetterPassport.getPendingLinkings(C.address))[0]).to.deep.equal([B.address])
+      expect((await veBetterPassport.getPendingLinkings(C.address))[1]).to.equal(ZeroAddress)
+
+      // B should be able to cancel his link request to C
+      await expect(veBetterPassport.connect(B).cancelOutgoingPendingEntityLink())
+        .to.emit(veBetterPassport, "LinkRemoved")
+        .withArgs(B.address, C.address)
+
+      // C should have 1 incoming pending links and 0 outgoing pending links
+      expect((await veBetterPassport.getPendingLinkings(C.address))[0]).to.deep.equal([])
+      expect((await veBetterPassport.getPendingLinkings(C.address))[1]).to.equal(ZeroAddress)
     })
 
     it("Should not be able to assign an entity to a passport if the entity is already linked to another passport", async function () {
