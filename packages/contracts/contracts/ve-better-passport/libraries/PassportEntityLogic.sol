@@ -381,30 +381,38 @@ library PassportEntityLogic {
   }
 
   /**
-   * @notice Removes a pending entity link to a passport.
-   * @dev Can only be called by the passport or the entity involved in the pending link.
+   * @notice Deny an incoming pending entity link to the sender's passport.
+   * @dev Only the passport can deny an incoming pending link.
    * @param entity The address of the entity with a pending link to the passport.
    */
-  function removePendingEntityLinkFromPassport(
-    PassportStorageTypes.PassportStorage storage self,
-    address entity
-  ) external {
+  function denyIncomingPendingEntityLink(PassportStorageTypes.PassportStorage storage self, address entity) external {
     address passport = self.pendingLinksEntityToPassport[entity];
-
-    // Ensure the entity has a pending link to the passport
     if (passport == address(0)) {
       revert NotLinked(entity);
     }
 
-    // Ensure the caller is either the passport or the entity
-    if (msg.sender != entity && msg.sender != passport) {
+    // Ensure the caller is the passport that the entity is trying to link to
+    if (passport != msg.sender) {
       revert UnauthorizedUser(msg.sender);
     }
 
-    // Remove the pending link
     _removePendingEntityLink(self, entity, passport);
 
     emit LinkRemoved(entity, passport);
+  }
+
+  /**
+   * @notice Cancel an outgoing pending entity link from the sender.
+   */
+  function cancelOutgoingPendingEntityLink(PassportStorageTypes.PassportStorage storage self) external {
+    address passport = self.pendingLinksEntityToPassport[msg.sender];
+    if (passport == address(0)) {
+      revert NotLinked(msg.sender);
+    }
+
+    _removePendingEntityLink(self, msg.sender, passport);
+
+    emit LinkRemoved(msg.sender, passport);
   }
 
   /**
