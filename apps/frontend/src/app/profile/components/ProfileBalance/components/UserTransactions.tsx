@@ -1,6 +1,7 @@
-import { useTransactionsMock } from "@/api"
-import { TransactionCard, TransactionType } from "@/components"
+import { useTransactions } from "@/api"
+import { TransactionCard } from "@/components"
 import { Button, Card, CardBody, Flex, Heading, VStack } from "@chakra-ui/react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -8,18 +9,13 @@ import { useTranslation } from "react-i18next"
 export const UserTransactions = () => {
   const { t } = useTranslation()
 
-  const { data } = useTransactionsMock({ kind: "all" })
+  const { account } = useWallet()
+  const { data } = useTransactions({
+    user: account ?? "",
+  })
 
   const transactions = useMemo(() => {
-    return (
-      data?.pages.flatMap(page =>
-        page.data.map(transaction => ({
-          id: transaction.id,
-          type: transaction.type as TransactionType,
-          data: transaction,
-        })),
-      ) ?? []
-    )
+    return data?.pages.flatMap(page => page.data) ?? []
   }, [data])
 
   const last5Transactions = useMemo(() => {
@@ -40,14 +36,16 @@ export const UserTransactions = () => {
           </VStack>
           <VStack spacing={4} align="stretch">
             {last5Transactions.map(transaction => (
-              <TransactionCard key={transaction.id} type={transaction.type} data={transaction.data} />
+              <TransactionCard key={transaction.txId} transaction={transaction} />
             ))}
           </VStack>
-          <Flex justify="center">
-            <Button variant={"primaryGhost"} onClick={handleSeeAll}>
-              {t("See all")}
-            </Button>
-          </Flex>
+          {transactions.length > 5 && (
+            <Flex justify="center">
+              <Button variant={"primaryGhost"} onClick={handleSeeAll}>
+                {t("See all")}
+              </Button>
+            </Flex>
+          )}
         </VStack>
       </CardBody>
     </Card>

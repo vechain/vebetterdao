@@ -2,15 +2,12 @@ import { Card, CardBody, Flex, HStack, Text, VStack } from "@chakra-ui/react"
 import { UilHeart } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
-
+import { B3trTransaction } from "@/api"
 type Props = {
-  data: {
-    amount: string
-    blockTimestamp: number
-  }
+  transaction: B3trTransaction
 }
 
-export const SupportCard = ({ data }: Props) => {
+export const SupportCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
   return (
     <Card variant={"filledSmall"} w="full" cursor="pointer">
@@ -30,7 +27,7 @@ export const SupportCard = ({ data }: Props) => {
                 </Text>
               </HStack>
               <Text fontSize={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
-                {dayjs.unix(data?.blockTimestamp ?? 0).fromNow()}
+                {dayjs.unix(transaction?.blockTimestamp ?? 0).fromNow()}
               </Text>
             </VStack>
           </HStack>
@@ -38,7 +35,7 @@ export const SupportCard = ({ data }: Props) => {
             <HStack spacing={2}>
               <Text fontWeight={600}>
                 {"-"}
-                {data.amount}
+                {transaction.amountVOT3}
               </Text>
               <Text fontWeight={400} fontSize={"sm"}>
                 {"VOT3"}
