@@ -198,29 +198,17 @@ library PassportDelegationLogic {
   }
 
   /**
-   * @notice Returns a list of pending delegations for the given delegatee.
+   * @notice Returns a list of pending delegations for the given user.
    * @param self The storage object for the Passport contract containing delegation data.
-   * @param delegatee The address of the delegatee whose pending delegations are being queried.
-   * @return An array of addresses representing delegators with pending delegations for the delegatee.
+   * @param user The address of the user whose pending delegations are being queried.
+   * @return incoming The addresses of users that are delegating to the user.
+   * @return outgoing The address that the user is delegating to.
    */
   function getPendingDelegations(
     PassportStorageTypes.PassportStorage storage self,
-    address delegatee
-  ) internal view returns (address[] memory) {
-    return self.pendingDelegationsDelegateeToDelegators[delegatee];
-  }
-
-  /**
-   * @notice Returns the pending delegatation for a given delegator.
-   * @param self The storage object for the Passport contract containing delegation data.
-   * @param delegator The address of the delegator whose pending delegation is being queried.
-   * @return The address that is pending delegation for the given delegator.
-   */
-  function getPendingDelegatorDelegations(
-    PassportStorageTypes.PassportStorage storage self,
-    address delegator
-  ) internal view returns (address) {
-    return self.pendingDelegationsDelegatorToDelegatee[delegator];
+    address user
+  ) internal view returns (address[] memory incoming, address outgoing) {
+    return (self.pendingDelegationsDelegateeToDelegators[user], self.pendingDelegationsDelegatorToDelegatee[user]);
   }
 
   // ---------- Setters ------------ //
@@ -371,6 +359,51 @@ library PassportDelegationLogic {
   }
 
   /**
+   * @notice Allows a user to deny (and remove) an incoming pending delegation.
+   * @param self The storage object for the Passport contract.
+   * @param delegator the user who is delegating to me (aka the delegator)
+   */
+  function denyIncomingPendingDelegation(
+    PassportStorageTypes.PassportStorage storage self,
+    address delegator
+  ) external {
+    address delegatee = self.pendingDelegationsDelegatorToDelegatee[delegator];
+
+    // Check if the pending delegation exists
+    if (delegatee == address(0)) {
+      revert NotDelegated(delegator);
+    }
+
+    // Check caller is the delegatee
+    if (msg.sender != delegatee) {
+      revert PassportDelegationUnauthorizedUser(msg.sender);
+    }
+
+    // Use the _removePendingDelegation function to handle the deletion logic
+    _removePendingDelegation(self, delegator, delegatee);
+
+    emit DelegationRevoked(delegator, delegatee);
+  }
+
+  /**
+   * @notice Allows a delegator to cancel (and remove) the outgoing pending delegation.
+   * @param self The storage object for the Passport contract.
+   */
+  function cancelOutgoingPendingDelegation(PassportStorageTypes.PassportStorage storage self) external {
+    address delegatee = self.pendingDelegationsDelegatorToDelegatee[msg.sender];
+
+    // Check if the pending delegation exists
+    if (delegatee == address(0)) {
+      revert NotDelegated(msg.sender);
+    }
+
+    // Use the _removePendingDelegation function to handle the deletion logic
+    _removePendingDelegation(self, msg.sender, delegatee);
+
+    emit DelegationRevoked(msg.sender, delegatee);
+  }
+
+  /**
    * @notice Allows a delegator or delegatee to revoke an existing delegation.
    * This removes the delegation between the delegator and the delegatee.
    * @param self The storage object for the Passport contract.
@@ -393,31 +426,6 @@ library PassportDelegationLogic {
 
     // Revoke the delegation and reset the checkpoints
     _removeDelegation(self, delegator, delegatee);
-  }
-
-  /**
-   * @notice Allows a delegator to remove a pending delegation.
-   * This removes the pending delegation between the delegator and the delegatee.
-   * @param self The storage object for the Passport contract.
-   * @param delegator The address of the delegator.
-   */
-  function removePendingDelegation(PassportStorageTypes.PassportStorage storage self, address delegator) external {
-    address delegatee = self.pendingDelegationsDelegatorToDelegatee[delegator];
-
-    // Check if the pending delegation exists
-    if (delegatee == address(0)) {
-      revert NotDelegated(delegator);
-    }
-
-    // Check caller is the delegator or the delegatee
-    if (msg.sender != delegator && msg.sender != delegatee) {
-      revert PassportDelegationUnauthorizedUser(msg.sender);
-    }
-
-    // Use the _removePendingDelegation function to handle the deletion logic
-    _removePendingDelegation(self, delegator, delegatee);
-
-    emit DelegationRevoked(delegator, delegatee);
   }
 
   // ---------- Private ---------- //

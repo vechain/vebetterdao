@@ -56,6 +56,8 @@ export type SustainabilityActionsResponse = z.infer<typeof SustainabilityActions
 type SustainabilityActionsRequest = {
   appId?: string
   wallet?: string
+  before?: number
+  after?: number
   page?: number
   size?: number
   direction?: "asc" | "desc"
@@ -90,6 +92,8 @@ export const getSustainabilitActionsQueryKey = (data: Omit<SustainabilityActions
   "ACTIONS",
   data.appId,
   data.wallet,
+  ...(data.before ? ["BEFORE", data.before] : []),
+  ...(data.after ? ["AFTER", data.after] : []),
   data.direction,
 ]
 
@@ -98,14 +102,10 @@ export const getSustainabilitActionsQueryKey = (data: Omit<SustainabilityActions
  * @param data the request data @see SustainabilityUserOverviewRequest
  * @returns the query object with the data @see SustainabilityActionsResponse
  */
-export const useSustainabilityActions = ({
-  wallet,
-  appId,
-  direction = "asc",
-}: Omit<SustainabilityActionsRequest, "page" | "size">) => {
+export const useSustainabilityActions = (data: Omit<SustainabilityActionsRequest, "page" | "size">) => {
   return useInfiniteQuery({
-    queryKey: getSustainabilitActionsQueryKey({ wallet, appId, direction }),
-    queryFn: ({ pageParam = 0 }) => getSustainabilityActions({ page: pageParam, wallet, appId, direction }),
+    queryKey: getSustainabilitActionsQueryKey(data),
+    queryFn: ({ pageParam = 0 }) => getSustainabilityActions({ page: pageParam, ...data }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,

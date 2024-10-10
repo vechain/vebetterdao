@@ -21,7 +21,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { ZeroAddress } from "ethers"
 
-describe.only("VeBetterPassport - @shard3", function () {
+describe("VeBetterPassport - @shard3", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await getOrDeployContractInstances({
@@ -676,7 +676,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.false
       // Expect pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(1)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(1)
 
       // Approve the entity
       await expect(veBetterPassport.connect(passport).acceptEntityLink(entity.address))
@@ -688,7 +688,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if passport is linked to an entity
       expect(await veBetterPassport.isPassport(passport.address)).to.equal(true)
       // Expect no pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(0)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(0)
     })
 
     it("Should be able to register an entity by signature", async function () {
@@ -815,7 +815,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.false
       // Expect pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(1)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(1)
 
       // Approve the entity
       await expect(veBetterPassport.connect(passport).acceptEntityLink(entity.address))
@@ -827,7 +827,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if passport is linked to an entity
       expect(await veBetterPassport.isPassport(passport.address)).to.equal(true)
       // Expect no pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(0)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(0)
 
       // Unlink the entity
       await expect(veBetterPassport.connect(passport).removeEntityLink(entity.address))
@@ -862,13 +862,18 @@ describe.only("VeBetterPassport - @shard3", function () {
         .to.emit(veBetterPassport, "LinkPending")
         .withArgs(entity.address, passport.address)
 
-      await expect(veBetterPassport.connect(randomWallet).removePendingEntityLinkFromPassport(entity.address)).to.be
-        .reverted
+      await expect(veBetterPassport.connect(randomWallet).denyIncomingPendingDelegation(entity.address)).to.be.reverted
 
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.false
       // Expect pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(1)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(1)
+      // Expect no outgoing pending link
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[1]).to.equal(ZeroAddress)
+      // Expect an outgoing pending link from the random wallet to the entity
+      expect((await veBetterPassport.getPendingLinkings(entity.address))[1]).to.equal(passport.address)
+      // Expect no incoming pending link
+      expect((await veBetterPassport.getPendingLinkings(entity.address))[0].length).to.equal(0)
 
       // Approve the entity
       await expect(veBetterPassport.connect(passport).acceptEntityLink(entity.address))
@@ -880,7 +885,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if passport is linked to an entity
       expect(await veBetterPassport.isPassport(passport.address)).to.equal(true)
       // Expect no pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(0)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(0)
 
       // Unlink the entity
       await expect(
@@ -966,10 +971,10 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.false
       // Expect pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(1)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(1)
 
       // Cancel the pending link
-      await expect(veBetterPassport.connect(passport).removePendingEntityLinkFromPassport(entity.address))
+      await expect(veBetterPassport.connect(passport).denyIncomingPendingEntityLink(entity.address))
         .to.emit(veBetterPassport, "LinkRemoved")
         .withArgs(entity.address, passport.address)
 
@@ -978,7 +983,85 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if passport is linked to an entity
       expect(await veBetterPassport.isPassport(passport.address)).to.be.true
       // Expect no pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport.address)).length).to.equal(0)
+      expect((await veBetterPassport.getPendingLinkings(passport.address))[0].length).to.equal(0)
+    })
+
+    it("Only the link target can deny an incoming link request", async function () {
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(entity.address)).to.be.false
+      // Check if passport is linked to an entity
+      expect(await veBetterPassport.isPassport(passport.address)).to.be.true
+
+      // Approve the entity
+      await expect(veBetterPassport.connect(entity).linkEntityToPassport(passport.address))
+        .to.emit(veBetterPassport, "LinkPending")
+        .withArgs(entity.address, passport.address)
+
+      // Try to deny the link request
+      await expect(
+        veBetterPassport.connect(otherAccounts[1]).denyIncomingPendingEntityLink(entity.address),
+      ).to.be.revertedWithCustomError(veBetterPassport, "UnauthorizedUser")
+
+      // The target of the link should be able to deny the link request
+      await expect(veBetterPassport.connect(passport).denyIncomingPendingEntityLink(entity.address))
+        .to.emit(veBetterPassport, "LinkRemoved")
+        .withArgs(entity.address, passport.address)
+    })
+
+    it("If A wants to link to C, and B wants to link to C, A should be able to deny only B's link request", async function () {
+      const { veBetterPassport, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const A = otherAccounts[0]
+      const B = otherAccounts[1]
+      const C = otherAccounts[2]
+
+      // Check if entity is linked to a passport
+      expect(await veBetterPassport.isEntity(A.address)).to.be.false
+      expect(await veBetterPassport.isEntity(B.address)).to.be.false
+      expect(await veBetterPassport.isEntity(C.address)).to.be.false
+
+      // A wants to link to C
+      await expect(veBetterPassport.connect(A).linkEntityToPassport(C.address))
+        .to.emit(veBetterPassport, "LinkPending")
+        .withArgs(A.address, C.address)
+
+      // B wants to link to C
+      await expect(veBetterPassport.connect(B).linkEntityToPassport(C.address))
+        .to.emit(veBetterPassport, "LinkPending")
+        .withArgs(B.address, C.address)
+
+      // C should have 2 incoming pending links and 0 outgoing pending links
+      expect((await veBetterPassport.getPendingLinkings(C.address))[0]).to.deep.equal([A.address, B.address])
+      expect((await veBetterPassport.getPendingLinkings(C.address))[1]).to.equal(ZeroAddress)
+
+      // C denies A's link request
+      await expect(veBetterPassport.connect(C).denyIncomingPendingEntityLink(A.address))
+        .to.emit(veBetterPassport, "LinkRemoved")
+        .withArgs(A.address, C.address)
+
+      // C should have 1 incoming pending links and 0 outgoing pending links
+      expect((await veBetterPassport.getPendingLinkings(C.address))[0]).to.deep.equal([B.address])
+      expect((await veBetterPassport.getPendingLinkings(C.address))[1]).to.equal(ZeroAddress)
+
+      // B should be able to cancel his link request to C
+      await expect(veBetterPassport.connect(B).cancelOutgoingPendingEntityLink())
+        .to.emit(veBetterPassport, "LinkRemoved")
+        .withArgs(B.address, C.address)
+
+      // C should have 1 incoming pending links and 0 outgoing pending links
+      expect((await veBetterPassport.getPendingLinkings(C.address))[0]).to.deep.equal([])
+      expect((await veBetterPassport.getPendingLinkings(C.address))[1]).to.equal(ZeroAddress)
     })
 
     it("Should not be able to assign an entity to a passport if the entity is already linked to another passport", async function () {
@@ -1010,7 +1093,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.false
       // Expect pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport1.address)).length).to.equal(1)
+      expect((await veBetterPassport.getPendingLinkings(passport1.address))[0].length).to.equal(1)
 
       // Approve the entity
       await expect(veBetterPassport.connect(passport1).acceptEntityLink(entity.address))
@@ -1023,7 +1106,7 @@ describe.only("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.isPassport(passport1.address)).to.be.true
       expect(await veBetterPassport.isPassport(passport2.address)).to.be.true
       // Expect no pending link
-      expect((await veBetterPassport.getPendingEntitiesForPassport(passport1.address)).length).to.equal(0)
+      expect((await veBetterPassport.getPendingLinkings(passport1.address))[0].length).to.equal(0)
 
       // Try to link the entity to another passport
       await expect(
@@ -2014,13 +2097,13 @@ describe.only("VeBetterPassport - @shard3", function () {
         .to.emit(veBetterPassport, "DelegationPending")
         .withArgs(owner.address, delegatee.address)
 
-      // Check the pending delegation
+      // Check the pending delegation: 1 incoming and 0 outgoing
       const pendingDelegation = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation[0]).to.equal(owner.address)
+      expect(pendingDelegation).to.deep.equal([[owner.address], ZeroAddress])
 
-      // Check the pending delegation from delegator POV
-      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegationForDelegator).to.equal(delegatee.address)
+      // Check the pending delegation from delegator POV: 0 incoming and 1 outgoing
+      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator).to.deep.equal([[], delegatee.address])
 
       // Perform the delegation using the signature
       await expect(veBetterPassport.connect(delegatee).acceptDelegation(owner.address))
@@ -2029,11 +2112,11 @@ describe.only("VeBetterPassport - @shard3", function () {
 
       // Check the pending delegation
       const pendingDelegation2 = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation2.length).to.equal(0)
+      expect(pendingDelegation2).to.deep.equal([[], ZeroAddress])
 
       // Check the pending delegation from delegator POV
-      const pendingDelegation3 = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegation3).to.equal(ZeroAddress)
+      const pendingDelegationForDelegator2 = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator2).to.deep.equal([[], ZeroAddress])
 
       // Verify that the delegatee has been assigned the delegator
       const storedDelegatee = await veBetterPassport.getDelegatee(owner.address)
@@ -2121,24 +2204,24 @@ describe.only("VeBetterPassport - @shard3", function () {
 
       // Check the pending delegation
       const pendingDelegation = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation[0]).to.equal(owner.address)
+      expect(pendingDelegation).to.deep.equal([[owner.address], ZeroAddress])
 
       // Check the pending delegation from delegator POV
-      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegationForDelegator).to.equal(delegatee.address)
+      const pendingDelegationForDelegator = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator).to.deep.equal([[], delegatee.address])
 
       // Perform the delegation using the signature
-      await expect(veBetterPassport.connect(delegatee).removePendingDelegation(owner.address))
+      await expect(veBetterPassport.connect(delegatee).denyIncomingPendingDelegation(owner.address))
         .to.emit(veBetterPassport, "DelegationRevoked")
         .withArgs(owner.address, delegatee.address)
 
       // Check the pending delegation
       const pendingDelegation2 = await veBetterPassport.getPendingDelegations(delegatee.address)
-      expect(pendingDelegation2.length).to.equal(0)
+      expect(pendingDelegation2).to.deep.equal([[], ZeroAddress])
 
       // Check the pending delegation from delegator POV
-      const pendingDelegation3 = await veBetterPassport.getPendingDelegatorDelegations(owner.address)
-      expect(pendingDelegation3).to.equal(ZeroAddress)
+      const pendingDelegationForDelegator2 = await veBetterPassport.getPendingDelegations(owner.address)
+      expect(pendingDelegationForDelegator2).to.deep.equal([[], ZeroAddress])
 
       // Owner can vote
       await expect(
@@ -2150,6 +2233,184 @@ describe.only("VeBetterPassport - @shard3", function () {
             [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
           ),
       ).to.be.reverted
+    })
+
+    it("Only the target delegatee can deny an incoming delegation request", async function () {
+      const {
+        otherAccounts,
+        owner,
+        veBetterPassport,
+        otherAccount: delegatee,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const delegator = owner
+
+      // Delegate to delegatee
+      await expect(veBetterPassport.connect(delegator).delegatePassport(delegatee.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(delegator.address, delegatee.address)
+
+      // Try to deny the link request
+      await expect(
+        veBetterPassport.connect(otherAccounts[1]).denyIncomingPendingDelegation(delegator.address),
+      ).to.be.revertedWithCustomError(veBetterPassport, "PassportDelegationUnauthorizedUser")
+
+      // The target of the link should be able to deny the link request
+      await expect(veBetterPassport.connect(delegatee).denyIncomingPendingDelegation(delegator.address))
+        .to.emit(veBetterPassport, "DelegationRevoked")
+        .withArgs(delegator.address, delegatee.address)
+    })
+
+    it("User with one incoming and one outgoing delegation should be able to cancel only one", async function () {
+      const {
+        otherAccounts,
+        owner,
+        veBetterPassport,
+        otherAccount: delegatee,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Use case: A has a pending delegation to B, and B has a pending delegation to C.
+      // B should be able to cancel only the pending delegation to C or from A.
+      const A = owner
+      const B = delegatee
+      const C = otherAccounts[0]
+
+      // A delegate to B
+      await expect(veBetterPassport.connect(A).delegatePassport(B.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(A.address, B.address)
+
+      // B delegate to C
+      await expect(veBetterPassport.connect(B).delegatePassport(C.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(B.address, C.address)
+
+      // If we check now the pending delegations of A we should see 1 outgoing to B
+      const pendingDelegationsOfA = await veBetterPassport.getPendingDelegations(A.address)
+      expect(pendingDelegationsOfA).to.deep.equal([[], B.address])
+
+      // If we check now the pending delegations of B we should see 1 incoming from A and 1 outgoing to C
+      const pendingDelegationsOfB = await veBetterPassport.getPendingDelegations(B.address)
+      expect(pendingDelegationsOfB).to.deep.equal([[A.address], C.address])
+
+      // If we check now the pending delegations of C we should see 1 incoming from B
+      const pendingDelegationsOfC = await veBetterPassport.getPendingDelegations(C.address)
+      expect(pendingDelegationsOfC).to.deep.equal([[B.address], ZeroAddress])
+
+      // B should be able to cancel only the outgoing delegation to C
+      await veBetterPassport.connect(B).cancelOutgoingPendingDelegation()
+      // should still have 1 incoming and 0 outgoing
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[A.address], ZeroAddress])
+
+      // Now we return to original simulation with B trying to delegate again to C
+      await expect(veBetterPassport.connect(B).delegatePassport(C.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(B.address, C.address)
+
+      // should have 1 incoming and 1 outgoing
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[A.address], C.address])
+
+      // This time B wants to remove pending delegation from A
+      await veBetterPassport.connect(B).denyIncomingPendingDelegation(A.address)
+      // should have 0 incoming and 1 outgoing
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[], C.address])
+
+      const pendingDelegationsOfB2 = await veBetterPassport.getPendingDelegations(B.address)
+      expect(pendingDelegationsOfB2).to.deep.equal([[], C.address])
+
+      // If C want to delegate to A, B should not be able to remove it
+      await expect(veBetterPassport.connect(C).delegatePassport(A.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(C.address, A.address)
+
+      await expect(veBetterPassport.connect(B).denyIncomingPendingDelegation(A.address)).to.be.reverted
+    })
+
+    it("If A has a pending delegation to B, and B has a pending delegation to A, then A or B should be able to cancel only one", async function () {
+      const {
+        owner,
+        veBetterPassport,
+        otherAccount: delegatee,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const A = owner
+      const B = delegatee
+
+      // A delegate to B
+      await expect(veBetterPassport.connect(A).delegatePassport(B.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(A.address, B.address)
+
+      // B delegate to A
+      await expect(veBetterPassport.connect(B).delegatePassport(A.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(B.address, A.address)
+
+      // Get pending delegations of A
+      const pendingDelegationsOfA = await veBetterPassport.getPendingDelegations(A.address)
+      expect(pendingDelegationsOfA).to.deep.equal([[B.address], B.address])
+
+      // Get pending delegations of B
+      const pendingDelegationsOfB = await veBetterPassport.getPendingDelegations(B.address)
+      expect(pendingDelegationsOfB).to.deep.equal([[A.address], A.address])
+
+      // A should be able to cancel only the pending delegation to B
+      await veBetterPassport.connect(A).cancelOutgoingPendingDelegation()
+      // should still have 1 incoming and 0 outgoing
+      expect(await veBetterPassport.getPendingDelegations(A.address)).to.deep.equal([[B.address], ZeroAddress])
+
+      // Now we return to original simulation with A trying to delegate to B
+      await expect(veBetterPassport.connect(A).delegatePassport(B.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(A.address, B.address)
+
+      // should have 1 incoming and 1 outgoing
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[A.address], A.address])
+
+      // This time A wants to remove the incoming delegation from B
+      await veBetterPassport.connect(A).denyIncomingPendingDelegation(B.address)
+      // should have 0 incoming and 1 outgoing
+      expect(await veBetterPassport.getPendingDelegations(A.address)).to.deep.equal([[], B.address])
+    })
+
+    it("If A delegates to B, and C delegates to B (both pending), then B should be able to cancel only one", async function () {
+      const {
+        owner,
+        veBetterPassport,
+        otherAccount: delegatee,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const A = owner
+      const B = delegatee
+      const C = otherAccounts[0]
+
+      // A delegate to B
+      await expect(veBetterPassport.connect(A).delegatePassport(B.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(A.address, B.address)
+
+      // C delegate to B
+      await expect(veBetterPassport.connect(C).delegatePassport(B.address))
+        .to.emit(veBetterPassport, "DelegationPending")
+        .withArgs(C.address, B.address)
+
+      // Get pending delegations of B: should have 2 incoming delegations from A and C, and 0 outgoing
+      const pendingDelegationsOfB = await veBetterPassport.getPendingDelegations(B.address)
+      expect(pendingDelegationsOfB).to.deep.equal([[A.address, C.address], ZeroAddress])
+
+      // B should be able to cancel only the pending delegation from A
+      await veBetterPassport.connect(B).denyIncomingPendingDelegation(A.address)
+      // should still have 1 incoming and 0 outgoing
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[C.address], ZeroAddress])
     })
 
     it("Should not be able to vote if delegating and not delegatee with allocation voting", async function () {

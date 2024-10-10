@@ -231,18 +231,16 @@ library PassportEntityLogic {
   }
 
   /**
-   * @notice Returns the list of pending entities waiting to be linked to a passport.
-   * @dev Pending entities are those that have been initiated for linking to a passport but are awaiting confirmation.
-   * This function returns an array of entity addresses that are in the pending state for the specified passport.
-   * @param self The storage reference for PassportStorage.
-   * @param passport The address of the passport for which pending entities are being retrieved.
-   * @return An array of addresses representing the entities pending linkage to the passport.
+   * @notice Returns the pending links for a user (both incoming and outgoing)
+   * @param user The address of the user
+   * @return incoming The addresss of users that want to link to the user.
+   * @return outgoing The address that the user wants to link to.
    */
-  function getPendingEntitiesForPassport(
+  function getPendingLinkings(
     PassportStorageTypes.PassportStorage storage self,
-    address passport
-  ) internal view returns (address[] memory) {
-    return self.pendingLinksPassportToEntities[passport];
+    address user
+  ) internal view returns (address[] memory incoming, address outgoing) {
+    return (self.pendingLinksPassportToEntities[user], self.pendingLinksEntityToPassport[user]);
   }
 
   /**
@@ -383,30 +381,38 @@ library PassportEntityLogic {
   }
 
   /**
-   * @notice Removes a pending entity link to a passport.
-   * @dev Can only be called by the passport or the entity involved in the pending link.
+   * @notice Deny an incoming pending entity link to the sender's passport.
+   * @dev Only the passport can deny an incoming pending link.
    * @param entity The address of the entity with a pending link to the passport.
    */
-  function removePendingEntityLinkFromPassport(
-    PassportStorageTypes.PassportStorage storage self,
-    address entity
-  ) external {
+  function denyIncomingPendingEntityLink(PassportStorageTypes.PassportStorage storage self, address entity) external {
     address passport = self.pendingLinksEntityToPassport[entity];
-
-    // Ensure the entity has a pending link to the passport
     if (passport == address(0)) {
       revert NotLinked(entity);
     }
 
-    // Ensure the caller is either the passport or the entity
-    if (msg.sender != entity && msg.sender != passport) {
+    // Ensure the caller is the passport that the entity is trying to link to
+    if (passport != msg.sender) {
       revert UnauthorizedUser(msg.sender);
     }
 
-    // Remove the pending link
     _removePendingEntityLink(self, entity, passport);
 
     emit LinkRemoved(entity, passport);
+  }
+
+  /**
+   * @notice Cancel an outgoing pending entity link from the sender.
+   */
+  function cancelOutgoingPendingEntityLink(PassportStorageTypes.PassportStorage storage self) external {
+    address passport = self.pendingLinksEntityToPassport[msg.sender];
+    if (passport == address(0)) {
+      revert NotLinked(msg.sender);
+    }
+
+    _removePendingEntityLink(self, msg.sender, passport);
+
+    emit LinkRemoved(msg.sender, passport);
   }
 
   /**

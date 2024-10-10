@@ -699,7 +699,7 @@
   "Qualified": "資格あり",
   "Not qualified": "資格なし",
   "Delegate your Voting Qualification": "投票資格を委任する",
-  "By delegating your qualification, another person will be able to vote on this round's allocation and proposals.": "資格を委任することで、他の人がこのラウンドの配分と提案に関して投票できるようになります。",
+  "By delegating your qualification, another person will be able to vote on next round's allocation and proposals.": "資格を委任することで、他の人がこのラウンドの配分と提案に関して投票できるようになります。",
   "You won't lose any of your VOT3 or B3TR tokens with this operation.": "この操作により、VOT3やB3TRトークンを失うことはありません。",
   "Who do you want to delegate to?": "誰に委任したいですか？",
   "Send request": "リクエストを送信",

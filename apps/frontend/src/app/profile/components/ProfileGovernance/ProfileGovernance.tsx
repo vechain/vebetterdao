@@ -16,6 +16,10 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { FaScaleBalanced, FaChartPie } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
 import { HandPlantIcon, VoteBoxIcon } from "@/components"
+import { PendingDelegationDelegateePOV } from "./components/delegation/PendingDelegationDelegateePOV"
+import { PendingDelegationDelegatorPOV } from "./components/delegation/PendingDelegationDelegatorPOV"
+import { CurrentDelegation } from "./components/delegation/CurrentDelegation"
+import { VotingQualification } from "./components/delegation/VotingQualification"
 import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 
@@ -94,6 +98,10 @@ export const ProfileGovernance = () => {
     case ListView.ALL:
       return (
         <>
+          <PendingDelegationDelegateePOV />
+          <PendingDelegationDelegatorPOV />
+          <CurrentDelegation />
+          <VotingQualification />
           {isFirstCreatedProposalsAvailable && (
             <PreviewCreatedProposals
               firstProposals={firstCreatedProposals}

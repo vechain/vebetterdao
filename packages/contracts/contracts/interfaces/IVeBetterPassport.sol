@@ -187,10 +187,11 @@ interface IVeBetterPassport {
   /// @return The address of the passport
   function getPassportForEntity(address entity) external view returns (address);
 
-  /// @notice Returns the pending delegations for a passport
-  /// @param passport - the passport address
-  /// @return the entity address
-  function getPendingEntitiesForPassport(address passport) external view returns (address[] memory);
+  /// @notice Returns the pending links for a user (both incoming and outgoing)
+  /// @param user The address of the user
+  /// @return incoming The addresss of users that want to link to the user.
+  /// @return outgoing The address that the user wants to link to.
+  function getPendingLinkings(address user) external view returns (address[] memory incoming, address outgoing);
 
   /// @notice Returns the passport address for a entity at a specific timepoint
   /// @param entity The entity's address
@@ -393,13 +394,16 @@ interface IVeBetterPassport {
   /// @param entity - the entity address
   function acceptEntityLink(address entity) external;
 
-  /// @notice Remove the email link
+  /// @notice Deny an incoming pending entity link to the sender's passport.
+  /// @param entity - the entity address
+  function denyIncomingPendingEntityLink(address entity) external;
+
+  /// @notice Cancel an outgoing pending entity link from the sender.
+  function cancelOutgoingPendingEntityLink() external;
+
+  /// @notice Remove the linked enitity from the passport
   /// @param entity - the entity address
   function removeEntityLink(address entity) external;
-
-  /// @notice Allows a entity to remove their pending delegation to a passport.
-  /// @param entity - the entity address
-  function removePendingEntityLinkFromPassport(address entity) external;
 
   /// @notice Registers an action for a user
   /// @param user - the user that performed the action
@@ -431,20 +435,34 @@ interface IVeBetterPassport {
   /// @param maxEntities - the maximum number of entities
   function setMaxEntitiesPerPassport(uint256 maxEntities) external;
 
+  /// @notice Delegate the personhood to another address
+  /// @param delegatee - the delegatee address
+  function delegatePassport(address delegatee) external;
+
+  /// @notice Allow the delegatee to accept the delegation
+  /// @param delegator - the delegator address
+  function acceptDelegation(address delegator) external;
+
+  /// @notice Revoke the delegation (can be done by the delegator or the delegatee)
+  function revokeDelegation() external;
+
+  /// @notice Allows a delegator to deny (and remove) an incoming pending delegation.
+  /// @param delegator - the user who is delegating to me (aka the delegator)
+  function denyIncomingPendingDelegation(address delegator) external;
+
+  /// @notice Allows a delegator to cancel (and remove) the outgoing pending delegation.
+  function cancelOutgoingPendingDelegation() external;
+
   /// @notice Returns the delegatee address for a delegator
   /// @param delegator The delegator's address
   /// @return The address of the delegatee
   function getDelegatee(address delegator) external view returns (address);
 
-  /// @notice Returns the pending delegations for a delegatee
-  /// @param delegatee - the delegatee address
-  /// @return the delegator address
-  function getPendingDelegations(address delegatee) external view returns (address[] memory);
-
-  /// @notice Returns the pending delegations for a delegator
-  /// @param delegator - the delegator address
-  /// @return the delegatee address
-  function getPendingDelegatorDelegations(address delegator) external view returns (address);
+  /// @notice Returns the incoming and outgoing pending delegations for a user
+  /// @param user - the user address
+  /// @return incoming The address[] memory of users that are delegating to the user.
+  /// @return outgoing The address that the user is delegating to.
+  function getPendingDelegations(address user) external view returns (address[] memory incoming, address outgoing);
 
   /// @notice Returns the delegatee address for a delegator at a specific timepoint
   /// @param delegator The delegator's address
