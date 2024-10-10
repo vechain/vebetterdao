@@ -1,6 +1,6 @@
 import { useTransactions } from "@/api"
 import { TransactionCard } from "@/components"
-import { Button, Card, CardBody, Flex, Heading, VStack } from "@chakra-ui/react"
+import { Button, Card, CardBody, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -39,12 +39,18 @@ export const UserTransactions = () => {
               <TransactionCard key={transaction.txId} transaction={transaction} />
             ))}
           </VStack>
-          {transactions.length > 5 && (
-            <Flex justify="center">
-              <Button variant={"primaryGhost"} onClick={handleSeeAll}>
-                {t("See all")}
-              </Button>
-            </Flex>
+          {transactions.length > 0 ? (
+            <>
+              {transactions.length > 5 && (
+                <Flex justify="center">
+                  <Button variant={"primaryGhost"} onClick={handleSeeAll}>
+                    {t("See all")}
+                  </Button>
+                </Flex>
+              )}
+            </>
+          ) : (
+            <Text>{t("No transactions found")}</Text>
           )}
         </VStack>
       </CardBody>

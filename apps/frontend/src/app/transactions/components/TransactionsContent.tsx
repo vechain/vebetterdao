@@ -129,9 +129,7 @@ export const TransactionsContent = () => {
             hasMore={!!hasNextPage}
             loader={<Spinner />}>
             <VStack spacing={6} align="stretch">
-              {Object.entries(groupedTransactions).length === 0 ? (
-                <Text>{t("No transactions found")}</Text>
-              ) : transactions.length > 0 ? (
+              {transactions.length > 0 ? (
                 Object.entries(groupedTransactions).map(([day, transactions]) => (
                   <VStack key={day} spacing={3} align="stretch">
                     <Text fontWeight="600" color="#848484">
