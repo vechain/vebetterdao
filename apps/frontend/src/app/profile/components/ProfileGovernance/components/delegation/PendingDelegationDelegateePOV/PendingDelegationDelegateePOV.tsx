@@ -7,7 +7,7 @@ export const PendingDelegationDelegateePOV = () => {
   const { t } = useTranslation()
   const { data: pendingDelegations, isLoading: isPendingDelegationsLoading } =
     useGetUserPendingDelegationsDelegateePOV()
-  if (isPendingDelegationsLoading || pendingDelegations?.length === 0) return null
+  if (isPendingDelegationsLoading || !pendingDelegations?.length) return null
 
   return (
     <Card variant="baseWithBorder" w="full">
