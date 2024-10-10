@@ -25,7 +25,10 @@ Another change in the `XAllocationVoting` contract is the fixed weight during th
 
 ### Changes 🚀
 
-- **Upgraded Contract(s):** `XAllocationVoting.sol` to version `2`, `B3TRGovernor.sol` to version `4`, `X2EarnRewardsPool.sol` to version `3`
+- **Upgraded Contract(s):** 
+  - `XAllocationVoting.sol` to version `2`
+  - `B3TRGovernor.sol` to version `4`
+  - `X2EarnRewardsPool.sol` to version `3`
 
 ### Storage Changes 📦
 
