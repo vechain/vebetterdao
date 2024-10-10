@@ -58,7 +58,7 @@ export const getSustainabilitySingleUserOverviewByDay = async (
 
   const queryString = buildQueryString(data)
 
-  const response = await fetch(`${indexerUrl}/sustainability/user/overviews-daily?${queryString}`, {
+  const response = await fetch(`${indexerUrl}/sustainability/user/day/overviews?${queryString}`, {
     method: "GET",
   })
 
