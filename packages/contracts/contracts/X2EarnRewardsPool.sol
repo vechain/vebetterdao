@@ -46,6 +46,7 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  *
  * ----- Version 2 -----
  * - Added onchain proof and impact tracking
+ * ----- Version 3 -----
  * - Added VeBetterPassport integration
  */
 contract X2EarnRewardsPool is
@@ -109,14 +110,9 @@ contract X2EarnRewardsPool is
     $.x2EarnApps = _x2EarnApps;
   }
 
-  function initializeV2(
-    address _impactKeyManager,
-    string[] memory _initialImpactKeys,
-    IVeBetterPassport _veBetterPassport
-  ) external reinitializer(2) {
+  function initializeV2(address _impactKeyManager, string[] memory _initialImpactKeys) external reinitializer(2) {
     require(_impactKeyManager != address(0), "X2EarnRewardsPool: impactKeyManager is the zero address");
     require(_initialImpactKeys.length > 0, "X2EarnRewardsPool: initialImpactKeys is empty");
-    require(address(_veBetterPassport) != address(0), "X2EarnRewardsPool: veBetterPassport is the zero address");
 
     _grantRole(IMPACT_KEY_MANAGER_ROLE, _impactKeyManager);
 
@@ -125,8 +121,13 @@ contract X2EarnRewardsPool is
     for (uint256 i; i < _initialImpactKeys.length; i++) {
       _addImpactKey(_initialImpactKeys[i], $);
     }
+  }
 
-    $.veBetterPassport = _veBetterPassport;
+  function initializeV3(address _veBetterPassport) external reinitializer(3) {
+    require(address(_veBetterPassport) != address(0), "X2EarnRewardsPool: veBetterPassport is the zero address");
+
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    $.veBetterPassport = IVeBetterPassport(_veBetterPassport);
   }
 
   // ---------- Modifiers ---------- //
@@ -491,7 +492,7 @@ contract X2EarnRewardsPool is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "2";
+    return "3";
   }
 
   /**

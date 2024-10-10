@@ -122,7 +122,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
         <Box>
           <Text color="#6A6A6A" as="span">
             {t(
-              "By delegating your qualification, another person will be able to vote on this round's allocation and proposals.",
+              "By delegating your qualification, another person will be able to vote on next round's allocation and proposals.",
             )}
           </Text>
           <Text color="#6A6A6A" as="span" fontWeight="600">

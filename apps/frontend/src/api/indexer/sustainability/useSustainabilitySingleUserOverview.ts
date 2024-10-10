@@ -11,19 +11,13 @@ const indexerUrl = getConfig().indexerUrl
 const SustainabilitySingleUserOverviewObjectSchema = SustainabilityMultipleUsersOverviewObjectSchema.extend({
   rankByReward: z.number(),
   rankByActionsRewarded: z.number(),
+  uniqueXAppInteractions: z.array(z.string()),
   roundId: z.number().optional(),
 })
 
-export const SustainabilitySingleUserOverviewResponseSchema = z.object({
-  pagination: z.object({
-    hasNext: z.boolean(),
-  }),
-  data: z.array(SustainabilitySingleUserOverviewObjectSchema).default([]),
-})
+export const SustainabilitySingleUserOverviewResponseSchema = SustainabilitySingleUserOverviewObjectSchema
 
-export type SustainabilitySingleUserOverviewResponse = z.infer<
-  typeof SustainabilitySingleUserOverviewResponseSchema
->["data"][number]
+export type SustainabilitySingleUserOverviewResponse = z.infer<typeof SustainabilitySingleUserOverviewResponseSchema>
 
 type SustainabilitySingleUserOverviewRequest = {
   wallet?: string
@@ -35,27 +29,35 @@ type SustainabilitySingleUserOverviewRequest = {
  * @param data  the request data @see SustainabilitySingleUserOverviewRequest
  * @returns the response data @see SustainabilitySingleUserOverviewResponse
  */
-export const getSustainabilitySingleUserOverview = async (
-  data: SustainabilitySingleUserOverviewRequest,
-): Promise<SustainabilitySingleUserOverviewResponse> => {
+export const getSustainabilitySingleUserOverview = async ({
+  wallet,
+  roundId,
+}: SustainabilitySingleUserOverviewRequest): Promise<SustainabilitySingleUserOverviewResponse> => {
   if (!indexerUrl) throw new Error("Indexer URL not found")
-  if (!data.wallet) throw new Error("Wallet is required")
+  if (!wallet) throw new Error("Wallet is required")
 
-  const queryString = buildQueryString(data)
-  const endpoint = data.roundId
-    ? `${indexerUrl}/sustainability/user/round/overviews`
-    : `${indexerUrl}/sustainability/user/overviews`
+  const queryString = buildQueryString({ roundId })
+  const endpoint = `${indexerUrl}/sustainability/user/${wallet}/overview`
   const response = await fetch(`${endpoint}?${queryString}`, {
     method: "GET",
   })
 
   if (!response.ok) {
+    if (response.status === 404) {
+      return {
+        entity: wallet,
+        actionsRewarded: 0,
+        totalRewardAmount: 0,
+        rankByReward: 0,
+        rankByActionsRewarded: 0,
+        uniqueXAppInteractions: [],
+        ...(roundId ? { roundId: Number(roundId) } : {}),
+      }
+    }
     throw new Error(`Failed to fetch sustainability user overview: ${response.statusText}`)
   }
 
-  const parsed = SustainabilitySingleUserOverviewResponseSchema.parse(await response.json())
-  if (!parsed.data[0]) throw new Error("User not found")
-  return parsed.data[0]
+  return SustainabilitySingleUserOverviewResponseSchema.parse(await response.json())
 }
 
 export const getSustainabilitySingleUserOverviewQueryKey = (data: SustainabilitySingleUserOverviewRequest) => [

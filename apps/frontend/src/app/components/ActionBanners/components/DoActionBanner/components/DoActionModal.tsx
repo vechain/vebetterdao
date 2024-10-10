@@ -19,6 +19,10 @@ export const DoActionModal = ({ doActionModal }: Props) => {
     router.push("/apps")
   }, [router])
 
+  const goToKnowMoreLink = useCallback(() => {
+    window?.open("https://vebetterdao.org/blog/inside-vepassport", "_blank")
+  }, [])
+
   const { userActions, missingActions, totalActions, isLoading } = useUserActions()
 
   if (isLoading) return null
@@ -78,7 +82,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
         <Button variant="primaryAction" leftIcon={<IoGridOutline />} onClick={goToApps}>
           {t("Explore apps")}
         </Button>
-        <Button variant="primarySubtle" leftIcon={<UilInfoCircle />} onClick={goToApps}>
+        <Button variant="primarySubtle" leftIcon={<UilInfoCircle />} onClick={goToKnowMoreLink}>
           {t("Know more")}
         </Button>
       </VStack>

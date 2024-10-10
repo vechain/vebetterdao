@@ -699,7 +699,7 @@
   "Qualified": "合格",
   "Not qualified": "不合格",
   "Delegate your Voting Qualification": "委托您的投票资格",
-  "By delegating your qualification, another person will be able to vote on this round's allocation and proposals.": "通过委托您的资格，他人将能够对本轮的分配和提案进行投票。",
+  "By delegating your qualification, another person will be able to vote on next round's allocation and proposals.": "通过委托您的资格，他人将能够对本轮的分配和提案进行投票。",
   "You won't lose any of your VOT3 or B3TR tokens with this operation.": "您不会因此操作而失去任何 VOT3 或 B3TR 代币。",
   "Who do you want to delegate to?": "你希望委托给谁？",
   "Send request": "发送请求",

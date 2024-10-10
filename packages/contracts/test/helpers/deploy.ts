@@ -58,12 +58,13 @@ import {
   PassportWhitelistAndBlacklistLogic,
   PassportPersonhoodLogic,
   PassportDelegationLogic,
+  X2EarnRewardsPoolV2,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
-import { setWhitelistedFunctions } from "../../scripts/deploy/deploy"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
+import { setWhitelistedFunctions } from "../../scripts/deploy/deployAll"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -83,6 +84,8 @@ interface DeployInstance {
   voterRewardsV1: VoterRewardsV1
   treasury: Treasury
   nodeManagement: NodeManagement
+  x2EarnRewardsPoolV1: X2EarnRewardsPoolV1
+  x2EarnRewardsPoolV2: X2EarnRewardsPoolV2
   x2EarnRewardsPool: X2EarnRewardsPool
   veBetterPassport: VeBetterPassport
   owner: HardhatEthersSigner
@@ -295,13 +298,23 @@ export const getOrDeployContractInstances = async ({
     await x2EarnApps.getAddress(),
   ])) as X2EarnRewardsPoolV1
 
-  const x2EarnRewardsPool = (await upgradeProxy(
+  const x2EarnRewardsPoolV2 = (await upgradeProxy(
     "X2EarnRewardsPoolV1",
-    "X2EarnRewardsPool",
+    "X2EarnRewardsPoolV2",
     await x2EarnRewardsPoolV1.getAddress(),
-    [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS, veBetterPassportContractAddress],
+    [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS],
     {
       version: 2,
+    },
+  )) as X2EarnRewardsPoolV2
+
+  const x2EarnRewardsPool = (await upgradeProxy(
+    "X2EarnRewardsPoolV2",
+    "X2EarnRewardsPool",
+    await x2EarnRewardsPoolV2.getAddress(),
+    [veBetterPassportContractAddress],
+    {
+      version: 3,
     },
   )) as X2EarnRewardsPool
 
@@ -648,6 +661,8 @@ export const getOrDeployContractInstances = async ({
     timelockAdmin,
     otherAccounts,
     treasury,
+    x2EarnRewardsPoolV1,
+    x2EarnRewardsPoolV2,
     x2EarnRewardsPool,
     veBetterPassport,
     governorClockLogicLib: GovernorClockLogicLib,
