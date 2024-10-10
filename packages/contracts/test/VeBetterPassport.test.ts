@@ -2019,7 +2019,6 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Should be able to assign multiple entites to a passport, do actions with entities and use the combintation to meet personhood status", async function () {
       const config = createLocalConfig()
-      config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD = 500
       const { veBetterPassport, x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -2028,6 +2027,9 @@ describe("VeBetterPassport - @shard3", function () {
       const enity1 = otherAccounts[0]
       const enity2 = otherAccounts[1]
       const passport = otherAccounts[2]
+
+      // Set the threshold to 500
+      await veBetterPassport.connect(owner).setThresholdPoPScore(500)
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions()
@@ -3252,7 +3254,6 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Should be able to assign multiple entites to a passport, do actions and use the combintation to meet personhood status", async function () {
       const config = createLocalConfig()
-      config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD = 500
       const {
         veBetterPassport,
         x2EarnApps,
@@ -3267,6 +3268,9 @@ describe("VeBetterPassport - @shard3", function () {
       const enity1 = otherAccounts[0]
       const enity2 = otherAccounts[1]
       const passport = otherAccounts[2]
+
+      // Set the score threshold to 500
+      await veBetterPassport.connect(owner).setThresholdPoPScore(500)
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions()
@@ -4512,7 +4516,6 @@ describe("VeBetterPassport - @shard3", function () {
 
   describe("Governance & X Allocation Voting", function () {
     it("Should register participation correctly through emission's cycles", async function () {
-      const config = createLocalConfig()
       const {
         x2EarnApps,
         owner,
@@ -4525,10 +4528,6 @@ describe("VeBetterPassport - @shard3", function () {
         governor,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
-        config: {
-          ...config,
-          VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD: 0, // Initially threshold score of participation is 0, any user can vote
-        },
       })
 
       await getVot3Tokens(otherAccount, "10000")
