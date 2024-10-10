@@ -74,9 +74,10 @@ export async function main() {
         signalingThreshold: contractsConfig.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
         roundsForCumulativeScore: contractsConfig.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
         minimumGalaxyMemberLevel: contractsConfig.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
-        blacklistThreshold: contractsConfig.VEPASSPORT_BLACKLIST_THRESHOLD, //blacklistThreshold
-        whitelistThreshold: contractsConfig.VEBETTER_WHITELIST_THRESHOLD, //whitelistThreshold
-        maxEntitiesPerPassport: contractsConfig.VEBETTER_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
+        blacklistThreshold: contractsConfig.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE, //blacklistThreshold
+        whitelistThreshold: contractsConfig.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE, //whitelistThreshold
+        maxEntitiesPerPassport: contractsConfig.VEPASSPORT_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
+        decayRate: contractsConfig.VEPASSPORT_DECAY_RATE, //decayRate
       },
       {
         admin: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // admins

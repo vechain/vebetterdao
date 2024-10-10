@@ -133,9 +133,10 @@ describe("VeBetterPassport - @shard3", function () {
             signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
             roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
             minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
-            blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD, //blacklistThreshold
-            whitelistThreshold: config.VEBETTER_WHITELIST_THRESHOLD, //whitelistThreshold
-            maxEntitiesPerPassport: config.VEBETTER_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
+            blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE, //blacklistThreshold
+            whitelistThreshold: config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE, //whitelistThreshold
+            maxEntitiesPerPassport: config.VEPASSPORT_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
+            decayRate: config.VEPASSPORT_DECAY_RATE, //decayRate
           },
           {
             admin: owner.address, // admin
@@ -1011,7 +1012,7 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Should not be ale to link more entities than MAX allowed to be linked to a pasport", async function () {
       const config = createLocalConfig()
-      config.VEBETTER_PASSPORT_MAX_ENTITIES = 2
+      config.VEPASSPORT_PASSPORT_MAX_ENTITIES = 2
       const {
         veBetterPassport,
         owner: passport,
@@ -1493,7 +1494,7 @@ describe("VeBetterPassport - @shard3", function () {
     it("Should not be able to assign an entity to a passport if passport has the max number of entities already assigned", async function () {
       const config = createLocalConfig()
 
-      config.VEBETTER_PASSPORT_MAX_ENTITIES = 2
+      config.VEPASSPORT_PASSPORT_MAX_ENTITIES = 2
 
       const {
         veBetterPassport,
@@ -1532,6 +1533,7 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Should assign an enities score correctly", async function () {
       const config = createLocalConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
 
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1643,6 +1645,7 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Should remove an enities score correctly", async function () {
       const config = createLocalConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
 
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1916,8 +1919,8 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Should assign an enities blacklists and whitelists correctly", async function () {
       const config = createLocalConfig()
-      config.VEPASSPORT_BLACKLIST_THRESHOLD = 0
-      config.VEBETTER_WHITELIST_THRESHOLD = 0
+      config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 0
+      config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 0
       const {
         veBetterPassport,
         owner: passport,
@@ -1960,8 +1963,8 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Should remove any blacklists and whitelists an entity may have when it detaches", async function () {
       const config = createLocalConfig()
-      config.VEPASSPORT_BLACKLIST_THRESHOLD = 0
-      config.VEBETTER_WHITELIST_THRESHOLD = 0
+      config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 0
+      config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 0
       const {
         veBetterPassport,
         owner: passport,
@@ -3542,8 +3545,11 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should correctly calculate cumulative score", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { x2EarnApps, otherAccounts, owner, veBetterPassport, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       // Bootstrap emissions
@@ -3588,8 +3594,11 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should correctly transfer enities cumulative score", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { x2EarnApps, otherAccounts, owner, veBetterPassport, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       // Bootstrap emissions
@@ -3694,8 +3703,11 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should calculate cumulative score correctly with different security multipliers", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       //Add apps
@@ -3760,8 +3772,11 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should calculate decay from first round if last round specified is greater than cumulative rounds to look for", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       //Add apps
@@ -3835,8 +3850,11 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should calculate cumulative score correctly with different security multipliers", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       //Add apps
@@ -3899,8 +3917,11 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should be able to update rounds for cumulative scores", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       await bootstrapAndStartEmissions()
@@ -3977,8 +3998,11 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should calculate decay from first round if last round specified is greater than cumulative rounds to look for", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       //Add apps
@@ -4236,7 +4260,7 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Can update blacklist threshold", async function () {
       const config = createLocalConfig()
-      config.VEPASSPORT_BLACKLIST_THRESHOLD = 60 // 60% of entities are blacklisted
+      config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
         owner: passport,
@@ -4269,7 +4293,7 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Can update whitelist threshold", async function () {
       const config = createLocalConfig()
-      config.VEBETTER_WHITELIST_THRESHOLD = 60 // 60% of entities are blacklisted
+      config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
         owner: passport,
@@ -4302,7 +4326,7 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Can remove user from blacklist", async function () {
       const config = createLocalConfig()
-      config.VEPASSPORT_BLACKLIST_THRESHOLD = 60 // 60% of entities are blacklisted
+      config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
         otherAccount: entity1,
@@ -4327,7 +4351,7 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Can remove user from whitelist", async function () {
       const config = createLocalConfig()
-      config.VEBETTER_WHITELIST_THRESHOLD = 60 // 60% of entities are whitelisted
+      config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are whitelisted
       const { veBetterPassport, otherAccount: entity1 } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -4346,7 +4370,7 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("If over the threshold amount of entities are blacklisted, passport should return blacklisted", async function () {
       const config = createLocalConfig()
-      config.VEPASSPORT_BLACKLIST_THRESHOLD = 60 // 60% of entities are blacklisted
+      config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
         owner: passport,
@@ -4465,6 +4489,7 @@ describe("VeBetterPassport - @shard3", function () {
   describe("Governance & X Allocation Voting", function () {
     it("Should register participation correctly through emission's cycles", async function () {
       const config = createLocalConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const {
         x2EarnApps,
         owner,

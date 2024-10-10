@@ -63,6 +63,7 @@ library PassportTypes {
     uint256 blacklistThreshold;
     uint256 whitelistThreshold;
     uint256 maxEntitiesPerPassport;
+    uint256 decayRate;
   }
 
   struct InitializationRoleData {
