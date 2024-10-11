@@ -43,7 +43,7 @@ const config: AppConfig = {
       "https://mainnet.veblocks.net",
       "https://mainnet.vecha.in",
     ],
-    explorerUrl: "https://insight.vecha.in/#/main",
+    explorerUrl: "https://vechainstats.com",
     blockTime: 10000,
     genesis: {
       number: 0,

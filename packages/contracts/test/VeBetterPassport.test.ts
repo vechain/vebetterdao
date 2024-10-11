@@ -18,9 +18,9 @@ import {
   moveBlocks,
 } from "./helpers"
 import { describe, it } from "mocha"
-import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { ZeroAddress } from "ethers"
+import { createTestConfig } from "./helpers/config"
 
 describe("VeBetterPassport - @shard5", function () {
   describe("Contract parameters", function () {
@@ -51,7 +51,7 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should have action score thresholds set correctly", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
         config: {
@@ -69,7 +69,7 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should have rounds for cumulative score set correctly", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
         config: {
@@ -82,7 +82,7 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should have minimum galaxy member level set correctly", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
         config: {
@@ -121,7 +121,7 @@ describe("VeBetterPassport - @shard5", function () {
       expect(await veBetterPassport.version()).to.equal("1")
     })
     it("Should not be able to initialize twice", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport, owner, x2EarnApps, xAllocationVoting, galaxyMember } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -136,9 +136,10 @@ describe("VeBetterPassport - @shard5", function () {
             signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
             roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
             minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
-            blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD, //blacklistThreshold
-            whitelistThreshold: config.VEBETTER_WHITELIST_THRESHOLD, //whitelistThreshold
-            maxEntitiesPerPassport: config.VEBETTER_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
+            blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE, //blacklistThreshold
+            whitelistThreshold: config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE, //whitelistThreshold
+            maxEntitiesPerPassport: config.VEPASSPORT_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
+            decayRate: config.VEPASSPORT_DECAY_RATE, //decayRate
           },
           {
             admin: owner.address, // admin
@@ -643,7 +644,7 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Admin can update the signaling threshold", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_BOT_SIGNALING_THRESHOLD = 5
       const { veBetterPassport, otherAccount, owner, otherAccounts, x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1137,8 +1138,8 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should not be ale to link more entities than MAX allowed to be linked to a pasport", async function () {
-      const config = createLocalConfig()
-      config.VEBETTER_PASSPORT_MAX_ENTITIES = 2
+      const config = createTestConfig()
+      config.VEPASSPORT_PASSPORT_MAX_ENTITIES = 2
       const {
         veBetterPassport,
         owner: passport,
@@ -1640,9 +1641,9 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should not be able to assign an entity to a passport if passport has the max number of entities already assigned", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
 
-      config.VEBETTER_PASSPORT_MAX_ENTITIES = 2
+      config.VEPASSPORT_PASSPORT_MAX_ENTITIES = 2
 
       const {
         veBetterPassport,
@@ -1680,7 +1681,9 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should assign an enities score correctly", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
+      config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE = 5
 
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1790,9 +1793,165 @@ describe("VeBetterPassport - @shard5", function () {
       expect(await veBetterPassport.userRoundScore(passport, 6)).to.equal(100)
     })
 
-    it("Should remove an enities score correctly", async function () {
-      const config = createLocalConfig()
+    it("Should register aggregated actions for a round correctly", async function () {
+      const {
+        veBetterPassport,
+        owner,
+        x2EarnApps,
+        b3tr,
+        otherAccounts,
+        xAllocationVoting,
+        x2EarnRewardsPool,
+        minterAccount,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
+      const user1 = otherAccounts[0]
+      const user2 = otherAccounts[1]
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions()
+      // simulate 5 rounds of actions
+      await moveToCycle(6)
+
+      // Add 3 apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+
+      // Set apps security to LOW
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 1)
+      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 1)
+
+      // Owner can distribute rewards for all apps
+      await x2EarnApps.connect(owner).addRewardDistributor(app1Id, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(app1Id, owner.address)).to.equal(true)
+      await x2EarnApps.connect(owner).addRewardDistributor(app2Id, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(app2Id, owner.address)).to.equal(true)
+      await x2EarnApps.connect(owner).addRewardDistributor(app3Id, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(app3Id, owner.address)).to.equal(true)
+
+      // fill the pool
+      await b3tr.connect(minterAccount).mint(owner.address, ethers.parseEther("100"))
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), ethers.parseEther("100"))
+      await x2EarnRewardsPool.connect(owner).deposit(ethers.parseEther("30"), app1Id)
+      await x2EarnRewardsPool.connect(owner).deposit(ethers.parseEther("30"), app2Id)
+      await x2EarnRewardsPool.connect(owner).deposit(ethers.parseEther("30"), app3Id)
+
+      const currentRound = await xAllocationVoting.currentRoundId()
+      const currentBlock = await ethers.provider.getBlockNumber()
+      const currentRoundSnapshot = await xAllocationVoting.currentRoundSnapshot()
+      const currentRoundDeadline = await xAllocationVoting.currentRoundDeadline()
+      expect(currentRound).to.equal(5n)
+      expect(currentBlock > currentRoundSnapshot && currentBlock < currentRoundDeadline).to.be.true
+
+      // Let's assume we deployed VeBetterPassport in the middle of the 5th round
+      // and we want to register the actions for the first 4 rounds aggregating data offchain.
+      // Scenario:
+      // User 1 used app1 4 times, app2 2 times and app3 never (distributed in multiple rounds), before deploying VBP
+      // User 2 used app1 2 times, app2 2 times and app3 2 times (distributed in multiple rounds), before deploying VBP
+
+      // Simulate that while we seed old actions, User1 uses app2 1 more time and app3 1 time
+      await x2EarnRewardsPool.connect(owner).distributeReward(app2Id, ethers.parseEther("1"), user1.address, "0x")
+      await x2EarnRewardsPool.connect(owner).distributeReward(app3Id, ethers.parseEther("1"), user1.address, "0x")
+
+      // Now we seed old aggregated actions for the first 4 rounds and part of the 5th
+      await veBetterPassport.connect(owner).registerAggregatedActionsForRound(user1.address, app1Id, 1, 200) // user1 used app1 2 times in round 1
+      await veBetterPassport.connect(owner).registerAggregatedActionsForRound(user1.address, app1Id, 2, 200) // user1 used app1 2 times in round 2
+      await veBetterPassport.connect(owner).registerAggregatedActionsForRound(user1.address, app2Id, 2, 100) // user1 used app2 1 time in round 2
+      await veBetterPassport.connect(owner).registerAggregatedActionsForRound(user1.address, app2Id, 5, 100) // user1 used app2 1 time in round 2
+
+      await veBetterPassport.connect(owner).registerAggregatedActionsForRound(user2.address, app3Id, 1, 100) // user2 used app3 1 time in round 1
+      await veBetterPassport.connect(owner).registerAggregatedActionsForRound(user2.address, app1Id, 3, 100) // user2 used app1 1 time in round 3
+      await veBetterPassport.connect(owner).registerAggregatedActionsForRound(user2.address, app3Id, 3, 100) // user2 used app3 1 time in round 3
+      await veBetterPassport.connect(owner).registerAggregatedActionsForRound(user2.address, app1Id, 4, 100) // user2 used app1 1 time in round 4
+      await veBetterPassport.connect(owner).registerAggregatedActionsForRound(user2.address, app2Id, 5, 200) // user2 used app2 2 time in round 5
+
+      // At the end this should be the result:
+      // user1:
+      //   round 1: 200, using app1 2 times
+      //   round 2: 200 + 100 = 300, using app1 2 times and app2 1 time
+      //   round 3: 0
+      //   round 4: 0
+      //   round 5: 200 + 100 = 300, using app1 1 time, app2 1 time, app3 1 time
+      // user2:
+      //   round 1: 100, using app1 1 time
+      //   round 2: 0
+      //   round 3: 100 + 100 = 200, using app1 1 time and app3 1 time
+      //   round 4: 100, using app1 1 time
+      //   round 5: 100 + 100 = 200, using app2 2 times
+      //
+      // Now we should check that the following mappings were updated correctly in the contract:
+      // userRoundScore[passport][round]
+      // userTotalScore[passport]
+      // userAppRoundScore[passport][round][appId]
+      // userAppTotalScore[passport][appId]
+      //user1
+      expect(await veBetterPassport.userRoundScore(user1.address, 1)).to.equal(200n)
+      expect(await veBetterPassport.userRoundScore(user1.address, 2)).to.equal(300n)
+      expect(await veBetterPassport.userRoundScore(user1.address, 3)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScore(user1.address, 4)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScore(user1.address, 5)).to.equal(300n)
+      expect(await veBetterPassport.userTotalScore(user1.address)).to.equal(800n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 1, app1Id)).to.equal(200n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 1, app2Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 1, app3Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 2, app1Id)).to.equal(200n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 2, app2Id)).to.equal(100n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 2, app3Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 3, app1Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 3, app2Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 3, app3Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 4, app1Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 4, app2Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 4, app3Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 5, app1Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 5, app2Id)).to.equal(200n)
+      expect(await veBetterPassport.userRoundScoreApp(user1.address, 5, app3Id)).to.equal(100n)
+      expect(await veBetterPassport.userAppTotalScore(user1.address, app1Id)).to.equal(400n)
+      expect(await veBetterPassport.userAppTotalScore(user1.address, app2Id)).to.equal(300n)
+      expect(await veBetterPassport.userAppTotalScore(user1.address, app3Id)).to.equal(100n)
+      //user2
+      expect(await veBetterPassport.userRoundScore(user2.address, 1)).to.equal(100n)
+      expect(await veBetterPassport.userRoundScore(user2.address, 2)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScore(user2.address, 3)).to.equal(200n)
+      expect(await veBetterPassport.userRoundScore(user2.address, 4)).to.equal(100n)
+      expect(await veBetterPassport.userRoundScore(user2.address, 5)).to.equal(200n)
+      expect(await veBetterPassport.userTotalScore(user2.address)).to.equal(600n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 1, app1Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 1, app2Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 1, app3Id)).to.equal(100n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 2, app1Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 2, app2Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 2, app3Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 3, app1Id)).to.equal(100n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 3, app2Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 3, app3Id)).to.equal(100n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 4, app1Id)).to.equal(100n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 4, app2Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 4, app3Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 5, app1Id)).to.equal(0n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 5, app2Id)).to.equal(200n)
+      expect(await veBetterPassport.userRoundScoreApp(user2.address, 5, app3Id)).to.equal(0n)
+      expect(await veBetterPassport.userAppTotalScore(user2.address, app1Id)).to.equal(200n)
+      expect(await veBetterPassport.userAppTotalScore(user2.address, app2Id)).to.equal(200n)
+      expect(await veBetterPassport.userAppTotalScore(user2.address, app3Id)).to.equal(200n)
+    })
+
+    it("Should remove an enities score correctly", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1854,7 +2013,7 @@ describe("VeBetterPassport - @shard5", function () {
 
       /*
 
-        The entitys score should remain the same for the same when first assigned
+        The entitys score should remain the same as when first assigned
 
         Round 1 score: 100
         Round 2 score: 100
@@ -2064,9 +2223,9 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should assign an enities blacklists and whitelists correctly", async function () {
-      const config = createLocalConfig()
-      config.VEPASSPORT_BLACKLIST_THRESHOLD = 0
-      config.VEBETTER_WHITELIST_THRESHOLD = 0
+      const config = createTestConfig()
+      config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 0
+      config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 0
       const {
         veBetterPassport,
         owner: passport,
@@ -2108,9 +2267,9 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should remove any blacklists and whitelists an entity may have when it detaches", async function () {
-      const config = createLocalConfig()
-      config.VEPASSPORT_BLACKLIST_THRESHOLD = 0
-      config.VEBETTER_WHITELIST_THRESHOLD = 0
+      const config = createTestConfig()
+      config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 0
+      config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 0
       const {
         veBetterPassport,
         owner: passport,
@@ -2167,7 +2326,7 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should be able to assign multiple entites to a passport, do actions with entities and use the combintation to meet personhood status", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport, x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -3609,7 +3768,7 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should be able to assign multiple entites to a passport, do actions and use the combintation to meet personhood status", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const {
         veBetterPassport,
         x2EarnApps,
@@ -3902,8 +4061,11 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should correctly calculate cumulative score", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { x2EarnApps, otherAccounts, owner, veBetterPassport, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       // Bootstrap emissions
@@ -3948,8 +4110,11 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should correctly transfer enities cumulative score", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { x2EarnApps, otherAccounts, owner, veBetterPassport, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       // Bootstrap emissions
@@ -4054,8 +4219,11 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should calculate cumulative score correctly with different security multipliers", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       //Add apps
@@ -4120,8 +4288,11 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should calculate decay from first round if last round specified is greater than cumulative rounds to look for", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       //Add apps
@@ -4195,8 +4366,11 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should calculate cumulative score correctly with different security multipliers", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       //Add apps
@@ -4259,8 +4433,11 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should be able to update rounds for cumulative scores", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       await bootstrapAndStartEmissions()
@@ -4337,8 +4514,11 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should calculate decay from first round if last round specified is greater than cumulative rounds to look for", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       //Add apps
@@ -4443,6 +4623,18 @@ describe("VeBetterPassport - @shard5", function () {
         round 5 = 100 + (111 * 0.1) = 111.1 => 111
       */
       expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 5)).to.equal(111)
+    })
+
+    it("Should be able to set decay rate to 0", async function () {
+      const { veBetterPassport, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await veBetterPassport.connect(owner).setDecayRate(1)
+      expect(await veBetterPassport.decayRate()).to.equal(1)
+
+      await veBetterPassport.connect(owner).setDecayRate(0)
+      expect(await veBetterPassport.decayRate()).to.equal(0)
     })
 
     it("Should not register action score if app security is not set", async function () {
@@ -4770,8 +4962,8 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Can update blacklist threshold", async function () {
-      const config = createLocalConfig()
-      config.VEPASSPORT_BLACKLIST_THRESHOLD = 60 // 60% of entities are blacklisted
+      const config = createTestConfig()
+      config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
         owner: passport,
@@ -4803,8 +4995,8 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Can update whitelist threshold", async function () {
-      const config = createLocalConfig()
-      config.VEBETTER_WHITELIST_THRESHOLD = 60 // 60% of entities are blacklisted
+      const config = createTestConfig()
+      config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
         owner: passport,
@@ -4836,8 +5028,8 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Can remove user from blacklist", async function () {
-      const config = createLocalConfig()
-      config.VEPASSPORT_BLACKLIST_THRESHOLD = 60 // 60% of entities are blacklisted
+      const config = createTestConfig()
+      config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
         otherAccount: entity1,
@@ -4861,8 +5053,8 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Can remove user from whitelist", async function () {
-      const config = createLocalConfig()
-      config.VEBETTER_WHITELIST_THRESHOLD = 60 // 60% of entities are whitelisted
+      const config = createTestConfig()
+      config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are whitelisted
       const { veBetterPassport, otherAccount: entity1 } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -4910,8 +5102,8 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("If over the threshold amount of entities are blacklisted, passport should return blacklisted", async function () {
-      const config = createLocalConfig()
-      config.VEPASSPORT_BLACKLIST_THRESHOLD = 60 // 60% of entities are blacklisted
+      const config = createTestConfig()
+      config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
         owner: passport,
@@ -4977,14 +5169,14 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should return true if user does meet participation score threshold", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport, owner, otherAccount, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
-        config: {
-          ...config,
-          VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD: 100, // 100 score threshold
-        },
+        config,
       })
+
+      // Set the threshold to 100
+      await veBetterPassport.connect(owner).setThresholdPoPScore(100)
 
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
@@ -5029,6 +5221,8 @@ describe("VeBetterPassport - @shard5", function () {
 
   describe("Governance & X Allocation Voting", function () {
     it("Should register participation correctly through emission's cycles", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const {
         x2EarnApps,
         owner,
@@ -5041,6 +5235,7 @@ describe("VeBetterPassport - @shard5", function () {
         governor,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       await getVot3Tokens(otherAccount, "10000")
@@ -5151,6 +5346,9 @@ describe("VeBetterPassport - @shard5", function () {
       await veBetterPassport.setThresholdPoPScore(1000)
 
       await waitForNextCycle()
+
+      // Increase participation score threshold to 1000
+      await veBetterPassport.setThresholdPoPScore(1000)
 
       await startNewAllocationRound()
 
@@ -5282,6 +5480,9 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Should use checkpointed PoP score threshold for whole round regardless if PoP score changes", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
+      config.EMISSIONS_CYCLE_DURATION = 20
       const {
         x2EarnApps,
         owner,
@@ -5294,6 +5495,7 @@ describe("VeBetterPassport - @shard5", function () {
         governor,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       await getVot3Tokens(otherAccount, "10000")
@@ -5355,7 +5557,7 @@ describe("VeBetterPassport - @shard5", function () {
           [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
         )
 
-      // Set minimum participation score to 500
+      // Set minimum participation score to 500, which will take effect from the next round
       await veBetterPassport.setThresholdPoPScore(500)
 
       // owmer has a threshold of 0 but can vote because the threshold is still 0 for the round

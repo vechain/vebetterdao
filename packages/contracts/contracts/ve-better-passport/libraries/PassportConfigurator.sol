@@ -86,7 +86,7 @@ library PassportConfigurator {
     self.securityMultiplier[PassportTypes.APP_SECURITY.HIGH] = 400;
 
     // Decay
-    self.decayRate = 20;
+    self.decayRate = initializationData.decayRate;
 
     // Set the threshold percentage of blacklisted or whitelisted entities to consider a passport user as blacklisted or whitelisted
     self.blacklistThreshold = initializationData.blacklistThreshold;
