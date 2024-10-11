@@ -200,7 +200,7 @@ library PassportPoPScoreLogic {
       updateUniqueAppInteractions(self, passport, appId);
     }
 
-    // If the entity is not linked to a passport and the entity has not interacted with the app track interaction
+    // If the entity is linked to a passport and the entity has not interacted with the app track interaction
     if (passport != user && !self.userUniqueAppInteraction[user][appId]) {
       updateUniqueAppInteractions(self, user, appId);
     }
@@ -336,7 +336,7 @@ library PassportPoPScoreLogic {
       updateUniqueAppInteractions(self, passport, appId);
     }
 
-    // If the entity is not linked to a passport and the entity has not interacted with the app track interaction
+    // If the entity is linked to a passport and the entity has not interacted with the app track interaction
     if (passport != user && !self.userUniqueAppInteraction[user][appId]) {
       updateUniqueAppInteractions(self, user, appId);
     }
