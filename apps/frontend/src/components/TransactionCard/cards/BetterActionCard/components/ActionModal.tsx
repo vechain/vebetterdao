@@ -1,42 +1,58 @@
-import { SustainabilityActionsResponse, useXApps } from "@/api"
+import { SustainabilityProof, useXApps } from "@/api"
 import { Box, Heading, Image, Link, UseDisclosureProps } from "@chakra-ui/react"
 import { VStack, HStack, Text, Card, CardBody } from "@chakra-ui/react"
 import dayjs from "dayjs"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { EmbeddedTweet, useTweet } from "react-tweet"
 import { BaseModal } from "@/components/BaseModal"
+import { isEmpty } from "lodash"
+import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { getConfig } from "@repo/config"
 
 const compactFormatter = getCompactFormatter(2)
 
 type Props = {
   actionModal: UseDisclosureProps
-  action: SustainabilityActionsResponse["data"][number]
+  proof?: SustainabilityProof
+  appId?: string
+  blockTimestamp?: number
+  blockNumber?: number
+  b3trAmount?: number
+  txId?: string
 }
-export const ActionModal = ({ actionModal, action }: Props) => {
+
+const explorerUrl = getConfig().network.explorerUrl
+const network = getConfig().network.type
+
+export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNumber, b3trAmount, txId }: Props) => {
   const { data: apps } = useXApps()
   const { t } = useTranslation()
 
   const app = useMemo(() => {
-    return apps?.find(app => app.id === action?.appId ?? "")
-  }, [apps, action?.appId])
+    return apps?.find(app => app.id === appId ?? "")
+  }, [apps, appId])
 
   const isTweet = useMemo(() => {
-    return action?.proof?.proof?.link?.includes("x.com") || action?.proof?.proof?.link?.includes("twitter.com")
-  }, [action?.proof?.proof?.link])
+    return proof?.proof?.link?.includes("x.com") || proof?.proof?.link?.includes("twitter.com")
+  }, [proof?.proof?.link])
 
   const tweetId = useMemo(() => {
     if (isTweet) {
-      const match = action?.proof?.proof?.link?.match(/\/status\/(\d+)/)
+      const match = proof?.proof?.link?.match(/\/status\/(\d+)/)
       return match ? match[1] : null
     }
     return null
-  }, [action?.proof?.proof?.link, isTweet])
+  }, [isTweet, proof?.proof?.link])
 
   const { data: tweet } = useTweet(tweetId ?? undefined)
 
-  const proof = useMemo(() => {
+  const isProof = useMemo(() => {
+    return !isEmpty(proof)
+  }, [proof])
+
+  const renderProof = useMemo(() => {
     if (isTweet && tweet) {
       return (
         <Box>
@@ -44,30 +60,32 @@ export const ActionModal = ({ actionModal, action }: Props) => {
         </Box>
       )
     }
-    if (action?.proof?.proof?.image)
+    if (proof?.proof?.image)
       return (
-        <Image
-          src={action.proof.proof.image}
-          alt="proof-image"
-          borderRadius="md"
-          w={["auto", "50%"]}
-          objectFit={"contain"}
-        />
+        <Image src={proof.proof.image} alt="proof-image" borderRadius="md" w={["auto", "50%"]} objectFit={"contain"} />
       )
 
-    if (action?.proof?.proof?.video)
+    if (proof?.proof?.video)
       return (
         <video width="320" height="240" controls>
-          <source src={action.proof.proof.video} type="video/mp4" />
+          <source src={proof.proof.video} type="video/mp4" />
           {"Your browser does not support the video tag."}
         </video>
       )
     return (
-      <Link href={action?.proof?.proof?.link} isExternal>
-        <Text fontSize="sm">{action?.proof?.proof?.link}</Text>
+      <Link href={proof?.proof?.link} isExternal>
+        <Text fontSize="sm">{proof?.proof?.link}</Text>
       </Link>
     )
-  }, [action.proof, isTweet, tweet])
+  }, [proof, isTweet, tweet])
+
+  const onTransactionDetailClick = useCallback(() => {
+    if (!txId) return
+
+    if (network === "main") window.open(`${explorerUrl}/transaction/${txId}`, "_blank")
+
+    if (network === "test") window.open(`${explorerUrl}/transactions/${txId}`, "_blank")
+  }, [txId])
 
   return (
     <BaseModal
@@ -77,41 +95,62 @@ export const ActionModal = ({ actionModal, action }: Props) => {
       ariaDescription="ActionModal">
       <VStack align="stretch" spacing={4}>
         <Text fontSize="sm" color="black" bg="#F8F8F8" py={1} px={3} borderRadius="full" alignSelf="flex-start">
-          {dayjs.unix(action?.blockTimestamp ?? 0).fromNow()}
+          {dayjs.unix(blockTimestamp ?? 0).fromNow()}
         </Text>
-        <Card variant="filled">
-          <CardBody p={4}>
-            <VStack align="stretch" spacing={1}>
-              <HStack>
-                <Heading fontSize="3xl" fontWeight="bold">
-                  {"+"}
-                  {compactFormatter.format(Number(action.amount))}
-                </Heading>
-                <Image h="30px" w="30px" src="/images/b3tr-token.png" alt="b3tr-token" />
-              </HStack>
-              <HStack gap={1}>
-                <Heading fontSize="md">{t("Better action on")}</Heading>
-                <Heading fontSize="md" fontWeight="600">
-                  {app?.name}
-                </Heading>
-              </HStack>
-            </VStack>
-          </CardBody>
-        </Card>
-        <VStack align="stretch" spacing={2}>
-          <Heading fontSize="lg">{t("Sustainability proof")}</Heading>
+        {b3trAmount && (
+          <Card variant="filled">
+            <CardBody p={4}>
+              <VStack align="stretch" spacing={1}>
+                <HStack>
+                  <Heading fontSize="3xl" fontWeight="bold">
+                    {compactFormatter.format(Number(b3trAmount ?? 0))}
+                  </Heading>
+                  <Image h="30px" w="30px" src="/images/b3tr-token.png" alt="b3tr-token" />
+                </HStack>
+                <HStack gap={1}>
+                  <Heading fontSize="md">{t("Better action on")}</Heading>
+                  <Heading fontSize="md" fontWeight="600">
+                    {app?.name}
+                  </Heading>
+                </HStack>
+              </VStack>
+            </CardBody>
+          </Card>
+        )}
+        {isProof && (
           <VStack align="stretch" spacing={2}>
-            <Text fontSize="sm">{action?.proof?.description}</Text>
-            {proof}
+            <Heading fontSize="lg">{t("Sustainability proof")}</Heading>
+            <VStack align="stretch" spacing={2}>
+              <Text fontSize="sm">{proof?.description}</Text>
+              {renderProof}
+            </VStack>
           </VStack>
-        </VStack>
+        )}
         <VStack align="stretch" spacing={4}>
           <Heading fontSize="lg">{t("Transaction information")}</Heading>
           <HStack justify="space-between">
             <Text fontWeight="600">{t("Block")}</Text>
-            <Text color="#6A6A6A">{action?.blockNumber}</Text>
+            <Text color="#6A6A6A">{blockNumber}</Text>
           </HStack>
         </VStack>
+        {txId && (
+          <VStack
+            align="stretch"
+            spacing={4}
+            w={"full"}
+            alignItems={"center"}
+            mt={4}
+            color={"rgba(0, 76, 252, 1)"}
+            cursor={"pointer"}
+            onClick={onTransactionDetailClick}>
+            <HStack align="stretch" spacing={4} alignItems={"center"}>
+              <Text fontSize={16} fontWeight={500}>
+                {t("See more details on")} Vechain Stats
+              </Text>
+              <UilArrowUpRight size={16} />
+            </HStack>
+          </VStack>
+        )}
       </VStack>
     </BaseModal>
   )
