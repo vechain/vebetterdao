@@ -129,7 +129,6 @@ describe("VeBetterPassport - @shard3", function () {
             x2EarnApps: await x2EarnApps.getAddress(),
             xAllocationVoting: await xAllocationVoting.getAddress(),
             galaxyMember: await galaxyMember.getAddress(),
-            popScoreThreshold: config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD, //threshold
             signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
             roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
             minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
@@ -4491,11 +4490,11 @@ describe("VeBetterPassport - @shard3", function () {
       const config = createLocalConfig()
       const { veBetterPassport, owner, otherAccount, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
-        config: {
-          ...config,
-          VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD: 100, // 100 score threshold
-        },
+        config,
       })
+
+      // Set the threshold to 100
+      await veBetterPassport.connect(owner).setThresholdPoPScore(100)
 
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
@@ -4554,6 +4553,7 @@ describe("VeBetterPassport - @shard3", function () {
         governor,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       await getVot3Tokens(otherAccount, "10000")
@@ -4615,12 +4615,12 @@ describe("VeBetterPassport - @shard3", function () {
           [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
         )
 
+      // Set minimum participation score to 500
+      await veBetterPassport.setThresholdPoPScore(500)
+
       await waitForProposalToBeActive(proposalId)
 
       expect(await xAllocationVoting.currentRoundId()).to.equal(2)
-
-      // Set minimum participation score to 500
-      await veBetterPassport.setThresholdPoPScore(500)
 
       // User tries to vote both governance and x allocation voting but reverts due to not meeting the participation score threshold
       await expect(
@@ -4662,12 +4662,12 @@ describe("VeBetterPassport - @shard3", function () {
 
       await waitForNextCycle()
 
+      // Increase participation score threshold to 1000
+      await veBetterPassport.setThresholdPoPScore(1000)
+
       await startNewAllocationRound()
 
       expect(await xAllocationVoting.currentRoundId()).to.equal(3)
-
-      // Increase participation score threshold to 1000
-      await veBetterPassport.setThresholdPoPScore(1000)
 
       // User tries to vote x allocation voting but reverts due to not meeting the participation score threshold
       await expect(
@@ -4795,6 +4795,8 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should use checkpointed PoP score threshold for whole round regardless if PoP score changes", async function () {
+      const config = createLocalConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
       const {
         x2EarnApps,
         owner,
@@ -4807,6 +4809,7 @@ describe("VeBetterPassport - @shard3", function () {
         governor,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
+        config,
       })
 
       await getVot3Tokens(otherAccount, "10000")

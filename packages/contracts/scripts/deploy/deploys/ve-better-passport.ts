@@ -70,7 +70,6 @@ export async function main() {
         x2EarnApps: envConfig.x2EarnAppsContractAddress,
         xAllocationVoting: envConfig.xAllocationVotingContractAddress,
         galaxyMember: envConfig.galaxyMemberContractAddress,
-        popScoreThreshold: contractsConfig.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD, //threshold
         signalingThreshold: contractsConfig.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
         roundsForCumulativeScore: contractsConfig.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
         minimumGalaxyMemberLevel: contractsConfig.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
