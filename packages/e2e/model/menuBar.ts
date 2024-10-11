@@ -27,7 +27,7 @@ export class MenuBar {
   /**
    * Goto the dashboard page
    */
-  async gotoDashbard(): Promise<DashboardPage> {
+  async gotoDashboard(): Promise<DashboardPage> {
     return await test.step("Go to dashboard", async () => {
       await this.dashBoardButton.first().click()
       await this.waitUntilInSection("Dashboard")

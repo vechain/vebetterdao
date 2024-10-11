@@ -1,7 +1,7 @@
 import { Page } from "playwright"
 import { Locator, test, expect } from "@playwright/test"
-import { VoteCastDialog } from "./voteCastDialog"
 import { AllocationVote, AppName } from "./types"
+import { TxModalVoteCast } from "./TxModalVoteCast"
 
 /**
  * Allocation rounds page model
@@ -15,8 +15,10 @@ export class RoundsPage {
   readonly voteAppCard: (appName: AppName) => Locator
   readonly voteAppCheckbox: (appName: AppName) => Locator
   readonly continueButton: Locator
+  readonly confirmVoteButton: Locator
   readonly voteAppInput: (appName: AppName) => Locator
-  readonly pageTitle: Locator
+  readonly votingConfirmationPageTitle: Locator
+  readonly userVotesCard: Locator
 
   constructor(page: Page) {
     this.page = page
@@ -26,9 +28,11 @@ export class RoundsPage {
     this.castYourVoteButton = this.page.getByTestId("cast-your-vote-button")
     this.voteAppCheckbox = (appName: AppName) => this.page.getByTestId(`select-app-checkbox-${appName}`)
     this.continueButton = this.page.getByTestId("continue")
+    this.confirmVoteButton = this.page.getByTestId("confirm-vote")
     this.voteAppInput = (appName: AppName) => this.page.getByTestId(`${appName}-vote-input`)
-    this.pageTitle = this.page.getByTestId("voting-confirmation-page-title")
+    this.votingConfirmationPageTitle = this.page.getByTestId("voting-confirmation-page-title")
     this.voteAppCard = (appName: AppName) => this.page.getByTestId(`vote-app-card-${appName}`)
+    this.userVotesCard = this.page.getByTestId("user-votes-card")
   }
 
   /**
@@ -70,9 +74,7 @@ export class RoundsPage {
       // select apps on the list and click Continue
       await this.castYourVoteButton.click()
       for (const vote of votes) {
-        // await this.voteAppCheckbox(vote.appName).
-        // await this.voteAppCheckbox(vote.appName).click()
-        await this.voteAppCard(vote.appName).click()
+        await this.selectAppToVoteFor(vote.appName)
       }
       await this.continueButton.click()
 
@@ -83,14 +85,19 @@ export class RoundsPage {
       await this.continueButton.click()
 
       // confirm vote
-      await this.page.waitForURL("**/rounds/**/vote/confirm", { timeout: 10000 })
-      await this.pageTitle.waitFor({ state: "visible", timeout: 10000 })
+      await this.votingConfirmationPageTitle.waitFor({ state: "visible", timeout: 10000 })
       await this.continueButton.click()
+      await new TxModalVoteCast(this.page).expectPending()
+      // await new TxModalVoteCast(this.page).expectSuccess()
+      await this.userVotesCard.waitFor({ state: "visible", timeout: 10000 })
+    })
+  }
 
-      // expect vote casting to succeed
-      const voteCastDialog = new VoteCastDialog(this.page)
-      await voteCastDialog.expectDialogSuccess()
-      await voteCastDialog.closeDialog()
+  async selectAppToVoteFor(appName: AppName) {
+    await test.step(`Select the "${appName}" app for votes allocation`, async () => {
+      // dataChecked is expected to be null if prop isn't on the element, hence - checkbox isn't checked
+      const dataChecked = await this.voteAppCheckbox(appName).getAttribute("data-checked")
+      if (dataChecked === null) await this.voteAppCard(appName).click()
     })
   }
 
@@ -121,7 +128,7 @@ export class RoundsPage {
    */
   async expectAppVotes(appName: string, votes: number) {
     await test.step(`Expect app votes: ${appName} to be ${votes}`, async () => {
-      await expect(this.page.getByTestId(`${appName}-total-votes`)).toHaveText(String(votes))
+      await expect(this.page.getByTestId(`${appName}-votes-percentage`)).toHaveText(String(votes))
     })
   }
 

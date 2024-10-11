@@ -13,6 +13,7 @@ export class AllocationsPage extends BasePage {
   readonly pageTitleText: Locator
   readonly latestRoundCard: Locator
   readonly latestRoundStatus: Locator
+  readonly roundHeaderCard: Locator
   readonly roundCardByIndex: (i: RoundIndex) => Locator
   readonly roundStatusByIndex: (i: RoundIndex) => Locator
 
@@ -30,6 +31,7 @@ export class AllocationsPage extends BasePage {
       return this.roundCardByIndex(i).getByTestId("round-status")
     }
     this.latestRoundStatus = this.latestRoundCard.getByTestId("round-status")
+    this.roundHeaderCard = this.page.getByTestId("allocation-round-header-card")
   }
 
   /**
@@ -60,7 +62,7 @@ export class AllocationsPage extends BasePage {
           )
           await delay(5000)
           const menuBar = new MenuBar(this.page)
-          await menuBar.gotoDashbard()
+          await menuBar.gotoDashboard()
           await menuBar.gotoAllocations()
         }
       }
@@ -103,25 +105,27 @@ export class AllocationsPage extends BasePage {
    */
   async clickOnRound(roundIndex: RoundIndex): Promise<RoundsPage> {
     return await test.step(`Click on round #${roundIndex}`, async () => {
-      console.log(`Retry clicking on round #${roundIndex}`)
       const roundsPage = new RoundsPage(this.page)
       const maxAttempts = 10
       let attemptsLeft = maxAttempts
-      while (attemptsLeft > 0) {
+      let isOpened = false
+      while (attemptsLeft > 0 && !isOpened) {
         try {
-          await this.expectRoundStatus(roundIndex, "Active now")
+          console.log(`\t Attempt #${maxAttempts - attemptsLeft + 1} to click on Round #${roundIndex}`)
           await this.roundCardByIndex(roundIndex).click()
+          await expect(this.roundHeaderCard).toBeVisible()
+          isOpened = true
         } catch (error) {
           console.log(`\t Error clicking on round #${roundIndex}: ${error}`)
           const menuBar = new MenuBar(this.page)
-          await menuBar.gotoDashbard()
+          await menuBar.gotoDashboard()
           await menuBar.gotoAllocations()
           attemptsLeft--
         } finally {
           await delay(5000)
         }
       }
-      if (attemptsLeft === 0) {
+      if (attemptsLeft === 0 || !isOpened) {
         console.log(`\t Failed to click on round #${roundIndex} after ${maxAttempts} attempts`)
         throw new Error(`Failed to click on round #${roundIndex}`)
       }
