@@ -55,7 +55,11 @@ export const SuccessAppBalanceModalContent = ({
         initial="initial"
         animate="animate"
       />
-      <Text style={{ fontFamily: "Instrument Sans, sans-serif" }} fontSize={28} fontWeight={700}>
+      <Text
+        style={{ fontFamily: "Instrument Sans, sans-serif" }}
+        fontSize={28}
+        fontWeight={700}
+        data-testid={"tx-modal-title"}>
         {isDeposit ? t("Deposit complete!") : t("Withdrawal complete!")}
       </Text>
 

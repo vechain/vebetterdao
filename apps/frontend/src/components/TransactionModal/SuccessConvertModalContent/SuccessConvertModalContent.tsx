@@ -56,7 +56,7 @@ export const SuccessConvertModalContent = ({
         style={{ fontFamily: "Instrument Sans, sans-serif" }}
         fontSize={28}
         fontWeight={700}
-        data-testid={"swap-success-title"}>
+        data-testid={"tx-modal-title"}>
         {t("Conversion complete!")}
       </Text>
       <Text fontSize={16} fontWeight={400} textAlign={"center"}>

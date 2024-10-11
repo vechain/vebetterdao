@@ -70,6 +70,7 @@ export const StartRoundButton = () => {
         pendingTitle="Starting round..."
         errorTitle={"Error starting round"}
         errorDescription={error?.reason}
+        data-testid={"round-start-modal-title"}
       />
     </VStack>
   )

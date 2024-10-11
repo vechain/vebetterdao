@@ -29,7 +29,7 @@ export const ErrorModalContent = ({
     <ModalAnimation>
       <ModalCloseButton top={4} right={4} />
       <VStack align={"center"} p={6} gap={0}>
-        <Heading size="md" data-testid={"modal-error-title"}>
+        <Heading size="md" data-testid={"tx-modal-title"}>
           {title}
         </Heading>
         <motion.div

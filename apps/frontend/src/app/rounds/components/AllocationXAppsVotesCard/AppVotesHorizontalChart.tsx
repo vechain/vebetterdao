@@ -75,7 +75,11 @@ export const AppVotesHorizontalChart = ({
               {appMetadata?.name}
             </Heading>
             <VStack spacing={0} align={"flex-start"} justify={"flex-start"}>
-              <Heading size={["16px"]} fontWeight={600} color="#6DCB09">
+              <Heading
+                size={["16px"]}
+                fontWeight={600}
+                color="#6DCB09"
+                data-testid={`${appMetadata?.name}-votes-percentage`}>
                 {t("{{percentage}}%", {
                   percentage: data.percentage.toLocaleString("en", { minimumFractionDigits: 2 }),
                 })}
