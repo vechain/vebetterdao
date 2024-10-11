@@ -23,8 +23,8 @@ export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosu
   const removeDelegation = useRemovePendingDelegationDelegatorPOV({})
 
   const handleDelegate = useCallback(() => {
-    removeDelegation.sendTransaction({ delegatee })
-  }, [removeDelegation, delegatee])
+    removeDelegation.sendTransaction({})
+  }, [removeDelegation])
 
   const handleClose = useCallback(() => {
     modal.onClose?.()
@@ -43,7 +43,7 @@ export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosu
         errorDescription={removeDelegation.error?.reason}
         errorTitle={removeDelegation.error ? t("Error removing delegation request") : undefined}
         showTryAgainButton
-        onTryAgain={() => removeDelegation.sendTransaction({ delegatee })}
+        onTryAgain={() => removeDelegation.sendTransaction({})}
         pendingTitle={t("Removing delegation request...")}
         showExplorerButton
         txId={removeDelegation.txReceipt?.meta.txID ?? removeDelegation.sendTransactionTx?.txid}

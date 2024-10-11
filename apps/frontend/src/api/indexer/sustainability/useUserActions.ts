@@ -20,7 +20,7 @@ export const useUserActions = () => {
   // we show the round actions because it's impossible to calculate the number of actions for the decay period
   const userActions = userOverview?.actionsRewarded ?? 0
   const scoreNeeded = Math.max(Number(scoreThreshold ?? 0) - (Number(userScore ?? 0) ?? 0), 0)
-  const missingActions = scoreNeeded / easyActionScore
+  const missingActions = easyActionScore ? Math.ceil(scoreNeeded / easyActionScore) : 0
 
   const totalActions = userActions + missingActions
 
