@@ -1,10 +1,10 @@
-import { hasRoleQueryKey } from "@/api/contracts/account"
+import { DEFAULT_ADMIN_ROLE, hasRoleQueryKey } from "@/api/contracts/account"
 import { AccessControl__factory } from "@repo/contracts/typechain-types"
 import { useQueryClient } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
-import { EnhancedClause, useSendTransaction } from "./useSendTransaction"
+import { EnhancedClause, useSendTransaction, UseSendTransactionReturnValue } from "./useSendTransaction"
 
 type Props = {
   contractAddress: string
@@ -35,7 +35,7 @@ export const useAccessControl = ({
   const queryClient = useQueryClient()
 
   const bytes32Role = useMemo(
-    () => (role === "DEFAULT_ADMIN_ROLE" ? ethers.ZeroHash : ethers.solidityPackedKeccak256(["string"], [role])),
+    () => (role === "DEFAULT_ADMIN_ROLE" ? DEFAULT_ADMIN_ROLE : ethers.solidityPackedKeccak256(["string"], [role])),
     [role],
   )
 
@@ -63,6 +63,18 @@ export const useAccessControl = ({
     ] as EnhancedClause[]
   }, [contractAddress, walletAddress, bytes32Role, role])
 
+  const buildRenounceClause = useCallback(() => {
+    return [
+      {
+        to: contractAddress,
+        value: 0,
+        data: accessControlInterface.encodeFunctionData("renounceRole", [bytes32Role, walletAddress]),
+        comment: `Renouncing ${role} role from ${walletAddress}`,
+        abi: JSON.parse(JSON.stringify(accessControlInterface.getFunction("renounceRole"))),
+      },
+    ] as EnhancedClause[]
+  }, [contractAddress, walletAddress, bytes32Role, role])
+
   const performCacheInvalidation = useCallback(async () => {
     if (invalidateCache) {
       await queryClient.cancelQueries({
@@ -79,12 +91,17 @@ export const useAccessControl = ({
     onSuccess?.()
   }, [performCacheInvalidation, onSuccess])
 
-  const grantRole = useSendTransaction({
+  const grantRole: UseSendTransactionReturnValue = useSendTransaction({
     signerAccount: account,
     onTxConfirmed: handleOnSuccess,
   })
 
-  const revokeRole = useSendTransaction({
+  const revokeRole: UseSendTransactionReturnValue = useSendTransaction({
+    signerAccount: account,
+    onTxConfirmed: handleOnSuccess,
+  })
+
+  const renounceRole: UseSendTransactionReturnValue = useSendTransaction({
     signerAccount: account,
     onTxConfirmed: handleOnSuccess,
   })
@@ -99,8 +116,14 @@ export const useAccessControl = ({
     return revokeRole.sendTransaction(clauses)
   }, [buildRevokeClause, revokeRole])
 
+  const onMutateRenounceRole = useCallback(async () => {
+    const clauses = buildRenounceClause()
+    return renounceRole.sendTransaction(clauses)
+  }, [buildRenounceClause, renounceRole])
+
   return {
     grantRole: { ...grantRole, sendTransaction: onMutateGrantRole },
     revokeRole: { ...revokeRole, sendTransaction: onMutateRevokeRole },
+    renounceRole: { ...renounceRole, sendTransaction: onMutateRenounceRole },
   }
 }
