@@ -15,7 +15,7 @@ export interface Properties {
 export const initialise = () => {
   if (MIX_PANEL_TOKEN) {
     mixpanel.init(MIX_PANEL_TOKEN, {
-      debug: true,
+      // debug: true,
       track_pageview: true,
       ignore_dnt: true,
     })

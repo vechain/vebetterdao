@@ -79,6 +79,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   }, [data?.voteEndTimestamp, isFinished])
 
   const navigateToVote = useCallback(() => {
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CASTING_VOTE))
     router.push(`/rounds/${roundId}/vote`)
   }, [router, roundId])
 
@@ -177,10 +178,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                 <Button
                   data-testid="cast-your-vote-button"
                   variant={"primaryAction"}
-                  onClick={() => {
-                    navigateToVote()
-                    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CASTING_VOTE))
-                  }}
+                  onClick={navigateToVote}
                   size={"lg"}
                   colorScheme={"primary"}
                   w={["full", "auto"]}

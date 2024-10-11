@@ -19,7 +19,6 @@ export const generateMockLocalConfig = () => {
     environment: "local",
     ipfsPinningService: "${IPFS_PINNING_SERVICE_DEV}",
     ipfsFetchingService: "${IPFS_FETCHING_SERVICE_DEV}",
-    mixPanelProjectToken: "469f5f427fed829387f3721b62c0b4e3", 
     b3trContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     vot3ContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     b3trGovernorAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
