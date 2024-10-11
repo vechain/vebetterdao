@@ -57,8 +57,8 @@ describe("VeBetterPassport - @shard5", function () {
         config: {
           ...config,
           VEPASSPORT_BOT_SIGNALING_THRESHOLD: 5,
-          VEBETTER_WHITELIST_THRESHOLD: 20,
-          VEPASSPORT_BLACKLIST_THRESHOLD: 10,
+          VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE: 20,
+          VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE: 10,
         },
       })
 
@@ -4805,8 +4805,8 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("should revert if you are trying to accept a link request and passport has reached max amoutn entities", async function () {
-      const config = createLocalConfig()
-      config.VEBETTER_PASSPORT_MAX_ENTITIES = 1
+      const config = createTestConfig()
+      config.VEPASSPORT_PASSPORT_MAX_ENTITIES = 1
       const {
         veBetterPassport,
         owner: passport,
@@ -5072,8 +5072,8 @@ describe("VeBetterPassport - @shard5", function () {
     })
 
     it("Can remove an entity from whitelist", async function () {
-      const config = createLocalConfig()
-      config.VEBETTER_WHITELIST_THRESHOLD = 60 // 60% of entities are whitelisted
+      const config = createTestConfig()
+      config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are whitelisted
       const {
         veBetterPassport,
         otherAccount: entity1,
