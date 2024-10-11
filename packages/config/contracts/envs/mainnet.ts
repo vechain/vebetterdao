@@ -99,7 +99,6 @@ export function createMainnetConfig() {
     ],
 
     // VeBetterPassport
-    VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD: 0, // TODO: Set the correct value
     VEPASSPORT_BOT_SIGNALING_THRESHOLD: 2, // TODO: Set the correct value
     VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE: 5, // TODO: Set the correct value
     VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL: 2, // TODO: Set the correct value

@@ -3,7 +3,6 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
-import { isValid } from "@repo/utils/AddressUtils"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getPendingDelegationsQueryKeyDelegatorPOV, getPendingDelegationsQueryKeyDelegateePOV } from "@/api"
 
@@ -15,9 +14,7 @@ type UseRemovePendingDelegationProps = {
   onSuccess?: () => void
 }
 
-type ClausesParams = {
-  delegatee: string
-}
+type ClausesParams = {}
 
 /**
  * Provides a React hook to remove pending a delegation using a blockchain transaction.
@@ -27,9 +24,9 @@ export const useRemovePendingDelegationDelegatorPOV = ({ onSuccess }: UseRemoveP
   const { account } = useWallet()
 
   const clauseBuilder = useCallback(
-    ({ delegatee }: ClausesParams) => {
+    ({}: ClausesParams) => {
       if (!account) throw new Error("Account is required")
-      if (!isValid(delegatee)) throw new Error("Invalid delegatee address")
+      // if (!isValid(delegatee)) throw new Error("Invalid delegatee address")
 
       return [
         buildClause({
