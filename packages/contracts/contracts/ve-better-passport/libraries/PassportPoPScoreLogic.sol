@@ -219,8 +219,6 @@ library PassportPoPScoreLogic {
   /// @notice Sets the decay rate for the exponential decay
   /// @param newDecayRate - the decay rate
   function setDecayRate(PassportStorageTypes.PassportStorage storage self, uint256 newDecayRate) external {
-    require(newDecayRate > 0, "ProofOfParticipation: decay rate is zero");
-
     self.decayRate = newDecayRate;
   }
 

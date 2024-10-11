@@ -4112,6 +4112,18 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 5)).to.equal(111)
     })
 
+    it("Should be able to set decay rate to 0", async function () {
+      const { veBetterPassport, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await veBetterPassport.connect(owner).setDecayRate(1)
+      expect(await veBetterPassport.decayRate()).to.equal(1)
+
+      await veBetterPassport.connect(owner).setDecayRate(0)
+      expect(await veBetterPassport.decayRate()).to.equal(0)
+    })
+
     it("Should not register action score if app security is not set", async function () {
       const { veBetterPassport, owner, otherAccounts, otherAccount, x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
