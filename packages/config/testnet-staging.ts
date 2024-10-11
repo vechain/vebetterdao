@@ -32,7 +32,7 @@ const config: AppConfig = {
       "https://sync-testnet.veblocks.net",
       "https://testnet.vecha.in",
     ],
-    explorerUrl: "https://insight.vecha.in/#/test",
+    explorerUrl: "https://explore-testnet.vechain.org",
     blockTime: 10000,
     genesis: {
       number: 0,
