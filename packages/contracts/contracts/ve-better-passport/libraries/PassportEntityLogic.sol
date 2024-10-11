@@ -286,6 +286,11 @@ library PassportEntityLogic {
 
     // Check if the entity is already linked, if so revert
     if (self.entityToPassport[entity].latest() != 0 || self.pendingLinksEntityToPassport[entity] != address(0)) {
+      revert AlreadyLinked(entity);
+    }
+
+    // Check if the passport is an entity, if so revert
+    if (self.entityToPassport[msg.sender].latest() != 0 || self.pendingLinksEntityToPassport[msg.sender] != address(0)) {
       revert AlreadyLinked(msg.sender);
     }
 
@@ -306,6 +311,11 @@ library PassportEntityLogic {
     // Check if the entity (msg.sender) is already linked
     if (self.entityToPassport[msg.sender].latest() != 0 || self.pendingLinksIndexes[msg.sender] != 0) {
       revert AlreadyLinked(msg.sender);
+    }
+
+    // Check if the passport is an entity, if so revert
+    if (self.entityToPassport[passport].latest() != 0 || self.pendingLinksEntityToPassport[passport] != address(0)) {
+      revert AlreadyLinked(passport);
     }
 
     // Prevent self-linking (an entity cannot be its own passport)

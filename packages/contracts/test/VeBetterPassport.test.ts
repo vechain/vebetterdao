@@ -949,6 +949,40 @@ describe("VeBetterPassport - @shard5", function () {
   })
 
   describe("Passport Entities", function () {
+    it("Should revert if a passport is trying to link to another passport", async function () {
+      const { veBetterPassport, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const A = otherAccounts[0]
+      const B = otherAccounts[1]
+      const C = otherAccounts[2]
+
+      await linkEntityToPassportWithSignature(veBetterPassport, A, B, 1000)
+
+      await expect(linkEntityToPassportWithSignature(veBetterPassport, B, C, 1000)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "AlreadyLinked",
+      )
+    })
+
+    it("Should revert if passport is trying to create a pending ", async function () {
+      const { veBetterPassport, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const A = otherAccounts[0]
+      const B = otherAccounts[1]
+      const C = otherAccounts[2]
+
+      await linkEntityToPassportWithSignature(veBetterPassport, A, B, 1000)
+
+      await expect(veBetterPassport.connect(B).linkEntityToPassport(C.address)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "AlreadyLinked",
+      )
+    })
+
     it("Should be able to register an entity by function calls", async function () {
       const {
         veBetterPassport,
