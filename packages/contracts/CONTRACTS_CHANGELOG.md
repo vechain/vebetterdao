@@ -6,9 +6,9 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                               | Summary                                                     |
 | ------------------- | --------------------------------------------------------- | ----------------------------------------------------------- |
-| 9th October 2024    | `XAllocationVoting` version `2`                           | Check isPerson when casting vote & fixed weight during vote |
-| 9th October 2024    | `B3TRGovernor` version `4`                                | Check isPerson when casting vote                            |
-| 9th October 2024    | `X2EarnRewardsPool` version `3`                           | Register action in VeBetter Passport contract               |
+| 11th October 2024   | `XAllocationVoting` version `2`                           | Check isPerson when casting vote & fixed weight during vote |
+| 11th October 2024   | `B3TRGovernor` version `4`                                | Check isPerson when casting vote                            |
+| 11th October 2024   | `X2EarnRewardsPool` version `3`                           | Register action in VeBetter Passport contract               |
 | 27th September 2024 | `Emissions` version `2`                                   | Aligned emissions with the expected schedule                |
 | 13th September 2024 | `B3TRGovernor` version `3`, `XAllocationPool` version `2` | Added toggling of quadratic voting and funding              |
 | 4th September 2024  | `X2EarnRewardsPool` version `2`                           | Added impact key management and proof building              |
@@ -25,7 +25,7 @@ Another change in the `XAllocationVoting` contract is the fixed weight during th
 
 ### Changes 🚀
 
-- **Upgraded Contract(s):** 
+- **Upgraded Contract(s):**
   - `XAllocationVoting.sol` to version `2`
   - `B3TRGovernor.sol` to version `4`
   - `X2EarnRewardsPool.sol` to version `3`

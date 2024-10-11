@@ -31,6 +31,7 @@ import {
   transferGovernorFunctionSettingsRole,
   transferMinterRole,
   transferSettingsManagerRole,
+  transferUpgraderRole,
   validateContractRole,
 } from "../helpers/roles"
 
@@ -231,7 +232,7 @@ export async function deployAll(config: ContractsConfig) {
     [
       [
         TEMP_ADMIN, // admin
-        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        TEMP_ADMIN, // upgrader
         TEMP_ADMIN, // contractsAddressManager
         await b3tr.getAddress(),
         await treasury.getAddress(),
@@ -276,7 +277,7 @@ export async function deployAll(config: ContractsConfig) {
         {
           minter: TEMP_ADMIN,
           admin: TEMP_ADMIN,
-          upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+          upgrader: TEMP_ADMIN,
           contractsAddressManager: TEMP_ADMIN,
           decaySettingsManager: TEMP_ADMIN,
           b3trAddress: await b3tr.getAddress(),
@@ -687,6 +688,9 @@ export async function deployAll(config: ContractsConfig) {
     await transferAdminRole(x2EarnApps, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferAdminRole(timelock, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+
+    await transferUpgraderRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferUpgraderRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferSettingsManagerRole(veBetterPassport, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 

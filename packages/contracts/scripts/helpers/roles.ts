@@ -269,3 +269,27 @@ export const transferSettingsManagerRole = async (
 
   console.log("Settings Manager Role transferred successfully on " + (await contract.getAddress()))
 }
+
+export const transferUpgraderRole = async (
+  contract: Emissions | XAllocationPool,
+  admin: HardhatEthersSigner,
+  newAddress: string,
+) => {
+  if (admin.address === newAddress) return
+
+  const upgraderRole = await contract.UPGRADER_ROLE()
+
+  await contract
+    .connect(admin)
+    .grantRole(upgraderRole, newAddress)
+    .then(async tx => await tx.wait())
+  await contract
+    .connect(admin)
+    .renounceRole(upgraderRole, admin.address)
+    .then(async tx => await tx.wait())
+
+  const newRoleSet = await contract.hasRole(upgraderRole, newAddress)
+  const oldRoleRemoved = !(await contract.hasRole(upgraderRole, admin.address))
+
+  if (!newRoleSet || !oldRoleRemoved) throw new Error("Role not set correctly on " + (await contract.getAddress()))
+}
