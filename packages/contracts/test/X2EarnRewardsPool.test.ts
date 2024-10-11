@@ -14,7 +14,7 @@ import { X2EarnRewardsPool, X2EarnRewardsPoolV2 } from "../typechain-types"
 import { X2EarnRewardsPoolV1 } from "../typechain-types/contracts/deprecated/V1"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
-describe("X2EarnRewardsPool - @shard3", function () {
+describe("X2EarnRewardsPool - @shard7", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {
