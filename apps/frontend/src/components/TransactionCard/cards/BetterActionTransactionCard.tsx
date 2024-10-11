@@ -1,5 +1,5 @@
 import { Card, CardBody, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import { B3trTransaction } from "@/api"
+import { B3trTransaction, useXApps } from "@/api"
 import dayjs from "dayjs"
 import { LeafIcon } from "../../Icons/LeafIcon"
 import { useTranslation } from "react-i18next"
@@ -15,7 +15,13 @@ const compactFormatter = getCompactFormatter(2)
 export const BetterActionTransactionCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
 
+  const { data: apps } = useXApps()
+
   const actionModal = useDisclosure()
+
+  const getAppName = (appId: string) => {
+    return apps?.find(app => app.id === appId)?.name ?? ""
+  }
 
   return (
     <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
@@ -28,7 +34,10 @@ export const BetterActionTransactionCard = ({ transaction }: Props) => {
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
-                  {t("Better action")}
+                  {t("Better action on")}
+                </Text>
+                <Text fontSize={"sm"} fontWeight={600}>
+                  {getAppName(transaction?.appId ?? "")}
                 </Text>
               </HStack>
               <Text fontSize={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
