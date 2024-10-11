@@ -1384,6 +1384,117 @@ describe("X-Allocation Voting - @shard4", function () {
       ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorVotingThresholdNotMet")
     })
 
+    it.only("If the vote weight for an XApp is less than 1, the exact vote weight should be applied to increase the XApp's total votes, rather than using the square root of the vote weight", async function () {
+      const { xAllocationVoting, x2EarnApps, otherAccounts, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      await veBetterPassport.toggleCheck(4)
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+
+      //Add apps
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+
+      //Start allocation round
+      const round1 = await startNewAllocationRound()
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0.5"), ethers.parseEther("0.5"), ethers.parseEther("0.5")],
+        )
+
+      await xAllocationVoting
+        .connect(otherAccounts[2])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0.4"), ethers.parseEther("0.1"), ethers.parseEther("0.5")],
+        )
+
+      await xAllocationVoting
+        .connect(otherAccounts[3])
+        .castVote(
+          round1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0.1"), ethers.parseEther("4"), ethers.parseEther("0")],
+        )
+
+      // Votes should be tracked correctly
+      let appVotes = await xAllocationVoting.getAppVotesQF(round1, app1Id)
+      expect(appVotes).to.eql(ethers.parseEther("1") / 1000000000n)
+
+      appVotes = await xAllocationVoting.getAppVotesQF(round1, app2Id)
+      expect(appVotes).to.eql(ethers.parseEther("2.6") / 1000000000n)
+
+      appVotes = await xAllocationVoting.getAppVotesQF(round1, app3Id)
+      expect(appVotes).to.eql(ethers.parseEther("1") / 1000000000n)
+    })
+
+    it.only("If a user votes for an XApp with a vote wieght < 1 we do not get the square of the number ", async function () {
+      const { xAllocationVoting, x2EarnApps, otherAccounts, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      await veBetterPassport.toggleCheck(4)
+
+      otherAccounts.forEach(async account => {
+        await getVot3Tokens(account, "10000")
+      })
+
+      //Add apps
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      //Start allocation round
+      const round1 = await startNewAllocationRound()
+      // Vote
+      await xAllocationVoting
+        .connect(otherAccounts[1])
+        .castVote(round1, [app1Id, app2Id], [ethers.parseEther("0.5"), ethers.parseEther("9")])
+
+      await waitForRoundToEnd(round1)
+
+      const app1VotesQF = await xAllocationVoting.getAppVotesQF(round1, app1Id)
+      const app2VotesQF = await xAllocationVoting.getAppVotesQF(round1, app2Id)
+      // sqrt of 10^18 is 10^9 hence we need to divide by 10^9
+      expect(app1VotesQF).to.equal(ethers.parseEther("0.5") / 1000000000n)
+      expect(app2VotesQF).to.equal(ethers.parseEther("3") / 1000000000n)
+    })
+
     it("I should not be able to cast vote twice", async function () {
       const { xAllocationVoting, x2EarnApps, otherAccounts, otherAccount, owner, veBetterPassport } =
         await getOrDeployContractInstances({
