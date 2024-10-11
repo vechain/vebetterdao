@@ -428,6 +428,12 @@ interface IVeBetterPassport {
   /// @notice Returns the maximum number of entities per passport
   function maxEntitiesPerPassport() external view returns (uint256);
 
+  /// @notice Gets the decay rate for the cumulative score
+  function decayRate() external view returns (uint256);
+
+  /// @notice Gets the minimum galaxy member level to be considered a person
+  function minimumGalaxyMemberLevel() external view returns (uint256);
+
   /// @notice Sets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
   function setBlacklistThreshold(uint256 _threshold) external;
 

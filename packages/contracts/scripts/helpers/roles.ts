@@ -234,6 +234,8 @@ export const validateContractRole = async (
   tempAdmin: string,
   role: string,
 ) => {
+  if (expectedAddress === tempAdmin) return
+
   const roleSet = await contract.hasRole(role, expectedAddress)
   // Check that the temporary admin does not have the role
   const roleRemoved = !(await contract.hasRole(role, tempAdmin))
@@ -247,6 +249,8 @@ export const transferSettingsManagerRole = async (
   admin: HardhatEthersSigner,
   newAddress: string,
 ) => {
+  if (admin.address === newAddress) return
+
   const settingsManagerRole = await contract.SETTINGS_MANAGER_ROLE()
 
   await contract
