@@ -26,7 +26,6 @@ pragma solidity 0.8.20;
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
-import { INodeManagement } from "../../interfaces/INodeManagement.sol";
 
 /**
  * @title PassportTypes
