@@ -36,7 +36,13 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
   }, [apps, appId])
 
   const isTweet = useMemo(() => {
-    return proof?.proof?.link?.includes("x.com") || proof?.proof?.link?.includes("twitter.com")
+    try {
+      const url = new URL(proof?.proof?.link);
+      const allowedHosts = ["twitter.com", "x.com"];
+      return allowedHosts.includes(url.host);
+    } catch (e) {
+      return false;
+    }
   }, [proof?.proof?.link])
 
   const tweetId = useMemo(() => {
