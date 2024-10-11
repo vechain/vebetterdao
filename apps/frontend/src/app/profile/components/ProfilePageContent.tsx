@@ -7,11 +7,13 @@ import { ProfileBalance } from "./ProfileBalance"
 import { ProfileGovernance } from "./ProfileGovernance"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts"
 
 enum Tab {
   Balance = "balance",
   BetterActions = "better-actions",
   Governance = "governance",
+  LinkedAccounts = "linked-accounts",
 }
 
 export const ProfilePageContent = () => {
@@ -27,6 +29,8 @@ export const ProfilePageContent = () => {
         return Tab.BetterActions
       case Tab.Governance:
         return Tab.Governance
+      case Tab.LinkedAccounts:
+        return Tab.LinkedAccounts
       default:
         return Tab.Balance
     }
@@ -40,6 +44,8 @@ export const ProfilePageContent = () => {
         return <ProfileBetterActions />
       case Tab.Governance:
         return <ProfileGovernance />
+      case Tab.LinkedAccounts:
+        return <ProfileLinkedAcounts />
       default:
         return null
     }
@@ -53,33 +59,33 @@ export const ProfilePageContent = () => {
     router.push(`?tab=${tab}`)
   }
 
+  const tabs = useMemo(
+    () => [
+      { tab: Tab.Balance, label: t("Balance") },
+      { tab: Tab.BetterActions, label: t("Better Actions") },
+      { tab: Tab.Governance, label: t("Governance") },
+      { tab: Tab.LinkedAccounts, label: t("Linked Accounts") },
+    ],
+    [t],
+  )
+
   if (!account) return <></>
 
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
       <ProfileHeader />
       <HStack justify="space-between">
-        <Button
-          variant={"primaryGhost"}
-          borderBottom={selectedTab === Tab.Balance ? "2px solid #004CFC" : "none"}
-          rounded="none"
-          onClick={() => handleTabChange(Tab.Balance)}>
-          {t("Balance")}
-        </Button>
-        <Button
-          variant={"primaryGhost"}
-          borderBottom={selectedTab === Tab.BetterActions ? "2px solid #004CFC" : "none"}
-          rounded="none"
-          onClick={() => handleTabChange(Tab.BetterActions)}>
-          {t("Better Actions")}
-        </Button>
-        <Button
-          variant={"primaryGhost"}
-          borderBottom={selectedTab === Tab.Governance ? "2px solid #004CFC" : "none"}
-          rounded="none"
-          onClick={() => handleTabChange(Tab.Governance)}>
-          {t("Governance")}
-        </Button>
+        {tabs.map(({ tab, label }) => (
+          <Button
+            key={tab}
+            variant={"primaryGhost"}
+            borderBottom={selectedTab === tab ? "2px solid #004CFC" : "none"}
+            rounded="none"
+            fontSize={["xs", "xs", "md"]}
+            onClick={() => handleTabChange(tab)}>
+            {label}
+          </Button>
+        ))}
       </HStack>
       {selectedTabContent}
     </VStack>
