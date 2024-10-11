@@ -11,7 +11,7 @@ type Props = {
 export const TransactionCard = ({ transaction }: Props) => {
   switch (transaction.txType) {
     case "B3TR_ACTION":
-      return <BetterActionTransactionCard transaction={transaction} />
+      return <BetterActionTransactionCard transaction={transaction} /> /* TODO: Use BetterActionCard */
     case "SWAP":
       return <SwapCard transaction={transaction} />
     case "CLAIM_REWARD":

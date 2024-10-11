@@ -17,9 +17,10 @@ export const TransactionsResponseSchema = z.object({
         blockTimestamp: z.number(),
         user: z.string(),
         txId: z.string(),
-        amountB3TR: z.number(),
-        amountVOT3: z.number(),
+        amountB3TR: z.number().optional(),
+        amountVOT3: z.number().optional(),
         txType: z.enum(["SWAP", "CLAIM_REWARD", "PROPOSAL_SUPPORT", "UPGRADE_GM", "B3TR_ACTION"]),
+        appId: z.string().optional(),
       }),
     )
     .default([]),
@@ -56,8 +57,14 @@ export const getTransactions = async (data: TransactionsRequest): Promise<Transa
   if (!response.ok) {
     throw new Error(`Failed to fetch transactions: ${response.statusText}`)
   }
+  try {
+    const result = await response.json()
 
-  return TransactionsResponseSchema.parse(await response.json())
+    return TransactionsResponseSchema.parse(result)
+  } catch (e) {
+    console.error(e)
+    throw new Error("Failed to parse response")
+  }
 }
 
 export const getTransactionsQueryKey = (data: Omit<TransactionsRequest, "page" | "size">) => [
