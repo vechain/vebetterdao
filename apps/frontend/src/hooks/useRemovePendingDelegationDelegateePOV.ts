@@ -9,7 +9,7 @@ import { getPendingDelegationsQueryKeyDelegatorPOV, getPendingDelegationsQueryKe
 
 const PassportContractInterface = VeBetterPassport__factory.createInterface()
 const passportContractAddress = getConfig().veBetterPassportContractAddress
-const method = "removePendingDelegation"
+const method = "denyIncomingPendingDelegation"
 
 type UseRemovePendingDelegationProps = {
   onSuccess?: () => void
@@ -23,7 +23,7 @@ type ClausesParams = {
  * Provides a React hook to remove pending a delegation using a blockchain transaction.
  * This hook integrates with the blockchain wallet and manages transaction state.
  */
-export const useRemovePendingDelegation = ({ onSuccess }: UseRemovePendingDelegationProps) => {
+export const useRemovePendingDelegationDelegateePOV = ({ onSuccess }: UseRemovePendingDelegationProps) => {
   const { account } = useWallet()
 
   const clauseBuilder = useCallback(

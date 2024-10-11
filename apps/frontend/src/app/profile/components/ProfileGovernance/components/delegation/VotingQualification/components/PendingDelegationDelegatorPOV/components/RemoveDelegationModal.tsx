@@ -15,16 +15,16 @@ import {
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
-import { useRemovePendingDelegation } from "@/hooks"
+import { useRemovePendingDelegationDelegatorPOV } from "@/hooks/useRemovePendingDelegationDelegatorPOV"
 
-export const RemoveDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
+export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosureProps; delegatee: string }) => {
   const { t } = useTranslation()
 
-  const removeDelegation = useRemovePendingDelegation({})
+  const removeDelegation = useRemovePendingDelegationDelegatorPOV({})
 
   const handleDelegate = useCallback(() => {
-    removeDelegation.sendTransaction({ delegator })
-  }, [removeDelegation, delegator])
+    removeDelegation.sendTransaction({})
+  }, [removeDelegation])
 
   const handleClose = useCallback(() => {
     modal.onClose?.()
@@ -43,7 +43,7 @@ export const RemoveDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
         errorDescription={removeDelegation.error?.reason}
         errorTitle={removeDelegation.error ? t("Error removing delegation request") : undefined}
         showTryAgainButton
-        onTryAgain={() => removeDelegation.sendTransaction({ delegator })}
+        onTryAgain={() => removeDelegation.sendTransaction({})}
         pendingTitle={t("Removing delegation request...")}
         showExplorerButton
         txId={removeDelegation.txReceipt?.meta.txID ?? removeDelegation.sendTransactionTx?.txid}
@@ -62,7 +62,7 @@ export const RemoveDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
         </VStack>
         <VStack align="stretch">
           <Text fontWeight="600">{t("You're removing it to")}</Text>
-          <Text fontSize="sm">{delegator}</Text>
+          <Text fontSize="sm">{delegatee}</Text>
         </VStack>
         <Alert status="error" borderRadius="2xl">
           <AlertIcon w={9} h={9} />

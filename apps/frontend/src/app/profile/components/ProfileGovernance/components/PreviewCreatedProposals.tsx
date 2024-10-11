@@ -47,8 +47,6 @@ export const PreviewCreatedProposals = ({
     })
   }, [firstProposals, proposalsMetadata])
 
-  console.log({ proposalsURIs, firstProposalsWithMetadata, proposalsMetadata })
-
   if (!firstProposals || firstProposals.length == 0) return null
 
   return (
