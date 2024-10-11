@@ -149,6 +149,11 @@ library PassportPoPScoreLogic {
     return self.roundsForCumulativeScore;
   }
 
+  /// @notice Gets the decay rate for the cumulative score
+  function decayRate(PassportStorageTypes.PassportStorage storage self) internal view returns (uint256) {
+    return self.decayRate;
+  }
+
   // ---------- Setters ---------- //
 
   /// @notice Registers an action for a user
@@ -212,11 +217,9 @@ library PassportPoPScoreLogic {
   }
 
   /// @notice Sets the decay rate for the exponential decay
-  /// @param decayRate - the decay rate
-  function setDecayRate(PassportStorageTypes.PassportStorage storage self, uint256 decayRate) external {
-    require(decayRate > 0, "ProofOfParticipation: decay rate is zero");
-
-    self.decayRate = decayRate;
+  /// @param newDecayRate - the decay rate
+  function setDecayRate(PassportStorageTypes.PassportStorage storage self, uint256 newDecayRate) external {
+    self.decayRate = newDecayRate;
   }
 
   // ---------- Internal & Private ---------- //
