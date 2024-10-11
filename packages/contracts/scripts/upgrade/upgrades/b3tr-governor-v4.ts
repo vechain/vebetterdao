@@ -133,6 +133,12 @@ async function main() {
     throw new Error(`B3TRGovernor version is not the expected one: ${version}`)
   }
 
+  // check that the VeBetterPassport contract address is set
+  const veBetterPassport = await governor.veBetterPassport()
+  if (veBetterPassport !== config.veBetterPassportContractAddress) {
+    throw new Error(`VeBetterPassport contract address is not the expected one: ${veBetterPassport}`)
+  }
+
   console.log("Execution completed")
 
   await saveLibrariesToFile(libraries)
