@@ -15,6 +15,7 @@ import {
   delegateWithSignature,
   moveToCycle,
   waitForCurrentRoundToEnd,
+  moveBlocks,
 } from "./helpers"
 import { describe, it } from "mocha"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
@@ -55,12 +56,11 @@ describe("VeBetterPassport - @shard3", function () {
         forceDeploy: true,
         config: {
           ...config,
-          VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD: 100,
           VEPASSPORT_BOT_SIGNALING_THRESHOLD: 5,
         },
       })
 
-      expect(await veBetterPassport.thresholdParticipationScore()).to.equal(100)
+      expect(await veBetterPassport.thresholdPoPScore()).to.equal(0)
       expect(await veBetterPassport.signalingThreshold()).to.equal(5)
     })
 
@@ -646,7 +646,7 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.isCheckEnabled(4)).to.be.true
 
       // Expect score threshold to be 0
-      expect(await veBetterPassport.thresholdParticipationScore()).to.equal(0)
+      expect(await veBetterPassport.thresholdPoPScore()).to.equal(0)
 
       const appAdmin = otherAccounts[0]
 
@@ -2022,7 +2022,6 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Should be able to assign multiple entites to a passport, do actions with entities and use the combintation to meet personhood status", async function () {
       const config = createLocalConfig()
-      config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD = 500
       const { veBetterPassport, x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -2031,6 +2030,9 @@ describe("VeBetterPassport - @shard3", function () {
       const enity1 = otherAccounts[0]
       const enity2 = otherAccounts[1]
       const passport = otherAccounts[2]
+
+      // Set the threshold to 500
+      await veBetterPassport.connect(owner).setThresholdPoPScore(500)
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions()
@@ -2077,7 +2079,7 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.getCumulativeScoreWithDecay(enity2, 1)).to.equal(300)
 
       // Score threshold should be 500
-      expect(await veBetterPassport.thresholdParticipationScore()).to.equal(500)
+      expect(await veBetterPassport.thresholdPoPScore()).to.equal(500)
 
       // Enable PoP score check
       await veBetterPassport.connect(owner).toggleCheck(4)
@@ -2939,7 +2941,7 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.isCheckEnabled(4)).to.be.true
 
       // Expect score threshold to be 0
-      expect(await veBetterPassport.thresholdParticipationScore()).to.equal(0)
+      expect(await veBetterPassport.thresholdPoPScore()).to.equal(0)
 
       // expect all passports to be a person as score is enabled
       expect(await veBetterPassport.isPerson(A.address)).to.deep.equal([
@@ -3255,7 +3257,6 @@ describe("VeBetterPassport - @shard3", function () {
 
     it("Should be able to assign multiple entites to a passport, do actions and use the combintation to meet personhood status", async function () {
       const config = createLocalConfig()
-      config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD = 500
       const {
         veBetterPassport,
         x2EarnApps,
@@ -3270,6 +3271,9 @@ describe("VeBetterPassport - @shard3", function () {
       const enity1 = otherAccounts[0]
       const enity2 = otherAccounts[1]
       const passport = otherAccounts[2]
+
+      // Set the score threshold to 500
+      await veBetterPassport.connect(owner).setThresholdPoPScore(500)
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions()
@@ -3316,7 +3320,7 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.getCumulativeScoreWithDecay(enity2, 1)).to.equal(300)
 
       // Score threshold should be 500
-      expect(await veBetterPassport.thresholdParticipationScore()).to.equal(500)
+      expect(await veBetterPassport.thresholdPoPScore()).to.equal(500)
 
       // Enable PoP score check
       await veBetterPassport.connect(owner).toggleCheck(4)
@@ -3419,7 +3423,7 @@ describe("VeBetterPassport - @shard3", function () {
 
       await veBetterPassport.setAppSecurity(app1Id, 3) // APP_SECURITY.HIGH
       await veBetterPassport.connect(owner).toggleCheck(4) // Enable PoP score check
-      await veBetterPassport.connect(owner).setThreshold(200)
+      await veBetterPassport.connect(owner).setThresholdPoPScore(200)
 
       //Start allocation round
       const round1 = await startNewAllocationRound()
@@ -4132,6 +4136,54 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.userRoundScore(otherAccount, 1)).to.equal(0)
       expect(await veBetterPassport.userRoundScoreApp(otherAccount, 1, app1Id)).to.equal(0)
     })
+
+    it("Should checkpoint the PoP score threshold correctly", async function () {
+      const { veBetterPassport, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner.address)).to.be
+        .true
+
+      // Get block number post deployment
+      const blockNumber1 = await ethers.provider.getBlockNumber()
+
+      // Threshold PoP score is 0
+      expect(await veBetterPassport.thresholdPoPScore()).to.equal(0)
+
+      // Wait for next block
+      await moveBlocks(1)
+
+      // Set threshold PoP score to 100
+      await veBetterPassport.connect(owner).setThresholdPoPScore(100)
+
+      // Threshold PoP score is 100
+      expect(await veBetterPassport.thresholdPoPScore()).to.equal(100)
+
+      // Get block number post setting threshold
+      const blockNumber2 = await ethers.provider.getBlockNumber()
+
+      // Wait for next block
+      await moveBlocks(1)
+
+      // Set threshold PoP score to 200
+      await veBetterPassport.connect(owner).setThresholdPoPScore(200)
+
+      // Threshold PoP score is 200
+      expect(await veBetterPassport.thresholdPoPScore()).to.equal(200)
+
+      // Get block number post setting threshold
+      const blockNumber3 = await ethers.provider.getBlockNumber()
+
+      // Checkpoints
+      expect(await veBetterPassport.thresholdPoPScoreAtTimepoint(blockNumber1)).to.equal(0)
+
+      expect(await veBetterPassport.thresholdPoPScoreAtTimepoint(blockNumber2)).to.equal(100)
+
+      expect(await veBetterPassport.thresholdPoPScoreAtTimepoint(blockNumber3)).to.equal(200)
+    })
   })
 
   describe("Passport Whitelisting & Blacklisting", function () {
@@ -4502,10 +4554,6 @@ describe("VeBetterPassport - @shard3", function () {
         governor,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
-        config: {
-          ...config,
-          VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD: 0, // Initially threshold score of participation is 0, any user can vote
-        },
       })
 
       await getVot3Tokens(otherAccount, "10000")
@@ -4572,7 +4620,7 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await xAllocationVoting.currentRoundId()).to.equal(2)
 
       // Set minimum participation score to 500
-      await veBetterPassport.setThreshold(500)
+      await veBetterPassport.setThresholdPoPScore(500)
 
       // User tries to vote both governance and x allocation voting but reverts due to not meeting the participation score threshold
       await expect(
@@ -4619,7 +4667,7 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await xAllocationVoting.currentRoundId()).to.equal(3)
 
       // Increase participation score threshold to 1000
-      await veBetterPassport.setThreshold(1000)
+      await veBetterPassport.setThresholdPoPScore(1000)
 
       // User tries to vote x allocation voting but reverts due to not meeting the participation score threshold
       await expect(
@@ -4739,6 +4787,213 @@ describe("VeBetterPassport - @shard3", function () {
       // Owner can vote now
       await xAllocationVoting
         .connect(owner)
+        .castVote(
+          4,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+    })
+
+    it("Should use checkpointed PoP score threshold for whole round regardless if PoP score changes", async function () {
+      const {
+        x2EarnApps,
+        owner,
+        otherAccount,
+        veBetterPassport,
+        otherAccounts,
+        b3tr,
+        B3trContract,
+        xAllocationVoting,
+        governor,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await getVot3Tokens(otherAccount, "10000")
+      await getVot3Tokens(owner, "10000")
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+
+      // Set app security levels
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 2)
+      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 3)
+
+      // Grant action registrar role
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions()
+
+      // Create a proposal for next round
+      // create a new proposal active from round 2
+      const tx = await createProposal(b3tr, B3trContract, owner, "Get b3tr token details", "tokenDetails", [], 2)
+
+      const proposalId = await getProposalIdFromTx(tx)
+
+      // pay deposit
+      await payDeposit(proposalId.toString(), owner)
+
+      // First round, participation score check is disabled
+
+      // Register actions for round 1
+      await veBetterPassport.connect(owner).registerAction(otherAccount, app1Id)
+      await veBetterPassport.connect(owner).registerAction(otherAccount, app2Id)
+
+      // User's cumulative score = 100 (app1) + 200 (app2) = 300
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 1)).to.equal(300)
+
+      await veBetterPassport.toggleCheck(4)
+
+      // Vote
+      // Note that `otherAccount` can vote because the participation score threshold is set to 0
+      await xAllocationVoting
+        .connect(otherAccount)
+        .castVote(
+          1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+
+      // Set minimum participation score to 500
+      await veBetterPassport.setThresholdPoPScore(500)
+
+      // owmer has a threshold of 0 but can vote because the threshold is still 0 for the round
+      await xAllocationVoting
+        .connect(owner)
+        .castVote(
+          1,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+
+      await waitForProposalToBeActive(proposalId)
+
+      // New round has started and the threshold is now 500
+      expect(await xAllocationVoting.currentRoundId()).to.equal(2)
+
+      // User tries to vote both governance and x allocation voting but reverts due to not meeting the participation score threshold
+      await expect(
+        xAllocationVoting
+          .connect(otherAccount)
+          .castVote(
+            2,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+          ),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorPersonhoodVerificationFailed")
+
+      await expect(governor.connect(otherAccount).castVote(proposalId, 2)).to.be.revertedWithCustomError(
+        xAllocationVoting,
+        "GovernorPersonhoodVerificationFailed",
+      )
+
+      // Register actions for round 2
+      await veBetterPassport.connect(owner).registerAction(otherAccount, app2Id)
+      await veBetterPassport.connect(owner).registerAction(otherAccount, app3Id)
+
+      /*
+        User's cumulative score:
+        round 1 = 300
+        round 2 = 600 + (300 * 0.8) = 840
+      */
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 2)).to.equal(840)
+
+      // User now meets the participation score threshold and can vote
+      await xAllocationVoting
+        .connect(otherAccount)
+        .castVote(
+          2,
+          [app1Id, app2Id, app3Id],
+          [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+        )
+
+      // Owner can not as threshold is 500
+      await expect(
+        xAllocationVoting
+          .connect(owner)
+          .castVote(
+            2,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+          ),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorPersonhoodVerificationFailed")
+
+      await governor.connect(otherAccount).castVote(proposalId, 2)
+
+      await waitForNextCycle()
+
+      await startNewAllocationRound()
+
+      expect(await xAllocationVoting.currentRoundId()).to.equal(3)
+
+      // Increase participation score threshold to 1000
+      await veBetterPassport.setThresholdPoPScore(1000)
+
+      // User tries to vote x allocation voting and can vote because the threshold is still 500 for the round
+      await expect(
+        xAllocationVoting
+          .connect(otherAccount)
+          .castVote(
+            3,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+          ),
+      ).to.not.be.reverted
+
+      await waitForNextCycle()
+
+      await startNewAllocationRound()
+
+      // User tries to vote x allocation voting and can't vote because the threshold is now 1000 for the round
+      await expect(
+        xAllocationVoting
+          .connect(otherAccount)
+          .castVote(
+            4,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+          ),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorPersonhoodVerificationFailed")
+
+      // Register action for round 4
+      await veBetterPassport.connect(owner).registerAction(otherAccount, app1Id)
+
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 4)).to.equal(637)
+
+      // User still doesn't meet the participation score threshold and can't vote
+      await expect(
+        xAllocationVoting
+          .connect(otherAccount)
+          .castVote(
+            4,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
+          ),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorPersonhoodVerificationFailed")
+
+      // register more actions for round 4
+      await veBetterPassport.connect(owner).registerAction(otherAccount, app2Id)
+      await veBetterPassport.connect(owner).registerAction(otherAccount, app3Id)
+
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 4)).to.equal(1237)
+
+      // User now meets the participation score threshold and can vote
+      await xAllocationVoting
+        .connect(otherAccount)
         .castVote(
           4,
           [app1Id, app2Id, app3Id],

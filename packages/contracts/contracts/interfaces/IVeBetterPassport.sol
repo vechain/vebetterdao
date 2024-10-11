@@ -253,7 +253,10 @@ interface IVeBetterPassport {
 
   /// @notice Gets the threshold score for a user to be considered a person
   /// @return The threshold participation score
-  function thresholdParticipationScore() external view returns (uint256);
+  function thresholdPoPScore() external view returns (uint256);
+
+  /// @notice Gets the threshold score for a user to be considered a person at a specific timepoint
+  function thresholdPoPScoreAtTimepoint(uint48 timepoint) external view returns (uint256);
 
   /// @notice Gets the number of rounds to be considered for the cumulative score
   /// @return The number of rounds
@@ -360,7 +363,7 @@ interface IVeBetterPassport {
 
   /// @notice Sets the threshold score for a user to be considered a person
   /// @param threshold The threshold score
-  function setThreshold(uint256 threshold) external;
+  function setThresholdPoPScore(uint208 threshold) external;
 
   /// @notice Sets the number of rounds to consider for cumulative score calculation
   /// @param rounds The number of rounds

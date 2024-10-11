@@ -99,7 +99,6 @@ export function createMainnetConfig() {
     ],
 
     // VeBetterPassport
-    VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD: 0, // Initialy set to 0
     VEPASSPORT_BOT_SIGNALING_THRESHOLD: 2, // Address must be signaled more than X times to be considered a bot
     VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE: 12,
     VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL: 2,

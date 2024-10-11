@@ -49,11 +49,14 @@ library PassportPersonhoodLogic {
     PassportStorageTypes.PassportStorage storage self,
     address user
   ) external view returns (bool person, string memory reason) {
+    // Get the current timepoint
+    uint48 timepoint = PassportClockLogic.clock();
+
     // Resolve the address of the person based on the delegation status
-    user = _resolvePersonhoodAddress(self, user, PassportClockLogic.clock());
+    user = _resolvePersonhoodAddress(self, user, timepoint);
 
     // Check is the user is a person
-    return _checkPassport(self, user);
+    return _checkPassport(self, user, timepoint);
   }
 
   /**
@@ -72,7 +75,7 @@ library PassportPersonhoodLogic {
     user = _resolvePersonhoodAddress(self, user, timepoint);
 
     // Check is the user is a person
-    return _checkPassport(self, user);
+    return _checkPassport(self, user, timepoint);
   }
 
   // ---------- Internal & Private Functions ---------- //
@@ -135,7 +138,8 @@ library PassportPersonhoodLogic {
    */
   function _checkPassport(
     PassportStorageTypes.PassportStorage storage self,
-    address user
+    address user,
+    uint48 timepoint
   ) private view returns (bool person, string memory reason) {
     // Check if the user has delegated their personhood to another wallet
     if (user == address(0)) {
@@ -174,7 +178,7 @@ library PassportPersonhoodLogic {
       );
 
       // If the user's cumulated score in the last rounds is greater than or equal to the threshold
-      if ((participationScore >= PassportPoPScoreLogic.thresholdParticipationScore(self))) {
+      if ((participationScore >= PassportPoPScoreLogic._thresholdPoPScoreAtTimepoint(self, timepoint))) {
         return (true, "User's participation score is above the threshold");
       }
     }

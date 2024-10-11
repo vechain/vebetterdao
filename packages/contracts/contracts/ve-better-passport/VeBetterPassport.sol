@@ -208,9 +208,15 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Gets the threshold for a user to be considered a person
-  function thresholdParticipationScore() external view returns (uint256) {
+  function thresholdPoPScore() external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportPoPScoreLogic.thresholdParticipationScore($);
+    return PassportPoPScoreLogic.thresholdPoPScore($);
+  }
+
+  /// @notice Gets the threshold for a user to be considered a person at a specific timepoint (block number)
+  function thresholdPoPScoreAtTimepoint(uint48 timepoint) external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.thresholdPoPScoreAtTimepoint($, timepoint);
   }
 
   /// @notice Gets the security multiplier for an app security
@@ -510,10 +516,10 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Sets the threshold for a user to be considered a person
-  /// @param threshold - the round threshold
-  function setThreshold(uint256 threshold) external onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+  /// @param threshold - the proof of participation score threshold
+  function setThresholdPoPScore(uint208 threshold) external onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportPoPScoreLogic.setThreshold($, threshold);
+    PassportPoPScoreLogic.setThresholdPoPScore($, threshold);
   }
 
   /// @notice Sets the number of rounds to consider for the cumulative score

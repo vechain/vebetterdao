@@ -56,7 +56,6 @@ library PassportTypes {
     IXAllocationVotingGovernor xAllocationVoting;
     IX2EarnApps x2EarnApps;
     IGalaxyMember galaxyMember;
-    uint256 popScoreThreshold;
     uint256 signalingThreshold;
     uint256 roundsForCumulativeScore;
     uint256 minimumGalaxyMemberLevel;
