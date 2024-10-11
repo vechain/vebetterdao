@@ -1,17 +1,24 @@
-import { Card, CardBody, Flex, HStack, Text, VStack } from "@chakra-ui/react"
+import { Card, CardBody, Flex, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { B3trTransaction } from "@/api"
 import dayjs from "dayjs"
 import { LeafIcon } from "../../Icons/LeafIcon"
 import { useTranslation } from "react-i18next"
+import { ActionModal } from "./BetterActionCard"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   transaction: B3trTransaction
 }
+
+const compactFormatter = getCompactFormatter(2)
+
 export const BetterActionTransactionCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
 
+  const actionModal = useDisclosure()
+
   return (
-    <Card variant={"filledSmall"} w="full" cursor="pointer">
+    <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
       <CardBody>
         <HStack spacing={3} w="full" justify="space-between">
           <HStack spacing={4}>
@@ -32,7 +39,7 @@ export const BetterActionTransactionCard = ({ transaction }: Props) => {
           <HStack spacing={2}>
             <Text fontWeight={600}>
               {"+"}
-              {transaction.amountB3TR}
+              {compactFormatter.format(Number(transaction?.amountB3TR ?? 0))}
             </Text>
             <Text fontWeight={400} fontSize={"sm"}>
               {"B3TR"}
@@ -40,6 +47,14 @@ export const BetterActionTransactionCard = ({ transaction }: Props) => {
           </HStack>
         </HStack>
       </CardBody>
+      <ActionModal
+        actionModal={actionModal}
+        appId={transaction?.appId}
+        blockNumber={transaction?.blockNumber}
+        blockTimestamp={transaction?.blockTimestamp}
+        b3trAmount={transaction?.amountB3TR}
+        txId={transaction?.txId}
+      />
     </Card>
   )
 }

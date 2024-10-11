@@ -51,7 +51,14 @@ export const BetterActionCard = ({ action }: Props) => {
           </HStack>
         </HStack>
       </CardBody>
-      <ActionModal actionModal={actionModal} action={action} />
+      <ActionModal
+        actionModal={actionModal}
+        proof={action?.proof}
+        appId={action?.appId}
+        blockNumber={action?.blockNumber}
+        blockTimestamp={action?.blockTimestamp}
+        b3trAmount={action?.amount}
+      />
     </Card>
   )
 }
