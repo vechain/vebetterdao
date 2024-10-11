@@ -18,9 +18,9 @@ import {
   moveBlocks,
 } from "./helpers"
 import { describe, it } from "mocha"
-import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { ZeroAddress } from "ethers"
+import { createTestConfig } from "./helpers/config"
 
 describe("VeBetterPassport - @shard3", function () {
   describe("Contract parameters", function () {
@@ -51,7 +51,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should have action score thresholds set correctly", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
         config: {
@@ -65,7 +65,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should have rounds for cumulative score set correctly", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
         config: {
@@ -78,7 +78,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should have minimum galaxy member level set correctly", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
         config: {
@@ -117,7 +117,7 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.version()).to.equal("1")
     })
     it("Should not be able to initialize twice", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport, owner, x2EarnApps, xAllocationVoting, galaxyMember } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -631,7 +631,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Admin can update the signaling threshold", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_BOT_SIGNALING_THRESHOLD = 5
       const { veBetterPassport, otherAccount, owner, otherAccounts, x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1010,7 +1010,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should not be ale to link more entities than MAX allowed to be linked to a pasport", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_PASSPORT_MAX_ENTITIES = 2
       const {
         veBetterPassport,
@@ -1491,7 +1491,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should not be able to assign an entity to a passport if passport has the max number of entities already assigned", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
 
       config.VEPASSPORT_PASSPORT_MAX_ENTITIES = 2
 
@@ -1531,8 +1531,9 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should assign an enities score correctly", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
+      config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE = 5
 
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1643,9 +1644,8 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should remove an enities score correctly", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
-
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1707,7 +1707,7 @@ describe("VeBetterPassport - @shard3", function () {
 
       /*
 
-        The entitys score should remain the same for the same when first assigned
+        The entitys score should remain the same as when first assigned
 
         Round 1 score: 100
         Round 2 score: 100
@@ -1917,7 +1917,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should assign an enities blacklists and whitelists correctly", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 0
       config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 0
       const {
@@ -1961,7 +1961,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should remove any blacklists and whitelists an entity may have when it detaches", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 0
       config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 0
       const {
@@ -2020,7 +2020,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should be able to assign multiple entites to a passport, do actions with entities and use the combintation to meet personhood status", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport, x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -3255,7 +3255,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should be able to assign multiple entites to a passport, do actions and use the combintation to meet personhood status", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const {
         veBetterPassport,
         x2EarnApps,
@@ -3548,7 +3548,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should correctly calculate cumulative score", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       const { x2EarnApps, otherAccounts, owner, veBetterPassport, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -3597,7 +3597,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should correctly transfer enities cumulative score", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       const { x2EarnApps, otherAccounts, owner, veBetterPassport, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -3706,7 +3706,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should calculate cumulative score correctly with different security multipliers", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -3775,7 +3775,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should calculate decay from first round if last round specified is greater than cumulative rounds to look for", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -3853,7 +3853,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should calculate cumulative score correctly with different security multipliers", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -3920,7 +3920,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should be able to update rounds for cumulative scores", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -4001,7 +4001,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should calculate decay from first round if last round specified is greater than cumulative rounds to look for", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -4310,7 +4310,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Can update blacklist threshold", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
@@ -4343,7 +4343,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Can update whitelist threshold", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
@@ -4376,7 +4376,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Can remove user from blacklist", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
@@ -4401,7 +4401,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Can remove user from whitelist", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are whitelisted
       const { veBetterPassport, otherAccount: entity1 } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -4420,7 +4420,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("If over the threshold amount of entities are blacklisted, passport should return blacklisted", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are blacklisted
       const {
         veBetterPassport,
@@ -4487,7 +4487,7 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should return true if user does meet participation score threshold", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       const { veBetterPassport, owner, otherAccount, x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -4539,7 +4539,7 @@ describe("VeBetterPassport - @shard3", function () {
 
   describe("Governance & X Allocation Voting", function () {
     it("Should register participation correctly through emission's cycles", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       const {
         x2EarnApps,
@@ -4795,8 +4795,9 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should use checkpointed PoP score threshold for whole round regardless if PoP score changes", async function () {
-      const config = createLocalConfig()
+      const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
+      config.EMISSIONS_CYCLE_DURATION = 20
       const {
         x2EarnApps,
         owner,
@@ -4871,7 +4872,7 @@ describe("VeBetterPassport - @shard3", function () {
           [ethers.parseEther("0"), ethers.parseEther("900"), ethers.parseEther("100")],
         )
 
-      // Set minimum participation score to 500
+      // Set minimum participation score to 500, which will take effect from the next round
       await veBetterPassport.setThresholdPoPScore(500)
 
       // owmer has a threshold of 0 but can vote because the threshold is still 0 for the round
