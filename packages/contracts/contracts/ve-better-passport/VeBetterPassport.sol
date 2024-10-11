@@ -17,7 +17,6 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
-import { INodeManagement } from "../interfaces/INodeManagement.sol";
 import { IGalaxyMember } from "../interfaces/IGalaxyMember.sol";
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 

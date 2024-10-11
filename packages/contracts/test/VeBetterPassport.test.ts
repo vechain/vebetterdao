@@ -22,7 +22,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { ZeroAddress } from "ethers"
 import { createTestConfig } from "./helpers/config"
 
-describe("VeBetterPassport - @shard3", function () {
+describe("VeBetterPassport - @shard5", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await getOrDeployContractInstances({
@@ -57,11 +57,15 @@ describe("VeBetterPassport - @shard3", function () {
         config: {
           ...config,
           VEPASSPORT_BOT_SIGNALING_THRESHOLD: 5,
+          VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE: 20,
+          VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE: 10,
         },
       })
 
       expect(await veBetterPassport.thresholdPoPScore()).to.equal(0)
       expect(await veBetterPassport.signalingThreshold()).to.equal(5)
+      expect(await veBetterPassport.whitelistThreshold()).to.equal(20)
+      expect(await veBetterPassport.blacklistThreshold()).to.equal(10)
     })
 
     it("Should have rounds for cumulative score set correctly", async function () {
@@ -302,7 +306,7 @@ describe("VeBetterPassport - @shard3", function () {
     */
   })
 
-  describe("PersonhoodSettings", function () {
+  describe("Passport Checks", function () {
     it("Should initialize correctly", async function () {
       const {
         owner: settingsManager,
@@ -449,6 +453,15 @@ describe("VeBetterPassport - @shard3", function () {
 
       // Verify the minimum galaxy member level
       expect(await veBetterPassport.getMinimumGalaxyMemberLevel()).to.equal(5)
+    })
+
+    it("Should not be able to toggle a a check that is not defined in enum", async function () {
+      const { owner: settingsManager, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Should revert if the check is not defined in the enum
+      await expect(veBetterPassport.connect(settingsManager).toggleCheck(8)).to.be.reverted
     })
   })
 
@@ -727,6 +740,120 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.appSignalsCounter(appId, owner.address)).to.equal(1)
     })
 
+    it("Passport signals should be updated when an enitys signals get reset", async function () {
+      const {
+        veBetterPassport,
+        otherAccount: entity,
+        owner: passport,
+        otherAccounts,
+        x2EarnApps,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const appAdmin = otherAccounts[0]
+
+      await x2EarnApps
+        .connect(passport)
+        .addApp(otherAccounts[0].address, appAdmin, otherAccounts[0].address, "metadataURI")
+
+      // Link entity to passport
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 100000)
+
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+
+      await expect(veBetterPassport.connect(appAdmin).assignSignalerToAppByAppAdmin(appId, passport.address))
+        .to.emit(veBetterPassport, "SignalerAssignedToApp")
+        .withArgs(passport.address, appId)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), passport.address)).to.be.true
+
+      await expect(veBetterPassport.connect(passport).signalUser(entity.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(entity.address, passport.address, appId, "")
+
+      expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(1)
+      expect(await veBetterPassport.appSignalsCounter(appId, entity.address)).to.equal(1)
+
+      // Passports signals should be same as entity signals
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(1)
+      // App signals counter for passport should be 0
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(1)
+
+      await expect(
+        veBetterPassport
+          .connect(passport)
+          .resetUserSignalsWithReason(entity.address, "User demonstrated erroneous signaling"),
+      )
+        .to.emit(veBetterPassport, "UserSignalsReset")
+        .withArgs(entity.address, "User demonstrated erroneous signaling")
+
+      expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(0)
+      // Passports signals should be same as entity signals
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(0)
+
+      // App signals remains 1 so we keep stored the number of signals occurred in the past
+      expect(await veBetterPassport.appSignalsCounter(appId, entity.address)).to.equal(1)
+
+      // App signals counter for passport should be 0
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(1)
+    })
+
+    it("Passport signals should be updated when an enitys apps signals get reset", async function () {
+      const {
+        veBetterPassport,
+        otherAccount: entity,
+        owner: passport,
+        otherAccounts,
+        x2EarnApps,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const appAdmin = otherAccounts[0]
+
+      await x2EarnApps
+        .connect(passport)
+        .addApp(otherAccounts[0].address, appAdmin, otherAccounts[0].address, "metadataURI")
+
+      // Link entity to passport
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 100000)
+
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+
+      await expect(veBetterPassport.connect(appAdmin).assignSignalerToAppByAppAdmin(appId, appAdmin.address))
+        .to.emit(veBetterPassport, "SignalerAssignedToApp")
+        .withArgs(appAdmin.address, appId)
+
+      await expect(veBetterPassport.connect(appAdmin).signalUser(entity.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(entity.address, appAdmin.address, appId, "")
+
+      expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(1)
+      expect(await veBetterPassport.appSignalsCounter(appId, entity.address)).to.equal(1)
+
+      // Passports signals should be same as entity signals
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(1)
+      // App signals counter for passport should be 0
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(1)
+
+      await expect(
+        veBetterPassport
+          .connect(appAdmin)
+          .resetUserSignalsByAppAdminWithReason(entity.address, "User demonstrated erroneous signaling"),
+      )
+        .to.emit(veBetterPassport, "UserSignalsResetForApp")
+        .withArgs(entity.address, appId, "User demonstrated erroneous signaling")
+
+      expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(0)
+      // Passports signals should be same as entity signals
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(0)
+
+      expect(await veBetterPassport.appSignalsCounter(appId, entity.address)).to.equal(0)
+
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(0)
+    })
+
     it("Should not be able to reset signals without DEFAULT_ADMIN_ROLE", async function () {
       const { veBetterPassport, otherAccount, owner, otherAccounts, x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -988,6 +1115,7 @@ describe("VeBetterPassport - @shard3", function () {
 
       // Check if entity is linked to a passport
       expect(await veBetterPassport.isEntity(entity.address)).to.be.true
+      expect(await veBetterPassport.getPassportForEntity(entity.address)).to.equal(passport.address)
       // Check if passport is linked to an entity
       expect(await veBetterPassport.isPassport(passport.address)).to.equal(true)
       // Expect no pending link
@@ -1232,6 +1360,28 @@ describe("VeBetterPassport - @shard3", function () {
       await expect(veBetterPassport.connect(passport).denyIncomingPendingEntityLink(entity.address))
         .to.emit(veBetterPassport, "LinkRemoved")
         .withArgs(entity.address, passport.address)
+    })
+
+    it("Should revert if passport tries remove pending link without any pending link", async function () {
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccount: entity,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Try to deny the link request
+      await expect(veBetterPassport.connect(passport).denyIncomingPendingEntityLink(entity.address)).to.be.reverted
+    })
+
+    it("Should revert if entity tries cancel pending link without any pending link", async function () {
+      const { veBetterPassport, otherAccount: entity } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Try to deny the link request
+      await expect(veBetterPassport.connect(entity).cancelOutgoingPendingEntityLink()).to.be.reverted
     })
 
     it("If A wants to link to C, and B wants to link to C, A should be able to deny only B's link request", async function () {
@@ -2717,6 +2867,20 @@ describe("VeBetterPassport - @shard3", function () {
       await expect(veBetterPassport.connect(B).denyIncomingPendingDelegation(A.address)).to.be.reverted
     })
 
+    it("Should revert if a user tries to cancel pending delegation thta does not exist", async function () {
+      const { owner: A, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // A has not created a pending delegation
+
+      // B should not be able to cancel the pending delegation from A
+      await expect(veBetterPassport.connect(A).cancelOutgoingPendingDelegation()).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "NotDelegated",
+      )
+    })
+
     it("If A has a pending delegation to B, and B has a pending delegation to A, then A or B should be able to cancel only one", async function () {
       const {
         owner,
@@ -2932,6 +3096,177 @@ describe("VeBetterPassport - @shard3", function () {
         governor,
         "GovernorPersonhoodVerificationFailed",
       )
+    })
+
+    it("should revert if a user tries to accept a pending delegation that does not exist", async function () {
+      const { owner: A, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // A has not created a pending delegation
+
+      // B should not be able to accept the pending delegation from A
+      await expect(veBetterPassport.connect(A).acceptDelegation(A.address)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "NotDelegated",
+      )
+    })
+
+    it("should revert if a user tries to accept a pending delegation that is a not a delagatee", async function () {
+      const {
+        owner: A,
+        veBetterPassport,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const B = otherAccounts[0]
+      const C = otherAccounts[1]
+
+      // A has requested to delegate there passport to C
+      await veBetterPassport.connect(A).delegatePassport(C.address)
+
+      // B should not be able to accept the pending delegation from A
+      await expect(veBetterPassport.connect(B).acceptDelegation(A.address)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "PassportDelegationUnauthorizedUser",
+      )
+    })
+
+    it("should revert if a user tries to delegate a passport to themselves", async function () {
+      const { owner: A, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // A should not be able to delegate there passport to themselves
+      await expect(veBetterPassport.connect(A).delegatePassport(A.address)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "CannotDelegateToSelf",
+      )
+    })
+
+    it("If already a delagatee it should remove mapping of old delegation and accept new", async function () {
+      const {
+        owner: A,
+        veBetterPassport,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const B = otherAccounts[0]
+      const C = otherAccounts[1]
+
+      // A has delegated there passport to C
+      await delegateWithSignature(veBetterPassport, A, C, 3600)
+
+      // C should be a delegatee of A
+      expect(await veBetterPassport.getDelegatee(A.address)).to.equal(C.address)
+      expect(await veBetterPassport.getDelegator(C.address)).to.equal(A.address)
+
+      // B requests to delegate there passport to C
+      await veBetterPassport.connect(B).delegatePassport(C.address)
+
+      // C should be pending delegatee of B
+      expect(await veBetterPassport.getPendingDelegations(C.address)).to.deep.equal([[B.address], ZeroAddress])
+
+      // C accepts the delegation
+      await veBetterPassport.connect(C).acceptDelegation(B.address)
+
+      // C should be a delegatee of B
+      expect(await veBetterPassport.getDelegatee(B.address)).to.equal(C.address)
+      expect(await veBetterPassport.getDelegator(C.address)).to.equal(B.address)
+
+      // A should no longer be a delegatee of C
+      expect(await veBetterPassport.getDelegatee(A.address)).to.equal(ZeroAddress)
+    })
+
+    it("If delegator is already a delegator remove mapping", async function () {
+      const {
+        owner: A,
+        veBetterPassport,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const B = otherAccounts[0]
+      const C = otherAccounts[1]
+
+      // A has delegated there passport to C
+      await delegateWithSignature(veBetterPassport, A, C, 3600)
+
+      // C should be a delegatee of A
+      expect(await veBetterPassport.getDelegatee(A.address)).to.equal(C.address)
+      expect(await veBetterPassport.getDelegator(C.address)).to.equal(A.address)
+
+      // A requests to delegate there passport to B
+      await veBetterPassport.connect(A).delegatePassport(B.address)
+
+      // B should be pending delegatee of A
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[A.address], ZeroAddress])
+
+      // C should no longer be a delegatee of A
+      expect(await veBetterPassport.getDelegatee(A.address)).to.equal(ZeroAddress)
+      expect(await veBetterPassport.getDelegator(C.address)).to.equal(ZeroAddress)
+
+      // A requests to delegate there passport to C
+      await veBetterPassport.connect(A).delegatePassport(C.address)
+
+      // B should no longer be a pending delegatee of A
+      expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[], ZeroAddress])
+
+      // C should be a pending delegatee of A
+      expect(await veBetterPassport.getPendingDelegations(C.address)).to.deep.equal([[A.address], ZeroAddress])
+    })
+
+    it("If a delegator delegating with signature is already a delegator remove mapping", async function () {
+      const {
+        owner: A,
+        veBetterPassport,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const B = otherAccounts[0]
+      const C = otherAccounts[1]
+
+      // A has delegated there passport to C
+      await delegateWithSignature(veBetterPassport, A, C, 3600)
+
+      // C should be a delegatee of A
+      expect(await veBetterPassport.getDelegatee(A.address)).to.equal(C.address)
+      expect(await veBetterPassport.getDelegator(C.address)).to.equal(A.address)
+
+      // A now delegates to B
+      await delegateWithSignature(veBetterPassport, A, B, 3600)
+
+      // C should no longer be a delegatee of A
+      expect(await veBetterPassport.getDelegator(C.address)).to.equal(ZeroAddress)
+
+      // B should be a delegatee of A
+      expect(await veBetterPassport.getDelegatee(A.address)).to.equal(B.address)
+
+      // B should be a delegator of A
+      expect(await veBetterPassport.getDelegator(B.address)).to.equal(A.address)
+
+      // A now requests to delegate there passport to C
+      await veBetterPassport.connect(A).delegatePassport(C.address)
+
+      // B should no longer be a delegatee of A
+      expect(await veBetterPassport.getDelegatee(A.address)).to.equal(ZeroAddress)
+      expect(await veBetterPassport.getPendingDelegations(A.address)).to.deep.equal([[], C.address])
+
+      // C should be a pending delegatee of A
+      expect(await veBetterPassport.getPendingDelegations(C.address)).to.deep.equal([[A.address], ZeroAddress])
+
+      // A decided to delegate with signature to B
+      await delegateWithSignature(veBetterPassport, A, B, 3600)
+
+      // C should no longer be a pending delegatee of A
+      expect(await veBetterPassport.getPendingDelegations(C.address)).to.deep.equal([[], ZeroAddress])
     })
 
     // If X delegates to Y, X can't vote. If Z delegates to X, X now can vote as he's a delegatee of Z.
@@ -3294,24 +3629,31 @@ describe("VeBetterPassport - @shard3", function () {
     })
 
     it("Should be able to revoke delegation as delegatee", async function () {
-      const { veBetterPassport, owner, otherAccount } = await getOrDeployContractInstances({
+      const {
+        veBetterPassport,
+        owner: delegator,
+        otherAccount: delegatee,
+      } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      await delegateWithSignature(veBetterPassport, owner, otherAccount, 3600)
+      await delegateWithSignature(veBetterPassport, delegator, delegatee, 3600)
       const block = await ethers.provider.getBlockNumber()
 
-      await expect(veBetterPassport.revokeDelegation()).to.emit(veBetterPassport, "DelegationRevoked")
-      expect(await veBetterPassport.getDelegatee(owner.address)).to.equal(ethers.ZeroAddress)
-      expect(await veBetterPassport.getDelegator(otherAccount.address)).to.equal(ethers.ZeroAddress)
+      await expect(veBetterPassport.connect(delegatee).revokeDelegation()).to.emit(
+        veBetterPassport,
+        "DelegationRevoked",
+      )
+      expect(await veBetterPassport.getDelegatee(delegator.address)).to.equal(ethers.ZeroAddress)
+      expect(await veBetterPassport.getDelegator(delegatee.address)).to.equal(ethers.ZeroAddress)
 
-      expect(await veBetterPassport.getDelegatorInTimepoint(otherAccount.address, block)).to.equal(owner.address)
+      expect(await veBetterPassport.getDelegatorInTimepoint(delegatee.address, block)).to.equal(delegator.address)
 
       expect(
-        await veBetterPassport.getDelegatorInTimepoint(otherAccount.address, await ethers.provider.getBlockNumber()),
+        await veBetterPassport.getDelegatorInTimepoint(delegatee.address, await ethers.provider.getBlockNumber()),
       ).to.equal(ZeroAddress)
 
-      expect(await veBetterPassport.getDelegateeInTimepoint(owner.address, block)).to.equal(otherAccount.address)
+      expect(await veBetterPassport.getDelegateeInTimepoint(delegator.address, block)).to.equal(delegatee.address)
     })
 
     it("Should be able to revoke delegation as delegator", async function () {
@@ -3408,6 +3750,21 @@ describe("VeBetterPassport - @shard3", function () {
 
       // Should be able to delegate
       await expect(delegateWithSignature(veBetterPassport, passport, entity2, 3600)).to.not.be.reverted
+    })
+
+    it("should revert if a wallet not linked to a passport tries to be removed", async function () {
+      const {
+        veBetterPassport,
+        owner: user,
+        otherAccount: randomWallet,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(veBetterPassport.connect(user).removeEntityLink(randomWallet)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "NotLinked",
+      )
     })
 
     it("Should be able to assign multiple entites to a passport, do actions and use the combintation to meet personhood status", async function () {
@@ -4304,6 +4661,77 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.userRoundScoreApp(otherAccount, 1, app1Id)).to.equal(0)
     })
 
+    it("Should not register action score if user is blacklisted", async function () {
+      const { veBetterPassport, owner, otherAccounts, otherAccount, x2EarnApps } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner.address)).to.be
+        .true
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+
+      // Set app security to APP_SECURITY.LOW
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 1)
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      await x2EarnApps
+        .connect(owner)
+        .addApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+
+      expect(await veBetterPassport.userRoundScore(otherAccount, 1)).to.equal(100)
+      expect(await veBetterPassport.userRoundScoreApp(otherAccount, 1, app1Id)).to.equal(100)
+
+      // Blacklist user
+      await veBetterPassport.connect(owner).blacklist(otherAccount.address)
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 2)
+
+      expect(await veBetterPassport.userRoundScore(otherAccount, 2)).to.equal(0)
+
+      // Attach to passport
+      await linkEntityToPassportWithSignature(veBetterPassport, owner, otherAccount, 1000)
+
+      // Passport score should be 0
+      expect(await veBetterPassport.userRoundScore(owner.address, 2)).to.equal(0)
+
+      // Actions registered by blacklisted user should not affect passport score
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 3)
+
+      expect(await veBetterPassport.userRoundScore(owner.address, 3)).to.equal(0)
+      expect(await veBetterPassport.userRoundScore(otherAccount.address, 3)).to.equal(0)
+
+      // Remove user from blacklist
+      await veBetterPassport.connect(owner).whitelist(otherAccount.address)
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app2Id, 4)
+
+      expect(await veBetterPassport.userRoundScore(otherAccount, 4)).to.equal(0)
+      // Passport score should be 1
+      expect(await veBetterPassport.userRoundScore(owner.address, 4)).to.equal(100)
+    })
+
+    it("should revert if you try to link passport to yourself via signature", async function () {
+      const { veBetterPassport, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(linkEntityToPassportWithSignature(veBetterPassport, owner, owner, 1000)).to.be.reverted
+    })
+
     it("Should checkpoint the PoP score threshold correctly", async function () {
       const { veBetterPassport, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -4350,6 +4778,62 @@ describe("VeBetterPassport - @shard3", function () {
       expect(await veBetterPassport.thresholdPoPScoreAtTimepoint(blockNumber2)).to.equal(100)
 
       expect(await veBetterPassport.thresholdPoPScoreAtTimepoint(blockNumber3)).to.equal(200)
+    })
+
+    it("should revert if you are trying to accept a link request that does not exist", async function () {
+      const { veBetterPassport, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(veBetterPassport.connect(owner).acceptEntityLink(owner.address)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "NotLinked",
+      )
+    })
+
+    it("should revert if you are trying to accept a link request and you are not the passport", async function () {
+      const { veBetterPassport, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await veBetterPassport.linkEntityToPassport(otherAccount.address)
+
+      await expect(veBetterPassport.connect(owner).acceptEntityLink(owner.address)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "UnauthorizedUser",
+      )
+    })
+
+    it("should revert if you are trying to accept a link request and passport has reached max amoutn entities", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_PASSPORT_MAX_ENTITIES = 1
+      const {
+        veBetterPassport,
+        owner: passport,
+        otherAccounts,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const entity1 = otherAccounts[0]
+      const entity2 = otherAccounts[1]
+
+      // Entities create link requests
+      await veBetterPassport.connect(entity1).linkEntityToPassport(passport.address)
+      await veBetterPassport.connect(entity2).linkEntityToPassport(passport.address)
+
+      // Entity 2 link accepts link request
+      await veBetterPassport.connect(passport).acceptEntityLink(entity2.address)
+
+      //Entity 2 should be a passport entity
+      expect(await veBetterPassport.getPassportForEntity(entity2.address)).to.equal(passport.address)
+
+      // Should revert if entity 1 tries to accept link request as max entities reached
+      await expect(veBetterPassport.connect(passport).acceptEntityLink(entity1.address)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "MaxEntitiesPerPassportReached",
+      )
     })
   })
 
@@ -4585,6 +5069,36 @@ describe("VeBetterPassport - @shard3", function () {
 
       // Entity1 should no longer be whitelisted
       expect(await veBetterPassport.isWhitelisted(entity1.address)).to.be.false
+    })
+
+    it("Can remove an entity from whitelist", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE = 60 // 60% of entities are whitelisted
+      const {
+        veBetterPassport,
+        otherAccount: entity1,
+        owner: passport,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity1, 1000)
+
+      await veBetterPassport.whitelist(entity1.address)
+
+      expect(await veBetterPassport.isWhitelisted(entity1.address)).to.be.true
+
+      expect(await veBetterPassport.isPassportWhitelisted(passport.address)).to.be.true
+
+      // Remove entity1 from whitelist
+      await veBetterPassport.removeFromWhitelist(entity1.address)
+
+      // Entity1 should no longer be whitelisted
+      expect(await veBetterPassport.isWhitelisted(entity1.address)).to.be.false
+
+      // Passport should no longer be whitelisted
+      expect(await veBetterPassport.isPassportWhitelisted(passport.address)).to.be.false
     })
 
     it("If over the threshold amount of entities are blacklisted, passport should return blacklisted", async function () {
@@ -4827,6 +5341,9 @@ describe("VeBetterPassport - @shard3", function () {
         )
 
       await governor.connect(otherAccount).castVote(proposalId, 2)
+
+      // Increase participation score threshold to 1000
+      await veBetterPassport.setThresholdPoPScore(1000)
 
       await waitForNextCycle()
 

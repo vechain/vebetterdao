@@ -28,7 +28,6 @@ import { PassportTypes } from "./PassportTypes.sol";
 import { PassportClockLogic } from "./PassportClockLogic.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
-import { INodeManagement } from "../../interfaces/INodeManagement.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
