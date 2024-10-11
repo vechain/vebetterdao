@@ -143,6 +143,9 @@ interface IVeBetterPassport {
   ///  @notice Thrown when a user tries to link a entity to a passport that has reached the maximum number of entities.
   error MaxEntitiesPerPassportReached();
 
+  /// @notice Thrown when a user tries to link a entity to a passport that is already linked to another entity.
+  error NotLinked(address user);
+
   // ---------- Functions ---------- //
   /// @notice Initializes the contract with the required data and roles
   /// @param data The initialization data for the contract
