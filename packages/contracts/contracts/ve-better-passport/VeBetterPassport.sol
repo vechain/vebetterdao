@@ -17,7 +17,6 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IVeBetterPassport } from "../interfaces/IVeBetterPassport.sol";
 import { IXAllocationVotingGovernor } from "../interfaces/IXAllocationVotingGovernor.sol";
-import { INodeManagement } from "../interfaces/INodeManagement.sol";
 import { IGalaxyMember } from "../interfaces/IGalaxyMember.sol";
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 
@@ -208,9 +207,15 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Gets the threshold for a user to be considered a person
-  function thresholdParticipationScore() external view returns (uint256) {
+  function thresholdPoPScore() external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportPoPScoreLogic.thresholdParticipationScore($);
+    return PassportPoPScoreLogic.thresholdPoPScore($);
+  }
+
+  /// @notice Gets the threshold for a user to be considered a person at a specific timepoint (block number)
+  function thresholdPoPScoreAtTimepoint(uint48 timepoint) external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.thresholdPoPScoreAtTimepoint($, timepoint);
   }
 
   /// @notice Gets the security multiplier for an app security
@@ -231,6 +236,18 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   function roundsForCumulativeScore() external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     return PassportPoPScoreLogic.roundsForCumulativeScore($);
+  }
+
+  /// @notice Gets the decay rate for the cumulative score
+  function decayRate() external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.decayRate($);
+  }
+
+  /// @notice Gets the minimum galaxy member level to be considered a person
+  function minimumGalaxyMemberLevel() external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return $.minimumGalaxyMemberLevel;
   }
 
   /// @notice Returns the maximum number of entities per passport
@@ -509,11 +526,27 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     PassportPoPScoreLogic.registerActionForRound($, user, appId, round);
   }
 
-  /// @notice Sets the threshold for a user to be considered a person
-  /// @param threshold - the round threshold
-  function setThreshold(uint256 threshold) external onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+  /// @notice Function used to seed the passport with old actions by aggregating them
+  /// based on (user, appId, round) and summing up the total score offchain
+  /// @param user - the user that performed the actions
+  /// @param appId - the app id of the actions
+  /// @param round - the round id of the actions
+  /// @param totalScore - the total score of the actions
+  function registerAggregatedActionsForRound(
+    address user,
+    bytes32 appId,
+    uint256 round,
+    uint256 totalScore
+  ) external onlyRole(ACTION_REGISTRAR_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportPoPScoreLogic.setThreshold($, threshold);
+    PassportPoPScoreLogic.registerAggregatedActionsForRound($, user, appId, round, totalScore);
+  }
+
+  /// @notice Sets the threshold for a user to be considered a person
+  /// @param threshold - the proof of participation score threshold
+  function setThresholdPoPScore(uint208 threshold) external onlyRoleOrAdmin(ACTION_SCORE_MANAGER_ROLE) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportPoPScoreLogic.setThresholdPoPScore($, threshold);
   }
 
   /// @notice Sets the number of rounds to consider for the cumulative score
@@ -546,10 +579,10 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Sets the decay rate for the exponential decay
-  /// @param decayRate - the decay rate
-  function setDecayRate(uint256 decayRate) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+  /// @param _decayRate - the decay rate
+  function setDecayRate(uint256 _decayRate) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportPoPScoreLogic.setDecayRate($, decayRate);
+    PassportPoPScoreLogic.setDecayRate($, _decayRate);
   }
 
   /// @notice Delegate the personhood to another address
@@ -729,10 +762,10 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Sets the minimum galaxy member level
-  /// @param minimumGalaxyMemberLevel The new minimum galaxy member level
-  function setMinimumGalaxyMemberLevel(uint256 minimumGalaxyMemberLevel) external onlyRole(SETTINGS_MANAGER_ROLE) {
+  /// @param _minimumGalaxyMemberLevel The new minimum galaxy member level
+  function setMinimumGalaxyMemberLevel(uint256 _minimumGalaxyMemberLevel) external onlyRole(SETTINGS_MANAGER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportChecksLogic.setMinimumGalaxyMemberLevel($, minimumGalaxyMemberLevel);
+    PassportChecksLogic.setMinimumGalaxyMemberLevel($, _minimumGalaxyMemberLevel);
   }
 
   /// @dev Sets the xAllocationVoting contract

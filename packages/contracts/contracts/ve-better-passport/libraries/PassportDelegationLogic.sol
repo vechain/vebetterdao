@@ -264,8 +264,9 @@ library PassportDelegationLogic {
     }
 
     // Check if the passport is already pending delegation
-    if (self.pendingDelegationsDelegatorToDelegatee[delegator] != address(0)) {
-      _removePendingDelegation(self, delegator, msg.sender);
+    address pendingDelegatee = self.pendingDelegationsDelegatorToDelegatee[delegator];
+    if (pendingDelegatee != address(0)) {
+      _removePendingDelegation(self, delegator, pendingDelegatee);
     }
 
     // Check if the delegatee has already been delegated

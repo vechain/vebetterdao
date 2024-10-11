@@ -31,6 +31,7 @@ import {
   transferGovernorFunctionSettingsRole,
   transferMinterRole,
   transferSettingsManagerRole,
+  transferUpgraderRole,
   validateContractRole,
 } from "../helpers/roles"
 
@@ -231,7 +232,7 @@ export async function deployAll(config: ContractsConfig) {
     [
       [
         TEMP_ADMIN, // admin
-        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        TEMP_ADMIN, // upgrader
         TEMP_ADMIN, // contractsAddressManager
         await b3tr.getAddress(),
         await treasury.getAddress(),
@@ -276,7 +277,7 @@ export async function deployAll(config: ContractsConfig) {
         {
           minter: TEMP_ADMIN,
           admin: TEMP_ADMIN,
-          upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+          upgrader: TEMP_ADMIN,
           contractsAddressManager: TEMP_ADMIN,
           decaySettingsManager: TEMP_ADMIN,
           b3trAddress: await b3tr.getAddress(),
@@ -364,13 +365,13 @@ export async function deployAll(config: ContractsConfig) {
         x2EarnApps: await x2EarnApps.getAddress(),
         xAllocationVoting: await xAllocationVoting.getAddress(),
         galaxyMember: await galaxyMember.getAddress(),
-        popScoreThreshold: config.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD, //threshold
         signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
         roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
         minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
-        blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD, //blacklistThreshold
-        whitelistThreshold: config.VEBETTER_WHITELIST_THRESHOLD, //whitelistThreshold
-        maxEntitiesPerPassport: config.VEBETTER_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
+        blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE, //blacklistThreshold
+        whitelistThreshold: config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE, //whitelistThreshold
+        maxEntitiesPerPassport: config.VEPASSPORT_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
+        decayRate: config.VEPASSPORT_DECAY_RATE, //decayRate
       },
       {
         admin: config.CONTRACTS_ADMIN_ADDRESS, // admins
@@ -687,6 +688,9 @@ export async function deployAll(config: ContractsConfig) {
     await transferAdminRole(x2EarnApps, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferAdminRole(timelock, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+
+    await transferUpgraderRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferUpgraderRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferSettingsManagerRole(veBetterPassport, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 

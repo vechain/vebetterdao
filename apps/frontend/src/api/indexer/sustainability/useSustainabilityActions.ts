@@ -52,6 +52,7 @@ export const SustainabilityActionsResponseSchema = z.object({
 })
 
 export type SustainabilityActionsResponse = z.infer<typeof SustainabilityActionsResponseSchema>
+export type SustainabilityProof = z.infer<typeof SustainabilityActionsResponseSchema>["data"][number]["proof"]
 
 type SustainabilityActionsRequest = {
   appId?: string

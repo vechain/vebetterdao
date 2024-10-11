@@ -31,7 +31,7 @@ export const useSetParticipationThreshold = ({
     const clauses = buildClause({
       contractInterface: VeBetterPassportInterface,
       to: VE_BETTER_PASSPORT_ADDRESS,
-      method: "setThreshold",
+      method: "setThresholdPoPScore",
       args: [participationThreshold],
       comment: `Set participation threshold to ${participationThreshold}`,
     })

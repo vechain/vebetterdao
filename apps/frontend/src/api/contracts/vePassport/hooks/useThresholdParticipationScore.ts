@@ -4,7 +4,7 @@ import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
 
 const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
 const vePassportInterface = VeBetterPassport__factory.createInterface()
-const method = "thresholdParticipationScore"
+const method = "thresholdPoPScore"
 
 /**
  * Returns the query key for fetching the threshold participation score.
@@ -22,7 +22,7 @@ export const useThresholdParticipationScore = () => {
   return useCall({
     contractInterface: vePassportInterface,
     contractAddress: VEPASSPORT_CONTRACT,
-    method: "thresholdParticipationScore",
+    method: "thresholdPoPScore",
     args: [],
   })
 }

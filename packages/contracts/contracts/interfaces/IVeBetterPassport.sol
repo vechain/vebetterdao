@@ -143,6 +143,9 @@ interface IVeBetterPassport {
   ///  @notice Thrown when a user tries to link a entity to a passport that has reached the maximum number of entities.
   error MaxEntitiesPerPassportReached();
 
+  /// @notice Thrown when a user tries to link a entity to a passport that is already linked to another entity.
+  error NotLinked(address user);
+
   // ---------- Functions ---------- //
   /// @notice Initializes the contract with the required data and roles
   /// @param data The initialization data for the contract
@@ -253,7 +256,10 @@ interface IVeBetterPassport {
 
   /// @notice Gets the threshold score for a user to be considered a person
   /// @return The threshold participation score
-  function thresholdParticipationScore() external view returns (uint256);
+  function thresholdPoPScore() external view returns (uint256);
+
+  /// @notice Gets the threshold score for a user to be considered a person at a specific timepoint
+  function thresholdPoPScoreAtTimepoint(uint48 timepoint) external view returns (uint256);
 
   /// @notice Gets the number of rounds to be considered for the cumulative score
   /// @return The number of rounds
@@ -360,7 +366,7 @@ interface IVeBetterPassport {
 
   /// @notice Sets the threshold score for a user to be considered a person
   /// @param threshold The threshold score
-  function setThreshold(uint256 threshold) external;
+  function setThresholdPoPScore(uint208 threshold) external;
 
   /// @notice Sets the number of rounds to consider for cumulative score calculation
   /// @param rounds The number of rounds
@@ -416,6 +422,14 @@ interface IVeBetterPassport {
   /// @param round - the round id of the action
   function registerActionForRound(address user, bytes32 appId, uint256 round) external;
 
+  /// @notice Function used to seed the passport with old actions by aggregating them
+  /// based on (user, appId, round) and summing up the total score offchain
+  /// @param user - the user that performed the actions
+  /// @param appId - the app id of the actions
+  /// @param round - the round id of the actions
+  /// @param totalScore - the total score of the actions
+  function registerAggregatedActionsForRound(address user, bytes32 appId, uint256 round, uint256 totalScore) external;
+
   /// @notice Gets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
   function blacklistThreshold() external view returns (uint256);
 
@@ -424,6 +438,12 @@ interface IVeBetterPassport {
 
   /// @notice Returns the maximum number of entities per passport
   function maxEntitiesPerPassport() external view returns (uint256);
+
+  /// @notice Gets the decay rate for the cumulative score
+  function decayRate() external view returns (uint256);
+
+  /// @notice Gets the minimum galaxy member level to be considered a person
+  function minimumGalaxyMemberLevel() external view returns (uint256);
 
   /// @notice Sets the threshold percentage of blacklisted entities for a passport to be considered blacklisted
   function setBlacklistThreshold(uint256 _threshold) external;
