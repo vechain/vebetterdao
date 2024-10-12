@@ -32,7 +32,6 @@ import { PassportTypes } from "./PassportTypes.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import "hardhat/console.sol";
 
 /**
  * @title PassportEntityLogic
@@ -279,7 +278,7 @@ library PassportEntityLogic {
     if (signer != entity) {
       revert InvalidSignature();
     }
- 
+
     // Check if the entity is ok to link
     _checkLink(self, msg.sender, entity);
 
@@ -557,7 +556,7 @@ library PassportEntityLogic {
   /**
    * @notice Checks if passport and entity are eligible for linking.
    * @param passport The address of the passport being checked.
-    * @param entity The address of the entity being checked.
+   * @param entity The address of the entity being checked.
    */
   function _checkLink(
     PassportStorageTypes.PassportStorage storage self,

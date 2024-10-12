@@ -1000,6 +1000,28 @@ describe("VeBetterPassport - @shard5", function () {
       )
     })
 
+    it("Entity check should be done also when accepting a link", async function () {
+      const { veBetterPassport, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const A = otherAccounts[0]
+      const B = otherAccounts[1]
+      const C = otherAccounts[2]
+
+      // Scenario:
+      // A -> pending linking to B
+      // C -> pending linking to A
+      // B accepts linking
+      // A accepts linking -> should revert
+
+      await veBetterPassport.connect(A).linkEntityToPassport(B.address)
+      await expect(veBetterPassport.connect(C).linkEntityToPassport(A.address)).to.be.revertedWithCustomError(
+        veBetterPassport,
+        "AlreadyLinked",
+      )
+    })
+
     it("Should revert if passport is trying to link to another passport with signature", async function () {
       const { veBetterPassport, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
