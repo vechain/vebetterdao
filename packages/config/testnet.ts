@@ -30,6 +30,16 @@ const config: AppConfig = {
     governorStateLogicAddress: "",
     governorVotesLogicAddress: "",
   },
+  passportLibraries: {
+    passportChecksLogicAddress: "",
+    passportConfiguratorAddress: "",
+    passportEntityLogicAddress: "",
+    passportDelegationLogicAddress: "",
+    passportPersonhoodLogicAddress: "",
+    passportPoPScoreLogicAddress: "",
+    passportSignalingLogicAddress: "",
+    passportWhitelistAndBlacklistLogicAddress: "",
+  },
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
