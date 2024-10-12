@@ -36,19 +36,19 @@ async function main() {
     throw new Error(`X2EarnRewardsPool version is not the expected one: ${version}`)
   }
 
-  // We need to assign the ACTION_SCORE_MANAGER_ROLE inside VeBetterPassport to the X2EarnRewardsPool contract
-  console.log("Assigning ACTION_SCORE_MANAGER_ROLE to X2EarnRewardsPool contract")
+  // We need to assign the ACTION_REGISTRAR_ROLE inside VeBetterPassport to the X2EarnRewardsPool contract
+  console.log("Assigning ACTION_REGISTRAR_ROLE to X2EarnRewardsPool contract")
   const veBetterPassport = await ethers.getContractAt("VeBetterPassport", config.veBetterPassportContractAddress)
-  const ACTION_SCORE_MANAGER_ROLE = await veBetterPassport.ACTION_SCORE_MANAGER_ROLE()
+  const ACTION_REGISTRAR_ROLE = await veBetterPassport.ACTION_REGISTRAR_ROLE()
   await veBetterPassport
     .connect(deployer)
-    .grantRole(ACTION_SCORE_MANAGER_ROLE, config.x2EarnRewardsPoolContractAddress)
+    .grantRole(ACTION_REGISTRAR_ROLE, config.x2EarnRewardsPoolContractAddress)
     .then(async tx => await tx.wait())
 
   // check that the role was assigned successfully
-  const hasRole = await veBetterPassport.hasRole(ACTION_SCORE_MANAGER_ROLE, config.x2EarnRewardsPoolContractAddress)
+  const hasRole = await veBetterPassport.hasRole(ACTION_REGISTRAR_ROLE, config.x2EarnRewardsPoolContractAddress)
   if (!hasRole) {
-    throw new Error(`Failed to assign ACTION_SCORE_MANAGER_ROLE to X2EarnRewardsPool contract`)
+    throw new Error(`Failed to assign ACTION_REGISTRAR_ROLE to X2EarnRewardsPool contract`)
   }
 
   console.log("Execution completed")
