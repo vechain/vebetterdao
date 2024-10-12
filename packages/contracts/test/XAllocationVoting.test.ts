@@ -1384,7 +1384,7 @@ describe("X-Allocation Voting - @shard4", function () {
       ).to.be.revertedWithCustomError(xAllocationVoting, "GovernorVotingThresholdNotMet")
     })
 
-    it.only("If the vote weight for an XApp is less than 1, the exact vote weight should be applied to increase the XApp's total votes, rather than using the square root of the vote weight", async function () {
+    it("If the vote weight for an XApp is less than 1, the exact vote weight should be applied to increase the XApp's total votes, rather than using the square root of the vote weight", async function () {
       const { xAllocationVoting, x2EarnApps, otherAccounts, owner, veBetterPassport } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -1453,7 +1453,7 @@ describe("X-Allocation Voting - @shard4", function () {
       expect(appVotes).to.eql(ethers.parseEther("1") / 1000000000n)
     })
 
-    it.only("If a user votes for an XApp with a vote wieght < 1 we do not get the square of the number ", async function () {
+    it("If a user votes for an XApp with a vote wieght < 1 we do not get the square of the number ", async function () {
       const { xAllocationVoting, x2EarnApps, otherAccounts, owner, veBetterPassport } =
         await getOrDeployContractInstances({
           forceDeploy: true,
