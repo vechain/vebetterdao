@@ -596,6 +596,24 @@ describe("X-Allocation Voting - @shard4", function () {
             .reverted
         })
       })
+
+      it("Can get and set veBetterPassport address", async function () {
+        const { xAllocationVoting, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+        // assign governance role to owner
+        await xAllocationVoting.grantRole(await xAllocationVoting.GOVERNANCE_ROLE(), owner.address)
+        expect(await xAllocationVoting.hasRole(await xAllocationVoting.GOVERNANCE_ROLE(), owner.address)).to.be.true
+
+        await xAllocationVoting.connect(owner).setVeBetterPassport(owner.address)
+
+        const updatedVeBetterPassportAddress = await xAllocationVoting.veBetterPassport()
+        expect(updatedVeBetterPassportAddress).to.eql(owner.address)
+
+        // only GOVERNANCE_ROLE can set the veBetterPassport address
+        expect(await xAllocationVoting.hasRole(await xAllocationVoting.GOVERNANCE_ROLE(), otherAccount.address)).to.be
+          .false
+        await expect(xAllocationVoting.connect(otherAccount).setVeBetterPassport(otherAccount.address)).to.be.reverted
+      })
     })
 
     describe("Voting threshold", function () {

@@ -174,5 +174,8 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
       address(newVeBetterPassport) != address(0),
       "XAllocationVotingGovernor: new VeBetterPassport is the zero address"
     );
+
+    ExternalContractsStorage storage $ = _getExternalContractsStorage();
+    $._veBetterPassport = newVeBetterPassport;
   }
 }

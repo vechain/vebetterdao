@@ -441,6 +441,18 @@ describe("X2EarnRewardsPool - @shard7", function () {
         data: "0x1234", // some data
       })
     })
+
+    it("Can get and set veBetterPassport address", async function () {
+      const { x2EarnRewardsPool, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await x2EarnRewardsPool.connect(owner).setVeBetterPassport(owner.address)
+
+      const updatedVeBetterPassportAddress = await x2EarnRewardsPool.veBetterPassport()
+      expect(updatedVeBetterPassportAddress).to.eql(owner.address)
+
+      // only admin can set the veBetterPassport address
+      await expect(x2EarnRewardsPool.connect(otherAccount).setVeBetterPassport(otherAccount.address)).to.be.reverted
+    })
   })
 
   // deposit
