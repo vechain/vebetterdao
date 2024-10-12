@@ -46,17 +46,6 @@ export const useAccountLinking = () => {
     isEntityLoading ||
     isPendingLinkingsLoading
 
-  console.log({
-    isLinked,
-    passport,
-    isPassport,
-    isEntity,
-    passportLinkedEntities: passportLinkedEntities ?? [],
-    incomingPendingLinkings,
-    outgoingPendingLink,
-    isLoading,
-  })
-
   return {
     isLinked,
     passport,
