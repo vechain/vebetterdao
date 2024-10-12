@@ -511,6 +511,18 @@ describe("VeBetterPassport - @shard5", function () {
 
       expect(await veBetterPassport.getXAllocationVoting()).to.equal(otherAccount.address)
     })
+
+    it("Can set pop threshold to 0", async function () {
+      const { owner, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await veBetterPassport.connect(owner).setThresholdPoPScore(12)
+      expect(await veBetterPassport.thresholdPoPScore()).to.equal(12n)
+
+      await veBetterPassport.connect(owner).setThresholdPoPScore(0)
+      expect(await veBetterPassport.thresholdPoPScore()).to.equal(0n)
+    })
   })
 
   describe("Passport Signaling", function () {
