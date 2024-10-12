@@ -78,15 +78,15 @@ export async function main() {
         decayRate: contractsConfig.VEPASSPORT_DECAY_RATE, //decayRate
       },
       {
-        admin: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // admins
-        botSignaler: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // botSignaler
-        upgrader: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        admin: TEMP_ADMIN, // admins
+        botSignaler: TEMP_ADMIN, // botSignaler
+        upgrader: TEMP_ADMIN, // upgrader
         settingsManager: TEMP_ADMIN, // settingsManager
-        roleGranter: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // roleGranter
-        blacklister: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // blacklister
-        whitelister: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // whitelistManager
-        actionRegistrar: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // actionRegistrar
-        actionScoreManager: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // actionScoreManager
+        roleGranter: TEMP_ADMIN, // roleGranter
+        blacklister: TEMP_ADMIN, // blacklister
+        whitelister: TEMP_ADMIN, // whitelistManager
+        actionRegistrar: TEMP_ADMIN, // actionRegistrar
+        actionScoreManager: TEMP_ADMIN, // actionScoreManager
       },
     ],
     libraries.VeBetterPassport,
