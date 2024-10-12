@@ -28,6 +28,7 @@ import { PassportClockLogic } from "./PassportClockLogic.sol";
 import { PassportEIP712SigningLogic } from "./PassportEIP712SigningLogic.sol";
 import { PassportSignalingLogic } from "./PassportSignalingLogic.sol";
 import { PassportWhitelistAndBlacklistLogic } from "./PassportWhitelistAndBlacklistLogic.sol";
+import { PassportDelegationLogic } from "./PassportDelegationLogic.sol";
 import { PassportTypes } from "./PassportTypes.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -106,6 +107,11 @@ library PassportEntityLogic {
    * @notice Thrown when a user tries to link a entity to a passport that has reached the maximum number of entities.
    */
   error MaxEntitiesPerPassportReached();
+
+  /**
+   * @notice Thrown when a user tries to link a entity that has delegated to another passport.
+   */
+  error DelegatedEntity(address entity);
 
   // ---------- Events ---------- //
   /**
@@ -576,6 +582,14 @@ library PassportEntityLogic {
     // Check if the entity is a passport, if so revert
     if (self.passportToEntities[entity].length != 0) {
       revert AlreadyLinked(passport);
+    }
+
+    // Check if entity has delegated to another passport or has a pending delegation
+    if (
+      PassportDelegationLogic.isDelegator(self, entity) ||
+      self.pendingDelegationsDelegatorToDelegatee[entity] != address(0)
+    ) {
+      revert DelegatedEntity(entity);
     }
 
     // Prevent self-linking (an entity cannot be its own passport)
