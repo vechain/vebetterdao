@@ -285,7 +285,7 @@ library PassportEntityLogic {
     if (signer != entity) {
       revert InvalidSignature();
     }
- 
+
     // Check if the entity is ok to link
     _checkLink(self, msg.sender, entity);
 
@@ -563,7 +563,7 @@ library PassportEntityLogic {
   /**
    * @notice Checks if passport and entity are eligible for linking.
    * @param passport The address of the passport being checked.
-    * @param entity The address of the entity being checked.
+   * @param entity The address of the entity being checked.
    */
   function _checkLink(
     PassportStorageTypes.PassportStorage storage self,
@@ -586,7 +586,10 @@ library PassportEntityLogic {
     }
 
     // Check if entity has delegated to another passport or has a pending delegation
-    if (PassportDelegationLogic.isDelegator(self, entity) || self.pendingDelegationsDelegatorToDelegatee[entity] != address(0)) {
+    if (
+      PassportDelegationLogic.isDelegator(self, entity) ||
+      self.pendingDelegationsDelegatorToDelegatee[entity] != address(0)
+    ) {
       revert DelegatedEntity(entity);
     }
 
