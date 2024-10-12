@@ -31,6 +31,16 @@ const config: AppConfig = {
     governorStateLogicAddress: "0xB5083e959F9636d3B0244e4fb0Daad9c1738Eb8E",
     governorVotesLogicAddress: "0x9A3adc3d37a5B4E7f4271D6F9D3AD03F761EC0b8",
   },
+  passportLibraries: {
+    passportChecksLogicAddress: "",
+    passportConfiguratorAddress: "",
+    passportEntityLogicAddress: "",
+    passportDelegationLogicAddress: "",
+    passportPersonhoodLogicAddress: "",
+    passportPoPScoreLogicAddress: "",
+    passportSignalingLogicAddress: "",
+    passportWhitelistAndBlacklistLogicAddress: "",
+  },
   nodeUrl: "https://mainnet.vechain.org",
   network: {
     id: "main",

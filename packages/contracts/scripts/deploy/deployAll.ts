@@ -988,6 +988,14 @@ export async function deployAll(config: ContractsConfig) {
       governorQuorumLogic: GovernorQuorumLogicLib,
       governorStateLogic: GovernorStateLogicLib,
       governorVotesLogic: GovernorVotesLogicLib,
+      passportChecksLogic: PassportChecksLogic,
+      passportConfigurator: PassportConfigurator,
+      passportEntityLogic: PassportEntityLogic,
+      passportDelegationLogic: PassportDelegationLogic,
+      passportPersonhoodLogic: PassportPersonhoodLogic,
+      passportPoPScoreLogic: PassportPoPScoreLogic,
+      passportSignalingLogic: PassportSignalingLogic,
+      passportWhitelistAndBlacklistLogic: PassportWhitelistAndBlacklistLogic,
     },
   }
   // close the script

@@ -63,5 +63,15 @@ const config: AppConfig = {
     governorStateLogicAddress: "0x12925B727F3fc900c8F3a6C537fD6B39163eAD79",
     governorVotesLogicAddress: "0x832C5C75ea870fC2578b9e4a9902B8b020fF732A",
   },
+  passportLibraries: {
+    passportChecksLogicAddress: "",
+    passportConfiguratorAddress: "",
+    passportEntityLogicAddress: "",
+    passportDelegationLogicAddress: "",
+    passportPersonhoodLogicAddress: "",
+    passportPoPScoreLogicAddress: "",
+    passportSignalingLogicAddress: "",
+    passportWhitelistAndBlacklistLogicAddress: "",
+  },
 }
 export default config
