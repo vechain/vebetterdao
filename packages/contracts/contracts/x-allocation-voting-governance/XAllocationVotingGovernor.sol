@@ -115,7 +115,6 @@ abstract contract XAllocationVotingGovernor is
     require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
 
     uint256 _currentRoundSnapshot = currentRoundSnapshot();
-    XAllocationVotingGovernorStorage storage $ = _getXAllocationVotingGovernorStorage();
 
     (bool isPerson, string memory explanation) = veBetterPassport().isPersonAtTimepoint(
       _msgSender(),

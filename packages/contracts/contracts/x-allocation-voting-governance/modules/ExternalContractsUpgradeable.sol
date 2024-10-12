@@ -87,9 +87,9 @@ abstract contract ExternalContractsUpgradeable is Initializable, XAllocationVoti
     $._voterRewards = initialVoterRewards;
   }
 
-  function __ExternalContracts_init_v2(IVeBetterPassport veBetterPassport) internal onlyInitializing {
+  function __ExternalContracts_init_v2(IVeBetterPassport _veBetterPassport) internal onlyInitializing {
     ExternalContractsStorage storage $ = _getExternalContractsStorage();
-    $._veBetterPassport = veBetterPassport;
+    $._veBetterPassport = _veBetterPassport;
   }
 
   // ------- Getters ------- //
