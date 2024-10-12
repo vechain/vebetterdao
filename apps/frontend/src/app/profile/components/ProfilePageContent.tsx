@@ -52,7 +52,7 @@ export const ProfilePageContent = () => {
   }, [selectedTab])
 
   useEffect(() => {
-    if (!account) router.back()
+    if (!account) router.push("/")
   }, [account, router])
 
   const handleTabChange = (tab: Tab) => {
