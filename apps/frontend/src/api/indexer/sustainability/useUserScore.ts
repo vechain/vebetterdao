@@ -41,6 +41,7 @@ export const useUserScore = (user?: string) => {
 
   return {
     isUserQualified,
+    isUserDelegatee: !!delegatorAddress,
     scorePercentage,
     scoreThreshold,
     userScore,

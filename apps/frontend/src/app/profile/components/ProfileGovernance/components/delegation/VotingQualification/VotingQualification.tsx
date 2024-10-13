@@ -7,6 +7,7 @@ import { DelegationModal } from "./components/DelegationModal"
 import { useGetUserPendingDelegationsDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
 import { DelegatorDelegations } from "./components/DelegatorDelegations"
 import { PendingDelegationDelegatorPOV } from "./components/PendingDelegationDelegatorPOV"
+import { useMissingActionsLabel } from "@/hooks"
 
 export const VotingQualification = () => {
   const { t } = useTranslation()
@@ -16,15 +17,21 @@ export const VotingQualification = () => {
   const { data: pendingDelegations, isLoading: isPendingDelegationsLoading } =
     useGetUserPendingDelegationsDelegatorPOV()
 
-  const { missingActions, isUserQualified, scorePercentage, isLoading: isScoreLoading } = useUserScore()
+  const {
+    missingActions,
+    isUserQualified,
+    isUserDelegatee,
+    scorePercentage,
+    isLoading: isScoreLoading,
+  } = useUserScore()
+
+  const missingActionsLabel = useMissingActionsLabel({ missingActions, isUserDelegatee })
 
   const border = isUserQualified ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
   const progressLabel = useMemo(() => {
     if (isUserQualified) return t("QUALIFIED TO VOTE")
-    return t("You need {{missingActions}} more actions", {
-      missingActions,
-    })
-  }, [isUserQualified, t, missingActions])
+    return missingActionsLabel.short
+  }, [isUserQualified, missingActionsLabel.short, t])
 
   const descriptionLabel = useMemo(() => {
     if (isUserQualified)
@@ -55,7 +62,7 @@ export const VotingQualification = () => {
                 <Heading fontSize="xl" fontWeight="700">
                   {t("Your Voting Qualification")}
                 </Heading>
-                {!isDelegator && isUserQualified && Number(pendingDelegations) === 0 && (
+                {!isDelegator && Number(pendingDelegations) === 0 && (
                   <Button
                     variant={"primaryGhost"}
                     onClick={delegationModal.onOpen}

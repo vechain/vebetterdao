@@ -1,5 +1,6 @@
 import { useUserScore } from "@/api"
 import { BaseModal } from "@/components/BaseModal"
+import { useMissingActionsLabel } from "@/hooks"
 import { UseDisclosureProps, Card, CardBody, VStack, Flex, Text, Heading, Button, Image } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
@@ -23,7 +24,9 @@ export const DoActionModal = ({ doActionModal }: Props) => {
     window?.open("https://vebetterdao.org/blog/inside-vepassport", "_blank")
   }, [])
 
-  const { scorePercentage, missingActions, isLoading } = useUserScore()
+  const { scorePercentage, missingActions, isUserDelegatee, isLoading } = useUserScore()
+
+  const missingActionsLabel = useMissingActionsLabel({ missingActions, isUserDelegatee })
 
   if (isLoading) return null
   return (
@@ -54,24 +57,18 @@ export const DoActionModal = ({ doActionModal }: Props) => {
               </Flex>
               <Flex justify="flex-end">
                 <Text color="#6A6A6A" fontWeight="400" fontSize="xs">
-                  {missingActions
-                    ? t("You need {{missingActions}} more actions", {
-                        missingActions,
-                      })
-                    : t("You are qualified!")}
+                  {missingActionsLabel.short}
                 </Text>
               </Flex>
             </VStack>
           </CardBody>
         </Card>
         <Heading fontSize={"2xl"} fontWeight={700}>
-          {t("You need at least {{missingActions}} more actions to become able to vote on this round.", {
-            missingActions: missingActions ?? 0,
-          })}
+          {missingActionsLabel.long}
         </Heading>
         <Text color="#6A6A6A" fontWeight={400}>
           {t(
-            "To be able to vote on this round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!",
+            "To be able to vote on the next round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!",
           )}
         </Text>
         <Button variant="primaryAction" leftIcon={<IoGridOutline />} onClick={goToApps}>

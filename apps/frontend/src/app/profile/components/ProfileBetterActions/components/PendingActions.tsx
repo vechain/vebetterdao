@@ -1,11 +1,20 @@
 import { useUserScore } from "@/api"
+import { useMissingActionsLabel } from "@/hooks"
 import { Heading, Text, Flex, VStack, Card, CardBody, HStack, Image, Show } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export const PendingActions = () => {
   const { t } = useTranslation()
 
-  const { isUserQualified, missingActions, scorePercentage, isLoading: isScoreLoading } = useUserScore()
+  const {
+    isUserQualified,
+    missingActions,
+    isUserDelegatee,
+    scorePercentage,
+    isLoading: isScoreLoading,
+  } = useUserScore()
+
+  const missingActionsLabel = useMissingActionsLabel({ missingActions, isUserDelegatee })
 
   if (isScoreLoading || isUserQualified) return null
 
@@ -29,9 +38,7 @@ export const PendingActions = () => {
                     {t("PENDING ACTIONS")}
                   </Text>
                   <Heading fontSize="lg" fontWeight="700" color="#5F4400">
-                    {t("You need at least {{missingActions}} more actions to become able to vote on this round.", {
-                      missingActions: missingActions ?? 0,
-                    })}
+                    {missingActionsLabel.long}
                   </Heading>
                 </VStack>
               </HStack>
@@ -57,11 +64,7 @@ export const PendingActions = () => {
                 </Flex>
                 <Flex justify="center">
                   <Text color="#6A6A6A" fontWeight="400" fontSize="xs">
-                    {missingActions
-                      ? t("You need {{missingActions}} more actions", {
-                          missingActions,
-                        })
-                      : t("You are qualified!")}
+                    {missingActions ? missingActionsLabel.short : t("You are qualified!")}
                   </Text>
                 </Flex>
               </VStack>
