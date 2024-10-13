@@ -1,4 +1,8 @@
-import { useCurrentAllocationsRoundId, useThresholdParticipationScore, useUserRoundScore } from "@/api/contracts"
+import {
+  useCurrentAllocationsRoundId,
+  useGetCumulativeScoreWithDecay,
+  useThresholdParticipationScore,
+} from "@/api/contracts"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 
@@ -10,8 +14,10 @@ export const useUserScore = (user?: string) => {
   const { account } = useWallet()
   const { data: scoreThreshold, isLoading: isScoreThresholdLoading } = useThresholdParticipationScore()
   const { data: roundId, isLoading: isRoundIdLoading } = useCurrentAllocationsRoundId()
-  const { data: userScore, isLoading: isUserRoundScoreLoading } = useUserRoundScore(
-    user || account || "",
+
+  // this is the user's cumulative score with decay, we use that because it must be greater than the threshold
+  const { data: userScore, isLoading: isUserRoundScoreLoading } = useGetCumulativeScoreWithDecay(
+    (Number(user) ? user : account) || "",
     Number(roundId),
   )
 

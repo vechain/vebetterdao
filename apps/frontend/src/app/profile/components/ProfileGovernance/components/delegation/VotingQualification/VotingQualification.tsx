@@ -17,16 +17,15 @@ export const VotingQualification = () => {
     useGetUserPendingDelegationsDelegatorPOV()
 
   const { isUserQualified, scorePercentage, isLoading: isScoreLoading } = useUserScore()
-  const { userActions, totalActions, isLoading: isUserActionsLoading } = useUserActions()
+  const { missingActions, isLoading: isUserActionsLoading } = useUserActions()
 
   const border = isUserQualified ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
   const progressLabel = useMemo(() => {
     if (isUserQualified) return t("QUALIFIED TO VOTE")
-    return t("{{userActions}}/{{totalActions}} actions performed", {
-      userActions,
-      totalActions,
+    return t("You need {{missingActions}} more actions", {
+      missingActions,
     })
-  }, [isUserQualified, t, totalActions, userActions])
+  }, [isUserQualified, t, missingActions])
 
   const descriptionLabel = useMemo(() => {
     if (isUserQualified)

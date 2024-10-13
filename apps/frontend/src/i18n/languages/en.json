@@ -527,6 +527,8 @@
   "Link Accounts": "Link Accounts",
   "Pending request": "Pending request",
   "Pending request removed!": "Pending request removed!",
+  "You need {{missingActions}} more actions": "You need {{missingActions}} more actions",
+  "You are qualified!": "You are qualified!",
   "Remove request": "Remove request",
   "Are you sure you want to remove the pending request?": "Are you sure you want to remove the pending request?",
   "once you have removed the pending request.": "once you have removed the pending request.",

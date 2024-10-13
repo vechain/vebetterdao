@@ -1,4 +1,4 @@
-import { useAccountLinking, useUserActions } from "@/api"
+import { useAccountLinking, useSustainabilityCurrentUserOverview } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
@@ -16,8 +16,8 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
   const isUserAccountCard = compareAddresses(account, userAccount)
-  const { userActions } = useUserActions()
-  const { isPassport, isEntity, outgoingPendingLink } = useAccountLinking()
+  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentUserOverview()
+  const { isPassport, isEntity, outgoingPendingLink, isLoading: isAccountLinkingLoading } = useAccountLinking()
   const removeLinkModalPassportPOV = useDisclosure()
   const removeLinkModalEntityPOV = useDisclosure()
   const removePendingRequestModal = useDisclosure()
@@ -27,6 +27,8 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
     if (isUserAccountCard) return "1px solid #4A90E2"
     return "none"
   }, [pending, isUserAccountCard])
+
+  if (isUserOverviewLoading || isAccountLinkingLoading) return null
 
   return (
     <HStack
@@ -60,7 +62,7 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
         <HStack gap={1}>
           <LeafIcon color="#448300" size="24" />
           <Heading fontWeight="700" fontSize={"xl"}>
-            {userActions}
+            {userOverview?.actionsRewarded ?? 0}
           </Heading>
         </HStack>
         {isPassport && !isUserAccountCard && (

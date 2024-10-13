@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next"
 export const PendingActions = () => {
   const { t } = useTranslation()
 
-  const { userActions, missingActions, totalActions, isLoading: isUserActionsLoading } = useUserActions()
-  const { isUserQualified, isLoading: isScoreLoading } = useUserScore()
+  const { missingActions, isLoading: isUserActionsLoading } = useUserActions()
+  const { isUserQualified, scorePercentage, isLoading: isScoreLoading } = useUserScore()
 
   if (isUserActionsLoading || isScoreLoading || isUserQualified) return null
 
@@ -50,7 +50,7 @@ export const PendingActions = () => {
                     top={0}
                     left={0}
                     bottom={0}
-                    w={`${(userActions / totalActions) * 100}%`}
+                    w={`${scorePercentage * 100}%`}
                     bg="#F29B32"></Flex>
                   <Text fontWeight={700} fontSize={"xs"} zIndex={1}>
                     {t("YOU CANNOT VOTE YET")}
@@ -58,10 +58,11 @@ export const PendingActions = () => {
                 </Flex>
                 <Flex justify="center">
                   <Text color="#6A6A6A" fontWeight="400" fontSize="xs">
-                    {t("{{userActions}}/{{totalActions}} actions performed", {
-                      userActions,
-                      totalActions,
-                    })}
+                    {missingActions
+                      ? t("You need {{missingActions}} more actions", {
+                          missingActions,
+                        })
+                      : t("You are qualified!")}
                   </Text>
                 </Flex>
               </VStack>
@@ -89,23 +90,18 @@ export const PendingActions = () => {
               borderRadius="base"
               position="relative"
               overflow={"hidden"}>
-              <Flex
-                position="absolute"
-                top={0}
-                left={0}
-                bottom={0}
-                w={`${(userActions / totalActions) * 100}%`}
-                bg="#F29B32"></Flex>
+              <Flex position="absolute" top={0} left={0} bottom={0} w={`${scorePercentage}%`} bg="#F29B32"></Flex>
               <Text fontWeight={700} fontSize={"xs"} zIndex={1}>
                 {t("YOU CANNOT VOTE YET")}
               </Text>
             </Flex>
             <Flex justify="flex-end">
               <Text color="#6A6A6A" fontWeight="400" fontSize="xs">
-                {t("{{userActions}}/{{totalActions}} actions performed", {
-                  userActions,
-                  totalActions,
-                })}
+                {missingActions
+                  ? t("You need {{missingActions}} more actions", {
+                      missingActions,
+                    })
+                  : t("You are qualified!")}
               </Text>
             </Flex>
           </VStack>
