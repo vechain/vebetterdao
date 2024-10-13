@@ -1,14 +1,13 @@
-import { useUserActions, useUserScore } from "@/api"
+import { useUserScore } from "@/api"
 import { Heading, Text, Flex, VStack, Card, CardBody, HStack, Image, Show } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export const PendingActions = () => {
   const { t } = useTranslation()
 
-  const { missingActions, isLoading: isUserActionsLoading } = useUserActions()
-  const { isUserQualified, scorePercentage, isLoading: isScoreLoading } = useUserScore()
+  const { isUserQualified, missingActions, scorePercentage, isLoading: isScoreLoading } = useUserScore()
 
-  if (isUserActionsLoading || isScoreLoading || isUserQualified) return null
+  if (isScoreLoading || isUserQualified) return null
 
   return (
     <Card bg="#FFD979" borderRadius="xl" w="full">

@@ -11,7 +11,7 @@ export const CurrentDelegation = () => {
   const { t } = useTranslation()
   const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetUserDelegator()
   const isDelegated = !isDelegatorLoading && !!Number(delegatorAddress)
-  const { isUserQualified: isDelegatorQualified, isLoading: isScoreLoading } = useUserScore(delegatorAddress)
+  const { isUserQualified: isDelegatorQualified, isLoading: isScoreLoading } = useUserScore()
 
   const delegationModal = useDisclosure()
 

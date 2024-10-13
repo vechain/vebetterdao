@@ -1,6 +1,6 @@
 import { Heading, VStack, Card, CardBody, HStack, Button, Text, Flex, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { useGetUserDelegatee, useUserActions, useUserScore } from "@/api"
+import { useGetUserDelegatee, useUserScore } from "@/api"
 import { useMemo } from "react"
 import { UilArrowUpRight, UilCheck } from "@iconscout/react-unicons"
 import { DelegationModal } from "./components/DelegationModal"
@@ -16,8 +16,7 @@ export const VotingQualification = () => {
   const { data: pendingDelegations, isLoading: isPendingDelegationsLoading } =
     useGetUserPendingDelegationsDelegatorPOV()
 
-  const { isUserQualified, scorePercentage, isLoading: isScoreLoading } = useUserScore()
-  const { missingActions, isLoading: isUserActionsLoading } = useUserActions()
+  const { missingActions, isUserQualified, scorePercentage, isLoading: isScoreLoading } = useUserScore()
 
   const border = isUserQualified ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
   const progressLabel = useMemo(() => {

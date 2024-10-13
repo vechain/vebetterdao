@@ -1,5 +1,4 @@
 import { useUserScore } from "@/api"
-import { useUserActions } from "@/api/indexer/sustainability/useUserActions"
 import { BaseModal } from "@/components/BaseModal"
 import { UseDisclosureProps, Card, CardBody, VStack, Flex, Text, Heading, Button, Image } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
@@ -24,8 +23,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
     window?.open("https://vebetterdao.org/blog/inside-vepassport", "_blank")
   }, [])
 
-  const { missingActions, isLoading } = useUserActions()
-  const { scorePercentage } = useUserScore()
+  const { scorePercentage, missingActions, isLoading } = useUserScore()
 
   if (isLoading) return null
   return (

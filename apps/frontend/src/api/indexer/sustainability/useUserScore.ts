@@ -1,6 +1,9 @@
 import {
+  SecurityLevel,
   useCurrentAllocationsRoundId,
   useGetCumulativeScoreWithDecay,
+  useGetUserDelegator,
+  useSecurityMultiplier,
   useThresholdParticipationScore,
 } from "@/api/contracts"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -14,10 +17,12 @@ export const useUserScore = (user?: string) => {
   const { account } = useWallet()
   const { data: scoreThreshold, isLoading: isScoreThresholdLoading } = useThresholdParticipationScore()
   const { data: roundId, isLoading: isRoundIdLoading } = useCurrentAllocationsRoundId()
+  const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetUserDelegator()
 
   // this is the user's cumulative score with decay, we use that because it must be greater than the threshold
   const { data: userScore, isLoading: isUserRoundScoreLoading } = useGetCumulativeScoreWithDecay(
-    (Number(user) ? user : account) || "",
+    // if the user is delegated, we use the delegator's address, otherwise we use the user's address
+    user || delegatorAddress || account || "",
     Number(roundId),
   )
 
@@ -28,11 +33,23 @@ export const useUserScore = (user?: string) => {
 
   const isUserQualified = userScore >= scoreThreshold
 
+  // we take the score of the easy actions as reference, as the minimum score of an action
+  // so we can calculate the number of actions needed to reach the threshold at minimum
+  const { data: easyActionScore, isLoading: isSecurityMultiplierLoading } = useSecurityMultiplier(SecurityLevel.LOW)
+  const scoreNeeded = Math.max(Number(scoreThreshold ?? 0) - (Number(userScore ?? 0) ?? 0), 0)
+  const missingActions = easyActionScore && scoreNeeded ? Math.ceil(scoreNeeded / easyActionScore) : 0
+
   return {
     isUserQualified,
     scorePercentage,
     scoreThreshold,
     userScore,
-    isLoading: isScoreThresholdLoading || isUserRoundScoreLoading || isRoundIdLoading,
+    missingActions,
+    isLoading:
+      isScoreThresholdLoading ||
+      isUserRoundScoreLoading ||
+      isRoundIdLoading ||
+      isDelegatorLoading ||
+      isSecurityMultiplierLoading,
   }
 }
