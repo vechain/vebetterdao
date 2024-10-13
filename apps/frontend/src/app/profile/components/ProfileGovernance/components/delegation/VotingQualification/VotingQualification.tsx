@@ -43,7 +43,7 @@ export const VotingQualification = () => {
 
   const delegationModal = useDisclosure()
 
-  if (isScoreLoading || isPendingDelegationsLoading || isUserActionsLoading) return null
+  if (isScoreLoading || isPendingDelegationsLoading) return null
 
   return (
     <Card borderRadius="xl" w="full" border={border}>
