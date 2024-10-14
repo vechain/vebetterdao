@@ -73,7 +73,17 @@ export const generateMockLocalConfig = () => {
       "governorQuorumLogicAddress": "0xAD2765a76243CcDB4b49e7957CF3C5F5a68F388C",
       "governorStateLogicAddress": "0x64378225012ABA6569Bf20643561fac66BB69e99",
       "governorVotesLogicAddress": "0x45290a8969f2E5396a7770a21a90aE6B7708ef8F"
-    }
+    },
+    passportLibraries: {
+      passportChecksLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
+      passportConfiguratorAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
+      passportEntityLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
+      passportDelegationLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
+      passportPersonhoodLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
+      passportPoPScoreLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
+      passportSignalingLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
+      passportWhitelistAndBlacklistLogicAddress: "0x5036111024873CDEdb5112626E30fc6E16bd4364",
+    },
     }
     export default config;
     `

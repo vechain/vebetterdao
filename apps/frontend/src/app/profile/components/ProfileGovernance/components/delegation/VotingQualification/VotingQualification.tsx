@@ -1,12 +1,13 @@
 import { Heading, VStack, Card, CardBody, HStack, Button, Text, Flex, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { useGetUserDelegatee, useUserActions, useUserScore } from "@/api"
+import { useGetUserDelegatee, useUserScore } from "@/api"
 import { useMemo } from "react"
 import { UilArrowUpRight, UilCheck } from "@iconscout/react-unicons"
 import { DelegationModal } from "./components/DelegationModal"
 import { useGetUserPendingDelegationsDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
 import { DelegatorDelegations } from "./components/DelegatorDelegations"
 import { PendingDelegationDelegatorPOV } from "./components/PendingDelegationDelegatorPOV"
+import { useMissingActionsLabel } from "@/hooks"
 
 export const VotingQualification = () => {
   const { t } = useTranslation()
@@ -16,17 +17,21 @@ export const VotingQualification = () => {
   const { data: pendingDelegations, isLoading: isPendingDelegationsLoading } =
     useGetUserPendingDelegationsDelegatorPOV()
 
-  const { isUserQualified, scorePercentage, isLoading: isScoreLoading } = useUserScore()
-  const { userActions, totalActions, isLoading: isUserActionsLoading } = useUserActions()
+  const {
+    missingActions,
+    isUserQualified,
+    isUserDelegatee,
+    scorePercentage,
+    isLoading: isScoreLoading,
+  } = useUserScore()
+
+  const missingActionsLabel = useMissingActionsLabel({ missingActions, isUserDelegatee })
 
   const border = isUserQualified ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
   const progressLabel = useMemo(() => {
     if (isUserQualified) return t("QUALIFIED TO VOTE")
-    return t("{{userActions}}/{{totalActions}} actions performed", {
-      userActions,
-      totalActions,
-    })
-  }, [isUserQualified, t, totalActions, userActions])
+    return missingActionsLabel.short
+  }, [isUserQualified, missingActionsLabel.short, t])
 
   const descriptionLabel = useMemo(() => {
     if (isUserQualified)
@@ -45,7 +50,7 @@ export const VotingQualification = () => {
 
   const delegationModal = useDisclosure()
 
-  if (isScoreLoading || isPendingDelegationsLoading || isUserActionsLoading) return null
+  if (isScoreLoading || isPendingDelegationsLoading) return null
 
   return (
     <Card borderRadius="xl" w="full" border={border}>
@@ -57,7 +62,7 @@ export const VotingQualification = () => {
                 <Heading fontSize="xl" fontWeight="700">
                   {t("Your Voting Qualification")}
                 </Heading>
-                {!isDelegator && isUserQualified && Number(pendingDelegations) === 0 && (
+                {!isDelegator && Number(pendingDelegations) === 0 && (
                   <Button
                     variant={"primaryGhost"}
                     onClick={delegationModal.onOpen}

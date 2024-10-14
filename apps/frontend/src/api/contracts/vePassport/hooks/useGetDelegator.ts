@@ -26,6 +26,7 @@ export const useGetDelegator = (delegator?: string | null) => {
     contractAddress: VEPASSPORT_CONTRACT,
     method: "getDelegator",
     args: [delegator],
+    mapResponse: response => (Number(response.decoded?.[0]) ? response.decoded?.[0] : null),
     enabled: !!delegator,
   })
 }

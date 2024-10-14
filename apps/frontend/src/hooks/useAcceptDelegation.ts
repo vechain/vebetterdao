@@ -6,7 +6,12 @@ import { isValid } from "@repo/utils/AddressUtils"
 import { buildClause } from "@/utils/buildClause"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getDelegatorQueryKey } from "@/api/contracts/vePassport/hooks/useGetDelegator"
-import { getPendingDelegationsQueryKeyDelegateePOV, getPendingDelegationsQueryKeyDelegatorPOV } from "@/api"
+import {
+  getGetCumulativeScoreWithDecayQueryKey,
+  getPendingDelegationsQueryKeyDelegateePOV,
+  getPendingDelegationsQueryKeyDelegatorPOV,
+  useCurrentAllocationsRoundId,
+} from "@/api"
 
 const PassportContractInterface = VeBetterPassport__factory.createInterface()
 const passportContractAddress = getConfig().veBetterPassportContractAddress
@@ -26,6 +31,7 @@ type ClausesParams = {
  */
 export const useAcceptDelegation = ({ onSuccess }: UseAcceptDelegationProps) => {
   const { account } = useWallet()
+  const { data: roundId } = useCurrentAllocationsRoundId()
 
   const clauseBuilder = useCallback(
     ({ delegator }: ClausesParams) => {
@@ -50,8 +56,9 @@ export const useAcceptDelegation = ({ onSuccess }: UseAcceptDelegationProps) => 
       getPendingDelegationsQueryKeyDelegatorPOV(account || ""),
       getPendingDelegationsQueryKeyDelegateePOV(account || ""),
       getDelegatorQueryKey(account || ""),
+      getGetCumulativeScoreWithDecayQueryKey(account || "", Number(roundId)),
     ],
-    [account],
+    [account, roundId],
   )
 
   return useBuildTransaction<ClausesParams>({

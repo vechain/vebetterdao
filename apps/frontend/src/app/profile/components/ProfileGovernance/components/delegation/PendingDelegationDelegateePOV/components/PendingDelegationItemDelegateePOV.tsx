@@ -1,4 +1,3 @@
-import { useIsPerson } from "@/api/contracts/vePassport/hooks/useIsPerson"
 import { useTranslation } from "react-i18next"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -7,10 +6,12 @@ import { RejectDelegationModal } from "./RejectDelegationModal"
 import { Stack, HStack, VStack, Text, Button, useDisclosure } from "@chakra-ui/react"
 import { QualificationBadge } from "../../QualificationBadges"
 import { UilCheck, UilTimes } from "@iconscout/react-unicons"
+import { useUserScore } from "@/api"
 
 export const PendingDelegationItemDelegateePOV = ({ delegationAddress }: { delegationAddress: string }) => {
   const { t } = useTranslation()
-  const { data: isPerson, isLoading: isPersonLoading } = useIsPerson(delegationAddress)
+  const { isUserQualified: isDelegatorQualified, isLoading: isScoreLoading } = useUserScore(delegationAddress)
+
   const acceptDelegationModal = useDisclosure()
   const rejectDelegationModal = useDisclosure()
 
@@ -25,9 +26,9 @@ export const PendingDelegationItemDelegateePOV = ({ delegationAddress }: { deleg
             </Text>
           </VStack>
         </HStack>
-        {!isPersonLoading && (
+        {!isScoreLoading && (
           <HStack>
-            <QualificationBadge qualified={isPerson} />
+            <QualificationBadge qualified={isDelegatorQualified} />
           </HStack>
         )}
       </HStack>

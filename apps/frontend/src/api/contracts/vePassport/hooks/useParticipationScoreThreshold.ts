@@ -4,7 +4,7 @@ import { getCallKey, useCall } from "@/hooks"
 
 const contractInterface = VeBetterPassport__factory.createInterface()
 const contractAddress = getConfig().veBetterPassportContractAddress
-const method = "thresholdParticipationScore"
+const method = "thresholdPoPScore"
 
 export const getParticipationScoreThresholdQueryKey = () => {
   return getCallKey({ method, keyArgs: [] })

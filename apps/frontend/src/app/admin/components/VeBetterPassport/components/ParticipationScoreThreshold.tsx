@@ -24,7 +24,7 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 export const ParticipationScoreThreshold = () => {
-  const [threshold, setThreshold] = useState<number | undefined>()
+  const [threshold, setThresholdPoPScore] = useState<number | undefined>()
   const [isThresholdFieldDirty, setIsThresholdFieldDirty] = useState<boolean>(false)
   const { isOpen, onClose, onOpen } = useDisclosure()
 
@@ -93,7 +93,7 @@ export const ParticipationScoreThreshold = () => {
                     value={threshold}
                     isDisabled={isLoading}
                     onChange={value => {
-                      setThreshold(parseInt(value))
+                      setThresholdPoPScore(parseInt(value))
                       setIsThresholdFieldDirty(true)
                     }}>
                     <NumberInputField />

@@ -234,6 +234,8 @@ export const validateContractRole = async (
   tempAdmin: string,
   role: string,
 ) => {
+  if (expectedAddress === tempAdmin) return
+
   const roleSet = await contract.hasRole(role, expectedAddress)
   // Check that the temporary admin does not have the role
   const roleRemoved = !(await contract.hasRole(role, tempAdmin))
@@ -247,6 +249,8 @@ export const transferSettingsManagerRole = async (
   admin: HardhatEthersSigner,
   newAddress: string,
 ) => {
+  if (admin.address === newAddress) return
+
   const settingsManagerRole = await contract.SETTINGS_MANAGER_ROLE()
 
   await contract
@@ -264,4 +268,28 @@ export const transferSettingsManagerRole = async (
   if (!newRoleSet || !oldRoleRemoved) throw new Error("Role not set correctly on " + (await contract.getAddress()))
 
   console.log("Settings Manager Role transferred successfully on " + (await contract.getAddress()))
+}
+
+export const transferUpgraderRole = async (
+  contract: Emissions | XAllocationPool,
+  admin: HardhatEthersSigner,
+  newAddress: string,
+) => {
+  if (admin.address === newAddress) return
+
+  const upgraderRole = await contract.UPGRADER_ROLE()
+
+  await contract
+    .connect(admin)
+    .grantRole(upgraderRole, newAddress)
+    .then(async tx => await tx.wait())
+  await contract
+    .connect(admin)
+    .renounceRole(upgraderRole, admin.address)
+    .then(async tx => await tx.wait())
+
+  const newRoleSet = await contract.hasRole(upgraderRole, newAddress)
+  const oldRoleRemoved = !(await contract.hasRole(upgraderRole, admin.address))
+
+  if (!newRoleSet || !oldRoleRemoved) throw new Error("Role not set correctly on " + (await contract.getAddress()))
 }

@@ -26,6 +26,8 @@ pragma solidity 0.8.20;
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { PassportTypes } from "./PassportTypes.sol";
 import { PassportEntityLogic } from "./PassportEntityLogic.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import { PassportClockLogic } from "./PassportClockLogic.sol";
 
 /**
  * @title PassportPoPScoreLogic
@@ -34,6 +36,8 @@ import { PassportEntityLogic } from "./PassportEntityLogic.sol";
  * exponential decay, and various other factors. The PoP score can determine if a user qualifies as a person in the Passport system.
  */
 library PassportPoPScoreLogic {
+  using Checkpoints for Checkpoints.Trace208;
+
   // ---------- Events ---------- //
   /// @notice Emitted when a user registers an action
   /// @param user - the user that registered the action
@@ -110,10 +114,16 @@ library PassportPoPScoreLogic {
   }
 
   /// @notice Gets the threshold for a user to be considered a person
-  function thresholdParticipationScore(
-    PassportStorageTypes.PassportStorage storage self
-  ) internal view returns (uint256) {
-    return self.popScoreThreshold;
+  function thresholdPoPScore(PassportStorageTypes.PassportStorage storage self) internal view returns (uint256) {
+    return self.popScoreThreshold.latest();
+  }
+
+  /// @notice Gets the threshold for a user to be considered a person at a specific timepoint
+  function thresholdPoPScoreAtTimepoint(
+    PassportStorageTypes.PassportStorage storage self,
+    uint48 timepoint
+  ) external view returns (uint256) {
+    return _thresholdPoPScoreAtTimepoint(self, timepoint);
   }
 
   /// @notice Gets the security multiplier for an app security
@@ -139,6 +149,11 @@ library PassportPoPScoreLogic {
     return self.roundsForCumulativeScore;
   }
 
+  /// @notice Gets the decay rate for the cumulative score
+  function decayRate(PassportStorageTypes.PassportStorage storage self) internal view returns (uint256) {
+    return self.decayRate;
+  }
+
   // ---------- Setters ---------- //
 
   /// @notice Registers an action for a user
@@ -161,12 +176,51 @@ library PassportPoPScoreLogic {
     _registerAction(self, user, appId, round);
   }
 
+  /// @notice Function used to seed the passport with old actions by aggregating them
+  /// based on (user, appId, round) and summing up the total score offchain
+  /// @param user - the user that performed the actions
+  /// @param appId - the app id of the actions
+  /// @param round - the round id of the actions
+  /// @param totalScore - the total score of the actions
+  function registerAggregatedActionsForRound(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    bytes32 appId,
+    uint256 round,
+    uint256 totalScore
+  ) external {
+    require(user != address(0), "ProofOfParticipation: user is the zero address");
+    require(self.x2EarnApps.appExists(appId), "ProofOfParticipation: app does not exist");
+
+    // Check if the user has attached their entity to a passport, if so, use the passport address, else use the users address (passport)
+    address passport = PassportEntityLogic._getPassportForEntity(self, user);
+
+    // Track unique apps core user has interacted with
+    if (!self.userUniqueAppInteraction[passport][appId]) {
+      updateUniqueAppInteractions(self, passport, appId);
+    }
+
+    // If the entity is linked to a passport and the entity has not interacted with the app track interaction
+    if (passport != user && !self.userUniqueAppInteraction[user][appId]) {
+      updateUniqueAppInteractions(self, user, appId);
+    }
+
+    // Update the user's score for the round
+    self.userRoundScore[passport][round] += totalScore;
+    // Update the user's total score
+    self.userTotalScore[passport] += totalScore;
+    // Update the user's score for the app in the round
+    self.userAppRoundScore[passport][round][appId] += totalScore;
+    // Update the user's total score for the app
+    self.userAppTotalScore[passport][appId] += totalScore;
+
+    emit RegisteredAction(user, passport, appId, round, totalScore);
+  }
+
   /// @notice Sets the threshold for a user to be considered a person
   /// @param threshold - the round threshold
-  function setThreshold(PassportStorageTypes.PassportStorage storage self, uint256 threshold) external {
-    require(threshold > 0, "ProofOfParticipation: threshold is zero");
-
-    self.popScoreThreshold = threshold;
+  function setThresholdPoPScore(PassportStorageTypes.PassportStorage storage self, uint208 threshold) external {
+    self.popScoreThreshold.push(PassportClockLogic.clock(), threshold);
   }
 
   /// @notice Sets the number of rounds to consider for the cumulative score
@@ -202,11 +256,9 @@ library PassportPoPScoreLogic {
   }
 
   /// @notice Sets the decay rate for the exponential decay
-  /// @param decayRate - the decay rate
-  function setDecayRate(PassportStorageTypes.PassportStorage storage self, uint256 decayRate) external {
-    require(decayRate > 0, "ProofOfParticipation: decay rate is zero");
-
-    self.decayRate = decayRate;
+  /// @param newDecayRate - the decay rate
+  function setDecayRate(PassportStorageTypes.PassportStorage storage self, uint256 newDecayRate) external {
+    self.decayRate = newDecayRate;
   }
 
   // ---------- Internal & Private ---------- //
@@ -234,6 +286,16 @@ library PassportPoPScoreLogic {
     }
 
     return cumulativeScore;
+  }
+
+  /**
+   * @dev Internal funciton to get the threshold for a user to be considered a person at a specific timepoint
+   */
+  function _thresholdPoPScoreAtTimepoint(
+    PassportStorageTypes.PassportStorage storage self,
+    uint48 timepoint
+  ) internal view returns (uint256) {
+    return self.popScoreThreshold.upperLookupRecent(timepoint);
   }
 
   /**
@@ -272,7 +334,7 @@ library PassportPoPScoreLogic {
       updateUniqueAppInteractions(self, passport, appId);
     }
 
-    // If the entity is not linked to a passport and the entity has not interacted with the app track interaction
+    // If the entity is linked to a passport and the entity has not interacted with the app track interaction
     if (passport != user && !self.userUniqueAppInteraction[user][appId]) {
       updateUniqueAppInteractions(self, user, appId);
     }

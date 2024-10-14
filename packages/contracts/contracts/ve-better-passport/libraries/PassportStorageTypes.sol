@@ -24,7 +24,6 @@
 pragma solidity 0.8.20;
 
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
-import { INodeManagement } from "../../interfaces/INodeManagement.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { PassportTypes } from "./PassportTypes.sol";
@@ -82,8 +81,8 @@ library PassportStorageTypes {
     mapping(address user => mapping(uint256 round => uint256 score)) userRoundScore;
     // Score of a user for a specific app in a specific round
     mapping(address user => mapping(uint256 round => mapping(bytes32 appId => uint256 score))) userAppRoundScore;
-    // Threshold for a user to be considered a person in a round //threshold can be 0
-    uint256 popScoreThreshold;
+    // Checkpointed threshold for a user to be considered a person in a round
+    Checkpoints.Trace208 popScoreThreshold;
     // Number of rounds to consider for the cumulative score
     uint256 roundsForCumulativeScore;
     // Decay rate for the exponential decay

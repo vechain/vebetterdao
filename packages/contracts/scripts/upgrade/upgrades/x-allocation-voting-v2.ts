@@ -38,6 +38,12 @@ async function main() {
     throw new Error(`XAllocationVoting version is not 2: ${version}`)
   }
 
+  // check that the VeBetterPassport contract address is set
+  const veBetterPassport = await xAllocationVotingV2.veBetterPassport()
+  if (veBetterPassport !== config.veBetterPassportContractAddress) {
+    throw new Error(`VeBetterPassport contract address is not the expected one: ${veBetterPassport}`)
+  }
+
   console.log("Execution completed")
   process.exit(0)
 }

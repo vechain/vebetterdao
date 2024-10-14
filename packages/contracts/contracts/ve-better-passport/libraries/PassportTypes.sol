@@ -26,7 +26,6 @@ pragma solidity 0.8.20;
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
-import { INodeManagement } from "../../interfaces/INodeManagement.sol";
 
 /**
  * @title PassportTypes
@@ -56,13 +55,13 @@ library PassportTypes {
     IXAllocationVotingGovernor xAllocationVoting;
     IX2EarnApps x2EarnApps;
     IGalaxyMember galaxyMember;
-    uint256 popScoreThreshold;
     uint256 signalingThreshold;
     uint256 roundsForCumulativeScore;
     uint256 minimumGalaxyMemberLevel;
     uint256 blacklistThreshold;
     uint256 whitelistThreshold;
     uint256 maxEntitiesPerPassport;
+    uint256 decayRate;
   }
 
   struct InitializationRoleData {

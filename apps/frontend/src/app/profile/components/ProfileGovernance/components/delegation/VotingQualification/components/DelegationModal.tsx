@@ -24,6 +24,7 @@ import { isValid } from "@repo/utils/AddressUtils"
 import { useDelegatePassport } from "@/hooks/useDelegatePassport"
 import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
+import { useAccountLinking } from "@/api"
 
 type FormData = {
   walletAddress: string
@@ -38,6 +39,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
     watch,
     reset,
   } = useForm<FormData>()
+  const { isEntity } = useAccountLinking()
 
   const confirmationModal = useDisclosure()
 
@@ -115,7 +117,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   }
 
   return (
-    <BaseModal onClose={modal.onClose ?? (() => {})} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
       <VStack align="stretch" gap={6} as="form" onSubmit={handleSubmit(openConfirmationModal)}>
         <UilArrowUpRight color="#004CFC" />
         <Heading fontSize="2xl">{t("Delegate your Voting Qualification")}</Heading>
@@ -136,16 +138,23 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
               {t("User wallet address")}
             </FormLabel>
             <Input
+              disabled={isEntity}
               {...register("walletAddress", {
                 required: t("Wallet address is required"),
                 validate: value => isValid(value) || t("Please enter a valid wallet address"),
               })}
             />
-            <FormErrorMessage>{errors.walletAddress && errors.walletAddress.message}</FormErrorMessage>
+            {isEntity ? (
+              <Text color="#C84968" fontSize="sm">
+                {t("You can't delegate from an account linked as a secondary account")}
+              </Text>
+            ) : (
+              <FormErrorMessage>{errors.walletAddress && errors.walletAddress.message}</FormErrorMessage>
+            )}
           </FormControl>
         </VStack>
         <VStack align="stretch">
-          <Button variant="primaryAction" type="submit">
+          <Button variant="primaryAction" type="submit" isDisabled={isEntity}>
             {t("Send request")}
           </Button>
           <Button variant={"primaryGhost"} onClick={modal.onClose}>

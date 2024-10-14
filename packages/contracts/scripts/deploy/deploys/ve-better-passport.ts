@@ -4,7 +4,6 @@ import { passportLibraries } from "../../libraries"
 import { deployProxyOnly, initializeProxy } from "../../helpers"
 import { VeBetterPassport } from "../../../typechain-types"
 import { ethers } from "hardhat"
-import { transferSettingsManagerRole, validateContractRole } from "../../helpers/roles"
 
 export async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -70,24 +69,24 @@ export async function main() {
         x2EarnApps: envConfig.x2EarnAppsContractAddress,
         xAllocationVoting: envConfig.xAllocationVotingContractAddress,
         galaxyMember: envConfig.galaxyMemberContractAddress,
-        popScoreThreshold: contractsConfig.VEPASSPORT_PARTICIPATION_SCORE_THRESHOLD, //threshold
         signalingThreshold: contractsConfig.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
         roundsForCumulativeScore: contractsConfig.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
         minimumGalaxyMemberLevel: contractsConfig.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
-        blacklistThreshold: contractsConfig.VEPASSPORT_BLACKLIST_THRESHOLD, //blacklistThreshold
-        whitelistThreshold: contractsConfig.VEBETTER_WHITELIST_THRESHOLD, //whitelistThreshold
-        maxEntitiesPerPassport: contractsConfig.VEBETTER_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
+        blacklistThreshold: contractsConfig.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE, //blacklistThreshold
+        whitelistThreshold: contractsConfig.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE, //whitelistThreshold
+        maxEntitiesPerPassport: contractsConfig.VEPASSPORT_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
+        decayRate: contractsConfig.VEPASSPORT_DECAY_RATE, //decayRate
       },
       {
-        admin: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // admins
-        botSignaler: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // botSignaler
-        upgrader: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        admin: TEMP_ADMIN, // admins
+        botSignaler: TEMP_ADMIN, // botSignaler
+        upgrader: TEMP_ADMIN, // upgrader
         settingsManager: TEMP_ADMIN, // settingsManager
-        roleGranter: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // roleGranter
-        blacklister: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // blacklister
-        whitelister: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // whitelistManager
-        actionRegistrar: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // actionRegistrar
-        actionScoreManager: contractsConfig.CONTRACTS_ADMIN_ADDRESS, // actionScoreManager
+        roleGranter: TEMP_ADMIN, // roleGranter
+        blacklister: TEMP_ADMIN, // blacklister
+        whitelister: TEMP_ADMIN, // whitelistManager
+        actionRegistrar: TEMP_ADMIN, // actionRegistrar
+        actionScoreManager: TEMP_ADMIN, // actionScoreManager
       },
     ],
     libraries.VeBetterPassport,
@@ -96,24 +95,109 @@ export async function main() {
   console.log(`================  Contract deployed `)
   console.log(`================  Configuring contract `)
 
+  console.log("Checking that params are set correctly")
+  const botSignalingThreshold = await veBetterPassport.signalingThreshold()
+  console.log("Bot signaling threshold: ", botSignalingThreshold)
+  const roundsForCumulativeScore = await veBetterPassport.roundsForCumulativeScore()
+  console.log("Rounds for cumulative score: ", roundsForCumulativeScore)
+  const decayRate = await veBetterPassport.decayRate()
+  console.log("Decay rate: ", decayRate)
+  const galaxyMemberMinimumLevel = await veBetterPassport.minimumGalaxyMemberLevel()
+  console.log("Galaxy member minimum level: ", galaxyMemberMinimumLevel)
+  const maxEntitiesPerPassport = await veBetterPassport.maxEntitiesPerPassport()
+  console.log("Max entities per passport: ", maxEntitiesPerPassport)
+  const blacklistThreshold = await veBetterPassport.blacklistThreshold()
+  console.log("Blacklist threshold: ", blacklistThreshold)
+  const whitelistThreshold = await veBetterPassport.whitelistThreshold()
+  console.log("Whitelist threshold: ", whitelistThreshold)
+  const popScoreThreshold = await veBetterPassport.thresholdPoPScore()
+  console.log("Pop score threshold: ", popScoreThreshold)
+
+  if (
+    botSignalingThreshold !== BigInt(contractsConfig.VEPASSPORT_BOT_SIGNALING_THRESHOLD) ||
+    roundsForCumulativeScore !== BigInt(contractsConfig.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE) ||
+    decayRate !== BigInt(contractsConfig.VEPASSPORT_DECAY_RATE) ||
+    galaxyMemberMinimumLevel !== BigInt(contractsConfig.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL) ||
+    maxEntitiesPerPassport !== BigInt(contractsConfig.VEPASSPORT_PASSPORT_MAX_ENTITIES) ||
+    blacklistThreshold !== BigInt(contractsConfig.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE) ||
+    whitelistThreshold !== BigInt(contractsConfig.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE) ||
+    popScoreThreshold !== 0n
+  ) {
+    console.log("ERROR: Params are not set correctly")
+  }
+
+  console.log("Check that security level scores are set correctly")
+  const none = await veBetterPassport.securityMultiplier(0)
+  console.log("None: ", none)
+  const low = await veBetterPassport.securityMultiplier(1)
+  console.log("Low: ", low)
+  const medium = await veBetterPassport.securityMultiplier(2)
+  console.log("Medium: ", medium)
+  const high = await veBetterPassport.securityMultiplier(3)
+  console.log("High: ", high)
+  if (none !== 0n || low !== 100n || medium !== 200n || high !== 400n) {
+    console.log("ERROR: Security leve scores are not set correctly")
+  }
+
+  // seed apps levels
+  const x2EarnAppsContract = await ethers.getContractAt("X2EarnApps", envConfig.x2EarnAppsContractAddress)
+  const apps = await x2EarnAppsContract.apps()
+  for (const app of apps) {
+    console.log("Setting app level to LOW for ", app.name, app.id)
+    await veBetterPassport.setAppSecurity(app.id, 1) // 1 = LOW
+
+    // Check that the app security is set correctly
+    const appSecurity = await veBetterPassport.appSecurity(app.id)
+    if (appSecurity !== 1n) {
+      console.log("ERROR: App security is not set correctly")
+    }
+  }
+
+  // Check that all checks are disabled a part from participation score
+  const enum checkTypes {
+    UNDEFINED, // Default value for invalid or uninitialized checks
+    WHITELIST_CHECK, // Check if the user is whitelisted
+    BLACKLIST_CHECK, // Check if the user is blacklisted
+    SIGNALING_CHECK, // Check if the user has been signaled too many times
+    PARTICIPATION_SCORE_CHECK, // Check the user's participation score
+    GM_OWNERSHIP_CHECK, // Check if the user owns a GM token
+  }
   console.log("Enable Participation Score for VeBetterPassport")
   await veBetterPassport
     .connect(deployer)
-    .toggleCheck(4)
+    .toggleCheck(checkTypes.PARTICIPATION_SCORE_CHECK)
     .then(async tx => await tx.wait())
 
-  console.log("Transfer settingsManager role to the final admin")
-  await transferSettingsManagerRole(veBetterPassport, deployer, contractsConfig.CONTRACTS_ADMIN_ADDRESS)
+  const participationScoreCheckEnabled = await veBetterPassport.isCheckEnabled(checkTypes.PARTICIPATION_SCORE_CHECK)
+  console.log("Participation score check enabled: ", participationScoreCheckEnabled)
+  const whitelistCheckEnabled = await veBetterPassport.isCheckEnabled(checkTypes.WHITELIST_CHECK)
+  console.log("Whitelist check enabled: ", whitelistCheckEnabled)
+  const blacklistCheckEnabled = await veBetterPassport.isCheckEnabled(checkTypes.BLACKLIST_CHECK)
+  console.log("Blacklist check enabled: ", blacklistCheckEnabled)
+  const signalingCheckEnabled = await veBetterPassport.isCheckEnabled(checkTypes.SIGNALING_CHECK)
+  console.log("Signaling check enabled: ", signalingCheckEnabled)
+  const gmOwnershipCheckEnabled = await veBetterPassport.isCheckEnabled(checkTypes.GM_OWNERSHIP_CHECK)
+  console.log("GM ownership check enabled: ", gmOwnershipCheckEnabled)
+  if (!participationScoreCheckEnabled) {
+    console.log("ERROR: participation score check is not enabled")
+  }
+  if (whitelistCheckEnabled || blacklistCheckEnabled || signalingCheckEnabled || gmOwnershipCheckEnabled) {
+    console.log("ERROR: some checks are enabled")
+  }
 
-  console.log("Validating contract role for VeBetterPassport")
-  await validateContractRole(
-    veBetterPassport,
-    contractsConfig.CONTRACTS_ADMIN_ADDRESS,
-    TEMP_ADMIN,
-    await veBetterPassport.SETTINGS_MANAGER_ROLE(),
+  console.log("================  Configuring roles")
+  console.log(
+    "INFO: roles will not be set automatically in this script, allowing the deployer to handle possible issues in the next days",
   )
+  // UPGRADER_ROLE
+  // ROLE_GRANTER
+  // SETTINGS_MANAGER_ROLE
+  // WHITELISTER_ROLE
+  // ACTION_REGISTRAR_ROLE
+  // ACTION_SCORE_MANAGER_ROLE
+  // SIGNALER_ROLE
 
-  console.log("Execution completed")
+  console.log("================  Execution completed")
   process.exit(0)
 }
 
