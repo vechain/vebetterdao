@@ -14,12 +14,27 @@ import {
 import { useTranslation } from "react-i18next"
 import { DoActionModal } from "./components/DoActionModal"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useUserScore } from "@/api/indexer/sustainability/useUserScore"
+import { useMemo } from "react"
 
 export const DoActionBanner = () => {
   const { t } = useTranslation()
   const doActionModal = useDisclosure()
+  const { isUserDelegatee, isLoading: isLoadingUserScore } = useUserScore()
 
   const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
+
+  const title = useMemo(() => {
+    if (isUserDelegatee) return t("YOUR DELEGATOR IS LAZY THIS WEEK!")
+    return t("YOU ARE LAZY THIS WEEK!")
+  }, [t, isUserDelegatee])
+
+  const description = useMemo(() => {
+    if (isUserDelegatee) return t("Your delegator has to do some Better Actions in our apps to become able to vote!")
+    return t("Do some Better Actions in our apps to become able to vote!")
+  }, [t, isUserDelegatee])
+
+  if (isLoadingUserScore) return null
 
   return (
     <Card bg="#FFD979" borderRadius="xl" w="full" h={"full"}>
@@ -37,10 +52,10 @@ export const DoActionBanner = () => {
             <HStack flex={1}>
               <VStack gap={2} align="stretch" flex={1}>
                 <Text size="xs" color="#8D6602" fontWeight="600">
-                  {t("YOU ARE LAZY THIS WEEK!")}
+                  {title}
                 </Text>
                 <Heading fontSize="lg" fontWeight="700" color="#5F4400">
-                  {t("Do some Better Actions in our apps to become able to vote!")}
+                  {description}
                 </Heading>
               </VStack>
               <Button
@@ -63,10 +78,10 @@ export const DoActionBanner = () => {
           <HStack align="center" zIndex={1} position="relative" w="full" h="full" alignItems={"center"}>
             <VStack gap={2} align="stretch" justify={"space-between"} h="full">
               <Text fontSize={12} color="#8D6602" fontWeight="600">
-                {t("YOU ARE LAZY THIS WEEK!")}
+                {title}
               </Text>
               <Heading fontSize="18" fontWeight="700" color="#5F4400">
-                {t("Do some Better Actions in our apps to become able to vote!")}
+                {description}
               </Heading>
               <Button
                 onClick={doActionModal.onOpen}

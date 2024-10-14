@@ -27,7 +27,7 @@ export const useMissingActionsLabel = ({
   const long = useMemo(() => {
     if (isUserDelegatee)
       return t(
-        `Your delegatee needs at least {{missingActions}} more action${missingActions > 1 ? "s" : ""} to become able to vote on this round.`,
+        `Your delegator needs at least {{missingActions}} more action${missingActions > 1 ? "s" : ""} to become able to vote on this round.`,
         {
           missingActions,
         },
