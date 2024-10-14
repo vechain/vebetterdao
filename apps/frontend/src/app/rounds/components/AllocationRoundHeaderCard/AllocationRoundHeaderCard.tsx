@@ -33,6 +33,8 @@ import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
 import { useRouter } from "next/navigation"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
@@ -77,6 +79,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   }, [data?.voteEndTimestamp, isFinished])
 
   const navigateToVote = useCallback(() => {
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CASTING_VOTE))
     router.push(`/rounds/${roundId}/vote`)
   }, [router, roundId])
 

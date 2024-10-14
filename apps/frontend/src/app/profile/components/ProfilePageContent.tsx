@@ -8,6 +8,8 @@ import { ProfileGovernance } from "./ProfileGovernance"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts"
+import { AnalyticsUtils } from "@/utils"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 
 enum Tab {
   Balance = "balance",
@@ -57,6 +59,26 @@ export const ProfilePageContent = () => {
 
   const handleTabChange = (tab: Tab) => {
     router.push(`?tab=${tab}`)
+
+    switch (tab) {
+      case Tab.Balance:
+        AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.EXPLORE_BALANCE_FROM_PROFILE))
+        break
+      case Tab.BetterActions:
+        AnalyticsUtils.trackEvent(
+          buttonClicked,
+          buttonClickActions(ButtonClickProperties.EXPLORE_BETTER_ACTIONS_FROM_PROFILE),
+        )
+        break
+      case Tab.Governance:
+        AnalyticsUtils.trackEvent(
+          buttonClicked,
+          buttonClickActions(ButtonClickProperties.EXPLORE_GOVERNANCE_FROM_PROFILE),
+        )
+        break
+      default:
+        break
+    }
   }
 
   const tabs = useMemo(

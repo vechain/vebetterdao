@@ -19,6 +19,8 @@ import { HandPlantIcon, VoteBoxIcon } from "@/components"
 import { PendingDelegationDelegateePOV } from "./components/delegation/PendingDelegationDelegateePOV"
 import { CurrentDelegation } from "./components/delegation/CurrentDelegation"
 import { VotingQualification } from "./components/delegation/VotingQualification"
+import { AnalyticsUtils } from "@/utils"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 
 enum ListView {
   ALL,
@@ -62,6 +64,7 @@ export const ProfileGovernance = () => {
 
   const onExploreGovernance = useCallback(() => {
     router.push("/proposals")
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.EXPLORE_GOVERNANCE_FROM_PROFILE))
   }, [router])
 
   const firstCreatedProposals = useMemo(() => createdProposals?.slice(0, PREVIEW_SIZE), [createdProposals])

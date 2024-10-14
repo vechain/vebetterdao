@@ -4,6 +4,8 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { MdArrowOutward } from "react-icons/md"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
 
 export type ConfirmationModalContentProps = {
   b3trBalanceAfter?: string
@@ -42,6 +44,7 @@ export const SuccessConvertModalContent = ({
   onClose,
 }: ConfirmationModalContentProps) => {
   const { t } = useTranslation()
+
   return (
     <VStack align={"center"} p={8} gap={2}>
       <MotionImage
@@ -98,7 +101,10 @@ export const SuccessConvertModalContent = ({
           isExternal
           color="gray.500"
           fontSize={"14px"}
-          style={{ textDecoration: "none" }}>
+          style={{ textDecoration: "none" }}
+          onClick={() =>
+            AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SEE_DETAILS_TX))
+          }>
           <HStack alignSelf={"center"}>
             <Text fontSize={14} fontWeight={500} color={"rgba(0, 76, 252, 1)"}>
               {t("See transaction information")}
@@ -114,7 +120,10 @@ export const SuccessConvertModalContent = ({
         rounded={"full"}
         size={{ base: "md", md: "lg" }}
         w={{ base: "full", md: "auto" }}
-        onClick={onClose}
+        onClick={() => {
+          onClose()
+          AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SWAP_CONFIRMED))
+        }}
         data-testid={"close-swap-modal-button"}>
         {t("Continue")}
       </Button>

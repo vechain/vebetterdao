@@ -2,11 +2,13 @@ import { Heading, Text, VStack, ModalCloseButton, Link } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import successAnimation from "./success.json"
 import { ShareButtons } from "../../ShareButtons"
-import { ReactNode } from "react"
+import { ReactNode, useState } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
 import { getConfig } from "@repo/config"
 import { useTranslation } from "react-i18next"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties, buttonClickActions } from "@/constants"
 
 export type SuccessModalContentProps = {
   title?: ReactNode
@@ -14,6 +16,7 @@ export type SuccessModalContentProps = {
   socialDescriptionEncoded?: string
   showExplorerButton?: boolean
   txId?: string
+  isSuccessBeenTrack?: boolean
 }
 
 /**
@@ -31,8 +34,16 @@ export const SuccessModalContent = ({
   socialDescriptionEncoded = "%F0%9F%8C%B1%20Excited%20to%20contribute%20to%20a%20%23Better%20future%20with%20my%20latest%20activity%20on%20%23VeBetterDAO%21%0A%0AVisit%20https%3A%2F%2Fvebetterdao.org%20and%20start%20making%20a%20difference%20today%21%20%F0%9F%92%AB%0A%0A%23VeBetterDAO%20%23Vechain",
   showExplorerButton = false,
   txId,
+  isSuccessBeenTrack,
 }: SuccessModalContentProps) => {
   const { t } = useTranslation()
+
+  const [isTracked, setIsTracked] = useState(isSuccessBeenTrack)
+
+  if (isTracked && typeof title === "string") {
+    AnalyticsUtils.trackEvent(title, buttonClickActions(ButtonClickProperties.SUCCESS_TX))
+    setIsTracked(false)
+  }
   return (
     <ModalAnimation>
       <ModalCloseButton top={4} right={4} />
