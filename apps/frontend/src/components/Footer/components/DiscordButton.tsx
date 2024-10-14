@@ -2,6 +2,8 @@ import { DISCORD_URL } from "@/constants"
 import { Button, Link, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FaDiscord } from "react-icons/fa6"
+import { AnalyticsUtils } from "@/utils"
+import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 
 type Props = {
   isFullWidth?: boolean
@@ -10,7 +12,11 @@ type Props = {
 export const DiscordButton: React.FC<Props> = ({ isFullWidth }) => {
   const { t } = useTranslation()
   return (
-    <Link href={DISCORD_URL} isExternal w={isFullWidth ? "full" : undefined}>
+    <Link
+      href={DISCORD_URL}
+      isExternal
+      w={isFullWidth ? "full" : undefined}
+      onClick={() => AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_DISCORD))}>
       <Button
         leftIcon={<FaDiscord size={24} />}
         textColor={"white"}

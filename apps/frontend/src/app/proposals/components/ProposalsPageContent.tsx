@@ -8,6 +8,8 @@ import { ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } 
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
 import { useProposalFilters } from "@/store"
+import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
@@ -31,7 +33,7 @@ export const ProposalsPageContent = () => {
       open()
       return
     }
-
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CREATE_PROPOSAL))
     router.push("/proposals/new")
   }, [account, open, router])
 

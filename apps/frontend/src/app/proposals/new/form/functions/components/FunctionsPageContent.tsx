@@ -22,6 +22,9 @@ import { useTranslation } from "react-i18next"
 import { EnvConfig, EnvConfigValues } from "@repo/config/contracts"
 import { ContractsWithFunctions, SelectedFunction } from "./ContractsWithFunctions"
 
+import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
+
 const devEnvs: EnvConfig[] = ["local", "e2e", "testnet-staging"]
 
 export const FunctionsPageContent = () => {
@@ -45,6 +48,10 @@ export const FunctionsPageContent = () => {
       return
     }
     router.push("/proposals/new/form/functions/details")
+    AnalyticsUtils.trackEvent(
+      buttonClicked,
+      buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_FUNCTIONS),
+    )
   }, [router, actions, t])
 
   const goBack = useCallback(() => {

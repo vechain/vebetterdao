@@ -8,6 +8,8 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 const compactFormatter = getCompactFormatter(2)
 
@@ -100,7 +102,10 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
       </Stack>
       <Button
         isDisabled={isSwapDisabled}
-        onClick={onOpen}
+        onClick={() => {
+          onOpen()
+          AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SWAP_TOKENS))
+        }}
         leftIcon={<UilExchangeAlt size={"16px"} />}
         variant={"whiteAction"}
         rounded={"full"}

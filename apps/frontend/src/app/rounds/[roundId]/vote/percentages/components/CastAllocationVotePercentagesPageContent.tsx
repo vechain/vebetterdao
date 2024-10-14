@@ -17,6 +17,8 @@ import { scaledDivision } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
 import { ResponsiveCard } from "@/components"
 import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 type Props = {
   roundId: string
@@ -87,6 +89,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   const onContinue = useCallback(() => {
     if (error) return
     router.push(`/rounds/${roundId}/vote/confirm`)
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CASTING_VOTE_PERCENTAGE))
   }, [router, roundId, error])
 
   const shouldSeeThePage = useMemo(() => {
