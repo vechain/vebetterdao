@@ -40,15 +40,11 @@ export const UserTransactions = () => {
             ))}
           </VStack>
           {transactions.length > 0 ? (
-            <>
-              {transactions.length > 5 && (
-                <Flex justify="center">
-                  <Button variant={"primaryGhost"} onClick={handleSeeAll}>
-                    {t("See all")}
-                  </Button>
-                </Flex>
-              )}
-            </>
+            <Flex justify="center">
+              <Button variant={"primaryGhost"} onClick={handleSeeAll}>
+                {t("See all")}
+              </Button>
+            </Flex>
           ) : (
             <Text>{t("No transactions found")}</Text>
           )}
