@@ -39,10 +39,13 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
 
   const [selectedDate, setSelectedDate] = useState<string>()
 
+  const startDate = currentDate.startOf("month").format("YYYY-MM-DD")
+  const endDate = currentDate.endOf("month").format("YYYY-MM-DD")
+
   const currentMonthOverviewQuery = useSustainabilitySingleUserOverviewByDay({
     wallet: account ?? "",
-    startDate: currentDate.startOf("month").format("YYYY-MM-DD"),
-    endDate: currentDate.endOf("month").format("YYYY-MM-DD"),
+    startDate,
+    endDate,
   })
 
   useEffect(() => {
@@ -54,7 +57,8 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
     }
 
     fetchAllPages()
-  }, [currentMonthOverviewQuery])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDate.toString()])
 
   const currentMonthOverview = useMemo(
     () => currentMonthOverviewQuery.data?.pages.flatMap(page => page.data) ?? [],

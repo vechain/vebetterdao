@@ -4,6 +4,9 @@ import dayjs from "dayjs"
 import { LeafIcon } from "../../../Icons/LeafIcon"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./components/ActionModal"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+
+const compactFormatter = getCompactFormatter(2)
 
 type Props = {
   action: SustainabilityActionsResponse["data"][number]
@@ -43,7 +46,7 @@ export const BetterActionCard = ({ action }: Props) => {
           <HStack spacing={2}>
             <Text fontWeight={600}>
               {"+"}
-              {action.amount}
+              {compactFormatter.format(Number(action.amount))}
             </Text>
             <Text fontWeight={400} fontSize={"sm"}>
               {"B3TR"}

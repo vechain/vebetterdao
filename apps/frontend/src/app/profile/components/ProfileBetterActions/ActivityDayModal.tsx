@@ -19,7 +19,11 @@ export const ActivityDayModal = ({ isOpen, onClose, date }: Props) => {
   const startOfDay = dayjs(date).startOf("day").unix()
   const endOfDay = dayjs(date).endOf("day").unix()
 
-  const actionsOfDayQuery = useSustainabilityActions({ wallet: account ?? "", after: startOfDay, before: endOfDay })
+  const actionsOfDayQuery = useSustainabilityActions({
+    wallet: date ? account ?? "" : undefined,
+    after: startOfDay,
+    before: endOfDay,
+  })
 
   useEffect(() => {
     // Fetch until there are no more pages left
@@ -30,7 +34,8 @@ export const ActivityDayModal = ({ isOpen, onClose, date }: Props) => {
     }
 
     fetchAllPages()
-  }, [actionsOfDayQuery])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startOfDay, endOfDay])
 
   const flatActions = actionsOfDayQuery.data?.pages.map(page => page.data).flat() ?? []
 
@@ -39,7 +44,8 @@ export const ActivityDayModal = ({ isOpen, onClose, date }: Props) => {
       isOpen={isOpen}
       onClose={onClose}
       ariaTitle={`ActivityDayModal for ${date}`}
-      ariaDescription={`ActivityDayModal for ${date}`}>
+      ariaDescription={`ActivityDayModal for ${date}`}
+      modalBodyProps={{ maxH: "80vh", overflowY: "auto" }}>
       <VStack spacing={3} align="stretch">
         <Text fontWeight="600" color="#848484">
           {dayjs(date).format("MMMM D YYYY").toUpperCase()}
