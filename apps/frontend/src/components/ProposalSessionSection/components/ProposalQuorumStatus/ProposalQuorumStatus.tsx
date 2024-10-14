@@ -48,7 +48,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery }: Props) 
   return (
     <VStack align="stretch">
       <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
-        {t("VOT3 used to vote until now")}
+        {t("VOT3 used to vote")}
       </Text>
       <HStack justify={"space-between"} align={"baseline"}>
         <HStack gap={2}>
