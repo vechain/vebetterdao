@@ -101,30 +101,36 @@ export class AllocationsPage extends BasePage {
    * Click on the round, this asserts the round page is displayed
    * Note: This click has proven problematic, so it has a retry mechanism
    * @param roundIndex index of the round
+   * @param isVotable specifies if round is expected to be votable;
+   *                   this arg is in place because sometimes "Cast your vote" button is not visible
+   *                   despite the round being in "Active now" state
    * @returns RoundsPage
    */
-  async clickOnRound(roundIndex: RoundIndex): Promise<RoundsPage> {
+  async clickOnRound(roundIndex: RoundIndex, isVotable = true): Promise<RoundsPage> {
     return await test.step(`Click on round #${roundIndex}`, async () => {
       const roundsPage = new RoundsPage(this.page)
+      const menuBar = new MenuBar(this.page)
       const maxAttempts = 10
       let attemptsLeft = maxAttempts
       let isOpened = false
+
       while (attemptsLeft > 0 && !isOpened) {
         try {
           console.log(`\t Attempt #${maxAttempts - attemptsLeft + 1} to click on Round #${roundIndex}`)
           await this.roundCardByIndex(roundIndex).click()
           await expect(this.roundHeaderCard).toBeVisible()
+          if (isVotable) await expect(new RoundsPage(this.page).castYourVoteButton).toBeVisible()
           isOpened = true
         } catch (error) {
           console.log(`\t Error clicking on round #${roundIndex}: ${error}`)
-          const menuBar = new MenuBar(this.page)
           await menuBar.gotoDashboard()
           await menuBar.gotoAllocations()
           attemptsLeft--
         } finally {
-          await delay(5000)
+          await delay(3000)
         }
       }
+
       if (attemptsLeft === 0 || !isOpened) {
         console.log(`\t Failed to click on round #${roundIndex} after ${maxAttempts} attempts`)
         throw new Error(`Failed to click on round #${roundIndex}`)

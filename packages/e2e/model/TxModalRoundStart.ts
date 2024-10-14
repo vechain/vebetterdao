@@ -7,7 +7,7 @@ export class TxModalRoundStart extends BaseTxModal {
     super(page, {
       success: "Round started!",
       error: "Error starting round",
-      pending: "Starting round...",
+      pending: "Starting emissions and rounds...",
     })
   }
 }

@@ -8,7 +8,6 @@ import { TxModalVoteCast } from "./TxModalVoteCast"
  */
 export class RoundsPage {
   private page: Page
-  readonly castVoteButton: Locator
   readonly roundTitleText: Locator
   readonly quorumFailedError: Locator
   readonly castYourVoteButton: Locator
@@ -22,7 +21,6 @@ export class RoundsPage {
 
   constructor(page: Page) {
     this.page = page
-    this.castVoteButton = this.page.locator('xpath=//button[contains(text(), "Cast vote now")]')
     this.roundTitleText = this.page.getByTestId("round-title")
     this.quorumFailedError = this.page.locator('css=div[data-status="error"][role="alert"] div').first()
     this.castYourVoteButton = this.page.getByTestId("cast-your-vote-button")
@@ -57,20 +55,6 @@ export class RoundsPage {
    */
   async castVote(votes: Array<AllocationVote>) {
     await test.step("Cast vote", async () => {
-      // for (const vote of votes) {
-      //   const appName = vote.appName
-      //   const votePercentage = vote.votePercentage
-      //   const xpath = `xpath=//input[@data-testid="${appName}-vote-input"]`
-      //   // cast-your-vote-button
-      //   await expect(this.page.locator(xpath).first()).toBeEnabled()
-      //   await this.page.locator(xpath).first().scrollIntoViewIfNeeded()
-      //   await this.page.locator(xpath).first().fill(String(votePercentage))
-      // }
-      // await this.castVoteButton.first().click()
-      // const voteCastDialog = new VoteCastDialog(this.page)
-      // await voteCastDialog.expectDialogSuccess()
-      // await voteCastDialog.closeDialog()
-
       // select apps on the list and click Continue
       await this.castYourVoteButton.click()
       for (const vote of votes) {

@@ -1,7 +1,7 @@
 import { Page } from "playwright"
 import { expect, Locator, test } from "@playwright/test"
 
-type RoundStartTitle = "Round started!" | "Error starting round" | "Starting round..."
+type RoundStartTitle = "Round started!" | "Error starting round" | "Starting emissions and rounds..."
 type CastVoteTitle = "Vote Cast!" | "Error casting vote" | "Sending Transaction..."
 type ClaimRewardsTitle = "Rewards claimed!" | ""
 type TxModalTitles = {

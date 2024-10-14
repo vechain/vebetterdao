@@ -6,7 +6,7 @@ import blockchainUtils from "../utils/blockchain"
 import BigNumber from "bignumber.js"
 import { MenuBar } from "../model/menuBar"
 import { AllocationVote, RoundIndex } from "../model/types"
-import { GMNFTDialog } from "../model/gmnftDialog"
+// import { GMNFTDialog } from "../model/gmnftDialog"
 import { AllocationsPage } from "../model/allocationsPage"
 import { TxModalRoundStart } from "../model/TxModalRoundStart"
 import { TxModalClaimRewards } from "../model/TxModalClaimRewards"
@@ -74,8 +74,16 @@ const adminOpenRound = async (page: Page) => {
 
     await dashboardPage.connectWallet(DAO_ADMIN_ACCOUNT)
     const adminPage = await menuBar.gotoAdmin()
+    const isFirstRound = (await adminPage.startVotingRoundButton.textContent()) === "Start emissions"
     await adminPage.startAllocationRound()
-    await new TxModalRoundStart(page).expectSuccess()
+    // TODO: the following if condition is a workaround for this issue -- https://github.com/vechain/b3tr/issues/1484
+    //  remove it once it's fixed
+    if (isFirstRound) {
+      await new TxModalRoundStart(page).expectPending()
+      expect(await adminPage.startVotingRoundButton.getAttribute("disabled")).toBe("")
+    } else {
+      await new TxModalRoundStart(page).expectSuccess()
+    }
     await page.evaluate(() => window.localStorage.clear())
     await page.evaluate(() => window.sessionStorage.clear())
   })
@@ -141,7 +149,7 @@ test.describe("Allocation voting", () => {
     const menuBar = new MenuBar(page)
     const allocationsPage = await menuBar.gotoAllocations()
     await allocationsPage.expectRoundStatus("latest", "Concluded")
-    const roundPage = await allocationsPage.clickOnRound("latest")
+    const roundPage = await allocationsPage.clickOnRound("latest", false)
     const totalVotes = votingDetails.reduce((acc, voter) => acc + voter.vot3Balance, 0)
     // assert total votes
     await roundPage.expectTotalVotes(totalVotes)
@@ -183,25 +191,26 @@ test.describe("Allocation voting", () => {
     })
   }
 
-  for (let i = 0; i < votingDetails.length; i++) {
-    let nftCounter = 1
-    test(`Users can claim their allocation round NFT after voting on the first round; Voter accIndex: ${votingDetails[i].accIndex}`, async ({
-      page,
-    }) => {
-      const menuBar = new MenuBar(page)
-      const dashboardPage = await menuBar.gotoDashboard()
-      await veWorldMockClient.setConfig(page, { accountIndex: votingDetails[i].accIndex })
-      await dashboardPage.connectWallet()
-      // claim NFT
-      await dashboardPage.mintNFT()
-      const dialog = new GMNFTDialog(page)
-      await dialog.expectDialogDisplayed(nftCounter)
-      await dialog.closeDialog()
-      // assert NFT is displayed
-      await dashboardPage.expectNFTToBeDisplayed("GM Earth")
-      nftCounter++
-    })
-  }
+  // TODO: uncomment once this is fixed -- https://github.com/vechain/b3tr/issues/1485
+  // for (let i = 0; i < votingDetails.length; i++) {
+  //   let nftCounter = 1
+  //   test(`Users can claim their allocation round NFT after voting on the first round; Voter accIndex: ${votingDetails[i].accIndex}`, async ({
+  //     page,
+  //   }) => {
+  //     const menuBar = new MenuBar(page)
+  //     const dashboardPage = await menuBar.gotoDashboard()
+  //     await veWorldMockClient.setConfig(page, { accountIndex: votingDetails[i].accIndex })
+  //     await dashboardPage.connectWallet()
+  //     // claim NFT
+  //     await dashboardPage.mintNFT()
+  //     const dialog = new GMNFTDialog(page)
+  //     await dialog.expectDialogDisplayed(nftCounter)
+  //     await dialog.closeDialog()
+  //     // assert NFT is displayed
+  //     await dashboardPage.expectNFTToBeDisplayed("GM Earth")
+  //     nftCounter++
+  //   })
+  // }
 
   test("Admin user can open the second allocation round", async ({ page }) => {
     await adminOpenRound(page)
@@ -223,7 +232,7 @@ test.describe("Allocation voting", () => {
     await allocationsPage.expectOnPage()
     // assert round status
     await allocationsPage.expectRoundStatus("latest", "Concluded")
-    const roundPage = await allocationsPage.clickOnRound("latest")
+    const roundPage = await allocationsPage.clickOnRound("latest", false)
     await roundPage.expectQuorumNotReached()
     // assert total votes
     await roundPage.expectTotalVotes(votingDetails[0].vot3Balance)

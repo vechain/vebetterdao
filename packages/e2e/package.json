@@ -6,7 +6,6 @@
     "playwright:e2e": "playwright test",
     "playwright:e2e:debug": "playwright test --debug",
     "install-browsers": "npx playwright install",
-    "test": "playwright test tests/allocation_voting.spec.ts",
     "dev:healthcheck": "./healthcheck.sh http://localhost:8669 && ./healthcheck.sh http://localhost:3000/_next/static/chunks/main-app.js",
     "report": "yarn playwright show-report"
   },
