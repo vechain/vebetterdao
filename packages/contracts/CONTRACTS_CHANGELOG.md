@@ -6,6 +6,7 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                               | Summary                                                     |
 | ------------------- | --------------------------------------------------------- | ----------------------------------------------------------- |
+| 15th October 2024   | `VeBetterPassport` version `2`                            | Check if the entity is a delegatee when request is created  |
 | 11th October 2024   | `XAllocationVoting` version `2`                           | Check isPerson when casting vote & fixed weight during vote |
 | 11th October 2024   | `B3TRGovernor` version `4`                                | Check isPerson when casting vote                            |
 | 11th October 2024   | `X2EarnRewardsPool` version `3`                           | Register action in VeBetter Passport contract               |
@@ -52,6 +53,32 @@ Another change in the `XAllocationVoting` contract is the fixed weight during th
 
 - **`XAllocationVoting.sol`**:
   - Fixed weight during vote to ensure it cannot be lower than 1.
+
+---
+
+## Upgrade `XAllocationVoting` to Version 2, `B3TRGovernor` to version 4, and `X2EarnRewardsPool` to version 3 (9th October 2024)
+
+This upgrade ensures that the `isPerson` check is performed when casting a vote in the `XAllocationVoting` and `B3TRGovernor` contracts. Additionally, the `X2EarnRewardsPool` contract now registers actions in the `VeBetter Passport` contract.
+
+Another change in the `XAllocationVoting` contract is the fixed weight during the vote, ensuring that the weight cannot be lower than 1.
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `VeBetterPassport.sol` to version `2`
+
+### Storage Changes 📦
+
+- None.
+
+### New Features 🚀
+
+- None.
+
+### Bug Fixes 🐛
+
+- **`VeBetterPassport.sol`**:
+  - Added check to ensure entity is not a delegatee or pending delegatee when making entity link request.
 
 ---
 
