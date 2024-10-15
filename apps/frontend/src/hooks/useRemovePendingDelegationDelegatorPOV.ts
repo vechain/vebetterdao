@@ -14,8 +14,6 @@ type UseRemovePendingDelegationProps = {
   onSuccess?: () => void
 }
 
-type ClausesParams = {}
-
 /**
  * Provides a React hook to remove pending a delegation using a blockchain transaction.
  * This hook integrates with the blockchain wallet and manages transaction state.
@@ -23,23 +21,20 @@ type ClausesParams = {}
 export const useRemovePendingDelegationDelegatorPOV = ({ onSuccess }: UseRemovePendingDelegationProps) => {
   const { account } = useWallet()
 
-  const clauseBuilder = useCallback(
-    ({}: ClausesParams) => {
-      if (!account) throw new Error("Account is required")
-      // if (!isValid(delegatee)) throw new Error("Invalid delegatee address")
+  const clauseBuilder = useCallback(() => {
+    if (!account) throw new Error("Account is required")
+    // if (!isValid(delegatee)) throw new Error("Invalid delegatee address")
 
-      return [
-        buildClause({
-          to: passportContractAddress,
-          contractInterface: PassportContractInterface,
-          method,
-          args: [],
-          comment: "remove pending delegation",
-        }),
-      ]
-    },
-    [account],
-  )
+    return [
+      buildClause({
+        to: passportContractAddress,
+        contractInterface: PassportContractInterface,
+        method,
+        args: [],
+        comment: "remove pending delegation",
+      }),
+    ]
+  }, [account])
 
   const refetchQueryKeys = useMemo(
     () => [
@@ -49,7 +44,7 @@ export const useRemovePendingDelegationDelegatorPOV = ({ onSuccess }: UseRemoveP
     [account],
   )
 
-  return useBuildTransaction<ClausesParams>({
+  return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,
     onSuccess,

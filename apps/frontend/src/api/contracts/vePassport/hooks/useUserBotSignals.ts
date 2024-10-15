@@ -26,5 +26,6 @@ export const useUserBotSignals = (address?: string) => {
     contractAddress: VEPASSPORT_CONTRACT,
     method,
     args: [address],
+    enabled: !!address,
   })
 }
