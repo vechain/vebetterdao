@@ -304,15 +304,15 @@ export const getOrDeployContractInstances = async ({
   ])) as X2EarnApps
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
-  const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassport", {
-    PassportChecksLogic: await PassportChecksLogic.getAddress(),
-    PassportConfigurator: await PassportConfigurator.getAddress(),
-    PassportEntityLogic: await PassportEntityLogic.getAddress(),
-    PassportDelegationLogic: await PassportDelegationLogic.getAddress(),
-    PassportPersonhoodLogic: await PassportPersonhoodLogic.getAddress(),
-    PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
-    PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
-    PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
+  const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
+    PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
+    PassportConfiguratorV1: await PassportConfiguratorV1.getAddress(),
+    PassportEntityLogicV1: await PassportEntityLogicV1.getAddress(),
+    PassportDelegationLogicV1: await PassportDelegationLogicV1.getAddress(),
+    PassportPersonhoodLogicV1: await PassportPersonhoodLogicV1.getAddress(),
+    PassportPoPScoreLogicV1: await PassportPoPScoreLogicV1.getAddress(),
+    PassportSignalingLogicV1: await PassportSignalingLogicV1.getAddress(),
+    PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
   })
 
   const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
