@@ -1,14 +1,15 @@
 // app/layout.tsx
 
 import { getConfig } from "@repo/config"
-import dynamic from "next/dynamic"
+import nextDynamic from "next/dynamic"
 
-const RootLayoutContent = dynamic(() => import("./RootLayoutContent").then(mod => mod.RootLayoutContent), {
+// Enforce static generation for all the pages of the app
+// We can change this behavior for specific pages by setting the `dynamic` property to `force-dynamic. Not needed atm as we don't really use SSR
+export const dynamic = "force-static"
+
+const RootLayoutContent = nextDynamic(() => import("./RootLayoutContent").then(mod => mod.RootLayoutContent), {
   ssr: false,
 })
-
-// Set revalidation time
-export const revalidate = 3600 // Revalidate every hour
 
 // Define metadata for your layout
 export const metadata = {

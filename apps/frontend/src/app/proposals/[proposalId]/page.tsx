@@ -4,6 +4,7 @@ import { getNodeJsConnex, toIPFSURL } from "@/utils"
 import { ResolvingMetadata, Metadata } from "next"
 import { getConfig } from "@repo/config"
 import { ProposalPage } from "./ProposalPage"
+import { unstable_cache } from "next/cache"
 
 type Props = {
   params: {
@@ -11,21 +12,30 @@ type Props = {
   }
 }
 
+// Wrap the data fetching logic in a cached function
+const getCachedProposalData = unstable_cache(
+  async (id: string): Promise<ProposalMetadata> => {
+    console.log("Fetching proposal data")
+
+    const connex = await getNodeJsConnex()
+
+    const proposalsEvents = await getProposalsEvents(connex.thor, id)
+
+    const proposal = proposalsEvents.created.find(ev => ev.proposalId === id)
+    if (!proposal) throw new Error(`Proposal ${id} not found`)
+
+    const proposalMetadata = await getIpfsMetadata<ProposalMetadata>(toIPFSURL(proposal.description))
+    return proposalMetadata
+  },
+  [`proposal-data`],
+  { revalidate: 3600 }, // Revalidate every hour
+)
+
 export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
   // read route params
   const id = params.proposalId
 
-  // optionally access and extend (rather than replace) parent metadata
-  //   const previousImages = (await parent).openGraph?.images || []
-
-  const connex = await getNodeJsConnex()
-
-  const proposalsEvents = await getProposalsEvents(connex.thor, params.proposalId)
-
-  const proposal = proposalsEvents.created.find(ev => ev.proposalId === id)
-  if (!proposal) throw new Error(`Proposal ${id} not found`)
-
-  const proposalMetadata = await getIpfsMetadata<ProposalMetadata>(toIPFSURL(proposal.description))
+  const proposalMetadata = await getCachedProposalData(id)
 
   if (!proposalMetadata) return {}
 
