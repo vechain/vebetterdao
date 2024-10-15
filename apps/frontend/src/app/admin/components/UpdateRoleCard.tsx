@@ -60,18 +60,26 @@ export const UpdateRoleCard = () => {
     walletAddress,
   )
 
-  const { grantRole, revokeRole } = useAccessControl({
+  const { grantRole, renounceRole, revokeRole } = useAccessControl({
     contractAddress: selectedContractAddress ?? "",
     walletAddress: walletAddress ?? "",
     role: selectedRole ?? "",
+    onSuccess: () => {
+      accessControlAction.resetStatus()
+      onClose()
+    },
   })
 
   const accessControlAction = useMemo(() => {
+    if (compareAddresses(account ?? "", walletAddress)) {
+      return renounceRole
+    }
+
     if (!userAlreadyHasRole) {
       return grantRole
     }
     return revokeRole
-  }, [userAlreadyHasRole, grantRole, revokeRole])
+  }, [userAlreadyHasRole, account, walletAddress, grantRole, renounceRole, revokeRole])
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -185,11 +193,11 @@ export const UpdateRoleCard = () => {
                 isDisabled={!isFormValid || !!hasRoleError}
                 colorScheme={userAlreadyHasRole ? "red" : "green"}
                 type="submit">
-                {userAlreadyHasRole
-                  ? compareAddresses(account ?? "", walletAddress)
-                    ? t("Renounce Role")
-                    : t("Revoke Role")
-                  : t("Grant Role")}
+                {compareAddresses(account ?? "", walletAddress)
+                  ? t("Renounce Role")
+                  : userAlreadyHasRole
+                    ? t("Revoke Role")
+                    : t("Grant Role")}
               </Button>
             </VStack>
           </form>
