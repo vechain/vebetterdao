@@ -569,26 +569,31 @@ library PassportEntityLogic {
     address passport,
     address entity
   ) private view {
-    // Check if the entity is already an entity, if so revert
+    // Check if the entity is already an entity or pending entity, if so revert
     if (self.entityToPassport[entity].latest() != 0 || self.pendingLinksIndexes[entity] != 0) {
       revert AlreadyLinked(entity);
     }
 
-    // Check if the passport is an entity, if so revert
+    // Check if the passport is an entity or pending entity, if so revert
     if (self.entityToPassport[passport].latest() != 0 || self.pendingLinksEntityToPassport[passport] != address(0)) {
       revert AlreadyLinked(passport);
     }
 
-    // Check if the entity is a passport, if so revert
-    if (self.passportToEntities[entity].length != 0) {
+    // Check if the entity is a passport or pending passport, if so revert
+    if (self.passportToEntities[entity].length != 0 || self.pendingLinksPassportToEntities[entity].length != 0) {
       revert AlreadyLinked(passport);
     }
 
-    // Check if entity has delegated to another passport or has a pending delegation
+    // Check if entity has delegated to another passport or has a pending delegation, if so revert
     if (
       PassportDelegationLogic.isDelegator(self, entity) ||
       self.pendingDelegationsDelegatorToDelegatee[entity] != address(0)
     ) {
+      revert DelegatedEntity(entity);
+    }
+
+    // Check if the entity is a delegatee or pending delegatee, if so revert
+    if (PassportDelegationLogic.isDelegatee(self, entity) || self.pendingDelegationsDelegateeToDelegators[entity].length != 0) {
       revert DelegatedEntity(entity);
     }
 
