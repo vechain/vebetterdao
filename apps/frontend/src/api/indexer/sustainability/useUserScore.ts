@@ -27,7 +27,8 @@ export const useUserScore = (user?: string) => {
   )
 
   const scorePercentage = useMemo(
-    () => (Number(scoreThreshold) ? Math.min((Number(userScore || 0) / Number(scoreThreshold || 0)) * 100, 100) : 100),
+    () =>
+      Number(scoreThreshold ?? 0) ? Math.min((Number(userScore ?? 0) / Number(scoreThreshold ?? 0)) * 100, 100) : 100,
     [userScore, scoreThreshold],
   )
 
@@ -36,8 +37,9 @@ export const useUserScore = (user?: string) => {
   // we take the score of the easy actions as reference, as the minimum score of an action
   // so we can calculate the number of actions needed to reach the threshold at minimum
   const { data: easyActionScore, isLoading: isSecurityMultiplierLoading } = useSecurityMultiplier(SecurityLevel.LOW)
-  const scoreNeeded = Math.max(Number(scoreThreshold ?? 0) - (Number(userScore ?? 0) ?? 0), 0)
-  const missingActions = easyActionScore && scoreNeeded ? Math.ceil(scoreNeeded / easyActionScore) : 0
+  const scoreNeeded = Math.max(Number(scoreThreshold ?? 0) - Number(userScore ?? 0), 0)
+  const missingActions =
+    Number(easyActionScore ?? 0) && scoreNeeded ? Math.ceil(scoreNeeded / Number(easyActionScore ?? 0)) : 0
 
   return {
     isUserQualified,

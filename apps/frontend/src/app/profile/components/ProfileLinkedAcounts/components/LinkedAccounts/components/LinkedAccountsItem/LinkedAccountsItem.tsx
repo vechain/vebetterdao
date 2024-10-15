@@ -2,7 +2,7 @@ import { useAccountLinking, useSustainabilityCurrentUserOverview } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
-import { HStack, VStack, Text, Badge, Heading, Button, useDisclosure } from "@chakra-ui/react"
+import { HStack, Text, Badge, Heading, Button, useDisclosure, Stack, Show } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useTranslation } from "react-i18next"
@@ -31,42 +31,56 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
   if (isUserOverviewLoading || isAccountLinkingLoading) return null
 
   return (
-    <HStack
-      justify={"space-between"}
+    <Stack
+      direction={["column", "column", "row"]}
+      justify={"stretch"}
       flexWrap={"wrap"}
-      align={"center"}
+      align={["stretch", "stretch", "center"]}
       bg="#F8F8F8"
       rounded="xl"
       p={3}
       border={border}
       boxShadow={pending ? "0px 0px 7.9px 0px rgba(242, 155, 50, 0.50)" : "none"}>
-      <HStack gap={4}>
+      <HStack gap={4} flex={1}>
         <AddressIcon address={account} w={12} h={12} rounded="full" />
-        <VStack align="start">
-          <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
-            {humanAddress(account, 4, 4)}
-          </Text>
-        </VStack>
-        {pending && (
-          <Badge color="white" bg={"#F29B32"} borderRadius="full" px="12px" py="4px" textTransform={"inherit"}>
-            {t("Pending request")}
-          </Badge>
-        )}
-        {!pending && isUserAccountCard && (
-          <Badge color="white" bg={"#004CFC"} borderRadius="full" px="12px" py="4px" textTransform={"inherit"}>
-            {t("Your account")}
-          </Badge>
-        )}
-      </HStack>
-      <HStack gap={2}>
-        <HStack gap={1}>
-          <LeafIcon color="#448300" size="24" />
-          <Heading fontWeight="700" fontSize={"xl"}>
-            {userOverview?.actionsRewarded ?? 0}
-          </Heading>
+        <HStack justify={"space-between"} w={"full"} flex={1}>
+          <Stack direction={["column", "column", "row"]} align={["stretch", "stretch", "center"]}>
+            <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
+              {humanAddress(account, 4, 4)}
+            </Text>
+            {pending && (
+              <Badge color="white" bg={"#F29B32"} borderRadius="full" px="12px" py="4px" textTransform={"inherit"}>
+                {t("Pending request")}
+              </Badge>
+            )}
+            {!pending && isUserAccountCard && (
+              <Badge color="white" bg={"#004CFC"} borderRadius="full" px="12px" py="4px" textTransform={"inherit"}>
+                {t("Your account")}
+              </Badge>
+            )}
+          </Stack>
+          <Show below="md">
+            <HStack gap={1}>
+              <LeafIcon color="#448300" size="24" />
+              <Heading fontWeight="700" fontSize={"xl"}>
+                {userOverview?.actionsRewarded ?? 0}
+              </Heading>
+            </HStack>
+          </Show>
         </HStack>
+      </HStack>
+      <HStack gap={2} flex={[1, 1, 0]}>
+        <Show above="md">
+          <HStack gap={1}>
+            <LeafIcon color="#448300" size="24" />
+            <Heading fontWeight="700" fontSize={"xl"}>
+              {userOverview?.actionsRewarded ?? 0}
+            </Heading>
+          </HStack>
+        </Show>
         {isPassport && !isUserAccountCard && (
           <Button
+            flex={1}
             variant={"dangerGhost"}
             leftIcon={<UilLinkBroken color="#C84968" />}
             onClick={removeLinkModalPassportPOV.onOpen}>
@@ -75,6 +89,7 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
         )}
         {isEntity && isUserAccountCard && (
           <Button
+            flex={1}
             variant={"dangerGhost"}
             leftIcon={<UilLinkBroken color="#C84968" />}
             onClick={removeLinkModalEntityPOV.onOpen}>
@@ -83,6 +98,7 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
         )}
         {pending && (
           <Button
+            flex={1}
             variant={"dangerGhost"}
             leftIcon={<UilLinkBroken color="#C84968" />}
             onClick={removePendingRequestModal.onOpen}>
@@ -93,6 +109,6 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
       <RemovePendingRequestModal modal={removePendingRequestModal} passport={outgoingPendingLink} />
       <RemoveLinkModalPassportPOV modal={removeLinkModalPassportPOV} entity={account} />
       <RemoveLinkModalEntityPOV modal={removeLinkModalEntityPOV} entity={account} />
-    </HStack>
+    </Stack>
   )
 }
