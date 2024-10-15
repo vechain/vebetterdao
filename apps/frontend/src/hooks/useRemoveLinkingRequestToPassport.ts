@@ -14,8 +14,6 @@ type UseRemoveLinkingRequestToPassportProps = {
   onSuccess?: () => void
 }
 
-type ClausesParams = {}
-
 /**
  * Provides a React hook to cancel an outgoing pending entity link using a blockchain transaction.
  * This hook integrates with the blockchain wallet and manages transaction state.
@@ -23,26 +21,23 @@ type ClausesParams = {}
 export const useRemoveLinkingRequestToPassport = ({ onSuccess }: UseRemoveLinkingRequestToPassportProps) => {
   const { account } = useWallet()
 
-  const clauseBuilder = useCallback(
-    ({}: ClausesParams) => {
-      if (!account) throw new Error("Account is required")
+  const clauseBuilder = useCallback(() => {
+    if (!account) throw new Error("Account is required")
 
-      return [
-        buildClause({
-          to: passportContractAddress,
-          contractInterface: PassportContractInterface,
-          method,
-          args: [],
-          comment: "cancel outgoing pending entity link",
-        }),
-      ]
-    },
-    [account],
-  )
+    return [
+      buildClause({
+        to: passportContractAddress,
+        contractInterface: PassportContractInterface,
+        method,
+        args: [],
+        comment: "cancel outgoing pending entity link",
+      }),
+    ]
+  }, [account])
 
   const refetchQueryKeys = useMemo(() => [getPendingLinkingsQueryKey(account || "")], [account])
 
-  return useBuildTransaction<ClausesParams>({
+  return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,
     onSuccess,
