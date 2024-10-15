@@ -39,6 +39,7 @@ export const trackEvent = (event: string, properties?: Properties): void => {
 
     if (isInitialized) {
       mixpanel.track(event, properties)
+      console.log("Event tracked", event, properties)
     } else {
       console.warn("Analytics not initialized or enabled")
     }

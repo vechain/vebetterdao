@@ -7,7 +7,6 @@ import {
   useProposalCreatedEvent,
   ProposalState,
   useProposalState,
-  useProposalVotes,
   useProposalVoteDates,
   useProposalUserDeposit,
   useIsDepositReached,
@@ -21,6 +20,7 @@ import {
   useProposalQueuedEvent,
   useProposalExecutedEvent,
   useProposalCanceledEvent,
+  useProposalVotesIndexer,
 } from "@/api"
 import { ethers } from "ethers"
 import dayjs from "dayjs"
@@ -38,11 +38,10 @@ export const useProposalDetailById = (proposalId: string) => {
   const proposalSnapshotBlock = useMemo(() => Number(proposalSnapshot.data), [proposalSnapshot.data])
   const isDepositReached = useIsDepositReached(proposalId)
   const isProposalActive = useMemo(() => proposalState?.data === ProposalState.Active, [proposalState?.data])
-  const isProposalNotPending = useMemo(() => proposalState?.data !== ProposalState.Pending, [proposalState?.data])
   const proposalQuorum = useProposalQuorum(proposalSnapshotBlock)
   const isQuorumReached = useIsProposalQuorumReached(proposalId)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
-  const proposalVotes = useProposalVotes(proposalId, isProposalNotPending)
+  const { data: proposalVotes, isLoading: isVotesLoading } = useProposalVotesIndexer({ proposalId })
   const proposalSnapshotVot3 = useGetVotesOnBlock(proposalSnapshotBlock, account ?? undefined, isProposalActive)
 
   const roundIdVoteStart = useMemo(
@@ -68,7 +67,6 @@ export const useProposalDetailById = (proposalId: string) => {
   const calls = useMemo(
     () => [
       proposalState,
-      proposalVotes,
       proposalCreatedEvent,
       proposalCanceledEvent,
       proposalDepositEvent,
@@ -82,7 +80,6 @@ export const useProposalDetailById = (proposalId: string) => {
     ],
     [
       proposalState,
-      proposalVotes,
       proposalCreatedEvent,
       proposalCanceledEvent,
       proposalDepositEvent,
@@ -106,15 +103,23 @@ export const useProposalDetailById = (proposalId: string) => {
   } = useProposalVoteDates(proposalId)
 
   const proposal = useMemo(() => {
-    const totalVotingPowerUsedInVotes = Number(proposalVotes.data?.totalVotes || "0")
+    let forVotes,
+      againstVotes,
+      abstainVotes,
+      totalVotingPowerUsedInVotes,
+      forPercentage,
+      againstPercentage,
+      abstainPercentage
+    if (proposalVotes && proposalVotes.length === 3) {
+      forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
+      againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
+      abstainVotes = BigInt(proposalVotes[2]?.totalWeight ?? "0")
+      totalVotingPowerUsedInVotes = forVotes + againstVotes + abstainVotes
+      forPercentage = Number((forVotes * BigInt(10000)) / totalVotingPowerUsedInVotes) / 100
+      againstPercentage = Number((againstVotes * BigInt(10000)) / totalVotingPowerUsedInVotes) / 100
+      abstainPercentage = Number((abstainVotes * BigInt(10000)) / totalVotingPowerUsedInVotes) / 100
+    }
 
-    const forVotes = Number(proposalVotes.data?.forVotes || "0")
-    const againstVotes = Number(proposalVotes.data?.againstVotes || "0")
-    const abstainVotes = Number(proposalVotes.data?.abstainVotes || "0")
-    const forPercentage = Number(proposalVotes.data?.forPercentage || "0")
-
-    const againstPercentage = Number(proposalVotes.data?.againstPercentage || "0")
-    const abstainPercentage = Number(proposalVotes.data?.abstainPercentage || "0")
     const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
     const communityDeposits = proposalDepositEvent.communityDeposits
     const communityDepositPercentage = communityDeposits / depositThreshold
@@ -192,7 +197,7 @@ export const useProposalDetailById = (proposalId: string) => {
       userVot3OnSnapshot,
       isUserVot3OnSnapshotLoading: proposalSnapshotVot3.isLoading,
       snapshotVotesQuery: proposalSnapshotVot3,
-      isVotesLoading: proposalVotes.isLoading,
+      isVotesLoading,
       isQuorumReached: isQuorumReached.data,
       isQuorumReachedLoading: isQuorumReached.isLoading,
       quorum: proposalQuorum.data || 0,

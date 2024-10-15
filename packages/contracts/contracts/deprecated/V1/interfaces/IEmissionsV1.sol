@@ -5,7 +5,7 @@ pragma solidity 0.8.20;
 import "./IB3TR.sol";
 import "./IXAllocationVotingGovernorV1.sol";
 
-interface IEmissions {
+interface IEmissionsV1 {
   struct Emission {
     uint256 xAllocations;
     uint256 vote2Earn;
@@ -69,6 +69,7 @@ interface IEmissions {
   function getNextCycleBlock() external view returns (uint256);
 
   function getRemainingEmissions() external view returns (uint256);
+
   function getRoleAdmin(bytes32 role) external view returns (bytes32);
 
   function getTreasuryAmount(uint256 cycle) external view returns (uint256);
@@ -76,6 +77,7 @@ interface IEmissions {
   function getVote2EarnAmount(uint256 cycle) external view returns (uint256);
 
   function getXAllocationAmount(uint256 cycle) external view returns (uint256);
+
   function grantRole(bytes32 role, address account) external;
 
   function hasRole(bytes32 role, address account) external view returns (bool);
@@ -91,6 +93,7 @@ interface IEmissions {
   function maxVote2EarnDecay() external view returns (uint256);
 
   function nextCycle() external view returns (uint256);
+
   function renounceRole(bytes32 role, address callerConfirmation) external;
 
   function revokeRole(bytes32 role, address account) external;
@@ -133,7 +136,7 @@ interface IEmissions {
 
   function xAllocationsDecay() external view returns (uint256);
 
-  function xAllocationsGovernor() external view returns (IXAllocationVotingGovernor);
+  function xAllocationsGovernor() external view returns (IXAllocationVotingGovernorV1);
 
   function version() external view returns (string memory);
 }

@@ -1,0 +1,54 @@
+import { Stack, HStack, VStack, Text, Button, Badge, useDisclosure } from "@chakra-ui/react"
+import { AddressIcon } from "@/components/AddressIcon"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { UilCheck, UilTimes } from "@iconscout/react-unicons"
+import { useTranslation } from "react-i18next"
+import { AcceptLinkingModal } from "./components/AcceptLinkingModal"
+import { RejectLinkingModal } from "./components/RejectLinkingModal"
+
+export const PendingLinkingProposalItem = ({ secondaryAccount }: { secondaryAccount: string }) => {
+  const { t } = useTranslation()
+  const rejectLinkingModal = useDisclosure()
+  const acceptLinkingModal = useDisclosure()
+  return (
+    <Stack
+      direction={["column", "column", "row"]}
+      justify={"space-between"}
+      bg="#F8F8F8"
+      rounded="xl"
+      p={3}
+      boxShadow={"0px 0px 7.9px 0px rgba(242, 155, 50, 0.50)"}>
+      <HStack gap={4}>
+        <HStack gap={4}>
+          <AddressIcon address={secondaryAccount} w={12} h={12} rounded="full" />
+          <VStack align="start">
+            <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
+              {humanAddress(secondaryAccount, 4, 4)}
+            </Text>
+          </VStack>
+          <Badge color="white" bg={"#F29B32"} borderRadius="full" px="12px" py="4px" textTransform={"inherit"}>
+            {t("Pending")}
+          </Badge>
+        </HStack>
+      </HStack>
+      <HStack gap={4}>
+        <Button
+          variant={"dangerGhost"}
+          p={3}
+          leftIcon={<UilTimes color="#C84968" />}
+          onClick={rejectLinkingModal.onOpen}>
+          {t("Reject")}
+        </Button>
+        <Button
+          variant={"primaryGhost"}
+          p={3}
+          leftIcon={<UilCheck color="#004CFC" />}
+          onClick={acceptLinkingModal.onOpen}>
+          {t("Accept")}
+        </Button>
+      </HStack>
+      <AcceptLinkingModal modal={acceptLinkingModal} secondaryAccount={secondaryAccount} />
+      <RejectLinkingModal modal={rejectLinkingModal} secondaryAccount={secondaryAccount} />
+    </Stack>
+  )
+}

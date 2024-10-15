@@ -19,21 +19,29 @@ import { NavbarMenu } from "./NavbarMenu"
 import { NavbarLogo } from "./NavbarLogo"
 import { Route } from "./Routes"
 import { NavbarBalance } from "./NavbarBalance"
+import { ProfileButton } from "./ProfileButton"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
   { ssr: false },
 )
 
-const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({ routesToRender, ...props }) => {
+const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({
+  routesToRender,
+  isNotMobile,
+  ...props
+}) => {
   return (
-    <Drawer size={"xs"} placement="right" {...props}>
+    <Drawer size={"sm"} placement="right" {...props}>
       <DrawerOverlay />
-      <DrawerContent>
-        <DrawerCloseButton />
-        <DrawerHeader>{"Menu"}</DrawerHeader>
-        <DrawerBody display={"flex"} flexDirection={"column"} justifyContent={"space-between"}>
-          <VStack spacing={4} w="full">
+      <DrawerContent maxWidth={isNotMobile ? undefined : "95%"} borderTopLeftRadius={16} borderBottomLeftRadius={16}>
+        <DrawerCloseButton position={"absolute"} top={4} right={4} color={"gray.500"} _hover={{ color: "gray.700" }} />
+        <DrawerHeader>
+          <NavbarLogo />
+        </DrawerHeader>
+        <DrawerBody display={"flex"} flexDirection={"column"} justifyContent={"space-between"} px={5}>
+          <VStack spacing={0} w="full">
+            <ProfileButton onMenuClose={props.onClose} />
             <NavbarMenu routesToRender={routesToRender} onMenuClick={props.onClose} />
           </VStack>
           {/* <Box w="full" alignSelf="flex-end">
@@ -47,6 +55,7 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({ rou
 
 type Props = {
   routesToRender: Route[]
+  isNotMobile?: boolean
 }
 export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
   const { isOpen: isMenuOpen, onClose: closeMenu, onOpen: openMenu } = useDisclosure()
@@ -71,7 +80,12 @@ export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
         )}
       </HStack>
       {!!routesToRender.length && (
-        <MobileMenuDrawer isOpen={isMenuOpen} onClose={closeMenu} routesToRender={routesToRender} />
+        <MobileMenuDrawer
+          isOpen={isMenuOpen}
+          onClose={closeMenu}
+          routesToRender={routesToRender}
+          isNotMobile={isLargerThan500}
+        />
       )}
     </>
   )

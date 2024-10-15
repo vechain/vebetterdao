@@ -1,11 +1,11 @@
-import { ProposalState, useProposalState, useProposalVotes } from "@/api"
+import { ProposalState, useProposalState, useProposalVotesIndexer } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
 import { Heading, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
 import { ProposalVotesResults } from "./components/ProposalVotesResults"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ExclamationTriangle, ResponsiveCard } from "@/components"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 
@@ -20,8 +20,45 @@ const abstainColor = "#B59525"
 export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { t } = useTranslation()
 
-  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotes(proposalId)
+  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotesIndexer({ proposalId })
   const { data: proposalState } = useProposalState(proposalId)
+
+  const totalVotes = useMemo(() => {
+    if (!proposalVotes || proposalVotes?.length !== 3) return BigInt(0)
+
+    const forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
+    const againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
+    const abstainVotes = BigInt(proposalVotes[2]?.totalWeight ?? "0")
+
+    return forVotes + againstVotes + abstainVotes
+  }, [proposalVotes])
+
+  const forVotesPercentage = useMemo(() => {
+    if (!proposalVotes || proposalVotes?.length !== 3 || totalVotes === BigInt(0)) return 0
+
+    const forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
+    const percentage = (forVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
+
+    return Number(percentage) / 100 // Return as a number with two decimal places
+  }, [proposalVotes, totalVotes])
+
+  const againstVotesPercentage = useMemo(() => {
+    if (!proposalVotes || proposalVotes?.length !== 3 || totalVotes === BigInt(0)) return 0
+
+    const againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
+    const percentage = (againstVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
+
+    return Number(percentage) / 100 // Return as a number with two decimal places
+  }, [proposalVotes, totalVotes])
+
+  const abstainVotesPercentage = useMemo(() => {
+    if (!proposalVotes || proposalVotes?.length !== 3 || totalVotes === BigInt(0)) return 0
+
+    const abstainVotes = BigInt(proposalVotes[2]?.totalWeight ?? "0")
+    const percentage = (abstainVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
+
+    return Number(percentage) / 100 // Return as a number with two decimal places
+  }, [proposalVotes, totalVotes])
 
   //TODO: Enable again when indexer is ready
   //   const { data: voteEvents, isLoading: voteEventsLoading } = useProposalVoteEvents(proposalId)
@@ -40,20 +77,20 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
     for: {
       color: forColor,
       text: t("Votes for"),
-      percentage: proposalVotes?.forPercentage ?? 0,
+      percentage: forVotesPercentage,
       icon: <Icon as={UilThumbsUp} boxSize={["20px", "20px", "16px"]} />,
     },
     against: {
       color: againstColor,
       text: t("Against"),
-      percentage: proposalVotes?.againstPercentage ?? 0,
+      percentage: againstVotesPercentage,
       icon: <Icon as={UilThumbsDown} boxSize={["20px", "20px", "16px"]} />,
     },
 
     abstain: {
       color: abstainColor,
       text: t("Abstained"),
-      percentage: proposalVotes?.abstainPercentage ?? 0,
+      percentage: abstainVotesPercentage,
       icon: <Image src={"/images/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
     },
   }
