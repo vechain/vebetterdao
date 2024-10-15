@@ -4,6 +4,7 @@ import { veWorldMockClient } from "@vechain/veworld-mock-playwright"
 import BigNumber from "bignumber.js"
 import { SwapDialog } from "./swapDialog"
 import { BasePage } from "./basePage"
+import { trimAddress } from "../utils/strings"
 
 /**
  * Dashboard page model
@@ -44,10 +45,9 @@ export class DashboardPage extends BasePage {
       await this.veWorldOption.first().click()
       const mockAddress = await veWorldMockClient.getSignerAddress(this.page)
       console.log("connected wallet address", mockAddress)
-      const trimmedAddress = mockAddress.toLowerCase().slice(-6)
       await this.reloadWithReconnect(accountIndex)
       await expect(this.connectWalletButton.first()).not.toBeVisible()
-      await expect(this.page.getByTestId("wallet-address")).toHaveText(trimmedAddress)
+      await expect(this.page.getByTestId("wallet-address")).toHaveText(trimAddress(mockAddress))
       return mockAddress
     })
   }
