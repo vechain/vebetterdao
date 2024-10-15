@@ -1,4 +1,9 @@
 {
+  "Current round (#{{currentRoundId}}) will end in {{currentRoundEndsAt}}": "Current round (#{{currentRoundId}}) will end in {{currentRoundEndsAt}}",
+  "Last round (#{{currentRoundId}}) ended {{currentRoundEndedAt}}": "Last round (#{{currentRoundId}}) ended {{currentRoundEndedAt}}",
+  "Error checking endorsement": "Error checking endorsement",
+  "Checking endorsement...": "Checking endorsement...",
+  "Check Endorsement": "Check Endorsement",
   "You are endorsing": "You are endorsing",
   "Removing your endorsement from": "Removing your endorsement from",
   "{{value}} points": "{{value}} points",
