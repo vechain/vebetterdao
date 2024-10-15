@@ -14,3 +14,11 @@ export const compact = (number: number | bigint): string => {
 
   return getCompactFormatter(4).format(number)
 }
+
+/**
+ * Trims full wallet address to a shorter version in same way it's displayed in the UI on a Connect Wallet button.
+ * @param fullAddress
+ */
+export const trimAddress = (fullAddress: string): string => {
+  return `${fullAddress.slice(0, 4)}…${fullAddress.slice(-6)}`
+}

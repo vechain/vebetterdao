@@ -2,6 +2,8 @@ import { Box, Button, Image, Text, useDisclosure, VStack } from "@chakra-ui/reac
 import { useTranslation } from "react-i18next"
 import { CommunityModal } from "./CommunityModal"
 import { useCallback } from "react"
+import { AnalyticsUtils } from "@/utils"
+import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 
 export const JoinCommunity = () => {
   const { t } = useTranslation()
@@ -10,6 +12,7 @@ export const JoinCommunity = () => {
 
   const onJoinClick = useCallback(() => {
     onOpen()
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_COMMUNITY))
   }, [onOpen])
 
   return (

@@ -93,6 +93,19 @@ export const ContractsDetails = () => {
         address={config.x2EarnRewardsPoolContractAddress}
         roles={["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE", "IMPACT_KEY_MANAGER_ROLE"]}
       />
+      <ContractDetailsCard
+        title="VeBetterPassport"
+        address={config.veBetterPassportContractAddress}
+        roles={[
+          "DEFAULT_ADMIN_ROLE",
+          "UPGRADER_ROLE",
+          "SETTINGS_MANAGER_ROLE",
+          "WHITELISTER_ROLE",
+          "ACTION_REGISTRAR_ROLE",
+          "ACTION_SCORE_MANAGER_ROLE",
+          "SIGNALER_ROLE",
+        ]}
+      />
     </Grid>
   )
 }
@@ -132,10 +145,12 @@ const ContractDetailsCard = ({ title, address, roles }: ContractDetailsCardProps
   // Get user roles
   const userHasRoles = useHasRoles(roles, address, account ?? "")
   // iterate over the roles and get the data
-  const userRoles = userHasRoles.map((role, index) => ({
-    hasRole: role.data,
-    name: roles[index],
-  }))
+  const userRoles = useMemo(() => {
+    return userHasRoles.map((role, index) => ({
+      hasRole: role.data,
+      name: roles[index],
+    }))
+  }, [userHasRoles])
 
   return (
     <Card w="full" borderRadius={"2xl"} p={2}>
@@ -148,7 +163,7 @@ const ContractDetailsCard = ({ title, address, roles }: ContractDetailsCardProps
             <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
               {"Address"}
             </Text>
-            <AddressButton address={address} size={"sm"} />
+            <AddressButton address={address} size={"sm"} showAddressIcon={false} />
           </HStack>
 
           <HStack w="full" justify={"space-between"}>

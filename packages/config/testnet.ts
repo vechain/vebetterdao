@@ -19,6 +19,7 @@ const config: AppConfig = {
   treasuryContractAddress: "",
   x2EarnRewardsPoolContractAddress: "",
   nodeManagementContractAddress: "",
+  veBetterPassportContractAddress: "",
   b3trGovernorLibraries: {
     governorClockLogicAddress: "",
     governorConfiguratorAddress: "",
@@ -29,6 +30,17 @@ const config: AppConfig = {
     governorStateLogicAddress: "",
     governorVotesLogicAddress: "",
   },
+  passportLibraries: {
+    passportChecksLogicAddress: "",
+    passportConfiguratorAddress: "",
+    passportEntityLogicAddress: "",
+    passportDelegationLogicAddress: "",
+    passportPersonhoodLogicAddress: "",
+    passportPoPScoreLogicAddress: "",
+    passportSignalingLogicAddress: "",
+    passportWhitelistAndBlacklistLogicAddress: "",
+  },
+  indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
     id: "testnet",

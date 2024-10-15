@@ -85,7 +85,7 @@ export const EditAppPageContent = () => {
       telegramUrl: findUrlByName(appMetadata?.social_urls, "Telegram"),
       youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
       mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
-      ve_world_bannerImage: veWorldBanner || "",
+      ve_world_bannerImage: veWorldBanner,
     },
   })
   const {
@@ -150,6 +150,13 @@ export const EditAppPageContent = () => {
       router.push(`/apps/${app?.id}`)
     }
   }, [isAdminOrModerator, app?.id, router, isAdminOfX2EarnApps])
+
+  // Update the form values when the app fetches the data from blockchain
+  useEffect(() => {
+    if (veWorldBanner) {
+      form.setValue("ve_world_bannerImage", veWorldBanner)
+    }
+  }, [veWorldBanner, form])
 
   if (!isAdminOrModerator && !isAdminOfX2EarnApps) {
     return null

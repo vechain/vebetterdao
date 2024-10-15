@@ -17,6 +17,17 @@ type B3TRGovernorLibraries = {
   governorVotesLogicAddress: string
 }
 
+type PassportLibraries = {
+  passportChecksLogicAddress: string
+  passportConfiguratorAddress: string
+  passportEntityLogicAddress: string
+  passportDelegationLogicAddress: string
+  passportPersonhoodLogicAddress: string
+  passportPoPScoreLogicAddress: string
+  passportSignalingLogicAddress: string
+  passportWhitelistAndBlacklistLogicAddress: string
+}
+
 export type AppConfig = {
   environment: EnvConfig
   basePath?: string
@@ -36,8 +47,11 @@ export type AppConfig = {
   x2EarnAppsContractAddress: string
   x2EarnRewardsPoolContractAddress: string
   nodeManagementContractAddress: string
+  veBetterPassportContractAddress: string
   b3trGovernorLibraries: B3TRGovernorLibraries
+  passportLibraries: PassportLibraries
   nodeUrl: string
+  indexerUrl?: string
   network: Network
 }
 

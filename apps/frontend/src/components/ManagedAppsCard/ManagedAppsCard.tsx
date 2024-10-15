@@ -8,7 +8,7 @@ export const ManagedAppsCard = () => {
   const { t } = useTranslation()
   const { isOpen, onClose, onOpen } = useDisclosure()
   const { data: xApps } = useXApps()
-  const appsRoles = useGetAppAdministrationRole(xApps?.map(xApp => xApp.id) || [])
+  const appsRoles = useGetAppAdministrationRole(xApps?.map?.(xApp => xApp.id) || [])
 
   // filter only apps that are managed by the user and recreate the array by not using UseQueryResult but directly data
   const userAppRoles: AppAdministrationRole[] = appsRoles.reduce((acc, appRole) => {

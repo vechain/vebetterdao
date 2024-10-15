@@ -20,6 +20,8 @@ import { FiArrowUpRight } from "react-icons/fi"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { SeeVoteDetailsModal } from "@/app/rounds/components/AllocationRoundUserVotes/SeeVoteDetailsModal"
 import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 type Props = {
   roundId: string
@@ -77,6 +79,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
       }
     })
 
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CASTING_VOTE_CONFIRM_TX))
     transactionModal.onOpen()
     castAllocationVotes.sendTransaction(appVotesPercentagesToValue)
   }, [castAllocationVotes, transactionModal, votesAtSnapshot, votes])
@@ -120,6 +123,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
         showTryAgainButton
         showExplorerButton
         txId={castAllocationVotes.txReceipt?.meta.txID ?? castAllocationVotes.sendTransactionTx?.txid}
+        isSuccessBeenTrack={true}
       />
 
       <ResponsiveCard>
