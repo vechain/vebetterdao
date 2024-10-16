@@ -7,6 +7,9 @@ import { useDisclosure } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+
+const compactFormatter = getCompactFormatter(2)
 
 export const ClaimVotingRewardsBanner = () => {
   const { t } = useTranslation()
@@ -37,8 +40,6 @@ export const ClaimVotingRewardsBanner = () => {
     claimRewardsMutation.resetStatus()
     handleClaim()
   }, [claimRewardsMutation, handleClaim])
-
-  if (roundsRewardsQuery.data?.total !== 0) return null
 
   return (
     <>
@@ -73,10 +74,10 @@ export const ClaimVotingRewardsBanner = () => {
               <HStack flex={1}>
                 <VStack gap={2} align="stretch" flex={1}>
                   <Text size="xs" color="#3A5798" fontWeight="600">
-                    {t("CLAIM YOUR REWARDS")}
+                    {t("CLAIM YOUR REWARDS NOW! 💰")}
                   </Text>
                   <Heading fontSize="lg" fontWeight="700" color="#0C2D75">
-                    {t("You have B3TR to claim as rewards for voting in governance")}
+                    {t("Congratulations! You have B3TR to claim for casting your vote in governance.")}
                   </Heading>
                 </VStack>
                 <Button
@@ -85,7 +86,9 @@ export const ClaimVotingRewardsBanner = () => {
                   borderRadius="full"
                   leftIcon={<UilGift color="white" />}>
                   <Text fontWeight="500">
-                    {t("Claim your {{b3trToClaim}} B3TR", { b3trToClaim: roundsRewardsQuery.data?.totalFormatted })}
+                    {t("Claim your {{b3trToClaim}} B3TR", {
+                      b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.total ?? 0)),
+                    })}
                   </Text>
                 </Button>
               </HStack>
@@ -95,10 +98,10 @@ export const ClaimVotingRewardsBanner = () => {
             <HStack align="stretch" zIndex={1} position="relative" h="full" w={"full"} alignItems={"center"}>
               <VStack gap={2} align="stretch" justify={"space-between"} h={"full"}>
                 <Text fontSize={12} color="#3A5798" fontWeight="600">
-                  {t("CLAIM YOUR REWARDS")}
+                  {t("CLAIM YOUR REWARDS NOW! 💰")}
                 </Text>
                 <Heading fontSize="18" fontWeight="700" color="#0C2D75">
-                  {t("You have B3TR to claim as rewards for voting in governance")}
+                  {t("Congratulations! You have B3TR to claim for casting your vote in governance.")}
                 </Heading>
                 <Button
                   variant="primaryAction"
@@ -106,7 +109,9 @@ export const ClaimVotingRewardsBanner = () => {
                   borderRadius="full"
                   leftIcon={<UilGift color="white" />}>
                   <Text fontWeight="500">
-                    {t("Claim your {{b3trToClaim}} B3TR", { b3trToClaim: roundsRewardsQuery.data?.totalFormatted })}
+                    {t("Claim your {{b3trToClaim}} B3TR", {
+                      b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.total ?? 0)),
+                    })}
                   </Text>
                 </Button>
               </VStack>
