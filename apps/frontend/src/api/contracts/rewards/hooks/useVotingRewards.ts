@@ -9,8 +9,8 @@ import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
 import Bignumber from "bignumber.js"
 
-const b3trGovernorInterface = VoterRewards__factory.createInterface()
-const voteRewardFragment = b3trGovernorInterface.getFunction("getReward").format("json")
+const voterRewardsInterface = VoterRewards__factory.createInterface()
+const voteRewardFragment = voterRewardsInterface.getFunction("getReward").format("json")
 const getReward = new abi.Function(JSON.parse(voteRewardFragment))
 
 const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
