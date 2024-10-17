@@ -24,14 +24,10 @@ export const DoActionBanner = () => {
 
   const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
 
-  const title = useMemo(() => {
-    if (isUserDelegatee) return t("YOUR DELEGATOR IS LAZY THIS WEEK!")
-    return t("YOU ARE LAZY THIS WEEK!")
-  }, [t, isUserDelegatee])
-
   const description = useMemo(() => {
-    if (isUserDelegatee) return t("Your delegator has to do some Better Actions in our apps to become able to vote!")
-    return t("Do some Better Actions in our apps to become able to vote!")
+    if (isUserDelegatee)
+      return t("Your delegator has to complete Better Actions in our apps and unlock your right to vote.")
+    return t("Complete Better Actions in our apps and unlock your right to vote. Make your impact count!")
   }, [t, isUserDelegatee])
 
   if (isLoadingUserScore) return null
@@ -52,7 +48,7 @@ export const DoActionBanner = () => {
             <HStack flex={1}>
               <VStack gap={2} align="stretch" flex={1}>
                 <Text size="xs" color="#8D6602" fontWeight="600">
-                  {title}
+                  {t("TIME TO STEP UP! 🏃🏼‍♂️")}
                 </Text>
                 <Heading fontSize="lg" fontWeight="700" color="#5F4400">
                   {description}
@@ -78,7 +74,7 @@ export const DoActionBanner = () => {
           <HStack align="center" zIndex={1} position="relative" w="full" h="full" alignItems={"center"}>
             <VStack gap={2} align="stretch" justify={"space-between"} h="full">
               <Text fontSize={12} color="#8D6602" fontWeight="600">
-                {title}
+                {t("TIME TO STEP UP! 🏃🏼‍♂️")}
               </Text>
               <Heading fontSize="18" fontWeight="700" color="#5F4400">
                 {description}

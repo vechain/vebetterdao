@@ -5,6 +5,7 @@ import { DashboardXApps } from "./DashboardXApps"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 import { TokensBalance } from "./TokensBalance"
 import { ActionBanner } from "./ActionBanners"
+import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 
 export const HomePageContent = () => {
   return (
@@ -26,8 +27,8 @@ export const HomePageContent = () => {
           <VStack flex={4.5} justifyContent="stretch" alignItems={"stretch"} spacing={"32px"} data-testid="homepage">
             <Show above="md">
               <TokensBalance showGoToBalance />
+              <CantVoteCard />
             </Show>
-
             <Show above="md">
               <DashboardAllocationRounds />
             </Show>

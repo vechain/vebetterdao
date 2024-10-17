@@ -9,8 +9,8 @@ import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
 import Bignumber from "bignumber.js"
 
-const b3trGovernorInterface = VoterRewards__factory.createInterface()
-const voteRewardFragment = b3trGovernorInterface.getFunction("getReward").format("json")
+const voterRewardsInterface = VoterRewards__factory.createInterface()
+const voteRewardFragment = voterRewardsInterface.getFunction("getReward").format("json")
 const getReward = new abi.Function(JSON.parse(voteRewardFragment))
 
 const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
@@ -35,6 +35,7 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
 
   return useQuery({
     queryKey: getRoundRewardQueryKey("ALL", voter),
+    enabled: !!thor && !!voter && !!rounds.length,
     queryFn: async () => {
       const clauses = rounds.map(roundId => ({
         to: VOTER_REWARDS_CONTRACT,
@@ -47,13 +48,17 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
       let total = 0
       const roundsRewards = res.map((r, index) => {
         const decoded = getReward.decode(r.data)
+        if (r.reverted) throw new Error(`Clause ${index + 1} Reverted with reason ${r.revertReason}`)
         const roundId = rounds[index] as string
         const rewards = decoded[0]
         const formattedRewards = ethers.formatEther(rewards)
 
-        total += parseFloat(formattedRewards)
+        total += parseFloat(rewards)
 
-        queryClient.setQueryData(getRoundRewardQueryKey(roundId, voter), state)
+        queryClient.setQueryData(getRoundRewardQueryKey(roundId, voter), {
+          roundId,
+          rewards: formattedRewards,
+        })
         return {
           roundId,
           rewards,

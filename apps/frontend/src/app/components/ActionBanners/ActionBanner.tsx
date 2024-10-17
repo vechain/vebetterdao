@@ -6,6 +6,7 @@ import {
   useAccountBalance,
   useB3trBalance,
   useCanUserVote,
+  useCurrentAllocationsRoundId,
   useUserScore,
   useVot3Balance,
   useVotingRewards,
@@ -37,10 +38,12 @@ export const ActionBanner = () => {
     setIsSliderStart(_swiper.isBeginning)
   }, [])
 
-  const votingRewardsQuery = useVotingRewards()
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { account } = useWallet()
+
+  const votingRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
   const { data: canUserVote, isLoading: canUserVoteLoading } = useCanUserVote()
 
-  const { account } = useWallet()
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account ?? undefined)
