@@ -51,7 +51,6 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
         if (r.reverted) throw new Error(`Clause ${index + 1} Reverted with reason ${r.revertReason}`)
         const roundId = rounds[index] as string
         const rewards = decoded[0]
-        console.log("rewards", rewards, ethers.formatEther(rewards))
         const formattedRewards = ethers.formatEther(rewards)
 
         total += parseFloat(rewards)
