@@ -32,11 +32,10 @@ export const CastVoteBanner = () => {
             <HStack flex={1}>
               <VStack gap={2} align="stretch" flex={1}>
                 <Text size="xs" color="#3A5798" fontWeight="600">
-                  {t("ROUND")} {"#"}
-                  {roundId}
+                  {t("CAST YOUR VOTE NOW! ⚖️")}
                 </Text>
                 <Heading fontSize="lg" fontWeight="700" color="#0C2D75">
-                  {t("Time to cast your vote and earn rewards!")}
+                  {t("It’s time to make your voice heard in this round and earn exciting rewards!")}
                 </Heading>
               </VStack>
               <Button
@@ -53,11 +52,10 @@ export const CastVoteBanner = () => {
           <HStack align="stretch" zIndex={1} position="relative" h="full" w="full" alignItems={"center"}>
             <VStack gap={2} align="stretch" justify={"space-between"} h={"full"}>
               <Text fontSize={12} color="#3A5798" fontWeight="600">
-                {t("ROUND")} {"#"}
-                {roundId}
+                {t("CAST YOUR VOTE NOW! ⚖️")}
               </Text>
               <Heading fontSize="18" fontWeight="700" color="#0C2D75">
-                {t("Time to cast your vote and earn rewards!")}
+                {t("It’s time to make your voice heard in this round and earn exciting rewards!")}
               </Heading>
               <Button
                 variant="primaryAction"

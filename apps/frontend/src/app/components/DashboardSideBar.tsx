@@ -5,12 +5,14 @@ import { YourBetterActionsCard } from "./YourBetterActionsCard"
 import { TokensBalance } from "./TokensBalance"
 import { Leaderboard } from "./Leaderboard"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
+import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 
 export const DashboardSideBar = () => {
   return (
     <VStack spacing={4} flex={2.5} position="relative" pos={"sticky"} top={24} left={0}>
       <Show below="md">
         <TokensBalance showGoToBalance />
+        <CantVoteCard />
       </Show>
       <YourBetterActionsCard />
       <Leaderboard />
