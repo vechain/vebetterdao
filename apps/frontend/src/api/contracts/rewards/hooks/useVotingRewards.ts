@@ -10,7 +10,7 @@ import { ethers } from "ethers"
 import Bignumber from "bignumber.js"
 
 const voterRewardsInterface = VoterRewards__factory.createInterface()
-const voteRewardFragment = voterRewardsInterface.getFunction("cycleToVoterToTotal").format("json")
+const voteRewardFragment = voterRewardsInterface.getFunction("getReward").format("json")
 const getReward = new abi.Function(JSON.parse(voteRewardFragment))
 
 const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
