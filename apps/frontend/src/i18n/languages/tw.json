@@ -957,5 +957,6 @@
   "Go to your profile to learn more about delegated accounts.": "前往您的個人資料以了解更多關於委派帳戶的資訊。",
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "此帳戶已連結至{{delegatee}}。欲投票，請切換到您的主錢包。",
   "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "您當前的錢包是連結至{{delegatee}}的次要錢包。欲投票，請切換至您的主錢包。您可以在個人資料部分管理連結帳戶。",
-  "You have no linked accounts": "您沒有已連結的帳戶"
+  "You have no linked accounts": "您沒有已連結的帳戶",
+  "VePassport activation from round 18": "從第18輪開始啟用VePassport"
 }

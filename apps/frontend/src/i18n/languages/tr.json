@@ -957,5 +957,6 @@
   "Go to your profile to learn more about delegated accounts.": "Devredilmiş hesaplar hakkında daha fazla bilgi almak için profilinize gidin.",
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "Bu hesap {{delegatee}} ile bağlantılıdır. Oy vermek için lütfen ana cüzdanınıza geçin.",
   "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Şu anki cüzdanınız, {{delegatee}} ile bağlantılı ikincil bir cüzdandır. Oy vermek için lütfen ana cüzdanınıza geçin. Bağlı hesapları profil bölümünde yönetebilirsiniz.",
-  "You have no linked accounts": "Bağlantılı hesabınız yok"
+  "You have no linked accounts": "Bağlantılı hesabınız yok",
+  "VePassport activation from round 18": "18. turdan itibaren VePasaport aktivasyonu"
 }
