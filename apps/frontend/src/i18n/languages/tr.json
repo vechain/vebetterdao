@@ -948,5 +948,13 @@
   "Get more VTHO to be able to vote and perform transactions!": "Oy kullanabilmek ve işlemleri gerçekleştirebilmek için daha fazla VTHO alın!",
   "{{userActions}}/{{totalActions}} action score reached": "{{userActions}}/{{totalActions}} eylem puanı ulaşıldı",
   "{{userActions}}/{{totalActions}} actions performed": "{{userActions}}/{{totalActions}} işlem gerçekleştirildi",
-  "See more details on": "Daha fazla detay için bakınız"
+  "See more details on": "Daha fazla detay için bakınız",
+  "SECONDARY ACCOUNT": "İKİNCİ HESAP",
+  "Check linked accounts": "Bağlı hesapları kontrol et",
+  "Switch to your main account to vote or go to your profile to learn more about linked accounts.": "Oy vermek için ana hesabınıza geçin veya bağlı hesaplar hakkında daha fazla bilgi almak için profilinize gidin.",
+  "You can’t vote because this is a secondary account.": "Oy veremezsiniz çünkü bu ikincil bir hesap.",
+  "You can’t vote because this is a delegated account.": "Oy veremezsiniz çünkü bu devredilmiş bir hesap.",
+  "Go to your profile to learn more about delegated accounts.": "Devredilmiş hesaplar hakkında daha fazla bilgi almak için profilinize gidin.",
+  "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "Bu hesap {{delegatee}} ile bağlantılıdır. Oy vermek için lütfen ana cüzdanınıza geçin.",
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Şu anki cüzdanınız, {{delegatee}} ile bağlantılı ikincil bir cüzdandır. Oy vermek için lütfen ana cüzdanınıza geçin. Bağlı hesapları profil bölümünde yönetebilirsiniz."
 }

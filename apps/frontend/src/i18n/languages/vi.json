@@ -948,5 +948,13 @@
   "Get more VTHO to be able to vote and perform transactions!": "Hãy lấy thêm VTHO để có thể bầu cử và thực hiện các giao dịch!",
   "{{userActions}}/{{totalActions}} action score reached": "{{userActions}}/{{totalActions}} điểm hành động đã đạt được",
   "{{userActions}}/{{totalActions}} actions performed": "{{userActions}}/{{totalActions}} hành động đã thực hiện",
-  "See more details on": "Xem thêm chi tiết tại"
+  "See more details on": "Xem thêm chi tiết tại",
+  "SECONDARY ACCOUNT": "TÀI KHOẢN PHỤ",
+  "Check linked accounts": "Kiểm tra các tài khoản liên kết",
+  "Switch to your main account to vote or go to your profile to learn more about linked accounts.": "Chuyển sang tài khoản chính của bạn để bỏ phiếu hoặc truy cập hồ sơ của bạn để tìm hiểu thêm về các tài khoản liên kết.",
+  "You can’t vote because this is a secondary account.": "Bạn không thể bỏ phiếu vì đây là tài khoản phụ.",
+  "You can’t vote because this is a delegated account.": "Bạn không thể bỏ phiếu vì đây là tài khoản được ủy quyền.",
+  "Go to your profile to learn more about delegated accounts.": "Truy cập hồ sơ của bạn để tìm hiểu thêm về các tài khoản được ủy quyền.",
+  "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "Tài khoản này được liên kết với {{delegatee}}. Để bỏ phiếu, vui lòng chuyển sang ví chính của bạn.",
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Ví hiện tại của bạn là ví phụ liên kết với {{delegatee}}. Để bỏ phiếu, vui lòng chuyển sang ví chính của bạn. Bạn có thể quản lý các tài khoản liên kết trong phần hồ sơ."
 }

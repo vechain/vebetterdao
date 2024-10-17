@@ -948,5 +948,13 @@
   "Get more VTHO to be able to vote and perform transactions!": "Obtenez plus de VTHO pour pouvoir voter et effectuer des transactions !",
   "{{userActions}}/{{totalActions}} action score reached": "Score d'action atteint : {{userActions}}/{{totalActions}}",
   "{{userActions}}/{{totalActions}} actions performed": "{{userActions}}/{{totalActions}} actions effectuées",
-  "See more details on": "Voir plus de détails sur"
+  "See more details on": "Voir plus de détails sur",
+  "SECONDARY ACCOUNT": "COMPTE SECONDAIRE",
+  "Check linked accounts": "Vérifiez les comptes liés",
+  "Switch to your main account to vote or go to your profile to learn more about linked accounts.": "Basculez vers votre compte principal pour voter ou allez dans votre profil pour en savoir plus sur les comptes liés.",
+  "You can’t vote because this is a secondary account.": "Vous ne pouvez pas voter car c'est un compte secondaire.",
+  "You can’t vote because this is a delegated account.": "Vous ne pouvez pas voter car c'est un compte délégué.",
+  "Go to your profile to learn more about delegated accounts.": "Allez dans votre profil pour en savoir plus sur les comptes délégués.",
+  "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "Ce compte est lié à {{delegatee}}. Pour voter, veuillez passer à votre portefeuille principal.",
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Votre portefeuille actuel est un portefeuille secondaire lié à {{delegatee}}. Pour voter, veuillez passer à votre portefeuille principal. Vous pouvez gérer les comptes liés dans la section profil."
 }

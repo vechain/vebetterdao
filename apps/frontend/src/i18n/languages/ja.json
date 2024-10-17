@@ -948,5 +948,13 @@
   "Get more VTHO to be able to vote and perform transactions!": "投票や取引を行うためにもっと多くのVTHOを取得してください！",
   "{{userActions}}/{{totalActions}} action score reached": "{{userActions}}/{{totalActions}} のアクションスコアに達しました",
   "{{userActions}}/{{totalActions}} actions performed": "{{userActions}}/{{totalActions}} のアクションが実行されました",
-  "See more details on": "詳細を見る"
+  "See more details on": "詳細を見る",
+  "SECONDARY ACCOUNT": "副アカウント",
+  "Check linked accounts": "リンクされたアカウントを確認",
+  "Switch to your main account to vote or go to your profile to learn more about linked accounts.": "投票するにはメインアカウントに切り替えるか、プロフィールに移動してリンクされたアカウントの詳細を確認してください。",
+  "You can’t vote because this is a secondary account.": "このアカウントは副アカウントのため、投票できません。",
+  "You can’t vote because this is a delegated account.": "このアカウントは委任されたアカウントのため、投票できません。",
+  "Go to your profile to learn more about delegated accounts.": "プロフィールに移動して委任されたアカウントについて詳しく学んでください。",
+  "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "このアカウントは{{delegatee}}にリンクされています。投票するにはメインウォレットに切り替えてください。",
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "現在のウォレットは{{delegatee}}にリンクされた副ウォレットです。投票するにはメインウォレットに切り替えてください。リンクされたアカウントはプロフィールセクションで管理できます。"
 }

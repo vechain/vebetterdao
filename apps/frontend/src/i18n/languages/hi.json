@@ -948,5 +948,13 @@
   "Get more VTHO to be able to vote and perform transactions!": "मतदान और लेनदेन करने योग्य बनने के लिए अधिक VTHO प्राप्त करें!",
   "{{userActions}}/{{totalActions}} action score reached": "{{userActions}}/{{totalActions}} कार्य स्कोर प्राप्त हुआ",
   "{{userActions}}/{{totalActions}} actions performed": "{{userActions}}/{{totalActions}} कार्य पूरे किए गए",
-  "See more details on": "पर अधिक जानकारी देखें"
+  "See more details on": "पर अधिक जानकारी देखें",
+  "SECONDARY ACCOUNT": "गौण खाता",
+  "Check linked accounts": "लिंक किए गए खातों की जाँच करें",
+  "Switch to your main account to vote or go to your profile to learn more about linked accounts.": "मतदान करने के लिए अपने मुख्य खाते में स्विच करें या लिंक किए गए खातों के बारे में अधिक जानने के लिए अपनी प्रोफ़ाइल पर जाएँ।",
+  "You can’t vote because this is a secondary account.": "आप मतदान नहीं कर सकते क्योंकि यह एक गौण खाता है।",
+  "You can’t vote because this is a delegated account.": "आप मतदान नहीं कर सकते क्योंकि यह एक सौंपी गई खाता है।",
+  "Go to your profile to learn more about delegated accounts.": "सौंपी गई खातों के बारे में अधिक जानने के लिए अपनी प्रोफ़ाइल पर जाएँ।",
+  "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "यह खाता {{delegatee}} से लिंक है। मतदान करने के लिए कृपया अपने मुख्य वॉलेट पर स्विच करें।",
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "आपका वर्तमान वॉलेट एक गौण वॉलेट है जो {{delegatee}} से लिंक है। मतदान करने के लिए कृपया अपने मुख्य वॉलेट पर स्विच करें। आप प्रोफ़ाइल अनुभाग में लिंक किए गए खातों का प्रबंधन कर सकते हैं।"
 }

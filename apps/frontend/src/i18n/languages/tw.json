@@ -948,5 +948,13 @@
   "Get more VTHO to be able to vote and perform transactions!": "獲取更多 VTHO 以便能夠投票和進行交易！",
   "{{userActions}}/{{totalActions}} action score reached": "{{userActions}}/{{totalActions}} 動作分數已達成",
   "{{userActions}}/{{totalActions}} actions performed": "{{userActions}}/{{totalActions}} 個操作已執行",
-  "See more details on": "查看更多詳情"
+  "See more details on": "查看更多詳情",
+  "SECONDARY ACCOUNT": "次要帳戶",
+  "Check linked accounts": "檢查連結帳戶",
+  "Switch to your main account to vote or go to your profile to learn more about linked accounts.": "切換到您的主帳戶以進行投票，或前往您的個人資料以了解有關連結帳戶的更多資訊。",
+  "You can’t vote because this is a secondary account.": "您無法投票，因為這是次要帳戶。",
+  "You can’t vote because this is a delegated account.": "您無法投票，因為這是委派帳戶。",
+  "Go to your profile to learn more about delegated accounts.": "前往您的個人資料以了解更多關於委派帳戶的資訊。",
+  "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "此帳戶已連結至{{delegatee}}。欲投票，請切換到您的主錢包。",
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "您當前的錢包是連結至{{delegatee}}的次要錢包。欲投票，請切換至您的主錢包。您可以在個人資料部分管理連結帳戶。"
 }
