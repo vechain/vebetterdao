@@ -17,7 +17,7 @@ const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
  * @returns {Promise<string>} A promise that resolves to the reward for the given round and voter.
  */
 export const getRoundReward = async (thor: Connex.Thor, address: string, roundId: string): Promise<RoundReward> => {
-  const functionFragment = VoterRewards__factory.createInterface().getFunction("getReward").format("json")
+  const functionFragment = VoterRewards__factory.createInterface().getFunction("cycleToVoterToTotal").format("json")
 
   const res = await thor.account(VOTER_REWARDS_CONTRACT).method(JSON.parse(functionFragment)).call(roundId, address)
 
