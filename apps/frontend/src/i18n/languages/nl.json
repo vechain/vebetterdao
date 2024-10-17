@@ -957,5 +957,6 @@
   "Go to your profile to learn more about delegated accounts.": "Ga naar je profiel om meer te leren over gedelegeerde accounts.",
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "Dit account is gekoppeld aan {{delegatee}}. Om te stemmen, schakel over naar uw hoofdportemonnee.",
   "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Uw huidige portemonnee is een secundaire portemonnee gekoppeld aan {{delegatee}}. Om te stemmen, schakelt u over naar uw hoofdportemonnee. U kunt gekoppelde accounts beheren in het profielgedeelte.",
-  "You have no linked accounts": "U heeft geen gekoppelde accounts"
+  "You have no linked accounts": "U heeft geen gekoppelde accounts",
+  "VePassport activation from round 18": "VePassport-activering vanaf ronde 18"
 }

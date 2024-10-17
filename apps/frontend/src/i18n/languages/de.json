@@ -957,5 +957,6 @@
   "Go to your profile to learn more about delegated accounts.": "Gehen Sie zu Ihrem Profil, um mehr über delegierte Konten zu erfahren.",
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "Dieses Konto ist mit {{delegatee}} verknüpft. Um abzustimmen, wechseln Sie bitte zu Ihrer Hauptgeldbörse.",
   "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Ihr aktuelles Wallet ist ein sekundäres Wallet, das mit {{delegatee}} verknüpft ist. Um abzustimmen, wechseln Sie bitte zu Ihrem Hauptwallet. Sie können verknüpfte Konten im Profilbereich verwalten.",
-  "You have no linked accounts": "Sie haben keine verknüpften Konten"
+  "You have no linked accounts": "Sie haben keine verknüpften Konten",
+  "VePassport activation from round 18": "VePassport-Aktivierung ab Runde 18"
 }
