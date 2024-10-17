@@ -956,5 +956,6 @@
   "You can’t vote because this is a delegated account.": "이 계정은 위임된 계정이므로 투표할 수 없습니다.",
   "Go to your profile to learn more about delegated accounts.": "위임된 계정에 대한 자세한 내용을 보려면 프로필로 이동하세요.",
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "이 계정은 {{delegatee}}에 연결되어 있습니다. 투표하려면 주 지갑으로 전환하세요.",
-  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "현재 지갑은 {{delegatee}}에 연결된 보조 지갑입니다. 투표하려면 주 지갑으로 전환하세요. 연결된 계정은 프로필 섹션에서 관리할 수 있습니다."
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "현재 지갑은 {{delegatee}}에 연결된 보조 지갑입니다. 투표하려면 주 지갑으로 전환하세요. 연결된 계정은 프로필 섹션에서 관리할 수 있습니다.",
+  "You have no linked accounts": "연결된 계정이 없습니다"
 }

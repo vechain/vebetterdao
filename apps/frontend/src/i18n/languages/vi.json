@@ -956,5 +956,6 @@
   "You can’t vote because this is a delegated account.": "Bạn không thể bỏ phiếu vì đây là tài khoản được ủy quyền.",
   "Go to your profile to learn more about delegated accounts.": "Truy cập hồ sơ của bạn để tìm hiểu thêm về các tài khoản được ủy quyền.",
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "Tài khoản này được liên kết với {{delegatee}}. Để bỏ phiếu, vui lòng chuyển sang ví chính của bạn.",
-  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Ví hiện tại của bạn là ví phụ liên kết với {{delegatee}}. Để bỏ phiếu, vui lòng chuyển sang ví chính của bạn. Bạn có thể quản lý các tài khoản liên kết trong phần hồ sơ."
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Ví hiện tại của bạn là ví phụ liên kết với {{delegatee}}. Để bỏ phiếu, vui lòng chuyển sang ví chính của bạn. Bạn có thể quản lý các tài khoản liên kết trong phần hồ sơ.",
+  "You have no linked accounts": "Bạn không có tài khoản liên kết nào"
 }

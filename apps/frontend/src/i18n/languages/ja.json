@@ -956,5 +956,6 @@
   "You can’t vote because this is a delegated account.": "このアカウントは委任されたアカウントのため、投票できません。",
   "Go to your profile to learn more about delegated accounts.": "プロフィールに移動して委任されたアカウントについて詳しく学んでください。",
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "このアカウントは{{delegatee}}にリンクされています。投票するにはメインウォレットに切り替えてください。",
-  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "現在のウォレットは{{delegatee}}にリンクされた副ウォレットです。投票するにはメインウォレットに切り替えてください。リンクされたアカウントはプロフィールセクションで管理できます。"
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "現在のウォレットは{{delegatee}}にリンクされた副ウォレットです。投票するにはメインウォレットに切り替えてください。リンクされたアカウントはプロフィールセクションで管理できます。",
+  "You have no linked accounts": "リンクされたアカウントがありません"
 }

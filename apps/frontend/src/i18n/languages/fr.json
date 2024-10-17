@@ -956,5 +956,6 @@
   "You can’t vote because this is a delegated account.": "Vous ne pouvez pas voter car c'est un compte délégué.",
   "Go to your profile to learn more about delegated accounts.": "Allez dans votre profil pour en savoir plus sur les comptes délégués.",
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "Ce compte est lié à {{delegatee}}. Pour voter, veuillez passer à votre portefeuille principal.",
-  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Votre portefeuille actuel est un portefeuille secondaire lié à {{delegatee}}. Pour voter, veuillez passer à votre portefeuille principal. Vous pouvez gérer les comptes liés dans la section profil."
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Votre portefeuille actuel est un portefeuille secondaire lié à {{delegatee}}. Pour voter, veuillez passer à votre portefeuille principal. Vous pouvez gérer les comptes liés dans la section profil.",
+  "You have no linked accounts": "Vous n'avez pas de comptes liés"
 }

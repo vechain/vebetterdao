@@ -956,5 +956,6 @@
   "You can’t vote because this is a delegated account.": "Du kan inte rösta eftersom detta är ett delegerat konto.",
   "Go to your profile to learn more about delegated accounts.": "Gå till din profil för att lära dig mer om delegerade konton.",
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "Detta konto är länkat till {{delegatee}}. För att rösta, vänligen byt till din huvudplånbok.",
-  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Din nuvarande plånbok är en sekundär plånbok länkad till {{delegatee}}. För att rösta, vänligen byt till din huvudplånbok. Du kan hantera länkade konton i profildelen."
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Din nuvarande plånbok är en sekundär plånbok länkad till {{delegatee}}. För att rösta, vänligen byt till din huvudplånbok. Du kan hantera länkade konton i profildelen.",
+  "You have no linked accounts": "Du har inga länkade konton"
 }

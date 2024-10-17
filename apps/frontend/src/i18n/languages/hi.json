@@ -956,5 +956,6 @@
   "You can’t vote because this is a delegated account.": "आप मतदान नहीं कर सकते क्योंकि यह एक सौंपी गई खाता है।",
   "Go to your profile to learn more about delegated accounts.": "सौंपी गई खातों के बारे में अधिक जानने के लिए अपनी प्रोफ़ाइल पर जाएँ।",
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "यह खाता {{delegatee}} से लिंक है। मतदान करने के लिए कृपया अपने मुख्य वॉलेट पर स्विच करें।",
-  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "आपका वर्तमान वॉलेट एक गौण वॉलेट है जो {{delegatee}} से लिंक है। मतदान करने के लिए कृपया अपने मुख्य वॉलेट पर स्विच करें। आप प्रोफ़ाइल अनुभाग में लिंक किए गए खातों का प्रबंधन कर सकते हैं।"
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "आपका वर्तमान वॉलेट एक गौण वॉलेट है जो {{delegatee}} से लिंक है। मतदान करने के लिए कृपया अपने मुख्य वॉलेट पर स्विच करें। आप प्रोफ़ाइल अनुभाग में लिंक किए गए खातों का प्रबंधन कर सकते हैं।",
+  "You have no linked accounts": "आपके पास कोई लिंक्ड खाता नहीं है"
 }

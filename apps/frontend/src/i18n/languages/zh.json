@@ -956,5 +956,6 @@
   "You can’t vote because this is a delegated account.": "您不能投票，因为这是一个委托账户。",
   "Go to your profile to learn more about delegated accounts.": "前往您的个人资料了解更多关于委托账户的信息。",
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "此账户已链接到{{delegatee}}。要投票，请切换到您的主钱包。",
-  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "您当前的钱包是链接到{{delegatee}}的次要钱包。要投票，请切换到您的主钱包。您可以在个人资料部分管理关联账户。"
+  "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "您当前的钱包是链接到{{delegatee}}的次要钱包。要投票，请切换到您的主钱包。您可以在个人资料部分管理关联账户。",
+  "You have no linked accounts": "您没有关联的账户"
 }
