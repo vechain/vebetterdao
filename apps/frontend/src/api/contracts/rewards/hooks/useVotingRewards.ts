@@ -51,9 +51,12 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
         const rewards = decoded[0]
         const formattedRewards = ethers.formatEther(rewards)
 
-        total += parseFloat(formattedRewards)
+        total += parseFloat(rewards)
 
-        queryClient.setQueryData(getRoundRewardQueryKey(roundId, voter), state)
+        queryClient.setQueryData(getRoundRewardQueryKey(roundId, voter), {
+          roundId,
+          rewards: formattedRewards,
+        })
         return {
           roundId,
           rewards,
