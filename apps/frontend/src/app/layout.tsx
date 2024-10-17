@@ -7,7 +7,7 @@ import dayjs from "dayjs"
 
 import relativeTime from "dayjs/plugin/relativeTime"
 import duration from "dayjs/plugin/duration"
-import { Footer } from "@/components"
+import { AlphaTestnetBanner, Footer } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "@repo/config"
@@ -107,7 +107,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Providers>
           {isProduction && <FreshDeskWidget widgetId={103000007852} />}
           <VStack minH="100vh" gap={0} align="stretch">
-            {/* <AlphaTestnetBanner /> */}
+            <AlphaTestnetBanner />
             <Navbar />
             <Flex flex={1}>
               <Container
