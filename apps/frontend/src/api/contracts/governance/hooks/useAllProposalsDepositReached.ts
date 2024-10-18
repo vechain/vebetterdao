@@ -34,6 +34,7 @@ export const useAllProposalsDepositReached = (proposalsIds: string[]) => {
       const res = await thor.explain(clauses).execute()
 
       const depositsReached = res.map((r, index) => {
+        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
         const decoded = proposalDepositReachedAbi.decode(r.data)
         const proposalId = proposalsIds[index] as string
         const depositReached = decoded[0] as boolean

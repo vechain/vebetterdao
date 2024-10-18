@@ -48,7 +48,7 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
       let total = 0
       const roundsRewards = res.map((r, index) => {
         const decoded = getReward.decode(r.data)
-        if (r.reverted) throw new Error(`Clause ${index + 1} Reverted with reason ${r.revertReason}`)
+        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
         const roundId = rounds[index] as string
         const rewards = decoded[0]
         const formattedRewards = ethers.formatEther(rewards)
