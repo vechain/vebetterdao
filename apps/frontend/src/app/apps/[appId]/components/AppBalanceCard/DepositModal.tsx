@@ -9,14 +9,13 @@ import {
   ModalOverlay,
   ModalCloseButton,
   Input,
-  Image,
   Skeleton,
   Icon,
 } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useDepositToAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
-import { TransactionModal, CustomModalContent } from "@/components"
+import { TransactionModal, CustomModalContent, B3TRIcon } from "@/components"
 import BigNumber from "bignumber.js"
 import { Trans, useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
@@ -185,11 +184,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
                       </Text>
                     </HStack>
                     <HStack w="full">
-                      <Image
-                        src="/images/logo/b3tr_logo_dark.svg"
-                        boxSize={{ base: "30px", md: "36px" }}
-                        alt="B3TR Icon"
-                      />
+                      <B3TRIcon boxSize={"30px"} />
                       {amountInput}
                     </HStack>
                   </VStack>

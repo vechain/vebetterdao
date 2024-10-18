@@ -1,5 +1,5 @@
 import { useB3trBalance, useVot3Balance } from "@/api"
-import { WalletNotConnectedOverlay } from "@/components"
+import { B3TRIcon, WalletNotConnectedOverlay } from "@/components"
 import { ConvertModal } from "@/components/Convert/ConvertModal"
 import { Box, Button, Heading, HStack, Image, Skeleton, Stack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilArrowUpRight, UilExchangeAlt } from "@iconscout/react-unicons"
@@ -71,7 +71,8 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
             {t("B3TR Balance")}
           </Text>
           <HStack>
-            <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={["24px", "28px"]} alt="B3TR Icon" />
+            <B3TRIcon boxSize={["24px", "28px"]} />
+
             <Skeleton isLoaded={!isB3trBalanceLoading}>
               <Heading fontSize={["24px", "28px"]}>
                 {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}

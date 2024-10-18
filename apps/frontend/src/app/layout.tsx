@@ -73,6 +73,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <title>{t("VeBetterDAO")}</title>
         <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance." />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/images/favicon.png" />
         <link rel="apple-touch-icon" sizes="57x57" href="/images/favicon.png" />
         <meta name="msapplication-TileImage" content="/images/favicon.png" />
