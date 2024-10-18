@@ -25,5 +25,6 @@ export const useIsBlacklisted = (address?: string) => {
     contractAddress: VEPASSPORT_CONTRACT,
     method,
     args: [address ?? ""],
+    enabled: !!address,
   })
 }
