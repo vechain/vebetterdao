@@ -1,7 +1,6 @@
 import { ethers } from "ethers"
 import { useMemo } from "react"
-import { useCurrentAllocationsRoundId } from "../../xAllocations"
-import { useUserVotes } from "./useUserVotes"
+import { useUserVotesInAllRounds } from "./useUserVotesInAllRounds"
 import { useXApps } from "./useXApps"
 
 export type AppVotesGiven = {
@@ -16,19 +15,17 @@ export type AppVotesGiven = {
  * @returns An array containing the top voted apps.
  */
 export const useUserTopVotedApps = (user?: string) => {
-  const { data: roundId } = useCurrentAllocationsRoundId()
-
-  const userRoundVotes = useUserVotes(roundId, user)
+  const userRoundVotes = useUserVotesInAllRounds(user)
   const { data: xApps } = useXApps()
 
   const topVotedAppIds = useMemo(() => {
     const appIdToVotes: Record<string, number> = {}
 
-    userRoundVotes.forEach(({ data }) => {
-      const appIds = data?.[0]?.appsIds
+    userRoundVotes.data?.forEach(voteEvent => {
+      const appIds = voteEvent.appsIds
 
       if (appIds && appIds.length > 0) {
-        const voteWeights = data?.[0]?.voteWeights
+        const voteWeights = voteEvent.voteWeights
 
         if (!voteWeights || voteWeights.length !== appIds.length) {
           return
