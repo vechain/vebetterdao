@@ -24,7 +24,7 @@ export const HomePageContent = () => {
           <ActionBanner />
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
-          <VStack flex={4.5} justifyContent="stretch" alignItems={"stretch"} spacing={"32px"} data-testid="homepage">
+          <VStack justifyContent="stretch" alignItems={"stretch"} spacing={"32px"} data-testid="homepage">
             <Show above="md">
               <TokensBalance showGoToBalance />
               <CantVoteCard />
