@@ -99,6 +99,7 @@ export const useMultipleXAppRoundEarnings = (roundId: string, xAppIds: string[])
       const res = await thor.explain(clauses).execute()
 
       const decoded = res.map((r, index) => {
+        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
         const decoded = roundEarningsAbi.decode(r.data)
         const parsedAmount = ethers.formatEther(decoded[0])
         const appId = xAppsInRound[index]?.id as string
