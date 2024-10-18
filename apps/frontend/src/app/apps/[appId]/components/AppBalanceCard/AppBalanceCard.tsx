@@ -7,7 +7,6 @@ import {
   HStack,
   Heading,
   Icon,
-  Image,
   Skeleton,
   Text,
   VStack,
@@ -20,7 +19,7 @@ import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 import { WithdrawModal } from "./WithdrawModal"
 import { DepositModal } from "./DepositModal"
-import { BaseTooltip } from "@/components"
+import { B3TRIcon, BaseTooltip } from "@/components"
 import { FiInfo } from "react-icons/fi"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useIsAppAdmin } from "@/api"
@@ -55,7 +54,7 @@ export const AppBalanceCard = () => {
               {t("Total B3TR Balance")}
             </Text>
             <HStack>
-              <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"30px"} alt="B3TR Icon" />
+              <B3TRIcon boxSize={"30px"} />
               <Skeleton isLoaded={!isBalanceLoading}>
                 <Heading size={{ base: "2xl", md: "xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
               </Skeleton>
