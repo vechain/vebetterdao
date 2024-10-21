@@ -1,8 +1,9 @@
-import { Emissions, Treasury, X2EarnApps } from "../../typechain-types"
+import { Emissions, Treasury, VeBetterPassport, X2EarnApps } from "../../typechain-types"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions } from "../helpers/emissions"
 import { addXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury } from "../helpers/airdrop"
+import { setSecurityLevel, setThreshold, simulateAppInteractions } from "../helpers/veBetterPassport"
 
 const accounts = getTestKeys(13)
 
@@ -57,7 +58,12 @@ const APPS = [
   },
 ]
 
-export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnApps) => {
+export const setupLocalEnvironment = async (
+  emissions: Emissions,
+  treasury: Treasury,
+  x2EarnApps: X2EarnApps,
+  veBetterPassport: VeBetterPassport,
+) => {
   const start = performance.now()
   console.log("================ Setup local environment")
 
@@ -76,6 +82,16 @@ export const setupLocalEnvironment = async (emissions: Emissions, treasury: Trea
   const treasuryAddress = await treasury.getAddress()
   const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
+
+  // VeBetterPassport
+  // set all apps to LOW security level
+  await setSecurityLevel(veBetterPassport, admin, APPS)
+
+  // simulate app interactions
+  await simulateAppInteractions(veBetterPassport, admin, seedAccounts, APPS)
+
+  // set threshold to 300
+  await setThreshold(veBetterPassport, admin, 300)
 
   const end = new Date(performance.now() - start)
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
