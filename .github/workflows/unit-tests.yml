@@ -161,7 +161,7 @@ jobs:
           target: "packages/contracts/"
           solc-version: "0.8.20"
           fail-on: none
-          slither-args: --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown slither-report.md --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+          slither-args: --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --print human-summary --markdown slither-report.md --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
           
       - name: Upload Slither report
         uses: actions/upload-artifact@v3
