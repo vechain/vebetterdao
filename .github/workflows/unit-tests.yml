@@ -139,8 +139,14 @@ jobs:
           node-version-file: .nvmrc
           cache: "yarn"
 
+      - name: Clean previous build
+        run: yarn clean
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+
+      - name: Compile contracts
+        run: npx hardhat contracts:compile
 
       - name: Cache Solidity compilers
         uses: actions/cache@v3
