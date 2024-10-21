@@ -84,7 +84,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
     const progress = (forVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
 
     return Number(progress) / 100 // Return as a number with two decimal places
-  }, [proposalVotes])
+  }, [proposalVotes, forVotes, totalVotes])
 
   const quorumProgress = useMemo(() => {
     const compactQuorum = compactFormatter.format(Number(quorum))
@@ -117,7 +117,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
         {compactQuorum} {t("votes needed to reach quorum")}
       </Heading>
     )
-  }, [quorum, quorumLoading, proposalVotesLoading, t, isIncoming, estimatedStartTime])
+  }, [quorum, quorumLoading, proposalVotesLoading, t, isIncoming, estimatedStartTime, totalVotes])
 
   return (
     <Box w="80%" alignSelf={"center"}>

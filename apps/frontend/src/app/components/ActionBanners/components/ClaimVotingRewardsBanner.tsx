@@ -9,7 +9,7 @@ import { useClaimRewards } from "@/hooks/useClaimRewards"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
-const compactFormatter = getCompactFormatter(2)
+const compactFormatter = getCompactFormatter(4)
 
 export const ClaimVotingRewardsBanner = () => {
   const { t } = useTranslation()
@@ -87,7 +87,7 @@ export const ClaimVotingRewardsBanner = () => {
                   leftIcon={<UilGift color="white" />}>
                   <Text fontWeight="500">
                     {t("Claim your {{b3trToClaim}} B3TR", {
-                      b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.total ?? 0)),
+                      b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
                     })}
                   </Text>
                 </Button>

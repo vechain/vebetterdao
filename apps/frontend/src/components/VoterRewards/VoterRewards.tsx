@@ -99,7 +99,7 @@ export const VoterRewards: React.FC = () => {
             <Button
               zIndex={2}
               mt={2}
-              isDisabled={roundsRewardsQuery.data?.total !== 0}
+              isDisabled={Number(roundsRewardsQuery.data?.total ?? 0) === 0}
               isLoading={isClaimRewardsLoading}
               onClick={handleClaim}
               variant={"primaryAction"}

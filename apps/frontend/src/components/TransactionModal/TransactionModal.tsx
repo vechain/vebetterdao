@@ -159,6 +159,7 @@ export const TransactionModal = ({
     socialDescriptionEncoded,
     b3trAmount,
     isAppDeposit,
+    isSuccessBeenTrack,
   ])
   if (!modalContent) return null
 
