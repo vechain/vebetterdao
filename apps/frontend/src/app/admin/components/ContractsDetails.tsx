@@ -150,7 +150,7 @@ const ContractDetailsCard = ({ title, address, roles }: ContractDetailsCardProps
       hasRole: role.data,
       name: roles[index],
     }))
-  }, [userHasRoles])
+  }, [userHasRoles, roles])
 
   return (
     <Card w="full" borderRadius={"2xl"} p={2}>
