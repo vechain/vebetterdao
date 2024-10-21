@@ -1,6 +1,11 @@
 import { getConfig } from "@repo/config"
 const config = getConfig()
 
+// function that returns the contract from the list by the address
+export const getContractByAddress = (address: string) => {
+  return CONTRACT_LIST.find(contract => contract.contractAddress === address)
+}
+
 export const CONTRACT_LIST = [
   {
     name: "B3TR",
