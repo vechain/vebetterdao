@@ -958,5 +958,15 @@
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "此帳戶已連結至{{delegatee}}。欲投票，請切換到您的主錢包。",
   "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "您當前的錢包是連結至{{delegatee}}的次要錢包。欲投票，請切換至您的主錢包。您可以在個人資料部分管理連結帳戶。",
   "You have no linked accounts": "您沒有已連結的帳戶",
-  "VePassport activation from round 18": "從第18輪開始啟用VePassport"
+  "VePassport activation from round 18": "從第18輪開始啟用VePassport",
+  "You can earn actions by using the dApps.": "您可以通过使用dApps获得action。",
+  "You can’t vote because you have no voting power.": "您无法投票，因为您没有投票权。",
+  "You can't vote because you haven't accumulated enough actions.": "您无法投票，因为您未累积足够的action。",
+  "Snapshot is taken every sunday at 23:59 UTC. You can earn actions by using the dApps.": "快照在每周日23:59（UTC）拍摄。您可以通过使用dApps获得action。",
+  "{{value}}": "{{value}}",
+  "Error {{value}}": "错误 {{value}}",
+  "Something went wrong. Let’s try that again!": "出了点问题。让我们再试一次！",
+  "Error 404": "错误 404",
+  "We can't find what you're looking for. Let's head back and try again!": "我们找不到您正在寻找的内容。让我们回去再试一次！",
+  "Go back home": "返回主页"
 }

@@ -958,5 +958,15 @@
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "Bu hesap {{delegatee}} ile bağlantılıdır. Oy vermek için lütfen ana cüzdanınıza geçin.",
   "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Şu anki cüzdanınız, {{delegatee}} ile bağlantılı ikincil bir cüzdandır. Oy vermek için lütfen ana cüzdanınıza geçin. Bağlı hesapları profil bölümünde yönetebilirsiniz.",
   "You have no linked accounts": "Bağlantılı hesabınız yok",
-  "VePassport activation from round 18": "18. turdan itibaren VePasaport aktivasyonu"
+  "VePassport activation from round 18": "18. turdan itibaren VePasaport aktivasyonu",
+  "You can earn actions by using the dApps.": "dApp'leri kullanarak aksiyonlar kazanabilirsiniz.",
+  "You can’t vote because you have no voting power.": "Oy kullanamazsınız çünkü oy hakkınız yok.",
+  "You can't vote because you haven't accumulated enough actions.": "Oy kullanamazsınız çünkü yeterli aksiyon biriktirmediniz.",
+  "Snapshot is taken every sunday at 23:59 UTC. You can earn actions by using the dApps.": "Her Pazar 23:59 UTC'de anlık görüntü alınır. dApp'leri kullanarak aksiyonlar kazanabilirsiniz.",
+  "{{value}}": "{{değer}}",
+  "Error {{value}}": "Hata {{değer}}",
+  "Something went wrong. Let’s try that again!": "Bir şeyler yanlış gitti. Tekrar deneyelim!",
+  "Error 404": "Hata 404",
+  "We can't find what you're looking for. Let's head back and try again!": "Aradığınızı bulamıyoruz. Geri dönelim ve tekrar deneyelim!",
+  "Go back home": "Ana sayfaya dön"
 }

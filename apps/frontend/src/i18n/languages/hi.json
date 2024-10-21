@@ -958,5 +958,15 @@
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "यह खाता {{delegatee}} से लिंक है। मतदान करने के लिए कृपया अपने मुख्य वॉलेट पर स्विच करें।",
   "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "आपका वर्तमान वॉलेट एक गौण वॉलेट है जो {{delegatee}} से लिंक है। मतदान करने के लिए कृपया अपने मुख्य वॉलेट पर स्विच करें। आप प्रोफ़ाइल अनुभाग में लिंक किए गए खातों का प्रबंधन कर सकते हैं।",
   "You have no linked accounts": "आपके पास कोई लिंक्ड खाता नहीं है",
-  "VePassport activation from round 18": "गोल 18 से वेपासपोर्ट सक्रियकरण"
+  "VePassport activation from round 18": "गोल 18 से वेपासपोर्ट सक्रियकरण",
+  "You can earn actions by using the dApps.": "आप dApps का उपयोग करके कार्य प्राप्त कर सकते हैं।",
+  "You can’t vote because you have no voting power.": "आप मतदान नहीं कर सकते क्योंकि आपके पास कोई मतदान शक्ति नहीं है।",
+  "You can't vote because you haven't accumulated enough actions.": "आप मतदान नहीं कर सकते क्योंकि आपने पर्याप्त कार्य संचित नहीं किए हैं।",
+  "Snapshot is taken every sunday at 23:59 UTC. You can earn actions by using the dApps.": "हर रविवार को 23:59 UTC पर स्नैपशॉट लिया जाता है। आप dApps का उपयोग करके कार्य प्राप्त कर सकते हैं।",
+  "{{value}}": "{{मान}}",
+  "Error {{value}}": "त्रुटि {{मान}}",
+  "Something went wrong. Let’s try that again!": "कुछ गलत हो गया। चलिए इसे फिर से कोशिश करते हैं!",
+  "Error 404": "त्रुटि 404",
+  "We can't find what you're looking for. Let's head back and try again!": "हम वह नहीं ढूँढ पा रहे हैं जो आप ढूँढ रहे हैं। चलिए वापस जाते हैं और फिर से कोशिश करते हैं!",
+  "Go back home": "घर वापस जाएं"
 }
