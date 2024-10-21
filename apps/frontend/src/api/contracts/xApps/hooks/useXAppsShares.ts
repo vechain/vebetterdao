@@ -49,6 +49,7 @@ export const useXAppsShares = (apps: string[], roundId?: string) => {
       const res = await thor.explain(clauses).execute()
 
       const votes = res.map((r, index) => {
+        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
         const decoded = functionAbi.decode(r.data)
 
         return {

@@ -1,4 +1,4 @@
-import { Image, ImageProps, useColorModeValue } from "@chakra-ui/react"
+import { Image, ImageProps } from "@chakra-ui/react"
 import React from "react"
 
 type Props = ImageProps & {
@@ -7,15 +7,14 @@ type Props = ImageProps & {
 
 const paths = {
   light: "/images/logo/b3tr_logo.svg",
-  dark: "/images/logo/b3tr_logo_dark.svg",
+  dark: "/images/logo/b3tr_logo_dark.png",
 }
 
 /**
  * B3TRIcon is the icon for the B3TR token
  */
-export const B3TRIcon: React.FC<Props> = ({ colorVariant, ...props }) => {
-  const logo = useColorModeValue(paths.light, paths.dark)
-  const logoVariant = colorVariant ? paths[colorVariant] : logo
+export const B3TRIcon: React.FC<Props> = ({ colorVariant = "dark", ...props }) => {
+  const logoVariant = paths[colorVariant]
 
   return <Image src={logoVariant} alt="B3TR icon" {...props} />
 }

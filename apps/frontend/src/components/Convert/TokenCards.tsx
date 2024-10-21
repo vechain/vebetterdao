@@ -5,6 +5,7 @@ import { TokenBalance, useB3trBalance, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
+import { B3TRIcon } from "../Icons"
 
 type Props = {
   amount: string
@@ -142,11 +143,7 @@ export const TokenCards = ({
                 </HStack>
                 <HStack w="full" data-testid={"B3TR"}>
                   <HStack flex={1}>
-                    <Image
-                      src="/images/logo/b3tr_logo_dark.svg"
-                      boxSize={{ base: "30px", md: "36px" }}
-                      alt="B3TR Icon"
-                    />
+                    <B3TRIcon boxSize={["30px", "36px"]} />
                     {amountInput}
                   </HStack>
                   {isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { MdArrowOutward } from "react-icons/md"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
+import { B3TRIcon } from "@/components/Icons"
 
 export type ConfirmationModalContentProps = {
   b3trBalanceAfter?: string
@@ -73,7 +74,7 @@ export const SuccessConvertModalContent = ({
             </Text>
 
             <HStack>
-              <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"20px"} alt="B3TR Icon" />
+              <B3TRIcon boxSize={"20px"} />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
                 {compactFormatter.format(Number(b3trBalanceAfter))}
               </Text>

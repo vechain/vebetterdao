@@ -15,7 +15,7 @@ export const NoLinkedAccount = () => {
       <VStack gap={4}>
         <PeopleIcon color="#757575" size="105" />
         <Heading fontSize="xl" fontWeight="500" textAlign="center">
-          {t("You have not any linked account")}
+          {t("You have no linked accounts")}
         </Heading>
         <Text fontSize="sm" color="#757575" textAlign="center">
           {t("You can merge several secondary accounts with your main one")}
