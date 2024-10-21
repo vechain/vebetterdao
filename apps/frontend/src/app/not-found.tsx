@@ -13,7 +13,7 @@ export default function Custom404() {
   }
 
   return (
-    <VStack h="full" alignSelf="start" alignItems="start" w={["100%", "100%", "100%", "50%"]}>
+    <VStack alignSelf="start" alignItems="start" w={["100%", "100%", "100%", "50%"]}>
       <Image boxSize={"190px"} src="/images/not-found-404.svg" alt="404" />
       <Text color="#6A6A6A">{t("Error 404")}</Text>
       <Heading>{t("We can't find what you're looking for. Let's head back and try again!")}</Heading>

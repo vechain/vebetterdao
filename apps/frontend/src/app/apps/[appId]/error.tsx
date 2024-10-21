@@ -17,7 +17,7 @@ export default function CustomError({ error }: CustomErrorProps) {
   }
 
   return (
-    <VStack h="full" alignItems="start" alignSelf="start" w={["100%", "100%", "100%", "50%"]}>
+    <VStack alignItems="start" alignSelf="start" w={["100%", "100%", "100%", "50%"]}>
       <Image boxSize={"190px"} src="/images/error-to-define.svg" alt="error" />
       <Text color="#6A6A6A">{t("{{value}}", { value: error })}</Text>
       <Heading>{t("Something went wrong. Let’s try that again!")}</Heading>
