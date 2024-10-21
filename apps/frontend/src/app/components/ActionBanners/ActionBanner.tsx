@@ -65,7 +65,7 @@ export const ActionBanner = () => {
   const { isUserQualified, isLoading: isScoreLoading } = useUserScore()
 
   const showDoActionBanner = !!account && !isScoreLoading && !isUserQualified
-  const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && votingRewardsQuery.data.total !== 0
+  const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
   const showCastVoteBanner = !!account && !canUserVoteLoading && canUserVote
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
 

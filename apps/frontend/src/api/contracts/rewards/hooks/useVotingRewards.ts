@@ -7,14 +7,13 @@ import { VoterRewards__factory } from "@repo/contracts"
 import { abi } from "thor-devkit"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
-import Bignumber from "bignumber.js"
+import { BigNumber } from "bignumber.js"
 
 const voterRewardsInterface = VoterRewards__factory.createInterface()
 const voteRewardFragment = voterRewardsInterface.getFunction("getReward").format("json")
 const getReward = new abi.Function(JSON.parse(voteRewardFragment))
 
 const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
-const DECIMAL_PLACES = 4
 /**
  * useVotingRewards is a custom hook that fetches the voting rewards for a given round and voter.
  * It uses the mutli-clause reading to fetch the data in parallel for all rounds up to the current one.
@@ -45,15 +44,15 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
 
       const res = await thor.explain(clauses).execute()
 
-      let total = 0
+      let total = new BigNumber(0)
       const roundsRewards = res.map((r, index) => {
         const decoded = getReward.decode(r.data)
         if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
         const roundId = rounds[index] as string
-        const rewards = decoded[0]
+        const rewards = decoded[0] as string
         const formattedRewards = ethers.formatEther(rewards)
 
-        total += parseFloat(rewards)
+        total = total.plus(rewards)
 
         queryClient.setQueryData(getRoundRewardQueryKey(roundId, voter), {
           roundId,
@@ -66,10 +65,10 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
         }
       })
 
-      const totalFormatted = new Bignumber(total).decimalPlaces(DECIMAL_PLACES, Bignumber.ROUND_DOWN).toString()
+      const totalFormatted = ethers.formatEther(total.toFixed())
 
       return {
-        total,
+        total: total.toFixed(),
         totalFormatted,
         roundsRewards,
       }
