@@ -161,26 +161,16 @@ jobs:
           target: "packages/contracts/"
           solc-version: "0.8.20"
           fail-on: none
-          slither-args: --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --print human-summary --markdown slither-report.md --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
+          slither-args: --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
       
-      - name: Check for slither-report.md
-        run: ls -al
-
-      - name: Upload Slither report
-        uses: actions/upload-artifact@v3
-        with:
-          name: slither-report
-          path: slither-report.md
-
       - name: Create/update checklist as PR comment
         uses: actions/github-script@v7
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && steps.contract_changes.outputs.src == 'true'
         env:
           REPORT: ${{ steps.slither.outputs.stdout }}
         with:
           script: |
-            const fs = require('fs');
-            const script = require('.github/scripts/comment');
-            const header = '# Slither report';
-            const body = fs.readFileSync('slither-report.md', 'utf8');
-            await script({ github, context, header, body });
+            const script = require('.github/scripts/comment')
+            const header = '# Slither report'
+            const body = process.env.REPORT
+            await script({ github, context, header, body })
