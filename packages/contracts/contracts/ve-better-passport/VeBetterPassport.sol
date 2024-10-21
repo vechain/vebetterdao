@@ -585,11 +585,9 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     PassportPoPScoreLogic.setDecayRate($, _decayRate);
   }
 
-  /// @notice Delegate the personhood to another address
-  /// The entity must sign a message where he authorizes the passport to request the delegation:
-  /// this is done to avoid that a malicious user delegates the personhood to another user without his consent.
-  /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
-  /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
+  /// @notice Link an account (which will become an entity) to a passport (an address that is not an enitity)
+  /// After linking, the scores of the enitity will be stored to the linked account (passport)
+  /// Balance is not transferred and the entity will not be able to vote after linking.
   /// @param entity - the entity address
   /// @param deadline - the deadline for the signature
   /// @param signature - the signature of the delegation
@@ -598,10 +596,10 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     PassportEntityLogic.linkEntityToPassportWithSignature($, entity, deadline, signature);
   }
 
-  /// @notice Delegate the personhood to another address
+  /// @notice Link an account (which will become an entity) to a passport (an address that is not an enitity)
+  /// After linking, the scores of the enitity will be stored to the linked account (passport)
+  /// Balance is not transferred and the entity will not be able to vote after linking.
   /// @dev The passport must accept the delegation
-  /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
-  /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
   function linkEntityToPassport(address passport) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportEntityLogic.linkEntityToPassport($, passport);
