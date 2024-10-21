@@ -58,7 +58,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { data: threshold } = useVotingThreshold()
 
   const totalVotesCast = useMemo(() => {
-    return userVotes?.voteWeights.reduce((acc, curr) => acc + Number(ethers.formatEther(curr)), 0) ?? 0
+    return userVotes?.voteWeights?.reduce((acc, curr) => acc + Number(ethers.formatEther(curr)), 0) ?? 0
   }, [userVotes?.voteWeights])
 
   const { data: roundApps, isLoading: roundAppsLoading } = useRoundXApps(roundId)
