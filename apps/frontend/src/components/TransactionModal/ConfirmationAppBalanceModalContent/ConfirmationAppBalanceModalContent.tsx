@@ -1,8 +1,9 @@
-import { VStack, Text, Image, HStack } from "@chakra-ui/react"
+import { VStack, Text, HStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import loadingAnimation from "./loading.json"
 import Lottie from "react-lottie"
+import { B3TRIcon } from "@/components/Icons"
 
 export type ConfirmationAppBalanceModalContentProps = {
   b3trBalanceAfter?: string
@@ -52,7 +53,7 @@ export const ConfirmationAppBalanceModalContent = ({
             </Text>
 
             <HStack>
-              <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"20px"} alt="B3TR Icon" />
+              <B3TRIcon boxSize={"20px"} />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
                 {compactFormatter.format(Number(b3trAmount))}
               </Text>
@@ -66,7 +67,7 @@ export const ConfirmationAppBalanceModalContent = ({
             </Text>
 
             <HStack>
-              <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"20px"} alt="B3TR Icon" />
+              <B3TRIcon boxSize={"20px"} />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
                 {compactFormatter.format(Number(b3trBalanceAfter))}
               </Text>

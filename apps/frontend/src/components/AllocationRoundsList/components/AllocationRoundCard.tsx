@@ -1,4 +1,4 @@
-import { RoundCreated, useAllocationAmount, useAllocationsRound } from "@/api"
+import { useAllocationAmount, useAllocationsRound } from "@/api"
 import {
   Box,
   Card,
@@ -23,21 +23,17 @@ import { B3TRIcon } from "@/components/Icons"
 import { AllocationRoundParticipatingXApps } from "./AllocationRoundParticipatingXApps"
 
 type Props = {
-  round: RoundCreated
+  roundId: string
 }
 
 const compactFormatter = getCompactFormatter()
 
-export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
+export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
   const { t } = useTranslation()
   const router = useRouter()
 
-  const { data: allocationRound, isLoading } = useAllocationsRound(round.roundId)
-  const {
-    data: roundAmount,
-    isLoading: roundAmountLoading,
-    error: roundAmountError,
-  } = useAllocationAmount(round.roundId)
+  const { data: allocationRound, isLoading } = useAllocationsRound(roundId)
+  const { data: roundAmount, isLoading: roundAmountLoading, error: roundAmountError } = useAllocationAmount(roundId)
 
   const totalAmount = useMemo(() => {
     if (!roundAmount) return 0
@@ -45,7 +41,7 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
   }, [roundAmount])
 
   const onRoundClick = () => {
-    router.push(`/rounds/${round.roundId}`)
+    router.push(`/rounds/${roundId}`)
   }
   const isActive = useMemo(() => {
     return allocationRound?.state === 0 && allocationRound?.voteEndTimestamp?.isAfter()
@@ -75,14 +71,14 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}
-      data-testid={`round-card-#${round.roundId}`}>
+      data-testid={`round-card-#${roundId}`}>
       <CardBody py="20px">
         <HStack justify={"space-between"} w="full">
           <Stack w="full" spacing={1} flex={2}>
             <HStack spacing={2} w="fit-content" justify="space-between">
               <AllocationStateBadge
-                roundId={round.roundId}
-                data-testid={`round-card-#${round.roundId}`}
+                roundId={roundId}
+                data-testid={`round-card-#${roundId}`}
                 renderBadge={false}
                 renderIcon={isActive}
               />
@@ -99,9 +95,9 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
             </HStack>
 
             <HStack mt={0.5} w="full" justify="space-between" color={cardTextColor}>
-              <Heading as="h3" fontSize="20px" fontWeight={700} data-testid={"round-title"}>
+              <Heading as="h3" fontSize="20px" fontWeight={700}>
                 {t("Round #{{round}}", {
-                  round: round.roundId,
+                  round: roundId,
                 })}
               </Heading>
             </HStack>
@@ -136,14 +132,9 @@ export const AllocationRoundCard: React.FC<Props> = ({ round }) => {
                 </Skeleton>
               </Box>
 
-              <AllocationRoundParticipatingXApps roundId={round.roundId} />
+              <AllocationRoundParticipatingXApps roundId={roundId} />
             </Stack>
-            <Icon
-              as={FaAngleRight}
-              boxSize={"24px"}
-              color={cardTextColor}
-              data-testid={`round-link-#${round.roundId}`}
-            />
+            <Icon as={FaAngleRight} boxSize={"24px"} color={cardTextColor} data-testid={`round-link-#${roundId}`} />
           </HStack>
         </HStack>
       </CardBody>

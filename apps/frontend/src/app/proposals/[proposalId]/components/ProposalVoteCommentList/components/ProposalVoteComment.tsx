@@ -1,4 +1,4 @@
-import { ProposalVoteEvent, VoteType } from "@/api"
+import { ProposalComment, VoteType } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { Card, Divider, HStack, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter, humanAddress } from "@repo/utils/FormattingUtils"
@@ -10,11 +10,11 @@ import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 const compactFormatter = getCompactFormatter(2)
 
-export const ProposalVoteComment = ({ vote }: { vote: ProposalVoteEvent }) => {
+export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
   const { t } = useTranslation()
-  const { name: accountName } = useWalletName(vote.account)
+  const { name: accountName } = useWalletName(vote.voter)
 
-  const voteType = Number(vote.support) as VoteType
+  const voteType = vote.support
 
   const borderColor = useMemo(
     () =>
@@ -58,14 +58,14 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalVoteEvent }) => {
   const votePower = ethers.formatEther(BigInt(vote.power || 0))
 
   return (
-    <Card key={vote.account} p={"24px"} borderRadius={"6px"} bg={bgColor} borderColor={borderColor}>
+    <Card key={vote.voter} p={"24px"} borderRadius={"6px"} bg={bgColor} borderColor={borderColor}>
       <VStack alignItems="stretch" gap={4}>
         <HStack justify={"space-between"} align={"baseline"}>
           <Text color={textColor} fontSize={"20px"} fontWeight={600}>
             {voteLabel}
           </Text>
           <Text color={textColor} fontSize={"14px"}>
-            {dayjs(vote.blockMeta.blockTimestamp * 1000).fromNow()}
+            {dayjs(vote.blockTimestamp * 1000).fromNow()}
           </Text>
         </HStack>
         {vote.reason && <Text color={textColor}>{vote.reason}</Text>}
@@ -79,10 +79,10 @@ export const ProposalVoteComment = ({ vote }: { vote: ProposalVoteEvent }) => {
               </Text>
             </HStack>
           </VStack>
-          <HStack align={"center"}>
-            <AddressIcon address={vote.account} boxSize={4} rounded={"full"} />
-            <Text fontWeight={"400"}>{accountName || humanAddress(vote.account, 4, 6)}</Text>
-          </HStack>
+        </HStack>
+        <HStack align={"center"}>
+          <AddressIcon address={vote.voter} boxSize={4} rounded={"full"} />
+          <Text fontWeight={"400"}>{accountName || humanAddress(vote.voter, 4, 6)}</Text>
         </HStack>
       </VStack>
     </Card>

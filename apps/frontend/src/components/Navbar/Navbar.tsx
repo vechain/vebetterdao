@@ -7,14 +7,16 @@ import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { Routes } from "./Routes"
+import { useHideOnScroll } from "@/hooks"
 
 export const Navbar: React.FC = () => {
-  // ssr-friendly media query with fallback
   const [isLargerThan1200] = useMediaQuery("(min-width: 1200px)")
 
   const { account } = useWallet()
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
   const { isAdmin } = useAccountPermissions(account ?? "")
+
+  const isNavbarVisible = useHideOnScroll()
 
   // Filter routes based on user's role and if there are any allocation rounds
   const routesToRender = useMemo(
@@ -24,10 +26,11 @@ export const Navbar: React.FC = () => {
           route.isVisible &&
           (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
           (route.name === "Admin" ? isAdmin : true) &&
-          (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true)
+          (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true) &&
+          (route.name === "Profile" ? isLargerThan1200 && !!account : true)
         )
       }),
-    [allocationRoundsEvents, isAdmin],
+    [account, allocationRoundsEvents?.created?.length, isAdmin, isLargerThan1200],
   )
 
   const parsedRoutesToRender = useMemo(() => {
@@ -37,7 +40,16 @@ export const Navbar: React.FC = () => {
 
   const bg = useColorModeValue("#F7F7F7", "#131313")
   return (
-    <Box bg={bg} px={0} position={"sticky"} top={0} zIndex={10} h={"auto"} w={"full"}>
+    <Box
+      bg={bg}
+      px={0}
+      position={"sticky"}
+      top={0}
+      zIndex={2}
+      h={"auto"}
+      w={"full"}
+      transition="transform 0.3s ease-in-out"
+      transform={isNavbarVisible ? "translateY(0)" : "translateY(-100%)"}>
       <HStack
         justify={"space-between"}
         p={isLargerThan1200 ? "16px 48px" : "8px 20px"}

@@ -1,6 +1,7 @@
 import {
   useAllocationsRound,
   useAllocationsRoundState,
+  useCanUserVote,
   useGetVotesOnBlock,
   useHasVotedInRound,
   useRoundXApps,
@@ -32,6 +33,8 @@ import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
 import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
 import { useRouter } from "next/navigation"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
@@ -55,7 +58,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { data: threshold } = useVotingThreshold()
 
   const totalVotesCast = useMemo(() => {
-    return userVotes?.voteWeights.reduce((acc, curr) => acc + Number(ethers.formatEther(curr)), 0) ?? 0
+    return userVotes?.voteWeights?.reduce((acc, curr) => acc + Number(ethers.formatEther(curr)), 0) ?? 0
   }, [userVotes?.voteWeights])
 
   const { data: roundApps, isLoading: roundAppsLoading } = useRoundXApps(roundId)
@@ -76,12 +79,11 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   }, [data?.voteEndTimestamp, isFinished])
 
   const navigateToVote = useCallback(() => {
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CASTING_VOTE))
     router.push(`/rounds/${roundId}/vote`)
   }, [router, roundId])
 
-  const shouldSeeVoteButton = useMemo(() => {
-    return !isFinished && !!account && hasVoted === false && hasVotesAtSnapshot
-  }, [isFinished, account, hasVoted, hasVotesAtSnapshot])
+  const { data: shouldSeeVoteButton, isLoading: shouldSeeVoteButtonLoading } = useCanUserVote()
 
   const yourVoteText = useMemo(() => {
     if (hasVoted) return compactFormatter.format(totalVotesCast)
@@ -175,7 +177,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                   </Box>
                 )}
               </Stack>
-              {shouldSeeVoteButton && (
+              {!shouldSeeVoteButtonLoading && shouldSeeVoteButton && (
                 <Button
                   data-testid="cast-your-vote-button"
                   variant={"primaryAction"}

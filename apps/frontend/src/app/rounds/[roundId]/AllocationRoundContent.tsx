@@ -11,6 +11,7 @@ import { redirect } from "next/navigation"
 import { AllocationXAppsVotesCard } from "../components/AllocationXAppsVotesCard"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { AllocationVoterRewards } from "../components/AllocationVoterRewards"
+import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 
 type Props = {
   roundId: string
@@ -48,6 +49,7 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
   return (
     <VStack w="full" spacing={8} data-testid={`allocation-${roundId}-page`}>
       <AllocationRoundNavbar roundId={roundId} />
+      <CantVoteCard />
       <AllocationRoundHeaderCard roundId={roundId} />
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full" alignItems={"flex-start"}>
         <GridItem colSpan={[3, 3, 2]} w="full">

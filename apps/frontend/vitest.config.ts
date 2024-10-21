@@ -7,6 +7,11 @@ import { resolve } from "path"
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   test: {
+    server: {
+      deps: {
+        inline: ["react-tweet"],
+      },
+    },
     coverage: {
       provider: "istanbul", // or 'v8'
       reporter: ["lcov"],

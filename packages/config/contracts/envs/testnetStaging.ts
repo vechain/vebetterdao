@@ -125,5 +125,14 @@ export function createTestnetStagingConfig() {
       "plastic",
       "trees_planted",
     ],
+
+    // VeBetterPassport
+    VEPASSPORT_BOT_SIGNALING_THRESHOLD: 2, // Address must be signaled more than X times to be considered a bot
+    VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE: 12,
+    VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL: 2,
+    VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE: 20,
+    VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE: 20,
+    VEPASSPORT_PASSPORT_MAX_ENTITIES: 5,
+    VEPASSPORT_DECAY_RATE: 0,
   })
 }

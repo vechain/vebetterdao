@@ -1,4 +1,5 @@
-import { VStack, Text, Image, HStack, Flex, Button, Link } from "@chakra-ui/react"
+import { B3TRIcon } from "@/components/Icons"
+import { VStack, Text, Image, Flex, Button, Link, HStack } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { motion } from "framer-motion"
@@ -87,7 +88,7 @@ export const SuccessAppBalanceModalContent = ({
             </Text>
 
             <HStack>
-              <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"20px"} alt="B3TR Icon" />
+              <B3TRIcon boxSize={"20px"} />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
                 {compactFormatter.format(Number(b3trAmount))}
               </Text>
@@ -101,7 +102,7 @@ export const SuccessAppBalanceModalContent = ({
             </Text>
 
             <HStack>
-              <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"20px"} alt="B3TR Icon" />
+              <B3TRIcon boxSize={"20px"} />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
                 {compactFormatter.format(Number(b3trBalanceAfter))}
               </Text>

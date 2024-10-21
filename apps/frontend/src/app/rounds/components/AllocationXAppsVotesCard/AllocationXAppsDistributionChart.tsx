@@ -28,7 +28,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
 
   const { data: xApps, isLoading: xAppsLoading } = useRoundXApps(roundId)
 
-  const forecastedEarningsQueries = useMultipleXAppRoundEarnings(roundId, xApps?.map(app => app.id) ?? [])
+  const forecastedEarningsQuery = useMultipleXAppRoundEarnings(roundId, xApps?.map(app => app.id) ?? [])
 
   const { data: voters, isLoading: votersLoading } = useAllocationVoters(roundId)
 
@@ -45,12 +45,9 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
 
   // the total amount of B3TR distributed in the round only votes
   const totalEarningsWithoutBase = useMemo(() => {
-    if (!forecastedEarningsQueries || !baseAmount) return 0
-    return forecastedEarningsQueries.reduce(
-      (acc, curr) => acc + Number(curr?.data?.amount ?? 0) - Number(baseAmount),
-      0,
-    )
-  }, [forecastedEarningsQueries, baseAmount])
+    if (!forecastedEarningsQuery.data || !baseAmount) return 0
+    return forecastedEarningsQuery.data?.reduce((acc, curr) => acc + Number(curr?.amount ?? 0) - Number(baseAmount), 0)
+  }, [forecastedEarningsQuery, baseAmount])
 
   //the percentage of the total amount of B3TR distrivuted in the round between the base and votes
   const baseAmountsPercentage = useMemo(() => {
@@ -74,7 +71,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
       },
       {
         amount: totalEarningsWithoutBase,
-        isLoading: baseAmountLoading || forecastedEarningsQueries.some(query => query.isLoading),
+        isLoading: baseAmountLoading || forecastedEarningsQuery.isLoading,
         percentage: baseAmountsPercentage.votesAmount,
         color: appsColor,
         label: "votes allocation",
@@ -88,7 +85,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
     totalBaseAmount,
     baseAmountsPercentage,
     totalEarningsWithoutBase,
-    forecastedEarningsQueries,
+    forecastedEarningsQuery,
   ])
 
   return (

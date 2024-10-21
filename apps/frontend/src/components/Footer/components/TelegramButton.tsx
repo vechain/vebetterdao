@@ -1,4 +1,5 @@
-import { TELEGRAM_URL } from "@/constants"
+import { buttonClickActions, ButtonClickProperties, buttonClicked, TELEGRAM_URL } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
 import { Button, Link, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { FaTelegram } from "react-icons/fa6"
@@ -10,7 +11,11 @@ type Props = {
 export const TelegramButton: React.FC<Props> = ({ isFullWidth }) => {
   const { t } = useTranslation()
   return (
-    <Link href={TELEGRAM_URL} isExternal w={isFullWidth ? "full" : undefined}>
+    <Link
+      href={TELEGRAM_URL}
+      isExternal
+      w={isFullWidth ? "full" : undefined}
+      onClick={() => AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_TELEGRAM))}>
       <Button
         leftIcon={<FaTelegram size={24} />}
         textColor={"white"}

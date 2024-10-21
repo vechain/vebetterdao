@@ -2,11 +2,13 @@ import { HStack, Text } from "@chakra-ui/react"
 import { motion } from "framer-motion"
 import { getConfig } from "@repo/config"
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 
-const isTestnetPhase = ["test", "solo", "custom"].includes(getConfig().network.type)
-const text = "Alpha Testnet Phase"
+const isTestnetPhase = ["test", "solo", "custom", "main"].includes(getConfig().network.type)
 const MotionHStack = motion(HStack)
 export const AlphaTestnetBanner = () => {
+  const { t } = useTranslation()
+  const text = t("VePassport activation from round 18")
   const textsNumber = 50
   const texts = Array.from({ length: textsNumber }, _ => text)
   const gap = 8
