@@ -52,6 +52,25 @@
       "persistent": true,
       "dependsOn": ["^setup-contracts:mainnet"]
     },
+    "start": {
+      "cache": false,
+      "dependsOn": ["^setup-contracts"]
+    },
+    "start:staging": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^setup-contracts:staging"]
+    },
+    "start:testnet": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^setup-contracts:testnet"]
+    },
+    "start:mainnet": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^setup-contracts:mainnet"]
+    },
     "setup-contracts": {
       "cache": false,
       "persistent": true,
