@@ -206,16 +206,20 @@ export async function deployAll(config: ContractsConfig) {
   )) as X2EarnApps
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
-  const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
-    PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
-    PassportConfiguratorV1: await PassportConfiguratorV1.getAddress(),
-    PassportEntityLogicV1: await PassportEntityLogicV1.getAddress(),
-    PassportDelegationLogicV1: await PassportDelegationLogicV1.getAddress(),
-    PassportPersonhoodLogicV1: await PassportPersonhoodLogicV1.getAddress(),
-    PassportPoPScoreLogicV1: await PassportPoPScoreLogicV1.getAddress(),
-    PassportSignalingLogicV1: await PassportSignalingLogicV1.getAddress(),
-    PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
-  })
+  const veBetterPassportContractAddress = await deployProxyOnly(
+    "VeBetterPassportV1",
+    {
+      PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
+      PassportConfiguratorV1: await PassportConfiguratorV1.getAddress(),
+      PassportEntityLogicV1: await PassportEntityLogicV1.getAddress(),
+      PassportDelegationLogicV1: await PassportDelegationLogicV1.getAddress(),
+      PassportPersonhoodLogicV1: await PassportPersonhoodLogicV1.getAddress(),
+      PassportPoPScoreLogicV1: await PassportPoPScoreLogicV1.getAddress(),
+      PassportSignalingLogicV1: await PassportSignalingLogicV1.getAddress(),
+      PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
+    },
+    true,
+  )
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
     ["X2EarnRewardsPoolV1", "X2EarnRewardsPoolV2", "X2EarnRewardsPool"],
@@ -426,6 +430,7 @@ export async function deployAll(config: ContractsConfig) {
         PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
         PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
       },
+      logOutput: true,
     },
   )) as VeBetterPassport
 
@@ -665,11 +670,11 @@ export async function deployAll(config: ContractsConfig) {
       break
     case "vechain_testnet":
       if (appEnv === "testnet-staging") {
-        await setupLocalEnvironment(emissions, treasury, x2EarnApps)
+        await setupLocalEnvironment(emissions, treasury, x2EarnApps, veBetterPassport)
       } else await setupTestEnvironment(emissions, x2EarnApps)
       break
     case "vechain_solo":
-      await setupLocalEnvironment(emissions, treasury, x2EarnApps)
+      await setupLocalEnvironment(emissions, treasury, x2EarnApps, veBetterPassport)
       break
   }
 
