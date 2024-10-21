@@ -57,4 +57,12 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v2: "Aligns the emissions with the expected B3TR emissions schedule",
     },
   },
+  "VeBetter Passport": {
+    name: "vebetter-passport",
+    configAddressField: "veBetterPassportContractAddress",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Prevent delegation of passports to entities",
+    },
+  },
 } as const

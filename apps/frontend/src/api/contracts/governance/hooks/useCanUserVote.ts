@@ -32,5 +32,7 @@ export const useCanUserVote = () => {
   return {
     data: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && isPerson,
     isLoading: hasVotedLoading || stateLoading || votesAtSnapshotLoading || isPersonLoading,
+    hasVotesAtSnapshot,
+    isPerson,
   }
 }

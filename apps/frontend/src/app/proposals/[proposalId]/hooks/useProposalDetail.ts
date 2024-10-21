@@ -234,6 +234,7 @@ export const useProposalDetailById = (proposalId: string) => {
     isQuorumReached,
     votingStartBlock,
     votingEndBlock,
+    isVotesLoading,
   ])
 
   const error = useMemo(() => calls.find(call => call.error)?.error || null, [calls])

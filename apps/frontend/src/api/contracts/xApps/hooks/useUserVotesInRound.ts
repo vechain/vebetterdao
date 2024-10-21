@@ -21,11 +21,13 @@ export const getUserVotesInRound = async (
   roundId?: string,
   address?: string,
 ): Promise<AllocationVoteCastEvent[]> => {
-  if (!roundId) throw new Error("roundId is required")
   const eventFragment = XAllocationVotingInterface.getEvent("AllocationVoteCast").format("json")
   const allocationVoteCast = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
 
-  const topics = allocationVoteCast.encode({ voter: address, roundId })
+  const topics = allocationVoteCast.encode({
+    ...(address ? { voter: address } : {}),
+    ...(roundId ? { roundId } : {}),
+  })
   /**
    * Filter criteria to get the events from the governor contract that we are interested in
    * This way we can get all of them in one call
