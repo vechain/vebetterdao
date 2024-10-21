@@ -40,7 +40,7 @@
     "@vechain.energy/dapp-kit-hooks": "^1.2.1",
     "@vechain/connex-driver": "^2.1.0",
     "@vechain/connex-framework": "^2.1.0",
-    "@vechain/dapp-kit-react": "^1.0.12",
+    "@vechain/dapp-kit-react": "^1.0.15",
     "axios": "^1.7.4",
     "browser-image-compression": "^2.0.2",
     "dayjs": "^1.11.10",
