@@ -110,7 +110,7 @@ export const ClaimVotingRewardsBanner = () => {
                   leftIcon={<UilGift color="white" />}>
                   <Text fontWeight="500">
                     {t("Claim your {{b3trToClaim}} B3TR", {
-                      b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.total ?? 0)),
+                      b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
                     })}
                   </Text>
                 </Button>
