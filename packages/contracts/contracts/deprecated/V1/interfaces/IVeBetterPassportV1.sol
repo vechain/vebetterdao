@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import { PassportTypes } from "../ve-better-passport/libraries/PassportTypes.sol";
-import { IX2EarnApps } from "./IX2EarnApps.sol";
-import { IXAllocationVotingGovernor } from "./IXAllocationVotingGovernor.sol";
+import { PassportTypesV1 } from "../ve-better-passport/libraries/PassportTypesV1.sol";
+import { IX2EarnApps } from "../../../interfaces/IX2EarnApps.sol";
+import { IXAllocationVotingGovernor } from "../../../interfaces/IXAllocationVotingGovernor.sol";
 
-interface IVeBetterPassport {
+interface IVeBetterPassportV1 {
   // ---------- Events ---------- //
 
   /// @notice Emitted when a specific check is toggled.
@@ -154,8 +154,8 @@ interface IVeBetterPassport {
   /// @param data The initialization data for the contract
   /// @param roles The roles data for initialization
   function initialize(
-    PassportTypes.InitializationData calldata data,
-    PassportTypes.InitializationRoleData calldata roles
+    PassportTypesV1.InitializationData calldata data,
+    PassportTypesV1.InitializationRoleData calldata roles
   ) external;
 
   /// @notice Checks if a user is a person based on the participation score and other criteria
@@ -186,7 +186,7 @@ interface IVeBetterPassport {
   function isBlacklisted(address _user) external view returns (bool);
 
   /// @notice Toggles the specified check
-  function toggleCheck(PassportTypes.CheckType check) external;
+  function toggleCheck(PassportTypesV1.CheckType check) external;
 
   /// @notice Returns the passport address for a entity
   /// @param entity The entity's address
@@ -271,19 +271,19 @@ interface IVeBetterPassport {
   /// @notice Gets the security multiplier for an app security
   /// @param security The app security level (LOW, MEDIUM, HIGH)
   /// @return The security multiplier for the app
-  function securityMultiplier(PassportTypes.APP_SECURITY security) external view returns (uint256);
+  function securityMultiplier(PassportTypesV1.APP_SECURITY security) external view returns (uint256);
 
   /// @notice Gets the security level of an app
   /// @param appId The app ID
   /// @return The security level of the app
-  function appSecurity(bytes32 appId) external view returns (PassportTypes.APP_SECURITY);
+  function appSecurity(bytes32 appId) external view returns (PassportTypesV1.APP_SECURITY);
 
   /// @notice Gets the minimum galaxy member level required
   /// @return The minimum galaxy member level
   function getMinimumGalaxyMemberLevel() external view returns (uint256);
 
   /// @notice Returns if the specific check is enabled
-  function isCheckEnabled(PassportTypes.CheckType check) external view returns (bool);
+  function isCheckEnabled(PassportTypesV1.CheckType check) external view returns (bool);
 
   /// @notice Returns the signaling threshold
   /// @return The signaling threshold
@@ -360,12 +360,12 @@ interface IVeBetterPassport {
   /// @notice Sets the security multiplier for an app security level
   /// @param security The app security level
   /// @param multiplier The security multiplier
-  function setSecurityMultiplier(PassportTypes.APP_SECURITY security, uint256 multiplier) external;
+  function setSecurityMultiplier(PassportTypesV1.APP_SECURITY security, uint256 multiplier) external;
 
   /// @notice Sets the app security level for a specific app
   /// @param appId The app ID
   /// @param security The security level
-  function setAppSecurity(bytes32 appId, PassportTypes.APP_SECURITY security) external;
+  function setAppSecurity(bytes32 appId, PassportTypesV1.APP_SECURITY security) external;
 
   /// @notice Sets the threshold score for a user to be considered a person
   /// @param threshold The threshold score
@@ -387,18 +387,16 @@ interface IVeBetterPassport {
   /// @param xAllocationVoting The xAllocationVoting contract address
   function setXAllocationVoting(IXAllocationVotingGovernor xAllocationVoting) external;
 
-  /// @notice Link an account (which will become an entity) to a passport (an address that is not an enitity)
-  /// After linking, the scores of the enitity will be stored to the linked account (passport)
-  /// Balance is not transferred and the entity will not be able to vote after linking.
+  /// @notice Delegate personhood to another address
   /// @param entity The entity's address
   /// @param deadline The deadline for the signature
   /// @param signature The signature of the delegation
   function linkEntityToPassportWithSignature(address entity, uint256 deadline, bytes memory signature) external;
 
-  /// @notice Link an account (which will become an entity) to a passport (an address that is not an enitity)
-  /// After linking, the scores of the enitity will be stored to the linked account (passport)
-  /// Balance is not transferred and the entity will not be able to vote after linking.
+  /// @notice Delegate the personhood to another address
   /// @dev The passport must accept the delegation
+  /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
+  /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
   function linkEntityToPassport(address passport) external;
 
   /// @notice Allow the passport to accept the delegation
