@@ -104,6 +104,7 @@ export const ContractsDetails = () => {
           "ACTION_REGISTRAR_ROLE",
           "ACTION_SCORE_MANAGER_ROLE",
           "SIGNALER_ROLE",
+          "ROLE_GRANTER",
         ]}
       />
     </Grid>
