@@ -3,7 +3,7 @@ const config = getConfig()
 
 // function that returns the contract from the list by the address
 export const getContractByAddress = (address: string) => {
-  return CONTRACT_LIST.find(contract => contract.contractAddress === address)
+  return CONTRACT_LIST.find(contract => contract.contractAddress.toUpperCase() === address.toUpperCase())
 }
 
 export const CONTRACT_LIST = [
