@@ -80,6 +80,9 @@ jobs:
             src:
               - 'packages/lambda/**'
 
+      - name: Compile contracts
+        run: yarn contracts:compile
+
       # Run Slither if Solidity changes are detected
       - name: Run Slither
         uses: crytic/slither-action@v0.4.0
