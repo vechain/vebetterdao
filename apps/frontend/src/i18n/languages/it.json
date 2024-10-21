@@ -960,5 +960,15 @@
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "Questo conto è collegato a {{delegatee}}. Per votare, passa al tuo portafoglio principale.",
   "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "Il tuo portafoglio attuale è un portafoglio secondario collegato a {{delegatee}}. Per votare, passa al tuo portafoglio principale. Puoi gestire i conti collegati nella sezione profilo.",
   "You have no linked accounts": "Non hai account collegati",
-  "VePassport activation from round 18": "Attivazione di VePassport dal giro 18"
+  "VePassport activation from round 18": "Attivazione di VePassport dal giro 18",
+  "You can earn actions by using the dApps.": "Puoi guadagnare azioni utilizzando i dApp.",
+  "You can’t vote because you have no voting power.": "Non puoi votare perché non hai potere di voto.",
+  "You can't vote because you haven't accumulated enough actions.": "Non puoi votare perché non hai accumulato abbastanza azioni.",
+  "Snapshot is taken every sunday at 23:59 UTC. You can earn actions by using the dApps.": "Il snapshot viene effettuato ogni domenica alle 23:59 UTC. Puoi guadagnare azioni utilizzando i dApp.",
+  "{{value}}": "{{valore}}",
+  "Error {{value}}": "Errore {{valore}}",
+  "Something went wrong. Let’s try that again!": "Qualcosa è andato storto. Proviamo di nuovo!",
+  "Error 404": "Errore 404",
+  "We can't find what you're looking for. Let's head back and try again!": "Non riusciamo a trovare quello che stai cercando. Torniamo indietro e proviamo di nuovo!",
+  "Go back home": "Torna a casa"
 }
