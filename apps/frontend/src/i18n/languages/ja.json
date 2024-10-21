@@ -958,5 +958,15 @@
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "このアカウントは{{delegatee}}にリンクされています。投票するにはメインウォレットに切り替えてください。",
   "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "現在のウォレットは{{delegatee}}にリンクされた副ウォレットです。投票するにはメインウォレットに切り替えてください。リンクされたアカウントはプロフィールセクションで管理できます。",
   "You have no linked accounts": "リンクされたアカウントがありません",
-  "VePassport activation from round 18": "ラウンド18からのVePassportの有効化"
+  "VePassport activation from round 18": "ラウンド18からのVePassportの有効化",
+  "You can earn actions by using the dApps.": "dAppsを使用することでアクションを獲得できます。",
+  "You can’t vote because you have no voting power.": "投票権がないため、投票できません。",
+  "You can't vote because you haven't accumulated enough actions.": "アクションが十分にたまっていないため、投票できません。",
+  "Snapshot is taken every sunday at 23:59 UTC. You can earn actions by using the dApps.": "スナップショットは毎週日曜日のUTC 23:59に取得されます。dAppsを使用することでアクションを獲得できます。",
+  "{{value}}": "{{値}}",
+  "Error {{value}}": "エラー {{値}}",
+  "Something went wrong. Let’s try that again!": "問題が発生しました。もう一度やってみましょう！",
+  "Error 404": "エラー 404",
+  "We can't find what you're looking for. Let's head back and try again!": "お探しのものが見つかりません。戻ってもう一度試してみましょう！",
+  "Go back home": "ホームに戻る"
 }

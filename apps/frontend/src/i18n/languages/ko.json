@@ -958,5 +958,15 @@
   "This account is linked to {{delegatee}}. To vote, please switch to your main wallet.": "이 계정은 {{delegatee}}에 연결되어 있습니다. 투표하려면 주 지갑으로 전환하세요.",
   "Your current wallet is a secondary wallet linked to {{delegatee}}. To vote, please switch to your main wallet. You can manage linked accounts in the profile section.": "현재 지갑은 {{delegatee}}에 연결된 보조 지갑입니다. 투표하려면 주 지갑으로 전환하세요. 연결된 계정은 프로필 섹션에서 관리할 수 있습니다.",
   "You have no linked accounts": "연결된 계정이 없습니다",
-  "VePassport activation from round 18": "라운드 18부터 VePassport 활성화"
+  "VePassport activation from round 18": "라운드 18부터 VePassport 활성화",
+  "You can earn actions by using the dApps.": "dApps를 사용하여 액션을 획득할 수 있습니다.",
+  "You can’t vote because you have no voting power.": "투표 권한이 없어서 투표할 수 없습니다.",
+  "You can't vote because you haven't accumulated enough actions.": "충분한 액션을 축적하지 않아서 투표할 수 없습니다.",
+  "Snapshot is taken every sunday at 23:59 UTC. You can earn actions by using the dApps.": "스냅샷은 매주 일요일 23:59 UTC에 촬영됩니다. dApps를 사용하여 액션을 획득할 수 있습니다.",
+  "{{value}}": "{{값}}",
+  "Error {{value}}": "오류 {{값}}",
+  "Something went wrong. Let’s try that again!": "무언가 잘못 되었습니다. 다시 시도해 보겠습니다!",
+  "Error 404": "오류 404",
+  "We can't find what you're looking for. Let's head back and try again!": "찾고 계신 것을 찾을 수 없습니다. 돌아가서 다시 시도해봅시다!",
+  "Go back home": "홈으로 돌아가기"
 }
