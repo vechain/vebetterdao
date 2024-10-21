@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+
 pragma solidity 0.8.20;
 
 interface IVOT3 {
@@ -171,9 +173,3 @@ interface IVOT3 {
   function version() external view returns (string memory);
 }
 
-interface Checkpoints {
-  struct Checkpoint208 {
-    uint48 _key;
-    uint208 _value;
-  }
-}
