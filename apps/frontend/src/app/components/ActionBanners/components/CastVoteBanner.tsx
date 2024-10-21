@@ -17,7 +17,7 @@ export const CastVoteBanner = () => {
   }, [router, roundId])
 
   return (
-    <Card bg="#B1F16C" borderRadius="xl" w="full" h={"full"}>
+    <Card bg="#B1F16C" borderRadius="xl" w="full">
       <CardBody position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
         <Image
           src="/images/community-green-blob.png"
@@ -49,8 +49,8 @@ export const CastVoteBanner = () => {
           </HStack>
         </Show>
         <Show below="md">
-          <HStack align="stretch" zIndex={1} position="relative" h="full" w="full" alignItems={"center"}>
-            <VStack gap={2} align="stretch" justify={"space-between"} h={"full"}>
+          <HStack align="stretch" zIndex={1} position="relative" w="full" alignItems={"center"}>
+            <VStack gap={2} align="stretch" justify={"space-between"}>
               <Text fontSize={12} color="#3A5798" fontWeight="600">
                 {t("CAST YOUR VOTE NOW! ⚖️")}
               </Text>
