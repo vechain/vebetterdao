@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
-
 pragma solidity 0.8.20;
+
+import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 interface IVOT3 {
   error AccessControlBadConfirmation();
