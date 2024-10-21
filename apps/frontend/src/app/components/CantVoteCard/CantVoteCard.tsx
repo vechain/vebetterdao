@@ -1,6 +1,7 @@
 import { useAccountLinking, useCanUserVote, useUserDelegation, useUserScore } from "@/api"
 import { Card, CardBody, HStack, Text, VStack, Button } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -14,6 +15,7 @@ type CantVoteReasonText = {
 }
 export const CantVoteCard = () => {
   const { t } = useTranslation()
+  const { account } = useWallet()
   const router = useRouter()
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
@@ -30,13 +32,14 @@ export const CantVoteCard = () => {
   }, [router])
 
   const cantVoteReason = useMemo<CantVoteReason | null>(() => {
-    if (isLoadingAccountLinking || isLoadingDelegator || canVoteLoading || isScoreLoading) return null
+    if (!account || isLoadingAccountLinking || isLoadingDelegator || canVoteLoading || isScoreLoading) return null
     if (isEntity) return "secondary"
     if (isDelegator) return "delegator"
     if (!hasVotesAtSnapshot) return "no-votes"
     if (!isUserQualified) return "no-actions"
     return null
   }, [
+    account,
     isEntity,
     isLoadingAccountLinking,
     isLoadingDelegator,
