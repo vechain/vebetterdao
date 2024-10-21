@@ -80,6 +80,20 @@ export const CONTRACT_LIST = [
     contractAddress: config.x2EarnRewardsPoolContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE", "IMPACT_KEY_MANAGER_ROLE"],
   },
+  {
+    name: "VeBetterPassport",
+    contractAddress: config.veBetterPassportContractAddress,
+    roles: [
+      "DEFAULT_ADMIN_ROLE",
+      "UPGRADER_ROLE",
+      "SETTINGS_MANAGER_ROLE",
+      "WHITELISTER_ROLE",
+      "ACTION_REGISTRAR_ROLE",
+      "ACTION_SCORE_MANAGER_ROLE",
+      "SIGNALER_ROLE",
+      "ROLE_GRANTER",
+    ],
+  },
   // TODO: Add node management contract when deployed
   // {
   //   name: "Node Management Contract",
