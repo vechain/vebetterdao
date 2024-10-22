@@ -17,10 +17,10 @@ export default function CustomError({ error }: CustomErrorProps) {
   }
 
   return (
-    <VStack alignItems="start" alignSelf="start" w={["100%", "100%", "100%", "50%"]}>
+    <VStack w={"full"}>
       <Image boxSize={"190px"} src="/images/error-to-define.svg" alt="error" />
       <Text color="#6A6A6A">{t("{{value}}", { value: error })}</Text>
-      <Heading>{t("Something went wrong. Let’s try that again!")}</Heading>
+      <Heading textAlign={"center"}>{t("Something went wrong. Let’s try that again!")}</Heading>
       <Button variant={"primaryAction"} onClick={goToHomePage} my={"20px"}>
         {t("Go back home")}
       </Button>
