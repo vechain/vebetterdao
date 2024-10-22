@@ -49,7 +49,7 @@ import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
  * ----- Version 3 -----
  * - Added VeBetterPassport integration
  */
-contract X2EarnRewardsPool is
+contract X2EarnRewardsPoolV3 is
   IX2EarnRewardsPoolV3,
   UUPSUpgradeable,
   AccessControlUpgradeable,

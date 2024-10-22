@@ -2475,7 +2475,6 @@ describe("VoterRewards - @shard7", () => {
 
       const governorV2 = await upgradeGovernanceToV2()
 
-      const voter1 = otherAccounts[0]
       const voter2 = otherAccounts[1]
       const proposar = otherAccounts[2]
 
@@ -2536,7 +2535,6 @@ describe("VoterRewards - @shard7", () => {
 
       const governorV2 = await upgradeGovernanceToV2()
 
-      const voter1 = otherAccounts[0]
       const voter2 = otherAccounts[1]
 
       await getVot3Tokens(voter1, "1000")
