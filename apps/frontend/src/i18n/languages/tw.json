@@ -968,5 +968,9 @@
   "Something went wrong. Let’s try that again!": "出了点问题。让我们再试一次！",
   "Error 404": "错误 404",
   "We can't find what you're looking for. Let's head back and try again!": "我们找不到您正在寻找的内容。让我们回去再试一次！",
-  "Go back home": "返回主页"
+  "Go back home": "返回主页",
+  "Round {{id}} leaderboard": "第 {{id}} 回合排行榜",
+  "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "準備好拯救地球了嗎？在應用程式中採取更好的行動，成為可持續性冠軍！🌍✨",
+  "Link a Primary Account": "連結主要帳戶",
+  "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.": "通過連結此帳戶，所有更好的行動將轉移到主要帳戶，後者還將擁有獨有的投票權。必須先由主要帳戶批准連結請求。"
 }

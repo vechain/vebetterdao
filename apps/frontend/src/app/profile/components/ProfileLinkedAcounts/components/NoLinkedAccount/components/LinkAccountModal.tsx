@@ -69,11 +69,11 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
     <BaseModal isOpen={modal.isOpen} onClose={modal.onClose}>
       <VStack align="stretch" gap={6} as="form" onSubmit={handleSubmit(onSubmit)}>
         <UilLink color="#004CFC" size={"3rem"} />
-        <Heading fontSize="2xl">{t("Link a Secondary Account")}</Heading>
+        <Heading fontSize="2xl">{t("Link a Primary Account")}</Heading>
         <Box>
           <Text color="#6A6A6A" as="span">
             {t(
-              "By linking Secondary Accounts, your Primary Account will receive all the Better Actions performed in those addresses.",
+              "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.",
             )}
           </Text>
           <Text color="#6A6A6A" as="span" fontWeight="600">

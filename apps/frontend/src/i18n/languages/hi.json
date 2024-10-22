@@ -968,5 +968,9 @@
   "Something went wrong. Let’s try that again!": "कुछ गलत हो गया। चलिए इसे फिर से कोशिश करते हैं!",
   "Error 404": "त्रुटि 404",
   "We can't find what you're looking for. Let's head back and try again!": "हम वह नहीं ढूँढ पा रहे हैं जो आप ढूँढ रहे हैं। चलिए वापस जाते हैं और फिर से कोशिश करते हैं!",
-  "Go back home": "घर वापस जाएं"
+  "Go back home": "घर वापस जाएं",
+  "Round {{id}} leaderboard": "राउंड {{id}} लीडरबोर्ड",
+  "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "ग्रह को बचाने के लिए तैयार? उपयोगी क्रियाएं ऐप्स में करें और स्थिरता चैंपियन बनें! 🌍✨",
+  "Link a Primary Account": "एक प्रमुख खाता लिंक करें",
+  "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.": "इस खाते को लिंक करने पर, सभी बेहतर कार्य प्रमुख खाते में स्थानांतरित हो जाएंगे, जो विशेष मतदान शक्ति भी रखेगा। लिंक अनुरोध को पहले प्रमुख खाते द्वारा अनुमोदित किया जाना चाहिए।"
 }

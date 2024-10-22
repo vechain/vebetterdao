@@ -968,5 +968,9 @@
   "Something went wrong. Let’s try that again!": "Bir şeyler yanlış gitti. Tekrar deneyelim!",
   "Error 404": "Hata 404",
   "We can't find what you're looking for. Let's head back and try again!": "Aradığınızı bulamıyoruz. Geri dönelim ve tekrar deneyelim!",
-  "Go back home": "Ana sayfaya dön"
+  "Go back home": "Ana sayfaya dön",
+  "Round {{id}} leaderboard": "Tur {{id}} lider tahtası",
+  "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "Gezegeni kurtarmaya hazır mısınız? Uygulamalarda Daha İyi Eylemler yapın ve sürdürülebilirlik şampiyonu olun! 🌍✨",
+  "Link a Primary Account": "Bir Birincil Hesap Bağlayın",
+  "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.": "Bu hesabı bağlayarak, tüm Daha İyi Eylemler Birincil Hesaba aktarılacak ve bu hesap özel oy kullanma yetkisine sahip olacak. Öncelikle Birincil Hesabın bağlantı isteğini onaylaması gerekir."
 }
