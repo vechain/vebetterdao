@@ -1,9 +1,15 @@
+import {
+  useCurrentAllocationsRoundId,
+  useSustainabilitySingleUserOverview,
+  useSustainabilityUserOverviewPerRound,
+} from "@/api"
 import { AddressButton } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
-import { Box, Card, CardBody, Divider, Heading, HStack, Image, Text, VStack } from "@chakra-ui/react"
+import { Box, Card, CardBody, Divider, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
+import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
 type LeaderboardRanking = {
@@ -11,68 +17,125 @@ type LeaderboardRanking = {
   address: string
   score: number
 }
-const LeaderboardRankings: LeaderboardRanking[] = [
-  {
-    position: 1,
-    address: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
-    score: 100,
-  },
-  {
-    position: 2,
-    address: "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68",
-    score: 98,
-  },
-  {
-    position: 3,
-    address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5",
-    score: 86,
-  },
-  {
-    position: 4,
-    address: "0xF370940aBDBd2583bC80bfc19d19bc216C88Ccf0",
-    score: 72,
-  },
-  {
-    position: 5,
-    address: "0x99602e4Bbc0503b8ff4432bB1857F916c3653B85",
-    score: 60,
-  },
+
+const MockLeaderboard = [
+  { position: 1, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 100 },
+  { position: 2, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 90 },
+  { position: 3, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 80 },
+  { position: 4, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 70 },
+  { position: 5, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 60 },
 ]
 
-const YourRanking = {
-  position: 20,
-  address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5",
-  score: 51,
-}
+//TODO: Connected user ranking
 export const Leaderboard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { data: roundId, isLoading: roundIdLoading } = useCurrentAllocationsRoundId()
 
-  const isRankingInTop5 = LeaderboardRankings.some(ranking =>
-    AddressUtils.compareAddresses(ranking.address, account ?? ""),
+  const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId })
+
+  const yourRaking = useMemo(() => {
+    if (!account) return undefined
+    if (userRoundOverview.isLoading) return undefined
+    if (userRoundOverview.isError) return undefined
+    return {
+      position: userRoundOverview.data?.rankByActionsRewarded ?? 0,
+      address: account ?? "",
+      score: userRoundOverview.data?.actionsRewarded ?? 0,
+    }
+  }, [userRoundOverview, account])
+
+  const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId, direction: "desc" })
+
+  const flatLeaderboard = useMemo(
+    () =>
+      leaderboardQuery.data?.pages
+        .map(page => page.data)
+        .flat()
+        .slice(0, 5) ?? [],
+    [leaderboardQuery.data],
   )
+  const rankings = flatLeaderboard.map((entry, index) => ({
+    position: index + 1,
+    address: entry?.entity as string,
+    score: entry?.actionsRewarded as number,
+  }))
+
+  const renderRankings = useMemo(() => {
+    if (leaderboardQuery.isLoading)
+      return MockLeaderboard.map(ranking => (
+        <Skeleton key={ranking.position} borderRadius={"lg"}>
+          <LeaderboardRankingComponent
+            ranking={ranking}
+            isYourRanking={AddressUtils.compareAddresses(ranking.address, account ?? "")}
+          />
+        </Skeleton>
+      ))
+
+    if (leaderboardQuery.isError || !rankings.length)
+      return (
+        <VStack spacing={4} align="stretch" w="full" h="full" pos="relative">
+          <VStack
+            pos={"absolute"}
+            backdropFilter="blur(10px)"
+            borderRadius="xl"
+            top={0}
+            left={0}
+            w={"full"}
+            justify={"center"}
+            spacing={1}
+            p={4}
+            h="full"
+            zIndex={2}
+            bg="rgba(255, 255, 255, 0.6)">
+            <Heading size="sm">{t("Not enough data for the week")}</Heading>
+            <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
+              {t("Come back later to see how you are ranking 🥇")}
+            </Text>
+          </VStack>
+          {MockLeaderboard.map(ranking => (
+            <LeaderboardRankingComponent
+              key={ranking.position}
+              ranking={ranking}
+              isYourRanking={AddressUtils.compareAddresses(ranking.address, account ?? "")}
+            />
+          ))}
+        </VStack>
+      )
+    return rankings.map(ranking => (
+      <LeaderboardRankingComponent
+        ranking={ranking}
+        key={ranking.position}
+        isYourRanking={AddressUtils.compareAddresses(ranking.address, account ?? "")}
+      />
+    ))
+  }, [leaderboardQuery, account, rankings, t])
+
+  const isRankingInTop5 = rankings.some(ranking => AddressUtils.compareAddresses(ranking.address, account ?? ""))
   return (
     <Card w="full" variant={"baseWithBorder"}>
       <CardBody>
         <VStack spacing={6} align="stretch">
           <VStack spacing={2} align="stretch">
-            <Heading size="md">{t("Leaderboard of the week")}</Heading>
+            <Skeleton isLoaded={!roundIdLoading}>
+              <Heading size="md">
+                {t("Round {{id}} leaderboard", {
+                  id: roundId ?? "",
+                })}
+              </Heading>
+            </Skeleton>
             <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
-              {t("Use the apps to do Better Actions and be recognized with more B3TR each week!")}
+              {t(
+                "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨",
+              )}
             </Text>
           </VStack>
-          <VStack spacing={4} align="stretch">
-            {LeaderboardRankings.map(ranking => (
-              <LeaderboardRankingComponent
-                ranking={ranking}
-                key={ranking.position}
-                isYourRanking={AddressUtils.compareAddresses(ranking.address, account ?? "")}
-              />
-            ))}
+          <VStack spacing={4} align="stretch" w="full" h="full">
+            {renderRankings}
             {!isRankingInTop5 && (
               <>
                 <Divider w="full" h={1} />
-                <LeaderboardRankingComponent ranking={YourRanking} isYourRanking />
+                {yourRaking && <LeaderboardRankingComponent ranking={yourRaking} isYourRanking />}
               </>
             )}
           </VStack>
@@ -87,25 +150,47 @@ type LeaderboardRankingComponentProps = {
   isYourRanking?: boolean
 }
 export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
-  const positionText =
-    ranking.position === 1
-      ? "🥇"
-      : ranking.position === 2
-        ? "🥈"
-        : ranking.position === 3
-          ? "🥉"
-          : `#${ranking.position}`
-  const positionFontSize = [1, 2, 3].includes(ranking.position) ? "3xl" : "lg"
+  const positionStyles = useMemo(() => {
+    if (ranking.position === 1)
+      return {
+        text: "🥇",
+        borderColor: "#FFD700",
+        fontSize: "3xl",
+        boxShadow: "0px 0px 5px 0px rgba(255, 215, 0, 0.4)",
+      }
+    if (ranking.position === 2)
+      return {
+        text: "🥈",
+        borderColor: "#C0C0C0",
+        fontSize: "3xl",
+        boxShadow: "0px 0px 5px 0px rgba(192, 192, 192, 0.4)",
+      }
+    if (ranking.position === 3)
+      return {
+        text: "🥉",
+        borderColor: "#CD7F32",
+        fontSize: "3xl",
+        boxShadow: "0px 0px 5px 0px rgba(205, 127, 50, 0.4)",
+      }
+    return {
+      text: `#${ranking.position}`,
+      borderColor: "#EFEFEF",
+      fontSize: "xl",
+      boxShadow: "0px 0px 5px 0px rgba(0, 0, 0, 0.1)",
+    }
+  }, [ranking.position])
 
   const whiteColor = isYourRanking ? "white" : "auto"
   const grayColor = isYourRanking ? "white" : "#6A6A6A"
 
   return (
     <Card
-      variant={isYourRanking ? "baseWithBorder" : "filledSmall"}
+      boxShadow={positionStyles.boxShadow}
+      variant={"baseWithBorder"}
       {...(isYourRanking && { bg: "#004CFC" })}
       pos="relative"
-      overflow={"hidden"}>
+      overflow={"hidden"}
+      borderColor={positionStyles.borderColor}>
       <CardBody color={whiteColor} p="12px">
         {isYourRanking && (
           <Image
@@ -150,9 +235,11 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
               </Text>
             </Box>
           </HStack>
-          <Text fontSize={positionFontSize} fontWeight={500} zIndex={1}>
-            {positionText}
-          </Text>
+          {ranking.position !== 0 && (
+            <Text fontSize={positionStyles.fontSize} fontWeight={600} zIndex={1}>
+              {positionStyles.text}
+            </Text>
+          )}
         </HStack>
       </CardBody>
     </Card>

@@ -26,12 +26,12 @@ pragma solidity 0.8.20;
 import { ERC165Upgradeable } from "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { ContextUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import { IXAllocationVotingGovernor, IERC6372 } from "../../../interfaces/IXAllocationVotingGovernor.sol";
-import { IXAllocationPool } from "../../../interfaces/IXAllocationPool.sol";
+import { IXAllocationVotingGovernorV1, IERC6372 } from "../interfaces/IXAllocationVotingGovernorV1.sol";
+import { IXAllocationPoolV1 } from "../interfaces/IXAllocationPoolV1.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { IX2EarnApps } from "../../../interfaces/IX2EarnApps.sol";
-import { IEmissions } from "../../../interfaces/IEmissions.sol";
-import { IVoterRewards } from "../../../interfaces/IVoterRewards.sol";
+import { IX2EarnAppsV1 } from "../interfaces/IX2EarnAppsV1.sol";
+import { IEmissionsV1 } from "../interfaces/IEmissionsV1.sol";
+import { IVoterRewardsV1 } from "../interfaces/IVoterRewardsV1.sol";
 
 /**
  * @title XAllocationVotingGovernorV1
@@ -50,7 +50,7 @@ abstract contract XAllocationVotingGovernorV1 is
   Initializable,
   ContextUpgradeable,
   ERC165Upgradeable,
-  IXAllocationVotingGovernor
+  IXAllocationVotingGovernorV1
 {
   bytes32 private constant ALL_ROUND_STATES_BITMAP = bytes32((2 ** (uint8(type(RoundState).max) + 1)) - 1);
 
@@ -134,7 +134,7 @@ abstract contract XAllocationVotingGovernorV1 is
   function supportsInterface(
     bytes4 interfaceId
   ) public view virtual override(IERC165, ERC165Upgradeable) returns (bool) {
-    return interfaceId == type(IXAllocationVotingGovernor).interfaceId || super.supportsInterface(interfaceId);
+    return interfaceId == type(IXAllocationVotingGovernorV1).interfaceId || super.supportsInterface(interfaceId);
   }
 
   /**
@@ -297,15 +297,15 @@ abstract contract XAllocationVotingGovernorV1 is
   /**
    * @dev Returns the X2EarnApps contract.
    */
-  function x2EarnApps() public view virtual returns (IX2EarnApps);
+  function x2EarnApps() public view virtual returns (IX2EarnAppsV1);
 
   /**
    * @dev Returns the Emissions contract.
    */
-  function emissions() public view virtual returns (IEmissions);
+  function emissions() public view virtual returns (IEmissionsV1);
 
   /**
    * @dev Returns the VoterRewards contract.
    */
-  function voterRewards() public view virtual returns (IVoterRewards);
+  function voterRewards() public view virtual returns (IVoterRewardsV1);
 }

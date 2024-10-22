@@ -8,6 +8,8 @@ import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
 import { SearchAndSelectApps } from "./components/SearchAndSelectApps"
 import { ResponsiveCard } from "@/components"
 import { CastAllocationControlsBottomBar } from "../CastAllocationControlsBottomBar"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 type Props = {
   roundId: string
@@ -33,6 +35,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const onContinue = useCallback(() => {
     if (!selectedApps.length) return setOnContinueError(t("Select at least one app to continue"))
     router.push(`/rounds/${roundId}/vote/percentages`)
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CASTING_VOTE_SELECTION))
   }, [router, roundId, selectedApps, t])
 
   const shouldSeeThePage = useCanUserVote()

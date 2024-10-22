@@ -4,6 +4,9 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
 import { MdArrowOutward } from "react-icons/md"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
+import { B3TRIcon } from "@/components/Icons"
 
 export type ConfirmationModalContentProps = {
   b3trBalanceAfter?: string
@@ -42,6 +45,7 @@ export const SuccessConvertModalContent = ({
   onClose,
 }: ConfirmationModalContentProps) => {
   const { t } = useTranslation()
+
   return (
     <VStack align={"center"} p={8} gap={2}>
       <MotionImage
@@ -52,7 +56,11 @@ export const SuccessConvertModalContent = ({
         initial="initial"
         animate="animate"
       />
-      <Text style={{ fontFamily: "Instrument Sans, sans-serif" }} fontSize={28} fontWeight={700}>
+      <Text
+        style={{ fontFamily: "Instrument Sans, sans-serif" }}
+        fontSize={28}
+        fontWeight={700}
+        data-testid={"swap-success-title"}>
         {t("Conversion complete!")}
       </Text>
       <Text fontSize={16} fontWeight={400} textAlign={"center"}>
@@ -66,7 +74,7 @@ export const SuccessConvertModalContent = ({
             </Text>
 
             <HStack>
-              <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"20px"} alt="B3TR Icon" />
+              <B3TRIcon boxSize={"20px"} />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
                 {compactFormatter.format(Number(b3trBalanceAfter))}
               </Text>
@@ -94,7 +102,10 @@ export const SuccessConvertModalContent = ({
           isExternal
           color="gray.500"
           fontSize={"14px"}
-          style={{ textDecoration: "none" }}>
+          style={{ textDecoration: "none" }}
+          onClick={() =>
+            AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SEE_DETAILS_TX))
+          }>
           <HStack alignSelf={"center"}>
             <Text fontSize={14} fontWeight={500} color={"rgba(0, 76, 252, 1)"}>
               {t("See transaction information")}
@@ -110,7 +121,11 @@ export const SuccessConvertModalContent = ({
         rounded={"full"}
         size={{ base: "md", md: "lg" }}
         w={{ base: "full", md: "auto" }}
-        onClick={onClose}>
+        onClick={() => {
+          onClose()
+          AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SWAP_CONFIRMED))
+        }}
+        data-testid={"close-swap-modal-button"}>
         {t("Continue")}
       </Button>
     </VStack>

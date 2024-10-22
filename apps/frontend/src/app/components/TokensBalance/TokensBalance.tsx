@@ -1,4 +1,5 @@
 import { useB3trBalance, useVot3Balance } from "@/api"
+import { B3TRIcon, WalletNotConnectedOverlay } from "@/components"
 import { ConvertModal } from "@/components/Convert/ConvertModal"
 import { Box, Button, Heading, HStack, Image, Skeleton, Stack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilArrowUpRight, UilExchangeAlt } from "@iconscout/react-unicons"
@@ -7,8 +8,10 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
-const compactFormatter = getCompactFormatter(4)
+const compactFormatter = getCompactFormatter(2)
 
 export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: boolean }) => {
   const { t } = useTranslation()
@@ -29,6 +32,8 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
     router.push("/profile")
   }, [router])
 
+  if (!account) return <WalletNotConnectedOverlay />
+
   return (
     <VStack
       w="full"
@@ -37,8 +42,8 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
       bg="#004CFC"
       rounded="xl"
       color="white"
-      padding="4"
       position={"relative"}
+      p={4}
       overflow={"hidden"}>
       <Box position="absolute" top={"-140%"} left={"-30%"} w={"150%"} h="auto" zIndex={1}>
         <Image src={"/images/cloud-background.png"} alt="cloud" objectFit={"contain"} />
@@ -66,9 +71,12 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
             {t("B3TR Balance")}
           </Text>
           <HStack>
-            <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"30px"} alt="B3TR Icon" />
+            <B3TRIcon boxSize={["24px", "28px"]} />
+
             <Skeleton isLoaded={!isB3trBalanceLoading}>
-              <Heading fontSize="1.75rem">{compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}</Heading>
+              <Heading fontSize={["24px", "28px"]}>
+                {compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}
+              </Heading>
             </Skeleton>
           </HStack>
         </VStack>
@@ -84,16 +92,21 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
             {t("VOT3 Balance")}
           </Text>
           <HStack>
-            <Image src={"/images/logo/vot3_logo_dark.svg"} boxSize={"30px"} alt="VOT3 Icon" />
+            <Image src={"/images/logo/vot3_logo_dark.svg"} boxSize={["24px", "28px"]} alt="VOT3 Icon" />
             <Skeleton isLoaded={!isVot3BalanceLoading}>
-              <Heading fontSize="1.75rem">{compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}</Heading>
+              <Heading fontSize={["24px", "28px"]}>
+                {compactFormatter.format(Number(vot3Balance?.scaled ?? "0"))}
+              </Heading>
             </Skeleton>
           </HStack>
         </VStack>
       </Stack>
       <Button
         isDisabled={isSwapDisabled}
-        onClick={onOpen}
+        onClick={() => {
+          onOpen()
+          AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SWAP_TOKENS))
+        }}
         leftIcon={<UilExchangeAlt size={"16px"} />}
         variant={"whiteAction"}
         rounded={"full"}

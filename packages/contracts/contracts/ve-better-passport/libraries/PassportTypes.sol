@@ -26,14 +26,18 @@ pragma solidity 0.8.20;
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
-import { INodeManagement } from "../../interfaces/INodeManagement.sol";
 
+/**
+ * @title PassportTypes
+ * @notice This library defines various data types, enumerations, and initialization parameters used within the Passport contract.
+ * It includes the `InitializationData` struct, which contains references to external contracts and configurations for personhood checks,
+ * proof of participation, signaling, and passport delegation. It also includes role-based configuration settings.
+ */
 library PassportTypes {
   /**
    * @dev Struct containing data to initialize the contract
    * @param xAllocationVoting The address of the xAllocationVoting
    * @param x2EarnApps The address of the x2EarnApps
-   * @param nodeManagement The address of the node management contract
    * @param galaxyMember The address of the galaxy member contract
    * @param upgrader The address of the upgrader
    * @param admins The addresses of the admins
@@ -51,14 +55,16 @@ library PassportTypes {
     IXAllocationVotingGovernor xAllocationVoting;
     IX2EarnApps x2EarnApps;
     IGalaxyMember galaxyMember;
-    INodeManagement nodeManagement;
-    uint256 popScoreThreshold;
     uint256 signalingThreshold;
     uint256 roundsForCumulativeScore;
     uint256 minimumGalaxyMemberLevel;
+    uint256 blacklistThreshold;
+    uint256 whitelistThreshold;
+    uint256 maxEntitiesPerPassport;
+    uint256 decayRate;
   }
 
-  struct InitializationRoleData{
+  struct InitializationRoleData {
     address admin;
     address botSignaler;
     address upgrader;
@@ -68,6 +74,15 @@ library PassportTypes {
     address whitelister;
     address actionRegistrar;
     address actionScoreManager;
+  }
+
+  enum CheckType {
+    UNDEFINED, // Default value for invalid or uninitialized checks
+    WHITELIST_CHECK, // Check if the user is whitelisted
+    BLACKLIST_CHECK, // Check if the user is blacklisted
+    SIGNALING_CHECK, // Check if the user has been signaled too many times
+    PARTICIPATION_SCORE_CHECK, // Check the user's participation score
+    GM_OWNERSHIP_CHECK // Check if the user owns a GM token
   }
 
   /// @notice Security level indicates how secure the app is

@@ -10,6 +10,7 @@ import { useProposalDetail } from "../hooks"
 import { ProposalSessionSection } from "@/components/ProposalSessionSection"
 import { ProposalTimeline } from "@/components/ProposalSessionSection/components/ProposalTimeline"
 import { useMemo } from "react"
+import { ProposalVoteCommentList } from "./ProposalVoteCommentList"
 
 type Props = {
   proposalId: string
@@ -49,7 +50,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
           <VStack align="stretch" gap={8}>
             <ProposalCommunitySupport />
             <ProposalContentAndActions proposal={proposalCreatedEvent} />
-            {/* <ProposalVoteCommentList /> */}
+            <ProposalVoteCommentList proposalId={proposalId} />
           </VStack>
         </GridItem>
         <GridItem colSpan={[3, 3, 1]}>

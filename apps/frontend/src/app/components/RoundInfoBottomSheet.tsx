@@ -16,7 +16,7 @@ export const RoundInfoBottomSheet = () => {
   const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
 
   const { allocationRound, roundLoading, proposalsToRender } = useRoundProposals(currentRoundId ?? "")
 
@@ -24,6 +24,8 @@ export const RoundInfoBottomSheet = () => {
 
   const totalAmount =
     Number(amounts?.treasury ?? 0) + Number(amounts?.voteX2Earn ?? 0) + Number(amounts?.voteXAllocations ?? 0)
+
+  const isCardLoading = roundLoading || currentRoundIdLoading
 
   return (
     <>
@@ -44,23 +46,29 @@ export const RoundInfoBottomSheet = () => {
           cursor="pointer"
           zIndex={3}>
           <Box>
-            <Skeleton isLoaded={!roundLoading}>
+            <Skeleton isLoaded={!isCardLoading}>
               <Heading fontSize={"20px"} fontWeight={400}>
                 <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
               </Heading>
             </Skeleton>
-            <Text fontSize={"14px"} fontWeight={400}>
-              {t("{{from}} to {{to}}", {
-                from: allocationRound.voteStartTimestamp?.format("MMM D"),
-                to: allocationRound.voteEndTimestamp?.format("MMM D"),
-              })}
-            </Text>
+            <Skeleton isLoaded={!isCardLoading}>
+              <Text fontSize={"14px"} fontWeight={400}>
+                {t("{{from}} to {{to}}", {
+                  from: allocationRound.voteStartTimestamp?.format("MMM D"),
+                  to: allocationRound.voteEndTimestamp?.format("MMM D"),
+                })}
+              </Text>
+            </Skeleton>
           </Box>
           {currentRoundId && <AllocationRoundParticipatingXApps roundId={currentRoundId} iconSize={36} />}
         </HStack>
       )}
 
-      <BaseBottomSheet isOpen={isOpen} onClose={onClose} height="95vh">
+      <BaseBottomSheet
+        isOpen={isOpen}
+        onClose={onClose}
+        ariaTitle={t("Round #{{round}}", { round: allocationRound.roundId })}
+        ariaDescription={t("Round #{{round}}", { round: allocationRound.roundId })}>
         <VStack spacing={6} align="stretch" mx="auto">
           <HStack spacing={4} justify="space-between" w="full">
             <Box>
@@ -69,12 +77,14 @@ export const RoundInfoBottomSheet = () => {
                   <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
                 </Heading>
               </Skeleton>
-              <Text fontSize={"14px"} fontWeight={400}>
-                {t("{{from}} to {{to}}", {
-                  from: allocationRound.voteStartTimestamp?.format("MMM D"),
-                  to: allocationRound.voteEndTimestamp?.format("MMM D"),
-                })}
-              </Text>
+              <Skeleton isLoaded={!isCardLoading}>
+                <Text fontSize={"14px"} fontWeight={400}>
+                  {t("{{from}} to {{to}}", {
+                    from: allocationRound.voteStartTimestamp?.format("MMM D"),
+                    to: allocationRound.voteEndTimestamp?.format("MMM D"),
+                  })}
+                </Text>
+              </Skeleton>
             </Box>
             {currentRoundId && <AllocationRoundParticipatingXApps roundId={currentRoundId} iconSize={36} />}
           </HStack>

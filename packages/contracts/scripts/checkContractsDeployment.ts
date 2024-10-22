@@ -1,5 +1,5 @@
 import { ethers, network } from "hardhat"
-import { deployAll } from "./deploy/deploy"
+import { deployAll } from "./deploy/deployAll"
 import { getConfig, getContractsConfig } from "@repo/config"
 import { AppConfig } from "@repo/config"
 import fs from "fs"
@@ -23,7 +23,8 @@ async function main() {
 // check if the contracts specified in the config file are deployed on the network, if not, deploy them (only on solo network)
 async function checkContractsDeployment() {
   try {
-    const code = await ethers.provider.getCode(config.b3trContractAddress)
+    // if contract address is not set or it does not exist on the network, consider it as not deployed
+    const code = config.b3trContractAddress === "" ? "0x" : await ethers.provider.getCode(config.b3trContractAddress)
     if (code === "0x") {
       console.log(`B3tr contract not deployed at address ${config.b3trContractAddress}`)
       if (isSoloNetwork || isStagingEnv) {
@@ -55,6 +56,7 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     x2EarnAppsContractAddress: await contracts.x2EarnApps.getAddress(),
     x2EarnRewardsPoolContractAddress: await contracts.x2EarnRewardsPool.getAddress(),
     nodeManagementContractAddress: await contracts.vechainNodeManagement.getAddress(),
+    veBetterPassportContractAddress: await contracts.veBetterPassport.getAddress(),
     b3trGovernorLibraries: {
       governorClockLogicAddress: await contracts.libraries.governorClockLogic.getAddress(),
       governorConfiguratorAddress: await contracts.libraries.governorConfigurator.getAddress(),
@@ -65,6 +67,17 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
       governorQuorumLogicAddress: await contracts.libraries.governorQuorumLogic.getAddress(),
       governorStateLogicAddress: await contracts.libraries.governorStateLogic.getAddress(),
       governorVotesLogicAddress: await contracts.libraries.governorVotesLogic.getAddress(),
+    },
+    passportLibraries: {
+      passportChecksLogicAddress: await contracts.libraries.passportChecksLogic.getAddress(),
+      passportConfiguratorAddress: await contracts.libraries.passportConfigurator.getAddress(),
+      passportEntityLogicAddress: await contracts.libraries.passportEntityLogic.getAddress(),
+      passportDelegationLogicAddress: await contracts.libraries.passportDelegationLogic.getAddress(),
+      passportPersonhoodLogicAddress: await contracts.libraries.passportPersonhoodLogic.getAddress(),
+      passportPoPScoreLogicAddress: await contracts.libraries.passportPoPScoreLogic.getAddress(),
+      passportSignalingLogicAddress: await contracts.libraries.passportSignalingLogic.getAddress(),
+      passportWhitelistAndBlacklistLogicAddress:
+        await contracts.libraries.passportWhitelistAndBlacklistLogic.getAddress(),
     },
   }
 

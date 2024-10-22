@@ -27,7 +27,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployAndUpgrade, deployProxy, upgradeProxy } from "../scripts/helpers"
 import { B3TRGovernor, GalaxyMember, VoterRewards, VoterRewardsV1, XAllocationVoting } from "../typechain-types"
 
-describe("VoterRewards - @shard2", () => {
+describe("VoterRewards - @shard7", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { voterRewards, owner, galaxyMember, emissions } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -650,11 +650,9 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
-      await xAllocationVoting
-        .connect(voter1)
-        .castVote(roundId, [app1, app2], [ethers.parseEther("1000"), ethers.parseEther("0")])
+      await xAllocationVoting.connect(voter1).castVote(roundId, [app1], [ethers.parseEther("1000")])
       await xAllocationVoting
         .connect(voter2)
         .castVote(roundId, [app1, app2], [ethers.parseEther("200"), ethers.parseEther("100")])
@@ -768,9 +766,7 @@ describe("VoterRewards - @shard2", () => {
 
       expect(await xAllocationVoting.roundDeadline(roundId)).to.lt(await emissions.getNextCycleBlock())
 
-      await xAllocationVoting
-        .connect(voter1)
-        .castVote(roundId2, [app1, app2], [ethers.parseEther("0"), ethers.parseEther("1000")])
+      await xAllocationVoting.connect(voter1).castVote(roundId2, [app2], [ethers.parseEther("1000")])
       await xAllocationVoting
         .connect(voter2)
         .castVote(roundId2, [app1, app2], [ethers.parseEther("100"), ethers.parseEther("500")])
@@ -888,7 +884,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(otherAccount.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(otherAccount, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -1085,7 +1081,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(otherAccount.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(otherAccount, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -1275,7 +1271,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -1528,7 +1524,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1658,7 +1654,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -1795,7 +1791,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1961,7 +1957,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -2096,7 +2092,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -2251,7 +2247,7 @@ describe("VoterRewards - @shard2", () => {
       const proposalStart = await xAllocationVoting.roundSnapshot(roundId)
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await expect(
         voterRewards
@@ -2286,7 +2282,7 @@ describe("VoterRewards - @shard2", () => {
       await emissions.connect(minterAccount).start()
 
       await veBetterPassport.whitelist(otherAccount.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       const totalVotesBefore = await voterRewards.cycleToTotal(1)
 
@@ -2334,7 +2330,7 @@ describe("VoterRewards - @shard2", () => {
 
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, proposar, description, functionToCall, [])
@@ -2387,7 +2383,7 @@ describe("VoterRewards - @shard2", () => {
 
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
@@ -2461,7 +2457,7 @@ describe("VoterRewards - @shard2", () => {
 
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -2594,7 +2590,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions() // round 1
@@ -2764,7 +2760,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -2938,7 +2934,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions() // round 1
@@ -3115,7 +3111,7 @@ describe("VoterRewards - @shard2", () => {
       await veBetterPassport.whitelist(voter1.address)
       await veBetterPassport.whitelist(voter2.address)
       await veBetterPassport.whitelist(voter3.address)
-      await veBetterPassport.toggleWhitelistCheck()
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions() // round 1

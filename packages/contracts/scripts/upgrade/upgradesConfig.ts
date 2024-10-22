@@ -16,11 +16,12 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   },
   "B3TR Governor": {
     name: "b3tr-governor",
-    versions: ["v2", "v3"],
+    versions: ["v2", "v3", "v4"],
     configAddressField: "b3trGovernorAddress",
     descriptions: {
-      v2: "Fix XAllocation voting so that a user cannot vote for an XApp with a vote weight less than 1",
+      v2: "Give ability to contract admins to call governance only functions",
       v3: "Add the ability to toggle quadratic voting on and off.",
+      v4: "Integrate VeBetterPassport contract",
     },
   },
   "XAllocation Voting": {
@@ -28,7 +29,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
     configAddressField: "xAllocationVotingContractAddress",
     versions: ["v2"],
     descriptions: {
-      v2: "Fix XAllocation voting so that a user cannot vote for an XApp with a vote weight less than 1",
+      v2: "Integrate VeBetterPassport contract",
     },
   },
   "XAllocation Pool": {
@@ -42,9 +43,26 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "X2Earn Rewards Pool": {
     name: "x2earn-rewards-pool",
     configAddressField: "x2EarnRewardsPoolContractAddress",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Add onchain impacts and proof generation",
+      v3: "Integrate VeBetterPassport contract",
+    },
+  },
+  Emissions: {
+    name: "emissions",
+    configAddressField: "emissionsContractAddress",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Aligns the emissions with the expected B3TR emissions schedule",
+    },
+  },
+  "VeBetter Passport": {
+    name: "vebetter-passport",
+    configAddressField: "veBetterPassportContractAddress",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Prevent delegation of passports to entities",
     },
   },
 } as const

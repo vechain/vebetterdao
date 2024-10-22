@@ -1,4 +1,4 @@
-import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show } from "@chakra-ui/react"
+import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { UilArrowRight } from "@iconscout/react-unicons"
 import { useCurrentAllocationsRoundId } from "@/api"
@@ -9,6 +9,8 @@ export const CastVoteBanner = () => {
   const { t } = useTranslation()
   const { data: roundId } = useCurrentAllocationsRoundId()
 
+  const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
+
   const router = useRouter()
   const handleVote = useCallback(() => {
     router.push(`/rounds/${roundId}/vote`)
@@ -16,7 +18,7 @@ export const CastVoteBanner = () => {
 
   return (
     <Card bg="#B1F16C" borderRadius="xl" w="full">
-      <CardBody position="relative" overflow="hidden" borderRadius="xl">
+      <CardBody position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
         <Image
           src="/images/community-green-blob.png"
           alt="cloud-background"
@@ -30,11 +32,10 @@ export const CastVoteBanner = () => {
             <HStack flex={1}>
               <VStack gap={2} align="stretch" flex={1}>
                 <Text size="xs" color="#3A5798" fontWeight="600">
-                  {t("ROUND")} {"#"}
-                  {roundId}
+                  {t("CAST YOUR VOTE NOW! ⚖️")}
                 </Text>
                 <Heading fontSize="lg" fontWeight="700" color="#0C2D75">
-                  {t("Time to cast your vote and earn rewards!")}
+                  {t("It’s time to make your voice heard in this round and earn exciting rewards!")}
                 </Heading>
               </VStack>
               <Button
@@ -48,14 +49,13 @@ export const CastVoteBanner = () => {
           </HStack>
         </Show>
         <Show below="md">
-          <HStack align="stretch" zIndex={1} position="relative" h="full">
+          <HStack align="stretch" zIndex={1} position="relative" w="full" alignItems={"center"}>
             <VStack gap={2} align="stretch" justify={"space-between"}>
-              <Text size="xs" color="#3A5798" fontWeight="600">
-                {t("ROUND")} {"#"}
-                {roundId}
+              <Text fontSize={12} color="#3A5798" fontWeight="600">
+                {t("CAST YOUR VOTE NOW! ⚖️")}
               </Text>
-              <Heading fontSize="lg" fontWeight="700" color="#0C2D75">
-                {t("Time to cast your vote and earn rewards!")}
+              <Heading fontSize="18" fontWeight="700" color="#0C2D75">
+                {t("It’s time to make your voice heard in this round and earn exciting rewards!")}
               </Heading>
               <Button
                 variant="primaryAction"
@@ -65,7 +65,12 @@ export const CastVoteBanner = () => {
                 <Text fontWeight="500">{t("See round")}</Text>
               </Button>
             </VStack>
-            <Image src="/images/vote-icon.png" alt="Vote" w={24} h={24} />
+            <Image
+              src="/images/vote-icon.png"
+              alt="Vote"
+              w={isVerySmallMobile ? 16 : 24}
+              h={isVerySmallMobile ? 16 : 24}
+            />
           </HStack>
         </Show>
       </CardBody>

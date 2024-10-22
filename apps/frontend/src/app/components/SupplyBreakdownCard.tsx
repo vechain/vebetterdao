@@ -59,7 +59,7 @@ export const SupplyBreakdownCard = () => {
   }, [data])
 
   return (
-    <Card variant="baseWithBorder">
+    <Card variant="baseWithBorder" w="full">
       <CardHeader>
         <HStack w="full" justify={"space-between"}>
           <Heading size="md">{t("Supply breakdown")}</Heading>
@@ -77,21 +77,21 @@ export const SupplyBreakdownCard = () => {
         <VStack spacing={4} align="flex-start">
           <Grid templateColumns={["repeat(1, 2fr)", "repeat(3, 1fr)"]} w="full" gap={4}>
             <VStack spacing={1} align="flex-start">
-              <Text size="sm" fontWeight="400">
+              <Text size={["sm", "sm", "xs"]} fontWeight="400">
                 {t("B3TR in circulation")}
               </Text>
               <Skeleton isLoaded={!!data}>
-                <Heading size="lg" color={"#004CFC"}>
+                <Heading size={["lg", "lg", "md"]} color={"#004CFC"}>
                   {formattedB3trCirculatingSupply}
                 </Heading>
               </Skeleton>
             </VStack>
             <VStack spacing={1} align="flex-start">
-              <Text size="sm" fontWeight="400">
+              <Text size={["sm", "sm", "xs"]} fontWeight="400">
                 {t("VOT3 in circulation")}
               </Text>
               <Skeleton isLoaded={!!data}>
-                <Heading size="lg" color={"#3DBA67"}>
+                <Heading size={["lg", "lg", "md"]} color={"#3DBA67"}>
                   {formattedVot3CirculatingSupply}
                 </Heading>
               </Skeleton>

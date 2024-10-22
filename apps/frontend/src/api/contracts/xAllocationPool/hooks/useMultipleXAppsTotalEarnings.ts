@@ -33,6 +33,7 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
       const res = await thor.explain(earningsPerAppClauses).execute()
 
       const decoded = res.map((r, index) => {
+        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
         const decoded = roundEarningsAbi.decode(r.data)
         const parsedAmount = ethers.formatEther(decoded[0])
         const appId = appIds[index]

@@ -13,6 +13,7 @@
     "RUN_SIMULATION",
     "SHARD",
     "CONTRACT_TO_UPGRADE",
+    "CONTRACT_TO_DEPLOY",
     "CONTRACT_VERSION"
   ],
   "pipeline": {
@@ -101,6 +102,12 @@
     "deploy": {
       "dependsOn": ["^deploy", "@repo/config#check-or-generate-local-config"]
     },
+    "deploy:local": {
+      "dependsOn": ["^deploy:local"]
+    },
+    "deploy:testnet-staging": {
+      "dependsOn": ["^deploy:testnet-staging"]
+    },
     "deploy:testnet": {
       "dependsOn": ["^deploy:testnet"]
     },
@@ -123,6 +130,23 @@
     },
     "upgrade:contract:mainnet": {
       "dependsOn": ["upgrade:contract"]
+    },
+    "deploy:contract": {
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "outputs": [],
+      "cache": false
+    },
+    "deploy:contract:local": {
+      "dependsOn": ["deploy:contract"]
+    },
+    "deploy:contract:testnet-staging": {
+      "dependsOn": ["deploy:contract"]
+    },
+    "deploy:contract:testnet": {
+      "dependsOn": ["deploy:contract"]
+    },
+    "deploy:contract:mainnet": {
+      "dependsOn": ["deploy:contract"]
     },
     "start-round:testnet": {
       "dependsOn": ["@repo/config#check-or-generate-local-config"],

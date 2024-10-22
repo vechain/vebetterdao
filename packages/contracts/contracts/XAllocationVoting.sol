@@ -46,6 +46,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  *
  * ----- Version 2 -----
  * - Integrated VeBetterPassport
+ * - Added check to ensure that the vote weight for an XApp cast by a user is greater than the voting threshold
  */
 contract XAllocationVoting is
   XAllocationVotingGovernor,
@@ -138,7 +139,7 @@ contract XAllocationVoting is
   }
 
   function initializeV2(IVeBetterPassport _veBetterPassport) public reinitializer(2) {
-    __XAllocationVotingGovernor_init_v2(_veBetterPassport);
+    __ExternalContracts_init_v2(_veBetterPassport);
   }
 
   // ---------- Setters ---------- //
@@ -207,6 +208,13 @@ contract XAllocationVoting is
    */
   function updateQuorumNumerator(uint256 newQuorumNumerator) public virtual override onlyRole(GOVERNANCE_ROLE) {
     super.updateQuorumNumerator(newQuorumNumerator);
+  }
+
+  /**
+   * @dev Set the VeBetterPassport contract
+   */
+  function setVeBetterPassport(IVeBetterPassport newVeBetterPassport) external onlyRole(GOVERNANCE_ROLE) {
+    _setVeBetterPassport(newVeBetterPassport);
   }
 
   // ---------- Getters ---------- //

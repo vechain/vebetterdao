@@ -1,16 +1,18 @@
 import { useSustainabilityActions } from "@/api"
 import { UserSustainabilityOverviewStats } from "@/components"
-import { BetterActionCard } from "@/components/Sustainability/BetterActionCard"
 import { Card, CardBody, Heading, VStack, Text, Button } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useTranslation } from "react-i18next"
 import { NoActionsCard } from "./NoActionsCard"
 import { useRouter } from "next/navigation"
+import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
+import { NoAccountActionCard } from "./NoAccountActionCard"
 
 type Props = {
+  renderActions?: boolean
   maxActions?: number
 }
-export const YourBetterActionsCard = ({ maxActions = 3 }: Props) => {
+export const YourBetterActionsCard = ({ renderActions = true, maxActions = 3 }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const router = useRouter()
@@ -34,23 +36,31 @@ export const YourBetterActionsCard = ({ maxActions = 3 }: Props) => {
             </Text>
           </VStack>
           <VStack spacing={6} align="stretch">
-            <UserSustainabilityOverviewStats />
-            <VStack spacing={4} align="stretch">
-              <Heading size="sm" fontWeight={600}>
-                {t("Last actions")}
-              </Heading>
-              {lastActionsData.length > 0 ? (
-                lastActionsData.map((action, index) => <BetterActionCard key={index} action={action} />)
-              ) : (
-                <NoActionsCard />
-              )}
+            {account && <UserSustainabilityOverviewStats />}
+            {renderActions && (
+              <VStack spacing={4} align="stretch">
+                {account ? (
+                  <>
+                    <Heading size="sm" fontWeight={600}>
+                      {t("Last actions")}
+                    </Heading>
+                    {lastActionsData.length > 0 ? (
+                      lastActionsData.map((action, index) => <BetterActionCard key={index} action={action} />)
+                    ) : (
+                      <NoActionsCard />
+                    )}
 
-              {lastActionsData.length > maxActions && (
-                <Button variant={"primaryLink"} size={"sm"} onClick={() => router.push("/profile")}>
-                  {t("See all")}
-                </Button>
-              )}
-            </VStack>
+                    {lastActionsData.length > maxActions && (
+                      <Button variant={"primaryLink"} size={"sm"} onClick={() => router.push("/profile")}>
+                        {t("See all")}
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <NoAccountActionCard />
+                )}
+              </VStack>
+            )}
           </VStack>
         </VStack>
       </CardBody>

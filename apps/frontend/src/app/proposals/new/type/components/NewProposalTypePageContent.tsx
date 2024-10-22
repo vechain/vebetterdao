@@ -6,6 +6,8 @@ import { useProposalFormStore } from "@/store"
 import { useTranslation } from "react-i18next"
 import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuard"
 import { TFunction } from "i18next"
+import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
 
 export const Steps: (t: TFunction<"translation", undefined>) => (Omit<CheckableCardProps, "checked" | "onChange"> & {
   route: string
@@ -44,6 +46,7 @@ export const NewProposalTypePageContent = () => {
   const onContinue = useCallback(() => {
     if (selectedRoute) {
       clearData()
+      AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_TYPE))
       router.push(selectedRoute)
     }
   }, [router, selectedRoute, clearData])

@@ -10,11 +10,11 @@ import {
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { X2EarnRewardsPool } from "../typechain-types"
-import { X2EarnRewardsPoolV1 } from "../typechain-types/contracts/depreceated/V1"
+import { X2EarnRewardsPool, X2EarnRewardsPoolV2 } from "../typechain-types"
+import { X2EarnRewardsPoolV1 } from "../typechain-types/contracts/deprecated/V1"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
-describe("X2EarnRewardsPool - @shard3", function () {
+describe("X2EarnRewardsPool - @shard7", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {
@@ -54,8 +54,10 @@ describe("X2EarnRewardsPool - @shard3", function () {
     })
 
     it("Version should be set correctly", async function () {
-      const { x2EarnRewardsPool } = await getOrDeployContractInstances({ forceDeploy: false })
-      expect(await x2EarnRewardsPool.version()).to.equal("2")
+      const { x2EarnRewardsPool } = await getOrDeployContractInstances({
+        forceDeploy: false,
+      })
+      expect(await x2EarnRewardsPool.version()).to.equal("3")
     })
 
     it("X2EarnApps should be set correctly", async function () {
@@ -173,17 +175,32 @@ describe("X2EarnRewardsPool - @shard3", function () {
       // upgrade to new version
       const x2EarnRewardsPoolV2 = (await upgradeProxy(
         "X2EarnRewardsPoolV1",
-        "X2EarnRewardsPool",
+        "X2EarnRewardsPoolV2",
         await x2EarnRewardsPoolV1.getAddress(),
         [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS, await veBetterPassport.getAddress()],
         {
           version: 2,
         },
-      )) as X2EarnRewardsPool
+      )) as X2EarnRewardsPoolV2
 
       expect(await x2EarnRewardsPoolV2.version()).to.equal("2")
       expect(await x2EarnRewardsPoolV2.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPoolV2.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
+
+      // upgrade to new version
+      const x2EarnRewardsPoolV3 = (await upgradeProxy(
+        "X2EarnRewardsPoolV2",
+        "X2EarnRewardsPool",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [await veBetterPassport.getAddress()],
+        {
+          version: 3,
+        },
+      )) as X2EarnRewardsPool
+
+      expect(await x2EarnRewardsPoolV3.version()).to.equal("3")
+      expect(await x2EarnRewardsPoolV3.x2EarnApps()).to.equal(x2EarnAppsAddress)
+      expect(await x2EarnRewardsPoolV3.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
     })
 
     it("Should not be able to upgrade if initial impact keys is empty", async () => {
@@ -224,7 +241,7 @@ describe("X2EarnRewardsPool - @shard3", function () {
       await expect(
         upgradeProxy(
           "X2EarnRewardsPoolV1",
-          "X2EarnRewardsPool",
+          "X2EarnRewardsPoolV2",
           await x2EarnRewardsPoolV1.getAddress(),
           [owner.address, [], await veBetterPassport.getAddress()],
           {
@@ -232,6 +249,90 @@ describe("X2EarnRewardsPool - @shard3", function () {
           },
         ),
       ).to.be.reverted
+
+      await expect(
+        upgradeProxy(
+          "X2EarnRewardsPoolV1",
+          "X2EarnRewardsPoolV2",
+          await x2EarnRewardsPoolV1.getAddress(),
+          [owner.address, ["impact"]],
+          {
+            version: 2,
+          },
+        ),
+      ).to.not.be.reverted
+    })
+
+    it("Should not be able to upgrade to V3 if veBetterPassport address is empty", async () => {
+      const config = createLocalConfig()
+      const { owner, b3tr, x2EarnApps, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
+        owner.address,
+        owner.address,
+        owner.address,
+        await b3tr.getAddress(),
+        await x2EarnApps.getAddress(),
+      ])) as X2EarnRewardsPoolV1
+
+      expect(await x2EarnRewardsPoolV1.version()).to.equal("1")
+
+      // update x2EarnApps address
+      await x2EarnRewardsPoolV1.connect(owner).setX2EarnApps(await x2EarnApps.getAddress())
+
+      // deposit some funds
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      // create app
+      await x2EarnApps.addApp(owner.address, owner.address, "My app", "metadataURI")
+      await x2EarnApps.addApp(owner.address, owner.address, "My app #2", "metadataURI")
+
+      await b3tr.connect(owner).approve(await x2EarnRewardsPoolV1.getAddress(), amount)
+      await x2EarnRewardsPoolV1.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
+
+      expect(await b3tr.balanceOf(await x2EarnRewardsPoolV1.getAddress())).to.equal(amount)
+
+      // upgrade to new version
+      await expect(
+        upgradeProxy(
+          "X2EarnRewardsPoolV1",
+          "X2EarnRewardsPoolV2",
+          await x2EarnRewardsPoolV1.getAddress(),
+          [owner.address, config.X_2_EARN_INITIAL_IMPACT_KEYS],
+          {
+            version: 2,
+          },
+        ),
+      ).to.not.be.reverted
+
+      await expect(
+        upgradeProxy(
+          "X2EarnRewardsPoolV2",
+          "X2EarnRewardsPool",
+          await x2EarnRewardsPoolV1.getAddress(),
+          [ZERO_ADDRESS],
+          {
+            version: 3,
+          },
+        ),
+      ).to.be.reverted
+
+      await expect(
+        upgradeProxy(
+          "X2EarnRewardsPoolV2",
+          "X2EarnRewardsPool",
+          await x2EarnRewardsPoolV1.getAddress(),
+          [owner.address],
+          {
+            version: 3,
+          },
+        ),
+      ).to.not.be.reverted
     })
   })
 
@@ -339,6 +440,18 @@ describe("X2EarnRewardsPool - @shard3", function () {
         value: ethers.parseEther("0"),
         data: "0x1234", // some data
       })
+    })
+
+    it("Can get and set veBetterPassport address", async function () {
+      const { x2EarnRewardsPool, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      await x2EarnRewardsPool.connect(owner).setVeBetterPassport(owner.address)
+
+      const updatedVeBetterPassportAddress = await x2EarnRewardsPool.veBetterPassport()
+      expect(updatedVeBetterPassportAddress).to.eql(owner.address)
+
+      // only admin can set the veBetterPassport address
+      await expect(x2EarnRewardsPool.connect(otherAccount).setVeBetterPassport(otherAccount.address)).to.be.reverted
     })
   })
 
@@ -1648,7 +1761,6 @@ describe("X2EarnRewardsPool - @shard3", function () {
       minterAccount,
     } = await getOrDeployContractInstances({
       forceDeploy: true,
-      bootstrapAndStartEmissions: true,
     })
 
     const teamWallet = otherAccounts[10]
@@ -1696,14 +1808,14 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
     expect(registeredActionEvent).not.to.eql([])
     expect(registeredActionEvent?.args[0]).to.equal(user.address)
-    expect(registeredActionEvent?.args[1]).to.equal(appId)
-    expect(registeredActionEvent?.args[2]).to.equal(roundId)
+    expect(registeredActionEvent?.args[1]).to.equal(user.address)
+    expect(registeredActionEvent?.args[2]).to.equal(appId)
+    expect(registeredActionEvent?.args[3]).to.equal(roundId)
 
     // check that the action score is correct
     const appSecurity = await veBetterPassport.appSecurity(appId)
     const multiplier = await veBetterPassport.securityMultiplier(appSecurity)
-
-    expect(registeredActionEvent?.args[3]).to.equal(multiplier)
+    expect(registeredActionEvent?.args[4]).to.equal(multiplier)
 
     // check that the user score is correct
     expect(await veBetterPassport.userAppTotalScore(user.address, appId)).to.equal(multiplier)
@@ -1748,12 +1860,13 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
     expect(registeredActionEvent2).not.to.eql([])
     expect(registeredActionEvent2?.args[0]).to.equal(user.address)
-    expect(registeredActionEvent2?.args[1]).to.equal(appId)
-    expect(registeredActionEvent2?.args[2]).to.equal(roundId)
+    expect(registeredActionEvent2?.args[1]).to.equal(user.address)
+    expect(registeredActionEvent2?.args[2]).to.equal(appId)
+    expect(registeredActionEvent2?.args[3]).to.equal(roundId)
 
     // check that the action score is correct
     const supposedScore = multiplier + multiplier
-    expect(registeredActionEvent2?.args[3]).to.equal(multiplier)
+    expect(registeredActionEvent2?.args[4]).to.equal(multiplier)
 
     // check that the user score is correct
     expect(await veBetterPassport.userAppTotalScore(user.address, appId)).to.equal(supposedScore)
@@ -1789,42 +1902,17 @@ describe("X2EarnRewardsPool - @shard3", function () {
 
     expect(registeredActionEvent3).not.to.eql([])
     expect(registeredActionEvent3?.args[0]).to.equal(user.address)
-    expect(registeredActionEvent3?.args[1]).to.equal(appId)
-    expect(registeredActionEvent3?.args[2]).to.equal(roundId)
+    expect(registeredActionEvent3?.args[1]).to.equal(user.address)
+    expect(registeredActionEvent3?.args[2]).to.equal(appId)
+    expect(registeredActionEvent3?.args[3]).to.equal(roundId)
 
     // check that the action score is correct
     const supposedScore2 = supposedScore + multiplier
-    expect(registeredActionEvent3?.args[3]).to.equal(multiplier)
+    expect(registeredActionEvent3?.args[4]).to.equal(multiplier)
 
     // check that the user score is correct
     expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(multiplier)
     expect(await veBetterPassport.userTotalScore(user.address)).to.equal(supposedScore2)
     expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
-
-    await veBetterPassport.setRoundsForCumulativeScore(4)
-
-    await waitForRoundToEnd(roundId)
-    await xAllocationVoting.connect(owner).startNewRound()
-    roundId = await xAllocationVoting.currentRoundId()
-
-    // event is emitted when using depraceted distributeReward function
-    await x2EarnRewardsPool.connect(owner).distributeRewardDeprecated(appId, ethers.parseEther("1"), user.address, "")
-
-    await waitForRoundToEnd(roundId)
-    await xAllocationVoting.connect(owner).startNewRound()
-    roundId = await xAllocationVoting.currentRoundId()
-
-    await waitForRoundToEnd(roundId)
-    await xAllocationVoting.connect(owner).startNewRound()
-    roundId = await xAllocationVoting.currentRoundId()
-
-    await veBetterPassport.setAppSecurity(appId, 1)
-
-    await waitForRoundToEnd(roundId)
-    await xAllocationVoting.connect(owner).startNewRound()
-    roundId = await xAllocationVoting.currentRoundId()
-
-    // event is emitted when using depraceted distributeReward function
-    await x2EarnRewardsPool.connect(owner).distributeRewardDeprecated(appId, ethers.parseEther("1"), user.address, "")
   })
 })

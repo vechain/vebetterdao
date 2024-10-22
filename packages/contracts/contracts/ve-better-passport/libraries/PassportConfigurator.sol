@@ -25,15 +25,18 @@ pragma solidity 0.8.20;
 
 import { PassportStorageTypes } from "./PassportStorageTypes.sol";
 import { PassportTypes } from "./PassportTypes.sol";
+import { PassportClockLogic } from "./PassportClockLogic.sol";
 import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
 import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
-import { INodeManagement } from "../../interfaces/INodeManagement.sol";
 import { IGalaxyMember } from "../../interfaces/IGalaxyMember.sol";
+import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title PassportConfigurator Library
 /// @notice Library for managing the configuration of a Passport contract.
 /// @dev This library provides functions to set and get various configuration parameters and contracts used by the Passport contract.
 library PassportConfigurator {
+  using Checkpoints for Checkpoints.Trace208;
+
   // ---------- Getters ---------- //
   /// @notice Gets the x2EarnApps contract address
   function getX2EarnApps(PassportStorageTypes.PassportStorage storage self) internal view returns (IX2EarnApps) {
@@ -41,19 +44,10 @@ library PassportConfigurator {
   }
 
   /// @notice Gets the xAllocationVoting contract address
-  function getXAllocationVoting(PassportStorageTypes.PassportStorage storage self)
-    internal
-    view
-    returns (IXAllocationVotingGovernor)
-  {
-    return self.xAllocationVoting;
-  }
-
-  /// @notice Gets the node management contract address
-  function getNodeManagement(
+  function getXAllocationVoting(
     PassportStorageTypes.PassportStorage storage self
-  ) internal view returns (INodeManagement) {
-    return self.nodeManagement;
+  ) internal view returns (IXAllocationVotingGovernor) {
+    return self.xAllocationVoting;
   }
 
   /// @notice Gets the galaxy member contract address
@@ -71,7 +65,6 @@ library PassportConfigurator {
     // Initialize the external contracts
     setX2EarnApps(self, initializationData.x2EarnApps);
     setXAllocationVoting(self, initializationData.xAllocationVoting);
-    setNodeManagement(self, initializationData.nodeManagement);
     setGalaxyMember(self, initializationData.galaxyMember);
 
     // Initialize the bot signals threshold
@@ -81,7 +74,8 @@ library PassportConfigurator {
     self.minimumGalaxyMemberLevel = initializationData.minimumGalaxyMemberLevel;
 
     // Initialize the participant score threshold to be considered human by Personhood checks
-    self.popScoreThreshold = initializationData.popScoreThreshold;
+    self.popScoreThreshold.push(PassportClockLogic.clock(), 0);
+
     // Initialize the number of rounds for cumulative score
     self.roundsForCumulativeScore = initializationData.roundsForCumulativeScore;
 
@@ -91,7 +85,14 @@ library PassportConfigurator {
     self.securityMultiplier[PassportTypes.APP_SECURITY.HIGH] = 400;
 
     // Decay
-    self.decayRate = 20;
+    self.decayRate = initializationData.decayRate;
+
+    // Set the threshold percentage of blacklisted or whitelisted entities to consider a passport user as blacklisted or whitelisted
+    self.blacklistThreshold = initializationData.blacklistThreshold;
+    self.whitelistThreshold = initializationData.whitelistThreshold;
+
+    // Set the maximum number of entities per passport
+    self.maxEntitiesPerPassport = initializationData.maxEntitiesPerPassport;
   }
 
   /// @notice Sets the X2EarnApps contract address
@@ -113,18 +114,6 @@ library PassportConfigurator {
     require(address(_xAllocationVoting) != address(0), "VeBetterPassport: xAllocationVoting is the zero address");
 
     self.xAllocationVoting = _xAllocationVoting;
-  }
-
-  /// @notice Sets the node management contract address
-  /// @param self - the PassportStorage struct
-  /// @param _nodeManagement - the node management contract address
-  function setNodeManagement(
-    PassportStorageTypes.PassportStorage storage self,
-    INodeManagement _nodeManagement
-  ) public {
-    require(address(_nodeManagement) != address(0), "VeBetterPassport: nodeManagement is the zero address");
-
-    self.nodeManagement = _nodeManagement;
   }
 
   /// @notice Sets the galaxy member contract address

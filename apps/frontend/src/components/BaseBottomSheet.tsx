@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react"
+import { Box, useColorModeValue, VisuallyHidden } from "@chakra-ui/react"
 import { Drawer } from "vaul"
 
 type Props = {
@@ -6,10 +6,23 @@ type Props = {
   onClose: () => void
   height?: string
   children: React.ReactNode
+  ariaTitle: string
+  ariaDescription: string
+  isDismissable?: boolean
 }
-export const BaseBottomSheet = ({ isOpen, onClose, children, height }: Props) => {
+
+export const BaseBottomSheet = ({
+  isOpen,
+  onClose,
+  children,
+  ariaTitle = "BottomSheet",
+  ariaDescription,
+  isDismissable = true,
+}: Props) => {
+  const bgColor = useColorModeValue("#F9FAFB", "#1A1A1A")
   return (
     <Drawer.Root
+      dismissible={isDismissable}
       shouldScaleBackground
       open={isOpen}
       onOpenChange={open => {
@@ -30,24 +43,36 @@ export const BaseBottomSheet = ({ isOpen, onClose, children, height }: Props) =>
           }}
         />
         <Drawer.Content
+          aria-description={ariaDescription}
+          aria-describedby={ariaTitle}
           style={{
             zIndex: 3,
-            backgroundColor: "#F9FAFB",
+            backgroundColor: bgColor,
             borderRadius: "10px 10px 0 0",
             position: "fixed",
             bottom: 0,
             left: 0,
             right: 0,
-            height,
+            height: "auto", // Let the content define the height initially
+            maxHeight: "90vh", // Limit to a maximum of 90% of the viewport height
+            overflow: "hidden", // Prevent content from overflowing out of the drawer
+            display: "flex",
+            flexDirection: "column",
           }}>
+          <VisuallyHidden>
+            <Drawer.Title>{ariaTitle}</Drawer.Title>
+          </VisuallyHidden>
+
+          {/* Scrollable content area */}
           <div
             style={{
-              backgroundColor: "#fff",
+              backgroundColor: bgColor,
               borderRadius: "10px 10px 0 0",
               flex: 1,
+              overflowY: "auto", // Only scroll if content overflows
               padding: "1rem",
             }}>
-            <Box mx={"auto"} w={"34px"} h={"5px"} bg={"#D7D6D4"} mb={8} rounded={"full"} />
+            <Box mx={"auto"} w={"34px"} h={"5px"} bg={"#D7D6D4"} mb={4} rounded={"full"} />
             {children}
           </div>
         </Drawer.Content>

@@ -1,34 +1,31 @@
-import { useSustainabilityUserOverview } from "@/api"
+import { useSustainabilitySingleUserOverview } from "@/api"
 import { B3TRIcon } from "@/components/Icons"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { Heading, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { IoGridOutline } from "react-icons/io5"
 
+// Maximum precision of 4 decimals. Must also round down
+const compactFormatter = getCompactFormatter(2)
+
 export const UserSustainabilityOverviewStats = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
-  const { data, isLoading } = useSustainabilityUserOverview({
+  const { data, isLoading } = useSustainabilitySingleUserOverview({
     wallet: account ?? undefined,
   })
 
   //TOOD: Indexer should return aggregated data
   const parsedData = useMemo(() => {
-    const defaultData = { totalActions: 0, totalRewards: 0, apps: new Set<string>() }
-    const userOverview = data?.pages.map(page => page.data).flat() ?? []
-    if (!userOverview) return defaultData
-
-    return userOverview.reduce((acc, curr) => {
-      return {
-        ...acc,
-        totalActions: acc.totalActions + (curr?.actionsRewarded ?? 0),
-        totalRewards: acc.totalRewards + (curr?.totalRewardAmount ?? 0),
-        totalApps: acc.apps.add(curr?.entity ?? ""),
-      }
-    }, defaultData)
+    return {
+      totalActions: data?.actionsRewarded ?? 0,
+      totalRewards: data?.totalRewardAmount ?? 0,
+      apps: data?.uniqueXAppInteractions.length ?? 0,
+    }
   }, [data])
 
   return (
@@ -38,7 +35,7 @@ export const UserSustainabilityOverviewStats = () => {
           <Icon as={LeafIcon} color="#6DCB09" boxSize={4} />
           <Skeleton isLoaded={!isLoading}>
             <Heading size="md" fontWeight="700" color="#004CFC">
-              {parsedData.totalActions}
+              {compactFormatter.format(parsedData.totalActions)}
             </Heading>
           </Skeleton>
         </HStack>
@@ -52,12 +49,12 @@ export const UserSustainabilityOverviewStats = () => {
           <B3TRIcon boxSize={4} />
           <Skeleton isLoaded={!isLoading}>
             <Heading size="md" fontWeight="700" color="#004CFC">
-              {parsedData.totalRewards}
+              {compactFormatter.format(parsedData.totalRewards)}
             </Heading>
           </Skeleton>
         </HStack>
         <Text fontSize={["xs", "sm"]} fontWeight={400} color="#6A6A6A">
-          {t("total b3tr earn")}
+          {t("total B3TR earnt")}
         </Text>
       </VStack>
       <VStack align="flex-start" gap={1}>
@@ -65,7 +62,7 @@ export const UserSustainabilityOverviewStats = () => {
           <Icon as={IoGridOutline} color="#6DCB09" boxSize={4} />
           <Skeleton isLoaded={!isLoading}>
             <Heading size="md" fontWeight="700" color="#004CFC">
-              {parsedData.apps.size}
+              {parsedData.apps}
             </Heading>
           </Skeleton>
         </HStack>

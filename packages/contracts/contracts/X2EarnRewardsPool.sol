@@ -46,6 +46,7 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  *
  * ----- Version 2 -----
  * - Added onchain proof and impact tracking
+ * ----- Version 3 -----
  * - Added VeBetterPassport integration
  */
 contract X2EarnRewardsPool is
@@ -127,6 +128,13 @@ contract X2EarnRewardsPool is
     }
 
     $.veBetterPassport = _veBetterPassport;
+  }
+
+  function initializeV3(address _veBetterPassport) external reinitializer(3) {
+    require(address(_veBetterPassport) != address(0), "X2EarnRewardsPool: veBetterPassport is the zero address");
+
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    $.veBetterPassport = IVeBetterPassport(_veBetterPassport);
   }
 
   // ---------- Modifiers ---------- //
@@ -491,7 +499,7 @@ contract X2EarnRewardsPool is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "2";
+    return "3";
   }
 
   /**
