@@ -34,32 +34,29 @@ export const simulateAppInteractions = async (
   admin: TestPk,
   accounts: SeedAccount[],
   apps: App[],
+  randomize: boolean = false,
 ) => {
   console.log("Simulating app interactions...")
   const clauses: TransactionClause[] = []
 
   // for each account register a random amount of actions with random apps
   for (const account of accounts) {
-    const randomAmount = Math.floor(Math.random() * 10) + 1
+    //random amount of actions or 3
+    const randomAmount = randomize ? Math.floor(Math.random() * 10) + 1 : 3
     for (let i = 0; i < randomAmount; i++) {
-      // a random integer between 1 and 5
-      const randomRound = Math.floor(Math.random() * 5) + 1
+      // choose a random app
+      const randomApp = apps[Math.floor(Math.random() * apps.length)]
+      const appId = ethers.keccak256(ethers.toUtf8Bytes(randomApp.name))
 
-      for (let j = 0; j < randomRound; j++) {
-        // choose a random app
-        const randomApp = apps[Math.floor(Math.random() * apps.length)]
-        const appId = ethers.keccak256(ethers.toUtf8Bytes(randomApp.name))
-
-        clauses.push(
-          clauseBuilder.functionInteraction(
-            await veBetterPassport.getAddress(),
-            coder
-              .createInterface(JSON.stringify(VeBetterPassport__factory.abi))
-              .getFunction("registerAction") as FunctionFragment,
-            [account.key.address, appId],
-          ),
-        )
-      }
+      clauses.push(
+        clauseBuilder.functionInteraction(
+          await veBetterPassport.getAddress(),
+          coder
+            .createInterface(JSON.stringify(VeBetterPassport__factory.abi))
+            .getFunction("registerAction") as FunctionFragment,
+          [account.key.address, appId],
+        ),
+      )
     }
   }
 
