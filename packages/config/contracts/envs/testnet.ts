@@ -80,8 +80,16 @@ export function createTestnetConfig() {
     TREASURY_TRANSFER_LIMIT_VTHO: BigInt("0"),
     TREASURY_TRANSFER_LIMIT_VOT3: BigInt("0"),
 
-    // Version 2
+    // Endorsement
     VECHAIN_NODES_CONTRACT_ADDRESS: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302", // The contract address of the VeChainNodes contract on mainnet
     XAPP_GRACE_PERIOD: 120960, // 2 weeks -> max time to be unendorsed by node before being removed from the XAlloction voting rounds
+    // Passport
+    VEPASSPORT_BOT_SIGNALING_THRESHOLD: 2, // Address must be signaled more than X times to be considered a bot
+    VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE: 12,
+    VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL: 2,
+    VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE: 20,
+    VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE: 20,
+    VEPASSPORT_PASSPORT_MAX_ENTITIES: 5,
+    VEPASSPORT_DECAY_RATE: 0,
   })
 }

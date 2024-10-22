@@ -24,7 +24,7 @@
 pragma solidity 0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
+import { X2EarnAppsUpgradeableV1 } from "../X2EarnAppsUpgradeableV1.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
@@ -36,7 +36,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
  * we also have a checkpoint to track the changes for each single app (not for the array which is always up to date).
  * This is needed beacuse other contracts (like XAllocationPool) may want to know if a specific app was eligible for voting at a specific timepoint.
  */
-abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgradeable {
+abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgradeableV1 {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints used to track eligibility changes over time
 
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.VoteEligibility

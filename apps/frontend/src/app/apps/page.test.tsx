@@ -36,7 +36,7 @@ describe("Apps", () => {
       data: [
         {
           id: "1",
-          votes: "16347455",
+          percentage: 20,
           app: {
             id: "1",
             name: "GreenCart",

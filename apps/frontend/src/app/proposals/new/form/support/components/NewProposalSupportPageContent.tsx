@@ -25,6 +25,9 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
+import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
+
 type FormData = {
   amount: number
 }
@@ -56,6 +59,10 @@ export const NewProposalSupportPageContent = () => {
     (data: FormData) => {
       setData({ depositAmount: data.amount })
       router.push("/proposals/new/form/preview-and-publish")
+      AnalyticsUtils.trackEvent(
+        buttonClicked,
+        buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_SUPPORT),
+      )
     },
     [router, setData],
   )

@@ -53,6 +53,14 @@ interface IX2EarnRewardsPool {
   );
 
   /**
+   * @dev Event emitted when the proof of sustainability external contract call fails.
+   *
+   * @param reason The reason for the failure.
+   * @param lowLevelData The low level data returned by the external contract.
+   */
+  event RegisterActionFailed(string reason, bytes lowLevelData);
+
+  /**
    * @dev Retrieves the current version of the contract.
    *
    * @return The version of the contract.
@@ -120,7 +128,7 @@ interface IX2EarnRewardsPool {
     bytes32 appId,
     uint256 amount,
     address receiver,
-    string[] memory proofTypes, // link, photo, video, text, etc.
+    string[] memory proofTypes, // link, image, video, text, etc.
     string[] memory proofValues, // "https://...", "Qm...", etc.,
     string[] memory impactCodes, // carbon, water, etc.
     uint256[] memory impactValues, // 100, 200, etc.,

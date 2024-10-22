@@ -29,6 +29,8 @@ import { coinFlipAnimation, pulseAnimation } from "@/constants"
 import { NFTWithRings } from "./components"
 import { CustomModalContent } from "../CustomModalContent"
 import { useTranslation } from "react-i18next"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
 
 // Convert Button to a motion component
 const MotionImage = motion(Image)
@@ -54,6 +56,7 @@ export const GmNFT = () => {
   const handleFreeMint = useCallback(() => {
     freeMint({})
     onOpen()
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CLAIM_NFT))
   }, [freeMint, onOpen])
 
   const isClaimDisabled = useMemo(() => {

@@ -1,3 +1,3 @@
 module.exports = {
-  skipFiles: ["mocks", "deprecated"],
+  skipFiles: ["mocks", "deprecated", "interfaces", "test", "templates"],
 }

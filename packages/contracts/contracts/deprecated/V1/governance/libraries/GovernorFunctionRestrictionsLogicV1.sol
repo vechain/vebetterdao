@@ -25,7 +25,7 @@ pragma solidity 0.8.20;
 
 import { GovernorStorageTypesV1 } from "./GovernorStorageTypesV1.sol";
 
-/// @title GovernorFunctionRestrictionsLogicV1
+/// @title GovernorFunctionRestrictionsLogic
 /// @notice Library for managing function restrictions within the Governor contract.
 /// @dev This library provides functions to whitelist or restrict functions that can be called by proposals.
 library GovernorFunctionRestrictionsLogicV1 {

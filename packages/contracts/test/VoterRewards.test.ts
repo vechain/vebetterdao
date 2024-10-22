@@ -40,7 +40,7 @@ import {
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { endorseApp } from "./helpers/xnodes"
 
-describe("VoterRewards - @shard2", () => {
+describe("VoterRewards - @shard7", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { voterRewards, owner, galaxyMember, emissions } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -473,6 +473,15 @@ describe("VoterRewards - @shard2", () => {
         governorQuorumLogicLibV1,
         governorStateLogicLibV1,
         governorVotesLogicLibV1,
+        governorClockLogicLibV3,
+        governorConfiguratorLibV3,
+        governorDepositLogicLibV3,
+        governorFunctionRestrictionsLogicLibV3,
+        governorProposalLogicLibV3,
+        governorQuorumLogicLibV3,
+        governorStateLogicLibV3,
+        governorVotesLogicLibV3,
+        veBetterPassport,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -513,8 +522,8 @@ describe("VoterRewards - @shard2", () => {
           [
             {
               vot3Token: await vot3.getAddress(),
-              quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
-              initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
+              quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE, // quorum percentage
+              initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1, // X Alloc voting period
               timeLock: await timeLock.getAddress(),
               voterRewards: await voterRewardsV1.getAddress(),
               emissions: await emissions.getAddress(),
@@ -527,14 +536,16 @@ describe("VoterRewards - @shard2", () => {
               votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
             },
           ],
-          [],
+          [await veBetterPassport.getAddress()],
         ],
-        {},
+        {
+          versions: [undefined, 2],
+        },
       )) as XAllocationVoting
 
       // Deploy Governor
       const governor = (await deployAndUpgrade(
-        ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernor"],
+        ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernor"],
         [
           [
             {
@@ -542,10 +553,10 @@ describe("VoterRewards - @shard2", () => {
               timelock: await timeLock.getAddress(),
               xAllocationVoting: await xAllocationVoting.getAddress(),
               b3tr: await b3tr.getAddress(),
-              quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
-              initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
-              initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
-              initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+              quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
+              initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
+              initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
+              initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
               voterRewards: await voterRewardsV1.getAddress(),
               isFunctionRestrictionEnabled: true,
             },
@@ -559,9 +570,10 @@ describe("VoterRewards - @shard2", () => {
           ],
           [],
           [],
+          [await veBetterPassport.getAddress()],
         ],
         {
-          versions: [undefined, 2, 3],
+          versions: [undefined, 2, 3, 4],
           libraries: [
             {
               GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
@@ -582,6 +594,16 @@ describe("VoterRewards - @shard2", () => {
               GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
               GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
               GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+            },
+            {
+              GovernorClockLogicV3: await governorClockLogicLibV3.getAddress(),
+              GovernorConfiguratorV3: await governorConfiguratorLibV3.getAddress(),
+              GovernorDepositLogicV3: await governorDepositLogicLibV3.getAddress(),
+              GovernorFunctionRestrictionsLogicV3: await governorFunctionRestrictionsLogicLibV3.getAddress(),
+              GovernorProposalLogicV3: await governorProposalLogicLibV3.getAddress(),
+              GovernorQuorumLogicV3: await governorQuorumLogicLibV3.getAddress(),
+              GovernorStateLogicV3: await governorStateLogicLibV3.getAddress(),
+              GovernorVotesLogicV3: await governorVotesLogicLibV3.getAddress(),
             },
             {
               GovernorClockLogic: await governorClockLogicLib.getAddress(),
@@ -658,9 +680,12 @@ describe("VoterRewards - @shard2", () => {
 
       expect(await xAllocationVoting.roundDeadline(roundId)).to.lt(await emissions.getNextCycleBlock())
 
-      await xAllocationVoting
-        .connect(voter1)
-        .castVote(roundId, [app1, app2], [ethers.parseEther("1000"), ethers.parseEther("0")])
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
+
+      await xAllocationVoting.connect(voter1).castVote(roundId, [app1], [ethers.parseEther("1000")])
       await xAllocationVoting
         .connect(voter2)
         .castVote(roundId, [app1, app2], [ethers.parseEther("200"), ethers.parseEther("100")])
@@ -774,9 +799,7 @@ describe("VoterRewards - @shard2", () => {
 
       expect(await xAllocationVoting.roundDeadline(roundId)).to.lt(await emissions.getNextCycleBlock())
 
-      await xAllocationVoting
-        .connect(voter1)
-        .castVote(roundId2, [app1, app2], [ethers.parseEther("0"), ethers.parseEther("1000")])
+      await xAllocationVoting.connect(voter1).castVote(roundId2, [app2], [ethers.parseEther("1000")])
       await xAllocationVoting
         .connect(voter2)
         .castVote(roundId2, [app1, app2], [ethers.parseEther("100"), ethers.parseEther("500")])
@@ -929,6 +952,7 @@ describe("VoterRewards - @shard2", () => {
         b3tr,
         minterAccount,
         x2EarnApps,
+        veBetterPassport,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -946,6 +970,11 @@ describe("VoterRewards - @shard2", () => {
       await endorseApp(app2, otherAccounts[1])
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(otherAccount, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -1118,6 +1147,7 @@ describe("VoterRewards - @shard2", () => {
         b3tr,
         minterAccount,
         x2EarnApps,
+        veBetterPassport,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1139,6 +1169,11 @@ describe("VoterRewards - @shard2", () => {
       await endorseApp(app2, otherAccounts[1])
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(otherAccount, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -1309,6 +1344,7 @@ describe("VoterRewards - @shard2", () => {
         b3tr,
         minterAccount,
         x2EarnApps,
+        veBetterPassport,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1326,6 +1362,11 @@ describe("VoterRewards - @shard2", () => {
 
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -1531,6 +1572,7 @@ describe("VoterRewards - @shard2", () => {
         minterAccount,
         governor,
         treasury,
+        veBetterPassport,
         x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1583,6 +1625,11 @@ describe("VoterRewards - @shard2", () => {
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1670,6 +1717,7 @@ describe("VoterRewards - @shard2", () => {
         governor,
         treasury,
         x2EarnApps,
+        veBetterPassport,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1717,6 +1765,11 @@ describe("VoterRewards - @shard2", () => {
       await endorseApp(app2, otherAccounts[1])
       const voter2 = otherAccounts[3]
       const voter3 = otherAccounts[4]
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -1813,6 +1866,7 @@ describe("VoterRewards - @shard2", () => {
         b3tr,
         minterAccount,
         governor,
+        veBetterPassport,
         treasury,
         x2EarnApps,
       } = await getOrDeployContractInstances({
@@ -1867,6 +1921,11 @@ describe("VoterRewards - @shard2", () => {
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1985,6 +2044,7 @@ describe("VoterRewards - @shard2", () => {
         minterAccount,
         governor,
         treasury,
+        veBetterPassport,
         x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2038,6 +2098,11 @@ describe("VoterRewards - @shard2", () => {
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -2125,6 +2190,7 @@ describe("VoterRewards - @shard2", () => {
         minterAccount,
         governor,
         treasury,
+        veBetterPassport,
         x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2179,6 +2245,11 @@ describe("VoterRewards - @shard2", () => {
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -2319,7 +2390,7 @@ describe("VoterRewards - @shard2", () => {
     })
 
     it("Should revert if vote is registered by non vote registrar", async () => {
-      const { voterRewards, otherAccount, xAllocationVoting, emissions, minterAccount } =
+      const { voterRewards, otherAccount, xAllocationVoting, emissions, minterAccount, veBetterPassport } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -2332,6 +2403,9 @@ describe("VoterRewards - @shard2", () => {
       const roundId = await xAllocationVoting.currentRoundId()
 
       const proposalStart = await xAllocationVoting.roundSnapshot(roundId)
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleCheck(1)
 
       await expect(
         voterRewards
@@ -2354,15 +2428,19 @@ describe("VoterRewards - @shard2", () => {
     })
 
     it("Should not register any vote if voting power is zero", async () => {
-      const { voterRewards, otherAccount, owner, emissions, minterAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { voterRewards, otherAccount, owner, emissions, minterAccount, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), otherAccount.address)
 
       await bootstrapEmissions()
 
       await emissions.connect(minterAccount).start()
+
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleCheck(1)
 
       const totalVotesBefore = await voterRewards.cycleToTotal(1)
 
@@ -2381,13 +2459,17 @@ describe("VoterRewards - @shard2", () => {
     const functionToCall = "tokenDetails"
 
     it("Should calculate rewards correctly for governance voting", async () => {
-      const config = createLocalConfig()
-      const { otherAccounts, b3tr, B3trContract, voterRewards } = await getOrDeployContractInstances({
-        config: {
-          ...config,
-          EMISSIONS_CYCLE_DURATION: 200,
-          B3TR_GOVERNOR_DEPOSIT_THRESHOLD: 0,
-        },
+      const {
+        otherAccounts,
+        otherAccount: voter1,
+        b3tr,
+        governor,
+        B3trContract,
+        veBetterPassport,
+        emissions,
+        voterRewards,
+        minterAccount,
+      } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -2401,6 +2483,10 @@ describe("VoterRewards - @shard2", () => {
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(proposar, "1000")
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.toggleCheck(1)
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, proposar, description, functionToCall, [])
@@ -2431,7 +2517,15 @@ describe("VoterRewards - @shard2", () => {
       config.B3TR_GOVERNOR_VOTING_THRESHOLD = ethers.parseEther("0")
       config.INITIAL_X_ALLOCATION = BigInt("66666666666666666666666")
 
-      const { otherAccounts, b3tr, B3trContract, voterRewards } = await getOrDeployContractInstances({
+      const {
+        otherAccounts,
+        otherAccount: voter1,
+        b3tr,
+        governor,
+        B3trContract,
+        veBetterPassport,
+        voterRewards,
+      } = await getOrDeployContractInstances({
         forceDeploy: true,
         config: {
           ...config,
@@ -2446,6 +2540,10 @@ describe("VoterRewards - @shard2", () => {
       const voter2 = otherAccounts[1]
 
       await getVot3Tokens(voter1, "1000")
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.toggleCheck(1)
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [])
@@ -2476,6 +2574,7 @@ describe("VoterRewards - @shard2", () => {
         emissions,
         minterAccount,
         owner,
+        veBetterPassport,
         voterRewards,
         treasury,
         xAllocationVoting,
@@ -2524,6 +2623,10 @@ describe("VoterRewards - @shard2", () => {
       const voter1 = otherAccounts[0]
       const voter2 = otherAccounts[1]
       const proposar = otherAccounts[2]
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -2590,6 +2693,7 @@ describe("VoterRewards - @shard2", () => {
         otherAccounts,
         b3tr,
         B3trContract,
+        veBetterPassport,
         emissions,
         minterAccount,
         owner,
@@ -2659,7 +2763,13 @@ describe("VoterRewards - @shard2", () => {
       await getVot3Tokens(voter3, "1000")
       await getVot3Tokens(proposar, "2000")
 
-      await waitForNextCycle()
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
+
+      // Bootstrap emissions
+      await bootstrapAndStartEmissions() // round 1
 
       // Quadratic rewarding enabled
       expect(await voterRewards.isQuadraticRewardingDisabledForCurrentCycle()).to.be.false
@@ -2772,6 +2882,7 @@ describe("VoterRewards - @shard2", () => {
         voterRewards,
         vot3,
         xAllocationVoting,
+        veBetterPassport,
         treasury,
         x2EarnApps,
       } = await getOrDeployContractInstances({
@@ -2834,6 +2945,11 @@ describe("VoterRewards - @shard2", () => {
       const voter2 = otherAccounts[1]
       const voter3 = otherAccounts[2]
       const proposar = otherAccounts[3]
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
 
       await getVot3Tokens(voter1, "1000")
       await getVot3Tokens(voter2, "1000")
@@ -2934,6 +3050,7 @@ describe("VoterRewards - @shard2", () => {
         xAllocationVoting,
         treasury,
         x2EarnApps,
+        veBetterPassport,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config: {
@@ -2994,6 +3111,11 @@ describe("VoterRewards - @shard2", () => {
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
       await getVot3Tokens(proposar, "2000")
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions() // round 1
@@ -3111,6 +3233,7 @@ describe("VoterRewards - @shard2", () => {
         vechainNodesMock,
         owner,
         voterRewards,
+        veBetterPassport,
         xAllocationVoting,
         treasury,
         x2EarnApps,
@@ -3176,6 +3299,11 @@ describe("VoterRewards - @shard2", () => {
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
       await getVot3Tokens(proposar, "2000")
+
+      await veBetterPassport.whitelist(voter1.address)
+      await veBetterPassport.whitelist(voter2.address)
+      await veBetterPassport.whitelist(voter3.address)
+      await veBetterPassport.toggleCheck(1)
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions() // round 1

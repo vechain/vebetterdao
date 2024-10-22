@@ -23,15 +23,15 @@
 
 pragma solidity 0.8.20;
 
-import "./x-allocation-voting-governance/XAllocationVotingGovernor.sol";
-import "./x-allocation-voting-governance/modules/RoundVotesCountingUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/VotesUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/VotesQuorumFractionUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/VotingSettingsUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/RoundEarningsSettingsUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeable.sol";
-import "./x-allocation-voting-governance/modules/ExternalContractsUpgradeable.sol";
+import "./x-allocation-voting-governance/XAllocationVotingGovernorV1.sol";
+import "./x-allocation-voting-governance/modules/RoundVotesCountingUpgradeableV1.sol";
+import "./x-allocation-voting-governance/modules/VotesUpgradeableV1.sol";
+import "./x-allocation-voting-governance/modules/VotesQuorumFractionUpgradeableV1.sol";
+import "./x-allocation-voting-governance/modules/VotingSettingsUpgradeableV1.sol";
+import "./x-allocation-voting-governance/modules/RoundEarningsSettingsUpgradeableV1.sol";
+import "./x-allocation-voting-governance/modules/RoundFinalizationUpgradeableV1.sol";
+import "./x-allocation-voting-governance/modules/RoundsStorageUpgradeableV1.sol";
+import "./x-allocation-voting-governance/modules/ExternalContractsUpgradeableV1.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
@@ -45,15 +45,15 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * @dev The contract is using AccessControl to handle roles for admin, governance, and round-starting operations.
  */
 contract XAllocationVotingV1 is
-  XAllocationVotingGovernor,
-  VotingSettingsUpgradeable,
-  RoundVotesCountingUpgradeable,
-  VotesUpgradeable,
-  VotesQuorumFractionUpgradeable,
-  RoundEarningsSettingsUpgradeable,
-  ExternalContractsUpgradeable,
-  RoundsStorageUpgradeable,
-  RoundFinalizationUpgradeable,
+  XAllocationVotingGovernorV1,
+  VotingSettingsUpgradeableV1,
+  RoundVotesCountingUpgradeableV1,
+  VotesUpgradeableV1,
+  VotesQuorumFractionUpgradeableV1,
+  RoundEarningsSettingsUpgradeableV1,
+  ExternalContractsUpgradeableV1,
+  RoundsStorageUpgradeableV1,
+  RoundFinalizationUpgradeableV1,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
@@ -87,12 +87,12 @@ contract XAllocationVotingV1 is
     uint256 quorumPercentage;
     uint32 initialVotingPeriod;
     address timeLock;
-    IVoterRewards voterRewards;
-    IEmissions emissions;
+    IVoterRewardsV1 voterRewards;
+    IEmissionsV1 emissions;
     address[] admins;
     address upgrader;
     address contractsAddressManager;
-    IX2EarnApps x2EarnAppsAddress;
+    IX2EarnAppsV1 x2EarnAppsAddress;
     uint256 baseAllocationPercentage;
     uint256 appSharesCap;
     uint256 votingThreshold;
@@ -111,7 +111,7 @@ contract XAllocationVotingV1 is
     require(address(data.vot3Token) != address(0), "XAllocationVoting: invalid VOT3 token address");
     require(address(data.voterRewards) != address(0), "XAllocationVoting: invalid VoterRewards address");
     require(address(data.emissions) != address(0), "XAllocationVoting: invalid Emissions address");
-    
+
     __XAllocationVotingGovernor_init("XAllocationVoting");
     __ExternalContracts_init(data.x2EarnAppsAddress, data.emissions, data.voterRewards);
     __VotingSettings_init(data.initialVotingPeriod);
@@ -138,21 +138,21 @@ contract XAllocationVotingV1 is
   /**
    * @dev Set the address of the X2EarnApps contract
    */
-  function setX2EarnAppsAddress(IX2EarnApps newX2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setX2EarnAppsAddress(IX2EarnAppsV1 newX2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setX2EarnApps(newX2EarnApps);
   }
 
   /**
    * @dev Set the address of the Emissions contract
    */
-  function setEmissionsAddress(IEmissions newEmissions) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setEmissionsAddress(IEmissionsV1 newEmissions) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setEmissions(newEmissions);
   }
 
   /**
    * @dev Set the address of the VoterRewards contract
    */
-  function setVoterRewardsAddress(IVoterRewards newVoterRewards) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setVoterRewardsAddress(IVoterRewardsV1 newVoterRewards) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     _setVoterRewards(newVoterRewards);
   }
 
@@ -213,19 +213,24 @@ contract XAllocationVotingV1 is
 
   // ---------- Required overrides ---------- //
 
-  function votingPeriod() public view override(XAllocationVotingGovernor, VotingSettingsUpgradeable) returns (uint256) {
+  function votingPeriod()
+    public
+    view
+    override(XAllocationVotingGovernorV1, VotingSettingsUpgradeableV1)
+    returns (uint256)
+  {
     return super.votingPeriod();
   }
 
   function quorum(
     uint256 blockNumber
-  ) public view override(XAllocationVotingGovernor, VotesQuorumFractionUpgradeable) returns (uint256) {
+  ) public view override(XAllocationVotingGovernorV1, VotesQuorumFractionUpgradeableV1) returns (uint256) {
     return super.quorum(blockNumber);
   }
 
   function supportsInterface(
     bytes4 interfaceId
-  ) public view override(AccessControlUpgradeable, XAllocationVotingGovernor) returns (bool) {
+  ) public view override(AccessControlUpgradeable, XAllocationVotingGovernorV1) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 

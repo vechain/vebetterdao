@@ -27,7 +27,7 @@ import { GovernorStorageTypesV1 } from "./GovernorStorageTypesV1.sol";
 import { GovernorStateLogicV1 } from "./GovernorStateLogicV1.sol";
 import { GovernorTypesV1 } from "./GovernorTypesV1.sol";
 
-/// @title GovernorDepositLogicV1 Library
+/// @title GovernorDepositLogic Library
 /// @notice Library for managing deposits related to proposals in the Governor contract.
 /// @dev This library provides functions to deposit and withdraw tokens for proposals, and to get deposit-related information.
 library GovernorDepositLogicV1 {

@@ -24,10 +24,10 @@
 pragma solidity 0.8.20;
 
 import { GovernorTypesV1 } from "./GovernorTypesV1.sol";
-import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
-import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
-import { IB3TR } from "../../interfaces/IB3TR.sol";
-import { IVOT3 } from "../../interfaces/IVOT3.sol";
+import { IVoterRewards } from"../../../../interfaces/IVoterRewards.sol";
+import { IXAllocationVotingGovernor } from"../../../../interfaces/IXAllocationVotingGovernor.sol";
+import { IB3TR } from"../../../../interfaces/IB3TR.sol";
+import { IVOT3 } from"../../../../interfaces/IVOT3.sol";
 import { DoubleEndedQueue } from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";

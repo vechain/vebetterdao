@@ -101,25 +101,25 @@ describe("NewProposalDiscussion", async () => {
     await waitFor(() => expect(mockRouterPush).toHaveBeenCalledWith("/proposals"))
   }) // redirects to /proposals if no account connected
 
-  describe("solo-staging", () => {
+  describe("testnet-staging", () => {
     it("no functions selected - clicks continue - error is showed", async () => {
-      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet-staging")
 
-      await checkCardContractsRendered("solo-staging")
+      await checkCardContractsRendered("testnet-staging")
     }) // no functions selected - clicks continue - error is showed
 
     it("all functions selected - clicks continue - error is showed", async () => {
-      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet-staging")
 
-      await checkCardContractsRendered("solo-staging", true)
+      await checkCardContractsRendered("testnet-staging", true)
     }) // all functions selected - clicks continue - error is showed
 
     it("add and remove all functions - clicks continue - error is showed", async () => {
-      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "solo-staging")
+      vi.stubEnv("NEXT_PUBLIC_APP_ENV", "testnet-staging")
 
-      await checkCardContractsRendered("solo-staging", true, true)
+      await checkCardContractsRendered("testnet-staging", true, true)
     }) //add and remove all functions - clicks continue - error is showed
-  }) //solo-staging
+  }) //testnet-staging
 
   describe("testnet", () => {
     it("no functions selected - clicks continue - error is showed", async () => {

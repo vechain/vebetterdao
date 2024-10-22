@@ -1,6 +1,7 @@
 import {
   ProposalState,
   useGetVotesOnBlock,
+  useIsUserPerson,
   useProposalSnapshot,
   useProposalState,
   useUserSingleProposalVoteEvent,
@@ -22,6 +23,7 @@ export const CastProposalVoteButton = ({ proposalId }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { open: openConnectModal } = useWalletModal()
+  const { data: isPerson, isLoading: isPersonLoading } = useIsUserPerson()
 
   const { data: userVote, isLoading: userVoteLoading } = useUserSingleProposalVoteEvent(proposalId)
   const { data: state } = useProposalState(proposalId)
@@ -49,8 +51,16 @@ export const CastProposalVoteButton = ({ proposalId }: Props) => {
   }, [account, goToProposalVote, openConnectModal])
 
   const shouldSeeVoteButton = useMemo(() => {
-    return state === ProposalState.Active && !!account && !userVote && !userVoteLoading && hasVotesAtSnapshot
-  }, [state, account, userVote, userVoteLoading, hasVotesAtSnapshot])
+    return (
+      state === ProposalState.Active &&
+      !!account &&
+      !userVote &&
+      !userVoteLoading &&
+      hasVotesAtSnapshot &&
+      !isPersonLoading &&
+      isPerson
+    )
+  }, [state, account, userVote, userVoteLoading, hasVotesAtSnapshot, isPerson, isPersonLoading])
 
   if (shouldSeeVoteButton)
     return (

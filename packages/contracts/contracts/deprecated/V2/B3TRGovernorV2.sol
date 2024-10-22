@@ -29,17 +29,17 @@ import { GovernorVotesLogicV1 } from "../V1/governance/libraries/GovernorVotesLo
 import { GovernorQuorumLogicV1 } from "../V1/governance/libraries/GovernorQuorumLogicV1.sol";
 import { GovernorDepositLogicV1 } from "../V1/governance/libraries/GovernorDepositLogicV1.sol";
 import { GovernorStorageTypesV1 } from "../V1/governance/libraries/GovernorStorageTypesV1.sol";
-import { GovernorClockLogicV1 } from "../V1/governance/libraries/GovernorClockLogicV1.sol";
+import { GovernorClockLogicV1} from "../V1/governance/libraries/GovernorClockLogicV1.sol";
 import { GovernorFunctionRestrictionsLogicV1 } from "../V1/governance/libraries/GovernorFunctionRestrictionsLogicV1.sol";
 import { GovernorGovernanceLogicV1 } from "../V1/governance/libraries/GovernorGovernanceLogicV1.sol";
 import { GovernorConfiguratorV1 } from "../V1/governance/libraries/GovernorConfiguratorV1.sol";
 import { GovernorTypesV1 } from "../V1/governance/libraries/GovernorTypesV1.sol";
 import { GovernorStorageV1 } from "../V1/governance/GovernorStorageV1.sol";
-import { IVoterRewards } from "../V1/interfaces/IVoterRewards.sol";
-import { IVOT3 } from "../V1/interfaces/IVOT3.sol";
-import { IB3TR } from "../V1/interfaces/IB3TR.sol";
-import { IB3TRGovernor } from "../V1/interfaces/IB3TRGovernor.sol";
-import { IXAllocationVotingGovernor } from "../V1/interfaces/IXAllocationVotingGovernor.sol";
+import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
+import { IVOT3 } from "../../interfaces/IVOT3.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
+import { IB3TRGovernorV1 } from "../V1/interfaces/IB3TRGovernorV1.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
@@ -72,7 +72,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * - Replaced onlyGovernance modifier with onlyRoleOrGovernance which checks if the caller has the DEFAULT_ADMIN_ROLE role or if the function is called through a governance proposal
  */
 contract B3TRGovernorV2 is
-  IB3TRGovernor,
+  IB3TRGovernorV1,
   GovernorStorageV1,
   AccessControlUpgradeable,
   UUPSUpgradeable,
@@ -894,7 +894,7 @@ contract B3TRGovernorV2 is
     bytes4 interfaceId
   ) public pure override(IERC165, AccessControlUpgradeable) returns (bool) {
     return
-      interfaceId == type(IB3TRGovernor).interfaceId ||
+      interfaceId == type(IB3TRGovernorV1).interfaceId ||
       interfaceId == type(IERC1155Receiver).interfaceId ||
       interfaceId == type(IERC165).interfaceId;
   }

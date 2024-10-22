@@ -1,15 +1,15 @@
 import { Page } from "playwright"
-import { expect } from "@playwright/test"
+import { expect, Locator, test } from "@playwright/test"
 import { veWorldMockClient } from "@vechain/veworld-mock-playwright"
 import BigNumber from "bignumber.js"
 import { SwapDialog } from "./swapDialog"
-import { test, Locator } from "@playwright/test"
+import { BasePage } from "./basePage"
+import { trimAddress } from "../utils/strings"
 
 /**
  * Dashboard page model
  */
-export class DashboardPage {
-  private page: Page
+export class DashboardPage extends BasePage {
   readonly connectWalletButton: Locator
   readonly veWorldOption: Locator
   readonly disconnectOption: Locator
@@ -21,14 +21,14 @@ export class DashboardPage {
   readonly mintNFTButton: Locator
 
   constructor(page: Page) {
-    this.page = page
+    super(page)
 
     this.connectWalletButton = this.page.getByTestId("connect-wallet")
-    this.veWorldOption = this.page.locator("div.modal-body button.card.LIGHT")
-    this.disconnectOption = this.page.locator("div.modal-footer button.LIGHT")
-    this.b3trBalanceText = this.page.locator('xpath=//p[contains(text(),"B3TR Tokens")]/preceding-sibling::h2')
-    this.vot3BalanceText = this.page.locator('xpath=//p[contains(text(),"VOT3 Tokens")]/preceding-sibling::h2')
-    this.swapButton = this.page.locator('xpath=//button[contains(text(), "Swap")]')
+    this.veWorldOption = this.page.locator("vdk-source-card", { hasText: "VeWorld" })
+    this.disconnectOption = this.page.getByRole("button", { name: "Disconnect" })
+    this.b3trBalanceText = this.page.getByTestId("B3TR-balance")
+    this.vot3BalanceText = this.page.getByTestId("VOT3-balance")
+    this.swapButton = this.page.getByTestId("convert-tokens-button")
     this.claimRewardsButton = this.page.locator('xpath=//button[contains(text(), "Claim")]')
     this.votingRewardsAmount = "voting-rewards"
     this.mintNFTButton = this.page.locator('xpath=//button[contains(text(), "Mint now")]')
@@ -38,16 +38,16 @@ export class DashboardPage {
    * Connect wallet
    * @returns address of connected wallet
    */
-  async connectWallet(): Promise<string> {
+  async connectWallet(accountIndex?: number): Promise<string> {
     return await test.step("Connect Wallet", async () => {
       await expect(this.connectWalletButton.first()).toBeVisible()
       await this.connectWalletButton.first().click()
       await this.veWorldOption.first().click()
-      await expect(this.connectWalletButton.first()).not.toBeVisible()
       const mockAddress = await veWorldMockClient.getSignerAddress(this.page)
       console.log("connected wallet address", mockAddress)
-      const trimmedAddress = mockAddress.toLowerCase().slice(-6)
-      await expect(this.page.locator(`xpath=//p[contains(text(), "${trimmedAddress}")]`).first()).toBeVisible()
+      await this.reloadWithReconnect(accountIndex)
+      await expect(this.connectWalletButton.first()).not.toBeVisible()
+      await expect(this.page.getByTestId("wallet-address")).toHaveText(trimAddress(mockAddress))
       return mockAddress
     })
   }
@@ -58,10 +58,9 @@ export class DashboardPage {
    */
   async disconnectWallet(address: string) {
     await test.step("Disconnect Wallet", async () => {
-      const trimmedAddress = address.toLowerCase().slice(-6)
-      await expect(this.page.locator(`xpath=//p[contains(text(), "${trimmedAddress}")]`).first()).toBeVisible()
-      await this.page.locator(`xpath=//p[contains(text(), "${trimmedAddress}")]`).first().click()
+      await this.page.locator(`[data-cy='address-icon-${address}']`).click()
       await this.disconnectOption.first().click()
+      await this.page.reload()
       await expect(this.connectWalletButton.first()).toBeVisible()
     })
   }
@@ -89,9 +88,9 @@ export class DashboardPage {
    * Expect B3TR balance to be equal to expected balance
    * @param expectedBalance expected B3TR balance
    */
-  async expectB3TRBalance(expectedBalance: BigNumber) {
+  async expectB3TRBalance(expectedBalance: string) {
     await test.step(`Expect B3TR balance = ${expectedBalance}`, async () => {
-      await expect(this.b3trBalanceText.first()).toHaveText(expectedBalance.toString())
+      await expect(this.b3trBalanceText.first()).toHaveText(expectedBalance)
     })
   }
 
@@ -122,8 +121,7 @@ export class DashboardPage {
           throw new Error("VOT3 balance not found")
         })()
       const fullTextBalance = textBalance.replace("K", "000")
-      const balance = new BigNumber(fullTextBalance)
-      return balance
+      return new BigNumber(fullTextBalance)
     })
   }
 
@@ -131,9 +129,9 @@ export class DashboardPage {
    * Expect VOT3 balance to be equal to expected balance
    * @param expectedBalance expected VOT3 balance
    */
-  async expectVOT3Balance(expectedBalance: BigNumber) {
+  async expectVOT3Balance(expectedBalance: string) {
     await test.step(`Expect VOT3 balance = ${expectedBalance}`, async () => {
-      await expect(this.vot3BalanceText.first()).toHaveText(expectedBalance.toString())
+      await expect(this.vot3BalanceText.first()).toHaveText(expectedBalance)
     })
   }
 
@@ -142,8 +140,8 @@ export class DashboardPage {
    */
   async clickSwapButton(): Promise<SwapDialog> {
     return await test.step("Click Swap button", async () => {
-      await this.page.locator('xpath=//button[contains(text(), "Swap")]').first().click()
-      await expect(this.page.locator('section[role="dialog"]').first()).toBeVisible()
+      await this.page.getByRole("button", { name: "Convert tokens" }).first().click()
+      await expect(this.swapButton).toBeVisible()
       return new SwapDialog(this.page)
     })
   }

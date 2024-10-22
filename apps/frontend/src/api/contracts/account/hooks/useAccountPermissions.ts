@@ -15,6 +15,7 @@ type useAccountPermissionsResponse = {
   isAdminOfTimeLock: boolean
   isAdminOfTreasury: boolean
   isAdminOfX2EarnApps: boolean
+  isAdminOfVeBetterPassport: boolean
   isMinterOfB3tr: boolean
   isMinterOfEmissions: boolean
   isUpgraderOfEmissions: boolean
@@ -26,7 +27,13 @@ type useAccountPermissionsResponse = {
   isUpgraderOfTimelock: boolean
   isUpgraderOfTreasury: boolean
   isUpgraderOfX2EarnApps: boolean
+  isUpgraderOfVeBetterPassport: boolean
   isProposalExecutor: boolean
+  isPassportSettingsManager: boolean
+  isPassportBotSignaler: boolean
+  isPassportActionRegistrar: boolean
+  isPassportScoreManager: boolean
+  isPassportWhitelister: boolean
 }
 
 /**
@@ -57,6 +64,11 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
   const { data: isAdminOfTimeLock } = useHasRole("DEFAULT_ADMIN_ROLE", config.timelockContractAddress, address)
   const { data: isAdminOfTreasury } = useHasRole("DEFAULT_ADMIN_ROLE", config.treasuryContractAddress, address)
   const { data: isAdminOfX2EarnApps } = useHasRole("DEFAULT_ADMIN_ROLE", config.x2EarnAppsContractAddress, address)
+  const { data: isAdminOfVeBetterPassport } = useHasRole(
+    "DEFAULT_ADMIN_ROLE",
+    config.veBetterPassportContractAddress,
+    address,
+  )
 
   const { data: isMinterOfB3tr } = useHasRole("MINTER_ROLE", config.b3trContractAddress, address)
   const { data: isMinterOfEmissions } = useHasRole("MINTER_ROLE", config.emissionsContractAddress, address)
@@ -72,13 +84,41 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
     config.xAllocationPoolContractAddress,
     address,
   )
+
   const { data: isUpgraderOfGalaxyMember } = useHasRole("UPGRADER_ROLE", config.galaxyMemberContractAddress, address)
   const { data: isUpgraderOfVot3 } = useHasRole("UPGRADER_ROLE", config.vot3ContractAddress, address)
   const { data: isUpgraderOfVoterRewards } = useHasRole("UPGRADER_ROLE", config.voterRewardsContractAddress, address)
   const { data: isUpgraderOfTimelock } = useHasRole("UPGRADER_ROLE", config.timelockContractAddress, address)
   const { data: isUpgraderOfTreasury } = useHasRole("UPGRADER_ROLE", config.treasuryContractAddress, address)
   const { data: isUpgraderOfX2EarnApps } = useHasRole("UPGRADER_ROLE", config.x2EarnAppsContractAddress, address)
+  const { data: isUpgraderOfVeBetterPassport } = useHasRole(
+    "UPGRADER_ROLE",
+    config.veBetterPassportContractAddress,
+    address,
+  )
   const { data: isProposalExecutor } = useHasRole("PROPOSAL_EXECUTOR_ROLE", config.b3trGovernorAddress, address)
+
+  const { data: isPassportSettingsManager } = useHasRole(
+    "SETTINGS_MANAGER_ROLE",
+    config.veBetterPassportContractAddress,
+    address,
+  )
+  const { data: isPassportBotSignaler } = useHasRole("SIGNALER_ROLE", config.veBetterPassportContractAddress, address)
+  const { data: isPassportActionRegistrar } = useHasRole(
+    "ACTION_REGISTRAR_ROLE",
+    config.veBetterPassportContractAddress,
+    address,
+  )
+  const { data: isPassportWhitelister } = useHasRole(
+    "WHITELISTER_ROLE",
+    config.veBetterPassportContractAddress,
+    address,
+  )
+  const { data: isPassportScoreManager } = useHasRole(
+    "ACTION_SCORE_MANAGER_ROLE",
+    config.veBetterPassportContractAddress,
+    address,
+  )
 
   return useMemo(() => {
     return {
@@ -91,7 +131,9 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
         isAdminOfGalaxyMember ||
         isAdminOfVot3 ||
         isAdminOfVoterRewards ||
-        isAdminOfX2EarnApps,
+        isAdminOfX2EarnApps ||
+        isAdminOfVeBetterPassport ||
+        false,
       isAdminOfB3tr: isAdminOfB3tr ?? false,
       isAdminOfEmissions: isAdminOfEmissions ?? false,
       isAdminOfXAllocationVoting: isAdminOfXAllocationVoting ?? false,
@@ -103,6 +145,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
       isAdminOfTimeLock: isAdminOfTimeLock ?? false,
       isAdminOfTreasury: isAdminOfTreasury ?? false,
       isAdminOfX2EarnApps: isAdminOfX2EarnApps ?? false,
+      isAdminOfVeBetterPassport: isAdminOfVeBetterPassport ?? false,
       isMinterOfB3tr: isMinterOfB3tr ?? false,
       isMinterOfEmissions: isMinterOfEmissions ?? false,
       isUpgraderOfEmissions: isUpgraderOfEmissions ?? false,
@@ -114,7 +157,13 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
       isUpgraderOfTimelock: isUpgraderOfTimelock ?? false,
       isUpgraderOfTreasury: isUpgraderOfTreasury ?? false,
       isUpgraderOfX2EarnApps: isUpgraderOfX2EarnApps ?? false,
+      isUpgraderOfVeBetterPassport: isUpgraderOfVeBetterPassport ?? false,
       isProposalExecutor: isProposalExecutor ?? false,
+      isPassportSettingsManager: isPassportSettingsManager ?? false,
+      isPassportBotSignaler: isPassportBotSignaler ?? false,
+      isPassportActionRegistrar: isPassportActionRegistrar ?? false,
+      isPassportWhitelister: isPassportWhitelister ?? false,
+      isPassportScoreManager: isPassportScoreManager ?? false,
     }
   }, [
     isAdminOfB3tr,
@@ -126,6 +175,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
     isAdminOfVot3,
     isAdminOfVoterRewards,
     isAdminOfX2EarnApps,
+    isAdminOfVeBetterPassport,
     isAdminOfTimeLock,
     isAdminOfTreasury,
     isMinterOfB3tr,
@@ -139,6 +189,12 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
     isUpgraderOfTimelock,
     isUpgraderOfTreasury,
     isUpgraderOfX2EarnApps,
+    isUpgraderOfVeBetterPassport,
     isProposalExecutor,
+    isPassportSettingsManager,
+    isPassportBotSignaler,
+    isPassportActionRegistrar,
+    isPassportWhitelister,
+    isPassportScoreManager,
   ])
 }

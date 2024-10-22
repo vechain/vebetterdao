@@ -23,7 +23,7 @@
 
 pragma solidity 0.8.20;
 
-import { X2EarnAppsUpgradeable } from "./x-2-earn-apps/X2EarnAppsUpgradeable.sol";
+import { X2EarnAppsUpgradeableV1 } from "./x-2-earn-apps/X2EarnAppsUpgradeableV1.sol";
 import { AdministrationUpgradeable } from "./x-2-earn-apps/modules/AdministrationUpgradeable.sol";
 import { AppsStorageUpgradeable } from "./x-2-earn-apps/modules/AppsStorageUpgradeable.sol";
 import { ContractSettingsUpgradeable } from "./x-2-earn-apps/modules/ContractSettingsUpgradeable.sol";
@@ -41,7 +41,7 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
  * Each app has a set of admins and moderators that can manage the app and settings.
  */
 contract X2EarnAppsV1 is
-  X2EarnAppsUpgradeable,
+  X2EarnAppsUpgradeableV1,
   AdministrationUpgradeable,
   ContractSettingsUpgradeable,
   VoteEligibilityUpgradeable,

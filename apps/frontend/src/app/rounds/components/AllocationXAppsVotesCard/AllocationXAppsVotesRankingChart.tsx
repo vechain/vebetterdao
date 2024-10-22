@@ -1,10 +1,9 @@
 import {
   useAllocationAmount,
   useAllocationBaseAmount,
-  useAllocationVotesQf,
   useMaxAllocationAmount,
   useRoundXApps,
-  useXAppsVotesQf,
+  useXAppsShares,
 } from "@/api"
 import { Spinner, VStack } from "@chakra-ui/react"
 import { useMemo } from "react"
@@ -21,9 +20,7 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
   const { data: allocationAmount } = useAllocationAmount(roundId)
   const { data: baseAmount } = useAllocationBaseAmount(roundId)
 
-  const { data: xAppsVotes, isLoading: xAppsVotesLoading } = useXAppsVotesQf(xApps?.map(app => app.id) ?? [], roundId)
-
-  const { data: votes } = useAllocationVotesQf(roundId)
+  const xAppsSharesQuery = useXAppsShares(xApps?.map(app => app.id) ?? [], roundId)
 
   const maxAllocationPercentage = useMemo(() => {
     const maxAmountWithVotes = Number(maxAllocation) - Number(baseAmount)
@@ -34,17 +31,17 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
   }, [maxAllocation, baseAmount, allocationAmount, xApps])
 
   const sortedData = useMemo(() => {
-    if (!xAppsVotes || !xApps) return []
+    if (!xAppsSharesQuery.data || !xApps) return []
 
-    return xAppsVotes
-      .map(appVotes => ({
-        votes: appVotes.votes ?? "0",
-        app: xApps?.find(xa => xa.id === appVotes.app)?.id ?? "",
+    return xAppsSharesQuery.data
+      .map(appShares => ({
+        percentage: appShares.share + appShares.unallocatedShare,
+        app: xApps?.find(xa => xa.id === appShares.app)?.id ?? "",
       }))
-      .sort((a, b) => Number(b.votes) - Number(a.votes))
-  }, [xAppsVotes, xApps])
+      .sort((a, b) => Number(b.percentage) - Number(a.percentage))
+  }, [xAppsSharesQuery, xApps])
 
-  const isLoading = xAppsLoading || xAppsVotesLoading
+  const isLoading = xAppsLoading || xAppsSharesQuery.isLoading
 
   if (isLoading) return <Spinner size={"lg"} alignSelf="center" />
 
@@ -54,7 +51,6 @@ export const AllocationXAppsVotesRankingChart = ({ roundId }: Props) => {
         <AppVotesHorizontalChart
           key={index}
           data={app}
-          totalVotes={votes}
           roundId={roundId}
           showReceived={true}
           maxAllocation={maxAllocation}

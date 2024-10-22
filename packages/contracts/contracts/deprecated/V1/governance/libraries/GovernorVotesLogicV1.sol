@@ -25,12 +25,12 @@ pragma solidity 0.8.20;
 
 import { GovernorStorageTypesV1 } from "./GovernorStorageTypesV1.sol";
 import { GovernorTypesV1 } from "./GovernorTypesV1.sol";
-import { GovernorStateLogicV1 } from "./GovernorStateLogicV1.sol";
+import { GovernorStateLogicV1} from "./GovernorStateLogicV1.sol";
 import { GovernorConfiguratorV1 } from "./GovernorConfiguratorV1.sol";
 import { GovernorProposalLogicV1 } from "./GovernorProposalLogicV1.sol";
 import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
 
-/// @title GovernorVotesLogicV1
+/// @title GovernorVotesLogic
 /// @notice Library for handling voting logic in the Governor contract.
 library GovernorVotesLogicV1 {
   /// @dev Thrown when a vote has already been cast by the voter.
@@ -211,11 +211,7 @@ library GovernorVotesLogicV1 {
     uint8 support,
     string calldata reason
   ) external returns (uint256) {
-    GovernorStateLogicV1.validateStateBitmap(
-      self,
-      proposalId,
-      GovernorStateLogicV1.encodeStateBitmap(GovernorTypesV1.ProposalState.Active)
-    );
+    GovernorStateLogicV1.validateStateBitmap(self, proposalId, GovernorStateLogicV1.encodeStateBitmap(GovernorTypesV1.ProposalState.Active));
 
     uint256 weight = self.vot3.getPastVotes(voter, GovernorProposalLogicV1._proposalSnapshot(self, proposalId));
     uint256 power = Math.sqrt(weight) * 1e9;
@@ -226,12 +222,7 @@ library GovernorVotesLogicV1 {
 
     _countVote(self, proposalId, voter, support, weight, power);
 
-    self.voterRewards.registerVote(
-      GovernorProposalLogicV1._proposalSnapshot(self, proposalId),
-      voter,
-      weight,
-      Math.sqrt(weight)
-    );
+    self.voterRewards.registerVote(GovernorProposalLogicV1._proposalSnapshot(self, proposalId), voter, weight, Math.sqrt(weight));
 
     emit VoteCast(voter, proposalId, support, weight, power, reason);
 

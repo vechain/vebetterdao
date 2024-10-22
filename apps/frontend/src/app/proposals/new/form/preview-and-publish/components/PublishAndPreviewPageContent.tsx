@@ -15,6 +15,8 @@ import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadi
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 import { useDepositThreshold, useHashProposal } from "@/api"
 import { ethers } from "ethers"
+import { AnalyticsUtils } from "@/utils"
+import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
 
 export const PublishAndPreviewPageContent = () => {
   const router = useRouter()
@@ -55,6 +57,7 @@ export const PublishAndPreviewPageContent = () => {
   )
 
   const onSubmit = useCallback(async () => {
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CREATE_PROPOSAL_SUBMITED))
     createProposalMutation.resetStatus()
     onConfirmationOpen()
     if (!title || !shortDescription || !markdownDescription || depositAmount === undefined)
@@ -123,6 +126,7 @@ export const PublishAndPreviewPageContent = () => {
         pendingTitle={t("Creating proposal...")}
         txId={createProposalMutation.txReceipt?.meta.txID}
         showExplorerButton
+        isSuccessBeenTrack={true}
       />
 
       <Card w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">

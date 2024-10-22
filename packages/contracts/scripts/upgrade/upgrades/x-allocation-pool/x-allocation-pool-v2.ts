@@ -14,7 +14,7 @@ async function main() {
     `Upgrading XAllocationPool contract at address: ${config.xAllocationPoolContractAddress} on network: ${config.network.name}`,
   )
 
-  const xAllocationPoolV2 = (await upgradeProxy(
+  const xAllocationPool = (await upgradeProxy(
     "XAllocationPoolV1",
     "XAllocationPool",
     config.xAllocationPoolContractAddress,
@@ -27,11 +27,11 @@ async function main() {
   console.log(`XAllocationPool upgraded`)
 
   // check that upgrade was successful
-  const version = await xAllocationPoolV2.version()
+  const version = await xAllocationPool.version()
   console.log(`New XAllocationPool version: ${version}`)
 
   if (parseInt(version) !== 2) {
-    throw new Error(`XAllocationPool version is not 2: ${version}`)
+    throw new Error(`XAllocationPool version is not the expected one: ${version}`)
   }
 
   console.log("Execution completed")

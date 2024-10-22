@@ -7,7 +7,7 @@ import dayjs from "dayjs"
 
 import relativeTime from "dayjs/plugin/relativeTime"
 import duration from "dayjs/plugin/duration"
-import { Footer } from "@/components"
+import { AlphaTestnetBanner, Footer } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "@repo/config"
@@ -73,6 +73,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <title>{t("VeBetterDAO")}</title>
         <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance." />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/images/favicon.png" />
         <link rel="apple-touch-icon" sizes="57x57" href="/images/favicon.png" />
         <meta name="msapplication-TileImage" content="/images/favicon.png" />
@@ -107,7 +108,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Providers>
           {isProduction && <FreshDeskWidget widgetId={103000007852} />}
           <VStack minH="100vh" gap={0} align="stretch">
-            {/* <AlphaTestnetBanner /> */}
+            <AlphaTestnetBanner />
             <Navbar />
             <Flex flex={1}>
               <Container

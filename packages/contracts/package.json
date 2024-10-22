@@ -11,9 +11,12 @@
     "test:coverage:solidity": "hardhat coverage --testfiles ./test/**/*test.ts",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy",
+    "deploy:local": "npx hardhat run scripts/deploy --network vechain_solo",
+    "deploy:testnet-staging": "npx hardhat run scripts/deploy --network vechain_testnet",
     "deploy:testnet": "npx hardhat run scripts/deploy --network vechain_testnet",
     "deploy:mainnet": "npx hardhat run scripts/deploy --network vechain_mainnet",
     "check-contracts-deployment": "npx hardhat run scripts/checkContractsDeployment.ts",
+    "check-contracts-deployment:staging": "npx hardhat run scripts/checkContractsDeployment.ts --network vechain_testnet",
     "check-contracts-deployment:testnet": "npx hardhat run scripts/checkContractsDeployment.ts --network vechain_testnet",
     "check-contracts-deployment:mainnet": "npx hardhat run scripts/checkContractsDeployment.ts --network vechain_mainnet",
     "generate-galaxy-member-metadata": "npx hardhat run scripts/metadata/GalaxyMember/generate.ts",
@@ -28,7 +31,9 @@
     "lint": "eslint . --ext .ts",
     "format": "eslint . --ext .ts --fix",
     "generate-docs": "npx hardhat docgen",
-    "upgrade:contract": "npx hardhat run scripts/upgrade/upgrades/\"$CONTRACT_TO_UPGRADE\"/\"$CONTRACT_TO_UPGRADE\"-\"$CONTRACT_VERSION\".ts"
+    "upgrade:contract": "npx hardhat run scripts/upgrade/upgrades/\"$CONTRACT_TO_UPGRADE\"/\"$CONTRACT_TO_UPGRADE\"-\"$CONTRACT_VERSION\".ts",
+    "deploy:contract": "npx hardhat run scripts/deploy/deploys/\"$CONTRACT_TO_DEPLOY\".ts",
+    "rename-contracts": "ts-node scripts/renameContracts.ts"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
