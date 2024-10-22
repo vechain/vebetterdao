@@ -4,9 +4,11 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { UilCopy, UilCheck } from "@iconscout/react-unicons"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 export const ProfileHeader = () => {
   const { account } = useWallet()
+  const { name } = useWalletName(account || "")
   const { onCopy } = useClipboard(account || "")
   const [isCopied, setIsCopied] = useState(false)
 
@@ -30,9 +32,14 @@ export const ProfileHeader = () => {
             <AddressIcon address={account || ""} rounded={"full"} h={12} />
             <VStack align="stretch" spacing={2} flex={1}>
               <HStack justify="space-between">
-                <Text fontSize="xl" fontWeight="bold">
-                  {humanAddress(account || "")}
-                </Text>
+                <HStack align="flex-start" w="full">
+                  <Text fontSize="xl" fontWeight="bold" borderRight={"2px solid #E0E0E0"} paddingRight={2}>
+                    {name}
+                  </Text>
+                  <Text fontSize="xl" fontWeight="bold">
+                    {humanAddress(account || "")}
+                  </Text>
+                </HStack>
                 <IconButton
                   variant="ghost"
                   rounded="full"
