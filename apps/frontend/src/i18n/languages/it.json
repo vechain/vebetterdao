@@ -970,5 +970,9 @@
   "Something went wrong. Let’s try that again!": "Qualcosa è andato storto. Proviamo di nuovo!",
   "Error 404": "Errore 404",
   "We can't find what you're looking for. Let's head back and try again!": "Non riusciamo a trovare quello che stai cercando. Torniamo indietro e proviamo di nuovo!",
-  "Go back home": "Torna a casa"
+  "Go back home": "Torna a casa",
+  "Round {{id}} leaderboard": "Classifica del Round {{id}}",
+  "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "Pronto a salvare il pianeta? Fai Azioni Migliori nelle app e diventa il campione di sostenibilità! 🌍✨",
+  "Link a Primary Account": "Collega un Account Primario",
+  "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.": "Collegando questo account, tutte le Azioni Migliori saranno trasferite all'Account Primario, che avrà anche il potere di voto esclusivo. L'Account Primario deve approvare prima la richiesta di collegamento."
 }
