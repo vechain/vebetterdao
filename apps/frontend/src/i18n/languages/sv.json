@@ -968,5 +968,9 @@
   "Something went wrong. Let’s try that again!": "Något gick fel. Låt oss försöka igen!",
   "Error 404": "Fel 404",
   "We can't find what you're looking for. Let's head back and try again!": "Vi kan inte hitta det du letar efter. Låt oss gå tillbaka och försöka igen!",
-  "Go back home": "Gå tillbaka hem"
+  "Go back home": "Gå tillbaka hem",
+  "Round {{id}} leaderboard": "Runda {{id}} ledartavla",
+  "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "Redo att rädda planeten? Gör bättre åtgärder i apparna och bli hållbarhetsmästare! 🌍✨",
+  "Link a Primary Account": "Länka ett primärt konto",
+  "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.": "Genom att länka detta konto kommer alla bättre åtgärder att överföras till det primära kontot, som också kommer att ha exklusiv rösträtt. Det primära kontot måste godkänna länkningsförfrågan först."
 }

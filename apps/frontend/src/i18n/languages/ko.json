@@ -968,5 +968,9 @@
   "Something went wrong. Let’s try that again!": "무언가 잘못 되었습니다. 다시 시도해 보겠습니다!",
   "Error 404": "오류 404",
   "We can't find what you're looking for. Let's head back and try again!": "찾고 계신 것을 찾을 수 없습니다. 돌아가서 다시 시도해봅시다!",
-  "Go back home": "홈으로 돌아가기"
+  "Go back home": "홈으로 돌아가기",
+  "Round {{id}} leaderboard": "라운드 {{id}} 리더보드",
+  "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "지구를 구할 준비가 되셨나요? 앱에서 더 나은 활동을 수행하고 지속 가능성 챔피언이 되세요! 🌍✨",
+  "Link a Primary Account": "주 계정 연결",
+  "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.": "이 계정을 연결하면 모든 더 나은 활동이 주 계정으로 전송되며, 주 계정은 독점적인 투표 권한을 갖게 됩니다. 주 계정이 연결 요청을 먼저 승인해야 합니다."
 }

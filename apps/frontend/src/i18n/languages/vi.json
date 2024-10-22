@@ -968,5 +968,9 @@
   "Something went wrong. Let’s try that again!": "Đã xảy ra sự cố. Hãy thử lại!",
   "Error 404": "Lỗi 404",
   "We can't find what you're looking for. Let's head back and try again!": "Chúng tôi không thể tìm thấy những gì bạn đang tìm kiếm. Hãy quay lại và thử lại!",
-  "Go back home": "Quay lại trang chủ"
+  "Go back home": "Quay lại trang chủ",
+  "Round {{id}} leaderboard": "Bảng xếp hạng vòng {{id}}",
+  "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "Sẵn sàng cứu hành tinh chưa? Thực hiện các Hành động Tốt hơn trong ứng dụng và trở thành nhà vô địch bền vững! 🌍✨",
+  "Link a Primary Account": "Liên kết Tài khoản Chính",
+  "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.": "Bằng cách liên kết tài khoản này, tất cả các Hành động Tốt hơn sẽ được chuyển tới Tài khoản Chính, nơi cũng sẽ có quyền biểu quyết độc quyền. Tài khoản Chính phải chấp thuận yêu cầu liên kết trước."
 }
