@@ -23,13 +23,14 @@ export const UserAppsChart: React.FC<Props> = ({ userId, appActions }) => {
   const { t } = useTranslation()
 
   const onAddressClick = useCallback(() => {
-    navigator.clipboard.writeText(userId),
-      toast({
-        title: "Address copied to clipboard",
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-      })
+    navigator.clipboard.writeText(userId)
+
+    toast({
+      title: "Address copied to clipboard",
+      status: "success",
+      duration: 2000,
+      isClosable: true,
+    })
   }, [toast, userId])
 
   return (

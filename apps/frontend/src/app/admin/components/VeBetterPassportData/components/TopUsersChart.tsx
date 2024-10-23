@@ -8,36 +8,6 @@ interface Props {
 }
 
 export const TopUsersChart: React.FC<Props> = ({ data }) => {
-  const toast = useToast()
-
-  // Custom Tick Component
-  const CustomizedAxisTick = (props: any) => {
-    const { x, y, payload } = props
-
-    // Abbreviate the address
-    const displayAddress = FormattingUtils.humanAddress(payload.value, 6, 8)
-
-    // Click handler to copy full address
-    const handleClick = () => {
-      navigator.clipboard.writeText(payload.value)
-      toast({
-        title: "Address copied",
-        description: `Copied ${payload.value} to clipboard.`,
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      })
-    }
-
-    return (
-      <g transform={`translate(${x},${y})`} onClick={handleClick} style={{ cursor: "pointer" }}>
-        <text x={0} y={0} dy={16} textAnchor="end" transform="rotate(-90)" fill="#666" fontSize={12}>
-          {displayAddress}
-        </text>
-      </g>
-    )
-  }
-
   return (
     <ResponsiveContainer width="100%" height={500}>
       <BarChart data={data}>
@@ -51,5 +21,35 @@ export const TopUsersChart: React.FC<Props> = ({ data }) => {
         <Bar dataKey="actions" name="Actions" fill="#82ca9d" />
       </BarChart>
     </ResponsiveContainer>
+  )
+}
+
+// Custom Tick Component
+const CustomizedAxisTick = (props: any) => {
+  const { x, y, payload } = props
+
+  const toast = useToast()
+
+  // Abbreviate the address
+  const displayAddress = FormattingUtils.humanAddress(payload.value, 6, 8)
+
+  // Click handler to copy full address
+  const handleClick = () => {
+    navigator.clipboard.writeText(payload.value)
+    toast({
+      title: "Address copied",
+      description: `Copied ${payload.value} to clipboard.`,
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+    })
+  }
+
+  return (
+    <g transform={`translate(${x},${y})`} onClick={handleClick} style={{ cursor: "pointer" }}>
+      <text x={0} y={0} dy={16} textAnchor="end" transform="rotate(-90)" fill="#666" fontSize={12}>
+        {displayAddress}
+      </text>
+    </g>
   )
 }

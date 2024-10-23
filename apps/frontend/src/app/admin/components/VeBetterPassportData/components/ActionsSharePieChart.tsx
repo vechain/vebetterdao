@@ -41,8 +41,8 @@ export const ActionsSharePieChart: React.FC<Props> = ({ data }) => {
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
         <Pie data={pieData} dataKey="value" nameKey="name" label>
-          {pieData.map((_, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          {pieData.map((name, index) => (
+            <Cell key={`cell-${name}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
         <Tooltip formatter={(value: any) => `${value}%`} />
