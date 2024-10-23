@@ -36,10 +36,8 @@ export const initialise = () => {
 export const trackEvent = (event: string, properties?: Properties): void => {
   try {
     // const securitySettings = getSecuritySettings(getState())
-
     if (isInitialized) {
       mixpanel.track(event, properties)
-      console.log("Event tracked", event, properties)
     } else {
       console.warn("Analytics not initialized or enabled")
     }
