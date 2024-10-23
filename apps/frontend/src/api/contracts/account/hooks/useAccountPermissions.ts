@@ -1,9 +1,14 @@
 import { getConfig } from "@repo/config"
-import { useHasRole } from "./useHasRole"
-import { useMemo } from "react"
+import { AccessControl__factory } from "@repo/contracts/typechain-types"
+import { useQuery, UseQueryResult } from "@tanstack/react-query"
+import { useConnex } from "@vechain/dapp-kit-react"
+import { abi } from "thor-devkit"
 
-type useAccountPermissionsResponse = {
-  isAdmin: boolean
+const fragment = AccessControl__factory.createInterface().getFunction("hasRole").format("json")
+const hasRoleAbi = new abi.Function(JSON.parse(fragment))
+
+const config = getConfig()
+type AccountPermissionResponse = {
   isAdminOfB3tr: boolean
   isAdminOfEmissions: boolean
   isAdminOfXAllocationVoting: boolean
@@ -36,165 +41,182 @@ type useAccountPermissionsResponse = {
   isPassportWhitelister: boolean
 }
 
+const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; contractAddress: string }> = {
+  isAdminOfB3tr: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.b3trContractAddress,
+  },
+  isAdminOfEmissions: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.emissionsContractAddress,
+  },
+  isAdminOfXAllocationVoting: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.xAllocationVotingContractAddress,
+  },
+  isAdminOfXAllocationPool: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.xAllocationPoolContractAddress,
+  },
+  isAdminOfB3TRGovernor: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.b3trGovernorAddress,
+  },
+  isAdminOfGalaxyMember: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.galaxyMemberContractAddress,
+  },
+  isAdminOfVot3: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.vot3ContractAddress,
+  },
+  isAdminOfVoterRewards: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.voterRewardsContractAddress,
+  },
+  isAdminOfTimeLock: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.timelockContractAddress,
+  },
+  isAdminOfTreasury: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.treasuryContractAddress,
+  },
+  isAdminOfX2EarnApps: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.x2EarnAppsContractAddress,
+  },
+  isAdminOfVeBetterPassport: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.veBetterPassportContractAddress,
+  },
+  isMinterOfB3tr: {
+    role: "MINTER_ROLE",
+    contractAddress: config.b3trContractAddress,
+  },
+  isMinterOfEmissions: {
+    role: "MINTER_ROLE",
+    contractAddress: config.emissionsContractAddress,
+  },
+  isUpgraderOfEmissions: {
+    role: "UPGRADER_ROLE",
+    contractAddress: config.emissionsContractAddress,
+  },
+  isUpgraderOfXAllocationVoting: {
+    role: "UPGRADER_ROLE",
+    contractAddress: config.xAllocationVotingContractAddress,
+  },
+  isUpgraderOfXAllocationPool: {
+    role: "UPGRADER_ROLE",
+    contractAddress: config.xAllocationPoolContractAddress,
+  },
+  isUpgraderOfGalaxyMember: {
+    role: "UPGRADER_ROLE",
+    contractAddress: config.galaxyMemberContractAddress,
+  },
+  isUpgraderOfVot3: {
+    role: "UPGRADER_ROLE",
+    contractAddress: config.vot3ContractAddress,
+  },
+  isUpgraderOfVoterRewards: {
+    role: "UPGRADER_ROLE",
+    contractAddress: config.voterRewardsContractAddress,
+  },
+  isUpgraderOfTimelock: {
+    role: "UPGRADER_ROLE",
+    contractAddress: config.timelockContractAddress,
+  },
+  isUpgraderOfTreasury: {
+    role: "UPGRADER_ROLE",
+    contractAddress: config.treasuryContractAddress,
+  },
+  isUpgraderOfX2EarnApps: {
+    role: "UPGRADER_ROLE",
+    contractAddress: config.x2EarnAppsContractAddress,
+  },
+  isUpgraderOfVeBetterPassport: {
+    role: "UPGRADER_ROLE",
+    contractAddress: config.veBetterPassportContractAddress,
+  },
+  isProposalExecutor: {
+    role: "PROPOSAL_EXECUTOR_ROLE",
+    contractAddress: config.b3trGovernorAddress,
+  },
+  isPassportSettingsManager: {
+    role: "SETTINGS_MANAGER_ROLE",
+    contractAddress: config.veBetterPassportContractAddress,
+  },
+  isPassportBotSignaler: {
+    role: "SIGNALER_ROLE",
+    contractAddress: config.veBetterPassportContractAddress,
+  },
+  isPassportActionRegistrar: {
+    role: "ACTION_REGISTRAR_ROLE",
+    contractAddress: config.veBetterPassportContractAddress,
+  },
+  isPassportWhitelister: {
+    role: "WHITELISTER_ROLE",
+    contractAddress: config.veBetterPassportContractAddress,
+  },
+  isPassportScoreManager: {
+    role: "ACTION_SCORE_MANAGER_ROLE",
+    contractAddress: config.veBetterPassportContractAddress,
+  },
+}
+
 /**
  * Get the permissions for an address
  *
  * @param address  - the address to get the permissions for
  * @returns useAccountPermissionsResponse
  */
-export const useAccountPermissions = (address?: string): useAccountPermissionsResponse => {
-  const config = getConfig()
+export const useAccountPermissions = (
+  address?: string,
+): UseQueryResult<
+  AccountPermissionResponse & {
+    isAdmin: boolean
+  }
+> => {
+  const { thor } = useConnex()
 
-  const { data: isAdminOfB3tr } = useHasRole("DEFAULT_ADMIN_ROLE", config.b3trContractAddress, address)
-  const { data: isAdminOfEmissions } = useHasRole("DEFAULT_ADMIN_ROLE", config.emissionsContractAddress, address)
-  const { data: isAdminOfXAllocationVoting } = useHasRole(
-    "DEFAULT_ADMIN_ROLE",
-    config.xAllocationVotingContractAddress,
-    address,
-  )
-  const { data: isAdminOfXAllocationPool } = useHasRole(
-    "DEFAULT_ADMIN_ROLE",
-    config.xAllocationPoolContractAddress,
-    address,
-  )
-  const { data: isAdminOfB3TRGovernor } = useHasRole("DEFAULT_ADMIN_ROLE", config.b3trGovernorAddress, address)
-  const { data: isAdminOfGalaxyMember } = useHasRole("DEFAULT_ADMIN_ROLE", config.galaxyMemberContractAddress, address)
-  const { data: isAdminOfVot3 } = useHasRole("DEFAULT_ADMIN_ROLE", config.vot3ContractAddress, address)
-  const { data: isAdminOfVoterRewards } = useHasRole("DEFAULT_ADMIN_ROLE", config.voterRewardsContractAddress, address)
-  const { data: isAdminOfTimeLock } = useHasRole("DEFAULT_ADMIN_ROLE", config.timelockContractAddress, address)
-  const { data: isAdminOfTreasury } = useHasRole("DEFAULT_ADMIN_ROLE", config.treasuryContractAddress, address)
-  const { data: isAdminOfX2EarnApps } = useHasRole("DEFAULT_ADMIN_ROLE", config.x2EarnAppsContractAddress, address)
-  const { data: isAdminOfVeBetterPassport } = useHasRole(
-    "DEFAULT_ADMIN_ROLE",
-    config.veBetterPassportContractAddress,
-    address,
-  )
+  return useQuery({
+    queryKey: ["accountPermissions", address],
+    enabled: !!address,
+    queryFn: async () => {
+      const clauses = Object.entries(CLAUSES_DATA).map(([_key, { role, contractAddress }]) => ({
+        to: contractAddress,
+        value: "0x0",
+        data: hasRoleAbi.encode(role, address),
+      }))
 
-  const { data: isMinterOfB3tr } = useHasRole("MINTER_ROLE", config.b3trContractAddress, address)
-  const { data: isMinterOfEmissions } = useHasRole("MINTER_ROLE", config.emissionsContractAddress, address)
+      const res = await thor.explain(clauses).execute()
 
-  const { data: isUpgraderOfEmissions } = useHasRole("UPGRADER_ROLE", config.emissionsContractAddress, address)
-  const { data: isUpgraderOfXAllocationVoting } = useHasRole(
-    "UPGRADER_ROLE",
-    config.xAllocationVotingContractAddress,
-    address,
-  )
-  const { data: isUpgraderOfXAllocationPool } = useHasRole(
-    "UPGRADER_ROLE",
-    config.xAllocationPoolContractAddress,
-    address,
-  )
+      const roles = Object.entries(CLAUSES_DATA).reduce((acc, [key], index) => {
+        const role = res[index]?.data as string
+        const decoded = hasRoleAbi.decode(role)
 
-  const { data: isUpgraderOfGalaxyMember } = useHasRole("UPGRADER_ROLE", config.galaxyMemberContractAddress, address)
-  const { data: isUpgraderOfVot3 } = useHasRole("UPGRADER_ROLE", config.vot3ContractAddress, address)
-  const { data: isUpgraderOfVoterRewards } = useHasRole("UPGRADER_ROLE", config.voterRewardsContractAddress, address)
-  const { data: isUpgraderOfTimelock } = useHasRole("UPGRADER_ROLE", config.timelockContractAddress, address)
-  const { data: isUpgraderOfTreasury } = useHasRole("UPGRADER_ROLE", config.treasuryContractAddress, address)
-  const { data: isUpgraderOfX2EarnApps } = useHasRole("UPGRADER_ROLE", config.x2EarnAppsContractAddress, address)
-  const { data: isUpgraderOfVeBetterPassport } = useHasRole(
-    "UPGRADER_ROLE",
-    config.veBetterPassportContractAddress,
-    address,
-  )
-  const { data: isProposalExecutor } = useHasRole("PROPOSAL_EXECUTOR_ROLE", config.b3trGovernorAddress, address)
+        return {
+          ...acc,
+          [key]: Boolean(decoded[0]),
+        }
+      }, {} as AccountPermissionResponse)
 
-  const { data: isPassportSettingsManager } = useHasRole(
-    "SETTINGS_MANAGER_ROLE",
-    config.veBetterPassportContractAddress,
-    address,
-  )
-  const { data: isPassportBotSignaler } = useHasRole("SIGNALER_ROLE", config.veBetterPassportContractAddress, address)
-  const { data: isPassportActionRegistrar } = useHasRole(
-    "ACTION_REGISTRAR_ROLE",
-    config.veBetterPassportContractAddress,
-    address,
-  )
-  const { data: isPassportWhitelister } = useHasRole(
-    "WHITELISTER_ROLE",
-    config.veBetterPassportContractAddress,
-    address,
-  )
-  const { data: isPassportScoreManager } = useHasRole(
-    "ACTION_SCORE_MANAGER_ROLE",
-    config.veBetterPassportContractAddress,
-    address,
-  )
+      const isAdmin =
+        roles.isAdminOfB3tr ||
+        roles.isAdminOfEmissions ||
+        roles.isAdminOfXAllocationVoting ||
+        roles.isAdminOfXAllocationPool ||
+        roles.isAdminOfB3TRGovernor ||
+        roles.isAdminOfGalaxyMember ||
+        roles.isAdminOfVot3 ||
+        roles.isAdminOfVoterRewards ||
+        roles.isAdminOfX2EarnApps ||
+        roles.isAdminOfVeBetterPassport
 
-  return useMemo(() => {
-    return {
-      isAdmin:
-        isAdminOfB3tr ||
-        isAdminOfEmissions ||
-        isAdminOfXAllocationVoting ||
-        isAdminOfXAllocationPool ||
-        isAdminOfB3TRGovernor ||
-        isAdminOfGalaxyMember ||
-        isAdminOfVot3 ||
-        isAdminOfVoterRewards ||
-        isAdminOfX2EarnApps ||
-        isAdminOfVeBetterPassport ||
-        false,
-      isAdminOfB3tr: isAdminOfB3tr ?? false,
-      isAdminOfEmissions: isAdminOfEmissions ?? false,
-      isAdminOfXAllocationVoting: isAdminOfXAllocationVoting ?? false,
-      isAdminOfXAllocationPool: isAdminOfXAllocationPool ?? false,
-      isAdminOfB3TRGovernor: isAdminOfB3TRGovernor ?? false,
-      isAdminOfGalaxyMember: isAdminOfGalaxyMember ?? false,
-      isAdminOfVot3: isAdminOfVot3 ?? false,
-      isAdminOfVoterRewards: isAdminOfVoterRewards ?? false,
-      isAdminOfTimeLock: isAdminOfTimeLock ?? false,
-      isAdminOfTreasury: isAdminOfTreasury ?? false,
-      isAdminOfX2EarnApps: isAdminOfX2EarnApps ?? false,
-      isAdminOfVeBetterPassport: isAdminOfVeBetterPassport ?? false,
-      isMinterOfB3tr: isMinterOfB3tr ?? false,
-      isMinterOfEmissions: isMinterOfEmissions ?? false,
-      isUpgraderOfEmissions: isUpgraderOfEmissions ?? false,
-      isUpgraderOfXAllocationVoting: isUpgraderOfXAllocationVoting ?? false,
-      isUpgraderOfXAllocationPool: isUpgraderOfXAllocationPool ?? false,
-      isUpgraderOfGalaxyMember: isUpgraderOfGalaxyMember ?? false,
-      isUpgraderOfVot3: isUpgraderOfVot3 ?? false,
-      isUpgraderOfVoterRewards: isUpgraderOfVoterRewards ?? false,
-      isUpgraderOfTimelock: isUpgraderOfTimelock ?? false,
-      isUpgraderOfTreasury: isUpgraderOfTreasury ?? false,
-      isUpgraderOfX2EarnApps: isUpgraderOfX2EarnApps ?? false,
-      isUpgraderOfVeBetterPassport: isUpgraderOfVeBetterPassport ?? false,
-      isProposalExecutor: isProposalExecutor ?? false,
-      isPassportSettingsManager: isPassportSettingsManager ?? false,
-      isPassportBotSignaler: isPassportBotSignaler ?? false,
-      isPassportActionRegistrar: isPassportActionRegistrar ?? false,
-      isPassportWhitelister: isPassportWhitelister ?? false,
-      isPassportScoreManager: isPassportScoreManager ?? false,
-    }
-  }, [
-    isAdminOfB3tr,
-    isAdminOfEmissions,
-    isAdminOfXAllocationVoting,
-    isAdminOfXAllocationPool,
-    isAdminOfB3TRGovernor,
-    isAdminOfGalaxyMember,
-    isAdminOfVot3,
-    isAdminOfVoterRewards,
-    isAdminOfX2EarnApps,
-    isAdminOfVeBetterPassport,
-    isAdminOfTimeLock,
-    isAdminOfTreasury,
-    isMinterOfB3tr,
-    isMinterOfEmissions,
-    isUpgraderOfEmissions,
-    isUpgraderOfXAllocationVoting,
-    isUpgraderOfXAllocationPool,
-    isUpgraderOfGalaxyMember,
-    isUpgraderOfVot3,
-    isUpgraderOfVoterRewards,
-    isUpgraderOfTimelock,
-    isUpgraderOfTreasury,
-    isUpgraderOfX2EarnApps,
-    isUpgraderOfVeBetterPassport,
-    isProposalExecutor,
-    isPassportSettingsManager,
-    isPassportBotSignaler,
-    isPassportActionRegistrar,
-    isPassportWhitelister,
-    isPassportScoreManager,
-  ])
+      return {
+        isAdmin,
+        ...roles,
+      }
+    },
+  })
 }

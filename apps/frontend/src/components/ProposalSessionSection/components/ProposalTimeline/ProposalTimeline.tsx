@@ -14,10 +14,10 @@ import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 export const ProposalTimeline = () => {
   const { proposal } = useProposalDetail()
   const { account } = useWallet()
-  const { isProposalExecutor } = useAccountPermissions(account || "")
+  const { data: permissions } = useAccountPermissions(account || "")
 
-  const showQueueButton = proposal.state === ProposalState.Succeeded && isProposalExecutor
-  const showExecuteButton = proposal.state === ProposalState.Queued && isProposalExecutor
+  const showQueueButton = proposal.state === ProposalState.Succeeded && permissions?.isProposalExecutor
+  const showExecuteButton = proposal.state === ProposalState.Queued && permissions?.isProposalExecutor
 
   const isCanceled = useMemo(() => proposal.state === ProposalState.Canceled, [proposal.state])
 
