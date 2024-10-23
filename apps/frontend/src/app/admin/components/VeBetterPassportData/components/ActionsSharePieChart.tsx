@@ -37,8 +37,6 @@ export const ActionsSharePieChart: React.FC<Props> = ({ data }) => {
       .filter(Boolean)
   }, [data, totalActions])
 
-  console.log({ pieData })
-
   return (
     <ResponsiveContainer width="100%" height={300}>
       <PieChart>
