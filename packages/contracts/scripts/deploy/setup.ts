@@ -12,7 +12,7 @@ import {
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
 import { endorseXApps, registerXDapps } from "../helpers/xApp"
-import { airdropB3trFromTreasury } from "../helpers/airdrop"
+import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
 import { mintVechainNodes, proposeUpgradeGovernance } from "../helpers"
 import { convertB3trForVot3 } from "../helpers/swap"
 
@@ -110,6 +110,8 @@ export const setupLocalEnvironment = async (
   const seedAccounts = allAccounts.slice(0, 5)
   const endorserAccounts = allAccounts
 
+  await airdropVTHO(seedAccounts, admin)
+
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
   await convertB3trForVot3(b3tr, vot3, seedAccounts)
@@ -122,7 +124,7 @@ export const setupLocalEnvironment = async (
    * Fifth seed account will have a Thunder Economic Node
    * Remaining accounts with have a Mjolnir X Node -> These will have an endorsement score of 100
    */
-  await mintVechainNodes(vechainNodesMock, allAccounts, padNodeTypes([7, 6, 5, 3, 2], allAccounts.length))
+  await mintVechainNodes(vechainNodesMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 2], endorserAccounts.length))
 
   if (endorseApps) {
     // Get unendorsed XAPPs

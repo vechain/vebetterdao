@@ -897,10 +897,11 @@ describe("X-Apps - @shard3", function () {
       await catchRevert(x2EarnApps.connect(otherAccounts[0]).setVotingEligibility(app1Id, true))
     })
 
-    it("App needs to wait next round if endorsed during an ongoing round", async function () {
-      const { otherAccounts, x2EarnApps, owner, xAllocationVoting } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+    it("App needs to wait next round if added during an ongoing round", async function () {
+      const { otherAccounts, x2EarnApps, owner, xAllocationVoting, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -911,6 +912,9 @@ describe("X-Apps - @shard3", function () {
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
       let round1 = await startNewAllocationRound()
+
+      await veBetterPassport.whitelist(voter.address)
+      await veBetterPassport.toggleCheck(1)
 
       await x2EarnApps
         .connect(owner)
@@ -1789,11 +1793,22 @@ describe("X-Apps - @shard3", function () {
     })
 
     it("Team allocation percentage of an app is 0 and apps need to withdraw, then they can change this", async function () {
-      const { x2EarnApps, otherAccounts, owner, xAllocationVoting, xAllocationPool, b3tr, x2EarnRewardsPool } =
-        await getOrDeployContractInstances({ forceDeploy: true })
+      const {
+        x2EarnApps,
+        otherAccounts,
+        owner,
+        xAllocationVoting,
+        xAllocationPool,
+        b3tr,
+        x2EarnRewardsPool,
+        veBetterPassport,
+      } = await getOrDeployContractInstances({ forceDeploy: true })
       const voter = otherAccounts[1]
 
       await getVot3Tokens(voter, "1")
+
+      await veBetterPassport.whitelist(voter.address)
+      await veBetterPassport.toggleCheck(1)
 
       const app1Id = await x2EarnApps.hashAppName("My app")
       await x2EarnApps

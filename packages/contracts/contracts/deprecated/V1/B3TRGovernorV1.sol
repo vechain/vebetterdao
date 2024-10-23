@@ -35,11 +35,11 @@ import { GovernorGovernanceLogicV1 } from "./governance/libraries/GovernorGovern
 import { GovernorConfiguratorV1 } from "./governance/libraries/GovernorConfiguratorV1.sol";
 import { GovernorTypesV1 } from "./governance/libraries/GovernorTypesV1.sol";
 import { GovernorStorageV1 } from "./governance/GovernorStorageV1.sol";
-import { IVoterRewards } from "./interfaces/IVoterRewards.sol";
-import { IVOT3 } from "./interfaces/IVOT3.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
-import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
+import { IVoterRewards } from "../../interfaces/IVoterRewards.sol";
+import { IVOT3 } from "../../interfaces/IVOT3.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
+import { IB3TRGovernorV1 } from "./interfaces/IB3TRGovernorV1.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 import { TimelockControllerUpgradeable } from "@openzeppelin/contracts-upgradeable/governance/TimelockControllerUpgradeable.sol";
 import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
@@ -66,10 +66,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * Once a proposal succeeds, it can be queued and executed. The execution is done through the timelock contract.
  *
  * The contract is upgradeable and uses the UUPS pattern.
- * @dev The contract is upgradeable and uses the UUPS pattern. All logic is stored in libraries.
+ * @dev The contract is upgradeable and uses the UUPS pattern. All LogicV1 is stored in libraries.
  */
 contract B3TRGovernorV1 is
-  IB3TRGovernor,
+  IB3TRGovernorV1,
   GovernorStorageV1,
   AccessControlUpgradeable,
   UUPSUpgradeable,
@@ -890,7 +890,7 @@ contract B3TRGovernorV1 is
     bytes4 interfaceId
   ) public pure override(IERC165, AccessControlUpgradeable) returns (bool) {
     return
-      interfaceId == type(IB3TRGovernor).interfaceId ||
+      interfaceId == type(IB3TRGovernorV1).interfaceId ||
       interfaceId == type(IERC1155Receiver).interfaceId ||
       interfaceId == type(IERC165).interfaceId;
   }

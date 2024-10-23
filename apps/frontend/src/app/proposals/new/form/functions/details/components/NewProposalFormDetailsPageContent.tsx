@@ -9,6 +9,9 @@ import { useTranslation } from "react-i18next"
 import { updateMarkdownTemplatePlaceholders } from "@/constants"
 import { useWallet } from "@vechain/dapp-kit-react"
 
+import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
+
 export const NewProposalFormDetailsPageContent: React.FC = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
@@ -51,6 +54,7 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
       })
 
       router.push("/proposals/new/form/content")
+      AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_ABOUT))
     },
     [setData, router, account],
   )

@@ -6,10 +6,11 @@ import { useTranslation } from "react-i18next"
 type Props = {
   roundId: string
   maxAppsToShow?: number
+  iconSize?: number
 }
-export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, maxAppsToShow = 4 }) => {
+export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, maxAppsToShow = 4, iconSize }) => {
   const { t } = useTranslation()
-  const boxSize = useBreakpointValue({ base: 28, lg: 36 })
+  const boxSize = useBreakpointValue({ base: iconSize ?? 28, lg: iconSize ?? 36 })
   const marginleft = (boxSize ?? 36) / 3
   const borderRadius = (boxSize ?? 36) / 4
 

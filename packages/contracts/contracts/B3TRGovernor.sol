@@ -48,6 +48,7 @@ import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
 
 /**
  * @title B3TRGovernor
@@ -67,11 +68,15 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  *
  * The contract is upgradeable and uses the UUPS pattern.
  * @dev The contract is upgradeable and uses the UUPS pattern. All logic is stored in libraries.
- * 
+ *
  * ------------------ VERSION 2 ------------------
  * - Replaced onlyGovernance modifier with onlyRoleOrGovernance which checks if the caller has the DEFAULT_ADMIN_ROLE role or if the function is called through a governance proposal
  * ------------------ VERSION 3 ------------------
-* @dev Difference from V2: Updated all libraries to V2, and IVoterRewards to IVoterRewards version 2.
+ * - Added the ability to toggle the quadratic voting mechanism on and off
+ * ------------------ VERSION 4 ------------------
+ * - Integrated VeBetterPassport contract
+ * ------------------ VERSION 5 ------------------
+ * - Difference from V4: Updated all libraries to use new version of IVoterRewards that supports GM Upgrades.
  */
 contract B3TRGovernor is
   IB3TRGovernor,
@@ -158,6 +163,10 @@ contract B3TRGovernor is
     _grantRole(PAUSER_ROLE, rolesData.pauser);
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, rolesData.contractsAddressManager);
     _grantRole(PROPOSAL_EXECUTOR_ROLE, rolesData.proposalExecutor);
+  }
+
+  function initializeV4(IVeBetterPassport _veBetterPassport) public reinitializer(4) {
+    __GovernorStorage_init_v4(_veBetterPassport);
   }
 
   /**
@@ -543,11 +552,30 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Check if quadratic voting is disabled for the current round.
+   * @return true if quadratic voting is disabled, false otherwise.
+   */
+  function isQuadraticVotingDisabledForCurrentRound() external view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorVotesLogic.isQuadraticVotingDisabledForCurrentRound($);
+  }
+
+  /**
+   * @notice Check if quadratic voting is disabled at a specific round.
+   * @param roundId - The round ID for which to check if quadratic voting is disabled.
+   * @return true if quadratic voting is disabled, false otherwise.
+   */
+  function isQuadraticVotingDisabledForRound(uint256 roundId) external view returns (bool) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return GovernorVotesLogic.isQuadraticVotingDisabledForRound($, roundId);
+  }
+
+  /**
    * @notice See {IB3TRGovernor-version}.
    * @return string The version of the governor
    */
   function version() external pure returns (string memory) {
-    return "3";
+    return "5";
   }
 
   /**
@@ -618,6 +646,15 @@ contract B3TRGovernor is
   function timelock() external view virtual returns (address) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     return address($.timelock);
+  }
+
+  /**
+   * @notice Returns the VeBetterPassport contract.
+   * @return The current VeBetterPassport contract.
+   */
+  function veBetterPassport() external view returns (IVeBetterPassport) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    return $.veBetterPassport;
   }
 
   // ------------------ SETTERS ------------------ //
@@ -779,6 +816,16 @@ contract B3TRGovernor is
   }
 
   /**
+   * @notice Toggle quadratic voting for next round.
+   * @dev This function toggles the state of quadratic votingstarting from the next round.
+   * The state will flip between enabled and disabled each time the function is called.
+   */
+  function toggleQuadraticVoting() external onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorVotesLogic.toggleQuadraticVoting($);
+  }
+
+  /**
    * @notice Method that allows to restrict functions that can be called by proposals for a single function selector
    * @param target The address of the contract
    * @param functionSelector The function selector
@@ -883,6 +930,17 @@ contract B3TRGovernor is
   ) external virtual onlyRoleOrGovernance(DEFAULT_ADMIN_ROLE) {
     GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
     GovernorConfigurator.updateTimelock($, newTimelock);
+  }
+
+  /**
+   * @notice Set the VeBetterPassport contract
+   * @param newVeBetterPassport The new VeBetterPassport contract
+   */
+  function setVeBetterPassport(
+    IVeBetterPassport newVeBetterPassport
+  ) public onlyRoleOrGovernance(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+    GovernorStorageTypes.GovernorStorage storage $ = getGovernorStorage();
+    GovernorConfigurator.setVeBetterPassport($, newVeBetterPassport);
   }
 
   // ------------------ Overrides ------------------ //

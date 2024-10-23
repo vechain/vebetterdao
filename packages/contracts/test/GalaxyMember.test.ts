@@ -27,7 +27,7 @@ import { deployProxy, upgradeProxy } from "../scripts/helpers"
 import { GalaxyMember, GalaxyMemberV1 } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 
-describe("Galaxy Member - @shard2", () => {
+describe("Galaxy Member - @shard6", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -824,23 +824,25 @@ describe("Galaxy Member - @shard2", () => {
 
       expect(await galaxyMember.connect(otherAccount).freeMint()).not.to.be.reverted
 
+      await galaxyMember.setMaxLevel(10)
+
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
 
       const tokenId = await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)
 
-      await galaxyMember.setMaxLevel(10)
+      //await galaxyMember.setMaxLevel(10)
       const tokenInfo = await galaxyMember.getTokenInfoByTokenId(tokenId)
 
-      expect(tokenInfo?.tokenId).to.equal(0)
+      expect(tokenInfo?.tokenId).to.equal(1)
       expect(tokenInfo?.tokenURI.includes("ipfs://")).to.equal(true)
       expect(tokenInfo?.tokenLevel).to.equal(1)
       expect(tokenInfo?.b3trToUpgrade).to.equal(10000000000000000000000n)
     })
 
     it("User can free mint if he participated in B3TR Governance", async () => {
-      const { galaxyMember, otherAccount, b3tr, otherAccounts, governor, B3trContract } =
+      const { galaxyMember, otherAccount, b3tr, otherAccounts, governor, B3trContract, veBetterPassport } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -855,6 +857,9 @@ describe("Galaxy Member - @shard2", () => {
 
       // we do it here but will use in the next test
       await getVot3Tokens(voter, "30000")
+
+      await veBetterPassport.whitelist(voter.address)
+      await veBetterPassport.toggleCheck(1)
 
       // Now we can create a new proposal
       const tx = await createProposal(b3tr, B3trContract, otherAccount, "", "tokenDetails", [])
@@ -874,7 +879,7 @@ describe("Galaxy Member - @shard2", () => {
     })
 
     it("User can free mint if he participated both in B3TR Governance and in x-allocation voting", async () => {
-      const { galaxyMember, otherAccount, b3tr, otherAccounts, governor, B3trContract } =
+      const { galaxyMember, otherAccount, b3tr, otherAccounts, governor, B3trContract, veBetterPassport } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -883,6 +888,9 @@ describe("Galaxy Member - @shard2", () => {
       await bootstrapAndStartEmissions()
 
       const voter = otherAccounts[0]
+
+      await veBetterPassport.whitelist(voter.address)
+      await veBetterPassport.toggleCheck(1)
 
       // Should not be able to free mint
       await catchRevert(galaxyMember.connect(voter).freeMint())
@@ -1648,7 +1656,7 @@ describe("Galaxy Member - @shard2", () => {
 
       const selectedTokenInfo = await galaxyMember.getSelectedTokenInfoByOwner(await otherAccount.getAddress())
 
-      expect(selectedTokenInfo?.tokenId).to.equal(0)
+      expect(selectedTokenInfo?.tokenId).to.equal(1)
       expect(selectedTokenInfo?.tokenURI.includes("ipfs://")).to.equal(true)
       expect(selectedTokenInfo?.tokenLevel).to.equal(1)
       expect(selectedTokenInfo?.b3trToUpgrade).to.equal(10000000000000000000000n)

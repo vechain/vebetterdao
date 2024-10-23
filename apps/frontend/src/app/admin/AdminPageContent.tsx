@@ -1,19 +1,21 @@
 "use client"
 
-import { Stack, Tabs, TabList, Tab, TabPanels, TabPanel, Grid, GridItem } from "@chakra-ui/react"
-import { useEffect } from "react"
-import { AnalyticsUtils } from "@/utils"
+import { useCurrentAllocationsRoundId } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
+import { AnalyticsUtils } from "@/utils"
+import { Grid, GridItem, Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { useEffect } from "react"
 import { B3trAllowance } from "./components/B3trAllowance"
 import { BulkClaimXAppsAllocations } from "./components/BulkClaimXAppsAllocations"
 import { XAppCheckEndorsement } from "./components/XAppCheckEndorsement"
-import { Pause } from "./components/Pause"
-import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
-import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
 import { ContractsDetails } from "./components/ContractsDetails"
+import { Pause } from "./components/Pause"
+import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
 import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
-import { useCurrentAllocationsRoundId } from "@/api"
+import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
+import { UpdateRoleCard } from "./components/UpdateRoleCard"
+import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport"
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 
 const isLocalhost = process.env.NODE_ENV === "development"
@@ -24,12 +26,31 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const { isAdminOfX2EarnApps, isAdminOfVot3, isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfB3TRGovernor } =
-    useAccountPermissions(account ?? "")
+  const {
+    isAdminOfX2EarnApps,
+    isAdminOfVot3,
+    isAdminOfB3tr,
+    isAdminOfGalaxyMember,
+    isAdminOfB3TRGovernor,
+    isAdminOfVeBetterPassport,
+    isPassportSettingsManager,
+    isPassportBotSignaler,
+    isPassportActionRegistrar,
+    isPassportScoreManager,
+    isPassportWhitelister,
+  } = useAccountPermissions(account ?? "")
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const canSeePauseTab = isAdminOfB3tr || isAdminOfGalaxyMember || isAdminOfVot3 || isAdminOfB3TRGovernor
+
+  const canSeeVeBetterPassportTab =
+    isAdminOfVeBetterPassport ||
+    isPassportSettingsManager ||
+    isPassportBotSignaler ||
+    isPassportActionRegistrar ||
+    isPassportScoreManager ||
+    isPassportWhitelister
 
   return (
     <Stack spacing={12} w={"full"} data-testid="admin-page">
@@ -48,6 +69,7 @@ export const AdminPageContent = () => {
           <Tab>{"Utils"}</Tab>
           <Tab>{"Contracts"}</Tab>
           {canSeePauseTab && <Tab>{"Pausing"}</Tab>}
+          {canSeeVeBetterPassportTab && <Tab>{"VeBetter Passport"}</Tab>}
         </TabList>
 
         <TabPanels>
@@ -77,8 +99,9 @@ export const AdminPageContent = () => {
           )}
 
           <TabPanel>
-            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+            <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
               <B3trAllowance />
+              <UpdateRoleCard />
             </Grid>
           </TabPanel>
 
@@ -89,6 +112,12 @@ export const AdminPageContent = () => {
           {canSeePauseTab && (
             <TabPanel>
               <Pause />
+            </TabPanel>
+          )}
+
+          {canSeeVeBetterPassportTab && (
+            <TabPanel>
+              <VeBetterPassport />
             </TabPanel>
           )}
         </TabPanels>

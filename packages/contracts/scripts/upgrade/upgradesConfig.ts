@@ -1,12 +1,14 @@
 export interface UpgradeContract {
   name: string
+  configAddressField: string
   versions: readonly string[]
   descriptions: Record<string, string>
 }
 
 export const upgradeConfig: Record<string, UpgradeContract> = {
-  VoterRewards: {
+  "Voter Rewards": {
     name: "voter-rewards",
+    configAddressField: "voterRewardsContractAddress",
     versions: ["v2", "v3"],
     descriptions: {
       v2: "Add the ability to toggle quadratic rewarding on and off.",
@@ -15,44 +17,70 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   },
   B3TRGovernor: {
     name: "b3tr-governor",
-    versions: ["v2", "v3"],
+    versions: ["v2", "v3", "v4", "v5"],
+    configAddressField: "b3trGovernorAddress",
     descriptions: {
-      v2: "Give ability to contract admins to can call governance only functions",
-      v3: "Vechain Nodes x GM upgrades feature",
+      v2: "Give ability to contract admins to call governance only functions",
+      v3: "Add the ability to toggle quadratic voting on and off.",
+      v4: "Integrate VeBetterPassport contract",
+      v5: "Vechain Nodes x GM upgrades feature",
     },
   },
   XAllocationVoting: {
     name: "x-allocation-voting",
+    configAddressField: "xAllocationVotingContractAddress",
     versions: ["v2", "v3"],
     descriptions: {
-      v2: "Fix XAllocation voting so that a user cannot vote for an XApp with a vote weight less than 1",
+      v2: "Integrate VeBetterPassport contract",
       v3: "Update X2Earn interface to include new endorsement feature",
     },
   },
-  X2EarnRewardsPool: {
-    name: "x2-earn-rewards-pool",
+  "XAllocation Pool": {
+    name: "x-allocation-pool",
+    configAddressField: "xAllocationPoolContractAddress",
     versions: ["v2", "v3"],
     descriptions: {
-      v2: "Add onchain impacts and proof generation",
+      v2: "Add the abilty to toggle quadratic funding on and off.",
       v3: "Update X2Earn interface to include new endorsement feature",
     },
   },
   X2EarnApps: {
     name: "x2-earn-apps",
+    configAddressField: "x2EarnAppsContractAddress",
     versions: ["v2"],
     descriptions: {
-      v2: "Add xapp endorsment module",
+      v2: "Add xapp endorsement module",
     },
   },
-  XAllocationPool: {
-    name: "x-allocation-pool",
+  "X2Earn Rewards Pool": {
+    name: "x2earn-rewards-pool",
+    configAddressField: "x2EarnRewardsPoolContractAddress",
+    versions: ["v2", "v3", "v4"],
+    descriptions: {
+      v2: "Add onchain impacts and proof generation",
+      v3: "Integrate VeBetterPassport contract",
+      v4: "Update X2Earn interface to include new endorsement feature",
+    },
+  },
+  Emissions: {
+    name: "emissions",
+    configAddressField: "emissionsContractAddress",
     versions: ["v2"],
     descriptions: {
-      v2: "Update X2Earn interface to include new endorsement feature",
+      v2: "Aligns the emissions with the expected B3TR emissions schedule",
     },
   },
-  GalaxyMember: {
+  "VeBetter Passport": {
+    name: "vebetter-passport",
+    configAddressField: "veBetterPassportContractAddress",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Prevent delegation of passports to entities",
+    },
+  },
+  "Galaxy Member": {
     name: "galaxy-member",
+    configAddressField: "galaxyMemberContractAddress",
     versions: ["v2"],
     descriptions: {
       v2: "Vechain Nodes x GM upgrades feature",

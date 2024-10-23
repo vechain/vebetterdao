@@ -1,16 +1,14 @@
 import { useRoundXApps } from "./useRoundXApps"
-import { useXAppsVotesQf } from "./useXAppsVotesQf"
 import { useXApps } from "./useXApps"
-import { useQuery } from "@tanstack/react-query"
 import { XApp } from "../getXApps"
+import { useXAppsShares } from "./useXAppsShares"
+import { useMemo } from "react"
 
 type MostVotedAppsInRoundReturnType = {
-  votes: string
+  percentage: number
   id: string
   app: XApp
 }
-
-export const getMostVotedAppsInRoundQueryKey = (roundId: string) => ["MOST_VOTED_APPS_IN_ROUND", roundId]
 
 /**
  * Get the most voted apps in a round
@@ -18,28 +16,34 @@ export const getMostVotedAppsInRoundQueryKey = (roundId: string) => ["MOST_VOTED
  * @param roundId the id of the round to get the most voted apps
  * @returns a sorted array of the most voted apps in the round
  */
-export const useMostVotedAppsInRound = (roundId: string) => {
-  const { data: roundXApps } = useRoundXApps(roundId ?? "")
+export const useMostVotedAppsInRound = (
+  roundId?: string,
+): { data: MostVotedAppsInRoundReturnType[]; isLoading: boolean } => {
+  // get apps from round
+  const { data: roundXApps } = useRoundXApps(roundId)
 
   // Notice: this trick is used because when starting the project in the local environment,
   // the roundId is "0" and the roundXApps is undefined, which will cause the app to not render apps info.
   const { data: allXApps } = useXApps()
   const apps = roundId === "0" ? allXApps?.active : roundXApps
 
-  const { data: xAppsVotes, isLoading: xAppsVotesLoading } = useXAppsVotesQf(apps?.map(app => app.id) ?? [], roundId)
+  // get shares of apps
+  const xAppsShares = useXAppsShares(apps?.map(app => app.id) ?? [], roundId)
 
-  return useQuery({
-    queryKey: getMostVotedAppsInRoundQueryKey(roundId),
-    queryFn: async (): Promise<MostVotedAppsInRoundReturnType[]> => {
-      if (!xAppsVotes || !apps) return []
-      return xAppsVotes
-        .map(appVotes => ({
-          votes: appVotes.votes ?? "0",
-          id: apps?.find(xa => xa.id === appVotes.app)?.id ?? "",
-          app: apps?.find(xa => xa.id === appVotes.app) ?? ({} as XApp),
+  const mostVotedApps = useMemo(
+    () =>
+      xAppsShares.data
+        ?.map(appShares => ({
+          percentage: appShares.share + appShares.unallocatedShare,
+          id: apps?.find(xa => xa.id === appShares.app)?.id ?? "",
+          app: apps?.find(xa => xa.id === appShares.app) ?? ({} as XApp),
         }))
-        .sort((a, b) => Number(b.votes) - Number(a.votes))
-    },
-    enabled: !xAppsVotesLoading && !!roundId && !!apps && !!xAppsVotes,
-  })
+        .sort((a, b) => Number(b.percentage) - Number(a.percentage)) ?? [],
+    [xAppsShares.data, apps],
+  )
+
+  return {
+    data: mostVotedApps,
+    isLoading: xAppsShares.isLoading,
+  }
 }

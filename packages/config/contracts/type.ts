@@ -1,5 +1,5 @@
 export type ContractsConfig = {
-  NEXT_PUBLIC_APP_ENV: "local" | "e2e" | "solo-staging" | "testnet" | "mainnet"
+  NEXT_PUBLIC_APP_ENV: "local" | "e2e" | "testnet-staging" | "testnet" | "mainnet"
 
   B3TR_GOVERNOR_QUORUM_PERCENTAGE: number
   TIMELOCK_MIN_DELAY: number
@@ -15,6 +15,7 @@ export type ContractsConfig = {
   EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD: number
   EMISSIONS_TREASURY_PERCENTAGE: number
   EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE: number
+  EMISSIONS_IS_NOT_ALIGNED: boolean
 
   X_ALLOCATION_VOTING_QUORUM_PERCENTAGE: number
   X_ALLOCATION_VOTING_VOTING_THRESHOLD: bigint
@@ -46,10 +47,19 @@ export type ContractsConfig = {
   MIGRATION_ADDRESS: string
   MIGRATION_AMOUNT: bigint
 
-  // Version 2
-  VECHAIN_NODES_CONTRACT_ADDRESS: string
-
-  XAPP_GRACE_PERIOD: number
   // X 2 Earn Rewards Pool
   X_2_EARN_INITIAL_IMPACT_KEYS: string[]
+
+  // Endorsement
+  VECHAIN_NODES_CONTRACT_ADDRESS: string
+  XAPP_GRACE_PERIOD: number
+
+  // VeBetterPassport
+  VEPASSPORT_BOT_SIGNALING_THRESHOLD: number
+  VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE: number
+  VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL: number
+  VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE: number
+  VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE: number
+  VEPASSPORT_PASSPORT_MAX_ENTITIES: number
+  VEPASSPORT_DECAY_RATE: number
 }

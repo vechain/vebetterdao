@@ -25,11 +25,11 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import "./interfaces/IGalaxyMember.sol";
-import "../V1/interfaces/IB3TRGovernor.sol";
-import "../V1/interfaces/IXAllocationVotingGovernor.sol";
-import "../V1/interfaces/IEmissions.sol";
-import "../V1/interfaces/IB3TR.sol";
+import "../V1/interfaces/IGalaxyMemberV1.sol";
+import "../V4/interfaces/IB3TRGovernorV4.sol";
+import "../V2/interfaces/IXAllocationVotingGovernorV2.sol";
+import "../../interfaces/IEmissions.sol";
+import "../../interfaces/IB3TR.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
@@ -77,7 +77,7 @@ contract VoterRewardsV2 is AccessControlUpgradeable, ReentrancyGuardUpgradeable,
 
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
   struct VoterRewardsStorage {
-    IGalaxyMember galaxyMember;
+    IGalaxyMemberV1 galaxyMember;
     IB3TR b3tr;
     IEmissions emissions;
     // level => percentage multiplier for the level of the GM NFT
@@ -170,7 +170,7 @@ contract VoterRewardsV2 is AccessControlUpgradeable, ReentrancyGuardUpgradeable,
 
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
 
-    $.galaxyMember = IGalaxyMember(_galaxyMember);
+    $.galaxyMember = IGalaxyMemberV1(_galaxyMember);
     $.b3tr = IB3TR(_b3tr);
     $.emissions = IEmissions(_emissions);
 
@@ -324,7 +324,7 @@ contract VoterRewardsV2 is AccessControlUpgradeable, ReentrancyGuardUpgradeable,
   }
 
   /// @notice Get the Galaxy Member contract.
-  function galaxyMember() external view returns (IGalaxyMember) {
+  function galaxyMember() external view returns (IGalaxyMemberV1) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.galaxyMember;
   }
@@ -376,7 +376,7 @@ contract VoterRewardsV2 is AccessControlUpgradeable, ReentrancyGuardUpgradeable,
 
     emit GalaxyMemberAddressUpdated(_galaxyMember, address($.galaxyMember));
 
-    $.galaxyMember = IGalaxyMember(_galaxyMember);
+    $.galaxyMember = IGalaxyMemberV1(_galaxyMember);
   }
 
   /// @notice Set the Galaxy Member level to multiplier mapping.

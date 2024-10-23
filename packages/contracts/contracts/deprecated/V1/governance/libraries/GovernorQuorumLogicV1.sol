@@ -75,7 +75,7 @@ library GovernorQuorumLogicV1 {
     return self.quorumNumeratorHistory.upperLookupRecent(SafeCast.toUint48(timepoint));
   }
 
-  /// @notice Retrieves the latest quorum numerator using the GovernorClockLogicV1 library.
+  /// @notice Retrieves the latest quorum numerator using the GovernorClockLogic library.
   /// @param self The storage structure containing the quorum numerator history.
   /// @return The latest quorum numerator.
   function quorumNumerator(GovernorStorageTypesV1.GovernorStorage storage self) public view returns (uint256) {

@@ -2,12 +2,14 @@ import { Heading, Text, VStack, ModalCloseButton, Link, Image, HStack } from "@c
 import Lottie from "react-lottie"
 import successAnimation from "./success.json"
 import { ShareButtons } from "../../ShareButtons"
-import { ReactNode } from "react"
+import { ReactNode, useState } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
 import { getConfig } from "@repo/config"
 import { useTranslation } from "react-i18next"
 import { PropsEndorsement } from "@/app/apps/components/UnendorseAppModal"
+import { AnalyticsUtils } from "@/utils"
+import { ButtonClickProperties, buttonClickActions } from "@/constants"
 
 export type SuccessModalContentProps = {
   title?: ReactNode
@@ -16,6 +18,7 @@ export type SuccessModalContentProps = {
   showExplorerButton?: boolean
   txId?: string
   endorsementInfo?: PropsEndorsement
+  isSuccessBeenTrack?: boolean
 }
 
 /**
@@ -34,8 +37,16 @@ export const SuccessModalContent = ({
   showExplorerButton = false,
   txId,
   endorsementInfo,
+  isSuccessBeenTrack,
 }: SuccessModalContentProps) => {
   const { t } = useTranslation()
+
+  const [isTracked, setIsTracked] = useState(isSuccessBeenTrack)
+
+  if (isTracked && typeof title === "string") {
+    AnalyticsUtils.trackEvent(title, buttonClickActions(ButtonClickProperties.SUCCESS_TX))
+    setIsTracked(false)
+  }
   return (
     <ModalAnimation>
       <ModalCloseButton top={4} right={4} />

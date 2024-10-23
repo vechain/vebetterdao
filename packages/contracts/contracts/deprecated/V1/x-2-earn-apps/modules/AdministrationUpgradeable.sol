@@ -24,7 +24,7 @@
 pragma solidity 0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
+import { X2EarnAppsUpgradeableV1 } from "../X2EarnAppsUpgradeableV1.sol";
 
 /**
  * @title AdministrationUpgradeable
@@ -35,7 +35,7 @@ import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
  * The team allocation percentage is the percentage funds sent to the team at each distribution of allocation rewards.
  * The reward distributors are the addresses that can distribute rewards from the X2EarnRewardsPool.
  */
-abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
+abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeableV1 {
   uint256 public constant MAX_MODERATORS = 100;
   uint256 public constant MAX_REWARD_DISTRIBUTORS = 100;
 

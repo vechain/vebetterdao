@@ -35,8 +35,8 @@ import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
-import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
+import { IXAllocationVotingGovernorV2 } from "../V2/interfaces/IXAllocationVotingGovernorV2.sol";
+import { IB3TRGovernorV4 } from "../V4/interfaces/IB3TRGovernorV4.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
@@ -63,8 +63,8 @@ contract GalaxyMemberV1 is
   /// @dev GalaxyMemberStorage structure holds all the state variables in a single location.
   /// @custom:storage-location erc7201:b3tr.storage.GalaxyMember
   struct GalaxyMemberStorage {
-    IXAllocationVotingGovernor xAllocationsGovernor; // XAllocationVotingGovernor contract
-    IB3TRGovernor b3trGovernor; // B3TRGovernor contract
+    IXAllocationVotingGovernorV2 xAllocationsGovernor; // XAllocationVotingGovernor contract
+    IB3TRGovernorV4 b3trGovernor; // B3TRGovernor contract
     IB3TR b3tr; // B3TR token contract
     address treasury; // Treasury contract address
     string _baseTokenURI; // Base URI for the Token
@@ -419,7 +419,7 @@ contract GalaxyMemberV1 is
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     emit XAllocationsGovernorAddressUpdated(_xAllocationsGovernor, address($.xAllocationsGovernor));
-    $.xAllocationsGovernor = IXAllocationVotingGovernor(_xAllocationsGovernor);
+    $.xAllocationsGovernor = IXAllocationVotingGovernorV2(_xAllocationsGovernor);
   }
 
   /// @notice Sets the B3TRGovernor contract address
@@ -430,7 +430,7 @@ contract GalaxyMemberV1 is
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     emit B3trGovernorAddressUpdated(_b3trGovernor, address($.b3trGovernor));
-    $.b3trGovernor = IB3TRGovernor(payable(_b3trGovernor));
+    $.b3trGovernor = IB3TRGovernorV4(payable(_b3trGovernor));
   }
 
   /// @notice Sets the base URI for computing the tokenURI
@@ -505,10 +505,10 @@ contract GalaxyMemberV1 is
   function participatedInGovernance(address user) public view returns (bool) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     require(
-      $.xAllocationsGovernor != IXAllocationVotingGovernor(address(0)),
+      $.xAllocationsGovernor != IXAllocationVotingGovernorV2(address(0)),
       "Galaxy Member: XAllocationVotingGovernor not set"
     );
-    require($.b3trGovernor != IB3TRGovernor(payable(address(0))), "Galaxy Member: B3TRGovernor not set");
+    require($.b3trGovernor != IB3TRGovernorV4(payable(address(0))), "Galaxy Member: B3TRGovernor not set");
 
     if ($.xAllocationsGovernor.hasVotedOnce(user) || $.b3trGovernor.hasVotedOnce(user)) {
       return true;
@@ -568,13 +568,13 @@ contract GalaxyMemberV1 is
   }
 
   /// @notice Gets the xAllocationsGovernor contract address
-  function xAllocationsGovernor() external view returns (IXAllocationVotingGovernor) {
+  function xAllocationsGovernor() external view returns (IXAllocationVotingGovernorV2) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.xAllocationsGovernor;
   }
 
   /// @notice Gets the b3trGovernor contract address
-  function b3trGovernor() external view returns (IB3TRGovernor) {
+  function b3trGovernor() external view returns (IB3TRGovernorV4) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
     return $.b3trGovernor;
   }

@@ -43,6 +43,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * @dev Interacts with the X2EarnApps contract to get the app data (eg: app IDs, app existence, eligible apps for each round).
  * @dev Interacts with the VotingRewards contract to save the user from casting a vote.
  * @dev The contract is using AccessControl to handle roles for admin, governance, and round-starting operations.
+ *
+ * ----- Version 2 -----
+ * - Integrated VeBetterPassport
+ * - Added check to ensure that the vote weight for an XApp cast by a user is greater than the voting threshold
  */
 contract XAllocationVoting is
   XAllocationVotingGovernor,
@@ -134,6 +138,10 @@ contract XAllocationVoting is
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, data.contractsAddressManager);
   }
 
+  function initializeV2(IVeBetterPassport _veBetterPassport) public reinitializer(2) {
+    __ExternalContracts_init_v2(_veBetterPassport);
+  }
+
   // ---------- Setters ---------- //
   /**
    * @dev Set the address of the X2EarnApps contract
@@ -200,6 +208,13 @@ contract XAllocationVoting is
    */
   function updateQuorumNumerator(uint256 newQuorumNumerator) public virtual override onlyRole(GOVERNANCE_ROLE) {
     super.updateQuorumNumerator(newQuorumNumerator);
+  }
+
+  /**
+   * @dev Set the VeBetterPassport contract
+   */
+  function setVeBetterPassport(IVeBetterPassport newVeBetterPassport) external onlyRole(GOVERNANCE_ROLE) {
+    _setVeBetterPassport(newVeBetterPassport);
   }
 
   // ---------- Getters ---------- //

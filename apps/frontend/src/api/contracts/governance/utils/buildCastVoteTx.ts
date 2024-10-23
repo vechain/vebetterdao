@@ -5,9 +5,9 @@ const b3trGovernorAbi = B3TRGovernorJson.abi
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress
 
 export enum VoteType {
-  VOTE_AGAINST,
-  VOTE_FOR,
-  ABSTAIN,
+  VOTE_AGAINST = "AGAINST",
+  VOTE_FOR = "FOR",
+  ABSTAIN = "ABSTAIN",
 }
 
 /**

@@ -1,13 +1,14 @@
-import { useXAppMetadata, useAllocationsRoundState, useXAppRoundEarnings } from "@/api"
+import { useXAppMetadata, useXAppRoundEarnings, useRoundAppVotes } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { B3TRIcon } from "@/components"
 import { notFoundImage } from "@/constants"
 import { VStack, HStack, Skeleton, Heading, Box, Image, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 type AppVotesData = {
-  votes: string | number
+  percentage: number
   app: string
 }
 
@@ -28,7 +29,6 @@ const compactFormatter = getCompactFormatter(2)
 export const AppVotesHorizontalChart = ({
   data,
   roundId,
-  totalVotes,
   showReceived = false,
   maxAllocation,
   maxAllocationPercentage,
@@ -39,26 +39,25 @@ export const AppVotesHorizontalChart = ({
   const { data: appMetadata } = useXAppMetadata(data.app)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
-  const { data: roundState, isLoading: roundStateLoading } = useAllocationsRoundState(roundId)
-
   const { data: forecastedEarnings, isLoading: forecastedEarningsLoading } = useXAppRoundEarnings(roundId, data.app)
 
-  //TODO: Enable again when we have an indexer - too many events to fetch otherwise
-  //   const { data: roundVotes, isLoading: roundVotesLoading } = useVotesInRound(roundId, showTotalVoters)
+  const roundIdNumber = useMemo(() => {
+    try {
+      return Number(roundId)
+    } catch {
+      return 0
+    }
+  }, [roundId])
 
-  //   const votersLoading = roundVotesLoading || roundVotes === undefined
+  const { data: roundAppVotes } = useRoundAppVotes({ roundId: roundIdNumber })
 
-  //   const appVoters = useMemo(() => {
-  //     return (
-  //       roundVotes?.filter(vote => {
-  //         const appIndex = vote.appsIds.findIndex(appId => compareAddresses(appId, data.app))
-  //         if (appIndex === -1) return false
-  //         return Number(ethers.formatEther(vote.voteWeights[appIndex] as string)) > 0
-  //       }).length ?? 0
-  //     )
-  //   }, [roundVotes, data.app])
+  const appVotes = useMemo(() => {
+    const appVoteResult = roundAppVotes?.filter(vote => vote.appId === data.app) ?? []
 
-  const votesPercentage = Number(totalVotes) === 0 ? 0 : (Number(data.votes) / Number(totalVotes)) * 100
+    if (appVoteResult.length !== 1) return 0
+
+    return appVoteResult?.[0]?.voters
+  }, [roundAppVotes, data.app])
 
   const baseProgressColor = "rgba(208, 248, 164, 1)"
   const trackProgressColor = "rgba(154, 222, 78, 1)"
@@ -80,16 +79,9 @@ export const AppVotesHorizontalChart = ({
             <VStack spacing={0} align={"flex-start"} justify={"flex-start"}>
               <Heading size={["16px"]} fontWeight={600} color="#6DCB09">
                 {t("{{percentage}}%", {
-                  percentage: votesPercentage.toLocaleString("en", { minimumFractionDigits: 2 }),
+                  percentage: data.percentage.toLocaleString("en", { minimumFractionDigits: 2 }),
                 })}
               </Heading>
-              {/* {showTotalVoters && (
-                <Skeleton isLoaded={!votersLoading}>
-                  <Text fontSize={["12px"]} fontWeight={400} color="#6A6A6A">
-                    {`${appVoters} ${t("wallets voted")}`}
-                  </Text>
-                </Skeleton>
-              )} */}
             </VStack>
           </VStack>
         </HStack>
@@ -105,9 +97,12 @@ export const AppVotesHorizontalChart = ({
                   <B3TRIcon boxSize={["14px", "16px"]} colorVariant="dark" />
                 </HStack>
               </Skeleton>
-              <Skeleton isLoaded={!roundStateLoading} textAlign={"right"}>
+              <Skeleton isLoaded={appVotes !== undefined} textAlign={"right"}>
                 <Text fontSize={["12px", "14px"]} fontWeight={"400"} color="#6A6A6A">
-                  {roundState === 0 ? t("To receive") : t("Received")}
+                  {t("voted by")}{" "}
+                  <span style={{ fontWeight: 600 }}>
+                    {appVotes} {t("wallets")}
+                  </span>
                 </Text>
               </Skeleton>
             </VStack>
@@ -116,7 +111,7 @@ export const AppVotesHorizontalChart = ({
       </HStack>
       <VStack spacing={1} w="full">
         <Box w="full" h={2} bg={baseProgressColor} borderRadius={"xl"} pos="relative">
-          <Box pos="absolute" w={`${votesPercentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
+          <Box pos="absolute" w={`${data.percentage}%`} h={2} bg={trackProgressColor} borderRadius={"xl"} />
           <Box
             pos="absolute"
             left={`${maxAllocationPercentage}%`}

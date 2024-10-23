@@ -26,9 +26,9 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IB3TR } from "../V1/interfaces/IB3TR.sol";
-import { IX2EarnApps } from "../V1/interfaces/IX2EarnApps.sol";
-import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
+import { IX2EarnAppsV1 } from "../V1/interfaces/IX2EarnAppsV1.sol";
+import { IX2EarnRewardsPoolV2 } from "./interfaces/IX2EarnRewardsPoolV2.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -44,7 +44,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  * The contract is upgradable through the UUPS proxy pattern and UPGRADER_ROLE can authorize the upgrade.
  */
 contract X2EarnRewardsPoolV2 is
-  IX2EarnRewardsPool,
+  IX2EarnRewardsPoolV2,
   UUPSUpgradeable,
   AccessControlUpgradeable,
   ReentrancyGuardUpgradeable
@@ -61,7 +61,7 @@ contract X2EarnRewardsPoolV2 is
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnRewardsPool
   struct X2EarnRewardsPoolStorage {
     IB3TR b3tr;
-    IX2EarnApps x2EarnApps;
+    IX2EarnAppsV1 x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
     mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
     string[] allowedImpactKeys; // Array storing impact keys
@@ -82,7 +82,7 @@ contract X2EarnRewardsPoolV2 is
     address _contractsManagerAdmin,
     address _upgrader,
     IB3TR _b3tr,
-    IX2EarnApps _x2EarnApps
+    IX2EarnAppsV1 _x2EarnApps
   ) external initializer {
     require(_admin != address(0), "X2EarnRewardsPool: admin is the zero address");
     require(_contractsManagerAdmin != address(0), "X2EarnRewardsPool: contracts manager admin is the zero address");
@@ -135,7 +135,7 @@ contract X2EarnRewardsPoolV2 is
   // ---------- Setters ---------- //
 
   /**
-   * @dev See {IX2EarnRewardsPool-deposit}
+   * @dev See {IX2EarnRewardsPoolV1-deposit}
    */
   function deposit(uint256 amount, bytes32 appId) external returns (bool) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
@@ -155,7 +155,7 @@ contract X2EarnRewardsPoolV2 is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-withdraw}
+   * @dev See {IX2EarnRewardsPoolV1-withdraw}
    */
   function withdraw(uint256 amount, bytes32 appId, string memory reason) external nonReentrant {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
@@ -195,7 +195,7 @@ contract X2EarnRewardsPoolV2 is
   }
 
   /**
-   * @dev {IX2EarnRewardsPool-distributeReward}
+   * @dev {IX2EarnRewardsPoolV1-distributeReward}
    * @notice the proof argument is unused but kept for backwards compatibility
    */
   function distributeReward(bytes32 appId, uint256 amount, address receiver, string memory /*proof*/) external {
@@ -206,7 +206,7 @@ contract X2EarnRewardsPoolV2 is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-distributeRewardWithProof}
+   * @dev See {IX2EarnRewardsPoolV1-distributeRewardWithProof}
    */
   function distributeRewardWithProof(
     bytes32 appId,
@@ -223,7 +223,7 @@ contract X2EarnRewardsPoolV2 is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-distributeReward}
+   * @dev See {IX2EarnRewardsPoolV1-distributeReward}
    * @notice The impact is an array of integers and codes that represent the impact of the action.
    * Each index of the array represents a different impact.
    * The codes are predefined and the values are the impact values.
@@ -266,7 +266,7 @@ contract X2EarnRewardsPoolV2 is
   }
 
   /**
-   * @dev see {IX2EarnRewardsPool-buildProof}
+   * @dev see {IX2EarnRewardsPoolV1-buildProof}
    */
   function buildProof(
     string[] memory proofTypes,
@@ -395,7 +395,7 @@ contract X2EarnRewardsPoolV2 is
    *
    * @param _x2EarnApps the new X2EarnApps contract
    */
-  function setX2EarnApps(IX2EarnApps _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setX2EarnApps(IX2EarnAppsV1 _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(address(_x2EarnApps) != address(0), "X2EarnRewardsPool: x2EarnApps is the zero address");
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
@@ -444,7 +444,7 @@ contract X2EarnRewardsPoolV2 is
   // ---------- Getters ---------- //
 
   /**
-   * @dev See {IX2EarnRewardsPool-availableFunds}
+   * @dev See {IX2EarnRewardsPoolV1-availableFunds}
    */
   function availableFunds(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
@@ -452,7 +452,7 @@ contract X2EarnRewardsPoolV2 is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-version}
+   * @dev See {IX2EarnRewardsPoolV1-version}
    */
   function version() external pure virtual returns (string memory) {
     return "2";
@@ -469,7 +469,7 @@ contract X2EarnRewardsPoolV2 is
   /**
    * @dev Retrieves the X2EarnApps contract.
    */
-  function x2EarnApps() external view returns (IX2EarnApps) {
+  function x2EarnApps() external view returns (IX2EarnAppsV1) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.x2EarnApps;
   }

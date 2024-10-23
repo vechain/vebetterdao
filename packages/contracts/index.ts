@@ -14,6 +14,7 @@ import TreasuryJson from "./artifacts/contracts/Treasury.sol/Treasury.json"
 import X2EarnRewardsPoolJson from "./artifacts/contracts/X2EarnRewardsPool.sol/X2EarnRewardsPool.json"
 import VechainNodesJson from "./artifacts/contracts/mocks/VechainNodes/TokenAuction.sol/TokenAuction.json"
 import NodeManagementJson from "./artifacts/contracts/NodeManagement.sol/NodeManagement.json"
+import VeBetterPassportJson from "./artifacts/contracts/ve-better-passport/VeBetterPassport.sol/VeBetterPassport.json"
 
 export {
   VOT3__factory,
@@ -31,6 +32,7 @@ export {
   X2EarnRewardsPool__factory,
   TokenAuction__factory,
   NodeManagement__factory,
+  VeBetterPassport__factory,
 } from "./typechain-types"
 
 export {
@@ -50,4 +52,5 @@ export {
   X2EarnRewardsPoolJson,
   VechainNodesJson,
   NodeManagementJson,
+  VeBetterPassportJson,
 }

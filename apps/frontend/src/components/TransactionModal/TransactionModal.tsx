@@ -39,6 +39,7 @@ export type TransactionModalProps = {
   b3trBalance?: string
   vot3Balance?: string
   endorsementInfo?: PropsEndorsement
+  isSuccessBeenTrack?: boolean
 }
 
 export const TransactionModal = ({
@@ -66,6 +67,7 @@ export const TransactionModal = ({
   b3trBalance,
   vot3Balance,
   endorsementInfo,
+  isSuccessBeenTrack,
 }: TransactionModalProps) => {
   const modalContent = useMemo(() => {
     if (status === "uploadingMetadata") return <UploadingMetadataModalContent />
@@ -149,6 +151,7 @@ export const TransactionModal = ({
           socialDescriptionEncoded={socialDescriptionEncoded}
           showExplorerButton={showExplorerButton}
           txId={txId}
+          isSuccessBeenTrack={isSuccessBeenTrack}
         />
       )
     }
@@ -177,6 +180,7 @@ export const TransactionModal = ({
     b3trAmount,
     isAppDeposit,
     endorsementInfo,
+    isSuccessBeenTrack,
   ])
   if (!modalContent) return null
 

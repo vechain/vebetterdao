@@ -36,6 +36,7 @@ export const useAllProposalsState = (proposalsIds: string[]) => {
       const res = await thor.explain(clauses).execute()
 
       const states = res.map((r, index) => {
+        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
         const decoded = proposalStateABi.decode(r.data)
         const proposalId = proposalsIds[index] as string
         const state = Number(decoded[0]) as ProposalState

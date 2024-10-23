@@ -1,3 +1,5 @@
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
 import { Box, Image, Text, Button } from "@chakra-ui/react"
 import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
@@ -18,6 +20,7 @@ export const CreateProposalCard = () => {
       return
     }
 
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CREATE_PROPOSAL))
     router.push("/proposals/new")
   }, [account, open, router])
 

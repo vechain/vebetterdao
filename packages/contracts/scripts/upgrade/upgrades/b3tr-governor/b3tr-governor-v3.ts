@@ -11,16 +11,6 @@ async function main() {
 
   const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
 
-  // Check that latest version of GalaxyMember contract is deployed
-  const galaxyMemberContract = await ethers.getContractAt("GalaxyMember", config.galaxyMemberContractAddress)
-
-  const gmVersion = await galaxyMemberContract.version()
-  if (parseInt(gmVersion) !== 2) {
-    console.log(`GalaxyMember version is not 2: ${gmVersion}`)
-    console.log("Please upgrade GalaxyMember contract first")
-    process.exit(1)
-  }
-
   console.log("Deploying new version of B3TRGovernor libraries")
 
   // Deploy Governor Clock Logic
@@ -107,7 +97,7 @@ async function main() {
   console.log("Libraries", libraries)
 
   console.log(
-    `Upgrading B3TRGovernor contract at address: ${config.xAllocationPoolContractAddress} on network: ${config.network.name}`,
+    `Upgrading B3TRGovernor contract at address: ${config.b3trGovernorAddress} on network: ${config.network.name}`,
   )
 
   const governor = (await upgradeProxy("B3TRGovernorV2", "B3TRGovernor", config.b3trGovernorAddress, [], {
