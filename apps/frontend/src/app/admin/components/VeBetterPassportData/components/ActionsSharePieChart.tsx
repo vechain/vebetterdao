@@ -5,7 +5,18 @@ interface Props {
   data: { name: string; appId: string; actions: number }[]
 }
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A28FD0", "#FF6666"]
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#A28FD0",
+  "#FF6666",
+  "#D4A5A5",
+  "#B0E57C",
+  "#FFD700",
+  "#FF6347",
+]
 
 export const ActionsSharePieChart: React.FC<Props> = ({ data }) => {
   const totalActions = data.reduce((sum, item) => sum + item.actions, 0)
