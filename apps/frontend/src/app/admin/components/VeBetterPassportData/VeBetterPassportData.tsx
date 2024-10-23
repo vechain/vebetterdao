@@ -45,7 +45,7 @@ export const VeBetterPassportData = () => {
         if (!acc[receiver]) {
           acc[receiver] = []
         }
-        acc[receiver].push(action)
+        acc[receiver]?.push(action)
         return acc
       },
       {} as { [receiver: string]: SustainabilityActionsResponse["data"] },
