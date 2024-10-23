@@ -968,5 +968,9 @@
   "Something went wrong. Let’s try that again!": "問題が発生しました。もう一度やってみましょう！",
   "Error 404": "エラー 404",
   "We can't find what you're looking for. Let's head back and try again!": "お探しのものが見つかりません。戻ってもう一度試してみましょう！",
-  "Go back home": "ホームに戻る"
+  "Go back home": "ホームに戻る",
+  "Round {{id}} leaderboard": "ラウンド{{id}}リーダーボード",
+  "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "地球を救う準備はできましたか？ アプリでより良いアクションを行い、持続可能性のチャンピオンになりましょう！ 🌍✨",
+  "Link a Primary Account": "プライマリアカウントをリンクする",
+  "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.": "このアカウントをリンクすると、すべてのベターアクションがプライマリアカウントに転送され、専用の投票権を持つことになります。 プライマリアカウントはリンクリクエストを最初に承認する必要があります。"
 }

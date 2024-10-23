@@ -31,7 +31,7 @@ const MockLeaderboard = [
 export const Leaderboard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: roundId } = useCurrentAllocationsRoundId()
+  const { data: roundId, isLoading: roundIdLoading } = useCurrentAllocationsRoundId()
 
   const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId })
 
@@ -118,9 +118,17 @@ export const Leaderboard = () => {
       <CardBody>
         <VStack spacing={6} align="stretch">
           <VStack spacing={2} align="stretch">
-            <Heading size="md">{t("Leaderboard of the week")}</Heading>
+            <Skeleton isLoaded={!roundIdLoading}>
+              <Heading size="md">
+                {t("Round {{id}} leaderboard", {
+                  id: roundId ?? "",
+                })}
+              </Heading>
+            </Skeleton>
             <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
-              {t("Use the apps to do Better Actions and be recognized with more B3TR each week!")}
+              {t(
+                "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨",
+              )}
             </Text>
           </VStack>
           <VStack spacing={4} align="stretch" w="full" h="full">

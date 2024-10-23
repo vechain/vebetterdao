@@ -968,5 +968,9 @@
   "Something went wrong. Let’s try that again!": "Er is iets misgegaan. Laten we dat nog eens proberen!",
   "Error 404": "Fout 404",
   "We can't find what you're looking for. Let's head back and try again!": "We kunnen niet vinden wat je zoekt. Laten we teruggaan en het opnieuw proberen!",
-  "Go back home": "Ga terug naar huis"
+  "Go back home": "Ga terug naar huis",
+  "Round {{id}} leaderboard": "Ronde {{id}} ranglijst",
+  "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "Klaar om de planeet te redden? Voer Betere Acties uit in de apps en word de duurzaamheidskampioen! 🌍✨",
+  "Link a Primary Account": "Koppel een Primaire Rekening",
+  "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.": "Door deze rekening te koppelen, worden alle Betere Acties overgedragen aan de Primaire Rekening, die ook exclusieve stemmacht zal hebben. De Primaire Rekening moet eerst het koppelverzoek goedkeuren."
 }
