@@ -12,7 +12,7 @@ import {
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
 import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
 import { endorseXApps, registerXDapps } from "../helpers/xApp"
-import { airdropB3trFromTreasury } from "../helpers/airdrop"
+import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
 import { mintVechainNodes, proposeUpgradeGovernance } from "../helpers"
 import { convertB3trForVot3 } from "../helpers/swap"
 
@@ -109,6 +109,8 @@ export const setupLocalEnvironment = async (
   const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 5 + APPS.length, 0)
   const seedAccounts = allAccounts.slice(0, 5)
   const endorserAccounts = allAccounts
+
+  await airdropVTHO(seedAccounts, admin)
 
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
