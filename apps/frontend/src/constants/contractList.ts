@@ -1,6 +1,11 @@
 import { getConfig } from "@repo/config"
 const config = getConfig()
 
+// function that returns the contract from the list by the address
+export const getContractByAddress = (address: string) => {
+  return CONTRACT_LIST.find(contract => contract.contractAddress.toUpperCase() === address.toUpperCase())
+}
+
 export const CONTRACT_LIST = [
   {
     name: "B3TR",
@@ -79,6 +84,20 @@ export const CONTRACT_LIST = [
     name: "X2Earn Rewards Pool",
     contractAddress: config.x2EarnRewardsPoolContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE", "IMPACT_KEY_MANAGER_ROLE"],
+  },
+  {
+    name: "VeBetterPassport",
+    contractAddress: config.veBetterPassportContractAddress,
+    roles: [
+      "DEFAULT_ADMIN_ROLE",
+      "UPGRADER_ROLE",
+      "SETTINGS_MANAGER_ROLE",
+      "WHITELISTER_ROLE",
+      "ACTION_REGISTRAR_ROLE",
+      "ACTION_SCORE_MANAGER_ROLE",
+      "SIGNALER_ROLE",
+      "ROLE_GRANTER",
+    ],
   },
   // TODO: Add node management contract when deployed
   // {
