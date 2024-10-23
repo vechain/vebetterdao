@@ -824,16 +824,18 @@ describe("Galaxy Member - @shard6", () => {
 
       expect(await galaxyMember.connect(otherAccount).freeMint()).not.to.be.reverted
 
+      await galaxyMember.setMaxLevel(10)
+
       expect(await galaxyMember.balanceOf(await otherAccount.getAddress())).to.equal(1) // Other account has 1 NFT
       expect(await galaxyMember.ownerOf(1)).to.equal(await otherAccount.getAddress()) // Owner of the first NFT is the otherAccount
       expect(await galaxyMember.totalSupply()).to.equal(1) // Total supply is 1
 
       const tokenId = await galaxyMember.tokenOfOwnerByIndex(await otherAccount.getAddress(), 0)
 
-      await galaxyMember.setMaxLevel(10)
+      //await galaxyMember.setMaxLevel(10)
       const tokenInfo = await galaxyMember.getTokenInfoByTokenId(tokenId)
 
-      expect(tokenInfo?.tokenId).to.equal(0)
+      expect(tokenInfo?.tokenId).to.equal(1)
       expect(tokenInfo?.tokenURI.includes("ipfs://")).to.equal(true)
       expect(tokenInfo?.tokenLevel).to.equal(1)
       expect(tokenInfo?.b3trToUpgrade).to.equal(10000000000000000000000n)
@@ -1654,7 +1656,7 @@ describe("Galaxy Member - @shard6", () => {
 
       const selectedTokenInfo = await galaxyMember.getSelectedTokenInfoByOwner(await otherAccount.getAddress())
 
-      expect(selectedTokenInfo?.tokenId).to.equal(0)
+      expect(selectedTokenInfo?.tokenId).to.equal(1)
       expect(selectedTokenInfo?.tokenURI.includes("ipfs://")).to.equal(true)
       expect(selectedTokenInfo?.tokenLevel).to.equal(1)
       expect(selectedTokenInfo?.b3trToUpgrade).to.equal(10000000000000000000000n)

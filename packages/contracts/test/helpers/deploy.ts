@@ -80,6 +80,11 @@ import { VoterRewardsV2 } from "../../typechain-types/contracts/deprecated/V2/Vo
 import { XAllocationVotingV2 } from "../../typechain-types/contracts/deprecated/V2/XAllocationVotingV2"
 import { XAllocationPoolV2 } from "../../typechain-types/contracts/deprecated/V2/XAllocationPoolV2"
 import { X2EarnAppsV1 } from "../../typechain-types/contracts/deprecated/V1/X2EarnAppsV1"
+import {
+  GovernorClockLogicV4,
+  GovernorVotesLogicV4,
+} from "../../typechain-types/contracts/deprecated/V4/governance/libraries"
+import { X2EarnRewardsPoolV3 } from "../../typechain-types/contracts/deprecated/V3/X2EarnRewardsPoolV3.sol/X2EarnRewardsPoolV3"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -134,6 +139,14 @@ interface DeployInstance {
   governorQuorumLogicLibV3: GovernorQuorumLogicV3
   governorStateLogicLibV3: GovernorStateLogicV3
   governorVotesLogicLibV3: GovernorVotesLogicV3
+  governorClockLogicLibV4: GovernorClockLogicV4
+  governorConfiguratorLibV4: GovernorConfiguratorLibV4
+  governorDepositLogicLibV4: GovernorDepositLogicLibV4
+  governorFunctionRestrictionsLogicLibV4: GovernorFunctionRestrictionsLogicLibV4
+  governorProposalLogicLibV4: GovernorProposalLogicLibV4
+  governorQuorumLogicLibV4: GovernorQuorumLogicLibV4
+  governorStateLogicLibV4: GovernorStateLogicV4
+  governorVotesLogicLibV4: GovernorVotesLogicV4
   passportChecksLogic: PassportChecksLogic
   passportDelegationLogic: PassportDelegationLogic
   passportEntityLogic: PassportEntityLogic
@@ -157,7 +170,7 @@ interface DeployInstance {
 
 export const NFT_NAME = "GalaxyMember"
 export const NFT_SYMBOL = "GM"
-export const DEFAULT_MAX_MINTABLE_LEVEL = 10
+export const DEFAULT_MAX_MINTABLE_LEVEL = 1
 
 // // Voter Rewards
 export const levels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Galaxy Member contract levels
@@ -378,13 +391,23 @@ export const getOrDeployContractInstances = async ({
     },
   )) as X2EarnRewardsPoolV2
 
-  const x2EarnRewardsPool = (await upgradeProxy(
+  const x2EarnRewardsPoolV3 = (await upgradeProxy(
     "X2EarnRewardsPoolV2",
-    "X2EarnRewardsPool",
+    "X2EarnRewardsPoolV3",
     await x2EarnRewardsPoolV2.getAddress(),
     [veBetterPassportContractAddress],
     {
       version: 3,
+    },
+  )) as X2EarnRewardsPoolV3
+
+  const x2EarnRewardsPool = (await upgradeProxy(
+    "X2EarnRewardsPoolV3",
+    "X2EarnRewardsPool",
+    await x2EarnRewardsPoolV2.getAddress(),
+    [],
+    {
+      version: 4,
     },
   )) as X2EarnRewardsPool
 
@@ -661,7 +684,7 @@ export const getOrDeployContractInstances = async ({
   )) as B3TRGovernorV4
 
   const governor = (await upgradeProxy("B3TRGovernorV4", "B3TRGovernor", await governorV1.getAddress(), [], {
-    version: 4,
+    version: 5,
     libraries: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
       GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
@@ -807,6 +830,14 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLibV3: GovernorQuorumLogicLibV3,
     governorStateLogicLibV3: GovernorStateLogicLibV3,
     governorVotesLogicLibV3: GovernorVotesLogicLibV3,
+    governorClockLogicLibV4: GovernorClockLogicLibV4,
+    governorConfiguratorLibV4: GovernorConfiguratorLibV4,
+    governorDepositLogicLibV4: GovernorDepositLogicLibV4,
+    governorFunctionRestrictionsLogicLibV4: GovernorFunctionRestrictionsLogicLibV4,
+    governorProposalLogicLibV4: GovernorProposalLogicLibV4,
+    governorQuorumLogicLibV4: GovernorQuorumLogicLibV4,
+    governorStateLogicLibV4: GovernorStateLogicLibV4,
+    governorVotesLogicLibV4: GovernorVotesLogicLibV4,
     passportChecksLogic: PassportChecksLogic,
     passportDelegationLogic: PassportDelegationLogic,
     passportEntityLogic: PassportEntityLogic,
