@@ -973,5 +973,6 @@
   "Top Users' Most Used Apps": "Top Users' Most Used Apps",
   "Start Date:": "Start Date:",
   "End Date:": "End Date:",
-  "User: {{user}}": "User: {{user}}"
+  "User: {{user}}": "User: {{user}}",
+  "Fetching data...": "Fetching data..."
 }
