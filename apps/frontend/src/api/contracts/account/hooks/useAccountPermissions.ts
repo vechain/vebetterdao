@@ -3,6 +3,7 @@ import { AccessControl__factory } from "@repo/contracts/typechain-types"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { abi } from "thor-devkit"
+import { getBytes32Role } from "./useHasRole"
 
 const fragment = AccessControl__factory.createInterface().getFunction("hasRole").format("json")
 const hasRoleAbi = new abi.Function(JSON.parse(fragment))
@@ -164,6 +165,7 @@ const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; cont
   },
 }
 
+export const getAccountPermissionsQueryKey = (address: string) => ["ACCOUNT_PERMISSIONS", address]
 /**
  * Get the permissions for an address
  *
@@ -180,13 +182,13 @@ export const useAccountPermissions = (
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: ["accountPermissions", address],
+    queryKey: getAccountPermissionsQueryKey(address ?? ""),
     enabled: !!address,
     queryFn: async () => {
       const clauses = Object.entries(CLAUSES_DATA).map(([_key, { role, contractAddress }]) => ({
         to: contractAddress,
         value: "0x0",
-        data: hasRoleAbi.encode(role, address),
+        data: hasRoleAbi.encode(getBytes32Role(role), address),
       }))
 
       const res = await thor.explain(clauses).execute()

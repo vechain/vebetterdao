@@ -31,6 +31,9 @@ export const ACTION_REGISTRAR_ROLE = ethers.solidityPackedKeccak256(["string"], 
 export const WHITELISTER_ROLE = ethers.solidityPackedKeccak256(["string"], ["WHITELISTER_ROLE"])
 export const ACTION_SCORE_MANAGER_ROLE = ethers.solidityPackedKeccak256(["string"], ["ACTION_SCORE_MANAGER_ROLE"])
 
+export const getBytes32Role = (role: string) =>
+  role === "DEFAULT_ADMIN_ROLE" ? DEFAULT_ADMIN_ROLE : ethers.solidityPackedKeccak256(["string"], [role])
+
 /**
  *  Function to check if the user has a specific role in AccessControl
  * @param thor  the thor instance
@@ -40,9 +43,7 @@ export const ACTION_SCORE_MANAGER_ROLE = ethers.solidityPackedKeccak256(["string
  * @returns  true if the user has the role, false otherwise
  */
 export const getHasRole = async (thor: Connex.Thor, role: string, contractAddress: string, address?: string) => {
-  const bytes32Role =
-    role === "DEFAULT_ADMIN_ROLE" ? DEFAULT_ADMIN_ROLE : ethers.solidityPackedKeccak256(["string"], [role])
-
+  const bytes32Role = getBytes32Role(role)
   const res = await thor.account(contractAddress).method(JSON.parse(fragment)).call(bytes32Role, address)
 
   if (res.reverted) throw new Error(res.revertReason)
