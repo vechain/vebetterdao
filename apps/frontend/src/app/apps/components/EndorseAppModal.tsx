@@ -177,7 +177,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                     flexWrap="wrap"
                     fontSize="sm">
                     <Trans
-                      i18nKey="<Text>{{value}}</Text> pts."
+                      i18nKey="{{value}} pts."
                       values={{ value: userEndorsementScore?.data || 0 }}
                       components={{
                         Text: (
@@ -212,7 +212,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                   flexWrap="wrap"
                   fontSize="sm">
                   <Trans
-                    i18nKey="<Text>{{value}}</Text> pts."
+                    i18nKey="{{value}} pts."
                     values={{ value: newScore }}
                     components={{
                       Text: <Heading as="span" size="lg" color="#3DBA67" />,

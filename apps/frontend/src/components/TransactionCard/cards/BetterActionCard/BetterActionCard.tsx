@@ -16,7 +16,7 @@ export const BetterActionCard = ({ action }: Props) => {
   const { t } = useTranslation()
 
   const getAppName = (appId: string) => {
-    return apps?.find(app => app.id === appId)?.name ?? ""
+    return apps?.allApps.find(app => app.id === appId)?.name ?? ""
   }
 
   const actionModal = useDisclosure()

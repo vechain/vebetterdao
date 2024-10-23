@@ -63,7 +63,7 @@
   "Endorse dApp": "Endorse dApp",
   "Current endorsement score": "Current endorsement score",
   "Your X-node score": "Your X-node score",
-  "<Text>{{value}}</Text> pts.": "<Text>{{value}}</Text> pts.",
+  "{{value}} pts.": "{{value}} pts.",
   "New dApp score": "New dApp score",
   "Endorse now": "Endorse now",
   "Users endorsing": "Users endorsing",
