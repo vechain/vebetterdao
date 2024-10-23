@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useRef } from "react"
 import { useXApps, XApp } from "../../xApps"
 import { getSustainabilityActions, SustainabilityActionsResponse } from "@/api"
 
@@ -18,6 +18,8 @@ export const useAppsSustainabilityActions = ({ startTimestamp, endTimestamp }: P
   const { data: xApps } = useXApps()
   const [actionsByApp, setActionsByApp] = useState<{ [appId: string]: AppData }>({})
   const [isLoading, setIsLoading] = useState(false)
+  const isLoadingRef = useRef(false)
+  const [fetchedAppCount, setFetchedAppCount] = useState(0)
 
   useEffect(() => {
     if (!xApps) return
@@ -35,18 +37,19 @@ export const useAppsSustainabilityActions = ({ startTimestamp, endTimestamp }: P
         after,
         before,
         page: pageParam,
-        size: 150,
+        size: 1000,
         direction: "asc",
       })
       return result
     }
 
     const fetchAllActions = async () => {
-      if (isLoading) return
+      if (isLoadingRef.current) return
+
+      isLoadingRef.current = true
+      setIsLoading(true)
 
       const newActionsByApp = { ...actionsByApp }
-
-      setIsLoading(true)
 
       const promises = appIds.map(async appId => {
         const appName = xApps.find(app => app.id === appId)?.name
@@ -81,13 +84,16 @@ export const useAppsSustainabilityActions = ({ startTimestamp, endTimestamp }: P
           minTimestamp: appData.minTimestamp,
           maxTimestamp: appData.maxTimestamp,
         }
+
+        setFetchedAppCount(prev => prev + 1)
       })
 
       await Promise.all(promises)
 
-      setIsLoading(false)
-
       setActionsByApp(newActionsByApp)
+
+      isLoadingRef.current = false
+      setIsLoading(false)
     }
 
     fetchAllActions()
@@ -103,5 +109,13 @@ export const useAppsSustainabilityActions = ({ startTimestamp, endTimestamp }: P
     })
   }, [actionsByApp, startTimestamp, endTimestamp])
 
-  return { allActions, actionsByApp, isLoading }
+  return {
+    allActions,
+    actionsByApp,
+    isLoading,
+    fetchedAppCount,
+    totalAppCount: xApps?.length ?? 0,
+    setFetchedAppCount,
+    setActionsByApp,
+  }
 }
