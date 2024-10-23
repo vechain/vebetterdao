@@ -16,6 +16,7 @@ import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { UpdateRoleCard } from "./components/UpdateRoleCard"
 import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport"
+import { VeBetterPassportData } from "./components/VeBetterPassportData/VeBetterPassportData"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -67,6 +68,7 @@ export const AdminPageContent = () => {
           <Tab>{"Contracts"}</Tab>
           {canSeePauseTab && <Tab>{"Pausing"}</Tab>}
           {canSeeVeBetterPassportTab && <Tab>{"VeBetter Passport"}</Tab>}
+          <Tab>{"VeBetter Passport Data"}</Tab>
         </TabList>
 
         <TabPanels>
@@ -116,6 +118,9 @@ export const AdminPageContent = () => {
               <VeBetterPassport />
             </TabPanel>
           )}
+          <TabPanel>
+            <VeBetterPassportData />
+          </TabPanel>
         </TabPanels>
       </Tabs>
     </Stack>
