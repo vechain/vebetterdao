@@ -1,13 +1,11 @@
 import { SustainabilityActionsResponse, useAppsSustainabilityActions } from "@/api"
-import { Heading, VStack, HStack, Text, Input, Grid } from "@chakra-ui/react"
-import { useMemo, useState } from "react"
+import { Heading, VStack, HStack, Text, Input, Grid, CircularProgress, CircularProgressLabel } from "@chakra-ui/react"
+import { useCallback, useMemo, useState } from "react"
 import { ActionsSharePieChart, TopUsersChart, TotalActionsPerAppChart, UserAppsChart } from "./components"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 import { subDays } from "date-fns"
 import { useTranslation } from "react-i18next"
-import Lottie from "react-lottie"
-import loadingAnimation from "./components/loading.json"
 
 export const VeBetterPassportData = () => {
   // State variables for the date range
@@ -21,10 +19,11 @@ export const VeBetterPassportData = () => {
   const { t } = useTranslation()
 
   // Fetch data using the selected date range
-  const { allActions, actionsByApp, isLoading } = useAppsSustainabilityActions({
-    startTimestamp,
-    endTimestamp,
-  })
+  const { allActions, actionsByApp, isLoading, fetchedAppCount, totalAppCount, setFetchedAppCount, setActionsByApp } =
+    useAppsSustainabilityActions({
+      startTimestamp,
+      endTimestamp,
+    })
 
   const totalActionsPerApp = useMemo(() => {
     return Object.keys(actionsByApp).map(appId => {
@@ -79,7 +78,12 @@ export const VeBetterPassportData = () => {
           if (!acc[appId]) {
             acc[appId] = { appId, actions: 0 }
           }
-          acc[appId].actions += 1
+
+          const appActions = acc[appId]
+
+          // Increment the number of actions for this app
+          if (appActions) appActions.actions++
+
           return acc
         },
         {} as { [appId: string]: { appId: string; actions: number } },
@@ -101,21 +105,47 @@ export const VeBetterPassportData = () => {
     })
   }, [topUsers, actionsByUser, actionsByApp])
 
+  const onStartDateChange = useCallback(
+    (date: Date) => {
+      setStartDate(date)
+      setFetchedAppCount(0)
+      setActionsByApp({})
+    },
+    [setActionsByApp, setFetchedAppCount],
+  )
+
+  const onEndDateChange = useCallback(
+    (date: Date) => {
+      setEndDate(date)
+      setFetchedAppCount(0)
+      setActionsByApp({})
+    },
+    [setActionsByApp, setFetchedAppCount],
+  )
+
   if (isLoading) {
+    // Calculate the loading percentage
+    const progressPercent = totalAppCount > 0 ? Math.round((fetchedAppCount / totalAppCount) * 100) : 0
+
     return (
-      <VStack w={"full"}>
-        <Lottie
-          style={{
-            pointerEvents: "none",
-          }}
-          options={{
-            loop: true,
-            autoplay: true,
-            animationData: loadingAnimation,
-          }}
-          height={200}
-          width={200}
-        />
+      <VStack w="full" spacing={8} mt={10}>
+        {/* Circular Progress Indicator */}
+        <CircularProgress
+          value={progressPercent}
+          size="120px"
+          thickness="8px"
+          color="teal.400"
+          trackColor="gray.200"
+          capIsRound>
+          <CircularProgressLabel>
+            {progressPercent}
+            {"%"}
+          </CircularProgressLabel>
+        </CircularProgress>
+        {/* Loading Text */}
+        <Text fontSize="lg" color="gray.600">
+          {t("Fetching data...")}
+        </Text>
       </VStack>
     )
   }
@@ -128,7 +158,7 @@ export const VeBetterPassportData = () => {
           <Text>{t("Start Date:")}</Text>
           <DatePicker
             selected={startDate}
-            onChange={date => date && setStartDate(date)}
+            onChange={date => date && onStartDateChange(date)}
             selectsStart
             startDate={startDate}
             endDate={endDate}
@@ -141,7 +171,7 @@ export const VeBetterPassportData = () => {
           <Text>{t("End Date:")}</Text>
           <DatePicker
             selected={endDate}
-            onChange={date => date && setEndDate(date)}
+            onChange={date => date && onEndDateChange(date)}
             selectsEnd
             startDate={startDate}
             endDate={endDate}
