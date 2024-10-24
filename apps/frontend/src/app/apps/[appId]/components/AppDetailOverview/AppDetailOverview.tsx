@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   CardBody,
+  Divider,
   Flex,
   HStack,
   Heading,
@@ -142,8 +143,8 @@ export const AppDetailOverview = ({
                 h={{ base: "180px", md: "220px" }}
               />
             </Skeleton>
-            <Flex gap="48px" flexDir={["column", "column", "row"]}>
-              <VStack alignItems={"stretch"} flex={3} justify={"space-between"} gap={8}>
+            <Flex gap="48px" flexDir={["column", "column", "row"]} w="full">
+              <VStack alignItems={"stretch"} flex={3} justify={"space-between"} gap={8} w="full">
                 <HStack justify={"space-between"} flexWrap={"wrap"}>
                   <HStack gap={4}>
                     <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
@@ -180,14 +181,21 @@ export const AppDetailOverview = ({
                     {appMetadata?.description ?? appMetadataError?.message ?? "Error loading description"}
                   </Text>
                 </Skeleton>
-                <Flex flexDirection={{ base: "column", md: "row" }} justify={"space-between"} align={"center"}>
-                  <HStack
-                    gap={10}
+                <Stack flexDirection={["column", "column", "row"]} justify={"space-between"} align={"center"} w="full">
+                  <Stack
+                    direction={["column", "column", "row"]}
+                    gap={[4, 4, 10]}
                     w={{ base: "full", md: "auto" }}
                     justifyContent={{ base: "space-between", md: "flex-start" }}>
                     <AppReceiverAddress />
+                    <Show below="md">
+                      <Divider />
+                    </Show>
                     <AppID />
-                    <VStack>
+                    <Show below="md">
+                      <Divider />
+                    </Show>
+                    <VStack align="stretch">
                       <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
                         {t("Member since")}
                       </Text>
@@ -195,7 +203,7 @@ export const AppDetailOverview = ({
                         {dayjs((app?.createdAtTimestamp || 0) * 1000).format("D MMM, YYYY")}
                       </Text>
                     </VStack>
-                  </HStack>
+                  </Stack>
                   <HStack
                     justifyContent={{ base: "space-between", md: "flex-end" }}
                     w={{ base: "full", md: "auto" }}
@@ -205,6 +213,7 @@ export const AppDetailOverview = ({
                       <AdminAppPageButton />
                     </Show>
                     <Button
+                      w={["full", "full", "auto"]}
                       variant={"primaryAction"}
                       rightIcon={<UilArrowUpRight color="#FFFFFF" size={"16px"} />}
                       onClick={goToWebsite}>
@@ -215,7 +224,7 @@ export const AppDetailOverview = ({
                       <AdminAppPageButton />
                     </Show>
                   </HStack>
-                </Flex>
+                </Stack>
               </VStack>
               <AppDetailAllocationInfo />
             </Flex>
