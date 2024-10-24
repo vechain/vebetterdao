@@ -1,6 +1,6 @@
 import { useEndorsementInfos } from "@/hooks/useEndorsementData"
 import { Text, HStack, VStack } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 
@@ -31,7 +31,15 @@ export const EndorsementInfo = ({ appId, endorserAddress }: EndorsementInfoProps
           </Text>
         </VStack>
       </HStack>
-      <Text>{t("{{value}} pts.", { value: endorsementInfos.endorserTotalPoint })}</Text>
+      <Text>
+        <Trans
+          i18nKey="{{value}} pts."
+          values={{ value: endorsementInfos.endorserTotalPoint || 0 }}
+          components={{
+            Text: <Text />,
+          }}
+        />
+      </Text>
     </HStack>
   )
 }
