@@ -194,6 +194,8 @@ export const useAccountPermissions = (
       const res = await thor.explain(clauses).execute()
 
       const roles = Object.entries(CLAUSES_DATA).reduce((acc, [key], index) => {
+        if (res[index]?.reverted) throw new Error(`Reverted: ${key} with ${res[index]?.reverted}`)
+
         const role = res[index]?.data as string
         const decoded = hasRoleAbi.decode(role)
 
