@@ -148,14 +148,16 @@ export const AppEndorsementInfoCard = ({
                   isLoaded={!isEndorsementStatusLoading && !isXNodeLoading}
                   as={HStack}
                   spacing={1}
-                  align="flex-start">
+                  lineHeight={1}
+                  align="flex-end">
                   <Text
+                    lineHeight={1}
                     fontSize={isUserAppEndorser ? "28px" : "26px"}
                     fontWeight="700"
                     color={SCORE_COLOR_SCHEME[endorsementStatus].textColor}>
                     {endorsementScore}
                   </Text>
-                  <Text fontSize="14px" color="#6A6A6A" pt={4} pl={1}>
+                  <Text fontSize="14px" color="#6A6A6A">
                     {t("of {{value}}", { value: endorsementThreshold })}
                   </Text>
                 </Skeleton>
