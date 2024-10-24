@@ -5,9 +5,11 @@ import { UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { AcceptLinkingModal } from "./components/AcceptLinkingModal"
 import { RejectLinkingModal } from "./components/RejectLinkingModal"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 export const PendingLinkingProposalItem = ({ secondaryAccount }: { secondaryAccount: string }) => {
   const { t } = useTranslation()
+  const { name } = useWalletName(secondaryAccount || "")
   const rejectLinkingModal = useDisclosure()
   const acceptLinkingModal = useDisclosure()
   return (
@@ -22,9 +24,16 @@ export const PendingLinkingProposalItem = ({ secondaryAccount }: { secondaryAcco
         <HStack gap={4}>
           <AddressIcon address={secondaryAccount} w={12} h={12} rounded="full" />
           <VStack align="start">
-            <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
-              {humanAddress(secondaryAccount, 4, 4)}
-            </Text>
+            <HStack>
+              {name && (
+                <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} borderRight={"1px solid"} paddingRight={2}>
+                  {name}
+                </Text>
+              )}
+              <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
+                {humanAddress(secondaryAccount, 4, 4)}
+              </Text>
+            </HStack>
           </VStack>
           <Badge color="white" bg={"#F29B32"} borderRadius="full" px="12px" py="4px" textTransform={"inherit"}>
             {t("Pending")}
