@@ -131,48 +131,53 @@ export const AppEndorsementInfoCard = ({
                 values={{ value: endorsementThreshold }}
                 t={t}
               />
-              <Link pl={1} color="#004CFC">
+              {/* <Link pl={1} color="#004CFC">
                 {t("Know more")}
-              </Link>
+              </Link> */}
             </Text>
           </Skeleton>
         </CardHeader>
         <CardBody p={0}>
           <Stack spacing={3} w="full">
-            <Skeleton isLoaded={!isEndorsementStatusLoading && !isXNodeLoading}>
-              <HStack spacing={3}>
-                <Box>
-                  <Text fontSize="16px">{t("Current score")}</Text>
-                  <Box display="flex" alignItems="center">
-                    <Text fontSize="36px" fontWeight="700" color={SCORE_COLOR_SCHEME[endorsementStatus].textColor}>
-                      {endorsementScore}
-                    </Text>
-                    <Text fontSize="14px" color="#6A6A6A" pt={4} pl={1}>
-                      {t("of {{value}}", { value: endorsementThreshold })}
-                    </Text>
-                  </Box>
-                </Box>
+            <HStack spacing={12}>
+              <Box>
+                <Text fontSize="16px">{t("Current score")}</Text>
+                <Skeleton
+                  isLoaded={!isEndorsementStatusLoading && !isXNodeLoading}
+                  as={HStack}
+                  spacing={1}
+                  align="flex-start">
+                  <Text
+                    fontSize={isUserAppEndorser ? "28px" : "26px"}
+                    fontWeight="700"
+                    color={SCORE_COLOR_SCHEME[endorsementStatus].textColor}>
+                    {endorsementScore}
+                  </Text>
+                  <Text fontSize="14px" color="#6A6A6A" pt={4} pl={1}>
+                    {t("of {{value}}", { value: endorsementThreshold })}
+                  </Text>
+                </Skeleton>
+              </Box>
 
-                {isUserAppEndorser && (
-                  <Box>
-                    <Text fontSize="16px">{t("Your endorsement")}</Text>
-                    <Box display="flex" alignItems="center">
-                      <Text fontSize="36px" fontWeight="700" color="#004CFC">
-                        {xNodePoints}
-                      </Text>
-                    </Box>
-                  </Box>
-                )}
-              </HStack>
-            </Skeleton>
+              {isUserAppEndorser && (
+                <Box>
+                  <Text fontSize="16px">{t("Your endorsement")}</Text>
+                  <Skeleton isLoaded={!isEndorsementStatusLoading && !isXNodeLoading}>
+                    <Text fontSize="28px" fontWeight="700" color="#004CFC">
+                      {xNodePoints}
+                    </Text>
+                  </Skeleton>
+                </Box>
+              )}
+            </HStack>
 
             <Divider />
 
-            <Stack direction={["column", "column", "row"]} spacing={3} w="full" justify={"space-between"}>
-              <Skeleton isLoaded={!isAppEndorsersLoading && !isUserRolesDataLoading}>
-                <Box textAlign="center">
-                  {appEndorsers && appEndorsers.length ? (
-                    <HStack justify={"space-between"}>
+            <VStack spacing={4} w="full" justify={"space-between"}>
+              <Skeleton isLoaded={!isAppEndorsersLoading && !isUserRolesDataLoading} w="full">
+                {appEndorsers && appEndorsers.length ? (
+                  <HStack justify={"space-between"} w="full">
+                    <HStack>
                       <HStack>
                         {appEndorsers.map((endorser: string, index: number) => (
                           <Box key={index}>
@@ -185,22 +190,22 @@ export const AppEndorsementInfoCard = ({
                           ? t("{{value}}-x-node-users", { value: appEndorsers.length })
                           : t("1-x-node-user")}
                       </Text>
-                      <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
-                        {t("See all")}
-                      </Link>
                     </HStack>
-                  ) : (
-                    <VStack>
-                      <Text fontSize="14px" fontWeight="bold">
-                        {isAppModerator || isAppAdmin ? t("Nobody is endorsing your app") : t("Not endorsed by anyone")}
-                        <br />
-                        <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
-                          {t("See endorsement history")}
-                        </Link>
-                      </Text>
-                    </VStack>
-                  )}
-                </Box>
+                    <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
+                      {t("See all")}
+                    </Link>
+                  </HStack>
+                ) : (
+                  <VStack>
+                    <Text fontSize="14px" fontWeight="bold">
+                      {isAppModerator || isAppAdmin ? t("Nobody is endorsing your app") : t("Not endorsed by anyone")}
+                      <br />
+                      <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
+                        {t("See endorsement history")}
+                      </Link>
+                    </Text>
+                  </VStack>
+                )}
               </Skeleton>
 
               <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading}>
@@ -222,12 +227,12 @@ export const AppEndorsementInfoCard = ({
                 ) : null}
 
                 {isUserAppEndorser ? (
-                  <Button variant={"dangerGhost"} onClick={onOpenUnendorsementModal}>
+                  <Button variant={"link"} colorScheme="red" onClick={onOpenUnendorsementModal}>
                     {t("Remove endorsement")}
                   </Button>
                 ) : null}
               </Skeleton>
-            </Stack>
+            </VStack>
           </Stack>
         </CardBody>
       </Card>
