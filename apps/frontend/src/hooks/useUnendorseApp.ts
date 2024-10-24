@@ -9,6 +9,7 @@ import {
   getIsAppUnendorsedQueryKey,
   getNodesEndorsedAppsQueryKey,
   getUserXNodesQueryKey,
+  getXAppsQueryKey,
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 
@@ -44,6 +45,7 @@ export const useUnendorseApp = ({ appId, nodeId, userAddress, onSuccess }: Props
       getAppEndorsementScoreQueryKey(appId),
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
       getEndorsersQueryKey(appId ?? ""),
+      getXAppsQueryKey(),
     ],
     [appId, nodeId, userAddress],
   )

@@ -7,6 +7,7 @@ import {
   getEndorsersQueryKey,
   getIsAppUnendorsedQueryKey,
   getNodesEndorsedAppsQueryKey,
+  getXAppsQueryKey,
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 
@@ -52,6 +53,7 @@ export const useSwitchEndorsement = ({ appIdToEndorse, appIdToUnendorse, nodeId,
       getAppEndorsementScoreQueryKey(appIdToUnendorse),
       getEndorsersQueryKey(appIdToUnendorse),
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
+      getXAppsQueryKey(),
     ],
     [appIdToEndorse, appIdToUnendorse, nodeId],
   )
