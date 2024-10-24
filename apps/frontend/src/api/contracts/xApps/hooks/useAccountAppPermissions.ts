@@ -72,7 +72,7 @@ export const useAccountAppPermissions = (address?: string): UseQueryResult<Accou
           ...acc,
           [app.id]: {
             isAdmin: Boolean(isAdminDecoded[0]),
-            isModerator: Boolean(isModeratorDecoded),
+            isModerator: Boolean(isModeratorDecoded[0]),
           },
         }
       }, {} as AccountAppPermissions)
