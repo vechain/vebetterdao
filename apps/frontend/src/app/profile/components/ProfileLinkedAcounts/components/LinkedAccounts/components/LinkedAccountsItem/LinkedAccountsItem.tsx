@@ -11,10 +11,12 @@ import { UilLinkBroken } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
 import { RemoveLinkModalEntityPOV } from "./components/RemoveLinkModalEntityPOV"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 export const LinkedAccountsItem = ({ account, pending = false }: { account: string; pending?: boolean }) => {
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
+  const { name } = useWalletName(account || "")
   const isUserAccountCard = compareAddresses(account, userAccount)
   const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentUserOverview()
   const { isPassport, isEntity, outgoingPendingLink, isLoading: isAccountLinkingLoading } = useAccountLinking()
@@ -45,9 +47,16 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
         <AddressIcon address={account} w={12} h={12} rounded="full" />
         <HStack justify={"space-between"} w={"full"} flex={1}>
           <Stack direction={["column", "column", "row"]} align={["stretch", "stretch", "center"]}>
-            <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
-              {humanAddress(account, 4, 4)}
-            </Text>
+            <HStack>
+              {name && (
+                <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} borderRight={"1px solid"} paddingRight={2}>
+                  {name}
+                </Text>
+              )}
+              <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
+                {humanAddress(account, 4, 4)}
+              </Text>
+            </HStack>
             {pending && (
               <Badge color="white" bg={"#F29B32"} borderRadius="full" px="12px" py="4px" textTransform={"inherit"}>
                 {t("Pending request")}
