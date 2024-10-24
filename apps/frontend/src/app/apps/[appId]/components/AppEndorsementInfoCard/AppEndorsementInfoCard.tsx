@@ -168,68 +168,66 @@ export const AppEndorsementInfoCard = ({
 
             <Divider />
 
-            <Skeleton isLoaded={!isAppEndorsersLoading && !isUserRolesDataLoading}>
-              <Box textAlign="center">
-                {appEndorsers && appEndorsers.length ? (
-                  <HStack justify={"space-between"}>
-                    <HStack>
-                      {appEndorsers.map((endorser: string, index: number) => (
-                        <Box key={index}>
-                          <AddressIcon address={endorser} rounded="full" h="20px" w="20px" />
-                        </Box>
-                      ))}
-                    </HStack>
-                    <Text as="span" fontSize="14px" fontWeight="bold">
-                      {appEndorsers.length > 1
-                        ? t("{{value}}-x-node-users", { value: appEndorsers.length })
-                        : t("1-x-node-user")}
-                    </Text>
-                    <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
-                      {t("See all")}
-                    </Link>
-                  </HStack>
-                ) : (
-                  <VStack>
-                    <Text fontSize="14px" fontWeight="bold">
-                      {isAppModerator || isAppAdmin ? t("Nobody is endorsing your app") : t("Not endorsed by anyone")}
-                      <br />
+            <Stack direction={["column", "column", "row"]} spacing={3} w="full" justify={"space-between"}>
+              <Skeleton isLoaded={!isAppEndorsersLoading && !isUserRolesDataLoading}>
+                <Box textAlign="center">
+                  {appEndorsers && appEndorsers.length ? (
+                    <HStack justify={"space-between"}>
+                      <HStack>
+                        {appEndorsers.map((endorser: string, index: number) => (
+                          <Box key={index}>
+                            <AddressIcon address={endorser} rounded="full" h="20px" w="20px" />
+                          </Box>
+                        ))}
+                      </HStack>
+                      <Text as="span" fontSize="14px" fontWeight="bold">
+                        {appEndorsers.length > 1
+                          ? t("{{value}}-x-node-users", { value: appEndorsers.length })
+                          : t("1-x-node-user")}
+                      </Text>
                       <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
-                        {t("See endorsement history")}
+                        {t("See all")}
                       </Link>
-                    </Text>
-                  </VStack>
-                )}
-              </Box>
-            </Skeleton>
-
-            <Box textAlign="center" py={6}>
-              <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading}>
-                <Stack spacing={4} align="center">
-                  {(isAppModerator || isAppAdmin) &&
-                  (endorsementStatus === EndorsementStatus.PENDING || endorsementStatus === EndorsementStatus.LOST) ? (
-                    <Button leftIcon={<VeBetterIcon color="#004CFC" size={16} />} variant={"primarySubtle"}>
-                      {t("Look for endorsers")}
-                    </Button>
-                  ) : null}
-                  {isXNodeHolder && !isEndorsingApp ? (
-                    <Button variant={"primaryAction"} onClick={onOpenEndorsementModal}>
-                      {t("Endorse with your {{value}} points", { value: xNodePoints })}
-                    </Button>
-                  ) : null}
-                  {isUserEndorsingOtherApp ? (
-                    <Button variant={"primaryAction"} onClick={onOpenSwitchEndorsementModal}>
-                      {t("Switch endorsement to this app")}
-                    </Button>
-                  ) : null}
-
-                  {isUserAppEndorser ? (
-                    <Button variant={"dangerGhost"} onClick={onOpenUnendorsementModal}>
-                      {t("Remove endorsement")}
-                    </Button>
-                  ) : null}
-                </Stack>
+                    </HStack>
+                  ) : (
+                    <VStack>
+                      <Text fontSize="14px" fontWeight="bold">
+                        {isAppModerator || isAppAdmin ? t("Nobody is endorsing your app") : t("Not endorsed by anyone")}
+                        <br />
+                        <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
+                          {t("See endorsement history")}
+                        </Link>
+                      </Text>
+                    </VStack>
+                  )}
+                </Box>
               </Skeleton>
-            </Box>
+
+              <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading}>
+                {(isAppModerator || isAppAdmin) &&
+                (endorsementStatus === EndorsementStatus.PENDING || endorsementStatus === EndorsementStatus.LOST) ? (
+                  <Button leftIcon={<VeBetterIcon color="#004CFC" size={16} />} variant={"primarySubtle"}>
+                    {t("Look for endorsers")}
+                  </Button>
+                ) : null}
+                {isXNodeHolder && !isEndorsingApp ? (
+                  <Button variant={"primaryAction"} onClick={onOpenEndorsementModal}>
+                    {t("Endorse with your {{value}} points", { value: xNodePoints })}
+                  </Button>
+                ) : null}
+                {isUserEndorsingOtherApp ? (
+                  <Button variant={"primaryAction"} onClick={onOpenSwitchEndorsementModal}>
+                    {t("Switch endorsement to this app")}
+                  </Button>
+                ) : null}
+
+                {isUserAppEndorser ? (
+                  <Button variant={"dangerGhost"} onClick={onOpenUnendorsementModal}>
+                    {t("Remove endorsement")}
+                  </Button>
+                ) : null}
+              </Skeleton>
+            </Stack>
           </Stack>
         </CardBody>
       </Card>

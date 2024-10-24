@@ -21,6 +21,7 @@ import {
   Link,
   ModalCloseButton,
   Skeleton,
+  Icon,
 } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
 import { PropsEndorsement } from "./UnendorseAppModal"
@@ -140,7 +141,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                   <Text color={"#6A6A6A"}>{t("Current endorsement score")}</Text>
                 </Box>
                 <HStack spacing={1} align={"flex-end"}>
-                  <Heading fontSize={"36px"} fontWeight={700} color={"#F29B32"} lineHeight={"36px"}>
+                  <Heading fontSize={"36px"} fontWeight={700} color={"#252525"} lineHeight={"36px"}>
                     {appScore}
                   </Heading>
                   <Text fontSize={"14px"} color={"#6A6A6A"} fontWeight={400} lineHeight={"24px"}>
@@ -171,7 +172,8 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                   <Text
                     as="span"
                     textTransform="none"
-                    fontWeight="normal"
+                    fontWeight={400}
+                    color={"#6A6A6A"}
                     whiteSpace="normal"
                     wordBreak="break-word"
                     flexWrap="wrap"
@@ -181,7 +183,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                       values={{ value: userEndorsementScore?.data || 0 }}
                       components={{
                         Text: (
-                          <Heading as="span" fontSize={"36px"} fontWeight={700} color={"#F29B32"} lineHeight={"36px"} />
+                          <Heading as="span" fontSize={"36px"} fontWeight={700} color={"#252525"} lineHeight={"36px"} />
                         ),
                       }}
                     />
@@ -205,8 +207,9 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
                 </Box>
                 <Text
                   as="span"
+                  color="#6A6A6A"
+                  fontWeight={400}
                   textTransform="none"
-                  fontWeight="normal"
                   whiteSpace="normal"
                   wordBreak="break-word"
                   flexWrap="wrap"
@@ -222,10 +225,8 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
               </HStack>
             </Skeleton>
             {newScoreMetThreshold ? (
-              <HStack spacing={3} align={"center"} w={"full"} p="16px" rounded={"md"}>
-                <Box>
-                  <UilExclamationCircle size="24" color="#252525" />
-                </Box>
+              <HStack spacing={4} align={"center"} w={"full"}>
+                <Icon as={UilExclamationCircle} boxSize="24px" color="#252525" />
                 <Text color="black">
                   {t("With your endorsement, {{appName}} gets enough score to get into the next allocation round.", {
                     appName: xApp?.name,
