@@ -16,7 +16,7 @@ export const EndorsementInfo = ({ appId, endorserAddress }: EndorsementInfoProps
   return (
     <HStack
       bg="white"
-      p={2}
+      p={"12px"}
       borderRadius={"16px"}
       boxShadow="sm"
       w={"full"}
@@ -26,17 +26,17 @@ export const EndorsementInfo = ({ appId, endorserAddress }: EndorsementInfoProps
         <AddressIcon address={endorserAddress} rounded="full" h="28px" w="28px" />
         <VStack align="start" justify={"center"} spacing={0}>
           <Text>{humanAddress(endorsementInfos.endorserAddress, 6, 3)}</Text>
-          <Text fontSize="xs" color="#6A6A6A">
+          <Text fontSize="12" fontWeight={400} color="#6A6A6A">
             {t("Endorsing since {{date}}", { date: endorsementInfos.dateOfFirstEndorsement })}
           </Text>
         </VStack>
       </HStack>
-      <Text>
+      <Text fontSize={"16px"} fontWeight={600}>
         <Trans
           i18nKey="{{value}} pts."
           values={{ value: endorsementInfos.endorserTotalPoint || 0 }}
           components={{
-            Text: <Text />,
+            Text: <Text as="span" />,
           }}
         />
       </Text>

@@ -130,7 +130,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
                 whiteSpace="normal"
                 wordBreak="break-word"
                 flexWrap="wrap"
-                fontSize="sm"
+                fontSize="16px"
                 color={"#6A6A6A"}>
                 <Trans
                   i18nKey={
@@ -141,7 +141,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
               </Text>
             </Skeleton>
 
-            <HStack spacing={3} align={"center"} w={"full"} p="16px" rounded={"lg"} bgColor={"#FFF3E5"}>
+            <HStack spacing={3} align={"center"} w={"full"} p="16px" rounded={"16px"} bgColor={"#FFF3E5"}>
               <Box>
                 <UilClock size={30} color="#AF5F00" />
               </Box>
@@ -166,7 +166,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
               </Button>
             </Skeleton>
 
-            <Button variant={"primaryGhost"} w={"full"} onClick={onClose}>
+            <Button variant={"link"} colorScheme="primary" w={"full"} onClick={onClose}>
               {t("Cancel")}
             </Button>
           </VStack>
