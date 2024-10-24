@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { getRoundRewardQueryKey } from "./useVotingRoundReward"
-import { useAllocationsRoundState } from "../../xAllocations"
 import { VoterRewards__factory } from "@repo/contracts"
 import { abi } from "thor-devkit"
 import { getConfig } from "@repo/config"
@@ -25,20 +24,19 @@ const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
 export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
   const { thor } = useConnex()
   const queryClient = useQueryClient()
-  const { data: state } = useAllocationsRoundState(currentRoundId ?? "")
 
   // Get array from 1 to currentRoundId - 1 (if currentRoundId is still active)
   const rounds = useMemo(() => {
-    return Array.from({ length: parseInt(currentRoundId ?? "0") - (state === 0 ? 1 : 0) }, (_, i) => (i + 1).toString())
-  }, [currentRoundId, state])
+    return Array.from({ length: parseInt(currentRoundId ?? "0") - 1 }, (_, i) => (i + 1).toString())
+  }, [currentRoundId])
 
   return useQuery({
     queryKey: getRoundRewardQueryKey("ALL", voter),
-    enabled: !!thor && !!voter && !!rounds.length,
+    enabled: !!thor && !!voter && !!currentRoundId && !!rounds.length,
     queryFn: async () => {
       const clauses = rounds.map(roundId => ({
         to: VOTER_REWARDS_CONTRACT,
-        value: 0,
+        value: "0x0",
         data: getReward.encode(roundId, voter),
       }))
 

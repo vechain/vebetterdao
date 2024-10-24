@@ -16,9 +16,11 @@ import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
 import { useAcceptDelegation } from "@/hooks"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
   const { t } = useTranslation()
+  const { name: delegatorName } = useWalletName(delegator || "")
 
   const acceptDelegation = useAcceptDelegation({})
 
@@ -62,6 +64,7 @@ export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
         </VStack>
         <VStack align="stretch">
           <Text fontWeight="600">{t("You’re accepting it from")}</Text>
+          <Text fontSize="sm">{delegatorName}</Text>
           <Text fontSize="sm">{delegator}</Text>
         </VStack>
         <Alert status="warning" borderRadius="2xl">
