@@ -89,7 +89,7 @@ export const AppDetailOverview = ({
   const endorsementLost = endorsementStatus === EndorsementStatus.LOST
   const StatusBadgeIcon = BADGE_INFORMATION[endorsementStatus].badgeIcon
   return (
-    <>
+    <VStack spacing={4}>
       {endorsementStatus !== EndorsementStatus.SUCCESS ? (
         <HStack w="full" flexWrap="wrap">
           <Badge w="full" bg={BADGE_INFORMATION[endorsementStatus].badgeBgColor} borderRadius="12px">
@@ -222,6 +222,6 @@ export const AppDetailOverview = ({
           </VStack>
         </CardBody>
       </Card>
-    </>
+    </VStack>
   )
 }

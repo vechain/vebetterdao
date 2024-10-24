@@ -27,18 +27,20 @@ import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { SwitchEndorsementAppModal } from "@/app/apps/components/SwitchEndorsementAppModal"
-
+type Props = {
+  endorsementScore?: string
+  endorsementStatus: EndorsementStatus
+  endorsementThreshold?: string
+  isEndorsementStatusLoading: boolean
+  isLargeCard?: boolean
+}
 export const AppEndorsementInfoCard = ({
   endorsementScore,
   endorsementStatus,
   endorsementThreshold,
   isEndorsementStatusLoading,
-}: {
-  endorsementScore: string | undefined
-  endorsementStatus: EndorsementStatus
-  endorsementThreshold: string | undefined
-  isEndorsementStatusLoading: boolean
-}) => {
+  isLargeCard = false,
+}: Props) => {
   const SCORE_COLOR_SCHEME = {
     LOST: {
       cardBorderColor: "#C84968",
@@ -173,8 +175,12 @@ export const AppEndorsementInfoCard = ({
 
             <Divider />
 
-            <VStack spacing={4} w="full" justify={"space-between"}>
-              <Skeleton isLoaded={!isAppEndorsersLoading && !isUserRolesDataLoading} w="full">
+            <Stack
+              direction={["column", "column", isLargeCard ? "row" : "column"]}
+              spacing={4}
+              w="full"
+              justify={"space-between"}>
+              <Skeleton isLoaded={!isAppEndorsersLoading && !isUserRolesDataLoading}>
                 {appEndorsers && appEndorsers.length ? (
                   <HStack justify={"space-between"} w="full">
                     <HStack>
@@ -211,28 +217,35 @@ export const AppEndorsementInfoCard = ({
               <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading}>
                 {(isAppModerator || isAppAdmin) &&
                 (endorsementStatus === EndorsementStatus.PENDING || endorsementStatus === EndorsementStatus.LOST) ? (
-                  <Button leftIcon={<VeBetterIcon color="#004CFC" size={16} />} variant={"primarySubtle"}>
+                  <Button
+                    leftIcon={<VeBetterIcon color="#004CFC" size={16} />}
+                    variant={"primarySubtle"}
+                    w={["full", "full", "auto"]}>
                     {t("Look for endorsers")}
                   </Button>
                 ) : null}
                 {isXNodeHolder && !isEndorsingApp ? (
-                  <Button variant={"primaryAction"} onClick={onOpenEndorsementModal}>
+                  <Button variant={"primaryAction"} onClick={onOpenEndorsementModal} w={["full", "full", "auto"]}>
                     {t("Endorse with your {{value}} points", { value: xNodePoints })}
                   </Button>
                 ) : null}
                 {isUserEndorsingOtherApp ? (
-                  <Button variant={"primaryAction"} onClick={onOpenSwitchEndorsementModal}>
+                  <Button variant={"primaryAction"} onClick={onOpenSwitchEndorsementModal} w={["full", "full", "auto"]}>
                     {t("Switch endorsement to this app")}
                   </Button>
                 ) : null}
 
                 {isUserAppEndorser ? (
-                  <Button variant={"link"} colorScheme="red" onClick={onOpenUnendorsementModal}>
+                  <Button
+                    variant={"link"}
+                    colorScheme="red"
+                    onClick={onOpenUnendorsementModal}
+                    w={["full", "full", "auto"]}>
                     {t("Remove endorsement")}
                   </Button>
                 ) : null}
               </Skeleton>
-            </VStack>
+            </Stack>
           </Stack>
         </CardBody>
       </Card>
