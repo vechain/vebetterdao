@@ -59,15 +59,6 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     }
   }
 
-  /**
-   * @dev Initializes the contract
-   */
-  function __Administration_init() internal onlyInitializing {
-    __Administration_init_unchained();
-  }
-
-  function __Administration_init_unchained() internal onlyInitializing {}
-
   // ---------- Internal ---------- //
   /**
    * @dev Internal function to set the admin address of the app

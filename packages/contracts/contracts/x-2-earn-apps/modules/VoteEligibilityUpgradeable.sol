@@ -57,15 +57,6 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
     }
   }
 
-  /**
-   * @dev Initializes the contract
-   */
-  function __VoteEligibility_init() internal onlyInitializing {
-    __VoteEligibility_init_unchained();
-  }
-
-  function __VoteEligibility_init_unchained() internal onlyInitializing {}
-
   // ---------- Internal ---------- //
 
   /**

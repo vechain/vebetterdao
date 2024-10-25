@@ -51,15 +51,6 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
   }
 
-  /**
-   * @dev Initializes the contract
-   */
-  function __AppsStorage_init() internal onlyInitializing {
-    __AppsStorage_init_unchained();
-  }
-
-  function __AppsStorage_init_unchained() internal onlyInitializing {}
-
   // ---------- Internal ---------- //
   /**
    * @dev Get the app data saved in storage
