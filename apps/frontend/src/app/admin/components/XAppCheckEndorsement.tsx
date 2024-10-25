@@ -26,8 +26,6 @@ export const XAppCheckEndorsement = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
-  const allXApps = useMemo(() => xApps?.active?.concat(xApps?.unendorsed) ?? [], [xApps])
-
   const {
     sendTransaction,
     resetStatus,
@@ -101,7 +99,7 @@ export const XAppCheckEndorsement = () => {
                       isDisabled={isLoading}
                       onChange={e => setAppId(e.target.value)}
                       value={appId}>
-                      {allXApps.map(item => {
+                      {xApps?.allApps.map(item => {
                         return (
                           <option key={`AppSelectOption-${item?.id}`} value={item.id}>
                             {item.name + " - id: " + item.id}
