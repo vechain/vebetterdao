@@ -60,6 +60,7 @@ import {
   PassportPersonhoodLogic,
   PassportDelegationLogic,
   X2EarnRewardsPoolV2,
+  X2EarnRewardsPoolV3,
   PassportChecksLogicV1,
   PassportDelegationLogicV1,
   PassportEntityLogicV1,
@@ -84,7 +85,6 @@ import {
   GovernorClockLogicV4,
   GovernorVotesLogicV4,
 } from "../../typechain-types/contracts/deprecated/V4/governance/libraries"
-import { X2EarnRewardsPoolV3 } from "../../typechain-types/contracts/deprecated/V3/X2EarnRewardsPoolV3.sol/X2EarnRewardsPoolV3"
 
 interface DeployInstance {
   B3trContract: ContractFactory
