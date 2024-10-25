@@ -226,7 +226,7 @@ export const AppEndorsementInfoCard = ({
                     {t("Look for endorsers")}
                   </Button>
                 ) : null}
-                {isXNodeHolder && !isEndorsingApp ? (
+                {isXNodeHolder && !isEndorsingApp && !(endorsementStatus === EndorsementStatus.SUCCESS) ? (
                   <Button variant={"primaryAction"} onClick={onOpenEndorsementModal} w={["full", "full", "auto"]}>
                     {t("Endorse with your {{value}} points", { value: xNodePoints })}
                   </Button>
