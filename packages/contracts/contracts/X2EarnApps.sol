@@ -66,12 +66,14 @@ contract X2EarnApps is
    * @notice Initialize the version 2 contract
    * @param _gracePeriod the grace period to be reendorsed
    * @param _nodeManagementContract the address of the vechain node management contract
+   * @param _veBetterPassportContract the address of the VeBetterPassport contract
    *
    * @dev This function is called only once during the contract deployment
    */
-  function initializeV2(uint48 _gracePeriod, address _nodeManagementContract) public reinitializer(2) {
+  function initializeV2(uint48 _gracePeriod, address _nodeManagementContract, address _veBetterPassportContract) public reinitializer(2) {
     require(_nodeManagementContract != address(0), "X2EarnApps: Invalid Node Managementcontract address");
-    __Endorsement_init(_gracePeriod, _nodeManagementContract);
+    require(_veBetterPassportContract != address(0), "X2EarnApps: Invalid VeBetterPassport contract address");
+    __Endorsement_init(_gracePeriod, _nodeManagementContract, _veBetterPassportContract);
   }
 
   /**
@@ -313,5 +315,19 @@ contract X2EarnApps is
    */
   function removeXAppSubmission(bytes32 _appId) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _removeXAppSubmission(_appId);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-setNodeManagementContract}.
+   */
+  function setNodeManagementContract(address _nodeManagementContract) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setNodeManagementContract(_nodeManagementContract);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-setVeBetterPassportContract}.
+   */
+  function setVeBetterPassportContract(address _veBetterPassportContract) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setVeBetterPassportContract(_veBetterPassportContract);
   }
 }

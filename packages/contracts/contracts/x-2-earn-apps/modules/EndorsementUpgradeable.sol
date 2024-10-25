@@ -28,6 +28,8 @@ import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
 import { INodeManagement } from "../../interfaces/INodeManagement.sol";
+import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
+import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
 
 abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Endorsment
@@ -36,12 +38,14 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     mapping(bytes32 => uint256) _unendorsedAppsIndex; // Mapping from app ID to index in the _unendorsedApps array, so we can remove an app in O(1)
     mapping(bytes32 => uint256[]) _appEndorsers; // Maps each app ID to an array of node IDs that have endorsed it
     mapping(VechainNodesDataTypes.NodeStrengthLevel => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
-    mapping(bytes32 => uint48) _appGracePeriod; // The grace period elapsed by the app since endorsed
+    mapping(bytes32 => uint48) _appGracePeriodStart; // The grace period elapsed by the app since endorsed
     mapping(uint256 => bytes32) _nodeToEndorsedApp; // Maps a node ID to the app it currently endorses
     uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
     uint256 _endorsementScoreThreshold; // The endorsement score threshold for an app to be eligible for voting
     mapping(bytes32 => uint256) _appScores; // The score of each app
+    mapping(bytes32 => PassportTypes.APP_SECURITY) _appSecurity; // The security score of each app
     INodeManagement _nodeManagementContract; // The token auction contract
+    IVeBetterPassport _veBetterPassport; // The VeBetterPassport contract
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
@@ -58,17 +62,23 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev Sets the value for the grace period ane the endorsement score for each node level.
    * @param gracePeriodDuration The initial grace period.
    */
-  function __Endorsement_init(uint48 gracePeriodDuration, address vechainNodesContract) internal onlyInitializing {
-    __Endorsement_init_unchained(gracePeriodDuration, vechainNodesContract);
+  function __Endorsement_init(
+    uint48 gracePeriodDuration,
+    address vechainNodesContract,
+    address veBetterPassportContract
+  ) internal onlyInitializing {
+    __Endorsement_init_unchained(gracePeriodDuration, vechainNodesContract, veBetterPassportContract);
   }
 
   function __Endorsement_init_unchained(
     uint48 gracePeriodDuration,
-    address nodeManagementContract
+    address nodeManagementContract,
+    address veBetterPassportContract
   ) internal onlyInitializing {
     EndorsementStorage storage $ = _getEndorsementStorage();
     $._gracePeriodDuration = gracePeriodDuration;
     $._nodeManagementContract = INodeManagement(nodeManagementContract);
+    $._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
 
     // Set the endorsement score for each node level
     $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Strength] = 2; // Strength Node score
@@ -425,6 +435,22 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     _updateAppsPendingEndorsement(appId, true);
   }
 
+  /**
+   * @notice This function can be called to update the node management contract
+   */
+  function _setNodeManagementContract(address nodeManagementContract) internal virtual {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    $._nodeManagementContract = INodeManagement(nodeManagementContract);
+  }
+
+  /**
+   * @notice This function can be called to update the VeBetterPassport contract
+   */
+  function _setVeBetterPassportContract(address veBetterPassportContract) internal virtual {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    $._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
+  }
+
   // ---------- Private ---------- //
 
   /**
@@ -438,9 +464,13 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     if (!appExists(appId)) {
       // Add the app to the list of apps it will be eligible for voting by default from the next round
       _addApp(appId);
+      // Set the XAPP security score to LOW in VeBetterPassport
+      $._veBetterPassport.setAppSecurity(appId, PassportTypes.APP_SECURITY.LOW);
     } else if (!isEligibleNow(appId)) {
       // Mark the app as eligible for voting
       _setVotingEligibility(appId, true);
+      // Set the XAPP security score in VeBetterPassport the same as it was when it was unendorsed
+      $._veBetterPassport.setAppSecurity(appId, $._appSecurity[appId]);
     }
 
     // If the app is pending endorsement
@@ -450,7 +480,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Reset the grace period if the app has more than 100 points
-    $._appGracePeriod[appId] = 0;
+    $._appGracePeriodStart[appId] = 0;
   }
 
   /**
@@ -491,22 +521,29 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // If the app has a grace period of 0, set the grace period
-    if ($._appGracePeriod[appId] == 0) {
-      // Calculate the end block of the grace period  > current block + grace period duration
-      uint48 endBlock = clock() + $._gracePeriodDuration;
+    if ($._appGracePeriodStart[appId] == 0) {
+      // Get the current block number
+      uint48 clock = clock();
 
-      // Set the grace period for the app
-      $._appGracePeriod[appId] = endBlock;
+      // Set the grace period start (current block number)
+      $._appGracePeriodStart[appId] = clock;
 
-      emit AppUnendorsedGracePeriodStarted(appId, clock(), endBlock);
+      // Emit an event indicating the grace period has started for the app
+      emit AppUnendorsedGracePeriodStarted(appId, clock, clock + $._gracePeriodDuration);
 
       // Return true indicating the app is eligible for voting
       return true;
 
-      // If the X2Earn app is no longer in the grace period and is not eligible for voting
-    } else if (clock() > $._appGracePeriod[appId] && isEligibleNow(appId)) {
+      // If the X2Earn app is no longer in the grace period and is eligible for voting
+    } else if ((clock() > $._appGracePeriodStart[appId] + $._gracePeriodDuration) && isEligibleNow(appId)) {
       // Mark the app as not eligible for voting
       _setVotingEligibility(appId, false);
+
+      // Store the security score of the app
+      $._appSecurity[appId] = $._veBetterPassport.appSecurity(appId);
+
+      // Set the XAPP security score to 0 in VeBetterPassport
+      $._veBetterPassport.setAppSecurity(appId, PassportTypes.APP_SECURITY.NONE);
 
       // Return false indicating the app is not eligible for voting
       return false;
@@ -620,5 +657,15 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     VechainNodesDataTypes.NodeStrengthLevel nodeLevel = $._nodeManagementContract.getNodeLevel(nodeId);
     return $._nodeEnodorsmentScore[nodeLevel];
+  }
+
+  function getNodeManagementContract() external view returns (INodeManagement) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return $._nodeManagementContract;
+  }
+
+  function getVeBetterPassportContract() external view returns (IVeBetterPassport) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return $._veBetterPassport;
   }
 }
