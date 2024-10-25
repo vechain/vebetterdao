@@ -45,7 +45,16 @@ export const YourBetterActionsCard = ({ renderActions = true, maxActions = 3 }: 
                       {t("Last actions")}
                     </Heading>
                     {lastActionsData.length > 0 ? (
-                      lastActionsData.map((action, index) => <BetterActionCard key={index} action={action} />)
+                      lastActionsData.map((action, index) => (
+                        <BetterActionCard
+                          key={index}
+                          amountB3tr={action.amount}
+                          appId={action.appId}
+                          blockNumber={action.blockNumber}
+                          blockTimestamp={action.blockTimestamp}
+                          proof={action.proof}
+                        />
+                      ))
                     ) : (
                       <NoActionsCard />
                     )}

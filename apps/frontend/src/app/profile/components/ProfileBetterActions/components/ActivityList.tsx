@@ -71,7 +71,14 @@ export const ActivityList = ({ setIsCalendarView }: { setIsCalendarView: Dispatc
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
                     {dayActions.map((action, index) => (
-                      <BetterActionCard key={`${day}-${index}`} action={action} />
+                      <BetterActionCard
+                        key={`${day}-${index}`}
+                        amountB3tr={action.amount}
+                        appId={action.appId}
+                        blockNumber={action.blockNumber}
+                        blockTimestamp={action.blockTimestamp}
+                        proof={action.proof}
+                      />
                     ))}
                   </VStack>
                 ))}
