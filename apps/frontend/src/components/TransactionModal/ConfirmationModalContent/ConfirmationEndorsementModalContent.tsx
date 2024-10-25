@@ -54,6 +54,7 @@ export const ConfirmationEndorsementModalContent = ({
           <EndorsementDetails />
           <Image
             src={NodeStrengthLevelToImage[endorsementInfo?.xNodeLevel ?? 0]}
+            boxSize="24px"
             alt={`Node lvl ${endorsementInfo?.xNodeLevel}`}
           />
           <Text fontSize="small" fontWeight={800}>
