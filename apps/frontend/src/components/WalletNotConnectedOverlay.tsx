@@ -1,4 +1,4 @@
-import { Flex, Heading, Image, Text, Box, Stack, Button } from "@chakra-ui/react"
+import { Flex, Heading, Text, Box, Stack, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { WalletIcon } from "./Icons/WalletIcon"
 import { VeBetterIcon } from "./Icons/VeBetterIcon"
@@ -14,27 +14,21 @@ export const WalletNotConnectedOverlay = () => {
       w={"100%"}
       align="center"
       justify="center"
-      zIndex={3}
       data-testid="wallet-not-connected-overlay"
       p={6}
       overflow={"hidden"}
-      position={"relative"}>
-      <Image
-        src="/images/cloud-background.png"
-        alt="cloud-background"
-        position="absolute"
-        w={["150%", "150%", "100%"]}
-        maxW={["150%", "150%", "100%"]}
-        top={"-50%"}
-      />
+      position={"relative"}
+      bgImage={"url('/images/cloud-background.png')"}
+      bgSize={"cover"}
+      bgPosition={"center"}
+      bgRepeat={"no-repeat"}>
       <Stack
         gap={6}
-        zIndex={2}
         direction={["column", "column", "row"]}
         align={"center"}
         justify={["center", "center", "space-between"]}
         w="full">
-        <Stack gap={6} zIndex={2} direction={["column", "column", "row"]} align={"center"}>
+        <Stack gap={6} direction={["column", "column", "row"]} align={"center"}>
           <WalletIcon />
           <Box maxW={["full", "full", "350px"]}>
             <Heading fontSize={["xl", "xl", "2xl"]} textAlign={["center", "center", "left"]} color="white">
