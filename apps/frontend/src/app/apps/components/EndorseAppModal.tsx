@@ -66,6 +66,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     isEndorsing: true,
     points: userEndorsementScore.data,
     endorsedAppName: xApp?.name,
+    xNodeLevel: firstNode?.level,
   }
 
   if (endorseAppMutation.status !== "ready")

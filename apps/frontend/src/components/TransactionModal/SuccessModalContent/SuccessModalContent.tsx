@@ -102,7 +102,7 @@ export const SuccessModalContent = ({
                   </Text>
                 </Text>{" "}
                 <Image
-                  src={NodeStrengthLevelToImage[endorsementInfo?.xNodeLevel ?? 0]}
+                  src={NodeStrengthLevelToImage[(endorsementInfo?.xNodeLevel ?? 0).toString()]}
                   boxSize="24px"
                   alt={`Node lvl ${endorsementInfo?.xNodeLevel}`}
                 />
