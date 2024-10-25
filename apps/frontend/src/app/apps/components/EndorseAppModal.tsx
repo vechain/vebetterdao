@@ -48,9 +48,9 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   //TODO: Handle multiple xNodes on UI
   const userEndorsementScore = useUserEndorsementScore(account)
 
-  const appScore = useMemo(() => Number(endorsementScore) ?? 0, [endorsementScore])
-  const endorsementThreshold = useMemo(() => Number(endorsementScoreThreshold) ?? 0, [endorsementScoreThreshold])
-  const newScore = appScore + (Number(userEndorsementScore.data) ?? 0)
+  const appScore = useMemo(() => Number(endorsementScore ?? 0), [endorsementScore])
+  const endorsementThreshold = useMemo(() => Number(endorsementScoreThreshold ?? 0), [endorsementScoreThreshold])
+  const newScore = appScore + Number(userEndorsementScore.data ?? 0)
 
   const newScoreMetThreshold = useMemo(
     () => newScore >= endorsementThreshold && appScore < endorsementThreshold,
