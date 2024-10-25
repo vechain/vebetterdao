@@ -7,7 +7,7 @@ import {
 } from "../../xAllocations"
 import { useGetVotesOnBlock } from "./useVotesOnBlock"
 import { useVotingThreshold } from "./useVotingThreshold"
-import { useIsUserPerson } from "../../vePassport"
+import { useAllocationRoundSnapshot, useIsUserPersonAtTimepoint } from "@/api"
 
 /**
  * Hook to check if a user can vote in a round.
@@ -16,6 +16,7 @@ import { useIsUserPerson } from "../../vePassport"
 export const useCanUserVote = () => {
   const { account } = useWallet()
   const { data: roundId } = useCurrentAllocationsRoundId()
+  const { data: roundSnapshot, isLoading: roundSnapshotLoading } = useAllocationRoundSnapshot(roundId ?? "")
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
   const { data: roundInfo } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
@@ -27,11 +28,11 @@ export const useCanUserVote = () => {
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = [1, 2].includes(state ?? 0)
-  const { data: isPerson, isLoading: isPersonLoading } = useIsUserPerson()
+  const { data: isPerson, isLoading: isPersonLoading } = useIsUserPersonAtTimepoint(roundSnapshot)
 
   return {
     data: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && isPerson,
-    isLoading: hasVotedLoading || stateLoading || votesAtSnapshotLoading || isPersonLoading,
+    isLoading: hasVotedLoading || stateLoading || votesAtSnapshotLoading || isPersonLoading || roundSnapshotLoading,
     hasVotesAtSnapshot,
     isPerson,
   }
