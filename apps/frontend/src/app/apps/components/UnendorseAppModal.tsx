@@ -20,11 +20,12 @@ export type PropsEndorsement = {
   isEndorsing?: boolean
   points?: number | string
   endorsedAppName?: string
+  xNodeLevel?: number
 }
 
 export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  const { endorsedApp, xNodeId, xNodePoints } = useXNode()
+  const { endorsedApp, xNodeId, xNodePoints, xNodeLevel } = useXNode()
   const { data: logo } = useIpfsImage(endorsedApp?.logo)
   const { account } = useWallet()
 
@@ -45,6 +46,7 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
     isEndorsing: false,
     points: xNodePoints,
     endorsedAppName: endorsedApp?.name,
+    xNodeLevel,
   }
   if (unendorseAppMutation.status !== "ready")
     return (

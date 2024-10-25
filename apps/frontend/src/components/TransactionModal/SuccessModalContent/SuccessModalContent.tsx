@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next"
 import { PropsEndorsement } from "@/app/apps/components/UnendorseAppModal"
 import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions } from "@/constants"
+import { NodeStrengthLevelToImage } from "@/constants/XNode"
 
 export type SuccessModalContentProps = {
   title?: ReactNode
@@ -100,7 +101,10 @@ export const SuccessModalContent = ({
                     {endorsementInfo?.endorsedAppName}
                   </Text>
                 </Text>{" "}
-                <Image src="/images/xnode-strength.svg" alt="xnode-strength-icon" />
+                <Image
+                  src={NodeStrengthLevelToImage[endorsementInfo?.xNodeLevel ?? 0]}
+                  alt={`Node lvl ${endorsementInfo?.xNodeLevel}`}
+                />
                 <Text fontSize="small" fontWeight={800}>
                   {t("{{value}} points", { value: endorsementInfo?.points })}
                 </Text>

@@ -4,6 +4,7 @@ import confirmationAnimation from "./confirmation.json"
 import { ReactNode } from "react"
 import { PropsEndorsement } from "@/app/apps/components/UnendorseAppModal"
 import { t } from "i18next"
+import { NodeStrengthLevelToImage } from "@/constants/XNode"
 
 export type ConfirmationModalEndorsementContentProps = {
   title?: ReactNode
@@ -51,7 +52,10 @@ export const ConfirmationEndorsementModalContent = ({
       <HStack bg="#F8F8F8" justify="space-around" p="16px" rounded="8px" height={"full"}>
         <HStack>
           <EndorsementDetails />
-          <Image src="/images/xnode-strength.svg" alt="xnode-strength-icon" />
+          <Image
+            src={NodeStrengthLevelToImage[endorsementInfo?.xNodeLevel ?? 0]}
+            alt={`Node lvl ${endorsementInfo?.xNodeLevel}`}
+          />
           <Text fontSize="small" fontWeight={800}>
             {t("{{value}} points", { value: endorsementInfo?.points })}
           </Text>
