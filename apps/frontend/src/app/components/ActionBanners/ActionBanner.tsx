@@ -7,6 +7,7 @@ import {
   useB3trBalance,
   useCanUserVote,
   useCurrentAllocationsRoundId,
+  usePrepareVotingRewardsData,
   useUserScore,
   useVot3Balance,
   useVotingRewards,
@@ -42,6 +43,9 @@ export const ActionBanner = () => {
   const { account } = useWallet()
 
   const votingRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
+
+  const { total: totalVoterRewards } = usePrepareVotingRewardsData(votingRewardsQuery)
+
   const { data: canUserVote, isLoading: canUserVoteLoading } = useCanUserVote()
 
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
@@ -65,7 +69,7 @@ export const ActionBanner = () => {
   const { isUserQualified, isLoading: isScoreLoading } = useUserScore()
 
   const showDoActionBanner = !!account && !isScoreLoading && !isUserQualified
-  const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
+  const showClaimB3trBanner = !!account && totalVoterRewards && Number(totalVoterRewards) !== 0
   const showCastVoteBanner = !!account && !canUserVoteLoading && canUserVote
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
 

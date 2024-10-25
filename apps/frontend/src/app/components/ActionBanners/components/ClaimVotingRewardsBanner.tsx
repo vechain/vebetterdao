@@ -1,6 +1,6 @@
 import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
+import { useCurrentAllocationsRoundId, usePrepareVotingRewardsData, useVotingRewards } from "@/api"
 import { UilGift } from "@iconscout/react-unicons"
 import { TransactionModal } from "@/components"
 import { useDisclosure } from "@chakra-ui/react"
@@ -18,12 +18,14 @@ export const ClaimVotingRewardsBanner = () => {
 
   const roundsRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
 
+  const { roundsRewards, totalFormatted } = usePrepareVotingRewardsData(roundsRewardsQuery)
+
   const { isOpen, onClose, onOpen } = useDisclosure()
 
   const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
 
   const claimRewardsMutation = useClaimRewards({
-    roundRewards: roundsRewardsQuery.data?.roundsRewards ?? [],
+    roundRewards: roundsRewards ?? [],
   })
 
   const handleClaim = useCallback(() => {
@@ -87,7 +89,7 @@ export const ClaimVotingRewardsBanner = () => {
                   leftIcon={<UilGift color="white" />}>
                   <Text fontWeight="500">
                     {t("Claim your {{b3trToClaim}} B3TR", {
-                      b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
+                      b3trToClaim: compactFormatter.format(Number(totalFormatted ?? 0)),
                     })}
                   </Text>
                 </Button>
@@ -110,7 +112,7 @@ export const ClaimVotingRewardsBanner = () => {
                   leftIcon={<UilGift color="white" />}>
                   <Text fontWeight="500">
                     {t("Claim your {{b3trToClaim}} B3TR", {
-                      b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
+                      b3trToClaim: compactFormatter.format(Number(totalFormatted ?? 0)),
                     })}
                   </Text>
                 </Button>

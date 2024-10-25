@@ -1,7 +1,6 @@
 import { ethers } from "ethers"
 import { UseQueryResult } from "@tanstack/react-query"
 import { RoundReward } from "../utils"
-
 import { useMemo } from "react"
 import { BigNumber } from "bignumber.js"
 

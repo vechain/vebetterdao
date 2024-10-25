@@ -1,4 +1,9 @@
-import { useAllocationsRoundsEvents, useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
+import {
+  useAllocationsRoundsEvents,
+  useCurrentAllocationsRoundId,
+  usePrepareVotingRewardsData,
+  useVotingRewards,
+} from "@/api"
 import { Card, CardBody, Heading, VStack, Text, Button, Box, Image, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import React, { useCallback } from "react"
@@ -19,12 +24,15 @@ export const VoterRewards: React.FC = () => {
   const { account } = useWallet()
 
   const roundsRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
+
+  const { total, roundsRewards, totalFormatted } = usePrepareVotingRewardsData(roundsRewardsQuery)
+
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
   const claimRewardsMutation = useClaimRewards({
-    roundRewards: roundsRewardsQuery.data?.roundsRewards ?? [],
+    roundRewards: roundsRewards ?? [],
   })
 
   const handleClaim = useCallback(() => {
@@ -90,7 +98,7 @@ export const VoterRewards: React.FC = () => {
                   i18nKey="You have {{value}} B3TR rewards pending claim."
                   t={t}
                   values={{
-                    value: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
+                    value: compactFormatter.format(Number(totalFormatted ?? 0)),
                   }}
                 />
               </Text>
@@ -99,7 +107,7 @@ export const VoterRewards: React.FC = () => {
             <Button
               zIndex={2}
               mt={2}
-              isDisabled={Number(roundsRewardsQuery.data?.total ?? 0) === 0}
+              isDisabled={Number(total ?? 0) === 0}
               isLoading={isClaimRewardsLoading}
               onClick={handleClaim}
               variant={"primaryAction"}
