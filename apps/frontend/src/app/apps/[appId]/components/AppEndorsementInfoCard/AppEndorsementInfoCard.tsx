@@ -1,6 +1,5 @@
-import { useAppEndorsers, useIsAppAdmin, useIsAppModerator, useXNode } from "@/api"
+import { useIsAppAdmin, useIsAppModerator, useXNode } from "@/api"
 import { VeBetterIcon } from "@/components"
-import { AddressIcon } from "@/components/AddressIcon"
 import { EndorsementStatus } from "@/types"
 import {
   Box,
@@ -11,22 +10,20 @@ import {
   Divider,
   Heading,
   HStack,
-  Link,
   Skeleton,
   Stack,
-  VStack,
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
-import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { SwitchEndorsementAppModal } from "@/app/apps/components/SwitchEndorsementAppModal"
+import { AppEndorsersSection } from "./AppEndorsersSection"
 type Props = {
   endorsementScore?: string
   endorsementStatus: EndorsementStatus
@@ -70,11 +67,11 @@ export const AppEndorsementInfoCard = ({
   const { account } = useWallet()
 
   // App endorsement data
-  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
 
   // User roles data
   const { data: isAppModerator, isLoading: isAppModeratorLoading } = useIsAppModerator(app?.id ?? "", account ?? "")
   const { data: isAppAdmin, isLoading: isAppAdminLoading } = useIsAppAdmin(app?.id ?? "", account ?? "")
+
   const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
   // User xnodes, TODO support multiple xnodes
@@ -91,11 +88,7 @@ export const AppEndorsementInfoCard = ({
   }, [app, isXNodeLoading, isXNodeHolder, isEndorsingApp, endorsedApp])
 
   // Modals
-  const {
-    isOpen: isEndorsementInfoOpen,
-    onOpen: onOpenEndorsementInfoModal,
-    onClose: onCloseEndorsementInfoModal,
-  } = useDisclosure()
+
   const {
     isOpen: isEndorsementModalOpen,
     onOpen: onOpenEndorsementModal,
@@ -182,39 +175,7 @@ export const AppEndorsementInfoCard = ({
               spacing={4}
               w="full"
               justify={"space-between"}>
-              <Skeleton isLoaded={!isAppEndorsersLoading && !isUserRolesDataLoading}>
-                {appEndorsers && appEndorsers.length ? (
-                  <HStack justify={"space-between"} w="full">
-                    <HStack>
-                      <HStack>
-                        {appEndorsers.map((endorser: string, index: number) => (
-                          <Box key={index}>
-                            <AddressIcon address={endorser} rounded="full" h="20px" w="20px" />
-                          </Box>
-                        ))}
-                      </HStack>
-                      <Text as="span" fontSize="14px" fontWeight="bold">
-                        {appEndorsers.length > 1
-                          ? t("{{value}}-x-node-users", { value: appEndorsers.length })
-                          : t("1-x-node-user")}
-                      </Text>
-                    </HStack>
-                    <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
-                      {t("See all")}
-                    </Link>
-                  </HStack>
-                ) : (
-                  <VStack>
-                    <Text fontSize="14px" fontWeight="bold">
-                      {isAppModerator || isAppAdmin ? t("Nobody is endorsing your app") : t("Not endorsed by anyone")}
-                      <br />
-                      <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
-                        {t("See endorsement history")}
-                      </Link>
-                    </Text>
-                  </VStack>
-                )}
-              </Skeleton>
+              {app && <AppEndorsersSection appId={app.id} />}
 
               <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading}>
                 {(isAppModerator || isAppAdmin) &&
@@ -251,11 +212,7 @@ export const AppEndorsementInfoCard = ({
           </Stack>
         </CardBody>
       </Card>
-      <AppEndorsementInfoCardModal
-        isOpen={isEndorsementInfoOpen}
-        onClose={onCloseEndorsementInfoModal}
-        appId={app?.id || ""}
-      />
+
       <SwitchEndorsementAppModal
         isOpen={isSwitchEndorsementModalOpen}
         onClose={onCloseSwitchEndorsementModal}
