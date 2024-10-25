@@ -18,7 +18,7 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
   const { account: userAccount } = useWallet()
   const { name } = useWalletName(account || "")
   const isUserAccountCard = compareAddresses(account, userAccount)
-  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentUserOverview()
+  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentUserOverview(account)
   const { isPassport, isEntity, outgoingPendingLink, isLoading: isAccountLinkingLoading } = useAccountLinking()
   const removeLinkModalPassportPOV = useDisclosure()
   const removeLinkModalEntityPOV = useDisclosure()
