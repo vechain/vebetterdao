@@ -4,8 +4,9 @@ import {
   useGetCumulativeScoreWithDecay,
   useGetUserDelegator,
   useSecurityMultiplier,
-  useThresholdParticipationScore,
+  useThresholdParticipationScoreAtTimepoint,
 } from "@/api/contracts"
+import { useAllocationRoundSnapshot } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 
@@ -15,8 +16,10 @@ import { useMemo } from "react"
  */
 export const useUserScore = (user?: string) => {
   const { account } = useWallet()
-  const { data: scoreThreshold, isLoading: isScoreThresholdLoading } = useThresholdParticipationScore()
   const { data: roundId, isLoading: isRoundIdLoading } = useCurrentAllocationsRoundId()
+  const { data: roundSnapshot, isLoading: isRoundSnapshotLoading } = useAllocationRoundSnapshot(roundId ?? "")
+  const { data: scoreThresholdAtRoundStart, isLoading: isScoreThresholdAtRoundStartLoading } =
+    useThresholdParticipationScoreAtTimepoint(roundSnapshot ?? "")
   const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetUserDelegator()
 
   // this is the user's cumulative score with decay, we use that because it must be greater than the threshold
@@ -28,16 +31,18 @@ export const useUserScore = (user?: string) => {
 
   const scorePercentage = useMemo(
     () =>
-      Number(scoreThreshold ?? 0) ? Math.min((Number(userScore ?? 0) / Number(scoreThreshold ?? 0)) * 100, 100) : 100,
-    [userScore, scoreThreshold],
+      Number(scoreThresholdAtRoundStart ?? 0)
+        ? Math.min((Number(userScore ?? 0) / Number(scoreThresholdAtRoundStart ?? 0)) * 100, 100)
+        : 100,
+    [userScore, scoreThresholdAtRoundStart],
   )
 
-  const isUserQualified = userScore >= scoreThreshold
+  const isUserQualified = userScore >= scoreThresholdAtRoundStart
 
   // we take the score of the easy actions as reference, as the minimum score of an action
   // so we can calculate the number of actions needed to reach the threshold at minimum
   const { data: easyActionScore, isLoading: isSecurityMultiplierLoading } = useSecurityMultiplier(SecurityLevel.LOW)
-  const scoreNeeded = Math.max(Number(scoreThreshold ?? 0) - Number(userScore ?? 0), 0)
+  const scoreNeeded = Math.max(Number(scoreThresholdAtRoundStart ?? 0) - Number(userScore ?? 0), 0)
   const missingActions =
     Number(easyActionScore ?? 0) && scoreNeeded ? Math.ceil(scoreNeeded / Number(easyActionScore ?? 0)) : 0
 
@@ -46,14 +51,15 @@ export const useUserScore = (user?: string) => {
     isUserDelegatee: !!delegatorAddress,
     delegatorAddress,
     scorePercentage,
-    scoreThreshold,
+    scoreThresholdAtRoundStart,
     userScore,
     missingActions,
     isLoading:
-      isScoreThresholdLoading ||
+      isScoreThresholdAtRoundStartLoading ||
       isUserRoundScoreLoading ||
       isRoundIdLoading ||
       isDelegatorLoading ||
-      isSecurityMultiplierLoading,
+      isSecurityMultiplierLoading ||
+      isRoundSnapshotLoading,
   }
 }
