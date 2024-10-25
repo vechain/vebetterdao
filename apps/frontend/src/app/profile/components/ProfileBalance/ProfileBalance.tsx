@@ -1,17 +1,27 @@
-import { TokensBalance } from "@/app/components/TokensBalance"
-import { VStack, Heading } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
+import { VStack } from "@chakra-ui/react"
 import { UserTransactions } from "./components/UserTransactions"
+import { SwapB3trVot3 } from "@/components/GmNFTAndNodeCard/components/SwapB3trVot3"
 
 export const ProfileBalance = () => {
-  const { t } = useTranslation()
-
   return (
     <VStack align={"stretch"} gap={4}>
-      <Heading fontSize="lg" fontWeight={700}>
-        {t("Your tokens")}
-      </Heading>
-      <TokensBalance />
+      <SwapB3trVot3
+        containerProps={{
+          w: "full",
+          align: "stretch",
+          gap: "24px",
+          bg: "#004CFC",
+          rounded: "xl",
+          color: "white",
+          position: "relative",
+          p: 4,
+          overflow: "hidden",
+          bgImage: "url('/images/cloud-background.png')",
+          bgSize: "cover",
+          bgPosition: "center",
+          bgRepeat: "no-repeat",
+        }}
+      />
       <UserTransactions />
     </VStack>
   )

@@ -8,6 +8,7 @@ import {
   Image,
   Skeleton,
   Stack,
+  StackProps,
   Text,
   useDisclosure,
   useMediaQuery,
@@ -15,11 +16,16 @@ import {
 } from "@chakra-ui/react"
 import { UilExchangeAlt } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import React from "react"
 import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(4)
 
-export const SwapB3trVot3 = () => {
+type Props = {
+  containerProps?: StackProps
+  innerContent?: React.ReactNode
+}
+export const SwapB3trVot3 = ({ containerProps, innerContent }: Props) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
@@ -34,9 +40,10 @@ export const SwapB3trVot3 = () => {
 
   return (
     <>
-      <VStack flex="2" align={"stretch"} gap="24px">
+      <VStack flex="2" align={"stretch"} gap="24px" {...containerProps}>
+        {innerContent}
         <Text fontSize="xl" fontWeight={700}>
-          {t("Your token balance")}
+          {t("Your tokens")}
         </Text>
         <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
           <VStack
