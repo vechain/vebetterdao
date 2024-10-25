@@ -22,6 +22,8 @@ export const HomePageContent = () => {
         data-testid="form-proposal-layout">
         <GridItem colSpan={[1, 1, 3]} display="grid">
           <ActionBanner />
+        </GridItem>
+        <GridItem colSpan={[1, 1, 3]}>
           <GmNFTAndNodeCard />
         </GridItem>
         <GridItem colSpan={[1, 1, 2]} order={[2, 2, 1]}>
