@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@repo/contracts"
-import { ethers } from "ethers"
 import { RoundReward } from "../utils"
 
 // Get the voter rewards contract address from the configuration
@@ -23,7 +22,7 @@ export const getRoundReward = async (thor: Connex.Thor, address: string, roundId
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 
-  const reward = ethers.formatEther(res.decoded[0])
+  const reward = res.decoded[0]
 
   return {
     roundId,
