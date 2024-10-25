@@ -344,6 +344,18 @@ export const getOrDeployContractInstances = async ({
     owner.address,
   ])) as NodeManagement
 
+  // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
+  const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
+    PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
+    PassportConfiguratorV1: await PassportConfiguratorV1.getAddress(),
+    PassportEntityLogicV1: await PassportEntityLogicV1.getAddress(),
+    PassportDelegationLogicV1: await PassportDelegationLogicV1.getAddress(),
+    PassportPersonhoodLogicV1: await PassportPersonhoodLogicV1.getAddress(),
+    PassportPoPScoreLogicV1: await PassportPoPScoreLogicV1.getAddress(),
+    PassportSignalingLogicV1: await PassportSignalingLogicV1.getAddress(),
+    PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
+  })
+
   // Deploy X2EarnAppsV1
   const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
     "ipfs://",
@@ -357,21 +369,9 @@ export const getOrDeployContractInstances = async ({
     "X2EarnAppsV1",
     "X2EarnApps",
     await x2EarnAppsV1.getAddress(),
-    [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress()],
+    [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress(), veBetterPassportContractAddress],
     { version: 2 },
   )) as X2EarnApps
-
-  // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
-  const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
-    PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
-    PassportConfiguratorV1: await PassportConfiguratorV1.getAddress(),
-    PassportEntityLogicV1: await PassportEntityLogicV1.getAddress(),
-    PassportDelegationLogicV1: await PassportDelegationLogicV1.getAddress(),
-    PassportPersonhoodLogicV1: await PassportPersonhoodLogicV1.getAddress(),
-    PassportPoPScoreLogicV1: await PassportPoPScoreLogicV1.getAddress(),
-    PassportSignalingLogicV1: await PassportSignalingLogicV1.getAddress(),
-    PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
-  })
 
   const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
     owner.address,
@@ -751,6 +751,11 @@ export const getOrDeployContractInstances = async ({
 
   // Set xAllocationGovernor in emissions
   await emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+
+  // Grant action score manager role to X2EarnApps
+  await veBetterPassport
+    .connect(owner)
+    .grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), await x2EarnApps.getAddress())
 
   // Setup XAllocationPool addresses
   await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())

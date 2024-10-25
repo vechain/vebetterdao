@@ -38,8 +38,16 @@ describe("X-Apps - @shard3", function () {
   describe("Contract upgradeablity", () => {
     it("Cannot initialize twice", async function () {
       const config = createLocalConfig()
-      const { x2EarnApps, vechainNodesMock } = await getOrDeployContractInstances({ forceDeploy: true })
-      await catchRevert(x2EarnApps.initializeV2(config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()))
+      const { x2EarnApps, vechainNodesMock, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      await catchRevert(
+        x2EarnApps.initializeV2(
+          config.XAPP_GRACE_PERIOD,
+          await vechainNodesMock.getAddress(),
+          await veBetterPassport.getAddress(),
+        ),
+      )
     })
 
     it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
@@ -101,9 +109,11 @@ describe("X-Apps - @shard3", function () {
     it("X2Earn Apps Info added pre contract upgrade should should be same after upgrade", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      const { timeLock, owner, otherAccounts, vechainNodesMock } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { timeLock, owner, otherAccounts, vechainNodesMock, veBetterPassport } = await getOrDeployContractInstances(
+        {
+          forceDeploy: true,
+        },
+      )
 
       // Deploy X2EarnApps
       const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
@@ -140,7 +150,7 @@ describe("X-Apps - @shard3", function () {
         "X2EarnAppsV1",
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
-        [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
+        [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress(), await veBetterPassport.getAddress()],
         { version: 2 },
       )) as X2EarnApps
 
@@ -154,10 +164,18 @@ describe("X-Apps - @shard3", function () {
     it("X2Earn Apps added pre contract upgrade should need endorsement after upgrade and should be in grace period", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      const { xAllocationVoting, x2EarnRewardsPool, xAllocationPool, timeLock, owner, nodeManagement, otherAccounts } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const {
+        xAllocationVoting,
+        x2EarnRewardsPool,
+        xAllocationPool,
+        timeLock,
+        owner,
+        nodeManagement,
+        otherAccounts,
+        veBetterPassport,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Deploy X2EarnApps
       const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
@@ -212,9 +230,13 @@ describe("X-Apps - @shard3", function () {
         "X2EarnAppsV1",
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
-        [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress()],
+        [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress(), await veBetterPassport.getAddress()],
         { version: 2 },
       )) as X2EarnApps
+
+      await veBetterPassport
+        .connect(owner)
+        .grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), await x2EarnAppsV2.getAddress())
 
       // start new round
       const round2 = await startNewAllocationRound()
@@ -298,6 +320,7 @@ describe("X-Apps - @shard3", function () {
         owner,
         vechainNodesMock,
         otherAccounts,
+        veBetterPassport,
       } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Deploy X2EarnAppsV1
@@ -366,7 +389,7 @@ describe("X-Apps - @shard3", function () {
         "X2EarnAppsV1",
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
-        [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
+        [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress(), await veBetterPassport.getAddress()],
         { version: 2 },
       )
 
@@ -403,6 +426,32 @@ describe("X-Apps - @shard3", function () {
 
       expect(await x2EarnApps.MAX_MODERATORS()).to.eql(100n)
       expect(await x2EarnApps.MAX_REWARD_DISTRIBUTORS()).to.eql(100n)
+    })
+
+    it("Only admin can update node management contract address", async function () {
+      const { x2EarnApps, otherAccount, nodeManagement, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.getNodeManagementContract()).to.eql(await nodeManagement.getAddress())
+      await catchRevert(x2EarnApps.connect(otherAccount).setNodeManagementContract(otherAccount.address))
+
+      await x2EarnApps.connect(owner).setNodeManagementContract(await otherAccount.getAddress())
+
+      expect(await x2EarnApps.getNodeManagementContract()).to.eql(await otherAccount.getAddress())
+    })
+
+    it("Only admin can update veBetter passport contract address", async function () {
+      const { x2EarnApps, otherAccount, veBetterPassport, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.getVeBetterPassportContract()).to.eql(await veBetterPassport.getAddress())
+      await catchRevert(x2EarnApps.connect(otherAccount).setVeBetterPassportContract(otherAccount.address))
+
+      await x2EarnApps.connect(owner).setVeBetterPassportContract(await otherAccount.getAddress())
+
+      expect(await x2EarnApps.getVeBetterPassportContract()).to.eql(await otherAccount.getAddress())
     })
   })
 
@@ -505,7 +554,7 @@ describe("X-Apps - @shard3", function () {
     })
 
     it("Can get unendorsed app ids", async function () {
-      const { x2EarnApps, otherAccounts, owner, otherAccount } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -2393,6 +2442,120 @@ describe("X-Apps - @shard3", function () {
       expect(endorsers.length).to.eql(0)
     })
 
+    it("If the grace period is updated it should should update the grace period for apps that are already in the grace period", async function () {
+      const config = createLocalConfig()
+      const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      const appIdsPendingEndorsement1 = await x2EarnApps.unendorsedAppIds()
+      expect(appIdsPendingEndorsement1.length).to.eql(1)
+
+      // Create two Mjolnir node holders with an endorsement score of 50 each
+      await createNodeHolder(3, otherAccounts[1]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 50
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, 2) // Node holder endorsement score is 50
+
+      let round1 = await startNewAllocationRound()
+
+      // app should be eligible for the current round
+      let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
+      expect(isEligibleForVote).to.eql(true)
+
+      // App is not pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
+
+      // remove endorsement from one of the node holders
+      const tx = await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id, 1)
+
+      const receipt = await tx.wait()
+      if (!receipt) throw new Error("No receipt")
+
+      // check event emitted
+      let events = receipt?.logs
+      let decodedEvents = events?.map(event => {
+        return x2EarnApps.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      const event = decodedEvents.find(event => event?.name === "AppEndorsementStatusUpdated")
+      expect(event).to.not.equal(undefined)
+
+      const eventGracePeriod = decodedEvents.find(event => event?.name === "AppUnendorsedGracePeriodStarted")
+      expect(eventGracePeriod).to.not.equal(undefined)
+      expect(eventGracePeriod?.args[0]).to.eql(app1Id)
+      expect(eventGracePeriod?.args[1]).to.eql(BigInt(receipt.blockNumber))
+      expect(eventGracePeriod?.args[2]).to.eql(BigInt(receipt.blockNumber + config.XAPP_GRACE_PERIOD))
+
+      // app should still be eligible for the current round
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
+      expect(isEligibleForVote).to.eql(true)
+
+      // app should be pending endorsement -> score is now 50 -> grace period starts
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      // start new round -> 1st cycle unedorsed
+      let round2 = await startNewAllocationRound()
+
+      // app should still be eligible for the current round as it is in the grace period
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
+      expect(isEligibleForVote).to.eql(true)
+
+      // App is eligible as in grace period
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(true)
+
+      // If we update the grace period now to 1 block the app should not be eligible if we check endorsement
+      await x2EarnApps.updateGracePeriod(1)
+
+      // check endorsement this time it will remove the app from the voting rounds
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // app should still be eligible for the current round as it was not removed before the round started
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
+      expect(isEligibleForVote).to.eql(true)
+
+      // App is no longer eligible
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(false)
+
+      // check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      // start new round -> 2nd cycle unendorsed
+      let round3 = await startNewAllocationRound()
+
+      // app id not eligible for the current round
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round3)
+      expect(isEligibleForVote).to.eql(false)
+
+      // Updating grace period now has no effect as the app is no longer eligible
+      await x2EarnApps.updateGracePeriod(500000)
+
+      // check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // app should not be eligible now
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(false)
+    })
+
     it("If an XAPP is no longer in eligible for voting as they lost their endorsement they can get added in by getting reendorsed", async function () {
       const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -3325,6 +3488,109 @@ describe("X-Apps - @shard3", function () {
 
       // Check XApps pending endorsement should be empty
       expect((await x2EarnApps.unendorsedAppIds()).length).to.eql(1)
+    })
+
+    it("An XAPPs security should be set to LOW when they intially join the platform", async function () {
+      const { x2EarnApps, otherAccounts, owner, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pending endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      await endorseApp(app1Id, otherAccounts[1])
+
+      // Get app security level
+      const appSecurityLevel = await veBetterPassport.appSecurity(app1Id)
+      expect(appSecurityLevel).to.eql(1n)
+    })
+
+    it("An XAPPs security should be set to NONE when they lose there endorsement", async function () {
+      const config = createLocalConfig()
+      config.XAPP_GRACE_PERIOD = 0
+      const { x2EarnApps, otherAccounts, owner, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pending endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      await endorseApp(app1Id, otherAccounts[1])
+
+      // Get app security level
+      const appSecurityLevel = await veBetterPassport.appSecurity(app1Id)
+      expect(appSecurityLevel).to.eql(1n)
+
+      await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id, 1) // Node holder removes their endorsement
+
+      // Check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // Get app security level
+      const appSecurityLevel2 = await veBetterPassport.appSecurity(app1Id)
+      expect(appSecurityLevel2).to.eql(0n)
+    })
+
+    it("An XAPPs security should be reset when an XAPP that once was endorsed gets re-endorsed", async function () {
+      const config = createLocalConfig()
+      config.XAPP_GRACE_PERIOD = 0
+      const { x2EarnApps, otherAccounts, owner, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+      const app2Id = await x2EarnApps.hashAppName(otherAccounts[1].address)
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+
+      await endorseApp(app1Id, otherAccounts[1])
+      await endorseApp(app2Id, otherAccounts[2])
+
+      // Get app security level
+      expect(await veBetterPassport.appSecurity(app1Id)).to.eql(1n)
+      expect(await veBetterPassport.appSecurity(app2Id)).to.eql(1n)
+
+      // Passport admin changes their security level
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 0)
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 3)
+
+      // Get app security level
+      expect(await veBetterPassport.appSecurity(app1Id)).to.eql(0n)
+      expect(await veBetterPassport.appSecurity(app2Id)).to.eql(3n)
+
+      // Unendorse apps
+      await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id, 1)
+      await x2EarnApps.connect(otherAccounts[2]).unendorseApp(app2Id, 2)
+
+      // Check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+      await x2EarnApps.checkEndorsement(app2Id)
+
+      // App security level should be NONE
+      expect(await veBetterPassport.appSecurity(app1Id)).to.eql(0n)
+      expect(await veBetterPassport.appSecurity(app2Id)).to.eql(0n)
+
+      // Re-endorse apps
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 1)
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app2Id, 2)
+
+      // Scores should be reset to where they were before
+      expect(await veBetterPassport.appSecurity(app1Id)).to.eql(0n)
+      expect(await veBetterPassport.appSecurity(app2Id)).to.eql(3n)
     })
 
     it("An XAPP that has been removed from black list that has endorsers should not be pending endorsement", async function () {
