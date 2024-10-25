@@ -6,10 +6,10 @@ import { useTranslation } from "react-i18next"
 import { ProfileBalance } from "./ProfileBalance"
 import { ProfileGovernance } from "./ProfileGovernance"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts"
 import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 enum Tab {
   Balance = "balance",
@@ -18,10 +18,15 @@ enum Tab {
   LinkedAccounts = "linked-accounts",
 }
 
-export const ProfilePageContent = () => {
+type Props = {
+  address?: string
+}
+export const ProfilePageContent = ({ address }: Props) => {
+  const { account } = useWallet()
+
+  const parsedAddress = address ?? account ?? ""
   const { t } = useTranslation()
   const router = useRouter()
-  const { account } = useWallet()
   const searchParams = useSearchParams()
 
   const selectedTab = useMemo(() => {
@@ -41,21 +46,21 @@ export const ProfilePageContent = () => {
   const selectedTabContent = useMemo(() => {
     switch (selectedTab) {
       case Tab.Balance:
-        return <ProfileBalance />
+        return <ProfileBalance address={parsedAddress} />
       case Tab.BetterActions:
-        return <ProfileBetterActions />
+        return <ProfileBetterActions address={parsedAddress} />
       case Tab.Governance:
-        return <ProfileGovernance />
+        return <ProfileGovernance address={parsedAddress} />
       case Tab.LinkedAccounts:
-        return <ProfileLinkedAcounts />
+        return <ProfileLinkedAcounts address={parsedAddress} />
       default:
         return null
     }
-  }, [selectedTab])
+  }, [selectedTab, parsedAddress])
 
   useEffect(() => {
-    if (!account) router.push("/")
-  }, [account, router])
+    if (!parsedAddress) router.push("/")
+  }, [parsedAddress, router])
 
   const handleTabChange = (tab: Tab) => {
     router.push(`?tab=${tab}`)
@@ -91,11 +96,11 @@ export const ProfilePageContent = () => {
     [t],
   )
 
-  if (!account) return <></>
+  if (!parsedAddress) return <></>
 
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
-      <ProfileHeader />
+      <ProfileHeader address={parsedAddress} />
       <HStack justify="space-between">
         {tabs.map(({ tab, label }) => (
           <Button

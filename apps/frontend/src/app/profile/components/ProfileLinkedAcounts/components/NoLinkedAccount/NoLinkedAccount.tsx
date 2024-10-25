@@ -4,10 +4,13 @@ import { useTranslation } from "react-i18next"
 import { LinkAccountModal } from "./components/LinkAccountModal"
 import { useAccountLinking } from "@/api"
 
-export const NoLinkedAccount = () => {
+type Props = {
+  address: string
+}
+export const NoLinkedAccount = ({ address }: Props) => {
   const { t } = useTranslation()
   const addLinkedAccountModal = useDisclosure()
-  const { isLoading, isLinked, outgoingPendingLink } = useAccountLinking()
+  const { isLoading, isLinked, outgoingPendingLink } = useAccountLinking(address)
 
   if (isLoading || isLinked || outgoingPendingLink) return null
   return (

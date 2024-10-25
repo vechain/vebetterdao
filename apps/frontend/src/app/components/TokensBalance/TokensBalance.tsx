@@ -4,7 +4,6 @@ import { ConvertModal } from "@/components/Convert/ConvertModal"
 import { Box, Button, Heading, HStack, Image, Skeleton, Stack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilArrowUpRight, UilExchangeAlt } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -13,13 +12,15 @@ import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/cons
 
 const compactFormatter = getCompactFormatter(2)
 
-export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: boolean }) => {
+type Props = {
+  address: string
+  showGoToBalance?: boolean
+}
+export const TokensBalance = ({ address, showGoToBalance = false }: Props) => {
   const { t } = useTranslation()
 
-  const { account } = useWallet()
-
-  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account ?? undefined)
-  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(account ?? undefined)
+  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(address ?? undefined)
+  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(address ?? undefined)
 
   const { isOpen, onClose, onOpen } = useDisclosure()
   const hasNoBalance = (!b3trBalance || b3trBalance.scaled === "0") && (!vot3Balance || vot3Balance.scaled === "0")
@@ -32,7 +33,7 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
     router.push("/profile")
   }, [router])
 
-  if (!account) return <WalletNotConnectedOverlay />
+  if (!address) return <WalletNotConnectedOverlay />
 
   return (
     <VStack

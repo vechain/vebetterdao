@@ -1,7 +1,7 @@
 import { useSustainabilityActions } from "@/api"
 import { UserSustainabilityOverviewStats } from "@/components"
 import { Card, CardBody, Heading, VStack, Text, Button } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+
 import { useTranslation } from "react-i18next"
 import { NoActionsCard } from "./NoActionsCard"
 import { useRouter } from "next/navigation"
@@ -9,16 +9,17 @@ import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActio
 import { NoAccountActionCard } from "./NoAccountActionCard"
 
 type Props = {
+  address: string
   renderActions?: boolean
   maxActions?: number
 }
-export const YourBetterActionsCard = ({ renderActions = true, maxActions = 3 }: Props) => {
+export const YourBetterActionsCard = ({ address, renderActions = true, maxActions = 3 }: Props) => {
   const { t } = useTranslation()
-  const { account } = useWallet()
+
   const router = useRouter()
 
   const { data } = useSustainabilityActions({
-    wallet: account ?? undefined,
+    wallet: address ?? undefined,
     direction: "desc",
   })
 
@@ -36,10 +37,10 @@ export const YourBetterActionsCard = ({ renderActions = true, maxActions = 3 }: 
             </Text>
           </VStack>
           <VStack spacing={6} align="stretch">
-            {account && <UserSustainabilityOverviewStats />}
+            {address && <UserSustainabilityOverviewStats address={address} />}
             {renderActions && (
               <VStack spacing={4} align="stretch">
-                {account ? (
+                {address ? (
                   <>
                     <Heading size="sm" fontWeight={600}>
                       {t("Last actions")}

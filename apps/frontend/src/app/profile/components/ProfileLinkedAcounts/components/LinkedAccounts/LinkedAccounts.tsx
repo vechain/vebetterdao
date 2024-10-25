@@ -2,13 +2,14 @@ import { Card, CardBody, VStack, Heading, Text, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { LinkedAccountsItem } from "./components/LinkedAccountsItem"
 import { useAccountLinking } from "@/api"
-import { useWallet } from "@vechain/dapp-kit-react"
 
-export const LinkedAccounts = () => {
+type Props = {
+  address: string
+}
+export const LinkedAccounts = ({ address }: Props) => {
   const { t } = useTranslation()
 
-  const { isLinked, passport, passportLinkedEntities, outgoingPendingLink, isLoading } = useAccountLinking()
-  const { account } = useWallet()
+  const { isLinked, passport, passportLinkedEntities, outgoingPendingLink, isLoading } = useAccountLinking(address)
 
   if (isLoading || (!isLinked && !outgoingPendingLink)) return null
   return (
@@ -47,7 +48,7 @@ export const LinkedAccounts = () => {
             </Text>
           </VStack>
           {outgoingPendingLink ? (
-            <LinkedAccountsItem account={account ?? ""} pending={true} />
+            <LinkedAccountsItem account={address ?? ""} pending={true} />
           ) : (
             <VStack gap={4} align="stretch">
               {passportLinkedEntities.map((account: string) => (

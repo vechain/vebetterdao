@@ -3,10 +3,13 @@ import { Card, CardBody, VStack, Heading, Text, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { PendingLinkingProposalItem } from "./components/PendingLinkingProposalItem/PendingLinkingProposalItem"
 
-export const PendingLinkingProposal = () => {
+type Props = {
+  address: string
+}
+export const PendingLinkingProposal = ({ address }: Props) => {
   const { t } = useTranslation()
 
-  const { incomingPendingLinkings, isLoading } = useAccountLinking()
+  const { incomingPendingLinkings, isLoading } = useAccountLinking(address)
   if (isLoading || !incomingPendingLinkings?.length) return null
   return (
     <Card variant="baseWithBorder" w="full">

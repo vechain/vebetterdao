@@ -3,7 +3,10 @@ import { useMissingActionsLabel } from "@/hooks"
 import { Heading, Text, Flex, VStack, Card, CardBody, HStack, Image, Show } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
-export const PendingActions = () => {
+type Props = {
+  address: string
+}
+export const PendingActions = ({ address }: Props) => {
   const { t } = useTranslation()
 
   const {
@@ -12,7 +15,7 @@ export const PendingActions = () => {
     isUserDelegatee,
     scorePercentage,
     isLoading: isScoreLoading,
-  } = useUserScore()
+  } = useUserScore(address)
 
   const missingActionsLabel = useMissingActionsLabel({ missingActions, isUserDelegatee })
 
