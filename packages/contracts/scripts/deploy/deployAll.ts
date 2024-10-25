@@ -203,22 +203,6 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as NodeManagement
 
-  const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnApps"],
-    [
-      [
-        config.XAPP_BASE_URI,
-        [TEMP_ADMIN], //admins
-        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-        TEMP_ADMIN, // governance role
-      ],
-      [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress()],
-    ],
-    {
-      versions: [undefined, 2],
-    },
-  )) as X2EarnApps
-
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
   const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
     PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
@@ -230,6 +214,22 @@ export async function deployAll(config: ContractsConfig) {
     PassportSignalingLogicV1: await PassportSignalingLogicV1.getAddress(),
     PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
   })
+
+  const x2EarnApps = (await deployAndUpgrade(
+    ["X2EarnAppsV1", "X2EarnApps"],
+    [
+      [
+        config.XAPP_BASE_URI,
+        [TEMP_ADMIN], //admins
+        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        TEMP_ADMIN, // governance role
+      ],
+      [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress(), veBetterPassportContractAddress],
+    ],
+    {
+      versions: [undefined, 2],
+    },
+  )) as X2EarnApps
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
     ["X2EarnRewardsPoolV1", "X2EarnRewardsPoolV2", "X2EarnRewardsPoolV3", "X2EarnRewardsPool"],
