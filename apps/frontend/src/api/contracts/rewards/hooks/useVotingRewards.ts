@@ -44,12 +44,6 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
   // Use the useMultiCall hook to execute the clauses
   const { data: multiCallData, error, isLoading } = useMultiCall(clauses, getRoundRewardQueryKey("ALL", voter))
 
-  console.log({
-    multiCallData,
-    error,
-    isLoading,
-  })
-
   // Process the results from multiCallData
   const data = useMemo(() => {
     if (isLoading || error || !multiCallData || multiCallData.reverted) {
@@ -59,7 +53,7 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
     let total = new BigNumber(0)
     const roundsRewards = multiCallData.results.map((result, index) => {
       const decoded = getReward.decode(result.data)
-      const roundId = rounds[index]
+      const roundId = rounds[index] as string
       const rewards = decoded[0] as string
       const formattedRewards = ethers.formatEther(rewards)
 
