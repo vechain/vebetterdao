@@ -1,135 +1,116 @@
-import { SustainabilityActionsResponse, useAppsSustainabilityActions } from "@/api"
-import { Heading, VStack, HStack, Text, Input, Grid, CircularProgress, CircularProgressLabel } from "@chakra-ui/react"
-import { useCallback, useMemo, useState } from "react"
+import { useAppsSustainabilityActions, useCurrentAllocationsRoundId, AppUsersData } from "@/api"
+import { Heading, VStack, HStack, Text, Select, CircularProgress, CircularProgressLabel, Grid } from "@chakra-ui/react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { ActionsSharePieChart, TopUsersChart, TotalActionsPerAppChart, UserAppsChart } from "./components"
-import DatePicker from "react-datepicker"
-import "react-datepicker/dist/react-datepicker.css"
-import { subDays } from "date-fns"
 import { useTranslation } from "react-i18next"
 
 export const VeBetterPassportData = () => {
-  // State variables for the date range
-  const [startDate, setStartDate] = useState<Date>(subDays(new Date(), 1)) // Default to 7 days ago
-  const [endDate, setEndDate] = useState<Date>(new Date()) // Default to today
-
-  // Convert dates to UNIX timestamps in seconds
-  const startTimestamp = Math.floor(startDate.getTime() / 1000)
-  const endTimestamp = Math.floor(endDate.getTime() / 1000)
-
   const { t } = useTranslation()
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
-  // Fetch data using the selected date range
-  const { allActions, actionsByApp, isLoading, fetchedAppCount, totalAppCount, setFetchedAppCount, setActionsByApp } =
+  // State variables for round range
+  const [startRound, setStartRound] = useState<number>(0)
+  const [endRound, setEndRound] = useState<number>(0)
+  const [roundOptions, setRoundOptions] = useState<number[]>([])
+
+  useEffect(() => {
+    if (currentRoundId) {
+      const rounds = Array.from({ length: 20 }, (_, i) => Number(currentRoundId) - i) // Show up to 20 rounds back
+      setRoundOptions(rounds)
+      setStartRound(rounds?.[7] ?? 0) // Default to 7 rounds back
+      setEndRound(rounds?.[0] ?? 0) // Default to current round
+    }
+  }, [currentRoundId])
+
+  // Fetch data using the selected round range
+  const { appActions, appUsers, isLoading, loadedAppCount, totalAppCount, setLoadedAppCount } =
     useAppsSustainabilityActions({
-      startTimestamp,
-      endTimestamp,
+      startRound,
+      endRound,
     })
 
   const totalActionsPerApp = useMemo(() => {
-    return Object.keys(actionsByApp).map(appId => {
-      const actions = actionsByApp[appId]
+    return Object.keys(appActions).map(appId => {
+      const actions = appActions[appId]
       return {
         appId,
         name: actions?.name ?? "",
-        actions: actions?.actions?.length ?? 0,
-        amount: actions?.actions?.reduce((sum, action) => sum + action.amount, 0),
+        actions: actions?.actions ?? 0,
+        amount: actions?.totalRewardAmount ?? 0,
       }
     })
-  }, [actionsByApp])
+  }, [appActions])
 
-  const actionsByUser = useMemo(() => {
-    return allActions.reduce(
-      (acc, action) => {
-        const { receiver } = action
-        if (!acc[receiver]) {
-          acc[receiver] = []
-        }
-        acc[receiver]?.push(action)
+  // A user can be part of multiple apps, aggregate their actions
+  const actionsByUsers = useMemo(() => {
+    return Object.values(appUsers).reduce(
+      (acc, users) => {
+        users.forEach(user => {
+          // Ensure user entry exists in the accumulator
+          acc[user.user] = acc[user.user] || { totalActions: 0, totalRewardAmount: 0 }
+
+          const existingUser = acc[user.user]
+
+          if (existingUser) {
+            // Accumulate total actions and reward amounts
+            existingUser.totalActions += user.totalActions || 0
+            existingUser.totalRewardAmount += user.totalRewardAmount || 0
+          }
+        })
         return acc
       },
-      {} as { [receiver: string]: SustainabilityActionsResponse["data"] },
+      {} as { [user: string]: { totalActions: number; totalRewardAmount: number } },
     )
-  }, [allActions])
-
-  const totalActionsPerUser = useMemo(() => {
-    return Object.keys(actionsByUser).map(userId => {
-      const actions = actionsByUser[userId]
-      return {
-        userId,
-        actions: actions?.length ?? 0,
-        amount: actions?.reduce((sum, action) => sum + action.amount, 0) ?? 0,
-      }
-    })
-  }, [actionsByUser])
+  }, [appUsers])
 
   const topUsers = useMemo(() => {
-    return totalActionsPerUser.sort((a, b) => b.actions - a.actions).slice(0, 10)
-  }, [totalActionsPerUser])
+    return Object.entries(actionsByUsers)
+      .map(([user, { totalActions, totalRewardAmount }]) => ({ user, totalActions, totalRewardAmount }))
+      .sort((a, b) => b.totalActions - a.totalActions)
+      .slice(0, 25)
+  }, [actionsByUsers])
 
   const topUsersAppActions = useMemo(() => {
-    return topUsers.map(user => {
-      const userId = user.userId
-      const userActions = actionsByUser[userId] || []
+    return topUsers.map(({ user }) => {
+      const userAppActions: AppUsersData[] = []
+      Object.keys(appUsers).forEach(appId => {
+        const userActions = appUsers[appId]?.find(userActions => userActions.user === user)
+        if (userActions) {
+          userAppActions.push(userActions)
+        }
+      })
 
-      // Calculate actions per app for this user
-      const actionsPerApp = userActions.reduce(
-        (acc, action) => {
-          const appId = action.appId
-          if (!acc[appId]) {
-            acc[appId] = { appId, actions: 0 }
-          }
-
-          const appActions = acc[appId]
-
-          // Increment the number of actions for this app
-          if (appActions) appActions.actions++
-
-          return acc
-        },
-        {} as { [appId: string]: { appId: string; actions: number } },
-      )
-
-      // Convert to array and sort by actions descending
-      const appActionsArray = Object.values(actionsPerApp).sort((a, b) => b.actions - a.actions)
-
-      // Map appId to app name
-      const appActionsWithNames = appActionsArray.map(appAction => ({
-        ...appAction,
-        appName: actionsByApp[appAction.appId]?.name ?? appAction.appId,
-      }))
-
-      return {
-        userId,
-        appActions: appActionsWithNames,
-      }
+      return { userId: user, appActions: userAppActions }
     })
-  }, [topUsers, actionsByUser, actionsByApp])
+  }, [topUsers, appActions])
 
-  const onStartDateChange = useCallback(
-    (date: Date) => {
-      setStartDate(date)
-      setFetchedAppCount(0)
-      setActionsByApp({})
+  // Filtered options for the dropdowns to ensure startRound < endRound
+  const startRoundOptions = roundOptions.filter(round => round <= endRound && round > 0)
+  const endRoundOptions = roundOptions.filter(round => round >= startRound && round > 0)
+
+  // Handlers for dropdown changes
+  const onStartRoundChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setLoadedAppCount(0)
+      setStartRound(Number(event.target.value))
     },
-    [setActionsByApp, setFetchedAppCount],
+    [setLoadedAppCount],
   )
 
-  const onEndDateChange = useCallback(
-    (date: Date) => {
-      setEndDate(date)
-      setFetchedAppCount(0)
-      setActionsByApp({})
+  const onEndRoundChange = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setLoadedAppCount(0)
+      setEndRound(Number(event.target.value))
     },
-    [setActionsByApp, setFetchedAppCount],
+    [setLoadedAppCount],
   )
 
   if (isLoading) {
-    // Calculate the loading percentage
-    const progressPercent = totalAppCount > 0 ? Math.round((fetchedAppCount / totalAppCount) * 100) : 0
+    // Calculate loading progress percentage
+    const progressPercent = totalAppCount > 0 ? Math.round((loadedAppCount / totalAppCount) * 100) : 0
 
     return (
       <VStack w="full" spacing={8} mt={10}>
-        {/* Circular Progress Indicator */}
         <CircularProgress
           value={progressPercent}
           size="120px"
@@ -142,7 +123,6 @@ export const VeBetterPassportData = () => {
             {"%"}
           </CircularProgressLabel>
         </CircularProgress>
-        {/* Loading Text */}
         <Text fontSize="lg" color="gray.600">
           {t("Fetching data...")}
         </Text>
@@ -152,56 +132,49 @@ export const VeBetterPassportData = () => {
 
   return (
     <VStack w="full" spacing={8} overflow={"clip"}>
-      {/* Date Range Pickers */}
+      {/* Round Range Dropdowns */}
       <HStack spacing={4} alignItems="flex-end" w="full" flexDir={{ base: "column", md: "row" }}>
         <VStack alignItems="flex-start" w="full">
-          <Text>{t("Start Date:")}</Text>
-          <DatePicker
-            selected={startDate}
-            onChange={date => date && onStartDateChange(date)}
-            selectsStart
-            startDate={startDate}
-            endDate={endDate}
-            maxDate={endDate}
-            customInput={<Input />}
-            dateFormat="yyyy-MM-dd"
-          />
+          <Text>{t("Start Round:")}</Text>
+          <Select value={startRound} onChange={onStartRoundChange} placeholder={t("Select start round")}>
+            {startRoundOptions.map(round => (
+              <option key={round} value={round}>
+                {t("Round")} {round}
+              </option>
+            ))}
+          </Select>
         </VStack>
         <VStack alignItems="flex-start" w="full">
-          <Text>{t("End Date:")}</Text>
-          <DatePicker
-            selected={endDate}
-            onChange={date => date && onEndDateChange(date)}
-            selectsEnd
-            startDate={startDate}
-            endDate={endDate}
-            minDate={startDate}
-            maxDate={new Date()}
-            customInput={<Input />}
-            dateFormat="yyyy-MM-dd"
-          />
+          <Text>{t("End Round:")}</Text>
+          <Select value={endRound} onChange={onEndRoundChange} placeholder={t("Select end round")}>
+            {endRoundOptions.map(round => (
+              <option key={round} value={round}>
+                {t("Round")} {round}
+              </option>
+            ))}
+          </Select>
         </VStack>
       </HStack>
+
       {/* Chart Components */}
       <HStack spacing={4} alignItems="flex-end" w="full" flexDir={{ base: "column", md: "row" }}>
         <VStack w="full" spacing={4}>
           <Heading size="md">{t("Total Actions per App")}</Heading>
           <TotalActionsPerAppChart data={totalActionsPerApp} />
         </VStack>
-
         <VStack w="full" spacing={4}>
-          <Heading size={"md"}>{t("Percentage Share of Actions per App")}</Heading>
+          <Heading size="md">{t("Percentage Share of Actions per App")}</Heading>
           <ActionsSharePieChart data={totalActionsPerApp} />
         </VStack>
       </HStack>
 
+      {/* Additional Components for Users if needed */}
       <VStack w="full" spacing={4}>
         <Heading size="md">{t("Top Users by Actions")}</Heading>
         <TopUsersChart data={topUsers} />
       </VStack>
       <VStack w="full" spacing={4}>
         <Heading size="md">{t("Top Users' Most Used Apps")}</Heading>
-        {/* Responsive Grid */}
         <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} w="full">
           {topUsersAppActions.map(({ userId, appActions }) => (
             <UserAppsChart key={userId} userId={userId} appActions={appActions} />
