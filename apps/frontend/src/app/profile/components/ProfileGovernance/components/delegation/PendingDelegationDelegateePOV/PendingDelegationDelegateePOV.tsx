@@ -31,6 +31,7 @@ export const PendingDelegationDelegateePOV = ({ address, isConnectedUser }: Prop
           <VStack align="stretch">
             {pendingDelegations?.map((delegationAddress: string) => (
               <PendingDelegationItemDelegateePOV
+                address={address}
                 isConnectedUser={isConnectedUser}
                 key={delegationAddress}
                 delegationAddress={delegationAddress}

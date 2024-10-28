@@ -8,11 +8,11 @@ import { QualificationBadge } from "../../QualificationBadges"
 import { UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { useCanUserVote } from "@/api"
 
-type Props = { isConnectedUser: boolean; delegationAddress: string }
-export const PendingDelegationItemDelegateePOV = ({ isConnectedUser, delegationAddress }: Props) => {
+type Props = { address: string; isConnectedUser: boolean; delegationAddress: string }
+export const PendingDelegationItemDelegateePOV = ({ address, isConnectedUser, delegationAddress }: Props) => {
   const { t } = useTranslation()
   //TODo: IS this right?
-  const { isPerson, isLoading: isScoreLoading } = useCanUserVote(delegationAddress)
+  const { isPerson, isLoading: isScoreLoading } = useCanUserVote(address, delegationAddress)
 
   const acceptDelegationModal = useDisclosure()
   const rejectDelegationModal = useDisclosure()
