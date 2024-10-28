@@ -1,4 +1,4 @@
-import { useCanUserVote, useUserScore } from "@/api"
+import { useCanUserVote, useGetDelegatee, useUserScore } from "@/api"
 import { useMissingActionsLabel } from "@/hooks"
 import { Heading, Text, Flex, VStack, Card, CardBody, HStack, Image, Show } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -10,11 +10,13 @@ export const PendingActions = ({ address }: Props) => {
   const { t } = useTranslation()
 
   const { isPerson, isLoading } = useCanUserVote(address)
+  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
+  const isDelegator = !isDelegateeLoading && !!delegateeAddress
   const { missingActions, isUserDelegatee, scorePercentage, isLoading: isScoreLoading } = useUserScore(address)
 
   const missingActionsLabel = useMissingActionsLabel({ missingActions, isUserDelegatee })
 
-  if (isScoreLoading || isPerson || isLoading) return null
+  if (isScoreLoading || isPerson || isLoading || isDelegator) return null
 
   return (
     <Card bg="#FFD979" borderRadius="xl" w="full">

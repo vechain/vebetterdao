@@ -5,7 +5,7 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { RevokeDelegationDelegateePOVModal } from "./components/RevokeDelegationDelegateePOVModal"
 import { QualificationBadge } from "../QualificationBadges"
-import { useCanUserVote, useGetUserDelegator } from "@/api"
+import { useCanUserVote, useGetDelegator } from "@/api"
 
 type Props = {
   address: string
@@ -13,7 +13,7 @@ type Props = {
 }
 export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
   const { t } = useTranslation()
-  const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetUserDelegator()
+  const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetDelegator(address)
   const isDelegated = !isDelegatorLoading && !!Number(delegatorAddress)
   const { isPerson, isLoading } = useCanUserVote(address)
 
