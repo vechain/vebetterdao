@@ -1,4 +1,4 @@
-import { useAccountLinking, useSustainabilityCurrentUserOverview } from "@/api"
+import { useAccountLinking, useSustainabilityCurrentRoundOverview } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
@@ -20,8 +20,8 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
   const { account: userAccount } = useWallet()
   const { name } = useWalletName(account || "")
   const isUserAccountCard = compareAddresses(account, userAccount)
-  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentUserOverview()
-  const { isPassport, isEntity, outgoingPendingLink, isLoading: isAccountLinkingLoading } = useAccountLinking()
+  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentRoundOverview(account)
+  const { isPassport, isEntity, outgoingPendingLink, isLoading: isAccountLinkingLoading } = useAccountLinking(account)
   const removeLinkModalPassportPOV = useDisclosure()
   const removeLinkModalEntityPOV = useDisclosure()
   const removePendingRequestModal = useDisclosure()
