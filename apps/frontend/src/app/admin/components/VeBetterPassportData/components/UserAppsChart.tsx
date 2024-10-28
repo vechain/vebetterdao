@@ -3,16 +3,11 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelL
 import { Box, Text, useToast } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 import { Trans, useTranslation } from "react-i18next"
-
-interface AppActionData {
-  appId: string
-  appName: string
-  actions: number
-}
+import { AppUsersData } from "@/api"
 
 interface Props {
   userId: string
-  appActions: AppActionData[]
+  appActions: AppUsersData[]
 }
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE", "#00C49F"]
@@ -43,8 +38,8 @@ export const UserAppsChart: React.FC<Props> = ({ userId, appActions }) => {
           <YAxis type="category" dataKey="appName" tick={{ fontSize: 12 }} width={150} />
           <XAxis type="number" />
           <Tooltip />
-          <Bar dataKey="actions" fill="#8884d8">
-            <LabelList dataKey="actions" position="insideRight" />
+          <Bar dataKey="totalActions" fill="#8884d8">
+            <LabelList dataKey="totalActions" position="insideRight" />
             {appActions.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}

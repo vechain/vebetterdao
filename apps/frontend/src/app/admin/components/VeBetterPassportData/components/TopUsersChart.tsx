@@ -4,21 +4,21 @@ import { useToast } from "@chakra-ui/react"
 import { FormattingUtils } from "@repo/utils"
 
 interface Props {
-  data: { userId: string; actions: number }[]
+  data: { user: string; totalActions: number }[]
 }
 
 export const TopUsersChart: React.FC<Props> = ({ data }) => {
   return (
     <ResponsiveContainer width="100%" height={500}>
       <BarChart data={data}>
-        <XAxis dataKey="userId" tick={<CustomizedAxisTick />} interval={0} height={100} />
+        <XAxis dataKey="user" tick={<CustomizedAxisTick />} interval={0} height={100} />
         <YAxis label={{ value: "Actions", angle: -90, position: "insideLeft", dx: -10 }} />
         <Tooltip
           formatter={(value: number) => [value, "Actions"]}
           labelFormatter={(label: string) => `User: ${label}`}
         />
         <Legend />
-        <Bar dataKey="actions" name="Actions" fill="#82ca9d" />
+        <Bar dataKey="totalActions" name="Actions" fill="#82ca9d" />
       </BarChart>
     </ResponsiveContainer>
   )
