@@ -974,5 +974,9 @@
   "Start Date:": "Start Date:",
   "End Date:": "End Date:",
   "User: {{user}}": "User: {{user}}",
-  "Fetching data...": "Fetching data..."
+  "Fetching data...": "Fetching data...",
+  "Start Round:": "Start Round:",
+  "End Round:": "End Round:",
+  "Select start round": "Select start round",
+  "Select end round": "Select end round"
 }
