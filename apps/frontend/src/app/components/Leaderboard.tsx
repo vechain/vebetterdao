@@ -7,8 +7,10 @@ import { AddressButton } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
 import { Box, Card, CardBody, Divider, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
+import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
@@ -30,7 +32,7 @@ const MockLeaderboard = [
 export const Leaderboard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: roundId } = useCurrentAllocationsRoundId()
+  const { data: roundId, isLoading: roundIdLoading } = useCurrentAllocationsRoundId()
 
   const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId })
 
@@ -117,9 +119,17 @@ export const Leaderboard = () => {
       <CardBody>
         <VStack spacing={6} align="stretch">
           <VStack spacing={2} align="stretch">
-            <Heading size="md">{t("Leaderboard of the week")}</Heading>
+            <Skeleton isLoaded={!roundIdLoading}>
+              <Heading size="md">
+                {t("Round {{id}} leaderboard", {
+                  id: roundId ?? "",
+                })}
+              </Heading>
+            </Skeleton>
             <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
-              {t("Use the apps to do Better Actions and be recognized with more B3TR each week!")}
+              {t(
+                "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨",
+              )}
             </Text>
           </VStack>
           <VStack spacing={4} align="stretch" w="full" h="full">
@@ -142,6 +152,13 @@ type LeaderboardRankingComponentProps = {
   isYourRanking?: boolean
 }
 export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
+  const { name } = useWalletName(ranking.address)
+  const router = useRouter()
+
+  const onClick = () => {
+    router.push(`/profile/${ranking.address}`)
+  }
+
   const positionStyles = useMemo(() => {
     if (ranking.position === 1)
       return {
@@ -177,6 +194,12 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
 
   return (
     <Card
+      onClick={onClick}
+      _hover={{
+        cursor: "pointer",
+        bg: "#F7F7F7",
+        transition: "all 0.2s",
+      }}
       boxShadow={positionStyles.boxShadow}
       variant={"baseWithBorder"}
       {...(isYourRanking && { bg: "#004CFC" })}
@@ -208,18 +231,28 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                     {`(${t("You")})`}
                   </Text>
                 )}
-                <AddressButton
-                  fontSize="sm"
-                  fontWeight={600}
-                  h="auto"
-                  address={ranking.address}
-                  size={"sm"}
-                  variant={"unstyled"}
-                  showAddressIcon={false}
-                  padding={0}
-                  digitsBeforeEllipsis={5}
-                  digitsAfterEllipsis={3}
-                />
+
+                {name && (
+                  <Text fontSize="md" fontWeight={600} h="auto" colorScheme={"gray"}>
+                    {name}
+                  </Text>
+                )}
+                {!name && (
+                  <AddressButton
+                    fontSize="sm"
+                    fontWeight={600}
+                    h="auto"
+                    address={ranking.address}
+                    size={"sm"}
+                    variant={"unstyled"}
+                    onClick={e => e.preventDefault()}
+                    showAddressIcon={false}
+                    showCopyIcon={false}
+                    padding={0}
+                    digitsBeforeEllipsis={5}
+                    digitsAfterEllipsis={3}
+                  />
+                )}
               </HStack>
 
               <Text fontSize="sm" color={grayColor} fontWeight={400}>

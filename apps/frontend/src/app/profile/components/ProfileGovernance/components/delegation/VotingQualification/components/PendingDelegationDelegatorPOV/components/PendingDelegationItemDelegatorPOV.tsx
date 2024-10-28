@@ -5,7 +5,12 @@ import { RemoveDelegationModal } from "./RemoveDelegationModal"
 import { Stack, HStack, VStack, Text, Button, useDisclosure, Badge } from "@chakra-ui/react"
 import { UilTimes } from "@iconscout/react-unicons"
 
-export const PendingDelegationItemDelegatorPOV = ({ delegationAddress }: { delegationAddress: string }) => {
+type Props = {
+  delegationAddress: string
+  isConnectedUser: boolean
+}
+
+export const PendingDelegationItemDelegatorPOV = ({ delegationAddress, isConnectedUser }: Props) => {
   const { t } = useTranslation()
   const removeDelegationModal = useDisclosure()
 
@@ -31,13 +36,15 @@ export const PendingDelegationItemDelegatorPOV = ({ delegationAddress }: { deleg
         </HStack>
       </HStack>
       <HStack gap={4}>
-        <Button
-          variant={"dangerGhost"}
-          p={3}
-          leftIcon={<UilTimes color="#C84968" />}
-          onClick={removeDelegationModal.onOpen}>
-          {t("Cancel request")}
-        </Button>
+        {isConnectedUser && (
+          <Button
+            variant={"dangerGhost"}
+            p={3}
+            leftIcon={<UilTimes color="#C84968" />}
+            onClick={removeDelegationModal.onOpen}>
+            {t("Cancel request")}
+          </Button>
+        )}
       </HStack>
       <RemoveDelegationModal modal={removeDelegationModal} delegatee={delegationAddress} />
     </Stack>

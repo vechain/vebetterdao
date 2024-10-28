@@ -4,14 +4,17 @@ import { PendingLinkingProposal } from "./components/PendingLinkingProposal"
 import { LinkedAccounts } from "./components/LinkedAccounts"
 import { VStack } from "@chakra-ui/react"
 
-export const ProfileLinkedAcounts = () => {
+type Props = {
+  address: string
+}
+export const ProfileLinkedAcounts = ({ address }: Props) => {
   const { isLoading } = useAccountLinking()
   if (isLoading) return null
   return (
     <VStack align="stretch" gap={6}>
-      <PendingLinkingProposal />
-      <NoLinkedAccount />
-      <LinkedAccounts />
+      <PendingLinkingProposal address={address} />
+      <NoLinkedAccount address={address} />
+      <LinkedAccounts address={address} />
     </VStack>
   )
 }
