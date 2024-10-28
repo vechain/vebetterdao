@@ -25,7 +25,7 @@ export const useUserScore = (user?: string) => {
   // this is the user's cumulative score with decay, we use that because it must be greater than the threshold
   const { data: userScore, isLoading: isUserRoundScoreLoading } = useGetCumulativeScoreWithDecay(
     // if the user is delegated, we use the delegator's address, otherwise we use the user's address
-    user || delegatorAddress || account || "",
+    delegatorAddress ?? user ?? account ?? "",
     Number(roundId),
   )
 

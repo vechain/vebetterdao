@@ -14,7 +14,7 @@ type Props = {
 export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
   const { t } = useTranslation()
   const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetDelegator(address)
-  const isDelegated = !isDelegatorLoading && !!Number(delegatorAddress)
+  const isDelegated = !isDelegatorLoading && !!delegatorAddress
   const { isPerson, isLoading } = useCanUserVote(address)
 
   const delegationModal = useDisclosure()
