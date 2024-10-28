@@ -1,0 +1,146 @@
+import { AddressButton } from "@/components"
+import { AddressIcon } from "@/components/AddressIcon"
+import { Card, CardBody, HStack, Box, Image, Text, Icon } from "@chakra-ui/react"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
+import { t } from "i18next"
+import { useRouter } from "next/navigation"
+import { useMemo } from "react"
+import { Trans } from "react-i18next"
+import { FaArrowRight } from "react-icons/fa6"
+
+export type LeaderboardRanking = {
+  position: number
+  address: string
+  score: number
+}
+
+export type LeaderboardRankingComponentProps = {
+  ranking: LeaderboardRanking
+  isYourRanking?: boolean
+  overlayInnerContent?: React.ReactNode
+}
+export const LeaderboardRankingComponent = ({
+  ranking,
+  isYourRanking,
+  overlayInnerContent,
+}: LeaderboardRankingComponentProps) => {
+  const { name } = useWalletName(ranking.address)
+  const router = useRouter()
+
+  const onClick = () => {
+    router.push(`/profile/${ranking.address}`)
+  }
+
+  const positionStyles = useMemo(() => {
+    if (ranking.position === 1)
+      return {
+        text: "🥇",
+        borderColor: "#FFD700",
+        fontSize: "3xl",
+        boxShadow: "0px 0px 5px 0px rgba(255, 215, 0, 0.4)",
+      }
+    if (ranking.position === 2)
+      return {
+        text: "🥈",
+        borderColor: "#C0C0C0",
+        fontSize: "3xl",
+        boxShadow: "0px 0px 5px 0px rgba(192, 192, 192, 0.4)",
+      }
+    if (ranking.position === 3)
+      return {
+        text: "🥉",
+        borderColor: "#CD7F32",
+        fontSize: "3xl",
+        boxShadow: "0px 0px 5px 0px rgba(205, 127, 50, 0.4)",
+      }
+    return {
+      text: `#${ranking.position}`,
+      borderColor: "#EFEFEF",
+      fontSize: "xl",
+      boxShadow: "0px 0px 5px 0px rgba(0, 0, 0, 0.1)",
+    }
+  }, [ranking.position])
+
+  const whiteColor = isYourRanking ? "white" : "auto"
+  const grayColor = isYourRanking ? "white" : "#6A6A6A"
+
+  return (
+    <Card
+      onClick={onClick}
+      _hover={{
+        cursor: "pointer",
+        bg: "#F7F7F7",
+        transition: "all 0.2s",
+      }}
+      boxShadow={positionStyles.boxShadow}
+      variant={"baseWithBorder"}
+      {...(isYourRanking && { bg: "#004CFC" })}
+      pos="relative"
+      overflow={"hidden"}
+      borderColor={positionStyles.borderColor}>
+      {overlayInnerContent}
+      <CardBody color={whiteColor} p="12px">
+        {isYourRanking && (
+          <Image
+            src="/images/your-ranking-bg.svg"
+            alt="Bg image"
+            zIndex={0}
+            rounded={"full"}
+            pos="absolute"
+            right={-7}
+            top={"50%"}
+            h="full"
+            transform={"translateY(-50%)"}
+            aria-label="Bg image"
+          />
+        )}
+        <HStack w="full" justify="space-between">
+          <HStack spacing={2} zIndex={1}>
+            <AddressIcon address={ranking.address} boxSize={8} rounded={"full"} />
+            <Box>
+              <HStack spacing={1}>
+                {isYourRanking && (
+                  <Text fontSize="sm" fontWeight={600}>
+                    {`(${t("You")})`}
+                  </Text>
+                )}
+
+                {name && (
+                  <Text fontSize="md" fontWeight={600} h="auto" colorScheme={"gray"}>
+                    {name}
+                  </Text>
+                )}
+                {!name && (
+                  <AddressButton
+                    fontSize="sm"
+                    fontWeight={600}
+                    h="auto"
+                    address={ranking.address}
+                    size={"sm"}
+                    variant={"unstyled"}
+                    onClick={e => e.preventDefault()}
+                    showAddressIcon={false}
+                    showCopyIcon={false}
+                    padding={0}
+                    digitsBeforeEllipsis={5}
+                    digitsAfterEllipsis={3}
+                  />
+                )}
+                <Icon as={FaArrowRight} color={"primary.500"} transform={"rotate(-45deg)"} />
+              </HStack>
+
+              <Text fontSize="sm" color={grayColor} fontWeight={400}>
+                <Trans i18nKey="{{value}} actions" values={{ value: ranking.score }} />
+              </Text>
+            </Box>
+          </HStack>
+          {ranking.position !== 0 && (
+            <Text fontSize={positionStyles.fontSize} fontWeight={600} zIndex={1}>
+              {positionStyles.text}
+            </Text>
+          )}
+        </HStack>
+      </CardBody>
+    </Card>
+  )
+}
