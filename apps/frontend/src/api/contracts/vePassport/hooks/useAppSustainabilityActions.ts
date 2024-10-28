@@ -112,8 +112,13 @@ export const useAppsSustainabilityActions = ({ startRound, endRound }: Props) =>
               if (!userAggregatedData[user]) {
                 userAggregatedData[user] = { user, totalActions: 0, totalRewardAmount: 0, appName }
               }
-              userAggregatedData[user].totalActions += actionsRewarded
-              userAggregatedData[user].totalRewardAmount += totalRewardAmount
+
+              const userData = userAggregatedData[user]
+
+              if (userData) {
+                userData.totalActions += actionsRewarded
+                userData.totalRewardAmount += totalRewardAmount
+              }
             })
           }
 
