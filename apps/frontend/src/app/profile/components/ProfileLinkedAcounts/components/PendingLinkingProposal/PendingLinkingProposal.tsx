@@ -2,12 +2,17 @@ import { useAccountLinking } from "@/api"
 import { Card, CardBody, VStack, Heading, Text, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { PendingLinkingProposalItem } from "./components/PendingLinkingProposalItem/PendingLinkingProposalItem"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
   address: string
 }
 export const PendingLinkingProposal = ({ address }: Props) => {
   const { t } = useTranslation()
+
+  const { account: connectedAccount } = useWallet()
+  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
 
   const { incomingPendingLinkings, isLoading } = useAccountLinking(address)
   if (isLoading || !incomingPendingLinkings?.length) return null
@@ -27,7 +32,11 @@ export const PendingLinkingProposal = ({ address }: Props) => {
           </VStack>
           <VStack align="stretch">
             {incomingPendingLinkings.map((secondaryAccount: string) => (
-              <PendingLinkingProposalItem key={secondaryAccount} secondaryAccount={secondaryAccount} />
+              <PendingLinkingProposalItem
+                isConnectedUser={isConnectedUser}
+                key={secondaryAccount}
+                secondaryAccount={secondaryAccount}
+              />
             ))}
           </VStack>
         </VStack>

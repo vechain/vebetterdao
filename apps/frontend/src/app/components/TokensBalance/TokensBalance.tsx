@@ -9,6 +9,8 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const compactFormatter = getCompactFormatter(2)
 
@@ -18,6 +20,9 @@ type Props = {
 }
 export const TokensBalance = ({ address, showGoToBalance = false }: Props) => {
   const { t } = useTranslation()
+
+  const { account: connectedAccount } = useWallet()
+  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
 
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(address ?? undefined)
   const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(address ?? undefined)
@@ -102,20 +107,22 @@ export const TokensBalance = ({ address, showGoToBalance = false }: Props) => {
           </HStack>
         </VStack>
       </Stack>
-      <Button
-        isDisabled={isSwapDisabled}
-        onClick={() => {
-          onOpen()
-          AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SWAP_TOKENS))
-        }}
-        leftIcon={<UilExchangeAlt size={"16px"} />}
-        variant={"whiteAction"}
-        rounded={"full"}
-        fontWeight={500}
-        px="24px"
-        zIndex={1}>
-        {t("Swap tokens")}
-      </Button>
+      {isConnectedUser && (
+        <Button
+          isDisabled={isSwapDisabled}
+          onClick={() => {
+            onOpen()
+            AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SWAP_TOKENS))
+          }}
+          leftIcon={<UilExchangeAlt size={"16px"} />}
+          variant={"whiteAction"}
+          rounded={"full"}
+          fontWeight={500}
+          px="24px"
+          zIndex={1}>
+          {t("Swap tokens")}
+        </Button>
+      )}
       <ConvertModal isOpen={isOpen} onClose={onClose} />
     </VStack>
   )

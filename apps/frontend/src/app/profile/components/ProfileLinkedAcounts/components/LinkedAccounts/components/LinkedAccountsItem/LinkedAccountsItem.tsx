@@ -13,7 +13,9 @@ import { RemovePendingRequestModal } from "./components/RemovePendingRequestModa
 import { RemoveLinkModalEntityPOV } from "./components/RemoveLinkModalEntityPOV"
 import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
-export const LinkedAccountsItem = ({ account, pending = false }: { account: string; pending?: boolean }) => {
+type Props = { isConnectedUser: boolean; account: string; pending?: boolean }
+
+export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }: Props) => {
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
   const { name } = useWalletName(account || "")
@@ -87,7 +89,7 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
             </Heading>
           </HStack>
         </Show>
-        {isPassport && !isUserAccountCard && (
+        {isConnectedUser && isPassport && !isUserAccountCard && (
           <Button
             flex={1}
             variant={"dangerGhost"}
@@ -96,7 +98,7 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
             {t("Unlink account")}
           </Button>
         )}
-        {isEntity && isUserAccountCard && (
+        {isConnectedUser && isEntity && isUserAccountCard && (
           <Button
             flex={1}
             variant={"dangerGhost"}
@@ -105,7 +107,7 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
             {t("Unlink account")}
           </Button>
         )}
-        {pending && (
+        {isConnectedUser && pending && (
           <Button
             flex={1}
             variant={"dangerGhost"}

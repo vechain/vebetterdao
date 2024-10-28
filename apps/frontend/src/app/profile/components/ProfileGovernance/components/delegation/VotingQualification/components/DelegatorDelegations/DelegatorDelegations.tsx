@@ -7,12 +7,18 @@ import { useTranslation } from "react-i18next"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { UilTimes } from "@iconscout/react-unicons"
 import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
   address: string
 }
 export const DelegatorDelegations = ({ address }: Props) => {
   const { t } = useTranslation()
+
+  const { account: connectedAccount } = useWallet()
+  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
+
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
   const isDelegator = !isDelegateeLoading && !!Number(delegateeAddress)
 
@@ -49,13 +55,15 @@ export const DelegatorDelegations = ({ address }: Props) => {
             </VStack>
           </HStack>
           <HStack>
-            <Button
-              variant={"dangerGhost"}
-              p={3}
-              leftIcon={<UilTimes color="#C84968" />}
-              onClick={revokeDelegationModal.onOpen}>
-              {t("Remove delegation")}
-            </Button>
+            {isConnectedUser && (
+              <Button
+                variant={"dangerGhost"}
+                p={3}
+                leftIcon={<UilTimes color="#C84968" />}
+                onClick={revokeDelegationModal.onOpen}>
+                {t("Remove delegation")}
+              </Button>
+            )}
           </HStack>
         </Stack>
       </VStack>

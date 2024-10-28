@@ -3,6 +3,8 @@ import { Flex, VStack, Button, Text, Heading, useDisclosure } from "@chakra-ui/r
 import { useTranslation } from "react-i18next"
 import { LinkAccountModal } from "./components/LinkAccountModal"
 import { useAccountLinking } from "@/api"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
   address: string
@@ -11,6 +13,9 @@ export const NoLinkedAccount = ({ address }: Props) => {
   const { t } = useTranslation()
   const addLinkedAccountModal = useDisclosure()
   const { isLoading, isLinked, outgoingPendingLink } = useAccountLinking(address)
+
+  const { account: connectedAccount } = useWallet()
+  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
 
   if (isLoading || isLinked || outgoingPendingLink) return null
   return (
@@ -23,9 +28,11 @@ export const NoLinkedAccount = ({ address }: Props) => {
         <Text fontSize="sm" color="#757575" textAlign="center">
           {t("You can merge several secondary accounts with your main one")}
         </Text>
-        <Button variant="primaryAction" onClick={addLinkedAccountModal.onOpen}>
-          {t("Link Accounts")}
-        </Button>
+        {isConnectedUser && (
+          <Button variant="primaryAction" onClick={addLinkedAccountModal.onOpen}>
+            {t("Link Accounts")}
+          </Button>
+        )}
         <LinkAccountModal modal={addLinkedAccountModal} />
       </VStack>
     </Flex>

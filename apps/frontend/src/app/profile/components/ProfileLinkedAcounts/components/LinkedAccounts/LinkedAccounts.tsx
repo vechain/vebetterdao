@@ -2,6 +2,8 @@ import { Card, CardBody, VStack, Heading, Text, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { LinkedAccountsItem } from "./components/LinkedAccountsItem"
 import { useAccountLinking } from "@/api"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
   address: string
@@ -9,6 +11,8 @@ type Props = {
 export const LinkedAccounts = ({ address }: Props) => {
   const { t } = useTranslation()
 
+  const { account: connectedAccount } = useWallet()
+  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
   const { isLinked, passport, passportLinkedEntities, outgoingPendingLink, isLoading } = useAccountLinking(address)
 
   if (isLoading || (!isLinked && !outgoingPendingLink)) return null
@@ -36,7 +40,10 @@ export const LinkedAccounts = ({ address }: Props) => {
               )}
             </Text>
           </VStack>
-          <LinkedAccountsItem account={outgoingPendingLink ? outgoingPendingLink : passport} />
+          <LinkedAccountsItem
+            isConnectedUser={isConnectedUser}
+            account={outgoingPendingLink ? outgoingPendingLink : passport}
+          />
           <VStack align="start">
             <Heading fontSize="lg" fontWeight="700">
               {t("Secondary accounts")}
@@ -48,11 +55,11 @@ export const LinkedAccounts = ({ address }: Props) => {
             </Text>
           </VStack>
           {outgoingPendingLink ? (
-            <LinkedAccountsItem account={address ?? ""} pending={true} />
+            <LinkedAccountsItem isConnectedUser={isConnectedUser} account={address ?? ""} pending={true} />
           ) : (
             <VStack gap={4} align="stretch">
               {passportLinkedEntities.map((account: string) => (
-                <LinkedAccountsItem key={account} account={account} />
+                <LinkedAccountsItem isConnectedUser={isConnectedUser} key={account} account={account} />
               ))}
             </VStack>
           )}

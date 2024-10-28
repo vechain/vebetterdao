@@ -7,12 +7,16 @@ import { DelegationModal } from "./components/DelegationModal"
 import { DelegatorDelegations } from "./components/DelegatorDelegations"
 import { PendingDelegationDelegatorPOV } from "./components/PendingDelegationDelegatorPOV"
 import { useMissingActionsLabel } from "@/hooks"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
   address: string
 }
 
 export const VotingQualification = ({ address }: Props) => {
+  const { account: connectedAccount } = useWallet()
+  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
   const { t } = useTranslation()
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
   const isDelegator = !isDelegateeLoading && !!Number(delegateeAddress)
@@ -61,7 +65,7 @@ export const VotingQualification = ({ address }: Props) => {
                 <Heading fontSize="xl" fontWeight="700">
                   {t("Your Voting Qualification")}
                 </Heading>
-                {!isDelegator && Number(pendingDelegations) === 0 && (
+                {isConnectedUser && !isDelegator && Number(pendingDelegations) === 0 && (
                   <Button
                     variant={"primaryGhost"}
                     onClick={delegationModal.onOpen}
