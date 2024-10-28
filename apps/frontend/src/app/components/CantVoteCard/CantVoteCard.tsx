@@ -1,4 +1,4 @@
-import { useAccountLinking, useCanUserVote, useUserDelegation, useUserScore } from "@/api"
+import { useAccountLinking, useCanUserVote, useUserDelegation } from "@/api"
 import { Card, CardBody, HStack, Text, VStack, Button } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -19,9 +19,8 @@ export const CantVoteCard = () => {
   const router = useRouter()
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
-  const { isUserQualified, isLoading: isScoreLoading } = useUserScore()
 
-  const { hasVotesAtSnapshot, isLoading: canVoteLoading } = useCanUserVote()
+  const { hasVotesAtSnapshot, isLoading: canVoteLoading, isPerson } = useCanUserVote()
 
   const handleGoToLinking = useCallback(() => {
     router.push("/profile?tab=linked-accounts")
@@ -32,11 +31,11 @@ export const CantVoteCard = () => {
   }, [router])
 
   const cantVoteReason = useMemo<CantVoteReason | null>(() => {
-    if (!account || isLoadingAccountLinking || isLoadingDelegator || canVoteLoading || isScoreLoading) return null
+    if (!account || isLoadingAccountLinking || isLoadingDelegator || canVoteLoading) return null
     if (isEntity) return "secondary"
     if (isDelegator) return "delegator"
     if (!hasVotesAtSnapshot) return "no-votes"
-    if (!isUserQualified) return "no-actions"
+    if (!isPerson) return "no-actions"
     return null
   }, [
     account,
@@ -46,8 +45,7 @@ export const CantVoteCard = () => {
     isDelegator,
     canVoteLoading,
     hasVotesAtSnapshot,
-    isUserQualified,
-    isScoreLoading,
+    isPerson,
   ])
 
   const cantVoteReasonText = useMemo<CantVoteReasonText | null>(() => {

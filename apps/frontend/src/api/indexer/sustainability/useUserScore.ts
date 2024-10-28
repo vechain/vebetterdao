@@ -2,7 +2,7 @@ import {
   SecurityLevel,
   useCurrentAllocationsRoundId,
   useGetCumulativeScoreWithDecay,
-  useGetUserDelegator,
+  useGetDelegator,
   useSecurityMultiplier,
   useThresholdParticipationScoreAtTimepoint,
 } from "@/api/contracts"
@@ -20,12 +20,12 @@ export const useUserScore = (user?: string) => {
   const { data: roundSnapshot, isLoading: isRoundSnapshotLoading } = useAllocationRoundSnapshot(roundId ?? "")
   const { data: scoreThresholdAtRoundStart, isLoading: isScoreThresholdAtRoundStartLoading } =
     useThresholdParticipationScoreAtTimepoint(roundSnapshot ?? "")
-  const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetUserDelegator()
+  const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetDelegator(user)
 
   // this is the user's cumulative score with decay, we use that because it must be greater than the threshold
   const { data: userScore, isLoading: isUserRoundScoreLoading } = useGetCumulativeScoreWithDecay(
     // if the user is delegated, we use the delegator's address, otherwise we use the user's address
-    user || delegatorAddress || account || "",
+    delegatorAddress ?? user ?? account ?? "",
     Number(roundId),
   )
 
@@ -37,8 +37,6 @@ export const useUserScore = (user?: string) => {
     [userScore, scoreThresholdAtRoundStart],
   )
 
-  const isUserQualified = userScore >= scoreThresholdAtRoundStart
-
   // we take the score of the easy actions as reference, as the minimum score of an action
   // so we can calculate the number of actions needed to reach the threshold at minimum
   const { data: easyActionScore, isLoading: isSecurityMultiplierLoading } = useSecurityMultiplier(SecurityLevel.LOW)
@@ -47,7 +45,6 @@ export const useUserScore = (user?: string) => {
     Number(easyActionScore ?? 0) && scoreNeeded ? Math.ceil(scoreNeeded / Number(easyActionScore ?? 0)) : 0
 
   return {
-    isUserQualified,
     isUserDelegatee: !!delegatorAddress,
     delegatorAddress,
     scorePercentage,

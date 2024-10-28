@@ -80,21 +80,20 @@ export const useSustainabilitySingleUserOverview = (data: SustainabilitySingleUs
 }
 
 /**
- * Get the sustainability overview for the current user for the current round
- * @param account - The address of the user.
+ * Get the sustainability overview for tan user for the current round
  */
-export const useSustainabilityCurrentUserOverview = (account?: string) => {
+export const useSustainabilityCurrentRoundOverview = (user?: string) => {
   const { data: currentRound } = useCurrentAllocationsRoundId()
   return useQuery({
     queryKey: getSustainabilitySingleUserOverviewQueryKey({
-      wallet: account ?? "",
+      wallet: user ?? "",
       roundId: currentRound ?? "",
     }),
     queryFn: () =>
       getSustainabilitySingleUserOverview({
-        wallet: account ?? "",
+        wallet: user ?? "",
         roundId: currentRound ?? "",
       }),
-    enabled: !!account && !!currentRound,
+    enabled: !!user && !!currentRound,
   })
 }

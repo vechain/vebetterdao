@@ -19,7 +19,6 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 import { ActivityDayModal } from "../../ActivityDayModal"
 import { useSustainabilitySingleUserOverviewByDay } from "@/api"
-import { useWallet } from "@vechain/dapp-kit-react"
 
 // configure dayjs to start the week on Monday
 dayjs.extend(updateLocale)
@@ -27,8 +26,11 @@ dayjs.updateLocale("en", {
   weekStart: 1,
 })
 
-export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dispatch<SetStateAction<boolean>> }) => {
-  const { account } = useWallet()
+type Props = {
+  address: string
+  setIsCalendarView: Dispatch<SetStateAction<boolean>>
+}
+export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
   const { t } = useTranslation()
   const today = dayjs()
   const [currentDate, setCurrentDate] = useState(today)
@@ -43,7 +45,7 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
   const endDate = currentDate.endOf("month").format("YYYY-MM-DD")
 
   const currentMonthOverviewQuery = useSustainabilitySingleUserOverviewByDay({
-    wallet: account ?? "",
+    wallet: address ?? "",
     startDate,
     endDate,
   })
@@ -114,7 +116,12 @@ export const ActivityCalendar = ({ setIsCalendarView }: { setIsCalendarView: Dis
 
   return (
     <>
-      <ActivityDayModal isOpen={!!selectedDate} onClose={() => setSelectedDate(undefined)} date={selectedDate} />
+      <ActivityDayModal
+        address={address}
+        isOpen={!!selectedDate}
+        onClose={() => setSelectedDate(undefined)}
+        date={selectedDate}
+      />
       <Card w="full" variant="baseWithBorder">
         <CardBody>
           <VStack align="stretch" spacing={4}>

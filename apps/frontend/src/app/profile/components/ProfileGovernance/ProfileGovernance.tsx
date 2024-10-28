@@ -12,7 +12,6 @@ import {
   PreviewCreatedProposals,
   TopVotedApps,
 } from "./components"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { FaScaleBalanced, FaChartPie } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
 import { HandPlantIcon, VoteBoxIcon } from "@/components"
@@ -21,6 +20,8 @@ import { CurrentDelegation } from "./components/delegation/CurrentDelegation"
 import { VotingQualification } from "./components/delegation/VotingQualification"
 import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 enum ListView {
   ALL,
@@ -31,10 +32,15 @@ enum ListView {
 
 const PREVIEW_SIZE = 3 // The number of proposals to show in the preview
 
-export const ProfileGovernance = () => {
-  const { account } = useWallet()
-  const { data: createdProposals } = useUserProposalsCreatedEvents(account ?? "")
-  const { data: votedProposals } = useUserProposalsVoteEvents(account ?? "")
+type Props = {
+  address: string
+}
+export const ProfileGovernance = ({ address }: Props) => {
+  const { data: createdProposals } = useUserProposalsCreatedEvents(address ?? "")
+  const { data: votedProposals } = useUserProposalsVoteEvents(address ?? "")
+
+  const { account: connectedAccount } = useWallet()
+  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
 
   const router = useRouter()
 
@@ -42,7 +48,7 @@ export const ProfileGovernance = () => {
 
   const { created: votedProposalsWithDescription } = useProposalsCreatedFromIds(votedProposalsIds)
 
-  const topVotedApps = useUserTopVotedApps(account ?? "")
+  const topVotedApps = useUserTopVotedApps(address ?? "")
 
   const [listView, setListView] = useState<ListView>(ListView.ALL)
 
@@ -97,9 +103,9 @@ export const ProfileGovernance = () => {
     case ListView.ALL:
       return (
         <>
-          <PendingDelegationDelegateePOV />
-          <CurrentDelegation />
-          <VotingQualification />
+          <PendingDelegationDelegateePOV address={address} isConnectedUser={isConnectedUser} />
+          <CurrentDelegation address={address} isConnectedUser={isConnectedUser} />
+          <VotingQualification address={address} isConnectedUser={isConnectedUser} />
           {isFirstCreatedProposalsAvailable && (
             <PreviewCreatedProposals
               firstProposals={firstCreatedProposals}

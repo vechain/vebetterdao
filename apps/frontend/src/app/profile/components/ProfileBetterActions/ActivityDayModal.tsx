@@ -2,7 +2,6 @@ import { useSustainabilityActions } from "@/api"
 import { BaseModal } from "@/components/BaseModal"
 import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
 import { Text, VStack } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
 import dayjs from "dayjs"
 import { useEffect } from "react"
 
@@ -10,17 +9,16 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   date?: string
+  address: string
 }
 
-export const ActivityDayModal = ({ isOpen, onClose, date }: Props) => {
-  const { account } = useWallet()
-
+export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
   //get unix timestamps for the start and end of the day
   const startOfDay = dayjs(date).startOf("day").unix()
   const endOfDay = dayjs(date).endOf("day").unix()
 
   const actionsOfDayQuery = useSustainabilityActions({
-    wallet: date ? account ?? "" : undefined,
+    wallet: date ? address ?? "" : undefined,
     after: startOfDay,
     before: endOfDay,
   })

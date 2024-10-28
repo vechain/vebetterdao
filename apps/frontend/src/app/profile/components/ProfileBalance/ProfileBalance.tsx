@@ -3,7 +3,10 @@ import { VStack, Heading } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { UserTransactions } from "./components/UserTransactions"
 
-export const ProfileBalance = () => {
+type Props = {
+  address: string
+}
+export const ProfileBalance = ({ address }: Props) => {
   const { t } = useTranslation()
 
   return (
@@ -11,8 +14,8 @@ export const ProfileBalance = () => {
       <Heading fontSize="lg" fontWeight={700}>
         {t("Your tokens")}
       </Heading>
-      <TokensBalance />
-      <UserTransactions />
+      <TokensBalance address={address} />
+      <UserTransactions address={address} />
     </VStack>
   )
 }
