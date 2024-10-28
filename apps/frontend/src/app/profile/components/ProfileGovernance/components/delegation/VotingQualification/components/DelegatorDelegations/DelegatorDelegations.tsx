@@ -1,17 +1,26 @@
 import { Button, Stack, useDisclosure } from "@chakra-ui/react"
 
-import { useGetUserDelegatee } from "@/api"
+import { useGetDelegatee } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { Divider, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { UilTimes } from "@iconscout/react-unicons"
 import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
-export const DelegatorDelegations = () => {
+type Props = {
+  address: string
+}
+export const DelegatorDelegations = ({ address }: Props) => {
   const { t } = useTranslation()
-  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetUserDelegatee()
-  const isDelegator = !isDelegateeLoading && !!Number(delegateeAddress)
+
+  const { account: connectedAccount } = useWallet()
+  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
+
+  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
+  const isDelegator = !isDelegateeLoading && !!delegateeAddress
 
   const revokeDelegationModal = useDisclosure()
 
@@ -46,13 +55,15 @@ export const DelegatorDelegations = () => {
             </VStack>
           </HStack>
           <HStack>
-            <Button
-              variant={"dangerGhost"}
-              p={3}
-              leftIcon={<UilTimes color="#C84968" />}
-              onClick={revokeDelegationModal.onOpen}>
-              {t("Remove delegation")}
-            </Button>
+            {isConnectedUser && (
+              <Button
+                variant={"dangerGhost"}
+                p={3}
+                leftIcon={<UilTimes color="#C84968" />}
+                onClick={revokeDelegationModal.onOpen}>
+                {t("Remove delegation")}
+              </Button>
+            )}
           </HStack>
         </Stack>
       </VStack>

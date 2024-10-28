@@ -101,7 +101,7 @@ export const DashboardAllocationRounds = () => {
             />
           )}
         </HStack>
-        {currentRoundId && <AllocationRoundCard roundId={currentRoundId} />}
+        {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
         <VStack spacing={4} w="full">
           <Heading fontSize="24px" fontWeight={400}>
             {t("Proposals in this round")}

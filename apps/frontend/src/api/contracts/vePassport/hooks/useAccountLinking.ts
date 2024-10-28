@@ -2,32 +2,34 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useGetPassportForEntity } from "./useGetPassportForEntity"
 import { useGetUserPendingLinkings } from "./useGetPendingLinkings"
 import { useIsUserEntity } from "./useIsEntity"
-import { useGetEntitiesLinkedToPassport, useGetUserEntitiesLinkedToPassport } from "./useGetEntitiesLinkedToPassport"
+import { useGetEntitiesLinkedToPassport } from "./useGetEntitiesLinkedToPassport"
 import { useMemo } from "react"
 
 /**
  * Hook to get the account linking status of the current user.
  * @returns The account linking status of the current user.
  */
-export const useAccountLinking = () => {
+export const useAccountLinking = (user?: string) => {
   const { account } = useWallet()
+  const parsedAccount = user ?? account
 
   const { data: isEntity, isLoading: isEntityLoading } = useIsUserEntity()
-  const { data: userLinkedEntities, isLoading: isUserLinkedEntitiesLoading } = useGetUserEntitiesLinkedToPassport()
+  const { data: userLinkedEntities, isLoading: isUserLinkedEntitiesLoading } =
+    useGetEntitiesLinkedToPassport(parsedAccount)
   const isPassport = !isEntity && userLinkedEntities?.length > 0
 
   // if the user is an entity, get the passport for that entity
   const { data: entityPassport, isLoading: isEntityPassportLoading } = useGetPassportForEntity(
-    !!isEntity ? account : undefined,
+    !!isEntity ? parsedAccount : undefined,
   )
   const isLinked = !!isPassport || !!isEntity
 
   // if the user is an entity, use the entity's passport, otherwise use the user's account
   const passport = useMemo(() => {
     if (isEntity) return entityPassport ?? undefined
-    if (isPassport) return account
+    if (isPassport) return parsedAccount
     return undefined
-  }, [isEntity, entityPassport, isPassport, account])
+  }, [isEntity, entityPassport, isPassport, parsedAccount])
 
   // if linked, get the entities linked to the passport
   const { data: passportLinkedEntities, isLoading: isPassportLinkedEntitiesLoading } = useGetEntitiesLinkedToPassport(

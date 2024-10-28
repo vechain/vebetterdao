@@ -926,9 +926,6 @@
   "Account address is required": "Se requiere la dirección de la cuenta",
   "Link a Secondary Account": "Vincular una cuenta secundaria",
   "By linking Secondary Accounts, your Primary Account will receive all the Better Actions performed in those addresses.": "Al vincular las cuentas secundarias, su cuenta principal recibirá todas las Mejores Acciones realizadas en esas direcciones.",
-  "You will only be able to vote from your Primary account.": "Solo podrá votar desde su cuenta principal.",
-  "What account do you want to link?": "¿Qué cuenta desea vincular?",
-  "Link this account": "Vincular esta cuenta",
   "You will not able to vote when the user accept your request.": "No podrá votar cuando el usuario acepte su solicitud.",
   "You need at least {{missingActions}} more actions to become able to vote on this round.": "Necesita al menos {{missingActions}} acciones más para poder votar en esta ronda.",
   "NOT ENOUGH VTHO": "NO HAY SUFICIENTE VTHO",
@@ -968,5 +965,12 @@
   "Something went wrong. Let’s try that again!": "Algo salió mal. ¡Vamos a intentar eso de nuevo!",
   "Error 404": "Error 404",
   "We can't find what you're looking for. Let's head back and try again!": "No podemos encontrar lo que estás buscando. ¡Volvamos e intentemos de nuevo!",
-  "Go back home": "Regresar a la página de inicio"
+  "Go back home": "Regresar a la página de inicio",
+  "Round {{id}} leaderboard": "Tabla de clasificación de la ronda {{id}}",
+  "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "¿Listo para salvar el planeta? Realiza Mejor Acciones en las aplicaciones y conviértete en el campeón de la sostenibilidad! 🌍✨",
+  "Link a Primary Account": "Vincular una Cuenta Principal",
+  "Which Primary Account would you like to link to?": "¿A qué cuenta principal le gustaría vincularse?",
+  "Become a secondary account": "Convertirse en una cuenta secundaria",
+  "Send link request": "Enviar solicitud de enlace",
+  "By linking this account to a primary account, all your future better actions will be transferred to it, which will also hold exclusive voting power.": "Al vincular esta cuenta a una cuenta principal, todas sus futuras mejores acciones se transferirán a ella, que también tendrá poder de voto exclusivo."
 }

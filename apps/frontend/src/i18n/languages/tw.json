@@ -926,9 +926,6 @@
   "Account address is required": "需要帳號地址",
   "Link a Secondary Account": "連結次要帳戶",
   "By linking Secondary Accounts, your Primary Account will receive all the Better Actions performed in those addresses.": "通過連結次要帳戶，您的主帳戶將接收這些地址中執行的所有更佳操作。",
-  "You will only be able to vote from your Primary account.": "您將只能從您的主帳戶進行投票。",
-  "What account do you want to link?": "您想連結哪個帳戶？",
-  "Link this account": "連結此帳戶",
   "You will not able to vote when the user accept your request.": "當用戶接受您的請求時，您將無法投票。",
   "You need at least {{missingActions}} more actions to become able to vote on this round.": "您需要至少再執行 {{missingActions}} 個操作才能在此輪投票。",
   "NOT ENOUGH VTHO": "VTHO 不足",
@@ -968,5 +965,12 @@
   "Something went wrong. Let’s try that again!": "出了点问题。让我们再试一次！",
   "Error 404": "错误 404",
   "We can't find what you're looking for. Let's head back and try again!": "我们找不到您正在寻找的内容。让我们回去再试一次！",
-  "Go back home": "返回主页"
+  "Go back home": "返回主页",
+  "Round {{id}} leaderboard": "第 {{id}} 回合排行榜",
+  "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "準備好拯救地球了嗎？在應用程式中採取更好的行動，成為可持續性冠軍！🌍✨",
+  "Link a Primary Account": "連結主要帳戶",
+  "Which Primary Account would you like to link to?": "您想連結到哪個主要帳戶？",
+  "Become a secondary account": "成為次要帳戶",
+  "Send link request": "發送連結請求",
+  "By linking this account to a primary account, all your future better actions will be transferred to it, which will also hold exclusive voting power.": "通過將此帳戶連結到主要帳戶，您所有未來的行動將轉移到該帳戶，並且該帳戶將擁有獨有的投票權。"
 }
