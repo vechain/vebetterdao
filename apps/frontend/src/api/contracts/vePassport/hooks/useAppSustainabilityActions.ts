@@ -1,121 +1,162 @@
-import { useEffect, useMemo, useState, useRef } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useXApps, XApp } from "../../xApps"
-import { getSustainabilityActions, SustainabilityActionsResponse } from "@/api"
+import {
+  getSustainabilityAppOverviewByRound,
+  getSustainabilityAppUsersByRound,
+  SustainabilityAppOverViewByRoundResponse,
+  SustainabilityAppUsersByRoundResponse,
+} from "@/api"
 
 type Props = {
-  startTimestamp: number
-  endTimestamp: number
+  startRound: number
+  endRound: number
 }
 
-interface AppData {
-  actions: SustainabilityActionsResponse["data"]
+export interface AppActionsData {
+  actions: number
   name: string
-  minTimestamp: number // Timestamp of the earliest action
-  maxTimestamp: number // Timestamp of the latest action
+  totalRewardAmount: number
+  totalImpact: Record<string, number>
 }
 
-export const useAppsSustainabilityActions = ({ startTimestamp, endTimestamp }: Props) => {
+export interface AppUsersData {
+  user: string
+  appName: string
+  totalActions: number
+  totalRewardAmount: number
+}
+
+export const useAppsSustainabilityActions = ({ startRound, endRound }: Props) => {
   const { data: xApps } = useXApps()
-  const [actionsByApp, setActionsByApp] = useState<{ [appId: string]: AppData }>({})
+
+  const [appActions, setAppActions] = useState<{ [appId: string]: AppActionsData }>({})
+  const [appUsers, setAppUsers] = useState<{ [appId: string]: AppUsersData[] }>({})
+
   const [isLoading, setIsLoading] = useState(false)
   const isLoadingRef = useRef(false)
-  const [fetchedAppCount, setFetchedAppCount] = useState(0)
+  const [loadedAppCount, setLoadedAppCount] = useState(0) // Track fully loaded apps
+  const totalAppCount = xApps?.length ?? 0
 
   useEffect(() => {
     if (!xApps) return
 
     const appIds = xApps.map((app: XApp) => app.id)
 
-    const fetchActionsForApp = async (
-      appId: string,
-      after?: number,
-      before?: number,
-      pageParam = 0,
-    ): Promise<SustainabilityActionsResponse> => {
-      const result = await getSustainabilityActions({
-        appId,
-        after,
-        before,
-        page: pageParam,
-        size: 1000,
-        direction: "asc",
-      })
-      return result
+    // Fetch actions and aggregated data for each app and round
+    const fetchActionsForApp = async (appId: string): Promise<void> => {
+      const aggregatedData = { actions: 0, totalRewardAmount: 0, totalImpact: {} as Record<string, number> }
+
+      for (let round = startRound; round <= endRound; round++) {
+        let page = 0
+        let hasNext = true
+
+        // Fetch all pages for the current round
+        while (hasNext) {
+          const result: SustainabilityAppOverViewByRoundResponse = await getSustainabilityAppOverviewByRound({
+            appId,
+            roundId: round,
+            page,
+            size: 1000,
+            direction: "asc",
+          })
+
+          if (result?.data) {
+            result.data.forEach(day => {
+              aggregatedData.actions += day.actionsRewarded
+              aggregatedData.totalRewardAmount += day.totalRewardAmount
+              Object.entries(day.totalImpact || {}).forEach(([key, value]) => {
+                aggregatedData.totalImpact[key] = (aggregatedData.totalImpact[key] || 0) + (value ?? 0)
+              })
+            })
+          }
+
+          hasNext = result.pagination.hasNext
+          page += 1
+        }
+      }
+
+      const name = xApps.find(app => app.id === appId)?.name ?? ""
+
+      setAppActions(prev => ({
+        ...prev,
+        [appId]: {
+          name,
+          ...aggregatedData,
+        },
+      }))
     }
 
-    const fetchAllActions = async () => {
+    // Fetch user-specific data for each app and round
+    const fetchUsersForApp = async (appId: string): Promise<void> => {
+      const userAggregatedData: { [user: string]: AppUsersData } = {}
+
+      const appName = xApps.find(app => app.id === appId)?.name ?? ""
+
+      for (let round = startRound; round <= endRound; round++) {
+        let page = 0
+        let hasNext = true
+
+        while (hasNext) {
+          const result: SustainabilityAppUsersByRoundResponse = await getSustainabilityAppUsersByRound({
+            appId,
+            roundId: round,
+            page,
+            size: 1000,
+            direction: "asc",
+            sortBy: "actionsRewarded",
+          })
+
+          if (result?.data) {
+            result.data.forEach(userEntry => {
+              const { user, actionsRewarded, totalRewardAmount } = userEntry
+              if (!userAggregatedData[user]) {
+                userAggregatedData[user] = { user, totalActions: 0, totalRewardAmount: 0, appName }
+              }
+              userAggregatedData[user].totalActions += actionsRewarded
+              userAggregatedData[user].totalRewardAmount += totalRewardAmount
+            })
+          }
+
+          hasNext = result.pagination.hasNext
+          page += 1
+        }
+      }
+
+      setAppUsers(prev => ({
+        ...prev,
+        [appId]: Object.values(userAggregatedData),
+      }))
+    }
+
+    // Fetch all data for the selected rounds and apps
+    const fetchAllData = async () => {
       if (isLoadingRef.current) return
+      if (!startRound || !endRound) return
 
       isLoadingRef.current = true
       setIsLoading(true)
 
-      const newActionsByApp = { ...actionsByApp }
-
-      const promises = appIds.map(async appId => {
-        const appName = xApps.find(app => app.id === appId)?.name
-        const appData = actionsByApp[appId] || {
-          actions: [],
-          name: appName ?? "",
-          minTimestamp: Number.MAX_SAFE_INTEGER,
-          maxTimestamp: 0,
-        }
-
-        let appActions = appData.actions
-
-        let pageParam = 0
-        let hasNext = true
-        while (hasNext) {
-          const result = await fetchActionsForApp(appId, startTimestamp, endTimestamp, pageParam)
-          appActions = appActions.concat(result.data)
-          hasNext = result.pagination.hasNext
-          pageParam += 1
-          if (result.data.length > 0) {
-            appData.minTimestamp = Math.min(appData.minTimestamp, ...result.data.map(a => a.blockTimestamp))
-            appData.maxTimestamp = Math.max(appData.maxTimestamp, ...result.data.map(a => a.blockTimestamp))
-          } else {
-            break
-          }
-        }
-
-        // Update appData
-        newActionsByApp[appId] = {
-          actions: appActions,
-          name: appData.name,
-          minTimestamp: appData.minTimestamp,
-          maxTimestamp: appData.maxTimestamp,
-        }
-
-        setFetchedAppCount(prev => prev + 1)
-      })
-
-      await Promise.all(promises)
-
-      setActionsByApp(newActionsByApp)
+      await Promise.all(
+        appIds.map(async appId => {
+          await fetchActionsForApp(appId)
+          await fetchUsersForApp(appId)
+          setLoadedAppCount(prev => prev + 1) // Increment for each fully loaded app
+        }),
+      )
 
       isLoadingRef.current = false
       setIsLoading(false)
     }
 
-    fetchAllActions()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [xApps, startTimestamp, endTimestamp])
-
-  // Combine and filter actions within the specified timestamps
-  const allActions = useMemo(() => {
-    const actions = Object.values(actionsByApp).flatMap(appData => appData.actions)
-    return actions.filter(action => {
-      const ts = action.blockTimestamp
-      return (!startTimestamp || ts >= startTimestamp) && (!endTimestamp || ts <= endTimestamp)
-    })
-  }, [actionsByApp, startTimestamp, endTimestamp])
+    fetchAllData()
+  }, [xApps, startRound, endRound])
 
   return {
-    allActions,
-    actionsByApp,
+    appActions,
+    appUsers,
     isLoading,
-    fetchedAppCount,
-    totalAppCount: xApps?.length ?? 0,
-    setFetchedAppCount,
-    setActionsByApp,
+    loadedAppCount,
+    totalAppCount,
+    setLoadedAppCount,
   }
 }
