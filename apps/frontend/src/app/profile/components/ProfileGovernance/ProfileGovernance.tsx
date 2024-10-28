@@ -20,6 +20,8 @@ import { CurrentDelegation } from "./components/delegation/CurrentDelegation"
 import { VotingQualification } from "./components/delegation/VotingQualification"
 import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 enum ListView {
   ALL,
@@ -36,6 +38,9 @@ type Props = {
 export const ProfileGovernance = ({ address }: Props) => {
   const { data: createdProposals } = useUserProposalsCreatedEvents(address ?? "")
   const { data: votedProposals } = useUserProposalsVoteEvents(address ?? "")
+
+  const { account: connectedAccount } = useWallet()
+  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
 
   const router = useRouter()
 
@@ -98,9 +103,9 @@ export const ProfileGovernance = ({ address }: Props) => {
     case ListView.ALL:
       return (
         <>
-          <PendingDelegationDelegateePOV />
-          <CurrentDelegation />
-          <VotingQualification address={address} />
+          <PendingDelegationDelegateePOV address={address} isConnectedUser={isConnectedUser} />
+          <CurrentDelegation address={address} isConnectedUser={isConnectedUser} />
+          <VotingQualification address={address} isConnectedUser={isConnectedUser} />
           {isFirstCreatedProposalsAvailable && (
             <PreviewCreatedProposals
               firstProposals={firstCreatedProposals}

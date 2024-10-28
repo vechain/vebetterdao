@@ -6,11 +6,13 @@ import { RejectDelegationModal } from "./RejectDelegationModal"
 import { Stack, HStack, VStack, Text, Button, useDisclosure } from "@chakra-ui/react"
 import { QualificationBadge } from "../../QualificationBadges"
 import { UilCheck, UilTimes } from "@iconscout/react-unicons"
-import { useUserScore } from "@/api"
+import { useCanUserVote } from "@/api"
 
-export const PendingDelegationItemDelegateePOV = ({ delegationAddress }: { delegationAddress: string }) => {
+type Props = { isConnectedUser: boolean; delegationAddress: string }
+export const PendingDelegationItemDelegateePOV = ({ isConnectedUser, delegationAddress }: Props) => {
   const { t } = useTranslation()
-  const { isUserQualified: isDelegatorQualified, isLoading: isScoreLoading } = useUserScore(delegationAddress)
+  //TODo: IS this right?
+  const { isPerson, isLoading: isScoreLoading } = useCanUserVote(delegationAddress)
 
   const acceptDelegationModal = useDisclosure()
   const rejectDelegationModal = useDisclosure()
@@ -28,26 +30,28 @@ export const PendingDelegationItemDelegateePOV = ({ delegationAddress }: { deleg
         </HStack>
         {!isScoreLoading && (
           <HStack>
-            <QualificationBadge qualified={isDelegatorQualified} />
+            <QualificationBadge qualified={isPerson} />
           </HStack>
         )}
       </HStack>
-      <HStack gap={4}>
-        <Button
-          variant={"dangerGhost"}
-          p={3}
-          leftIcon={<UilTimes color="#C84968" />}
-          onClick={rejectDelegationModal.onOpen}>
-          {t("Reject")}
-        </Button>
-        <Button
-          variant={"primaryGhost"}
-          p={3}
-          leftIcon={<UilCheck color="#004CFC" />}
-          onClick={acceptDelegationModal.onOpen}>
-          {t("Accept")}
-        </Button>
-      </HStack>
+      {isConnectedUser && (
+        <HStack gap={4}>
+          <Button
+            variant={"dangerGhost"}
+            p={3}
+            leftIcon={<UilTimes color="#C84968" />}
+            onClick={rejectDelegationModal.onOpen}>
+            {t("Reject")}
+          </Button>
+          <Button
+            variant={"primaryGhost"}
+            p={3}
+            leftIcon={<UilCheck color="#004CFC" />}
+            onClick={acceptDelegationModal.onOpen}>
+            {t("Accept")}
+          </Button>
+        </HStack>
+      )}
       <AcceptDelegationModal modal={acceptDelegationModal} delegator={delegationAddress} />
       <RejectDelegationModal modal={rejectDelegationModal} delegator={delegationAddress} />
     </Stack>

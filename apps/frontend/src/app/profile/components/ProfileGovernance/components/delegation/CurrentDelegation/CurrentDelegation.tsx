@@ -5,17 +5,21 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { RevokeDelegationDelegateePOVModal } from "./components/RevokeDelegationDelegateePOVModal"
 import { QualificationBadge } from "../QualificationBadges"
-import { useGetUserDelegator, useUserScore } from "@/api"
+import { useCanUserVote, useGetUserDelegator } from "@/api"
 
-export const CurrentDelegation = () => {
+type Props = {
+  address: string
+  isConnectedUser: boolean
+}
+export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
   const { t } = useTranslation()
   const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetUserDelegator()
   const isDelegated = !isDelegatorLoading && !!Number(delegatorAddress)
-  const { isUserQualified: isDelegatorQualified, isLoading: isScoreLoading } = useUserScore()
+  const { isPerson, isLoading } = useCanUserVote(address)
 
   const delegationModal = useDisclosure()
 
-  if (isDelegatorLoading || isScoreLoading || !isDelegated) return null
+  if (isDelegatorLoading || isLoading || !isDelegated) return null
 
   return (
     <Card variant="baseWithBorder" w="full">
@@ -30,7 +34,7 @@ export const CurrentDelegation = () => {
               </Heading>
             </HStack>
             <Text color="#6A6A6A" fontSize="md">
-              {isDelegatorQualified
+              {isPerson
                 ? t("While this account keeps their qualification, you’ll be able to use it to vote.")
                 : t("This account is not currently qualified to vote.")}
             </Text>
@@ -50,17 +54,19 @@ export const CurrentDelegation = () => {
                     {humanAddress(delegatorAddress, 4, 4)}
                   </Text>
                 </VStack>
-                <QualificationBadge qualified={isDelegatorQualified} />
+                <QualificationBadge qualified={isPerson} />
               </HStack>
             </Stack>
             <HStack>
-              <Button
-                variant={"dangerGhost"}
-                p={3}
-                leftIcon={<UilTimes color="#C84968" />}
-                onClick={delegationModal.onOpen}>
-                {t("Remove delegation")}
-              </Button>
+              {isConnectedUser && (
+                <Button
+                  variant={"dangerGhost"}
+                  p={3}
+                  leftIcon={<UilTimes color="#C84968" />}
+                  onClick={delegationModal.onOpen}>
+                  {t("Remove delegation")}
+                </Button>
+              )}
             </HStack>
           </Stack>
         </VStack>
