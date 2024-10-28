@@ -1,7 +1,6 @@
 import { getCallKey, useCall } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { useWallet } from "@vechain/dapp-kit-react"
 
 const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
 const vePassportInterface = VeBetterPassport__factory.createInterface()
@@ -30,14 +29,4 @@ export const useIsPersonAtTimepoint = (user?: string | null, blockNumber?: strin
     args: [user, blockNumber],
     enabled: !!user && !!blockNumber,
   })
-}
-
-/**
- * Hook to get the isPerson status from the VeBetterPassport contract for the current user.
- * @param blockNumber - The block number.
- * @returns The isPerson status.
- */
-export const useIsUserPersonAtTimepoint = (blockNumber?: string | null) => {
-  const { account } = useWallet()
-  return useIsPersonAtTimepoint(account, blockNumber)
 }

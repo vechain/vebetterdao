@@ -1,7 +1,6 @@
 import { getCallKey, useCall } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { useWallet } from "@vechain/dapp-kit-react"
 
 const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
 const vePassportInterface = VeBetterPassport__factory.createInterface()
@@ -28,13 +27,4 @@ export const useGetDelegatee = (delegator?: string | null) => {
     args: [delegator],
     enabled: !!delegator,
   })
-}
-
-/**
- * Hook to get the delegatee from the VeBetterPassport contract for the current user.
- * @returns The address of the delegatee for the current user.
- */
-export const useGetUserDelegatee = () => {
-  const { account } = useWallet()
-  return useGetDelegatee(account)
 }

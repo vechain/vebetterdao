@@ -1,6 +1,6 @@
 import { Button, Stack, useDisclosure } from "@chakra-ui/react"
 
-import { useGetUserDelegatee } from "@/api"
+import { useGetDelegatee } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { Divider, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -8,9 +8,12 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { UilTimes } from "@iconscout/react-unicons"
 import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
 
-export const DelegatorDelegations = () => {
+type Props = {
+  address: string
+}
+export const DelegatorDelegations = ({ address }: Props) => {
   const { t } = useTranslation()
-  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetUserDelegatee()
+  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
   const isDelegator = !isDelegateeLoading && !!Number(delegateeAddress)
 
   const revokeDelegationModal = useDisclosure()

@@ -7,7 +7,6 @@ import {
   useB3trBalance,
   useCanUserVote,
   useCurrentAllocationsRoundId,
-  useUserScore,
   useVot3Balance,
   useVotingRewards,
 } from "@/api"
@@ -62,9 +61,9 @@ export const ActionBanner = () => {
     return balanceLoading || b3trBalanceLoading || vot3BalanceLoading
   }, [balanceLoading, b3trBalanceLoading, vot3BalanceLoading])
 
-  const { isUserQualified, isLoading: isScoreLoading } = useUserScore()
+  const { isPerson, isLoading } = useCanUserVote(account ?? undefined)
 
-  const showDoActionBanner = !!account && !isScoreLoading && !isUserQualified
+  const showDoActionBanner = !!account && !isPerson && !isLoading
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
   const showCastVoteBanner = !!account && !canUserVoteLoading && canUserVote
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading

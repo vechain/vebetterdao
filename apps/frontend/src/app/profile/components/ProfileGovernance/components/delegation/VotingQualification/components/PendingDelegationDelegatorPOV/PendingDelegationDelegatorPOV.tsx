@@ -1,11 +1,15 @@
 import { VStack, Heading, Text, HStack, Divider } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { PendingDelegationItemDelegatorPOV } from "./components/PendingDelegationItemDelegatorPOV"
-import { useGetUserPendingDelegationsDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
+import { useGetPendingDelegationsDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
 
-export const PendingDelegationDelegatorPOV = () => {
+type Props = {
+  address: string
+}
+export const PendingDelegationDelegatorPOV = ({ address }: Props) => {
   const { t } = useTranslation()
-  const { data: delegateeAddress, isLoading: isPendingDelegationsLoading } = useGetUserPendingDelegationsDelegatorPOV()
+  const { data: delegateeAddress, isLoading: isPendingDelegationsLoading } =
+    useGetPendingDelegationsDelegatorPOV(address)
   if (isPendingDelegationsLoading || !delegateeAddress || Number(delegateeAddress) === 0) return null
   return (
     <>

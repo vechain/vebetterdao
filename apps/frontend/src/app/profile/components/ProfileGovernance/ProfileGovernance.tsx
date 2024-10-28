@@ -100,7 +100,7 @@ export const ProfileGovernance = ({ address }: Props) => {
         <>
           <PendingDelegationDelegateePOV />
           <CurrentDelegation />
-          <VotingQualification />
+          <VotingQualification address={address} />
           {isFirstCreatedProposalsAvailable && (
             <PreviewCreatedProposals
               firstProposals={firstCreatedProposals}

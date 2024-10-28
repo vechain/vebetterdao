@@ -37,8 +37,6 @@ export const useUserScore = (user?: string) => {
     [userScore, scoreThresholdAtRoundStart],
   )
 
-  const isUserQualified = userScore >= scoreThresholdAtRoundStart
-
   // we take the score of the easy actions as reference, as the minimum score of an action
   // so we can calculate the number of actions needed to reach the threshold at minimum
   const { data: easyActionScore, isLoading: isSecurityMultiplierLoading } = useSecurityMultiplier(SecurityLevel.LOW)
@@ -47,7 +45,6 @@ export const useUserScore = (user?: string) => {
     Number(easyActionScore ?? 0) && scoreNeeded ? Math.ceil(scoreNeeded / Number(easyActionScore ?? 0)) : 0
 
   return {
-    isUserQualified,
     isUserDelegatee: !!delegatorAddress,
     delegatorAddress,
     scorePercentage,
