@@ -926,9 +926,6 @@
   "Account address is required": "L'adresse du compte est requise",
   "Link a Secondary Account": "Lier un compte secondaire",
   "By linking Secondary Accounts, your Primary Account will receive all the Better Actions performed in those addresses.": "En liant des comptes secondaires, votre compte principal recevra toutes les meilleures actions effectuées à ces adresses.",
-  "You will only be able to vote from your Primary account.": "Vous ne pourrez voter qu'à partir de votre compte principal.",
-  "What account do you want to link?": "Quel compte souhaitez-vous lier?",
-  "Link this account": "Lier ce compte",
   "You will not able to vote when the user accept your request.": "Vous ne pourrez pas voter lorsque l'utilisateur acceptera votre demande.",
   "You need at least {{missingActions}} more actions to become able to vote on this round.": "Vous avez besoin d'au moins {{missingActions}} actions supplémentaires pour pouvoir voter à ce tour.",
   "NOT ENOUGH VTHO": "PAS ASSEZ DE VTHO",
@@ -972,5 +969,8 @@
   "Round {{id}} leaderboard": "Classement de la ronde {{id}}",
   "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨": "Prêt à sauver la planète ? Effectuez de meilleures actions dans les applications et devenez le champion de la durabilité ! 🌍✨",
   "Link a Primary Account": "Lier un compte principal",
-  "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.": "En liant ce compte, toutes les meilleures actions seront transférées sur le compte principal, qui détiendra également un pouvoir de vote exclusif. Le compte principal doit d'abord approuver la demande de lien."
+  "Which Primary Account would you like to link to?": "Quel compte principal souhaitez-vous lier ?",
+  "Become a secondary account": "Devenir un compte secondaire",
+  "Send link request": "Envoyer une demande de lien",
+  "By linking this account to a primary account, all your future better actions will be transferred to it, which will also hold exclusive voting power.": "En reliant ce compte à un compte principal, toutes vos futures meilleures actions seront transférées à celui-ci, qui détiendra également un pouvoir de vote exclusif."
 }
