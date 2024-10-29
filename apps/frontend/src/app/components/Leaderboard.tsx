@@ -7,8 +7,10 @@ import { AddressButton } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
 import { Box, Card, CardBody, Divider, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
+import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
@@ -150,6 +152,13 @@ type LeaderboardRankingComponentProps = {
   isYourRanking?: boolean
 }
 export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
+  const { name } = useWalletName(ranking.address)
+  const router = useRouter()
+
+  const onClick = () => {
+    router.push(`/profile/${ranking.address}`)
+  }
+
   const positionStyles = useMemo(() => {
     if (ranking.position === 1)
       return {
@@ -185,6 +194,12 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
 
   return (
     <Card
+      onClick={onClick}
+      _hover={{
+        cursor: "pointer",
+        bg: "#F7F7F7",
+        transition: "all 0.2s",
+      }}
       boxShadow={positionStyles.boxShadow}
       variant={"baseWithBorder"}
       {...(isYourRanking && { bg: "#004CFC" })}
@@ -216,18 +231,28 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                     {`(${t("You")})`}
                   </Text>
                 )}
-                <AddressButton
-                  fontSize="sm"
-                  fontWeight={600}
-                  h="auto"
-                  address={ranking.address}
-                  size={"sm"}
-                  variant={"unstyled"}
-                  showAddressIcon={false}
-                  padding={0}
-                  digitsBeforeEllipsis={5}
-                  digitsAfterEllipsis={3}
-                />
+
+                {name && (
+                  <Text fontSize="md" fontWeight={600} h="auto" colorScheme={"gray"}>
+                    {name}
+                  </Text>
+                )}
+                {!name && (
+                  <AddressButton
+                    fontSize="sm"
+                    fontWeight={600}
+                    h="auto"
+                    address={ranking.address}
+                    size={"sm"}
+                    variant={"unstyled"}
+                    onClick={e => e.preventDefault()}
+                    showAddressIcon={false}
+                    showCopyIcon={false}
+                    padding={0}
+                    digitsBeforeEllipsis={5}
+                    digitsAfterEllipsis={3}
+                  />
+                )}
               </HStack>
 
               <Text fontSize="sm" color={grayColor} fontWeight={400}>

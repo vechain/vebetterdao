@@ -69,19 +69,16 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
     <BaseModal isOpen={modal.isOpen} onClose={modal.onClose}>
       <VStack align="stretch" gap={6} as="form" onSubmit={handleSubmit(onSubmit)}>
         <UilLink color="#004CFC" size={"3rem"} />
-        <Heading fontSize="2xl">{t("Link a Primary Account")}</Heading>
+        <Heading fontSize="2xl">{t("Become a secondary account")}</Heading>
         <Box>
           <Text color="#6A6A6A" as="span">
             {t(
-              "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.",
+              "By linking this account to a primary account, all your future better actions will be transferred to it, which will also hold exclusive voting power.",
             )}
-          </Text>
-          <Text color="#6A6A6A" as="span" fontWeight="600">
-            {t("You will only be able to vote from your Primary account.")}
           </Text>
         </Box>
         <VStack align="stretch">
-          <Heading fontSize="lg">{t("What account do you want to link?")}</Heading>
+          <Heading fontSize="lg">{t("Which Primary Account would you like to link to?")}</Heading>
           <FormControl isInvalid={!!errors.accountToConnect}>
             <FormLabel color="#6A6A6A" fontSize="sm">
               {t("Wallet address")}
@@ -97,7 +94,7 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
         </VStack>
         <VStack align="stretch">
           <Button variant="primaryAction" type="submit">
-            {t("Link this account")}
+            {t("Send link request")}
           </Button>
           <Button variant={"primaryGhost"} onClick={modal.onClose}>
             {t("Cancel")}
