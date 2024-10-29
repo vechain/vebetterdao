@@ -40,7 +40,7 @@ export const ProfileHeader = ({ address }: Props) => {
               <Heading fontSize="xl">{name}</Heading>
               <HStack spacing={2}>
                 <Text fontSize="xl" fontWeight="500">
-                  {humanAddress(address ?? "", 8, 6)}
+                  {humanAddress(address ?? "", 6, 4)}
                 </Text>
 
                 <IconButton
