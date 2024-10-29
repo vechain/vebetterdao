@@ -3,22 +3,15 @@ import {
   useSustainabilitySingleUserOverview,
   useSustainabilityUserOverviewPerRound,
 } from "@/api"
-import { AddressButton } from "@/components"
-import { AddressIcon } from "@/components/AddressIcon"
-import { Box, Card, CardBody, Divider, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
-import { AddressUtils } from "@repo/utils"
-import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { t } from "i18next"
-import { useRouter } from "next/navigation"
-import { useMemo } from "react"
-import { Trans, useTranslation } from "react-i18next"
 
-type LeaderboardRanking = {
-  position: number
-  address: string
-  score: number
-}
+import { Card, CardBody, Divider, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { AddressUtils } from "@repo/utils"
+
+import { useWallet } from "@vechain/dapp-kit-react"
+
+import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
+import { LeaderboardRankingComponent } from "./LeaderboardRankingComponent"
 
 const MockLeaderboard = [
   { position: 1, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 100 },
@@ -142,130 +135,6 @@ export const Leaderboard = () => {
             )}
           </VStack>
         </VStack>
-      </CardBody>
-    </Card>
-  )
-}
-
-type LeaderboardRankingComponentProps = {
-  ranking: LeaderboardRanking
-  isYourRanking?: boolean
-}
-export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
-  const { name } = useWalletName(ranking.address)
-  const router = useRouter()
-
-  const onClick = () => {
-    router.push(`/profile/${ranking.address}`)
-  }
-
-  const positionStyles = useMemo(() => {
-    if (ranking.position === 1)
-      return {
-        text: "🥇",
-        borderColor: "#FFD700",
-        fontSize: "3xl",
-        boxShadow: "0px 0px 5px 0px rgba(255, 215, 0, 0.4)",
-      }
-    if (ranking.position === 2)
-      return {
-        text: "🥈",
-        borderColor: "#C0C0C0",
-        fontSize: "3xl",
-        boxShadow: "0px 0px 5px 0px rgba(192, 192, 192, 0.4)",
-      }
-    if (ranking.position === 3)
-      return {
-        text: "🥉",
-        borderColor: "#CD7F32",
-        fontSize: "3xl",
-        boxShadow: "0px 0px 5px 0px rgba(205, 127, 50, 0.4)",
-      }
-    return {
-      text: `#${ranking.position}`,
-      borderColor: "#EFEFEF",
-      fontSize: "xl",
-      boxShadow: "0px 0px 5px 0px rgba(0, 0, 0, 0.1)",
-    }
-  }, [ranking.position])
-
-  const whiteColor = isYourRanking ? "white" : "auto"
-  const grayColor = isYourRanking ? "white" : "#6A6A6A"
-
-  return (
-    <Card
-      onClick={onClick}
-      _hover={{
-        cursor: "pointer",
-        bg: "#F7F7F7",
-        transition: "all 0.2s",
-      }}
-      boxShadow={positionStyles.boxShadow}
-      variant={"baseWithBorder"}
-      {...(isYourRanking && { bg: "#004CFC" })}
-      pos="relative"
-      overflow={"hidden"}
-      borderColor={positionStyles.borderColor}>
-      <CardBody color={whiteColor} p="12px">
-        {isYourRanking && (
-          <Image
-            src="/images/your-ranking-bg.svg"
-            alt="Bg image"
-            zIndex={0}
-            rounded={"full"}
-            pos="absolute"
-            right={-7}
-            top={"50%"}
-            h="full"
-            transform={"translateY(-50%)"}
-            aria-label="Bg image"
-          />
-        )}
-        <HStack w="full" justify="space-between">
-          <HStack spacing={2} zIndex={1}>
-            <AddressIcon address={ranking.address} boxSize={8} rounded={"full"} />
-            <Box>
-              <HStack spacing={1}>
-                {isYourRanking && (
-                  <Text fontSize="sm" fontWeight={600}>
-                    {`(${t("You")})`}
-                  </Text>
-                )}
-
-                {name && (
-                  <Text fontSize="md" fontWeight={600} h="auto" colorScheme={"gray"}>
-                    {name}
-                  </Text>
-                )}
-                {!name && (
-                  <AddressButton
-                    fontSize="sm"
-                    fontWeight={600}
-                    h="auto"
-                    address={ranking.address}
-                    size={"sm"}
-                    variant={"unstyled"}
-                    onClick={e => e.preventDefault()}
-                    showAddressIcon={false}
-                    showCopyIcon={false}
-                    padding={0}
-                    digitsBeforeEllipsis={5}
-                    digitsAfterEllipsis={3}
-                  />
-                )}
-              </HStack>
-
-              <Text fontSize="sm" color={grayColor} fontWeight={400}>
-                <Trans i18nKey="{{value}} actions" values={{ value: ranking.score }} />
-              </Text>
-            </Box>
-          </HStack>
-          {ranking.position !== 0 && (
-            <Text fontSize={positionStyles.fontSize} fontWeight={600} zIndex={1}>
-              {positionStyles.text}
-            </Text>
-          )}
-        </HStack>
       </CardBody>
     </Card>
   )
