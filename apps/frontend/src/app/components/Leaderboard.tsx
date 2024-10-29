@@ -10,6 +10,7 @@ import { AddressUtils } from "@repo/utils"
 import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
+import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
@@ -152,6 +153,11 @@ type LeaderboardRankingComponentProps = {
 }
 export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
   const { name } = useWalletName(ranking.address)
+  const router = useRouter()
+
+  const onClick = () => {
+    router.push(`/profile/${ranking.address}`)
+  }
 
   const positionStyles = useMemo(() => {
     if (ranking.position === 1)
@@ -188,6 +194,12 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
 
   return (
     <Card
+      onClick={onClick}
+      _hover={{
+        cursor: "pointer",
+        bg: isYourRanking ? "#005EFF" : "#F7F7F7",
+        transition: "all 0.2s",
+      }}
       boxShadow={positionStyles.boxShadow}
       variant={"baseWithBorder"}
       {...(isYourRanking && { bg: "#004CFC" })}
@@ -233,7 +245,9 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                     address={ranking.address}
                     size={"sm"}
                     variant={"unstyled"}
+                    onClick={e => e.preventDefault()}
                     showAddressIcon={false}
+                    showCopyIcon={false}
                     padding={0}
                     digitsBeforeEllipsis={5}
                     digitsAfterEllipsis={3}

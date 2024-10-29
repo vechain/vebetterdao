@@ -9,14 +9,18 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 const compactFormatter = getCompactFormatter(2)
 
 type Props = {
-  action: SustainabilityActionsResponse["data"][number]
+  appId?: string
+  blockNumber?: number
+  blockTimestamp?: number
+  amountB3tr?: number
+  proof?: SustainabilityActionsResponse["data"][number]["proof"]
 }
-export const BetterActionCard = ({ action }: Props) => {
+export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3tr, proof }: Props) => {
   const { data: apps } = useXApps()
   const { t } = useTranslation()
 
   const getAppName = (appId: string) => {
-    return apps?.find(app => app.id === appId)?.name ?? ""
+    return apps?.allApps.find(app => app.id === appId)?.name ?? ""
   }
 
   const actionModal = useDisclosure()
@@ -35,18 +39,18 @@ export const BetterActionCard = ({ action }: Props) => {
                   {t("Better action on")}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
-                  {getAppName(action?.appId ?? "")}
+                  {getAppName(appId ?? "")}
                 </Text>
               </HStack>
               <Text fontSize={"xs"} fontWeight={"400"} color={"#6A6A6A"}>
-                {dayjs.unix(action?.blockTimestamp ?? 0).fromNow()}
+                {dayjs.unix(blockTimestamp ?? 0).fromNow()}
               </Text>
             </VStack>
           </HStack>
           <HStack spacing={2}>
             <Text fontWeight={600}>
               {"+"}
-              {compactFormatter.format(Number(action.amount))}
+              {compactFormatter.format(Number(amountB3tr))}
             </Text>
             <Text fontWeight={400} fontSize={"sm"}>
               {"B3TR"}
@@ -56,11 +60,11 @@ export const BetterActionCard = ({ action }: Props) => {
       </CardBody>
       <ActionModal
         actionModal={actionModal}
-        proof={action?.proof}
-        appId={action?.appId}
-        blockNumber={action?.blockNumber}
-        blockTimestamp={action?.blockTimestamp}
-        b3trAmount={action?.amount}
+        proof={proof}
+        appId={appId}
+        blockNumber={blockNumber}
+        blockTimestamp={blockTimestamp}
+        b3trAmount={amountB3tr}
       />
     </Card>
   )

@@ -13,13 +13,13 @@ export const EndorsementPointsBanner = () => {
 
   const isLoading = userXNodes.isLoading || nodesEndorsementScore.isLoading || endorsedApps.isLoading
   const availablePoints = useMemo(() => {
-    if (!nodesEndorsementScore.data || !endorsedApps.data || !nodesEndorsementScore.data) return 0
+    if (!userXNodes.data || !endorsedApps.data || !nodesEndorsementScore.data) return 0
 
     const availableNodes = userXNodes.data?.filter((_node, index) => !endorsedApps.data[index]?.endorsedApp)
-    return availableNodes?.reduce((acc, node) => acc + Number(nodesEndorsementScore.data[Number(node.id)]), 0) ?? 0
+    return availableNodes?.reduce((acc, node) => acc + Number(nodesEndorsementScore.data[Number(node.level)]), 0) ?? 0
   }, [nodesEndorsementScore.data, endorsedApps.data, userXNodes.data])
 
-  //TODO: SUpport multiple nodes
+  //TODO: Support multiple nodes
   const nodeToDisplay = userXNodes.data?.[0]
   const nodeType = (nodeToDisplay?.level ?? 0) >= MinXNodeLevel ? "XNode" : "Node"
 

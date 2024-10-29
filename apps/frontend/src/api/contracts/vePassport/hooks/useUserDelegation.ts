@@ -15,7 +15,7 @@ export const useUserDelegation = () => {
     delegator,
     delegatee,
     isLoading: isDelegatorLoading || isDelegateeLoading,
-    isDelegator: !!delegatee && Number(delegatee) > 0,
-    isDelegatee: !!delegator && Number(delegator) > 0,
+    isDelegator: !!delegatee,
+    isDelegatee: !!delegator,
   }
 }

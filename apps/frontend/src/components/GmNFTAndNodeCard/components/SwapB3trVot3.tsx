@@ -1,5 +1,6 @@
-import { useUserB3trBalance, useUserVot3Balance } from "@/api"
+import { useB3trBalance, useVot3Balance } from "@/api"
 import { ConvertModal } from "@/components/Convert/ConvertModal"
+import { B3TRIcon } from "@/components/Icons"
 import {
   Button,
   Heading,
@@ -7,6 +8,7 @@ import {
   Image,
   Skeleton,
   Stack,
+  StackProps,
   Text,
   useDisclosure,
   useMediaQuery,
@@ -14,16 +16,23 @@ import {
 } from "@chakra-ui/react"
 import { UilExchangeAlt } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import React from "react"
 import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(4)
 
-export const SwapB3trVot3 = () => {
+type Props = {
+  containerProps?: StackProps
+  innerContent?: React.ReactNode
+  address: string
+  isConnectedUser: boolean
+}
+export const SwapB3trVot3 = ({ address, isConnectedUser, containerProps, innerContent }: Props) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
-  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useUserB3trBalance()
-  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useUserVot3Balance()
+  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(address)
+  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(address)
 
   const { isOpen, onClose, onOpen } = useDisclosure()
   const hasNoBalance = (!b3trBalance || b3trBalance.scaled === "0") && (!vot3Balance || vot3Balance.scaled === "0")
@@ -33,9 +42,10 @@ export const SwapB3trVot3 = () => {
 
   return (
     <>
-      <VStack flex="2" align={"stretch"} gap="24px">
+      <VStack flex="2" align={"stretch"} gap="24px" {...containerProps}>
+        {innerContent}
         <Text fontSize="xl" fontWeight={700}>
-          {t("Your token balance")}
+          {t("Your tokens")}
         </Text>
         <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
           <VStack
@@ -50,7 +60,7 @@ export const SwapB3trVot3 = () => {
               {t("Total B3TR Balance")}
             </Text>
             <HStack>
-              <Image src={"/images/logo/b3tr_logo_dark.svg"} boxSize={"30px"} alt="B3TR Icon" />
+              <B3TRIcon boxSize={"30px"} />
               <Skeleton isLoaded={!isB3trBalanceLoading}>
                 <Heading fontSize="1.75rem">{compactFormatter.format(Number(b3trBalance?.scaled ?? "0"))}</Heading>
               </Skeleton>
@@ -75,23 +85,25 @@ export const SwapB3trVot3 = () => {
             </HStack>
           </VStack>
         </Stack>
-        <Button
-          isDisabled={isSwapDisabled}
-          onClick={onOpen}
-          leftIcon={
-            <UilExchangeAlt
-              size={"16px"}
-              style={{
-                transform: "rotate(90deg)",
-              }}
-            />
-          }
-          variant={"whiteAction"}
-          rounded={"full"}
-          fontWeight={500}
-          px="24px">
-          {t("Convert tokens")}
-        </Button>
+        {isConnectedUser && (
+          <Button
+            isDisabled={isSwapDisabled}
+            onClick={onOpen}
+            leftIcon={
+              <UilExchangeAlt
+                size={"16px"}
+                style={{
+                  transform: "rotate(90deg)",
+                }}
+              />
+            }
+            variant={"whiteAction"}
+            rounded={"full"}
+            fontWeight={500}
+            px="24px">
+            {t("Convert tokens")}
+          </Button>
+        )}
       </VStack>
       <ConvertModal isOpen={isOpen} onClose={onClose} />
     </>

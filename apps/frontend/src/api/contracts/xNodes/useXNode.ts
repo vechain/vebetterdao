@@ -41,11 +41,11 @@ export const useXNode = () => {
         logo: logo?.image,
       }
     : undefined
-  const isEndorsingApp = endorsedAppId
+  const isEndorsingApp = !!endorsedAppId
 
   // get xNode score points
-  const nodesEndorsementScore = useNodesEndorsementScore()
-  const xNodePoints = Number(nodesEndorsementScore?.data?.[firstXNode?.level ?? 0] ?? 0)
+  const nodeLevelToEndorsementScore = useNodesEndorsementScore()
+  const xNodePoints = Number(nodeLevelToEndorsementScore?.data?.[firstXNode?.level ?? 0] ?? 0)
 
   // get attached GM token id
   const {
@@ -56,10 +56,14 @@ export const useXNode = () => {
   } = useGetTokenIdAttachedToNode(firstXNodeId)
 
   const isXNodeLoading =
-    xNodes.isLoading || endorsedAppMetadata.isLoading || nodesEndorsementScore.isLoading || isLoadingAttachedGMTokenId
+    xNodes.isLoading ||
+    endorsedAppMetadata.isLoading ||
+    nodeLevelToEndorsementScore.isLoading ||
+    isLoadingAttachedGMTokenId
   const isXNodeError =
-    xNodes.isError || endorsedAppMetadata.isError || nodesEndorsementScore.isError || isErrorAttachedGMTokenId
-  const xNodeError = xNodes.error || endorsedAppMetadata.error || nodesEndorsementScore.error || errorAttachedGMTokenId
+    xNodes.isError || endorsedAppMetadata.isError || nodeLevelToEndorsementScore.isError || isErrorAttachedGMTokenId
+  const xNodeError =
+    xNodes.error || endorsedAppMetadata.error || nodeLevelToEndorsementScore.error || errorAttachedGMTokenId
 
   const isXNodeAttachedToGM = !!Number(attachedGMTokenId)
 

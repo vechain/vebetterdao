@@ -7,7 +7,8 @@ import { AcceptLinkingModal } from "./components/AcceptLinkingModal"
 import { RejectLinkingModal } from "./components/RejectLinkingModal"
 import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
-export const PendingLinkingProposalItem = ({ secondaryAccount }: { secondaryAccount: string }) => {
+type Props = { isConnectedUser: boolean; secondaryAccount: string }
+export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }: Props) => {
   const { t } = useTranslation()
   const { name } = useWalletName(secondaryAccount || "")
   const rejectLinkingModal = useDisclosure()
@@ -40,24 +41,26 @@ export const PendingLinkingProposalItem = ({ secondaryAccount }: { secondaryAcco
           </Badge>
         </HStack>
       </HStack>
-      <HStack gap={4}>
-        <Button
-          variant={"dangerGhost"}
-          flex={1}
-          p={3}
-          leftIcon={<UilTimes color="#C84968" />}
-          onClick={rejectLinkingModal.onOpen}>
-          {t("Reject")}
-        </Button>
-        <Button
-          variant={"primaryGhost"}
-          flex={1}
-          p={3}
-          leftIcon={<UilCheck color="#004CFC" />}
-          onClick={acceptLinkingModal.onOpen}>
-          {t("Accept")}
-        </Button>
-      </HStack>
+      {isConnectedUser && (
+        <HStack gap={4}>
+          <Button
+            variant={"dangerGhost"}
+            flex={1}
+            p={3}
+            leftIcon={<UilTimes color="#C84968" />}
+            onClick={rejectLinkingModal.onOpen}>
+            {t("Reject")}
+          </Button>
+          <Button
+            variant={"primaryGhost"}
+            flex={1}
+            p={3}
+            leftIcon={<UilCheck color="#004CFC" />}
+            onClick={acceptLinkingModal.onOpen}>
+            {t("Accept")}
+          </Button>
+        </HStack>
+      )}
       <AcceptLinkingModal modal={acceptLinkingModal} secondaryAccount={secondaryAccount} />
       <RejectLinkingModal modal={rejectLinkingModal} secondaryAccount={secondaryAccount} />
     </Stack>

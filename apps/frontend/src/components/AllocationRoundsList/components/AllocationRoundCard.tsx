@@ -1,4 +1,4 @@
-import { useAllocationAmount, useAllocationsRound } from "@/api"
+import { useAllocationAmount, useAllocationsRound, useMostVotedAppsInRound } from "@/api"
 import {
   Box,
   Card,
@@ -20,7 +20,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { AllocationStateBadge } from "@/components/AllocationStateBadge"
 import { useTranslation } from "react-i18next"
 import { B3TRIcon } from "@/components/Icons"
-import { AllocationRoundParticipatingXApps } from "./AllocationRoundParticipatingXApps"
+import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 
 type Props = {
   roundId: string
@@ -55,6 +55,8 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
   //TODO: dark mode support
   const nonActiveBackgroundColor = useColorModeValue("rgba(166, 217, 110, 0.12)", "rgba(166, 217, 110, 0.12)")
 
+  const mostVotedAppsQuery = useMostVotedAppsInRound(roundId)
+
   return (
     <Card
       variant={"baseWithBorder"}
@@ -71,14 +73,14 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
         cursor: "pointer",
         transition: "all 0.2s ease-in-out",
       }}
-      data-testid={"round-#" + roundId + "-card"}>
+      data-testid={`round-card-#${roundId}`}>
       <CardBody py="20px">
         <HStack justify={"space-between"} w="full">
           <Stack w="full" spacing={1} flex={2}>
             <HStack spacing={2} w="fit-content" justify="space-between">
               <AllocationStateBadge
                 roundId={roundId}
-                data-testid={"round-#" + roundId + "-status"}
+                data-testid={`round-card-#${roundId}`}
                 renderBadge={false}
                 renderIcon={isActive}
               />
@@ -132,14 +134,13 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
                 </Skeleton>
               </Box>
 
-              <AllocationRoundParticipatingXApps roundId={roundId} />
+              <OverlappedAppsImages
+                appsIds={mostVotedAppsQuery.data.map(a => a.id)}
+                isLoading={mostVotedAppsQuery.isLoading}
+                otherAppsActiveColor={isActive}
+              />
             </Stack>
-            <Icon
-              as={FaAngleRight}
-              boxSize={"24px"}
-              color={cardTextColor}
-              data-testid={"round-#" + roundId + "-link"}
-            />
+            <Icon as={FaAngleRight} boxSize={"24px"} color={cardTextColor} data-testid={`round-link-#${roundId}`} />
           </HStack>
         </HStack>
       </CardBody>

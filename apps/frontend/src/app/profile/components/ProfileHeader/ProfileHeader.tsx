@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react"
-import { Text, VStack, HStack, Card, CardBody, useClipboard, IconButton } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { Text, VStack, HStack, Card, CardBody, useClipboard, IconButton, Stack, Heading } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { UilCopy, UilCheck } from "@iconscout/react-unicons"
 import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
-export const ProfileHeader = () => {
-  const { account } = useWallet()
-  const { name } = useWalletName(account || "")
-  const { onCopy } = useClipboard(account || "")
+type Props = {
+  address: string
+}
+
+export const ProfileHeader = ({ address }: Props) => {
+  const { name } = useWalletName(address ?? "")
+  const { onCopy } = useClipboard(address ?? "")
   const [isCopied, setIsCopied] = useState(false)
 
   useEffect(() => {
@@ -28,27 +30,28 @@ export const ProfileHeader = () => {
     <Card variant="baseWithBorder">
       <CardBody>
         <VStack align="stretch" gap={6}>
-          <HStack gap={4}>
-            <AddressIcon address={account || ""} rounded={"full"} h={12} />
-            <VStack align="stretch" spacing={2} flex={1}>
-              <HStack justify="space-between">
-                <HStack align="flex-start" w="full">
-                  <Text fontSize="xl" fontWeight="bold" borderRight={"2px solid #E0E0E0"} paddingRight={2}>
-                    {name}
-                  </Text>
-                  <Text fontSize="xl" fontWeight="bold">
-                    {humanAddress(account || "")}
-                  </Text>
-                </HStack>
+          <HStack spacing={4}>
+            <AddressIcon address={address ?? ""} rounded={"full"} boxSize={12} />
+            <Stack
+              direction={["column", "column", "column"]}
+              align={["flex-start", "flex-start", "column"]}
+              w="full"
+              spacing={1}>
+              <Heading fontSize="xl">{name}</Heading>
+              <HStack spacing={2}>
+                <Text fontSize="xl" fontWeight="500">
+                  {humanAddress(address ?? "", 6, 4)}
+                </Text>
+
                 <IconButton
-                  variant="ghost"
-                  rounded="full"
-                  icon={isCopied ? <UilCheck color="green" /> : <UilCopy />}
+                  variant="link"
+                  colorScheme={isCopied ? "green" : "primary"}
+                  icon={isCopied ? <UilCheck /> : <UilCopy />}
                   onClick={handleCopy}
                   aria-label="Copy Address"
                 />
               </HStack>
-            </VStack>
+            </Stack>
           </HStack>
         </VStack>
       </CardBody>

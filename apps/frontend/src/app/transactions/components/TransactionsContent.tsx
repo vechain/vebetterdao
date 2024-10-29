@@ -19,10 +19,13 @@ import { FaChevronDown, FaChevronLeft, FaChevronUp } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
 import dayjs from "dayjs"
 import InfiniteScroll from "react-infinite-scroll-component"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { TransactionType } from "@/constants"
 
-export const TransactionsContent = () => {
+type Props = {
+  address: string
+}
+
+export const TransactionsContent = ({ address }: Props) => {
   const { t } = useTranslation()
 
   const filters: { id: TransactionType | "all"; label: string }[] = useMemo(
@@ -59,9 +62,8 @@ export const TransactionsContent = () => {
 
   const selectedFilter = useMemo(() => filters.find(filter => filter.id === filterId), [filterId, filters])
 
-  const { account } = useWallet()
   const { data, fetchNextPage, hasNextPage } = useTransactions({
-    user: account ?? "",
+    user: address ?? "",
     txType: selectedFilter?.id === "all" ? undefined : (selectedFilter?.id as TransactionType),
   })
   const transactions = useMemo(() => {

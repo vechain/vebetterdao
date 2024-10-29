@@ -32,7 +32,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
   const { t } = useTranslation()
 
   const app = useMemo(() => {
-    return apps?.find(app => app.id === (appId ?? ""))
+    return apps?.allApps.find(app => app.id === (appId ?? ""))
   }, [apps, appId])
 
   const isTweet = useMemo(() => {

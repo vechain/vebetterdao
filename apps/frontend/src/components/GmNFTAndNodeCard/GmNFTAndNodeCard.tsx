@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 
 export const GmNFTAndNodeCard = () => {
+  const { account } = useWallet()
   const { t } = useTranslation()
 
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
@@ -72,23 +73,23 @@ export const GmNFTAndNodeCard = () => {
     router.push("/xnode")
   }, [router])
 
-  const { account } = useWallet()
   if (!account) {
     return <NotConnectedWallet />
   }
 
   return (
-    <Card bg="#004CFC" rounded="12px" p="24px" color="white" position="relative" overflow={"hidden"}>
-      <Box
-        position="absolute"
-        top={isAbove800 ? "-50%" : "-10%"}
-        left={isAbove800 ? "0" : "-50%"}
-        w={isAbove800 ? "100%" : "200%"}
-        h="auto"
-        zIndex="2">
-        <Image src={"/images/cloud-background.png"} alt="cloud" objectFit={"contain"} />
-      </Box>
-      <Stack gap={8} align="stretch" justify={"stretch"} direction={isAbove1200 ? "row" : "column-reverse"} zIndex="3">
+    <Card
+      bg="#004CFC"
+      rounded="12px"
+      p="24px"
+      color="white"
+      position="relative"
+      overflow={"hidden"}
+      bgImage="url('/images/cloud-background.png')"
+      bgSize="cover"
+      bgPosition="center"
+      bgRepeat="no-repeat">
+      <Stack gap={8} align="stretch" justify={"stretch"} direction={isAbove1200 ? "row" : "column-reverse"}>
         <VStack flex="3" align={"stretch"} gap="24px">
           <HStack gap="40px" align={"baseline"} justify={"space-between"}>
             <Heading fontSize="xl" fontWeight={600}>
@@ -208,7 +209,7 @@ export const GmNFTAndNodeCard = () => {
           <GmNFTAndNodeFooter />
         </VStack>
         <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />
-        <SwapB3trVot3 />
+        {account && <SwapB3trVot3 address={account} isConnectedUser={true} />}
       </Stack>
     </Card>
   )

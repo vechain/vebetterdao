@@ -1,9 +1,10 @@
-import { useSelectedGmNft, useUserB3trBalance, useXNode } from "@/api"
+import { useB3trBalance, useSelectedGmNft, useXNode } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { GmActionButton } from "@/components/GmActionButton"
 import { Box, Card, Flex, HStack, Image, Skeleton, Stack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilTimesCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -15,7 +16,8 @@ export const GmNFTPageHeader = () => {
 
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
-  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useUserB3trBalance()
+  const { account } = useWallet()
+  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account ?? "")
 
   const { isXNodeAttachedToGM, isMaxGmLevelReached } = useSelectedGmNft()
   const { isXNodeHolder } = useXNode()

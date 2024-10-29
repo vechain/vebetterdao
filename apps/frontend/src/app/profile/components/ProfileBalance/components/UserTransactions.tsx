@@ -1,17 +1,18 @@
 import { useTransactions } from "@/api"
 import { TransactionCard } from "@/components"
 import { Button, Card, CardBody, Flex, Heading, Text, VStack } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
-export const UserTransactions = () => {
+type Props = {
+  address: string
+}
+export const UserTransactions = ({ address }: Props) => {
   const { t } = useTranslation()
 
-  const { account } = useWallet()
   const { data } = useTransactions({
-    user: account ?? "",
+    user: address ?? "",
   })
 
   const transactions = useMemo(() => {
@@ -24,8 +25,8 @@ export const UserTransactions = () => {
 
   const router = useRouter()
   const handleSeeAll = useCallback(() => {
-    router.push("/transactions")
-  }, [router])
+    router.push(`/transactions/${address}`)
+  }, [router, address])
 
   return (
     <Card w={"full"} variant={"baseWithBorder"}>
