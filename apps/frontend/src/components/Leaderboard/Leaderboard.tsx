@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next"
 import { LeaderboardRankingComponent } from "./LeaderboardRankingComponent"
 import { useRouter } from "next/navigation"
 
-const MockLeaderboard = [
+export const MockLeaderboard = [
   { position: 1, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 100 },
   { position: 2, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 90 },
   { position: 3, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 80 },
@@ -59,7 +59,7 @@ export const Leaderboard = () => {
   }))
 
   const onSeeAllClick = () => {
-    router.push("/leaderboard")
+    router.push(`/leaderboard/${roundId}`)
   }
 
   const renderRankings = useMemo(() => {
@@ -140,6 +140,7 @@ export const Leaderboard = () => {
               </>
             )}
           </VStack>
+          <Divider w="full" h={1} />
           <Button size="md" variant={"link"} colorScheme="primary" w="full" onClick={onSeeAllClick}>
             {t("See full leaderboard")}
           </Button>

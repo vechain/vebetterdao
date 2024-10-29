@@ -7,7 +7,7 @@ import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
 const LeaderboardPageContent = dynamic(
-  () => import("./LeaderboardPageContent").then(mod => mod.LeaderboardPageContent),
+  () => import("../LeaderboardPageContent").then(mod => mod.LeaderboardPageContent),
   {
     ssr: false,
     loading: () => (
@@ -18,14 +18,15 @@ const LeaderboardPageContent = dynamic(
   },
 )
 
-export default function LeaderboardPage() {
+type Props = { params: { roundId: string } }
+export default function LeaderboardPage({ params }: Props) {
   useEffect(() => {
-    AnalyticsUtils.trackPage("Leaderboard")
-  }, [])
+    AnalyticsUtils.trackPage(`Leaderboard/${params.roundId}`)
+  }, [params.roundId])
 
   return (
     <MotionVStack>
-      <LeaderboardPageContent />
+      <LeaderboardPageContent roundId={params.roundId} />
     </MotionVStack>
   )
 }
