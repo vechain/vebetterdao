@@ -213,7 +213,11 @@ export const StatsPageContent = () => {
   const topUsersForSelectedApp = useMemo(() => {
     if (!selectedAppId || !appUsers[selectedAppId]) return []
 
-    return appUsers[selectedAppId]
+    const selectedAppUsers = appUsers[selectedAppId]
+
+    if (!selectedAppUsers) return []
+
+    return selectedAppUsers
       .slice() // Create a copy to avoid mutating original data
       .sort((a, b) => b.totalRewardAmount - a.totalRewardAmount)
   }, [selectedAppId, appUsers])
