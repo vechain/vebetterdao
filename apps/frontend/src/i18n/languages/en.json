@@ -617,8 +617,8 @@
   "Pending request removed!": "Pending request removed!",
   "You are qualified!": "You are qualified!",
   "To be able to vote on the next round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!": "To be able to vote on the next round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!",
-  "Your delegatee needs {{missingActions}} more actions": "Your delegatee needs {{missingActions}} more actions",
-  "Your delegatee needs {{missingActions}} more action": "Your delegatee needs {{missingActions}} more action",
+  "Your delegator needs {{missingActions}} more actions": "Your delegator needs {{missingActions}} more actions",
+  "Your delegator needs {{missingActions}} more action": "Your delegator needs {{missingActions}} more action",
   "You need {{missingActions}} more action": "You need {{missingActions}} more action",
   "You need {{missingActions}} more actions": "You need {{missingActions}} more actions",
   "You need at least {{missingActions}} more action to become able to vote on this round.": "You need at least {{missingActions}} more action to become able to vote on this round.",
@@ -640,10 +640,6 @@
   "Removing linking...": "Removing linking...",
   "Account address is required": "Account address is required",
   "Link a Primary Account": "Link a Primary Account",
-  "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.": "By linking this account, all Better Actions will be transferred to the Primary Account, which will also hold exclusive voting power. The Primary Account must approve the link request first.",
-  "You will only be able to vote from your Primary account.": "You will only be able to vote from your Primary account.",
-  "What account do you want to link?": "What account do you want to link?",
-  "Link this account": "Link this account",
   "You will not able to vote when the user accept your request.": "You will not able to vote when the user accept your request.",
   "Are you sure you want to reject the Voting Qualification delegation?": "Are you sure you want to reject the Voting Qualification delegation?",
   "You will not be able to vote using delegator's Voting Qualification": "You will not be able to vote using delegator's Voting Qualification",
@@ -1083,5 +1079,9 @@
   "voted by": "voted by",
   "wallets": "wallets",
   "See more details on": "See more details on",
-  "VePassport activation from round 18": "VePassport activation from round 18"
+  "VePassport activation from round 18": "VePassport activation from round 18",
+  "Which Primary Account would you like to link to?": "Which Primary Account would you like to link to?",
+  "Become a secondary account": "Become a secondary account",
+  "Send link request": "Send link request",
+  "By linking this account to a primary account, all your future better actions will be transferred to it, which will also hold exclusive voting power.": "By linking this account to a primary account, all your future better actions will be transferred to it, which will also hold exclusive voting power."
 }

@@ -11,6 +11,7 @@ import { ProposalSessionSection } from "@/components/ProposalSessionSection"
 import { ProposalTimeline } from "@/components/ProposalSessionSection/components/ProposalTimeline"
 import { useMemo } from "react"
 import { ProposalVoteCommentList } from "./ProposalVoteCommentList"
+import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 
 type Props = {
   proposalId: string
@@ -44,6 +45,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
   return (
     <VStack w="full" alignItems="stretch" gap={8}>
       {proposal.state === ProposalState.Canceled && <ProposalCanceledAlert />}
+      {proposal.state === ProposalState.Active && <CantVoteCard />}
       <ProposalOverview />
       <Grid templateColumns="repeat(3, 1fr)" gap={[8, 8, 8]} w="full">
         <GridItem colSpan={[3, 3, 2]} gap={8}>
