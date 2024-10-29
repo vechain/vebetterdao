@@ -29,7 +29,10 @@ const MotionVStack = motion(VStack)
 
 const isSelected = (route: Route, pathname: string) => {
   if (route.onClick === "/") return pathname === "/"
-  if (typeof route.onClick === "string") return pathname.startsWith(route.onClick)
+  if (typeof route.onClick === "string") {
+    if (route.onClick.startsWith("/profile")) return pathname === "/profile"
+    return pathname.startsWith(route.onClick)
+  }
   return false
 }
 
