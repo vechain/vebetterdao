@@ -986,7 +986,7 @@ describe("X-Apps - @shard3", function () {
       await waitForRoundToEnd(round1)
       let round2 = await startNewAllocationRound()
 
-      // app should not be eligible from this round
+      // app should be eligible from this round
       isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
       expect(isEligibleForVote).to.eql(true)
 

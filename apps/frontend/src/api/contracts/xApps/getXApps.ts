@@ -33,7 +33,13 @@ export type UnendorsedApp = XApp & {
  * @param thor  the thor client
  * @returns  all the available xApps in the ecosystem capped to 256 see {@link XApp}
  */
-export const getXApps = async (thor: Connex.Thor): Promise<{ active: XApp[]; unendorsed: UnendorsedApp[] }> => {
+
+type GetAllApps = {
+  active: XApp[]
+  unendorsed: UnendorsedApp[]
+  allApps: (XApp | UnendorsedApp)[]
+}
+export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
   const clauses = [
     {
       to: X2EARNAPPS_CONTRACT,
@@ -85,5 +91,6 @@ export const getXApps = async (thor: Connex.Thor): Promise<{ active: XApp[]; une
   return {
     active: apps,
     unendorsed: unendorsedApps,
+    allApps: [...apps, ...unendorsedApps],
   }
 }

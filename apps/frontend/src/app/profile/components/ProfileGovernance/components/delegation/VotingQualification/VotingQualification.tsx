@@ -1,50 +1,50 @@
+import { useMemo } from "react"
 import { Heading, VStack, Card, CardBody, HStack, Button, Text, Flex, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { useGetUserDelegatee, useUserScore } from "@/api"
-import { useMemo } from "react"
+import { useCanUserVote, useGetDelegatee, useGetPendingDelegationsDelegateePOV, useUserScore } from "@/api"
 import { UilArrowUpRight, UilCheck } from "@iconscout/react-unicons"
 import { DelegationModal } from "./components/DelegationModal"
-import { useGetUserPendingDelegationsDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
 import { DelegatorDelegations } from "./components/DelegatorDelegations"
 import { PendingDelegationDelegatorPOV } from "./components/PendingDelegationDelegatorPOV"
 import { useMissingActionsLabel } from "@/hooks"
 
-export const VotingQualification = () => {
+type Props = {
+  address: string
+  isConnectedUser: boolean
+}
+
+export const VotingQualification = ({ address, isConnectedUser }: Props) => {
   const { t } = useTranslation()
-  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetUserDelegatee()
-  const isDelegator = !isDelegateeLoading && !!Number(delegateeAddress)
+  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
+  const isDelegator = !isDelegateeLoading && !!delegateeAddress
 
   const { data: pendingDelegations, isLoading: isPendingDelegationsLoading } =
-    useGetUserPendingDelegationsDelegatorPOV()
+    useGetPendingDelegationsDelegateePOV(address)
 
-  const {
-    missingActions,
-    isUserQualified,
-    isUserDelegatee,
-    scorePercentage,
-    isLoading: isScoreLoading,
-  } = useUserScore()
+  const { missingActions, isUserDelegatee, scorePercentage, isLoading: isScoreLoading } = useUserScore(address)
+
+  const { isPerson } = useCanUserVote(address, delegateeAddress)
 
   const missingActionsLabel = useMissingActionsLabel({ missingActions, isUserDelegatee })
 
-  const border = isUserQualified ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
+  const border = isPerson ? "1px solid #D5D5D5" : "1px solid#EC9BAF"
   const progressLabel = useMemo(() => {
-    if (isUserQualified) return t("QUALIFIED TO VOTE")
+    if (isPerson) return t("QUALIFIED TO VOTE")
     return missingActionsLabel.short
-  }, [isUserQualified, missingActionsLabel.short, t])
+  }, [isPerson, missingActionsLabel.short, t])
 
   const descriptionLabel = useMemo(() => {
-    if (isUserQualified)
+    if (isPerson)
       return t(
         "Your are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens",
       )
     return t("To be availabe to vote on the platform, you must do more Better Actions on the Apps")
-  }, [isUserQualified, t])
+  }, [isPerson, t])
 
   const darkColor = useMemo(() => {
-    if (isUserQualified) return "#3DBA67"
+    if (isPerson) return "#3DBA67"
     return "#C84968"
-  }, [isUserQualified])
+  }, [isPerson])
 
   const lightColor = "#FCEEF1"
 
@@ -62,7 +62,7 @@ export const VotingQualification = () => {
                 <Heading fontSize="xl" fontWeight="700">
                   {t("Your Voting Qualification")}
                 </Heading>
-                {!isDelegator && Number(pendingDelegations) === 0 && (
+                {isConnectedUser && !isDelegator && Number(pendingDelegations) === 0 && (
                   <Button
                     variant={"primaryGhost"}
                     onClick={delegationModal.onOpen}
@@ -100,8 +100,8 @@ export const VotingQualification = () => {
               </HStack>
             </VStack>
           </VStack>
-          <DelegatorDelegations />
-          <PendingDelegationDelegatorPOV />
+          <DelegatorDelegations address={address} />
+          <PendingDelegationDelegatorPOV address={address} />
         </VStack>
       </CardBody>
       <DelegationModal modal={delegationModal} />

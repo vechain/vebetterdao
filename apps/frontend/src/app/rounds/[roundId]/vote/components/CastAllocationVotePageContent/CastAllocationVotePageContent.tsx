@@ -1,7 +1,7 @@
 "use client"
 import { useCanUserVote, useRoundXApps } from "@/api"
 import { Heading, Text, VStack } from "@chakra-ui/react"
-import { useCallback, useLayoutEffect, useState } from "react"
+import { useCallback, useLayoutEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
@@ -19,8 +19,22 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
 
-  const { data: selectedApps, setData: onSelectedAppsChange } = useCastAllocationFormStore()
   const xAppsQuery = useRoundXApps(roundId)
+
+  const { data: selectedApps, setData: onSelectedAppsChange } = useCastAllocationFormStore()
+
+  // Handle the case when user has data in LS but the app is not active anymore
+  const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
+    return selectedApps
+      .filter(vote => vote.rawValue > 0 && xAppsQuery.data?.find(app => app.id === vote.appId))
+      .map(vote => {
+        return {
+          appId: vote.appId,
+          rawValue: vote.rawValue,
+          value: vote.value,
+        }
+      })
+  }, [selectedApps, xAppsQuery])
 
   const [onContinueError, setOnContinueError] = useState<string | null>(null)
 
@@ -63,7 +77,7 @@ export const CastAllocationPageVoteContent = ({ roundId }: Props) => {
         </Text>
 
         <SearchAndSelectApps
-          selectedApps={selectedApps}
+          selectedApps={parsedVotes}
           onSelectedAppsChange={handleOnSelectedAppsChange}
           xAppsQuery={xAppsQuery}
         />

@@ -1,7 +1,6 @@
 import { getCallKey, useCall } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { useWallet } from "@vechain/dapp-kit-react"
 
 const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
 const vePassportInterface = VeBetterPassport__factory.createInterface()
@@ -31,13 +30,4 @@ export const useGetPendingDelegationsDelegateePOV = (delegatee?: string | null) 
     mapResponse: response => response.decoded[0] ?? [],
     enabled: !!delegatee,
   })
-}
-
-/**
- * Hook to get pending delegations from the VeBetterPassport contract for the current user.
- * @returns An array of addresses representing delegators with pending delegations for the current user.
- */
-export const useGetUserPendingDelegationsDelegateePOV = () => {
-  const { account } = useWallet()
-  return useGetPendingDelegationsDelegateePOV(account)
 }

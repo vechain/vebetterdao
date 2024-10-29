@@ -22,7 +22,7 @@ export const UpdateAppsEligibility = () => {
   const { data: x2EarnApps } = useXApps()
 
   // loop through x2EarnApps and check if appIds are in x2EarnApps,
-  // if they are in then put elegible true, otherwise eligible false
+  // if they are in then put eligible true, otherwise eligible false
   let x2EarnAppsEligible = useMemo(() => {
     return x2EarnApps?.active.map(app => {
       return {

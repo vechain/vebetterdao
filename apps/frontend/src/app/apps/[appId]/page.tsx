@@ -1,15 +1,15 @@
-import { ResolvingMetadata, Metadata } from "next"
-import { getConfig } from "@repo/config"
-import { AppDetailPage } from "./AppDetailPage"
 import { getNodeJsConnex } from "@/utils"
+import { getConfig } from "@repo/config"
+import { Metadata, ResolvingMetadata } from "next"
+import { AppDetailPage } from "./AppDetailPage"
 
 //Need precise import to avoid having dapp-kit imported and indexed somewhere
-import { getXApps } from "@/api/contracts/xApps/getXApps"
 import { getXAppMetadata } from "@/api/contracts/xApps/getXAppMetadata"
+import { getXApps } from "@/api/contracts/xApps/getXApps"
 
-import { compareAddresses } from "@repo/utils/AddressUtils"
 import { getXAppsMetadataBaseUri } from "@/api/contracts/xApps/getXAppsMetadataBaseUri"
 import { getIpfsMetadata } from "@/api/ipfs"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 
 export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
   // read route params

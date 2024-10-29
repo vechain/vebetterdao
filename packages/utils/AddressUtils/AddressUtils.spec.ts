@@ -132,3 +132,30 @@ describe("regexPattern", () => {
     expect(regexPattern()).toStrictEqual(/^0x[a-fA-F0-9]{40}$/)
   })
 })
+
+describe("leftPadWithZeros", () => {
+  test("no padding needed", () => {
+    expect(leftPadWithZeros("0x1234", 4)).toBe("0x1234")
+  })
+
+  test("padding needed", () => {
+    expect(leftPadWithZeros("0x1234", 8)).toBe("0x00001234")
+  })
+
+  test("no prefix, no padding needed", () => {
+    expect(leftPadWithZeros("1234", 4)).toBe("0x1234")
+  })
+
+  test("no prefix, padding needed", () => {
+    expect(leftPadWithZeros("1234", 8)).toBe("0x00001234")
+  })
+
+  test("not a string", () => {
+    // @ts-ignore
+    expect(() => leftPadWithZeros(1234, 8)).toThrow(TypeError)
+  })
+
+  test("given length is less than the string length", () => {
+    expect(() => leftPadWithZeros("0x1234", 3)).toThrow(Error)
+  })
+})

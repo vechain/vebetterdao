@@ -4,6 +4,7 @@ import {
   useAllocationsRoundState,
   useGetVotesOnBlock,
   useHasVotedInRound,
+  useRoundXApps,
   useVotingThreshold,
 } from "@/api"
 import { Button, HStack, Heading, Text, VStack } from "@chakra-ui/react"
@@ -29,7 +30,23 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
 
   const router = useRouter()
 
+  const xAppsQuery = useRoundXApps(roundId)
+
   const { data: votes, setData: onVotesChange } = useCastAllocationFormStore()
+
+  // Handle the case when user has data in LS but the app is not active anymore
+  const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
+    return votes
+      .filter(vote => vote.rawValue > 0 && xAppsQuery.data?.find(app => app.id === vote.appId))
+      .map(vote => {
+        return {
+          appId: vote.appId,
+          rawValue: vote.rawValue,
+          value: vote.value,
+        }
+      })
+  }, [votes, xAppsQuery])
+
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
 
   const { data: roundInfo } = useAllocationsRound(roundId)
@@ -129,7 +146,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
           </Button>
         </HStack>
         <VStack w="full" spacing={8} align={"flex-start"}>
-          {votes.map((vote, index) => {
+          {parsedVotes.map((vote, index) => {
             return (
               <SelectAppVotesInput
                 onChange={onAppVotesChange(index)}
