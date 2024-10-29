@@ -1,4 +1,4 @@
-import { useAllocationAmount, useAllocationsRound } from "@/api"
+import { useAllocationAmount, useAllocationsRound, useMostVotedAppsInRound } from "@/api"
 import {
   Box,
   Card,
@@ -20,7 +20,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { AllocationStateBadge } from "@/components/AllocationStateBadge"
 import { useTranslation } from "react-i18next"
 import { B3TRIcon } from "@/components/Icons"
-import { AllocationRoundParticipatingXApps } from "./AllocationRoundParticipatingXApps"
+import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 
 type Props = {
   roundId: string
@@ -54,6 +54,8 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
 
   //TODO: dark mode support
   const nonActiveBackgroundColor = useColorModeValue("rgba(166, 217, 110, 0.12)", "rgba(166, 217, 110, 0.12)")
+
+  const mostVotedAppsQuery = useMostVotedAppsInRound(roundId)
 
   return (
     <Card
@@ -132,7 +134,11 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
                 </Skeleton>
               </Box>
 
-              <AllocationRoundParticipatingXApps roundId={roundId} />
+              <OverlappedAppsImages
+                appsIds={mostVotedAppsQuery.data.map(a => a.id)}
+                isLoading={mostVotedAppsQuery.isLoading}
+                otherAppsActiveColor={isActive}
+              />
             </Stack>
             <Icon
               as={FaAngleRight}

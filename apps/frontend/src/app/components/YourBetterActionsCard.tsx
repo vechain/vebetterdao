@@ -1,4 +1,4 @@
-import { useSustainabilityActions } from "@/api"
+import { useSustainabilityActions, useSustainabilitySingleUserOverview } from "@/api"
 import { UserSustainabilityOverviewStats } from "@/components"
 import { Card, CardBody, Heading, VStack, Text, Button } from "@chakra-ui/react"
 
@@ -9,6 +9,7 @@ import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActio
 import { NoAccountActionCard } from "./NoAccountActionCard"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
+import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 
 type Props = {
   address: string
@@ -28,6 +29,10 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
     direction: "desc",
   })
 
+  const { data: userOverview, isLoading: userOverviewLoading } = useSustainabilitySingleUserOverview({
+    wallet: address ?? undefined,
+  })
+
   const lastActions = data?.pages.map(page => page.data).flat() ?? []
   const lastActionsData = lastActions.slice(0, maxActions)
 
@@ -36,7 +41,15 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
       <CardBody>
         <VStack spacing={4} align="stretch">
           <VStack spacing={2} align="stretch">
-            <Heading size="md">{isConnectedUser ? t("Your better actions") : t("Better actions")}</Heading>
+            <VStack w="full" align={"flex-start"}>
+              <OverlappedAppsImages
+                appsIds={userOverview?.uniqueXAppInteractions ?? []}
+                isLoading={userOverviewLoading}
+                iconSize={36}
+                maxAppsToShow={10}
+              />
+              <Heading size="md">{isConnectedUser ? t("Your better actions") : t("Better actions")}</Heading>
+            </VStack>
             {isConnectedUser && (
               <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
                 {t("Use Apps to earn B3TR tokens through your Better Actions")}
