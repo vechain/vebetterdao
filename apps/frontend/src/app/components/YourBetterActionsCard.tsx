@@ -1,4 +1,4 @@
-import { useSustainabilityActions, useSustainabilitySingleUserOverview } from "@/api"
+import { useSustainabilityActions } from "@/api"
 import { UserSustainabilityOverviewStats } from "@/components"
 import { Card, CardBody, Heading, VStack, Text, Button } from "@chakra-ui/react"
 
@@ -9,7 +9,6 @@ import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActio
 import { NoAccountActionCard } from "./NoAccountActionCard"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 
 type Props = {
   address: string
@@ -29,10 +28,6 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
     direction: "desc",
   })
 
-  const { data: userOverview, isLoading: userOverviewLoading } = useSustainabilitySingleUserOverview({
-    wallet: address ?? undefined,
-  })
-
   const lastActions = data?.pages.map(page => page.data).flat() ?? []
   const lastActionsData = lastActions.slice(0, maxActions)
 
@@ -42,12 +37,6 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
         <VStack spacing={4} align="stretch">
           <VStack spacing={2} align="stretch">
             <VStack w="full" align={"flex-start"}>
-              <OverlappedAppsImages
-                appsIds={userOverview?.uniqueXAppInteractions ?? []}
-                isLoading={userOverviewLoading}
-                iconSize={36}
-                maxAppsToShow={10}
-              />
               <Heading size="md">{isConnectedUser ? t("Your better actions") : t("Better actions")}</Heading>
             </VStack>
             {isConnectedUser && (
@@ -58,6 +47,7 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
           </VStack>
           <VStack spacing={6} align="stretch">
             {address && <UserSustainabilityOverviewStats address={address} />}
+
             {renderActions && (
               <VStack spacing={4} align="stretch">
                 {address ? (
