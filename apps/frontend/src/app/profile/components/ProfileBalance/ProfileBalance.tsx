@@ -2,7 +2,10 @@ import { VStack } from "@chakra-ui/react"
 import { UserTransactions } from "./components/UserTransactions"
 import { SwapB3trVot3 } from "@/components/GmNFTAndNodeCard/components/SwapB3trVot3"
 
-export const ProfileBalance = () => {
+type Props = {
+  address: string
+}
+export const ProfileBalance = ({ address }: Props) => {
   return (
     <VStack align={"stretch"} gap={4}>
       <SwapB3trVot3
@@ -22,7 +25,7 @@ export const ProfileBalance = () => {
           bgRepeat: "no-repeat",
         }}
       />
-      <UserTransactions />
+      <UserTransactions address={address} />
     </VStack>
   )
 }

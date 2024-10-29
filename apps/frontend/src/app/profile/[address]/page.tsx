@@ -6,8 +6,8 @@ import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import { useEffect } from "react"
 
-const TransactionsContent = dynamic(
-  () => import("./components/TransactionsContent").then(mod => mod.TransactionsContent),
+const ProfilePageContent = dynamic(
+  () => import("../components/ProfilePageContent").then(mod => mod.ProfilePageContent),
   {
     ssr: false,
     loading: () => (
@@ -18,13 +18,19 @@ const TransactionsContent = dynamic(
   },
 )
 
-export default function Home() {
+type Props = {
+  params: {
+    address: string
+  }
+}
+
+export default function Profile({ params }: Readonly<Props>) {
   useEffect(() => {
-    AnalyticsUtils.trackPage("Transactions")
+    AnalyticsUtils.trackPage("Profile")
   }, [])
   return (
     <MotionVStack>
-      <TransactionsContent />
+      <ProfilePageContent address={params.address} />
     </MotionVStack>
   )
 }
