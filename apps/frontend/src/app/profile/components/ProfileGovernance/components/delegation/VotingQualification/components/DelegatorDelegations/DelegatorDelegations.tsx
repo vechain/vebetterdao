@@ -20,7 +20,7 @@ export const DelegatorDelegations = ({ address }: Props) => {
   const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
 
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
-  const isDelegator = !isDelegateeLoading && !!Number(delegateeAddress)
+  const isDelegator = !isDelegateeLoading && !!delegateeAddress
 
   const revokeDelegationModal = useDisclosure()
 

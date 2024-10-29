@@ -13,7 +13,7 @@ import { useAllocationRoundSnapshot, useIsPersonAtTimepoint } from "@/api"
  * Hook to check if a user can vote in a round.
  * @returns The user's voting status.
  */
-export const useCanUserVote = (user?: string) => {
+export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
   const { account } = useWallet()
   const parsedAccount = user || account
   const { data: roundId } = useCurrentAllocationsRoundId()
@@ -29,7 +29,10 @@ export const useCanUserVote = (user?: string) => {
 
   const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, parsedAccount ?? undefined)
   const isVotingConcluded = [1, 2].includes(state ?? 0)
-  const { data: isPerson, isLoading: isPersonLoading } = useIsPersonAtTimepoint(parsedAccount, roundSnapshot)
+  const { data: isPerson, isLoading: isPersonLoading } = useIsPersonAtTimepoint(
+    delegateeAddress ?? parsedAccount,
+    roundSnapshot,
+  )
 
   return {
     data: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && isPerson,

@@ -7,6 +7,7 @@ import {
   useB3trBalance,
   useCanUserVote,
   useCurrentAllocationsRoundId,
+  useGetDelegatee,
   useVot3Balance,
   useVotingRewards,
 } from "@/api"
@@ -41,7 +42,7 @@ export const ActionBanner = () => {
   const { account } = useWallet()
 
   const votingRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
-  const { data: canUserVote, isLoading: canUserVoteLoading } = useCanUserVote()
+  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account)
 
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account ?? undefined)
@@ -61,11 +62,11 @@ export const ActionBanner = () => {
     return balanceLoading || b3trBalanceLoading || vot3BalanceLoading
   }, [balanceLoading, b3trBalanceLoading, vot3BalanceLoading])
 
-  const { isPerson, isLoading } = useCanUserVote(account ?? undefined)
+  const { data: canUserVote, isPerson, isLoading } = useCanUserVote(account ?? undefined, delegateeAddress)
 
-  const showDoActionBanner = !!account && !isPerson && !isLoading
+  const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
-  const showCastVoteBanner = !!account && !canUserVoteLoading && canUserVote
+  const showCastVoteBanner = !!account && !isLoading && canUserVote
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
 
   const slides = useMemo(() => {

@@ -49,7 +49,14 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
           {dayjs(date).format("MMMM D YYYY").toUpperCase()}
         </Text>
         {flatActions.map((action, index) => (
-          <BetterActionCard key={index} action={action} />
+          <BetterActionCard
+            key={index}
+            amountB3tr={action.amount}
+            appId={action.appId}
+            blockNumber={action.blockNumber}
+            blockTimestamp={action.blockTimestamp}
+            proof={action.proof}
+          />
         ))}
       </VStack>
     </BaseModal>
