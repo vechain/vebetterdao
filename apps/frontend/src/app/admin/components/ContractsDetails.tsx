@@ -7,6 +7,7 @@ import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useHasRoles } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { getContractByAddress } from "@/constants"
 
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(2)
@@ -18,80 +19,67 @@ export const ContractsDetails = () => {
       <ContractDetailsCard
         title="B3TR"
         address={config.b3trContractAddress}
-        roles={["DEFAULT_ADMIN_ROLE", "MINTER_ROLE", "PAUSER_ROLE"]}
+        roles={getContractByAddress(config.b3trContractAddress)?.roles}
       />
       <ContractDetailsCard
         title="B3TRGovernor"
         address={config.b3trGovernorAddress}
-        roles={[
-          "DEFAULT_ADMIN_ROLE",
-          "PROPOSAL_EXECUTOR_ROLE",
-          "PAUSER_ROLE",
-          "GOVERNOR_FUNCTIONS_SETTINGS_ROLE",
-          "CONTRACTS_ADDRESS_MANAGER_ROLE",
-        ]}
+        roles={getContractByAddress(config.b3trGovernorAddress)?.roles}
       />
       <ContractDetailsCard
         title="Emissions"
         address={config.emissionsContractAddress}
-        roles={[
-          "DEFAULT_ADMIN_ROLE",
-          "MINTER_ROLE",
-          "UPGRADER_ROLE",
-          "CONTRACTS_ADDRESS_MANAGER_ROLE",
-          "DECAY_SETTINGS_MANAGER_ROLE",
-        ]}
+        roles={getContractByAddress(config.emissionsContractAddress)?.roles}
       />
       <ContractDetailsCard
         title="GalaxyMember"
         address={config.galaxyMemberContractAddress}
-        roles={["DEFAULT_ADMIN_ROLE", "PAUSER_ROLE", "UPGRADER_ROLE", "MINTER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE"]}
+        roles={getContractByAddress(config.galaxyMemberContractAddress)?.roles}
       />
       <ContractDetailsCard
         title="TimeLock"
         address={config.timelockContractAddress}
-        roles={["DEFAULT_ADMIN_ROLE", "Proposer", "Executor", "UPGRADER_ROLE"]}
+        roles={getContractByAddress(config.timelockContractAddress)?.roles}
       />
       <ContractDetailsCard
         title="Treasury"
         address={config.treasuryContractAddress}
-        roles={["DEFAULT_ADMIN_ROLE", "PAUSER_ROLE", "UPGRADER_ROLE", "GOVERNANCE_ROLE"]}
+        roles={getContractByAddress(config.treasuryContractAddress)?.roles}
       />
       <ContractDetailsCard
         title="VOT3"
         address={config.vot3ContractAddress}
-        roles={["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "PAUSER_ROLE"]}
+        roles={getContractByAddress(config.vot3ContractAddress)?.roles}
       />
       <ContractDetailsCard
         title="VoterRewards"
         address={config.voterRewardsContractAddress}
-        roles={["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "VOTE_REGISTRAR_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE"]}
+        roles={getContractByAddress(config.voterRewardsContractAddress)?.roles}
       />
       <ContractDetailsCard
         title="X2EarnApps"
         address={config.x2EarnAppsContractAddress}
-        roles={["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "GOVERNANCE_ROLE"]}
+        roles={getContractByAddress(config.x2EarnAppsContractAddress)?.roles}
       />
       <ContractDetailsCard
         title="XAllocationPool"
         address={config.xAllocationPoolContractAddress}
-        roles={["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "GOVERNANCE_ROLE"]}
+        roles={getContractByAddress(config.xAllocationPoolContractAddress)?.roles}
       />
       <ContractDetailsCard
         title="XAllocationVoting"
         address={config.xAllocationVotingContractAddress}
-        roles={[
-          "DEFAULT_ADMIN_ROLE",
-          "UPGRADER_ROLE",
-          "GOVERNANCE_ROLE",
-          "ROUND_STARTER_ROLE",
-          "CONTRACTS_ADDRESS_MANAGER_ROLE",
-        ]}
+        roles={getContractByAddress(config.xAllocationVotingContractAddress)?.roles}
       />
       <ContractDetailsCard
         title="X2EarnRewardsPool"
         address={config.x2EarnRewardsPoolContractAddress}
-        roles={["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE", "IMPACT_KEY_MANAGER_ROLE"]}
+        roles={getContractByAddress(config.x2EarnRewardsPoolContractAddress)?.roles}
+      />
+      <ContractDetailsCard
+        title="VeBetterPassport"
+        address={config.veBetterPassportContractAddress}
+        roles={getContractByAddress(config.veBetterPassportContractAddress)?.roles}
       />
     </Grid>
   )
@@ -100,9 +88,9 @@ export const ContractsDetails = () => {
 type ContractDetailsCardProps = {
   title: string
   address: string
-  roles: string[]
+  roles?: string[]
 }
-const ContractDetailsCard = ({ title, address, roles }: ContractDetailsCardProps) => {
+const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCardProps) => {
   const { account } = useWallet()
 
   //Get balances
@@ -137,7 +125,7 @@ const ContractDetailsCard = ({ title, address, roles }: ContractDetailsCardProps
       hasRole: role.data,
       name: roles[index],
     }))
-  }, [userHasRoles])
+  }, [userHasRoles, roles])
 
   return (
     <Card w="full" borderRadius={"2xl"} p={2}>
@@ -150,7 +138,7 @@ const ContractDetailsCard = ({ title, address, roles }: ContractDetailsCardProps
             <Text fontSize="md" wordBreak={"break-word"} fontWeight={600}>
               {"Address"}
             </Text>
-            <AddressButton address={address} size={"sm"} />
+            <AddressButton address={address} size={"sm"} showAddressIcon={false} />
           </HStack>
 
           <HStack w="full" justify={"space-between"}>

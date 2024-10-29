@@ -21,6 +21,9 @@ import { SelectedRoundRadioCard } from "./SelectedRoundRadioCard"
 import { useTranslation } from "react-i18next"
 import { isUndefined } from "lodash"
 
+import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
+
 const roundsToRender = 3
 
 export const NewProposalRoundPageContent = () => {
@@ -46,6 +49,10 @@ export const NewProposalRoundPageContent = () => {
 
   const onContinue = useCallback(() => {
     router.push("/proposals/new/form/support")
+    AnalyticsUtils.trackEvent(
+      buttonClicked,
+      buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_ROUND_SELECTION),
+    )
   }, [router])
 
   const rounds = useMemo(() => {

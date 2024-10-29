@@ -1,7 +1,7 @@
 // We recommend this pattern to be able to use async/await everywhere
 
 import { getContractsConfig } from "@repo/config"
-import { deployAll } from "./deploy"
+import { deployAll } from "./deployAll"
 import { EnvConfig } from "@repo/config/contracts"
 
 // and properly handle errors.

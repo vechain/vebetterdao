@@ -1,9 +1,11 @@
+import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 import { AllocationRoundsList, TotalAllocations } from "@/components"
 import { VStack, HStack, Stack } from "@chakra-ui/react"
 
 export const AllocationRoundsContent = () => {
   return (
-    <VStack w="full" spacing={12} data-testid="allocations-page">
+    <VStack w="full" spacing={8} data-testid="allocations-page">
+      <CantVoteCard />
       <Stack
         direction={["column-reverse", "column-reverse", "row"]}
         w="full"
