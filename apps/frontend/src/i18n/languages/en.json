@@ -978,5 +978,16 @@
   "Start Round:": "Start Round:",
   "End Round:": "End Round:",
   "Select start round": "Select start round",
-  "Select end round": "Select end round"
+  "Select end round": "Select end round",
+  "Active Users per App": "Active Users per App",
+  "Total Rewards per App": "Total Rewards per App",
+  "Average and Median Reward per Action per App": "Average and Median Reward per Action per App",
+  "Top Users by Rewards": "Top Users by Rewards",
+  "Top Users by Rewards for Selected App": "Top Users by Rewards for Selected App",
+  "Select App:": "Select App:",
+  "Select an app": "Select an app",
+  "Top 50 Users by Rewards for": "Top 50 Users by Rewards for",
+  "Please select an app to view the top users.": "Please select an app to view the top users.",
+  "Users by Rewards for": "Users by Rewards for",
+  "Please select an app to view the users.": "Please select an app to view the users."
 }
