@@ -55,7 +55,7 @@ export const TokensBalance = ({ address, showGoToBalance = false }: Props) => {
         <Image src={"/images/cloud-background.png"} alt="cloud" objectFit={"contain"} />
       </Box>
       <HStack color="white" zIndex={2} justifyContent={"space-between"}>
-        <Heading fontSize="xl">{t("Your token balance")}</Heading>
+        <Heading fontSize="xl">{t("Balance")}</Heading>
         {showGoToBalance && (
           <HStack _hover={{ cursor: "pointer", textDecoration: "underline" }} gap={1} onClick={goToBalance}>
             <Text fontWeight={500}>{t("Go to balance")}</Text>

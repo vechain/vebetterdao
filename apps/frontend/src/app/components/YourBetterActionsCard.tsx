@@ -7,6 +7,8 @@ import { NoActionsCard } from "./NoActionsCard"
 import { useRouter } from "next/navigation"
 import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
 import { NoAccountActionCard } from "./NoAccountActionCard"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
   address: string
@@ -17,6 +19,9 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
   const { t } = useTranslation()
 
   const router = useRouter()
+
+  const { account } = useWallet()
+  const isConnectedUser = compareAddresses(account ?? "", address)
 
   const { data } = useSustainabilityActions({
     wallet: address ?? undefined,
@@ -31,10 +36,12 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
       <CardBody>
         <VStack spacing={4} align="stretch">
           <VStack spacing={2} align="stretch">
-            <Heading size="md">{t("Your better actions")}</Heading>
-            <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
-              {t("Use Apps to earn B3TR tokens through your Better Actions")}
-            </Text>
+            <Heading size="md">{isConnectedUser ? t("Your better actions") : t("Better actions")}</Heading>
+            {isConnectedUser && (
+              <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
+                {t("Use Apps to earn B3TR tokens through your Better Actions")}
+              </Text>
+            )}
           </VStack>
           <VStack spacing={6} align="stretch">
             {address && <UserSustainabilityOverviewStats address={address} />}
