@@ -109,18 +109,19 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
       {yourRaking && (
         <VStack
           pos="fixed"
-          alignItems={"stretch"}
           bottom={0}
           w="full"
           bg="white"
-          boxShadow="md"
+          boxShadow="0px -1px 9px 0px rgba(0, 0, 0, 0.08);"
           p={4}
           zIndex={2}
           left={0}
           right={0}
           borderTopWidth={1}
           borderColor="gray.200">
-          <LeaderboardRankingComponent ranking={yourRaking} isYourRanking={true} />
+          <VStack w="full" maxW={"container.md"} mx="auto" align="stretch">
+            <LeaderboardRankingComponent ranking={yourRaking} isYourRanking={true} />
+          </VStack>
         </VStack>
       )}
       <VStack spacing={4} align="flex-start" w="full">
