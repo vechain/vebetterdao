@@ -95,7 +95,8 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
         id="user-votes"
         maxH={[!account ? "600px" : "auto", "auto"]}
         overflowY={"hidden"}
-        variant="baseWithBorder">
+        variant="baseWithBorder"
+        data-testid={"user-votes-card"}>
         <CardBody>
           <VStack flex={1} w="full" spacing={8} align={"flex-start"}>
             <VStack spacing={2} align="flex-start" w="full">
