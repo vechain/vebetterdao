@@ -2560,7 +2560,7 @@ describe("VoterRewards - @shard7", () => {
       expect(await voterRewards.getReward(cycle, voter2.address)).to.equal(0) // Even if voter2 voted, he has 0 VOT3 tokens so he should not receive any rewards
     })
 
-    it.only("Should be able to increase voting rewards by upgrading GM NFT", async () => {
+    it("Should be able to increase voting rewards by upgrading GM NFT", async () => {
       const config = createLocalConfig()
       const {
         otherAccounts,
@@ -3405,7 +3405,7 @@ describe("VoterRewards - @shard7", () => {
   })
 
   describe("GM NFT Binding with Vechain nodes", () => {
-    it.only("Should not multiply voting power if GM NFT already voted for proposal", async () => {
+    it("Should not multiply voting power if GM NFT already voted for proposal", async () => {
       const description = "Test Proposal: testing propsal with random description!"
       const functionToCall = "tokenDetails"
 
