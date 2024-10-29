@@ -89,6 +89,7 @@
     "@types/uuid": "^9.0.8",
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/coverage-istanbul": "^1.4.0",
+    "d3-array": "^3.2.4",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
     "happy-dom": "^14.12.3",
