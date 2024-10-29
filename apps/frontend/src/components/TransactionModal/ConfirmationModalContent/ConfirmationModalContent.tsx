@@ -14,7 +14,9 @@ export const ConfirmationModalContent = ({
 }: ConfirmationModalContentProps) => {
   return (
     <VStack align={"center"} p={6} gap={6}>
-      <Heading size="md">{title}</Heading>
+      <Heading size="md" data-testid={"tx-modal-title"}>
+        {title}
+      </Heading>
       <Lottie
         style={{
           pointerEvents: "none",

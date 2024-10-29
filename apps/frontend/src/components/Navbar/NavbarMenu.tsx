@@ -70,7 +70,8 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
               leftIcon={<Icon as={route.icon} />}
               key={route.name}
               variant={selected ? "primaryAction" : "ghost"}
-              onClick={onClick}>
+              onClick={onClick}
+              data-testid={selected ? "current-section" : ""}>
               {route.name}
             </Button>
           )

@@ -40,7 +40,8 @@ export const StartEmissionsButton = () => {
         isDisabled={parseInt(currentRoundId ?? "0") > 0}
         colorScheme="blue"
         onClick={handleStartEmissions}
-        isLoading={loading}>
+        isLoading={loading}
+        data-testid={"start-voting-round-button"}>
         {t("Start emissions")}
       </Button>
 

@@ -128,7 +128,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
       <ResponsiveCard>
         <VStack w="full" spacing={8} align={"flex-start"}>
-          <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700}>
+          <Heading fontSize={["24px", "24px", "36px"]} fontWeight={700} data-testid={"voting-confirmation-page-title"}>
             {t("Review and confirm")}
           </Heading>
           <Text fontSize={"16px"} fontWeight={400} color="#6A6A6A">

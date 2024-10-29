@@ -6,7 +6,9 @@ import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import {
   useAllocationAmount,
   useAllocationsRoundState,
+  useCanUserVote,
   useCurrentAllocationsRoundId,
+  useGetDelegatee,
   useMostVotedAppsInRound,
 } from "@/api"
 import { useRoundProposals } from "../rounds/hooks/useRoundProposals"
@@ -15,11 +17,13 @@ import { AllocationStateBadge, B3TRIcon, ProposalCompactCard } from "@/component
 import { useRouter } from "next/navigation"
 import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const { account } = useWallet()
 
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
 
@@ -32,6 +36,9 @@ export const RoundInfoBottomSheet = () => {
   const { data: state } = useAllocationsRoundState(currentRoundId)
 
   const isOthersOverlappedAppsColorActive = state !== undefined && state !== 0
+
+  const { data: delegateeAddress } = useGetDelegatee(account ?? "")
+  const { data: canVote } = useCanUserVote(account ?? "", delegateeAddress)
 
   const totalAmount =
     Number(amounts?.treasury ?? 0) + Number(amounts?.voteX2Earn ?? 0) + Number(amounts?.voteXAllocations ?? 0)
@@ -164,13 +171,15 @@ export const RoundInfoBottomSheet = () => {
                   rounded={"full"}>
                   {t("See More")}
                 </Button>
-                <Button
-                  onClick={() => router.push(`/rounds/${allocationRound.roundId}/vote`)}
-                  colorScheme="primary"
-                  w="full"
-                  rounded={"full"}>
-                  {t("Vote now")}
-                </Button>
+                {canVote && (
+                  <Button
+                    onClick={() => router.push(`/rounds/${allocationRound.roundId}/vote`)}
+                    colorScheme="primary"
+                    w="full"
+                    rounded={"full"}>
+                    {t("Vote now")}
+                  </Button>
+                )}
               </HStack>
             </VStack>
           </VStack>

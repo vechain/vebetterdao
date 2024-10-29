@@ -46,9 +46,11 @@ export const SuccessModalContent = ({
   }
   return (
     <ModalAnimation>
-      <ModalCloseButton top={4} right={4} />
+      <ModalCloseButton top={4} right={4} data-testid={"modal-close-button"} />
       <VStack align={"center"} p={6}>
-        <Heading size="md">{title}</Heading>
+        <Heading size="md" data-testid={"tx-modal-title"}>
+          {title}
+        </Heading>
         <motion.div
           transition={{
             duration: 4,

@@ -15,14 +15,14 @@ type Props = {
 
 export const VotingQualification = ({ address, isConnectedUser }: Props) => {
   const { t } = useTranslation()
-  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
-  const isDelegator = !isDelegateeLoading && !!delegateeAddress
 
   const { data: pendingDelegations, isLoading: isPendingDelegationsLoading } =
     useGetPendingDelegationsDelegateePOV(address)
 
   const { missingActions, isUserDelegatee, scorePercentage, isLoading: isScoreLoading } = useUserScore(address)
 
+  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
+  const isDelegator = !isDelegateeLoading && !!delegateeAddress
   const { isPerson } = useCanUserVote(address, delegateeAddress)
 
   const missingActionsLabel = useMissingActionsLabel({ missingActions, isUserDelegatee })
