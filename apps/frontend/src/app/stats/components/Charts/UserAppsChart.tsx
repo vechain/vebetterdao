@@ -8,11 +8,12 @@ import { AppUsersData } from "@/api"
 interface Props {
   userId: string
   appActions: AppUsersData[]
+  type: "actions" | "rewards"
 }
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE", "#00C49F"]
 
-export const UserAppsChart: React.FC<Props> = ({ userId, appActions }) => {
+export const UserAppsChart: React.FC<Props> = ({ userId, appActions, type }) => {
   const toast = useToast()
 
   const { t } = useTranslation()
@@ -38,8 +39,8 @@ export const UserAppsChart: React.FC<Props> = ({ userId, appActions }) => {
           <YAxis type="category" dataKey="appName" tick={{ fontSize: 12 }} width={150} />
           <XAxis type="number" />
           <Tooltip />
-          <Bar dataKey="totalActions" fill="#8884d8">
-            <LabelList dataKey="totalActions" position="insideRight" />
+          <Bar dataKey={type == "actions" ? "totalActions" : "totalRewardAmount"} fill="#8884d8">
+            <LabelList dataKey={type == "actions" ? "totalActions" : "totalRewardAmount"} position="insideRight" />
             {appActions.map((_, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}

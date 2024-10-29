@@ -346,7 +346,7 @@ export const StatsPageContent = () => {
             <AccordionPanel pb={4}>
               <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} w="full">
                 {topUsersAppActions.map(({ userId, appActions }) => (
-                  <UserAppsChart key={userId} userId={userId} appActions={appActions} />
+                  <UserAppsChart key={userId} userId={userId} appActions={appActions} type="actions" />
                 ))}
               </Grid>
             </AccordionPanel>
@@ -363,7 +363,7 @@ export const StatsPageContent = () => {
             <AccordionPanel pb={4}>
               <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} w="full">
                 {topUsersByRewardsAppActions.map(({ userId, appActions }) => (
-                  <UserAppsChart key={userId} userId={userId} appActions={appActions} />
+                  <UserAppsChart key={userId} userId={userId} appActions={appActions} type="rewards" />
                 ))}
               </Grid>
             </AccordionPanel>
