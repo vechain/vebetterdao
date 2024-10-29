@@ -4,7 +4,7 @@ import {
   useSustainabilityUserOverviewPerRound,
 } from "@/api"
 
-import { Card, CardBody, Divider, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Button, Card, CardBody, Divider, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -12,6 +12,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { LeaderboardRankingComponent } from "./LeaderboardRankingComponent"
+import { useRouter } from "next/navigation"
 
 const MockLeaderboard = [
   { position: 1, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 100 },
@@ -25,6 +26,7 @@ const MockLeaderboard = [
 export const Leaderboard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const router = useRouter()
   const { data: roundId, isLoading: roundIdLoading } = useCurrentAllocationsRoundId()
 
   const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId })
@@ -55,6 +57,10 @@ export const Leaderboard = () => {
     address: entry?.entity as string,
     score: entry?.actionsRewarded as number,
   }))
+
+  const onSeeAllClick = () => {
+    router.push("/leaderboard")
+  }
 
   const renderRankings = useMemo(() => {
     if (leaderboardQuery.isLoading)
@@ -134,6 +140,9 @@ export const Leaderboard = () => {
               </>
             )}
           </VStack>
+          <Button size="md" variant={"link"} colorScheme="primary" w="full" onClick={onSeeAllClick}>
+            {t("See full leaderboard")}
+          </Button>
         </VStack>
       </CardBody>
     </Card>
