@@ -22,6 +22,7 @@ import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { t } from "i18next"
 
 enum ListView {
   ALL,
@@ -122,9 +123,9 @@ export const ProfileGovernance = ({ address }: Props) => {
             />
           ) : (
             <EmptyStateGovernance
-              title="Voted Proposals"
-              description="Your voted proposals will appear here."
-              buttonText="Explore governance"
+              title={t("Voted Proposals")}
+              description={t("Your voted proposals will appear here.")}
+              buttonText={t("Explore governance")}
               illustration={<HandPlantIcon color="rgba(117, 117, 117, 1)" />}
               buttonIcon={FaScaleBalanced}
               onClick={onExploreGovernance}
@@ -138,9 +139,9 @@ export const ProfileGovernance = ({ address }: Props) => {
             />
           ) : (
             <EmptyStateGovernance
-              title="Your Most Voted Apps"
-              description="Your top voted apps will appear here."
-              buttonText="Explore allocations"
+              title={t("Most voted apps")}
+              description={t("Your top voted apps will appear here.")}
+              buttonText={t("Explore allocations")}
               illustration={<VoteBoxIcon color="rgba(117, 117, 117, 1)" />}
               buttonIcon={FaChartPie}
               onClick={onExploreGovernance}

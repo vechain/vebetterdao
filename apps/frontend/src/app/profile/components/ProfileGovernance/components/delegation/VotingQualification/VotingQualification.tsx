@@ -35,11 +35,17 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
 
   const descriptionLabel = useMemo(() => {
     if (isPerson)
-      return t(
-        "Your are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens",
-      )
-    return t("To be availabe to vote on the platform, you must do more Better Actions on the Apps")
-  }, [isPerson, t])
+      return isConnectedUser
+        ? t(
+            "Your are now qualified to vote. To maintain your qualification, keep using the Apps and earning B3TR tokens",
+          )
+        : t(
+            "The user is now qualified to vote. To maintain the qualification, the user must keep using the Apps and earning B3TR tokens",
+          )
+    return isConnectedUser
+      ? t("To be availabe to vote on the platform, you must do more Better Actions on the Apps")
+      : t("To be availabe to vote on the platform, the user must do more Better Actions on the Apps")
+  }, [isPerson, t, isConnectedUser])
 
   const darkColor = useMemo(() => {
     if (isPerson) return "#3DBA67"
@@ -60,7 +66,7 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
             <VStack align="stretch">
               <HStack justify="space-between">
                 <Heading fontSize="xl" fontWeight="700">
-                  {t("Your Voting Qualification")}
+                  {t(isConnectedUser ? "Your Voting Qualification" : "Voting qualification")}
                 </Heading>
                 {isConnectedUser && !isDelegator && Number(pendingDelegations) === 0 && (
                   <Button
@@ -73,9 +79,10 @@ export const VotingQualification = ({ address, isConnectedUser }: Props) => {
                 )}
               </HStack>
               <Text color="#6A6A6A" fontSize="md">
-                {t(
-                  "To make sure you are a real person, you have to earn some of your tokens from Apps to be elegible to vote. You can also delegate your qualification to another account.",
-                )}
+                {isConnectedUser &&
+                  t(
+                    "To make sure you are a real person, you have to earn some of your tokens from Apps to be elegible to vote. You can also delegate your qualification to another account.",
+                  )}
               </Text>
             </VStack>
             <VStack align="stretch">
