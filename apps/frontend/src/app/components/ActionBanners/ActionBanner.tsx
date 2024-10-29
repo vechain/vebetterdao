@@ -71,10 +71,10 @@ export const ActionBanner = () => {
 
   const slides = useMemo(() => {
     const bannerComponents = []
+    if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
-    if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
     return bannerComponents
   }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner, showLowVthoBanner])
 
