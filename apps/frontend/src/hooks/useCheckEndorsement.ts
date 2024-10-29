@@ -1,0 +1,51 @@
+import { useCallback, useMemo } from "react"
+import { X2EarnApps__factory } from "@repo/contracts"
+import { getConfig } from "@repo/config"
+import { useBuildTransaction } from "./useBuildTransaction"
+import {
+  getAppEndorsementScoreQueryKey,
+  getEndorsersQueryKey,
+  getIsAppEligibleNowQueryKey,
+  getIsAppUnendorsedQueryKey,
+} from "@/api"
+import { buildClause } from "@/utils/buildClause"
+
+const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
+
+type Props = { appId: string; onSuccess?: () => void }
+
+/**
+ * Hook to check endorsement of an app
+ * @param appId  the app id to endorse
+ * @param onSuccess  the callback to call after the check is done
+ * @returns the check endorsement transaction
+ */
+export const useCheckEndorsement = ({ appId, onSuccess }: Props) => {
+  const clauseBuilder = useCallback(() => {
+    return [
+      buildClause({
+        to: getConfig().x2EarnAppsContractAddress,
+        contractInterface: X2EarnAppsInterface,
+        method: "checkEndorsement",
+        args: [appId],
+        comment: `Check endorsement for ${appId}`,
+      }),
+    ]
+  }, [appId])
+
+  const refetchQueryKeys = useMemo(
+    () => [
+      getIsAppEligibleNowQueryKey(appId),
+      getIsAppUnendorsedQueryKey(appId),
+      getAppEndorsementScoreQueryKey(appId),
+      getEndorsersQueryKey(appId),
+    ],
+    [appId],
+  )
+
+  return useBuildTransaction({
+    clauseBuilder,
+    refetchQueryKeys,
+    onSuccess,
+  })
+}

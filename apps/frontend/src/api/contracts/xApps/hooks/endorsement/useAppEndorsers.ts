@@ -10,9 +10,7 @@ const method = "getEndorsers"
 /**
  * Get the query key for the list of endorsers for an app
  */
-export const getEndorsersQueryKey = (appId: string) => {
-  getCallKey({ method, keyArgs: [appId] })
-}
+export const getEndorsersQueryKey = (appId: string) => getCallKey({ method, keyArgs: [appId] })
 
 /**
  *  Hook to get the list of endorsers for an app

@@ -4,6 +4,7 @@ import {
   useAllocationsRoundState,
   useGetVotesOnBlock,
   useHasVotedInRound,
+  useRoundXApps,
   useVotingThreshold,
 } from "@/api"
 import { Button, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
@@ -11,7 +12,7 @@ import { useCallback, useLayoutEffect, useMemo } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
-import { useCastAllocationFormStore } from "@/store"
+import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
 import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
 import { ResponsiveCard, TransactionModal } from "@/components"
 import { useCastAllocationVotes, CastAllocationVotesProps } from "@/hooks"
@@ -34,7 +35,23 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
   const router = useRouter()
 
+  const xAppsQuery = useRoundXApps(roundId)
+
   const { data: votes } = useCastAllocationFormStore()
+
+  // Handle the case when user has data in LS but the app is not active anymore
+  const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
+    return votes
+      .filter(vote => vote.rawValue > 0 && xAppsQuery.data?.find(app => app.id === vote.appId))
+      .map(vote => {
+        return {
+          appId: vote.appId,
+          rawValue: vote.rawValue,
+          value: vote.value,
+        }
+      })
+  }, [votes, xAppsQuery])
+
   const { data: state } = useAllocationsRoundState(roundId)
 
   const { data: roundInfo, isLoading: stateLoading } = useAllocationsRound(roundId)
@@ -161,7 +178,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
                   </Text>
                 </Skeleton>
               </VStack>
-              <AppVotesBreakdown votes={votes} />
+              <AppVotesBreakdown votes={parsedVotes} />
             </VStack>
           </ResponsiveCard>
 

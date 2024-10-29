@@ -1,5 +1,6 @@
 import { ReactNode, useMemo } from "react"
 import { ConfirmationModalContent } from "./ConfirmationModalContent"
+import { ConfirmationEndorsementModalContent } from "./ConfirmationModalContent/ConfirmationEndorsementModalContent"
 import { ErrorModalContent } from "./ErrorModalContent"
 import { LoadingModalContent } from "./LoadingModalContent"
 import { SuccessModalContent } from "./SuccessModalContent"
@@ -11,6 +12,7 @@ import { SuccessConvertModalContent } from "./SuccessConvertModalContent"
 import { ConfirmationAppBalanceModalContent } from "./ConfirmationAppBalanceModalContent"
 import { SuccessAppBalanceModalContent } from "./SuccessAppBalanceModalContent"
 import { CoinsFlipModalContent } from "./CoinsFlipModalContent/CoinsFlipModalContent"
+import { PropsEndorsement } from "@/app/apps/components/UnendorseAppModal"
 
 export type TransactionModalProps = {
   isOpen: boolean
@@ -36,6 +38,7 @@ export type TransactionModalProps = {
   isAppDeposit?: boolean
   b3trBalance?: string
   vot3Balance?: string
+  endorsementInfo?: PropsEndorsement
   isSuccessBeenTrack?: boolean
 }
 
@@ -63,6 +66,7 @@ export const TransactionModal = ({
   b3trAmount,
   b3trBalance,
   vot3Balance,
+  endorsementInfo,
   isSuccessBeenTrack,
 }: TransactionModalProps) => {
   const modalContent = useMemo(() => {
@@ -86,6 +90,10 @@ export const TransactionModal = ({
             isDeposit={isAppDeposit}
           />
         )
+
+      if (endorsementInfo?.isUnendorsing || endorsementInfo?.isEndorsing) {
+        return <ConfirmationEndorsementModalContent endorsementInfo={endorsementInfo} />
+      }
 
       return <ConfirmationModalContent title={confirmationTitle} />
     }
@@ -123,6 +131,18 @@ export const TransactionModal = ({
             onClose={onClose}
           />
         )
+      if (endorsementInfo?.isUnendorsing || endorsementInfo?.isEndorsing) {
+        return (
+          <SuccessModalContent
+            title={successTitle}
+            showSocialButtons={showSocialButtons}
+            socialDescriptionEncoded={socialDescriptionEncoded}
+            showExplorerButton={showExplorerButton}
+            txId={txId}
+            endorsementInfo={endorsementInfo}
+          />
+        )
+      }
 
       return (
         <SuccessModalContent
@@ -159,6 +179,7 @@ export const TransactionModal = ({
     socialDescriptionEncoded,
     b3trAmount,
     isAppDeposit,
+    endorsementInfo,
     isSuccessBeenTrack,
   ])
   if (!modalContent) return null

@@ -82,7 +82,7 @@ export const AppSecurity = () => {
                     isDisabled={isLoading}
                     onChange={e => setAppId(e.target.value)}
                     value={appId}>
-                    {xApps?.map(item => {
+                    {xApps?.active.map(item => {
                       return (
                         <option key={"Select" + item.name} value={item.id}>
                           {item.name}
