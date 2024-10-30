@@ -26,6 +26,7 @@ pragma solidity 0.8.20;
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
+import { AppStorageUtils } from "../libraries/AppStorageUtils.sol";
 
 /**
  * @title AppsStorageUpgradeable
@@ -224,26 +225,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
   function getPaginatedApps(uint startIndex, uint count) external view returns (X2EarnAppsDataTypes.App[] memory) {
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
-    uint256 length = $._appIds.length;
-    if (length <= startIndex) {
-      revert X2EarnInvalidStartIndex();
-    }
-
-    // Calculate the end index
-    uint256 endIndex = startIndex + count;
-    if (endIndex > length) {
-      endIndex = length;
-    }
-
-    // Create an array to hold the paginated apps
-    X2EarnAppsDataTypes.App[] memory paginatedApps = new X2EarnAppsDataTypes.App[](endIndex - startIndex);
-
-    // Populate the paginated array
-    for (uint i = startIndex; i < endIndex; i++) {
-      paginatedApps[i - startIndex] = $._apps[$._appIds[i]];
-    }
-
-    return paginatedApps;
+    return AppStorageUtils.getPaginatedApps($._apps, $._appIds, startIndex, count);
   }
 
   /**
