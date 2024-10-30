@@ -8,7 +8,7 @@ import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import dynamic from "next/dynamic"
 import { useWallet } from "@vechain/dapp-kit-react"
 
-const Leaderboard = dynamic(() => import("@/components/Leaderboard/Leaderboard").then(mod => mod.Leaderboard), {
+const Leaderboard = dynamic(() => import("../../components/Leaderboard/Leaderboard").then(mod => mod.Leaderboard), {
   ssr: false,
   loading: () => (
     <VStack w="full" spacing={12} h="80vh" justify="center">
