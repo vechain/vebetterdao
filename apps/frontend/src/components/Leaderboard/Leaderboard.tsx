@@ -4,15 +4,28 @@ import {
   useSustainabilityUserOverviewPerRound,
 } from "@/api"
 
-import { Button, Card, CardBody, Divider, Heading, Skeleton, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  CardBody,
+  Divider,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 
 import { useWallet } from "@vechain/dapp-kit-react"
 
-import { useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LeaderboardRankingComponent } from "./LeaderboardRankingComponent"
 import { useRouter } from "next/navigation"
+import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 
 export const MockLeaderboard = [
   { position: 1, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 100 },
@@ -28,7 +41,22 @@ export const Leaderboard = () => {
   const router = useRouter()
   const { data: roundId, isLoading: roundIdLoading } = useCurrentAllocationsRoundId()
 
-  const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId })
+  const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
+
+  const isLastRound = selectedRoundId === roundId
+  const isFirstRound = selectedRoundId === "1"
+
+  useEffect(() => {
+    if (roundId && !selectedRoundId) {
+      setSelectedRoundId(roundId)
+    }
+  }, [roundId, selectedRoundId])
+
+  const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId: selectedRoundId })
+
+  const onRoundChange = (roundId: string) => () => {
+    setSelectedRoundId(roundId)
+  }
 
   const yourRaking = useMemo(() => {
     if (!account) return undefined
@@ -41,7 +69,7 @@ export const Leaderboard = () => {
     }
   }, [userRoundOverview, account])
 
-  const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId, direction: "desc" })
+  const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId: selectedRoundId, direction: "desc" })
 
   const flatLeaderboard = useMemo(
     () =>
@@ -58,7 +86,7 @@ export const Leaderboard = () => {
   }))
 
   const onSeeAllClick = () => {
-    router.push(`/leaderboard/${roundId}`)
+    router.push(`/leaderboard/${selectedRoundId}`)
   }
 
   const renderRankings = useMemo(() => {
@@ -90,7 +118,7 @@ export const Leaderboard = () => {
             bg="rgba(255, 255, 255, 0.6)">
             <Heading size="sm">{t("Not enough data for the week")}</Heading>
             <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
-              {t("Come back later to see how you are ranking 🥇")}
+              {t("Leaderboard is available since the integration of sustainability proofs 🥇")}
             </Text>
           </VStack>
           {MockLeaderboard.map(ranking => (
@@ -115,15 +143,37 @@ export const Leaderboard = () => {
   return (
     <Card w="full" variant={"baseWithBorder"}>
       <CardBody>
-        <VStack spacing={6} align="stretch">
+        <VStack spacing={6} align="stretch" h="full">
           <VStack spacing={2} align="stretch">
-            <Skeleton isLoaded={!roundIdLoading}>
-              <Heading size="md">
-                {t("Round {{id}} leaderboard", {
-                  id: roundId ?? "",
-                })}
-              </Heading>
-            </Skeleton>
+            <HStack justify={"space-between"} w="full">
+              <IconButton
+                minW={0}
+                size={"lg"}
+                aria-label="Next round"
+                variant="link"
+                colorScheme="primary"
+                icon={<Icon as={FaAngleLeft} boxSize={5} />}
+                isDisabled={isFirstRound}
+                onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
+              />
+              <Skeleton isLoaded={!roundIdLoading}>
+                <Heading size={["sm", "sm", "md"]}>
+                  {t("Round {{id}} leaderboard", {
+                    id: selectedRoundId ?? "",
+                  })}
+                </Heading>
+              </Skeleton>
+              <IconButton
+                minW={0}
+                size={"lg"}
+                aria-label="Next round"
+                variant="link"
+                colorScheme="primary"
+                icon={<Icon as={FaAngleRight} boxSize={5} />}
+                isDisabled={isLastRound}
+                onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
+              />
+            </HStack>
             <Text fontSize="sm" color="#6A6A6A" fontWeight={400}>
               {t(
                 "Ready to save the planet? Do Better Actions in the apps and become the sustainability champion! 🌍✨",

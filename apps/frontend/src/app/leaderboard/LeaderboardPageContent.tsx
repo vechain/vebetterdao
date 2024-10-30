@@ -1,12 +1,12 @@
 import { useSustainabilitySingleUserOverview, useSustainabilityUserOverviewPerRound } from "@/api"
 import { LeaderboardRankingComponent, MockLeaderboard } from "@/components/Leaderboard"
-import { Button, Heading, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Button, Center, Heading, HStack, Icon, IconButton, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
 import { useRouter } from "next/navigation"
-import { useMemo } from "react"
-import { FaAngleLeft } from "react-icons/fa6"
+import { useEffect, useMemo, useState } from "react"
+import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 import InfiniteScroll from "react-infinite-scroll-component"
 
 type Props = { roundId: string }
@@ -14,7 +14,22 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
   const { account } = useWallet()
   const router = useRouter()
 
-  const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId })
+  const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
+
+  const isLastRound = selectedRoundId === roundId
+  const isFirstRound = selectedRoundId === "1"
+
+  useEffect(() => {
+    if (roundId && !selectedRoundId) {
+      setSelectedRoundId(roundId)
+    }
+  }, [roundId, selectedRoundId])
+
+  const onRoundChange = (roundId: string) => () => {
+    setSelectedRoundId(roundId)
+  }
+
+  const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId: selectedRoundId })
 
   const yourRaking = useMemo(() => {
     if (!account) return undefined
@@ -27,7 +42,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
     }
   }, [userRoundOverview, account])
 
-  const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId, direction: "desc" })
+  const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId: selectedRoundId, direction: "desc" })
 
   const visibleRankings = useMemo(
     () => leaderboardQuery.data?.pages.map(page => page.data).flat() ?? [],
@@ -80,7 +95,11 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
         dataLength={visibleRankings.length}
         next={leaderboardQuery.fetchNextPage}
         hasMore={leaderboardQuery.hasNextPage}
-        loader={<Spinner size="md" alignSelf={"center"} />}
+        loader={
+          <Center>
+            <Spinner size="md" mt={4} alignSelf="center" />
+          </Center>
+        }
         endMessage={
           <Heading size="md" textAlign={"center"} mt={4}>
             {t("You reached the end!")}
@@ -124,7 +143,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
           </VStack>
         </VStack>
       )}
-      <VStack spacing={4} align="flex-start" w="full">
+      <VStack spacing={8} align="flex-start" w="full">
         <Button
           leftIcon={<FaAngleLeft />}
           variant="link"
@@ -133,11 +152,35 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
           onClick={() => router.push("/")}>
           {t("Go back")}
         </Button>
-        <Heading size={["md", "lg"]}>
-          {t("Round {{id}} leaderboard", {
-            id: roundId ?? "",
-          })}
-        </Heading>
+        <HStack justify={"space-between"} w="full">
+          <IconButton
+            minW={0}
+            size={"lg"}
+            aria-label="Next round"
+            variant="link"
+            colorScheme="primary"
+            icon={<Icon as={FaAngleLeft} boxSize={5} />}
+            isDisabled={isFirstRound}
+            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
+          />
+
+          <Heading size={["sm", "sm", "md"]}>
+            {t("Round {{id}} leaderboard", {
+              id: selectedRoundId ?? "",
+            })}
+          </Heading>
+
+          <IconButton
+            minW={0}
+            size={"lg"}
+            aria-label="Next round"
+            variant="link"
+            colorScheme="primary"
+            icon={<Icon as={FaAngleRight} boxSize={5} />}
+            isDisabled={isLastRound}
+            onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
+          />
+        </HStack>
       </VStack>
       {renderRankings}
     </VStack>
