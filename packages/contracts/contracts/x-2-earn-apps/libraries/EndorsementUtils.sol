@@ -119,7 +119,7 @@ library EndorsementUtils {
   }
 
   // ------------------------------- Setter Functions -------------------------------
-    /**
+  /**
    * @notice Calculates the score of an app based on its endorsers, and removes a specified endorser if needed.
    * @param _nodeEnodorsmentScore Mapping of endorsement scores for each node level.
    * @param _nodeToEndorsedApp Mapping of node IDs to the app ID they are currently endorsing.
@@ -281,7 +281,7 @@ library EndorsementUtils {
     uint48 clock,
     bytes32 appId,
     bool isEligibleNow
-  ) external returns (bool stillEligble) {
+  ) external returns (bool stillEligible) {
     // If the app is not pending endorsement
     if (!isAppUnendorsed) {
       // Mark the app as not endorsed so that it is added to the list of apps pending endorsement
