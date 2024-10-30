@@ -42,6 +42,7 @@ import {
   transferUpgraderRole,
   validateContractRole,
 } from "../helpers/roles"
+import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -122,6 +123,9 @@ export async function deployAll(config: ContractsConfig) {
     PassportSignalingLogic,
     PassportWhitelistAndBlacklistLogic,
   } = await passportLibraries()
+
+  console.log("Deploying X2Earn App Libraries")
+  const { AdministrationUtils, EndorsementUtils, VoteEligibilityUtils } = await x2EarnLibraries()
 
   let vechainNodesAddress = "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302" // this is the mainnet address
 
@@ -228,6 +232,14 @@ export async function deployAll(config: ContractsConfig) {
     ],
     {
       versions: [undefined, 2],
+      libraries: [
+        undefined,
+        {
+          AdministrationUtils: await AdministrationUtils.getAddress(),
+          EndorsementUtils: await EndorsementUtils.getAddress(),
+          VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+        },
+      ],
     },
   )) as X2EarnApps
 
@@ -560,6 +572,7 @@ export async function deployAll(config: ContractsConfig) {
   const libraries: {
     B3TRGovernor: Record<string, string>
     VeBetterPassport: Record<string, string>
+    X2EarnApps: Record<string, string>
   } = {
     B3TRGovernor: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -580,6 +593,11 @@ export async function deployAll(config: ContractsConfig) {
       PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
       PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
       PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
+    },
+    X2EarnApps: {
+      AdministrationUtils: await AdministrationUtils.getAddress(),
+      EndorsementUtils: await EndorsementUtils.getAddress(),
+      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
     },
   }
 
