@@ -1,5 +1,5 @@
 import { useSustainabilitySingleUserOverview, useSustainabilityUserOverviewPerRound } from "@/api"
-import { LeaderboardRankingComponent, MockLeaderboard } from "@/components"
+import { LeaderboardRankingComponent, MockLeaderboard } from "@/components/Leaderboard"
 import { Button, Heading, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"

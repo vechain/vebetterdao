@@ -5,8 +5,8 @@ import { YourBetterActionsCard } from "./YourBetterActionsCard"
 import { TokensBalance } from "./TokensBalance"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
-import dynamic from "next/dynamic"
 import { useWallet } from "@vechain/dapp-kit-react"
+import dynamic from "next/dynamic"
 
 const Leaderboard = dynamic(() => import("../../components/Leaderboard/Leaderboard").then(mod => mod.Leaderboard), {
   ssr: false,

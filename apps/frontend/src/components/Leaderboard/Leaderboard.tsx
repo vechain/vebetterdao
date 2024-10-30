@@ -22,7 +22,6 @@ export const MockLeaderboard = [
   { position: 5, address: "0x0F872421Dc479F3c11eDd89512731814D0598dB5", score: 60 },
 ]
 
-//TODO: Connected user ranking
 export const Leaderboard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
