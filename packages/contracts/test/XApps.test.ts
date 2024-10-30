@@ -51,12 +51,20 @@ describe("X-Apps - @shard3", function () {
     })
 
     it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
-      const { x2EarnApps, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, owner, administrationUtils, endorsementUtils, voteEligibilityUtils } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("X2EarnApps")
+      const Contract = await ethers.getContractFactory("X2EarnApps", {
+        libraries: {
+          AdministrationUtils: await administrationUtils.getAddress(),
+          EndorsementUtils: await endorsementUtils.getAddress(),
+          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+        },
+      })
+
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -75,12 +83,19 @@ describe("X-Apps - @shard3", function () {
     })
 
     it("Only user with UPGRADER_ROLE should be able to upgrade the contract", async function () {
-      const { x2EarnApps, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, otherAccount, administrationUtils, endorsementUtils, voteEligibilityUtils } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("X2EarnApps")
+      const Contract = await ethers.getContractFactory("X2EarnApps", {
+        libraries: {
+          AdministrationUtils: await administrationUtils.getAddress(),
+          EndorsementUtils: await endorsementUtils.getAddress(),
+          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+        },
+      })
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -109,11 +124,18 @@ describe("X-Apps - @shard3", function () {
     it("X2Earn Apps Info added pre contract upgrade should should be same after upgrade", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      const { timeLock, owner, otherAccounts, vechainNodesMock, veBetterPassport } = await getOrDeployContractInstances(
-        {
-          forceDeploy: true,
-        },
-      )
+      const {
+        timeLock,
+        owner,
+        otherAccounts,
+        vechainNodesMock,
+        veBetterPassport,
+        administrationUtils,
+        endorsementUtils,
+        voteEligibilityUtils,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Deploy X2EarnApps
       const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
@@ -151,7 +173,14 @@ describe("X-Apps - @shard3", function () {
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
         [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress(), await veBetterPassport.getAddress()],
-        { version: 2 },
+        {
+          version: 2,
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        },
       )) as X2EarnApps
 
       // start new round
@@ -173,6 +202,9 @@ describe("X-Apps - @shard3", function () {
         nodeManagement,
         otherAccounts,
         veBetterPassport,
+        administrationUtils,
+        endorsementUtils,
+        voteEligibilityUtils,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -231,7 +263,14 @@ describe("X-Apps - @shard3", function () {
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
         [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress(), await veBetterPassport.getAddress()],
-        { version: 2 },
+        {
+          version: 2,
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        },
       )) as X2EarnApps
 
       await veBetterPassport
@@ -321,6 +360,9 @@ describe("X-Apps - @shard3", function () {
         vechainNodesMock,
         otherAccounts,
         veBetterPassport,
+        endorsementUtils,
+        administrationUtils,
+        voteEligibilityUtils,
       } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Deploy X2EarnAppsV1
@@ -390,7 +432,14 @@ describe("X-Apps - @shard3", function () {
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
         [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress(), await veBetterPassport.getAddress()],
-        { version: 2 },
+        {
+          version: 2,
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        },
       )
 
       const storageSlotsAfter = await getStorageSlots(
@@ -880,10 +929,19 @@ describe("X-Apps - @shard3", function () {
     })
 
     it("DAO can make an app unavailable for allocation voting starting from next round", async function () {
-      const { otherAccounts, x2EarnApps, xAllocationVoting, emissions, timeLock, owner } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const {
+        otherAccounts,
+        x2EarnApps,
+        xAllocationVoting,
+        emissions,
+        timeLock,
+        owner,
+        endorsementUtils,
+        administrationUtils,
+        voteEligibilityUtils,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       await bootstrapAndStartEmissions()
 
@@ -916,7 +974,13 @@ describe("X-Apps - @shard3", function () {
         proposer,
         voter1,
         x2EarnApps,
-        await ethers.getContractFactory("X2EarnApps"),
+        await ethers.getContractFactory("X2EarnApps", {
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        }),
         "Exclude app from the allocation voting rounds",
         "setVotingEligibility",
         [app1Id, false],
