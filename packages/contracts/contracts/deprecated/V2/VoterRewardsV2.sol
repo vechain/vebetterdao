@@ -25,11 +25,11 @@ pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import "./interfaces/IGalaxyMember.sol";
-import "./interfaces/IB3TRGovernor.sol";
-import "./interfaces/IXAllocationVotingGovernor.sol";
-import "./interfaces/IEmissions.sol";
-import "./interfaces/IB3TR.sol";
+import "../../interfaces/IGalaxyMember.sol";
+import "../../interfaces/IB3TRGovernor.sol";
+import "../../interfaces/IXAllocationVotingGovernor.sol";
+import "../../interfaces/IEmissions.sol";
+import "../../interfaces/IB3TR.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
@@ -60,7 +60,7 @@ import "@openzeppelin/contracts/utils/types/Time.sol";
  * - Added functions to check if quadratic rewarding is disabled at a specific block number or for the current cycle.
  * - Added function to disable quadratic rewarding or re-enable it.
  */
-contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+contract VoterRewardsV2 is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
 
   /// @notice The role that can register votes for rewards calculation.
@@ -286,26 +286,12 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // Get the total reward-weighted votes for the voter in the cycle.
     uint256 total = $.cycleToVoterToTotal[cycle][voter];
 
-    // If total is zero, return 0
-    if (total == 0) {
-      return 0;
-    }
-
     // Get the total reward-weighted votes in the cycle.
     uint256 totalCycle = $.cycleToTotal[cycle];
 
-    // If totalCycle is zero, return 0
-    if (totalCycle == 0) {
-      return 0;
-    }
-
     // Get the emissions for voter rewards in the cycle.
     uint256 emissionsAmount = $.emissions.getVote2EarnAmount(cycle);
-
-    // If emissionsAmount is zero, return 0
-    if (emissionsAmount == 0) {
-      return 0;
-    }
+    require(emissionsAmount > 0, "VoterRewards: emissionsAmount must be greater than 0");
 
     // Scale up the numerator before division to improve precision
     uint256 scaledNumerator = total * emissionsAmount * SCALING_FACTOR; // Scale by a factor of SCALING_FACTOR for precision
