@@ -438,7 +438,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @dev This should be updated every time a new version of implementation is deployed
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
-    return "2";
+    return "3";
   }
 
   /// @dev Clock used for flagging checkpoints.
