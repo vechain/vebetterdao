@@ -125,6 +125,11 @@ contract X2EarnCreator is
     _setTokenURI(tokenId, uri);
   }
 
+  /// @notice Retieves the version of the contract
+  function version() public pure returns (string memory) {
+    return "1";
+  }
+
   // ---------------- Overrides for Non-Transferability ----------------
 
   /// @notice Prevents token transfers by reverting any call to transferFrom
