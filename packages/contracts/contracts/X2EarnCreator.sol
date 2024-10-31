@@ -24,7 +24,6 @@
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -34,7 +33,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 contract X2EarnCreator is
   Initializable,
   ERC721Upgradeable,
-  ERC721URIStorageUpgradeable,
   ERC721PausableUpgradeable,
   ERC721EnumerableUpgradeable,
   AccessControlUpgradeable,
@@ -55,6 +53,7 @@ contract X2EarnCreator is
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnCreator
   struct X2EarnCreatorStorage {
     uint256 nextTokenId;
+    string baseURI;
   }
 
   /// @notice Storage slot for X2EarnCreator
@@ -79,13 +78,15 @@ contract X2EarnCreator is
   /// @param pauser Address to be assigned the pauser role
   /// @param minter Address to be assigned the minter role
   /// @param upgrader Address to be assigned the upgrader role
-  function initialize(address defaultAdmin, address pauser, address minter, address upgrader) public initializer {
-    __ERC721_init("XAppCreator", "XAC");
-    __ERC721URIStorage_init();
+  function initialize(string calldata baseURI, address defaultAdmin, address pauser, address minter, address upgrader, address burner) public initializer {
+    __ERC721_init("X2EarnCreator", "XC");
     __ERC721Pausable_init();
     __AccessControl_init();
     __UUPSUpgradeable_init();
     __ERC721Enumerable_init();
+
+    X2EarnCreatorStorage storage $ = _getX2EarnCreatorStorage();
+    $.baseURI = baseURI;
 
     require(defaultAdmin != address(0), "X2EarnCreator: zero address");
 
@@ -93,6 +94,7 @@ contract X2EarnCreator is
     _grantRole(PAUSER_ROLE, pauser);
     _grantRole(MINTER_ROLE, minter);
     _grantRole(UPGRADER_ROLE, upgrader);
+    _grantRole(BURNER_ROLE, burner);
   }
 
   /// @notice Pauses all token transfers and minting functions
@@ -114,15 +116,24 @@ contract X2EarnCreator is
     _burn(tokenId);
   }
 
-  /// @notice Mints a new token to a specified address with metadata
+  /// @notice Mints a new token to a specified address
   /// @param to Address that will receive the new token
-  /// @param uri URI pointing to the token's metadata
   /// @dev Only callable by accounts with the MINTER_ROLE
-  function safeMint(address to, string memory uri) public onlyRole(MINTER_ROLE) whenNotPaused {
+  function safeMint(address to) public onlyRole(MINTER_ROLE) whenNotPaused {
     X2EarnCreatorStorage storage $ = _getX2EarnCreatorStorage();
     uint256 tokenId = $.nextTokenId++;
     _safeMint(to, tokenId);
-    _setTokenURI(tokenId, uri);
+  }
+
+  // @notice Retrieves the metadata URI for a given token ID
+  /// @dev Ensures the token ID is owned, then returns the base URI as the token URI
+  /// @param tokenId The ID of the token to retrieve the URI for
+  /// @return The metadata URI for the specified token ID
+  function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable) returns (string memory) {
+    _requireOwned(tokenId);
+
+    string memory baseURI = _baseURI();
+    return baseURI;
   }
 
   /// @notice Retieves the version of the contract
@@ -156,6 +167,15 @@ contract X2EarnCreator is
     revert TransfersDisabled();
   }
 
+  // ---------------- Internal Functions ----------------
+
+  /// @notice Returns the base URI used for all token metadata URIs in the contract
+  /// @dev This function retrieves the base URI from the contract's storage.
+  function _baseURI() internal view override(ERC721Upgradeable) returns (string memory) {
+    X2EarnCreatorStorage storage $ = _getX2EarnCreatorStorage();
+    return $.baseURI;
+  }
+
   // ---------------- Upgrade and Utility Overrides ----------------
   function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
 
@@ -167,20 +187,9 @@ contract X2EarnCreator is
     return super._update(to, tokenId, auth);
   }
 
-  function tokenURI(
-    uint256 tokenId
-  ) public view override(ERC721Upgradeable, ERC721URIStorageUpgradeable) returns (string memory) {
-    return super.tokenURI(tokenId);
-  }
-
   function supportsInterface(
     bytes4 interfaceId
-  )
-    public
-    view
-    override(ERC721Upgradeable, ERC721URIStorageUpgradeable, ERC721EnumerableUpgradeable, AccessControlUpgradeable)
-    returns (bool)
-  {
+  ) public view override(ERC721Upgradeable, ERC721EnumerableUpgradeable, AccessControlUpgradeable) returns (bool) {
     return super.supportsInterface(interfaceId);
   }
 
