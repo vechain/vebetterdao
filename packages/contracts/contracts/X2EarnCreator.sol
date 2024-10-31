@@ -48,6 +48,9 @@ contract X2EarnCreator is
   /// @dev Error thrown when a transfer attempt is made, as transfers are disabled
   error TransfersDisabled();
 
+  /// @dev Error thrown when a user already owns an NFT
+  error AlreadyOwnsNFT(address owner);
+
   // ---------------- Storage ----------------
   /// @notice Storage structure for X2EarnCreator
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnCreator
@@ -78,7 +81,14 @@ contract X2EarnCreator is
   /// @param pauser Address to be assigned the pauser role
   /// @param minter Address to be assigned the minter role
   /// @param upgrader Address to be assigned the upgrader role
-  function initialize(string calldata baseURI, address defaultAdmin, address pauser, address minter, address upgrader, address burner) public initializer {
+  function initialize(
+    string calldata baseURI,
+    address defaultAdmin,
+    address pauser,
+    address minter,
+    address upgrader,
+    address burner
+  ) public initializer {
     __ERC721_init("X2EarnCreator", "XC");
     __ERC721Pausable_init();
     __AccessControl_init();
@@ -118,10 +128,15 @@ contract X2EarnCreator is
 
   /// @notice Mints a new token to a specified address
   /// @param to Address that will receive the new token
-  /// @dev Only callable by accounts with the MINTER_ROLE
+  /// @dev Only callable by accounts with the MINTER_ROLE. Ensures the address does not already own a token.
   function safeMint(address to) public onlyRole(MINTER_ROLE) whenNotPaused {
+    if (balanceOf(to) > 0) {
+      revert AlreadyOwnsNFT(to);
+    }
+
     X2EarnCreatorStorage storage $ = _getX2EarnCreatorStorage();
     uint256 tokenId = $.nextTokenId++;
+
     _safeMint(to, tokenId);
   }
 
