@@ -24,7 +24,7 @@ const estimateTxGasWithNext = async (clauses: Connex.VM.Clause[], caller: string
     body: JSON.stringify({
       clauses: clauses.map(clause => ({
         to: clause.to,
-        value: clause.value,
+        value: clause.value || "0x0",
         data: clause.data,
       })),
       caller,
