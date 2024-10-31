@@ -20,7 +20,7 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
   const { t } = useTranslation()
 
   const getAppName = (appId: string) => {
-    return apps?.allApps.find(app => app.id === appId)?.name ?? ""
+    return apps?.allApps?.find(app => app.id === appId)?.name ?? ""
   }
 
   const actionModal = useDisclosure()
