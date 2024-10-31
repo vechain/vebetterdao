@@ -7,8 +7,7 @@ import { AddressButton } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
 import { Box, Card, CardBody, Divider, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
-import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet, useVechainDomain } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
@@ -152,7 +151,7 @@ type LeaderboardRankingComponentProps = {
   isYourRanking?: boolean
 }
 export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
-  const { name } = useWalletName(ranking.address)
+  const { domain } = useVechainDomain({ addressOrDomain: ranking.address })
   const router = useRouter()
 
   const onClick = () => {
@@ -232,12 +231,12 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                   </Text>
                 )}
 
-                {name && (
+                {domain && (
                   <Text fontSize="md" fontWeight={600} h="auto" colorScheme={"gray"}>
-                    {name}
+                    {domain}
                   </Text>
                 )}
-                {!name && (
+                {!domain && (
                   <AddressButton
                     fontSize="sm"
                     fontWeight={600}
