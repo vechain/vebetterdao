@@ -96,7 +96,7 @@ export const useSustainabilityUserOverviewPerRound = ({
       direction,
     }),
     queryFn: ({ pageParam = 0 }) =>
-      getSustainabilityUserOverviewPerRound({ page: pageParam, size: 100, wallet, roundId, direction }),
+      getSustainabilityUserOverviewPerRound({ page: pageParam, size: 10, wallet, roundId, direction }),
     initialPageParam: 0,
     getNextPageParam: (lastPage, _pages, lastPageParam) =>
       lastPage.pagination.hasNext ? lastPageParam + 1 : undefined,
