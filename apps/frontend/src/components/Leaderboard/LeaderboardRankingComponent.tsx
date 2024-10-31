@@ -1,11 +1,11 @@
 import { Card, CardBody, HStack, Box, Image, Text } from "@chakra-ui/react"
-import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 import { t } from "i18next"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { Trans } from "react-i18next"
 import { AddressButton } from "../AddressButton"
 import { AddressIcon } from "../AddressIcon"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 
 export type LeaderboardRanking = {
   position: number
@@ -17,7 +17,7 @@ type LeaderboardRankingComponentProps = {
   isYourRanking?: boolean
 }
 export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
-  const { name } = useWalletName(ranking.address)
+  const { domain } = useVechainDomain({ addressOrDomain: ranking.address })
   const router = useRouter()
 
   const onClick = () => {
@@ -97,12 +97,12 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
                   </Text>
                 )}
 
-                {name && (
+                {domain && (
                   <Text fontSize="md" fontWeight={600} h="auto" colorScheme={"gray"}>
-                    {name}
+                    {domain}
                   </Text>
                 )}
-                {!name && (
+                {!domain && (
                   <AddressButton
                     fontSize="sm"
                     fontWeight={600}
