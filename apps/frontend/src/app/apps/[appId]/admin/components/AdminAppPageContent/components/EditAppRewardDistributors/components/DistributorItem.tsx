@@ -43,11 +43,9 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
               <Text color="#6A6A6A" textAlign={"center"}>
                 {t("This address won't be able to distribute rewards anymore.")}
               </Text>
-              {domain && (
-                <Text color="#6A6A6A" textAlign={"center"}>
-                  {`Address: ${humanAddress(distributor, 8, 6)}`}
-                </Text>
-              )}
+              <Text color="#6A6A6A" textAlign={"center"}>
+                {`Account: ${domain ?? humanAddress(distributor, 8, 6)}`}
+              </Text>
               <VStack align="center" gap="20px" mt="20px">
                 <Button variant="primaryAction" onClick={onClose}>
                   {t("Cancel")}
