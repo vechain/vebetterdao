@@ -6,7 +6,6 @@ import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@repo/contracts"
 
 const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
-const method = "VoteRegistered"
 
 export type VoteRegisteredEvent = {
   cycle: number
@@ -22,14 +21,20 @@ export type VoteRegisteredEvent = {
  */
 export const getVoteRegisteredEvents = async (
   thor: Connex.Thor,
-  filterOptions?: { cycle?: number; voter?: string },
+  filterOptions?: { cycle?: number; voter?: string; votes?: number; rewardWeightedVote?: number },
 ): Promise<VoteRegisteredEvent[]> => {
-  const eventFragment = VoterRewards__factory.createInterface().getEvent(method).format("json")
+  const eventFragment = VoterRewards__factory.createInterface().getEvent("VoteRegistered").format("json")
+  if (!eventFragment) throw new Error("VoteRegistered event not found")
   const voteRegisteredEvent = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
 
+  /**
+   * Encode the topics to filter the events
+   */
   const topics = voteRegisteredEvent.encode({
     cycle: filterOptions?.cycle ?? undefined,
     voter: filterOptions?.voter ?? undefined,
+    votes: filterOptions?.votes ?? undefined,
+    rewardWeightedVote: filterOptions?.rewardWeightedVote ?? undefined,
   })
 
   const filterCriteria = [
@@ -66,23 +71,28 @@ export const getVoteRegisteredEvents = async (
   return decodedVoteRegisteredEvents
 }
 
-export const getVoteRegisteredEventsQueryKey = (filterOptions?: { cycle?: number; voter?: string }) => [
-  "VoteRegisteredEvents",
-  filterOptions,
-]
+export const getVoteRegisteredEventsQueryKey = (filterOptions?: {
+  cycle?: number
+  voter?: string
+  votes?: number
+  rewardWeightedVote?: number
+}) => ["VoteRegisteredEvents", filterOptions]
 
 /**
- * Hook to get all AppEndorsed events from the X2EarnApps contract
+ * Hook to get all VoteRegistered events from the VoterRewards contract
  * @returns {UseQueryResult<VoteRegisteredEvent[], Error>}
  */
-export const useGetVoteRegisteredEvent = (filterOptions?: { cycle?: number; voter?: string }) => {
+export const useGetVoteRegisteredEvent = (filterOptions?: {
+  cycle?: number
+  voter?: string
+  votes?: number
+  rewardWeightedVote?: number
+}) => {
   const { thor } = useConnex()
 
-  const cycleToVoterToTotal = useQuery({
+  return useQuery({
     queryKey: getVoteRegisteredEventsQueryKey(filterOptions),
     queryFn: async () => await getVoteRegisteredEvents(thor, filterOptions),
     enabled: !!thor,
   })
-
-  return { cycleToVoterToTotal }
 }
