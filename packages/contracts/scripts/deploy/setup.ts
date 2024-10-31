@@ -18,7 +18,7 @@ import { convertB3trForVot3 } from "../helpers/swap"
 
 const accounts = getTestKeys(13)
 
-const APPS = [
+export const APPS = [
   {
     admin: accounts[6].address,
     teamWalletAddress: accounts[6].address,

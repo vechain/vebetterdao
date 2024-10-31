@@ -33,7 +33,7 @@ async function main() {
   console.log("Libraries", libraries)
 
   console.log(
-    `Upgrading X2EarnApps contract at address: ${config.voterRewardsContractAddress} on network: ${config.network.name}`,
+    `Upgrading X2EarnApps contract at address: ${config.x2EarnAppsContractAddress} on network: ${config.network.name}`,
   )
 
   // Check if the node management contract is deployed

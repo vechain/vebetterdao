@@ -561,7 +561,7 @@ export async function deployAll(config: ContractsConfig) {
     Treasury: await treasury.getAddress(),
     VOT3: await vot3.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
-    X2EarnAppsV1: await x2EarnApps.getAddress(),
+    X2EarnApps: await x2EarnApps.getAddress(),
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
@@ -705,6 +705,12 @@ export async function deployAll(config: ContractsConfig) {
     .grantRole(roundStarterRole, await emissions.getAddress())
     .then(async tx => await tx.wait())
   console.log("Round starter role granted to emissions contract")
+
+  // Grant the ACTION_SCORE_MANAGER_ROLE to X2Earn contract
+  await veBetterPassport
+    .connect(deployer)
+    .grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), await x2EarnApps.getAddress())
+    .then(async tx => await tx.wait())
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
