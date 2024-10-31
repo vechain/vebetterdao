@@ -15,6 +15,10 @@ const selectDeployConfigs: Record<string, SelectDeploy> = {
     name: "ve-better-passport",
     description: "Deploy only this contract",
   },
+  "Node Management": {
+    name: "node-management",
+    description: "Deploy only this contract",
+  },
 } as const
 
 async function upgradeContract() {
@@ -43,6 +47,13 @@ async function upgradeContract() {
     switch (userChoice.deploy) {
       case "ve-better-passport":
         console.log("Deploying VeBetter Passport")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
+      case "node-management":
+        console.log("Deploying Node Management")
         // Set environment variables
         process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
         // Run the upgrade script
