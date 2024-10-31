@@ -43,7 +43,7 @@ export const useVotingRewards = (currentRoundId?: string, voter?: string) => {
 
       const res = await multiCall(thor, clauses)
 
-      if (res.reverted) console.error(`useVotingRewards Multi-call reverted with reason ${res.revertInfo?.reason}`)
+      if (res.reverted) throw new Error(`useVotingRewards Multi-call reverted with reason ${res.revertInfo?.reason}`)
 
       let total = new BigNumber(0)
       const roundsRewards = res.results.map((r, index) => {
