@@ -17,8 +17,8 @@ const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
  * * @param {string} cycle - The id of the round.
  * @returns The query key for fetching the getCycleToTotal
  */
-export const getCycleToTotal = (address?: string) => {
-  return getCallKey({ method, keyArgs: [address] })
+export const getCycleToTotal = (cycle?: string) => {
+  return getCallKey({ method, keyArgs: [cycle] })
 }
 
 /**
