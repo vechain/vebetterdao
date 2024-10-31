@@ -11,14 +11,19 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   appId: string
+  userScore: number | null
 }
 
-export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) => {
+export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore }: Props) => {
   const { t } = useTranslation()
   const { data: isUnendorsed } = useIsAppUnendorsed(appId)
   const { data: endorsementScore } = useAppEndorsementScore(appId)
   const { data: endorsers } = useAppEndorsers(appId)
   const { data: endorsementEvents } = useAppEndorsedEvents({ appId })
+
+  // Map the score of the user from the endorsers list. If the user is in the endorsers list, show his score and is UserEndorsing = true
+  // const isUserEndorsing = ?
+  // const userEndorsementScore = endorsers.find((endorser) => endorser.address === userAddress)?.score
 
   return (
     <BaseModal
@@ -41,6 +46,16 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                   {endorsementScore}
                 </Heading>
               </Box>
+              {userScore != null && (
+                <Box>
+                  <Text fontWeight="400" fontSize="14px">
+                    {t("Your score")}
+                  </Text>
+                  <Heading fontSize={"24px"} fontWeight="700" color="#444AD1">
+                    {userScore}
+                  </Heading>
+                </Box>
+              )}
 
               <Box>
                 <Text fontWeight="400" fontSize="14px">
@@ -51,6 +66,8 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                 </Heading>
               </Box>
 
+              {/* TODO: modify the status with a tag box red . An emoji (✅) and status 'Endorsed and active if the endorsment ok  */}
+              {/* TODO: add a tagbox yellow if lookig for endorsement. An emoji(❗️), and status 'Looking for endorsement'  */}
               <Box>
                 <Text fontWeight="400" fontSize="14px">
                   {t("Status")}

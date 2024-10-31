@@ -40,6 +40,9 @@ export const EndorsementInfo = ({ appId, endorserAddress }: EndorsementInfoProps
           }}
         />
       </Text>
+      {/* TODO: add 3 point Vertical on mobile. onClick() -> accordion open with 2 options (🗑️ Remove this endorsement(red text)); or (✔ (bleu) See endorser info )*/}
+      {/* TODO : if onClick() = removeUndorsement  , a card  appears on top of the HStack to say Are you sure. Two button in bottom right. in left =( 🗑️ Remove (red button, white text)). In right = `cancel`( blue).  */}
+      {/* nit: same in mobile, just card position smaller, and tag opened UI friendly   */}
     </HStack>
   )
 }

@@ -8,8 +8,9 @@ import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
   appId: string
+  userScore: number | null
 }
-export const AppEndorsersSection = ({ appId }: Props) => {
+export const AppEndorsersSection = ({ appId, userScore }: Props) => {
   const { account } = useWallet()
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId)
 
@@ -27,7 +28,12 @@ export const AppEndorsersSection = ({ appId }: Props) => {
 
   return (
     <>
-      <AppEndorsementInfoCardModal isOpen={isEndorsementInfoOpen} onClose={onCloseEndorsementInfoModal} appId={appId} />
+      <AppEndorsementInfoCardModal
+        isOpen={isEndorsementInfoOpen}
+        onClose={onCloseEndorsementInfoModal}
+        appId={appId}
+        userScore={userScore}
+      />
 
       <Skeleton isLoaded={!isAppEndorsersLoading && !isUserRolesDataLoading}>
         {appEndorsers && appEndorsers.length ? (
