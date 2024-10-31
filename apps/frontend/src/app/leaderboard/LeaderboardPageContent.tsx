@@ -1,4 +1,8 @@
-import { useSustainabilitySingleUserOverview, useSustainabilityUserOverviewPerRound } from "@/api"
+import {
+  useCurrentAllocationsRoundId,
+  useSustainabilitySingleUserOverview,
+  useSustainabilityUserOverviewPerRound,
+} from "@/api"
 import { LeaderboardRankingComponent, MockLeaderboard } from "@/components/Leaderboard"
 import { Button, Center, Heading, HStack, Icon, IconButton, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
@@ -14,9 +18,11 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
   const { account } = useWallet()
   const router = useRouter()
 
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+
   const [selectedRoundId, setSelectedRoundId] = useState<string | undefined>()
 
-  const isLastRound = selectedRoundId === roundId
+  const isLastRound = selectedRoundId === currentRoundId
   const isFirstRound = selectedRoundId === "1"
 
   useEffect(() => {
