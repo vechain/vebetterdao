@@ -89,7 +89,7 @@ contract X2EarnCreator is
     address upgrader,
     address burner
   ) public initializer {
-    __ERC721_init("X2EarnCreator", "XC");
+    __ERC721_init("X2EarnCreator", "X2C");
     __ERC721Pausable_init();
     __AccessControl_init();
     __UUPSUpgradeable_init();

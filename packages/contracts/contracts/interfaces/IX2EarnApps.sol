@@ -21,6 +21,11 @@ interface IX2EarnApps {
    */
   error X2EarnNonexistentApp(bytes32 appId);
 
+    /**
+   * @dev The creator of the app doesn't exist.
+   */
+  error X2EarnNonexistentCreator(bytes32 appId, address creator);
+
   /**
    * @dev The `addr` is not valid (eg: is the ZERO ADDRESS).
    */

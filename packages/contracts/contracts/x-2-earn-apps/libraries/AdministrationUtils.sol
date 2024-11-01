@@ -498,7 +498,7 @@ library AdministrationUtils {
       revert X2EarnInvalidAddress(creator);
     }
 
-    if (appSubmitted) {
+    if (!appSubmitted) {
       revert X2EarnNonexistentApp(appId);
     }
 
