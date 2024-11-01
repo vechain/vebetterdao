@@ -22,10 +22,9 @@ interface IX2EarnCreator {
 
   // ---------------- Token Management ----------------
 
-  /// @notice Mints a new token to the specified address with a given URI
+  /// @notice Mints a new token to the specified address
   /// @param to The address to receive the token
-  /// @param uri The URI for the token metadata
-  function safeMint(address to, string memory uri) external;
+  function safeMint(address to) external;
 
   /// @notice Burns a specified token, removing it from circulation
   /// @param tokenId The ID of the token to burn

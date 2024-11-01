@@ -3,6 +3,7 @@ pragma solidity 0.8.20;
 
 import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
 import { VechainNodesDataTypes } from "../libraries/VechainNodesDataTypes.sol";
+import { IX2EarnCreator } from "./IX2EarnCreator.sol";
 
 /**
  * @title IX2EarnApps
@@ -56,6 +57,21 @@ interface IX2EarnApps {
   error X2EarnUnauthorizedUser(address user);
 
   /**
+   * @dev The maximum number of creators has been reached.
+   */
+  error X2EarnMaxCreatorsReached(bytes32 appId);
+
+  /**
+   * @dev The caller is already the creator of the app.
+   */
+  error X2EarnAlreadyCreator(address creator);
+
+  /**
+   * @dev The caller is an unverified creator.
+   */
+  error X2EarnUnverifiedCreator(address creator);
+
+  /**
    * @dev Invalid start index for get apps pagination
    */
   error X2EarnInvalidStartIndex();
@@ -101,6 +117,11 @@ interface IX2EarnApps {
   error X2EarnMaxRewardDistributorsReached(bytes32 appId);
 
   /**
+   * @dev The maximum number of managers has been reached.
+   */
+  error X2EarnMaxManagersReached(bytes32 appId);
+
+  /**
    * @dev Event fired when a new app is added.
    */
   event AppAdded(bytes32 indexed id, address addr, string name, bool appAvailableForAllocationVoting);
@@ -129,6 +150,11 @@ interface IX2EarnApps {
    * @dev Event fired when the admin removes a moderator from the app.
    */
   event ModeratorRemovedFromApp(bytes32 indexed appId, address moderator);
+
+  /**
+   * @dev Event fired when the admin adds a new creator to the app and new creator NFT is minted.
+   */
+  event CreatorAddedToApp(bytes32 indexed appId, address creatorAddress);
 
   /**
    * @dev Event fired when the admin adds a new reward distributor to the app.
@@ -251,6 +277,48 @@ interface IX2EarnApps {
    * Emits a {AppAdminUpdated} event.
    */
   function setAppAdmin(bytes32 appId, address admin) external;
+
+  /**
+   * @dev Add a new creator to the app.
+   *
+   * @param appId the id of the app
+   * @param creator the address of the creator
+   *
+   * Emits a {CreatorAddedToApp} event.
+   */
+  function addCreator(bytes32 appId, address creator) external;
+
+  /**
+   * @dev Remove a creator from the app.
+   *
+   * @param appId the id of the app
+   * @param creator the address of the creator
+   *
+   * Emits a {CreatorRemovedFromApp} event.
+   */
+  function removeAppCreator(bytes32 appId, address creator) external;
+
+  /**
+   * @dev Get the creators of an app.
+   *
+   * @param appId the id of the app
+   */
+  function appCreators(bytes32 appId) external view returns (address[] memory);
+
+  /**
+   * @dev Check if an account is the creator of the app
+   *
+   * @param appId the hashed name of the app
+   * @param account the address of the account
+   */
+  function isAppCreator(bytes32 appId, address account) external view returns (bool);
+
+  /**
+   * @dev Get the number of apps created by an account.
+   *
+   * @param creator the address of the creator
+   */
+  function creatorApps(address creator) external view returns (uint256);
 
   /**
    * @dev Get the app admin.
@@ -519,4 +587,16 @@ interface IX2EarnApps {
    * @return uint256 The endorsement score of the node level.
    */
   function nodeLevelEndorsementScore(VechainNodesDataTypes.NodeStrengthLevel nodeLevel) external view returns (uint256);
+
+  /**
+   * @dev Update the X2EarnCreator contract address.
+   *
+   * @param x2EarnCreatorContract the address of the X2EarnCreator contract
+   */
+  function setX2EarnCreatorContract(address x2EarnCreatorContract) external;
+
+  /**
+   * @dev Get the X2EarnCreator contract address.
+   */
+  function x2EarnCreatorContract() external view returns (IX2EarnCreator);
 }
