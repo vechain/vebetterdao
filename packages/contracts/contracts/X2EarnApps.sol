@@ -66,44 +66,14 @@ contract X2EarnApps is
    * @notice Initialize the version 2 contract
    * @param _gracePeriod the grace period to be reendorsed
    * @param _nodeManagementContract the address of the vechain node management contract
+   * @param _veBetterPassportContract the address of the VeBetterPassport contract
    *
    * @dev This function is called only once during the contract deployment
    */
-  function initializeV2(uint48 _gracePeriod, address _nodeManagementContract) public reinitializer(2) {
+  function initializeV2(uint48 _gracePeriod, address _nodeManagementContract, address _veBetterPassportContract) public reinitializer(2) {
     require(_nodeManagementContract != address(0), "X2EarnApps: Invalid Node Managementcontract address");
-    __Endorsement_init(_gracePeriod, _nodeManagementContract);
-  }
-
-  /**
-   * @notice Initialize the contract
-   * @param _baseURI the base URI for the contract
-   * @param _admins the addresses of the admins
-   * @param _upgrader the address of the upgrader
-   * @param _governor the address that will be granted the governance role
-   *
-   * @dev This function is called only once during the contract deployment
-   */
-  function initialize(
-    string memory _baseURI,
-    address[] memory _admins,
-    address _upgrader,
-    address _governor
-  ) external initializer {
-    __X2EarnApps_init();
-    __Administration_init();
-    __AppsStorage_init();
-    __ContractSettings_init(_baseURI);
-    __VoteEligibility_init();
-    __UUPSUpgradeable_init();
-    __AccessControl_init();
-
-    for (uint256 i; i < _admins.length; i++) {
-      require(_admins[i] != address(0), "X2EarnApps: admin address cannot be zero");
-      _grantRole(DEFAULT_ADMIN_ROLE, _admins[i]);
-    }
-
-    _grantRole(UPGRADER_ROLE, _upgrader);
-    _grantRole(GOVERNANCE_ROLE, _governor);
+    require(_veBetterPassportContract != address(0), "X2EarnApps: Invalid VeBetterPassport contract address");
+    __Endorsement_init(_gracePeriod, _nodeManagementContract, _veBetterPassportContract);
   }
 
   // ---------- Modifiers ------------ //
@@ -313,5 +283,19 @@ contract X2EarnApps is
    */
   function removeXAppSubmission(bytes32 _appId) public virtual onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _removeXAppSubmission(_appId);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-setNodeManagementContract}.
+   */
+  function setNodeManagementContract(address _nodeManagementContract) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setNodeManagementContract(_nodeManagementContract);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-setVeBetterPassportContract}.
+   */
+  function setVeBetterPassportContract(address _veBetterPassportContract) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setVeBetterPassportContract(_veBetterPassportContract);
   }
 }
