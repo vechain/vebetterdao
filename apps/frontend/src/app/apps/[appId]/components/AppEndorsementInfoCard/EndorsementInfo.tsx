@@ -1,17 +1,35 @@
 import { useEndorsementInfos } from "@/hooks/useEndorsementData"
-import { Text, HStack, VStack } from "@chakra-ui/react"
+import { Text, HStack, VStack, Box } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useState } from "react"
+
+import { HiDotsVertical } from "react-icons/hi"
+import { UilTrash, UilCheck } from "@iconscout/react-unicons"
 
 type EndorsementInfoProps = {
   appId: string
   endorserAddress: string
+  isConfirmOpen: boolean
+  setIsConfirmOpen: (value: boolean) => void
 }
 
-export const EndorsementInfo = ({ appId, endorserAddress }: EndorsementInfoProps) => {
+export const EndorsementInfo = ({ appId, endorserAddress, isConfirmOpen, setIsConfirmOpen }: EndorsementInfoProps) => {
   const endorsementInfos = useEndorsementInfos(appId, endorserAddress)
   const { t } = useTranslation()
+
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false)
+
+  const endorsemenInfos = () => {
+    setIsAccordionOpen(!isAccordionOpen)
+  }
+
+  const handleRemoveClick = () => {
+    setIsConfirmOpen(true)
+    setIsAccordionOpen(false)
+    console.log("isConfirmOpen", isConfirmOpen)
+  }
 
   return (
     <HStack
@@ -20,7 +38,7 @@ export const EndorsementInfo = ({ appId, endorserAddress }: EndorsementInfoProps
       borderRadius={"16px"}
       boxShadow="sm"
       w={"full"}
-      align-items={"center"}
+      alignItems={"center"}
       justify={"space-between"}>
       <HStack alignItems={"center"} gap={4}>
         <AddressIcon address={endorserAddress} rounded="full" h="28px" w="28px" />
@@ -31,18 +49,46 @@ export const EndorsementInfo = ({ appId, endorserAddress }: EndorsementInfoProps
           </Text>
         </VStack>
       </HStack>
-      <Text fontSize={"16px"} fontWeight={600}>
-        <Trans
-          i18nKey="{{value}} pts."
-          values={{ value: endorsementInfos.endorserTotalPoint || 0 }}
-          components={{
-            Text: <Text as="span" />,
-          }}
-        />
-      </Text>
-      {/* TODO: add 3 point Vertical on mobile. onClick() -> accordion open with 2 options (🗑️ Remove this endorsement(red text)); or (✔ (bleu) See endorser info )*/}
-      {/* TODO : if onClick() = removeUndorsement  , a card  appears on top of the HStack to say Are you sure. Two button in bottom right. in left =( 🗑️ Remove (red button, white text)). In right = `cancel`( blue).  */}
-      {/* nit: same in mobile, just card position smaller, and tag opened UI friendly   */}
+      <HStack alignItems={"center"} gap={4}>
+        <Text fontSize={"16px"} fontWeight={600}>
+          <Trans
+            i18nKey="{{value}} pts."
+            values={{ value: endorsementInfos.endorserTotalPoint || 0 }}
+            components={{
+              Text: <Text as="span" />,
+            }}
+          />
+        </Text>
+        <Box as="button" onClick={endorsemenInfos}>
+          <HiDotsVertical />
+        </Box>
+      </HStack>
+
+      {isAccordionOpen && (
+        <VStack
+          position="absolute"
+          top="50%"
+          left="50%"
+          transform="translate(-50%, -50%)"
+          bg="white"
+          border={"1px solid #EFEFEF"}
+          boxShadow="md"
+          rounded="md"
+          alignItems="stretch"
+          p={3}
+          spacing={3}
+          justify={"space-between"}>
+          {" "}
+          <HStack color="#C84968" onClick={handleRemoveClick} cursor="pointer">
+            <UilTrash />
+            <Text>{t("Remove this endorsement")}</Text>
+          </HStack>
+          <HStack onClick={() => setIsAccordionOpen(false)} cursor="pointer">
+            <UilCheck color={"#004CFC"} />
+            <Text>{t("See endorser info")}</Text>
+          </HStack>
+        </VStack>
+      )}
     </HStack>
   )
 }

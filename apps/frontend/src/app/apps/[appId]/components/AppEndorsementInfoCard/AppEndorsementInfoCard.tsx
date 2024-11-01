@@ -202,6 +202,8 @@ export const AppEndorsementInfoCard = ({
                     {t("Endorse with your {{value}} points", { value: xNodePoints })}
                   </Button>
                 ) : null}
+                {/* Prevent endorsing the app when the threshold is met. The SC already reverts the transaction, but the frontend still allows it. 
+                TODO: Hide the 'endorse' button when the threshold is met. */}
                 {isUserEndorsingOtherApp ? (
                   <Button variant={"primaryAction"} onClick={onOpenSwitchEndorsementModal} w={["full", "full", "auto"]}>
                     {t("Switch endorsement to this app")}

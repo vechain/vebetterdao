@@ -4,10 +4,25 @@ import { EndorsementHistory } from "./EndorsementHistory"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { AppEndorsersIcon } from "./AppEndorsersSection"
 
-import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
-import { VStack, HStack, Text, Stack, Image, Heading, Box, Center, Divider, Show } from "@chakra-ui/react"
+import { UilCheckCircle, UilExclamationCircle, UilTrash } from "@iconscout/react-unicons"
+import {
+  VStack,
+  HStack,
+  Text,
+  Stack,
+  Image,
+  Heading,
+  Box,
+  Center,
+  Divider,
+  Show,
+  Button,
+  useDisclosure,
+} from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { BaseModal } from "@/components/BaseModal"
+
+import { useState } from "react"
 
 import { useBreakpoints } from "@/hooks"
 
@@ -46,6 +61,17 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
       )}
     </Box>
   )
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+
+  const {
+    // isOpen: isUnendorsementModalOpen,
+    onOpen: onOpenUnendorsementModal,
+    // onClose: onCloseUnendorsementModal,
+  } = useDisclosure()
+
+  const handleCancelClick = () => {
+    setIsConfirmOpen(false)
+  }
 
   return (
     <BaseModal
@@ -128,8 +154,39 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
                     .slice()
                     .reverse()
                     .map((endorser, index) => (
-                      <EndorsementInfo key={index} appId={appId} endorserAddress={endorser} />
+                      <EndorsementInfo
+                        key={index}
+                        appId={appId}
+                        endorserAddress={endorser}
+                        isConfirmOpen={isConfirmOpen}
+                        setIsConfirmOpen={setIsConfirmOpen}
+                      />
                     ))}
+                  {isConfirmOpen && (
+                    <VStack
+                      border={"1px solid #EC9BAF"}
+                      p={4}
+                      borderRadius={"16px"}
+                      bg={"white"}
+                      alignItems="start"
+                      w={"full"}>
+                      <Text>
+                        {t(
+                          "Are you sure? If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active.",
+                          { endorsedAddress: endorsers, value: endorsers.length }, // TODO: put the right value
+                        )}
+                      </Text>
+                      <HStack justifyContent="flex-start" border={"1px solid black"}>
+                        <Button bg="#C84968" color={"white"} onClick={onOpenUnendorsementModal}>
+                          <UilTrash />
+                          {t("Remove")}
+                        </Button>
+                        <Button bg="#E0E9FE" color={"#004CFC"} onClick={handleCancelClick}>
+                          {t("Cancel")}
+                        </Button>
+                      </HStack>
+                    </VStack>
+                  )}
                 </VStack>
               ) : (
                 <Center w="full" h="full">
