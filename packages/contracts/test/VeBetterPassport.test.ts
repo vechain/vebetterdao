@@ -36,7 +36,7 @@ import {
 } from "../typechain-types"
 import { endorseApp } from "./helpers/xnodes"
 
-describe.only("VeBetterPassport - @shard5", function () {
+describe("VeBetterPassport - @shard5", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await getOrDeployContractInstances({
@@ -6016,7 +6016,7 @@ describe.only("VeBetterPassport - @shard5", function () {
       expect(await veBetterPassport.decayRate()).to.equal(0)
     })
 
-    it("Should not register action score if app security is not set", async function () {
+    it("Should set app score to LOW by default when joining the ecosystem", async function () {
       const { veBetterPassport, owner, otherAccounts, otherAccount, x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -6038,8 +6038,8 @@ describe.only("VeBetterPassport - @shard5", function () {
 
       await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
 
-      expect(await veBetterPassport.userRoundScore(otherAccount, 1)).to.equal(0)
-      expect(await veBetterPassport.userRoundScoreApp(otherAccount, 1, app1Id)).to.equal(0)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 1)).to.equal(100n)
+      expect(await veBetterPassport.userRoundScoreApp(otherAccount, 1, app1Id)).to.equal(100n)
     })
 
     it("Should not register action score if user is blacklisted", async function () {

@@ -151,7 +151,7 @@ export const deployAndUpgrade = async (
   let proxy = await deployProxy(
     contractName,
     contractArgs,
-    options.libraries?.[0],
+    options?.libraries?.[0],
     options.logOutput,
     options.versions?.[0],
   )

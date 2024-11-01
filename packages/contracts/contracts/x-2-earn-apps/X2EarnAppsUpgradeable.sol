@@ -39,17 +39,8 @@ import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
  * - a module to handle the settings of the contract
  */
 abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
-  /**
-   * @dev Initializes the contract
-   */
-  function __X2EarnApps_init() internal onlyInitializing {
-    __X2EarnApps_init_unchained();
-  }
-
-  function __X2EarnApps_init_unchained() internal onlyInitializing {}
 
   // ---------- Getters ---------- //
-
   /**
    * @dev Get the baseURI and metadata URI of the app concatenated
    *
