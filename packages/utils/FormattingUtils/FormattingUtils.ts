@@ -78,6 +78,17 @@ export const humanAddress = (address: string, lengthBefore = 4, lengthAfter = 10
   return `${before}…${after}`
 }
 
+export const humanDomain = (domain: string | null, lengthBefore = 8, lengthAfter = 6) => {
+  if (!domain) return ""
+
+  // if domain is smaller than lengthBefore + lengthAfter, return the domain
+  if (domain.length <= lengthBefore + lengthAfter) return domain
+
+  const before = domain.substring(0, lengthBefore)
+  const after = domain.substring(domain.length - lengthAfter)
+  return `${before}…${after}`
+}
+
 export const humanUrl = (url: string, lengthBefore = 8, lengthAfter = 6) => {
   const before = url.substring(0, lengthBefore)
   const after = url.substring(url.length - lengthAfter)
