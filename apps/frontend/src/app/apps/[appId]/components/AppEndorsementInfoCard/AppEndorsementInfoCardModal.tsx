@@ -2,10 +2,14 @@ import { useIsAppUnendorsed, useAppEndorsementScore, useAppEndorsers } from "@/a
 import { EndorsementInfo } from "./EndorsementInfo"
 import { EndorsementHistory } from "./EndorsementHistory"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { AppEndorsersIcon } from "./AppEndorsersSection"
 
+import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import { VStack, HStack, Text, Stack, Image, Heading, Box, Center, Divider, Show } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { BaseModal } from "@/components/BaseModal"
+
+import { useBreakpoints } from "@/hooks"
 
 type Props = {
   isOpen: boolean
@@ -21,9 +25,27 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
   const { data: endorsers } = useAppEndorsers(appId)
   const { data: endorsementEvents } = useAppEndorsedEvents({ appId })
 
-  // Map the score of the user from the endorsers list. If the user is in the endorsers list, show his score and is UserEndorsing = true
-  // const isUserEndorsing = ?
-  // const userEndorsementScore = endorsers.find((endorser) => endorser.address === userAddress)?.score
+  const { isMobile } = useBreakpoints()
+
+  const TagBox = () => (
+    <Box>
+      {isUnendorsed ? (
+        <HStack bg="#FFF3E5" p={"6px 10px"} rounded="9px" justifyContent={"center"}>
+          <UilExclamationCircle color="#AF5F00" size={"1rem"} />
+          <Text color="#AF5F00" fontWeight={600} fontSize="sm">
+            {t("Looking for endorsement")}
+          </Text>
+        </HStack>
+      ) : (
+        <HStack bg="#E9FDF1" p={"6px 10px"} rounded="9px" justifyContent={"center"}>
+          <UilCheckCircle color="#3DBA67" size={"1rem"} />
+          <Text color="#3DBA67" fontWeight={600} fontSize="sm">
+            {t("Endorsed and active")}
+          </Text>
+        </HStack>
+      )}
+    </Box>
+  )
 
   return (
     <BaseModal
@@ -39,44 +61,48 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
           <VStack flex={1.5} h="full" maxH={["auto", "auto", "50vh"]} minH={["auto", "auto", "50vh"]} spacing={4}>
             <HStack w="full" justify="space-between">
               <Box>
-                <Text fontWeight="400" fontSize="14px">
-                  {t("Current score")}
-                </Text>
                 <Heading fontSize={"24px"} fontWeight="700" color="#444AD1">
                   {endorsementScore}
                 </Heading>
+                <Text fontWeight="400" fontSize="14px">
+                  {t("Current score")}
+                </Text>
               </Box>
               {userScore != null && (
                 <Box>
-                  <Text fontWeight="400" fontSize="14px">
-                    {t("Your score")}
-                  </Text>
                   <Heading fontSize={"24px"} fontWeight="700" color="#444AD1">
                     {userScore}
                   </Heading>
+                  <Text fontWeight="400" fontSize="14px">
+                    {t("Your score")}
+                  </Text>
                 </Box>
               )}
 
               <Box>
+                <HStack>
+                  <AppEndorsersIcon endorsers={endorsers ?? []} />
+                  <Heading fontSize={"24px"} fontWeight="700" color="#444AD1">
+                    {endorsers?.length}
+                  </Heading>{" "}
+                </HStack>
                 <Text fontWeight="400" fontSize="14px">
                   {t("Users endorsing")}
                 </Text>
-                <Heading fontSize={"24px"} fontWeight="700" color="#444AD1">
-                  {endorsers?.length}
-                </Heading>
               </Box>
 
-              {/* TODO: modify the status with a tag box red . An emoji (✅) and status 'Endorsed and active if the endorsment ok  */}
-              {/* TODO: add a tagbox yellow if lookig for endorsement. An emoji(❗️), and status 'Looking for endorsement'  */}
-              <Box>
-                <Text fontWeight="400" fontSize="14px">
-                  {t("Status")}
-                </Text>
-                <Heading fontSize={"24px"} fontWeight="700" color={isUnendorsed ? "#C84968" : "#3DBA67"}>
-                  {isUnendorsed ? t("Not endorsed") : t("Endorsed")}
-                </Heading>
-              </Box>
+              {!isMobile && (
+                <Box>
+                  <TagBox />
+                </Box>
+              )}
             </HStack>
+
+            {isMobile && (
+              <Box w={"full"} alignItems={"center"}>
+                <TagBox />
+              </Box>
+            )}
 
             <Show below="md">
               <Divider w="full" />

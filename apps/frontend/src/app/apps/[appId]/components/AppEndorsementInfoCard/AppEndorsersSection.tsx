@@ -66,7 +66,7 @@ export const AppEndorsersSection = ({ appId, userScore }: Props) => {
   )
 }
 
-const AppEndorsersIcon = ({ endorsers, maxToRender = 3 }: { endorsers: string[]; maxToRender?: number }) => {
+export const AppEndorsersIcon = ({ endorsers, maxToRender = 3 }: { endorsers: string[]; maxToRender?: number }) => {
   const boxSize = 20
   const marginleft = boxSize / 2
 
