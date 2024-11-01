@@ -25,6 +25,7 @@ pragma solidity 0.8.20;
 
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
+import { AdministrationUtils } from "../libraries/AdministrationUtils.sol";
 
 /**
  * @title AdministrationUpgradeable
@@ -67,19 +68,8 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param newAdmin the address of the new admin
    */
   function _setAppAdmin(bytes32 appId, address newAdmin) internal override {
-    if (!_appSubmitted(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    if (newAdmin == address(0)) {
-      revert X2EarnInvalidAddress(newAdmin);
-    }
-
     AdministrationStorage storage $ = _getAdministrationStorage();
-
-    emit AppAdminUpdated(appId, $._admin[appId], newAdmin);
-
-    $._admin[appId] = newAdmin;
+    AdministrationUtils.setAppAdmin($._admin, appId, newAdmin, _appSubmitted(appId));
   }
 
   /**
@@ -89,23 +79,8 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param moderator the address of the moderator
    */
   function _addAppModerator(bytes32 appId, address moderator) internal {
-    if (moderator == address(0)) {
-      revert X2EarnInvalidAddress(moderator);
-    }
-
-    if (!_appSubmitted(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
     AdministrationStorage storage $ = _getAdministrationStorage();
-
-    if ($._moderators[appId].length >= MAX_MODERATORS) {
-      revert X2EarnMaxModeratorsReached(appId);
-    }
-
-    $._moderators[appId].push(moderator);
-
-    emit ModeratorAddedToApp(appId, moderator);
+    AdministrationUtils.addAppModerator($._moderators, appId, moderator, _appSubmitted(appId), MAX_MODERATORS);
   }
 
   /**
@@ -115,29 +90,8 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param moderator the address of the moderator
    */
   function _removeAppModerator(bytes32 appId, address moderator) internal {
-    if (moderator == address(0)) {
-      revert X2EarnInvalidAddress(moderator);
-    }
-
-    if (!_appSubmitted(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    if (!isAppModerator(appId, moderator)) {
-      revert X2EarnNonexistentModerator(appId, moderator);
-    }
-
     AdministrationStorage storage $ = _getAdministrationStorage();
-
-    address[] storage moderators = $._moderators[appId];
-    for (uint256 i; i < moderators.length; i++) {
-      if (moderators[i] == moderator) {
-        moderators[i] = moderators[moderators.length - 1];
-        moderators.pop();
-        emit ModeratorRemovedFromApp(appId, moderator);
-        break;
-      }
-    }
+    AdministrationUtils.removeAppModerator($._moderators, appId, moderator, _appSubmitted(appId));
   }
 
   /**
@@ -147,23 +101,8 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param distributor the address of the reward distributor
    */
   function _addRewardDistributor(bytes32 appId, address distributor) internal {
-    if (distributor == address(0)) {
-      revert X2EarnInvalidAddress(distributor);
-    }
-
-    if (!_appSubmitted(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
     AdministrationStorage storage $ = _getAdministrationStorage();
-
-    if ($._rewardDistributors[appId].length >= MAX_REWARD_DISTRIBUTORS) {
-      revert X2EarnMaxRewardDistributorsReached(appId);
-    }
-
-    $._rewardDistributors[appId].push(distributor);
-
-    emit RewardDistributorAddedToApp(appId, distributor);
+    AdministrationUtils.addRewardDistributor($._rewardDistributors, appId, distributor, _appSubmitted(appId), MAX_REWARD_DISTRIBUTORS);
   }
 
   /**
@@ -173,29 +112,8 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param distributor the address of the reward distributor
    */
   function _removeRewardDistributor(bytes32 appId, address distributor) internal {
-    if (distributor == address(0)) {
-      revert X2EarnInvalidAddress(distributor);
-    }
-
-    if (!_appSubmitted(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    if (!isRewardDistributor(appId, distributor)) {
-      revert X2EarnNonexistentRewardDistributor(appId, distributor);
-    }
-
     AdministrationStorage storage $ = _getAdministrationStorage();
-
-    address[] storage distributors = $._rewardDistributors[appId];
-    for (uint256 i; i < distributors.length; i++) {
-      if (distributors[i] == distributor) {
-        distributors[i] = distributors[distributors.length - 1];
-        distributors.pop();
-        emit RewardDistributorRemovedFromApp(appId, distributor);
-        break;
-      }
-    }
+    AdministrationUtils.removeRewardDistributor($._rewardDistributors, appId, distributor, _appSubmitted(appId));
   }
 
   /**
@@ -205,19 +123,8 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param newTeamWalletAddress the address of the new wallet where the team will receive the funds
    */
   function _updateTeamWalletAddress(bytes32 appId, address newTeamWalletAddress) internal override {
-    if (newTeamWalletAddress == address(0)) {
-      revert X2EarnInvalidAddress(newTeamWalletAddress);
-    }
-
-    if (!_appSubmitted(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
     AdministrationStorage storage $ = _getAdministrationStorage();
-    address oldTeamWalletAddress = $._teamWalletAddress[appId];
-    $._teamWalletAddress[appId] = newTeamWalletAddress;
-
-    emit TeamWalletAddressUpdated(appId, oldTeamWalletAddress, newTeamWalletAddress);
+    AdministrationUtils.updateTeamWalletAddress($._teamWalletAddress, appId, newTeamWalletAddress, _appSubmitted(appId));
   }
 
   /**
@@ -229,15 +136,8 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * Emits a {AppMetadataURIUpdated} event.
    */
   function _updateAppMetadata(bytes32 appId, string memory newMetadataURI) internal override {
-    if (!_appSubmitted(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
     AdministrationStorage storage $ = _getAdministrationStorage();
-    string memory oldMetadataURI = $._metadataURI[appId];
-    $._metadataURI[appId] = newMetadataURI;
-
-    emit AppMetadataURIUpdated(appId, oldMetadataURI, newMetadataURI);
+    AdministrationUtils.updateAppMetadata($._metadataURI, appId, newMetadataURI, _appSubmitted(appId));
   }
 
   /**
@@ -247,19 +147,8 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    * @param newAllocationPercentage the new allocation percentage
    */
   function _setTeamAllocationPercentage(bytes32 appId, uint256 newAllocationPercentage) internal virtual override {
-    if (!_appSubmitted(appId)) {
-      revert X2EarnNonexistentApp(appId);
-    }
-
-    if (newAllocationPercentage > 100) {
-      revert X2EarnInvalidAllocationPercentage(newAllocationPercentage);
-    }
-
     AdministrationStorage storage $ = _getAdministrationStorage();
-    uint256 oldAllocationPercentage = $._teamAllocationPercentage[appId];
-    $._teamAllocationPercentage[appId] = newAllocationPercentage;
-
-    emit TeamAllocationPercentageUpdated(appId, oldAllocationPercentage, newAllocationPercentage);
+    AdministrationUtils.setTeamAllocationPercentage($._teamAllocationPercentage, appId, newAllocationPercentage, _appSubmitted(appId));
   }
 
   // ---------- Getters ---------- //
@@ -304,15 +193,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    */
   function isAppModerator(bytes32 appId, address account) public view returns (bool) {
     AdministrationStorage storage $ = _getAdministrationStorage();
-
-    address[] memory moderators = $._moderators[appId];
-    for (uint256 i; i < moderators.length; i++) {
-      if (moderators[i] == account) {
-        return true;
-      }
-    }
-
-    return false;
+    return AdministrationUtils.isAppModerator($._moderators, appId, account);
   }
 
   /**
@@ -357,14 +238,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   function isRewardDistributor(bytes32 appId, address account) public view returns (bool) {
     AdministrationStorage storage $ = _getAdministrationStorage();
 
-    address[] memory distributors = $._rewardDistributors[appId];
-    for (uint256 i; i < distributors.length; i++) {
-      if (distributors[i] == account) {
-        return true;
-      }
-    }
-
-    return false;
+    return AdministrationUtils.isRewardDistributor($._rewardDistributors, appId, account);
   }
 
   /**

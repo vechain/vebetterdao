@@ -70,6 +70,9 @@ import {
   PassportWhitelistAndBlacklistLogicV1,
   VeBetterPassportV1,
   PassportConfiguratorV1,
+  AdministrationUtils,
+  VoteEligibilityUtils,
+  EndorsementUtils,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -85,6 +88,7 @@ import {
   GovernorClockLogicV4,
   GovernorVotesLogicV4,
 } from "../../typechain-types/contracts/deprecated/V4/governance/libraries"
+import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -163,6 +167,9 @@ interface DeployInstance {
   passportWhitelistBlacklistLogicV1: PassportWhitelistAndBlacklistLogicV1
   passportConfiguratorV1: PassportConfiguratorV1
   passportConfigurator: any // no abi for this library, which means a typechain is not generated
+  administrationUtils: AdministrationUtils
+  endorsementUtils: EndorsementUtils
+  voteEligibilityUtils: VoteEligibilityUtils
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
   vechainNodesMock: TokenAuction
@@ -246,6 +253,8 @@ export const getOrDeployContractInstances = async ({
     PassportSignalingLogic,
     PassportWhitelistAndBlacklistLogic,
   } = await passportLibraries()
+
+  const { AdministrationUtils, EndorsementUtils, VoteEligibilityUtils } = await x2EarnLibraries()
 
   // ---------------------- Deploy Mocks ----------------------
 
@@ -370,7 +379,14 @@ export const getOrDeployContractInstances = async ({
     "X2EarnApps",
     await x2EarnAppsV1.getAddress(),
     [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress(), veBetterPassportContractAddress],
-    { version: 2 },
+    {
+      version: 2,
+      libraries: {
+        AdministrationUtils: await AdministrationUtils.getAddress(),
+        EndorsementUtils: await EndorsementUtils.getAddress(),
+        VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      },
+    },
   )) as X2EarnApps
 
   const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
@@ -723,6 +739,11 @@ export const getOrDeployContractInstances = async ({
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
       GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
     },
+    X2EarnApps: {
+      EndorsementUtils: await EndorsementUtils.getAddress(),
+      AdministrationUtils: await AdministrationUtils.getAddress(),
+      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+    },
   }
 
   await setWhitelistedFunctions(contractAddresses, config, governor, owner, libraries) // Set whitelisted functions for governor proposals
@@ -859,6 +880,9 @@ export const getOrDeployContractInstances = async ({
     passportPoPScoreLogicV1: PassportPoPScoreLogicV1,
     passportSignalingLogicV1: PassportSignalingLogicV1,
     passportWhitelistBlacklistLogicV1: PassportWhitelistAndBlacklistLogicV1,
+    administrationUtils: AdministrationUtils,
+    endorsementUtils: EndorsementUtils,
+    voteEligibilityUtils: VoteEligibilityUtils,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vechainNodesMock,

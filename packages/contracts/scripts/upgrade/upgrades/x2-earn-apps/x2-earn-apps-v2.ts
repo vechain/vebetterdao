@@ -1,8 +1,9 @@
 import { getConfig } from "@repo/config"
-import { upgradeProxy } from "../../../helpers"
+import { saveLibrariesToFile, upgradeProxy } from "../../../helpers"
 import { EnvConfig, getContractsConfig } from "@repo/config/contracts"
 import { X2EarnApps } from "../../../../typechain-types"
 import { ethers } from "hardhat"
+import { x2EarnLibraries } from "../../../libraries/x2EarnLibraries"
 
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -10,11 +11,29 @@ async function main() {
   }
 
   const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
-
   const contractsConfig = getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
+  const deployer = (await ethers.getSigners())[0]
 
   console.log(
-    `Upgrading X2EarnApps contract at address: ${config.voterRewardsContractAddress} on network: ${config.network.name}`,
+    `Deploying X2EarnApps libraries on network: ${config.network.name} (env: ${config.environment}) with account: ${deployer.address}`,
+  )
+  const { AdministrationUtils, EndorsementUtils, VoteEligibilityUtils } = await x2EarnLibraries()
+
+  const libraries: {
+    X2EarnApps: Record<string, string>
+  } = {
+    X2EarnApps: {
+      AdministrationUtils: await AdministrationUtils.getAddress(),
+      EndorsementUtils: await EndorsementUtils.getAddress(),
+      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+    },
+  }
+
+  console.log("Libraries deployed")
+  console.log("Libraries", libraries)
+
+  console.log(
+    `Upgrading X2EarnApps contract at address: ${config.x2EarnAppsContractAddress} on network: ${config.network.name}`,
   )
 
   // Check if the node management contract is deployed
@@ -39,6 +58,11 @@ async function main() {
     [contractsConfig.XAPP_GRACE_PERIOD, config.nodeManagementContractAddress, config.veBetterPassportContractAddress],
     {
       version: 2,
+      libraries: {
+        AdministrationUtils: await AdministrationUtils.getAddress(),
+        EndorsementUtils: await EndorsementUtils.getAddress(),
+        VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      },
     },
   )) as X2EarnApps
 
@@ -53,6 +77,8 @@ async function main() {
   }
 
   console.log("Execution completed")
+
+  await saveLibrariesToFile(libraries)
   process.exit(0)
 }
 
