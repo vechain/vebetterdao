@@ -3,6 +3,7 @@ import { EnvConfig, getContractsConfig } from "@repo/config/contracts"
 import { deployProxy } from "../../helpers"
 import { X2EarnCreator } from "../../../typechain-types"
 import { ethers } from "hardhat"
+import { updateConfig } from "../../helpers/config"
 
 export async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -54,6 +55,20 @@ export async function main() {
   console.log(
     "INFO: roles will not be set automatically in this script, allowing the deployer to handle possible issues in the next days",
   )
+
+  console.log("================================================================================")
+  console.log(`Updating the config file with the new NodeManagement contract address`)
+  try {
+    Object.assign(envConfig, { x2EarnCreatorContractAddress: await x2EarnCreator.getAddress() })
+    await updateConfig(envConfig, "x2EarnCreatorContract")
+    console.log("Config file updated successfully")
+  } catch (e) {
+    console.error("Failed to update config file, update it manually")
+  }
+
+  console.log(`Update .../deploy_output/contracts.txt file with new NodeManagement contract address`)
+
+  console.log("================================================================================")
 
   console.log("================  Execution completed")
   process.exit(0)
