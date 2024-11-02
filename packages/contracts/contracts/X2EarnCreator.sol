@@ -30,6 +30,9 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+/// @title X2EarnCreator
+/// @notice Contract for minting and managing NFTs for X2Earn creators of VeBetterDAO.
+/// @dev This contract extends ERC721 Non-Fungible Token Standard basic implementation with upgradeable pattern, enumerable, pausable, and access control functionalities.
 contract X2EarnCreator is
   Initializable,
   ERC721Upgradeable,
