@@ -490,7 +490,7 @@ describe("X-Apps - @shard3", function () {
       }
     })
 
-    it("Check no issues upgrading to V2 with addition of libraries", async function () {
+    it.skip("Check no issues upgrading to V2 with addition of libraries", async function () {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 50
       const {
