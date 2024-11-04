@@ -18,14 +18,14 @@ export const EditAppPageButton = () => {
   const { account } = useWallet()
   const { admin } = useCurrentAppAdmin()
   const { moderators } = useCurrentAppModerators()
-  const { data: permissions } = useAccountPermissions(account || "")
+  const { isAdminOfX2EarnApps } = useAccountPermissions(account || "")
 
   const showEditButton = useMemo(() => {
     if (compareAddresses(account || "", admin)) return true
     if (moderators?.find(moderator => compareAddresses(account || "", moderator))) return true
-    if (permissions?.isAdminOfX2EarnApps) return true
+    if (isAdminOfX2EarnApps) return true
     return false
-  }, [account, admin, moderators, permissions])
+  }, [account, admin, moderators, isAdminOfX2EarnApps])
 
   if (!showEditButton) {
     return null

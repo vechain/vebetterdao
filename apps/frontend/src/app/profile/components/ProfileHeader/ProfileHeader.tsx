@@ -3,14 +3,14 @@ import { Text, VStack, HStack, Card, CardBody, useClipboard, IconButton, Stack, 
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { UilCopy, UilCheck } from "@iconscout/react-unicons"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 type Props = {
   address: string
 }
 
 export const ProfileHeader = ({ address }: Props) => {
-  const { domain } = useVechainDomain({ addressOrDomain: address ?? "" })
+  const { name } = useWalletName(address ?? "")
   const { onCopy } = useClipboard(address ?? "")
   const [isCopied, setIsCopied] = useState(false)
 
@@ -37,7 +37,7 @@ export const ProfileHeader = ({ address }: Props) => {
               align={["flex-start", "flex-start", "column"]}
               w="full"
               spacing={1}>
-              <Heading fontSize="xl">{domain}</Heading>
+              <Heading fontSize="xl">{name}</Heading>
               <HStack spacing={2}>
                 <Text fontSize="xl" fontWeight="500">
                   {humanAddress(address ?? "", 6, 4)}

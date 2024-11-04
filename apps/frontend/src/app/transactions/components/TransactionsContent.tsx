@@ -13,7 +13,6 @@ import {
   MenuList,
   MenuItem,
   Spinner,
-  Center,
 } from "@chakra-ui/react"
 import { TransactionCard } from "@/components"
 import { FaChevronDown, FaChevronLeft, FaChevronUp } from "react-icons/fa6"
@@ -130,11 +129,7 @@ export const TransactionsContent = ({ address }: Props) => {
             dataLength={transactions.length}
             next={fetchNextPage}
             hasMore={!!hasNextPage}
-            loader={
-              <Center>
-                <Spinner size="md" mt={4} alignSelf="center" />
-              </Center>
-            }>
+            loader={<Spinner />}>
             <VStack spacing={6} align="stretch">
               {transactions.length > 0 ? (
                 Object.entries(groupedTransactions).map(([day, transactions]) => (

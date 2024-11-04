@@ -69,7 +69,7 @@ export const EditAppPageContent = () => {
   const transactionModal = useDisclosure()
   const { isAdminOrModerator } = useCurrentAppRole()
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account || "")
+  const { isAdminOfX2EarnApps } = useAccountPermissions(account || "")
   const { appId } = useParams<{ appId: string }>()
 
   const form = useForm<EditAppForm>({
@@ -146,10 +146,10 @@ export const EditAppPageContent = () => {
   }, [handleClose, handleSubmit, onSubmit])
 
   useEffect(() => {
-    if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
+    if (!isAdminOrModerator && !isAdminOfX2EarnApps) {
       router.push(`/apps/${app?.id}`)
     }
-  }, [isAdminOrModerator, app?.id, router, permissions])
+  }, [isAdminOrModerator, app?.id, router, isAdminOfX2EarnApps])
 
   // Update the form values when the app fetches the data from blockchain
   useEffect(() => {
@@ -158,7 +158,7 @@ export const EditAppPageContent = () => {
     }
   }, [veWorldBanner, form])
 
-  if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
+  if (!isAdminOrModerator && !isAdminOfX2EarnApps) {
     return null
   }
 
