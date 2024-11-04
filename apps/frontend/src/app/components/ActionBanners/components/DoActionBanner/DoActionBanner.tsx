@@ -33,7 +33,7 @@ export const DoActionBanner = () => {
   if (isLoadingUserScore) return null
 
   return (
-    <Card bg="#FFD979" borderRadius="xl" w="full" h={"full"}>
+    <Card bg="#FFD979" borderRadius="xl" w="full">
       <CardBody position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
         <Image
           src="/images/cloud-background-orange.png"
@@ -71,8 +71,8 @@ export const DoActionBanner = () => {
           </HStack>
         </Show>
         <Show below="md">
-          <HStack align="center" zIndex={1} position="relative" w="full" h="full" alignItems={"center"}>
-            <VStack gap={2} align="stretch" justify={"space-between"} h="full">
+          <HStack align="center" zIndex={1} position="relative" w="full" alignItems={"center"}>
+            <VStack gap={2} align="stretch" justify={"space-between"}>
               <Text fontSize={12} color="#8D6602" fontWeight="600">
                 {t("TIME TO STEP UP! 🏃🏼‍♂️")}
               </Text>

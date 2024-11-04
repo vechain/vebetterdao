@@ -59,7 +59,7 @@ export const ClaimVotingRewardsBanner = () => {
         txId={claimRewardsMutation.txReceipt?.meta.txID ?? claimRewardsMutation.sendTransactionTx?.txid}
         isClaimingRewards
       />
-      <Card bg="#C8DDFF" borderRadius="xl" w="full" h={"full"}>
+      <Card bg="#C8DDFF" borderRadius="xl" w="full">
         <CardBody position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
           <Image
             src="/images/cloud-background.png"
@@ -95,8 +95,8 @@ export const ClaimVotingRewardsBanner = () => {
             </HStack>
           </Show>
           <Show below="md">
-            <HStack align="stretch" zIndex={1} position="relative" h="full" w={"full"} alignItems={"center"}>
-              <VStack gap={2} align="stretch" justify={"space-between"} h={"full"}>
+            <HStack align="stretch" zIndex={1} position="relative" w={"full"} alignItems={"center"}>
+              <VStack gap={2} align="stretch" justify={"space-between"}>
                 <Text fontSize={12} color="#3A5798" fontWeight="600">
                   {t("CLAIM YOUR REWARDS NOW! 💰")}
                 </Text>
@@ -110,7 +110,7 @@ export const ClaimVotingRewardsBanner = () => {
                   leftIcon={<UilGift color="white" />}>
                   <Text fontWeight="500">
                     {t("Claim your {{b3trToClaim}} B3TR", {
-                      b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.total ?? 0)),
+                      b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
                     })}
                   </Text>
                 </Button>

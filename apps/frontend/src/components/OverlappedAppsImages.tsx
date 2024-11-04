@@ -1,37 +1,39 @@
-import { useAllocationsRoundState, useMostVotedAppsInRound } from "@/api"
 import { AppImage } from "@/components/AppImage/AppImage"
 import { Flex, HStack, Skeleton, Text, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 type Props = {
-  roundId: string
+  appsIds: string[]
+  isLoading?: boolean
+  otherAppsActiveColor?: boolean
   maxAppsToShow?: number
   iconSize?: number
 }
-export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, maxAppsToShow = 4, iconSize }) => {
+export const OverlappedAppsImages: React.FC<Props> = ({
+  appsIds,
+  isLoading,
+  otherAppsActiveColor = true,
+  maxAppsToShow = 4,
+  iconSize,
+}) => {
   const { t } = useTranslation()
   const boxSize = useBreakpointValue({ base: iconSize ?? 28, lg: iconSize ?? 36 })
   const marginleft = (boxSize ?? 36) / 3
   const borderRadius = (boxSize ?? 36) / 4
 
-  // Apps are listed based on the rank in the round
-  const { data: xApps, isLoading: isLoadingXApps } = useMostVotedAppsInRound(roundId)
+  const appsToRender = appsIds.slice(0, maxAppsToShow)
 
-  const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
+  const remainingApps = appsIds.length - maxAppsToShow
 
-  const appsToRender = xApps?.slice(0, maxAppsToShow)
-
-  const remainingApps = (xApps?.length ?? 0) - maxAppsToShow
-
-  const otherAppsBoxColor = state === 0 ? "#C9EAA3" : "#D4D6FF"
-  const otherAppsTextColor = state === 0 ? "#5C6C4A" : "#4A4FD3"
+  const otherAppsBoxColor = !otherAppsActiveColor ? "#C9EAA3" : "#D4D6FF"
+  const otherAppsTextColor = !otherAppsActiveColor ? "#5C6C4A" : "#4A4FD3"
 
   // render a gallery where every app overlaps each other with a small offset
   // if we have more than 5 apps, the 5th bacame a card with the number of apps that are not shown
   // if we have less than 5 apps, we show them all
   // if we have no apps, we render nothing
 
-  if (isLoadingXApps || stateLoading)
+  if (isLoading)
     return (
       <HStack spacing={0}>
         {Array.from({ length: maxAppsToShow }).map((_, index) => (
@@ -40,15 +42,15 @@ export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, ma
       </HStack>
     )
 
-  if (xApps?.length) {
+  if (appsIds?.length) {
     return (
       <HStack spacing={0}>
-        {appsToRender?.map((xApp, index) => {
+        {appsToRender?.map((appId, index) => {
           const ml = index > 0 ? `-${marginleft}px` : "0"
           return (
             <AppImage
-              key={xApp.id}
-              appId={xApp.id}
+              key={appId}
+              appId={appId}
               boxSize={`${boxSize}px`}
               borderRadius={`${borderRadius}px`}
               ml={ml}
@@ -56,7 +58,7 @@ export const AllocationRoundParticipatingXApps: React.FC<Props> = ({ roundId, ma
             />
           )
         })}
-        {xApps.length > maxAppsToShow && (
+        {appsIds.length > maxAppsToShow && (
           <Flex
             zIndex={1}
             boxSize={`${boxSize}px`}

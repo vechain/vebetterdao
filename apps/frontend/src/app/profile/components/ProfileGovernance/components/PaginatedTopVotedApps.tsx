@@ -14,8 +14,10 @@ type PaginatedProposalsProps = {
 export const PaginatedTopVotedApps = ({ topVotedApps, itemsPerPage = 6, goBack }: PaginatedProposalsProps) => {
   const { t } = useTranslation()
 
+  //TODO: refactor and align  with useInfiniteQuery
   const { currentItems, hasMore, loadMore, loading } = usePagination(topVotedApps ?? [], itemsPerPage)
 
+  //TODO: refactor  and align with useInfiniteQuery
   useInfiniteScroll({
     loading,
     hasMore,

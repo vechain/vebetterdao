@@ -2,11 +2,19 @@ import { useAccountLinking } from "@/api"
 import { Card, CardBody, VStack, Heading, Text, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { PendingLinkingProposalItem } from "./components/PendingLinkingProposalItem/PendingLinkingProposalItem"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
-export const PendingLinkingProposal = () => {
+type Props = {
+  address: string
+}
+export const PendingLinkingProposal = ({ address }: Props) => {
   const { t } = useTranslation()
 
-  const { incomingPendingLinkings, isLoading } = useAccountLinking()
+  const { account: connectedAccount } = useWallet()
+  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
+
+  const { incomingPendingLinkings, isLoading } = useAccountLinking(address)
   if (isLoading || !incomingPendingLinkings?.length) return null
   return (
     <Card variant="baseWithBorder" w="full">
@@ -19,12 +27,18 @@ export const PendingLinkingProposal = () => {
               </Heading>
             </HStack>
             <Text color="#6A6A6A" fontSize="md">
-              {t("Their actions will be attributed to your main account.")}
+              {isConnectedUser
+                ? t("Their actions will be attributed to your main account.")
+                : t("Their actions will be attributed to user's main account.")}
             </Text>
           </VStack>
           <VStack align="stretch">
             {incomingPendingLinkings.map((secondaryAccount: string) => (
-              <PendingLinkingProposalItem key={secondaryAccount} secondaryAccount={secondaryAccount} />
+              <PendingLinkingProposalItem
+                isConnectedUser={isConnectedUser}
+                key={secondaryAccount}
+                secondaryAccount={secondaryAccount}
+              />
             ))}
           </VStack>
         </VStack>

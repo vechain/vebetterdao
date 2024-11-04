@@ -4,22 +4,28 @@ import { ConvertModal } from "@/components/Convert/ConvertModal"
 import { Box, Button, Heading, HStack, Image, Skeleton, Stack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilArrowUpRight, UilExchangeAlt } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const compactFormatter = getCompactFormatter(2)
 
-export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: boolean }) => {
+type Props = {
+  address: string
+  showGoToBalance?: boolean
+}
+export const TokensBalance = ({ address, showGoToBalance = false }: Props) => {
   const { t } = useTranslation()
 
-  const { account } = useWallet()
+  const { account: connectedAccount } = useWallet()
+  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
 
-  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account ?? undefined)
-  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(account ?? undefined)
+  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(address ?? undefined)
+  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(address ?? undefined)
 
   const { isOpen, onClose, onOpen } = useDisclosure()
   const hasNoBalance = (!b3trBalance || b3trBalance.scaled === "0") && (!vot3Balance || vot3Balance.scaled === "0")
@@ -32,7 +38,7 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
     router.push("/profile")
   }, [router])
 
-  if (!account) return <WalletNotConnectedOverlay />
+  if (!address) return <WalletNotConnectedOverlay />
 
   return (
     <VStack
@@ -49,7 +55,7 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
         <Image src={"/images/cloud-background.png"} alt="cloud" objectFit={"contain"} />
       </Box>
       <HStack color="white" zIndex={2} justifyContent={"space-between"}>
-        <Heading fontSize="xl">{t("Your token balance")}</Heading>
+        <Heading fontSize="xl">{t("Balance")}</Heading>
         {showGoToBalance && (
           <HStack _hover={{ cursor: "pointer", textDecoration: "underline" }} gap={1} onClick={goToBalance}>
             <Text fontWeight={500}>{t("Go to balance")}</Text>
@@ -101,20 +107,22 @@ export const TokensBalance = ({ showGoToBalance = false }: { showGoToBalance?: b
           </HStack>
         </VStack>
       </Stack>
-      <Button
-        isDisabled={isSwapDisabled}
-        onClick={() => {
-          onOpen()
-          AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SWAP_TOKENS))
-        }}
-        leftIcon={<UilExchangeAlt size={"16px"} />}
-        variant={"whiteAction"}
-        rounded={"full"}
-        fontWeight={500}
-        px="24px"
-        zIndex={1}>
-        {t("Swap tokens")}
-      </Button>
+      {isConnectedUser && (
+        <Button
+          isDisabled={isSwapDisabled}
+          onClick={() => {
+            onOpen()
+            AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.SWAP_TOKENS))
+          }}
+          leftIcon={<UilExchangeAlt size={"16px"} />}
+          variant={"whiteAction"}
+          rounded={"full"}
+          fontWeight={500}
+          px="24px"
+          zIndex={1}>
+          {t("Swap tokens")}
+        </Button>
+      )}
       <ConvertModal isOpen={isOpen} onClose={onClose} />
     </VStack>
   )

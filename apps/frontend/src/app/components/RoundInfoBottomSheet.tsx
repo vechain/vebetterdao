@@ -2,25 +2,43 @@
 
 import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton } from "@chakra-ui/react"
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
-import { AllocationRoundParticipatingXApps } from "@/components/AllocationRoundsList/components/AllocationRoundParticipatingXApps"
-import { useAllocationAmount, useCurrentAllocationsRoundId } from "@/api"
+import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
+import {
+  useAllocationAmount,
+  useAllocationsRoundState,
+  useCanUserVote,
+  useCurrentAllocationsRoundId,
+  useGetDelegatee,
+  useMostVotedAppsInRound,
+} from "@/api"
 import { useRoundProposals } from "../rounds/hooks/useRoundProposals"
 import { Trans, useTranslation } from "react-i18next"
 import { AllocationStateBadge, B3TRIcon, ProposalCompactCard } from "@/components"
 import { useRouter } from "next/navigation"
 import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const { account } = useWallet()
 
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
 
   const { allocationRound, roundLoading, proposalsToRender } = useRoundProposals(currentRoundId ?? "")
 
   const { data: amounts, isLoading: amountsLoading } = useAllocationAmount(currentRoundId)
+
+  const mostVotedAppsQuery = useMostVotedAppsInRound(currentRoundId)
+
+  const { data: state } = useAllocationsRoundState(currentRoundId)
+
+  const isOthersOverlappedAppsColorActive = state !== undefined && state !== 0
+
+  const { data: delegateeAddress } = useGetDelegatee(account ?? "")
+  const { data: canVote } = useCanUserVote(account ?? "", delegateeAddress)
 
   const totalAmount =
     Number(amounts?.treasury ?? 0) + Number(amounts?.voteX2Earn ?? 0) + Number(amounts?.voteXAllocations ?? 0)
@@ -60,7 +78,14 @@ export const RoundInfoBottomSheet = () => {
               </Text>
             </Skeleton>
           </Box>
-          {currentRoundId && <AllocationRoundParticipatingXApps roundId={currentRoundId} iconSize={36} />}
+          {currentRoundId && (
+            <OverlappedAppsImages
+              appsIds={mostVotedAppsQuery.data.map(a => a.id)}
+              isLoading={mostVotedAppsQuery.isLoading}
+              otherAppsActiveColor={isOthersOverlappedAppsColorActive}
+              iconSize={36}
+            />
+          )}
         </HStack>
       )}
 
@@ -86,7 +111,14 @@ export const RoundInfoBottomSheet = () => {
                 </Text>
               </Skeleton>
             </Box>
-            {currentRoundId && <AllocationRoundParticipatingXApps roundId={currentRoundId} iconSize={36} />}
+            {currentRoundId && (
+              <OverlappedAppsImages
+                appsIds={mostVotedAppsQuery.data.map(a => a.id)}
+                isLoading={mostVotedAppsQuery.isLoading}
+                otherAppsActiveColor={isOthersOverlappedAppsColorActive}
+                iconSize={36}
+              />
+            )}
           </HStack>
           <VStack spacing={4} w="full" align="flex-start">
             <VStack spacing={2} w="full" align="flex-start">
@@ -139,13 +171,15 @@ export const RoundInfoBottomSheet = () => {
                   rounded={"full"}>
                   {t("See More")}
                 </Button>
-                <Button
-                  onClick={() => router.push(`/rounds/${allocationRound.roundId}/vote`)}
-                  colorScheme="primary"
-                  w="full"
-                  rounded={"full"}>
-                  {t("Vote now")}
-                </Button>
+                {canVote && (
+                  <Button
+                    onClick={() => router.push(`/rounds/${allocationRound.roundId}/vote`)}
+                    colorScheme="primary"
+                    w="full"
+                    rounded={"full"}>
+                    {t("Vote now")}
+                  </Button>
+                )}
               </HStack>
             </VStack>
           </VStack>

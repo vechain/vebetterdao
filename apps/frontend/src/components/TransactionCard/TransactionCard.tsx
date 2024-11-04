@@ -1,4 +1,4 @@
-import { BetterActionTransactionCard } from "./cards/BetterActionTransactionCard"
+import { BetterActionCard } from "./cards/BetterActionCard"
 import { ClaimCard } from "./cards/ClaimCard"
 import { SupportCard } from "./cards/SupportCard"
 import { SwapCard } from "./cards/SwapCard"
@@ -10,8 +10,17 @@ type Props = {
 }
 export const TransactionCard = ({ transaction }: Props) => {
   switch (transaction.txType) {
-    case "B3TR_ACTION":
-      return <BetterActionTransactionCard transaction={transaction} /> /* TODO: Use BetterActionCard */
+    case "B3TR_ACTION": {
+      return (
+        <BetterActionCard
+          amountB3tr={transaction.amountB3TR}
+          appId={transaction.appId}
+          blockNumber={transaction.blockNumber}
+          blockTimestamp={transaction.blockTimestamp}
+          proof={transaction.proof}
+        />
+      )
+    }
     case "SWAP":
       return <SwapCard transaction={transaction} />
     case "CLAIM_REWARD":

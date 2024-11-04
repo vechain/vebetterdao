@@ -16,7 +16,7 @@ export default defineConfig({
       provider: "istanbul", // or 'v8'
       reporter: ["lcov"],
     },
-    environment: "jsdom",
+    environment: "happy-dom",
     globals: true,
     setupFiles: [resolve(__dirname, "test/vite.setup.ts")],
   },
