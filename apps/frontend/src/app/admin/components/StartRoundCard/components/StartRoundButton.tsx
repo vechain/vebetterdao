@@ -58,7 +58,8 @@ export const StartRoundButton = () => {
             colorScheme="blue"
             isDisabled={isCurrentRoundActive}
             onClick={handleSubmit}
-            isLoading={distributionLoading}>
+            isLoading={distributionLoading}
+            data-testid={"start-voting-round-button"}>
             {t("Start new round")}
           </Button>
         </VStack>
@@ -75,6 +76,7 @@ export const StartRoundButton = () => {
         pendingTitle="Starting round..."
         errorTitle={"Error starting round"}
         errorDescription={error?.reason}
+        data-testid={"round-start-modal-title"}
       />
     </VStack>
   )

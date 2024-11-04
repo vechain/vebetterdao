@@ -1,5 +1,4 @@
 import { VStack, Text, Button, Icon } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { IconType } from "react-icons"
 
 type Props = {
@@ -12,12 +11,10 @@ type Props = {
 }
 
 export const EmptyStateGovernance = ({ title, description, illustration, buttonText, buttonIcon, onClick }: Props) => {
-  const { t } = useTranslation()
-
   return (
     <VStack w={"full"}>
       <Text fontSize={{ base: 18, md: 20 }} fontWeight={"bold"} alignSelf={"start"}>
-        {t(title as any)}
+        {title}
       </Text>
       <VStack w={"full"} borderRadius={12} borderWidth={1} borderColor={"#D5D5D5"} p={10}>
         {illustration}
@@ -29,7 +26,7 @@ export const EmptyStateGovernance = ({ title, description, illustration, buttonT
           colorScheme="primary"
           leftIcon={buttonIcon && <Icon as={buttonIcon} />}
           onClick={onClick}>
-          {t(buttonText as any)}
+          {buttonText}
         </Button>
       </VStack>
     </VStack>

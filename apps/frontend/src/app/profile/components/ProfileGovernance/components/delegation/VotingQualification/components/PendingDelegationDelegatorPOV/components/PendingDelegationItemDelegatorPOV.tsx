@@ -4,10 +4,18 @@ import { AddressIcon } from "@/components/AddressIcon"
 import { RemoveDelegationModal } from "./RemoveDelegationModal"
 import { Stack, HStack, VStack, Text, Button, useDisclosure, Badge } from "@chakra-ui/react"
 import { UilTimes } from "@iconscout/react-unicons"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 
-export const PendingDelegationItemDelegatorPOV = ({ delegationAddress }: { delegationAddress: string }) => {
+type Props = {
+  delegationAddress: string
+  isConnectedUser: boolean
+}
+
+export const PendingDelegationItemDelegatorPOV = ({ delegationAddress, isConnectedUser }: Props) => {
   const { t } = useTranslation()
   const removeDelegationModal = useDisclosure()
+
+  const { domain } = useVechainDomain({ addressOrDomain: delegationAddress })
 
   return (
     <Stack
@@ -22,7 +30,7 @@ export const PendingDelegationItemDelegatorPOV = ({ delegationAddress }: { deleg
           <AddressIcon address={delegationAddress} w={12} h={12} rounded="full" />
           <VStack align="start">
             <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
-              {humanAddress(delegationAddress, 4, 4)}
+              {domain ?? humanAddress(delegationAddress, 4, 4)}
             </Text>
           </VStack>
           <Badge color="white" bg={"#F29B32"} borderRadius="full" px="12px" py="4px" textTransform={"inherit"}>
@@ -31,13 +39,15 @@ export const PendingDelegationItemDelegatorPOV = ({ delegationAddress }: { deleg
         </HStack>
       </HStack>
       <HStack gap={4}>
-        <Button
-          variant={"dangerGhost"}
-          p={3}
-          leftIcon={<UilTimes color="#C84968" />}
-          onClick={removeDelegationModal.onOpen}>
-          {t("Cancel request")}
-        </Button>
+        {isConnectedUser && (
+          <Button
+            variant={"dangerGhost"}
+            p={3}
+            leftIcon={<UilTimes color="#C84968" />}
+            onClick={removeDelegationModal.onOpen}>
+            {t("Cancel request")}
+          </Button>
+        )}
       </HStack>
       <RemoveDelegationModal modal={removeDelegationModal} delegatee={delegationAddress} />
     </Stack>

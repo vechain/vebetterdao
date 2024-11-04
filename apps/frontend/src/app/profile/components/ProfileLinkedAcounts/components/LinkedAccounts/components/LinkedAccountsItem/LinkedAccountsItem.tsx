@@ -1,25 +1,26 @@
-import { useAccountLinking, useSustainabilityCurrentUserOverview } from "@/api"
+import { useAccountLinking, useSustainabilityCurrentRoundOverview } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import { HStack, Text, Badge, Heading, Button, useDisclosure, Stack, Show } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet, useVechainDomain } from "@vechain/dapp-kit-react"
 import { useTranslation } from "react-i18next"
 import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassportPOV"
 import { UilLinkBroken } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
 import { RemoveLinkModalEntityPOV } from "./components/RemoveLinkModalEntityPOV"
-import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
-export const LinkedAccountsItem = ({ account, pending = false }: { account: string; pending?: boolean }) => {
+type Props = { isConnectedUser: boolean; account: string; pending?: boolean }
+
+export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }: Props) => {
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
-  const { name } = useWalletName(account || "")
+  const { domain } = useVechainDomain({ addressOrDomain: account || "" })
   const isUserAccountCard = compareAddresses(account, userAccount)
-  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentUserOverview()
-  const { isPassport, isEntity, outgoingPendingLink, isLoading: isAccountLinkingLoading } = useAccountLinking()
+  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentRoundOverview(account)
+  const { isPassport, isEntity, outgoingPendingLink, isLoading: isAccountLinkingLoading } = useAccountLinking(account)
   const removeLinkModalPassportPOV = useDisclosure()
   const removeLinkModalEntityPOV = useDisclosure()
   const removePendingRequestModal = useDisclosure()
@@ -48,9 +49,9 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
         <HStack justify={"space-between"} w={"full"} flex={1}>
           <Stack direction={["column", "column", "row"]} align={["stretch", "stretch", "center"]}>
             <HStack>
-              {name && (
+              {domain && (
                 <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} borderRight={"1px solid"} paddingRight={2}>
-                  {name}
+                  {domain}
                 </Text>
               )}
               <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
@@ -87,7 +88,7 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
             </Heading>
           </HStack>
         </Show>
-        {isPassport && !isUserAccountCard && (
+        {isConnectedUser && isPassport && !isUserAccountCard && (
           <Button
             flex={1}
             variant={"dangerGhost"}
@@ -96,7 +97,7 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
             {t("Unlink account")}
           </Button>
         )}
-        {isEntity && isUserAccountCard && (
+        {isConnectedUser && isEntity && isUserAccountCard && (
           <Button
             flex={1}
             variant={"dangerGhost"}
@@ -105,7 +106,7 @@ export const LinkedAccountsItem = ({ account, pending = false }: { account: stri
             {t("Unlink account")}
           </Button>
         )}
-        {pending && (
+        {isConnectedUser && pending && (
           <Button
             flex={1}
             variant={"dangerGhost"}
