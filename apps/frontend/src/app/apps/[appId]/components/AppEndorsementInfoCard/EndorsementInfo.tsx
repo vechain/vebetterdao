@@ -4,6 +4,9 @@ import { Trans, useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useState } from "react"
+import { normalize } from "@repo/utils/HexUtils"
+
+import { useWallet } from "@vechain/dapp-kit-react"
 
 import { HiDotsVertical } from "react-icons/hi"
 import { UilTrash, UilCheck } from "@iconscout/react-unicons"
@@ -17,6 +20,7 @@ type EndorsementInfoProps = {
 
 export const EndorsementInfo = ({ appId, endorserAddress, isConfirmOpen, setIsConfirmOpen }: EndorsementInfoProps) => {
   const endorsementInfos = useEndorsementInfos(appId, endorserAddress)
+  const { account } = useWallet()
   const { t } = useTranslation()
 
   const [isAccordionOpen, setIsAccordionOpen] = useState(false)
@@ -59,9 +63,11 @@ export const EndorsementInfo = ({ appId, endorserAddress, isConfirmOpen, setIsCo
             }}
           />
         </Text>
-        <Box as="button" onClick={endorsemenInfos}>
-          <HiDotsVertical />
-        </Box>
+        {account && endorserAddress === normalize(account) && (
+          <Box as="button" onClick={endorsemenInfos}>
+            <HiDotsVertical />
+          </Box>
+        )}
       </HStack>
 
       {isAccordionOpen && (
