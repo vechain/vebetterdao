@@ -23,8 +23,7 @@ export const AppSelectableCard = ({ app, isSelected, onSelect }: Props) => {
       borderRadius="12px"
       borderColor={"gray.200"}
       onClick={onSelect}
-      cursor="pointer"
-      data-testid={`vote-app-card-${app.name}`}>
+      cursor="pointer">
       <HStack w="full" spacing={4} justify="space-between">
         <HStack spacing={4}>
           <Skeleton isLoaded={!isLogoLoading}>
@@ -34,13 +33,7 @@ export const AppSelectableCard = ({ app, isSelected, onSelect }: Props) => {
             {app.name}
           </Text>
         </HStack>
-        <Checkbox
-          pointerEvents={"none"}
-          isChecked={isSelected}
-          onChange={onSelect}
-          colorScheme="primary"
-          data-testid={`select-app-checkbox-${app.name}`}
-        />
+        <Checkbox pointerEvents={"none"} isChecked={isSelected} onChange={onSelect} colorScheme="primary" />
       </HStack>
     </Box>
   )

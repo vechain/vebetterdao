@@ -1,20 +1,11 @@
 import { VStack, Heading, Text, HStack, Divider } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { PendingDelegationItemDelegatorPOV } from "./components/PendingDelegationItemDelegatorPOV"
-import { useGetPendingDelegationsDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useGetUserPendingDelegationsDelegatorPOV } from "@/api/contracts/vePassport/hooks/useGetPendingDelegationsDelegatorPOV"
 
-type Props = {
-  address: string
-}
-export const PendingDelegationDelegatorPOV = ({ address }: Props) => {
+export const PendingDelegationDelegatorPOV = () => {
   const { t } = useTranslation()
-  const { account: connectedAccount } = useWallet()
-  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
-
-  const { data: delegateeAddress, isLoading: isPendingDelegationsLoading } =
-    useGetPendingDelegationsDelegatorPOV(address)
+  const { data: delegateeAddress, isLoading: isPendingDelegationsLoading } = useGetUserPendingDelegationsDelegatorPOV()
   if (isPendingDelegationsLoading || !delegateeAddress || Number(delegateeAddress) === 0) return null
   return (
     <>
@@ -31,11 +22,7 @@ export const PendingDelegationDelegatorPOV = ({ address }: Props) => {
           </Text>
         </VStack>
         <VStack align="stretch">
-          <PendingDelegationItemDelegatorPOV
-            isConnectedUser={isConnectedUser}
-            key={delegateeAddress}
-            delegationAddress={delegateeAddress}
-          />
+          <PendingDelegationItemDelegatorPOV key={delegateeAddress} delegationAddress={delegateeAddress} />
         </VStack>
       </VStack>
     </>

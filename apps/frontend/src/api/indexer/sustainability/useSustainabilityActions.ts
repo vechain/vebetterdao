@@ -23,14 +23,12 @@ export const SustainabilityActionsResponseSchema = z.object({
           .object({
             version: z.number(),
             description: z.string(),
-            proof: z
-              .object({
-                image: z.string().optional(),
-                link: z.string().optional(),
-                text: z.string().optional(),
-                video: z.string().optional(),
-              })
-              .optional(),
+            proof: z.object({
+              image: z.string().optional(),
+              link: z.string().optional(),
+              text: z.string().optional(),
+              video: z.string().optional(),
+            }),
             impact: z
               .object({
                 carbon: z.number().optional(),
@@ -87,15 +85,7 @@ export const getSustainabilityActions = async (
     throw new Error(`Failed to fetch sustainability actions: ${response.statusText}`)
   }
 
-  let result
-
-  try {
-    result = await response.json()
-
-    return SustainabilityActionsResponseSchema.parse(result)
-  } catch (e) {
-    throw new Error(`Failed to parse sustainability actions: ${e}`)
-  }
+  return SustainabilityActionsResponseSchema.parse(await response.json())
 }
 
 export const getSustainabilitActionsQueryKey = (data: Omit<SustainabilityActionsRequest, "page" | "size">) => [

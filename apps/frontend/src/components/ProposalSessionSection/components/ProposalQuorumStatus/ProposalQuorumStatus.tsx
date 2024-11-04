@@ -54,7 +54,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery }: Props) 
         <HStack gap={2}>
           <Image h="20px" w="20px" src="/images/vot3-token.png" alt="vot3-token" />
           <Skeleton isLoaded={votesQueryReady && quorumQueryReady}>
-            <Text fontSize="24px" fontWeight={700} data-testid={"total-votes"}>
+            <Text fontSize="24px" fontWeight={700}>
               {compactFormatter.format(Number(currentVotesQuery.data ?? 0))}
             </Text>
           </Skeleton>

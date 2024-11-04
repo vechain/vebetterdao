@@ -3,6 +3,7 @@ import { B3TRIcon } from "@/components/Icons"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { Heading, HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { IoGridOutline } from "react-icons/io5"
@@ -10,14 +11,12 @@ import { IoGridOutline } from "react-icons/io5"
 // Maximum precision of 4 decimals. Must also round down
 const compactFormatter = getCompactFormatter(2)
 
-type Props = {
-  address: string
-}
-export const UserSustainabilityOverviewStats = ({ address }: Props) => {
+export const UserSustainabilityOverviewStats = () => {
   const { t } = useTranslation()
+  const { account } = useWallet()
 
   const { data, isLoading } = useSustainabilitySingleUserOverview({
-    wallet: address ?? undefined,
+    wallet: account ?? undefined,
   })
 
   //TOOD: Indexer should return aggregated data

@@ -4,7 +4,7 @@ import { XApp } from "../getXApps"
 import { useXAppsShares } from "./useXAppsShares"
 import { useMemo } from "react"
 
-export type MostVotedAppsInRoundReturnType = {
+type MostVotedAppsInRoundReturnType = {
   percentage: number
   id: string
   app: XApp

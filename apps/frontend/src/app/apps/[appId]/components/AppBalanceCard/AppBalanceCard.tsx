@@ -22,8 +22,7 @@ import { DepositModal } from "./DepositModal"
 import { B3TRIcon, BaseTooltip } from "@/components"
 import { FiInfo } from "react-icons/fi"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useAccountAppPermissions } from "@/api"
-import { useMemo } from "react"
+import { useIsAppAdmin } from "@/api"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -34,13 +33,7 @@ export const AppBalanceCard = () => {
   const { app } = useCurrentAppInfo()
   const { data: balance, isLoading: isBalanceLoading } = useAppBalance(app?.id ?? "")
   const { account } = useWallet()
-
-  const { data: appPermissions } = useAccountAppPermissions(account ?? "")
-
-  const isAppAdmin = useMemo(() => {
-    if (!appPermissions || !app) return false
-    return appPermissions[app.id]?.isAdmin
-  }, [appPermissions, app])
+  const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account ?? "")
 
   return (
     <>

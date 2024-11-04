@@ -35,11 +35,7 @@ export const ConfirmationAppBalanceModalContent = ({
         width={200}
       />
 
-      <Text
-        style={{ fontFamily: "Instrument Sans, sans-serif" }}
-        fontSize={28}
-        fontWeight={700}
-        data-testid={"tx-modal-title"}>
+      <Text style={{ fontFamily: "Instrument Sans, sans-serif" }} fontSize={28} fontWeight={700}>
         {t("Waiting for confirmation")}
       </Text>
       <Text fontSize={16} fontWeight={400} textAlign={"center"}>

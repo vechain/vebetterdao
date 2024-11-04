@@ -29,10 +29,7 @@ const MotionVStack = motion(VStack)
 
 const isSelected = (route: Route, pathname: string) => {
   if (route.onClick === "/") return pathname === "/"
-  if (typeof route.onClick === "string") {
-    if (route.onClick.startsWith("/profile")) return pathname === "/profile"
-    return pathname.startsWith(route.onClick)
-  }
+  if (typeof route.onClick === "string") return pathname.startsWith(route.onClick)
   return false
 }
 
@@ -70,8 +67,7 @@ export const NavbarMenu = ({ onMenuClick, routesToRender }: Props) => {
               leftIcon={<Icon as={route.icon} />}
               key={route.name}
               variant={selected ? "primaryAction" : "ghost"}
-              onClick={onClick}
-              data-testid={selected ? "current-section" : ""}>
+              onClick={onClick}>
               {route.name}
             </Button>
           )

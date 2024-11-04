@@ -50,19 +50,3 @@ build: install #@ Build the app.
 test: #@ Test the app.
 	yarn test
 .PHONY:build
-
-# spins up a local instance of thor solo, builds the app and runs it in dev mode
-# the env config used is defined by ENV input param
-# !!! NOTE !!!: existing instance of thor solo will be removed along with its data volume
-# example: make up ENV=e2e
-up:
-	make solo-down
-	@if ![ -e ./.env ]; then cp .env.example .env; fi
-	# if exists - remove the old thor image and its data volume
-	@if [ -n "$$(docker images -q vechain/thor)" ]; then docker rmi $$(docker images -q vechain/thor); fi
-	@if [ -n "$$(docker volume ls -q -f name=thor-data)" ]; then docker volume rm thor-data; fi
-	yarn install
-	make solo-up
-	yarn build
-	@if [ -e ./packages/config/local.ts ]; then rm ./packages/config/local.ts; fi
-	yarn dev:$(ENV)

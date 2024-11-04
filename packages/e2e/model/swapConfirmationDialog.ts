@@ -13,7 +13,7 @@ export class SwapConfirmationDialog {
   constructor(page: Page) {
     this.page = page
     this.successTitle = this.page.getByTestId("swap-success-title")
-    this.errorTitle = this.page.getByTestId("modal-error-title")
+    this.errorTitle = this.page.getByTestId("swap-error-title")
     this.closeDialogButton = this.page.getByTestId("close-swap-modal-button")
   }
 

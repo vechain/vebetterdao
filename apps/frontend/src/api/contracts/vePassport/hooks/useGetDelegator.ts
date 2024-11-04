@@ -1,8 +1,7 @@
 import { getCallKey, useCall } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { ZeroAddress } from "ethers"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
 const vePassportInterface = VeBetterPassport__factory.createInterface()
@@ -19,7 +18,7 @@ export const getDelegatorQueryKey = (delegator: string) => {
 /**
  * Hook to get the delegator from the VeBetterPassport contract.
  * @param delegator - The delegator address.
- * @returns The address of the delegator for the given delegator address, or null if the delegator has no delegator.
+ * @returns The address of the delegator for the given delegator.
  */
 export const useGetDelegator = (delegator?: string | null) => {
   return useCall({
@@ -27,11 +26,16 @@ export const useGetDelegator = (delegator?: string | null) => {
     contractAddress: VEPASSPORT_CONTRACT,
     method: "getDelegator",
     args: [delegator],
-    mapResponse: response => {
-      const delegator = response.decoded[0]
-      if (compareAddresses(delegator, ZeroAddress)) return null
-      return delegator
-    },
+    mapResponse: response => (Number(response.decoded?.[0]) ? response.decoded?.[0] : null),
     enabled: !!delegator,
   })
+}
+
+/**
+ * Hook to get the delegator from the VeBetterPassport contract for the current user.
+ * @returns The address of the delegator for the current user.
+ */
+export const useGetUserDelegator = () => {
+  const { account } = useWallet()
+  return useGetDelegator(account)
 }

@@ -5,24 +5,17 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { RevokeDelegationDelegateePOVModal } from "./components/RevokeDelegationDelegateePOVModal"
 import { QualificationBadge } from "../QualificationBadges"
-import { useCanUserVote, useGetDelegator } from "@/api"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useGetUserDelegator, useUserScore } from "@/api"
 
-type Props = {
-  address: string
-  isConnectedUser: boolean
-}
-export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
+export const CurrentDelegation = () => {
   const { t } = useTranslation()
-  const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetDelegator(address)
-  const isDelegated = !isDelegatorLoading && !!delegatorAddress
-  const { isPerson, isLoading } = useCanUserVote(address)
-
-  const { domain } = useVechainDomain({ addressOrDomain: delegatorAddress })
+  const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetUserDelegator()
+  const isDelegated = !isDelegatorLoading && !!Number(delegatorAddress)
+  const { isUserQualified: isDelegatorQualified, isLoading: isScoreLoading } = useUserScore()
 
   const delegationModal = useDisclosure()
 
-  if (isDelegatorLoading || isLoading || !isDelegated) return null
+  if (isDelegatorLoading || isScoreLoading || !isDelegated) return null
 
   return (
     <Card variant="baseWithBorder" w="full">
@@ -32,12 +25,12 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
             <HStack justify="space-between">
               <Heading fontSize="xl" fontWeight="700">
                 {t("You are using {{delegatorAddress}} voting qualification", {
-                  delegatorAddress: domain ?? humanAddress(delegatorAddress, 6, 6),
+                  delegatorAddress: humanAddress(delegatorAddress, 6, 6),
                 })}
               </Heading>
             </HStack>
             <Text color="#6A6A6A" fontSize="md">
-              {isPerson
+              {isDelegatorQualified
                 ? t("While this account keeps their qualification, you’ll be able to use it to vote.")
                 : t("This account is not currently qualified to vote.")}
             </Text>
@@ -54,22 +47,20 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
                 <AddressIcon address={delegatorAddress} w={12} h={12} rounded="full" />
                 <VStack align="start" gap={0}>
                   <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
-                    {domain ?? humanAddress(delegatorAddress, 4, 4)}
+                    {humanAddress(delegatorAddress, 4, 4)}
                   </Text>
                 </VStack>
-                <QualificationBadge qualified={isPerson} />
+                <QualificationBadge qualified={isDelegatorQualified} />
               </HStack>
             </Stack>
             <HStack>
-              {isConnectedUser && (
-                <Button
-                  variant={"dangerGhost"}
-                  p={3}
-                  leftIcon={<UilTimes color="#C84968" />}
-                  onClick={delegationModal.onOpen}>
-                  {t("Remove delegation")}
-                </Button>
-              )}
+              <Button
+                variant={"dangerGhost"}
+                p={3}
+                leftIcon={<UilTimes color="#C84968" />}
+                onClick={delegationModal.onOpen}>
+                {t("Remove delegation")}
+              </Button>
             </HStack>
           </Stack>
         </VStack>

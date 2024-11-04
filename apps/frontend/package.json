@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.9.2",
+  "version": "1.8.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -37,9 +37,10 @@
     "@tanstack/react-query-persist-client": "^5.28.12",
     "@transak/transak-sdk": "^3.1.1",
     "@uiw/react-md-editor": "^4.0.4",
+    "@vechain.energy/dapp-kit-hooks": "^1.2.1",
     "@vechain/connex-driver": "^2.1.0",
     "@vechain/connex-framework": "^2.1.0",
-    "@vechain/dapp-kit-react": "^1.1.0",
+    "@vechain/dapp-kit-react": "^1.0.15",
     "@vechain/picasso": "^2.1.1",
     "axios": "^1.7.4",
     "browser-image-compression": "^2.0.2",
@@ -87,7 +88,6 @@
     "@types/uuid": "^9.0.8",
     "@vitejs/plugin-react": "^4.2.1",
     "@vitest/coverage-istanbul": "^1.4.0",
-    "d3-array": "^3.2.4",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
     "happy-dom": "^14.12.3",

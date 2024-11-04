@@ -20,14 +20,13 @@ export const ProposalsPageContent = () => {
   const { selectedFilter } = useProposalFilters()
   const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
 
-  const userProposalDepositsQuery = useProposalClaimableUserDeposits(account ?? "")
+  const userProposalDeposits = useProposalClaimableUserDeposits(account ?? "")
 
   const userTotalDeposits = useMemo(() => {
-    if (!userProposalDepositsQuery.data) return BigInt(0)
-    return userProposalDepositsQuery.data.reduce((acc, deposit) => {
-      return BigInt(acc) + BigInt(deposit.deposit ?? 0)
+    return userProposalDeposits.reduce((acc, deposit) => {
+      return BigInt(acc) + BigInt(deposit.data?.deposit ?? 0)
     }, BigInt(0))
-  }, [userProposalDepositsQuery])
+  }, [userProposalDeposits])
 
   const onNewClick = useCallback(() => {
     if (!account) {
@@ -83,7 +82,7 @@ export const ProposalsPageContent = () => {
       <Show below="sm">
         {userTotalDeposits > 0 && (
           <Box mb={2} mt={3}>
-            <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDepositsQuery} />
+            <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDeposits} />
           </Box>
         )}
       </Show>
@@ -114,7 +113,7 @@ export const ProposalsPageContent = () => {
         <Show above="sm">
           <VStack flex={2} alignSelf="flex-start" spacing={6} position={"sticky"} top={24}>
             {userTotalDeposits > 0 && (
-              <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDepositsQuery} />
+              <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDeposits} />
             )}
             {sortedProposals.length > 0 && <CreateProposalCard />}
             <JoinCommunity />

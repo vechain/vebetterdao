@@ -18,7 +18,7 @@ export const useMissingActionsLabel = ({
 
   const short = useMemo(() => {
     if (isUserDelegatee)
-      return t(`Your delegator needs {{missingActions}} more action${missingActions > 1 ? "s" : ""}`, {
+      return t(`Your delegatee needs {{missingActions}} more action${missingActions > 1 ? "s" : ""}`, {
         missingActions,
       })
     return t(`You need {{missingActions}} more action${missingActions > 1 ? "s" : ""}`, { missingActions })

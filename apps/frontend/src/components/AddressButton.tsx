@@ -1,6 +1,6 @@
 import { Button, HStack, Text, useClipboard, Icon, ButtonProps } from "@chakra-ui/react"
 import React, { useEffect } from "react"
-import { AddressIcon, IAddressIcon } from "./AddressIcon"
+import { AddressIcon } from "./AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { FaCheck, FaCopy } from "react-icons/fa6"
 
@@ -10,7 +10,6 @@ interface IAddressButton extends ButtonProps {
   showCopyIcon?: boolean
   addressFontSize?: string
   buttonSize?: string
-  addressIconProps?: Omit<IAddressIcon, "address">
   digitsBeforeEllipsis?: number
   digitsAfterEllipsis?: number
 }
@@ -20,7 +19,6 @@ export const AddressButton: React.FC<IAddressButton> = ({
   showCopyIcon = true,
   addressFontSize = "md",
   buttonSize = "md",
-  addressIconProps = {},
   digitsBeforeEllipsis = 6,
   digitsAfterEllipsis = 4,
   ...props
@@ -51,7 +49,7 @@ export const AddressButton: React.FC<IAddressButton> = ({
       variant="outline"
       {...otherProps}>
       <HStack justify={"flex-start"} spacing={spacing} roundedLeft={"md"}>
-        {showAddressIcon && <AddressIcon address={address} roundedLeft={"md"} {...addressIconProps} />}
+        {showAddressIcon && <AddressIcon address={address} roundedLeft={"md"} />}
         <Text fontSize={addressFontSize}>{humanAddress(address, digitsBeforeEllipsis, digitsAfterEllipsis)}</Text>
         {showCopyIcon && (
           <Icon

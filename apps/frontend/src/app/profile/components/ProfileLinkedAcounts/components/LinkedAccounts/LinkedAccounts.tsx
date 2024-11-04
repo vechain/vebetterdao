@@ -2,18 +2,13 @@ import { Card, CardBody, VStack, Heading, Text, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { LinkedAccountsItem } from "./components/LinkedAccountsItem"
 import { useAccountLinking } from "@/api"
-import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 
-type Props = {
-  address: string
-}
-export const LinkedAccounts = ({ address }: Props) => {
+export const LinkedAccounts = () => {
   const { t } = useTranslation()
 
-  const { account: connectedAccount } = useWallet()
-  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
-  const { isLinked, passport, passportLinkedEntities, outgoingPendingLink, isLoading } = useAccountLinking(address)
+  const { isLinked, passport, passportLinkedEntities, outgoingPendingLink, isLoading } = useAccountLinking()
+  const { account } = useWallet()
 
   if (isLoading || (!isLinked && !outgoingPendingLink)) return null
   return (
@@ -40,10 +35,7 @@ export const LinkedAccounts = ({ address }: Props) => {
               )}
             </Text>
           </VStack>
-          <LinkedAccountsItem
-            isConnectedUser={isConnectedUser}
-            account={outgoingPendingLink ? outgoingPendingLink : passport}
-          />
+          <LinkedAccountsItem account={outgoingPendingLink ? outgoingPendingLink : passport} />
           <VStack align="start">
             <Heading fontSize="lg" fontWeight="700">
               {t("Secondary accounts")}
@@ -55,11 +47,11 @@ export const LinkedAccounts = ({ address }: Props) => {
             </Text>
           </VStack>
           {outgoingPendingLink ? (
-            <LinkedAccountsItem isConnectedUser={isConnectedUser} account={address ?? ""} pending={true} />
+            <LinkedAccountsItem account={account ?? ""} pending={true} />
           ) : (
             <VStack gap={4} align="stretch">
               {passportLinkedEntities.map((account: string) => (
-                <LinkedAccountsItem isConnectedUser={isConnectedUser} key={account} account={account} />
+                <LinkedAccountsItem key={account} account={account} />
               ))}
             </VStack>
           )}

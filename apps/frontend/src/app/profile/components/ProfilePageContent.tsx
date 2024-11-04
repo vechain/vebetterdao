@@ -1,17 +1,15 @@
 import { VStack, HStack, Button } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
-import { useMemo, useEffect, useCallback } from "react"
+import { useMemo, useEffect } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
 import { useTranslation } from "react-i18next"
 import { ProfileBalance } from "./ProfileBalance"
 import { ProfileGovernance } from "./ProfileGovernance"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts"
 import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { FaAngleLeft } from "react-icons/fa6"
 
 enum Tab {
   Balance = "balance",
@@ -20,21 +18,11 @@ enum Tab {
   LinkedAccounts = "linked-accounts",
 }
 
-type Props = {
-  address?: string
-}
-export const ProfilePageContent = ({ address }: Props) => {
-  const { account } = useWallet()
-  const isConnectedUser = compareAddresses(account ?? "", address ?? "")
-
-  const parsedAddress = address ?? account ?? ""
+export const ProfilePageContent = () => {
   const { t } = useTranslation()
   const router = useRouter()
+  const { account } = useWallet()
   const searchParams = useSearchParams()
-
-  const onGoBack = useCallback(() => {
-    router.push("/")
-  }, [router])
 
   const selectedTab = useMemo(() => {
     const tabParam = searchParams.get("tab")
@@ -53,21 +41,21 @@ export const ProfilePageContent = ({ address }: Props) => {
   const selectedTabContent = useMemo(() => {
     switch (selectedTab) {
       case Tab.Balance:
-        return <ProfileBalance address={parsedAddress} />
+        return <ProfileBalance />
       case Tab.BetterActions:
-        return <ProfileBetterActions address={parsedAddress} />
+        return <ProfileBetterActions />
       case Tab.Governance:
-        return <ProfileGovernance address={parsedAddress} />
+        return <ProfileGovernance />
       case Tab.LinkedAccounts:
-        return <ProfileLinkedAcounts address={parsedAddress} />
+        return <ProfileLinkedAcounts />
       default:
         return null
     }
-  }, [selectedTab, parsedAddress])
+  }, [selectedTab])
 
   useEffect(() => {
-    if (!parsedAddress) router.push("/")
-  }, [parsedAddress, router])
+    if (!account) router.push("/")
+  }, [account, router])
 
   const handleTabChange = (tab: Tab) => {
     router.push(`?tab=${tab}`)
@@ -103,22 +91,11 @@ export const ProfilePageContent = ({ address }: Props) => {
     [t],
   )
 
-  if (!parsedAddress) return <></>
+  if (!account) return <></>
 
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
-      {!isConnectedUser && (
-        <Button
-          variant={"link"}
-          colorScheme="primary"
-          onClick={onGoBack}
-          leftIcon={<FaAngleLeft />}
-          size="sm"
-          alignSelf={"flex-start"}>
-          {t("Go back")}
-        </Button>
-      )}
-      <ProfileHeader address={parsedAddress} />
+      <ProfileHeader />
       <HStack justify="space-between">
         {tabs.map(({ tab, label }) => (
           <Button

@@ -5,19 +5,16 @@ import { ActivityList } from "./components/ActivityList"
 import { PendingActions } from "./components/PendingActions"
 import { YourBetterActionsCard } from "@/app/components/YourBetterActionsCard"
 
-type Props = {
-  address: string
-}
-export const ProfileBetterActions = ({ address }: Props) => {
+export const ProfileBetterActions = () => {
   const [isCalendarView, setIsCalendarView] = useState(true)
   return (
     <VStack gap={4} w="full">
-      <PendingActions address={address} />
-      <YourBetterActionsCard address={address} renderActions={false} />
+      <PendingActions />
+      <YourBetterActionsCard renderActions={false} />
       {isCalendarView ? (
-        <ActivityCalendar address={address} setIsCalendarView={setIsCalendarView} />
+        <ActivityCalendar setIsCalendarView={setIsCalendarView} />
       ) : (
-        <ActivityList address={address} setIsCalendarView={setIsCalendarView} />
+        <ActivityList setIsCalendarView={setIsCalendarView} />
       )}
     </VStack>
   )

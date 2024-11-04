@@ -1,27 +1,28 @@
-import { VStack, Heading } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-
-import { TokensBalance } from "@/app/components/TokensBalance"
-
+import { VStack } from "@chakra-ui/react"
 import { UserTransactions } from "./components/UserTransactions"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { SwapB3trVot3 } from "@/components/GmNFTAndNodeCard/components/SwapB3trVot3"
 
-type Props = {
-  address: string
-}
-export const ProfileBalance = ({ address }: Props) => {
-  const { t } = useTranslation()
-  const { account: connectedAccount } = useWallet()
-  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
-
+export const ProfileBalance = () => {
   return (
     <VStack align={"stretch"} gap={4}>
-      <Heading fontSize="lg" fontWeight={700}>
-        {isConnectedUser ? t("Your tokens") : t("Tokens")}
-      </Heading>
-      <TokensBalance address={address} />
-      <UserTransactions address={address} />
+      <SwapB3trVot3
+        containerProps={{
+          w: "full",
+          align: "stretch",
+          gap: "24px",
+          bg: "#004CFC",
+          rounded: "xl",
+          color: "white",
+          position: "relative",
+          p: 4,
+          overflow: "hidden",
+          bgImage: "url('/images/cloud-background.png')",
+          bgSize: "cover",
+          bgPosition: "center",
+          bgRepeat: "no-repeat",
+        }}
+      />
+      <UserTransactions />
     </VStack>
   )
 }

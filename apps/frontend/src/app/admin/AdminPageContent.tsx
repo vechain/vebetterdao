@@ -26,23 +26,31 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account ?? "")
+  const {
+    isAdminOfX2EarnApps,
+    isAdminOfVot3,
+    isAdminOfB3tr,
+    isAdminOfGalaxyMember,
+    isAdminOfB3TRGovernor,
+    isAdminOfVeBetterPassport,
+    isPassportSettingsManager,
+    isPassportBotSignaler,
+    isPassportActionRegistrar,
+    isPassportScoreManager,
+    isPassportWhitelister,
+  } = useAccountPermissions(account ?? "")
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
-  const canSeePauseTab =
-    permissions?.isAdminOfB3tr ||
-    permissions?.isAdminOfGalaxyMember ||
-    permissions?.isAdminOfVot3 ||
-    permissions?.isAdminOfB3TRGovernor
+  const canSeePauseTab = isAdminOfB3tr || isAdminOfGalaxyMember || isAdminOfVot3 || isAdminOfB3TRGovernor
 
   const canSeeVeBetterPassportTab =
-    permissions?.isAdminOfVeBetterPassport ||
-    permissions?.isPassportSettingsManager ||
-    permissions?.isPassportBotSignaler ||
-    permissions?.isPassportActionRegistrar ||
-    permissions?.isPassportScoreManager ||
-    permissions?.isPassportWhitelister
+    isAdminOfVeBetterPassport ||
+    isPassportSettingsManager ||
+    isPassportBotSignaler ||
+    isPassportActionRegistrar ||
+    isPassportScoreManager ||
+    isPassportWhitelister
 
   return (
     <Stack spacing={12} w={"full"} data-testid="admin-page">
@@ -57,7 +65,7 @@ export const AdminPageContent = () => {
           }}>
           <Tab>{"Emissions"}</Tab>
           {Number(currentRoundId) > 0 && <Tab>{"Allocation Rewards"}</Tab>}
-          {permissions?.isAdminOfX2EarnApps && <Tab>{"X2Earn Apps"}</Tab>}
+          {isAdminOfX2EarnApps && <Tab>{"X2Earn Apps"}</Tab>}
           <Tab>{"Utils"}</Tab>
           <Tab>{"Contracts"}</Tab>
           {canSeePauseTab && <Tab>{"Pausing"}</Tab>}
@@ -80,7 +88,7 @@ export const AdminPageContent = () => {
               </Grid>
             </TabPanel>
           )}
-          {permissions?.isAdminOfX2EarnApps && (
+          {isAdminOfX2EarnApps && (
             <TabPanel>
               <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
                 <UpdateReceiverAddress />

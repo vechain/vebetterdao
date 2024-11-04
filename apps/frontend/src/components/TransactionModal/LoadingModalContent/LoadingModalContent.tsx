@@ -21,9 +21,7 @@ export const LoadingModalContent = ({
   return (
     <ModalAnimation>
       <VStack align={"center"} p={6}>
-        <Heading data-testid={"tx-modal-title"} size="md">
-          {title}
-        </Heading>
+        <Heading size="md">{title}</Heading>
         <Lottie
           style={{
             pointerEvents: "none",

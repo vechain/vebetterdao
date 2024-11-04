@@ -1,17 +1,12 @@
 import { Card, CardBody, VStack, Heading, Text, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { PendingDelegationItemDelegateePOV } from "./components/PendingDelegationItemDelegateePOV"
-import { useGetPendingDelegationsDelegateePOV } from "@/api"
+import { useGetUserPendingDelegationsDelegateePOV } from "@/api"
 
-type Props = {
-  address: string
-  isConnectedUser: boolean
-}
-
-export const PendingDelegationDelegateePOV = ({ address, isConnectedUser }: Props) => {
+export const PendingDelegationDelegateePOV = () => {
   const { t } = useTranslation()
   const { data: pendingDelegations, isLoading: isPendingDelegationsLoading } =
-    useGetPendingDelegationsDelegateePOV(address)
+    useGetUserPendingDelegationsDelegateePOV()
   if (isPendingDelegationsLoading || !pendingDelegations?.length) return null
 
   return (
@@ -30,12 +25,7 @@ export const PendingDelegationDelegateePOV = ({ address, isConnectedUser }: Prop
           </VStack>
           <VStack align="stretch">
             {pendingDelegations?.map((delegationAddress: string) => (
-              <PendingDelegationItemDelegateePOV
-                address={address}
-                isConnectedUser={isConnectedUser}
-                key={delegationAddress}
-                delegationAddress={delegationAddress}
-              />
+              <PendingDelegationItemDelegateePOV key={delegationAddress} delegationAddress={delegationAddress} />
             ))}
           </VStack>
         </VStack>

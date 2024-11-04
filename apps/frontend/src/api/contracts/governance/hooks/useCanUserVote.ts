@@ -7,36 +7,31 @@ import {
 } from "../../xAllocations"
 import { useGetVotesOnBlock } from "./useVotesOnBlock"
 import { useVotingThreshold } from "./useVotingThreshold"
-import { useAllocationRoundSnapshot, useIsPersonAtTimepoint } from "@/api"
+import { useIsUserPerson } from "../../vePassport"
 
 /**
  * Hook to check if a user can vote in a round.
  * @returns The user's voting status.
  */
-export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
+export const useCanUserVote = () => {
   const { account } = useWallet()
-  const parsedAccount = user || account
   const { data: roundId } = useCurrentAllocationsRoundId()
-  const { data: roundSnapshot, isLoading: roundSnapshotLoading } = useAllocationRoundSnapshot(roundId ?? "")
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
   const { data: roundInfo } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
     Number(roundInfo.voteStart),
-    parsedAccount ?? undefined,
+    account ?? undefined,
   )
   const { data: threshold } = useVotingThreshold()
   const hasVotesAtSnapshot = Number(votesAtSnapshot) >= (threshold ?? 0)
 
-  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, parsedAccount ?? undefined)
+  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
   const isVotingConcluded = [1, 2].includes(state ?? 0)
-  const { data: isPerson, isLoading: isPersonLoading } = useIsPersonAtTimepoint(
-    delegateeAddress ?? parsedAccount,
-    roundSnapshot,
-  )
+  const { data: isPerson, isLoading: isPersonLoading } = useIsUserPerson()
 
   return {
     data: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && isPerson,
-    isLoading: hasVotedLoading || stateLoading || votesAtSnapshotLoading || isPersonLoading || roundSnapshotLoading,
+    isLoading: hasVotedLoading || stateLoading || votesAtSnapshotLoading || isPersonLoading,
     hasVotesAtSnapshot,
     isPerson,
   }

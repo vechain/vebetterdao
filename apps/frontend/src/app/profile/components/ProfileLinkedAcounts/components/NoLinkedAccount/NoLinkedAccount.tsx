@@ -3,19 +3,11 @@ import { Flex, VStack, Button, Text, Heading, useDisclosure } from "@chakra-ui/r
 import { useTranslation } from "react-i18next"
 import { LinkAccountModal } from "./components/LinkAccountModal"
 import { useAccountLinking } from "@/api"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
 
-type Props = {
-  address: string
-}
-export const NoLinkedAccount = ({ address }: Props) => {
+export const NoLinkedAccount = () => {
   const { t } = useTranslation()
   const addLinkedAccountModal = useDisclosure()
-  const { isLoading, isLinked, outgoingPendingLink } = useAccountLinking(address)
-
-  const { account: connectedAccount } = useWallet()
-  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
+  const { isLoading, isLinked, outgoingPendingLink } = useAccountLinking()
 
   if (isLoading || isLinked || outgoingPendingLink) return null
   return (
@@ -23,18 +15,14 @@ export const NoLinkedAccount = ({ address }: Props) => {
       <VStack gap={4}>
         <PeopleIcon color="#757575" size="105" />
         <Heading fontSize="xl" fontWeight="500" textAlign="center">
-          {isConnectedUser ? t("You have no linked accounts") : t("No linked accounts")}
+          {t("You have no linked accounts")}
         </Heading>
         <Text fontSize="sm" color="#757575" textAlign="center">
-          {isConnectedUser
-            ? t("You can merge several secondary accounts with your main one")
-            : t("Several secondary accounts can be merged with your main one")}
+          {t("You can merge several secondary accounts with your main one")}
         </Text>
-        {isConnectedUser && (
-          <Button variant="primaryAction" onClick={addLinkedAccountModal.onOpen}>
-            {t("Link Accounts")}
-          </Button>
-        )}
+        <Button variant="primaryAction" onClick={addLinkedAccountModal.onOpen}>
+          {t("Link Accounts")}
+        </Button>
         <LinkAccountModal modal={addLinkedAccountModal} />
       </VStack>
     </Flex>

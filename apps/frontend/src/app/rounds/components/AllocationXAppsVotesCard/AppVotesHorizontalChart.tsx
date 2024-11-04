@@ -4,7 +4,6 @@ import { B3TRIcon } from "@/components"
 import { notFoundImage } from "@/constants"
 import { VStack, HStack, Skeleton, Heading, Box, Image, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -36,16 +35,12 @@ export const AppVotesHorizontalChart = ({
   renderMaxAllocation = false,
   //   showTotalVoters = false,
 }: Props) => {
-  const router = useRouter()
   const { t } = useTranslation()
   const { data: appMetadata } = useXAppMetadata(data.app)
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
   const { data: forecastedEarnings, isLoading: forecastedEarningsLoading } = useXAppRoundEarnings(roundId, data.app)
 
-  const onIconClick = () => {
-    router.push(`/apps/${data.app}`)
-  }
   const roundIdNumber = useMemo(() => {
     try {
       return Number(roundId)
@@ -75,25 +70,14 @@ export const AppVotesHorizontalChart = ({
       <HStack justify={"space-between"} w="full" align="center">
         <HStack spacing={3} align={"center"} justify={"flex-start"}>
           <Skeleton isLoaded={!isLogoLoading} boxSize={["48px", "48px", "48px"]}>
-            <Image
-              _hover={{ cursor: "pointer", transform: "scale(1.05)", transition: "transform 0.2s" }}
-              onClick={onIconClick}
-              src={logo?.image ?? notFoundImage}
-              w="full"
-              borderRadius="9px"
-              alt={appMetadata?.name}
-            />
+            <Image src={logo?.image ?? notFoundImage} w="full" borderRadius="9px" alt={appMetadata?.name} />
           </Skeleton>
           <VStack spacing={0} align={"flex-start"}>
             <Heading fontSize={["16px"]} fontWeight={600}>
               {appMetadata?.name}
             </Heading>
             <VStack spacing={0} align={"flex-start"} justify={"flex-start"}>
-              <Heading
-                size={["16px"]}
-                fontWeight={600}
-                color="#6DCB09"
-                data-testid={`${appMetadata?.name}-votes-percentage`}>
+              <Heading size={["16px"]} fontWeight={600} color="#6DCB09">
                 {t("{{percentage}}%", {
                   percentage: data.percentage.toLocaleString("en", { minimumFractionDigits: 2 }),
                 })}

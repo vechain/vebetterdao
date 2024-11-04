@@ -1,5 +1,5 @@
 import { useProposalComments } from "@/api"
-import { Card, CardBody, Center, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Card, CardBody, Heading, Spinner, Text, VStack } from "@chakra-ui/react"
 import { t } from "i18next"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { ProposalVoteComment } from "./components/ProposalVoteComment"
@@ -25,11 +25,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
             dataLength={visibleComments.length}
             next={fetchNextPage}
             hasMore={hasNextPage}
-            loader={
-              <Center>
-                <Spinner size="md" mt={4} alignSelf="center" />
-              </Center>
-            }
+            loader={<Spinner size="md" alignSelf={"center"} />}
             endMessage={
               <Heading size="md" textAlign={"center"} mt={4}>
                 {t("You reached the end!")}

@@ -22,7 +22,6 @@ export default function Profile() {
   useEffect(() => {
     AnalyticsUtils.trackPage("Profile")
   }, [])
-
   return (
     <MotionVStack>
       <ProfilePageContent />

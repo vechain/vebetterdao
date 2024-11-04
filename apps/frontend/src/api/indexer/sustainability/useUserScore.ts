@@ -2,11 +2,10 @@ import {
   SecurityLevel,
   useCurrentAllocationsRoundId,
   useGetCumulativeScoreWithDecay,
-  useGetDelegator,
+  useGetUserDelegator,
   useSecurityMultiplier,
-  useThresholdParticipationScoreAtTimepoint,
+  useThresholdParticipationScore,
 } from "@/api/contracts"
-import { useAllocationRoundSnapshot } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 
@@ -16,47 +15,45 @@ import { useMemo } from "react"
  */
 export const useUserScore = (user?: string) => {
   const { account } = useWallet()
+  const { data: scoreThreshold, isLoading: isScoreThresholdLoading } = useThresholdParticipationScore()
   const { data: roundId, isLoading: isRoundIdLoading } = useCurrentAllocationsRoundId()
-  const { data: roundSnapshot, isLoading: isRoundSnapshotLoading } = useAllocationRoundSnapshot(roundId ?? "")
-  const { data: scoreThresholdAtRoundStart, isLoading: isScoreThresholdAtRoundStartLoading } =
-    useThresholdParticipationScoreAtTimepoint(roundSnapshot ?? "")
-  const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetDelegator(user)
+  const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetUserDelegator()
 
   // this is the user's cumulative score with decay, we use that because it must be greater than the threshold
   const { data: userScore, isLoading: isUserRoundScoreLoading } = useGetCumulativeScoreWithDecay(
     // if the user is delegated, we use the delegator's address, otherwise we use the user's address
-    delegatorAddress ?? user ?? account ?? "",
+    user || delegatorAddress || account || "",
     Number(roundId),
   )
 
   const scorePercentage = useMemo(
     () =>
-      Number(scoreThresholdAtRoundStart ?? 0)
-        ? Math.min((Number(userScore ?? 0) / Number(scoreThresholdAtRoundStart ?? 0)) * 100, 100)
-        : 100,
-    [userScore, scoreThresholdAtRoundStart],
+      Number(scoreThreshold ?? 0) ? Math.min((Number(userScore ?? 0) / Number(scoreThreshold ?? 0)) * 100, 100) : 100,
+    [userScore, scoreThreshold],
   )
+
+  const isUserQualified = userScore >= scoreThreshold
 
   // we take the score of the easy actions as reference, as the minimum score of an action
   // so we can calculate the number of actions needed to reach the threshold at minimum
   const { data: easyActionScore, isLoading: isSecurityMultiplierLoading } = useSecurityMultiplier(SecurityLevel.LOW)
-  const scoreNeeded = Math.max(Number(scoreThresholdAtRoundStart ?? 0) - Number(userScore ?? 0), 0)
+  const scoreNeeded = Math.max(Number(scoreThreshold ?? 0) - Number(userScore ?? 0), 0)
   const missingActions =
     Number(easyActionScore ?? 0) && scoreNeeded ? Math.ceil(scoreNeeded / Number(easyActionScore ?? 0)) : 0
 
   return {
+    isUserQualified,
     isUserDelegatee: !!delegatorAddress,
     delegatorAddress,
     scorePercentage,
-    scoreThresholdAtRoundStart,
+    scoreThreshold,
     userScore,
     missingActions,
     isLoading:
-      isScoreThresholdAtRoundStartLoading ||
+      isScoreThresholdLoading ||
       isUserRoundScoreLoading ||
       isRoundIdLoading ||
       isDelegatorLoading ||
-      isSecurityMultiplierLoading ||
-      isRoundSnapshotLoading,
+      isSecurityMultiplierLoading,
   }
 }

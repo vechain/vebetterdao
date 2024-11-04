@@ -1,7 +1,7 @@
 import { useUserScore } from "@/api"
 import { BaseModal } from "@/components/BaseModal"
 import { useMissingActionsLabel } from "@/hooks"
-import { UseDisclosureProps, Card, CardBody, VStack, Flex, Text, Heading, Button, Image, Link } from "@chakra-ui/react"
+import { UseDisclosureProps, Card, CardBody, VStack, Flex, Text, Heading, Button, Image } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
@@ -74,14 +74,7 @@ export const DoActionModal = ({ doActionModal }: Props) => {
         <Button variant="primaryAction" leftIcon={<IoGridOutline />} onClick={goToApps}>
           {t("Explore apps")}
         </Button>
-        <Button
-          variant="primarySubtle"
-          leftIcon={<UilInfoCircle />}
-          onClick={goToKnowMoreLink}
-          _hover={{ textDecoration: "none" }}
-          as={Link}
-          href={"https://vebetterdao.org/blog/vepassport-powering-up-sybil-defence-rewarding-better-actions"}
-          isExternal>
+        <Button variant="primarySubtle" leftIcon={<UilInfoCircle />} onClick={goToKnowMoreLink}>
           {t("Know more")}
         </Button>
       </VStack>

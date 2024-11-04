@@ -12,6 +12,7 @@ import {
   PreviewCreatedProposals,
   TopVotedApps,
 } from "./components"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { FaScaleBalanced, FaChartPie } from "react-icons/fa6"
 import { useRouter } from "next/navigation"
 import { HandPlantIcon, VoteBoxIcon } from "@/components"
@@ -20,9 +21,6 @@ import { CurrentDelegation } from "./components/delegation/CurrentDelegation"
 import { VotingQualification } from "./components/delegation/VotingQualification"
 import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { t } from "i18next"
 
 enum ListView {
   ALL,
@@ -33,15 +31,10 @@ enum ListView {
 
 const PREVIEW_SIZE = 3 // The number of proposals to show in the preview
 
-type Props = {
-  address: string
-}
-export const ProfileGovernance = ({ address }: Props) => {
-  const { data: createdProposals } = useUserProposalsCreatedEvents(address ?? "")
-  const { data: votedProposals } = useUserProposalsVoteEvents(address ?? "")
-
-  const { account: connectedAccount } = useWallet()
-  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
+export const ProfileGovernance = () => {
+  const { account } = useWallet()
+  const { data: createdProposals } = useUserProposalsCreatedEvents(account ?? "")
+  const { data: votedProposals } = useUserProposalsVoteEvents(account ?? "")
 
   const router = useRouter()
 
@@ -49,7 +42,7 @@ export const ProfileGovernance = ({ address }: Props) => {
 
   const { created: votedProposalsWithDescription } = useProposalsCreatedFromIds(votedProposalsIds)
 
-  const topVotedApps = useUserTopVotedApps(address ?? "")
+  const topVotedApps = useUserTopVotedApps(account ?? "")
 
   const [listView, setListView] = useState<ListView>(ListView.ALL)
 
@@ -104,9 +97,9 @@ export const ProfileGovernance = ({ address }: Props) => {
     case ListView.ALL:
       return (
         <>
-          <PendingDelegationDelegateePOV address={address} isConnectedUser={isConnectedUser} />
-          <CurrentDelegation address={address} isConnectedUser={isConnectedUser} />
-          <VotingQualification address={address} isConnectedUser={isConnectedUser} />
+          <PendingDelegationDelegateePOV />
+          <CurrentDelegation />
+          <VotingQualification />
           {isFirstCreatedProposalsAvailable && (
             <PreviewCreatedProposals
               firstProposals={firstCreatedProposals}
@@ -123,9 +116,9 @@ export const ProfileGovernance = ({ address }: Props) => {
             />
           ) : (
             <EmptyStateGovernance
-              title={t("Voted Proposals")}
-              description={t("Your voted proposals will appear here.")}
-              buttonText={t("Explore governance")}
+              title="Voted Proposals"
+              description="Your voted proposals will appear here."
+              buttonText="Explore governance"
               illustration={<HandPlantIcon color="rgba(117, 117, 117, 1)" />}
               buttonIcon={FaScaleBalanced}
               onClick={onExploreGovernance}
@@ -139,9 +132,9 @@ export const ProfileGovernance = ({ address }: Props) => {
             />
           ) : (
             <EmptyStateGovernance
-              title={t("Most voted apps")}
-              description={t("Your top voted apps will appear here.")}
-              buttonText={t("Explore allocations")}
+              title="Your Most Voted Apps"
+              description="Your top voted apps will appear here."
+              buttonText="Explore allocations"
               illustration={<VoteBoxIcon color="rgba(117, 117, 117, 1)" />}
               buttonIcon={FaChartPie}
               onClick={onExploreGovernance}

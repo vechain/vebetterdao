@@ -5,12 +5,11 @@ import { UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { AcceptLinkingModal } from "./components/AcceptLinkingModal"
 import { RejectLinkingModal } from "./components/RejectLinkingModal"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
-type Props = { isConnectedUser: boolean; secondaryAccount: string }
-export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }: Props) => {
+export const PendingLinkingProposalItem = ({ secondaryAccount }: { secondaryAccount: string }) => {
   const { t } = useTranslation()
-  const { domain } = useVechainDomain({ addressOrDomain: secondaryAccount || "" })
+  const { name } = useWalletName(secondaryAccount || "")
   const rejectLinkingModal = useDisclosure()
   const acceptLinkingModal = useDisclosure()
   return (
@@ -26,9 +25,9 @@ export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }
           <AddressIcon address={secondaryAccount} w={12} h={12} rounded="full" />
           <VStack align="start">
             <HStack>
-              {domain && (
+              {name && (
                 <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} borderRight={"1px solid"} paddingRight={2}>
-                  {domain}
+                  {name}
                 </Text>
               )}
               <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
@@ -41,26 +40,24 @@ export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }
           </Badge>
         </HStack>
       </HStack>
-      {isConnectedUser && (
-        <HStack gap={4}>
-          <Button
-            variant={"dangerGhost"}
-            flex={1}
-            p={3}
-            leftIcon={<UilTimes color="#C84968" />}
-            onClick={rejectLinkingModal.onOpen}>
-            {t("Reject")}
-          </Button>
-          <Button
-            variant={"primaryGhost"}
-            flex={1}
-            p={3}
-            leftIcon={<UilCheck color="#004CFC" />}
-            onClick={acceptLinkingModal.onOpen}>
-            {t("Accept")}
-          </Button>
-        </HStack>
-      )}
+      <HStack gap={4}>
+        <Button
+          variant={"dangerGhost"}
+          flex={1}
+          p={3}
+          leftIcon={<UilTimes color="#C84968" />}
+          onClick={rejectLinkingModal.onOpen}>
+          {t("Reject")}
+        </Button>
+        <Button
+          variant={"primaryGhost"}
+          flex={1}
+          p={3}
+          leftIcon={<UilCheck color="#004CFC" />}
+          onClick={acceptLinkingModal.onOpen}>
+          {t("Accept")}
+        </Button>
+      </HStack>
       <AcceptLinkingModal modal={acceptLinkingModal} secondaryAccount={secondaryAccount} />
       <RejectLinkingModal modal={rejectLinkingModal} secondaryAccount={secondaryAccount} />
     </Stack>

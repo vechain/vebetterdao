@@ -23,11 +23,9 @@ test.describe("Swap Tokens", () => {
     await veWorldMockClient.setOptions(page, { gasMultiplier: 0.5 })
   })
 
-  test.afterEach(async ({ page }, testInfo) => {
-    if (testInfo.status !== "passed") {
-      const lastTxId = await veWorldMockClient.getSenderTxId(page)
-      console.log(`Last tx id: ${lastTxId}`)
-    }
+  test.afterEach(async ({ page }) => {
+    const lastTxId = await veWorldMockClient.getSenderTxId(page)
+    console.log(`Last tx id: ${lastTxId}`)
   })
 
   test("User can swap B3TR to VOT3", async ({ page }) => {

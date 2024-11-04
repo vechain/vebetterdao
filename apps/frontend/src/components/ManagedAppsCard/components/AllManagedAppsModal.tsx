@@ -1,3 +1,4 @@
+import { AppAdministrationRole } from "@/api"
 import { AppDetails } from "./AppDetails"
 import {
   Heading,
@@ -10,12 +11,6 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-
-export type AppAdministrationRole = {
-  isAdmin: boolean
-  isModerator: boolean
-  appId: string
-}
 
 type Props = {
   userAppRoles: AppAdministrationRole[]

@@ -1,4 +1,5 @@
 import { SustainabilityActionsResponse, useSustainabilityActions } from "@/api"
+import { useWallet } from "@vechain/dapp-kit-react"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { VStack, Spinner, HStack, Heading, Button, Card, CardBody, Text, Center } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -6,15 +7,11 @@ import { Dispatch, SetStateAction } from "react"
 import dayjs from "dayjs"
 import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
 
-type Props = {
-  setIsCalendarView: Dispatch<SetStateAction<boolean>>
-  address: string
-}
-
-export const ActivityList = ({ address, setIsCalendarView }: Props) => {
+export const ActivityList = ({ setIsCalendarView }: { setIsCalendarView: Dispatch<SetStateAction<boolean>> }) => {
   const { t } = useTranslation()
+  const { account } = useWallet()
   const { data, fetchNextPage, hasNextPage } = useSustainabilityActions({
-    wallet: address ?? undefined,
+    wallet: account ?? undefined,
     direction: "desc",
   })
 
@@ -74,14 +71,7 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
                     {dayActions.map((action, index) => (
-                      <BetterActionCard
-                        key={`${day}-${index}`}
-                        amountB3tr={action.amount}
-                        appId={action.appId}
-                        blockNumber={action.blockNumber}
-                        blockTimestamp={action.blockTimestamp}
-                        proof={action.proof}
-                      />
+                      <BetterActionCard key={`${day}-${index}`} action={action} />
                     ))}
                   </VStack>
                 ))}

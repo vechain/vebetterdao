@@ -21,33 +21,6 @@ export const TransactionsResponseSchema = z.object({
         amountVOT3: z.number().optional(),
         txType: z.enum(["SWAP", "CLAIM_REWARD", "PROPOSAL_SUPPORT", "UPGRADE_GM", "B3TR_ACTION"]),
         appId: z.string().optional(),
-        proof: z
-          .object({
-            version: z.number(),
-            description: z.string(),
-            proof: z.object({
-              image: z.string().optional(),
-              link: z.string().optional(),
-              text: z.string().optional(),
-              video: z.string().optional(),
-            }),
-            impact: z
-              .object({
-                carbon: z.number().optional(),
-                water: z.number().optional(),
-                energy: z.number().optional(),
-                waste_mass: z.number().optional(),
-                waste_items: z.number().optional(),
-                waste_reduction: z.number().optional(),
-                biodiversity: z.number().optional(),
-                people: z.number().optional(),
-                timber: z.number().optional(),
-                plastic: z.number().optional(),
-                learning_time: z.number().optional(),
-              })
-              .optional(),
-          })
-          .optional(),
       }),
     )
     .default([]),

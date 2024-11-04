@@ -107,7 +107,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
         <HStack spacing={8} align="center" w={["full", "full", "auto"]} justify={"space-between"}>
           <VStack spacing={0} align={["flex-start", "flex-start", "flex-end"]}>
             <Skeleton isLoaded={!votersLoading}>
-              <Text fontWeight={600} fontSize={"18px"} color="#252525" data-testid={"total-voters"}>
+              <Text fontWeight={600} fontSize={"18px"} color="#252525">
                 {compactFormatter.format(Number(voters ?? 0))}
               </Text>
             </Skeleton>
