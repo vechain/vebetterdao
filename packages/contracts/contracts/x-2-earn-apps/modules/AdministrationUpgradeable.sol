@@ -229,7 +229,8 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    */
   function _revokeAppCreators(bytes32 appId) internal {
     AdministrationStorage storage $ = _getAdministrationStorage();
-    AdministrationUtils.revokeAppCreators($._creators, $._creatorApps, $._x2EarnCreatorContract, appId);
+    if (!isBlacklisted(appId))
+      AdministrationUtils.revokeAppCreators($._creators, $._creatorApps, $._x2EarnCreatorContract, appId);
   }
 
   /**
@@ -239,7 +240,8 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    */
   function _validateAppCreators(bytes32 appId) internal {
     AdministrationStorage storage $ = _getAdministrationStorage();
-    AdministrationUtils.validateAppCreators($._creators, $._creatorApps, $._x2EarnCreatorContract, appId);
+    if (isBlacklisted(appId))
+      AdministrationUtils.validateAppCreators($._creators, $._creatorApps, $._x2EarnCreatorContract, appId);
   }
 
   /**
