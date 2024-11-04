@@ -2,7 +2,7 @@ import { Box, Circle, HStack, Skeleton, Stack, Text, useMediaQuery } from "@chak
 import { UilArrowCircleUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useSelectedGmNft, useParticipatedInGovernance, useUserB3trBalance, useXNode } from "@/api"
+import { useSelectedGmNft, useParticipatedInGovernance, useXNode, useB3trBalance } from "@/api"
 import { useMemo } from "react"
 import { SparklesIcon } from "@/components/Icons"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -26,7 +26,7 @@ export const GmNFTAndNodeFooter = () => {
   } = useSelectedGmNft()
   const { isXNodeHolder } = useXNode()
 
-  const { isLoading: isB3trBalanceLoading } = useUserB3trBalance()
+  const { isLoading: isB3trBalanceLoading } = useB3trBalance(account ?? "")
 
   const upgradeMessage = useMemo(() => {
     if (!hasUserVoted && !isGMOwned) {

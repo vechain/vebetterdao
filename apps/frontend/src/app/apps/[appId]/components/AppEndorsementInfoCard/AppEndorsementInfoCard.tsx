@@ -15,7 +15,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react"
-import { useMemo, useEffect, useState } from "react"
+import { useMemo } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
@@ -76,20 +76,11 @@ export const AppEndorsementInfoCard = ({
 
   // User xnodes, TODO support multiple xnodes
   const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints } = useXNode()
-  const [userScore, setUserScore] = useState<number | null>(null)
 
   const isUserAppEndorser = useMemo(() => {
     if (!app || isXNodeLoading) return false
     return isXNodeHolder && isEndorsingApp && compareAddresses(app.id, endorsedApp?.id)
   }, [app, isXNodeLoading, isXNodeHolder, isEndorsingApp, endorsedApp])
-
-  useEffect(() => {
-    if (isUserAppEndorser) {
-      setUserScore(xNodePoints)
-    } else {
-      setUserScore(null)
-    }
-  }, [isEndorsingApp, isUserAppEndorser, xNodePoints])
 
   const isUserEndorsingOtherApp = useMemo(() => {
     if (!app || isXNodeLoading) return false
@@ -184,7 +175,7 @@ export const AppEndorsementInfoCard = ({
               spacing={4}
               w="full"
               justify={"space-between"}>
-              {app && <AppEndorsersSection appId={app.id} userScore={userScore} />}
+              {app && <AppEndorsersSection appId={app.id} />}
 
               <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading}>
                 {(isAppModerator || isAppAdmin) &&
@@ -201,8 +192,6 @@ export const AppEndorsementInfoCard = ({
                     {t("Endorse with your {{value}} points", { value: xNodePoints })}
                   </Button>
                 ) : null}
-                {/* Prevent endorsing the app when the threshold is met. The SC already reverts the transaction, but the frontend still allows it. 
-                TODO: Hide the 'endorse' button when the threshold is met. */}
                 {isUserEndorsingOtherApp ? (
                   <Button variant={"primaryAction"} onClick={onOpenSwitchEndorsementModal} w={["full", "full", "auto"]}>
                     {t("Switch endorsement to this app")}

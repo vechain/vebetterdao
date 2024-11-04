@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 
 export const GmNFTAndNodeCard = () => {
+  const { account } = useWallet()
   const { t } = useTranslation()
 
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
@@ -72,7 +73,6 @@ export const GmNFTAndNodeCard = () => {
     router.push("/xnode")
   }, [router])
 
-  const { account } = useWallet()
   if (!account) {
     return <NotConnectedWallet />
   }
@@ -209,7 +209,7 @@ export const GmNFTAndNodeCard = () => {
           <GmNFTAndNodeFooter />
         </VStack>
         <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />
-        <SwapB3trVot3 />
+        {account && <SwapB3trVot3 address={account} isConnectedUser={true} />}
       </Stack>
     </Card>
   )

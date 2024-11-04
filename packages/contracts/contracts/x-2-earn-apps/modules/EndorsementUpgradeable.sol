@@ -27,7 +27,10 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol";
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 import { X2EarnAppsDataTypes } from "../../libraries/X2EarnAppsDataTypes.sol";
+import { EndorsementUtils } from "../libraries/EndorsementUtils.sol";
 import { INodeManagement } from "../../interfaces/INodeManagement.sol";
+import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
+import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
 
 abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Endorsment
@@ -36,12 +39,14 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     mapping(bytes32 => uint256) _unendorsedAppsIndex; // Mapping from app ID to index in the _unendorsedApps array, so we can remove an app in O(1)
     mapping(bytes32 => uint256[]) _appEndorsers; // Maps each app ID to an array of node IDs that have endorsed it
     mapping(VechainNodesDataTypes.NodeStrengthLevel => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
-    mapping(bytes32 => uint48) _appGracePeriod; // The grace period elapsed by the app since endorsed
+    mapping(bytes32 => uint48) _appGracePeriodStart; // The grace period elapsed by the app since endorsed
     mapping(uint256 => bytes32) _nodeToEndorsedApp; // Maps a node ID to the app it currently endorses
     uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
     uint256 _endorsementScoreThreshold; // The endorsement score threshold for an app to be eligible for voting
     mapping(bytes32 => uint256) _appScores; // The score of each app
+    mapping(bytes32 => PassportTypes.APP_SECURITY) _appSecurity; // The security score of each app
     INodeManagement _nodeManagementContract; // The token auction contract
+    IVeBetterPassport _veBetterPassport; // The VeBetterPassport contract
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
@@ -58,17 +63,23 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @dev Sets the value for the grace period ane the endorsement score for each node level.
    * @param gracePeriodDuration The initial grace period.
    */
-  function __Endorsement_init(uint48 gracePeriodDuration, address vechainNodesContract) internal onlyInitializing {
-    __Endorsement_init_unchained(gracePeriodDuration, vechainNodesContract);
+  function __Endorsement_init(
+    uint48 gracePeriodDuration,
+    address vechainNodesContract,
+    address veBetterPassportContract
+  ) internal onlyInitializing {
+    __Endorsement_init_unchained(gracePeriodDuration, vechainNodesContract, veBetterPassportContract);
   }
 
   function __Endorsement_init_unchained(
     uint48 gracePeriodDuration,
-    address nodeManagementContract
+    address nodeManagementContract,
+    address veBetterPassportContract
   ) internal onlyInitializing {
     EndorsementStorage storage $ = _getEndorsementStorage();
     $._gracePeriodDuration = gracePeriodDuration;
     $._nodeManagementContract = INodeManagement(nodeManagementContract);
+    $._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
 
     // Set the endorsement score for each node level
     $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Strength] = 2; // Strength Node score
@@ -227,38 +238,15 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   function _getScoreAndRemoveEndorsement(bytes32 appId, uint256 endorserToRemove) internal returns (uint256) {
     // Retrieve the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
-    uint256 score;
-
-    // Iterate over the list of endorsers for the given app
-    for (uint256 i; i < $._appEndorsers[appId].length; ) {
-      // Get the current endorser's node id
-      uint256 endorser = $._appEndorsers[appId][i];
-      // Get the node level of the endorser
-      VechainNodesDataTypes.NodeStrengthLevel nodeLevel = $._nodeManagementContract.getNodeLevel(endorser);
-
-      // Check if the endorser's node level is 0 or if the endorser is the one to be removed
-      if (nodeLevel == VechainNodesDataTypes.NodeStrengthLevel.None || endorser == endorserToRemove) {
-        // Remove endorser by swapping with the last element and then reducing the length
-        $._appEndorsers[appId][i] = $._appEndorsers[appId][$._appEndorsers[appId].length - 1];
-        $._appEndorsers[appId].pop();
-
-        // Emit an event indicating the app has been unendorsed by the node ID
-        emit AppEndorsed(appId, endorser, false);
-
-        // Delete the endorser from the endorsers mapping
-        delete $._nodeToEndorsedApp[endorser];
-      } else {
-        // Add the endorser's score to the total score
-        score += $._nodeEnodorsmentScore[nodeLevel];
-        i++; // Only increment i if we didn't remove an endorser
-      }
-    }
-
-    // Store the latest score of the app
-    $._appScores[appId] = score;
-
-    // Return the total score of the app
-    return score;
+    return EndorsementUtils.getScoreAndRemoveEndorsement(
+      $._nodeEnodorsmentScore,
+      $._nodeToEndorsedApp,
+      $._appEndorsers,
+      $._appScores,
+      $._nodeManagementContract,
+      appId,
+      endorserToRemove
+    );
   }
 
   /**
@@ -267,18 +255,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function _updateNodeEndorsementScores(VechainNodesDataTypes.NodeStrengthScores calldata nodeStrengthScores) internal {
     EndorsementStorage storage $ = _getEndorsementStorage();
-
-    // Set the endorsement score for each node level
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Strength] = nodeStrengthScores.strength; // Strength Node score
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Thunder] = nodeStrengthScores.thunder; // Thunder Node score
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Mjolnir] = nodeStrengthScores.mjolnir; // Mjolnir Node score
-
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.VeThorX] = nodeStrengthScores.veThorX; // VeThor X Node score
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.StrengthX] = nodeStrengthScores.strengthX; // Strength X Node score
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.ThunderX] = nodeStrengthScores.thunderX; // Thunder X Node score
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.MjolnirX] = nodeStrengthScores.mjolnirX; // Mjolnir X Node score
-
-    emit NodeStrengthScoresUpdated(nodeStrengthScores);
+    EndorsementUtils.updateNodeEndorsementScores($._nodeEnodorsmentScore, nodeStrengthScores);
   }
 
   /**
@@ -300,49 +277,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function _updateAppsPendingEndorsement(bytes32 appId, bool remove) internal {
     EndorsementStorage storage $ = _getEndorsementStorage();
-
-    if (remove) {
-      /**
-       *  If the app is no longer pending endorsement we need to remove it from the _unendorsedApps array
-       *
-       * In order to remove an app from the _unendorsedApps array correctly we need to:
-       * 1) Move the element in the last position of the array to the index we want to remove
-       * 2) Update the `_unendorsedAppsIndex` mapping accordingly.
-       * 3) Pop the last element of the _unendorsedApps array and delete the index mapping of the app we removed
-       *
-       * Example:
-       *
-       * _unendorsedApps = [A, B, C, D, E]
-       * _unendorsedAppsIndex = {A: 1, B: 2, C: 3, D: 4, E: 5}
-       *
-       * If we want to remove C:
-       *
-       * 1) Move E to the index of C
-       * _unendorsedApps = [A, B, E, D, E]
-       *
-       * 2) Update the index of E in the mapping
-       * _unendorsedAppsIndex = {A: 1, B: 2, C: 3, D: 4, E: 3}
-       *
-       * 3) Pop the last element of the array and delete the index mapping of the app we removed
-       * _unendorsedApps = [A, B, E, D]
-       * _unendorsedAppsIndex = {A: 1, B: 2, D: 4, E: 3}
-       *
-       */
-      uint256 index = $._unendorsedAppsIndex[appId] - 1;
-      uint256 lastIndex = $._unendorsedApps.length - 1;
-      bytes32 lastAppId = $._unendorsedApps[lastIndex];
-
-      $._unendorsedApps[index] = lastAppId;
-      $._unendorsedAppsIndex[lastAppId] = index + 1;
-
-      $._unendorsedApps.pop();
-      delete $._unendorsedAppsIndex[appId];
-    } else {
-      // If the app is pending endorsement we need to add it to the _unendorsedApps array
-      $._unendorsedApps.push(appId);
-      // Store index + 1 to avoid zero index
-      $._unendorsedAppsIndex[appId] = $._unendorsedApps.length;
-    }
+    EndorsementUtils.updateAppsPendingEndorsement($._unendorsedApps, $._unendorsedAppsIndex, appId, remove);
   }
 
   /**
@@ -425,6 +360,22 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     _updateAppsPendingEndorsement(appId, true);
   }
 
+  /**
+   * @notice This function can be called to update the node management contract
+   */
+  function _setNodeManagementContract(address nodeManagementContract) internal virtual {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    $._nodeManagementContract = INodeManagement(nodeManagementContract);
+  }
+
+  /**
+   * @notice This function can be called to update the VeBetterPassport contract
+   */
+  function _setVeBetterPassportContract(address veBetterPassportContract) internal virtual {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    $._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
+  }
+
   // ---------- Private ---------- //
 
   /**
@@ -438,9 +389,13 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     if (!appExists(appId)) {
       // Add the app to the list of apps it will be eligible for voting by default from the next round
       _addApp(appId);
+      // Set the XAPP security score to LOW in VeBetterPassport
+      $._veBetterPassport.setAppSecurity(appId, PassportTypes.APP_SECURITY.LOW);
     } else if (!isEligibleNow(appId)) {
       // Mark the app as eligible for voting
       _setVotingEligibility(appId, true);
+      // Set the XAPP security score in VeBetterPassport the same as it was when it was unendorsed
+      $._veBetterPassport.setAppSecurity(appId, $._appSecurity[appId]);
     }
 
     // If the app is pending endorsement
@@ -450,7 +405,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Reset the grace period if the app has more than 100 points
-    $._appGracePeriod[appId] = 0;
+    $._appGracePeriodStart[appId] = 0;
   }
 
   /**
@@ -484,34 +439,26 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     // Get the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
 
-    // If the app is not pending endorsement
-    if (!isAppUnendorsed(appId)) {
-      // Mark the app as not endorsed so that it is added to the list of apps pending endorsement
-      _setEndorsementStatus(appId, false);
-    }
+    // Use the EndorsementUtils library to update the status of the app
+    bool stillEligible = EndorsementUtils.updateStatusIfThresholdNotMet(
+      $._appGracePeriodStart,
+      $._appSecurity,
+      $._unendorsedApps,
+      $._unendorsedAppsIndex,
+      $._veBetterPassport,
+      $._gracePeriodDuration,
+      isAppUnendorsed(appId),
+      clock(),
+      appId,
+      isEligibleNow(appId)
+    );
 
-    // If the app has a grace period of 0, set the grace period
-    if ($._appGracePeriod[appId] == 0) {
-      // Calculate the end block of the grace period  > current block + grace period duration
-      uint48 endBlock = clock() + $._gracePeriodDuration;
-
-      // Set the grace period for the app
-      $._appGracePeriod[appId] = endBlock;
-
-      emit AppUnendorsedGracePeriodStarted(appId, clock(), endBlock);
-
-      // Return true indicating the app is eligible for voting
-      return true;
-
-      // If the X2Earn app is no longer in the grace period and is not eligible for voting
-    } else if (clock() > $._appGracePeriod[appId] && isEligibleNow(appId)) {
-      // Mark the app as not eligible for voting
+    // If the app is no longer eligible for voting, remove it from the list of apps
+    if (!stillEligible) {
       _setVotingEligibility(appId, false);
-
-      // Return false indicating the app is not eligible for voting
-      return false;
     }
   }
+
 
   // ---------- Getters ---------- //
 
@@ -572,25 +519,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function getEndorsers(bytes32 appId) external view returns (address[] memory) {
     EndorsementStorage storage $ = _getEndorsementStorage();
-
-    uint256 length = $._appEndorsers[appId].length;
-    address[] memory endorsers = new address[](length);
-    uint256 count = 0;
-
-    for (uint256 i = 0; i < length; i++) {
-      address endorser = $._nodeManagementContract.getNodeManager($._appEndorsers[appId][i]);
-      if (endorser != address(0)) {
-        endorsers[count] = endorser;
-        count++;
-      }
-    }
-
-    // Resize the array to the actual number of non-zero addresses
-    assembly {
-      mstore(endorsers, count)
-    }
-
-    return endorsers;
+    return EndorsementUtils.getEndorsers($._appEndorsers, $._nodeManagementContract, appId);
   }
 
   /**
@@ -598,18 +527,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    */
   function getUsersEndorsementScore(address user) external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
-
-    // Retrieve the node levels managed by the user
-    VechainNodesDataTypes.NodeStrengthLevel[] memory nodeLevels = $._nodeManagementContract.getUsersNodeLevels(user);
-
-    uint256 totalScore;
-
-    // Iterate over each node level and sum the endorsement scores
-    for (uint256 i; i < nodeLevels.length; i++) {
-      totalScore += $._nodeEnodorsmentScore[nodeLevels[i]];
-    }
-
-    return totalScore;
+    return EndorsementUtils.getUsersEndorsementScore($._nodeEnodorsmentScore, $._nodeManagementContract, user);
   }
 
   /**
@@ -620,5 +538,15 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     VechainNodesDataTypes.NodeStrengthLevel nodeLevel = $._nodeManagementContract.getNodeLevel(nodeId);
     return $._nodeEnodorsmentScore[nodeLevel];
+  }
+
+  function getNodeManagementContract() external view returns (INodeManagement) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return $._nodeManagementContract;
+  }
+
+  function getVeBetterPassportContract() external view returns (IVeBetterPassport) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return $._veBetterPassport;
   }
 }

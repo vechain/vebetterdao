@@ -1,4 +1,4 @@
-import { useUserB3trBalance, useUserVot3Balance } from "@/api"
+import { useB3trBalance, useVot3Balance } from "@/api"
 import { ConvertModal } from "@/components/Convert/ConvertModal"
 import { B3TRIcon } from "@/components/Icons"
 import {
@@ -24,13 +24,15 @@ const compactFormatter = getCompactFormatter(4)
 type Props = {
   containerProps?: StackProps
   innerContent?: React.ReactNode
+  address: string
+  isConnectedUser: boolean
 }
-export const SwapB3trVot3 = ({ containerProps, innerContent }: Props) => {
+export const SwapB3trVot3 = ({ address, isConnectedUser, containerProps, innerContent }: Props) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
-  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useUserB3trBalance()
-  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useUserVot3Balance()
+  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(address)
+  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(address)
 
   const { isOpen, onClose, onOpen } = useDisclosure()
   const hasNoBalance = (!b3trBalance || b3trBalance.scaled === "0") && (!vot3Balance || vot3Balance.scaled === "0")
@@ -83,23 +85,25 @@ export const SwapB3trVot3 = ({ containerProps, innerContent }: Props) => {
             </HStack>
           </VStack>
         </Stack>
-        <Button
-          isDisabled={isSwapDisabled}
-          onClick={onOpen}
-          leftIcon={
-            <UilExchangeAlt
-              size={"16px"}
-              style={{
-                transform: "rotate(90deg)",
-              }}
-            />
-          }
-          variant={"whiteAction"}
-          rounded={"full"}
-          fontWeight={500}
-          px="24px">
-          {t("Convert tokens")}
-        </Button>
+        {isConnectedUser && (
+          <Button
+            isDisabled={isSwapDisabled}
+            onClick={onOpen}
+            leftIcon={
+              <UilExchangeAlt
+                size={"16px"}
+                style={{
+                  transform: "rotate(90deg)",
+                }}
+              />
+            }
+            variant={"whiteAction"}
+            rounded={"full"}
+            fontWeight={500}
+            px="24px">
+            {t("Convert tokens")}
+          </Button>
+        )}
       </VStack>
       <ConvertModal isOpen={isOpen} onClose={onClose} />
     </>

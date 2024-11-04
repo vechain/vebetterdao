@@ -18,8 +18,6 @@ import { UpdateRoleCard } from "./components/UpdateRoleCard"
 import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport"
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 
-const isLocalhost = process.env.NODE_ENV === "development"
-
 export const AdminPageContent = () => {
   useEffect(() => {
     AnalyticsUtils.trackPage("Admin")
@@ -93,7 +91,7 @@ export const AdminPageContent = () => {
               <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
                 <UpdateReceiverAddress />
                 <UpdateAppsEligibility />
-                {isLocalhost ? <XAppCheckEndorsement /> : null}
+                <XAppCheckEndorsement />
               </Grid>
             </TabPanel>
           )}

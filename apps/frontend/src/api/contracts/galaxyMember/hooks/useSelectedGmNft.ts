@@ -1,7 +1,7 @@
 import { notFoundImage } from "@/constants"
 import { useIsGMclaimable } from "./useIsGMclaimable"
 import { NFTMetadata, useNFTImage } from "./useNFTImage"
-import { useUserB3trBalance } from "../../b3tr"
+import { useB3trBalance } from "../../b3tr"
 import { useSelectedTokenId } from "./useSelectedTokenId"
 import { useNFTMetadataUri } from "./useNFTMetadataUri"
 import { useIpfsImage, useIpfsMetadata } from "@/api/ipfs"
@@ -12,6 +12,7 @@ import { useGetNodeIdAttached } from "./useGetNodeIdAttached"
 import { useXNode } from "../../xNodes"
 import { useGMMaxLevel } from "./useGMMaxLevel"
 import { gmNfts } from "@/constants/gmNfts"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 /**
  * Custom hook for retrieving data related to a Galaxy Member NFT.
@@ -27,9 +28,10 @@ import { gmNfts } from "@/constants/gmNfts"
  *   - attachedNodeId: The ID of the node attached to the Galaxy Member NFT.
  */
 export const useSelectedGmNft = () => {
+  const { account } = useWallet()
   const { isOwned: isGMOwned } = useIsGMclaimable()
   const { isLoading: isGMLoading } = useNFTImage()
-  const { data: b3trBalance } = useUserB3trBalance()
+  const { data: b3trBalance } = useB3trBalance(account ?? "")
   const {
     data: selectedTokenId,
     isLoading: isSelectedTokenIdLoading,
