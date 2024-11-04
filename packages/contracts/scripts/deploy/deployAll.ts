@@ -238,7 +238,12 @@ export async function deployAll(config: ContractsConfig) {
         config.CONTRACTS_ADMIN_ADDRESS, // upgrader
         TEMP_ADMIN, // governance role
       ],
-      [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress(), veBetterPassportContractAddress],
+      [
+        config.XAPP_GRACE_PERIOD,
+        await nodeManagement.getAddress(),
+        veBetterPassportContractAddress,
+        await x2EarnCreator.getAddress(),
+      ],
     ],
     {
       versions: [undefined, 2],

@@ -99,9 +99,15 @@ contract X2EarnCreator is
     __ERC721Enumerable_init();
 
     X2EarnCreatorStorage storage $ = _getX2EarnCreatorStorage();
+
+    require(bytes(baseURI).length > 0, "X2EarnCreator: baseURI is empty");
     $.baseURI = baseURI;
 
     require(defaultAdmin != address(0), "X2EarnCreator: zero address");
+    require(pauser != address(0), "X2EarnCreator: zero address");
+    require(minter != address(0), "X2EarnCreator: zero address");
+    require(upgrader != address(0), "X2EarnCreator: zero address");
+    require(burner != address(0), "X2EarnCreator: zero address");
 
     _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
     _grantRole(PAUSER_ROLE, pauser);

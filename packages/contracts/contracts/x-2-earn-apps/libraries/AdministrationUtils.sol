@@ -192,11 +192,11 @@ library AdministrationUtils {
   }
 
   /**
-   * @dev Checks if an account is a moderator for an app.
+   * @dev Checks if an account is a creator for an app.
    * @param creators Mapping of app IDs to arrays of creator addresses.
    * @param appId The ID of the app.
    * @param account The account address to check.
-   * @return True if the account is a moderator, false otherwise.
+   * @return True if the account is a creator, false otherwise.
    */
   function isAppCreator(
     mapping(bytes32 appId => address[]) storage creators,
@@ -379,7 +379,7 @@ library AdministrationUtils {
   }
 
   /**
-   * @dev Removes a moderator from an app.
+   * @dev Removes a creator from an app.
    * @param creators Mapping of app IDs to arrays of creator addresses.
    * @param creatorApps Mapping of creator addresses to the number of apps they have created.
    * @param x2EarnCreatorContract The X2EarnCreator contract instance.
@@ -407,18 +407,18 @@ library AdministrationUtils {
       revert X2EarnNonexistentCreator(appId, creator);
     }
 
+    // Decrease the number of apps created by the creator
+    creatorApps[creator]--;
+
+    // Remove the creator from the app
+    remove(creators[appId], creator);
+
     // Burn the creator NFT if the creator doesn't have any apps
     if (creatorApps[creator] == 1) {
       x2EarnCreatorContract.burn(x2EarnCreatorContract.tokenOfOwnerByIndex(creator, 0));
     }
 
-    // Decrease the number of apps created by the creator
-    creatorApps[creator]--;
-
-    bool removed = remove(creators[appId], creator);
-    if (removed) {
-      emit ModeratorRemovedFromApp(appId, creator);
-    }
+    emit ModeratorRemovedFromApp(appId, creator);
   }
 
   /**
@@ -511,16 +511,16 @@ library AdministrationUtils {
       revert X2EarnAlreadyCreator(creator);
     }
 
-    // Mint a creator NFT if the creator doesn't have one
-    if (x2EarnCreatorContract.balanceOf(creator) == 0) {
-      x2EarnCreatorContract.safeMint(creator);
-    }
-
     // Increase the number of apps created by the creator
     creatorApps[creator]++;
 
     // Add the creator to the app
     creators[appId].push(creator);
+
+    // Mint a creator NFT if the creator doesn't have one
+    if (x2EarnCreatorContract.balanceOf(creator) == 0) {
+      x2EarnCreatorContract.safeMint(creator);
+    }
 
     emit CreatorAddedToApp(appId, creator);
   }
@@ -554,7 +554,7 @@ library AdministrationUtils {
    *
    * @param appId the hashed name of the app
    */
-  function valdiateAppCreators(
+  function validateAppCreators(
     mapping(bytes32 => address[]) storage creators,
     mapping(address => uint256) storage creatorApps,
     IX2EarnCreator x2EarnCreatorContract,

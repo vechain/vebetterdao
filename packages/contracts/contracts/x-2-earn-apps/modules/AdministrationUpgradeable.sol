@@ -239,7 +239,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    */
   function _validateAppCreators(bytes32 appId) internal {
     AdministrationStorage storage $ = _getAdministrationStorage();
-    AdministrationUtils.valdiateAppCreators($._creators, $._creatorApps, $._x2EarnCreatorContract, appId);
+    AdministrationUtils.validateAppCreators($._creators, $._creatorApps, $._x2EarnCreatorContract, appId);
   }
 
   /**
