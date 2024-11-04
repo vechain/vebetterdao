@@ -89,7 +89,6 @@ export const AppEndorsementInfoCard = ({
     } else {
       setUserScore(null)
     }
-    console.log("userScore", userScore)
   }, [isEndorsingApp, isUserAppEndorser, xNodePoints])
 
   const isUserEndorsingOtherApp = useMemo(() => {

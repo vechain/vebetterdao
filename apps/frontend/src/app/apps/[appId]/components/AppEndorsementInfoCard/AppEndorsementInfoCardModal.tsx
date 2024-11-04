@@ -2,7 +2,11 @@ import { useIsAppUnendorsed, useAppEndorsementScore, useAppEndorsers } from "@/a
 import { EndorsementInfo } from "./EndorsementInfo"
 import { EndorsementHistory } from "./EndorsementHistory"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 import { AppEndorsersIcon } from "./AppEndorsersSection"
+
+import { normalize } from "@repo/utils/HexUtils"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 
 import { UilCheckCircle, UilExclamationCircle, UilTrash } from "@iconscout/react-unicons"
 import {
@@ -19,11 +23,11 @@ import {
   Button,
   useDisclosure,
 } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
-import { BaseModal } from "@/components/BaseModal"
-
+import { useTranslation, Trans } from "react-i18next"
 import { useState } from "react"
 
+import { BaseModal } from "@/components/BaseModal"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useBreakpoints } from "@/hooks"
 
 type Props = {
@@ -35,10 +39,22 @@ type Props = {
 
 export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore }: Props) => {
   const { t } = useTranslation()
+
+  const { account } = useWallet()
   const { data: isUnendorsed } = useIsAppUnendorsed(appId)
   const { data: endorsementScore } = useAppEndorsementScore(appId)
   const { data: endorsers } = useAppEndorsers(appId)
   const { data: endorsementEvents } = useAppEndorsedEvents({ appId })
+
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const {
+    isOpen: isUnendorsementModalOpen,
+    onOpen: onOpenUnendorsementModal,
+    onClose: onCloseUnendorsementModal,
+  } = useDisclosure()
+  const handleCancelClick = () => {
+    setIsConfirmOpen(false)
+  }
 
   const { isMobile } = useBreakpoints()
 
@@ -61,17 +77,6 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
       )}
     </Box>
   )
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
-
-  const {
-    // isOpen: isUnendorsementModalOpen,
-    onOpen: onOpenUnendorsementModal,
-    // onClose: onCloseUnendorsementModal,
-  } = useDisclosure()
-
-  const handleCancelClick = () => {
-    setIsConfirmOpen(false)
-  }
 
   return (
     <BaseModal
@@ -150,33 +155,22 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
 
               {endorsers && endorsers.length > 0 ? (
                 <VStack flex={1} w="full" overflowY="auto" h="full" spacing={2}>
-                  {endorsers
-                    .slice()
-                    .reverse()
-                    .map((endorser, index) => (
-                      <EndorsementInfo
-                        key={index}
-                        appId={appId}
-                        endorserAddress={endorser}
-                        isConfirmOpen={isConfirmOpen}
-                        setIsConfirmOpen={setIsConfirmOpen}
-                      />
-                    ))}
-                  {isConfirmOpen && (
+                  {account && isConfirmOpen && endorsers.includes(normalize(account)) && (
                     <VStack
                       border={"1px solid #EC9BAF"}
                       p={4}
+                      mx={2}
                       borderRadius={"16px"}
                       bg={"white"}
-                      alignItems="start"
-                      w={"full"}>
-                      <Text>
-                        {t(
-                          "Are you sure? If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active.",
-                          { endorsedAddress: endorsers, value: endorsers.length }, // TODO: put the right value
-                        )}
+                      alignItems="start">
+                      <Text mb={4} maxW="full">
+                        <Trans
+                          i18nKey="<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active"
+                          values={{ endorsedAddress: humanAddress(normalize(account), 6, 3), value: userScore }}
+                          components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                        />
                       </Text>
-                      <HStack justifyContent="flex-start" border={"1px solid black"}>
+                      <HStack justifyContent="flex-start">
                         <Button bg="#C84968" color={"white"} onClick={onOpenUnendorsementModal}>
                           <UilTrash />
                           {t("Remove")}
@@ -187,6 +181,18 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
                       </HStack>
                     </VStack>
                   )}
+
+                  {endorsers
+                    .slice()
+                    .reverse()
+                    .map((endorser, index) => (
+                      <EndorsementInfo
+                        key={index}
+                        appId={appId}
+                        endorserAddress={endorser}
+                        setIsConfirmOpen={setIsConfirmOpen}
+                      />
+                    ))}
                 </VStack>
               ) : (
                 <Center w="full" h="full">
@@ -233,6 +239,9 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
           </VStack>
         </Stack>
       </VStack>
+      {isUnendorsementModalOpen && (
+        <UnendorseAppModal isOpen={isUnendorsementModalOpen} onClose={onCloseUnendorsementModal} />
+      )}
     </BaseModal>
   )
 }

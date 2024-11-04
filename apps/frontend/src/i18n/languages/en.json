@@ -1143,7 +1143,7 @@
   "VePassport activation from round 18": "VePassport activation from round 18",
   "Your score": "Your score",
   "Endorsed and active": "Endorsed and active",
-  "Are you sure? If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active.": "Are you sure? If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active.",
   "Remove this endorsement": "Remove this endorsement",
-  "See endorser info": "See endorser info"
+  "See endorser info": "See endorser info",
+  "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active": "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active"
 }

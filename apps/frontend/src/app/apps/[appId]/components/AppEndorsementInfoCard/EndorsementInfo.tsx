@@ -1,9 +1,18 @@
 import { useEndorsementInfos } from "@/hooks/useEndorsementData"
-import { Text, HStack, VStack, Box } from "@chakra-ui/react"
+import {
+  Text,
+  HStack,
+  VStack,
+  Box,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  PopoverBody,
+  useDisclosure,
+} from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useState } from "react"
 import { normalize } from "@repo/utils/HexUtils"
 
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -14,25 +23,18 @@ import { UilTrash, UilCheck } from "@iconscout/react-unicons"
 type EndorsementInfoProps = {
   appId: string
   endorserAddress: string
-  isConfirmOpen: boolean
   setIsConfirmOpen: (value: boolean) => void
 }
 
-export const EndorsementInfo = ({ appId, endorserAddress, isConfirmOpen, setIsConfirmOpen }: EndorsementInfoProps) => {
+export const EndorsementInfo = ({ appId, endorserAddress, setIsConfirmOpen }: EndorsementInfoProps) => {
   const endorsementInfos = useEndorsementInfos(appId, endorserAddress)
   const { account } = useWallet()
   const { t } = useTranslation()
 
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false)
-
-  const endorsemenInfos = () => {
-    setIsAccordionOpen(!isAccordionOpen)
-  }
+  const { onClose } = useDisclosure()
 
   const handleRemoveClick = () => {
     setIsConfirmOpen(true)
-    setIsAccordionOpen(false)
-    console.log("isConfirmOpen", isConfirmOpen)
   }
 
   return (
@@ -63,38 +65,34 @@ export const EndorsementInfo = ({ appId, endorserAddress, isConfirmOpen, setIsCo
             }}
           />
         </Text>
+
         {account && endorserAddress === normalize(account) && (
-          <Box as="button" onClick={endorsemenInfos}>
-            <HiDotsVertical />
-          </Box>
+          <Popover placement="bottom-end" isLazy>
+            <PopoverTrigger>
+              <Box as="button">
+                <HiDotsVertical />
+              </Box>
+            </PopoverTrigger>
+            <PopoverContent width="auto" boxShadow="md" border="1px solid #EFEFEF">
+              <PopoverBody p={2}>
+                <VStack alignItems="stretch" spacing={3}>
+                  <HStack color="#C84968" onClick={handleRemoveClick} cursor="pointer">
+                    <UilTrash />
+                    <Text whiteSpace="nowrap" fontSize={["sm", "md"]}>
+                      {t("Remove this endorsement")}
+                    </Text>
+                  </HStack>
+                  {/* TODO : find where it goes ?  */}
+                  <HStack onClick={onClose} cursor="pointer">
+                    <UilCheck color={"#004CFC"} />
+                    <Text fontSize={["sm", "md"]}>{t("See endorser info")}</Text>
+                  </HStack>
+                </VStack>
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
         )}
       </HStack>
-
-      {isAccordionOpen && (
-        <VStack
-          position="absolute"
-          top="50%"
-          left="50%"
-          transform="translate(-50%, -50%)"
-          bg="white"
-          border={"1px solid #EFEFEF"}
-          boxShadow="md"
-          rounded="md"
-          alignItems="stretch"
-          p={3}
-          spacing={3}
-          justify={"space-between"}>
-          {" "}
-          <HStack color="#C84968" onClick={handleRemoveClick} cursor="pointer">
-            <UilTrash />
-            <Text>{t("Remove this endorsement")}</Text>
-          </HStack>
-          <HStack onClick={() => setIsAccordionOpen(false)} cursor="pointer">
-            <UilCheck color={"#004CFC"} />
-            <Text>{t("See endorser info")}</Text>
-          </HStack>
-        </VStack>
-      )}
     </HStack>
   )
 }
