@@ -162,7 +162,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
                       mx={2}
                       borderRadius={"16px"}
                       bg={"white"}
-                      alignItems="start">
+                      alignItems="end">
                       <Text mb={4} maxW="full">
                         <Trans
                           i18nKey="<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active"
@@ -170,12 +170,12 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
                           components={{ bold: <Text as="span" fontWeight={"600"} /> }}
                         />
                       </Text>
-                      <HStack justifyContent="flex-start">
-                        <Button bg="#C84968" color={"white"} onClick={onOpenUnendorsementModal}>
+                      <HStack>
+                        <Button borderRadius="16px" bg="#C84968" color={"white"} onClick={onOpenUnendorsementModal}>
                           <UilTrash />
                           {t("Remove")}
                         </Button>
-                        <Button bg="#E0E9FE" color={"#004CFC"} onClick={handleCancelClick}>
+                        <Button borderRadius="16px" bg="#E0E9FE" color={"#004CFC"} onClick={handleCancelClick}>
                           {t("Cancel")}
                         </Button>
                       </HStack>
