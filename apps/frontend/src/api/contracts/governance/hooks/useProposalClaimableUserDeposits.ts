@@ -1,28 +1,12 @@
-import { useQueries } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
-import { getProposalUserDeposit } from "./useProposalUserDeposit"
-import { ProposalState, getProposalState, getProposalStateQueryKey } from "./useProposalState"
-import { ProposalDeposit } from "../utils"
+import { getProposalUserDepositQueryKey, proposalDepositAbi } from "./useProposalUserDeposit"
 import { queryClient } from "@/api/QueryProvider"
 import { useProposalsEvents } from "./useProposalsEvents"
+import { getConfig } from "@repo/config"
 
-/**
- * Returns a key used for deposit queries in the context of a proposal.
- *
- * This function constructs and returns an array that uniquely identifies the deposit information
- * for a given proposal and user within the application's caching layer.
- *
- * @param proposalId - The unique identifier for the proposal.
- * @param userAddress - The Ethereum address of the user.
- * @returns An array of strings that form the query key.
- */
-export const getProposalDepositKey = (proposalId: string, userAddress: string) => [
-  "proposals",
-  proposalId,
-  "deposit",
-  userAddress,
-]
+const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress
 
 /**
  * Custom React hook that fetches and monitors claimable user deposits for each proposal.
@@ -43,26 +27,32 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
     return proposals?.created.map(proposal => proposal.proposalId) ?? []
   }, [proposals])
 
-  return useQueries({
-    queries: proposalIds.map(proposalId => ({
-      queryKey: getProposalDepositKey(proposalId, userAddress),
-      queryFn: async () => {
-        const state = await queryClient.ensureQueryData({
-          queryKey: getProposalStateQueryKey(proposalId),
-          queryFn: () => getProposalState(thor, proposalId),
-        })
+  return useQuery({
+    queryKey: getProposalUserDepositQueryKey("ALL", userAddress),
+    enabled: !!thor && !!userAddress && !!proposalIds,
+    queryFn: async () => {
+      const clauses = proposalIds.map(proposalId => ({
+        to: GOVERNOR_CONTRACT,
+        value: "0x0",
+        data: proposalDepositAbi.encode(proposalId, userAddress),
+      }))
 
-        if (state === ProposalState.Pending) return { proposalId, deposit: "0" } as ProposalDeposit
+      const res = await thor.explain(clauses).execute()
 
-        const deposit = await getProposalUserDeposit(thor, proposalId, userAddress)
+      const proposalsDeposit = res.map((r, index) => {
+        const decoded = proposalDepositAbi.decode(r.data)
+        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
+        const proposalId = proposalIds[index] as string
+        const deposit = decoded[0] as string
 
-        const proposalDeposit: ProposalDeposit = {
+        queryClient.setQueryData(getProposalUserDepositQueryKey(proposalId, userAddress), deposit)
+        return {
           proposalId,
           deposit,
         }
+      })
 
-        return proposalDeposit
-      },
-    })),
+      return proposalsDeposit
+    },
   })
 }

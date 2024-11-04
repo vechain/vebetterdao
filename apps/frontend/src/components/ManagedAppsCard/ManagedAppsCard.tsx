@@ -1,23 +1,33 @@
-import { AppAdministrationRole, useGetAppAdministrationRole, useXApps } from "@/api"
+import { useAccountAppPermissions } from "@/api"
 import { Button, Card, CardBody, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
 import { AppDetails } from "./components/AppDetails"
 import { useTranslation } from "react-i18next"
-import { AllManagedAppsModal } from "./components/AllManagedAppsModal"
+import { AllManagedAppsModal, AppAdministrationRole } from "./components/AllManagedAppsModal"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { useMemo } from "react"
 
 export const ManagedAppsCard = () => {
   const { t } = useTranslation()
+  const { account } = useWallet()
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const { data: xApps } = useXApps()
-  const appsRoles = useGetAppAdministrationRole(xApps?.allApps?.map(xApp => xApp.id) || [])
+  const { data: appsPermissions } = useAccountAppPermissions(account ?? "")
 
   // filter only apps that are managed by the user and recreate the array by not using UseQueryResult but directly data
-  const userAppRoles: AppAdministrationRole[] = appsRoles.reduce((acc, appRole) => {
-    const data = appRole.data
-    if (data && (data.isAdmin || data.isModerator)) {
-      acc.push(data)
-    }
-    return acc
-  }, [] as AppAdministrationRole[])
+  const userAppRoles: AppAdministrationRole[] = useMemo(() => {
+    if (!appsPermissions) return []
+    return Object.entries(appsPermissions).reduce((acc, appRole) => {
+      const appId = appRole[0]
+      const data = appRole[1]
+      if (data.isAdmin || data.isModerator) {
+        acc.push({
+          isAdmin: data.isAdmin,
+          isModerator: data.isModerator,
+          appId,
+        } as AppAdministrationRole)
+      }
+      return acc
+    }, [] as AppAdministrationRole[])
+  }, [appsPermissions])
 
   if (!userAppRoles || userAppRoles.length < 1) return null
 

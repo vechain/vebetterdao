@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { RevokeDelegationDelegateePOVModal } from "./components/RevokeDelegationDelegateePOVModal"
 import { QualificationBadge } from "../QualificationBadges"
 import { useCanUserVote, useGetDelegator } from "@/api"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 
 type Props = {
   address: string
@@ -16,6 +17,8 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
   const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetDelegator(address)
   const isDelegated = !isDelegatorLoading && !!delegatorAddress
   const { isPerson, isLoading } = useCanUserVote(address)
+
+  const { domain } = useVechainDomain({ addressOrDomain: delegatorAddress })
 
   const delegationModal = useDisclosure()
 
@@ -29,7 +32,7 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
             <HStack justify="space-between">
               <Heading fontSize="xl" fontWeight="700">
                 {t("You are using {{delegatorAddress}} voting qualification", {
-                  delegatorAddress: humanAddress(delegatorAddress, 6, 6),
+                  delegatorAddress: domain ?? humanAddress(delegatorAddress, 6, 6),
                 })}
               </Heading>
             </HStack>
@@ -51,7 +54,7 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
                 <AddressIcon address={delegatorAddress} w={12} h={12} rounded="full" />
                 <VStack align="start" gap={0}>
                   <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
-                    {humanAddress(delegatorAddress, 4, 4)}
+                    {domain ?? humanAddress(delegatorAddress, 4, 4)}
                   </Text>
                 </VStack>
                 <QualificationBadge qualified={isPerson} />

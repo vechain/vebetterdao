@@ -29,7 +29,7 @@ export const CancelProposalSection = () => {
   const { proposal } = useProposalDetail()
   const confirmationModal = useDisclosure()
   const transactionModal = useDisclosure()
-  const { isAdminOfB3TRGovernor } = useAccountPermissions(account ?? "")
+  const { data: permissions } = useAccountPermissions(account ?? "")
 
   const handleCloseConfirmationModal = useCallback(() => {
     confirmationModal.onClose()
@@ -51,8 +51,8 @@ export const CancelProposalSection = () => {
   }, [cancelProposalMutation, transactionModal])
 
   const accountCanCancelProposal = useMemo(
-    () => compareAddresses(proposal.proposer, account || "") || isAdminOfB3TRGovernor,
-    [proposal.proposer, account, isAdminOfB3TRGovernor],
+    () => compareAddresses(proposal.proposer, account || "") || permissions?.isAdminOfB3TRGovernor,
+    [proposal.proposer, account, permissions],
   )
 
   if (accountCanCancelProposal && proposal.state !== ProposalState.Pending) {
