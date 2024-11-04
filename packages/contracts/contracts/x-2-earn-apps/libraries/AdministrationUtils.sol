@@ -407,9 +407,6 @@ library AdministrationUtils {
       revert X2EarnNonexistentCreator(appId, creator);
     }
 
-    // Decrease the number of apps created by the creator
-    creatorApps[creator]--;
-
     // Remove the creator from the app
     remove(creators[appId], creator);
 
@@ -417,6 +414,9 @@ library AdministrationUtils {
     if (creatorApps[creator] == 1) {
       x2EarnCreatorContract.burn(x2EarnCreatorContract.tokenOfOwnerByIndex(creator, 0));
     }
+
+    // Decrease the number of apps created by the creator
+    creatorApps[creator]--;
 
     emit ModeratorRemovedFromApp(appId, creator);
   }
