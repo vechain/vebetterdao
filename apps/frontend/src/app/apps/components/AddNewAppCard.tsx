@@ -9,7 +9,7 @@ export const AddNewAppCard = () => {
 
   const router = useRouter()
   const navigateToCreatorForm = () => {
-    return router.push("/apps/creator/new/form")
+    return router.push("/apps/creator/new")
   }
   const {
     isOpen: isSubmitCreatorFormModalOpen,

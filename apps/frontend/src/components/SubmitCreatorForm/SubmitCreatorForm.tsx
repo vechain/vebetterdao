@@ -26,6 +26,8 @@ import {
 import { useTranslation } from "react-i18next"
 import { signIn, signOut, useSession } from "next-auth/react"
 import { useCreatorSubmissionFormStore } from "@/store"
+import { UilGithub } from "@iconscout/react-unicons"
+import { FaXTwitter } from "react-icons/fa6"
 
 export type SubmitCreatorFormData = {
   appName: string
@@ -105,11 +107,6 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
         setData({ twitterUsername: session.user.twitterUsername })
       }
     }
-    if (!session?.user?.githubUsername && !session?.user?.twitterUsername) {
-      //Remove if no session
-      setValue("githubUsername", "")
-      setValue("twitterUsername", "")
-    }
   }, [session?.user, setValue, setData])
 
   // Handle social media auth
@@ -135,43 +132,47 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
   return (
     <Card>
       <CardHeader>
-        <Heading size="lg">{t("Your App Creator Info")}</Heading>
+        <Heading size="md">{t("Your App Creator Info")}</Heading>
       </CardHeader>
       <CardBody>
-        <VStack spacing={8} w="full">
+        <VStack spacing={4} w="full">
           <FormControl isInvalid={!!errors.githubUsername}>
             <FormLabel>{t("GitHub Username")}</FormLabel>
             <Button
-              colorScheme={watch("githubUsername") ? "blackAlpha" : "blue"}
+              backgroundColor={"black"}
+              color={"white"}
               onClick={() => handleAuth("github")}
               size="lg"
               alignSelf="flex-end"
-              borderRadius="full">
-              {watch("githubUsername") || "Link Github"}
+              borderRadius="full"
+              leftIcon={<UilGithub size={30} />}>
+              {watch("githubUsername") || t("Connect GitHub")}
             </Button>
             <Input type="hidden" {...register("githubUsername", { required: "GitHub Username is required" })} />
             <FormErrorMessage>{errors.githubUsername?.message}</FormErrorMessage>
           </FormControl>
 
-          {/* <FormControl isInvalid={!!errors.twitterUsername}>
+          <FormControl isInvalid={!!errors.twitterUsername}>
             <FormLabel>{t("X Username")}</FormLabel>
             <Button
-              colorScheme={watch("twitterUsername") ? "blackAlpha" : "blue"}
+              backgroundColor={"black"}
+              color={"white"}
               onClick={() => handleAuth("twitter")}
               size="lg"
               alignSelf="flex-end"
-              borderRadius="full">
-              {watch("twitterUsername") || "Link X"}
+              borderRadius="full"
+              leftIcon={<FaXTwitter />}>
+              {watch("twitterUsername") || t("Connect X")}
             </Button>
             <Input type="hidden" {...register("twitterUsername", { required: "X Username is required" })} />
-
             <FormErrorMessage>{errors.twitterUsername?.message}</FormErrorMessage>
-          </FormControl> */}
+          </FormControl>
 
           <FormControl isInvalid={!!errors.appName}>
             <FormLabel>{t("App Name")}</FormLabel>
             <Input
               rounded={"xl"}
+              placeholder={t("App Name")}
               {...register("appName", { required: "App Name is required" })}
               onBlur={() => onBlur("appName")}
             />
@@ -182,6 +183,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
             <FormLabel>{t("App Description")}</FormLabel>
             <Textarea
               rounded={"xl"}
+              placeholder={t("App Description")}
               {...register("appDescription", {
                 required: "App Description is required",
                 min: { value: 100, message: "App Description is too short" },
@@ -194,6 +196,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
           <FormControl isInvalid={!!errors.projectUrl}>
             <FormLabel>{t("Project URL")}</FormLabel>
             <Input
+              placeholder={t("Project URL")}
               rounded={"xl"}
               {...register("projectUrl", {
                 required: t("Project URL is required"),
@@ -213,13 +216,19 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
 
           <FormControl isInvalid={!!errors.adminName}>
             <FormLabel>{t("Admin Name (optional)")}</FormLabel>
-            <Input rounded={"xl"} {...register("adminName")} onBlur={() => onBlur("adminName")} />
+            <Input
+              rounded={"xl"}
+              placeholder={t("Admin Name")}
+              {...register("adminName")}
+              onBlur={() => onBlur("adminName")}
+            />
             {errors.adminName && <FormErrorMessage>{errors.adminName.message}</FormErrorMessage>}
           </FormControl>
 
           <FormControl isInvalid={!!errors.adminEmail}>
             <FormLabel>{t("Admin Email")}</FormLabel>
             <Input
+              placeholder={t("Admin Email")}
               rounded={"xl"}
               {...register("adminEmail", {
                 required: t("Admin Email is required"),
@@ -236,6 +245,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
           <FormControl isInvalid={!!errors.adminWalletAddress}>
             <FormLabel>{t("Admin Wallet Address")}</FormLabel>
             <Input
+              placeholder={t("Admin Wallet Address")}
               rounded={"xl"}
               {...register("adminWalletAddress", {
                 required: t("Account address is required"),
@@ -254,7 +264,11 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
           type="submit"
           w="full"
           px={10}
-          maxW={["50%", "30%"]}
+          maxW={{
+            base: "100%",
+            sm: "80%",
+            md: "30%",
+          }}
           size="lg"
           borderRadius={"full"}>
           {t("Send Application")}
