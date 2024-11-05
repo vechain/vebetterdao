@@ -1,4 +1,6 @@
 import { SubmitCreatorFormData } from "@/components/SubmitCreatorForm"
+import { Session } from "next-auth"
+import { NextRequest, NextResponse } from "next/server"
 
 const requiredFields: (keyof SubmitCreatorFormData)[] = [
   "appName",
@@ -25,4 +27,17 @@ export const checkMissingFields = (data: Partial<SubmitCreatorFormData>): string
   const missingFields = requiredFields.filter(field => !data[field])
 
   return missingFields.length > 0 ? missingFields : null
+}
+export const validateRequestOrigin = (request: NextRequest) => {
+  const requestOrigin = request.headers.get("origin") ?? ""
+  const appHostUrl = request.headers.get("host") ?? ""
+  if (!isOriginAllowed(requestOrigin, appHostUrl)) {
+    return NextResponse.json({ error: "Access Denied" }, { status: 403 })
+  }
+}
+
+export const validateRequestSession = (session: Session | null) => {
+  if (!session) {
+    return NextResponse.json({ error: "Access Denied" }, { status: 403 })
+  }
 }

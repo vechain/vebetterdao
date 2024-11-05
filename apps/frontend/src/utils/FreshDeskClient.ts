@@ -1,4 +1,7 @@
 import axios, { AxiosInstance } from "axios"
+type FreshdeskQueryResult = {
+  results: FreshdeskTicketBody[]
+}
 
 export type FreshdeskTicketBody = {
   description: string
@@ -92,6 +95,18 @@ class FreshdeskClient {
    */
   public async getTicketById(ticketId: number): Promise<TicketResponse> {
     const response = await this.apiClient.get(`tickets/${ticketId}`)
+    return response.data
+  }
+
+  /**
+   * Get a ticket by the admin wallet address
+   * @param walletAddress  The wallet address of the admin to search for
+   * @returns The ticket information for the specified admin wallet address
+   */
+  public async getTicketByAdminWalletAddress(walletAddress: string): Promise<FreshdeskQueryResult> {
+    const response = await this.apiClient.get(
+      `search/tickets?query="cf_admin_wallet_address:'${walletAddress}' OR custom_string:'${walletAddress}'"`,
+    )
     return response.data
   }
 
