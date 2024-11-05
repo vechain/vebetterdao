@@ -24,9 +24,8 @@ export const AppsPageContent = () => {
     if (isActiveSection)
       return (
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={6} w="full">
-          {xApps?.active.map(xApp => <AppCard key={xApp.id} xApp={xApp} />)}
-
           <AddNewAppCard />
+          {xApps?.active.map(xApp => <AppCard key={xApp.id} xApp={xApp} />)}
         </Grid>
       )
 
