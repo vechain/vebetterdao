@@ -3,7 +3,7 @@ import { EndorsementInfo } from "./EndorsementInfo"
 import { EndorsementHistory } from "./EndorsementHistory"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
-import { AppEndorsersIcon } from "./AppEndorsersSection"
+import { EndorsersIcon } from "./EndorsersIcon"
 
 import { normalize } from "@repo/utils/HexUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
@@ -58,6 +58,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
 
   const { isMobile } = useBreakpoints()
 
+  // TODO refactor
   const TagBox = () => (
     <Box>
       {isUnendorsed ? (
@@ -112,7 +113,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
 
               <Box>
                 <HStack>
-                  <AppEndorsersIcon endorsers={endorsers ?? []} />
+                  <EndorsersIcon endorsers={endorsers ?? []} />
                   <Heading fontSize={"24px"} fontWeight="700" color="#444AD1">
                     {endorsers?.length}
                   </Heading>{" "}

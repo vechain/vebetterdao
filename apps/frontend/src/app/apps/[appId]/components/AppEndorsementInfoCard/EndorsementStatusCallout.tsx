@@ -70,13 +70,15 @@ export const EndorsementStatusCallout = ({ endorsementStatus }: Props) => {
 
   return (
     <Box w="full" p={4} borderRadius="8px" backgroundColor={backgroundColor}>
-      <HStack>
-        <Text fontWeight={600} color={color}>
+      <HStack w="full">
+        <Icon as={icon} boxSize={6} color={color} />
+        <Text fontSize="16px" fontWeight={600} color={color}>
           {title}
         </Text>
-        <Icon as={icon} boxSize={30} color={color} />
       </HStack>
-      <Text>{description}</Text>
+      <Text fontSize="14px" color="#6A6A6A">
+        {description}
+      </Text>
     </Box>
   )
 }
