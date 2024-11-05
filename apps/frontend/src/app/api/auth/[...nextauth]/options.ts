@@ -14,6 +14,10 @@ if (!githubClientId || !githubClientSecret || !nextAuthSecret || !twitterClientI
 
 export const authOptions: NextAuthOptions = {
   secret: nextAuthSecret,
+  pages: {
+    error: "/error",
+    signIn: "/error",
+  },
   providers: [
     GithubProvider({
       clientId: githubClientId,
