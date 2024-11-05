@@ -1,17 +1,14 @@
 import { useAppEndorsers, useIsAppAdmin, useIsAppModerator } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
-import { Skeleton, HStack, VStack, useDisclosure, Text, Link, Flex } from "@chakra-ui/react"
+import { Skeleton, HStack, VStack, Text, Flex } from "@chakra-ui/react"
 import { t } from "i18next"
-
-import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
   appId: string
-  userScore?: number | null
 }
 
-export const AppEndorsersSection = ({ appId, userScore }: Props) => {
+export const AppEndorsersSection = ({ appId }: Props) => {
   const { account } = useWallet()
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId)
 
@@ -21,20 +18,8 @@ export const AppEndorsersSection = ({ appId, userScore }: Props) => {
 
   const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
-  const {
-    isOpen: isEndorsementInfoOpen,
-    onOpen: onOpenEndorsementInfoModal,
-    onClose: onCloseEndorsementInfoModal,
-  } = useDisclosure()
-
   return (
     <>
-      <AppEndorsementInfoCardModal
-        isOpen={isEndorsementInfoOpen}
-        onClose={onCloseEndorsementInfoModal}
-        appId={appId}
-        userScore={userScore ?? null}
-      />
       <Skeleton isLoaded={!isAppEndorsersLoading && !isUserRolesDataLoading}>
         {appEndorsers && appEndorsers.length ? (
           <HStack justify={"space-between"} w="full">
@@ -46,18 +31,12 @@ export const AppEndorsersSection = ({ appId, userScore }: Props) => {
                   : t("{{value}} Node holder", { value: appEndorsers.length })}
               </Text>
             </HStack>
-            <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
-              {t("See all")}
-            </Link>
           </HStack>
         ) : (
           <VStack>
             <Text fontSize="14px" fontWeight="bold">
               {isAppModerator || isAppAdmin ? t("Nobody is endorsing your app") : t("Not endorsed by anyone")}
               <br />
-              <Link fontSize="14px" color="#004CFC" onClick={onOpenEndorsementInfoModal}>
-                {t("See endorsement history")}
-              </Link>
             </Text>
           </VStack>
         )}

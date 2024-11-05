@@ -9,6 +9,7 @@ export enum XAppsCreationStepStatus {
   PENDING = "PENDING",
 }
 
+// TODO remove
 export enum EndorsementStatus {
   UNKNOWN = "UNKNOWN",
   LOST = "LOST",
