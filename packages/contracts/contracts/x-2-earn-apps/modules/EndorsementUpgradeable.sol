@@ -194,7 +194,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     }
 
     // Check if the caller is an endorser
-    if ($._nodeToEndorsedApp[nodeId] == bytes32(0)) {
+    if ($._nodeToEndorsedApp[nodeId] != appId) {
       revert X2EarnNonEndorser();
     }
 
