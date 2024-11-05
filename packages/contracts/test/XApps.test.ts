@@ -3962,6 +3962,9 @@ describe("X-Apps - @shard3", function () {
       // AppId that does not exist
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
 
+      // User should be a node holder to by pass first check
+      await createNodeHolder(7, otherAccounts[1])
+
       // Should revert as endorser is already endorsing an XApp
       await expect(x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id, 1)).to.revertedWithCustomError(
         x2EarnApps,
@@ -3973,6 +3976,9 @@ describe("X-Apps - @shard3", function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
+
+      // User should be a node holder to by pass first check
+      await createNodeHolder(7, otherAccounts[1])
 
       // Register XAPPs -> XAPP is pending endorsement
       await x2EarnApps
