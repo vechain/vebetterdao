@@ -8,8 +8,9 @@ import { useWallet } from "@vechain/dapp-kit-react"
 
 type Props = {
   appId: string
+  userScore: number | null
 }
-export const AppEndorsersSection = ({ appId }: Props) => {
+export const AppEndorsersSection = ({ appId, userScore }: Props) => {
   const { account } = useWallet()
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId)
 
@@ -27,8 +28,12 @@ export const AppEndorsersSection = ({ appId }: Props) => {
 
   return (
     <>
-      <AppEndorsementInfoCardModal isOpen={isEndorsementInfoOpen} onClose={onCloseEndorsementInfoModal} appId={appId} />
-
+      <AppEndorsementInfoCardModal
+        isOpen={isEndorsementInfoOpen}
+        onClose={onCloseEndorsementInfoModal}
+        appId={appId}
+        userScore={userScore}
+      />
       <Skeleton isLoaded={!isAppEndorsersLoading && !isUserRolesDataLoading}>
         {appEndorsers && appEndorsers.length ? (
           <HStack justify={"space-between"} w="full">
@@ -60,7 +65,7 @@ export const AppEndorsersSection = ({ appId }: Props) => {
   )
 }
 
-const AppEndorsersIcon = ({ endorsers, maxToRender = 3 }: { endorsers: string[]; maxToRender?: number }) => {
+export const AppEndorsersIcon = ({ endorsers, maxToRender = 3 }: { endorsers: string[]; maxToRender?: number }) => {
   const boxSize = 20
   const marginleft = boxSize / 2
 
