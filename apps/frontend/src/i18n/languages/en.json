@@ -1159,6 +1159,5 @@
   "Remove this endorsement": "Remove this endorsement",
   "See endorser info": "See endorser info",
   "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active": "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active",
-  "Endorsed and active": "Endorsed and active",
   "Your score": "Your score"
 }
