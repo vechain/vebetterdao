@@ -16,7 +16,11 @@
     "SHARD",
     "CONTRACT_TO_UPGRADE",
     "CONTRACT_TO_DEPLOY",
-    "CONTRACT_VERSION"
+    "CONTRACT_VERSION",
+    "NEXTAUTH_SECRET",
+    "FRESHDESK_API_KEY",
+    "FRESHDESK_API_DOMAIN",
+    "FRESHDESK_GROUP_ID"
   ],
   "pipeline": {
     "install": {
