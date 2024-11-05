@@ -1,14 +1,8 @@
+import { SubmitCreatorFormData } from "@/components/SubmitCreatorForm"
 import { create } from "zustand"
 import { devtools, persist } from "zustand/middleware"
 
-export type CreatorSubmissionFormStoreState = {
-  appName: string
-  appDescription: string
-  adminWalletAddress: string
-  adminEmail: string
-  projectUrl: string
-  githubUsername: string
-  twitterUsername: string
+export interface CreatorSubmissionFormStoreState extends SubmitCreatorFormData {
   setData: (data: Partial<CreatorSubmissionFormStoreState>) => void
   clearData: () => void
 }
@@ -23,6 +17,7 @@ export const useCreatorSubmissionFormStore = create<CreatorSubmissionFormStoreSt
         appName: "",
         appDescription: "",
         adminWalletAddress: "",
+        adminName: "",
         adminEmail: "",
         projectUrl: "",
         githubUsername: "",
@@ -37,6 +32,7 @@ export const useCreatorSubmissionFormStore = create<CreatorSubmissionFormStoreSt
             appName: "",
             appDescription: "",
             adminWalletAddress: "",
+            adminName: "",
             adminEmail: "",
             projectUrl: "",
             githubUsername: "",
