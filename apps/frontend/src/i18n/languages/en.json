@@ -1148,5 +1148,10 @@
   "Which Primary Account would you like to link to?": "Which Primary Account would you like to link to?",
   "Become a secondary account": "Become a secondary account",
   "Send link request": "Send link request",
-  "By linking this account to a primary account, all your future better actions will be transferred to it, which will also hold exclusive voting power.": "By linking this account to a primary account, all your future better actions will be transferred to it, which will also hold exclusive voting power."
+  "By linking this account to a primary account, all your future better actions will be transferred to it, which will also hold exclusive voting power.": "By linking this account to a primary account, all your future better actions will be transferred to it, which will also hold exclusive voting power.",
+  "Remove this endorsement": "Remove this endorsement",
+  "See endorser info": "See endorser info",
+  "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active": "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active",
+  "Endorsed and active": "Endorsed and active",
+  "Your score": "Your score"
 }
