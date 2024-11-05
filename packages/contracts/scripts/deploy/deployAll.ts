@@ -299,7 +299,7 @@ export async function deployAll(config: ContractsConfig) {
           pauser: config.CONTRACTS_ADMIN_ADDRESS,
           minter: config.CONTRACTS_ADMIN_ADDRESS,
           contractsAddressManager: TEMP_ADMIN,
-          maxLevel: 5,
+          maxLevel: config.GM_NFT_MAX_LEVEL,
           baseTokenURI: config.GM_NFT_BASE_URI,
           b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
           b3tr: await b3tr.getAddress(),

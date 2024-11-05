@@ -1001,7 +1001,7 @@
   "Active NFT": "Active NFT",
   "Select as active": "Select as active",
   "My Galaxy NFTs": "My Galaxy NFTs",
-  "You can choose which NFT use for rewards multiplier. Also you can min new earth to upgrade and sell them in the secondary market.": "You can choose which NFT use for rewards multiplier. Also you can min new earth to upgrade and sell them in the secondary market.",
+  "You can choose which NFT use for rewards multiplier. Also you can mint new earth to upgrade and sell them in the secondary market.": "You can choose which NFT use for rewards multiplier. Also you can mint new earth to upgrade and sell them in the secondary market.",
   "Attach now!": "Attach now!",
   "Attach to upgrade": "Attach to upgrade",
   "Attach your XNode to your GM NFT to upgrade it for free and earn more rewards!": "Attach your XNode to your GM NFT to upgrade it for free and earn more rewards!",
@@ -1068,7 +1068,7 @@
   "You’ve earned {{formattedRoundReward}} B3TR as a reward for voting on this allocation round Claim them now!": "You’ve earned <strong>{{formattedRoundReward}} B3TR</strong> as a reward for voting on this allocation round <strong>Claim them now!</strong>",
   "You’ve claimed your voter rewards! Remember to vote on the next allocation round to receive more rewards.": "You’ve claimed your voter rewards! Remember to <strong>vote on the next allocation round</strong> to receive more rewards.",
   "Rewards claimed": "Rewards claimed",
-  "Attach your XNode to you GM NFT and": "Attach your XNode to you GM NFT and",
+  "Attach your XNode to your GM NFT and": "Attach your XNode to your GM NFT and",
   "upgrade": "upgrade",
   "Connect your wallet to see your balance, earn rewards and mint NFTs.": "Connect your wallet to see your balance, earn rewards and mint NFTs.",
   "Mint now!": "Mint now!",
@@ -1153,5 +1153,14 @@
   "See endorser info": "See endorser info",
   "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active": "<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active",
   "Endorsed and active": "Endorsed and active",
-  "Your score": "Your score"
+  "Your score": "Your score",
+  "Your Galaxy Member": "Your Galaxy Member",
+  "Coming soon!": "Coming soon!",
+  "Here is a list of your GM NFTs. Soon you will be able to mint new ones, upgrade and sell them in the secondary market.": "Here is a list of your GM NFTs. Soon you will be able to mint new ones, upgrade and sell them in the secondary market.",
+  "Mint a GM NFT for free!": "Mint a GM NFT for free!",
+  "You will be able to upgrade your GM NFT soon!": "You will be able to upgrade your GM NFT soon!",
+  "Upgrade your GM NFT coming soon!": "Upgrade your GM NFT coming soon!",
+  "You will be able to attach GM NFT to this node": "You will be able to attach GM NFT to this node",
+  "Attach GM NFT to XNode coming soon!": "Attach GM NFT to XNode coming soon!",
+  "You will be able to upgrade your GM NFT soon": "You will be able to upgrade your GM NFT soon"
 }

@@ -1,6 +1,8 @@
 import { useB3trBalance, useSelectedGmNft, useXNode } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
+import { FeatureFlagWrapper } from "@/components"
 import { GmActionButton } from "@/components/GmActionButton"
+import { FeatureFlag } from "@/constants"
 import { Box, Card, Flex, HStack, Image, Skeleton, Stack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilTimesCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -29,14 +31,30 @@ export const GmNFTPageHeader = () => {
           <HStack>
             <UilArrowCircleUp size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
             <HStack gap={0} alignItems={"baseline"}>
-              <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                {t("You can attach GM NFT to this node")}
-              </Text>
+              <FeatureFlagWrapper
+                feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+                fallback={
+                  <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+                    {t("You will be able to attach GM NFT to this node")}
+                  </Text>
+                }>
+                <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+                  {t("You can attach GM NFT to this node")}
+                </Text>
+              </FeatureFlagWrapper>
             </HStack>
           </HStack>
-          <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-            {t("Attach GM NFT to XNode")}
-          </Text>
+          <FeatureFlagWrapper
+            feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+            fallback={
+              <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+                {t("Attach GM NFT to XNode coming soon!")}
+              </Text>
+            }>
+            <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+              {t("Attach GM NFT to XNode")}
+            </Text>
+          </FeatureFlagWrapper>
         </>
       )
     }
@@ -46,14 +64,30 @@ export const GmNFTPageHeader = () => {
           <HStack>
             <UilTimesCircle size={isAbove800 ? "24px" : "16px"} color="#B1F16C" />
             <HStack gap={0} alignItems={"baseline"}>
-              <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                {t("You reached the max GM NFT level")}
-              </Text>
+              <FeatureFlagWrapper
+                feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+                fallback={
+                  <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+                    {t("Upgrade your GM NFT coming soon!")}
+                  </Text>
+                }>
+                <Text color="#FFFFFF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+                  {t("You reached the max GM NFT level")}
+                </Text>
+              </FeatureFlagWrapper>
             </HStack>
           </HStack>
-          <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-            {t("You can't upgrade your GM NFT anymore")}
-          </Text>
+          <FeatureFlagWrapper
+            feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+            fallback={
+              <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+                {t("You will be able to upgrade your GM NFT soon")}
+              </Text>
+            }>
+            <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
+              {t("You can't upgrade your GM NFT anymore")}
+            </Text>
+          </FeatureFlagWrapper>
         </>
       )
     }
@@ -144,15 +178,17 @@ export const GmNFTPageHeader = () => {
             <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "xl" : "md"}>
               {gmName}
             </Text>
-            <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-              <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
-                {gmRewardMultiplier}
-                {"x"}
-              </Text>
-              <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
-                {t("Voting reward multiplier")}
-              </Text>
-            </HStack>
+            <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
+              <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
+                  {gmRewardMultiplier}
+                  {"x"}
+                </Text>
+                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
+                  {t("Voting reward multiplier")}
+                </Text>
+              </HStack>
+            </FeatureFlagWrapper>
           </VStack>
         </HStack>
         <Flex w={isAbove800 ? "1px" : "full"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF4D" flexBasis={"1px"} />
