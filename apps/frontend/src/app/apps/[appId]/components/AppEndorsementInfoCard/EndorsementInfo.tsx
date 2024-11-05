@@ -1,15 +1,6 @@
+import { useRouter } from "next/navigation"
 import { useEndorsementInfos } from "@/hooks/useEndorsementData"
-import {
-  Text,
-  HStack,
-  VStack,
-  Box,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  PopoverBody,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Text, HStack, VStack, Box, Popover, PopoverContent, PopoverTrigger, PopoverBody } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
@@ -29,12 +20,15 @@ type EndorsementInfoProps = {
 export const EndorsementInfo = ({ appId, endorserAddress, setIsConfirmOpen }: EndorsementInfoProps) => {
   const endorsementInfos = useEndorsementInfos(appId, endorserAddress)
   const { account } = useWallet()
+  const router = useRouter()
   const { t } = useTranslation()
-
-  const { onClose } = useDisclosure()
 
   const handleRemoveClick = () => {
     setIsConfirmOpen(true)
+  }
+
+  const goToUserProfilPage = () => {
+    router.push("/profile/" + endorserAddress)
   }
 
   return (
@@ -66,32 +60,32 @@ export const EndorsementInfo = ({ appId, endorserAddress, setIsConfirmOpen }: En
           />
         </Text>
 
-        {account && endorserAddress === normalize(account) && (
-          <Popover placement="bottom-end" isLazy>
-            <PopoverTrigger>
-              <Box as="button">
-                <HiDotsVertical />
-              </Box>
-            </PopoverTrigger>
-            <PopoverContent width="auto" boxShadow="md" border="1px solid #EFEFEF">
-              <PopoverBody p={2}>
-                <VStack alignItems="stretch" spacing={3}>
+        <Popover placement="bottom-end" isLazy>
+          <PopoverTrigger>
+            <Box as="button">
+              <HiDotsVertical />
+            </Box>
+          </PopoverTrigger>
+          <PopoverContent width="auto" boxShadow="md" border="1px solid #EFEFEF">
+            <PopoverBody p={2}>
+              <VStack alignItems="stretch" spacing={3}>
+                {account && endorserAddress === normalize(account) && (
                   <HStack color="#C84968" onClick={handleRemoveClick} cursor="pointer">
                     <UilTrash />
                     <Text whiteSpace="nowrap" fontSize={["sm", "md"]}>
                       {t("Remove this endorsement")}
                     </Text>
                   </HStack>
-                  {/* TODO : find where it goes ?  */}
-                  <HStack onClick={onClose} cursor="pointer">
-                    <UilCheck color={"#004CFC"} />
-                    <Text fontSize={["sm", "md"]}>{t("See endorser info")}</Text>
-                  </HStack>
-                </VStack>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
-        )}
+                )}
+                {/* TODO : find where it goes ?  */}
+                <HStack onClick={goToUserProfilPage} cursor="pointer">
+                  <UilCheck color={"#004CFC"} />
+                  <Text fontSize={["sm", "md"]}>{t("See endorser info")}</Text>
+                </HStack>
+              </VStack>
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
       </HStack>
     </HStack>
   )
