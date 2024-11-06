@@ -56,6 +56,9 @@ export function createTestnetConfig() {
       5000000000000000000000000n,
       25000000000000000000000000n,
     ],
+
+    GM_NFT_MAX_LEVEL: 1,
+
     VOTER_REWARDS_LEVELS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     /*
       Level => Percentage Multiplier

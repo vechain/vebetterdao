@@ -60,6 +60,8 @@ export function createTestConfig() {
 
     GM_NFT_BASE_URI: "ipfs://test/", // IPFS base URI for the Galaxy Member contract,
 
+    GM_NFT_MAX_LEVEL: 1,
+
     /*
       Vechain Node => Free Upgrade Level
       None => 1

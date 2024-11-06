@@ -8,6 +8,8 @@ import { useCurrentAllocationsRoundId, useParticipatedInGovernance, useSelectedG
 import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { MintNFTModal } from "./MintNFTModal"
+import { FeatureFlagWrapper } from "./FeatureFlagWrapper"
+import { FeatureFlag } from "@/constants"
 
 export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) => {
   const { t } = useTranslation()
@@ -55,19 +57,35 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     }
     if (isXNodeHolder && !isXNodeAttachedToGM) {
       return (
-        <Button {...buttonProps} onClick={attachGmToXNodeModal.onOpen}>
-          {t("Attach and Upgrade!")}
-        </Button>
+        <FeatureFlagWrapper
+          feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+          fallback={
+            <Button {...buttonProps} isDisabled={true}>
+              {t("Coming soon!")}
+            </Button>
+          }>
+          <Button {...buttonProps} onClick={attachGmToXNodeModal.onOpen}>
+            {t("Attach and Upgrade!")}
+          </Button>
+        </FeatureFlagWrapper>
       )
     }
 
     return (
-      <Button
-        {...buttonProps}
-        isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
-        onClick={upgradeGMModal.onOpen}>
-        {t("Upgrade now!")}
-      </Button>
+      <FeatureFlagWrapper
+        feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+        fallback={
+          <Button {...buttonProps} isDisabled={true}>
+            {t("Coming soon!")}
+          </Button>
+        }>
+        <Button
+          {...buttonProps}
+          isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
+          onClick={upgradeGMModal.onOpen}>
+          {t("Upgrade now!")}
+        </Button>
+      </FeatureFlagWrapper>
     )
   }, [
     attachGmToXNodeModal.onOpen,
