@@ -4,11 +4,12 @@ import { useGetDelegatee } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
 import { Divider, HStack, Heading, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { UilTimes } from "@iconscout/react-unicons"
 import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 
 type Props = {
   address: string
@@ -17,10 +18,13 @@ export const DelegatorDelegations = ({ address }: Props) => {
   const { t } = useTranslation()
 
   const { account: connectedAccount } = useWallet()
+
   const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
 
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
   const isDelegator = !isDelegateeLoading && !!delegateeAddress
+
+  const { domain: delegateeDomain } = useVechainDomain({ addressOrDomain: delegateeAddress })
 
   const revokeDelegationModal = useDisclosure()
 
@@ -50,7 +54,7 @@ export const DelegatorDelegations = ({ address }: Props) => {
             <AddressIcon address={delegateeAddress} w={12} h={12} rounded="full" />
             <VStack align="start" gap={0}>
               <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
-                {humanAddress(delegateeAddress, 4, 4)}
+                {delegateeDomain ? humanDomain(delegateeDomain, 4, 26) : humanAddress(delegateeAddress, 4, 4)}
               </Text>
             </VStack>
           </HStack>

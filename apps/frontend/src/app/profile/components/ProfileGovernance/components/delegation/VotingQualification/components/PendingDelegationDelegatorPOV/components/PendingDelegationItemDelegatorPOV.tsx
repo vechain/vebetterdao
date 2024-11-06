@@ -4,6 +4,7 @@ import { AddressIcon } from "@/components/AddressIcon"
 import { RemoveDelegationModal } from "./RemoveDelegationModal"
 import { Stack, HStack, VStack, Text, Button, useDisclosure, Badge } from "@chakra-ui/react"
 import { UilTimes } from "@iconscout/react-unicons"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 
 type Props = {
   delegationAddress: string
@@ -13,6 +14,8 @@ type Props = {
 export const PendingDelegationItemDelegatorPOV = ({ delegationAddress, isConnectedUser }: Props) => {
   const { t } = useTranslation()
   const removeDelegationModal = useDisclosure()
+
+  const { domain } = useVechainDomain({ addressOrDomain: delegationAddress })
 
   return (
     <Stack
@@ -27,7 +30,7 @@ export const PendingDelegationItemDelegatorPOV = ({ delegationAddress, isConnect
           <AddressIcon address={delegationAddress} w={12} h={12} rounded="full" />
           <VStack align="start">
             <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
-              {humanAddress(delegationAddress, 4, 4)}
+              {domain ?? humanAddress(delegationAddress, 4, 4)}
             </Text>
           </VStack>
           <Badge color="white" bg={"#F29B32"} borderRadius="full" px="12px" py="4px" textTransform={"inherit"}>
