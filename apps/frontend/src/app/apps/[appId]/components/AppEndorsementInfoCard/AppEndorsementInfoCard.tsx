@@ -43,7 +43,7 @@ export const AppEndorsementInfoCard = ({
   const { app } = useCurrentAppInfo()
   const { account } = useWallet()
 
-  // App data
+  // App endorsement data
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
 
   // User roles data
@@ -132,7 +132,7 @@ export const AppEndorsementInfoCard = ({
               spacing={4}
               w="full"
               justify={"space-between"}
-              alignItems={["center", "center", isLargeCard ? "center" : "center"]}>
+              alignItems={["center", "center", "center"]}>
               <EndorsementDetails
                 endorsementScore={endorsementScore}
                 endorsementStatus={endorsementStatus}
@@ -193,7 +193,6 @@ export const AppEndorsementInfoCard = ({
         isOpen={isEndorsementInfoOpen}
         onClose={onCloseEndorsementInfoModal}
         appId={app?.id ?? ""}
-        userScore={Number(xNodePoints)}
       />
     </>
   )

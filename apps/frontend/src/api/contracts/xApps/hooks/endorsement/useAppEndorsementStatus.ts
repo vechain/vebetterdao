@@ -13,6 +13,7 @@ import { XAppStatus } from "@/types"
  * @param isUnendorsed Whether the app is unendorsed
  * @param isEligibleNow Whether the app is eligible now
  * @param isBlacklisted Whether the app is blacklisted
+ * @param appHasBeenIntoAllocationRounds Whether the app has been into allocation rounds
  * @param score The app endorsement score
  * @param threshold The endorsement score threshold
  * @returns The current app endorsement status
