@@ -9,7 +9,7 @@ import { AppScreenshots } from "./AppScreenshots"
 import { AppTweets } from "./AppTweets"
 import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementInfoCard"
 import { AppBalanceCard } from "./AppBalanceCard"
-import { XAppStatus } from "@/types"
+import { EndorsementStatus } from "@/types"
 
 export const AppDetailPageContent = () => {
   const { app } = useCurrentAppInfo()
@@ -33,11 +33,19 @@ export const AppDetailPageContent = () => {
   }, [appHasBeenIntoAllocationRounds])
 
   const shouldBeLargeEndorsementBox = useMemo(() => {
-    if (endorsementStatus === XAppStatus.LOOKING_FOR_ENDORSEMENT) return true
-    return false
-  }, [endorsementStatus])
+    if (endorsementStatus === EndorsementStatus.SUCCESS) return false
+    if (endorsementStatus === EndorsementStatus.LOST) return true
+    if (isAppAdmin || isAppModerator) return false
+    return true
+  }, [endorsementStatus, isAppAdmin, isAppModerator])
 
   return (
+    // <VStack w="full" alignItems="stretch" gap={8}>
+    //   <AppDetailOverview
+    //     endorsementStatus={endorsementStatus}
+    //     endorsementThreshold={endorsementThreshold}
+    //     isEndorsementStatusLoading={isEndorsementStatusLoading}
+    //   />
     <Grid
       templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(3, 1fr)"]}
       gap={"32px"}
@@ -46,11 +54,11 @@ export const AppDetailPageContent = () => {
       alignItems={"flex-start"}
       data-testid="app-detail-grid">
       <GridItem w="full" colSpan={[1, 1, 3]}>
-        {/* <AppDetailOverview
+        <AppDetailOverview
           endorsementStatus={endorsementStatus}
           endorsementThreshold={endorsementThreshold}
           isEndorsementStatusLoading={isEndorsementStatusLoading}
-        /> */}
+        />
       </GridItem>
       <GridItem w="full" colSpan={[1, 1, 2]} order={[2, 2, 1]}>
         <Stack direction="column" spacing={8}>
@@ -83,5 +91,6 @@ export const AppDetailPageContent = () => {
         </Stack>
       </GridItem>
     </Grid>
+    // </VStack>
   )
 }

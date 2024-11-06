@@ -1,5 +1,5 @@
 import { notFoundImage } from "@/constants"
-import { XAppStatus } from "@/types"
+import { EndorsementStatus } from "@/types"
 import {
   Badge,
   Button,
@@ -38,7 +38,7 @@ export const AppDetailOverview = ({
   endorsementThreshold,
   isEndorsementStatusLoading,
 }: {
-  endorsementStatus: XAppStatus
+  endorsementStatus: EndorsementStatus
   endorsementThreshold: string | undefined
   isEndorsementStatusLoading: boolean
 }) => {
@@ -68,7 +68,7 @@ export const AppDetailOverview = ({
       badgeIcon: UilExclamationCircle,
     },
     PENDING: {
-      badgeText: t("Looking for endorsement"),
+      badgeText: t("Pending endorsement"),
       badgeTextColor: "#AF5F00",
       badgeBgColor: "#FFF3E5",
       badgeIcon: UilExclamationCircle,
@@ -80,18 +80,18 @@ export const AppDetailOverview = ({
       badgeIcon: UilCheckCircle,
     },
     UNKNOWN: {
-      badgeText: t("Unknown status"),
+      badgeText: t("Unknown endorsement status"),
       badgeTextColor: "#AF5F00",
       badgeBgColor: "#FFF3E5",
       badgeIcon: UilExclamationCircle,
     },
   }
-  // const unknownStatus = endorsementStatus === EndorsementStatus.UNKNOWN
-  // const endorsementLost = endorsementStatus === EndorsementStatus.LOST
-  // const StatusBadgeIcon = BADGE_INFORMATION[endorsementStatus].badgeIcon
+  const unknownStatus = endorsementStatus === EndorsementStatus.UNKNOWN
+  const endorsementLost = endorsementStatus === EndorsementStatus.LOST
+  const StatusBadgeIcon = BADGE_INFORMATION[endorsementStatus].badgeIcon
   return (
     <VStack spacing={4}>
-      {/* {endorsementStatus !== EndorsementStatus.SUCCESS ? (
+      {endorsementStatus !== EndorsementStatus.SUCCESS ? (
         <HStack w="full" flexWrap="wrap">
           <Badge w="full" bg={BADGE_INFORMATION[endorsementStatus].badgeBgColor} borderRadius="12px">
             <HStack p={2}>
@@ -112,7 +112,7 @@ export const AppDetailOverview = ({
                 <Trans
                   i18nKey={
                     unknownStatus
-                      ? "Unknown status"
+                      ? "Unknown endorsement status"
                       : endorsementLost
                         ? "This app lost the endorsement and will not join next allocation. The App will have to reach more than {{endorsementThreshold}} Endorsement score before {{date}} to be included on Allocations rounds. Know more."
                         : "This dApp won’t join next allocation round. The app will have to reach more than {{endorsementThreshold}} Endorsement score to be included on Allocations rounds. Know more."
@@ -230,7 +230,7 @@ export const AppDetailOverview = ({
             </Flex>
           </VStack>
         </CardBody>
-      </Card> */}
+      </Card>
     </VStack>
   )
 }
