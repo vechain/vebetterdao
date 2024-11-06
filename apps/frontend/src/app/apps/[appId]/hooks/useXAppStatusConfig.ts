@@ -38,7 +38,7 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
       title: t("In grace period"),
       description: t(
         "This app will participate in allocation rounds #X and #X. After that, it will only continue to participate if it has enough endorsement score.",
-      ),
+      ), // TODO check copy and figure out calculation
       backgroundColor: "#FFF3E5",
       color: "#F29B32",
       icon: UilExclamationCircle,
