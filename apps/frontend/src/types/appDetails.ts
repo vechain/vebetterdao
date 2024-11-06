@@ -9,14 +9,6 @@ export enum XAppsCreationStepStatus {
   PENDING = "PENDING",
 }
 
-// TODO remove
-export enum EndorsementStatus {
-  UNKNOWN = "UNKNOWN",
-  LOST = "LOST",
-  PENDING = "PENDING",
-  SUCCESS = "SUCCESS",
-}
-
 export enum XAppStatus {
   BLACKLISTED = "BLACKLISTED",
   LOOKING_FOR_ENDORSEMENT = "LOOKING_FOR_ENDORSEMENT", // New app, needs endorsement score above threshold

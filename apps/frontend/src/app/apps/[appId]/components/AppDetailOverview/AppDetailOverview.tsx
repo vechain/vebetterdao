@@ -1,7 +1,6 @@
 import { notFoundImage } from "@/constants"
-import { EndorsementStatus } from "@/types"
+import { XAppStatus } from "@/types"
 import {
-  Badge,
   Button,
   Card,
   CardBody,
@@ -9,19 +8,17 @@ import {
   Flex,
   HStack,
   Heading,
-  Icon,
   Image,
-  Link,
   Show,
   Skeleton,
   Stack,
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { UilArrowUpRight, UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
+import { UilArrowUpRight } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useCallback } from "react"
-import { Trans, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
 import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { AdminAppPageButton } from "./components/AdminAppPageButton"
@@ -30,16 +27,13 @@ import { AppDetailSocials } from "./components/AppDetailSocials"
 import { AppID } from "./components/AppID"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
-import { useGracePeriodEvent } from "@/api"
-import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import { EndorsementStatusCallout } from "../AppEndorsementInfoCard/EndorsementStatusCallout"
 
 export const AppDetailOverview = ({
   endorsementStatus,
-  endorsementThreshold,
   isEndorsementStatusLoading,
 }: {
-  endorsementStatus: EndorsementStatus
-  endorsementThreshold: string | undefined
+  endorsementStatus: XAppStatus
   isEndorsementStatusLoading: boolean
 }) => {
   const { t } = useTranslation()
@@ -48,11 +42,10 @@ export const AppDetailOverview = ({
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
 
-  const { data: gracePeriod } = useGracePeriodEvent(app?.id)
-
-  const gracePeriodEndsAt = useEstimateBlockTimestamp({
-    blockNumber: Number(gracePeriod?.gracePeriodEvent[0]?.endBlock),
-  })
+  // const { data: gracePeriod } = useGracePeriodEvent(app?.id)
+  // // const gracePeriodEndsAt = useEstimateBlockTimestamp({
+  // //   blockNumber: Number(gracePeriod?.gracePeriodEvent[0]?.endBlock),
+  // // })
 
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {
@@ -60,38 +53,10 @@ export const AppDetailOverview = ({
     }
   }, [appMetadata?.external_url])
 
-  const BADGE_INFORMATION = {
-    LOST: {
-      badgeText: t("Endorsement lost"),
-      badgeTextColor: "#C84968",
-      badgeBgColor: "#FCEEF1",
-      badgeIcon: UilExclamationCircle,
-    },
-    PENDING: {
-      badgeText: t("Pending endorsement"),
-      badgeTextColor: "#AF5F00",
-      badgeBgColor: "#FFF3E5",
-      badgeIcon: UilExclamationCircle,
-    },
-    SUCCESS: {
-      badgeText: t("Endorsed"),
-      badgeTextColor: "#3DBA67",
-      badgeBgColor: "#E9FDF1",
-      badgeIcon: UilCheckCircle,
-    },
-    UNKNOWN: {
-      badgeText: t("Unknown endorsement status"),
-      badgeTextColor: "#AF5F00",
-      badgeBgColor: "#FFF3E5",
-      badgeIcon: UilExclamationCircle,
-    },
-  }
-  const unknownStatus = endorsementStatus === EndorsementStatus.UNKNOWN
-  const endorsementLost = endorsementStatus === EndorsementStatus.LOST
-  const StatusBadgeIcon = BADGE_INFORMATION[endorsementStatus].badgeIcon
+  // CHECK waiting for feedback re top banner
   return (
     <VStack spacing={4}>
-      {endorsementStatus !== EndorsementStatus.SUCCESS ? (
+      {/* {endorsementStatus !== EndorsementStatus.SUCCESS ? (
         <HStack w="full" flexWrap="wrap">
           <Badge w="full" bg={BADGE_INFORMATION[endorsementStatus].badgeBgColor} borderRadius="12px">
             <HStack p={2}>
@@ -128,7 +93,7 @@ export const AppDetailOverview = ({
             </HStack>
           </Badge>
         </HStack>
-      ) : null}
+      ) : null} */}
       <Card variant="baseWithBorder">
         <CardBody>
           <VStack align="stretch" gap={4}>
@@ -153,21 +118,10 @@ export const AppDetailOverview = ({
 
                     <Skeleton isLoaded={!appMetadataLoading && !isEndorsementStatusLoading}>
                       <Stack flexDir={["column-reverse", "column-reverse", "column"]}>
-                        <Badge
-                          maxW={"fit-content"}
-                          color={BADGE_INFORMATION[endorsementStatus].badgeTextColor}
-                          bg={BADGE_INFORMATION[endorsementStatus].badgeBgColor}
-                          textTransform="none"
-                          justifyContent={"center"}
-                          alignItems={"center"}
-                          display={"flex"}
-                          gap={1}
-                          py={"4px"}
-                          px={"8px"}
-                          borderRadius="12px">
-                          <StatusBadgeIcon size={14} color={BADGE_INFORMATION[endorsementStatus].badgeTextColor} />
-                          <Text fontWeight="600">{BADGE_INFORMATION[endorsementStatus].badgeText}</Text>
-                        </Badge>
+                        <EndorsementStatusCallout
+                          endorsementStatus={endorsementStatus}
+                          showDescription={false}
+                          padding={2}></EndorsementStatusCallout>
                         <Heading fontSize={"28px"} fontWeight={700}>
                           {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                         </Heading>
