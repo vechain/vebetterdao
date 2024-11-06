@@ -14,9 +14,10 @@ type ConfigType = {
 type Props = {
   endorsementStatus: XAppStatus
   showDescription?: boolean
+  padding?: number
 }
 
-export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = true }: Props) => {
+export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = true, padding = 4 }: Props) => {
   const { t } = useTranslation()
 
   const STATUS_CONFIG: Partial<Record<XAppStatus, ConfigType>> = {
@@ -70,7 +71,7 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
   }
 
   return (
-    <Box w="full" p={4} borderRadius="8px" backgroundColor={backgroundColor}>
+    <Box w="full" p={padding} borderRadius="8px" backgroundColor={backgroundColor}>
       <HStack w="full">
         <Icon as={icon} boxSize={6} color={color} />
         <Text fontSize="16px" fontWeight={600} color={color}>

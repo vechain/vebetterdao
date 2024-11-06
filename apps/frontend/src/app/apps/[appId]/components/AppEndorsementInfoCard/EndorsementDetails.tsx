@@ -72,7 +72,7 @@ export const EndorsementDetails = ({
       <VStack gap={0} alignItems="flex-start">
         <Skeleton isLoaded={!isAppEndorsersLoading}>
           <HStack>
-            <EndorsersIcon endorsers={endorsers ?? []} />
+            {endorsers && endorsers.length > 0 && <EndorsersIcon endorsers={endorsers} />}
             <Text fontSize={"24px"} fontWeight="700" color="#004CFC">
               {endorsers?.length}
             </Text>

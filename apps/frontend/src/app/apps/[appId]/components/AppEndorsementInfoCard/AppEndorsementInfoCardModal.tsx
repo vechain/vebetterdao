@@ -94,7 +94,8 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
 
               <EndorsementStatusCallout
                 endorsementStatus={endorsementStatus}
-                showDescription={false}></EndorsementStatusCallout>
+                showDescription={false}
+                padding={2}></EndorsementStatusCallout>
             </Stack>
 
             <Show below="md">

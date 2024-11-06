@@ -131,7 +131,7 @@ export const AppEndorsementInfoCard = ({
               direction={["column", "column", isLargeCard ? "row" : "column"]}
               spacing={4}
               w="full"
-              justify={"space-between"}
+              justify="space-between"
               alignItems={["center", "center", "center"]}>
               <EndorsementDetails
                 endorsementScore={endorsementScore}
