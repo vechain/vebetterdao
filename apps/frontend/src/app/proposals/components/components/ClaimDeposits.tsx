@@ -10,7 +10,7 @@ import { TransactionModal } from "@/components"
 
 type Props = {
   claimableDeposits: bigint
-  userProposalDeposits: UseQueryResult<ProposalDeposit[], Error>
+  userProposalDeposits: UseQueryResult<ProposalDeposit, Error>[]
 }
 
 const compactFormatter = getCompactFormatter(2)
@@ -22,10 +22,9 @@ export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props
 
   const userProposalsDeposited = useMemo(() => {
     const proposals: ProposalDeposit[] = []
-    if (!userProposalDeposits.data) return proposals
-    for (const proposal of userProposalDeposits.data) {
-      if (proposal && proposal.deposit !== "0") {
-        proposals.push(proposal)
+    for (const proposal of userProposalDeposits) {
+      if (proposal.data && proposal.data?.deposit !== "0") {
+        proposals.push(proposal.data)
       }
     }
 
@@ -71,7 +70,7 @@ export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props
           </b>{" "}
           {t("that you used to support")} {userProposalsDeposited.length}
           {t(" proposal")}
-          {(userProposalDeposits.data?.length ?? 0) > 1 ? "s" : ""}
+          {userProposalDeposits.length > 1 ? "s" : ""}
           {t(".")}
         </Text>
         <Button onClick={handleClaim} w={"full"} variant={"primaryAction"} mt={5}>

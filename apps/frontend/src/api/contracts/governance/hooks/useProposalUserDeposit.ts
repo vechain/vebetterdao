@@ -2,13 +2,9 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 
 import { getConfig } from "@repo/config"
-import { B3TRGovernor__factory } from "@repo/contracts"
-import { abi } from "thor-devkit"
+import { B3TRGovernorJson } from "@repo/contracts"
+const b3trGovernorAbi = B3TRGovernorJson.abi
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
-
-const governorInterface = B3TRGovernor__factory.createInterface()
-export const proposalDepositFragment = governorInterface.getFunction("getUserDeposit").format("json")
-export const proposalDepositAbi = new abi.Function(JSON.parse(proposalDepositFragment))
 
 export const getProposalUserDeposit = async (
   thor: Connex.Thor,
@@ -17,11 +13,9 @@ export const getProposalUserDeposit = async (
 ): Promise<string> => {
   if (!proposalId) return Promise.reject(new Error("proposalId is required"))
   if (!userAddress) return Promise.reject(new Error("userAddress is required"))
-
-  const res = await thor
-    .account(GOVERNANCE_CONTRACT)
-    .method(JSON.parse(proposalDepositFragment))
-    .call(proposalId, userAddress)
+  const getUserDepositAbi = b3trGovernorAbi.find(abi => abi.name === "getUserDeposit")
+  if (!getUserDepositAbi) throw new Error("quorum function not found")
+  const res = await thor.account(GOVERNANCE_CONTRACT).method(getUserDepositAbi).call(proposalId, userAddress)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
 

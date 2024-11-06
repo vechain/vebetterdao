@@ -38,7 +38,7 @@ export const AdminAppPageContent = () => {
   const updateConfirmationModal = useDisclosure()
   const { admin } = useCurrentAppAdmin()
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account || "")
+  const { isAdminOfX2EarnApps } = useAccountPermissions(account || "")
   const { app } = useCurrentAppInfo()
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
@@ -155,8 +155,8 @@ export const AdminAppPageContent = () => {
   }, [form, handleClose, onSubmit])
 
   const allowedToEditAdminInfo = useMemo(
-    () => compareAddresses(account || "", admin) || permissions?.isAdminOfX2EarnApps,
-    [account, admin, permissions],
+    () => compareAddresses(account || "", admin) || isAdminOfX2EarnApps,
+    [account, admin, isAdminOfX2EarnApps],
   )
 
   useEffect(() => {

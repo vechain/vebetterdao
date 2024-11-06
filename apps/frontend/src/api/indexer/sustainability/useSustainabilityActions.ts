@@ -87,15 +87,7 @@ export const getSustainabilityActions = async (
     throw new Error(`Failed to fetch sustainability actions: ${response.statusText}`)
   }
 
-  let result
-
-  try {
-    result = await response.json()
-
-    return SustainabilityActionsResponseSchema.parse(result)
-  } catch (e) {
-    throw new Error(`Failed to parse sustainability actions: ${e}`)
-  }
+  return SustainabilityActionsResponseSchema.parse(await response.json())
 }
 
 export const getSustainabilitActionsQueryKey = (data: Omit<SustainabilityActionsRequest, "page" | "size">) => [

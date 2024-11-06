@@ -4,20 +4,21 @@ import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import { HStack, Text, Badge, Heading, Button, useDisclosure, Stack, Show } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useWallet, useVechainDomain } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/dapp-kit-react"
 import { useTranslation } from "react-i18next"
 import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassportPOV"
 import { UilLinkBroken } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
 import { RemoveLinkModalEntityPOV } from "./components/RemoveLinkModalEntityPOV"
+import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
 
 type Props = { isConnectedUser: boolean; account: string; pending?: boolean }
 
 export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }: Props) => {
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
-  const { domain } = useVechainDomain({ addressOrDomain: account || "" })
+  const { name } = useWalletName(account || "")
   const isUserAccountCard = compareAddresses(account, userAccount)
   const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentRoundOverview(account)
   const { isPassport, isEntity, outgoingPendingLink, isLoading: isAccountLinkingLoading } = useAccountLinking(account)
@@ -49,9 +50,9 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
         <HStack justify={"space-between"} w={"full"} flex={1}>
           <Stack direction={["column", "column", "row"]} align={["stretch", "stretch", "center"]}>
             <HStack>
-              {domain && (
+              {name && (
                 <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} borderRight={"1px solid"} paddingRight={2}>
-                  {domain}
+                  {name}
                 </Text>
               )}
               <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>

@@ -13,16 +13,22 @@ import { useWallet } from "@vechain/dapp-kit-react"
 
 export const VeBetterPassport: React.FC = () => {
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account ?? "")
+  const {
+    isPassportSettingsManager,
+    isPassportActionRegistrar,
+    isPassportScoreManager,
+    isPassportWhitelister,
+    isPassportBotSignaler,
+  } = useAccountPermissions(account ?? "")
 
   return (
     <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-      {permissions?.isPassportSettingsManager && <PassportToggles />}
-      {permissions?.isPassportActionRegistrar && <RegisterUserAction />}
-      {permissions?.isPassportScoreManager && <ParticipationScoreThreshold />}
-      {permissions?.isPassportScoreManager && <AppSecurity />}
-      {permissions?.isPassportWhitelister && <ManageUserStatus />}
-      {permissions?.isPassportBotSignaler && <ManageUserSignals />}
+      {isPassportSettingsManager && <PassportToggles />}
+      {isPassportActionRegistrar && <RegisterUserAction />}
+      {isPassportScoreManager && <ParticipationScoreThreshold />}
+      {isPassportScoreManager && <AppSecurity />}
+      {isPassportWhitelister && <ManageUserStatus />}
+      {isPassportBotSignaler && <ManageUserSignals />}
     </Grid>
   )
 }

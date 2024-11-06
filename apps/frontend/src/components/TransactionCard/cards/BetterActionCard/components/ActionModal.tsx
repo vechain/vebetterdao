@@ -79,9 +79,6 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
           {"Your browser does not support the video tag."}
         </video>
       )
-
-    if (proof?.proof?.text) return <Text fontSize="sm">{proof?.proof?.text}</Text>
-
     return (
       <Link href={proof?.proof?.link} isExternal>
         <Text fontSize="sm">{proof?.proof?.link}</Text>

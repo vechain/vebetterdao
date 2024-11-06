@@ -11,7 +11,9 @@ import { useTranslation } from "react-i18next"
 export const Pause: React.FC = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account ?? "")
+  const { isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfVot3, isAdminOfB3TRGovernor } = useAccountPermissions(
+    account ?? "",
+  )
 
   const { data: isGalaxyMemberPaused, isLoading: isGalaxyMemberPausedLoading } = useIsGMpaused()
 
@@ -160,7 +162,7 @@ export const Pause: React.FC = () => {
       </CardHeader>
       <CardBody>
         <VStack spacing={6} align={"flex-start"}>
-          {permissions?.isAdminOfVot3 && (
+          {isAdminOfVot3 && (
             <>
               <Show above="sm">
                 <HStack>{pauseB3TR}</HStack>
@@ -171,7 +173,7 @@ export const Pause: React.FC = () => {
             </>
           )}
 
-          {permissions?.isAdminOfB3tr && (
+          {isAdminOfB3tr && (
             <>
               <Show above="sm">
                 <HStack>{pauseVOT3}</HStack>
@@ -182,7 +184,7 @@ export const Pause: React.FC = () => {
             </>
           )}
 
-          {permissions?.isAdminOfGalaxyMember && (
+          {isAdminOfGalaxyMember && (
             <>
               <Show above="sm">
                 <HStack>{pauseGalaxyMember}</HStack>
@@ -193,7 +195,7 @@ export const Pause: React.FC = () => {
             </>
           )}
 
-          {permissions?.isAdminOfB3TRGovernor && (
+          {isAdminOfB3TRGovernor && (
             <>
               <Show above="sm">
                 <HStack>{pauseB3TRGovernor}</HStack>
