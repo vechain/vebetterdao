@@ -16,6 +16,7 @@ const config: AppConfig = {
   treasuryContractAddress: "0x43C2cB2a9de1E07dde2Ed6E00e09f55e2bB54720",
   x2EarnAppsContractAddress: "0x4eA4cDFFbE5d7de025BD6Cc6D3b77C8a257e99dB",
   x2EarnRewardsPoolContractAddress: "0x6f479582E759bdE6Aa117E1Ae21e96Eb868ad6FA",
+  x2EarnCreatorContractAddress: "",
   nodeManagementContractAddress: "0x4B0d3ead515965737d72569D45Ab76Ca3B4304Fe",
   veBetterPassportContractAddress: "0xb22C944F098C32294aE612888824807372C590B8",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",

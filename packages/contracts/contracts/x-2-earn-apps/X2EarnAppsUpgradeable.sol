@@ -27,6 +27,7 @@ import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
+import { IX2EarnCreator } from "../interfaces/IX2EarnCreator.sol";
 
 /**
  * @title X2EarnAppsUpgradeable
@@ -134,6 +135,11 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function isEligibleNow(bytes32 appId) public view virtual returns (bool);
 
   /**
+   * @dev Function to get X2EarnCreator contract
+   */
+  function x2EarnCreatorContract() public view virtual returns (IX2EarnCreator);
+
+  /**
    * @dev Function to set the voting Eligibility of an app.
    */
   function _setVotingEligibility(bytes32 _appId, bool _isEligible) internal virtual;
@@ -164,17 +170,24 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   function _setEndorsementStatus(bytes32 appId, bool status) internal virtual;
 
   /**
-   * @dev Function to add app to the list of apps in VeBetterDAO ecosystem.
+   * @dev Function to add app to the  list of apps in VeBetterDAO ecosystem.
    */
   function _addApp(bytes32 appId) internal virtual;
 
   /**
    * @dev Function to get the apps info.
    */
-  function _getAppsInfo(bytes32[] memory appIds) internal view virtual returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
+  function _getAppsInfo(
+    bytes32[] memory appIds
+  ) internal view virtual returns (X2EarnAppsDataTypes.AppWithDetailsReturnType[] memory);
 
   /**
    * @dev Function to check if an apo is registered.
    */
-   function _appSubmitted(bytes32 appId) internal view virtual returns (bool);
+  function _appSubmitted(bytes32 appId) internal view virtual returns (bool);
+
+  /**
+   * @dev Function to add a creator to the app.
+   */
+  function _addCreator(bytes32 appId, address creator) internal virtual;
 }
