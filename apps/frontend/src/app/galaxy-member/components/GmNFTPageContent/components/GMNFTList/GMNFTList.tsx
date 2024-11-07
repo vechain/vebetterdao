@@ -20,6 +20,8 @@ import { GMNFTListItem } from "./GMNFTListItem"
 import { useCallback, useMemo } from "react"
 import { useMintNFT } from "@/hooks"
 import { MintNFTModal } from "@/components/MintNFTModal"
+import { FeatureFlagWrapper } from "@/components"
+import { FeatureFlag } from "@/constants"
 
 export const GMNFTList = () => {
   const { t } = useTranslation()
@@ -60,11 +62,21 @@ export const GMNFTList = () => {
               <Heading fontSize="lg">{t("My Galaxy NFTs")}</Heading>
               <UilInfoCircle color="#004CFC" />
             </HStack>
-            <Text fontSize="sm">
-              {t(
-                "You can choose which NFT use for rewards multiplier. Also you can min new earth to upgrade and sell them in the secondary market.",
-              )}
-            </Text>
+            <FeatureFlagWrapper
+              feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+              fallback={
+                <Text fontSize="sm">
+                  {t(
+                    "Here is a list of your GM NFTs. Soon you will be able to mint new ones, upgrade and sell them in the secondary market.",
+                  )}
+                </Text>
+              }>
+              <Text fontSize="sm">
+                {t(
+                  "You can choose which NFT use for rewards multiplier. Also you can mint new earth to upgrade and sell them in the secondary market.",
+                )}
+              </Text>
+            </FeatureFlagWrapper>
           </VStack>
           <VStack align="stretch" gap={4}>
             <InfiniteScroll
@@ -76,30 +88,32 @@ export const GMNFTList = () => {
                 {tokens?.map((token, index) => <GMNFTListItem key={index} token={token} />)}
               </VStack>
             </InfiniteScroll>
-            <Card
-              mx={3}
-              rounded="8px"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23004CFC' stroke-width='1' stroke-dasharray='12%2c 15' stroke-dashoffset='2' stroke-linecap='square'/%3e%3c/svg%3e")`,
-              }}>
-              <CardBody bg={"#EBF1FE"} rounded="8px">
-                <Stack
-                  direction={isAbove800 ? "row" : "column"}
-                  justify={isAbove800 ? "space-between" : "flex-start"}
-                  align="stretch"
-                  gap={4}>
-                  <VStack align="stretch" gap={1}>
-                    <Heading fontSize="lg">{t("Mint a GM Earth NFT")}</Heading>
-                    <Text fontSize="sm" color="#6A6A6A">
-                      {t("To upgrade and sell in the secondary market")}
-                    </Text>
-                  </VStack>
-                  <Button variant="primaryAction" onClick={handleMintGM}>
-                    {t("Mint a GM Earth NFT")}
-                  </Button>
-                </Stack>
-              </CardBody>
-            </Card>
+            <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
+              <Card
+                mx={3}
+                rounded="8px"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23004CFC' stroke-width='1' stroke-dasharray='12%2c 15' stroke-dashoffset='2' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                }}>
+                <CardBody bg={"#EBF1FE"} rounded="8px">
+                  <Stack
+                    direction={isAbove800 ? "row" : "column"}
+                    justify={isAbove800 ? "space-between" : "flex-start"}
+                    align="stretch"
+                    gap={4}>
+                    <VStack align="stretch" gap={1}>
+                      <Heading fontSize="lg">{t("Mint a GM Earth NFT")}</Heading>
+                      <Text fontSize="sm" color="#6A6A6A">
+                        {t("To upgrade and sell in the secondary market")}
+                      </Text>
+                    </VStack>
+                    <Button variant="primaryAction" onClick={handleMintGM}>
+                      {t("Mint a GM Earth NFT")}
+                    </Button>
+                  </Stack>
+                </CardBody>
+              </Card>
+            </FeatureFlagWrapper>
           </VStack>
         </VStack>
       </CardBody>
