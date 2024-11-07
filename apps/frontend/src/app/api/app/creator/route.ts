@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from "next/server"
 import FreshdeskClient, { FreshdeskTicketBody } from "@/utils/FreshDeskClient"
-import { checkMissingFields, validateRequestOrigin, validateRequestSession } from "./utils"
+import { checkMissingFields } from "./utils"
 import { SubmitCreatorFormData } from "@/components/SubmitCreatorForm"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../auth/[...nextauth]/options"
+import { AddressUtils } from "@/utils"
 
 export async function GET(request: NextRequest) {
   if (!process.env.FRESHDESK_API_TOKEN || !process.env.FRESHDESK_DOMAIN || !process.env.FRESHDESK_GROUP_ID) {
     throw new Error("Missing environment variables for Freshdesk")
   }
-  // Validate request origin and session
-  // IF the request origin is not allowed, return a 403 response
-  validateRequestOrigin(request)
 
   const walletAddress = request.nextUrl.searchParams.get("walletAddress")
-
-  if (!walletAddress) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+  if (!walletAddress || !AddressUtils.isValid(walletAddress)) {
+    return NextResponse.json({ error: "Invalid parameter" }, { status: 400 })
   }
 
   const freshdeskClient = new FreshdeskClient(process.env.FRESHDESK_API_TOKEN, process.env.FRESHDESK_DOMAIN)
@@ -42,16 +39,13 @@ export async function GET(request: NextRequest) {
 // Handle POST request
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
+  if (!session) {
+    return NextResponse.json({ error: "Access Denied" }, { status: 403 })
+  }
 
   if (!process.env.FRESHDESK_API_TOKEN || !process.env.FRESHDESK_DOMAIN || !process.env.FRESHDESK_GROUP_ID) {
     throw new Error("Missing environment variables for Freshdesk")
   }
-
-  // Validate request origin and session
-  // IF the request origin is not allowed, return a 403 response
-  // IF the session is not valid, return a 403 response
-  validateRequestOrigin(request)
-  validateRequestSession(session)
 
   try {
     const data: Partial<SubmitCreatorFormData> = await request.json()
@@ -59,6 +53,9 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (checkMissingFields(data)) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+    if (!AddressUtils.isValid(data?.adminWalletAddress ?? "")) {
+      return NextResponse.json({ error: "Invalid wallet address" }, { status: 400 })
     }
 
     const {
