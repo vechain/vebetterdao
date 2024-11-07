@@ -1,48 +1,42 @@
 import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
-export const CreatorApplicationRejected = () => {
+export const CreatorApplicationApproved = () => {
   const { t } = useTranslation()
 
   const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
 
-  const title = t("CREATOR APPLICATION REJECTED")
-  const description = t("Your Creator's NFT application was rejected")
-  const doAction = t("Apply again")
+  const title = t("CREATOR'S NFT RECEIVED")
+  const description = t("Your Creator application was approved. Submit your app!")
+  const doAction = t("Submit app")
 
   return (
-    <Card bg="#FFD979" borderRadius="xl" w="full">
+    <Card bg="#C8DDFF" borderRadius="xl" w="full">
       <CardBody position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
         <Image
-          src="/images/cloud-background-orange.png"
-          alt="cloud-background-orange"
+          src="/images/cloud-background.png"
+          alt="cloud-background"
           position="absolute"
           right={["-50%", "-50%", "-10%"]}
           top={["-50%", "-50%", "-150%"]}
         />
         <Show above="md">
           <HStack align="stretch" zIndex={1} position="relative" w="full">
-            <Image src="/images/info-bell.png" alt="Creator application update" w={24} h={24} />
+            <Image src="/images/creator-nft.png" alt="Creator application update" w={24} h={24} />
             <HStack flex={1}>
               <VStack gap={2} align="stretch" flex={1}>
-                <Text size="xs" color="#8D6602" fontWeight="600">
+                <Text size="xs" color="#3A5798" fontWeight="600">
                   {title}
                 </Text>
-                <Heading fontSize="lg" fontWeight="700" color="#5F4400">
+                <Heading fontSize="lg" fontWeight="700" color="#0C2D75">
                   {description}
                 </Heading>
               </VStack>
               <Button
                 // onClick={doActionModal.onOpen}
-                borderRadius="full"
-                bg="transparent"
-                border="1px solid #5F4400"
-                _hover={{
-                  bg: "#5F440020",
-                }}>
-                <Text color="#5F4400" fontWeight="500">
-                  {doAction}
-                </Text>
+                variant="primaryAction"
+                borderRadius="full">
+                <Text fontWeight="500">{doAction}</Text>
               </Button>
             </HStack>
           </HStack>
@@ -50,27 +44,21 @@ export const CreatorApplicationRejected = () => {
         <Show below="md">
           <HStack align="center" zIndex={1} position="relative" w="full" alignItems={"center"}>
             <VStack gap={2} align="stretch" justify={"space-between"}>
-              <Text fontSize={12} color="#8D6602" fontWeight="600">
+              <Text fontSize={12} color="#3A5798" fontWeight="600">
                 {title}
               </Text>
-              <Heading fontSize="18" fontWeight="700" color="#5F4400">
+              <Heading fontSize="18" fontWeight="700" color="#0C2D75">
                 {description}
               </Heading>
               <Button
                 // onClick={doActionModal.onOpen}
-                borderRadius="full"
-                bg="transparent"
-                border="1px solid #5F4400"
-                _hover={{
-                  bg: "#5F440020",
-                }}>
-                <Text color="#5F4400" fontWeight="500">
-                  {doAction}
-                </Text>
+                variant="primaryAction"
+                borderRadius="full">
+                <Text fontWeight="500">{doAction}</Text>
               </Button>
             </VStack>
             <Image
-              src="/images/mascot/head-only-warning.png"
+              src="/images/creator-nft.png"
               alt="Creator application update"
               w={isVerySmallMobile ? 16 : 24}
               h={isVerySmallMobile ? 16 : 24}

@@ -25,6 +25,7 @@ import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
 import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
 import { CreatorApplicationRejected } from "./components/CreatorApplicationRejected"
+import { CreatorApplicationApproved } from "./components/CreatorApplicationApproved"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -70,7 +71,8 @@ export const ActionBanner = () => {
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
   const showCastVoteBanner = !!account && !isLoading && canUserVote
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
-  const showCreatorApplicationRejected = true // TODO: Implement logic
+  const showCreatorRejectedBanner = true // TODO: Implement logic
+  const showCreatorApprovedBanner = true // TODO: Implement logic
 
   const slides = useMemo(() => {
     const bannerComponents = []
@@ -78,10 +80,19 @@ export const ActionBanner = () => {
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
-    if (showCreatorApplicationRejected)
+    if (showCreatorRejectedBanner)
       bannerComponents.push(<CreatorApplicationRejected key="creator-application-rejected" />)
+    if (showCreatorApprovedBanner)
+      bannerComponents.push(<CreatorApplicationApproved key="creator-application-approved" />)
     return bannerComponents
-  }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner, showLowVthoBanner, showCreatorApplicationRejected])
+  }, [
+    showDoActionBanner,
+    showClaimB3trBanner,
+    showCastVoteBanner,
+    showLowVthoBanner,
+    showCreatorRejectedBanner,
+    showCreatorApprovedBanner,
+  ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
 
