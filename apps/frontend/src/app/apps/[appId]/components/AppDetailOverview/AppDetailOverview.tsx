@@ -42,58 +42,18 @@ export const AppDetailOverview = ({
   const { logo, isLogoLoading } = useCurrentAppLogo()
   const { banner, isBannerLoading } = useCurrentAppBanner()
 
-  // const { data: gracePeriod } = useGracePeriodEvent(app?.id)
-  // // const gracePeriodEndsAt = useEstimateBlockTimestamp({
-  // //   blockNumber: Number(gracePeriod?.gracePeriodEvent[0]?.endBlock),
-  // // })
-
   const goToWebsite = useCallback(() => {
     if (appMetadata?.external_url) {
       window.open(appMetadata.external_url, "_blank")
     }
   }, [appMetadata?.external_url])
 
-  // CHECK waiting for feedback re top banner
   return (
     <VStack spacing={4}>
-      {/* {endorsementStatus !== EndorsementStatus.SUCCESS ? (
-        <HStack w="full" flexWrap="wrap">
-          <Badge w="full" bg={BADGE_INFORMATION[endorsementStatus].badgeBgColor} borderRadius="12px">
-            <HStack p={2}>
-              <Icon
-                as={UilExclamationCircle}
-                boxSize={30}
-                color={BADGE_INFORMATION[endorsementStatus].badgeTextColor}
-              />
-              <Text
-                as="span"
-                color={BADGE_INFORMATION[endorsementStatus].badgeTextColor}
-                textTransform="none"
-                fontWeight="normal"
-                whiteSpace="normal"
-                wordBreak="break-word"
-                flexWrap="wrap"
-                fontSize="sm">
-                <Trans
-                  i18nKey={
-                    unknownStatus
-                      ? "Unknown endorsement status"
-                      : endorsementLost
-                        ? "This app lost the endorsement and will not join next allocation. The App will have to reach more than {{endorsementThreshold}} Endorsement score before {{date}} to be included on Allocations rounds. Know more."
-                        : "This dApp won’t join next allocation round. The app will have to reach more than {{endorsementThreshold}} Endorsement score to be included on Allocations rounds. Know more."
-                  }
-                  values={{ date: dayjs(gracePeriodEndsAt).format("MMMM D"), endorsementThreshold }}
-                  components={{
-                    Link: (
-                      <Link color={BADGE_INFORMATION[endorsementStatus].badgeTextColor} textDecoration="underline" />
-                    ),
-                  }}
-                />
-              </Text>
-            </HStack>
-          </Badge>
-        </HStack>
-      ) : null} */}
+      {endorsementStatus !== XAppStatus.ENDORSED_NOT_ELIGIBLE &&
+        endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE && (
+          <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
+        )}
       <Card variant="baseWithBorder">
         <CardBody>
           <VStack align="stretch" gap={4}>
