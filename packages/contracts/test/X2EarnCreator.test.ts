@@ -64,6 +64,20 @@ describe("X2EarnCreator - @shard7", () => {
     })
   })
 
+  describe("Base URI", () => {
+    it("Should be able to set the base URI", async () => {
+      const { x2EarnCreator, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+
+      // normal user
+      await expect(x2EarnCreator.connect(otherAccount).setBaseURI("ipfs://BASE_URI")).to.be.reverted
+
+      // default admin
+      expect(await x2EarnCreator.hasRole(await x2EarnCreator.DEFAULT_ADMIN_ROLE(), owner.address)).to.equal(true)
+      await expect(x2EarnCreator.connect(owner).setBaseURI("ipfs://BASE_URI2")).to.not.be.reverted
+      expect(await x2EarnCreator.baseURI()).to.equal("ipfs://BASE_URI2")
+    })
+  })
+
   describe("Upgrading", () => {
     it("Admin should be able to upgrade the contract", async function () {
       const { x2EarnCreator, owner, otherAccount } = await getOrDeployContractInstances({
