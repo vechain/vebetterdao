@@ -1,11 +1,9 @@
 import { AppConfig } from "."
-import { IPFS_FETCHING_SERVICE, IPFS_PINNING_SERVICE } from "@repo/constants"
 const config: AppConfig = {
   environment: "mainnet",
   basePath: "https://governance.vebetterdao.org",
-  ipfsPinningService: IPFS_PINNING_SERVICE,
-  ipfsFetchingService: IPFS_FETCHING_SERVICE,
-  mixPanelProjectToken: process.env.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN,
+  ipfsPinningService: "https://api.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
+  ipfsFetchingService: "https://api.gateway-proxy.vechain.org/ipfs",
   b3trContractAddress: "0x5ef79995FE8a89e0812330E4378eB2660ceDe699",
   vot3ContractAddress: "0x76Ca782B59C74d088C7D2Cce2f211BC00836c602",
   b3trGovernorAddress: "0x1c65C25fABe2fc1bCb82f253fA0C916a322f777C",
@@ -18,7 +16,7 @@ const config: AppConfig = {
   treasuryContractAddress: "0xD5903BCc66e439c753e525F8AF2FeC7be2429593",
   x2EarnAppsContractAddress: "0x8392B7CCc763dB03b47afcD8E8f5e24F9cf0554D",
   x2EarnRewardsPoolContractAddress: "0x6Bee7DDab6c99d5B2Af0554EaEA484CE18F52631",
-  x2EarnCreatorContractAddress: "",
+  x2EarnCreatorContractAddress: "0xe8e96a768ffd00417d4bd985bec9EcfC6F732a7f",
   indexerUrl: "https://b3tr.mainnet.vechain.org/api/v1",
   nodeManagementContractAddress: "",
   veBetterPassportContractAddress: "0x35a267671d8EDD607B2056A9a13E7ba7CF53c8b3",
