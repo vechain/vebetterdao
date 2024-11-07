@@ -28,6 +28,7 @@ import { signIn, signOut, useSession } from "next-auth/react"
 import { useCreatorSubmissionFormStore } from "@/store"
 import { UilGithub } from "@iconscout/react-unicons"
 import { FaXTwitter } from "react-icons/fa6"
+import { AddressUtils } from "@/utils"
 
 export type SubmitCreatorFormData = {
   appName: string
@@ -173,7 +174,16 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
             <Input
               rounded={"xl"}
               placeholder={t("App Name")}
-              {...register("appName", { required: "App Name is required" })}
+              {...register("appName", {
+                required: "App Name is required",
+                validate: value => {
+                  if (value && AddressUtils.isValid(value)) {
+                    //Prevent user from entering wallet address in app name field
+                    return t("Invalid Name")
+                  }
+                  return true
+                },
+              })}
               onBlur={() => onBlur("appName")}
             />
             {errors.appName && <FormErrorMessage>{errors.appName.message}</FormErrorMessage>}
@@ -219,7 +229,15 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
             <Input
               rounded={"xl"}
               placeholder={t("Admin Name")}
-              {...register("adminName")}
+              {...(register("adminName"),
+              {
+                validate: (value: string) => {
+                  if (value && AddressUtils.isValid(value)) {
+                    //Prevent user from entering wallet address in admin name field
+                    return t("Invalid Name")
+                  }
+                },
+              })}
               onBlur={() => onBlur("adminName")}
             />
             {errors.adminName && <FormErrorMessage>{errors.adminName.message}</FormErrorMessage>}
