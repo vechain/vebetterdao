@@ -478,6 +478,8 @@ contract GalaxyMember is
   /// @notice Gets the B3TR required to upgrade to the next level
   /// @param tokenId Token ID to check
   function getB3TRtoUpgrade(uint256 tokenId) public view virtual returns (uint256) {
+    if (_ownerOf(tokenId) == address(0)) return 0;
+
     uint256 nodeId = getNodeIdAttached(tokenId);
 
     // Get the level of the token and the B3TR donated left to upgrade

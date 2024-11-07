@@ -1,4 +1,4 @@
-import { describe, it } from "mocha"
+import { describe, it, beforeEach } from "mocha"
 import {
   NFT_NAME,
   NFT_SYMBOL,
@@ -24,8 +24,9 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { GalaxyMember, GalaxyMemberV1 } from "../typechain-types"
+import { GalaxyMember, GalaxyMemberV1, MockERC721Receiver } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
 describe("Galaxy Member - @shard6", () => {
   describe("Contract parameters", () => {
@@ -239,6 +240,147 @@ describe("Galaxy Member - @shard6", () => {
       expect(await galaxyMember.getNodeToFreeLevel(5)).to.equal(4) // Level 4 Free Upgrade for StrengthX
       expect(await galaxyMember.getNodeToFreeLevel(6)).to.equal(6) // Level 6 Free Upgrade for ThunderX
       expect(await galaxyMember.getNodeToFreeLevel(7)).to.equal(7) // Level 7 Free Upgrade for MjolnirX
+    })
+  })
+
+  describe("ERC721 Compliance", () => {
+    let galaxyMember: GalaxyMember
+    let owner: HardhatEthersSigner
+    let approved: HardhatEthersSigner
+    let operator: HardhatEthersSigner
+    let other: HardhatEthersSigner
+    let tokenId: number
+
+    beforeEach(async () => {
+      const contracts = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      galaxyMember = contracts.galaxyMember
+      owner = contracts.owner
+      approved = contracts.otherAccount
+      operator = contracts.otherAccounts[0]
+      other = contracts.otherAccounts[1]
+
+      // Mint a token for testing
+      await participateInAllocationVoting(owner)
+      await galaxyMember.connect(owner).freeMint()
+      tokenId = 1
+    })
+
+    describe("ERC721 Metadata", () => {
+      it("should implement supportsInterface for ERC721Metadata", async () => {
+        const ERC721MetadataInterfaceId = "0x5b5e139f"
+        expect(await galaxyMember.supportsInterface(ERC721MetadataInterfaceId)).to.be.true
+      })
+
+      it("should return correct name and symbol", async () => {
+        expect(await galaxyMember.name()).to.equal("GalaxyMember")
+        expect(await galaxyMember.symbol()).to.equal("GM")
+      })
+    })
+
+    describe("ERC721 Enumerable", () => {
+      it("should implement supportsInterface for ERC721Enumerable", async () => {
+        const ERC721EnumerableInterfaceId = "0x780e9d63"
+        expect(await galaxyMember.supportsInterface(ERC721EnumerableInterfaceId)).to.be.true
+      })
+
+      it("should correctly implement totalSupply and tokenByIndex", async () => {
+        expect(await galaxyMember.totalSupply()).to.equal(1)
+        expect(await galaxyMember.tokenByIndex(0)).to.equal(tokenId)
+      })
+
+      it("should correctly implement tokenOfOwnerByIndex", async () => {
+        expect(await galaxyMember.tokenOfOwnerByIndex(owner.address, 0)).to.equal(tokenId)
+      })
+    })
+
+    describe("ERC721 Core Functions", () => {
+      it("should implement approve correctly", async () => {
+        await galaxyMember.connect(owner).approve(approved.address, tokenId)
+        expect(await galaxyMember.getApproved(tokenId)).to.equal(approved.address)
+      })
+
+      it("should implement setApprovalForAll correctly", async () => {
+        await galaxyMember.connect(owner).setApprovalForAll(operator.address, true)
+        expect(await galaxyMember.isApprovedForAll(owner.address, operator.address)).to.be.true
+      })
+
+      it("should emit Approval event on approve", async () => {
+        await expect(galaxyMember.connect(owner).approve(approved.address, tokenId))
+          .to.emit(galaxyMember, "Approval")
+          .withArgs(owner.address, approved.address, tokenId)
+      })
+
+      it("should emit ApprovalForAll event on setApprovalForAll", async () => {
+        await expect(galaxyMember.connect(owner).setApprovalForAll(operator.address, true))
+          .to.emit(galaxyMember, "ApprovalForAll")
+          .withArgs(owner.address, operator.address, true)
+      })
+    })
+
+    describe("ERC721 Transfer Mechanics", () => {
+      it("should correctly transfer tokens using transferFrom", async () => {
+        await galaxyMember.connect(owner).approve(approved.address, tokenId)
+        await galaxyMember.connect(approved).transferFrom(owner.address, other.address, tokenId)
+        expect(await galaxyMember.ownerOf(tokenId)).to.equal(other.address)
+      })
+
+      it("should correctly transfer tokens using safeTransferFrom", async () => {
+        await galaxyMember
+          .connect(owner)
+          ["safeTransferFrom(address,address,uint256)"](owner.address, other.address, tokenId)
+        expect(await galaxyMember.ownerOf(tokenId)).to.equal(other.address)
+      })
+
+      it("should clear approvals after transfer", async () => {
+        await galaxyMember.connect(owner).approve(approved.address, tokenId)
+        await galaxyMember.connect(owner).transferFrom(owner.address, other.address, tokenId)
+        expect(await galaxyMember.getApproved(tokenId)).to.equal(ethers.ZeroAddress)
+      })
+    })
+
+    describe("ERC721 Safety Checks", () => {
+      it("should revert when transferring to zero address", async () => {
+        await expect(galaxyMember.connect(owner).transferFrom(owner.address, ethers.ZeroAddress, tokenId)).to.be
+          .reverted
+      })
+
+      it("should revert when caller is not owner or approved", async () => {
+        await expect(galaxyMember.connect(other).transferFrom(owner.address, other.address, tokenId)).to.be.reverted
+      })
+
+      it("should revert when querying non-existent token", async () => {
+        const nonExistentTokenId = 999
+        await expect(galaxyMember.ownerOf(nonExistentTokenId)).to.be.reverted
+      })
+    })
+
+    describe("ERC721 Receiver Compliance", () => {
+      let receiverContract: MockERC721Receiver
+
+      beforeEach(async () => {
+        const MockERC721Receiver = await ethers.getContractFactory("MockERC721Receiver")
+        receiverContract = await MockERC721Receiver.deploy()
+      })
+
+      it("should transfer to ERC721Receiver implementer", async () => {
+        await galaxyMember
+          .connect(owner)
+          ["safeTransferFrom(address,address,uint256)"](owner.address, await receiverContract.getAddress(), tokenId)
+        expect(await galaxyMember.ownerOf(tokenId)).to.equal(await receiverContract.getAddress())
+      })
+
+      it("should revert when transferring to non-receiver contract", async () => {
+        // Try to transfer to the GalaxyMember contract itself (which doesn't implement ERC721Receiver)
+        await expect(
+          galaxyMember
+            .connect(owner)
+            ["safeTransferFrom(address,address,uint256)"](owner.address, await galaxyMember.getAddress(), tokenId),
+        ).to.be.reverted
+      })
     })
   })
 
@@ -2337,6 +2479,8 @@ describe("Galaxy Member - @shard6", () => {
 
       expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1) // Strength Economy Node (token ID 1) still attached to GM NFT (token ID 0)
 
+      expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1 even though Strength Economy Node is attached because "owner" does not own the node anymore
+
       await galaxyMember.connect(otherAccount).detachNode(1, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(1) // GM NFT Level is now 1 as no X Node is attached
@@ -2603,7 +2747,7 @@ describe("Galaxy Member - @shard6", () => {
       // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
       await galaxyMember.connect(owner).attachNode(1, 1)
 
-      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 1
+      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
       expect(await galaxyMember.levelOf(2)).to.equal(1) // Level 1
 
       expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(1) // Owner has selected token ID 0 automatically as it was the first token owned
@@ -2783,6 +2927,53 @@ describe("Galaxy Member - @shard6", () => {
       await galaxyMember.connect(otherAccount).transferFrom(owner.address, otherAccount.address, 1)
 
       expect(await galaxyMember.ownerOf(1)).to.equal(otherAccount.address)
+    })
+
+    it("should handle node detached changes during upgrade", async () => {
+      const { owner, vechainNodesMock, galaxyMember, b3tr, minterAccount, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      await participateInAllocationVoting(owner, false, otherAccounts[4])
+
+      await galaxyMember.connect(owner).freeMint()
+
+      expect(await galaxyMember.tokenByIndex(0)).to.equal(1)
+
+      await galaxyMember.setMaxLevel(10)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
+
+      expect(await galaxyMember.ownerOf(1)).to.equal(owner.address)
+
+      // Attach node to GM NFT
+      await addNodeToken(2, owner) // Mint Level 2 Node with Token ID 1
+
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
+
+      await galaxyMember.connect(owner).attachNode(nodeId, 1)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(4)
+
+      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRtoUpgrade(1))
+
+      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(1))
+
+      // Detach node
+      await galaxyMember.connect(owner).detachNode(nodeId, 1)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(1)
+
+      // Upgrade GM NFT
+      await galaxyMember.connect(owner).upgrade(1)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(2)
     })
   })
 })

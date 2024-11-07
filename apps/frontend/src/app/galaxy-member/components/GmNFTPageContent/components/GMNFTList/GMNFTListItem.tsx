@@ -7,7 +7,8 @@ import { useIpfsImage, useIpfsMetadata } from "@/api/ipfs"
 import { useSelectedTokenId } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { SelectGMButton } from "./SelectGMButton"
 import { gmNfts } from "@/constants/gmNfts"
-import { notFoundImage } from "@/constants"
+import { FeatureFlag, notFoundImage } from "@/constants"
+import { FeatureFlagWrapper } from "@/components"
 
 interface GMNFTListItemProps {
   token: {
@@ -27,7 +28,11 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   const isGMSelected = useMemo(() => selectedTokenId === token.tokenId, [selectedTokenId, token.tokenId])
 
   const actionButton = useMemo(() => {
-    return <SelectGMButton tokenId={token.tokenId} isSelected={isGMSelected} />
+    return (
+      <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
+        <SelectGMButton tokenId={token.tokenId} isSelected={isGMSelected} />
+      </FeatureFlagWrapper>
+    )
   }, [isGMSelected, token.tokenId])
 
   const { data: nftMetadata } = useIpfsMetadata<NFTMetadata>(token.tokenURI)
@@ -83,15 +88,17 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                 </Text>
               </VStack>
               <HStack gap={6}>
-                <HStack gap={1}>
-                  <Text fontSize={"xs"} fontWeight={600}>
-                    {token.tokenLevel}
-                    {"x"}
-                  </Text>
-                  <Text fontSize={"xs"} fontWeight={400} noOfLines={1} whiteSpace={"nowrap"}>
-                    {t("Voting reward multiplier")}
-                  </Text>
-                </HStack>
+                <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
+                  <HStack gap={1}>
+                    <Text fontSize={"xs"} fontWeight={600}>
+                      {token.tokenLevel}
+                      {"x"}
+                    </Text>
+                    <Text fontSize={"xs"} fontWeight={400} noOfLines={1} whiteSpace={"nowrap"}>
+                      {t("Voting reward multiplier")}
+                    </Text>
+                  </HStack>
+                </FeatureFlagWrapper>
                 {isAbove800 && actionButton}
               </HStack>
             </Stack>

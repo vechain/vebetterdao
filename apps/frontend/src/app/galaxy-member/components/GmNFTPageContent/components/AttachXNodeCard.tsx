@@ -1,6 +1,8 @@
 import { useSelectedGmNft, useXNode } from "@/api"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+import { FeatureFlagWrapper } from "@/components"
+import { FeatureFlag } from "@/constants"
 import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { UilInfoCircle, UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
@@ -87,12 +89,20 @@ export const AttachXNodeCard = () => {
               {t("Detach")}
             </Button>
           ) : (
-            <Button
-              leftIcon={<UilLinkBroken color="#004CFC" />}
-              variant={"primarySubtle"}
-              onClick={attachGmToXNodeModal.onOpen}>
-              {t("Attach now!")}
-            </Button>
+            <FeatureFlagWrapper
+              feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+              fallback={
+                <Button leftIcon={<UilLinkBroken color="#004CFC" />} variant={"primarySubtle"} isDisabled={true}>
+                  {t("Coming soon!")}
+                </Button>
+              }>
+              <Button
+                leftIcon={<UilLinkBroken color="#004CFC" />}
+                variant={"primarySubtle"}
+                onClick={attachGmToXNodeModal.onOpen}>
+                {t("Attach now!")}
+              </Button>
+            </FeatureFlagWrapper>
           )}
         </VStack>
       </CardBody>

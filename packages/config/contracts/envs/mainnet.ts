@@ -63,6 +63,8 @@ export function createMainnetConfig() {
       25000000000000000000000000n,
     ],
 
+    GM_NFT_MAX_LEVEL: 1,
+
     /*
       Vechain Node => Free Upgrade Level
       None => 1
