@@ -127,6 +127,6 @@ export function createMainnetConfig() {
     VEPASSPORT_PASSPORT_MAX_ENTITIES: 5,
     VEPASSPORT_DECAY_RATE: 0,
 
-    CREATOR_NFT_URI: "ipfs://BASE_URI", // TODO: Update this with the actual IPFS URI
+    CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json", // TODO: Update this with the actual IPFS URI
   })
 }
