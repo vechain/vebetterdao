@@ -201,11 +201,11 @@ contract X2EarnCreator is
   }
 
   /// @notice Sets the base URI for the NFT metadata
-  /// @param baseURI The new base URI for the NFT metadata
+  /// @param newBaseURI The new base URI for the NFT metadata
   /// @dev Only callable by accounts with the DEFAULT_ADMIN_ROLE
-  function setBaseURI(string calldata baseURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setBaseURI(string calldata newBaseURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
     X2EarnCreatorStorage storage $ = _getX2EarnCreatorStorage();
-    $.baseURI = baseURI;
+    $.baseURI = newBaseURI;
   }
 
   // ---------------- Internal Functions ----------------
