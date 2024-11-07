@@ -100,6 +100,9 @@ contract X2EarnCreator is
     require(defaultAdmin != address(0), "X2EarnCreator: zero address");
 
     _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+
+    // make token id start from 1
+    $.nextTokenId = 1;
   }
 
   // ---------- Modifiers ------------ //
