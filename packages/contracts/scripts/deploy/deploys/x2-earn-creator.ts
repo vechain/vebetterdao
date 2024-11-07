@@ -31,7 +31,7 @@ export async function main() {
 
   const x2EarnCreator = (await deployProxy("X2EarnCreator", [
     contractsConfig.CREATOR_NFT_URI,
-    contractsConfig.CONTRACTS_ADMIN_ADDRESS,
+    TEMP_ADMIN,
   ])) as X2EarnCreator
 
   console.log(`================  Contract deployed `)
@@ -62,10 +62,10 @@ export async function main() {
     console.error("Failed to update config file, update it manually")
   }
 
-  console.log(`Update .../deploy_output/contracts.txt file with new NodeManagement contract address`)
+  console.log(`TODO: Update .../deploy_output/contracts.txt file with new X2EarnCreator contract address`)
 
   console.log("================================================================================")
-
+  console.log("X2EarnCreator address: ", await x2EarnCreator.getAddress())
   console.log("================  Execution completed")
   process.exit(0)
 }
