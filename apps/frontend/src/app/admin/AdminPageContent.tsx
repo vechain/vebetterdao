@@ -17,6 +17,7 @@ import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { UpdateRoleCard } from "./components/UpdateRoleCard"
 import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport"
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
+import { ManageCreatorsNFT } from "./components/ManageCreatorsNFT"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -92,6 +93,7 @@ export const AdminPageContent = () => {
                 <UpdateReceiverAddress />
                 <UpdateAppsEligibility />
                 <XAppCheckEndorsement />
+                <ManageCreatorsNFT />
               </Grid>
             </TabPanel>
           )}
