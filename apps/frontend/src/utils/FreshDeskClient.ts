@@ -1,6 +1,28 @@
 import axios, { AxiosInstance } from "axios"
-type FreshdeskQueryResult = {
-  results: FreshdeskTicketBody[]
+type FreshdeskQueryResult<T> = {
+  results: T[]
+}
+
+export type FreshdeskTicket = {
+  id: number
+  description?: string
+  subject: string
+  priority: number
+  status: number
+  group_id: number
+  type: string
+  email: string
+  custom_fields: {
+    cf_app_name: string
+    cf_app_description: string
+    cf_app_url_optional: string
+    cf_github_username: string
+    cf_x_username: string
+    cf_admin_wallet_address: string
+    cf_app_creator_email: string
+    cf_app_creator_name_optional: string
+  }
+  created_at: string
 }
 
 export type FreshdeskTicketBody = {
@@ -29,24 +51,38 @@ export interface TicketResponse {
   subject: string
 }
 
+export enum HumanizedTicketStatus {
+  Open = "Open",
+  Pending = "Pending",
+  Resolved = "Resolved",
+  Closed = "Closed",
+  WaitingOnCustomer = "Waiting on Customer",
+  WaitingOnDev = "Waiting on Dev",
+  Unknown = "Unknown",
+}
+
+export enum TicketStatus {
+  Open = 2,
+  Pending = 3,
+  Resolved = 4,
+  Closed = 5,
+  WaitingOnCustomer = 6,
+  WaitingOnDev = 7,
+  Unknown = 0,
+}
+
 enum TicketPriority {
   Low = 1,
   Medium = 2,
   High = 3,
   Urgent = 4,
 }
-enum TicketStatus {
-  Open = 2,
-  Pending = 3,
-  Resolved = 4,
-  Closed = 5,
-}
 
 class FreshdeskClient {
   private apiClient: AxiosInstance
   private readonly baseURL: URL
-  private readonly DEFAULT_PRIORITY = TicketPriority.Low // Low priority
-  private readonly DEFAULT_STATUS = TicketStatus.Open // Open status
+  private readonly DEFAULT_PRIORITY = TicketPriority.Low
+  private readonly DEFAULT_STATUS = TicketStatus.Pending
   private readonly DEFAULT_TYPE = "Other"
 
   constructor(apiKey: string, freshdeskDomain: string) {
@@ -103,7 +139,7 @@ class FreshdeskClient {
    * @param walletAddress  The wallet address of the admin to search for
    * @returns The ticket information for the specified admin wallet address
    */
-  public async getTicketByAdminWalletAddress(walletAddress: string): Promise<FreshdeskQueryResult> {
+  public async getTicketByAdminWalletAddress(walletAddress: string): Promise<FreshdeskQueryResult<FreshdeskTicket>> {
     const response = await this.apiClient.get(
       `search/tickets?query="cf_admin_wallet_address:'${walletAddress}' OR custom_string:'${walletAddress}'"`,
     )
@@ -147,6 +183,25 @@ class FreshdeskClient {
       priority: this.DEFAULT_PRIORITY,
       status: this.DEFAULT_STATUS,
       type: this.DEFAULT_TYPE,
+    }
+  }
+  // Function to map TicketStatus to HumanizedTicketStatus
+  public getHumanizedTicketStatus = (status: TicketStatus): HumanizedTicketStatus => {
+    switch (status) {
+      case TicketStatus.Open:
+        return HumanizedTicketStatus.Open
+      case TicketStatus.Pending:
+        return HumanizedTicketStatus.Pending
+      case TicketStatus.Resolved:
+        return HumanizedTicketStatus.Resolved
+      case TicketStatus.Closed:
+        return HumanizedTicketStatus.Closed
+      case TicketStatus.WaitingOnCustomer:
+        return HumanizedTicketStatus.WaitingOnCustomer
+      case TicketStatus.WaitingOnDev:
+        return HumanizedTicketStatus.WaitingOnDev
+      default:
+        return HumanizedTicketStatus.Unknown
     }
   }
 }

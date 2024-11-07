@@ -6,36 +6,6 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../../auth/[...nextauth]/options"
 import { AddressUtils } from "@/utils"
 
-export async function GET(request: NextRequest) {
-  if (!process.env.FRESHDESK_API_TOKEN || !process.env.FRESHDESK_DOMAIN || !process.env.FRESHDESK_GROUP_ID) {
-    throw new Error("Missing environment variables for Freshdesk")
-  }
-
-  const walletAddress = request.nextUrl.searchParams.get("walletAddress")
-  if (!walletAddress || !AddressUtils.isValid(walletAddress)) {
-    return NextResponse.json({ error: "Invalid parameter" }, { status: 400 })
-  }
-
-  const freshdeskClient = new FreshdeskClient(process.env.FRESHDESK_API_TOKEN, process.env.FRESHDESK_DOMAIN)
-  try {
-    const response = await freshdeskClient.getTicketByAdminWalletAddress(walletAddress)
-    if (!response?.results?.length) {
-      return NextResponse.json({ error: "No submission found" }, { status: 404 })
-    }
-    const formattedResponse = response.results.map((result: any) => {
-      return {
-        id: result.id,
-        status: result.status,
-        appName: result.custom_fields.cf_app_name,
-        adminWalletAddress: result.custom_fields.cf_admin_wallet_address,
-        createdAt: result.created_at,
-      }
-    })
-    return NextResponse.json({ submissions: formattedResponse })
-  } catch (error: any) {
-    return NextResponse.json({ error: "Failed to fetch submission" }, { status: 500 })
-  }
-}
 // Handle POST request
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
