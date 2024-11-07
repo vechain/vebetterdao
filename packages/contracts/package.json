@@ -23,6 +23,8 @@
     "upload-galaxy-member-metadata": "yarn generate-galaxy-member-metadata && npx hardhat run scripts/metadata/GalaxyMember/upload.ts",
     "generate-xapp-metadata": "npx hardhat run scripts/metadata/xApps/generate.ts",
     "upload-xapp-metadata": "yarn generate-xapp-metadata && npx hardhat run scripts/metadata/xApps/upload.ts",
+    "generate-creator-nft-metadata": "npx hardhat run scripts/metadata/CreatorNFT/generate.ts",
+    "upload-creator-nft-metadata": "npx hardhat run scripts/metadata/CreatorNFT/upload.ts",
     "start-round:testnet": "npx hardhat run scripts/emissions/startRound.ts --network vechain_testnet",
     "start-round": "npx hardhat run scripts/emissions/startRound.ts",
     "start-solo": "docker compose up -d",
