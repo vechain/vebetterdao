@@ -26,5 +26,5 @@ export const useHasCreatorNFT = (walletAddress: string) => {
     method,
     args: [walletAddress],
   })
-  return !!balance
+  return balance > 0
 }

@@ -45,11 +45,11 @@ export const NewCreatorPageFormContent = () => {
     router.push("/")
   }
 
-  const onSubmit = async (formValues: SubmitCreatorFormData) => {
+  const onSubmit = async ({ adminWalletAddress, ...formValues }: SubmitCreatorFormData) => {
     try {
       const response = await fetch("/api/app/creator", {
         method: "POST",
-        body: JSON.stringify(formValues),
+        body: JSON.stringify({ ...formValues, adminWalletAddress: adminWalletAddress.toLowerCase() }),
       })
       if (!response.ok) throw new Error("Failed to submit creator application")
 
