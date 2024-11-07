@@ -126,5 +126,7 @@ export function createMainnetConfig() {
     VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE: 20,
     VEPASSPORT_PASSPORT_MAX_ENTITIES: 5,
     VEPASSPORT_DECAY_RATE: 0,
+
+    CREATOR_NFT_URI: "ipfs://BASE_URI", // TODO: Update this with the actual IPFS URI
   })
 }

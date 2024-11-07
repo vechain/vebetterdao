@@ -55,7 +55,12 @@ async function main() {
     "X2EarnAppsV1",
     "X2EarnApps",
     config.x2EarnAppsContractAddress,
-    [contractsConfig.XAPP_GRACE_PERIOD, config.nodeManagementContractAddress, config.veBetterPassportContractAddress],
+    [
+      contractsConfig.XAPP_GRACE_PERIOD,
+      config.nodeManagementContractAddress,
+      config.veBetterPassportContractAddress,
+      config.x2EarnCreatorContractAddress,
+    ],
     {
       version: 2,
       libraries: {
