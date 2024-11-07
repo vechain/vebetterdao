@@ -185,10 +185,6 @@ export async function deployAll(config: ContractsConfig) {
   const x2EarnCreator = (await deployProxy("X2EarnCreator", [
     TEMP_ADMIN,
     config.CONTRACTS_ADMIN_ADDRESS,
-    config.CONTRACTS_ADMIN_ADDRESS,
-    config.CONTRACTS_ADMIN_ADDRESS,
-    config.CONTRACTS_ADMIN_ADDRESS,
-    config.CONTRACTS_ADMIN_ADDRESS,
   ])) as X2EarnCreator
 
   const treasury = (await deployProxy(

@@ -348,14 +348,7 @@ export const getOrDeployContractInstances = async ({
     { version: 2 },
   )) as GalaxyMember
 
-  const x2EarnCreator = (await deployProxy("X2EarnCreator", [
-    config.CREATOR_NFT_URI,
-    owner.address,
-    owner.address,
-    owner.address,
-    owner.address,
-    owner.address,
-  ])) as X2EarnCreator
+  const x2EarnCreator = (await deployProxy("X2EarnCreator", [config.CREATOR_NFT_URI, owner.address])) as X2EarnCreator
 
   // Deploy NodeManagement
   const nodeManagement = (await deployProxy("NodeManagement", [
