@@ -1,7 +1,5 @@
 import { useState, useCallback, useMemo, useRef } from "react"
 import { IconButton, Hide } from "@chakra-ui/react"
-import { DoActionBanner } from "./components/DoActionBanner"
-import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
 import {
   useAccountBalance,
   useB3trBalance,
@@ -11,7 +9,6 @@ import {
   useVot3Balance,
   useVotingRewards,
 } from "@/api"
-import { CastVoteBanner } from "./components/CastVoteBanner"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 // Import Swiper React components
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
@@ -22,7 +19,12 @@ import { A11y } from "swiper/modules"
 import "swiper/css"
 import "@/app/theme/swiper-custom.css"
 import { useWallet } from "@vechain/dapp-kit-react"
+
+import { CastVoteBanner } from "./components/CastVoteBanner"
+import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
+import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
+import { CreatorApplicationRejected } from "./components/CreatorApplicationRejected"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -68,6 +70,7 @@ export const ActionBanner = () => {
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
   const showCastVoteBanner = !!account && !isLoading && canUserVote
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
+  const showCreatorApplicationRejected = true // TODO: Implement logic
 
   const slides = useMemo(() => {
     const bannerComponents = []
@@ -75,8 +78,10 @@ export const ActionBanner = () => {
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
+    if (showCreatorApplicationRejected)
+      bannerComponents.push(<CreatorApplicationRejected key="creator-application-rejected" />)
     return bannerComponents
-  }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner, showLowVthoBanner])
+  }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner, showLowVthoBanner, showCreatorApplicationRejected])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
 
