@@ -102,13 +102,13 @@ export const EndorsingAppCard = () => {
                       {appScore} {t("points")}
                     </Text>
                     <Text fontSize="xs" color="#6A6A6A">
-                      {t("Current score")}
+                      {t("Total score")}
                     </Text>
                   </VStack>
                   <VStack align="flex-start" gap={0} my={"3"}>
                     <Text>{endorsersCount}</Text>
                     <Text fontSize="xs" color="#6A6A6A">
-                      {t("Endorsing users")}
+                      {t("Users endorsing")}
                     </Text>
                   </VStack>
                   <VStack align="flex-start" gap={0} my={"3"}>
@@ -116,7 +116,7 @@ export const EndorsingAppCard = () => {
                       {xNodePoints} {t("points")}
                     </Text>
                     <Text fontSize="xs" color="#6A6A6A">
-                      {t("My endorsement")}
+                      {t("Your score")}
                     </Text>
                   </VStack>
                   <VStack align="flex-start" gap={0} my={"3"}>
