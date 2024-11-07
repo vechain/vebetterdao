@@ -192,11 +192,19 @@
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
+    "generate-creator-nft-metadata": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
     "generate-xapp-metadata": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "upload-xapp-metadata": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "upload-creator-nft-metadata": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
