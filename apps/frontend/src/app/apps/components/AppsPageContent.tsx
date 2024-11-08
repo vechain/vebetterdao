@@ -6,6 +6,12 @@ import { useTranslation } from "react-i18next"
 import { useMemo } from "react"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
+import {
+  CreatorApplicationApproved,
+  CreatorApplicationInProgress,
+  CreatorApplicationRejected,
+  CreatorApplyNow,
+} from "../creator/banners"
 
 export const AppsPageContent = () => {
   const { t } = useTranslation()
@@ -35,6 +41,10 @@ export const AppsPageContent = () => {
         <Grid templateColumns={"repeat(1, 1fr)"} gap={6} w="full">
           {xApps?.unendorsed.map(xApp => <UnendorsedAppCard key={xApp.id} xApp={xApp} />)}
         </Grid>
+        <CreatorApplyNow />
+        <CreatorApplicationInProgress />
+        <CreatorApplicationApproved />
+        <CreatorApplicationRejected />
       </VStack>
     )
   }, [isActiveSection, xApps])
