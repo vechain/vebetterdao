@@ -1,8 +1,14 @@
 import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show, useMediaQuery } from "@chakra-ui/react"
+import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
 export const CreatorApplicationRejected = () => {
   const { t } = useTranslation()
+
+  const router = useRouter()
+  const navigateToCreatorForm = () => {
+    return router.push("/apps/creator/new")
+  }
 
   const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
 
@@ -33,7 +39,7 @@ export const CreatorApplicationRejected = () => {
                 </Heading>
               </VStack>
               <Button
-                // onClick={doActionModal.onOpen}
+                onClick={navigateToCreatorForm}
                 borderRadius="full"
                 bg="transparent"
                 border="1px solid #5F4400"
@@ -57,7 +63,7 @@ export const CreatorApplicationRejected = () => {
                 {description}
               </Heading>
               <Button
-                // onClick={doActionModal.onOpen}
+                onClick={navigateToCreatorForm}
                 borderRadius="full"
                 bg="transparent"
                 border="1px solid #5F4400"

@@ -26,6 +26,8 @@ import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
 import { CreatorApplicationRejected } from "./components/CreatorApplicationRejected"
 import { CreatorApplicationApproved } from "./components/CreatorApplicationApproved"
+import { useCreatorSubmission, useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/hooks"
+import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -67,12 +69,19 @@ export const ActionBanner = () => {
 
   const { data: canUserVote, isPerson, isLoading } = useCanUserVote(account ?? undefined, delegateeAddress)
 
+  // Creator banners
+  const { data: submissions, isLoading: submissionsLoading } = useCreatorSubmission(account ?? "")
+  const latestSubmissionStatus = submissions?.submissions[0]?.status // Only take into account the latest submission
+  const isLatestSubmissionRejected = latestSubmissionStatus === HumanizedTicketStatus.Closed
+
+  const hasCreatorNFT = useHasCreatorNFT(account ?? "") // No loading state
+
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
   const showCastVoteBanner = !!account && !isLoading && canUserVote
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
-  const showCreatorRejectedBanner = true // TODO: Implement logic
-  const showCreatorApprovedBanner = true // TODO: Implement logic
+  const showCreatorRejectedBanner = !!account && !submissionsLoading && isLatestSubmissionRejected
+  const showCreatorApprovedBanner = !!account && hasCreatorNFT
 
   const slides = useMemo(() => {
     const bannerComponents = []
@@ -80,10 +89,8 @@ export const ActionBanner = () => {
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
-    if (showCreatorRejectedBanner)
-      bannerComponents.push(<CreatorApplicationRejected key="creator-application-rejected" />)
-    if (showCreatorApprovedBanner)
-      bannerComponents.push(<CreatorApplicationApproved key="creator-application-approved" />)
+    if (showCreatorRejectedBanner) bannerComponents.push(<CreatorApplicationRejected key="creator-rejected" />)
+    if (showCreatorApprovedBanner) bannerComponents.push(<CreatorApplicationApproved key="creator-approved" />)
     return bannerComponents
   }, [
     showDoActionBanner,
