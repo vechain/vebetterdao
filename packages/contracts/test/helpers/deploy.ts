@@ -73,6 +73,7 @@ import {
   AdministrationUtils,
   VoteEligibilityUtils,
   EndorsementUtils,
+  X2EarnCreator,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -110,6 +111,7 @@ interface DeployInstance {
   voterRewardsV1: VoterRewardsV1
   treasury: Treasury
   nodeManagement: NodeManagement
+  x2EarnCreator: X2EarnCreator
   x2EarnRewardsPoolV1: X2EarnRewardsPoolV1
   x2EarnRewardsPoolV2: X2EarnRewardsPoolV2
   x2EarnRewardsPool: X2EarnRewardsPool
@@ -338,6 +340,8 @@ export const getOrDeployContractInstances = async ({
     },
   ])) as GalaxyMemberV1
 
+  const x2EarnCreator = (await deployProxy("X2EarnCreator", [config.CREATOR_NFT_URI, owner.address])) as X2EarnCreator
+
   // Deploy NodeManagement
   const nodeManagement = (await deployProxy("NodeManagement", [
     await vechainNodesMock.getAddress(),
@@ -383,7 +387,12 @@ export const getOrDeployContractInstances = async ({
     "X2EarnAppsV1",
     "X2EarnApps",
     await x2EarnAppsV1.getAddress(),
-    [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress(), veBetterPassportContractAddress],
+    [
+      config.XAPP_GRACE_PERIOD,
+      await nodeManagement.getAddress(),
+      veBetterPassportContractAddress,
+      await x2EarnCreator.getAddress(),
+    ],
     {
       version: 2,
       libraries: {
@@ -803,6 +812,13 @@ export const getOrDeployContractInstances = async ({
     .grantRole(roundStarterRole, owner.address)
     .then(async tx => await tx.wait())
 
+  // Set up the X2EarnCreator contract
+  await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())
+  await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.BURNER_ROLE(), await x2EarnApps.getAddress())
+
+  // Mint creator NFT to owner
+  await x2EarnCreator.safeMint(await owner.getAddress())
+
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
     await callBootstrapAndStartEmissions()
@@ -813,6 +829,7 @@ export const getOrDeployContractInstances = async ({
     b3tr,
     vot3,
     timeLock,
+    x2EarnCreator,
     governor,
     governorV1,
     governorV2,
