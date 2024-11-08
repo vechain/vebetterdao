@@ -121,6 +121,10 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     AppsStorageStorage storage $ = _getAppsStorageStorage();
 
+    if(x2EarnCreatorContract().balanceOf(msg.sender) == 0) {
+      revert X2EarnUnverifiedCreator(msg.sender);
+    }
+
     // Store the new app
     $._apps[id] = X2EarnAppsDataTypes.App(id, appName, 0);
     _setAppAdmin(id, admin);
@@ -128,6 +132,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
     _updateAppMetadata(id, metadataURI);
     _setTeamAllocationPercentage(id, 0);
     _setEndorsementStatus(id, false);
+    _addCreator(id, msg.sender);
 
     emit AppAdded(id, teamWalletAddress, appName, false);
   }

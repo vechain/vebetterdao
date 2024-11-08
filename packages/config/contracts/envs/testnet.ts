@@ -94,5 +94,7 @@ export function createTestnetConfig() {
     VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE: 20,
     VEPASSPORT_PASSPORT_MAX_ENTITIES: 5,
     VEPASSPORT_DECAY_RATE: 0,
+
+    CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json",
   })
 }
