@@ -82,7 +82,7 @@ export const AppEndorsementInfoCard = ({
     return (isAppModerator || isAppAdmin) && appUnendorsedStatus
   }, [isAppModerator, isAppAdmin, appUnendorsedStatus])
   const lookForEndorsersButtonVariant =
-    !shouldRenderEndorseButton && !shouldRenderSwitchEndorsementButton ? "primaryAction" : "defaultVariant"
+    !shouldRenderEndorseButton && !shouldRenderSwitchEndorsementButton ? "primaryAction" : "primarySubtle"
 
   // Modals
   const {
