@@ -37,11 +37,16 @@ export const AdminPageContent = () => {
     isPassportActionRegistrar,
     isPassportScoreManager,
     isPassportWhitelister,
+    isAdminOfX2EarnCreator,
+    isMinterOfX2EarnCreator,
+    isBurnerOfX2EarnCreator,
   } = useAccountPermissions(account ?? "")
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   const canSeePauseTab = isAdminOfB3tr || isAdminOfGalaxyMember || isAdminOfVot3 || isAdminOfB3TRGovernor
+
+  const canSeeX2EarnCreatorUtils = isAdminOfX2EarnCreator || isMinterOfX2EarnCreator || isBurnerOfX2EarnCreator
 
   const canSeeVeBetterPassportTab =
     isAdminOfVeBetterPassport ||
@@ -93,7 +98,6 @@ export const AdminPageContent = () => {
                 <UpdateReceiverAddress />
                 <UpdateAppsEligibility />
                 <XAppCheckEndorsement />
-                <ManageCreatorsNFT />
               </Grid>
             </TabPanel>
           )}
@@ -102,6 +106,7 @@ export const AdminPageContent = () => {
             <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
               <B3trAllowance />
               <UpdateRoleCard />
+              {canSeeX2EarnCreatorUtils ? <ManageCreatorsNFT /> : undefined}
             </Grid>
           </TabPanel>
 
