@@ -2,6 +2,8 @@ import { describe, it, expect } from "@jest/globals"
 import { execute } from "lambda-local"
 import path from "path"
 
+const ENVIRONMENT = process.env.TEST_ENVIRONMENT || "testnet"
+
 describe("startRound", () => {
   // Remove ".skip" to run the test
   it.skip(
@@ -12,7 +14,7 @@ describe("startRound", () => {
       const result = await new Promise((resolve, reject) => {
         execute({
           event,
-          lambdaPath: path.join(__dirname, "../../dist/mainnet/index.js"),
+          lambdaPath: path.join(__dirname, `../dist/${ENVIRONMENT}/startRound/index.js`), // Updated path
           timeoutMs: 5 * 60 * 1000,
           callback: (error: Error, result: unknown) => {
             if (error) {
@@ -23,7 +25,6 @@ describe("startRound", () => {
           },
         })
       })
-
       // Use the result for further assertions if necessary
       console.log(result)
       // Example assertion
