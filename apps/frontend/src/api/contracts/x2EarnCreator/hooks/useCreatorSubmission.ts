@@ -10,7 +10,7 @@ export const creatorSubmissionQueryKey = (walletAddress: string) => ["FETCH_CREA
  * @returns The creator submissions
  */
 export const useCreatorSubmission = (walletAddress: string) => {
-  const queryString = buildQueryString({ walletAddress })
+  const queryString = buildQueryString({ walletAddress: walletAddress.toLowerCase() })
 
   return useQuery({
     queryKey: creatorSubmissionQueryKey(walletAddress),

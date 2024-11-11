@@ -1,3 +1,4 @@
+import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import FreshdeskClient, { FreshdeskTicket } from "@/utils/FreshDeskClient"
 import { AddressUtils } from "@repo/utils"
 import { NextRequest, NextResponse } from "next/server"
@@ -25,20 +26,27 @@ export async function GET(request: NextRequest): Promise<NextResponse<Submission
 
   const freshdeskClient = new FreshdeskClient(process.env.FRESHDESK_API_TOKEN, process.env.FRESHDESK_DOMAIN)
   try {
-    const response = await freshdeskClient.getTicketByAdminWalletAddress(walletAddress)
+    const response = await freshdeskClient.getTicketByAdminWalletAddress(walletAddress.toLowerCase())
     if (!response?.results) {
       return NextResponse.json({ submissions: [] })
     }
-    const formattedResponse = response?.results.map((result: FreshdeskTicket) => {
-      const status = freshdeskClient.getHumanizedTicketStatus(result.status)
-      return {
-        id: result.id,
-        status,
-        adminWalletAddress: result.custom_fields.cf_admin_wallet_address,
-        createdAt: result.created_at,
-      }
-    })
-    return NextResponse.json({ submissions: formattedResponse })
+    const formattedResponse = response.results
+      .filter(
+        (result: FreshdeskTicket) =>
+          result?.custom_fields?.cf_admin_wallet_address &&
+          compareAddresses(result.custom_fields.cf_admin_wallet_address, walletAddress),
+      )
+      .map((result: FreshdeskTicket) => {
+        const status = freshdeskClient.getHumanizedTicketStatus(result.status)
+        return {
+          id: result.id,
+          status,
+          adminWalletAddress: result.custom_fields.cf_admin_wallet_address?.toLowerCase(),
+          createdAt: result.created_at,
+        }
+      })
+
+    return NextResponse.json({ submissions: formattedResponse.length > 0 ? formattedResponse : [] })
   } catch (error: any) {
     return NextResponse.json({ error: "Failed to fetch submission" }, { status: 500 })
   }

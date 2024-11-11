@@ -25,6 +25,7 @@ export const useHasCreatorNFT = (walletAddress: string) => {
     contractAddress: x2EarnCreatorContractAddress,
     method,
     args: [walletAddress],
+    enabled: !!walletAddress,
   })
   return balance > 0
 }

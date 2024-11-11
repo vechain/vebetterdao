@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
         cf_app_creator_name_optional: adminName,
         cf_app_url_optional: projectUrl,
         cf_github_username: githubUsername,
-        cf_admin_wallet_address: adminWalletAddress,
+        cf_admin_wallet_address: adminWalletAddress.toLowerCase(),
         cf_x_username: twitterUsername,
       },
     }
