@@ -34,6 +34,9 @@ type useAccountPermissionsResponse = {
   isPassportActionRegistrar: boolean
   isPassportScoreManager: boolean
   isPassportWhitelister: boolean
+  isMinterOfX2EarnCreator: boolean
+  isBurnerOfX2EarnCreator: boolean
+  isAdminOfX2EarnCreator: boolean
 }
 
 /**
@@ -120,6 +123,13 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
     address,
   )
 
+  const { data: isMinterOfX2EarnCreator } = useHasRole("MINTER_ROLE", config.x2EarnCreatorContractAddress, address)
+  const { data: isBurnerOfX2EarnCreator } = useHasRole("BURNER_ROLE", config.x2EarnCreatorContractAddress, address)
+  const { data: isAdminOfX2EarnCreator } = useHasRole(
+    "DEFAULT_ADMIN_ROLE",
+    config.x2EarnCreatorContractAddress,
+    address,
+  )
   return useMemo(() => {
     return {
       isAdmin:
@@ -133,6 +143,7 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
         isAdminOfVoterRewards ||
         isAdminOfX2EarnApps ||
         isAdminOfVeBetterPassport ||
+        isAdminOfX2EarnCreator ||
         false,
       isAdminOfB3tr: isAdminOfB3tr ?? false,
       isAdminOfEmissions: isAdminOfEmissions ?? false,
@@ -164,6 +175,9 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
       isPassportActionRegistrar: isPassportActionRegistrar ?? false,
       isPassportWhitelister: isPassportWhitelister ?? false,
       isPassportScoreManager: isPassportScoreManager ?? false,
+      isMinterOfX2EarnCreator: isMinterOfX2EarnCreator ?? false,
+      isBurnerOfX2EarnCreator: isBurnerOfX2EarnCreator ?? false,
+      isAdminOfX2EarnCreator: isAdminOfX2EarnCreator ?? false,
     }
   }, [
     isAdminOfB3tr,
@@ -196,5 +210,8 @@ export const useAccountPermissions = (address?: string): useAccountPermissionsRe
     isPassportActionRegistrar,
     isPassportWhitelister,
     isPassportScoreManager,
+    isMinterOfX2EarnCreator,
+    isBurnerOfX2EarnCreator,
+    isAdminOfX2EarnCreator,
   ])
 }
