@@ -28,7 +28,7 @@ export const CreatorApplicationRejected = () => {
         />
         <Show above="md">
           <HStack align="stretch" zIndex={1} position="relative" w="full">
-            <Image src="/images/info-bell.png" alt="Creator application update" w={24} h={24} />
+            <Image src="/images/head-only-warning.png" alt="Creator application update" w={24} h={24} />
             <HStack flex={1}>
               <VStack gap={2} align="stretch" flex={1}>
                 <Text size="xs" color="#8D6602" fontWeight="600">
