@@ -1186,5 +1186,18 @@
   "Upgrade your GM NFT coming soon!": "Upgrade your GM NFT coming soon!",
   "You will be able to attach GM NFT to this node": "You will be able to attach GM NFT to this node",
   "Attach GM NFT to XNode coming soon!": "Attach GM NFT to XNode coming soon!",
-  "You will be able to upgrade your GM NFT soon": "You will be able to upgrade your GM NFT soon"
+  "You will be able to upgrade your GM NFT soon": "You will be able to upgrade your GM NFT soon",
+  "CREATOR APPLICATION REJECTED": "CREATOR APPLICATION REJECTED",
+  "Your Creator's NFT application was rejected": "Your Creator's NFT application was rejected",
+  "Apply again": "Apply again",
+  "CREATOR'S NFT RECEIVED": "CREATOR'S NFT RECEIVED",
+  "Your Creator application was approved. Submit your app!": "Your Creator application was approved. Submit your app!",
+  "Submit app": "Submit app",
+  "Do you have a dApp to join the VeBetterDAO ecosystem?": "Do you have a dApp to join the VeBetterDAO ecosystem?",
+  "We're reviewing your Creator's NFT application form": "We're reviewing your Creator's NFT application form",
+  "If it's approved you'll receive a Creator's NFT and you'll be able to submit your app to VeBetterDAO!": "If it's approved you'll receive a Creator's NFT and you'll be able to submit your app to VeBetterDAO!",
+  "Your Creator's NFT application was approved!": "Your Creator's NFT application was approved!",
+  "You can now submit your app to the VeBetterDAO ecosystem": "You can now submit your app to the VeBetterDAO ecosystem",
+  "You're not cleared to receive a Creator's NFT": "You're not cleared to receive a Creator's NFT",
+  "Contact support": "Contact support"
 }
