@@ -1,8 +1,14 @@
 import { Button, Card, CardBody, Heading, HStack, Image, Stack, Text, VStack } from "@chakra-ui/react"
+import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
 export const CreatorApplicationRejected = () => {
   const { t } = useTranslation()
+
+  const router = useRouter()
+  const navigateToCreatorForm = () => {
+    return router.push("/apps/creator/new")
+  }
 
   return (
     <Card
@@ -39,11 +45,7 @@ export const CreatorApplicationRejected = () => {
             alignItems="center"
             spacing={4}
             px="24px">
-            <Button
-              variant={"link"}
-              colorScheme="primary"
-              // onClick={onOpenUnendorsementModal}
-            >
+            <Button variant={"link"} colorScheme="primary" onClick={navigateToCreatorForm}>
               {t("Contact support")}
             </Button>
             <Button
