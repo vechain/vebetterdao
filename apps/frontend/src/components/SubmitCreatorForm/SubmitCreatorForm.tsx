@@ -251,8 +251,8 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
               {...register("adminEmail", {
                 required: t("Admin Email is required"),
                 validate: value => {
-                  const re = /\S+@\S+\.\S+/
-                  return re.test(value) || t("Please enter a valid email")
+                  const emailRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)
+                  return emailRegex.test(value) || t("Please enter a valid email")
                 },
               })}
               onBlur={() => onBlur("adminEmail")}
