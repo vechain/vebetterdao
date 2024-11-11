@@ -32,6 +32,7 @@ export type ContractsConfig = {
   GM_NFT_BASE_URI: string
   GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL: bigint[]
   GM_NFT_NODE_TO_FREE_LEVEL: number[]
+  GM_NFT_MAX_LEVEL: number
 
   VOTER_REWARDS_LEVELS: number[]
   VOTER_REWARDS_MULTIPLIER: number[]
@@ -62,4 +63,6 @@ export type ContractsConfig = {
   VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE: number
   VEPASSPORT_PASSPORT_MAX_ENTITIES: number
   VEPASSPORT_DECAY_RATE: number
+
+  CREATOR_NFT_URI: string
 }
