@@ -54,6 +54,25 @@
       "persistent": true,
       "dependsOn": ["^setup-contracts:mainnet"]
     },
+    "start": {
+      "cache": false,
+      "dependsOn": ["^setup-contracts"]
+    },
+    "start:staging": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^setup-contracts:staging"]
+    },
+    "start:testnet": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^setup-contracts:testnet"]
+    },
+    "start:mainnet": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^setup-contracts:mainnet"]
+    },
     "setup-contracts": {
       "cache": false,
       "persistent": true,
@@ -192,11 +211,19 @@
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
+    "generate-creator-nft-metadata": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
     "generate-xapp-metadata": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },
     "upload-xapp-metadata": {
+      "cache": false,
+      "dependsOn": ["@repo/config#check-or-generate-local-config"]
+    },
+    "upload-creator-nft-metadata": {
       "cache": false,
       "dependsOn": ["@repo/config#check-or-generate-local-config"]
     },

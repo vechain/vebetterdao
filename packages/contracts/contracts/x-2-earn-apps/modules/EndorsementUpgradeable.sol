@@ -435,7 +435,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
    * @param appId The unique identifier of the app.
    * @return stillEligble True if the app is still eligible for voting.
    */
-  function _updateStatusIfThresholdNotMet(bytes32 appId) private returns (bool stillEligble) {
+  function _updateStatusIfThresholdNotMet(bytes32 appId) private returns (bool) {
     // Get the endorsement storage
     EndorsementStorage storage $ = _getEndorsementStorage();
 
@@ -457,6 +457,8 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     if (!stillEligible) {
       _setVotingEligibility(appId, false);
     }
+
+    return stillEligible;
   }
 
 

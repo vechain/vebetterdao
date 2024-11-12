@@ -23,6 +23,8 @@
 
 pragma solidity 0.8.20;
 
+import { IX2EarnCreator } from "../../interfaces/IX2EarnCreator.sol";
+
 /**
  * @title AdministrationUtils
  * @dev Utility library for administrative tasks in the X2Earn framework, including setting app administrators,
@@ -60,6 +62,23 @@ library AdministrationUtils {
    * @param appId The ID of the app.
    */
   error X2EarnMaxRewardDistributorsReached(bytes32 appId);
+
+  /**
+   * @dev Thrown when an attempt is made to add a creator when the maximum number of creators has been reached.
+   * @param appId The ID of the app.
+   */
+  error X2EarnMaxCreatorsReached(bytes32 appId);
+
+  /**
+   * @dev Thrown when an attempt is made to add a creator that is already a creator of the app.
+   * @param creator The address of the creator.
+   */
+  error X2EarnAlreadyCreator(address creator);
+
+  /**
+   * @dev Thrown when an attempt is made to remove a non-existent creator.
+   */
+  error X2EarnNonexistentCreator(bytes32 appId, address creator);
 
   /**
    * @dev Thrown when an attempt is made to remove a non-existent moderator.
@@ -134,6 +153,13 @@ library AdministrationUtils {
    */
   event AppAdminUpdated(bytes32 indexed appId, address oldAdmin, address newAdmin);
 
+  /**
+   * @dev Event fired when the admin adds a new creator to the app and new creator NFT is minted.
+   * @param appId The ID of the app.
+   * @param creatorAddress The address of the creator.
+   */
+  event CreatorAddedToApp(bytes32 indexed appId, address creatorAddress);
+
   // ------------------------------- Getter Functions -------------------------------
   /**
    * @dev Checks if an account is a reward distributor for an app.
@@ -163,6 +189,21 @@ library AdministrationUtils {
     address account
   ) public view returns (bool) {
     return contains(moderators[appId], account);
+  }
+
+  /**
+   * @dev Checks if an account is a creator for an app.
+   * @param creators Mapping of app IDs to arrays of creator addresses.
+   * @param appId The ID of the app.
+   * @param account The account address to check.
+   * @return True if the account is a creator, false otherwise.
+   */
+  function isAppCreator(
+    mapping(bytes32 appId => address[]) storage creators,
+    bytes32 appId,
+    address account
+  ) public view returns (bool) {
+    return contains(creators[appId], account);
   }
 
   // ------------------------------- Setter Functions -------------------------------
@@ -338,6 +379,49 @@ library AdministrationUtils {
   }
 
   /**
+   * @dev Removes a creator from an app.
+   * @param creators Mapping of app IDs to arrays of creator addresses.
+   * @param creatorApps Mapping of creator addresses to the number of apps they have created.
+   * @param x2EarnCreatorContract The X2EarnCreator contract instance.
+   * @param appId The ID of the app.
+   * @param creator The address of the creator to remove.
+   * @param appSubmitted Flag indicating if the app has been submitted.
+   */
+  function removeAppCreator(
+    mapping(bytes32 appId => address[]) storage creators,
+    mapping(address creator => uint256 apps) storage creatorApps,
+    IX2EarnCreator x2EarnCreatorContract,
+    bytes32 appId,
+    address creator,
+    bool appSubmitted
+  ) external {
+    if (creator == address(0)) {
+      revert X2EarnInvalidAddress(creator);
+    }
+
+    if (!appSubmitted) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    if (!isAppCreator(creators, appId, creator)) {
+      revert X2EarnNonexistentCreator(appId, creator);
+    }
+
+    // Remove the creator from the app
+    remove(creators[appId], creator);
+
+    // Burn the creator NFT if the creator doesn't have any apps
+    if (creatorApps[creator] == 1) {
+      x2EarnCreatorContract.burn(x2EarnCreatorContract.tokenOfOwnerByIndex(creator, 0));
+    }
+
+    // Decrease the number of apps created by the creator
+    creatorApps[creator]--;
+
+    emit ModeratorRemovedFromApp(appId, creator);
+  }
+
+  /**
    * @dev Adds a moderator to an app.
    * @param moderators Mapping of app IDs to arrays of moderator addresses.
    * @param appId The ID of the app.
@@ -393,6 +477,100 @@ library AdministrationUtils {
     emit AppAdminUpdated(appId, admin[appId], newAdmin);
 
     admin[appId] = newAdmin;
+  }
+
+  /**
+   * @dev Internal function to add a creator to the app
+   *
+   * @param appId the hashed name of the app
+   * @param creator the address of the creator
+   */
+  function addCreator(
+    mapping(bytes32 appId => address[]) storage creators,
+    mapping(address creator => uint256 apps) storage creatorApps,
+    IX2EarnCreator x2EarnCreatorContract,
+    bytes32 appId,
+    address creator,
+    bool appSubmitted,
+    uint256 MAX_CREATORS
+  ) external {
+    if (creator == address(0)) {
+      revert X2EarnInvalidAddress(creator);
+    }
+
+    if (!appSubmitted) {
+      revert X2EarnNonexistentApp(appId);
+    }
+
+    // Check if max number of managers has been reached
+    if (creators[appId].length >= MAX_CREATORS) {
+      revert X2EarnMaxCreatorsReached(appId);
+    }
+
+    if (contains(creators[appId], creator)) {
+      revert X2EarnAlreadyCreator(creator);
+    }
+
+    // Increase the number of apps created by the creator
+    creatorApps[creator]++;
+
+    // Add the creator to the app
+    creators[appId].push(creator);
+
+    // Mint a creator NFT if the creator doesn't have one
+    if (x2EarnCreatorContract.balanceOf(creator) == 0) {
+      x2EarnCreatorContract.safeMint(creator);
+    }
+
+    emit CreatorAddedToApp(appId, creator);
+  }
+
+  /**
+   * @dev Internal function to remove all creators from the app
+   *
+   * @param appId the hashed name of the app
+   */
+  function revokeAppCreators(
+    mapping(bytes32 => address[]) storage creators,
+    mapping(address => uint256) storage creatorApps,
+    IX2EarnCreator x2EarnCreatorContract,
+    bytes32 appId
+  ) external {
+    for (uint256 i = 0; i < creators[appId].length; i++) {
+      address creator = creators[appId][i];
+
+      // Burn the creator NFT if the creator doesn't have any other apps
+      if (creatorApps[creator] == 1) {
+        x2EarnCreatorContract.burn(x2EarnCreatorContract.tokenOfOwnerByIndex(creator, 0));
+      }
+
+      // Decrease the number of apps created by the creator
+      creatorApps[creator]--;
+    }
+  }
+
+  /**
+   * @dev Internal function to re-add all creators of an app
+   *
+   * @param appId the hashed name of the app
+   */
+  function validateAppCreators(
+    mapping(bytes32 => address[]) storage creators,
+    mapping(address => uint256) storage creatorApps,
+    IX2EarnCreator x2EarnCreatorContract,
+    bytes32 appId
+  ) external {
+    for (uint256 i = 0; i < creators[appId].length; i++) {
+      address creator = creators[appId][i];
+
+      // Mint a creator NFT if the creator doesn't have one
+      if (creatorApps[creator] == 0) {
+        x2EarnCreatorContract.safeMint(creator);
+      }
+
+      // Increase the number of apps created by the creator
+      creatorApps[creator]++;
+    }
   }
 
   // ------------------------------- Private Functions -------------------------------

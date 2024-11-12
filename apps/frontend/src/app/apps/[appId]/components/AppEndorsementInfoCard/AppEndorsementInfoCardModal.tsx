@@ -1,14 +1,12 @@
-import { useIsAppUnendorsed, useAppEndorsementScore, useAppEndorsers } from "@/api"
+import { useAppEndorsers, useAppEndorsementStatus, useXNode } from "@/api"
 import { EndorsementInfo } from "./EndorsementInfo"
 import { EndorsementHistory } from "./EndorsementHistory"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
-import { AppEndorsersIcon } from "./AppEndorsersSection"
-
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { normalize } from "@repo/utils/HexUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-
-import { UilCheckCircle, UilExclamationCircle, UilTrash } from "@iconscout/react-unicons"
+import { UilTrash } from "@iconscout/react-unicons"
 import {
   VStack,
   HStack,
@@ -16,7 +14,6 @@ import {
   Stack,
   Image,
   Heading,
-  Box,
   Center,
   Divider,
   Show,
@@ -24,27 +21,38 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { useTranslation, Trans } from "react-i18next"
-import { useState } from "react"
-
+import { useMemo, useState } from "react"
 import { BaseModal } from "@/components/BaseModal"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useBreakpoints } from "@/hooks"
+import { EndorsementDetails } from "./EndorsementDetails"
+import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 
 type Props = {
   isOpen: boolean
   onClose: () => void
   appId: string
-  userScore: number | null
 }
 
-export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore }: Props) => {
+export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) => {
   const { t } = useTranslation()
-
   const { account } = useWallet()
-  const { data: isUnendorsed } = useIsAppUnendorsed(appId)
-  const { data: endorsementScore } = useAppEndorsementScore(appId)
-  const { data: endorsers } = useAppEndorsers(appId)
+
+  const {
+    score: endorsementScore,
+    status: endorsementStatus,
+    threshold: endorsementThreshold,
+    isLoading: isEndorsementStatusLoading,
+  } = useAppEndorsementStatus(appId)
+  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId ?? "")
   const { data: endorsementEvents } = useAppEndorsedEvents({ appId })
+
+  // User xnodes, TODO support multiple xnodes
+  const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints } = useXNode()
+
+  const isUserAppEndorser = useMemo(() => {
+    if (!appId || isXNodeLoading) return false
+    return isXNodeHolder && isEndorsingApp && compareAddresses(appId, endorsedApp?.id)
+  }, [appId, isXNodeLoading, isXNodeHolder, isEndorsingApp, endorsedApp])
 
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const {
@@ -55,28 +63,6 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
   const handleCancelClick = () => {
     setIsConfirmOpen(false)
   }
-
-  const { isMobile } = useBreakpoints()
-
-  const TagBox = () => (
-    <Box>
-      {isUnendorsed ? (
-        <HStack bg="#FFF3E5" p={"6px 10px"} rounded="9px" justifyContent={"center"}>
-          <UilExclamationCircle color="#AF5F00" size={"1rem"} />
-          <Text color="#AF5F00" fontWeight={600} fontSize="sm">
-            {t("Looking for endorsement")}
-          </Text>
-        </HStack>
-      ) : (
-        <HStack bg="#E9FDF1" p={"6px 10px"} rounded="9px" justifyContent={"center"}>
-          <UilCheckCircle color="#3DBA67" size={"1rem"} />
-          <Text color="#3DBA67" fontWeight={600} fontSize="sm">
-            {t("Endorsed and active")}
-          </Text>
-        </HStack>
-      )}
-    </Box>
-  )
 
   return (
     <BaseModal
@@ -90,50 +76,27 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
 
         <Stack direction={["column", "column", "row"]} w={"full"} alignItems={"stretch"} spacing={5}>
           <VStack flex={1.5} h="full" maxH={["auto", "auto", "50vh"]} minH={["auto", "auto", "50vh"]} spacing={4}>
-            <HStack w="full" justify="space-between">
-              <Box>
-                <Heading fontSize={"24px"} fontWeight="700" color="#444AD1">
-                  {endorsementScore}
-                </Heading>
-                <Text fontWeight="400" fontSize="14px">
-                  {t("Current score")}
-                </Text>
-              </Box>
-              {userScore != null && (
-                <Box>
-                  <Heading fontSize={"24px"} fontWeight="700" color="#444AD1">
-                    {userScore}
-                  </Heading>
-                  <Text fontWeight="400" fontSize="14px">
-                    {t("Your score")}
-                  </Text>
-                </Box>
-              )}
+            <Stack
+              direction={["column", "column", "row"]}
+              w="full"
+              justify="space-between"
+              alignItems={["center", "center", "center"]}>
+              <EndorsementDetails
+                endorsementScore={endorsementScore}
+                endorsementStatus={endorsementStatus}
+                endorsementThreshold={endorsementThreshold}
+                isEndorsementStatusLoading={isEndorsementStatusLoading}
+                xNodePoints={xNodePoints}
+                isUserAppEndorser={isUserAppEndorser}
+                isXNodeLoading={isXNodeLoading}
+                endorsers={appEndorsers || []}
+                isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
 
-              <Box>
-                <HStack>
-                  <AppEndorsersIcon endorsers={endorsers ?? []} />
-                  <Heading fontSize={"24px"} fontWeight="700" color="#444AD1">
-                    {endorsers?.length}
-                  </Heading>{" "}
-                </HStack>
-                <Text fontWeight="400" fontSize="14px">
-                  {t("Users endorsing")}
-                </Text>
-              </Box>
-
-              {!isMobile && (
-                <Box>
-                  <TagBox />
-                </Box>
-              )}
-            </HStack>
-
-            {isMobile && (
-              <Box w={"full"} alignItems={"center"}>
-                <TagBox />
-              </Box>
-            )}
+              <EndorsementStatusCallout
+                endorsementStatus={endorsementStatus}
+                showDescription={false}
+                padding={2}></EndorsementStatusCallout>
+            </Stack>
 
             <Show below="md">
               <Divider w="full" />
@@ -153,9 +116,9 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
                 {t("Endorsers")}
               </Heading>
 
-              {endorsers && endorsers.length > 0 ? (
+              {appEndorsers && appEndorsers.length > 0 ? (
                 <VStack flex={1} w="full" overflowY="auto" h="full" spacing={2}>
-                  {account && isConfirmOpen && endorsers.includes(normalize(account)) && (
+                  {account && isConfirmOpen && appEndorsers.includes(normalize(account)) && (
                     <VStack
                       border={"1px solid #EC9BAF"}
                       p={4}
@@ -166,7 +129,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
                       <Text mb={4} maxW="full">
                         <Trans
                           i18nKey="<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active"
-                          values={{ endorsedAddress: humanAddress(normalize(account), 6, 3), value: userScore }}
+                          values={{ endorsedAddress: humanAddress(normalize(account), 6, 3), value: xNodePoints }}
                           components={{ bold: <Text as="span" fontWeight={"600"} /> }}
                         />
                       </Text>
@@ -182,7 +145,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId, userScore 
                     </VStack>
                   )}
 
-                  {endorsers
+                  {appEndorsers
                     .slice()
                     .reverse()
                     .map((endorser, index) => (

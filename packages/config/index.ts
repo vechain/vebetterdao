@@ -45,6 +45,7 @@ export type AppConfig = {
   galaxyMemberContractAddress: string
   treasuryContractAddress: string
   x2EarnAppsContractAddress: string
+  x2EarnCreatorContractAddress: string
   x2EarnRewardsPoolContractAddress: string
   nodeManagementContractAddress: string
   veBetterPassportContractAddress: string

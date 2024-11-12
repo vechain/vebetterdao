@@ -17,11 +17,11 @@ export const AdminAppPageButton = () => {
 
   const { account } = useWallet()
   const { admin } = useCurrentAppAdmin()
-  const { isAdminOfX2EarnApps } = useAccountPermissions(account || "")
+  const { data: permissions } = useAccountPermissions(account || "")
 
   const showAdminButton = useMemo(
-    () => compareAddresses(account || "", admin) || isAdminOfX2EarnApps,
-    [account, admin, isAdminOfX2EarnApps],
+    () => compareAddresses(account || "", admin) || permissions?.isAdminOfX2EarnApps,
+    [account, admin, permissions],
   )
 
   if (!showAdminButton) {

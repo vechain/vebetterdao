@@ -14,7 +14,7 @@ export const Navbar: React.FC = () => {
 
   const { account } = useWallet()
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
-  const { isAdmin } = useAccountPermissions(account ?? "")
+  const { data: permissions } = useAccountPermissions(account ?? "")
 
   const isNavbarVisible = useHideOnScroll()
 
@@ -25,12 +25,12 @@ export const Navbar: React.FC = () => {
         return (
           route.isVisible &&
           (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
-          (route.name === "Admin" ? isAdmin : true) &&
+          (route.name === "Admin" ? permissions?.isAdmin : true) &&
           (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true) &&
           (route.name === "Profile" ? isLargerThan1200 && !!account : true)
         )
       }),
-    [account, allocationRoundsEvents?.created?.length, isAdmin, isLargerThan1200],
+    [account, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200],
   )
 
   const parsedRoutesToRender = useMemo(() => {

@@ -70,10 +70,17 @@ contract X2EarnApps is
    *
    * @dev This function is called only once during the contract deployment
    */
-  function initializeV2(uint48 _gracePeriod, address _nodeManagementContract, address _veBetterPassportContract) public reinitializer(2) {
+  function initializeV2(
+    uint48 _gracePeriod,
+    address _nodeManagementContract,
+    address _veBetterPassportContract,
+    address _x2EarnCreatorContract
+  ) public reinitializer(2) {
     require(_nodeManagementContract != address(0), "X2EarnApps: Invalid Node Managementcontract address");
     require(_veBetterPassportContract != address(0), "X2EarnApps: Invalid VeBetterPassport contract address");
+    require(_x2EarnCreatorContract != address(0), "X2EarnApps: Invalid X2EarnCreator contract address");
     __Endorsement_init(_gracePeriod, _nodeManagementContract, _veBetterPassportContract);
+    __Administration_init_v2(_x2EarnCreatorContract);
   }
 
   // ---------- Modifiers ------------ //
@@ -148,6 +155,9 @@ contract X2EarnApps is
       _updateAppsPendingEndorsement(_appId, true);
     }
 
+    // Validate the app creators if the app is eligible and if not revoke the creators and burn their creator tokens
+    _isEligible ? _validateAppCreators(_appId) : _revokeAppCreators(_appId);
+
     // Set the app in the blacklist if not eligible and called by governance
     _setBlacklist(_appId, !_isEligible);
   }
@@ -209,6 +219,13 @@ contract X2EarnApps is
   }
 
   /**
+   * @dev See {IX2EarnApps-removeAppCreator}.
+   */
+  function removeAppCreator(bytes32 _appId, address _creator) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+    _removeAppCreator(_appId, _creator);
+  }
+
+  /**
    * @dev See {IX2EarnApps-addRewardDistributor}.
    */
   function addRewardDistributor(
@@ -216,6 +233,13 @@ contract X2EarnApps is
     address _distributor
   ) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _addRewardDistributor(_appId, _distributor);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-addCreator}.
+   */
+  function addCreator(bytes32 _appId, address _creator) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
+    _addCreator(_appId, _creator);
   }
 
   /**
@@ -297,5 +321,12 @@ contract X2EarnApps is
    */
   function setVeBetterPassportContract(address _veBetterPassportContract) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     _setVeBetterPassportContract(_veBetterPassportContract);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-setX2EarnCreatorContract}.
+   */
+  function setX2EarnCreatorContract(address _x2EarnCreatorContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setX2EarnCreatorContract(_x2EarnCreatorContract);
   }
 }

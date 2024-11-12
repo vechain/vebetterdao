@@ -23,6 +23,8 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { SwapB3trVot3 } from "./components/SwapB3trVot3"
 import { useRouter } from "next/navigation"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
+import { FeatureFlagWrapper } from "../FeatureFlagWrapper"
+import { FeatureFlag } from "@/constants"
 
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
@@ -92,9 +94,18 @@ export const GmNFTAndNodeCard = () => {
       <Stack gap={8} align="stretch" justify={"stretch"} direction={isAbove1200 ? "row" : "column-reverse"}>
         <VStack flex="3" align={"stretch"} gap="24px">
           <HStack gap="40px" align={"baseline"} justify={"space-between"}>
-            <Heading fontSize="xl" fontWeight={600}>
-              {t("You are on LEVEL {{level}}", { level: gmLevel })}
-            </Heading>
+            <FeatureFlagWrapper
+              feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+              fallback={
+                <Heading fontSize="xl" fontWeight={600}>
+                  {t("Your Galaxy Member")}
+                </Heading>
+              }>
+              <Heading fontSize="xl" fontWeight={600}>
+                {t("You are on LEVEL {{level}}", { level: gmLevel })}
+              </Heading>
+            </FeatureFlagWrapper>
+
             {isAbove800 && isXNodeAttachedToGM && (
               <>
                 <Text fontSize="xs" fontWeight={600} color="#B1F16C">
@@ -145,15 +156,17 @@ export const GmNFTAndNodeCard = () => {
                   <Text fontWeight={700} noOfLines={1}>
                     {gmName}
                   </Text>
-                  <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-                    <Text fontSize="xs" fontWeight={600}>
-                      {gmRewardMultiplier}
-                      {"x"}
-                    </Text>
-                    <Text fontSize="xs" fontWeight={400} noOfLines={1}>
-                      {t("Voting reward multiplier")}
-                    </Text>
-                  </HStack>
+                  <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
+                    <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+                      <Text fontSize="xs" fontWeight={600}>
+                        {gmRewardMultiplier}
+                        {"x"}
+                      </Text>
+                      <Text fontSize="xs" fontWeight={400} noOfLines={1}>
+                        {t("Voting reward multiplier")}
+                      </Text>
+                    </HStack>
+                  </FeatureFlagWrapper>
                 </VStack>
                 <FaChevronRight size={"24px"} />
               </HStack>
@@ -162,19 +175,23 @@ export const GmNFTAndNodeCard = () => {
             {isXNodeHolder && (
               <>
                 {isAbove800 ? (
-                  nodeSeparator
-                ) : (
-                  <HStack justify={"space-between"}>
-                    {isXNodeAttachedToGM ? (
-                      <Text fontSize="xs" fontWeight={600} color="#B1F16C">
-                        {t("GM NFT attached")}
-                      </Text>
-                    ) : (
-                      <Box flexBasis={"100px"} />
-                    )}
+                  <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<Box w={6} h={6}></Box>}>
                     {nodeSeparator}
-                    <Box flexBasis={"100px"} />
-                  </HStack>
+                  </FeatureFlagWrapper>
+                ) : (
+                  <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<Box w={6} h={6}></Box>}>
+                    <HStack justify={"space-between"}>
+                      {isXNodeAttachedToGM ? (
+                        <Text fontSize="xs" fontWeight={600} color="#B1F16C">
+                          {t("GM NFT attached")}
+                        </Text>
+                      ) : (
+                        <Box flexBasis={"100px"} />
+                      )}
+                      {nodeSeparator}
+                      <Box flexBasis={"100px"} />
+                    </HStack>
+                  </FeatureFlagWrapper>
                 )}
                 <HStack
                   bg="#0D5DFB"

@@ -2,6 +2,8 @@ import { useSelectedGmNft } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+import { FeatureFlagWrapper } from "@/components"
+import { FeatureFlag } from "@/constants"
 import {
   Box,
   Button,
@@ -84,15 +86,17 @@ export const AttachGMNFTCard = () => {
                 <Text fontWeight={700} noOfLines={1}>
                   {gmName}
                 </Text>
-                <HStack gap={1}>
-                  <Text fontSize="sm" fontWeight={600}>
-                    {gmRewardMultiplier}
-                    {"x"}
-                  </Text>
-                  <Text fontSize="sm" fontWeight={400} noOfLines={1}>
-                    {t("Voting reward multiplier")}
-                  </Text>
-                </HStack>
+                <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
+                  <HStack gap={1}>
+                    <Text fontSize="sm" fontWeight={600}>
+                      {gmRewardMultiplier}
+                      {"x"}
+                    </Text>
+                    <Text fontSize="sm" fontWeight={400} noOfLines={1}>
+                      {t("Voting reward multiplier")}
+                    </Text>
+                  </HStack>
+                </FeatureFlagWrapper>
               </VStack>
               <FaChevronRight size={"24px"} />
             </HStack>
@@ -106,12 +110,20 @@ export const AttachGMNFTCard = () => {
               {t("Detach")}
             </Button>
           ) : (
-            <Button
-              leftIcon={<UilLink color="#004CFC" />}
-              variant={"primarySubtle"}
-              onClick={attachGmToXNodeModal.onOpen}>
-              {t("Attach now!")}
-            </Button>
+            <FeatureFlagWrapper
+              feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+              fallback={
+                <Button leftIcon={<UilLink color="#004CFC" />} variant={"primarySubtle"} isDisabled={true}>
+                  {t("Coming soon!")}
+                </Button>
+              }>
+              <Button
+                leftIcon={<UilLink color="#004CFC" />}
+                variant={"primarySubtle"}
+                onClick={attachGmToXNodeModal.onOpen}>
+                {t("Attach now!")}
+              </Button>
+            </FeatureFlagWrapper>
           )}
         </VStack>
       </CardBody>

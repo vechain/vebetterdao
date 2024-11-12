@@ -1,6 +1,6 @@
 import { useTweets } from "@/api/twitter/hooks/useTweets"
 import { useCurrentAppMetadata } from "@/app/apps/[appId]/hooks"
-import { Spinner, VStack } from "@chakra-ui/react"
+import { Center, Spinner, VStack } from "@chakra-ui/react"
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { TweetCard } from "./components/TweetCard"
@@ -36,7 +36,11 @@ export const TweetList = ({ editMode, tweets, setTweets }: Props) => {
       dataLength={tweets.length}
       next={loadData}
       hasMore={visibleTweets.length < tweets.length}
-      loader={<Spinner size="md" alignSelf={"center"} />}>
+      loader={
+        <Center>
+          <Spinner size="md" mt={4} alignSelf="center" />
+        </Center>
+      }>
       <VStack alignItems="stretch" py={3} gap={4}>
         {visibleTweets?.map((tweetQuery, index) => (
           <TweetCard

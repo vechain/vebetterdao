@@ -97,6 +97,8 @@ export function createTestnetStagingConfig() {
       25000000000000000000000000n,
     ],
 
+    GM_NFT_MAX_LEVEL: 1,
+
     VOTER_REWARDS_LEVELS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
 
     /*
@@ -151,5 +153,7 @@ export function createTestnetStagingConfig() {
     VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE: 20,
     VEPASSPORT_PASSPORT_MAX_ENTITIES: 5,
     VEPASSPORT_DECAY_RATE: 0,
+
+    CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json",
   })
 }
