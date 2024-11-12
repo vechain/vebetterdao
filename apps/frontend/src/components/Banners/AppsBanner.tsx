@@ -7,6 +7,9 @@ export const AppsBanner = () => {
     <Card
       w={"full"}
       bg="#004CFC"
+      // position={"absolute"}
+      // top="0"
+      // left="0"
       color="white"
       overflow={"hidden"}
       borderRadius={"0px"}

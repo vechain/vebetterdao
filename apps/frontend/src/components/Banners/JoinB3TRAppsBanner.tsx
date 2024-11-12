@@ -20,7 +20,7 @@ export const JoinB3TRAppsBanner = () => {
       overflow={"hidden"}
       borderRadius={"12px"}
       bgImage="url('/images/community-green-blob.png')"
-      bgPosition="top"
+      bgPosition="center"
       bgSize="full">
       <HStack justifyContent={"space-between"}>
         <VStack alignItems={"flex-start"} my={"50px"} mx={"70px"} w={"50%"}>
