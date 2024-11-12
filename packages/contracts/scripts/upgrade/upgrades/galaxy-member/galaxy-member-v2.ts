@@ -21,6 +21,7 @@ async function main() {
     config.galaxyMemberContractAddress,
     [
       contractsConfig.VECHAIN_NODES_CONTRACT_ADDRESS,
+      config.nodeManagementContractAddress,
       contractsConfig.CONTRACTS_ADMIN_ADDRESS,
       contractsConfig.GM_NFT_NODE_TO_FREE_LEVEL,
     ],
