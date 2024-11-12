@@ -17,7 +17,7 @@ import { UilTrash } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { useBreakpointValue } from "@chakra-ui/react"
-import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 
 type Props = {
   distributor: string
@@ -27,7 +27,7 @@ type Props = {
 export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props) => {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { name } = useWalletName(distributor)
+  const { domain } = useVechainDomain({ addressOrDomain: distributor })
 
   return (
     <>
@@ -38,16 +38,14 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
             <VStack align="center" gap="20px">
               <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
               <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
-                {t("Delete {{address}} as reward distributor?", { address: name || humanAddress(distributor, 4, 4) })}
+                {t("Delete {{address}} as reward distributor?", { address: domain || humanAddress(distributor, 4, 4) })}
               </Heading>
               <Text color="#6A6A6A" textAlign={"center"}>
                 {t("This address won't be able to distribute rewards anymore.")}
               </Text>
-              {name && (
-                <Text color="#6A6A6A" textAlign={"center"}>
-                  {`Address: ${humanAddress(distributor, 8, 6)}`}
-                </Text>
-              )}
+              <Text color="#6A6A6A" textAlign={"center"}>
+                {`Account: ${domain ?? humanAddress(distributor, 8, 6)}`}
+              </Text>
               <VStack align="center" gap="20px" mt="20px">
                 <Button variant="primaryAction" onClick={onClose}>
                   {t("Cancel")}
@@ -68,7 +66,7 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
               {distributor}
             </Text>
             <Text fontSize={"14px"} color="#6A6A6A" borderLeft={"1px solid"} paddingLeft={2}>
-              {name}
+              {domain}
             </Text>
           </HStack>
           <Button variant="dangerGhost" leftIcon={<UilTrash size={"14px"} color="#D23F63" />} onClick={onOpen}>

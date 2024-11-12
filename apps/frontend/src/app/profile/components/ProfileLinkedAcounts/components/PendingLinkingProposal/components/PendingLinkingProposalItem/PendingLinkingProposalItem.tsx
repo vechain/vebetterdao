@@ -5,12 +5,12 @@ import { UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { AcceptLinkingModal } from "./components/AcceptLinkingModal"
 import { RejectLinkingModal } from "./components/RejectLinkingModal"
-import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 
 type Props = { isConnectedUser: boolean; secondaryAccount: string }
 export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }: Props) => {
   const { t } = useTranslation()
-  const { name } = useWalletName(secondaryAccount || "")
+  const { domain } = useVechainDomain({ addressOrDomain: secondaryAccount || "" })
   const rejectLinkingModal = useDisclosure()
   const acceptLinkingModal = useDisclosure()
   return (
@@ -26,9 +26,9 @@ export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }
           <AddressIcon address={secondaryAccount} w={12} h={12} rounded="full" />
           <VStack align="start">
             <HStack>
-              {name && (
+              {domain && (
                 <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} borderRight={"1px solid"} paddingRight={2}>
-                  {name}
+                  {domain}
                 </Text>
               )}
               <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>

@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 
 export const StartRoundCard = () => {
   const { account } = useWallet()
-  const { isAdminOfEmissions } = useAccountPermissions(account ?? "")
+  const { data: permissions } = useAccountPermissions(account ?? "")
   const { t } = useTranslation()
 
   return (
@@ -17,7 +17,7 @@ export const StartRoundCard = () => {
       </CardHeader>
       <CardBody>
         <VStack w={"full"} spacing={4} alignItems={"start"}>
-          {isAdminOfEmissions && <StartEmissionsButton />}
+          {permissions?.isAdminOfEmissions && <StartEmissionsButton />}
           <StartRoundButton />
         </VStack>
       </CardBody>

@@ -1,15 +1,14 @@
 import { AddressIcon } from "@/components/AddressIcon"
 import { Button, Fade, HStack, Text } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useWalletName } from "@vechain.energy/dapp-kit-hooks"
-import { useWalletModal } from "@vechain/dapp-kit-react"
+import { useVechainDomain, useWalletModal } from "@vechain/dapp-kit-react"
 
 type Props = {
   account: string
 }
 
 export const DesktopConnectedUserButton = ({ account }: Props) => {
-  const { name } = useWalletName(account)
+  const { domain } = useVechainDomain({ addressOrDomain: account })
   const { open } = useWalletModal()
 
   return (
@@ -18,7 +17,7 @@ export const DesktopConnectedUserButton = ({ account }: Props) => {
         <HStack spacing={2}>
           <AddressIcon address={account} boxSize={"28px"} rounded={"full"} />
           <Text fontWeight={"400"} data-testid={"wallet-address"}>
-            {name || humanAddress(account, 4, 6)}
+            {domain || humanAddress(account, 4, 6)}
           </Text>
         </HStack>
       </Button>
