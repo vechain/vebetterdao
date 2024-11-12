@@ -71,7 +71,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       })
     }
 
-    console.log("Creator NFT minted successfully:", receipt)
+    console.log("Creator NFT minted successfully:", { receipt, freshdeskTicketId: requestBody?.ticketId })
     return buildResponse(SuccessResponseType.SUCCESS, { receipt })
   } catch (error) {
     console.error("Error minting creator NFT:", error)
