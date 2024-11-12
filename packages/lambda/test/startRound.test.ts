@@ -7,14 +7,14 @@ const ENVIRONMENT = process.env.TEST_ENVIRONMENT || "testnet"
 describe("startRound", () => {
   // Remove ".skip" to run the test
   it.skip(
-    "should trigger start round lambda on staging environment",
+    `should trigger start round lambda on ${ENVIRONMENT} environment`,
     async () => {
       const event = {}
 
       const result = await new Promise((resolve, reject) => {
         execute({
           event,
-          lambdaPath: path.join(__dirname, `../dist/${ENVIRONMENT}/startRound/index.js`), // Updated path
+          lambdaPath: path.join(__dirname, `../dist/${ENVIRONMENT}/startRound/index.js`),
           timeoutMs: 5 * 60 * 1000,
           callback: (error: Error, result: unknown) => {
             if (error) {

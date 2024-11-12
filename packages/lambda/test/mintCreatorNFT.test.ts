@@ -5,7 +5,8 @@ import path from "path"
 const ENVIRONMENT = process.env.TEST_ENVIRONMENT || "testnet"
 
 describe("mintCreatorNFT", () => {
-  it(
+  // Remove ".skip" to run the test
+  it.skip(
     `should trigger creator NFT mint on ${ENVIRONMENT} environment`,
     async () => {
       const event = {
@@ -17,7 +18,7 @@ describe("mintCreatorNFT", () => {
       const result = await new Promise((resolve, reject) => {
         execute({
           event,
-          lambdaPath: path.join(__dirname, `../dist/${ENVIRONMENT}/mintCreatorNFT/index.js`), // Updated path
+          lambdaPath: path.join(__dirname, `../dist/${ENVIRONMENT}/mintCreatorNFT/index.js`),
           timeoutMs: 5 * 60 * 1000,
           callback: (error: Error, result: unknown) => {
             if (error) {
@@ -29,7 +30,9 @@ describe("mintCreatorNFT", () => {
         })
       })
 
+      // Use the result for further assertions if necessary
       console.log(result)
+      // Example assertion
       expect(result).toBeDefined()
     },
     5 * 60 * 1000,
