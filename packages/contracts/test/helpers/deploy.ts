@@ -60,6 +60,7 @@ import {
   PassportPersonhoodLogic,
   PassportDelegationLogic,
   X2EarnRewardsPoolV2,
+  X2EarnRewardsPoolV3,
   PassportChecksLogicV1,
   PassportDelegationLogicV1,
   PassportEntityLogicV1,
@@ -69,6 +70,10 @@ import {
   PassportWhitelistAndBlacklistLogicV1,
   VeBetterPassportV1,
   PassportConfiguratorV1,
+  AdministrationUtils,
+  VoteEligibilityUtils,
+  EndorsementUtils,
+  X2EarnCreator,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -84,7 +89,7 @@ import {
   GovernorClockLogicV4,
   GovernorVotesLogicV4,
 } from "../../typechain-types/contracts/deprecated/V4/governance/libraries"
-import { X2EarnRewardsPoolV3 } from "../../typechain-types/contracts/deprecated/V3/X2EarnRewardsPoolV3.sol/X2EarnRewardsPoolV3"
+import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
 
 interface DeployInstance {
   B3trContract: ContractFactory
@@ -106,6 +111,7 @@ interface DeployInstance {
   voterRewardsV1: VoterRewardsV1
   treasury: Treasury
   nodeManagement: NodeManagement
+  x2EarnCreator: X2EarnCreator
   x2EarnRewardsPoolV1: X2EarnRewardsPoolV1
   x2EarnRewardsPoolV2: X2EarnRewardsPoolV2
   x2EarnRewardsPool: X2EarnRewardsPool
@@ -163,6 +169,9 @@ interface DeployInstance {
   passportWhitelistBlacklistLogicV1: PassportWhitelistAndBlacklistLogicV1
   passportConfiguratorV1: PassportConfiguratorV1
   passportConfigurator: any // no abi for this library, which means a typechain is not generated
+  administrationUtils: AdministrationUtils
+  endorsementUtils: EndorsementUtils
+  voteEligibilityUtils: VoteEligibilityUtils
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
   vechainNodesMock: TokenAuction
@@ -247,6 +256,8 @@ export const getOrDeployContractInstances = async ({
     PassportWhitelistAndBlacklistLogic,
   } = await passportLibraries()
 
+  const { AdministrationUtils, EndorsementUtils, VoteEligibilityUtils } = await x2EarnLibraries()
+
   // ---------------------- Deploy Mocks ----------------------
 
   // deploy Mocks
@@ -329,13 +340,7 @@ export const getOrDeployContractInstances = async ({
     },
   ])) as GalaxyMemberV1
 
-  const galaxyMember = (await upgradeProxy(
-    "GalaxyMemberV1",
-    "GalaxyMember",
-    await galaxyMemberV1.getAddress(),
-    [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
-    { version: 2 },
-  )) as GalaxyMember
+  const x2EarnCreator = (await deployProxy("X2EarnCreator", [config.CREATOR_NFT_URI, owner.address])) as X2EarnCreator
 
   // Deploy NodeManagement
   const nodeManagement = (await deployProxy("NodeManagement", [
@@ -343,6 +348,31 @@ export const getOrDeployContractInstances = async ({
     owner.address,
     owner.address,
   ])) as NodeManagement
+
+  const galaxyMember = (await upgradeProxy(
+    "GalaxyMemberV1",
+    "GalaxyMember",
+    await galaxyMemberV1.getAddress(),
+    [
+      await vechainNodesMock.getAddress(),
+      await nodeManagement.getAddress(),
+      owner.address,
+      config.GM_NFT_NODE_TO_FREE_LEVEL,
+    ],
+    { version: 2 },
+  )) as GalaxyMember
+
+  // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
+  const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
+    PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
+    PassportConfiguratorV1: await PassportConfiguratorV1.getAddress(),
+    PassportEntityLogicV1: await PassportEntityLogicV1.getAddress(),
+    PassportDelegationLogicV1: await PassportDelegationLogicV1.getAddress(),
+    PassportPersonhoodLogicV1: await PassportPersonhoodLogicV1.getAddress(),
+    PassportPoPScoreLogicV1: await PassportPoPScoreLogicV1.getAddress(),
+    PassportSignalingLogicV1: await PassportSignalingLogicV1.getAddress(),
+    PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
+  })
 
   // Deploy X2EarnAppsV1
   const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
@@ -357,21 +387,21 @@ export const getOrDeployContractInstances = async ({
     "X2EarnAppsV1",
     "X2EarnApps",
     await x2EarnAppsV1.getAddress(),
-    [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress()],
-    { version: 2 },
+    [
+      config.XAPP_GRACE_PERIOD,
+      await nodeManagement.getAddress(),
+      veBetterPassportContractAddress,
+      await x2EarnCreator.getAddress(),
+    ],
+    {
+      version: 2,
+      libraries: {
+        AdministrationUtils: await AdministrationUtils.getAddress(),
+        EndorsementUtils: await EndorsementUtils.getAddress(),
+        VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+      },
+    },
   )) as X2EarnApps
-
-  // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
-  const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
-    PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
-    PassportConfiguratorV1: await PassportConfiguratorV1.getAddress(),
-    PassportEntityLogicV1: await PassportEntityLogicV1.getAddress(),
-    PassportDelegationLogicV1: await PassportDelegationLogicV1.getAddress(),
-    PassportPersonhoodLogicV1: await PassportPersonhoodLogicV1.getAddress(),
-    PassportPoPScoreLogicV1: await PassportPoPScoreLogicV1.getAddress(),
-    PassportSignalingLogicV1: await PassportSignalingLogicV1.getAddress(),
-    PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
-  })
 
   const x2EarnRewardsPoolV1 = (await deployProxy("X2EarnRewardsPoolV1", [
     owner.address,
@@ -723,6 +753,11 @@ export const getOrDeployContractInstances = async ({
       GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
       GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
     },
+    X2EarnApps: {
+      EndorsementUtils: await EndorsementUtils.getAddress(),
+      AdministrationUtils: await AdministrationUtils.getAddress(),
+      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+    },
   }
 
   await setWhitelistedFunctions(contractAddresses, config, governor, owner, libraries) // Set whitelisted functions for governor proposals
@@ -752,6 +787,11 @@ export const getOrDeployContractInstances = async ({
   // Set xAllocationGovernor in emissions
   await emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
 
+  // Grant action score manager role to X2EarnApps
+  await veBetterPassport
+    .connect(owner)
+    .grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), await x2EarnApps.getAddress())
+
   // Setup XAllocationPool addresses
   await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(owner).setEmissionsAddress(await emissions.getAddress())
@@ -772,6 +812,13 @@ export const getOrDeployContractInstances = async ({
     .grantRole(roundStarterRole, owner.address)
     .then(async tx => await tx.wait())
 
+  // Set up the X2EarnCreator contract
+  await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())
+  await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.BURNER_ROLE(), await x2EarnApps.getAddress())
+
+  // Mint creator NFT to owner
+  await x2EarnCreator.safeMint(await owner.getAddress())
+
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
     await callBootstrapAndStartEmissions()
@@ -782,6 +829,7 @@ export const getOrDeployContractInstances = async ({
     b3tr,
     vot3,
     timeLock,
+    x2EarnCreator,
     governor,
     governorV1,
     governorV2,
@@ -854,6 +902,9 @@ export const getOrDeployContractInstances = async ({
     passportPoPScoreLogicV1: PassportPoPScoreLogicV1,
     passportSignalingLogicV1: PassportSignalingLogicV1,
     passportWhitelistBlacklistLogicV1: PassportWhitelistAndBlacklistLogicV1,
+    administrationUtils: AdministrationUtils,
+    endorsementUtils: EndorsementUtils,
+    voteEligibilityUtils: VoteEligibilityUtils,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vechainNodesMock,

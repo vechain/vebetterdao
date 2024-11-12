@@ -790,3 +790,12 @@ export const linkEntityToPassportWithSignature = async (
   // Perform the delegation using the signature
   await veBetterPassport.connect(passport).linkEntityToPassportWithSignature(entity.address, deadline, signature)
 }
+
+export const getTwoUniqueRandomIndices = (max: number) => {
+  const firstIndex = Math.floor(Math.random() * max)
+  let secondIndex
+  do {
+    secondIndex = Math.floor(Math.random() * max)
+  } while (secondIndex === firstIndex)
+  return [firstIndex, secondIndex]
+}

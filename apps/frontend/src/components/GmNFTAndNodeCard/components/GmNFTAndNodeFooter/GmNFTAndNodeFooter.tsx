@@ -7,6 +7,8 @@ import { useMemo } from "react"
 import { SparklesIcon } from "@/components/Icons"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { GmActionButton } from "@/components/GmActionButton"
+import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
+import { FeatureFlag } from "@/constants"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -50,9 +52,17 @@ export const GmNFTAndNodeFooter = () => {
       } else {
         return (
           <Box>
-            <Text as="span" fontSize={"14px"}>
-              {t("Mint a GM NFT for free and get more rewards!")}
-            </Text>
+            <FeatureFlagWrapper
+              feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+              fallback={
+                <Text as="span" fontSize={"14px"}>
+                  {t("Mint a GM NFT for free!")}
+                </Text>
+              }>
+              <Text as="span" fontSize={"14px"}>
+                {t("Mint a GM NFT for free and get more rewards!")}
+              </Text>
+            </FeatureFlagWrapper>
           </Box>
         )
       }
@@ -62,10 +72,10 @@ export const GmNFTAndNodeFooter = () => {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
-            {t("Attach your XNode to you GM NFT and")}{" "}
+            {t("Attach your XNode to your GM NFT and")}{" "}
           </Text>
           <Text as="strong" fontSize={"14px"} fontWeight={600}>
-            {t("upgrade")}
+            {t("upgrade")}{" "}
           </Text>
           <Text as="span" fontSize={"14px"}>
             {t("it for free!")}
@@ -77,9 +87,17 @@ export const GmNFTAndNodeFooter = () => {
     if (isMaxGmLevelReached) {
       return (
         <Box>
-          <Text as="span" fontSize={"14px"}>
-            {t("You have reached the maximum level for your GM NFT")}
-          </Text>
+          <FeatureFlagWrapper
+            feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+            fallback={
+              <Text as="span" fontSize={"14px"}>
+                {t("You will be able to upgrade your GM NFT soon!")}
+              </Text>
+            }>
+            <Text as="span" fontSize={"14px"}>
+              {t("You have reached the maximum level for your GM NFT")}
+            </Text>
+          </FeatureFlagWrapper>
         </Box>
       )
     }

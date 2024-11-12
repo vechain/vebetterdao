@@ -37,6 +37,7 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
 import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
 import { ITokenAuction } from "./interfaces/ITokenAuction.sol";
+import { INodeManagement } from "./interfaces/INodeManagement.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
@@ -44,7 +45,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * @notice This contract manages the unique assets owned by users within the Galaxy Member ecosystem.
  * @dev Extends ERC721 Non-Fungible Token Standard basic implementation with upgradeable pattern, burnable, pausable, and access control functionalities.
  *
- * @dev Differences from V1:
+ * --------------------------------- VERSION ---------------------------------
  * - Added Vechain Nodes contract to attach and detach nodes to tokens
  * - Added NODES_MANAGER_ROLE to manage Vechain Nodes Contract address and free upgrade levels
  * - Added free upgrade levels for each Vechain node level
@@ -52,6 +53,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * - Added dynamic level fetching of the token based on the attached Vechain node and B3TR donated for upgrading
  * - Core logic functions are now overridable through inheritance
  * - B3TRGovernor has been updated to V2 thus pointing to the new interface
+ * - NodeManagement contract has been added to permit attaching and detaching nodes from managed nodes too
  */
 contract GalaxyMember is
   ERC721Upgradeable,
@@ -86,6 +88,7 @@ contract GalaxyMember is
     bool isPublicMintingPaused; // Flag to pause public minting
     // --------------------------- V2 Additions --------------------------- //
     ITokenAuction vechainNodes; // Vechain Nodes contract
+    INodeManagement nodeManagement; // Node Management contract
     mapping(uint256 => uint256) _nodeToTokenId; // Mapping from Vechain node ID to GalaxyMember Token ID. Used to track the XNode tied to the GM token ID
     mapping(uint256 => uint256) _tokenIdToNode; // Mapping from GalaxyMember Token ID to Vechain node ID. Used to track the GM token ID tied to the XNode token ID
     mapping(uint8 => uint256) _nodeToFreeUpgradeLevel; // Mapping from Vechain node level to GalaxyMember level. Used to track the GM level that can be upgraded for free for a given Vechain node level
@@ -104,12 +107,6 @@ contract GalaxyMember is
       $.slot := GalaxyMemberStorageLocation
     }
   }
-
-  /// @dev The clock was incorrectly modified.
-  error ERC6372InconsistentClock();
-
-  /// @dev Lookup to future votes is not available.
-  error ERC5805FutureLookup(uint256 timepoint, uint48 clock);
 
   /// @dev Emitted when an account changes the selected token for voting rewards.
   event Selected(address indexed owner, uint256 tokenId);
@@ -134,6 +131,12 @@ contract GalaxyMember is
 
   /// @dev Emitted when public minting is paused
   event PublicMintingPaused(bool isPaused);
+
+  /// @dev Emitted when a node is attached to a token
+  event NodeAttached(uint256 indexed nodeTokenId, uint256 indexed tokenId);
+
+  /// @dev Emitted when a node is detached from a token
+  event NodeDetached(uint256 indexed nodeTokenId, uint256 indexed tokenId);
 
   /// @notice Modifier to check if public minting is not paused
   modifier whenPublicMintingNotPaused() {
@@ -224,15 +227,18 @@ contract GalaxyMember is
   /// @custom:oz-upgrades-unsafe-allow constructor
   function initializeV2(
     address _vechainNodes,
+    address _nodesMangaement,
     address _nodesAdmin,
     uint256[] memory _nodeFreeLevels
   ) external reinitializer(2) {
     require(_nodeFreeLevels.length == 8, "GalaxyMember: invalid node free levels. Must be 7 levels");
     require(_vechainNodes != address(0), "GalaxyMember: _vechainNodes cannot be the zero address");
+    require(_nodesMangaement != address(0), "GalaxyMember: _nodesMangaement cannot be the zero address");
 
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     $.vechainNodes = ITokenAuction(_vechainNodes);
+    $.nodeManagement = INodeManagement(_nodesMangaement);
 
     $._nextTokenId = $._nextTokenId == 0 ? 1 : $._nextTokenId;
 
@@ -327,30 +333,39 @@ contract GalaxyMember is
 
   // ------------------------------- VECHAIN NODES FUNCTIONS ------------------------------- //
 
-  function attachNode(uint256 nodeTokenId, uint256 tokenId) public virtual {
+  function attachNode(uint256 nodeTokenId, uint256 tokenId) public virtual whenNotPaused {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
-    require(ownerOf(tokenId) != address(0), "GalaxyMember: token doesn't exist");
-    require($.vechainNodes.idToOwner(nodeTokenId) == msg.sender, "GalaxyMember: vechain node not owned by caller");
+    require(ownerOf(tokenId) == msg.sender, "GalaxyMember: token not owned by caller");
+    require(
+      $.nodeManagement.getNodeManager(nodeTokenId) == msg.sender,
+      "GalaxyMember: vechain node not owned or managed by caller"
+    );
     require(getIdAttachedToNode(nodeTokenId) == 0, "GalaxyMember: node already attached to a token");
     require(getNodeIdAttached(tokenId) == 0, "GalaxyMember: token already attached to a node");
 
     $._nodeToTokenId[nodeTokenId] = tokenId;
     $._tokenIdToNode[tokenId] = nodeTokenId;
+
+    emit NodeAttached(nodeTokenId, tokenId);
   }
 
-  function detachNode(uint256 nodeTokenId, uint256 tokenId) public virtual {
+  function detachNode(uint256 nodeTokenId, uint256 tokenId) public virtual whenNotPaused {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     require(
-      ownerOf(tokenId) == msg.sender || $.vechainNodes.idToOwner(nodeTokenId) == msg.sender,
-      "GalaxyMember: caller is not the owner of the token or the node"
+      ownerOf(tokenId) == msg.sender ||
+        $.nodeManagement.getNodeManager(nodeTokenId) == msg.sender ||
+        $.vechainNodes.idToOwner(nodeTokenId) == msg.sender,
+      "GalaxyMember: vechain node not owned or managed by caller or token not owned by caller"
     );
     require(getIdAttachedToNode(nodeTokenId) == tokenId, "GalaxyMember: node not attached to the token");
     require(getNodeIdAttached(tokenId) == nodeTokenId, "GalaxyMember: token not attached to the node");
 
     delete $._nodeToTokenId[nodeTokenId];
     delete $._tokenIdToNode[tokenId];
+
+    emit NodeDetached(nodeTokenId, tokenId);
   }
 
   // ----------- Internal & Private ----------- //
@@ -478,6 +493,8 @@ contract GalaxyMember is
   /// @notice Gets the B3TR required to upgrade to the next level
   /// @param tokenId Token ID to check
   function getB3TRtoUpgrade(uint256 tokenId) public view virtual returns (uint256) {
+    if (_ownerOf(tokenId) == address(0)) return 0;
+
     uint256 nodeId = getNodeIdAttached(tokenId);
 
     // Get the level of the token and the B3TR donated left to upgrade
@@ -502,8 +519,8 @@ contract GalaxyMember is
     // Default level is 1 if the token is not attached to a node or the token has not been upgraded
     uint256 level = 1;
 
-    // if the token is attached to a node and the node is owned by the token owner
-    if (nodeId != 0 && $.vechainNodes.idToOwner(nodeId) == ownerOf(tokenId)) {
+    // if the token is attached to a node and the node is managed by the caller
+    if (nodeId != 0 && $.nodeManagement.getNodeManager(nodeId) == ownerOf(tokenId)) {
       // Get the level of the node (i.e., Strength, Thunder, Mjolnir, VeThorX, StrengthX, ThunderX, MjolnirX)
       uint8 nodeLevel = getNodeLevelOf(nodeId);
 
@@ -785,6 +802,7 @@ contract GalaxyMember is
       _select(_previousOwner, tokenOfOwnerByIndex(_previousOwner, 0));
     }
 
+    // If the new owner has only one token, select it
     if (to != address(0) && balanceOf(to) == 1) {
       _select(to, tokenOfOwnerByIndex(to, 0));
     }

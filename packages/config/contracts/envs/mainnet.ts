@@ -63,6 +63,8 @@ export function createMainnetConfig() {
       25000000000000000000000000n,
     ],
 
+    GM_NFT_MAX_LEVEL: 1,
+
     /*
       Vechain Node => Free Upgrade Level
       None => 1
@@ -124,5 +126,7 @@ export function createMainnetConfig() {
     VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE: 20,
     VEPASSPORT_PASSPORT_MAX_ENTITIES: 5,
     VEPASSPORT_DECAY_RATE: 0,
+
+    CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json", // TODO: Update this with the actual IPFS URI
   })
 }

@@ -1,4 +1,4 @@
-import { describe, it } from "mocha"
+import { describe, it, beforeEach } from "mocha"
 import {
   NFT_NAME,
   NFT_SYMBOL,
@@ -24,10 +24,11 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { GalaxyMember, GalaxyMemberV1 } from "../typechain-types"
+import { GalaxyMember, GalaxyMemberV1, MockERC721Receiver } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
-describe("Galaxy Member - @shard6", () => {
+describe.only("Galaxy Member - @shard6", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -242,6 +243,147 @@ describe("Galaxy Member - @shard6", () => {
     })
   })
 
+  describe("ERC721 Compliance", () => {
+    let galaxyMember: GalaxyMember
+    let owner: HardhatEthersSigner
+    let approved: HardhatEthersSigner
+    let operator: HardhatEthersSigner
+    let other: HardhatEthersSigner
+    let tokenId: number
+
+    beforeEach(async () => {
+      const contracts = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      galaxyMember = contracts.galaxyMember
+      owner = contracts.owner
+      approved = contracts.otherAccount
+      operator = contracts.otherAccounts[0]
+      other = contracts.otherAccounts[1]
+
+      // Mint a token for testing
+      await participateInAllocationVoting(owner)
+      await galaxyMember.connect(owner).freeMint()
+      tokenId = 1
+    })
+
+    describe("ERC721 Metadata", () => {
+      it("should implement supportsInterface for ERC721Metadata", async () => {
+        const ERC721MetadataInterfaceId = "0x5b5e139f"
+        expect(await galaxyMember.supportsInterface(ERC721MetadataInterfaceId)).to.be.true
+      })
+
+      it("should return correct name and symbol", async () => {
+        expect(await galaxyMember.name()).to.equal("GalaxyMember")
+        expect(await galaxyMember.symbol()).to.equal("GM")
+      })
+    })
+
+    describe("ERC721 Enumerable", () => {
+      it("should implement supportsInterface for ERC721Enumerable", async () => {
+        const ERC721EnumerableInterfaceId = "0x780e9d63"
+        expect(await galaxyMember.supportsInterface(ERC721EnumerableInterfaceId)).to.be.true
+      })
+
+      it("should correctly implement totalSupply and tokenByIndex", async () => {
+        expect(await galaxyMember.totalSupply()).to.equal(1)
+        expect(await galaxyMember.tokenByIndex(0)).to.equal(tokenId)
+      })
+
+      it("should correctly implement tokenOfOwnerByIndex", async () => {
+        expect(await galaxyMember.tokenOfOwnerByIndex(owner.address, 0)).to.equal(tokenId)
+      })
+    })
+
+    describe("ERC721 Core Functions", () => {
+      it("should implement approve correctly", async () => {
+        await galaxyMember.connect(owner).approve(approved.address, tokenId)
+        expect(await galaxyMember.getApproved(tokenId)).to.equal(approved.address)
+      })
+
+      it("should implement setApprovalForAll correctly", async () => {
+        await galaxyMember.connect(owner).setApprovalForAll(operator.address, true)
+        expect(await galaxyMember.isApprovedForAll(owner.address, operator.address)).to.be.true
+      })
+
+      it("should emit Approval event on approve", async () => {
+        await expect(galaxyMember.connect(owner).approve(approved.address, tokenId))
+          .to.emit(galaxyMember, "Approval")
+          .withArgs(owner.address, approved.address, tokenId)
+      })
+
+      it("should emit ApprovalForAll event on setApprovalForAll", async () => {
+        await expect(galaxyMember.connect(owner).setApprovalForAll(operator.address, true))
+          .to.emit(galaxyMember, "ApprovalForAll")
+          .withArgs(owner.address, operator.address, true)
+      })
+    })
+
+    describe("ERC721 Transfer Mechanics", () => {
+      it("should correctly transfer tokens using transferFrom", async () => {
+        await galaxyMember.connect(owner).approve(approved.address, tokenId)
+        await galaxyMember.connect(approved).transferFrom(owner.address, other.address, tokenId)
+        expect(await galaxyMember.ownerOf(tokenId)).to.equal(other.address)
+      })
+
+      it("should correctly transfer tokens using safeTransferFrom", async () => {
+        await galaxyMember
+          .connect(owner)
+          ["safeTransferFrom(address,address,uint256)"](owner.address, other.address, tokenId)
+        expect(await galaxyMember.ownerOf(tokenId)).to.equal(other.address)
+      })
+
+      it("should clear approvals after transfer", async () => {
+        await galaxyMember.connect(owner).approve(approved.address, tokenId)
+        await galaxyMember.connect(owner).transferFrom(owner.address, other.address, tokenId)
+        expect(await galaxyMember.getApproved(tokenId)).to.equal(ethers.ZeroAddress)
+      })
+    })
+
+    describe("ERC721 Safety Checks", () => {
+      it("should revert when transferring to zero address", async () => {
+        await expect(galaxyMember.connect(owner).transferFrom(owner.address, ethers.ZeroAddress, tokenId)).to.be
+          .reverted
+      })
+
+      it("should revert when caller is not owner or approved", async () => {
+        await expect(galaxyMember.connect(other).transferFrom(owner.address, other.address, tokenId)).to.be.reverted
+      })
+
+      it("should revert when querying non-existent token", async () => {
+        const nonExistentTokenId = 999
+        await expect(galaxyMember.ownerOf(nonExistentTokenId)).to.be.reverted
+      })
+    })
+
+    describe("ERC721 Receiver Compliance", () => {
+      let receiverContract: MockERC721Receiver
+
+      beforeEach(async () => {
+        const MockERC721Receiver = await ethers.getContractFactory("MockERC721Receiver")
+        receiverContract = await MockERC721Receiver.deploy()
+      })
+
+      it("should transfer to ERC721Receiver implementer", async () => {
+        await galaxyMember
+          .connect(owner)
+          ["safeTransferFrom(address,address,uint256)"](owner.address, await receiverContract.getAddress(), tokenId)
+        expect(await galaxyMember.ownerOf(tokenId)).to.equal(await receiverContract.getAddress())
+      })
+
+      it("should revert when transferring to non-receiver contract", async () => {
+        // Try to transfer to the GalaxyMember contract itself (which doesn't implement ERC721Receiver)
+        await expect(
+          galaxyMember
+            .connect(owner)
+            ["safeTransferFrom(address,address,uint256)"](owner.address, await galaxyMember.getAddress(), tokenId),
+        ).to.be.reverted
+      })
+    })
+  })
+
   describe("Contract upgradeablity", () => {
     it("Admin should be able to upgrade the contract", async function () {
       const { galaxyMember, owner } = await getOrDeployContractInstances({
@@ -326,7 +468,9 @@ describe("Galaxy Member - @shard6", () => {
       })
 
       await expect(
-        galaxyMember.connect(owner).initializeV2(owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL),
+        galaxyMember
+          .connect(owner)
+          .initializeV2(owner.address, owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL),
       ).to.be.reverted
     })
 
@@ -533,6 +677,7 @@ describe("Galaxy Member - @shard6", () => {
         otherAccounts,
         minterAccount,
         vechainNodesMock,
+        nodeManagement,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -614,7 +759,7 @@ describe("Galaxy Member - @shard6", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMember.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -1720,7 +1865,7 @@ describe("Galaxy Member - @shard6", () => {
 
     it("Should be able to transfer a token with level greater than 1", async () => {
       const config = createLocalConfig()
-      const { owner, xAllocationVoting, b3tr, minterAccount, governor, otherAccount, treasury } =
+      const { owner, xAllocationVoting, b3tr, minterAccount, governor, otherAccount, treasury, nodeManagement } =
         await getOrDeployContractInstances({
           forceDeploy: true,
         })
@@ -1752,7 +1897,7 @@ describe("Galaxy Member - @shard6", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -1809,9 +1954,10 @@ describe("Galaxy Member - @shard6", () => {
 
     it("Should not be able to upgrade if contract is paused", async () => {
       const config = createLocalConfig()
-      const { owner, xAllocationVoting, b3tr, minterAccount, governor, treasury } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { owner, xAllocationVoting, b3tr, minterAccount, governor, treasury, nodeManagement } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1840,7 +1986,7 @@ describe("Galaxy Member - @shard6", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -1864,9 +2010,10 @@ describe("Galaxy Member - @shard6", () => {
 
     it("Should not be able to upgrade if allowance is not set", async () => {
       const config = createLocalConfig()
-      const { owner, xAllocationVoting, b3tr, minterAccount, governor, treasury } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { owner, xAllocationVoting, b3tr, minterAccount, governor, treasury, nodeManagement } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -1895,7 +2042,7 @@ describe("Galaxy Member - @shard6", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -1913,7 +2060,7 @@ describe("Galaxy Member - @shard6", () => {
 
     it("Should be able to upgrade to level 10", async () => {
       const config = createTestConfig()
-      const { owner, xAllocationVoting, minterAccount, governor, b3tr, otherAccount, treasury } =
+      const { owner, xAllocationVoting, minterAccount, governor, b3tr, otherAccount, treasury, nodeManagement } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -1946,7 +2093,7 @@ describe("Galaxy Member - @shard6", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -1994,7 +2141,7 @@ describe("Galaxy Member - @shard6", () => {
 
     it("Should not be able to upgrade token not owned", async () => {
       const config = createTestConfig()
-      const { owner, xAllocationVoting, minterAccount, governor, b3tr, otherAccount, treasury } =
+      const { owner, xAllocationVoting, minterAccount, governor, b3tr, otherAccount, treasury, nodeManagement } =
         await getOrDeployContractInstances({
           forceDeploy: true,
           config,
@@ -2027,7 +2174,7 @@ describe("Galaxy Member - @shard6", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -2047,10 +2194,11 @@ describe("Galaxy Member - @shard6", () => {
 
     it("Should not be able to upgrade above max level", async () => {
       const config = createTestConfig()
-      const { owner, xAllocationVoting, minterAccount, governor, b3tr, treasury } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
+      const { owner, xAllocationVoting, minterAccount, governor, b3tr, treasury, nodeManagement } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
 
       // Bootstrap emissions
       await bootstrapEmissions()
@@ -2079,7 +2227,7 @@ describe("Galaxy Member - @shard6", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -2337,6 +2485,8 @@ describe("Galaxy Member - @shard6", () => {
 
       expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1) // Strength Economy Node (token ID 1) still attached to GM NFT (token ID 0)
 
+      expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1 even though Strength Economy Node is attached because "owner" does not own the node anymore
+
       await galaxyMember.connect(otherAccount).detachNode(1, 1)
 
       expect(await galaxyMember.levelOf(1)).to.equal(1) // GM NFT Level is now 1 as no X Node is attached
@@ -2361,8 +2511,6 @@ describe("Galaxy Member - @shard6", () => {
       await galaxyMember.connect(owner).freeMint()
 
       await galaxyMember.setMaxLevel(10)
-
-      expect(await galaxyMember.getB3TRtoUpgrade(2)).to.equal(await galaxyMember.getB3TRtoUpgrade(1))
 
       await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRtoUpgrade(1))
 
@@ -2603,7 +2751,7 @@ describe("Galaxy Member - @shard6", () => {
       // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
       await galaxyMember.connect(owner).attachNode(1, 1)
 
-      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 1
+      expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
       expect(await galaxyMember.levelOf(2)).to.equal(1) // Level 1
 
       expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(1) // Owner has selected token ID 0 automatically as it was the first token owned
@@ -2783,6 +2931,925 @@ describe("Galaxy Member - @shard6", () => {
       await galaxyMember.connect(otherAccount).transferFrom(owner.address, otherAccount.address, 1)
 
       expect(await galaxyMember.ownerOf(1)).to.equal(otherAccount.address)
+    })
+
+    it("should handle node detached changes during upgrade", async () => {
+      const { owner, vechainNodesMock, galaxyMember, b3tr, minterAccount, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          deployMocks: true,
+        })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      await participateInAllocationVoting(owner, false, otherAccounts[4])
+
+      await galaxyMember.connect(owner).freeMint()
+
+      expect(await galaxyMember.tokenByIndex(0)).to.equal(1)
+
+      await galaxyMember.setMaxLevel(10)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(1) // Level 1
+
+      expect(await galaxyMember.ownerOf(1)).to.equal(owner.address)
+
+      // Attach node to GM NFT
+      await addNodeToken(2, owner) // Mint Level 2 Node with Token ID 1
+
+      const nodeId = await vechainNodesMock.ownerToId(owner.address)
+
+      await galaxyMember.connect(owner).attachNode(nodeId, 1)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(4)
+
+      await b3tr.connect(minterAccount).mint(owner, await galaxyMember.getB3TRtoUpgrade(1))
+
+      await b3tr.connect(owner).approve(await galaxyMember.getAddress(), await galaxyMember.getB3TRtoUpgrade(1))
+
+      // Detach node
+      await galaxyMember.connect(owner).detachNode(nodeId, 1)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(1)
+
+      // Upgrade GM NFT
+      await galaxyMember.connect(owner).upgrade(1)
+
+      expect(await galaxyMember.levelOf(1)).to.equal(2)
+    })
+
+    it("Should not be able to attach node when contract is paused", async () => {
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      await addNodeToken(1, owner)
+
+      await participateInAllocationVoting(owner, false, otherAccount)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      expect(await galaxyMember.tokenByIndex(0)).to.equal(1)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.setMaxLevel(10)
+
+      // Pause contract
+      await galaxyMember.connect(owner).pause()
+
+      await expect(galaxyMember.connect(owner).attachNode(1, 1)).to.be.reverted
+    })
+
+    it("Should not be able to detach node when contract is paused", async () => {
+      const { owner, vechainNodesMock, galaxyMember, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+      await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+      // Mint Mock Strength Economy Node (Level 1)
+      await addNodeToken(1, owner)
+
+      await participateInAllocationVoting(owner, false, otherAccount)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      expect(await galaxyMember.tokenByIndex(0)).to.equal(1)
+
+      await galaxyMember.connect(owner).freeMint()
+
+      await galaxyMember.setMaxLevel(10)
+
+      // Attach Strength Economy Node (token ID 1) to GM NFT (token ID 0)
+      await galaxyMember.connect(owner).attachNode(1, 1)
+
+      // Pause contract
+      await galaxyMember.connect(owner).pause()
+
+      await expect(galaxyMember.connect(owner).detachNode(1, 1)).to.be.reverted
+    })
+  })
+
+  describe("GalaxyMember Node Management Integration", () => {
+    describe("Node Delegation with Token Attachment", () => {
+      it("Should allow node manager (delegatee) to attach node to GM token", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, false, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(1)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(1)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(1)).to.equal(owner.address)
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(1, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+        expect(await galaxyMember.levelOf(1)).to.equal(7)
+      })
+
+      it("Should allow node manager to detach node from GM token", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, false, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(1)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(1)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(1)).to.equal(owner.address)
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(1, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+        expect(await galaxyMember.levelOf(1)).to.equal(7)
+
+        // Detach node from GM NFT
+        await galaxyMember.connect(owner).detachNode(1, 1)
+
+        // Expect node to be detached from GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(0)
+        expect(await galaxyMember.levelOf(1)).to.equal(1)
+      })
+
+      it("Should revert if non-manager tries to attach delegated node", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, false, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(1)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(1)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(1)).to.equal(nodeHolder.address)
+
+        // Attach node to GM NFT
+        await expect(galaxyMember.connect(owner).attachNode(1, 1)).to.be.revertedWith(
+          "GalaxyMember: vechain node not owned or managed by caller",
+        )
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(1)).to.equal(owner.address)
+
+        // Now owner can attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(1, 1)
+      })
+      it("Should revert if non-manager or non-owner tries to detach delegated node", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement, otherAccount } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, false, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(1)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(1)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(1)).to.equal(owner.address)
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(1, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+        expect(await galaxyMember.levelOf(1)).to.equal(7)
+
+        // Detach node from GM NFT
+        await expect(galaxyMember.connect(otherAccount).detachNode(1, 1)).to.be.revertedWith(
+          "GalaxyMember: vechain node not owned or managed by caller or token not owned by caller",
+        )
+
+        // Remove delegation
+        await nodeManagement.connect(nodeHolder).removeNodeDelegation()
+
+        // Expect node to be undelegated
+        expect(await nodeManagement.getNodeManager(1)).to.equal(nodeHolder.address)
+
+        // Now nodeHolder can attach node to GM NFT
+        await galaxyMember.connect(nodeHolder).detachNode(1, 1)
+      })
+    })
+
+    describe("Token Level Management with Delegated Nodes", () => {
+      it("Should NOT maintain token level when node is delegated to another address", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, true, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(1)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(1)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(1)).to.equal(owner.address)
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(1, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+        expect(await galaxyMember.levelOf(1)).to.equal(7)
+
+        // Remove delegation
+        await nodeManagement.connect(nodeHolder).removeNodeDelegation()
+
+        // Expect GM NFT level to be reset to 1 because the manager of the node is not the owner anymore but is nodeHolder
+        expect(await galaxyMember.levelOf(1)).to.equal(1)
+
+        // Expect GM is still attached to the node
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+
+        await participateInAllocationVoting(nodeHolder, false)
+
+        await galaxyMember.connect(nodeHolder).freeMint()
+
+        // Detach node from GM NFT of owner
+        await galaxyMember.connect(owner).detachNode(1, 1)
+
+        // Attach node to GM NFT of nodeHolder
+        await galaxyMember.connect(nodeHolder).attachNode(1, 2)
+
+        // Expect node to be attached to GM NFT of nodeHolder
+        expect(await galaxyMember.getNodeIdAttached(2)).to.equal(1)
+
+        // Expect GM NFT level to be 7
+        expect(await galaxyMember.levelOf(2)).to.equal(7)
+      })
+      it("Should update token level correctly when delegated node is upgraded", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, true)
+
+        // Mint Strength Economy Node (Level 1) to nodeHolder
+        await addNodeToken(1, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(2)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(2)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(1)) // Strength Economy Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(2)).to.equal(owner.address)
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(2, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(2)
+        expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+
+        // Upgrade node
+        await vechainNodesMock.connect(owner).upgradeTo(2, 3)
+
+        // Expect GM NFT level to be updated to 8
+        expect(await galaxyMember.levelOf(1)).to.equal(6)
+      })
+      it("Should update token level correctly when delegated node is downgraded", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, true)
+
+        // Mint Thunder Economy Node (Level 2) to nodeHolder
+        await addNodeToken(2, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(2)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(2)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(2)) // Thunder Economy Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(2)).to.equal(owner.address)
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(2, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(2)
+        expect(await galaxyMember.levelOf(1)).to.equal(4)
+
+        // Fast forward 4 hours for node to be downgraded
+        await time.setNextBlockTimestamp((await time.latest()) + 4 * 60 * 60)
+
+        // Downgrade node to Strength Economy Node (Level 1)
+        await vechainNodesMock.connect(owner).downgradeTo(2, 1)
+
+        // Expect GM NFT level to be updated to 2
+        expect(await galaxyMember.levelOf(1)).to.equal(2)
+      })
+    })
+
+    describe("Node Transfer Scenarios", () => {
+      it("Should maintain token attachment when delegated node is transferred", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, true)
+
+        // Mint Strength Economy Node (Level 1) to nodeHolder
+        await addNodeToken(1, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(2)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(2)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(1)) // Strength Economy Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(2)).to.equal(owner.address)
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(2, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(2)
+        expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+
+        // Skip ahead 1 day to be able to transfer node
+        await time.setNextBlockTimestamp((await time.latest()) + 86400)
+
+        // Transfer node to another address
+        await vechainNodesMock
+          .connect(nodeHolder)
+          .transferFrom(await nodeHolder.getAddress(), await otherAccounts[1].getAddress(), 2)
+
+        // Expect GM NFT level to be kept at 2 as the node is still attached and is still delegated to owner even though the node OWNER is different
+        expect(await galaxyMember.levelOf(1)).to.equal(2)
+
+        // OLD owner can't detach node anymore as the node is not owned by him
+        await expect(galaxyMember.connect(nodeHolder).detachNode(2, 1)).to.be.revertedWith(
+          "GalaxyMember: vechain node not owned or managed by caller or token not owned by caller",
+        )
+
+        // NEW owner can undelegete node
+        await nodeManagement.connect(otherAccounts[1]).removeNodeDelegation()
+
+        // Expect GM NFT level to be reset to 1 because the manager of the node is not the owner anymore but is otherAccounts[1]
+        expect(await galaxyMember.levelOf(1)).to.equal(1)
+      })
+      it("Should allow new owner to detach node even if delegated", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, true)
+
+        // Mint Strength Economy Node (Level 1) to nodeHolder
+        await addNodeToken(1, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(2)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(2)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(1)) // Strength Economy Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(2)).to.equal(owner.address)
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(2, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(2)
+        expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+
+        // Skip ahead 1 day to be able to transfer node
+        await time.setNextBlockTimestamp((await time.latest()) + 86400)
+
+        // Transfer node to another address
+        await vechainNodesMock
+          .connect(nodeHolder)
+          .transferFrom(await nodeHolder.getAddress(), await otherAccounts[1].getAddress(), 2)
+
+        // Node is still delegated to owner
+        expect(await nodeManagement.getNodeManager(2)).to.equal(owner.address)
+
+        // Expect GM NFT level to be kept at 2 as the node is still attached and is still delegated to owner even though the node OWNER is different
+        expect(await galaxyMember.levelOf(1)).to.equal(2)
+
+        // NEW owner can detach node
+        await galaxyMember.connect(otherAccounts[1]).detachNode(2, 1)
+
+        // Expect GM NFT level to be reset to 1 because node is detached
+        expect(await galaxyMember.levelOf(1)).to.equal(1)
+      })
+    })
+
+    describe("Edge Cases", () => {
+      it("Should handle delegation change while node is attached to token", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, true)
+
+        // Mint Strength Economy Node (Level 1) to nodeHolder
+        await addNodeToken(1, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(2)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(2)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(1)) // Strength Economy Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(2)).to.equal(owner.address)
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(2, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(2)
+        expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+
+        // Delegate node to otherAccounts[1]
+        await nodeManagement.connect(nodeHolder).delegateNode(otherAccounts[1])
+
+        // Expect node to be delegated to otherAccounts[1]
+        expect(await nodeManagement.getNodeManager(2)).to.equal(otherAccounts[1].address)
+
+        // Expect GM NFT level to be reset to 1 because the manager of the node is not the owner anymore but is otherAccounts[1]
+        expect(await galaxyMember.levelOf(1)).to.equal(1)
+      })
+      it("Should handle node downgrade to NONE level while attached to token", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, true)
+
+        // Mint Strength Economy Node (Level 1) to nodeHolder
+        await addNodeToken(1, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(2)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(2)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(1)) // Strength Economy Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(2)).to.equal(owner.address)
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(2, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(2)
+        expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+
+        // Fast forward 4 hours for node to be downgraded
+        await time.setNextBlockTimestamp((await time.latest()) + 4 * 60 * 60)
+
+        // Downgrade node to NONE level
+        await vechainNodesMock.connect(owner).downgradeTo(2, 0)
+
+        // Expect GM NFT level to be reset to 1 because the node level is NONE
+        expect(await galaxyMember.levelOf(1)).to.equal(1)
+      })
+      it("Should handle delegation removal while node is attached", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        const nodeHolder = otherAccounts[0]
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, true)
+
+        // Mint Strength Economy Node (Level 1) to nodeHolder
+        await addNodeToken(1, nodeHolder)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(nodeHolder.address)).to.equal(2)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(2)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(1)) // Strength Economy Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Delegate X Node created above to owner
+        await nodeManagement.connect(nodeHolder).delegateNode(owner)
+
+        // Expect node to be delegated to owner
+        expect(await nodeManagement.getNodeManager(2)).to.equal(owner.address)
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(2, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(2)
+        expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 2
+
+        // Remove delegation
+        await nodeManagement.connect(nodeHolder).removeNodeDelegation()
+
+        // Expect GM NFT level to be reset to 1 because the manager of the node is not the owner anymore but is nodeHolder
+        expect(await galaxyMember.levelOf(1)).to.equal(1)
+      })
+      it("Should handle GM level correctly when node attached is delegated", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccount, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, true)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(owner.address)).to.equal(1)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(1)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(1, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+        expect(await galaxyMember.levelOf(1)).to.equal(7)
+
+        // Owner delegates his Node
+        await nodeManagement.connect(owner).delegateNode(otherAccount)
+
+        // Expect node to be delegated to otherAccount
+        expect(await nodeManagement.getNodeManager(1)).to.equal(otherAccount.address)
+
+        // Expect GM NFT level to be reset to 1 because the manager of the node is not the owner anymore but is otherAccount
+        expect(await galaxyMember.levelOf(1)).to.equal(1)
+
+        // Expect GM NFT to still be attached to the node
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+
+        // Owner can detach node
+        await galaxyMember.connect(owner).detachNode(1, 1)
+
+        // Expect GM NFT to be detached from the node
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(0)
+      })
+      it("Should prevent token transfer while delegated node is attached", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccount, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, true)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(owner.address)).to.equal(1)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(1)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(1, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+        expect(await galaxyMember.levelOf(1)).to.equal(7)
+
+        // Owner delegates his Node
+        await nodeManagement.connect(owner).delegateNode(otherAccount)
+
+        // Expect node to be delegated to otherAccount
+        expect(await nodeManagement.getNodeManager(1)).to.equal(otherAccount.address)
+
+        // Expect GM NFT level to be reset to 1 because the manager of the node is not the owner anymore but is otherAccount
+        expect(await galaxyMember.levelOf(1)).to.equal(1)
+
+        // Expect GM NFT to still be attached to the node
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+
+        // Owner can't transfer GM NFT
+        await expect(
+          galaxyMember.connect(owner).transferFrom(owner.address, otherAccounts[1].address, 1),
+        ).to.be.revertedWith("GalaxyMember: token attached to a node, detach before transfer")
+      })
+      it("Should handle multiple delegation changes while attached to token", async () => {
+        const { owner, vechainNodesMock, galaxyMember, otherAccount, otherAccounts, nodeManagement } =
+          await getOrDeployContractInstances({
+            forceDeploy: true,
+            deployMocks: true,
+          })
+
+        if (!vechainNodesMock) throw new Error("VechainNodesMock not deployed")
+
+        await galaxyMember.setVechainNodes(await vechainNodesMock.getAddress())
+
+        await galaxyMember.setMaxLevel(10) // Set max level to 10
+
+        await participateInAllocationVoting(owner, true)
+
+        // nodeHolder owns a Mjolnir X Node
+        expect(await vechainNodesMock.ownerToId(owner.address)).to.equal(1)
+
+        const nodeMetadata = await vechainNodesMock.getMetadata(1)
+
+        expect(nodeMetadata[1]).to.equal(BigInt(7)) // Mjolnir X Node
+
+        await galaxyMember.connect(owner).freeMint()
+
+        // Attach node to GM NFT
+        await galaxyMember.connect(owner).attachNode(1, 1)
+
+        // Expect node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+        expect(await galaxyMember.levelOf(1)).to.equal(7)
+
+        // Owner delegates his Node
+        await nodeManagement.connect(owner).delegateNode(otherAccount)
+
+        // Expect node to be delegated to otherAccount
+        expect(await nodeManagement.getNodeManager(1)).to.equal(otherAccount.address)
+
+        // Expect GM NFT level to be reset to 1 because the manager of the node is not the owner anymore but is otherAccount
+        expect(await galaxyMember.levelOf(1)).to.equal(1)
+
+        // Expect GM NFT to still be attached to the node
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(1)
+
+        await galaxyMember.connect(owner).detachNode(1, 1)
+
+        await participateInAllocationVoting(otherAccounts[1], true, otherAccounts[1]) // Also mints a Mjolnir X Node to otherAccounts[1]
+
+        await galaxyMember.connect(otherAccounts[1]).freeMint()
+
+        // Attach new node to GM NFT
+        await galaxyMember.connect(otherAccounts[1]).attachNode(2, 2)
+
+        // Expect new node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(2)).to.equal(2)
+
+        // GM NFT Level should be 4
+        expect(await galaxyMember.levelOf(2)).to.equal(7)
+
+        // Owner delegates his Node
+        await nodeManagement.connect(otherAccounts[1]).delegateNode(owner)
+
+        await galaxyMember.connect(otherAccounts[1]).detachNode(2, 2)
+
+        // Expect node to be delegated to otherAccounts[1]
+        expect(await nodeManagement.getNodeManager(2)).to.equal(owner.address)
+
+        // Expect GM NFT level to be reset to 1 because the manager of the node is not the owner anymore but is otherAccount
+        expect(await galaxyMember.levelOf(2)).to.equal(1)
+
+        // GM NFT of owner can now be attached to new node delegated to him
+        await galaxyMember.connect(owner).attachNode(2, 1)
+
+        // Expect new node to be attached to GM NFT
+        expect(await galaxyMember.getNodeIdAttached(1)).to.equal(2)
+
+        // GM NFT Level should be 7
+        expect(await galaxyMember.levelOf(1)).to.equal(7)
+      })
     })
   })
 })

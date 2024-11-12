@@ -9,9 +9,11 @@ import {
   filterEventsByName,
   getOrDeployContractInstances,
   getStorageSlots,
+  getTwoUniqueRandomIndices,
   getVot3Tokens,
   parseAppAddedEvent,
   startNewAllocationRound,
+  waitForBlock,
   waitForCurrentRoundToEnd,
   waitForRoundToEnd,
 } from "./helpers"
@@ -20,12 +22,25 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createNodeHolder, endorseApp } from "./helpers/xnodes"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
-import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { X2EarnApps, X2EarnAppsV1, X2EarnApps__factory } from "../typechain-types"
+import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../scripts/helpers"
+import {
+  B3TRGovernor,
+  Emissions,
+  GalaxyMember,
+  VeBetterPassport,
+  VeBetterPassportV1,
+  VoterRewards,
+  X2EarnApps,
+  X2EarnAppsV1,
+  X2EarnApps__factory,
+  X2EarnRewardsPool,
+  XAllocationPool,
+  XAllocationVoting,
+} from "../typechain-types"
 import { SeedAccount, getTestKeys } from "../scripts/helpers/seedAccounts"
 import { buildTxBody, signAndSendTx } from "../scripts/helpers/txHelper"
+import { APPS } from "../scripts/deploy/setup"
 import { clauseBuilder, unitsUtils, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
-import { airdropVTHO } from "../scripts/helpers/airdrop"
 
 describe("X-Apps - @shard3", function () {
   describe("Deployment", function () {
@@ -38,17 +53,34 @@ describe("X-Apps - @shard3", function () {
   describe("Contract upgradeablity", () => {
     it("Cannot initialize twice", async function () {
       const config = createLocalConfig()
-      const { x2EarnApps, vechainNodesMock } = await getOrDeployContractInstances({ forceDeploy: true })
-      await catchRevert(x2EarnApps.initializeV2(config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()))
+      const { x2EarnApps, vechainNodesMock, veBetterPassport, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+      await catchRevert(
+        x2EarnApps.initializeV2(
+          config.XAPP_GRACE_PERIOD,
+          await vechainNodesMock.getAddress(),
+          await veBetterPassport.getAddress(),
+          await x2EarnCreator.getAddress(),
+        ),
+      )
     })
 
     it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
-      const { x2EarnApps, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, owner, administrationUtils, endorsementUtils, voteEligibilityUtils } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("X2EarnApps")
+      const Contract = await ethers.getContractFactory("X2EarnApps", {
+        libraries: {
+          AdministrationUtils: await administrationUtils.getAddress(),
+          EndorsementUtils: await endorsementUtils.getAddress(),
+          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+        },
+      })
+
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -67,12 +99,19 @@ describe("X-Apps - @shard3", function () {
     })
 
     it("Only user with UPGRADER_ROLE should be able to upgrade the contract", async function () {
-      const { x2EarnApps, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { x2EarnApps, otherAccount, administrationUtils, endorsementUtils, voteEligibilityUtils } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
 
       // Deploy the implementation contract
-      const Contract = await ethers.getContractFactory("X2EarnApps")
+      const Contract = await ethers.getContractFactory("X2EarnApps", {
+        libraries: {
+          AdministrationUtils: await administrationUtils.getAddress(),
+          EndorsementUtils: await endorsementUtils.getAddress(),
+          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+        },
+      })
       const implementation = await Contract.deploy()
       await implementation.waitForDeployment()
 
@@ -101,7 +140,17 @@ describe("X-Apps - @shard3", function () {
     it("X2Earn Apps Info added pre contract upgrade should should be same after upgrade", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      const { timeLock, owner, otherAccounts, vechainNodesMock } = await getOrDeployContractInstances({
+      const {
+        timeLock,
+        owner,
+        otherAccounts,
+        vechainNodesMock,
+        veBetterPassport,
+        administrationUtils,
+        endorsementUtils,
+        voteEligibilityUtils,
+        x2EarnCreator,
+      } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -140,8 +189,20 @@ describe("X-Apps - @shard3", function () {
         "X2EarnAppsV1",
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
-        [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
-        { version: 2 },
+        [
+          config.XAPP_GRACE_PERIOD,
+          await vechainNodesMock.getAddress(),
+          await veBetterPassport.getAddress(),
+          await x2EarnCreator.getAddress(),
+        ],
+        {
+          version: 2,
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        },
       )) as X2EarnApps
 
       // start new round
@@ -154,10 +215,22 @@ describe("X-Apps - @shard3", function () {
     it("X2Earn Apps added pre contract upgrade should need endorsement after upgrade and should be in grace period", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      const { xAllocationVoting, x2EarnRewardsPool, xAllocationPool, timeLock, owner, nodeManagement, otherAccounts } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const {
+        xAllocationVoting,
+        x2EarnRewardsPool,
+        xAllocationPool,
+        timeLock,
+        x2EarnCreator,
+        owner,
+        nodeManagement,
+        otherAccounts,
+        veBetterPassport,
+        administrationUtils,
+        endorsementUtils,
+        voteEligibilityUtils,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Deploy X2EarnApps
       const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
@@ -212,9 +285,25 @@ describe("X-Apps - @shard3", function () {
         "X2EarnAppsV1",
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
-        [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress()],
-        { version: 2 },
+        [
+          config.XAPP_GRACE_PERIOD,
+          await nodeManagement.getAddress(),
+          await veBetterPassport.getAddress(),
+          await x2EarnCreator.getAddress(),
+        ],
+        {
+          version: 2,
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        },
       )) as X2EarnApps
+
+      await veBetterPassport
+        .connect(owner)
+        .grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), await x2EarnAppsV2.getAddress())
 
       // start new round
       const round2 = await startNewAllocationRound()
@@ -298,6 +387,11 @@ describe("X-Apps - @shard3", function () {
         owner,
         vechainNodesMock,
         otherAccounts,
+        veBetterPassport,
+        endorsementUtils,
+        administrationUtils,
+        voteEligibilityUtils,
+        x2EarnCreator,
       } = await getOrDeployContractInstances({ forceDeploy: true })
 
       // Deploy X2EarnAppsV1
@@ -366,8 +460,20 @@ describe("X-Apps - @shard3", function () {
         "X2EarnAppsV1",
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
-        [config.XAPP_GRACE_PERIOD, await vechainNodesMock.getAddress()],
-        { version: 2 },
+        [
+          config.XAPP_GRACE_PERIOD,
+          await vechainNodesMock.getAddress(),
+          await veBetterPassport.getAddress(),
+          await x2EarnCreator.getAddress(),
+        ],
+        {
+          version: 2,
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        },
       )
 
       const storageSlotsAfter = await getStorageSlots(
@@ -382,6 +488,693 @@ describe("X-Apps - @shard3", function () {
       for (let i = 0; i < storageSlots.length; i++) {
         expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
       }
+    })
+
+    it.skip("Check no issues upgrading to V2 with addition of libraries", async function () {
+      const config = createLocalConfig()
+      config.EMISSIONS_CYCLE_DURATION = 50
+      const {
+        otherAccounts,
+        otherAccount,
+        owner,
+        vechainNodesMock,
+        timeLock,
+        b3tr,
+        vot3,
+        treasury,
+        x2EarnCreator,
+        nodeManagement,
+        passportChecksLogicV1,
+        passportConfiguratorV1,
+        passportDelegationLogicV1,
+        passportPersonhoodLogicV1,
+        passportPoPScoreLogicV1,
+        passportSignalingLogicV1,
+        passportEntityLogicV1,
+        passportWhitelistBlacklistLogicV1,
+        passportChecksLogic,
+        passportConfigurator,
+        passportDelegationLogic,
+        passportPersonhoodLogic,
+        passportPoPScoreLogic,
+        passportSignalingLogic,
+        passportWhitelistBlacklistLogic,
+        passportEntityLogic,
+        governorClockLogicLibV1,
+        governorConfiguratorLibV1,
+        governorDepositLogicLibV1,
+        governorFunctionRestrictionsLogicLibV1,
+        governorProposalLogicLibV1,
+        governorQuorumLogicLibV1,
+        governorStateLogicLibV1,
+        governorVotesLogicLibV1,
+        governorClockLogicLibV3,
+        governorConfiguratorLibV3,
+        governorDepositLogicLibV3,
+        governorFunctionRestrictionsLogicLibV3,
+        governorProposalLogicLibV3,
+        governorQuorumLogicLibV3,
+        governorStateLogicLibV3,
+        governorVotesLogicLibV3,
+        governorClockLogicLibV4,
+        governorConfiguratorLibV4,
+        governorDepositLogicLibV4,
+        governorFunctionRestrictionsLogicLibV4,
+        governorProposalLogicLibV4,
+        governorQuorumLogicLibV4,
+        governorStateLogicLibV4,
+        governorVotesLogicLibV4,
+        governorClockLogicLib,
+        governorConfiguratorLib,
+        governorDepositLogicLib,
+        governorFunctionRestrictionsLogicLib,
+        governorProposalLogicLib,
+        governorQuorumLogicLib,
+        governorStateLogicLib,
+        governorVotesLogicLib,
+        administrationUtils,
+        endorsementUtils,
+        voteEligibilityUtils,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Deploy X2EarnApps V1 and all the other contracts
+      const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
+        "ipfs://",
+        [await timeLock.getAddress(), owner.address],
+        owner.address,
+        owner.address,
+      ])) as X2EarnAppsV1
+
+      const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
+        PassportChecksLogicV1: await passportChecksLogicV1.getAddress(),
+        PassportConfiguratorV1: await passportConfiguratorV1.getAddress(),
+        PassportEntityLogicV1: await passportEntityLogicV1.getAddress(),
+        PassportDelegationLogicV1: await passportDelegationLogicV1.getAddress(),
+        PassportPersonhoodLogicV1: await passportPersonhoodLogicV1.getAddress(),
+        PassportPoPScoreLogicV1: await passportPoPScoreLogicV1.getAddress(),
+        PassportSignalingLogicV1: await passportSignalingLogicV1.getAddress(),
+        PassportWhitelistAndBlacklistLogicV1: await passportWhitelistBlacklistLogicV1.getAddress(),
+      })
+
+      const x2EarnRewardsPool = (await deployAndUpgrade(
+        ["X2EarnRewardsPoolV1", "X2EarnRewardsPoolV2", "X2EarnRewardsPoolV3", "X2EarnRewardsPool"],
+        [
+          [
+            owner.address, // admin
+            owner.address, // contracts address manager
+            owner.address, // upgrader //TODO: transferRole
+            await b3tr.getAddress(),
+            await x2EarnAppsV1.getAddress(),
+          ],
+          [
+            owner.address, // impact admin address
+            config.X_2_EARN_INITIAL_IMPACT_KEYS, // impact keys
+          ],
+          [veBetterPassportContractAddress],
+          [],
+        ],
+        {
+          versions: [undefined, 2, 3, 4],
+        },
+      )) as X2EarnRewardsPool
+
+      const xAllocationPool = (await deployAndUpgrade(
+        ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPool"],
+        [
+          [
+            owner.address, // admin
+            owner.address, // upgrader
+            owner.address, // contractsAddressManager
+            await b3tr.getAddress(),
+            await treasury.getAddress(),
+            await x2EarnAppsV1.getAddress(),
+            await x2EarnRewardsPool.getAddress(),
+          ],
+          [],
+          [],
+        ],
+        {
+          versions: [undefined, 2, 3],
+        },
+      )) as XAllocationPool
+
+      const galaxyMember = (await deployAndUpgrade(
+        ["GalaxyMemberV1", "GalaxyMember"],
+        [
+          [
+            {
+              name: "VeBetterDAO Galaxy Member",
+              symbol: "GM",
+              admin: owner.address,
+              upgrader: owner.address,
+              pauser: owner.address,
+              minter: owner.address,
+              contractsAddressManager: owner.address,
+              maxLevel: 5,
+              baseTokenURI: config.GM_NFT_BASE_URI,
+              b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+              b3tr: await b3tr.getAddress(),
+              treasury: await treasury.getAddress(),
+            },
+          ],
+          [await vechainNodesMock.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        ],
+        {
+          versions: [undefined, 2],
+        },
+      )) as GalaxyMember
+
+      const emissions = (await deployAndUpgrade(
+        ["EmissionsV1", "Emissions"],
+        [
+          [
+            {
+              minter: owner.address,
+              admin: owner.address,
+              upgrader: owner.address,
+              contractsAddressManager: owner.address,
+              decaySettingsManager: owner.address,
+              b3trAddress: await b3tr.getAddress(),
+              destinations: [
+                await xAllocationPool.getAddress(),
+                config.VOTE_2_EARN_POOL_ADDRESS,
+                await treasury.getAddress(),
+                config.MIGRATION_ADDRESS,
+              ],
+              initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+              cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+              decaySettings: [
+                config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+                config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+                config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+                config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+              ],
+              treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+              maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+              migrationAmount: config.MIGRATION_AMOUNT,
+            },
+          ],
+          [config.EMISSIONS_IS_NOT_ALIGNED],
+        ],
+        {
+          versions: [undefined, 2],
+        },
+      )) as Emissions
+
+      const voterRewards = (await deployAndUpgrade(
+        ["VoterRewardsV1", "VoterRewardsV2", "VoterRewards"],
+        [
+          [
+            owner.address, // admin
+            owner.address, // upgrader // TODO: transferRole
+            owner.address, // contractsAddressManager
+            await emissions.getAddress(),
+            await galaxyMember.getAddress(),
+            await b3tr.getAddress(),
+            config.VOTER_REWARDS_LEVELS,
+            config.VOTER_REWARDS_MULTIPLIER,
+          ],
+          [],
+          [],
+        ],
+        {
+          versions: [undefined, 2, 3],
+        },
+      )) as VoterRewards
+
+      const xAllocationVoting = (await deployAndUpgrade(
+        ["XAllocationVotingV1", "XAllocationVotingV2", "XAllocationVoting"],
+        [
+          [
+            {
+              vot3Token: await vot3.getAddress(),
+              quorumPercentage: config.X_ALLOCATION_VOTING_QUORUM_PERCENTAGE,
+              initialVotingPeriod: config.EMISSIONS_CYCLE_DURATION - 1,
+              timeLock: await timeLock.getAddress(),
+              voterRewards: await voterRewards.getAddress(),
+              emissions: await emissions.getAddress(),
+              admins: [await timeLock.getAddress(), owner.address],
+              upgrader: owner.address,
+              contractsAddressManager: owner.address,
+              x2EarnAppsAddress: await x2EarnAppsV1.getAddress(),
+              baseAllocationPercentage: config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE,
+              appSharesCap: config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP,
+              votingThreshold: config.X_ALLOCATION_VOTING_VOTING_THRESHOLD,
+            },
+          ],
+          [veBetterPassportContractAddress],
+          [],
+        ],
+        {
+          versions: [undefined, 2, 3],
+        },
+      )) as XAllocationVoting
+
+      const veBetterPassportV1 = (await initializeProxy(
+        veBetterPassportContractAddress,
+        "VeBetterPassportV1",
+        [
+          {
+            x2EarnApps: await x2EarnAppsV1.getAddress(),
+            xAllocationVoting: await xAllocationVoting.getAddress(),
+            galaxyMember: await galaxyMember.getAddress(),
+            signalingThreshold: config.VEPASSPORT_BOT_SIGNALING_THRESHOLD, //signalingThreshold
+            roundsForCumulativeScore: config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE, //roundsForCumulativeScore
+            minimumGalaxyMemberLevel: config.VEPASSPORT_GALAXY_MEMBER_MINIMUM_LEVEL, //galaxyMemberMinimumLevel
+            blacklistThreshold: config.VEPASSPORT_BLACKLIST_THRESHOLD_PERCENTAGE, //blacklistThreshold
+            whitelistThreshold: config.VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE, //whitelistThreshold
+            maxEntitiesPerPassport: config.VEPASSPORT_PASSPORT_MAX_ENTITIES, //maxEntitiesPerPassport
+            decayRate: config.VEPASSPORT_DECAY_RATE, //decayRate
+          },
+          {
+            admin: owner.address, // admins
+            botSignaler: owner.address, // botSignaler
+            upgrader: owner.address, // upgrader
+            settingsManager: owner.address, // settingsManager
+            roleGranter: owner.address, // roleGranter
+            blacklister: owner.address, // blacklister
+            whitelister: owner.address, // whitelistManager
+            actionRegistrar: owner.address, // actionRegistrar
+            actionScoreManager: owner.address, // actionScoreManager
+          },
+        ],
+        {
+          PassportChecksLogicV1: await passportChecksLogicV1.getAddress(),
+          PassportConfiguratorV1: await passportConfiguratorV1.getAddress(),
+          PassportEntityLogicV1: await passportEntityLogicV1.getAddress(),
+          PassportDelegationLogicV1: await passportDelegationLogicV1.getAddress(),
+          PassportPersonhoodLogicV1: await passportPersonhoodLogicV1.getAddress(),
+          PassportPoPScoreLogicV1: await passportPoPScoreLogicV1.getAddress(),
+          PassportSignalingLogicV1: await passportSignalingLogicV1.getAddress(),
+          PassportWhitelistAndBlacklistLogicV1: await passportWhitelistBlacklistLogicV1.getAddress(),
+        },
+      )) as VeBetterPassportV1
+
+      const veBetterPassport = (await upgradeProxy(
+        "VeBetterPassportV1",
+        "VeBetterPassport",
+        await veBetterPassportV1.getAddress(),
+        [],
+        {
+          version: 2,
+          libraries: {
+            PassportChecksLogic: await passportChecksLogic.getAddress(),
+            PassportConfigurator: await passportConfigurator.getAddress(),
+            PassportEntityLogic: await passportEntityLogic.getAddress(),
+            PassportDelegationLogic: await passportDelegationLogic.getAddress(),
+            PassportPersonhoodLogic: await passportPersonhoodLogic.getAddress(),
+            PassportPoPScoreLogic: await passportPoPScoreLogic.getAddress(),
+            PassportSignalingLogic: await passportSignalingLogic.getAddress(),
+            PassportWhitelistAndBlacklistLogic: await passportWhitelistBlacklistLogic.getAddress(),
+          },
+        },
+      )) as VeBetterPassport
+
+      const governor = (await deployAndUpgrade(
+        ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernor"],
+        [
+          [
+            {
+              vot3Token: await vot3.getAddress(),
+              timelock: await timeLock.getAddress(),
+              xAllocationVoting: await xAllocationVoting.getAddress(),
+              b3tr: await b3tr.getAddress(),
+              quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+              initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
+              initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+              initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+              voterRewards: await voterRewards.getAddress(),
+              isFunctionRestrictionEnabled: true,
+            },
+            {
+              governorAdmin: owner.address,
+              pauser: owner.address,
+              contractsAddressManager: owner.address,
+              proposalExecutor: owner.address,
+              governorFunctionSettingsRoleAddress: owner.address,
+            },
+          ],
+          [],
+          [],
+          [veBetterPassportContractAddress],
+          [],
+        ],
+        {
+          versions: [undefined, 2, 3, 4, 5],
+          libraries: [
+            {
+              GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+              GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+              GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+              GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+              GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+              GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+              GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+              GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+            },
+            {
+              GovernorClockLogicV1: await governorClockLogicLibV1.getAddress(),
+              GovernorConfiguratorV1: await governorConfiguratorLibV1.getAddress(),
+              GovernorDepositLogicV1: await governorDepositLogicLibV1.getAddress(),
+              GovernorFunctionRestrictionsLogicV1: await governorFunctionRestrictionsLogicLibV1.getAddress(),
+              GovernorProposalLogicV1: await governorProposalLogicLibV1.getAddress(),
+              GovernorQuorumLogicV1: await governorQuorumLogicLibV1.getAddress(),
+              GovernorStateLogicV1: await governorStateLogicLibV1.getAddress(),
+              GovernorVotesLogicV1: await governorVotesLogicLibV1.getAddress(),
+            },
+            {
+              GovernorClockLogicV3: await governorClockLogicLibV3.getAddress(),
+              GovernorConfiguratorV3: await governorConfiguratorLibV3.getAddress(),
+              GovernorDepositLogicV3: await governorDepositLogicLibV3.getAddress(),
+              GovernorFunctionRestrictionsLogicV3: await governorFunctionRestrictionsLogicLibV3.getAddress(),
+              GovernorProposalLogicV3: await governorProposalLogicLibV3.getAddress(),
+              GovernorQuorumLogicV3: await governorQuorumLogicLibV3.getAddress(),
+              GovernorStateLogicV3: await governorStateLogicLibV3.getAddress(),
+              GovernorVotesLogicV3: await governorVotesLogicLibV3.getAddress(),
+            },
+            {
+              GovernorClockLogicV4: await governorClockLogicLibV4.getAddress(),
+              GovernorConfiguratorV4: await governorConfiguratorLibV4.getAddress(),
+              GovernorDepositLogicV4: await governorDepositLogicLibV4.getAddress(),
+              GovernorFunctionRestrictionsLogicV4: await governorFunctionRestrictionsLogicLibV4.getAddress(),
+              GovernorProposalLogicV4: await governorProposalLogicLibV4.getAddress(),
+              GovernorQuorumLogicV4: await governorQuorumLogicLibV4.getAddress(),
+              GovernorStateLogicV4: await governorStateLogicLibV4.getAddress(),
+              GovernorVotesLogicV4: await governorVotesLogicLibV4.getAddress(),
+            },
+            {
+              GovernorClockLogic: await governorClockLogicLib.getAddress(),
+              GovernorConfigurator: await governorConfiguratorLib.getAddress(),
+              GovernorDepositLogic: await governorDepositLogicLib.getAddress(),
+              GovernorFunctionRestrictionsLogic: await governorFunctionRestrictionsLogicLib.getAddress(),
+              GovernorProposalLogic: await governorProposalLogicLib.getAddress(),
+              GovernorQuorumLogic: await governorQuorumLogicLib.getAddress(),
+              GovernorStateLogic: await governorStateLogicLib.getAddress(),
+              GovernorVotesLogic: await governorVotesLogicLib.getAddress(),
+            },
+          ],
+        },
+      )) as B3TRGovernor
+
+      // ------------------ Set up contracts ------------------
+      await veBetterPassportV1
+        .connect(owner)
+        .grantRole(await veBetterPassportV1.ACTION_REGISTRAR_ROLE(), await x2EarnRewardsPool.getAddress())
+
+      // Grant admin role to voter rewards for registering x allocation voting
+      await xAllocationVoting
+        .connect(owner)
+        .grantRole(await xAllocationVoting.DEFAULT_ADMIN_ROLE(), emissions.getAddress())
+
+      await voterRewards
+        .connect(owner)
+        .grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await xAllocationVoting.getAddress())
+
+      await voterRewards.connect(owner).grantRole(await voterRewards.VOTE_REGISTRAR_ROLE(), await governor.getAddress())
+
+      await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
+      await xAllocationPool.connect(owner).setEmissionsAddress(await emissions.getAddress())
+
+      // Set xAllocationGovernor and VoterRewards in emissions
+      await emissions.connect(owner).setXAllocationsGovernorAddress(await xAllocationVoting.getAddress())
+      await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
+      await b3tr.connect(owner).grantRole(await b3tr.MINTER_ROLE(), await emissions.getAddress())
+
+      await veBetterPassport.toggleCheck(4)
+
+      const roundStarterRole = await xAllocationVoting.ROUND_STARTER_ROLE()
+      await xAllocationVoting
+        .connect(owner)
+        .grantRole(roundStarterRole, await emissions.getAddress())
+        .then(async tx => await tx.wait())
+      await xAllocationVoting
+        .connect(owner)
+        .grantRole(roundStarterRole, owner.address)
+        .then(async tx => await tx.wait())
+
+      const testKeys = getTestKeys(50)
+
+      let eligibleAppIds: string[] = []
+      APPS.forEach(async (app, index) => {
+        const tx = await x2EarnAppsV1.addApp(app.teamWalletAddress, app.admin, app.name, app.metadataURI)
+        await tx.wait()
+
+        const appId = ethers.keccak256(ethers.toUtf8Bytes(app.name))
+        eligibleAppIds.push(appId)
+
+        // Add moderators
+        for (let i = 0; i < 3; i++) {
+          await x2EarnAppsV1.connect(owner).addAppModerator(appId, testKeys[index + i].address)
+        }
+      })
+
+      // Get VTHO tokens
+      for (let i = 0; i < otherAccounts.length; i++) {
+        // Create two node holders with an endorsement score
+        await getVot3Tokens(otherAccounts[i], "1000")
+        expect(await vot3.balanceOf(otherAccounts[i].address)).to.eql(ethers.parseEther("1000"))
+      }
+
+      expect(await x2EarnAppsV1.appsCount()).to.eql(8n)
+      expect((await x2EarnAppsV1.allEligibleApps()).length).to.eql(8)
+      await emissions.connect(owner).bootstrap()
+      await emissions.connect(owner).start()
+
+      // Expect round 1 to start
+      expect(await emissions.getCurrentCycle()).to.eql(1n)
+
+      // Start voting rounds
+      for (let i = 1; i < 18; i++) {
+        // Get each of the users to vote
+        otherAccounts.map(async account => {
+          const [firstAppIndex, secondAppIndex] = getTwoUniqueRandomIndices(eligibleAppIds.length)
+          const appIdsToVoteOn = [eligibleAppIds[firstAppIndex], eligibleAppIds[secondAppIndex]]
+
+          const voteAmounts = [
+            ethers.parseEther((Math.random() * 100).toFixed(2)), // Random amount for the first app
+            ethers.parseEther((Math.random() * 100).toFixed(2)), // Random amount for the second app
+          ]
+
+          const tx = await xAllocationVoting.connect(account).castVote(i, appIdsToVoteOn, voteAmounts)
+          await tx.wait()
+        })
+
+        // Wait for the round to end
+        const blockNextCycle = await emissions.getNextCycleBlock()
+        await waitForBlock(Number(blockNextCycle))
+
+        // Claim rewards as voter
+        otherAccounts.map(async account => {
+          const amount = await voterRewards.cycleToVoterToTotal(i, account.address)
+          expect(amount).to.not.eql(0n)
+          const tx = await voterRewards.connect(account).claimReward(i, account.address)
+          await tx.wait()
+
+          // Covert to vot3
+          await b3tr.connect(account).approve(await vot3.getAddress(), amount)
+          await vot3.connect(account).convertToVOT3(amount)
+
+          expect(await voterRewards.cycleToVoterToTotal(i, account.address)).to.eql(0n)
+        })
+
+        // Claim X2Earn rewards
+        eligibleAppIds.map(async appId => {
+          expect(await xAllocationPool.claimableAmount(i, appId)).to.not.eql(0n)
+          const tx = await xAllocationPool.connect(owner).claim(i, appId)
+          await tx.wait()
+        })
+
+        await emissions.distribute()
+      }
+
+      // Upgrade to V2 of X2EarnApps
+      const x2EarnAppsV2 = (await upgradeProxy(
+        "X2EarnAppsV1",
+        "X2EarnApps",
+        await x2EarnAppsV1.getAddress(),
+        [
+          config.XAPP_GRACE_PERIOD,
+          await nodeManagement.getAddress(),
+          await veBetterPassport.getAddress(),
+          await x2EarnCreator.getAddress(),
+        ],
+        {
+          version: 2,
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        },
+      )) as X2EarnApps
+
+      // Grant minter and burner role to X2Earn contract
+      await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnAppsV2.getAddress())
+      await x2EarnCreator.connect(owner).grantRole(await x2EarnCreator.BURNER_ROLE(), await x2EarnAppsV2.getAddress())
+
+      // Check if all apps are still registered
+      expect(await x2EarnAppsV2.appsCount()).to.eql(8n)
+      expect((await x2EarnAppsV2.allEligibleApps()).length).to.eql(8)
+
+      // Grant the ACTION_SCORE_MANAGER_ROLE to X2Earn contract
+      await veBetterPassport
+        .grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), await x2EarnAppsV2.getAddress())
+        .then(async tx => await tx.wait())
+
+      // Check if all moderators are still registered and endorse each app
+      for (let i = 0; i < eligibleAppIds.length; i++) {
+        const moderators = await x2EarnAppsV2.appModerators(eligibleAppIds[i])
+        expect(moderators[0]).to.eql(testKeys[i].address)
+        expect(moderators[1]).to.eql(testKeys[i + 1].address)
+        expect(moderators[2]).to.eql(testKeys[i + 2].address)
+
+        // Check endorsement status -> all apps should be unendorsed -> Grace period should start
+        await expect(x2EarnAppsV2.checkEndorsement(eligibleAppIds[i])).to.emit(
+          x2EarnAppsV2,
+          "AppUnendorsedGracePeriodStarted",
+        )
+        expect(await x2EarnAppsV2.isAppUnendorsed(eligibleAppIds[i])).to.eql(true)
+
+        const secuirtyScore = await veBetterPassport.appSecurity(eligibleAppIds[i])
+
+        // Endorse the app
+        await vechainNodesMock.addToken(otherAccounts[i], 7, false, 0, 0)
+        await expect(x2EarnAppsV2.connect(otherAccounts[i]).endorseApp(eligibleAppIds[i], BigInt(i + 1))).to.emit(
+          x2EarnAppsV2,
+          "AppEndorsed",
+        )
+        // Check endorsement status -> all apps should be endorsed
+        await x2EarnAppsV2.checkEndorsement(eligibleAppIds[i])
+        expect(await x2EarnAppsV2.isAppUnendorsed(eligibleAppIds[i])).to.eql(false)
+
+        // Secuirty score should remain same
+        expect(await veBetterPassport.appSecurity(eligibleAppIds[i])).to.eql(secuirtyScore)
+      }
+
+      // Continue voting rounds
+      for (let i = 1; i < 5; i++) {
+        // Get each of the users to vote
+        otherAccounts.map(async account => {
+          const [firstAppIndex, secondAppIndex] = getTwoUniqueRandomIndices(eligibleAppIds.length)
+          const appIdsToVoteOn = [eligibleAppIds[firstAppIndex], eligibleAppIds[secondAppIndex]]
+
+          const voteAmounts = [
+            ethers.parseEther((Math.random() * 100).toFixed(2)), // Random amount for the first app
+            ethers.parseEther((Math.random() * 100).toFixed(2)), // Random amount for the second app
+          ]
+
+          const tx = await xAllocationVoting.connect(account).castVote(i, appIdsToVoteOn, voteAmounts)
+          await tx.wait()
+        })
+
+        // Wait for the round to end
+        const blockNextCycle = await emissions.getNextCycleBlock()
+        await waitForBlock(Number(blockNextCycle))
+
+        // Claim rewards as voter
+        otherAccounts.map(async account => {
+          const amount = await voterRewards.cycleToVoterToTotal(i, account.address)
+          expect(amount).to.not.eql(0n)
+          const tx = await voterRewards.connect(account).claimReward(i, account.address)
+          await tx.wait()
+
+          // Covert to vot3
+          await b3tr.connect(account).approve(await vot3.getAddress(), amount)
+          await vot3.connect(account).convertToVOT3(amount)
+
+          expect(await voterRewards.cycleToVoterToTotal(i, account.address)).to.eql(0n)
+        })
+
+        // Claim X2Earn rewards
+        eligibleAppIds.map(async appId => {
+          expect(await xAllocationPool.claimableAmount(i, appId)).to.not.eql(0n)
+          const tx = await xAllocationPool.connect(owner).claim(i, appId)
+          await tx.wait()
+        })
+
+        // Check endorsement status -> all apps should be unendorsed -> Grace period should start
+        for (let i = 0; i < eligibleAppIds.length; i++) {
+          await x2EarnAppsV2.checkEndorsement(eligibleAppIds[i])
+          expect(await x2EarnAppsV2.isEligibleNow(eligibleAppIds[i])).to.eql(true)
+        }
+
+        await emissions.distribute()
+      }
+
+      // Submit a new app
+      await x2EarnAppsV2
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const newAppId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+
+      // Should be 1 app pending endorsement
+      expect(await x2EarnAppsV2.unendorsedAppIds()).to.deep.equal([newAppId])
+
+      // Should not be recognised as part of ecosystem yet
+      expect(await x2EarnAppsV2.apps()).to.not.include(newAppId)
+
+      // App security score should be 0
+      expect(await veBetterPassport.appSecurity(newAppId)).to.eql(0n)
+
+      // Endorse the app
+      await vechainNodesMock.addToken(otherAccount, 7, false, 0, 0)
+      const tokenId = await vechainNodesMock.ownerToId(otherAccount.address)
+      await x2EarnAppsV2.connect(otherAccount).endorseApp(newAppId, tokenId)
+
+      // Should be eligible
+      expect(await x2EarnAppsV2.isEligibleNow(newAppId)).to.eql(true)
+
+      // Should not be eligible for voting yet
+      const currentRound = await emissions.getCurrentCycle()
+      expect(await xAllocationVoting.isEligibleForVote(newAppId, currentRound)).to.eql(false)
+
+      // Should no longer be looking for endorsement
+      expect(await x2EarnAppsV2.unendorsedAppIds()).to.deep.equal([])
+
+      // Security score should be LOW
+      expect(await veBetterPassport.appSecurity(newAppId)).to.eql(1n)
+
+      // Cannot Vote on the app
+      await catchRevert(
+        xAllocationVoting
+          .connect(otherAccounts[1])
+          .castVote(1, [newAppId, eligibleAppIds[0]], [ethers.parseEther("10"), 0]),
+      )
+
+      // Wait for the round to end
+      const blockNextCycle = await emissions.getNextCycleBlock()
+      await waitForBlock(Number(blockNextCycle))
+
+      // Start new round of voting
+      await emissions.distribute()
+
+      // Should be eligible for voting now
+      expect(await xAllocationVoting.isEligibleForVote(newAppId, currentRound + 1n)).to.eql(true)
+
+      // Get each of the users to vote
+      otherAccounts.map(async account => {
+        const [firstAppIndex] = getTwoUniqueRandomIndices(eligibleAppIds.length)
+        const appIdsToVoteOn = [newAppId, eligibleAppIds[firstAppIndex]]
+
+        const voteAmounts = [
+          ethers.parseEther((Math.random() * 100).toFixed(2)), // Random amount for the first app
+          ethers.parseEther((Math.random() * 100).toFixed(2)), // Random amount for the second app
+        ]
+
+        const tx = await xAllocationVoting.connect(account).castVote(currentRound + 1n, appIdsToVoteOn, voteAmounts)
+        await tx.wait()
+      })
+
+      // Wait for the round to end
+      const blockNextCycle2 = await emissions.getNextCycleBlock()
+      await waitForBlock(Number(blockNextCycle2))
+
+      // New App can claim rewards
+      expect(await xAllocationPool.claimableAmount(currentRound + 1n, newAppId)).to.not.eql(0n)
+      const tx = await xAllocationPool.connect(owner).claim(currentRound + 1n, newAppId)
+      await tx.wait()
     })
   })
 
@@ -403,6 +1196,32 @@ describe("X-Apps - @shard3", function () {
 
       expect(await x2EarnApps.MAX_MODERATORS()).to.eql(100n)
       expect(await x2EarnApps.MAX_REWARD_DISTRIBUTORS()).to.eql(100n)
+    })
+
+    it("Only admin can update node management contract address", async function () {
+      const { x2EarnApps, otherAccount, nodeManagement, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.getNodeManagementContract()).to.eql(await nodeManagement.getAddress())
+      await catchRevert(x2EarnApps.connect(otherAccount).setNodeManagementContract(otherAccount.address))
+
+      await x2EarnApps.connect(owner).setNodeManagementContract(await otherAccount.getAddress())
+
+      expect(await x2EarnApps.getNodeManagementContract()).to.eql(await otherAccount.getAddress())
+    })
+
+    it("Only admin can update veBetter passport contract address", async function () {
+      const { x2EarnApps, otherAccount, veBetterPassport, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.getVeBetterPassportContract()).to.eql(await veBetterPassport.getAddress())
+      await catchRevert(x2EarnApps.connect(otherAccount).setVeBetterPassportContract(otherAccount.address))
+
+      await x2EarnApps.connect(owner).setVeBetterPassportContract(await otherAccount.getAddress())
+
+      expect(await x2EarnApps.getVeBetterPassportContract()).to.eql(await otherAccount.getAddress())
     })
   })
 
@@ -478,6 +1297,25 @@ describe("X-Apps - @shard3", function () {
         x2EarnApps.connect(owner).submitApp(otherAccounts[2].address, ZERO_ADDRESS, "My app", "metadataURI"),
       )
     })
+
+    it("Only users with the XAPP creator nft can register an app", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await expect(
+        x2EarnApps
+          .connect(otherAccounts[0])
+          .submitApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI"),
+      ).to.be.revertedWithCustomError(x2EarnApps, "X2EarnUnverifiedCreator")
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
+    })
   })
 
   describe("Fetch apps", function () {
@@ -505,7 +1343,7 @@ describe("X-Apps - @shard3", function () {
     })
 
     it("Can get unendorsed app ids", async function () {
-      const { x2EarnApps, otherAccounts, owner, otherAccount } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -831,10 +1669,19 @@ describe("X-Apps - @shard3", function () {
     })
 
     it("DAO can make an app unavailable for allocation voting starting from next round", async function () {
-      const { otherAccounts, x2EarnApps, xAllocationVoting, emissions, timeLock, owner } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
+      const {
+        otherAccounts,
+        x2EarnApps,
+        xAllocationVoting,
+        emissions,
+        timeLock,
+        owner,
+        endorsementUtils,
+        administrationUtils,
+        voteEligibilityUtils,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       await bootstrapAndStartEmissions()
 
@@ -867,7 +1714,13 @@ describe("X-Apps - @shard3", function () {
         proposer,
         voter1,
         x2EarnApps,
-        await ethers.getContractFactory("X2EarnApps"),
+        await ethers.getContractFactory("X2EarnApps", {
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        }),
         "Exclude app from the allocation voting rounds",
         "setVotingEligibility",
         [app1Id, false],
@@ -955,6 +1808,550 @@ describe("X-Apps - @shard3", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
 
       await catchRevert(x2EarnApps.setVotingEligibility(app1Id, true))
+    })
+  })
+
+  describe("Creator NFT", function () {
+    it("Users with the XAPP creator nft can register an app sucesfully", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+
+      // App should be registered successfully
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // User should be listed as one of the apps creators
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
+    })
+
+    it("App admin can add more creators for the app", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+
+      // App should be registered successfully
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // User should be listed as one of the apps creators
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
+
+      // App admin can add more creators for the app
+      await expect(x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)).to.emit(
+        x2EarnApps,
+        "CreatorAddedToApp",
+      )
+
+      // New creator should be added to the app
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
+    })
+
+    it("An app can have up to 3 creators", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+
+      // App should be registered successfully
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // User should be listed as one of the apps creators
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
+
+      // App admin can add more creators for the app
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
+
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)
+
+      // New creators should be added to the app
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([
+        otherAccounts[0].address,
+        otherAccounts[1].address,
+        otherAccounts[2].address,
+      ])
+
+      // Adding a fourth creator should fail
+      await expect(
+        x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[3].address),
+      ).to.be.revertedWithCustomError(x2EarnApps, "X2EarnMaxCreatorsReached")
+    })
+
+    it("Same creator cannot be added twice to the same app", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+
+      // App should be registered successfully
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // User should be listed as one of the apps creators
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
+
+      // App admin can add more creators for the app
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
+
+      // New creator should be added to the app
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
+
+      // Adding the same creator again should fail
+      await expect(
+        x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address),
+      ).to.be.revertedWithCustomError(x2EarnApps, "X2EarnAlreadyCreator")
+    })
+
+    it("Should mint a creator NFT for a creator that gets added after registration that doesnt currently hold one", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+
+      // Adding a new creator that doesnt hold a creator NFT
+      await expect(x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)).to.emit(
+        x2EarnCreator,
+        "Transfer",
+      )
+
+      // New creator should be added to the app
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
+
+      // New creator should have a creator NFT minted for them
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
+
+      // Adding a new creator that already holds a creator NFT should not mint a new one
+      await x2EarnCreator.safeMint(otherAccounts[2].address) // Mint the NFT
+
+      const balanceBefore = await x2EarnCreator.balanceOf(otherAccounts[2].address)
+
+      // Adding the user with a creator NFT
+      await expect(x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)).to.not.emit(
+        x2EarnCreator,
+        "Transfer",
+      )
+
+      // Balance of the user should remain the same
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(balanceBefore)
+    })
+
+    it("Should burn a creator NFT for a creator that gets removed from an app and is not a creator for any other app", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+
+      // Adding a new creator
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
+
+      // New creator should be added to the app
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
+
+      // New creator should have a creator NFT minted for them
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
+
+      // Removing the creator
+      await expect(x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[1].address)).to.emit(
+        x2EarnCreator,
+        "Transfer",
+      )
+
+      // New creator should have their creator NFT burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
+    })
+
+    it("Should track the number of apps a creator is a part of", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+
+      // Adding a new creator
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(otherAccounts[3]).addCreator(app2Id, otherAccounts[1].address)
+
+      // New creator should be added to the app
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
+      expect(await x2EarnApps.appCreators(app2Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
+
+      // Should be considered a creator for 2 apps
+      expect(await x2EarnApps.isAppCreator(app1Id, otherAccounts[1].address)).to.eql(true)
+
+      // New creator should have a creator NFT minted for them
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
+      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(2n)
+
+      // New creator should be part of 2 apps
+      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(2n)
+      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(2n)
+
+      // Removing the creator
+      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(otherAccounts[3]).removeAppCreator(app2Id, otherAccounts[1].address)
+
+      // New creator should have their creator NFT burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
+      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(0n)
+
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
+      expect(await x2EarnApps.appCreators(app2Id)).to.deep.equal([otherAccounts[0].address])
+
+      // Should not be considered a creator for 2 apps
+      expect(await x2EarnApps.isAppCreator(app1Id, otherAccounts[1].address)).to.eql(false)
+
+      // Other creator should still be part of 2 apps
+      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(2n)
+    })
+
+    it("Should not be able to remove a creator that is not part of the app", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+
+      // Removing a creator that is not part of the app should fail
+      await expect(
+        x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[3].address),
+      ).to.be.revertedWithCustomError(x2EarnApps, "X2EarnNonexistentCreator")
+    })
+
+    it("Should not be able to add a creator to an app that does not exist", async function () {
+      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+
+      // Adding a creator to an app that does not exist should fail
+      await expect(x2EarnApps.addCreator(app1Id, otherAccounts[1].address)).to.be.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnNonexistentApp",
+      )
+    })
+
+    it("Should not be able to remove a creator from an app that does not exist", async function () {
+      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+
+      // Removing a creator from an app that does not exist should fail
+      await expect(x2EarnApps.removeAppCreator(app1Id, otherAccounts[1].address)).to.be.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnNonexistentApp",
+      )
+    })
+
+    it("Should revoke all creator rights if their XApp is blacklisted, unless they are still aprt of other app", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      // Other Accounts 0 creates 2 apps -> Creator of both apps
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+
+      // Other account 2 and 3 are added as creators to the app 1
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)
+
+      // Both apps get endorsed
+      await endorseApp(app1Id, otherAccounts[2])
+      await endorseApp(app2Id, otherAccounts[3])
+
+      // Each account should have a creator NFT minted for them
+      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
+
+      // Blacklisting the first app
+      await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app
+
+      // Other account 1 & 2 should have their creator NFT burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
+
+      // Other account 0 should still have their creator NFT
+      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
+
+      // Should all still be considered creators of the app for info purposes
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([
+        otherAccounts[0].address,
+        otherAccounts[1].address,
+        otherAccounts[2].address,
+      ])
+    })
+
+    it("Should regrant creator rights if their XApp is unblacklisted", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      // Other Accounts 0 creates 2 apps -> Creator of both apps
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+
+      // Other account 2 and 3 are added as creators to the app 1
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)
+
+      // Both apps get endorsed
+      await endorseApp(app1Id, otherAccounts[2])
+      await endorseApp(app2Id, otherAccounts[3])
+
+      // Each account should have a creator NFT minted for them
+      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
+
+      // Blacklisting the first app
+      await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app
+
+      // Other account 1 & 2 should have their creator NFT burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
+
+      // Other account 0 should still have their creator NFT
+      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
+
+      // Should all still be considered creators of the app for info purposes
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([
+        otherAccounts[0].address,
+        otherAccounts[1].address,
+        otherAccounts[2].address,
+      ])
+
+      // Unblacklisting the first app
+      await x2EarnApps.setVotingEligibility(app1Id, true) // Unblacklist the app
+
+      // Other account 1 & 2 should have their creator NFT minted
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
+    })
+
+    it("XApps user endorsed should not go into negative if blacklisted multiple times", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      // Other Accounts 0 creates 2 apps -> Creator of both apps
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+
+      // Other account 2 and 3 are added as creators to the app 1
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)
+
+      // Both apps get endorsed
+      await endorseApp(app1Id, otherAccounts[2])
+      await endorseApp(app2Id, otherAccounts[3])
+
+      // Each account should have a creator NFT minted for them
+      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
+
+      // Other account 1 & 2 should be creators of 1 app
+      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(1n)
+      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(1n)
+
+      // Blacklisting the first app
+      await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app
+
+      // Other account 1 & 2 should have their creator NFT burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
+
+      // Other account 1 & 2 should be creators of 0 apps
+      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(0n)
+      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(0n)
+
+      // Blacklisting the first app again
+      await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app
+
+      // Other account 1 & 2 should not have their creator NFT burned again as they are already burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
+
+      // Other account 1 & 2 should be creators of 0 apps
+      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(0n)
+      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(0n)
+    })
+
+    it("XApps user endorsed should not keep increasing if de-blacklisted multiple times", async function () {
+      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Mint the NFT
+      await x2EarnCreator.safeMint(otherAccounts[0].address)
+
+      // Other Accounts 0 creates 2 apps -> Creator of both apps
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      await x2EarnApps
+        .connect(otherAccounts[0])
+        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+
+      // Other account 2 and 3 are added as creators to the app 1
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)
+
+      // Both apps get endorsed
+      await endorseApp(app1Id, otherAccounts[2])
+      await endorseApp(app2Id, otherAccounts[3])
+
+      // Each account should have a creator NFT minted for them
+      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
+
+      // De- Blacklisting the first app (It is not blacklisted)
+      await x2EarnApps.setVotingEligibility(app1Id, true)
+
+      // Other account 1 & 2 should have their no changes in creator NFT
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
+
+      // Other account 1 & 2 should be creators of 1 app
+      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(1n)
+      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(1n)
+
+      // De- Blacklisting the first app (It is not blacklisted)
+      await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app
+
+      // Should all still be considered creators of the app for info purposes
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([
+        otherAccounts[0].address,
+        otherAccounts[1].address,
+        otherAccounts[2].address,
+      ])
+
+      // Other account 1 & 2 should be creators of 0 apps
+      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(0n)
+      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(0n)
+
+      // Other account 1 & 2 should have their creator NFT burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
+
+      // Blacklisting the first app again (should not decrease the creator NFT)
+      await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app again
+
+      // Other account 1 & 2 should be creators of 0 apps
+      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(0n)
+      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(0n)
+
+      // Other account 1 & 2 should have their creator NFT burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
     })
   })
 
@@ -2393,6 +3790,120 @@ describe("X-Apps - @shard3", function () {
       expect(endorsers.length).to.eql(0)
     })
 
+    it("If the grace period is updated it should should update the grace period for apps that are already in the grace period", async function () {
+      const config = createLocalConfig()
+      const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.hasRole(await x2EarnApps.GOVERNANCE_ROLE(), owner.address)).to.eql(true)
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      const appIdsPendingEndorsement1 = await x2EarnApps.unendorsedAppIds()
+      expect(appIdsPendingEndorsement1.length).to.eql(1)
+
+      // Create two Mjolnir node holders with an endorsement score of 50 each
+      await createNodeHolder(3, otherAccounts[1]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+      await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
+
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 50
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, 2) // Node holder endorsement score is 50
+
+      let round1 = await startNewAllocationRound()
+
+      // app should be eligible for the current round
+      let isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
+      expect(isEligibleForVote).to.eql(true)
+
+      // App is not pending endorsement
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(false)
+
+      // remove endorsement from one of the node holders
+      const tx = await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id, 1)
+
+      const receipt = await tx.wait()
+      if (!receipt) throw new Error("No receipt")
+
+      // check event emitted
+      let events = receipt?.logs
+      let decodedEvents = events?.map(event => {
+        return x2EarnApps.interface.parseLog({
+          topics: event?.topics as string[],
+          data: event?.data as string,
+        })
+      })
+
+      const event = decodedEvents.find(event => event?.name === "AppEndorsementStatusUpdated")
+      expect(event).to.not.equal(undefined)
+
+      const eventGracePeriod = decodedEvents.find(event => event?.name === "AppUnendorsedGracePeriodStarted")
+      expect(eventGracePeriod).to.not.equal(undefined)
+      expect(eventGracePeriod?.args[0]).to.eql(app1Id)
+      expect(eventGracePeriod?.args[1]).to.eql(BigInt(receipt.blockNumber))
+      expect(eventGracePeriod?.args[2]).to.eql(BigInt(receipt.blockNumber + config.XAPP_GRACE_PERIOD))
+
+      // app should still be eligible for the current round
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round1)
+      expect(isEligibleForVote).to.eql(true)
+
+      // app should be pending endorsement -> score is now 50 -> grace period starts
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      // start new round -> 1st cycle unedorsed
+      let round2 = await startNewAllocationRound()
+
+      // app should still be eligible for the current round as it is in the grace period
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
+      expect(isEligibleForVote).to.eql(true)
+
+      // App is eligible as in grace period
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(true)
+
+      // If we update the grace period now to 1 block the app should not be eligible if we check endorsement
+      await x2EarnApps.updateGracePeriod(1)
+
+      // check endorsement this time it will remove the app from the voting rounds
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // app should still be eligible for the current round as it was not removed before the round started
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round2)
+      expect(isEligibleForVote).to.eql(true)
+
+      // App is no longer eligible
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(false)
+
+      // check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      // start new round -> 2nd cycle unendorsed
+      let round3 = await startNewAllocationRound()
+
+      // app id not eligible for the current round
+      isEligibleForVote = await xAllocationVoting.isEligibleForVote(app1Id, round3)
+      expect(isEligibleForVote).to.eql(false)
+
+      // Updating grace period now has no effect as the app is no longer eligible
+      await x2EarnApps.updateGracePeriod(500000)
+
+      // check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // app should not be eligible now
+      expect(await x2EarnApps.isEligibleNow(app1Id)).to.eql(false)
+    })
+
     it("If an XAPP is no longer in eligible for voting as they lost their endorsement they can get added in by getting reendorsed", async function () {
       const { x2EarnApps, xAllocationVoting, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -3127,7 +4638,7 @@ describe("X-Apps - @shard3", function () {
     })
 
     it("A node holder can remove endorsement if a XAPP is blacklisted", async function () {
-      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner, otherAccount, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -3160,9 +4671,12 @@ describe("X-Apps - @shard3", function () {
       // Endorser should be able to endorse a different XAPP
       const app2Id = await x2EarnApps.hashAppName(otherAccounts[1].address)
 
+      // Grant other account creator NFT
+      await x2EarnCreator.connect(owner).safeMint(otherAccount.address)
+
       // Register XAPPs -> XAPP is pending endorsement
       await x2EarnApps
-        .connect(owner)
+        .connect(otherAccount)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
       await expect(x2EarnApps.connect(otherAccounts[0]).endorseApp(app2Id, 1)).to.not.be.reverted
@@ -3325,6 +4839,109 @@ describe("X-Apps - @shard3", function () {
 
       // Check XApps pending endorsement should be empty
       expect((await x2EarnApps.unendorsedAppIds()).length).to.eql(1)
+    })
+
+    it("An XAPPs security should be set to LOW when they intially join the platform", async function () {
+      const { x2EarnApps, otherAccounts, owner, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pending endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      await endorseApp(app1Id, otherAccounts[1])
+
+      // Get app security level
+      const appSecurityLevel = await veBetterPassport.appSecurity(app1Id)
+      expect(appSecurityLevel).to.eql(1n)
+    })
+
+    it("An XAPPs security should be set to NONE when they lose there endorsement", async function () {
+      const config = createLocalConfig()
+      config.XAPP_GRACE_PERIOD = 0
+      const { x2EarnApps, otherAccounts, owner, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pending endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      await endorseApp(app1Id, otherAccounts[1])
+
+      // Get app security level
+      const appSecurityLevel = await veBetterPassport.appSecurity(app1Id)
+      expect(appSecurityLevel).to.eql(1n)
+
+      await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id, 1) // Node holder removes their endorsement
+
+      // Check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+
+      // Get app security level
+      const appSecurityLevel2 = await veBetterPassport.appSecurity(app1Id)
+      expect(appSecurityLevel2).to.eql(0n)
+    })
+
+    it("An XAPPs security should be reset when an XAPP that once was endorsed gets re-endorsed", async function () {
+      const config = createLocalConfig()
+      config.XAPP_GRACE_PERIOD = 0
+      const { x2EarnApps, otherAccounts, owner, veBetterPassport } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+      const app2Id = await x2EarnApps.hashAppName(otherAccounts[1].address)
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+
+      await endorseApp(app1Id, otherAccounts[1])
+      await endorseApp(app2Id, otherAccounts[2])
+
+      // Get app security level
+      expect(await veBetterPassport.appSecurity(app1Id)).to.eql(1n)
+      expect(await veBetterPassport.appSecurity(app2Id)).to.eql(1n)
+
+      // Passport admin changes their security level
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 0)
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 3)
+
+      // Get app security level
+      expect(await veBetterPassport.appSecurity(app1Id)).to.eql(0n)
+      expect(await veBetterPassport.appSecurity(app2Id)).to.eql(3n)
+
+      // Unendorse apps
+      await x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id, 1)
+      await x2EarnApps.connect(otherAccounts[2]).unendorseApp(app2Id, 2)
+
+      // Check endorsement
+      await x2EarnApps.checkEndorsement(app1Id)
+      await x2EarnApps.checkEndorsement(app2Id)
+
+      // App security level should be NONE
+      expect(await veBetterPassport.appSecurity(app1Id)).to.eql(0n)
+      expect(await veBetterPassport.appSecurity(app2Id)).to.eql(0n)
+
+      // Re-endorse apps
+      await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 1)
+      await x2EarnApps.connect(otherAccounts[2]).endorseApp(app2Id, 2)
+
+      // Scores should be reset to where they were before
+      expect(await veBetterPassport.appSecurity(app1Id)).to.eql(0n)
+      expect(await veBetterPassport.appSecurity(app2Id)).to.eql(3n)
     })
 
     it("An XAPP that has been removed from black list that has endorsers should not be pending endorsement", async function () {
@@ -3845,7 +5462,6 @@ describe("X-Apps - @shard3", function () {
       await x2EarnApps
         .connect(owner)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
-      console.log(`HERE 4`)
       const level = 1 // score = 2
 
       const seedAccounts: SeedAccount[] = []
@@ -4167,7 +5783,7 @@ describe("X-Apps - @shard3", function () {
     })
 
     it("Only app admins and contract admin should be able to remove an XApp from submission list", async function () {
-      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -4175,6 +5791,10 @@ describe("X-Apps - @shard3", function () {
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[1].address)
       const app2Id = await x2EarnApps.hashAppName(otherAccounts[2].address)
+
+      // Mint creator NFTs to accounts sumbmitting XApps
+      await x2EarnCreator.safeMint(otherAccounts[1].address)
+      await x2EarnCreator.safeMint(otherAccounts[2].address)
 
       // Register XAPP -> XAPP is pedning endorsement
       await x2EarnApps

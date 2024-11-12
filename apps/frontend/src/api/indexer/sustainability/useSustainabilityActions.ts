@@ -23,12 +23,14 @@ export const SustainabilityActionsResponseSchema = z.object({
           .object({
             version: z.number(),
             description: z.string(),
-            proof: z.object({
-              image: z.string().optional(),
-              link: z.string().optional(),
-              text: z.string().optional(),
-              video: z.string().optional(),
-            }),
+            proof: z
+              .object({
+                image: z.string().optional(),
+                link: z.string().optional(),
+                text: z.string().optional(),
+                video: z.string().optional(),
+              })
+              .optional(),
             impact: z
               .object({
                 carbon: z.number().optional(),

@@ -27,6 +27,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import { VoteEligibilityUtils } from "../libraries/VoteEligibilityUtils.sol";
 
 /**
  * @title VoteEligibilityUpgradeable
@@ -57,15 +58,6 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
     }
   }
 
-  /**
-   * @dev Initializes the contract
-   */
-  function __VoteEligibility_init() internal onlyInitializing {
-    __VoteEligibility_init_unchained();
-  }
-
-  function __VoteEligibility_init_unchained() internal onlyInitializing {}
-
   // ---------- Internal ---------- //
 
   /**
@@ -74,56 +66,16 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
   function _setVotingEligibility(bytes32 appId, bool canBeVoted) internal override {
     VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
 
-    // If the app is already in the desired state we do nothing
-    if (isEligibleNow(appId) == canBeVoted) {
-      return;
-    }
-
-    // We update the checkpoint with the new Eligibility status
-    _pushCheckpoint($._isAppEligibleCheckpoints[appId], canBeVoted ? SafeCast.toUint208(1) : SafeCast.toUint208(0));
-
-    if (!canBeVoted) {
-      // If the app is not eligible for voting we need to remove it from the _eligibleApps array
-      /**
-       * In order to remove an app from the _eligibleApps array correctly we need to:
-       * 1) move the element in the last position of the array to the index we want to remove
-       * 2) Update the `_eligibleAppIndex` mapping accordingly.
-       * 3) pop() the last element of the _eligibleApps array and delete the index mapping of the app we removed
-       *
-       * Example:
-       *
-       * _eligibleApps = [A, B, C, D, E]
-       * _eligibleAppIndex = {A: 0, B: 1, C: 2, D: 3, E: 4}
-       *
-       * If we want to remove C:
-       *
-       * 1) Move E to the index of C
-       * _eligibleApps = [A, B, E, D, E]
-       *
-       * 2) Update the index of E in the mapping
-       * _eligibleAppIndex = {A: 0, B: 1, C: 2, D: 3, E: 2}
-       *
-       * 3) pop() the last element of the array and delete the index mapping of the app we removed
-       * _eligibleApps = [A, B, E, D]
-       * _eligibleAppIndex = {A: 0, B: 1, D: 3, E: 2}
-       *
-       */
-      uint256 index = $._eligibleAppIndex[appId];
-      uint256 lastIndex = $._eligibleApps.length - 1;
-      bytes32 lastAppId = $._eligibleApps[lastIndex];
-
-      $._eligibleApps[index] = lastAppId;
-      $._eligibleAppIndex[lastAppId] = index;
-
-      $._eligibleApps.pop();
-      delete $._eligibleAppIndex[appId];
-    } else {
-      // If the app is eligible for voting we need to add it to the _eligibleApps array
-      $._eligibleApps.push(appId);
-      $._eligibleAppIndex[appId] = $._eligibleApps.length - 1;
-    }
-
-    emit VotingEligibilityUpdated(appId, canBeVoted);
+    // Use VoteEligibilityUtils to update the eligibility checkpoint
+    VoteEligibilityUtils.updateVotingEligibility(
+      $._eligibleApps,
+      $._isAppEligibleCheckpoints,
+      $._eligibleAppIndex,
+      appId,
+      canBeVoted,
+      isEligibleNow(appId),
+      clock()
+    );
   }
 
   function _setBlacklist(bytes32 _appId, bool _isBlacklisted) internal virtual {
@@ -131,13 +83,6 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
 
     $._blackList[_appId] = _isBlacklisted;
     emit BlacklistUpdated(_appId, _isBlacklisted);
-  }
-
-  /**
-   * @dev Store a new checkpoint for the app's Eligibility.
-   */
-  function _pushCheckpoint(Checkpoints.Trace208 storage store, uint208 delta) private returns (uint208, uint208) {
-    return store.push(clock(), delta);
   }
 
   // ---------- Getters ---------- //
@@ -167,18 +112,16 @@ abstract contract VoteEligibilityUpgradeable is Initializable, X2EarnAppsUpgrade
    * @param timepoint the timepoint when the app should be checked for Eligibility
    */
   function isEligible(bytes32 appId, uint256 timepoint) public view override returns (bool) {
-    if (!appExists(appId)) {
-      return false;
-    }
-
     VoteEligibilityStorage storage $ = _getVoteEligibilityStorage();
 
-    uint48 currentTimepoint = clock();
-    if (timepoint > currentTimepoint) {
-      revert ERC5805FutureLookup(timepoint, currentTimepoint);
-    }
-
-    return $._isAppEligibleCheckpoints[appId].upperLookupRecent(SafeCast.toUint48(timepoint)) == 1;
+    // Use VoteEligibilityUtils to check if the app is eligible at the given timepoint
+    return VoteEligibilityUtils.isEligible(
+      $._isAppEligibleCheckpoints,
+      appId,
+      timepoint,
+      appExists(appId),
+      clock()
+    );
   }
 
   /**

@@ -15,6 +15,7 @@ import {
   NodeManagement,
   VeBetterPassport,
   VeBetterPassportV1,
+  X2EarnCreator,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -42,6 +43,7 @@ import {
   transferUpgraderRole,
   validateContractRole,
 } from "../helpers/roles"
+import { x2EarnLibraries } from "../libraries/x2EarnLibraries"
 
 // GalaxyMember NFT Values
 const name = "VeBetterDAO Galaxy Member"
@@ -123,6 +125,9 @@ export async function deployAll(config: ContractsConfig) {
     PassportWhitelistAndBlacklistLogic,
   } = await passportLibraries()
 
+  console.log("Deploying X2Earn App Libraries")
+  const { AdministrationUtils, EndorsementUtils, VoteEligibilityUtils } = await x2EarnLibraries()
+
   let vechainNodesAddress = "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302" // this is the mainnet address
 
   let vechainNodesMock = await ethers.getContractAt("TokenAuction", config.VECHAIN_NODES_CONTRACT_ADDRESS)
@@ -177,6 +182,11 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as TimeLock
 
+  const x2EarnCreator = (await deployProxy("X2EarnCreator", [
+    TEMP_ADMIN,
+    config.CONTRACTS_ADMIN_ADDRESS,
+  ])) as X2EarnCreator
+
   const treasury = (await deployProxy(
     "Treasury",
     [
@@ -203,22 +213,6 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as NodeManagement
 
-  const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnApps"],
-    [
-      [
-        config.XAPP_BASE_URI,
-        [TEMP_ADMIN], //admins
-        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
-        TEMP_ADMIN, // governance role
-      ],
-      [config.XAPP_GRACE_PERIOD, await nodeManagement.getAddress()],
-    ],
-    {
-      versions: [undefined, 2],
-    },
-  )) as X2EarnApps
-
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
   const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {
     PassportChecksLogicV1: await PassportChecksLogicV1.getAddress(),
@@ -230,6 +224,35 @@ export async function deployAll(config: ContractsConfig) {
     PassportSignalingLogicV1: await PassportSignalingLogicV1.getAddress(),
     PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
   })
+
+  const x2EarnApps = (await deployAndUpgrade(
+    ["X2EarnAppsV1", "X2EarnApps"],
+    [
+      [
+        config.XAPP_BASE_URI,
+        [TEMP_ADMIN], //admins
+        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        TEMP_ADMIN, // governance role
+      ],
+      [
+        config.XAPP_GRACE_PERIOD,
+        await nodeManagement.getAddress(),
+        veBetterPassportContractAddress,
+        await x2EarnCreator.getAddress(),
+      ],
+    ],
+    {
+      versions: [undefined, 2],
+      libraries: [
+        undefined,
+        {
+          AdministrationUtils: await AdministrationUtils.getAddress(),
+          EndorsementUtils: await EndorsementUtils.getAddress(),
+          VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+        },
+      ],
+    },
+  )) as X2EarnApps
 
   const x2EarnRewardsPool = (await deployAndUpgrade(
     ["X2EarnRewardsPoolV1", "X2EarnRewardsPoolV2", "X2EarnRewardsPoolV3", "X2EarnRewardsPool"],
@@ -287,7 +310,7 @@ export async function deployAll(config: ContractsConfig) {
           pauser: config.CONTRACTS_ADMIN_ADDRESS,
           minter: config.CONTRACTS_ADMIN_ADDRESS,
           contractsAddressManager: TEMP_ADMIN,
-          maxLevel: 5,
+          maxLevel: config.GM_NFT_MAX_LEVEL,
           baseTokenURI: config.GM_NFT_BASE_URI,
           b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
           b3tr: await b3tr.getAddress(),
@@ -549,17 +572,19 @@ export async function deployAll(config: ContractsConfig) {
     Treasury: await treasury.getAddress(),
     VOT3: await vot3.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
-    X2EarnAppsV1: await x2EarnApps.getAddress(),
+    X2EarnApps: await x2EarnApps.getAddress(),
     X2EarnRewardsPool: await x2EarnRewardsPool.getAddress(),
     XAllocationPool: await xAllocationPool.getAddress(),
     XAllocationVoting: await xAllocationVoting.getAddress(),
     vechainNodesManagement: await nodeManagement.getAddress(),
     VeBetterPassport: await veBetterPassport.getAddress(),
+    X2EarnCreator: await x2EarnCreator.getAddress(),
   }
 
   const libraries: {
     B3TRGovernor: Record<string, string>
     VeBetterPassport: Record<string, string>
+    X2EarnApps: Record<string, string>
   } = {
     B3TRGovernor: {
       GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
@@ -580,6 +605,11 @@ export async function deployAll(config: ContractsConfig) {
       PassportPoPScoreLogic: await PassportPoPScoreLogic.getAddress(),
       PassportSignalingLogic: await PassportSignalingLogic.getAddress(),
       PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogic.getAddress(),
+    },
+    X2EarnApps: {
+      AdministrationUtils: await AdministrationUtils.getAddress(),
+      EndorsementUtils: await EndorsementUtils.getAddress(),
+      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
     },
   }
 
@@ -687,6 +717,22 @@ export async function deployAll(config: ContractsConfig) {
     .grantRole(roundStarterRole, await emissions.getAddress())
     .then(async tx => await tx.wait())
   console.log("Round starter role granted to emissions contract")
+
+  // Grant the ACTION_SCORE_MANAGER_ROLE to X2Earn contract
+  await veBetterPassport
+    .connect(deployer)
+    .grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), await x2EarnApps.getAddress())
+    .then(async tx => await tx.wait())
+
+  // Set up X2EarnApps contract
+  await x2EarnCreator.grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())
+  await x2EarnCreator.grantRole(await x2EarnCreator.BURNER_ROLE(), await x2EarnApps.getAddress())
+
+  // Mint the initial X2EarnCreator NFT to first admin
+  await x2EarnCreator
+    .connect(deployer)
+    .safeMint(await deployer.getAddress())
+    .then(async tx => await tx.wait())
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
@@ -1039,6 +1085,28 @@ export async function deployAll(config: ContractsConfig) {
       await galaxyMember.MINTER_ROLE(),
     )
 
+    // X2EarnCreator
+    await validateContractRole(
+      x2EarnCreator,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await x2EarnCreator.DEFAULT_ADMIN_ROLE(),
+    )
+
+    await validateContractRole(
+      x2EarnCreator,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await x2EarnCreator.MINTER_ROLE(),
+    )
+
+    await validateContractRole(
+      x2EarnCreator,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await x2EarnCreator.BURNER_ROLE(),
+    )
+
     console.log("Roles validated successfully!")
   }
   console.log("Deployment completed successfully!")
@@ -1067,6 +1135,7 @@ export async function deployAll(config: ContractsConfig) {
     vechainNodesMock: vechainNodesAddress,
     vechainNodeManagement: nodeManagement,
     veBetterPassport: veBetterPassport,
+    x2EarnCreator: x2EarnCreator,
     libraries: {
       governorClockLogic: GovernorClockLogicLib,
       governorConfigurator: GovernorConfiguratorLib,

@@ -23,10 +23,12 @@ export const NoLinkedAccount = ({ address }: Props) => {
       <VStack gap={4}>
         <PeopleIcon color="#757575" size="105" />
         <Heading fontSize="xl" fontWeight="500" textAlign="center">
-          {t("You have no linked accounts")}
+          {isConnectedUser ? t("You have no linked accounts") : t("No linked accounts")}
         </Heading>
         <Text fontSize="sm" color="#757575" textAlign="center">
-          {t("You can merge several secondary accounts with your main one")}
+          {isConnectedUser
+            ? t("You can merge several secondary accounts with your main one")
+            : t("Several secondary accounts can be merged with your main one")}
         </Text>
         {isConnectedUser && (
           <Button variant="primaryAction" onClick={addLinkedAccountModal.onOpen}>
