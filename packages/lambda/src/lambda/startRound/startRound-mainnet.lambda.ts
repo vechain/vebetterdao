@@ -2,16 +2,16 @@ import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
 import mainnetConfig from "@repo/config/mainnet"
 import { FunctionFragment } from "ethers"
-import { addressUtils, clauseBuilder, coder } from "@vechain/sdk-core"
+import { addressUtils, clauseBuilder } from "@vechain/sdk-core"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
-import { buildClaimClauses, getRoundXApps } from "./helpers/xApps"
-import { getIdsOfUnclaimed } from "./helpers/xApps"
-import { getSecret } from "./helpers/secret"
-import { waitForRoundStart } from "./helpers/emissions"
-import { publishMessage } from "./helpers/slack"
+import { buildClaimClauses, getRoundXApps } from "../../helpers/xApps"
+import { getIdsOfUnclaimed } from "../../helpers/xApps"
+import { getSecret } from "../../helpers/secret"
+import { waitForRoundStart } from "../../helpers/emissions"
+import { publishMessage } from "../../helpers/slack"
 import { Emissions__factory as Emissions } from "@repo/contracts"
 
-// Define the URL for the Vechain testnet
+// Define the URL for the Vechain mainnet
 const nodeURL = "https://mainnet.vechain.org/"
 
 const client = new SecretsManagerClient({
@@ -89,7 +89,7 @@ async function distributeXAllocations(thor: ThorClient) {
   const previousRound = Number(currentRound[0]) - 1
 
   // Get the X-Apps for the current round
-  const xApps = await getRoundXApps(thor, previousRound.toString())
+  const xApps = await getRoundXApps(thor, previousRound.toString(), mainnetConfig)
 
   // Get the IDs of the X-Apps that have not yet claimed their allocations
   const xAppIds = await getIdsOfUnclaimed(thor, xApps, previousRound.toString())
