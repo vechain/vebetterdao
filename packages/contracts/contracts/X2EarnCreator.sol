@@ -100,6 +100,9 @@ contract X2EarnCreator is
     require(defaultAdmin != address(0), "X2EarnCreator: zero address");
 
     _grantRole(DEFAULT_ADMIN_ROLE, defaultAdmin);
+
+    // make token id start from 1
+    $.nextTokenId = 1;
   }
 
   // ---------- Modifiers ------------ //
@@ -159,6 +162,13 @@ contract X2EarnCreator is
     return baseURI;
   }
 
+  /// @notice Retrieves the base URI for the NFT metadata
+  /// @return The base URI for the NFT metadata
+  function baseURI() public view returns (string memory) {
+    X2EarnCreatorStorage storage $ = _getX2EarnCreatorStorage();
+    return $.baseURI;
+  }
+
   /// @notice Retieves the version of the contract
   function version() public pure returns (string memory) {
     return "1";
@@ -188,6 +198,14 @@ contract X2EarnCreator is
   /// @dev Override to disable approval functionality
   function setApprovalForAll(address, bool) public pure override(ERC721Upgradeable, IERC721) {
     revert TransfersDisabled();
+  }
+
+  /// @notice Sets the base URI for the NFT metadata
+  /// @param newBaseURI The new base URI for the NFT metadata
+  /// @dev Only callable by accounts with the DEFAULT_ADMIN_ROLE
+  function setBaseURI(string calldata newBaseURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    X2EarnCreatorStorage storage $ = _getX2EarnCreatorStorage();
+    $.baseURI = newBaseURI;
   }
 
   // ---------------- Internal Functions ----------------

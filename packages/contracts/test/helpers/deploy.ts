@@ -340,14 +340,6 @@ export const getOrDeployContractInstances = async ({
     },
   ])) as GalaxyMemberV1
 
-  const galaxyMember = (await upgradeProxy(
-    "GalaxyMemberV1",
-    "GalaxyMember",
-    await galaxyMemberV1.getAddress(),
-    [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
-    { version: 2 },
-  )) as GalaxyMember
-
   const x2EarnCreator = (await deployProxy("X2EarnCreator", [config.CREATOR_NFT_URI, owner.address])) as X2EarnCreator
 
   // Deploy NodeManagement
@@ -356,6 +348,19 @@ export const getOrDeployContractInstances = async ({
     owner.address,
     owner.address,
   ])) as NodeManagement
+
+  const galaxyMember = (await upgradeProxy(
+    "GalaxyMemberV1",
+    "GalaxyMember",
+    await galaxyMemberV1.getAddress(),
+    [
+      await vechainNodesMock.getAddress(),
+      await nodeManagement.getAddress(),
+      owner.address,
+      config.GM_NFT_NODE_TO_FREE_LEVEL,
+    ],
+    { version: 2 },
+  )) as GalaxyMember
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
   const veBetterPassportContractAddress = await deployProxyOnly("VeBetterPassportV1", {

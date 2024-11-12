@@ -56,6 +56,8 @@ interface IGalaxyMember {
   event Upgraded(address indexed implementation);
   event Upgraded(uint256 indexed tokenId, uint256 oldLevel, uint256 newLevel);
   event XAllocationsGovernorAddressUpdated(address indexed newAddress, address indexed oldAddress);
+  event NodeDetached(uint256 indexed nodeTokenId, uint256 indexed tokenId);
+  event NodeAttached(uint256 indexed nodeTokenId, uint256 indexed tokenId);
 
   /// @notice Returns the role identifier for contracts address manager
   function CONTRACTS_ADDRESS_MANAGER_ROLE() external view returns (bytes32);
