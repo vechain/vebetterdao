@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react"
-import { VStack, HStack, Heading, Text, IconButton, useBreakpointValue } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Text, IconButton, useBreakpointValue, Box } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { motion, AnimatePresence } from "framer-motion"
 import { UilArrowRight, UilInfoCircle } from "@iconscout/react-unicons"
@@ -10,7 +10,7 @@ type Props = {
   xApps: UnendorsedApp[] | undefined
 }
 
-export const AppsLookingForEndorsement: React.FC<Props> = ({ xApps }) => {
+export const AppsLookingForEndorsement = ({ xApps }: Props) => {
   const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = useState(0)
   const isMobile = useBreakpointValue({ base: true, md: false })
@@ -31,7 +31,7 @@ export const AppsLookingForEndorsement: React.FC<Props> = ({ xApps }) => {
       alignItems="flex-start"
       spacing={4}
       p={"20px"}
-      width="full"
+      width={"full"}
       border={"1px solid #EFEFEF"}
       borderRadius={"20px"}
       bgColor={"#FFFFFF"}>
@@ -47,7 +47,7 @@ export const AppsLookingForEndorsement: React.FC<Props> = ({ xApps }) => {
         width="full"
         position="relative"
         overflow="hidden"
-        // border={"1px solid yellow"}
+        h={"full"}
         _after={{
           content: '""',
           position: "absolute",
@@ -65,10 +65,12 @@ export const AppsLookingForEndorsement: React.FC<Props> = ({ xApps }) => {
               key={xApp?.id}
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
-              // exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
               style={{ width: isMobile ? "100%" : "calc(33.33% - 10px)", flexShrink: 0 }}>
-              <AppCards xAppId={xApp.id} variant="lookingForEndorsementApps" />
+              {/* /TODO: align the AppsCards for the carousel */}
+              <Box width="full" height="full">
+                <AppCards xAppId={xApp.id} variant="lookingForEndorsementApps" status={undefined} />
+              </Box>
             </motion.div>
           ))}
         </AnimatePresence>

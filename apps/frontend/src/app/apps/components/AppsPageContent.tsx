@@ -1,114 +1,71 @@
-import { useXApps } from "@/api"
-import { HStack, VStack, Grid, Spinner, Button, useDisclosure, Text, Skeleton, Heading } from "@chakra-ui/react"
-import { AppCard } from "./AppCard"
-import { AddNewAppCard } from "./AddNewAppCard"
-import { useTranslation } from "react-i18next"
+import { useXApps, useXNode } from "@/api"
+import { JoinB3TRAppsBanner } from "@/components"
+
+import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
+import { AllApps } from "./AllApps"
+import { AppCards } from "./AppCards"
+
 import { useMemo } from "react"
-import { UnendorsedAppCard } from "./UnendorsedAppCard"
-import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
+
+import { VStack, Heading, Text } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
+
+export type XAppInformations = {
+  key?: string
+  xAppId?: string | undefined
+  xNodePoints?: number
+  xNodeLevel?: number
+  variant?: string
+  status?: string
+}
 
 export const AppsPageContent = () => {
   const { t } = useTranslation()
-
   const { data: xApps, isLoading: isXAppsLoading } = useXApps()
+  const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeLevel } = useXNode()
+  console.log("xApps in the AppsPageContent Component", xApps)
+  const xAppUserEndorsed: XAppInformations | null = useMemo(() => {
+    if (!xApps || isXNodeLoading || !endorsedApp || !isEndorsingApp) return null
 
-  const {
-    isOpen: isActiveSection,
-    onOpen: onActiveSection,
-    onClose: onUnendorsedSection,
-  } = useDisclosure({
-    defaultIsOpen: true,
-  })
+    return {
+      xAppId: endorsedApp.id,
+      xNodePoints: xNodePoints,
+      xNodeLevel: xNodeLevel,
+      isLoading: isXAppsLoading,
+    }
+  }, [isXNodeLoading, endorsedApp, xApps, xNodePoints])
 
-  const appsSection = useMemo(() => {
-    if (isActiveSection)
-      return (
-        <Grid templateColumns={["repeat(1, 1fr)", "repeat(3, 1fr)"]} gap={6} w="full">
-          {xApps?.active.map(xApp => <AppCard key={xApp.id} xApp={xApp} />)}
-
-          <AddNewAppCard />
-        </Grid>
-      )
-
-    return (
-      <VStack w="full" spacing={8}>
-        <EndorsementPointsBanner />
-        <Grid templateColumns={"repeat(1, 1fr)"} gap={6} w="full">
-          {xApps?.unendorsed.map(xApp => <UnendorsedAppCard key={xApp.id} xApp={xApp} />)}
-        </Grid>
-      </VStack>
-    )
-  }, [isActiveSection, xApps])
-
-  if (isXAppsLoading)
-    return (
-      <VStack w="full" spacing={12} h="80vh" justify="center" data-testid="apps-page-loading">
-        <Spinner size={"lg"} />
-      </VStack>
-    )
+  // {
+  //    TODO: show the appsLookingForEndorsement carrouselle if xNodeHolder && notEndorsingAnyApp on top instead bellow the page
+  // }
 
   //TODO: Pagination, search, filters
   return (
-    <VStack spacing={8} data-testid="apps-page">
-      <HStack
-        w="full"
-        overflowY={"visible"}
-        overflowX={"auto"}
-        spacing={4}
-        // Remove scrollbar
-        css={{
-          "&::-webkit-scrollbar": {
-            display: "none",
-          },
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}>
-        <Button
-          w="auto"
-          h="auto"
-          minW={"auto"}
-          variant="ghost"
-          onClick={onActiveSection}
-          borderRadius={"24px"}
-          px={"24px"}
-          py="16px"
-          bg={isActiveSection ? "#E0E9FE" : "transparent"}>
-          <Heading fontWeight={isActiveSection ? 700 : 500} fontSize={"20px"}>
-            {t("Active apps")}
-          </Heading>
-        </Button>
-        <Button
-          w="auto"
-          h="auto"
-          minW={"auto"}
-          variant="ghost"
-          onClick={onUnendorsedSection}
-          borderRadius={"24px"}
-          px={"24px"}
-          py="16px"
-          fontWeight={!isActiveSection ? 700 : 500}
-          fontSize={"20px"}
-          bg={!isActiveSection ? "#E0E9FE" : "transparent"}>
-          <HStack spacing={2}>
-            <Heading fontWeight={!isActiveSection ? 700 : 500} fontSize={"20px"}>
-              {t("Looking for endorsement")}
-            </Heading>
-            <Skeleton isLoaded={!isXAppsLoading}>
-              <Text
-                bg="#B1F16C"
-                py="10px"
-                px="4px"
-                borderRadius={"38px"}
-                fontSize={"12px"}
-                fontWeight={700}
-                lineHeight={0}>
-                {t("{{value}} new apps", { value: xApps?.unendorsed?.length })}
-              </Text>
-            </Skeleton>
-          </HStack>
-        </Button>
-      </HStack>
-      {appsSection}
+    <VStack alignItems={"flex-start"} position={"relative"} spacing={4}>
+      {/* TODO: pass the appBanner in that place (absolute position) */}
+      {/* <AppsBanner /> */}
+
+      <VStack alignItems={"flex-start"}>
+        <Heading>{t("Your endorsed app")}</Heading>
+        <Text>{t("With your XNode, you endorse apps to allow them to participate in governance")}</Text>
+        {xAppUserEndorsed ? (
+          <AppCards
+            xAppId={xAppUserEndorsed.xAppId}
+            xNodePoints={xAppUserEndorsed.xNodePoints}
+            xNodeLevel={xNodeLevel}
+            variant={"endorsedApps"}
+          />
+        ) : null}
+      </VStack>
+
+      <VStack alignItems={"flex-start"}>
+        <Heading>{t("All the apps")}</Heading>
+        <AllApps xApps={xApps} isXAppsLoading={isXAppsLoading} />
+      </VStack>
+
+      <AppsLookingForEndorsement xApps={xApps?.unendorsed} />
+
+      <JoinB3TRAppsBanner />
     </VStack>
   )
 }
