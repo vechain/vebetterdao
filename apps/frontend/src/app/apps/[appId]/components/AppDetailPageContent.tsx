@@ -32,10 +32,14 @@ export const AppDetailPageContent = () => {
     return appHasBeenIntoAllocationRounds
   }, [appHasBeenIntoAllocationRounds])
 
-  const shouldBeLargeEndorsementBox = useMemo(() => {
-    if (endorsementStatus === XAppStatus.LOOKING_FOR_ENDORSEMENT) return true
-    return false
-  }, [endorsementStatus])
+  const appUnendorsedStatus = useMemo(
+    () =>
+      endorsementStatus === XAppStatus.LOOKING_FOR_ENDORSEMENT ||
+      endorsementStatus === XAppStatus.UNENDORSED_AND_ELIGIBLE ||
+      endorsementStatus === XAppStatus.UNENDORSED_NOT_ELIGIBLE,
+    [endorsementStatus],
+  )
+  const shouldBeLargeEndorsementBox = appUnendorsedStatus
 
   return (
     <Grid
