@@ -2,17 +2,16 @@ import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
 import mainnetConfig from "@repo/config/mainnet"
 import { FunctionFragment } from "ethers"
-import { addressUtils, clauseBuilder, coder } from "@vechain/sdk-core"
+import { addressUtils, clauseBuilder } from "@vechain/sdk-core"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
-import { buildClaimClauses, getAllApps, getRoundXApps, getUnendorsedXApps } from "./helpers/xApps"
-import { getIdsOfUnclaimed } from "./helpers/xApps"
-import { getSecret } from "./helpers/secret"
-import { waitForRoundStart } from "./helpers/emissions"
-import { publishMessage } from "./helpers/slack"
+import { buildClaimClauses, getRoundXApps } from "../../helpers/xApps"
+import { getIdsOfUnclaimed } from "../../helpers/xApps"
+import { getSecret } from "../../helpers/secret"
+import { waitForRoundStart } from "../../helpers/emissions"
+import { publishMessage } from "../../helpers/slack"
 import { Emissions__factory as Emissions } from "@repo/contracts"
-import { buildCheckEndorsementClauses, chunk } from "./helpers/xApps/buildCheckEndorsementClauses"
 
-// Define the URL for the Vechain testnet
+// Define the URL for the Vechain mainnet
 const nodeURL = "https://mainnet.vechain.org/"
 
 const client = new SecretsManagerClient({
@@ -70,74 +69,6 @@ async function distributeEmissions(thor: ThorClient) {
   return { receipt, gasResult }
 }
 
-import _ from "lodash"
-
-/**
- * Checks the endorsements of the X-Apps before distributing the X-Allocations.
- *
- * @param thor - The ThorClient instance
- * @returns an array of transaction receipts if successful and the gas result of the last transaction
- */
-async function checkEndorsements(thor: ThorClient) {
-  const privateKey = await getSecret(client, "start_emissions_pk", "start-emissions-pk")
-
-  // Get the current round number from the Emissions contract
-  const currentRound = await thor.contracts.executeContractCall(
-    mainnetConfig.emissionsContractAddress,
-    Emissions.createInterface().getFunction("getCurrentCycle") as FunctionFragment,
-    [],
-  )
-
-  // Get the eligible X-Apps for the current round
-  const xApps = await getAllApps(thor, currentRound[0])
-
-  // Split X-Apps into chunks of 200
-  const xAppsChunks = chunk(xApps, 200)
-  let lastReceipt = null
-  let lastGasResult = null
-  for (const xAppsChunk of xAppsChunks) {
-    // Build the check endorsement clauses for the current chunk of X-Apps
-    const checkendorsementClauses = buildCheckEndorsementClauses(xAppsChunk)
-
-    // Estimate the gas cost for the transaction
-    const gasResult = await thor.gas.estimateGas(
-      checkendorsementClauses,
-      addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex")),
-    )
-
-    // Check if the transaction was estimated to revert and handle accordingly
-    if (gasResult.reverted) {
-      console.log("Transaction reverted:", gasResult.revertReasons, gasResult.vmErrors)
-
-      await publishMessage(
-        client,
-        "C06BLEJE5SA",
-        `:alert: Failed to distribute X-Allocations:\n${gasResult.revertReasons}, ${gasResult.vmErrors}`,
-      )
-
-      return { receipt: null, gasResult }
-    }
-
-    // Build the transaction body with the estimated gas
-    const txBody = await thor.transactions.buildTransactionBody(checkendorsementClauses, gasResult.totalGas)
-
-    // Sign the transaction with the developer's private key
-    const signedTx = await thor.transactions.signTransaction(txBody, privateKey)
-
-    // Send the signed transaction to the blockchain
-    const tx = await thor.transactions.sendTransaction(signedTx)
-
-    // Wait for the transaction receipt
-    lastReceipt = await thor.transactions.waitForTransaction(tx.id)
-
-    // Update the last gas result
-    lastGasResult = gasResult
-  }
-
-  // Return all transaction receipts and the last gas result
-  return { receipt: lastReceipt, gasResult: lastGasResult }
-}
-
 /**
  * Distributes X-Allocations to the X-App addresses that have not yet claimed their allocations.
  *
@@ -158,7 +89,7 @@ async function distributeXAllocations(thor: ThorClient) {
   const previousRound = Number(currentRound[0]) - 1
 
   // Get the X-Apps for the current round
-  const xApps = await getRoundXApps(thor, previousRound.toString())
+  const xApps = await getRoundXApps(thor, previousRound.toString(), mainnetConfig)
 
   // Get the IDs of the X-Apps that have not yet claimed their allocations
   const xAppIds = await getIdsOfUnclaimed(thor, xApps, previousRound.toString())
@@ -218,17 +149,6 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     const thorClient = new ThorClient(new HttpClient(nodeURL), {
       isPollingEnabled: false,
     })
-
-    // Check the endorsements of the X-Apps before distributing the X-Allocations
-    const { receipt: receiptCheck, gasResult: gasResultCheck } = await checkEndorsements(thorClient)
-
-    if (!receiptCheck)
-      return {
-        statusCode: 500,
-        body: JSON.stringify({
-          error: `Transaction reverted: ${gasResultCheck?.revertReasons}, ${gasResultCheck?.vmErrors}`,
-        }),
-      }
 
     // Distribute the emissions to the VeBetterDAO and start the next round
     const { receipt: receiptEmissions, gasResult: gasResultEmissions } = await distributeEmissions(thorClient)

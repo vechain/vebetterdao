@@ -2,6 +2,7 @@ import { ThorClient } from "@vechain/sdk-network"
 import mainnetConfig from "@repo/config/mainnet"
 import { FunctionFragment } from "@vechain/sdk-core"
 import { XAllocationVoting__factory as XAllocationVoting, X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
+import { AppConfig } from "@repo/config"
 
 /**
  * Retrieves the xApps for the specified round.
@@ -10,9 +11,9 @@ import { XAllocationVoting__factory as XAllocationVoting, X2EarnApps__factory as
  *
  * @returns an array of xApps Ids for the specified round.
  */
-export const getRoundXApps = async (thor: ThorClient, roundId: string): Promise<string[]> => {
+export const getRoundXApps = async (thor: ThorClient, roundId: string, config: AppConfig): Promise<string[]> => {
   const res = await thor.contracts.executeContractCall(
-    mainnetConfig.xAllocationVotingContractAddress,
+    config.xAllocationVotingContractAddress,
     XAllocationVoting.createInterface().getFunction("getAppIdsOfRound"),
     [Number(roundId)],
   )
@@ -30,9 +31,9 @@ export const getRoundXApps = async (thor: ThorClient, roundId: string): Promise<
  *
  * @returns an array of xApps IDs that are not endorsed.
  */
-export const getUnendorsedXApps = async (thor: ThorClient): Promise<string[]> => {
+export const getUnendorsedXApps = async (thor: ThorClient, config: AppConfig): Promise<string[]> => {
   const res = await thor.contracts.executeContractCall(
-    mainnetConfig.x2EarnAppsContractAddress,
+    config.x2EarnAppsContractAddress,
     X2EarnApps.createInterface().getFunction("unendorsedAppIds"),
     [],
   )
@@ -50,9 +51,9 @@ export const getUnendorsedXApps = async (thor: ThorClient): Promise<string[]> =>
  * @param roundId - The round ID to retrieve xApps for.
  * @returns an array of xApps Ids that are eligible or not endorsed.
  */
-export const getAllApps = async (thor: ThorClient, roundId: string): Promise<string[]> => {
-  const eligibleApps = await getRoundXApps(thor, roundId)
-  const unendorsedApps = await getUnendorsedXApps(thor)
+export const getAllApps = async (thor: ThorClient, roundId: string, config: AppConfig): Promise<string[]> => {
+  const eligibleApps = await getRoundXApps(thor, roundId, config)
+  const unendorsedApps = await getUnendorsedXApps(thor, config)
 
   const allApps = Array.from(new Set([...eligibleApps, ...unendorsedApps]))
 
