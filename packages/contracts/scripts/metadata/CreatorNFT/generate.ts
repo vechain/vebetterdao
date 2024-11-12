@@ -12,7 +12,7 @@ interface Metadata {
   image: string
 }
 
-const description = "Creator NFT is a community of people who are part of builders in the VeBetter DAO ecosystem."
+const description = "Creator NFT is a community of builders and innovators contributing to the VeBetter DAO ecosystem."
 
 const METADATA_PATH = path.join(__dirname, "../../../metadata/creatorNFT/metadata")
 const IMAGE_ZIP_PATH = path.join(__dirname, "../../../metadata/creatorNFT/images.zip")
@@ -59,7 +59,7 @@ async function generateAndSaveMetadata(): Promise<void> {
     console.log("Creator NFT Images IPFS URL:", toIPFSURL(imagesIpfsUrl, undefined, folderName))
 
     const image = toIPFSURL(imagesIpfsUrl, images[0].name, folderName)
-    const metadata = generateMetadata("VebetterDAO Creator", description, image)
+    const metadata = generateMetadata("VeBetterDAO Creator", description, image)
     await saveMetadataToFile(metadata, String(1))
   } catch (error) {
     console.error("Error generating metadata:", error)

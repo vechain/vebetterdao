@@ -59,6 +59,13 @@ async function upgradeContract() {
         // Run the upgrade script
         execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
         break
+      case "node-management":
+        console.log("Deploying Node Management")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
       case "deploy-all":
         console.log("Deploying all contracts")
         // Run the upgrade script
