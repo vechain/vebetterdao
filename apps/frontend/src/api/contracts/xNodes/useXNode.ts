@@ -16,7 +16,26 @@ import { useTranslation } from "react-i18next"
  * - attachedGMTokenId: The token ID of the GM NFT attached to the X-Node.
  * */
 
-export const useXNode = () => {
+interface XNodeData {
+  isXNodeLoading: boolean
+  isXNodeError: boolean
+  xNodeError: any
+  xNodeId: string | undefined
+  xNodeName: string
+  xNodeImage: string
+  xNodeLevel: number
+  xNodePoints: number
+  endorsedApp: any
+  isEndorsingApp: boolean
+  isXNodeHolder: boolean
+  attachedGMTokenId: string | undefined
+  isXNodeAttachedToGM: boolean
+  isLoadingAttachedGMTokenId: boolean
+  isErrorAttachedGMTokenId: boolean
+  errorAttachedGMTokenId: any
+}
+
+export const useXNode = (): XNodeData => {
   const { t } = useTranslation()
   const xNodes = useUserXNodes()
   // TODO: in the future we will have multiple xNodes
