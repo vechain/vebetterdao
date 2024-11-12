@@ -4,6 +4,7 @@ import {
   useAppEndorsers,
   useEndorsementScoreThreshold,
   useXAppMetadata,
+  XApp,
 } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { NEW_APP_MAX_DAYS, notFoundImage } from "@/constants"
@@ -29,7 +30,7 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 type Props = {
-  xApp: UnendorsedApp
+  xApp: XApp | UnendorsedApp
 }
 
 export const UnendorsedAppCard = ({ xApp }: Props) => {
