@@ -15,10 +15,8 @@ const selectDeployConfigs: Record<string, SelectDeploy> = {
     name: "ve-better-passport",
     description: "Deploy only this contract",
   },
-  "X2Earn Creator": {
-    name: "x2-earn-creator",
-    description: "Deploy only this contract",
-  },
+  name: "x2-earn-creator",
+  description: "Deploy only this contract",
 } as const
 
 async function upgradeContract() {
@@ -54,6 +52,13 @@ async function upgradeContract() {
         break
       case "x2-earn-creator":
         console.log("Deploying X2Earn Creator")
+        // Set environment variables
+        process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
+        // Run the upgrade script
+        execSync(`turbo run deploy:contract:${env}`, { stdio: "inherit" })
+        break
+      case "node-management":
+        console.log("Deploying Node Management")
         // Set environment variables
         process.env.CONTRACT_TO_DEPLOY = userChoice.deploy
         // Run the upgrade script
