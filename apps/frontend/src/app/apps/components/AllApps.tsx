@@ -15,8 +15,6 @@ type Props = {
 
 export const AllApps = ({ allApps, isXAppsLoading }: Props) => {
   const [filter, setFilter] = useState("All")
-  console.log("allApps", allApps)
-  console.log("filter", filter)
 
   // Filter xApps based on selected filter value
   const displayApps = useMemo(() => {
