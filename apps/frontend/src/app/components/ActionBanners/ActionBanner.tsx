@@ -10,6 +10,7 @@ import {
   useGetDelegatee,
   useVot3Balance,
   useVotingRewards,
+  useXApps,
 } from "@/api"
 import { CastVoteBanner } from "./components/CastVoteBanner"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -52,6 +53,7 @@ export const ActionBanner = () => {
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account ?? undefined)
+  const { data: xApps } = useXApps()
 
   const ownsTokens = useMemo(() => {
     if (!b3trBalance || !vot3Balance) return false
@@ -79,14 +81,17 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
   const hasCreatorNFT = useHasCreatorNFT(account ?? "") // No loading state
+  const userHasApp = !!account && !!xApps?.allApps.find(app => app.teamWalletAddress === account)
 
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
   const showCastVoteBanner = !!account && !isLoading && canUserVote
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
-  const showCreatorRejectedBanner = !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
-  const showCreatorApprovedBanner = !!account && hasCreatorNFT
-  const showCreatorUnderReviewBanner = !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
+  const showCreatorRejectedBanner =
+    !userHasApp && !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
+  const showCreatorApprovedBanner = !userHasApp && !!account && hasCreatorNFT
+  const showCreatorUnderReviewBanner =
+    !userHasApp && !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
   const slides = useMemo(() => {
     const bannerComponents = []
