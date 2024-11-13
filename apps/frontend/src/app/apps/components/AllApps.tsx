@@ -60,16 +60,9 @@ export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXA
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}>
-        <HStack>
-          {[FILTER_ALL, FILTER_ACTIVE_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST].map(filterType => (
-            <FilterAppsTypeButton
-              key={filterType}
-              filterType={filterType}
-              currentFilter={filter}
-              setFilter={setFilter}
-            />
-          ))}
-        </HStack>
+        {[FILTER_ALL, FILTER_ACTIVE_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST].map(filterType => (
+          <FilterAppsTypeButton key={filterType} filterType={filterType} currentFilter={filter} setFilter={setFilter} />
+        ))}
       </HStack>
       {appsSection}
     </VStack>
