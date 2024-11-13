@@ -7,7 +7,7 @@ import dayjs from "dayjs"
 
 import relativeTime from "dayjs/plugin/relativeTime"
 import duration from "dayjs/plugin/duration"
-import { AlphaTestnetBanner, Footer, AppsBanner } from "@/components"
+import { Footer, AppsBanner } from "@/components"
 import dynamic from "next/dynamic"
 import { usePathname } from "next/navigation"
 import { AnalyticsUtils } from "@/utils"
