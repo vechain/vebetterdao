@@ -229,13 +229,13 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
             <Input
               rounded={"xl"}
               placeholder={t("Your Name")}
-              {...(register("adminName"),
-              {
+              {...register("adminName", {
                 validate: (value: string) => {
                   if (value && AddressUtils.isValid(value)) {
-                    //Prevent user from entering wallet address in admin name field
+                    // Prevent user from entering wallet address in admin name field
                     return t("Invalid Name")
                   }
+                  return true
                 },
               })}
               onBlur={() => onBlur("adminName")}
