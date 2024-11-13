@@ -34,7 +34,7 @@ export type UnendorsedApp = XApp & {
  * @returns  all the available xApps in the ecosystem capped to 256 see {@link XApp}
  */
 
-export type GetAllApps = {
+type GetAllApps = {
   active: XApp[]
   unendorsed: UnendorsedApp[]
   allApps: (XApp | UnendorsedApp)[]

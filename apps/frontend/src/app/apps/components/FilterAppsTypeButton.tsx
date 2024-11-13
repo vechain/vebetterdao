@@ -1,20 +1,15 @@
 import { Button, Heading, HStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { GetAllApps } from "@/api"
 
 type Props = {
   filterType: string
   currentFilter: string
   setFilter: (filter: string) => void
-  isXAppsLoading: boolean
-  xApps: GetAllApps | undefined
 }
 
-export const FilterAppsTypeButton = ({ filterType, currentFilter, setFilter, isXAppsLoading, xApps }: Props) => {
+export const FilterAppsTypeButton = ({ filterType, currentFilter, setFilter }: Props) => {
   const { t } = useTranslation()
   const isActive = filterType === currentFilter
-  console.log("isXAppsLoading", isXAppsLoading)
-  console.log("xApps", xApps)
 
   return (
     <Button

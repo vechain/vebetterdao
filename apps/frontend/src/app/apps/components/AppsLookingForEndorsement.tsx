@@ -1,30 +1,32 @@
 import React, { useState, useCallback } from "react"
-import { VStack, HStack, Heading, Text, IconButton, useBreakpointValue, Box } from "@chakra-ui/react"
+import { VStack, HStack, Heading, Text, IconButton, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { motion, AnimatePresence } from "framer-motion"
 import { UilArrowRight, UilInfoCircle } from "@iconscout/react-unicons"
-import { AppCards } from "./AppCards"
 import { UnendorsedApp } from "@/api"
+import { UnendorsedAppCard } from "./UnendorsedAppCard"
 
 type Props = {
-  xApps: UnendorsedApp[] | undefined
+  xApps: UnendorsedApp[]
 }
 
 export const AppsLookingForEndorsement = ({ xApps }: Props) => {
   const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = useState(0)
   const isMobile = useBreakpointValue({ base: true, md: false })
+  // filter out apps where xApp.createdAtTimestamp is different from 0
+  const filteredApps = xApps.filter(xApp => xApp.createdAtTimestamp === 0)
 
   const handleNextCard = useCallback(() => {
-    setCurrentIndex(prevIndex => (prevIndex + 1) % (xApps?.length || 1))
-  }, [xApps?.length])
+    setCurrentIndex(prevIndex => (prevIndex + 1) % (filteredApps.length || 1))
+  }, [filteredApps.length])
 
-  // Handle previous card  ( optionnal )
+  // Handle previous card  ( optional )
   // const handlePrevCard = useCallback(() => {
   //   setCurrentIndex(prevIndex => (prevIndex - 1 + (xApps?.length || 1)) % (xApps?.length || 1))
   // }, [xApps?.length])
 
-  const visibleApps = xApps?.slice(currentIndex, currentIndex + 3)
+  const visibleApps = filteredApps.slice(currentIndex, currentIndex + 3)
 
   return (
     <VStack
@@ -60,7 +62,7 @@ export const AppsLookingForEndorsement = ({ xApps }: Props) => {
           zIndex: 1,
         }}>
         <AnimatePresence initial={false}>
-          {visibleApps?.map(xApp => (
+          {visibleApps.map(xApp => (
             <motion.div
               key={xApp?.id}
               initial={{ opacity: 0, x: 50 }}
@@ -68,13 +70,11 @@ export const AppsLookingForEndorsement = ({ xApps }: Props) => {
               transition={{ duration: 0.3 }}
               style={{ width: isMobile ? "100%" : "calc(33.33% - 10px)", flexShrink: 0 }}>
               {/* /TODO: align the AppsCards for the carousel */}
-              <Box width="full" height="full">
-                <AppCards xAppId={xApp.id} variant="lookingForEndorsementApps" status={undefined} />
-              </Box>
+              <UnendorsedAppCard key={xApp.id} xApp={xApp} />
             </motion.div>
           ))}
         </AnimatePresence>
-        {xApps?.length && xApps.length > 2 && (
+        {filteredApps.length > 2 && (
           <IconButton
             icon={<UilArrowRight color={"#004CFC"} />}
             aria-label="Next card"

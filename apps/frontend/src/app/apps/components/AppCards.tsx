@@ -26,6 +26,7 @@ import { NodeStrengthLevelToImage } from "@/constants/XNode"
 
 type StatusType = "LOST" | "PENDING" | "SUCCESS" | "UNKNOWN"
 
+// TODO: review
 export const AppCards = ({
   xAppId,
   xNodePoints,

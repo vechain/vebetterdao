@@ -1,13 +1,6 @@
-import {
-  UnendorsedApp,
-  useAppEndorsementScore,
-  useAppEndorsers,
-  useEndorsementScoreThreshold,
-  useXAppMetadata,
-  XApp,
-} from "@/api"
+import { UnendorsedApp, useAppEndorsementScore, useEndorsementScoreThreshold, useXAppMetadata, XApp } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
-import { NEW_APP_MAX_DAYS, notFoundImage } from "@/constants"
+import { notFoundImage } from "@/constants"
 import {
   Box,
   Card,
@@ -23,8 +16,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { UilAngleRight, UilStar } from "@iconscout/react-unicons"
-import dayjs from "dayjs"
+import { UilAngleRight } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -42,11 +34,8 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
 
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
-  const endorsers = useAppEndorsers(xApp.id)
   const endorsementScore = useAppEndorsementScore(xApp.id)
   const endorsementScoreThreshold = useEndorsementScoreThreshold()
-
-  const isAppNew = dayjs.unix(xApp.createdAtTimestamp).add(NEW_APP_MAX_DAYS, "days").isAfter(dayjs())
 
   const onCardClick = useCallback(() => {
     router.push(`/apps/${xApp.id}`)
@@ -85,40 +74,12 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
                 </Show>
               </HStack>
               <Stack direction={["column-reverse", "column-reverse", "column"]} spacing={2} align="flex-start">
-                <HStack spacing={3} align="center">
-                  <HStack color="#F29B32" bg="#FFF3E5" borderRadius={"12px"} py="4px" px={"10px"} spacing={"4px"}>
-                    <Icon as={UilStar} boxSize={"14px"} />
-                    <Text fontSize={"14px"} fontWeight={600}>
-                      {t("Looking for support")}
-                    </Text>
-                  </HStack>
-                  {isAppNew && (
-                    <HStack
-                      bg="#B1F16C"
-                      borderRadius={"12px"}
-                      color={"#3B3B3B"}
-                      fontWeight={600}
-                      py="4px"
-                      px={"10px"}
-                      spacing={"4px"}>
-                      <Icon as={UilStar} boxSize={"14px"} color={"#3B3B3B"} />
-                      <Text fontSize={"14px"} fontWeight={600}>
-                        {t("New")}
-                      </Text>
-                    </HStack>
-                  )}
-                </HStack>
                 <Box>
                   <Skeleton isLoaded={!appMetadataLoading}>
                     <Heading fontWeight={700} fontSize={"24px"}>
                       {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                     </Heading>
                   </Skeleton>
-                  <Text fontSize={"14px"} fontWeight={400} color={"#6A6A6A"}>
-                    {t("Submitted on {{date}}", {
-                      date: dayjs.unix(xApp.createdAtTimestamp).format("MMMM D"),
-                    })}
-                  </Text>
                 </Box>
               </Stack>
             </Stack>
@@ -155,15 +116,6 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
 
               <Text fontSize={"sm"} color={"gray.500"}>
                 {t("Endorsement score")}
-              </Text>
-            </VStack>
-            <VStack spacing={1} align="flex-start" w="full">
-              <Heading fontSize={"24px"} fontWeight={700} color={"#004CFC"}>
-                {endorsers.data?.length}
-              </Heading>
-
-              <Text fontSize={"sm"} color={"gray.500"}>
-                {t("Users endorsing")}
               </Text>
             </VStack>
           </Stack>
