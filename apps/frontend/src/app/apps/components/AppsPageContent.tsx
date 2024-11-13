@@ -32,8 +32,6 @@ export const AppsPageContent = () => {
     <VStack alignItems={"flex-start"} position={"relative"} spacing={4} w="full">
       <AppsBanner />
 
-      <AppsLookingForEndorsement filteredApps={newApps || []} />
-
       {!isXNodeLoading &&
         (isEndorsingApp ? (
           <>
@@ -44,6 +42,8 @@ export const AppsPageContent = () => {
         ) : (
           <EndorsementPointsBanner />
         ))}
+
+      <AppsLookingForEndorsement filteredApps={newApps || []} />
 
       <VStack alignItems={"flex-start"}>
         <Heading>{t("All the apps")}</Heading>
