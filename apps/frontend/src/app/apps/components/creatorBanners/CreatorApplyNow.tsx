@@ -25,7 +25,7 @@ export const CreatorApplyNow = () => {
             py="16px"
             pr="24px">
             <Heading fontSize="lg" fontWeight="700" color="#252525" flex={1}>
-              {t("Do you have a dApp to join the VeBetterDAO ecosystem?")}
+              {t("Do you have an app to join the VeBetter DAO ecosystem?")}
             </Heading>
             <Button
               // onClick={doActionModal.onOpen}
