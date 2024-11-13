@@ -55,7 +55,7 @@ export const useAdminCreatorNFT = ({ walletAddress, tokenId, onSuccess, invalida
         queryKey: getHasCreatorNFTQueryKey(walletAddress),
       })
     }
-  }, [invalidateCache, queryClient, tokenId, walletAddress])
+  }, [invalidateCache, queryClient, walletAddress])
 
   const handleOnSuccess = useCallback(async () => {
     await performCacheInvalidation()

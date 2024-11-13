@@ -18,7 +18,7 @@ const NewCreatorPageFormContent = dynamic(
   },
 )
 
-export default async function NewCreatorPageForm() {
+export default function NewCreatorPageForm() {
   useEffect(() => {
     AnalyticsUtils.trackPage("NewCreatorForm")
   }, [])

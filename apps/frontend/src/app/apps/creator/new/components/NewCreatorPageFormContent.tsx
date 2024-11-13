@@ -38,7 +38,7 @@ export const NewCreatorPageFormContent = () => {
   useEffect(() => {
     //Users with Creator NFT should be redirected to the new app page
     if (hasCreatorNft) router.push("/apps/new")
-  }, [hasCreatorNft])
+  }, [hasCreatorNft, router])
 
   const navigateToHome = () => {
     onClose()

@@ -43,7 +43,7 @@ export const CreatorApplicationModal: React.FC<CreatorApplicationModalProps> = (
         </VStack>
       </>
     )
-  }, [status, errorMessage, isOpen, onClose])
+  }, [status, errorMessage, isOpen, onClose, onButtonClick, t])
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
