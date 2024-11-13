@@ -25,7 +25,7 @@ export const useMostVotedAppsInRound = (
   // Notice: this trick is used because when starting the project in the local environment,
   // the roundId is "0" and the roundXApps is undefined, which will cause the app to not render apps info.
   const { data: allXApps } = useXApps()
-  const apps = roundId === "0" ? allXApps : roundXApps
+  const apps = roundId === "0" ? allXApps?.active : roundXApps
 
   // get shares of apps
   const xAppsShares = useXAppsShares(apps?.map(app => app.id) ?? [], roundId)

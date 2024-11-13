@@ -21,14 +21,13 @@ async function upgradeContract() {
 
     const selectedContract = upgradeConfig[contract]
 
-    // Prepare choices that include both version and description
     const versionChoices = selectedContract.versions.map(version => ({
       name: `${version} - ${selectedContract.descriptions[version]}`,
       value: version,
     }))
 
     // Prompt the user to select the version to upgrade to
-    const { version } = await inquirer.prompt<{ version: (typeof selectedContract.versions)[number] }>({
+    const { version } = await inquirer.prompt<{ version: string }>({
       type: "list",
       name: "version",
       message: `Which version do you want to upgrade ${contract} to?`,

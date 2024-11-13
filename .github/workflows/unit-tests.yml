@@ -6,12 +6,12 @@ on:
     branches:
       - main
       - testnet
-      - feature/vepassport
+      - gm-and-endorsements
   push:
     branches:
       - main
-      - Comment-only-solidity-changes
       - testnet
+      - Comment-only-solidity-changes
 
 jobs:
   check-changes:

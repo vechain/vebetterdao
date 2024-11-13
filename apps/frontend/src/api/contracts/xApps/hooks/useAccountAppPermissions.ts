@@ -37,7 +37,7 @@ export const useAccountAppPermissions = (address?: string): UseQueryResult<Accou
         queryFn: async () => await getXApps(thor),
       })
 
-      const clauses = apps
+      const clauses = apps?.active
         .map(app => [
           {
             to: X2EARNAPPS_CONTRACT,
@@ -57,7 +57,7 @@ export const useAccountAppPermissions = (address?: string): UseQueryResult<Accou
       // Here we create an object where keys are app ids and values are the permissions for the given address
       // Every app should take two slots in the res array, the first one is the isAdmin result and the second one is the isModerator result
 
-      const permissions: AccountAppPermissions = apps.reduce((acc, app, index) => {
+      const permissions: AccountAppPermissions = apps?.active.reduce((acc, app, index) => {
         const isAdminRes = res[index * 2] as Connex.VM.Output
         const isModeratorRes = res[index * 2 + 1] as Connex.VM.Output
 

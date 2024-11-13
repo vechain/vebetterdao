@@ -1,10 +1,23 @@
 import { CreateEditAppForm, CreateEditAppFormData } from "@/components/CreateEditAppForm"
-import { VStack, Grid, GridItem, Heading } from "@chakra-ui/react"
+import { VStack, Grid, GridItem, Heading, useDisclosure, Text, Button, Image, Box } from "@chakra-ui/react"
 import { useForm } from "react-hook-form"
 import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 import { useTranslation } from "react-i18next"
+import { useSubmitNewApp, useUploadAppMetadata } from "@/hooks"
+import { TransactionModal } from "@/components"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { useCallback, useMemo, useState } from "react"
+import { useXApps } from "@/api"
+import { useRouter } from "next/navigation"
+import { PreviewAppCard } from "./PreviewAppCard"
 
 export const NewAppPageFormContent = () => {
+  const router = useRouter()
+  const { t } = useTranslation()
+
+  const [appData, setAppData] = useState<CreateEditAppFormData | undefined>()
+  const [isSuccessSubmission, setIsSuccessSubmission] = useState(false)
+
   const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
     useForm<CreateEditAppFormData>({
       defaultValues: {
@@ -18,72 +31,64 @@ export const NewAppPageFormContent = () => {
     })
 
   const { errors } = formState
-  const { t } = useTranslation()
 
-  //   const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
+  const { data: xApps } = useXApps()
 
-  //   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
-  const onSubmit = async (data: CreateEditAppFormData) => {
-    // onConfirmationOpen()
+  const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
 
-    //TODO: integrate dapp creation contract logic
-    alert(`form submitted \n ${JSON.stringify(data)}`)
+  const { account } = useWallet()
 
-    // const metadataUri = await onMetadataUpload({
-    //   name: data.name,
-    //   description: data.description,
-    //   logo: data.logo,
-    //   banner: data.banner,
-    //   external_url: data.projectUrl,
-    //   screenshots: metadata?.screenshots ?? [],
-    //   app_urls: metadata?.app_urls ?? [],
-    //   social_urls: metadata?.social_urls ?? [],
-    // })
-    // if (!metadataUri) return
-    // console.log("metadataUri", metadataUri)
+  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
-    // updateAppMetadataMutation.sendTransaction({
-    //   metadataUri,
-    //   ...(compareAddresses(data.teamWalletAddress, appData?.teamWalletAddress)
-    //     ? {}
-    //     : { teamWalletAddress: data.teamWalletAddress }),
-    // })
-  }
+  const handleSuccess = useCallback(() => {
+    setIsSuccessSubmission(true)
+    onConfirmationClose()
+  }, [onConfirmationClose])
 
-  //   const onTryAgain = useCallback(() => {
-  //     onConfirmationClose()
-  //     onConfirmationOpen()
-  //   }, [onConfirmationClose, onConfirmationOpen])
+  const submittedAppId = useMemo(() => {
+    return xApps?.allApps.find(app => app.name.toLowerCase() === appData?.name.toLowerCase())?.id
+  }, [appData, xApps])
 
-  return (
-    <>
-      {/* <TransactionModal
-        isOpen={isConfirmationOpen}
-        onClose={onConfirmationClose}
-        confirmationTitle="Update App details"
-        successTitle="App details updated!"
-        status={
-          metadataUploading
-            ? "uploadingMetadata"
-            : updateAppMetadataMutation.error || metadataUploadError
-              ? "error"
-              : updateAppMetadataMutation.status
-        }
-        errorDescription={metadataUploadError?.message ?? updateAppMetadataMutation.error?.reason}
-        errorTitle={
-          metadataUploadError
-            ? "Error uploading metadata"
-            : updateAppMetadataMutation.error
-              ? "Error updating app details"
-              : undefined
-        }
-        showTryAgainButton={true}
-        onTryAgain={onTryAgain}
-        pendingTitle="Updating app details..."
-        txId={updateAppMetadataMutation.txReceipt?.meta.txID}
-        showExplorerButton={true}
-      /> */}
+  const onVisitAppPage = useCallback(() => {
+    router.push(`/apps/${submittedAppId}`)
+  }, [router, submittedAppId])
 
+  const submitAppMutation = useSubmitNewApp({ onSuccess: handleSuccess })
+
+  const onSubmit = useCallback(
+    async (data: CreateEditAppFormData) => {
+      setAppData(data)
+
+      onConfirmationOpen()
+
+      const metadataUri = await onMetadataUpload({
+        name: data.name,
+        description: data.description,
+        logo: data.logo,
+        banner: data.banner,
+        external_url: data.projectUrl,
+        screenshots: [],
+        app_urls: [],
+        social_urls: [],
+        tweets: [],
+        ve_world: {
+          banner: data.banner,
+        },
+      })
+      if (!metadataUri) return
+
+      submitAppMutation.sendTransaction({
+        teamWalletAddress: data.teamWalletAddress,
+        adminAddress: account ?? data.teamWalletAddress,
+        appName: data.name,
+        appMetadataUri: metadataUri,
+      })
+    },
+    [account, onConfirmationOpen, onMetadataUpload, submitAppMutation],
+  )
+
+  const renderAppSubmissionForm = useMemo(() => {
+    return (
       <Grid templateColumns="repeat(3, 1fr)" gap={[4, 4, 8]} w="full" data-testid={`new-app-form`}>
         <GridItem colSpan={[3, 3, 2]}>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -105,6 +110,63 @@ export const NewAppPageFormContent = () => {
           </VStack>
         </GridItem>
       </Grid>
+    )
+  }, [clearErrors, control, errors, handleSubmit, onSubmit, register, setError, setValue, t, watch])
+
+  const renderAppSubmissionSuccess = useMemo(() => {
+    return (
+      <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "3fr 4fr"]} gap={6} w="full" mt={6}>
+        <VStack alignItems={"flex-start"} order={[2, 2, 1]}>
+          <Text fontSize={[24, 36]} fontWeight={700}>
+            {t("Congratulations, Your App is part of VeBetter DAO!")}
+          </Text>
+          <Text fontSize={[14, 16]} fontWeight={400}>
+            {t(
+              "Now, to qualify for allocations and have founding from the community, you have to gain endorsements from X-node holders to reach 100 points.",
+            )}
+          </Text>
+          <Button variant="primaryAction" onClick={onVisitAppPage} mt={6} w={"full"}>
+            {t("Visit your app page")}
+          </Button>
+        </VStack>
+        <VStack position={"relative"} w={"full"} order={[1, 1, 2]}>
+          <Image src="/images/blue-cloud-full.png" alt="Submit app success" />
+          <Box w="full" h="full" position="absolute" display="flex" alignItems="center" justifyContent="center">
+            <PreviewAppCard name={appData?.name} logo={appData?.logo} banner={appData?.banner} appId={submittedAppId} />
+          </Box>
+        </VStack>
+      </Grid>
+    )
+  }, [appData?.banner, appData?.logo, appData?.name, onVisitAppPage, submittedAppId, t])
+
+  return (
+    <>
+      <TransactionModal
+        isOpen={isConfirmationOpen}
+        onClose={onConfirmationClose}
+        confirmationTitle="Submit App"
+        successTitle="App submitted"
+        status={
+          metadataUploading
+            ? "uploadingMetadata"
+            : submitAppMutation.error || metadataUploadError
+              ? "error"
+              : submitAppMutation.status
+        }
+        errorDescription={metadataUploadError?.message ?? submitAppMutation.error?.reason}
+        errorTitle={
+          metadataUploadError
+            ? "Error uploading metadata"
+            : submitAppMutation.error
+              ? "Error submitting app"
+              : undefined
+        }
+        showTryAgainButton={true}
+        pendingTitle="Submitting new app..."
+        txId={submitAppMutation.txReceipt?.meta.txID}
+        showExplorerButton={true}
+      />
+      {!isSuccessSubmission ? renderAppSubmissionForm : renderAppSubmissionSuccess}
     </>
   )
 }

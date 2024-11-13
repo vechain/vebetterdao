@@ -1,0 +1,170 @@
+import { useAppEndorsementStatus, useAppEndorsers, useXNode } from "@/api"
+import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
+import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
+import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import {
+  Button,
+  Card,
+  CardBody,
+  Divider,
+  Flex,
+  Heading,
+  HStack,
+  Image,
+  Stack,
+  Text,
+  useBreakpointValue,
+  useDisclosure,
+  VStack,
+} from "@chakra-ui/react"
+import { UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
+import dayjs from "dayjs"
+import { useRouter } from "next/navigation"
+import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
+
+export const EndorsingAppCard = () => {
+  const { t } = useTranslation()
+
+  const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeId } = useXNode()
+  // get the number of endorsers for the endorsed app
+  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(endorsedApp?.id ?? "")
+  // get app status and score
+  const {
+    score: endorsementScore,
+    status: endorsementStatus,
+    threshold: endorsementThreshold,
+    isLoading: isEndorsementStatusLoading,
+  } = useAppEndorsementStatus(endorsedApp?.id ?? "")
+
+  // get the last endorsement event for the endorsed app
+  const { data: appEndorsedEvents } = useAppEndorsedEvents({
+    nodeId: xNodeId,
+    appId: endorsedApp?.id,
+    endorsed: true,
+  })
+
+  const unendorseAppModal = useDisclosure()
+
+  const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber: appEndorsedEvents?.[0]?.blockNumber })
+  const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
+
+  const router = useRouter()
+  const goToApps = useCallback(() => {
+    router.push("/apps")
+  }, [router])
+
+  const searchIconSize = useBreakpointValue({ base: "4rem", md: "6rem" })
+
+  return (
+    <Card variant="baseWithBorder" w="full" h="min-content">
+      <CardBody>
+        <VStack align="stretch" gap={4}>
+          <VStack align="stretch">
+            <HStack justify="space-between">
+              <Heading fontSize="lg">{t("Endorsing app")}</Heading>
+              {isEndorsingApp && <UilInfoCircle color="#004CFC" />}
+            </HStack>
+            {isEndorsingApp && (
+              <Text fontSize="sm">
+                {t(
+                  "As the owner of an XNode, you can use your points to endorse apps and help them be voted in allocation rounds.",
+                )}
+              </Text>
+            )}
+          </VStack>
+          {isEndorsingApp ? (
+            <Card variant={"baseWithBorder"} p={4} rounded="lg">
+              <VStack align="stretch" spacing={6}>
+                <HStack w="full" spacing={4}>
+                  <Image src={endorsedApp?.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
+                  <Stack
+                    direction={["column", "column", "row"]}
+                    alignItems={["flex-start", "flex-start", "center"]}
+                    justifyContent={["flex-start", "flex-start", "space-between"]}
+                    spacing={2}
+                    w="full">
+                    <VStack alignItems="flex-start" spacing={2}>
+                      <EndorsementStatusCallout
+                        endorsementStatus={endorsementStatus}
+                        showDescription={false}
+                        padding={2}
+                      />
+                      <Heading fontSize="lg" fontWeight={"600"}>
+                        {endorsedApp?.name}
+                      </Heading>
+                    </VStack>
+                    <Stack
+                      direction={["row", "row", "column"]}
+                      alignItems={["flex-start", "flex-start", "flex-end"]}
+                      justifyContent={["flex-start", "flex-start", "flex-end"]}
+                      gap={0}>
+                      <Text
+                        fontSize={["xs", "xs", "md"]}
+                        color={["#6A6A6A", "#6A6A6A", "inherit"]}
+                        order={[1, 1, 2]} // Change order for large viewports
+                      >
+                        {endorsingSince}
+                      </Text>
+                      <Text
+                        fontSize="xs"
+                        color="#6A6A6A"
+                        order={[0, 0, 1]} // Change order for large viewports
+                        pr={[1, 2, 0]} // Change padding for large viewports
+                      >
+                        {t("Endorsing since")}
+                      </Text>
+                    </Stack>
+                  </Stack>
+                </HStack>
+
+                <Divider />
+
+                <Stack
+                  direction={["column", "column", "row"]}
+                  alignItems={["flex-start", "flex-start", "center"]}
+                  justifyContent={["flex-start", "flex-start", "space-between"]}
+                  spacing={4}
+                  w="full">
+                  <EndorsementDetails
+                    endorsementScore={endorsementScore}
+                    endorsementStatus={endorsementStatus}
+                    endorsementThreshold={endorsementThreshold}
+                    isEndorsementStatusLoading={isEndorsementStatusLoading}
+                    xNodePoints={xNodePoints}
+                    isUserAppEndorser={true}
+                    isXNodeLoading={isXNodeLoading}
+                    endorsers={appEndorsers || []}
+                    isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
+                  <Button variant="dangerGhost" onClick={unendorseAppModal.onOpen} w={["full", "full", "auto"]}>
+                    {t("Stop endorsing")}
+                  </Button>
+                </Stack>
+              </VStack>
+            </Card>
+          ) : (
+            <Flex align="center" justify={"center"} p={["8", "8", "12"]} bg="#F8F8F8" rounded="2xl" mt="2">
+              <VStack align="center" spacing={2} maxW="27rem" textAlign={"center"}>
+                <UilSearch size={searchIconSize} color="#757575" />
+                <Heading fontSize="xl" color="#757575" fontWeight={"500"}>
+                  {t("You’re not endorsing any app")}
+                </Heading>
+                <Text color="#757575">
+                  {t(
+                    "Browse the apps that are looking for endorsement and use your score to help them join the allocation rounds!",
+                  )}
+                </Text>
+                <Button variant="primaryAction" onClick={goToApps} mt={4} w={["full", "full", "auto"]}>
+                  {t("Browse apps")}
+                </Button>
+              </VStack>
+            </Flex>
+          )}
+        </VStack>
+      </CardBody>
+      <UnendorseAppModal isOpen={unendorseAppModal.isOpen} onClose={unendorseAppModal.onClose} />
+    </Card>
+  )
+}

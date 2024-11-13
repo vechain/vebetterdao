@@ -42,7 +42,7 @@ export const buildTxBody = async (
     const gasResult = await thorClient.gas.estimateGas(clauses, senderAddress)
 
     if (gasResult.reverted) {
-      throw new Error(`Gas estimation failed: ${gasResult.revertReasons}`)
+      throw new Error(`Gas estimation failed: ${gasResult.revertReasons} - ${gasResult.vmErrors}`)
     }
 
     gas = gasResult.totalGas + 200_000

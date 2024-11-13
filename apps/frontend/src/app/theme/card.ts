@@ -56,6 +56,16 @@ const variants = {
         padding: "24px",
       },
     }),
+  primaryBoxShadow: () =>
+    definePartsStyle({
+      container: {
+        border: "1px solid #004CFC",
+        boxShadow: "0px 0px 16px 0px rgba(0, 76, 252, 0.35)",
+      },
+      body: {
+        padding: "24px",
+      },
+    }),
   secondaryBoxShadow: (props: StyleFunctionProps) =>
     definePartsStyle({
       container: {

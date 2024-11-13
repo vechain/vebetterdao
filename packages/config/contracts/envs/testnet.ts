@@ -56,6 +56,9 @@ export function createTestnetConfig() {
       5000000000000000000000000n,
       25000000000000000000000000n,
     ],
+
+    GM_NFT_MAX_LEVEL: 1,
+
     VOTER_REWARDS_LEVELS: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     /*
       Level => Percentage Multiplier
@@ -71,6 +74,7 @@ export function createTestnetConfig() {
     */
     VOTER_REWARDS_MULTIPLIER: [0, 10, 20, 50, 100, 150, 200, 400, 900, 2400],
     XAPP_BASE_URI: "ipfs://",
+
     /*
       Token transfer limits. These values are not final and are for testing purposes only.
     */
@@ -79,6 +83,9 @@ export function createTestnetConfig() {
     TREASURY_TRANSFER_LIMIT_VTHO: BigInt("0"),
     TREASURY_TRANSFER_LIMIT_VOT3: BigInt("0"),
 
+    // Endorsement
+    VECHAIN_NODES_CONTRACT_ADDRESS: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302", // The contract address of the VeChainNodes contract on mainnet
+    XAPP_GRACE_PERIOD: 120960, // 2 weeks -> max time to be unendorsed by node before being removed from the XAlloction voting rounds
     // Passport
     VEPASSPORT_BOT_SIGNALING_THRESHOLD: 2, // Address must be signaled more than X times to be considered a bot
     VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE: 12,
@@ -87,5 +94,7 @@ export function createTestnetConfig() {
     VEPASSPORT_WHITELIST_THRESHOLD_PERCENTAGE: 20,
     VEPASSPORT_PASSPORT_MAX_ENTITIES: 5,
     VEPASSPORT_DECAY_RATE: 0,
+
+    CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json",
   })
 }

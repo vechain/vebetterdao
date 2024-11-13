@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 export const TotalAllocations = () => {
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
+  const activeApps = xApps?.active
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
@@ -18,7 +19,7 @@ export const TotalAllocations = () => {
 
   const { data: totalEarningsPerApp, isLoading: isTotalEarningsPerAppLoading } = useMultipleXAppsTotalEarnings(
     roundIds,
-    xApps?.map(app => app.id) ?? [],
+    activeApps?.map(app => app.id) ?? [],
   )
 
   const sortedTotalEarnings = useMemo(() => {
@@ -33,7 +34,9 @@ export const TotalAllocations = () => {
       <CardBody>
         <Stack spacing={5} w={"full"}>
           {isTotalEarningsPerAppLoading
-            ? xApps?.map(app => <AppAmount key={app.id} xAppId={app.id} isLoading={isTotalEarningsPerAppLoading} />)
+            ? activeApps?.map(app => (
+                <AppAmount key={app.id} xAppId={app.id} isLoading={isTotalEarningsPerAppLoading} />
+              ))
             : sortedTotalEarnings?.map(data => (
                 <AppAmount
                   key={data?.appId}

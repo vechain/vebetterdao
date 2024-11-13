@@ -8,7 +8,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useEffect } from "react"
 import { B3trAllowance } from "./components/B3trAllowance"
 import { BulkClaimXAppsAllocations } from "./components/BulkClaimXAppsAllocations"
-import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
+import { XAppCheckEndorsement } from "./components/XAppCheckEndorsement"
 import { ContractsDetails } from "./components/ContractsDetails"
 import { Pause } from "./components/Pause"
 import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
@@ -16,6 +16,7 @@ import { UpdateAppsEligibility } from "./components/UpdateAppsEligibility"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { UpdateRoleCard } from "./components/UpdateRoleCard"
 import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport"
+import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -82,6 +83,7 @@ export const AdminPageContent = () => {
               <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
                 <UpdateReceiverAddress />
                 <UpdateAppsEligibility />
+                <XAppCheckEndorsement />
               </Grid>
             </TabPanel>
           )}

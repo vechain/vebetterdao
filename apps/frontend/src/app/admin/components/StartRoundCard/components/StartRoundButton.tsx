@@ -43,8 +43,14 @@ export const StartRoundButton = () => {
         <VStack>
           <Text>
             {currentRound.voteEndTimestamp?.isBefore()
-              ? `Last round (#${currentRoundId}) ended ${currentRound.voteEndTimestamp?.fromNow()}`
-              : `Current round (#${currentRoundId}) will end in ${currentRound.voteEndTimestamp?.fromNow()}`}
+              ? t("Last round (#{{currentRoundId}}) ended {{currentRoundEndedAt}}", {
+                  currentRoundId: currentRoundId,
+                  currentRoundEndedAt: currentRound.voteEndTimestamp?.fromNow(),
+                })
+              : t("Current round (#{{currentRoundId}}) will end in {{currentRoundEndsAt}}", {
+                  currentRoundId: currentRoundId,
+                  currentRoundEndsAt: currentRound.voteEndTimestamp?.fromNow(),
+                })}
           </Text>
         </VStack>
         <VStack>

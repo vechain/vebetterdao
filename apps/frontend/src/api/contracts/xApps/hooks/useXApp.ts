@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import { useXApps } from "./useXApps"
 
 /**
@@ -8,8 +9,11 @@ import { useXApps } from "./useXApps"
 export const useXApp = (appId: string) => {
   const { data: xApps, ...props } = useXApps()
 
+  const allApps = useMemo(() => [...(xApps?.active ?? []), ...(xApps?.unendorsed ?? [])], [xApps])
+  const app = allApps.find(xa => xa.id === appId)
+
   return {
-    data: xApps?.find(xa => xa.id === appId),
+    data: app,
     ...props,
   }
 }

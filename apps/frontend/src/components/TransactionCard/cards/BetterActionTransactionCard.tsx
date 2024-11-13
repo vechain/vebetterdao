@@ -20,7 +20,7 @@ export const BetterActionTransactionCard = ({ transaction }: Props) => {
   const actionModal = useDisclosure()
 
   const getAppName = (appId: string) => {
-    return apps?.find(app => app.id === appId)?.name ?? ""
+    return apps?.allApps.find(app => app.id === appId)?.name ?? ""
   }
 
   return (

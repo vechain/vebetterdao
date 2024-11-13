@@ -35,12 +35,12 @@ export const useAppsSustainabilityActions = ({ startRound, endRound }: Props) =>
   const [isLoading, setIsLoading] = useState(false)
   const isLoadingRef = useRef(false)
   const [loadedAppCount, setLoadedAppCount] = useState(0) // Track fully loaded apps
-  const totalAppCount = xApps?.length ?? 0
+  const totalAppCount = xApps?.allApps?.length ?? 0
 
   useEffect(() => {
     if (!xApps) return
 
-    const appIds = xApps.map((app: XApp) => app.id)
+    const appIds = xApps?.allApps.map((app: XApp) => app.id)
 
     // Fetch actions and aggregated data for each app and round
     const fetchActionsForApp = async (appId: string): Promise<void> => {
@@ -75,7 +75,7 @@ export const useAppsSustainabilityActions = ({ startRound, endRound }: Props) =>
         }
       }
 
-      const name = xApps.find(app => app.id === appId)?.name ?? ""
+      const name = xApps?.allApps.find(app => app.id === appId)?.name ?? ""
 
       setAppActions(prev => ({
         ...prev,
@@ -90,7 +90,7 @@ export const useAppsSustainabilityActions = ({ startRound, endRound }: Props) =>
     const fetchUsersForApp = async (appId: string): Promise<void> => {
       const userAggregatedData: { [user: string]: AppUsersData } = {}
 
-      const appName = xApps.find(app => app.id === appId)?.name ?? ""
+      const appName = xApps?.allApps.find(app => app.id === appId)?.name ?? ""
 
       for (let round = startRound; round <= endRound; round++) {
         let page = 0

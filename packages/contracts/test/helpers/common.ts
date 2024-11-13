@@ -1,6 +1,6 @@
 import { ethers, network } from "hardhat"
 import { B3TR, GalaxyMember, VeBetterPassport } from "../../typechain-types"
-import { BaseContract, ContractFactory, ContractTransactionResponse } from "ethers"
+import { BaseContract, ContractFactory, ContractTransactionResponse, AddressLike } from "ethers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { getOrDeployContractInstances } from "./deploy"
 import { mine } from "@nomicfoundation/hardhat-network-helpers"
@@ -9,6 +9,8 @@ import { type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
 import { ZERO_ADDRESS } from "./const"
 import { buildTxBody, signAndSendTx } from "../../scripts/helpers/txHelper"
 import { getTestKeys } from "../../scripts/helpers/seedAccounts"
+import { endorseApp } from "./xnodes"
+import { time } from "@nomicfoundation/hardhat-network-helpers"
 
 export const waitForNextBlock = async () => {
   if (network.name === "hardhat") {
@@ -467,12 +469,15 @@ export const voteOnApps = async (
 }
 
 export const addAppsToAllocationVoting = async (apps: string[], owner: HardhatEthersSigner) => {
-  const { x2EarnApps } = await getOrDeployContractInstances({})
+  const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({})
 
   let appIds: string[] = []
+  let i = 0
   for (const app of apps) {
-    await x2EarnApps.connect(owner).addApp(app, app, app, "metadataURI")
-    appIds.push(ethers.keccak256(ethers.toUtf8Bytes(app)))
+    await x2EarnApps.connect(owner).submitApp(app, app, app, "metadataURI")
+    const appId = await x2EarnApps.hashAppName(app)
+    appIds.push(appId)
+    endorseApp(appId, otherAccounts[i])
   }
 
   return appIds
@@ -542,7 +547,11 @@ export const calculateUnallocatedAppAllocationOffChain = async (roundId: number,
   return (totalAvailable * appShares) / BigInt(100)
 }
 
-export const participateInAllocationVoting = async (user: HardhatEthersSigner, waitRoundToEnd: boolean = false) => {
+export const participateInAllocationVoting = async (
+  user: HardhatEthersSigner,
+  waitRoundToEnd: boolean = false,
+  endorser?: HardhatEthersSigner,
+) => {
   const { xAllocationVoting, x2EarnApps, owner, veBetterPassport } = await getOrDeployContractInstances({})
 
   await getVot3Tokens(user, "1")
@@ -553,7 +562,8 @@ export const participateInAllocationVoting = async (user: HardhatEthersSigner, w
 
   const appName = "App" + Math.random()
 
-  await x2EarnApps.connect(owner).addApp(user.address, user.address, appName, "metadataURI")
+  await x2EarnApps.connect(owner).submitApp(user.address, user.address, appName, "metadataURI")
+  await endorseApp(await x2EarnApps.hashAppName(appName), endorser ? endorser : owner)
   const roundId = await startNewAllocationRound()
 
   // Vote
@@ -648,6 +658,53 @@ export const upgradeNFTtoNextLevel = async (
   await nft.connect(owner).upgrade(tokenId)
 }
 
+/**
+ * Helper function to get storage slots.
+ * @param contractAddress The address of the contract.
+ * @param initialSlots The initial storage slots.
+ * @returns Array of storage slots.
+ */
+export const getStorageSlots = async (contractAddress: AddressLike, ...initialSlots: bigint[]) => {
+  const slots = []
+
+  for (const initialSlot of initialSlots) {
+    for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+      slots.push(await ethers.provider.getStorage(contractAddress, i))
+    }
+  }
+
+  return slots.filter(slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000") // Removing empty slots
+}
+
+export const addNodeToken = async (
+  level: number,
+  owner: HardhatEthersSigner,
+): Promise<[string, bigint, boolean, boolean, bigint, bigint, bigint]> => {
+  const { vechainNodesMock } = await getOrDeployContractInstances({})
+
+  if (!vechainNodesMock) throw new Error("VechainNodesMock not found")
+
+  const blockNumBefore = await ethers.provider.getBlockNumber()
+  const blockBefore = await ethers.provider.getBlock(blockNumBefore)
+  if (!blockBefore) throw new Error("Block before not found")
+
+  const timestampBefore = blockBefore.timestamp
+  const nextBlockTimestamp = timestampBefore + 1000
+  await time.setNextBlockTimestamp(nextBlockTimestamp)
+
+  await vechainNodesMock.addToken(owner.address, level, false, 0, 0)
+
+  return [
+    owner.address,
+    BigInt(level),
+    false,
+    false,
+    ethers.toBigInt(nextBlockTimestamp),
+    ethers.toBigInt(nextBlockTimestamp),
+    ethers.toBigInt(nextBlockTimestamp),
+  ]
+}
+
 export const delegateWithSignature = async (
   veBetterPassport: VeBetterPassport,
   delegator: HardhatEthersSigner,
@@ -732,4 +789,13 @@ export const linkEntityToPassportWithSignature = async (
 
   // Perform the delegation using the signature
   await veBetterPassport.connect(passport).linkEntityToPassportWithSignature(entity.address, deadline, signature)
+}
+
+export const getTwoUniqueRandomIndices = (max: number) => {
+  const firstIndex = Math.floor(Math.random() * max)
+  let secondIndex
+  do {
+    secondIndex = Math.floor(Math.random() * max)
+  } while (secondIndex === firstIndex)
+  return [firstIndex, secondIndex]
 }

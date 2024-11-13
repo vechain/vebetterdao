@@ -23,7 +23,9 @@ export type AppVotesBreakdownProps = {
  */
 export const AppVotesBreakdown = ({ votes, isLoading, minPercentageToNotMerge = 15 }: AppVotesBreakdownProps) => {
   const { t } = useTranslation()
-  const { data: x2EarnApps } = useXApps()
+  const { data: allApps } = useXApps()
+  const x2EarnApps = allApps?.active
+
   const totalVotes = (() => {
     const rawValue = votes.reduce((acc, vote) => acc + (Number(vote.rawValue) || 0), 0)
     if (rawValue >= 99.99 && rawValue < 100) return 100

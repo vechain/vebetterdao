@@ -1,12 +1,24 @@
-import { Emissions, Treasury, X2EarnApps } from "../../typechain-types"
+import {
+  B3TR,
+  B3TRGovernorV1,
+  Emissions,
+  TokenAuction,
+  Treasury,
+  VOT3,
+  X2EarnApps,
+  X2EarnAppsV1,
+  XAllocationVoting,
+} from "../../typechain-types"
 import { SeedStrategy, getSeedAccounts, getTestKeys } from "../helpers/seedAccounts"
-import { bootstrapEmissions } from "../helpers/emissions"
-import { addXDapps } from "../helpers/xApp"
-import { airdropB3trFromTreasury } from "../helpers/airdrop"
+import { bootstrapEmissions, startEmissions } from "../helpers/emissions"
+import { endorseXApps, registerXDapps } from "../helpers/xApp"
+import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
+import { mintVechainNodes, proposeUpgradeGovernance } from "../helpers"
+import { convertB3trForVot3 } from "../helpers/swap"
 
 const accounts = getTestKeys(13)
 
-const APPS = [
+export const APPS = [
   {
     admin: accounts[6].address,
     teamWalletAddress: accounts[6].address,
@@ -57,7 +69,27 @@ const APPS = [
   },
 ]
 
-export const setupLocalEnvironment = async (emissions: Emissions, treasury: Treasury, x2EarnApps: X2EarnApps) => {
+const padNodeTypes = (nodeTypes: number[], requiredLength: number) => {
+  const paddingValue = 7
+
+  while (nodeTypes.length < requiredLength) {
+    nodeTypes.push(paddingValue)
+  }
+
+  return nodeTypes
+}
+
+export const setupLocalEnvironment = async (
+  emissions: Emissions,
+  treasury: Treasury,
+  x2EarnApps: X2EarnApps,
+  governor: B3TRGovernorV1,
+  xAllocationVoting: XAllocationVoting,
+  b3tr: B3TR,
+  vot3: VOT3,
+  vechainNodesMock: TokenAuction,
+  endorseApps: boolean = false,
+) => {
   const start = performance.now()
   console.log("================ Setup local environment")
 
@@ -70,18 +102,51 @@ export const setupLocalEnvironment = async (emissions: Emissions, treasury: Trea
 
   // Add x-apps to the XAllocationPool
   const x2EarnAppsAddress = await x2EarnApps.getAddress()
-  await addXDapps(x2EarnAppsAddress, admin, APPS)
+  await registerXDapps(x2EarnAppsAddress, admin, APPS)
 
   // Seed the first 5 accounts with some tokens
   const treasuryAddress = await treasury.getAddress()
-  const seedAccounts = getSeedAccounts(SeedStrategy.FIXED, 5, 0)
+  const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 5 + APPS.length, 0)
+  const seedAccounts = allAccounts.slice(0, 5)
+  const endorserAccounts = allAccounts
+
+  await airdropVTHO(seedAccounts, admin)
+
   await airdropB3trFromTreasury(treasuryAddress, admin, seedAccounts)
 
+  await convertB3trForVot3(b3tr, vot3, seedAccounts)
+
+  /**
+   * First seed account will have a Mjolnir X Node
+   * Second seed account will have a Thunder X Node
+   * Third seed account will have a Strength X Node
+   * Forth seed account will have a Mjölnir Economic Node
+   * Fifth seed account will have a Thunder Economic Node
+   * Remaining accounts with have a Mjolnir X Node -> These will have an endorsement score of 100
+   */
+  await mintVechainNodes(vechainNodesMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 2], endorserAccounts.length))
+
+  if (endorseApps) {
+    // Get unendorsed XAPPs
+    const unedorsedApps = await x2EarnApps.unendorsedAppIds()
+    const appsToEndorse = unedorsedApps.slice(0, unedorsedApps.length / 2)
+    await endorseXApps(endorserAccounts, x2EarnApps, appsToEndorse, vechainNodesMock)
+  }
+
+  await startEmissions(emissionsContract, admin)
+
+  await proposeUpgradeGovernance(governor, xAllocationVoting)
+
   const end = new Date(performance.now() - start)
+
   console.log(`Setup complete in ${end.getMinutes()}m ${end.getSeconds()}s`)
 }
 
-export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2EarnApps) => {
+export const setupTestEnvironment = async (
+  emissions: Emissions,
+  x2EarnApps: X2EarnApps,
+  vechainNodesMock: TokenAuction,
+) => {
   console.log("================ Setup Testnet environment")
   const start = performance.now()
 
@@ -96,8 +161,13 @@ export const setupTestEnvironment = async (emissions: Emissions, x2EarnApps: X2E
 
   // Add x-apps to the XAllocationPool
   const x2EarnAppsAddress = await x2EarnApps.getAddress()
-  await addXDapps(x2EarnAppsAddress, admin, APPS)
+  await registerXDapps(x2EarnAppsAddress, admin, APPS)
   console.log("x-apps added")
+
+  // Creating NODE holders
+  const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 5 + APPS.length, 0)
+  await mintVechainNodes(vechainNodesMock, allAccounts, padNodeTypes([7, 6, 5, 3, 2], allAccounts.length))
+  console.log("NODE holders created")
 
   const end = performance.now()
   console.log(`Setup complete in ${end - start}ms`)
@@ -145,7 +215,7 @@ export const setupMainnetEnvironment = async (emissions: Emissions, x2EarnApps: 
     console.log("Team Wallet Address: ", app.teamWalletAddress)
   })
 
-  await addXDapps(x2EarnAppsAddress, admin, APPS)
+  await registerXDapps(x2EarnAppsAddress, admin, APPS)
   console.log("x-apps added")
 
   const end = performance.now()
