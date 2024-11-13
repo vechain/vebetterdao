@@ -63,11 +63,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     console.log("Error checking endorsements:", error)
 
     // Publish an error message to the Slack channel
-    await publishMessage(
-      client,
-      "C06BLEJE5SA",
-      `[STAGING] :alert: Error checking endorsements: ${error}`,
-    )
+    await publishMessage(client, "C06BLEJE5SA", `[STAGING] :alert: Error checking endorsements: ${error}`)
 
     return {
       statusCode: 500,
