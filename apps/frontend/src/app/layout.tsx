@@ -7,9 +7,8 @@ import dayjs from "dayjs"
 
 import relativeTime from "dayjs/plugin/relativeTime"
 import duration from "dayjs/plugin/duration"
-import { Footer, AppsBanner } from "@/components"
+import { Footer } from "@/components"
 import dynamic from "next/dynamic"
-import { usePathname } from "next/navigation"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "@repo/config"
 import "@/i18n"
@@ -65,8 +64,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     }
   }, [])
 
-  const pathname = usePathname()
-
   return (
     <html
       lang="en"
@@ -113,8 +110,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <VStack minH="100vh" gap={0} align="stretch">
             {/* <AlphaTestnetBanner /> */}
             <Navbar />
-            <Flex flex={1} direction="column">
-              {pathname === "/apps" && <AppsBanner />}
+            <Flex flex={1}>
               <Container
                 mt={{ base: 2, md: 10 }}
                 mb={[20, 20, 40]}

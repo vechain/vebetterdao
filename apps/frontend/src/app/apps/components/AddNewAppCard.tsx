@@ -17,7 +17,7 @@ export const AddNewAppCard = () => {
       w="full"
       h={"full"}
       style={{
-        backgroundImage: "./images/mascote/mascote-welcoming-left.png",
+        backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='20' ry='20' stroke='%239AE14DFF' stroke-width='4' stroke-dasharray='16%2c 18%2c 13%2c 24' stroke-dashoffset='0' stroke-linecap='round'/%3e%3c/svg%3e")`,
         borderRadius: "20px",
       }}>
       <CardBody>

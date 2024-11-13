@@ -1,9 +1,9 @@
 import { useXApps, useXNode } from "@/api"
-import { JoinB3TRAppsBanner } from "@/components"
-import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
-import { AllApps } from "./AllApps"
+import { AppsBanner } from "@/components"
 import { VStack, Heading, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
+import { AllApps } from "./AllApps"
 import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 
@@ -20,11 +20,15 @@ export const AppsPageContent = () => {
   const { t } = useTranslation()
   const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
   const { data: xApps, isLoading: isXAppsLoading } = useXApps()
+  console.log("*****xApps", xApps)
 
   //TODO: Pagination, search, filters
   return (
     <VStack alignItems={"flex-start"} position={"relative"} spacing={4} w="full">
-      {/* TODO: pass the appBanner in that place (absolute position) */}
+      <AppsBanner />
+
+      <AppsLookingForEndorsement xApps={xApps?.unendorsed || []} />
+
       {!isXNodeLoading &&
         (isEndorsingApp ? (
           <>
@@ -41,9 +45,7 @@ export const AppsPageContent = () => {
         <AllApps xApps={xApps?.allApps || []} isXAppsLoading={isXAppsLoading} />
       </VStack>
 
-      <AppsLookingForEndorsement xApps={xApps?.unendorsed || []} />
-
-      <JoinB3TRAppsBanner />
+      {/* TODO: mascot release <JoinB3TRAppsBanner /> */}
     </VStack>
   )
 }
