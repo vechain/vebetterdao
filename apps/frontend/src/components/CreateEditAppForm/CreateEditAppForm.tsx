@@ -253,7 +253,7 @@ export const CreateEditAppForm = ({
                     {errors.banner ? (
                       <FormErrorMessage>{errors.banner.message}</FormErrorMessage>
                     ) : (
-                      <FormHelperText>{t("Recommended size: 150x200px")}</FormHelperText>
+                      <FormHelperText>{t("Recommended size: 1500x2000px")}</FormHelperText>
                     )}
                     <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("banner")} />
                   </VStack>

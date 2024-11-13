@@ -587,7 +587,7 @@
   "Logo": "Logo",
   "Recommended size: 96x96px": "Recommended size: 96x96px",
   "Banner": "Banner",
-  "Recommended size: 150x200px": "Recommended size: 150x200px",
+  "Recommended size: 1500x2000px": "Recommended size: 1500x2000px",
   "VeBetterDAO": "VeBetterDAO",
   "GM Earth": "GM Earth",
   "#": "#",
@@ -1193,5 +1193,13 @@
   "Upgrade your GM NFT coming soon!": "Upgrade your GM NFT coming soon!",
   "You will be able to attach GM NFT to this node": "You will be able to attach GM NFT to this node",
   "Attach GM NFT to XNode coming soon!": "Attach GM NFT to XNode coming soon!",
-  "You will be able to upgrade your GM NFT soon": "You will be able to upgrade your GM NFT soon"
+  "You will be able to upgrade your GM NFT soon": "You will be able to upgrade your GM NFT soon",
+  "Congratulations, Your App is part of VeBetter DAO!": "Congratulations, Your App is part of VeBetter DAO!",
+  "Now, to qualify for allocations and have founding from the community, you have to gain endorsements from X-node holders to reach 100 points.": "Now, to qualify for allocations and have founding from the community, you have to gain endorsements from X-node holders to reach 100 points.",
+  "Visit your app page": "Visit your app page",
+  "today": "today",
+  "App submition": "App submition",
+  "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.": "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.",
+  "X Node Holders will use their NFTs to endorse your app. Once it reaches 100 points, it becomes eligible for allocations.": "X Node Holders will use their NFTs to endorse your app. Once it reaches 100 points, it becomes eligible for allocations.",
+  "The allocation rounds determine the resources and support your app receives from the ecosystem community.": "The allocation rounds determine the resources and support your app receives from the ecosystem community."
 }
