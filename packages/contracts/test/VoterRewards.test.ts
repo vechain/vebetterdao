@@ -428,7 +428,7 @@ describe("VoterRewards - @shard7", () => {
         forceDeploy: true,
       })
 
-      expect(await voterRewards.version()).to.equal("3")
+      expect(await voterRewards.version()).to.equal("2")
     })
 
     it("Should not have state conflict after upgrading to V2", async () => {

@@ -286,26 +286,12 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // Get the total reward-weighted votes for the voter in the cycle.
     uint256 total = $.cycleToVoterToTotal[cycle][voter];
 
-    // If total is zero, return 0
-    if (total == 0) {
-      return 0;
-    }
-
     // Get the total reward-weighted votes in the cycle.
     uint256 totalCycle = $.cycleToTotal[cycle];
 
-    // If totalCycle is zero, return 0
-    if (totalCycle == 0) {
-      return 0;
-    }
-
     // Get the emissions for voter rewards in the cycle.
     uint256 emissionsAmount = $.emissions.getVote2EarnAmount(cycle);
-
-    // If emissionsAmount is zero, return 0
-    if (emissionsAmount == 0) {
-      return 0;
-    }
+    require(emissionsAmount > 0, "VoterRewards: emissionsAmount must be greater than 0");
 
     // Scale up the numerator before division to improve precision
     uint256 scaledNumerator = total * emissionsAmount * SCALING_FACTOR; // Scale by a factor of SCALING_FACTOR for precision
@@ -438,7 +424,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @dev This should be updated every time a new version of implementation is deployed
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
-    return "3";
+    return "2";
   }
 
   /// @dev Clock used for flagging checkpoints.
