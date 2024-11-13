@@ -7,28 +7,30 @@ import { XApp, UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 
 type Props = {
-  xApps: (XApp | UnendorsedApp)[]
+  allApps: (XApp | UnendorsedApp)[]
   isXAppsLoading: boolean
 }
 
 // type SortOption = "score" | "name" | "recent"
 
-export const AllApps = ({ xApps, isXAppsLoading }: Props) => {
+export const AllApps = ({ allApps, isXAppsLoading }: Props) => {
   const [filter, setFilter] = useState("All")
+  console.log("allApps", allApps)
+  console.log("filter", filter)
 
   // Filter xApps based on selected filter value
   const displayApps = useMemo(() => {
     switch (filter) {
       case "Active apps":
-        return xApps.filter(xApp => !("appAvailableForAllocationVoting" in xApp))
+        return allApps.filter(xApp => !("appAvailableForAllocationVoting" in xApp))
       case "In grace period":
-        return xApps.filter(xApp => (xApp as UnendorsedApp).appAvailableForAllocationVoting === true)
+        return allApps.filter(xApp => (xApp as UnendorsedApp).appAvailableForAllocationVoting === true)
       case "Endorsement lost":
-        return xApps.filter(xApp => (xApp as UnendorsedApp).appAvailableForAllocationVoting === false)
+        return allApps.filter(xApp => (xApp as UnendorsedApp).appAvailableForAllocationVoting === false)
       default:
-        return xApps // "All" - no filtering
+        return allApps // "All" - no filtering
     }
-  }, [filter, xApps])
+  }, [filter, allApps])
 
   // const handleSortChange = useCallback((newSortOption: SortOption) => {
   //   setSortOption(newSortOption)

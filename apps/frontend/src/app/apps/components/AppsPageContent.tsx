@@ -20,14 +20,15 @@ export const AppsPageContent = () => {
   const { t } = useTranslation()
   const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
   const { data: xApps, isLoading: isXAppsLoading } = useXApps()
-  console.log("*****xApps", xApps)
 
-  //TODO: Pagination, search, filters
+  const appsLookingForEndorsement = xApps?.unendorsed.filter(xApp => xApp.createdAtTimestamp === "0")
+
+  // TODO: Pagination, search, filters
   return (
     <VStack alignItems={"flex-start"} position={"relative"} spacing={4} w="full">
       <AppsBanner />
 
-      <AppsLookingForEndorsement xApps={xApps?.unendorsed || []} />
+      <AppsLookingForEndorsement filteredApps={appsLookingForEndorsement || []} />
 
       {!isXNodeLoading &&
         (isEndorsingApp ? (
@@ -42,7 +43,7 @@ export const AppsPageContent = () => {
 
       <VStack alignItems={"flex-start"}>
         <Heading>{t("All the apps")}</Heading>
-        <AllApps xApps={xApps?.allApps || []} isXAppsLoading={isXAppsLoading} />
+        <AllApps allApps={xApps?.allApps || []} isXAppsLoading={isXAppsLoading} />
       </VStack>
 
       {/* TODO: mascot release <JoinB3TRAppsBanner /> */}

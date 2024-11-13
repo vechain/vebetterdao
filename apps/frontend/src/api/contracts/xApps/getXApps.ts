@@ -13,14 +13,14 @@ const unendorsedAppsAbi = new abi.Function(JSON.parse(unendorsedAppsFragment))
  * @property teamWalletAddress  the xApp address
  * @property name  the xApp name
  * @property metadataURI  the xApp metadata URI
- * @property createdAtTimestamp timestamp when xApp was addded
+ * @property createdAtTimestamp timestamp when xApp was added
  */
 export type XApp = {
   id: string
   teamWalletAddress: string
   name: string
   metadataURI: string
-  createdAtTimestamp: number
+  createdAtTimestamp: string
 }
 
 export type UnendorsedApp = XApp & {

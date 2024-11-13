@@ -7,24 +7,17 @@ import { UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 
 type Props = {
-  xApps: UnendorsedApp[]
+  filteredApps: UnendorsedApp[]
 }
 
-export const AppsLookingForEndorsement = ({ xApps }: Props) => {
+export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
   const { t } = useTranslation()
   const [currentIndex, setCurrentIndex] = useState(0)
   const isMobile = useBreakpointValue({ base: true, md: false })
-  // filter out apps where xApp.createdAtTimestamp is different from 0
-  const filteredApps = xApps.filter(xApp => xApp.createdAtTimestamp === 0)
 
   const handleNextCard = useCallback(() => {
     setCurrentIndex(prevIndex => (prevIndex + 1) % (filteredApps.length || 1))
   }, [filteredApps.length])
-
-  // Handle previous card  ( optional )
-  // const handlePrevCard = useCallback(() => {
-  //   setCurrentIndex(prevIndex => (prevIndex - 1 + (xApps?.length || 1)) % (xApps?.length || 1))
-  // }, [xApps?.length])
 
   const visibleApps = filteredApps.slice(currentIndex, currentIndex + 3)
 
@@ -58,7 +51,7 @@ export const AppsLookingForEndorsement = ({ xApps }: Props) => {
           bottom: 0,
           width: "20%",
           background: "linear-gradient(to left, #FFFFFF, rgba(239, 239, 239, 0))",
-          display: xApps && xApps?.length > 2 ? "block" : "none",
+          display: filteredApps.length > 2 ? "block" : "none",
           zIndex: 1,
         }}>
         <AnimatePresence initial={false}>
@@ -69,7 +62,6 @@ export const AppsLookingForEndorsement = ({ xApps }: Props) => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
               style={{ width: isMobile ? "100%" : "calc(33.33% - 10px)", flexShrink: 0 }}>
-              {/* /TODO: align the AppsCards for the carousel */}
               <UnendorsedAppCard key={xApp.id} xApp={xApp} />
             </motion.div>
           ))}
@@ -88,20 +80,6 @@ export const AppsLookingForEndorsement = ({ xApps }: Props) => {
             zIndex={2}
           />
         )}
-        {/* {xApps.length > 2 && (
-          <IconButton
-            icon={<UilArrowLeft color={"#004CFC"} />}
-            aria-label="Previous card"
-            onClick={handlePrevCard}
-            position="absolute"
-            left="0"
-            bgColor={"#E0E9FE"}
-            top="50%"
-            borderRadius="full"
-            size="lg"
-            zIndex={2}
-          />
-        )} */}
       </HStack>
     </VStack>
   )
