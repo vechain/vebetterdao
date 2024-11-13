@@ -1,4 +1,4 @@
-import { UnendorsedApp, useAppEndorsementScore, useEndorsementScoreThreshold, useXAppMetadata, XApp } from "@/api"
+import { UnendorsedApp, useAppEndorsementStatus, useXAppMetadata, useXNode, XApp } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import {
@@ -18,8 +18,10 @@ import {
 } from "@chakra-ui/react"
 import { UilAngleRight } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { useXAppStatusConfig } from "../[appId]/hooks"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
   xApp: XApp | UnendorsedApp
@@ -31,11 +33,24 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
   const router = useRouter()
 
   const { data: appMetadata, isLoading: appMetadataLoading, error: appMetadataError } = useXAppMetadata(xApp.id)
-
   const { data: logo, isLoading: isLogoLoading } = useIpfsImage(appMetadata?.logo)
 
-  const endorsementScore = useAppEndorsementScore(xApp.id)
-  const endorsementScoreThreshold = useEndorsementScoreThreshold()
+  const {
+    score: endorsementScore,
+    status: endorsementStatus,
+    threshold: endorsementThreshold,
+    isLoading: isEndorsementStatusLoading,
+  } = useAppEndorsementStatus(xApp.id)
+
+  const STATUS_CONFIG = useXAppStatusConfig()
+  const { color } = STATUS_CONFIG[endorsementStatus] ?? { color: "#6A6A6A" }
+
+  // User xnodes, TODO support multiple xnodes
+  const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints } = useXNode()
+  const isUserAppEndorser = useMemo(() => {
+    if (!xApp || isXNodeLoading) return false
+    return isXNodeHolder && isEndorsingApp && compareAddresses(xApp.id, endorsedApp?.id)
+  }, [xApp, isXNodeLoading, isXNodeHolder, isEndorsingApp, endorsedApp])
 
   const onCardClick = useCallback(() => {
     router.push(`/apps/${xApp.id}`)
@@ -102,22 +117,32 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
             align="flex-start"
             justify={"space-between"}
             my={[0, 0, 4]}>
-            <VStack spacing={1} align="flex-start" w="full">
-              <HStack spacing={1} align={"flex-end"}>
-                <Heading fontSize={"36px"} fontWeight={700} color={"#F29B32"} lineHeight={"36px"}>
-                  {endorsementScore.data}
-                </Heading>
-                <Text fontSize={"14px"} color={"#6A6A6A"} fontWeight={400} lineHeight={"24px"}>
-                  {t("of {{value}}", {
-                    value: endorsementScoreThreshold.data,
-                  })}
-                </Text>
-              </HStack>
-
-              <Text fontSize={"sm"} color={"gray.500"}>
-                {t("Endorsement score")}
+            <VStack gap={0} alignItems="flex-start">
+              <Skeleton isLoaded={!isEndorsementStatusLoading}>
+                <HStack spacing={1} alignItems="flex-end">
+                  <Text fontSize={"24px"} fontWeight="700" color={color}>
+                    {endorsementScore}
+                  </Text>
+                  <Text fontSize={"14px"} color={color} pb="3.5px">{`/${endorsementThreshold}`}</Text>
+                </HStack>
+              </Skeleton>
+              <Text fontSize="12px" color="#6A6A6A">
+                {t("Total score")}
               </Text>
             </VStack>
+
+            {isUserAppEndorser && (
+              <VStack gap={0} alignItems="flex-start">
+                <Skeleton isLoaded={!isXNodeLoading}>
+                  <Text fontSize={"24px"} fontWeight="700" color="#004CFC">
+                    {xNodePoints}
+                  </Text>
+                </Skeleton>
+                <Text fontSize="12px" color="#6A6A6A">
+                  {t("Your score")}
+                </Text>
+              </VStack>
+            )}
           </Stack>
           <Show above="md">
             <Icon as={UilAngleRight} boxSize={"32px"} color={"#004CFC"} alignSelf={"center"} />
