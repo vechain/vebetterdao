@@ -21,14 +21,18 @@ export const AppsPageContent = () => {
   const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
   const { data: xApps, isLoading: isXAppsLoading } = useXApps()
 
-  const appsLookingForEndorsement = xApps?.unendorsed.filter(xApp => xApp.createdAtTimestamp === "0")
+  const newApps = xApps?.unendorsed.filter(xApp => xApp.createdAtTimestamp === "0")
+
+  const unendorsedApps = xApps?.unendorsed.filter(xApp => xApp.createdAtTimestamp !== "0")
+  const gracePeriodApps = unendorsedApps?.filter(xApp => xApp.appAvailableForAllocationVoting === true)
+  const lostEndorsementApps = unendorsedApps?.filter(xApp => xApp.appAvailableForAllocationVoting === false)
 
   // TODO: Pagination, search, filters
   return (
     <VStack alignItems={"flex-start"} position={"relative"} spacing={4} w="full">
       <AppsBanner />
 
-      <AppsLookingForEndorsement filteredApps={appsLookingForEndorsement || []} />
+      <AppsLookingForEndorsement filteredApps={newApps || []} />
 
       {!isXNodeLoading &&
         (isEndorsingApp ? (
@@ -43,7 +47,12 @@ export const AppsPageContent = () => {
 
       <VStack alignItems={"flex-start"}>
         <Heading>{t("All the apps")}</Heading>
-        <AllApps allApps={xApps?.allApps || []} isXAppsLoading={isXAppsLoading} />
+        <AllApps
+          activeApps={xApps?.active || []}
+          gracePeriodApps={gracePeriodApps || []}
+          lostEndorsementApps={lostEndorsementApps || []}
+          isXAppsLoading={isXAppsLoading}
+        />
       </VStack>
 
       {/* TODO: mascot release <JoinB3TRAppsBanner /> */}
