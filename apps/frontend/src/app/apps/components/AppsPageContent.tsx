@@ -4,8 +4,8 @@ import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
 import { AllApps } from "./AllApps"
 import { VStack, Heading, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { EndorsingAppCard } from "@/app/xnode/XNodeContent/components/EndorsingAppCard"
 import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
+import { UnendorsedAppCard } from "./UnendorsedAppCard"
 
 export type XAppInformations = {
   key?: string
@@ -18,19 +18,23 @@ export type XAppInformations = {
 
 export const AppsPageContent = () => {
   const { t } = useTranslation()
+  const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
   const { data: xApps, isLoading: isXAppsLoading } = useXApps()
-  const { isXNodeLoading, isEndorsingApp } = useXNode()
 
   //TODO: Pagination, search, filters
   return (
-    <VStack alignItems={"flex-start"} position={"relative"} spacing={4}>
+    <VStack alignItems={"flex-start"} position={"relative"} spacing={4} w="full">
       {/* TODO: pass the appBanner in that place (absolute position) */}
-
-      <VStack alignItems={"flex-start"}>
-        <Heading>{t("Your endorsed app")}</Heading>
-        <Text>{t("With your XNode, you endorse apps to allow them to participate in governance")}</Text>
-        {!isXNodeLoading && (isEndorsingApp ? <EndorsingAppCard /> : <EndorsementPointsBanner />)}
-      </VStack>
+      {!isXNodeLoading &&
+        (isEndorsingApp ? (
+          <>
+            <Heading>{t("Your endorsed app")}</Heading>
+            <Text>{t("With your XNode, you endorse apps to allow them to participate in governance")}</Text>
+            <UnendorsedAppCard xApp={endorsedApp} />
+          </>
+        ) : (
+          <EndorsementPointsBanner />
+        ))}
 
       <VStack alignItems={"flex-start"}>
         <Heading>{t("All the apps")}</Heading>
