@@ -23,7 +23,12 @@ import "swiper/css"
 import "@/app/theme/swiper-custom.css"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { LowVthoBanner } from "./components/LowVthoBanner"
-
+import { CreatorApplicationRejectedBanner } from "./components/CreatorNFTBanner/CreatorApplicationRejectedBanner"
+import { CreatorApplicationApprovedBanner } from "./components/CreatorNFTBanner/CreatorApplicationApprovedBanner"
+import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/hooks/useCreatorSubmission"
+import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
+import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
 
@@ -64,10 +69,24 @@ export const ActionBanner = () => {
 
   const { data: canUserVote, isPerson, isLoading } = useCanUserVote(account ?? undefined, delegateeAddress)
 
+  // Creator banners
+  const { data: submissions, isLoading: submissionsLoading } = useCreatorSubmission(account ?? "")
+  const latestSubmissionStatus = submissions?.submissions[0]?.status // Only take into account the latest submission
+  const isLatestSubmissionRejected = latestSubmissionStatus === HumanizedTicketStatus.Closed
+  const isLatestSubmissionOngoing =
+    latestSubmissionStatus === HumanizedTicketStatus.Open ||
+    latestSubmissionStatus === HumanizedTicketStatus.Pending ||
+    latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
+    latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
+  const hasCreatorNFT = useHasCreatorNFT(account ?? "") // No loading state
+
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
   const showCastVoteBanner = !!account && !isLoading && canUserVote
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
+  const showCreatorRejectedBanner = !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
+  const showCreatorApprovedBanner = !!account && hasCreatorNFT
+  const showCreatorUnderReviewBanner = !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
   const slides = useMemo(() => {
     const bannerComponents = []
@@ -75,8 +94,19 @@ export const ActionBanner = () => {
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
+    if (showCreatorRejectedBanner) bannerComponents.push(<CreatorApplicationRejectedBanner key="creator-rejected" />)
+    if (showCreatorApprovedBanner) bannerComponents.push(<CreatorApplicationApprovedBanner key="creator-approved" />)
+    if (showCreatorUnderReviewBanner)
+      bannerComponents.push(<CreatorApplicationUnderReviewBanner key="creator-under-review" />)
     return bannerComponents
-  }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner, showLowVthoBanner])
+  }, [
+    showDoActionBanner,
+    showClaimB3trBanner,
+    showCastVoteBanner,
+    showLowVthoBanner,
+    showCreatorRejectedBanner,
+    showCreatorApprovedBanner,
+  ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
 
