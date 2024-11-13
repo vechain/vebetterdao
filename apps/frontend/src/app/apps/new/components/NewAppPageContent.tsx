@@ -8,9 +8,9 @@ const Steps: StepCardProps[] = [
   {
     stepImageSrc: "/images/sign.svg",
     stepNumber: 1,
-    stepTitle: "Mods approval",
+    stepTitle: "App submition",
     stepDescription:
-      "Submit your app for review. Our moderators will assess its functionality and compliance with our guidelines.",
+      "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.",
   },
   {
     stepImageSrc: "/images/handshake.svg",
