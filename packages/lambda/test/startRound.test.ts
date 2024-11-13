@@ -1,3 +1,4 @@
+import { describe, it, expect } from "@jest/globals"
 import { execute } from "lambda-local"
 import path from "path"
 
@@ -5,27 +6,31 @@ const ENVIRONMENT = process.env.TEST_ENVIRONMENT || "testnet"
 
 describe("startRound", () => {
   // Remove ".skip" to run the test
-  it.skip(`should trigger start round lambda on ${ENVIRONMENT} environment`, async () => {
-    const event = {}
+  it.skip(
+    `should trigger start round lambda on ${ENVIRONMENT} environment`,
+    async () => {
+      const event = {}
 
-    const result = await new Promise((resolve, reject) => {
-      execute({
-        event,
-        lambdaPath: path.join(__dirname, `../dist/${ENVIRONMENT}/startRound/index.js`),
-        timeoutMs: 5 * 60 * 1000,
-        callback: (error: Error, result: unknown) => {
-          if (error) {
-            reject(error)
-          } else {
-            resolve(result)
-          }
-        },
+      const result = await new Promise((resolve, reject) => {
+        execute({
+          event,
+          lambdaPath: path.join(__dirname, `../dist/${ENVIRONMENT}/startRound/index.js`),
+          timeoutMs: 5 * 60 * 1000,
+          callback: (error: Error, result: unknown) => {
+            if (error) {
+              reject(error)
+            } else {
+              resolve(result)
+            }
+          },
+        })
       })
-    })
 
-    // Use the result for further assertions if necessary
-    console.log(result)
-    // Example assertion
-    expect(result).toBeDefined()
-  })
+      // Use the result for further assertions if necessary
+      console.log(result)
+      // Example assertion
+      expect(result).toBeDefined()
+    },
+    5 * 60 * 1000,
+  )
 })

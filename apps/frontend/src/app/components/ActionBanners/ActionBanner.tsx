@@ -106,6 +106,7 @@ export const ActionBanner = () => {
     showLowVthoBanner,
     showCreatorRejectedBanner,
     showCreatorApprovedBanner,
+    showCreatorUnderReviewBanner,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1

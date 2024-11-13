@@ -31,7 +31,7 @@ export const AddNewAppCard = () => {
           <Stack direction={["row", "column", "column"]} h="full" align="center" justify="center" textAlign="left">
             <Image src="/images/hand-plant.svg" boxSize={32} alt="Add new App image" />
             <Stack direction={["column"]} spacing={4} align="center" textAlign="center" justify="center">
-              <Heading size="md">{t("Do you have an dApp to join the VeBetter DAO ecosystem?")}</Heading>
+              <Heading size="md">{t("Do you have an app to join the VeBetter DAO ecosystem?")}</Heading>
               <Button variant="primaryGhost" onClick={onOpenSubmitCreatorFormModal} leftIcon={<FaPlus />}>
                 {t("Apply now")}
               </Button>

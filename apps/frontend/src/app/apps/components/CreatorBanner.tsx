@@ -1,4 +1,3 @@
-import { useCreatorSubmission, useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/hooks"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { useWallet } from "@vechain/dapp-kit-react"
 import {
@@ -7,6 +6,8 @@ import {
   CreatorApplicationRejected,
   CreatorApplyNow,
 } from "./creatorBanners"
+import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/hooks/useCreatorSubmission"
+import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 
 export const CreatorBanner = () => {
   const { account } = useWallet()

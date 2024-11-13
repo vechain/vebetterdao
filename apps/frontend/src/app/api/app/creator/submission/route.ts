@@ -1,5 +1,5 @@
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
-import FreshdeskClient from "@/utils/FreshDeskClient"
+import FreshdeskClient, { FreshdeskTicket } from "@/utils/FreshDeskClient"
 import { AddressUtils } from "@repo/utils"
 import { NextRequest, NextResponse } from "next/server"
 
