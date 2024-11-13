@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react"
-import { HStack, VStack, Grid, Spinner } from "@chakra-ui/react"
+import { Box, HStack, VStack, Grid, Spinner } from "@chakra-ui/react"
 import { FilterAppsTypeButton } from "./FilterAppsTypeButton"
 import { XApp, UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
@@ -49,21 +49,29 @@ export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXA
 
   return (
     <VStack spacing={8} w="full" data-testid="apps-page">
-      <HStack
+      <Box
         w="full"
         overflowX="auto"
-        overflowY="visible"
-        spacing={4}
-        justifyContent="space-between"
         css={{
           "&::-webkit-scrollbar": { display: "none" },
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}>
-        {[FILTER_ALL, FILTER_ACTIVE_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST].map(filterType => (
-          <FilterAppsTypeButton key={filterType} filterType={filterType} currentFilter={filter} setFilter={setFilter} />
-        ))}
-      </HStack>
+        <HStack
+          w="full"
+          spacing={4}
+          justifyContent={{ base: "flex-start", md: "flex-start" }}
+          flexWrap={{ base: "nowrap", md: "wrap" }}>
+          {[FILTER_ALL, FILTER_ACTIVE_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST].map(filterType => (
+            <FilterAppsTypeButton
+              key={filterType}
+              filterType={filterType}
+              currentFilter={filter}
+              setFilter={setFilter}
+            />
+          ))}
+        </HStack>
+      </Box>
       {appsSection}
     </VStack>
   )
