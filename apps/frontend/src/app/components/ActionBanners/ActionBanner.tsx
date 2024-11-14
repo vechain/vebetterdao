@@ -10,6 +10,7 @@ import {
   useGetDelegatee,
   useVot3Balance,
   useVotingRewards,
+  useXApps,
 } from "@/api"
 import { CastVoteBanner } from "./components/CastVoteBanner"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
@@ -23,7 +24,12 @@ import "swiper/css"
 import "@/app/theme/swiper-custom.css"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { LowVthoBanner } from "./components/LowVthoBanner"
-
+import { CreatorApplicationRejectedBanner } from "./components/CreatorNFTBanner/CreatorApplicationRejectedBanner"
+import { CreatorApplicationApprovedBanner } from "./components/CreatorNFTBanner/CreatorApplicationApprovedBanner"
+import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/hooks/useCreatorSubmission"
+import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
+import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
 
@@ -47,6 +53,7 @@ export const ActionBanner = () => {
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account ?? undefined)
+  const { data: xApps } = useXApps()
 
   const ownsTokens = useMemo(() => {
     if (!b3trBalance || !vot3Balance) return false
@@ -64,10 +71,27 @@ export const ActionBanner = () => {
 
   const { data: canUserVote, isPerson, isLoading } = useCanUserVote(account ?? undefined, delegateeAddress)
 
+  // Creator banners
+  const { data: submissions, isLoading: submissionsLoading } = useCreatorSubmission(account ?? "")
+  const latestSubmissionStatus = submissions?.submissions[0]?.status // Only take into account the latest submission
+  const isLatestSubmissionRejected = latestSubmissionStatus === HumanizedTicketStatus.Closed
+  const isLatestSubmissionOngoing =
+    latestSubmissionStatus === HumanizedTicketStatus.Open ||
+    latestSubmissionStatus === HumanizedTicketStatus.Pending ||
+    latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
+    latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
+  const hasCreatorNFT = useHasCreatorNFT(account ?? "") // No loading state
+  const userHasApp = !!account && !!xApps?.allApps.find(app => app.teamWalletAddress === account)
+
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
   const showCastVoteBanner = !!account && !isLoading && canUserVote
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
+  const showCreatorRejectedBanner =
+    !userHasApp && !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
+  const showCreatorApprovedBanner = !userHasApp && !!account && hasCreatorNFT
+  const showCreatorUnderReviewBanner =
+    !userHasApp && !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
   const slides = useMemo(() => {
     const bannerComponents = []
@@ -75,8 +99,20 @@ export const ActionBanner = () => {
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
+    if (showCreatorRejectedBanner) bannerComponents.push(<CreatorApplicationRejectedBanner key="creator-rejected" />)
+    if (showCreatorApprovedBanner) bannerComponents.push(<CreatorApplicationApprovedBanner key="creator-approved" />)
+    if (showCreatorUnderReviewBanner)
+      bannerComponents.push(<CreatorApplicationUnderReviewBanner key="creator-under-review" />)
     return bannerComponents
-  }, [showDoActionBanner, showClaimB3trBanner, showCastVoteBanner, showLowVthoBanner])
+  }, [
+    showDoActionBanner,
+    showClaimB3trBanner,
+    showCastVoteBanner,
+    showLowVthoBanner,
+    showCreatorRejectedBanner,
+    showCreatorApprovedBanner,
+    showCreatorUnderReviewBanner,
+  ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
 

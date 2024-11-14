@@ -113,7 +113,7 @@ export const AppDetailOverview = ({
                         {t("Member since")}
                       </Text>
                       <Text fontSize={"16px"} fontWeight={400}>
-                        {dayjs((app?.createdAtTimestamp || 0) * 1000).format("D MMM, YYYY")}
+                        {dayjs((Number(app?.createdAtTimestamp) || 0) * 1000).format("D MMM, YYYY")}
                       </Text>
                     </VStack>
                   </Stack>
