@@ -17,6 +17,8 @@ type ClausesProps = {
   moderatorsToBeRemoved?: string[]
   distributorsToBeAdded?: string[]
   distributorsToBeRemoved?: string[]
+  creatorsToBeAdded?: string[]
+  creatorsToBeRemoved?: string[]
 }
 
 /**
@@ -35,8 +37,38 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
       moderatorsToBeRemoved,
       distributorsToBeAdded,
       distributorsToBeRemoved,
+      creatorsToBeAdded,
+      creatorsToBeRemoved,
     }: ClausesProps) => {
       const clauses = []
+
+      if (creatorsToBeAdded?.length) {
+        creatorsToBeAdded.map(creator => {
+          clauses.push(
+            buildClause({
+              to: getConfig().x2EarnAppsContractAddress,
+              contractInterface: X2EarnAppsInterface,
+              method: "addCreator",
+              args: [appId, creator],
+              comment: "add creator",
+            }),
+          )
+        })
+      }
+
+      if (creatorsToBeRemoved?.length) {
+        creatorsToBeRemoved.map(creator => {
+          clauses.push(
+            buildClause({
+              to: getConfig().x2EarnAppsContractAddress,
+              contractInterface: X2EarnAppsInterface,
+              method: "removeAppCreator",
+              args: [appId, creator],
+              comment: "remove creator",
+            }),
+          )
+        })
+      }
 
       if (moderatorsToBeAdded?.length) {
         moderatorsToBeAdded.map(moderator => {
@@ -117,6 +149,8 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
           }),
         )
       }
+
+      console.log("clauses", clauses)
 
       return clauses
     },

@@ -1,6 +1,7 @@
 import { Button, Card, CardBody, Divider, HStack, Heading, VStack, useDisclosure } from "@chakra-ui/react"
 import {
   useCurrentAppAdmin,
+  useCurrentAppCreators,
   useCurrentAppMetadata,
   useCurrentAppModerators,
   useCurrentAppRewardDistributors,
@@ -19,17 +20,20 @@ import { TransactionModal } from "@/components/TransactionModal"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { EditAppRewardDistributors } from "./components/EditAppRewardDistributors"
 import { useAccountPermissions } from "@/api/contracts/account"
+import { EditAppCreatorNFT } from "./components/EditAppCreatorNFT"
 
 export type AdminAppForm = {
   adminAddress: string
   teamWalletAddress: string
   moderators: string[]
+  creators: string[]
   distributors: string[]
 }
 
 export const AdminAppPageContent = () => {
   const { appMetadata } = useCurrentAppMetadata()
   const { moderators } = useCurrentAppModerators()
+  const { creators } = useCurrentAppCreators()
   const { distributors } = useCurrentAppRewardDistributors()
 
   const { t } = useTranslation()
@@ -45,26 +49,20 @@ export const AdminAppPageContent = () => {
   const form = useForm<AdminAppForm>({
     defaultValues: {
       moderators,
+      creators,
       adminAddress: admin || "",
       teamWalletAddress: app?.teamWalletAddress || "",
       distributors,
     },
   })
 
-  const [adminAddress, teamWalletAddress, newModerators, newDistributors] = form.watch([
+  const [adminAddress, teamWalletAddress, newModerators, newDistributors, newCreators] = form.watch([
     "adminAddress",
     "teamWalletAddress",
     "moderators",
     "distributors",
+    "creators",
   ])
-
-  // Update the form values when the app fetches the data from blockchain
-  useEffect(() => {
-    form.setValue("moderators", moderators)
-  }, [moderators, form])
-  useEffect(() => {
-    form.setValue("distributors", distributors)
-  }, [distributors, form])
 
   const isAdminAddressChanged = !compareAddresses(adminAddress, admin || "")
   const isTeamWalletAddressChanged = !compareAddresses(teamWalletAddress, app?.teamWalletAddress || "")
@@ -74,8 +72,15 @@ export const AdminAppPageContent = () => {
   const isDistributorsChanged =
     distributors.length !== newDistributors.length ||
     !distributors.every((distributor, index) => compareAddresses(distributor, newDistributors[index]))
+  const isCreatorsChanged =
+    creators.length !== newCreators.length ||
+    !creators.every((creator, index) => compareAddresses(creator, newCreators[index]))
   const disableSaveButton =
-    !isAdminAddressChanged && !isTeamWalletAddressChanged && !isModeratorsChanged && !isDistributorsChanged
+    !isAdminAddressChanged &&
+    !isTeamWalletAddressChanged &&
+    !isModeratorsChanged &&
+    !isDistributorsChanged &&
+    !isCreatorsChanged
   const router = useRouter()
 
   const updateMutation = useUpdateAppAdminInfo({
@@ -116,6 +121,12 @@ export const AdminAppPageContent = () => {
       const distributorsToBeRemoved = distributors.filter(
         distributor => !data.distributors.some(newDistributor => compareAddresses(distributor, newDistributor)),
       )
+      const creatorsToBeAdded = data.creators.filter(
+        newCreator => !creators.some(creator => compareAddresses(creator, newCreator)),
+      )
+      const creatorsToBeRemoved = creators.filter(
+        creator => !data.creators.some(newCreator => compareAddresses(creator, newCreator)),
+      )
 
       updateMutation.sendTransaction({
         appId: app?.id || "",
@@ -125,16 +136,19 @@ export const AdminAppPageContent = () => {
         moderatorsToBeRemoved,
         distributorsToBeAdded,
         distributorsToBeRemoved,
+        creatorsToBeAdded,
+        creatorsToBeRemoved,
       })
     },
     [
+      onConfirmationOpen,
+      moderators,
+      distributors,
+      creators,
+      updateMutation,
       app?.id,
       isAdminAddressChanged,
       isTeamWalletAddressChanged,
-      moderators,
-      onConfirmationOpen,
-      updateMutation,
-      distributors,
     ],
   )
 
@@ -177,6 +191,8 @@ export const AdminAppPageContent = () => {
             <Heading fontSize={"36px"} fontWeight={700}>
               {t("{{app}} settings", { app: appMetadata?.name })}
             </Heading>
+            <EditAppCreatorNFT form={form} />
+            <Divider />
             <EditAppModerators form={form} />
             <Divider />
             <EditAppAddresses
