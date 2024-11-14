@@ -152,6 +152,17 @@ export const ButtonStyle: ComponentStyleConfig = {
         bg: "#E0E9FEAA",
       },
     },
+    applyButton: {
+      rounded: "full",
+      fontSize: "16px",
+      fontWeight: 500,
+      px: "24px",
+      bgColor: "#D6FFAA",
+      color: "#253C0C",
+      _hover: {
+        bg: "#E0E9FEAA",
+      },
+    },
   },
   // default values for 'size', 'variant' and 'colorScheme'
   defaultProps: {
