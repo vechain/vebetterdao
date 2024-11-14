@@ -1,14 +1,18 @@
 import { Button, Card, CardBody, Heading, Image, Stack, Text } from "@chakra-ui/react"
+import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
 export const CreatorApplicationApproved = () => {
   const { t } = useTranslation()
+  const router = useRouter()
+  const goToAppCreation = () => {
+    router.push("/apps/new")
+  }
 
   return (
     <Card
       variant={"baseWithBorder"}
       w="full"
-      onClick={() => {}}
       maxW="100%"
       style={{
         backgroundColor: "#CEDCFD",
@@ -47,6 +51,7 @@ export const CreatorApplicationApproved = () => {
               borderRadius="full"
               maxW="150px"
               px={{ base: 2, md: 5 }}
+              onClick={goToAppCreation}
               w={{ base: "full", md: "auto" }}>
               {t("Submit app")}
             </Button>

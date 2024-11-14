@@ -8,7 +8,6 @@ export const CreatorApplicationInProgress = () => {
     <Card
       variant={"baseWithBorder"}
       w="full"
-      onClick={() => {}}
       maxW="100%"
       style={{
         backgroundColor: "#CEDCFD",

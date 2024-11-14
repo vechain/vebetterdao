@@ -28,16 +28,16 @@ export const CreatorBanner = () => {
   const isInProgress = !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
   if (isApproved) {
-    return <CreatorApplicationApproved /> // TODO couple to "submit app flow"
+    return <CreatorApplicationApproved />
   }
 
   if (isRejected) {
-    return <CreatorApplicationRejected /> // TODO update support link
+    return <CreatorApplicationRejected />
   }
 
   if (isInProgress) {
     return <CreatorApplicationInProgress />
   }
 
-  return <CreatorApplyNow /> // TODO couple to "submit creator flow"
+  return <CreatorApplyNow />
 }
