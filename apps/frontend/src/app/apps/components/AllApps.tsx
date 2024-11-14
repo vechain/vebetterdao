@@ -29,7 +29,7 @@ export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXA
       case FILTER_ENDORSEMENT_LOST:
         return lostEndorsementApps
       default:
-        return [...activeApps, ...gracePeriodApps, ...lostEndorsementApps]
+        return [...activeApps, ...lostEndorsementApps]
     }
   }, [filter, activeApps, gracePeriodApps, lostEndorsementApps])
 
@@ -49,17 +49,12 @@ export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXA
 
   return (
     <VStack spacing={8} w="full" data-testid="apps-page">
-      <Box
-        w="full"
-        overflowX="hidden" // Allow scrolling within the HStack
-      >
+      <Box w="full" overflowX="auto" whiteSpace="nowrap">
         <HStack
-          w="full"
           spacing={4}
-          overflowX="auto"
-          overflowY="hidden"
+          minWidth="max-content"
           justifyContent="flex-start"
-          flexWrap="nowrap" // Prevent wrapping on small screens
+          flexWrap="nowrap"
           css={{
             "&::-webkit-scrollbar": { display: "none" },
             scrollbarWidth: "none",
