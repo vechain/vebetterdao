@@ -33,7 +33,7 @@ export const AppsPageContent = () => {
       <AppsBanner />
 
       {!isXNodeLoading && isEndorsingApp ? (
-        <VStack alignItems={"flex-start"}>
+        <VStack alignItems={"flex-start"} spacing={4}>
           <Heading size="lg">{t("Your endorsed app")}</Heading>
           <Text color="#6a6a6a">
             {t("With your Node, you endorse apps to allow them to participate in governance")}
@@ -46,7 +46,7 @@ export const AppsPageContent = () => {
 
       <AppsLookingForEndorsement filteredApps={newApps || []} />
 
-      <VStack alignItems={"flex-start"}>
+      <VStack alignItems={"flex-start"} spacing={4}>
         <Heading size="lg">{t("All the apps")}</Heading>
         <AllApps
           activeApps={xApps?.active || []}
