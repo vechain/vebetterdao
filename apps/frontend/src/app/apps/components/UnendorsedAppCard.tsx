@@ -75,23 +75,40 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
           h="full"
           justify={"space-between"}>
           <VStack spacing={4} align="flex-start" flex={5} my={[0, 0, 4]}>
-            <Stack
-              w="full"
-              direction={["column", "column", "row"]}
-              spacing={4}
-              align={["flex-start", "flex-start", "center"]}>
-              <HStack w={["full", "full", "auto"]} align="flex-start" justify={"space-between"}>
+            {/* Wrapper Stack for Image and Text */}
+            <Stack w="full" direction={{ base: "row", md: "row" }} spacing={4} align="center">
+              {/* Image and Icon */}
+              <HStack w={{ base: "auto", md: "full" }} align="center" justify={"flex-start"}>
                 <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
-                  <Image src={logo?.image ?? notFoundImage} alt={"logo"} h={"72px"} w="full" borderRadius="9px" />
+                  <Image
+                    src={logo?.image ?? notFoundImage}
+                    alt="logo"
+                    h={{ base: "48px", sm: "60px", md: "72px" }} // Shrinks on small screens
+                    w={{ base: "48px", sm: "60px", md: "72px" }} // Matches height to maintain aspect ratio
+                    minW="48px" // Minimum width for the image to avoid too-small scaling
+                    borderRadius="9px"
+                  />
                 </Skeleton>
                 <Show below="sm">
-                  <Icon as={UilAngleRight} boxSize={"32px"} color={"#004CFC"} />
+                  <Icon as={UilAngleRight} boxSize={"24px"} color={"#004CFC"} />
                 </Show>
               </HStack>
-              <Stack direction={["column-reverse", "column-reverse", "column"]} spacing={2} align="flex-start">
+
+              {/* Title and Description */}
+              <Stack
+                direction="column" // Always stacked vertically for title and description
+                spacing={2}
+                flex="1"
+                align="flex-start"
+                maxW={{ base: "70%", md: "auto" }}>
                 <Box>
                   <Skeleton isLoaded={!appMetadataLoading}>
-                    <Heading fontWeight={700} fontSize={"24px"}>
+                    <Heading
+                      fontWeight={700}
+                      fontSize={"20px"}
+                      whiteSpace="nowrap" // Prevents the title from wrapping
+                      overflow="hidden"
+                      textOverflow="ellipsis">
                       {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                     </Heading>
                   </Skeleton>
