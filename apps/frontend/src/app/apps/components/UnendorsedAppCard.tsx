@@ -76,23 +76,18 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
           justify={"space-between"}>
           <VStack spacing={4} align="flex-start" flex={5} my={[0, 0, 4]}>
             {/* Wrapper Stack for Image and Text */}
-            <Stack w="full" direction={{ base: "row", md: "row" }} spacing={4} align="center">
+            <HStack w="full" spacing={4} align="flex-start">
               {/* Image and Icon */}
-              <HStack w={{ base: "auto", md: "full" }} align="center" justify={"flex-start"}>
-                <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
-                  <Image
-                    src={logo?.image ?? notFoundImage}
-                    alt="logo"
-                    h={{ base: "48px", sm: "60px", md: "72px" }} // Shrinks on small screens
-                    w={{ base: "48px", sm: "60px", md: "72px" }} // Matches height to maintain aspect ratio
-                    minW="48px" // Minimum width for the image to avoid too-small scaling
-                    borderRadius="9px"
-                  />
-                </Skeleton>
-                <Show below="sm">
-                  <Icon as={UilAngleRight} boxSize={"24px"} color={"#004CFC"} />
-                </Show>
-              </HStack>
+              <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
+                <Image
+                  src={logo?.image ?? notFoundImage}
+                  alt="logo"
+                  h={{ base: "48px", sm: "60px", md: "72px" }} // Shrinks on small screens
+                  w={{ base: "48px", sm: "60px", md: "72px" }} // Matches height to maintain aspect ratio
+                  minW="48px" // Minimum width for the image to avoid too-small scaling
+                  borderRadius="9px"
+                />
+              </Skeleton>
 
               {/* Title and Description */}
               <Stack
@@ -119,7 +114,7 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
                   </Skeleton>
                 </Box>
               </Stack>
-            </Stack>
+            </HStack>
           </VStack>
           <Show above="md">
             <Divider orientation="vertical" h="100%" />
