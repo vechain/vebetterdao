@@ -3,6 +3,7 @@ import { Box, HStack, VStack, Grid, Spinner } from "@chakra-ui/react"
 import { FilterAppsTypeButton } from "./FilterAppsTypeButton"
 import { XApp, UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
+import { CreatorBanner } from "./CreatorBanner"
 
 const FILTER_ALL = "All"
 const FILTER_ACTIVE_APPS = "Active apps"
@@ -40,6 +41,7 @@ export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXA
       </VStack>
     ) : (
       <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4} w="full">
+        <CreatorBanner />
         {displayApps.map(xApp => (
           <UnendorsedAppCard key={xApp.id} xApp={xApp} />
         ))}

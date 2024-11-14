@@ -23,15 +23,19 @@ export const CreatorBanner = () => {
 
   const hasCreatorNFT = useHasCreatorNFT(account ?? "") // No loading state
 
-  if (!!account && hasCreatorNFT) {
+  const isApproved = !!account && hasCreatorNFT
+  const isRejected = !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
+  const isInProgress = !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
+
+  if (isApproved) {
     return <CreatorApplicationApproved /> // TODO couple to "submit app flow"
   }
 
-  if (!!account && !submissionsLoading && isLatestSubmissionRejected) {
+  if (isRejected) {
     return <CreatorApplicationRejected /> // TODO update support link
   }
 
-  if (!!account && !submissionsLoading && isLatestSubmissionOngoing) {
+  if (isInProgress) {
     return <CreatorApplicationInProgress />
   }
 
