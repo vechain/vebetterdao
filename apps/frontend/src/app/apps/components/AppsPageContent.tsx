@@ -34,7 +34,7 @@ export const AppsPageContent = () => {
 
       {!isXNodeLoading && isEndorsingApp ? (
         <VStack>
-          <Heading size="2xl">{t("Your endorsed app")}</Heading>
+          <Heading size="lg">{t("Your endorsed app")}</Heading>
           <Text color="#6a6a6a">
             {t("With your Node, you endorse apps to allow them to participate in governance")}
           </Text>
@@ -47,7 +47,7 @@ export const AppsPageContent = () => {
       <AppsLookingForEndorsement filteredApps={newApps || []} />
 
       <VStack>
-        <Heading size="2xl">{t("All the apps")}</Heading>
+        <Heading size="lg">{t("All the apps")}</Heading>
         <AllApps
           activeApps={xApps?.active || []}
           gracePeriodApps={gracePeriodApps || []}
