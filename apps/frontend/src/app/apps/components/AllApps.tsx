@@ -4,17 +4,17 @@ import { FilterAppsTypeButton } from "./FilterAppsTypeButton"
 import { XApp, UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 
+const FILTER_ALL = "All"
+const FILTER_ACTIVE_APPS = "Active apps"
+const FILTER_GRACE_PERIOD = "In grace period"
+const FILTER_ENDORSEMENT_LOST = "Endorsement lost"
+
 type Props = {
   activeApps: XApp[]
   gracePeriodApps: UnendorsedApp[]
   lostEndorsementApps: UnendorsedApp[]
   isXAppsLoading: boolean
 }
-
-const FILTER_ALL = "All"
-const FILTER_ACTIVE_APPS = "Active apps"
-const FILTER_GRACE_PERIOD = "In grace period"
-const FILTER_ENDORSEMENT_LOST = "Endorsement lost"
 
 export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXAppsLoading }: Props) => {
   const [filter, setFilter] = useState(FILTER_ALL)
