@@ -46,7 +46,7 @@ export const AppsPageContent = () => {
 
       <AppsLookingForEndorsement filteredApps={newApps || []} />
 
-      <VStack alignItems={"flex-start"} spacing={4}>
+      <VStack alignItems={"flex-start"} spacing={4} w="100%">
         <Heading size="lg">{t("All the apps")}</Heading>
         <AllApps
           activeApps={xApps?.active || []}
