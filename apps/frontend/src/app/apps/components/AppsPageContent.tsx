@@ -29,24 +29,25 @@ export const AppsPageContent = () => {
 
   // TODO: Pagination, search, filters
   return (
-    <VStack alignItems={"flex-start"} position={"relative"} spacing={4} w="full">
+    <VStack alignItems={"flex-start"} position={"relative"} spacing={12} w="full">
       <AppsBanner />
 
-      {!isXNodeLoading &&
-        (isEndorsingApp ? (
-          <>
-            <Heading>{t("Your endorsed app")}</Heading>
-            <Text>{t("With your XNode, you endorse apps to allow them to participate in governance")}</Text>
-            <UnendorsedAppCard xApp={endorsedApp} />
-          </>
-        ) : (
-          <EndorsementPointsBanner />
-        ))}
+      {!isXNodeLoading && isEndorsingApp ? (
+        <VStack>
+          <Heading size="2xl">{t("Your endorsed app")}</Heading>
+          <Text color="#6a6a6a">
+            {t("With your Node, you endorse apps to allow them to participate in governance")}
+          </Text>
+          <UnendorsedAppCard xApp={endorsedApp} />
+        </VStack>
+      ) : (
+        <EndorsementPointsBanner />
+      )}
 
       <AppsLookingForEndorsement filteredApps={newApps || []} />
 
-      <VStack alignItems={"flex-start"}>
-        <Heading>{t("All the apps")}</Heading>
+      <VStack>
+        <Heading size="2xl">{t("All the apps")}</Heading>
         <AllApps
           activeApps={xApps?.active || []}
           gracePeriodApps={gracePeriodApps || []}

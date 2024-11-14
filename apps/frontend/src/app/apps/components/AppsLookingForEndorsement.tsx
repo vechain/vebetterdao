@@ -29,11 +29,12 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
       width={"full"}
       border={"1px solid #EFEFEF"}
       borderRadius={"20px"}
-      bgColor={"#FFFFFF"}>
+      bgColor={"#FFFFFF"}
+      boxShadow="0px 8px 16px 0px #00000014">
       <HStack justifyContent={"space-between"} alignItems={"center"} w={"full"}>
-        <VStack alignItems={"flex-start"}>
-          <Heading>{t("New apps looking for endorsement")}</Heading>
-          <Text>{t("These apps need to get enough endorsement score to become active")}</Text>
+        <VStack>
+          <Heading size="2xl">{t("New apps looking for endorsement")}</Heading>
+          <Text color="#6a6a6a">{t("These apps need to get enough endorsement score to become active")}</Text>
         </VStack>
         <UilInfoCircle color={"#004CFC"} />
       </HStack>
