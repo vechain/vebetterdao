@@ -20,16 +20,11 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
       color: "#F29B32",
       icon: UilExclamationCircle,
     },
-    [XAppStatus.ENDORSED_NOT_ELIGIBLE]: {
-      title: t("Endorsed"),
-      description: t("This app has enough score and will participate in the next allocation rounds."),
-      backgroundColor: "#E9FDF1",
-      color: "#3DBA67",
-      icon: UilCheckCircle,
-    },
     [XAppStatus.ENDORSED_AND_ELIGIBLE]: {
       title: t("Endorsed and active"),
-      description: t("This app has enough score and is participating in allocation rounds."),
+      description: t(
+        "This app has enough score and will participate in the next allocation rounds, if not already included.",
+      ),
       backgroundColor: "#E9FDF1",
       color: "#3DBA67",
       icon: UilCheckCircle,
