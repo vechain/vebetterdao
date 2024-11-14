@@ -39,7 +39,7 @@ export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXA
         <Spinner size="lg" />
       </VStack>
     ) : (
-      <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
+      <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4} w="full">
         {displayApps.map(xApp => (
           <UnendorsedAppCard key={xApp.id} xApp={xApp} />
         ))}
