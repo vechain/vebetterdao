@@ -37,7 +37,7 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
           <ModalBody p={"40px"}>
             <VStack align="center" gap="20px">
               <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
-              <Heading fontSize={["22px", "28px"]} fontWeight={700} textAlign={"center"}>
+              <Heading fontSize={["xl", "2xl"]} fontWeight={700} textAlign={"center"}>
                 {t("Delete {{address}} as moderator?", { address: domain || humanAddress(moderator, 4, 4) })}
               </Heading>
               <Text color="#6A6A6A" textAlign={"center"}>
