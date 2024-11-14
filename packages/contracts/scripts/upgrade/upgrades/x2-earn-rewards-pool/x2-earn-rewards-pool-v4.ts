@@ -15,12 +15,12 @@ async function main() {
   )
 
   const x2EarnRewardsPool = (await upgradeProxy(
-    "X2EarnRewardsPoolV2",
+    "X2EarnRewardsPoolV3",
     "X2EarnRewardsPool",
     config.x2EarnRewardsPoolContractAddress,
     [],
     {
-      version: 3,
+      version: 4,
     },
   )) as X2EarnRewardsPool
 
@@ -30,7 +30,7 @@ async function main() {
   const version = await x2EarnRewardsPool.version()
   console.log(`New X2EarnRewardsPool version: ${version}`)
 
-  if (parseInt(version) !== 3) {
+  if (parseInt(version) !== 4) {
     throw new Error(`X2EarnRewardsPool version is not the expected one: ${version}`)
   }
 
