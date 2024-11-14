@@ -49,17 +49,16 @@ export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXA
 
   return (
     <VStack spacing={8} w="full" data-testid="apps-page">
-      <Box w="full" overflowX="auto" whiteSpace="nowrap">
-        <HStack
-          spacing={4}
-          minWidth="max-content"
-          justifyContent="flex-start"
-          flexWrap="nowrap"
-          css={{
-            "&::-webkit-scrollbar": { display: "none" },
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-          }}>
+      <Box
+        w="full"
+        overflowX="auto"
+        whiteSpace="nowrap"
+        css={{
+          "&::-webkit-scrollbar": { display: "none" },
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}>
+        <HStack spacing={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
           {[FILTER_ALL, FILTER_ACTIVE_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST].map(filterType => (
             <FilterAppsTypeButton
               key={filterType}
