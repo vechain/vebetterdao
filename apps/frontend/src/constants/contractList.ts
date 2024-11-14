@@ -99,6 +99,11 @@ export const CONTRACT_LIST = [
       "ROLE_GRANTER",
     ],
   },
+  {
+    name: "X2Earn Creator NFT",
+    contractAddress: config.x2EarnCreatorContractAddress,
+    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "PAUSER_ROLE", "MINTER_ROLE", "BURNER_ROLE"],
+  },
   // TODO: Add node management contract when deployed
   // {
   //   name: "Node Management Contract",
