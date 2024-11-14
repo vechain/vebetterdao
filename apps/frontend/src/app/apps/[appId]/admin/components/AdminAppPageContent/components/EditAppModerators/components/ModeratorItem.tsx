@@ -64,12 +64,14 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
         <Show above={"sm"}>
           <HStack>
             <AddressIcon address={moderator} h="48px" w="48px" rounded={"full"} />
-            <Text fontSize={"14px"} color="#6A6A6A">
-              {moderator}
-            </Text>
-            <Text fontSize={"14px"} color="#6A6A6A" borderLeft={"1px solid"} paddingLeft={2}>
-              {domain}
-            </Text>
+            <VStack align="stretch" gap={0}>
+              <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+                {domain}
+              </Text>
+              <Text fontSize={"14px"} color="#6A6A6A">
+                {moderator}
+              </Text>
+            </VStack>
           </HStack>
           <Button variant="dangerGhost" leftIcon={<UilTrash size={"14px"} color="#D23F63" />} onClick={onOpen}>
             {t("Remove")}
@@ -78,9 +80,14 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
         <Show below={"sm"}>
           <HStack>
             <AddressIcon address={moderator} h="36px" w="36px" rounded={"full"} />
-            <Text fontSize={"14px"} color="#6A6A6A">
-              {humanAddress(moderator, 8, 6)}
-            </Text>
+            <VStack align="stretch" gap={0}>
+              <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+                {domain}
+              </Text>
+              <Text fontSize={"14px"} color="#6A6A6A">
+                {humanAddress(moderator, 8, 6)}
+              </Text>
+            </VStack>
           </HStack>
           <IconButton
             variant="dangerGhost"

@@ -66,12 +66,14 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
         <Show above={"sm"}>
           <HStack>
             <AddressIcon address={creator} h="48px" w="48px" rounded={"full"} />
-            <Text fontSize={"14px"} color="#6A6A6A">
-              {creator}
-            </Text>
-            <Text fontSize={"14px"} color="#6A6A6A" borderLeft={"1px solid"} paddingLeft={2}>
-              {domain}
-            </Text>
+            <VStack align="stretch" gap={0}>
+              <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+                {domain}
+              </Text>
+              <Text fontSize={"14px"} color="#6A6A6A">
+                {creator}
+              </Text>
+            </VStack>
           </HStack>
           <Button variant="dangerGhost" leftIcon={<UilTrash size={"14px"} color="#D23F63" />} onClick={onOpen}>
             {t("Remove")}
@@ -80,9 +82,14 @@ export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
         <Show below={"sm"}>
           <HStack>
             <AddressIcon address={creator} h="36px" w="36px" rounded={"full"} />
-            <Text fontSize={"14px"} color="#6A6A6A">
-              {humanAddress(creator, 8, 6)}
-            </Text>
+            <VStack align="stretch" gap={0}>
+              <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+                {domain}
+              </Text>
+              <Text fontSize={"14px"} color="#6A6A6A">
+                {humanAddress(creator, 8, 6)}
+              </Text>
+            </VStack>
           </HStack>
           <IconButton
             variant="dangerGhost"
