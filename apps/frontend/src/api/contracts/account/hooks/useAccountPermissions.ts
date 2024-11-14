@@ -40,6 +40,9 @@ type AccountPermissionResponse = {
   isPassportActionRegistrar: boolean
   isPassportScoreManager: boolean
   isPassportWhitelister: boolean
+  isMinterOfX2EarnCreator: boolean
+  isBurnerOfX2EarnCreator: boolean
+  isAdminOfX2EarnCreator: boolean
 }
 
 const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; contractAddress: string }> = {
@@ -163,6 +166,18 @@ const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; cont
     role: "ACTION_SCORE_MANAGER_ROLE",
     contractAddress: config.veBetterPassportContractAddress,
   },
+  isMinterOfX2EarnCreator: {
+    role: "MINTER_ROLE",
+    contractAddress: config.x2EarnCreatorContractAddress,
+  },
+  isBurnerOfX2EarnCreator: {
+    role: "BURNER_ROLE",
+    contractAddress: config.x2EarnCreatorContractAddress,
+  },
+  isAdminOfX2EarnCreator: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.x2EarnCreatorContractAddress,
+  },
 }
 
 export const getAccountPermissionsQueryKey = (address: string) => ["ACCOUNT_PERMISSIONS", address]
@@ -215,7 +230,8 @@ export const useAccountPermissions = (
         roles.isAdminOfVot3 ||
         roles.isAdminOfVoterRewards ||
         roles.isAdminOfX2EarnApps ||
-        roles.isAdminOfVeBetterPassport
+        roles.isAdminOfVeBetterPassport ||
+        roles.isAdminOfX2EarnCreator
 
       return {
         isAdmin,

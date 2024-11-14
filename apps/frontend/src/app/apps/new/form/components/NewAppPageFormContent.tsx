@@ -6,10 +6,11 @@ import { useTranslation } from "react-i18next"
 import { useSubmitNewApp, useUploadAppMetadata } from "@/hooks"
 import { TransactionModal } from "@/components"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useXApps } from "@/api"
 import { useRouter } from "next/navigation"
 import { PreviewAppCard } from "./PreviewAppCard"
+import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 
 export const NewAppPageFormContent = () => {
   const router = useRouter()
@@ -39,6 +40,13 @@ export const NewAppPageFormContent = () => {
   const { account } = useWallet()
 
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+
+  const hasCreatorNft = useHasCreatorNFT(account ?? "")
+
+  useEffect(() => {
+    //Users without Creator NFT should be redirected to home
+    if (!!account && !hasCreatorNft) router.push("/")
+  }, [hasCreatorNft, router, account])
 
   const handleSuccess = useCallback(() => {
     setIsSuccessSubmission(true)

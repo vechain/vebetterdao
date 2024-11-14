@@ -1,12 +1,11 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
-import _ from "lodash"
-import { checkEndorsements, getSecret, publishMessage } from "../../helpers"
-import mainnetConfig from "@repo/config/mainnet"
+import { checkEndorsements, getSecret, publishMessage } from "../helpers"
+import testnetStagingConfig from "@repo/config/testnet-staging"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
 
-// Define the URL for the Vechain Mainnet
-const nodeURL = "https://mainnet.vechain.org/"
+// Define the URL for the Vechain testnet
+const nodeURL = "https://testnet.vechain.org/"
 
 const client = new SecretsManagerClient({
   region: "eu-west-1",
@@ -31,13 +30,13 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       isPollingEnabled: false,
     })
 
-    const privateKey = await getSecret(client, "start_emissions_pk", "start-emissions-pk")
+    const privateKey = await getSecret(client, "testnet-staging-pk", "testnet_staging_pk")
 
     // Check the endorsements of the X-Apps
     const { receipt: receiptCheck, gasResult: gasResultCheck } = await checkEndorsements(
       thorClient,
       client,
-      mainnetConfig,
+      testnetStagingConfig,
       privateKey,
     )
 
@@ -50,7 +49,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       }
 
     // Publish a success message to the Slack channel
-    await publishMessage(client, "C073WL9ELUR", `:white_check_mark: Check endorsements ran successfully`)
+    await publishMessage(client, "C06BLEJE5SA", `[STAGING] :white_check_mark: Check endorsements ran successfully`)
 
     // Return a successful response with the transaction receipt
     return {
@@ -64,7 +63,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
     console.log("Error checking endorsements:", error)
 
     // Publish an error message to the Slack channel
-    await publishMessage(client, "C073WL9ELUR", `:alert: Error checking endorsements: ${error}`)
+    await publishMessage(client, "C06BLEJE5SA", `[STAGING] :alert: Error checking endorsements: ${error}`)
 
     return {
       statusCode: 500,

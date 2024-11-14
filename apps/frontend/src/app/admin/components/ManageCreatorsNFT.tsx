@@ -1,0 +1,207 @@
+import { TransactionModal } from "@/components/TransactionModal"
+import {
+  VStack,
+  Button,
+  FormControl,
+  FormLabel,
+  InputGroup,
+  Input,
+  Heading,
+  FormErrorMessage,
+  Card,
+  CardHeader,
+  CardBody,
+  useDisclosure,
+  Radio,
+  RadioGroup,
+  Text,
+  Badge,
+  HStack,
+  Icon,
+  As,
+} from "@chakra-ui/react"
+import { AddressUtils } from "@repo/utils"
+import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
+import { useCallback, useMemo } from "react"
+import { useTranslation } from "react-i18next"
+import { useForm } from "react-hook-form"
+import { useAdminCreatorNFT } from "@/hooks/useAdminCreatorNFT"
+import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+
+type NFTFormInputs = {
+  walletAddress?: string
+  tokenId?: string
+  lookupAddress?: string
+  actionType?: string
+}
+
+export const ManageCreatorsNFT = () => {
+  const { isOpen, onClose, onOpen } = useDisclosure()
+  const { t } = useTranslation()
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<NFTFormInputs>({
+    defaultValues: { walletAddress: "", tokenId: "", lookupAddress: "", actionType: "mint" },
+  })
+
+  const [walletAddress, tokenId, actionType, lookupAddress] = watch([
+    "walletAddress",
+    "tokenId",
+    "actionType",
+    "lookupAddress",
+  ])
+  const { mintNFT, burnNFT } = useAdminCreatorNFT({
+    walletAddress: walletAddress ?? "",
+    tokenId: tokenId ?? "",
+    onSuccess: onClose,
+  })
+
+  const hasNFT = useHasCreatorNFT(lookupAddress ?? "")
+
+  const { error, status, txReceipt, sendTransaction } = useMemo(() => {
+    return actionType === "mint" ? mintNFT : burnNFT
+  }, [actionType, mintNFT, burnNFT])
+
+  const onSubmit = useCallback(() => {
+    if (actionType !== "check") {
+      sendTransaction()
+      onOpen()
+    }
+  }, [sendTransaction, onOpen, actionType])
+
+  const renderBadge = (colorScheme: string, icon: As, text: string) => (
+    <Badge
+      textTransform="none"
+      fontSize="sm"
+      colorScheme={colorScheme}
+      display="flex"
+      alignItems="center"
+      borderRadius="12px"
+      p={2}>
+      <HStack align="start" spacing={2}>
+        <Icon as={icon} color={colorScheme === "green" ? "green.500" : "red.500"} />
+        <Text as="span" wordBreak="break-word" whiteSpace="normal">
+          {text}
+        </Text>
+      </HStack>
+    </Badge>
+  )
+
+  return (
+    <>
+      <Card w="full">
+        <CardHeader>
+          <Heading size="lg">{t("Manage Creator NFT")}</Heading>
+        </CardHeader>
+
+        <CardBody>
+          <VStack spacing={8} align="start" w="full">
+            <RadioGroup defaultValue="mint">
+              <VStack align="start">
+                <Radio {...register("actionType", { required: true })} value="mint">
+                  {t("Mint NFT")}
+                </Radio>
+                <Radio {...register("actionType", { required: true })} value="burn">
+                  {t("Burn NFT")}
+                </Radio>
+                <Radio {...register("actionType", { required: true })} value="check">
+                  {t("Check Ownership")}
+                </Radio>
+              </VStack>
+            </RadioGroup>
+
+            <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
+              <VStack spacing={4} align="start">
+                {actionType === "mint" && (
+                  <FormControl isRequired isInvalid={Boolean(errors.walletAddress)}>
+                    <FormLabel>
+                      <strong>{t("Wallet Address")}</strong>
+                    </FormLabel>
+                    <InputGroup>
+                      <Input
+                        placeholder={t("Enter the wallet address")}
+                        {...register("walletAddress", {
+                          required: actionType === "mint",
+                          validate: value => AddressUtils.isValid(value) || t("Invalid address"),
+                        })}
+                      />
+                    </InputGroup>
+                    {errors.walletAddress && <FormErrorMessage>{errors.walletAddress.message}</FormErrorMessage>}
+                  </FormControl>
+                )}
+                {actionType === "burn" && (
+                  <FormControl isRequired isInvalid={Boolean(errors.tokenId)}>
+                    <FormLabel>
+                      <strong>{t("Token ID")}</strong>
+                    </FormLabel>
+                    <InputGroup>
+                      <Input
+                        placeholder={t("Enter the token ID")}
+                        {...register("tokenId", {
+                          required: actionType === "burn",
+                        })}
+                      />
+                    </InputGroup>
+                    {errors.tokenId && <FormErrorMessage>{errors.tokenId.message}</FormErrorMessage>}
+                  </FormControl>
+                )}
+                {actionType === "check" && (
+                  <FormControl isInvalid={Boolean(errors.lookupAddress)}>
+                    <FormLabel>
+                      <strong>{t("Lookup Wallet Address")}</strong>
+                    </FormLabel>
+                    <InputGroup>
+                      <Input
+                        placeholder={t("Enter wallet address to check")}
+                        {...register("lookupAddress", {
+                          validate: value => {
+                            if (!AddressUtils.isValid(value)) {
+                              return t("Invalid address")
+                            }
+                          },
+                        })}
+                      />
+                    </InputGroup>
+                    {errors.lookupAddress && <FormErrorMessage>{errors.lookupAddress.message}</FormErrorMessage>}
+                    {lookupAddress && (
+                      <VStack mt={2} align="start">
+                        {renderBadge(
+                          hasNFT ? "green" : "red",
+                          hasNFT ? UilCheckCircle : UilExclamationCircle,
+                          hasNFT ? t("This address holds the NFT.") : t("This address does not hold the NFT."),
+                        )}
+                      </VStack>
+                    )}
+                  </FormControl>
+                )}
+                {actionType !== "check" && (
+                  <Button colorScheme="blue" type="submit">
+                    {t(actionType === "mint" ? "Mint" : "Burn")}
+                  </Button>
+                )}
+              </VStack>
+            </form>
+          </VStack>
+        </CardBody>
+      </Card>
+
+      <TransactionModal
+        isOpen={isOpen}
+        onClose={onClose}
+        status={error ? "error" : status}
+        successTitle={t("Transaction successful")}
+        onTryAgain={handleSubmit(onSubmit)}
+        showTryAgainButton
+        showExplorerButton
+        txId={txReceipt?.meta.txID}
+        pendingTitle={t("Processing transaction...")}
+        errorTitle={t("Transaction error")}
+        errorDescription={error?.reason}
+      />
+    </>
+  )
+}

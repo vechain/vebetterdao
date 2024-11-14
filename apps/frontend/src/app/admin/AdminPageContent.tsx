@@ -17,6 +17,7 @@ import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { UpdateRoleCard } from "./components/UpdateRoleCard"
 import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport"
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
+import { ManageCreatorsNFT } from "./components/ManageCreatorsNFT"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -41,6 +42,9 @@ export const AdminPageContent = () => {
     permissions?.isPassportActionRegistrar ||
     permissions?.isPassportScoreManager ||
     permissions?.isPassportWhitelister
+
+  const canSeeX2EarnCreatorUtils =
+    permissions?.isAdminOfX2EarnCreator || permissions?.isMinterOfX2EarnCreator || permissions?.isBurnerOfX2EarnCreator
 
   return (
     <Stack spacing={12} w={"full"} data-testid="admin-page">
@@ -92,6 +96,7 @@ export const AdminPageContent = () => {
             <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
               <B3trAllowance />
               <UpdateRoleCard />
+              {canSeeX2EarnCreatorUtils ? <ManageCreatorsNFT /> : undefined}
             </Grid>
           </TabPanel>
 

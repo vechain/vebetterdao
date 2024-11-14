@@ -10,6 +10,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
 import { DappKitWithChakraProvider } from "@/providers/DappKitWithChakraProvider"
 import { lightTheme } from "./theme"
+import { AuthSessionProvider } from "@/providers/AuthSessionProvider"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -17,7 +18,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
         <ReactQueryDevtools initialIsOpen={false} />
         <ChakraProvider theme={lightTheme}>
-          <DappKitWithChakraProvider>{children}</DappKitWithChakraProvider>
+          <DappKitWithChakraProvider>
+            <AuthSessionProvider>{children}</AuthSessionProvider>
+          </DappKitWithChakraProvider>
         </ChakraProvider>
       </PersistQueryClientProvider>
     </CacheProvider>
