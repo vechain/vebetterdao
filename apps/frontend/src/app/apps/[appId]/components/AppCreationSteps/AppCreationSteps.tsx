@@ -30,7 +30,12 @@ export const AppCreationSteps = () => {
               </HStack>
               <HStack w="full" justify="end" alignItems="center" display={{ base: "none", md: "flex" }}>
                 <Icon as={UilInfoCircle} color="rgba(0, 76, 252, 1)" />
-                <Link color="#004CFC">{t("Know more about Apps")}</Link>
+                <Link
+                  color="#004CFC"
+                  isExternal
+                  href={"https://docs.vebetterdao.org/developer-guides/submit-x2earn-app"}>
+                  {t("Know more about Apps")}
+                </Link>
               </HStack>
             </HStack>
             <Text fontSize="md" color="#6A6A6A">
