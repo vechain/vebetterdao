@@ -70,16 +70,14 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
               <Image
                 src={logo?.image ?? notFoundImage}
                 alt="logo"
-                maxH="72px"
-                maxW="72px"
-                minW="48px"
-                minH="48px"
+                h="72px"
+                w="72px"
                 borderRadius="9px"
                 objectFit="contain"
               />
             </Skeleton>
 
-            <Stack w="full" maxW="100%" align="stretch" justify="center">
+            <Stack flex="1" align="stretch" justify="center">
               <Skeleton isLoaded={!appMetadataLoading}>
                 <Heading fontWeight={700} fontSize="20px" noOfLines={1}>
                   {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
