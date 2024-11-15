@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { getXApps } from "../getXApps"
 
-export const getXAppsQueryKey = () => ["xApps"]
+export const getXAppsQueryKey = () => ["getXApps"]
 
 /**
  *  Hook to get all the available xApps in the B3TR ecosystem

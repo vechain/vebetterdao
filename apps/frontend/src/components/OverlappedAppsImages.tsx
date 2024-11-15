@@ -49,7 +49,7 @@ export const OverlappedAppsImages: React.FC<Props> = ({
           const ml = index > 0 ? `-${marginleft}px` : "0"
           return (
             <AppImage
-              key={appId}
+              key={index}
               appId={appId}
               boxSize={`${boxSize}px`}
               borderRadius={`${borderRadius}px`}
