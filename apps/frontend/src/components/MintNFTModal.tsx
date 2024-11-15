@@ -103,7 +103,7 @@ export const MintNFTModal = ({
               color={"white"}
               fontSize={24}
               fontWeight={600}>
-              {t("GM Earth")}
+              {"Earth"}
             </Text>
             <Text
               alignSelf={"center"}

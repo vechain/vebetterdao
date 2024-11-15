@@ -30,6 +30,7 @@ import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/hooks/useCre
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
+import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
 
@@ -81,7 +82,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
   const hasCreatorNFT = useHasCreatorNFT(account ?? "") // No loading state
-  const userHasApp = !!account && !!xApps?.allApps.find(app => app.teamWalletAddress === account)
+  const userHasApp = !!account && !!xApps?.allApps?.find(app => compareAddresses(app.teamWalletAddress, account))
 
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
