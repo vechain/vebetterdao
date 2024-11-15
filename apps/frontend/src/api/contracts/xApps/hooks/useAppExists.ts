@@ -11,9 +11,7 @@ const method = "appExists"
  * Get the query key for a boolean value indicating if the app exists
  * @param appId the app id
  */
-export const getAppExistsQueryKey = (appId: string) => {
-  getCallKey({ method, keyArgs: [appId] })
-}
+export const getAppExistsQueryKey = (appId: string) => getCallKey({ method, keyArgs: [appId] })
 
 /**
  * Hook to get a boolean value indicating if the app exists

@@ -4,6 +4,8 @@ import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import {
   getAppEndorsementScoreQueryKey,
+  getAppExistsQueryKey,
+  getAppIsBlacklistedQueryKey,
   getEndorsersQueryKey,
   getIsAppEligibleNowQueryKey,
   getIsAppUnendorsedQueryKey,
@@ -47,6 +49,8 @@ export const useEndorseApp = ({ appId, nodeId, userAddress, onSuccess }: Props) 
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
       getEndorsersQueryKey(appId),
       getXAppsQueryKey(),
+      getAppIsBlacklistedQueryKey(appId),
+      getAppExistsQueryKey(appId),
     ],
     [appId, nodeId, userAddress],
   )
