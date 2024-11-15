@@ -24,5 +24,6 @@ export const useIsAppEligibleNow = (appId: string): UseQueryResult<boolean, Erro
     contractAddress,
     method,
     args: [appId],
+    enabled: !!appId,
   })
 }

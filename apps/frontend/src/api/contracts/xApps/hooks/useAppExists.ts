@@ -24,5 +24,6 @@ export const useAppExists = (appId: string): UseQueryResult<boolean, Error> => {
     contractAddress,
     method,
     args: [appId],
+    enabled: !!appId,
   })
 }
