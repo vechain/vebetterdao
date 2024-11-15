@@ -16,7 +16,8 @@ export interface SubmissionsResponse {
 
 export async function GET(request: NextRequest): Promise<NextResponse<SubmissionsResponse | { error: string }>> {
   if (!process.env.FRESHDESK_API_TOKEN || !process.env.FRESHDESK_DOMAIN || !process.env.FRESHDESK_GROUP_ID) {
-    throw new Error("Missing environment variables for Freshdesk")
+    console.warn("API: Missing environment variables for Freshdesk")
+    return NextResponse.json({ error: "Missing environment variables" }, { status: 500 })
   }
 
   const walletAddress = request.nextUrl.searchParams.get("walletAddress")

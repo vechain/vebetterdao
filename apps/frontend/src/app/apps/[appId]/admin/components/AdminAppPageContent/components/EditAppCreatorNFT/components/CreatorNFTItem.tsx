@@ -20,14 +20,14 @@ import { useBreakpointValue } from "@chakra-ui/react"
 import { useVechainDomain } from "@vechain/dapp-kit-react"
 
 type Props = {
-  moderator: string
-  handleDeleteModerator: () => void
+  creator: string
+  handleDeleteCreator: () => void
 }
 
-export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
+export const CreatorNFTItem = ({ creator, handleDeleteCreator }: Props) => {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { domain } = useVechainDomain({ addressOrDomain: moderator })
+  const { domain } = useVechainDomain({ addressOrDomain: creator })
 
   return (
     <>
@@ -38,21 +38,23 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
             <VStack align="center" gap="20px">
               <ExclamationTriangle color="#D23F63" size={useBreakpointValue({ base: 150, sm: 230 })} />
               <Heading fontSize={["xl", "2xl"]} fontWeight={700} textAlign={"center"}>
-                {t("Delete {{address}} as moderator?", { address: domain || humanAddress(moderator, 4, 4) })}
+                {t("Delete {{address}} as creator?", { address: domain || humanAddress(creator, 4, 4) })}
               </Heading>
               <Text color="#6A6A6A" textAlign={"center"}>
-                {t("The user will not be able to access the app edition mode anymore.")}
+                {t(
+                  "The user will not be able to join the Discord channels, participate in the endorsement phases, and submit new apps.",
+                )}
               </Text>
               {domain && (
                 <Text color="#6A6A6A" textAlign={"center"}>
-                  {`Address: ${humanAddress(moderator, 8, 6)}`}
+                  {`Address: ${humanAddress(creator, 8, 6)}`}
                 </Text>
               )}
               <VStack align="center" gap="20px" mt="20px">
                 <Button variant="primaryAction" onClick={onClose}>
                   {t("Cancel")}
                 </Button>
-                <Button variant="dangerGhost" onClick={handleDeleteModerator}>
+                <Button variant="dangerGhost" onClick={handleDeleteCreator}>
                   {t("Yes, remove")}
                 </Button>
               </VStack>
@@ -63,13 +65,13 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
       <HStack gap={6} justify={"space-between"}>
         <Show above={"sm"}>
           <HStack>
-            <AddressIcon address={moderator} h="48px" w="48px" rounded={"full"} />
+            <AddressIcon address={creator} h="48px" w="48px" rounded={"full"} />
             <VStack align="stretch" gap={0}>
               <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
                 {domain}
               </Text>
               <Text fontSize={"14px"} color="#6A6A6A">
-                {moderator}
+                {creator}
               </Text>
             </VStack>
           </HStack>
@@ -79,13 +81,13 @@ export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
         </Show>
         <Show below={"sm"}>
           <HStack>
-            <AddressIcon address={moderator} h="36px" w="36px" rounded={"full"} />
+            <AddressIcon address={creator} h="36px" w="36px" rounded={"full"} />
             <VStack align="stretch" gap={0}>
               <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
                 {domain}
               </Text>
               <Text fontSize={"14px"} color="#6A6A6A">
-                {humanAddress(moderator, 8, 6)}
+                {humanAddress(creator, 8, 6)}
               </Text>
             </VStack>
           </HStack>

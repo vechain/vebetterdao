@@ -9,7 +9,6 @@ import { AppScreenshots } from "./AppScreenshots"
 import { AppTweets } from "./AppTweets"
 import { AppEndorsementInfoCard } from "./AppEndorsementInfoCard/AppEndorsementInfoCard"
 import { AppBalanceCard } from "./AppBalanceCard"
-import { XAppStatus } from "@/types"
 
 export const AppDetailPageContent = () => {
   const { app } = useCurrentAppInfo()
@@ -29,17 +28,8 @@ export const AppDetailPageContent = () => {
   }, [appHasBeenIntoAllocationRounds, isAppModerator, isAppAdmin])
 
   const shouldRenderBalance = useMemo(() => {
-    return appHasBeenIntoAllocationRounds
-  }, [appHasBeenIntoAllocationRounds])
-
-  const appUnendorsedStatus = useMemo(
-    () =>
-      endorsementStatus === XAppStatus.LOOKING_FOR_ENDORSEMENT ||
-      endorsementStatus === XAppStatus.UNENDORSED_AND_ELIGIBLE ||
-      endorsementStatus === XAppStatus.UNENDORSED_NOT_ELIGIBLE,
-    [endorsementStatus],
-  )
-  const shouldBeLargeEndorsementBox = appUnendorsedStatus
+    return appHasBeenIntoAllocationRounds && (isAppModerator || isAppAdmin)
+  }, [appHasBeenIntoAllocationRounds, isAppAdmin, isAppModerator])
 
   return (
     <Grid
@@ -58,14 +48,6 @@ export const AppDetailPageContent = () => {
       <GridItem w="full" colSpan={[1, 1, 2]} order={[2, 2, 1]}>
         <Stack direction="column" spacing={8}>
           {shouldRenderCreationSteps ? <AppCreationSteps /> : null}
-          {shouldBeLargeEndorsementBox && (
-            <AppEndorsementInfoCard
-              endorsementScore={endorsementScore}
-              endorsementStatus={endorsementStatus}
-              endorsementThreshold={endorsementThreshold}
-              isEndorsementStatusLoading={isEndorsementStatusLoading}
-            />
-          )}
           <AppScreenshots />
           <AppTweets />
         </Stack>
@@ -74,14 +56,12 @@ export const AppDetailPageContent = () => {
       <GridItem w="full" colSpan={1} order={[1, 1, 2]}>
         <Stack direction="column" spacing={8}>
           {shouldRenderBalance && <AppBalanceCard />}
-          {!shouldBeLargeEndorsementBox && (
-            <AppEndorsementInfoCard
-              endorsementScore={endorsementScore}
-              endorsementStatus={endorsementStatus}
-              endorsementThreshold={endorsementThreshold}
-              isEndorsementStatusLoading={isEndorsementStatusLoading}
-            />
-          )}
+          <AppEndorsementInfoCard
+            endorsementScore={endorsementScore}
+            endorsementStatus={endorsementStatus}
+            endorsementThreshold={endorsementThreshold}
+            isEndorsementStatusLoading={isEndorsementStatusLoading}
+          />
         </Stack>
       </GridItem>
     </Grid>
