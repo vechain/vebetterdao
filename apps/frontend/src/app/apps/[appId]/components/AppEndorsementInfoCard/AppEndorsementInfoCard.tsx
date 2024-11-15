@@ -5,11 +5,13 @@ import {
   Card,
   CardBody,
   CardHeader,
+  CardFooter,
   Heading,
   HStack,
   Link,
   Skeleton,
   Stack,
+  VStack,
   useDisclosure,
 } from "@chakra-ui/react"
 import { useMemo } from "react"
@@ -29,7 +31,6 @@ type Props = {
   endorsementStatus: XAppStatus
   endorsementThreshold?: string
   isEndorsementStatusLoading: boolean
-  isLargeCard?: boolean
 }
 
 export const AppEndorsementInfoCard = ({
@@ -37,7 +38,6 @@ export const AppEndorsementInfoCard = ({
   endorsementStatus,
   endorsementThreshold,
   isEndorsementStatusLoading,
-  isLargeCard = false,
 }: Props) => {
   const { t } = useTranslation()
   const { app } = useCurrentAppInfo()
@@ -109,30 +109,23 @@ export const AppEndorsementInfoCard = ({
 
   return (
     <>
-      <Card align="stretch" p="24px" gap="24px" border="1px" borderColor="#D5D5D5" borderRadius="12px">
-        <CardHeader p={0}>
+      <Card w={"full"} variant="baseWithBorder">
+        <CardHeader>
           <HStack justifyContent="space-between" alignItems="flex-end" w="full">
-            <Heading fontSize="24px" fontWeight={700}>
-              {t("Endorsement")}
-            </Heading>
+            <Heading size="md">{t("Endorsement")}</Heading>
             <Link fontSize="16px" fontWeight={600} color="#004CFC" onClick={onOpenEndorsementInfoModal}>
               {t("History")}
             </Link>
           </HStack>
         </CardHeader>
 
-        <CardBody p={0}>
+        <CardBody py={0}>
           <Stack spacing={4} w="full">
             <Skeleton isLoaded={!isEndorsementStatusLoading}>
               <EndorsementStatusCallout endorsementStatus={endorsementStatus}></EndorsementStatusCallout>
             </Skeleton>
 
-            <Stack
-              direction={["column", "column", isLargeCard ? "row" : "column"]}
-              spacing={4}
-              w="full"
-              justify="space-between"
-              alignItems={["center", "center", "center"]}>
+            <Stack direction="column" spacing={4} w="full" justify="space-between" alignItems="center">
               <EndorsementDetails
                 endorsementScore={endorsementScore}
                 endorsementStatus={endorsementStatus}
@@ -143,39 +136,38 @@ export const AppEndorsementInfoCard = ({
                 isXNodeLoading={isXNodeLoading}
                 endorsers={appEndorsers || []}
                 isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
-
-              <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading}>
-                {shouldRenderEndorseButton && (
-                  <Button variant={"primaryAction"} onClick={onOpenEndorsementModal} w={["full", "full", "auto"]}>
-                    {t("Endorse with your {{value}} points", { value: xNodePoints })}
-                  </Button>
-                )}
-
-                {shouldRenderSwitchEndorsementButton && (
-                  <Button variant={"primaryAction"} onClick={onOpenSwitchEndorsementModal} w={["full", "full", "auto"]}>
-                    {t("Switch endorsement to this app")}
-                  </Button>
-                )}
-
-                {shouldRenderLookForEndorsersButton && (
-                  <Button variant={lookForEndorsersButtonVariant} w={["full", "full", "auto"]}>
-                    {t("Look for endorsers")}
-                  </Button>
-                )}
-
-                {isUserAppEndorser && (
-                  <Button
-                    variant={"link"}
-                    colorScheme="red"
-                    onClick={onOpenUnendorsementModal}
-                    w={["full", "full", "auto"]}>
-                    {t("Remove endorsement")}
-                  </Button>
-                )}
-              </Skeleton>
             </Stack>
           </Stack>
         </CardBody>
+        <CardFooter>
+          <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading} w="full">
+            <VStack spacing={2} w={"full"}>
+              {shouldRenderEndorseButton && (
+                <Button variant={"primaryAction"} onClick={onOpenEndorsementModal} w="full">
+                  {t("Endorse with your {{value}} points", { value: xNodePoints })}
+                </Button>
+              )}
+
+              {shouldRenderSwitchEndorsementButton && (
+                <Button variant={"primaryAction"} onClick={onOpenSwitchEndorsementModal} w="full">
+                  {t("Switch endorsement to this app")}
+                </Button>
+              )}
+
+              {shouldRenderLookForEndorsersButton && (
+                <Button variant={lookForEndorsersButtonVariant} w="full">
+                  {t("Look for endorsers")}
+                </Button>
+              )}
+
+              {isUserAppEndorser && (
+                <Button variant={"link"} colorScheme="red" onClick={onOpenUnendorsementModal} w="full">
+                  {t("Remove endorsement")}
+                </Button>
+              )}
+            </VStack>
+          </Skeleton>
+        </CardFooter>
       </Card>
 
       <SwitchEndorsementAppModal
