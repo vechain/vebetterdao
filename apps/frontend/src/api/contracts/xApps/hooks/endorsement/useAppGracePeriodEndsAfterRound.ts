@@ -22,10 +22,16 @@ export const useAppGracePeriodEndsAfterRound = (appId: string) => {
   const gracePeriodEndingBlockNum = Number(gracePeriodEvents?.gracePeriodEvent[0]?.endBlock)
   const currentRoundEndingBlockNum = Number(currentRoundDeadline)
   const currentRoundIdNum = Number(currentRoundId)
-  console.log({ gracePeriodEndingBlockNum, currentRoundEndingBlockNum, currentRoundIdNum, EMISSIONS_CYCLE_DURATION })
 
   // Determine if the hook is in a loading state
   const isLoading = gracePeriodEventsLoading || currentRoundDeadlineLoading || currentRoundIdLoading
+  console.log({
+    EMISSIONS_CYCLE_DURATION,
+    gracePeriodEndingBlockNum,
+    currentRoundEndingBlockNum,
+    currentRoundIdNum,
+    isLoading,
+  })
 
   // Early return if essential data is missing or still loading
   if (
