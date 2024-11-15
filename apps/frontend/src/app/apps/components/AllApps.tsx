@@ -44,15 +44,16 @@ export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXA
       </VStack>
     ) : (
       <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4} w="full">
-        
-               {isEmpty ? (
+        {isEmpty ? (
           <GridItem colSpan={2}>
             <AppsEmptyState />
           </GridItem>
         ) : (
           <>
-          {showCreatorBanner ? <CreatorBanner /> : undefined}
-          displayApps.map((xApp, _) => <UnendorsedAppCard key={xApp.id} xApp={xApp} />)
+            {showCreatorBanner ? <CreatorBanner /> : undefined}
+            {displayApps.map((xApp, _) => (
+              <UnendorsedAppCard key={xApp.id} xApp={xApp} />
+            ))}
           </>
         )}
       </Grid>
