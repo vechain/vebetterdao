@@ -3,7 +3,7 @@ import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getAppAdminQueryKey, getAppModeratorsQueryKey, getXAppsQueryKey } from "@/api"
+import { getAppAdminQueryKey, getAppCreatorsQueryKey, getAppModeratorsQueryKey, getXAppsQueryKey } from "@/api"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 
@@ -17,6 +17,8 @@ type ClausesProps = {
   moderatorsToBeRemoved?: string[]
   distributorsToBeAdded?: string[]
   distributorsToBeRemoved?: string[]
+  creatorsToBeAdded?: string[]
+  creatorsToBeRemoved?: string[]
 }
 
 /**
@@ -35,18 +37,34 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
       moderatorsToBeRemoved,
       distributorsToBeAdded,
       distributorsToBeRemoved,
+      creatorsToBeAdded,
+      creatorsToBeRemoved,
     }: ClausesProps) => {
       const clauses = []
 
-      if (moderatorsToBeAdded?.length) {
-        moderatorsToBeAdded.map(moderator => {
+      if (creatorsToBeRemoved?.length) {
+        creatorsToBeRemoved.map(creator => {
           clauses.push(
             buildClause({
               to: getConfig().x2EarnAppsContractAddress,
               contractInterface: X2EarnAppsInterface,
-              method: "addAppModerator",
-              args: [appId, moderator],
-              comment: "add moderator",
+              method: "removeAppCreator",
+              args: [appId, creator],
+              comment: "remove creator",
+            }),
+          )
+        })
+      }
+
+      if (creatorsToBeAdded?.length) {
+        creatorsToBeAdded.map(creator => {
+          clauses.push(
+            buildClause({
+              to: getConfig().x2EarnAppsContractAddress,
+              contractInterface: X2EarnAppsInterface,
+              method: "addCreator",
+              args: [appId, creator],
+              comment: "add creator",
             }),
           )
         })
@@ -66,15 +84,15 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
         })
       }
 
-      if (distributorsToBeAdded?.length) {
-        distributorsToBeAdded.map(distributor => {
+      if (moderatorsToBeAdded?.length) {
+        moderatorsToBeAdded.map(moderator => {
           clauses.push(
             buildClause({
               to: getConfig().x2EarnAppsContractAddress,
               contractInterface: X2EarnAppsInterface,
-              method: "addRewardDistributor",
-              args: [appId, distributor],
-              comment: "add reward distributor",
+              method: "addAppModerator",
+              args: [appId, moderator],
+              comment: "add moderator",
             }),
           )
         })
@@ -89,6 +107,20 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
               method: "removeRewardDistributor",
               args: [appId, distributor],
               comment: "remove reward distributor",
+            }),
+          )
+        })
+      }
+
+      if (distributorsToBeAdded?.length) {
+        distributorsToBeAdded.map(distributor => {
+          clauses.push(
+            buildClause({
+              to: getConfig().x2EarnAppsContractAddress,
+              contractInterface: X2EarnAppsInterface,
+              method: "addRewardDistributor",
+              args: [appId, distributor],
+              comment: "add reward distributor",
             }),
           )
         })
@@ -124,7 +156,12 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
   )
 
   const refetchQueryKeys = useMemo(
-    () => [getAppAdminQueryKey(appId), getAppModeratorsQueryKey(appId), getXAppsQueryKey()],
+    () => [
+      getAppAdminQueryKey(appId),
+      getAppModeratorsQueryKey(appId),
+      getAppCreatorsQueryKey(appId),
+      getXAppsQueryKey(),
+    ],
     [appId],
   )
 

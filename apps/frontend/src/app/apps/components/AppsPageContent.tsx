@@ -26,7 +26,7 @@ export const AppsPageContent = () => {
   const unendorsedApps = xApps?.unendorsed.filter(xApp => xApp.createdAtTimestamp !== "0")
   const gracePeriodApps = unendorsedApps?.filter(xApp => xApp.appAvailableForAllocationVoting === true)
   const lostEndorsementApps = unendorsedApps?.filter(xApp => xApp.appAvailableForAllocationVoting === false)
-
+  const hasNewApps = newApps && newApps?.length > 0
   // TODO: Pagination, search, filters
   return (
     <VStack alignItems={"flex-start"} position={"relative"} spacing={12} w="full">
@@ -43,8 +43,7 @@ export const AppsPageContent = () => {
       ) : (
         <EndorsementPointsBanner />
       )}
-
-      <AppsLookingForEndorsement filteredApps={newApps || []} />
+      {hasNewApps ? <AppsLookingForEndorsement filteredApps={newApps} /> : undefined}
 
       <VStack alignItems={"flex-start"} spacing={4} w="100%">
         <Heading size="lg">{t("All the apps")}</Heading>
