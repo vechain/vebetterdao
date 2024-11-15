@@ -17,7 +17,7 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
 
   const { app } = useCurrentAppInfo()
   const { roundId, isLoading, isCurrentRound, isNextRound } = useAppGracePeriodEndsAfterRound(app?.id ?? "")
-  // TODO add console.log and guard the template against rendering wrong data
+  // TODO rm console.logss and guard the template against rendering wrong data
   console.log({ roundId, isLoading, isCurrentRound, isNextRound })
 
   const roundReference = isCurrentRound ? "current round" : isNextRound ? "next round" : `round ${roundId}`
