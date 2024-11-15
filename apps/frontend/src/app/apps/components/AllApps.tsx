@@ -3,6 +3,7 @@ import { Box, HStack, VStack, Grid, Spinner } from "@chakra-ui/react"
 import { FilterAppsTypeButton } from "./FilterAppsTypeButton"
 import { XApp, UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
+import { CreatorBanner } from "./CreatorBanner"
 
 const FILTER_ALL = "All"
 const FILTER_ACTIVE_APPS = "Active apps"
@@ -19,6 +20,7 @@ type Props = {
 export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXAppsLoading }: Props) => {
   const [filter, setFilter] = useState(FILTER_ALL)
 
+  const showCreatorBanner = useMemo(() => filter === FILTER_ALL, [filter])
   // Filter xApps based on selected filter value
   const displayApps = useMemo(() => {
     switch (filter) {
@@ -40,12 +42,13 @@ export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXA
       </VStack>
     ) : (
       <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4} w="full">
+        {showCreatorBanner ? <CreatorBanner /> : undefined}
         {displayApps.map(xApp => (
           <UnendorsedAppCard key={xApp.id} xApp={xApp} />
         ))}
       </Grid>
     )
-  }, [displayApps, isXAppsLoading])
+  }, [displayApps, isXAppsLoading, showCreatorBanner])
 
   return (
     <VStack spacing={8} w="full" data-testid="apps-page">

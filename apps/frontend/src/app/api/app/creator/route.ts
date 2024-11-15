@@ -14,7 +14,8 @@ export async function POST(request: NextRequest) {
   }
 
   if (!process.env.FRESHDESK_API_TOKEN || !process.env.FRESHDESK_DOMAIN || !process.env.FRESHDESK_GROUP_ID) {
-    throw new Error("Missing environment variables for Freshdesk")
+    console.warn("API: Missing environment variables for Freshdesk")
+    return NextResponse.json({ error: "Missing environment variables" }, { status: 500 })
   }
 
   try {

@@ -72,12 +72,12 @@ export const NewCreatorPageFormContent = () => {
     <VStack align="center" w="100%" justify="center">
       <VStack w={{ base: "100%", sm: "100%", md: "80%" }} spacing={0}>
         <HStack
-          py={2}
+          py={{ base: 5, md: 10 }}
           justify="space-between"
           bgColor="#004CFC"
           w="full"
           borderTopRadius="12px"
-          px={{ base: 5, md: "10%" }}
+          px={{ base: 7, md: 10 }}
           bgImage={"/images/cloud-background.png"}
           bgSize="cover"
           bgPosition="center"
@@ -91,13 +91,14 @@ export const NewCreatorPageFormContent = () => {
             </Text>
           </Stack>
           <Image
-            src="/images/creator-nft.png"
+            src="/images/creator-nft-xl.png"
             alt="Apply for Creator's NFT"
-            alignSelf="end"
+            borderRadius={12}
+            alignSelf={{ base: "center", md: "bottom" }}
             objectFit="cover"
-            objectPosition="bottom"
-            w={{ base: 150, md: 180, lg: 200 }}
-            h={{ base: 150, md: 180, lg: 200 }}
+            objectPosition={{ base: "center", md: "bottom" }}
+            w={{ base: 90, md: 120, lg: 120 }}
+            h={{ base: 90, md: 120, lg: 120 }}
           />
         </HStack>
 
