@@ -7,10 +7,10 @@ import { useSubmitNewApp, useUploadAppMetadata } from "@/hooks"
 import { TransactionModal } from "@/components"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { useXApps } from "@/api"
 import { useRouter } from "next/navigation"
 import { PreviewAppCard } from "./PreviewAppCard"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { ethers } from "ethers"
 
 export const NewAppPageFormContent = () => {
   const router = useRouter()
@@ -33,8 +33,6 @@ export const NewAppPageFormContent = () => {
 
   const { errors } = formState
 
-  const { data: xApps } = useXApps()
-
   const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
 
   const { account } = useWallet()
@@ -53,13 +51,14 @@ export const NewAppPageFormContent = () => {
     onConfirmationClose()
   }, [onConfirmationClose])
 
-  const submittedAppId = useMemo(() => {
-    return xApps?.allApps.find(app => app.name.toLowerCase() === appData?.name.toLowerCase())?.id
-  }, [appData, xApps])
+  const appName = watch("name")
+  const appId = useMemo(() => {
+    return ethers.keccak256(ethers.toUtf8Bytes(appName))
+  }, [appName])
 
   const onVisitAppPage = useCallback(() => {
-    router.push(`/apps/${submittedAppId}`)
-  }, [router, submittedAppId])
+    router.push(`/apps/${appId}`)
+  }, [router, appId])
 
   const submitAppMutation = useSubmitNewApp({ onSuccess: handleSuccess })
 
@@ -140,12 +139,12 @@ export const NewAppPageFormContent = () => {
         <VStack position={"relative"} w={"full"} order={[1, 1, 2]}>
           <Image src="/images/blue-cloud-full.png" alt="Submit app success" />
           <Box w="full" h="full" position="absolute" display="flex" alignItems="center" justifyContent="center">
-            <PreviewAppCard name={appData?.name} logo={appData?.logo} banner={appData?.banner} appId={submittedAppId} />
+            <PreviewAppCard name={appData?.name} logo={appData?.logo} banner={appData?.banner} appId={appId} />
           </Box>
         </VStack>
       </Grid>
     )
-  }, [appData?.banner, appData?.logo, appData?.name, onVisitAppPage, submittedAppId, t])
+  }, [appData?.banner, appData?.logo, appData?.name, onVisitAppPage, appId, t])
 
   return (
     <>
