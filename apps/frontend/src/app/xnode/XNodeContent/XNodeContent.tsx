@@ -6,6 +6,7 @@ import { EndorsementHistoryList } from "./components/EndorsementHistoryList/Endo
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { useXNode } from "@/api"
+import { ConnectWithCreators } from "./components/ConnectWithCreators"
 
 export const XNodeContent = () => {
   const { isXNodeHolder, isXNodeLoading } = useXNode()
@@ -29,6 +30,7 @@ export const XNodeContent = () => {
         </Flex>
         <VStack flex={1.5} align={"stretch"}>
           <AttachGMNFTCard />
+          <ConnectWithCreators />
           <EndorsementHistoryList />
         </VStack>
       </Stack>
