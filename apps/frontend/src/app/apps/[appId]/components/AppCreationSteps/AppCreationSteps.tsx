@@ -5,9 +5,11 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 import { Trans, useTranslation } from "react-i18next"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { StepBoxes } from "./components/StepBoxes"
+import { useRouter } from "next/navigation"
 
 export const AppCreationSteps = () => {
   const { t } = useTranslation()
+  const router = useRouter()
 
   const { app } = useCurrentAppInfo()
   const { data: isAppUnendorsed, isLoading } = useIsAppUnendorsed(app?.id ?? "")
@@ -19,6 +21,11 @@ export const AppCreationSteps = () => {
     if (step === currentStep) return XAppsCreationStepStatus.ACTIVE
     return XAppsCreationStepStatus.PENDING
   }
+
+  const redirectToEditPage = () => {
+    router.push(`/apps/${app?.id}/edit`)
+  }
+
   return (
     <Box>
       <Card>
@@ -45,7 +52,7 @@ export const AppCreationSteps = () => {
               <Trans
                 i18nKey="You can fill the App information while waiting!"
                 components={{
-                  Link: <Link href={`${app?.id}/edit`} color="#004CFC" />,
+                  Link: <Link onClick={redirectToEditPage} color="#004CFC" />,
                 }}
               />
             </Text>
