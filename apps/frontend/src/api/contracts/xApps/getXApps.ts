@@ -2,10 +2,10 @@ import { getConfig } from "@repo/config"
 import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 import { abi } from "thor-devkit"
 const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
-const activeAppsFragment = X2EarnApps.createInterface().getFunction("apps").format("json")
 const unendorsedAppsFragment = X2EarnApps.createInterface().getFunction("unendorsedApps").format("json")
-const activeAppsAbi = new abi.Function(JSON.parse(activeAppsFragment))
 const unendorsedAppsAbi = new abi.Function(JSON.parse(unendorsedAppsFragment))
+const allAppsFragment = X2EarnApps.createInterface().getFunction("apps").format("json")
+const allAppsAbi = new abi.Function(JSON.parse(allAppsFragment))
 
 /**
  * xApp type
@@ -44,7 +44,7 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
     {
       to: X2EARNAPPS_CONTRACT,
       value: 0,
-      data: activeAppsAbi.encode(),
+      data: allAppsAbi.encode(),
     },
     {
       to: X2EARNAPPS_CONTRACT,
@@ -63,7 +63,7 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
   let unendorsedApps: UnendorsedApp[] = []
 
   if (res[0]?.data) {
-    const appsDecoded = activeAppsAbi.decode(res[0]?.data)[0]
+    const appsDecoded = allAppsAbi.decode(res[0]?.data)[0]
     if (appsDecoded.length) {
       apps = appsDecoded.map((app: any) => ({
         id: app[0],
@@ -89,8 +89,8 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
   }
 
   return {
-    active: apps,
+    allApps: apps,
     unendorsed: unendorsedApps,
-    allApps: [...apps, ...unendorsedApps],
+    active: apps.filter(app => !unendorsedApps.some(unendorsedApp => unendorsedApp.id === app.id)),
   }
 }
