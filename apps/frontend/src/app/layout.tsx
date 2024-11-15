@@ -52,7 +52,7 @@ datadogRum.init({
 const error = console.error
 console.error = (...args: any) => {
   if (/defaultProps/.test(args[0])) return
-  if (args[1]?.includes("data-new-gr-c-s-check-loaded,data-gr-ext-installed")) return
+  if (args?.[1]?.includes?.("data-new-gr-c-s-check-loaded,data-gr-ext-installed")) return
   error(...args)
 }
 
