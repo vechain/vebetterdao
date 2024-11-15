@@ -1,5 +1,5 @@
 import { XAppStatus } from "@/types"
-import { Box, HStack, Icon, Skeleton, Text } from "@chakra-ui/react"
+import { HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
 import { Trans, useTranslation } from "react-i18next"
 import { useXAppStatusConfig } from "../../hooks"
@@ -30,7 +30,7 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
   }
 
   return (
-    <Box w="full" p={padding} borderRadius="8px" backgroundColor={backgroundColor}>
+    <VStack flex="1" p={padding} borderRadius="8px" backgroundColor={backgroundColor}>
       <HStack w="full">
         <Icon as={icon} boxSize={6} color={color} />
         <Text fontSize="16px" fontWeight={600} color={color}>
@@ -44,6 +44,6 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
           </Text>
         </Skeleton>
       )}
-    </Box>
+    </VStack>
   )
 }

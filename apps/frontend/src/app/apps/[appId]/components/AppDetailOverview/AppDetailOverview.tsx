@@ -73,7 +73,8 @@ export const AppDetailOverview = ({
                     direction={["column", "column", "row"]}
                     justify={["stretch", "stretch", "space-between"]}
                     w="full"
-                    align={["stretch", "stretch", "center"]}>
+                    align={["stretch", "stretch", "center"]}
+                    gap={[4, 4, 0]}>
                     <HStack gap={4}>
                       <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
                         <Image src={logo ?? notFoundImage} alt={"logo"} boxSize={"64px"} borderRadius="16px" />
@@ -84,7 +85,7 @@ export const AppDetailOverview = ({
                         </Heading>
                       </Skeleton>
                     </HStack>
-                    <Skeleton isLoaded={!isEndorsementStatusLoading}>
+                    <Skeleton isLoaded={!isEndorsementStatusLoading} alignSelf={["flex-start", "flex-start", "center"]}>
                       <EndorsementStatusCallout
                         endorsementStatus={endorsementStatus}
                         showDescription={false}

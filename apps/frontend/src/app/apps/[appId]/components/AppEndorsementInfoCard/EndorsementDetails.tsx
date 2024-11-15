@@ -33,8 +33,8 @@ export const EndorsementDetails = ({
   const { color } = STATUS_CONFIG[endorsementStatus] ?? { color: "#6A6A6A" }
 
   return (
-    <HStack w="full" spacing={8}>
-      <VStack gap={0} alignItems="flex-start">
+    <HStack w="full" justify="space-between" gap={4}>
+      <VStack gap={0} alignItems="center">
         <Skeleton isLoaded={!isEndorsementStatusLoading}>
           <HStack spacing={1} alignItems="flex-end">
             <Text fontSize={"24px"} fontWeight="700" color={color}>
@@ -49,7 +49,7 @@ export const EndorsementDetails = ({
       </VStack>
 
       {isUserAppEndorser && (
-        <VStack gap={0} alignItems="flex-start">
+        <VStack gap={0} alignItems="center">
           <Skeleton isLoaded={!isXNodeLoading}>
             <Text fontSize={"24px"} fontWeight="700" color="#004CFC">
               {xNodePoints}
@@ -61,7 +61,7 @@ export const EndorsementDetails = ({
         </VStack>
       )}
 
-      <VStack gap={0} alignItems="flex-start">
+      <VStack gap={0} alignItems="center">
         <Skeleton isLoaded={!isAppEndorsersLoading}>
           <HStack>
             {endorsers && endorsers.length > 0 && <EndorsersIcon endorsers={endorsers} />}

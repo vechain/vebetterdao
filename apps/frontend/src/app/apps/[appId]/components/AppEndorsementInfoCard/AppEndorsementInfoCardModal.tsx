@@ -19,6 +19,7 @@ import {
   Show,
   Button,
   useDisclosure,
+  Flex,
 } from "@chakra-ui/react"
 import { useTranslation, Trans } from "react-i18next"
 import { useMemo, useState } from "react"
@@ -72,7 +73,15 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
         size: "6xl",
       }}>
       <VStack spacing={6} align="flex-start" w="full">
-        <Heading fontSize={"24px"}> {t("Endorsement history")}</Heading>
+        <HStack w="full" justify="space-between">
+          <Heading fontSize={"24px"}>{t("Endorsement history")}</Heading>
+          <Flex>
+            <EndorsementStatusCallout
+              endorsementStatus={endorsementStatus}
+              showDescription={false}
+              padding={2}></EndorsementStatusCallout>
+          </Flex>
+        </HStack>
 
         <Stack direction={["column", "column", "row"]} w={"full"} alignItems={"stretch"} spacing={5}>
           <VStack flex={1.5} h="full" maxH={["auto", "auto", "50vh"]} minH={["auto", "auto", "50vh"]} spacing={4}>
@@ -91,11 +100,6 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                 isXNodeLoading={isXNodeLoading}
                 endorsers={appEndorsers || []}
                 isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
-
-              <EndorsementStatusCallout
-                endorsementStatus={endorsementStatus}
-                showDescription={false}
-                padding={2}></EndorsementStatusCallout>
             </Stack>
 
             <Show below="md">
