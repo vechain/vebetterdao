@@ -25,6 +25,8 @@ import { SwitchEndorsementAppModal } from "@/app/apps/components/SwitchEndorseme
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 import { EndorsementDetails } from "./EndorsementDetails"
+import { buttonClickActions, buttonClicked, ButtonClickProperties, DISCORD_URL } from "@/constants"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
 type Props = {
   endorsementScore?: string
@@ -155,9 +157,17 @@ export const AppEndorsementInfoCard = ({
               )}
 
               {shouldRenderLookForEndorsersButton && (
-                <Button variant={lookForEndorsersButtonVariant} w="full">
-                  {t("Look for endorsers")}
-                </Button>
+                <Link
+                  href={DISCORD_URL}
+                  isExternal
+                  w={"full"}
+                  onClick={() =>
+                    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_DISCORD))
+                  }>
+                  <Button w={"full"} variant={lookForEndorsersButtonVariant}>
+                    {t("Look for endorsers")}
+                  </Button>
+                </Link>
               )}
 
               {isUserAppEndorser && (

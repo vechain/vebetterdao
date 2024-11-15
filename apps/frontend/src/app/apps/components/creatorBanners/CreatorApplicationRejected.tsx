@@ -52,7 +52,12 @@ export const CreatorApplicationRejected = () => {
               justify="center"
               w={{ base: "100%", md: "30%" }}
               alignSelf="center">
-              <Link href="#" fontSize="14px" fontWeight={600} color="#004CFC">
+              <Link
+                isExternal
+                href="https://support.vechain.org/support/home"
+                fontSize="14px"
+                fontWeight={600}
+                color="#004CFC">
                 {t("Contact support")}
               </Link>
               <Button
