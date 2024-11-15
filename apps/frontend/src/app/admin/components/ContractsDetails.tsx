@@ -86,6 +86,11 @@ export const ContractsDetails = () => {
         address={config.x2EarnCreatorContractAddress}
         roles={getContractByAddress(config.x2EarnCreatorContractAddress)?.roles}
       />
+      <ContractDetailsCard
+        title="NodeManagement"
+        address={config.nodeManagementContractAddress}
+        roles={getContractByAddress(config.nodeManagementContractAddress)?.roles}
+      />
     </Grid>
   )
 }
