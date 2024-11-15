@@ -37,13 +37,13 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        successTitle={t("Detach GM from XNode")}
+        successTitle={t("Detach GM from Node")}
         status={detachGMFromXNodeMutation.error ? "error" : detachGMFromXNodeMutation.status}
         errorDescription={detachGMFromXNodeMutation.error?.reason}
         errorTitle={detachGMFromXNodeMutation.error ? t("Error detaching") : undefined}
         showTryAgainButton
         onTryAgain={handleDetachment}
-        pendingTitle={t("Detaching GM from XNode...")}
+        pendingTitle={t("Detaching GM from Node...")}
         showExplorerButton
         txId={detachGMFromXNodeMutation.txReceipt?.meta.txID ?? detachGMFromXNodeMutation.sendTransactionTx?.txid}
       />
@@ -55,15 +55,15 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
       <CustomModalContent>
         <ModalCloseButton />
         <ModalHeader>
-          <Heading fontSize="lg">{t("Detach XNode from GM NFT")}</Heading>
+          <Heading fontSize="lg">{t("Detach Node from GM NFT")}</Heading>
         </ModalHeader>
         <ModalBody>
-          <Text>{t("Detaching your XNode will downgrade your GM level to the one it was before.")}</Text>
+          <Text>{t("Detaching your Node will downgrade your GM level to the one it was before.")}</Text>
         </ModalBody>
         <ModalFooter w="full">
           <VStack align="stretch" w="full">
             <Button variant={"primaryAction"} w={"full"} onClick={handleDetachment}>
-              {t("Detach my XNode")}
+              {t("Detach my Node")}
             </Button>
             <Button variant={"secondaryAction"} w={"full"} onClick={onClose}>
               {t("Maybe later")}

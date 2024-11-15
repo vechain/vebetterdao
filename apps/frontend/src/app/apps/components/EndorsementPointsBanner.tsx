@@ -28,10 +28,10 @@ export const EndorsementPointsBanner = () => {
   return (
     <Stack
       direction={["column", "column", "row"]}
-      spacing={2}
+      spacing={4}
       w="full"
       p="24px"
-      borderRadius={"24px"}
+      borderRadius={"16px"}
       bgGradient={"linear(to-r, #29295C,#4747A5)"}>
       <Image
         src={nodeToDisplay?.image}
@@ -52,7 +52,7 @@ export const EndorsementPointsBanner = () => {
         </Skeleton>
         <Skeleton isLoaded={!requiredPoints.isLoading}>
           <Text fontSize={"14px"} fontWeight={400} color="white">
-            {t("Help a project to reach {{value}} points and join the next allocations to get funding.", {
+            {t("Help a project to reach {{value}} points and join the next allocation round and secure funding.", {
               value: requiredPoints.data,
             })}
           </Text>

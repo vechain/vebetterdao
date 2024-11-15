@@ -65,21 +65,19 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
       }}>
       <CardBody py="16px" px="24px">
         <Stack direction={{ base: "column", md: "row" }} align="stretch" w="full" h="full">
-          <Stack direction="row" spacing={4} align="center">
+          <Stack direction="row" spacing={4} align="center" flex="1">
             <Skeleton isLoaded={!isLogoLoading}>
               <Image
                 src={logo?.image ?? notFoundImage}
                 alt="logo"
-                maxH="72px"
-                maxW="72px"
-                minW="48px"
-                minH="48px"
+                h="72px"
+                w="72px"
                 borderRadius="9px"
                 objectFit="contain"
               />
             </Skeleton>
 
-            <Stack w="full" maxW="100%" align="stretch" justify="center">
+            <Stack flex="1" align="stretch" justify="center">
               <Skeleton isLoaded={!appMetadataLoading}>
                 <Heading fontWeight={700} fontSize="20px" noOfLines={1}>
                   {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
@@ -101,12 +99,12 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
           </Show>
 
           {/* Right Section: Score */}
-          <Stack direction="row" w={{ base: "100%", md: "30%" }} align="center" justify="center">
+          <Stack direction="row" align="center" justify="center">
             <Stack
               direction={{ base: "row", md: "column" }}
               spacing={3}
-              align={{ base: "space-between", md: "center" }}
-              justify={{ base: "stretch", md: "center" }}
+              align={{ base: "center", md: "stretch" }}
+              justify={{ base: "space-between", md: "stretch" }}
               w="full">
               <VStack gap={0} alignItems="flex-start">
                 <Skeleton isLoaded={!isEndorsementStatusLoading}>

@@ -8,7 +8,7 @@ import {
 } from "@/api"
 import { TransactionModal } from "@/components"
 import { useEndorseApp } from "@/hooks"
-import { VStack, Heading, HStack, Box, Text, Button, Link, Skeleton, Icon } from "@chakra-ui/react"
+import { VStack, Heading, HStack, Box, Text, Button, Skeleton, Icon } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
 import { PropsEndorsement } from "./UnendorseAppModal"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -101,11 +101,8 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
           fontSize="sm">
           <Trans
             i18nKey={
-              "As an X-Node holder, your unique NFT score can be used to endorse a single app of your choice within the ecosystem. <Link>Know more</Link>"
+              "As a Node holder, your unique NFT score can be used to endorse a single app of your choice within the ecosystem."
             }
-            components={{
-              Link: <Link href="" color="#004CFC" textDecoration="underline" />,
-            }}
           />
         </Text>
 

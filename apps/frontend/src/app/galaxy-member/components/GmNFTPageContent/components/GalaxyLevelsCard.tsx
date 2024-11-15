@@ -77,7 +77,7 @@ export const GalaxyLevelsCard = () => {
               </HStack>
             )
           })}
-          {showShortened && (
+          {showShortened && gmNfts.slice(0, maxGmLevel).length > gmNftsShortened.length && (
             <Button variant={"primaryLink"} onClick={() => setShowShortened(false)} fontSize="lg">
               {t("See all levels")}
             </Button>

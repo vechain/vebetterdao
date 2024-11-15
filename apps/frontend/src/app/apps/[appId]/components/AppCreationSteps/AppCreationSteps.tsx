@@ -5,9 +5,11 @@ import { UilInfoCircle } from "@iconscout/react-unicons"
 import { Trans, useTranslation } from "react-i18next"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { StepBoxes } from "./components/StepBoxes"
+import { useRouter } from "next/navigation"
 
 export const AppCreationSteps = () => {
   const { t } = useTranslation()
+  const router = useRouter()
 
   const { app } = useCurrentAppInfo()
   const { data: isAppUnendorsed, isLoading } = useIsAppUnendorsed(app?.id ?? "")
@@ -18,6 +20,10 @@ export const AppCreationSteps = () => {
     if (step < currentStep) return XAppsCreationStepStatus.COMPLETED
     if (step === currentStep) return XAppsCreationStepStatus.ACTIVE
     return XAppsCreationStepStatus.PENDING
+  }
+
+  const redirectToEditPage = () => {
+    router.push(`/apps/${app?.id}/edit`)
   }
 
   return (
@@ -31,7 +37,12 @@ export const AppCreationSteps = () => {
               </HStack>
               <HStack w="full" justify="end" alignItems="center" display={{ base: "none", md: "flex" }}>
                 <Icon as={UilInfoCircle} color="rgba(0, 76, 252, 1)" />
-                <Link color="#004CFC">{t("Know more about Apps")}</Link>
+                <Link
+                  color="#004CFC"
+                  isExternal
+                  href={"https://docs.vebetterdao.org/developer-guides/submit-x2earn-app"}>
+                  {t("Know more about Apps")}
+                </Link>
               </HStack>
             </HStack>
             <Text fontSize="md" color="#6A6A6A">
@@ -41,14 +52,14 @@ export const AppCreationSteps = () => {
               <Trans
                 i18nKey="You can fill the App information while waiting!"
                 components={{
-                  Link: <Link href={`${app?.id}/edit`} color="#004CFC" />,
+                  Link: <Link onClick={redirectToEditPage} color="#004CFC" />,
                 }}
               />
             </Text>
 
             <Box w="full" maxW={"100%"} overflowX="auto">
               <Skeleton isLoaded={!isLoading}>
-                <Grid gridTemplateColumns="repeat(3,  1fr)" gap={4} w="full">
+                <Grid gridTemplateColumns={["repeat(1,  1fr)", "repeat(3,  1fr)"]} gap={4} w="full">
                   <StepBoxes
                     stepText={t("STEP {{value}}", { value: XAppsCreationSteps.SUBMISSION + 1 })}
                     title={t("App submission")}

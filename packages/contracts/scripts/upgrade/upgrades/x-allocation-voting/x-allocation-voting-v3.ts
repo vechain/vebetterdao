@@ -15,12 +15,12 @@ async function main() {
   )
 
   const xAllocationVotingV2 = (await upgradeProxy(
-    "XAllocationVotingV1",
+    "XAllocationVotingV2",
     "XAllocationVoting",
     config.xAllocationVotingContractAddress,
     [],
     {
-      version: 2,
+      version: 3,
     },
   )) as XAllocationVoting
 
@@ -30,8 +30,8 @@ async function main() {
   const version = await xAllocationVotingV2.version()
   console.log(`New XAllocationVoting version: ${version}`)
 
-  if (parseInt(version) !== 2) {
-    throw new Error(`XAllocationVoting version is not 2: ${version}`)
+  if (parseInt(version) !== 3) {
+    throw new Error(`XAllocationVoting version is not 3: ${version}`)
   }
 
   console.log("Execution completed")

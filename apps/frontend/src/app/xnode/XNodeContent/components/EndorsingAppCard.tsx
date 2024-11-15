@@ -70,7 +70,7 @@ export const EndorsingAppCard = () => {
             {isEndorsingApp && (
               <Text fontSize="sm">
                 {t(
-                  "As the owner of an XNode, you can use your points to endorse apps and help them be voted in allocation rounds.",
+                  "As the owner of an Node, you can use your points to endorse apps and help them be voted in allocation rounds.",
                 )}
               </Text>
             )}
@@ -78,66 +78,61 @@ export const EndorsingAppCard = () => {
           {isEndorsingApp ? (
             <Card variant={"baseWithBorder"} p={4} rounded="lg">
               <VStack align="stretch" spacing={6}>
-                <HStack w="full" spacing={4}>
-                  <Image src={endorsedApp?.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
+                <Stack direction={["column", "column", "row"]} justify="space-between">
+                  <HStack>
+                    <Image src={endorsedApp?.logo} alt="endorsed-app" w="12" h="12" rounded="xl" />
+                    <Heading fontSize="lg" fontWeight={"600"}>
+                      {endorsedApp?.name}
+                    </Heading>
+                  </HStack>
+                  <Flex alignSelf={["flex-start", "flex-start", "center"]}>
+                    <EndorsementStatusCallout
+                      endorsementStatus={endorsementStatus}
+                      showDescription={false}
+                      padding={2}
+                    />
+                  </Flex>
                   <Stack
-                    direction={["column", "column", "row"]}
-                    alignItems={["flex-start", "flex-start", "center"]}
-                    justifyContent={["flex-start", "flex-start", "space-between"]}
-                    spacing={2}
-                    w="full">
-                    <VStack alignItems="flex-start" spacing={2}>
-                      <EndorsementStatusCallout
-                        endorsementStatus={endorsementStatus}
-                        showDescription={false}
-                        padding={2}
-                      />
-                      <Heading fontSize="lg" fontWeight={"600"}>
-                        {endorsedApp?.name}
-                      </Heading>
-                    </VStack>
-                    <Stack
-                      direction={["row", "row", "column"]}
-                      alignItems={["flex-start", "flex-start", "flex-end"]}
-                      justifyContent={["flex-start", "flex-start", "flex-end"]}
-                      gap={0}>
-                      <Text
-                        fontSize={["xs", "xs", "md"]}
-                        color={["#6A6A6A", "#6A6A6A", "inherit"]}
-                        order={[1, 1, 2]} // Change order for large viewports
-                      >
-                        {endorsingSince}
-                      </Text>
-                      <Text
-                        fontSize="xs"
-                        color="#6A6A6A"
-                        order={[0, 0, 1]} // Change order for large viewports
-                        pr={[1, 2, 0]} // Change padding for large viewports
-                      >
-                        {t("Endorsing since")}
-                      </Text>
-                    </Stack>
+                    direction={["row", "row", "column"]}
+                    alignItems={["flex-start", "flex-start", "flex-end"]}
+                    justifyContent={["flex-start", "flex-start", "flex-end"]}
+                    gap={0}>
+                    <Text
+                      fontSize={["xs", "xs", "md"]}
+                      color={["#6A6A6A", "#6A6A6A", "inherit"]}
+                      order={[1, 1, 2]} // Change order for large viewports
+                    >
+                      {endorsingSince}
+                    </Text>
+                    <Text
+                      fontSize="xs"
+                      color="#6A6A6A"
+                      order={[0, 0, 1]} // Change order for large viewports
+                      pr={[1, 2, 0]} // Change padding for large viewports
+                    >
+                      {t("Endorsing since")}
+                    </Text>
                   </Stack>
-                </HStack>
-
+                </Stack>
                 <Divider />
-
                 <Stack
                   direction={["column", "column", "row"]}
                   alignItems={["flex-start", "flex-start", "center"]}
                   justifyContent={["flex-start", "flex-start", "space-between"]}
                   spacing={4}
                   w="full">
-                  <EndorsementDetails
-                    endorsementScore={endorsementScore}
-                    endorsementStatus={endorsementStatus}
-                    endorsementThreshold={endorsementThreshold}
-                    isEndorsementStatusLoading={isEndorsementStatusLoading}
-                    xNodePoints={xNodePoints}
-                    isUserAppEndorser={true}
-                    isXNodeLoading={isXNodeLoading}
-                    endorsers={appEndorsers || []}
-                    isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
+                  <Flex>
+                    <EndorsementDetails
+                      endorsementScore={endorsementScore}
+                      endorsementStatus={endorsementStatus}
+                      endorsementThreshold={endorsementThreshold}
+                      isEndorsementStatusLoading={isEndorsementStatusLoading}
+                      xNodePoints={xNodePoints}
+                      isUserAppEndorser={true}
+                      isXNodeLoading={isXNodeLoading}
+                      endorsers={appEndorsers || []}
+                      isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
+                  </Flex>
                   <Button variant="dangerGhost" onClick={unendorseAppModal.onOpen} w={["full", "full", "auto"]}>
                     {t("Remove endorsement")}
                   </Button>

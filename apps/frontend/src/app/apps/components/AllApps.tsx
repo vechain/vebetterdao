@@ -26,13 +26,13 @@ export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXA
   const displayApps = useMemo(() => {
     switch (filter) {
       case FILTER_ACTIVE_APPS:
-        return activeApps
+        return [...activeApps, ...gracePeriodApps]
       case FILTER_GRACE_PERIOD:
         return gracePeriodApps
       case FILTER_ENDORSEMENT_LOST:
         return lostEndorsementApps
       default:
-        return [...activeApps, ...lostEndorsementApps]
+        return [...activeApps, ...gracePeriodApps, ...lostEndorsementApps]
     }
   }, [filter, activeApps, gracePeriodApps, lostEndorsementApps])
 

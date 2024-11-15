@@ -56,8 +56,7 @@ const determineAppStatus = (
     if (isEligibleNow) {
       return XAppStatus.ENDORSED_AND_ELIGIBLE
     }
-    return XAppStatus.ENDORSED_NOT_ELIGIBLE
-  } // CHECK not sure if it is possible to differentiate between the two cases above
+  }
 
   return XAppStatus.UNKNOWN
 }
