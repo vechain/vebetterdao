@@ -59,7 +59,7 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
       </CardHeader>
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-          {slicedXApps?.map(xApp => <DashboardXAppCard key={xApp.id} xApp={xApp.app} />)}
+          {slicedXApps?.map((xApp, index) => <DashboardXAppCard key={index} xApp={xApp.app} />)}
         </Grid>
       </CardBody>
     </Card>

@@ -29,7 +29,7 @@ export const getRoundXApps = async (thor: Connex.Thor, roundId?: string): Promis
   }))
 }
 
-export const getRoundXAppsQueryKey = (roundId?: string) => ["round", roundId, "xApps"]
+export const getRoundXAppsQueryKey = (roundId?: string) => ["round", roundId, "getXApps"]
 
 /**
  *  Hook to get all the available xApps (apps that can be voted on for allocation)
