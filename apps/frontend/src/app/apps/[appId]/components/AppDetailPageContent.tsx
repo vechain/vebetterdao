@@ -64,7 +64,6 @@ export const AppDetailPageContent = () => {
               endorsementStatus={endorsementStatus}
               endorsementThreshold={endorsementThreshold}
               isEndorsementStatusLoading={isEndorsementStatusLoading}
-              isLargeCard
             />
           )}
           <AppScreenshots />
