@@ -1,8 +1,10 @@
 import { XAppStatus } from "@/types"
 import { Box, HStack, Icon, Text } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
+import { Trans, useTranslation } from "react-i18next"
 import { useXAppStatusConfig } from "../../hooks"
-import { useTranslation } from "react-i18next"
+import { useAppGracePeriodEndsAfterRound } from "@/api"
+import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 
 type Props = {
   endorsementStatus: XAppStatus
@@ -13,6 +15,11 @@ type Props = {
 export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = true, padding = 4 }: Props) => {
   const STATUS_CONFIG = useXAppStatusConfig()
   const { t } = useTranslation()
+
+  const { app } = useCurrentAppInfo()
+  const { roundId, isLoading, isCurrentRound, isNextRound } = useAppGracePeriodEndsAfterRound(app?.id ?? "")
+
+  const roundReference = isCurrentRound ? "current round" : isNextRound ? "next round" : `round ${roundId}`
 
   const { title, description, backgroundColor, color, icon } = STATUS_CONFIG[endorsementStatus] ?? {
     title: t("Endorsement coming soon"),
@@ -32,7 +39,7 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
       </HStack>
       {showDescription && (
         <Text fontSize="14px" color="#6A6A6A">
-          {description}
+          <Trans i18nKey={description as any} values={{ roundReference }} t={t} />
         </Text>
       )}
     </Box>

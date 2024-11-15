@@ -49,10 +49,9 @@ export const AppDetailOverview = ({
 
   return (
     <VStack spacing={4} align="stretch">
-      {endorsementStatus !== XAppStatus.ENDORSED_NOT_ELIGIBLE &&
-        endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE && (
-          <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
-        )}
+      {endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE && (
+        <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
+      )}
       <Card variant="baseWithBorder">
         <CardBody>
           <VStack align="stretch" gap={4}>
