@@ -4,12 +4,10 @@ import { Text, HStack, VStack, Box, Popover, PopoverContent, PopoverTrigger, Pop
 import { Trans, useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { normalize } from "@repo/utils/HexUtils"
-
 import { useWallet } from "@vechain/dapp-kit-react"
-
 import { HiDotsVertical } from "react-icons/hi"
 import { UilTrash, UilCheck } from "@iconscout/react-unicons"
+import { useIsAppAdmin } from "@/api"
 
 type EndorsementInfoProps = {
   appId: string
@@ -18,16 +16,19 @@ type EndorsementInfoProps = {
 }
 
 export const EndorsementInfo = ({ appId, endorserAddress, setIsConfirmOpen }: EndorsementInfoProps) => {
-  const endorsementInfos = useEndorsementInfos(appId, endorserAddress)
-  const { account } = useWallet()
-  const router = useRouter()
   const { t } = useTranslation()
+  const router = useRouter()
+
+  const { account } = useWallet()
+  const { data: isAppAdmin } = useIsAppAdmin(appId, account ?? "")
+
+  const endorsementInfos = useEndorsementInfos(appId, endorserAddress)
 
   const handleRemoveClick = () => {
     setIsConfirmOpen(true)
   }
 
-  const goToUserProfilPage = () => {
+  const goToEndorserUserProfilePage = () => {
     router.push("/profile/" + endorserAddress)
   }
 
@@ -69,7 +70,7 @@ export const EndorsementInfo = ({ appId, endorserAddress, setIsConfirmOpen }: En
           <PopoverContent width="auto" boxShadow="md" border="1px solid #EFEFEF">
             <PopoverBody p={2}>
               <VStack alignItems="stretch" spacing={3}>
-                {account && endorserAddress === normalize(account) && (
+                {isAppAdmin && (
                   <HStack color="#C84968" onClick={handleRemoveClick} cursor="pointer">
                     <UilTrash />
                     <Text whiteSpace="nowrap" fontSize={["sm", "md"]}>
@@ -77,8 +78,7 @@ export const EndorsementInfo = ({ appId, endorserAddress, setIsConfirmOpen }: En
                     </Text>
                   </HStack>
                 )}
-                {/* TODO : find where it goes ?  */}
-                <HStack onClick={goToUserProfilPage} cursor="pointer">
+                <HStack onClick={goToEndorserUserProfilePage} cursor="pointer">
                   <UilCheck color={"#004CFC"} />
                   <Text fontSize={["sm", "md"]}>{t("See endorser info")}</Text>
                 </HStack>
