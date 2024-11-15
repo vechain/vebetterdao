@@ -317,7 +317,12 @@ export async function deployAll(config: ContractsConfig) {
           treasury: await treasury.getAddress(),
         },
       ],
-      [await vechainNodesMock.getAddress(), TEMP_ADMIN, config.GM_NFT_NODE_TO_FREE_LEVEL],
+      [
+        await vechainNodesMock.getAddress(),
+        await nodeManagement.getAddress(),
+        TEMP_ADMIN,
+        config.GM_NFT_NODE_TO_FREE_LEVEL,
+      ],
     ],
     {
       versions: [undefined, 2],

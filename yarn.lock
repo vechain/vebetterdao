@@ -6776,10 +6776,10 @@
     randombytes "^2.1.0"
     thor-devkit "^2.0.5"
 
-"@vechain/dapp-kit-react@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-1.1.0.tgz#0f008faee56a551375253962e8d946c70fc3c210"
-  integrity sha512-gH8GjFNkFuNyFhDwPXJ25nH9YhEsDbYKmhSXDoZsAR833jk6nBg+s5w1OS1Jrwm/h/y/5RcB70TZ6WyBQXQjwQ==
+"@vechain/dapp-kit-react@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit-react/-/dapp-kit-react-1.1.1.tgz#2cf31e003e310beabede8c6d98c8a974a82317d1"
+  integrity sha512-j0/Zvr8jmreZ1OoCA8PoK2dR88SknTZreYA/5SgkTUycUXabItRtBxnxDUvt3t7X+s+BrkRTLBUbXws087kNYA==
   dependencies:
     "@lit/react" "^1.0.1"
     "@vechain/connex" "2.1.0"
