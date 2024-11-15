@@ -32,7 +32,7 @@ export const useAppGracePeriodEndsAfterRound = (appId: string) => {
 
   // Early return if essential data is missing or still loading
   if (
-    !EMISSIONS_CYCLE_DURATION ||
+    isNaN(EMISSIONS_CYCLE_DURATION) ||
     isNaN(gracePeriodEndingBlockNum) ||
     isNaN(currentRoundEndingBlockNum) ||
     isNaN(currentRoundIdNum) ||

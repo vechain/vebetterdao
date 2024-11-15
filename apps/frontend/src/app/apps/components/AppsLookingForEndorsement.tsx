@@ -1,7 +1,6 @@
 import React, { useRef } from "react"
 import { VStack, HStack, Heading, Text, IconButton, Hide, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { UilInfoCircle } from "@iconscout/react-unicons"
 import { UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
@@ -52,7 +51,6 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
           <Heading size="lg">{t("New apps looking for endorsement")}</Heading>
           <Text color="#6a6a6a">{t("These apps need to get enough endorsement score to become active")}</Text>
         </VStack>
-        <UilInfoCircle color={"#004CFC"} />
       </HStack>
       <Swiper
         modules={[A11y]}
