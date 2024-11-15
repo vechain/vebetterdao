@@ -35,7 +35,7 @@ export const AppCardOptionsDesktopMenu = ({
   const handleOnCopy = () => {
     onCopy()
     toast({
-      title: t("Team wallet address copied"),
+      title: t("Treasury address copied"),
       status: "success",
       duration: 3000,
       isClosable: true,

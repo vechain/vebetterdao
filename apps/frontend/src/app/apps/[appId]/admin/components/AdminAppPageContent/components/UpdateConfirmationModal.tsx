@@ -77,7 +77,7 @@ export const UpdateConfirmationModal = ({
             {isTeamWalletAddressChanged && (
               <VStack align="stretch" gap={4} alignSelf={"stretch"}>
                 <VStack align="stretch">
-                  <Text fontWeight={600}>{t("Team wallet address")}</Text>
+                  <Text fontWeight={600}>{t("Treasury address")}</Text>
                   <HStack>
                     <Text fontSize={"14px"} textDecorationLine={"line-through"} color={"#979797"}>
                       {oldTeamWalletAddress}

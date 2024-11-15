@@ -19,7 +19,6 @@ export const AppCreationSteps = () => {
     if (step === currentStep) return XAppsCreationStepStatus.ACTIVE
     return XAppsCreationStepStatus.PENDING
   }
-
   return (
     <Box>
       <Card>
@@ -48,7 +47,7 @@ export const AppCreationSteps = () => {
 
             <Box w="full" maxW={"100%"} overflowX="auto">
               <Skeleton isLoaded={!isLoading}>
-                <Grid gridTemplateColumns="repeat(3,  1fr)" gap={4} w="full">
+                <Grid gridTemplateColumns={["repeat(1,  1fr)", "repeat(3,  1fr)"]} gap={4} w="full">
                   <StepBoxes
                     stepText={t("STEP {{value}}", { value: XAppsCreationSteps.SUBMISSION + 1 })}
                     title={t("App submission")}

@@ -44,7 +44,7 @@ export const AppCardOptionsMobileModal = ({
     onCopy()
     onClose()
     toast({
-      title: "Team wallet address copied",
+      title: "Treasury address copied",
       status: "success",
       duration: 3000,
       isClosable: true,
