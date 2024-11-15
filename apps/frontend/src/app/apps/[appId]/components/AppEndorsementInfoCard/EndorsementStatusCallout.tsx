@@ -2,6 +2,7 @@ import { XAppStatus } from "@/types"
 import { Box, HStack, Icon, Text } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
 import { useXAppStatusConfig } from "../../hooks"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   endorsementStatus: XAppStatus
@@ -11,10 +12,11 @@ type Props = {
 
 export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = true, padding = 4 }: Props) => {
   const STATUS_CONFIG = useXAppStatusConfig()
+  const { t } = useTranslation()
 
   const { title, description, backgroundColor, color, icon } = STATUS_CONFIG[endorsementStatus] ?? {
-    title: "Unknown status",
-    description: "The endorsement status of this app is unknown.",
+    title: t("Endorsement coming soon"),
+    description: t("Endorsement details available from next round."),
     backgroundColor: "#F8F8F8",
     color: "#6A6A6A",
     icon: UilExclamationCircle,

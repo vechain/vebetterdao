@@ -105,8 +105,8 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
             <Stack
               direction={{ base: "row", md: "column" }}
               spacing={3}
-              align={{ base: "space-between", md: "center" }}
-              justify={{ base: "stretch", md: "center" }}
+              align={{ base: "center", md: "stretch" }}
+              justify={{ base: "space-between", md: "stretch" }}
               w="full">
               <VStack gap={0} alignItems="flex-start">
                 <Skeleton isLoaded={!isEndorsementStatusLoading}>
