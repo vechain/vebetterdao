@@ -72,7 +72,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
         size: "6xl",
       }}>
       <VStack spacing={6} align="flex-start" w="full">
-        <Heading fontSize={"24px"}> {t("X-Node Endorsement")}</Heading>
+        <Heading fontSize={"24px"}> {t("Endorsement history")}</Heading>
 
         <Stack direction={["column", "column", "row"]} w={"full"} alignItems={"stretch"} spacing={5}>
           <VStack flex={1.5} h="full" maxH={["auto", "auto", "50vh"]} minH={["auto", "auto", "50vh"]} spacing={4}>
