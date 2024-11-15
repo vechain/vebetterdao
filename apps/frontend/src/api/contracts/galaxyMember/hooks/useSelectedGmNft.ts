@@ -82,7 +82,7 @@ export const useSelectedGmNft = () => {
   } = useIpfsMetadata<NFTMetadata>(metadataURI)
 
   const {
-    data: gmImage,
+    data: gmNftImage,
     isLoading: isLoadingImageData,
     isError: isErrorImageData,
     error: errorImageData,
@@ -102,6 +102,9 @@ export const useSelectedGmNft = () => {
     error: errorMaxGmLevel,
   } = useGMMaxLevel()
 
+  // INFO: workaround to get the NFT image and token ID
+  const { imageData, tokenID, isLoading: isLoadingNFT } = useNFTImage()
+
   const isLoading =
     isGMLoading ||
     isSelectedTokenIdLoading ||
@@ -113,7 +116,8 @@ export const useSelectedGmNft = () => {
     isB3trToUpgradeGMToNextLevelLoading ||
     isNextLevelGMRewardMultiplierLoading ||
     isLoadingAttachedNodeId ||
-    isLoadingMaxGmLevel
+    isLoadingMaxGmLevel ||
+    isLoadingNFT
   const isError =
     isErrorSelectedTokenId ||
     isErrorMetadataUri ||
@@ -145,11 +149,14 @@ export const useSelectedGmNft = () => {
 
   const isMaxGmLevelReached = !!maxGmLevel && !!gmLevel && Number(gmLevel) === Number(maxGmLevel)
 
+  // TODO: workaround to let it work until we enable upgradable gm nft
+  const gmImage = gmNftImage?.image || imageData?.image || gmNfts[Number(gmLevel) - 1]?.image || notFoundImage
   const nftName = nftMetadata?.name || gmNfts[Number(gmLevel) - 1]?.name
-  const gmName = `${nftName} #${selectedTokenId}`
+  const gmName = `${nftName} #${tokenID}`
+
   return {
     gmId: selectedTokenId,
-    gmImage: gmImage?.image || gmNfts[Number(gmLevel) - 1]?.image || notFoundImage,
+    gmImage,
     gmName,
     gmLevel,
     gmRewardMultiplier,
