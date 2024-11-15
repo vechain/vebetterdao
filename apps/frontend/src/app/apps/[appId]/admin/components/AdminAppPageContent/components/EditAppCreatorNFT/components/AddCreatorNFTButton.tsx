@@ -26,18 +26,19 @@ type Props = {
   editAdminForm: UseFormReturn<AdminAppForm>
 }
 
-export const AddModeratorButton = ({ editAdminForm }: Props) => {
+export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
   const { t } = useTranslation()
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const addressForm = useForm<{ moderatorAddress: string }>()
+  const addressForm = useForm<{ creatorAddress: string }>()
   const {
     formState: { errors },
   } = addressForm
-  const { domain } = useVechainDomain({ addressOrDomain: addressForm.watch("moderatorAddress") })
+
+  const { domain } = useVechainDomain({ addressOrDomain: addressForm.watch("creatorAddress") })
 
   const onSubmit = useCallback(
-    (data: { moderatorAddress: string }) => {
-      editAdminForm.setValue("moderators", [...editAdminForm.getValues("moderators"), data.moderatorAddress])
+    (data: { creatorAddress: string }) => {
+      editAdminForm.setValue("creators", [...editAdminForm.getValues("creators"), data.creatorAddress])
       addressForm.reset()
       onClose()
     },
@@ -58,7 +59,7 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
           <ModalBody p={"40px"}>
             <VStack align="stretch" gap="32px">
               <UilUser size="54px" color="#004CFC" />
-              <Heading fontSize="28px">{t("Add a new moderator")}</Heading>
+              <Heading fontSize="28px">{t("Add a new Creator NFT")}</Heading>
               <VStack align="stretch">
                 <HStack justify={"space-between"}>
                   <Text fontSize="14px">{t("User wallet address")}</Text>
@@ -69,9 +70,9 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
                     </Text>
                   )}
                 </HStack>
-                <FormControl isInvalid={!!errors.moderatorAddress}>
+                <FormControl isInvalid={!!errors.creatorAddress}>
                   <Input
-                    {...addressForm.register("moderatorAddress", {
+                    {...addressForm.register("creatorAddress", {
                       required: {
                         value: true,
                         message: t("Address required"),
@@ -79,19 +80,18 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
                       validate: {
                         validAddress: value => isValid(value) || t("Invalid address"),
                         alreadyPresent: value =>
-                          !editAdminForm
-                            .getValues("moderators")
-                            .some(moderator => compareAddresses(moderator, value)) || t("Moderator already present"),
+                          !editAdminForm.getValues("creators").some(creator => compareAddresses(creator, value)) ||
+                          t("Creator NFT already present"),
                       },
                     })}></Input>
-                  <FormErrorMessage>{errors.moderatorAddress?.message}</FormErrorMessage>
+                  <FormErrorMessage>{errors.creatorAddress?.message}</FormErrorMessage>
                 </FormControl>
               </VStack>
               <VStack align="stretch">
                 <Button variant="primaryAction" type="submit" onClick={addressForm.handleSubmit(onSubmit)}>
-                  {t("Add moderator")}
+                  {t("Add creator")}
                 </Button>
-                <Button variant="primaryGhost" onClick={onClose}>
+                <Button variant="primaryGhost" onClick={handleClose}>
                   {t("Cancel")}
                 </Button>
               </VStack>
@@ -103,10 +103,10 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
         mt={4}
         onClick={onOpen}
         variant="primarySubtle"
-        isDisabled={editAdminForm.getValues("moderators").length >= 3}
         leftIcon={<UilPlus size="14px" />}
+        isDisabled={editAdminForm.getValues("creators").length >= 3}
         alignSelf={"flex-start"}>
-        {editAdminForm.getValues("moderators").length >= 3 ? t("Max 3 moderators") : t("Add moderator")}
+        {editAdminForm.getValues("creators").length >= 3 ? t("Max 3 creators") : t("Add a new Creator NFT")}
       </Button>
     </>
   )

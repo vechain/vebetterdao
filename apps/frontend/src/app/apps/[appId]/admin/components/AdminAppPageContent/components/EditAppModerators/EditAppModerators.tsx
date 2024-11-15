@@ -29,9 +29,11 @@ export const EditAppModerators = ({ form }: Props) => {
       </Heading>
       <Text color="#6A6A6A">
         {moderators?.length
-          ? t("These users will be able to update app information and feed news.")
+          ? t(
+              "These users will be able to manage the information in the feed and update the visual data on the profile.",
+            )
           : t(
-              "Your app's page doesn't have moderators yet. Add someone to assist you in handling the information on the page and the feed.",
+              "These users will be able to manage the information in the feed and update the visual data on the profile.",
             )}
       </Text>
       <VStack align="stretch" spacing={4} my={4} gap={4}>
