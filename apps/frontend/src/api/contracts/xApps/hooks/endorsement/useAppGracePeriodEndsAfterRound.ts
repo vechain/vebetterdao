@@ -1,5 +1,9 @@
-import { useCurrentAllocationsRoundDeadline, useCurrentAllocationsRoundId, useGracePeriodEvent } from "@/api"
-import { getConfig, getContractsConfig } from "@repo/config"
+import {
+  useCurrentAllocationsRoundDeadline,
+  useCurrentAllocationsRoundId,
+  useGracePeriodEvent,
+  useVotingPeriod,
+} from "@/api"
 
 /**
  * This hook calculates the allocation round by which an app's grace period will end.
@@ -9,9 +13,8 @@ import { getConfig, getContractsConfig } from "@repo/config"
  */
 export const useAppGracePeriodEndsAfterRound = (appId: string) => {
   // Retrieve environment and contract configuration
-  const config = getConfig()
-  const env = config?.environment
-  const EMISSIONS_CYCLE_DURATION = env ? getContractsConfig(env)?.EMISSIONS_CYCLE_DURATION : undefined
+  const { data: votingPeriod, isLoading: isVotingPeriodLoading } = useVotingPeriod()
+  const EMISSIONS_CYCLE_DURATION = Number(votingPeriod)
 
   // Load necessary data for determining grace period and round information
   const { data: gracePeriodEvents, isLoading: gracePeriodEventsLoading } = useGracePeriodEvent(appId)
@@ -24,14 +27,8 @@ export const useAppGracePeriodEndsAfterRound = (appId: string) => {
   const currentRoundIdNum = Number(currentRoundId)
 
   // Determine if the hook is in a loading state
-  const isLoading = gracePeriodEventsLoading || currentRoundDeadlineLoading || currentRoundIdLoading
-  console.log({
-    EMISSIONS_CYCLE_DURATION,
-    gracePeriodEndingBlockNum,
-    currentRoundEndingBlockNum,
-    currentRoundIdNum,
-    isLoading,
-  })
+  const isLoading =
+    gracePeriodEventsLoading || currentRoundDeadlineLoading || currentRoundIdLoading || isVotingPeriodLoading
 
   // Early return if essential data is missing or still loading
   if (
