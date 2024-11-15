@@ -28,7 +28,7 @@ export const TeamWalletAddress = ({ teamWalletAddress }: { teamWalletAddress: st
           <Flex w={"fit-content"} justifyContent={"center"} mt={1}>
             <HStack alignSelf={"center"} w={"fit-content"}>
               <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A" w={"full"}>
-                {t("Team wallet address")}
+                {t("Treasury address")}
               </Text>
               <FiInfo color="rgba(0, 76, 252, 1)" size={14} />
             </HStack>

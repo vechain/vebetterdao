@@ -16,13 +16,16 @@ export const FilterAppsTypeButton = ({ filterType, currentFilter, setFilter }: P
       w="auto"
       h="auto"
       minW={"auto"}
-      variant="ghost"
       onClick={() => setFilter(filterType)}
       borderRadius={"24px"}
       px={"24px"}
       py="16px"
       bg={isActive ? "black" : "transparent"}
-      color={isActive ? "white" : "black"}>
+      color={isActive ? "white" : "black"}
+      _hover={{
+        opacity: "0.6",
+        transition: "all 0.3s",
+      }}>
       <HStack spacing={2}>
         <Heading fontWeight={isActive ? 700 : 500} fontSize={"20px"}>
           {t("{{value}}", { value: filterType })}

@@ -19,6 +19,10 @@ const selectDeployConfigs: Record<string, SelectDeploy> = {
     name: "x2-earn-creator",
     description: "Deploy only this contract",
   },
+  "Node Management": {
+    name: "node-management",
+    description: "Deploy only this contract",
+  },
 } as const
 
 async function upgradeContract() {

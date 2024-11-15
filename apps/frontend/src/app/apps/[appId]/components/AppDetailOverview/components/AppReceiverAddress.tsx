@@ -22,7 +22,7 @@ export const AppReceiverAddress = () => {
   return (
     <VStack align={"stretch"}>
       <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
-        {t("Team wallet address")}
+        {t("Treasury address")}
       </Text>
       <HStack>
         {showCopiedLink ? (

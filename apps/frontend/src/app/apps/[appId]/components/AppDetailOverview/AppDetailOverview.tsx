@@ -24,7 +24,6 @@ import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
 import { AdminAppPageButton } from "./components/AdminAppPageButton"
 import { AppDetailAllocationInfo } from "./components/AppDetailAllocationInfo"
 import { AppDetailSocials } from "./components/AppDetailSocials"
-import { AppID } from "./components/AppID"
 import { AppReceiverAddress } from "./components/AppReceiverAddress"
 import { EditAppPageButton } from "./components/EditAppPageButton"
 import { EndorsementStatusCallout } from "../AppEndorsementInfoCard/EndorsementStatusCallout"
@@ -49,7 +48,7 @@ export const AppDetailOverview = ({
   }, [appMetadata?.external_url])
 
   return (
-    <VStack spacing={4}>
+    <VStack spacing={4} align="stretch">
       {endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE && (
         <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
       )}
@@ -70,23 +69,28 @@ export const AppDetailOverview = ({
             <Flex gap="48px" flexDir={["column", "column", "row"]} w="full">
               <VStack alignItems={"stretch"} flex={3} justify={"space-between"} gap={8} w="full">
                 <HStack justify={"space-between"} flexWrap={"wrap"}>
-                  <HStack gap={4}>
-                    <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
-                      <Image src={logo ?? notFoundImage} alt={"logo"} boxSize={"64px"} borderRadius="16px" />
-                    </Skeleton>
-
-                    <Skeleton isLoaded={!appMetadataLoading && !isEndorsementStatusLoading}>
-                      <Stack flexDir={["column-reverse", "column-reverse", "column"]}>
-                        <EndorsementStatusCallout
-                          endorsementStatus={endorsementStatus}
-                          showDescription={false}
-                          padding={2}></EndorsementStatusCallout>
+                  <Stack
+                    direction={["column", "column", "row"]}
+                    justify={["stretch", "stretch", "space-between"]}
+                    w="full"
+                    align={["stretch", "stretch", "center"]}>
+                    <HStack gap={4}>
+                      <Skeleton isLoaded={!isLogoLoading} alignContent={"start"}>
+                        <Image src={logo ?? notFoundImage} alt={"logo"} boxSize={"64px"} borderRadius="16px" />
+                      </Skeleton>
+                      <Skeleton isLoaded={!appMetadataLoading}>
                         <Heading fontSize={"28px"} fontWeight={700}>
                           {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                         </Heading>
-                      </Stack>
+                      </Skeleton>
+                    </HStack>
+                    <Skeleton isLoaded={!isEndorsementStatusLoading}>
+                      <EndorsementStatusCallout
+                        endorsementStatus={endorsementStatus}
+                        showDescription={false}
+                        padding={2}></EndorsementStatusCallout>
                     </Skeleton>
-                  </HStack>
+                  </Stack>
                   <AppDetailSocials socialUrls={appMetadata?.social_urls || []} />
                 </HStack>
                 <Skeleton isLoaded={!appMetadataLoading}>
@@ -104,18 +108,16 @@ export const AppDetailOverview = ({
                     <Show below="md">
                       <Divider />
                     </Show>
-                    <AppID />
-                    <Show below="md">
-                      <Divider />
-                    </Show>
-                    <VStack align="stretch">
-                      <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
-                        {t("Member since")}
-                      </Text>
-                      <Text fontSize={"16px"} fontWeight={400}>
-                        {dayjs((Number(app?.createdAtTimestamp) || 0) * 1000).format("D MMM, YYYY")}
-                      </Text>
-                    </VStack>
+                    {app?.createdAtTimestamp && app.createdAtTimestamp !== "0" && (
+                      <VStack align="stretch">
+                        <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
+                          {t("Member since")}
+                        </Text>
+                        <Text fontSize={"16px"} fontWeight={400}>
+                          {dayjs((Number(app?.createdAtTimestamp) || 0) * 1000).format("D MMM, YYYY")}
+                        </Text>
+                      </VStack>
+                    )}
                   </Stack>
                   <HStack
                     justifyContent={{ base: "space-between", md: "flex-end" }}

@@ -4,7 +4,7 @@ import { TransactionModal } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 
 import { useUnendorseApp } from "@/hooks"
-import { Text, Button, Image, Flex, HStack, Icon, VStack, Heading } from "@chakra-ui/react"
+import { Text, Button, Image, Flex, HStack, Icon, VStack, Heading, Box } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -90,12 +90,14 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
         </Flex>
         <HStack bg="#FFF3E5" rounded="16px" py={6} px={4} spacing={4}>
           <Icon as={FaClock} boxSize={"36px"} color="#AF5F00" />
-          <VStack align="stretch" color="#AF5F00" gap={0}>
-            <Text fontSize={"16px"}>{t("Withdrawing your endorsement from an app may result in it")}</Text>
-            <Text fontSize={"16px"} fontWeight="600">
+          <Box color="#AF5F00">
+            <Text fontSize={"16px"} as="span">
+              {t("Withdrawing your endorsement from an app may result in it")}
+            </Text>{" "}
+            <Text fontSize={"16px"} as="span" fontWeight="600">
               {t("no longer being selected for allocations.")}
             </Text>
-          </VStack>
+          </Box>
         </HStack>
 
         <VStack align="stretch" w="full">

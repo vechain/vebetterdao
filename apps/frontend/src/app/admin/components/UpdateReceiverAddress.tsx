@@ -146,7 +146,7 @@ export const UpdateReceiverAddress = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? "error" : status}
-        successTitle={"Team wallet address updated"}
+        successTitle={"Treasury address updated"}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton

@@ -170,7 +170,7 @@ export const CreateEditAppForm = ({
             {errors.projectUrl && <FormErrorMessage>{errors.projectUrl.message}</FormErrorMessage>}
           </FormControl>
           <FormControl isInvalid={!!errors.teamWalletAddress}>
-            <FormLabel>{t("Team wallet address")}</FormLabel>
+            <FormLabel>{t("Treasury address")}</FormLabel>
             <InputGroup>
               <InputLeftElement pointerEvents="none">
                 <AddressIcon borderRadius={"full"} boxSize={6} address={watch("teamWalletAddress")} />

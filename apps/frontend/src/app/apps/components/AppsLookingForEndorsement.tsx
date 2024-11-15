@@ -1,10 +1,14 @@
-import React, { useState, useCallback } from "react"
-import { VStack, HStack, Heading, Text, IconButton, useBreakpointValue } from "@chakra-ui/react"
+import React, { useRef } from "react"
+import { VStack, HStack, Heading, Text, IconButton, Hide, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { motion, AnimatePresence } from "framer-motion"
-import { UilArrowRight, UilInfoCircle } from "@iconscout/react-unicons"
+import { UilInfoCircle } from "@iconscout/react-unicons"
 import { UnendorsedApp } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
+import { A11y } from "swiper/modules"
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
+import "swiper/css"
+import "@/app/theme/swiper-custom.css"
 
 type Props = {
   filteredApps: UnendorsedApp[]
@@ -12,14 +16,26 @@ type Props = {
 
 export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
   const { t } = useTranslation()
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const isMobile = useBreakpointValue({ base: true, md: false })
+  const swiperRef = useRef<SwiperClass | null>(null)
 
-  const handleNextCard = useCallback(() => {
-    setCurrentIndex(prevIndex => (prevIndex + 1) % (filteredApps.length || 1))
-  }, [filteredApps.length])
-
-  const visibleApps = filteredApps.slice(currentIndex, currentIndex + 3)
+  const swiperStyle = useBreakpointValue({
+    base: {
+      position: "relative",
+      width: "100%",
+      height: "100%",
+      overflow: "hidden",
+      display: "flex",
+    },
+    md: {
+      position: "relative",
+      width: "100%",
+      height: "100%",
+      overflow: "hidden",
+      display: "flex",
+      paddingLeft: "80px",
+      paddingRight: "80px",
+    },
+  })
 
   return (
     <VStack
@@ -38,50 +54,58 @@ export const AppsLookingForEndorsement = ({ filteredApps }: Props) => {
         </VStack>
         <UilInfoCircle color={"#004CFC"} />
       </HStack>
-      <HStack
-        spacing={4}
-        width="full"
-        position="relative"
-        overflow="hidden"
-        h={"full"}
-        _after={{
-          content: '""',
-          position: "absolute",
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: "20%",
-          background: "linear-gradient(to left, #FFFFFF, rgba(239, 239, 239, 0))",
-          display: filteredApps.length > 2 ? "block" : "none",
-          zIndex: 1,
-        }}>
-        <AnimatePresence initial={false}>
-          {visibleApps.map(xApp => (
-            <motion.div
-              key={xApp?.id}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{ width: isMobile ? "100%" : "calc(33.33% - 10px)", flexShrink: 0 }}>
-              <UnendorsedAppCard key={xApp.id} xApp={xApp} />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-        {filteredApps.length > 2 && (
+      <Swiper
+        modules={[A11y]}
+        spaceBetween={20}
+        slidesPerView={1.1}
+        breakpoints={{
+          1150: {
+            slidesPerView: 2.1,
+          },
+        }}
+        navigation={false}
+        pagination={{ clickable: true }}
+        scrollbar={{ draggable: true }}
+        onSwiper={swiper => (swiperRef.current = swiper)}
+        style={swiperStyle as any}>
+        {filteredApps.map(xApp => (
+          <SwiperSlide
+            key={xApp.id}
+            style={{
+              display: "flex",
+              width: "100%",
+              position: "relative",
+              opacity: 1,
+            }}>
+            <UnendorsedAppCard xApp={xApp} />
+          </SwiperSlide>
+        ))}
+
+        <Hide below="md">
           <IconButton
-            icon={<UilArrowRight color={"#004CFC"} />}
-            aria-label="Next card"
-            onClick={handleNextCard}
-            position="absolute"
-            right="0"
-            bgColor={"#E0E9FE"}
-            top="50%"
-            borderRadius="full"
-            size="lg"
+            pos={"absolute"}
             zIndex={2}
+            variant={"primarySubtle"}
+            left={5}
+            top={"50%"}
+            transform={"translateY(-50%)"}
+            icon={<FaChevronLeft />}
+            onClick={() => swiperRef.current?.slidePrev()}
+            aria-label="Previous app"
           />
-        )}
-      </HStack>
+          <IconButton
+            pos={"absolute"}
+            zIndex={2}
+            variant={"primarySubtle"}
+            right={5}
+            top={"50%"}
+            transform={"translateY(-50%)"}
+            icon={<FaChevronRight />}
+            onClick={() => swiperRef.current?.slideNext()}
+            aria-label="Next app"
+          />
+        </Hide>
+      </Swiper>
     </VStack>
   )
 }

@@ -18,7 +18,7 @@ export const CreatorApplicationUnderReviewBanner = () => {
         <Show above="md">
           <HStack align="stretch" zIndex={1} position="relative" w="full">
             <Image
-              src="/images/info-bell.png"
+              src="/images/creator-nft.png"
               alt="Creator application update"
               w={24}
               h={24}
@@ -47,7 +47,7 @@ export const CreatorApplicationUnderReviewBanner = () => {
               </Heading>
             </VStack>
             <Image
-              src="/images/info-bell.png"
+              src="/images/creator-nft.png"
               alt="Creator application update"
               w={isVerySmallMobile ? 16 : 24}
               h={isVerySmallMobile ? 16 : 24}

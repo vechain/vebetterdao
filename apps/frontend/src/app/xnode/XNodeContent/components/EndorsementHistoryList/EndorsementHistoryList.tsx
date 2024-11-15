@@ -1,6 +1,6 @@
 import { useXNode } from "@/api"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { Card, CardBody, Heading, VStack, Button } from "@chakra-ui/react"
+import { Text, Card, CardBody, Heading, VStack, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
 import { useCallback, useState } from "react"
@@ -15,6 +15,8 @@ export const EndorsementHistoryList = () => {
     setDisplayCount(prevCount => Math.min(prevCount + 5, appEndorsedEvents?.length || 0))
   }, [appEndorsedEvents])
 
+  const events = appEndorsedEvents?.slice(0, displayCount)
+
   return (
     <Card variant="baseWithBorder">
       <CardBody>
@@ -22,9 +24,12 @@ export const EndorsementHistoryList = () => {
           <Heading fontSize="xl" fontWeight="700">
             {t("Endorsement history")}
           </Heading>
-          {appEndorsedEvents
-            ?.slice(0, displayCount)
-            .map((event, index) => <EndorsementHistoryItem key={index} event={event} />)}
+
+          {events?.length ? (
+            events.map((event, index) => <EndorsementHistoryItem key={index} event={event} />)
+          ) : (
+            <Text>{t("No endorsement events")}</Text>
+          )}
           {appEndorsedEvents && displayCount < appEndorsedEvents.length && (
             <Button onClick={handleLoadMore} variant="primaryLink">
               {t("Load more")}

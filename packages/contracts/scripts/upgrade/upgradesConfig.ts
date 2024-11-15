@@ -53,7 +53,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
     },
   },
   "X2Earn Rewards Pool": {
-    name: "x2earn-rewards-pool",
+    name: "x2-earn-rewards-pool",
     configAddressField: "x2EarnRewardsPoolContractAddress",
     versions: ["v2", "v3", "v4"],
     descriptions: {

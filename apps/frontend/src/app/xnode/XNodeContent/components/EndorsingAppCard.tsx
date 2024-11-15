@@ -139,7 +139,7 @@ export const EndorsingAppCard = () => {
                     endorsers={appEndorsers || []}
                     isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
                   <Button variant="dangerGhost" onClick={unendorseAppModal.onOpen} w={["full", "full", "auto"]}>
-                    {t("Stop endorsing")}
+                    {t("Remove endorsement")}
                   </Button>
                 </Stack>
               </VStack>

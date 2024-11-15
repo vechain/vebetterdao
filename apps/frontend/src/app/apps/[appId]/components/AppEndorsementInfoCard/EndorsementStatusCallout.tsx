@@ -13,19 +13,17 @@ type Props = {
 }
 
 export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = true, padding = 4 }: Props) => {
+  const STATUS_CONFIG = useXAppStatusConfig()
   const { t } = useTranslation()
 
   const { app } = useCurrentAppInfo()
   const { roundId, isLoading, isCurrentRound, isNextRound } = useAppGracePeriodEndsAfterRound(app?.id ?? "")
-  // TODO rm console.logss and guard the template against rendering wrong data
-  console.log({ roundId, isLoading, isCurrentRound, isNextRound })
 
   const roundReference = isCurrentRound ? "current round" : isNextRound ? "next round" : `round ${roundId}`
 
-  const STATUS_CONFIG = useXAppStatusConfig()
   const { title, description, backgroundColor, color, icon } = STATUS_CONFIG[endorsementStatus] ?? {
-    title: "Unknown status",
-    description: "The endorsement status of this app is unknown.",
+    title: t("Endorsement coming soon"),
+    description: t("Endorsement details available from next round."),
     backgroundColor: "#F8F8F8",
     color: "#6A6A6A",
     icon: UilExclamationCircle,

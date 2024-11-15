@@ -11,9 +11,7 @@ const method = "isBlacklisted"
  * Get the query key for a boolean value indicating if the app exists
  * @param appId the app id
  */
-export const getAppIsBlacklistedQueryKey = (appId: string) => {
-  getCallKey({ method, keyArgs: [appId] })
-}
+export const getAppIsBlacklistedQueryKey = (appId: string) => getCallKey({ method, keyArgs: [appId] })
 
 /**
  * Hook to get a boolean value indicating if the app exists
@@ -26,5 +24,6 @@ export const useAppIsBlacklisted = (appId: string): UseQueryResult<boolean, Erro
     contractAddress,
     method,
     args: [appId],
+    enabled: !!appId,
   })
 }
