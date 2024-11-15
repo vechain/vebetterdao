@@ -48,11 +48,11 @@ export const GmNFTPageHeader = () => {
             feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
             fallback={
               <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-                {t("Attach GM NFT to XNode coming soon!")}
+                {t("Attach GM NFT to Node coming soon!")}
               </Text>
             }>
             <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
-              {t("Attach GM NFT to XNode")}
+              {t("Attach GM NFT to Node")}
             </Text>
           </FeatureFlagWrapper>
         </>

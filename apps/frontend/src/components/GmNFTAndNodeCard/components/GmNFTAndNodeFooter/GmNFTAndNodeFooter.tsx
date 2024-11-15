@@ -72,7 +72,7 @@ export const GmNFTAndNodeFooter = () => {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
-            {t("Attach your XNode to your GM NFT and")}{" "}
+            {t("Attach your Node to your GM NFT and")}{" "}
           </Text>
           <Text as="strong" fontSize={"14px"} fontWeight={600}>
             {t("upgrade")}{" "}

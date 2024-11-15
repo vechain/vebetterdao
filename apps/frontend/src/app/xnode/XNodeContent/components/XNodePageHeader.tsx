@@ -24,7 +24,7 @@ export const XNodePageHeader = () => {
       return [t("Mint GM NFT"), t("Mint now and get more rewards")]
     }
     if (isXNodeHolder && !isXNodeAttachedToGM) {
-      return [t("You can attach GM NFT to this node"), t("Attach GM NFT to XNode")]
+      return [t("You can attach GM NFT to this node"), t("Attach GM NFT to Node")]
     }
     if (isMaxGmLevelReached) {
       return [t("You reached the max GM NFT level"), t("You can't upgrade your GM NFT anymore")]

@@ -70,7 +70,7 @@ export const EndorsingAppCard = () => {
             {isEndorsingApp && (
               <Text fontSize="sm">
                 {t(
-                  "As the owner of an XNode, you can use your points to endorse apps and help them be voted in allocation rounds.",
+                  "As the owner of an Node, you can use your points to endorse apps and help them be voted in allocation rounds.",
                 )}
               </Text>
             )}

@@ -34,7 +34,7 @@ export const AppsBanner = () => {
               {t("Explore apps")}
             </Text>
             <Text align={isAbove1200 ? "left" : "center"}>
-              {t("Browse and discover apps where you can earn tokens for sustainable actions.")}
+              {t("Explore and discover apps that reward you for engaging in sustainable actions.")}
             </Text>
           </Stack>
         </Stack>

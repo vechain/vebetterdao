@@ -29,10 +29,10 @@ export const AppsPageContent = () => {
   const hasNewApps = newApps && newApps?.length > 0
   // TODO: Pagination, search, filters
   return (
-    <VStack alignItems={"flex-start"} position={"relative"} spacing={12} w="full">
+    <VStack alignItems={"flex-start"} position={"relative"} spacing={8} w="full">
       <AppsBanner />
 
-      {!isXNodeLoading && isEndorsingApp ? (
+      {!isXNodeLoading && isEndorsingApp && (
         <VStack alignItems={"flex-start"} spacing={4}>
           <Heading size="lg">{t("Your endorsed app")}</Heading>
           <Text color="#6a6a6a">
@@ -40,10 +40,11 @@ export const AppsPageContent = () => {
           </Text>
           <UnendorsedAppCard xApp={endorsedApp} />
         </VStack>
-      ) : (
-        <EndorsementPointsBanner />
       )}
+
       {hasNewApps ? <AppsLookingForEndorsement filteredApps={newApps} /> : undefined}
+
+      {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 
       <VStack alignItems={"flex-start"} spacing={4} w="100%">
         <Heading size="lg">{t("All the apps")}</Heading>

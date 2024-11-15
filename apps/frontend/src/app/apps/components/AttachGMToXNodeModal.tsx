@@ -47,7 +47,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        successTitle={t("Attach GM to XNode")}
+        successTitle={t("Attach GM to Node")}
         status={attachGMToXNodeMutation.error ? "error" : attachGMToXNodeMutation.status}
         errorDescription={attachGMToXNodeMutation.error?.reason}
         errorTitle={attachGMToXNodeMutation.error ? "Error attaching" : undefined}
@@ -63,12 +63,12 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
     {
       Icon: ThreeTokensIcon,
       title: t("Attach"),
-      description: t("Combine your GM NFT with your XNode."),
+      description: t("Combine your GM NFT with your Node."),
     },
     {
       Icon: CurveArrowIcon,
       title: t("Free upgrade"),
-      description: t("Your GM NFT will upgrade for free to a certain level depending on your XNode"),
+      description: t("Your GM NFT will upgrade for free to a certain level depending on your Node"),
     },
     {
       Icon: ThreeSparklesIcon,
@@ -83,11 +83,11 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
       <CustomModalContent>
         <ModalCloseButton />
         <ModalHeader>
-          <Heading fontSize="lg">{t("Attaching XNode to GM NFT")}</Heading>
+          <Heading fontSize="lg">{t("Attaching Node to GM NFT")}</Heading>
         </ModalHeader>
         <ModalBody>
           <VStack align="stretch" gap={4}>
-            <Text>{t("Upgrade your GM NFT for free with the help of your XNode!")}</Text>
+            <Text>{t("Upgrade your GM NFT for free with the help of your Node!")}</Text>
             <Stack align="stretch" direction={["column", "column", "row"]}>
               {steps.map((step, index) => (
                 <VStack
