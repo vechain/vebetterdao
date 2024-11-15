@@ -104,10 +104,9 @@ export const CONTRACT_LIST = [
     contractAddress: config.x2EarnCreatorContractAddress,
     roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "PAUSER_ROLE", "MINTER_ROLE", "BURNER_ROLE"],
   },
-  // TODO: Add node management contract when deployed
-  // {
-  //   name: "Node Management Contract",
-  //   contractAddress: config.nodeManagementContractAddress,
-  //   roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE"],
-  // },
+  {
+    name: "Node Management Contract",
+    contractAddress: config.nodeManagementContractAddress,
+    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE"],
+  },
 ]
