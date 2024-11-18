@@ -88,9 +88,13 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
     }
   }
 
+  const allApps = [...apps, ...unendorsedApps].filter(
+    (app, index, self) => self.findIndex(a => a.id === app.id) === index,
+  ) // all apps is a union of active and unendorsed apps with deduplication
+
   return {
-    allApps: apps,
+    allApps,
     unendorsed: unendorsedApps,
-    active: apps.filter(app => !unendorsedApps.some(unendorsedApp => unendorsedApp.id === app.id)),
+    active: allApps.filter(app => !unendorsedApps.some(unendorsedApp => unendorsedApp.id === app.id)),
   }
 }
