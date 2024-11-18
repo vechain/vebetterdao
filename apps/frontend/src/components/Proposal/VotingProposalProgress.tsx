@@ -1,7 +1,7 @@
 import React, { useMemo } from "react"
 import { useProposalDepositEvent } from "@/api/contracts/governance/hooks/useProposalDepositEvent"
 import { useIsDepositReached } from "@/api/contracts/governance/hooks/useIsDepositReached"
-import { ProposalState, useProposalCreatedEvent, useProposalVotesIndexer } from "@/api"
+import { ProposalState, useProposalVotesIndexer, useProposalCreatedEvent } from "@/api"
 import { Box, Card, CardBody, HStack, Icon, Image, Text, VStack } from "@chakra-ui/react"
 import { UilBan, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { ethers } from "ethers"
@@ -25,58 +25,21 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   const { t } = useTranslation()
   const { data: proposalVotes } = useProposalVotesIndexer({ proposalId })
 
-  const totalVotes = useMemo(() => {
-    if (!proposalVotes) return BigInt(0)
-
-    const forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
-    const againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
-    const abstainVotes = BigInt(proposalVotes[2]?.totalWeight ?? "0")
-
-    return forVotes + againstVotes + abstainVotes
-  }, [proposalVotes])
-
-  const forVotesPercentage = useMemo(() => {
-    if (!proposalVotes || totalVotes === BigInt(0)) return 0
-
-    const forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
-    const percentage = (forVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
-
-    return Number(percentage) / 100 // Return as a number with two decimal places
-  }, [proposalVotes, totalVotes])
-
-  const againstVotesPercentage = useMemo(() => {
-    if (!proposalVotes || totalVotes === BigInt(0)) return 0
-
-    const againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
-    const percentage = (againstVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
-
-    return Number(percentage) / 100 // Return as a number with two decimal places
-  }, [proposalVotes, totalVotes])
-
-  const abstainVotesPercentage = useMemo(() => {
-    if (!proposalVotes || totalVotes === BigInt(0)) return 0
-
-    const abstainVotes = BigInt(proposalVotes[2]?.totalWeight ?? "0")
-    const percentage = (abstainVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
-
-    return Number(percentage) / 100 // Return as a number with two decimal places
-  }, [proposalVotes, totalVotes])
-
   const votes = {
     for: {
       color: forColor,
-      percentage: forVotesPercentage,
+      percentage: proposalVotes?.votes.for.percentage ?? 0,
       icon: <Icon as={UilThumbsUp} boxSize={["20px", "20px", "16px"]} />,
     },
     against: {
       color: againstColor,
-      percentage: againstVotesPercentage,
+      percentage: proposalVotes?.votes.against.percentage ?? 0,
       icon: <Icon as={UilThumbsDown} boxSize={["20px", "20px", "16px"]} />,
     },
 
     abstain: {
       color: abstainColor,
-      percentage: abstainVotesPercentage,
+      percentage: proposalVotes?.votes.abstain.percentage ?? 0,
       icon: <Image src={"/images/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
     },
   }

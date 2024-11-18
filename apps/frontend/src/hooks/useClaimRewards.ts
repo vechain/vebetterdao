@@ -50,14 +50,12 @@ export const useClaimRewards = ({
   // Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
-      for (const roundReward of roundRewards) {
-        await queryClient.cancelQueries({
-          queryKey: getRoundRewardQueryKey(roundReward.roundId, account ?? undefined),
-        })
-        await queryClient.refetchQueries({
-          queryKey: getRoundRewardQueryKey(roundReward.roundId, account ?? undefined),
-        })
-      }
+      await queryClient.cancelQueries({
+        queryKey: getRoundRewardQueryKey("ALL", account ?? undefined),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getRoundRewardQueryKey("ALL", account ?? undefined),
+      })
 
       await queryClient.cancelQueries({
         queryKey: getB3TrBalanceQueryKey(account ?? ""),
@@ -69,7 +67,7 @@ export const useClaimRewards = ({
     }
 
     onSuccess?.()
-  }, [account, invalidateCache, onSuccess, queryClient, roundRewards])
+  }, [account, invalidateCache, onSuccess, queryClient])
 
   const result = useSendTransaction({
     signerAccount: account,

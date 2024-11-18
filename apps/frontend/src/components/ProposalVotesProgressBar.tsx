@@ -1,9 +1,9 @@
 import {
   ProposalCreatedEvent,
   useCurrentBlock,
+  useProposalVotesIndexer,
   useProposalQuorum,
   useProposalSnapshot,
-  useProposalVotesIndexer,
 } from "@/api"
 import { Box, HStack, Heading, Icon, Progress, Skeleton, Text } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
@@ -50,42 +50,6 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
     return startBlockFromNow >= 0
   }, [proposalSnapshotBlock, currentBlock])
 
-  const totalVotes = useMemo(() => {
-    if (!proposalVotes) return BigInt(0)
-
-    const forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
-    const againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
-    const abstainVotes = BigInt(proposalVotes[2]?.totalWeight ?? "0")
-
-    return forVotes + againstVotes + abstainVotes
-  }, [proposalVotes])
-
-  const forVotes = useMemo(() => {
-    if (!proposalVotes) return BigInt(0)
-
-    return BigInt(proposalVotes[0]?.totalWeight ?? "0")
-  }, [proposalVotes])
-
-  const againstVotes = useMemo(() => {
-    if (!proposalVotes) return BigInt(0)
-
-    return BigInt(proposalVotes[1]?.totalWeight ?? "0")
-  }, [proposalVotes])
-
-  const abstainVotes = useMemo(() => {
-    if (!proposalVotes) return BigInt(0)
-
-    return BigInt(proposalVotes[2]?.totalWeight ?? "0")
-  }, [proposalVotes])
-
-  const progress = useMemo(() => {
-    if (!proposalVotes) return 0
-
-    const progress = (forVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
-
-    return Number(progress) / 100 // Return as a number with two decimal places
-  }, [proposalVotes, forVotes, totalVotes])
-
   const quorumProgress = useMemo(() => {
     const compactQuorum = compactFormatter.format(Number(quorum))
     const isLoaded = !quorumLoading && !proposalVotesLoading
@@ -105,7 +69,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
           {t("Quorum available")} {estimatedStartTime}
         </Heading>
       )
-    if (totalVotes > Number(quorum)) {
+    if (Number(proposalVotes?.totalWeight ?? 0) > Number(quorum)) {
       return (
         <Heading size="xs" color="green.500" textAlign={"center"}>
           {t("Quorum reached")}
@@ -117,7 +81,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
         {compactQuorum} {t("votes needed to reach quorum")}
       </Heading>
     )
-  }, [quorum, quorumLoading, proposalVotesLoading, t, isIncoming, estimatedStartTime, totalVotes])
+  }, [quorum, quorumLoading, proposalVotesLoading, t, isIncoming, estimatedStartTime, proposalVotes])
 
   return (
     <Box w="80%" alignSelf={"center"}>
@@ -126,20 +90,26 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
         <HStack spacing={1}>
           <Icon as={FaThumbsUp} color="green.500" fontSize={"md"} />
           <Text fontSize="sm" color="gray.500">
-            {compactFormatter.format(forVotes)}
+            {compactFormatter.format(Number(proposalVotes?.votes.for.totalWeight ?? 0))}
           </Text>
         </HStack>
 
-        <Progress w="full" colorScheme="green" size="lg" value={progress} borderRadius={"lg"} />
+        <Progress
+          w="full"
+          colorScheme="green"
+          size="lg"
+          value={proposalVotes?.votes.for.percentage ?? 0}
+          borderRadius={"lg"}
+        />
         <HStack spacing={1}>
           <Icon as={FaThumbsDown} color="red.500" fontSize={"md"} />
           <Text fontSize="sm" color="gray.500">
-            {compactFormatter.format(againstVotes)}
+            {compactFormatter.format(Number(proposalVotes?.votes.against.totalWeight ?? 0))}
           </Text>
         </HStack>
       </HStack>
       <Text fontSize="sm" color="gray.500" textAlign={"center"}>
-        {compactFormatter.format(abstainVotes)} {t("preferred to abastain")}
+        {compactFormatter.format(Number(proposalVotes?.votes.abstain.totalWeight ?? 0))} {t("preferred to abastain")}
       </Text>
     </Box>
   )

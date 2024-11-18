@@ -30,12 +30,10 @@ export const ProposalVotesProgressBar = ({ isLoading, text, percentage, color, i
           </Skeleton>
         </HStack>
       </HStack>
-      <Box position="relative">
-        <Skeleton isLoaded={!isLoading}>
-          <Box bg="#D5D5D5" h="8px" rounded="full" />
-          <Box bg={color} h="8px" rounded="full" w={`${percentage}%`} position="absolute" top={0} left={0} />
-        </Skeleton>
-      </Box>
+      <Skeleton isLoaded={!isLoading} position="relative" h="8px" rounded="full" overflow={"hidden"}>
+        <Box bg="#D5D5D5" h="full" />
+        <Box overflow={"hidden"} bg={color} h="full" w={`${percentage}%`} position="absolute" top={0} left={0} />
+      </Skeleton>
     </VStack>
   )
 }
