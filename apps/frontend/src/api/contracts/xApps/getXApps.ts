@@ -38,6 +38,7 @@ type GetAllApps = {
   active: XApp[]
   unendorsed: UnendorsedApp[]
   allApps: (XApp | UnendorsedApp)[]
+  endorsed: XApp[]
 }
 export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
   const clauses = [
@@ -93,8 +94,9 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
   ) // all apps is a union of active and unendorsed apps with deduplication
 
   return {
-    allApps,
+    allApps: allApps,
+    active: apps,
     unendorsed: unendorsedApps,
-    active: allApps.filter(app => !unendorsedApps.some(unendorsedApp => unendorsedApp.id === app.id)),
+    endorsed: apps.filter(app => !unendorsedApps.some(unendorsedApp => unendorsedApp.id === app.id)),
   }
 }
