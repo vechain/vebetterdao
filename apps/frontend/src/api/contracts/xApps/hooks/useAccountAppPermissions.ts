@@ -32,12 +32,14 @@ export const useAccountAppPermissions = (address?: string): UseQueryResult<Accou
     queryKey: getAccountAppPermissionsQueryKey(address ?? ""),
     enabled: !!address,
     queryFn: async () => {
-      const apps = await queryClient.ensureQueryData({
+      const appsQuery = await queryClient.ensureQueryData({
         queryKey: getXAppsQueryKey(),
         queryFn: async () => await getXApps(thor),
       })
 
-      const clauses = apps?.active
+      const allApps = appsQuery.allApps
+
+      const clauses = allApps
         .map(app => [
           {
             to: X2EARNAPPS_CONTRACT,
@@ -57,7 +59,7 @@ export const useAccountAppPermissions = (address?: string): UseQueryResult<Accou
       // Here we create an object where keys are app ids and values are the permissions for the given address
       // Every app should take two slots in the res array, the first one is the isAdmin result and the second one is the isModerator result
 
-      const permissions: AccountAppPermissions = apps?.active.reduce((acc, app, index) => {
+      const permissions: AccountAppPermissions = allApps.reduce((acc, app, index) => {
         const isAdminRes = res[index * 2] as Connex.VM.Output
         const isModeratorRes = res[index * 2 + 1] as Connex.VM.Output
 
