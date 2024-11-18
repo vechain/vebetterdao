@@ -89,11 +89,17 @@ export const useProposalVotesIndexer = ({ proposalId }: ProposalVotesRequest) =>
       const totalWeight = res.reduce((acc, vote) => BigInt(acc) + BigInt(vote.totalWeight), BigInt(0))
 
       const forVotesPercentage =
-        Number(BigInt(BigInt(forVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
+        totalWeight === BigInt(0)
+          ? 0
+          : Number(BigInt(BigInt(forVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
       const againstVotesPercentage =
-        Number(BigInt(BigInt(againstVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
+        totalWeight === BigInt(0)
+          ? 0
+          : Number(BigInt(BigInt(againstVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
       const abstainVotesPercentage =
-        Number(BigInt(BigInt(abstainVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
+        totalWeight === BigInt(0)
+          ? 0
+          : Number(BigInt(BigInt(abstainVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
 
       return {
         totalVoters,
