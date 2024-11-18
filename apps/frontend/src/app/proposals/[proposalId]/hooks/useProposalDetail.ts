@@ -110,14 +110,14 @@ export const useProposalDetailById = (proposalId: string) => {
       forPercentage,
       againstPercentage,
       abstainPercentage
-    if (proposalVotes && proposalVotes.length === 3) {
-      forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
-      againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
-      abstainVotes = BigInt(proposalVotes[2]?.totalWeight ?? "0")
-      totalVotingPowerUsedInVotes = forVotes + againstVotes + abstainVotes
-      forPercentage = Number((forVotes * BigInt(10000)) / totalVotingPowerUsedInVotes) / 100
-      againstPercentage = Number((againstVotes * BigInt(10000)) / totalVotingPowerUsedInVotes) / 100
-      abstainPercentage = Number((abstainVotes * BigInt(10000)) / totalVotingPowerUsedInVotes) / 100
+    if (proposalVotes) {
+      forVotes = proposalVotes.votes.for.totalWeight
+      againstVotes = proposalVotes.votes.against.totalWeight
+      abstainVotes = proposalVotes.votes.abstain.totalWeight
+      totalVotingPowerUsedInVotes = proposalVotes.totalPower
+      forPercentage = proposalVotes.votes.for.percentage
+      againstPercentage = proposalVotes.votes.against.percentage
+      abstainPercentage = proposalVotes.votes.abstain.percentage
     }
 
     const depositThreshold = Number(ethers.formatEther(BigInt(proposalCreatedEvent.data?.depositThreshold || 0)))
