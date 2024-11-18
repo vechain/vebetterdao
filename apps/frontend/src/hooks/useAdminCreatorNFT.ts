@@ -2,7 +2,7 @@ import { getHasCreatorNFTQueryKey } from "@/api/contracts/x2EarnCreator/useHasCr
 import { X2EarnCreator__factory } from "@repo/contracts/typechain-types"
 import { useQueryClient } from "@tanstack/react-query"
 import { useWallet } from "@vechain/dapp-kit-react"
-import getConfig from "next/config"
+import { getConfig } from "@repo/config"
 import { useCallback } from "react"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 
