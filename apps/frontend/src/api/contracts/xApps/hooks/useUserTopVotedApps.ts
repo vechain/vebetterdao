@@ -44,7 +44,7 @@ export const useUserTopVotedApps = (user?: string) => {
 
   const topVotedApps: AppVotesGiven[] = useMemo(() => {
     return topVotedAppIds.map(app => {
-      const appFound = xApps?.active.find(xApp => xApp.id === app.appId)
+      const appFound = xApps?.allApps.find(xApp => xApp.id === app.appId)
 
       return {
         appName: appFound?.name,
