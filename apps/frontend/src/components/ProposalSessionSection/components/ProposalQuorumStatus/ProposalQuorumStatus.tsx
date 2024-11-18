@@ -1,44 +1,46 @@
-import { HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { Box, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
+import { UilTimes, UilCheck } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { UseQueryResult } from "@tanstack/react-query"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(2)
 
-// const getSafePercentage = (value: number) => {
-//   return isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100)
-// }
+const getSafePercentage = (value: number) => {
+  return isNaN(value) ? 0 : Math.min(Math.max(value, 0), 100)
+}
 
 type Props = {
   quorumQuery: UseQueryResult<string, Error>
   currentVotesQuery: UseQueryResult<string, Error>
   isEnded: boolean
 }
-export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery }: Props) => {
+export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }: Props) => {
   const { t } = useTranslation()
 
-  // const isQuorumReached = useMemo(() => {
-  //   if (quorumQuery.data === undefined || currentVotesQuery.data === undefined) {
-  //     return false
-  //   }
-  //   return Number(currentVotesQuery.data) >= Number(quorumQuery.data)
-  // }, [quorumQuery.data, currentVotesQuery.data])
+  const isQuorumReached = useMemo(() => {
+    if (quorumQuery.data === undefined || currentVotesQuery.data === undefined) {
+      return false
+    }
+    return Number(currentVotesQuery.data) >= Number(quorumQuery.data)
+  }, [quorumQuery.data, currentVotesQuery.data])
 
-  // const votesToQuorumPercentage = useMemo(() => {
-  //   if (quorumQuery.data === undefined || currentVotesQuery.data === undefined) {
-  //     return 0
-  //   }
-  //   return (Number(currentVotesQuery.data) / Number(quorumQuery.data)) * 100
-  // }, [quorumQuery.data, currentVotesQuery.data])
+  const votesToQuorumPercentage = useMemo(() => {
+    if (quorumQuery.data === undefined || currentVotesQuery.data === undefined) {
+      return 0
+    }
+    return (Number(currentVotesQuery.data) / Number(quorumQuery.data)) * 100
+  }, [quorumQuery.data, currentVotesQuery.data])
 
-  // const stateColor = useMemo(() => {
-  //   if (isQuorumReached) return "#38BF66"
+  const stateColor = useMemo(() => {
+    if (isQuorumReached) return "#38BF66"
 
-  //   if (isEnded) return "#D23F63"
-  //   return "#004CFC"
-  // }, [isQuorumReached, isEnded])
+    if (isEnded) return "#D23F63"
+    return "#004CFC"
+  }, [isQuorumReached, isEnded])
 
-  // const isEndedAndQuorumNotReached = isEnded && !isQuorumReached
+  const isEndedAndQuorumNotReached = isEnded && !isQuorumReached
 
   const quorumQueryReady = !quorumQuery.isLoading && quorumQuery.status === "success" && quorumQuery.data !== undefined
 
@@ -59,7 +61,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery }: Props) 
             </Text>
           </Skeleton>
         </HStack>
-        {/* <Skeleton isLoaded={quorumQueryReady && votesQueryReady}>
+        <Skeleton isLoaded={quorumQueryReady && votesQueryReady}>
           <HStack spacing={1} align="center">
             {isEndedAndQuorumNotReached && <UilTimes size="16px" color={stateColor} />}
             {isQuorumReached && <UilCheck size="16px" color={stateColor} />}
@@ -68,9 +70,9 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery }: Props) 
               {t("%")}
             </Text>
           </HStack>
-        </Skeleton> */}
+        </Skeleton>
       </HStack>
-      {/* <Box position="relative">
+      <Box position="relative">
         <Skeleton isLoaded={quorumQueryReady && votesQueryReady}>
           <Box bg="#D5D5D5" h="8px" rounded="full" />
           <Box
@@ -93,7 +95,7 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery }: Props) 
         <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
           {t("needed for quorum")}
         </Text>
-      </HStack> */}
+      </HStack>
     </VStack>
   )
 }
