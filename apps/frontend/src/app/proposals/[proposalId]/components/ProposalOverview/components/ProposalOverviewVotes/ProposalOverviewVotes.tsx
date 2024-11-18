@@ -1,6 +1,6 @@
 import { ProposalState, useProposalState, useProposalVotesIndexer } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
-import { Heading, Icon, Image, Text, VStack } from "@chakra-ui/react"
+import { Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
 import { ProposalVotesResults } from "./components/ProposalVotesResults"
 import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
@@ -8,6 +8,7 @@ import { ExclamationTriangle, ResponsiveCard } from "@/components"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
 type Props = {
   proposalId: string
@@ -24,7 +25,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { data: proposalState } = useProposalState(proposalId)
 
   const totalVotes = useMemo(() => {
-    if (!proposalVotes || proposalVotes?.length !== 3) return BigInt(0)
+    if (!proposalVotes) return BigInt(0)
 
     const forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
     const againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
@@ -33,8 +34,18 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
     return forVotes + againstVotes + abstainVotes
   }, [proposalVotes])
 
+  const totalVoters = useMemo(() => {
+    if (!proposalVotes) return 0
+
+    const forVoters = proposalVotes[0]?.voters ?? 0
+    const againstVoters = proposalVotes[1]?.voters ?? 0
+    const abstainVoters = proposalVotes[2]?.voters ?? 0
+
+    return forVoters + againstVoters + abstainVoters
+  }, [proposalVotes])
+
   const forVotesPercentage = useMemo(() => {
-    if (!proposalVotes || proposalVotes?.length !== 3 || totalVotes === BigInt(0)) return 0
+    if (!proposalVotes) return 0
 
     const forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
     const percentage = (forVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
@@ -43,7 +54,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   }, [proposalVotes, totalVotes])
 
   const againstVotesPercentage = useMemo(() => {
-    if (!proposalVotes || proposalVotes?.length !== 3 || totalVotes === BigInt(0)) return 0
+    if (!proposalVotes || totalVotes === BigInt(0)) return 0
 
     const againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
     const percentage = (againstVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
@@ -169,9 +180,9 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
               <Text fontWeight={"400"} color="#6A6A6A">
                 {t("Wallets voted")}
               </Text>
-              {/* <Skeleton isLoaded={!voteEventsLoading}>
-                <Heading size="sm">{getCompactFormatter(2).format(voteEvents?.votes.length ?? 0)}</Heading>
-              </Skeleton> */}
+              <Skeleton isLoaded={!proposalVotesLoading}>
+                <Heading size="sm">{getCompactFormatter(2).format(totalVoters ?? 0)}</Heading>
+              </Skeleton>
             </VStack>
             <VStack alignItems={"stretch"} gap={6}>
               {Object.entries(votes).map(([key, value]) => (

@@ -51,7 +51,7 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
   }, [proposalSnapshotBlock, currentBlock])
 
   const totalVotes = useMemo(() => {
-    if (!proposalVotes || proposalVotes?.length !== 3) return BigInt(0)
+    if (!proposalVotes) return BigInt(0)
 
     const forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
     const againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
@@ -61,19 +61,19 @@ export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
   }, [proposalVotes])
 
   const forVotes = useMemo(() => {
-    if (!proposalVotes || proposalVotes?.length !== 3) return BigInt(0)
+    if (!proposalVotes) return BigInt(0)
 
     return BigInt(proposalVotes[0]?.totalWeight ?? "0")
   }, [proposalVotes])
 
   const againstVotes = useMemo(() => {
-    if (!proposalVotes || proposalVotes?.length !== 3) return BigInt(0)
+    if (!proposalVotes) return BigInt(0)
 
     return BigInt(proposalVotes[1]?.totalWeight ?? "0")
   }, [proposalVotes])
 
   const abstainVotes = useMemo(() => {
-    if (!proposalVotes || proposalVotes?.length !== 3) return BigInt(0)
+    if (!proposalVotes) return BigInt(0)
 
     return BigInt(proposalVotes[2]?.totalWeight ?? "0")
   }, [proposalVotes])
