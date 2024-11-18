@@ -1,4 +1,4 @@
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { useQuery } from "@tanstack/react-query"
 import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
 import { useMemo } from "react"
@@ -29,7 +29,8 @@ export const useUserProposalsVoteEvents = (user?: string) => {
  * @returns An object containing information about the vote event.
  */
 export const useUserSingleProposalVoteEvent = (proposalId?: string) => {
-  const userProposalVoteEventsQuery = useUserProposalsVoteEvents()
+  const { account } = useWallet()
+  const userProposalVoteEventsQuery = useUserProposalsVoteEvents(account ?? undefined)
 
   const vote = useMemo(() => {
     return userProposalVoteEventsQuery.data?.find(vote => vote.proposalId === proposalId)
