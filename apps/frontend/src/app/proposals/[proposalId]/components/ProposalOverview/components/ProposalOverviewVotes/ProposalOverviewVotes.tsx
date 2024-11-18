@@ -1,4 +1,4 @@
-import { ProposalState, useParsedProposalVotesIndexer, useProposalState } from "@/api"
+import { ProposalState, useProposalVotesIndexer, useProposalState } from "@/api"
 import { timestampToTimeLeft } from "@/utils"
 import { Heading, Icon, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { ProposalVotesProgressBar } from "./components/ProposalVotesProgressBar"
@@ -21,7 +21,7 @@ const abstainColor = "#B59525"
 export const ProposalOverviewVotes = ({ proposalId }: Props) => {
   const { t } = useTranslation()
 
-  const { data: proposalVotes, isLoading: proposalVotesLoading } = useParsedProposalVotesIndexer({ proposalId })
+  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotesIndexer({ proposalId })
   const { data: proposalState } = useProposalState(proposalId)
 
   //TODO: Enable again when indexer is ready

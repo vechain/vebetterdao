@@ -1,7 +1,7 @@
 import {
   ProposalCreatedEvent,
   useCurrentBlock,
-  useParsedProposalVotesIndexer,
+  useProposalVotesIndexer,
   useProposalQuorum,
   useProposalSnapshot,
 } from "@/api"
@@ -22,7 +22,7 @@ type Props = {
 export const ProposalVotesProgressBar: React.FC<Props> = ({ proposal }) => {
   const { t } = useTranslation()
 
-  const { data: proposalVotes, isLoading: proposalVotesLoading } = useParsedProposalVotesIndexer({
+  const { data: proposalVotes, isLoading: proposalVotesLoading } = useProposalVotesIndexer({
     proposalId: proposal.proposalId,
   })
   const { data: proposalSnapshotBlock } = useProposalSnapshot(proposal.proposalId)

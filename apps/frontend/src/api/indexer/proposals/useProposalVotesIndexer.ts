@@ -1,6 +1,5 @@
 import { getConfig } from "@repo/config"
-import { useQuery, UseQueryResult } from "@tanstack/react-query"
-import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { z } from "zod"
 
 const indexerUrl = getConfig().indexerUrl
@@ -45,20 +44,7 @@ export const getProposalVotesIndexer = async (data: ProposalVotesRequest): Promi
   return ProposalVotesResponseSchema.parse(await response.json())
 }
 
-export const getProposalVotesQueryKey = (proposalId: string) => ["PROPOSAL", "VOTES", proposalId]
-
-/**
- * Hook to get the proposal votes from the indexer (i.e the number of votes for, against and abstain)
- * @param proposalId the proposal id to get the votes for
- * @returns the proposal votes {@link ProposalVotes}
- */
-export const useProposalVotesIndexer = ({ proposalId }: ProposalVotesRequest) => {
-  return useQuery({
-    queryKey: getProposalVotesQueryKey(proposalId),
-    queryFn: () => getProposalVotesIndexer({ proposalId }),
-    enabled: !!proposalId,
-  })
-}
+export const getProposalVotesQueryKey = (proposalId: string) => ["PROPOSAL", proposalId, "VOTES"]
 
 type ParsedProposalVotesResponse = {
   totalVoters: number
@@ -82,55 +68,56 @@ type ParsedProposalVotesResponse = {
     }
   }
 }
-export const useParsedProposalVotesIndexer = ({
-  proposalId,
-}: ProposalVotesRequest): UseQueryResult<ParsedProposalVotesResponse | undefined> => {
-  const proposalVotesQuery = useProposalVotesIndexer({ proposalId })
 
-  const parsedProposalVotes = useMemo(() => {
-    if (!proposalVotesQuery.data) return undefined
+/**
+ * Hook to get the proposal votes from the indexer (i.e the number of votes for, against and abstain)
+ * @param proposalId the proposal id to get the votes for
+ * @returns the proposal votes {@link ProposalVotes}
+ */
+export const useProposalVotesIndexer = ({ proposalId }: ProposalVotesRequest) => {
+  return useQuery({
+    queryKey: getProposalVotesQueryKey(proposalId),
+    queryFn: async (): Promise<ParsedProposalVotesResponse> => {
+      const res = await getProposalVotesIndexer({ proposalId })
 
-    const forVotes = proposalVotesQuery.data.find(vote => vote.support.toUpperCase() === "FOR")
-    const againstVotes = proposalVotesQuery.data.find(vote => vote.support.toUpperCase() === "AGAINST")
-    const abstainVotes = proposalVotesQuery.data.find(vote => vote.support.toUpperCase() === "ABSTAIN")
+      const forVotes = res.find(vote => vote.support.toUpperCase() === "FOR")
+      const againstVotes = res.find(vote => vote.support.toUpperCase() === "AGAINST")
+      const abstainVotes = res.find(vote => vote.support.toUpperCase() === "ABSTAIN")
 
-    const totalVoters = proposalVotesQuery.data.reduce((acc, vote) => acc + vote.voters, 0)
-    const totalPower = proposalVotesQuery.data.reduce((acc, vote) => BigInt(acc) + BigInt(vote.totalPower), BigInt(0))
-    const totalWeight = proposalVotesQuery.data.reduce((acc, vote) => BigInt(acc) + BigInt(vote.totalWeight), BigInt(0))
+      const totalVoters = res.reduce((acc, vote) => acc + vote.voters, 0)
+      const totalPower = res.reduce((acc, vote) => BigInt(acc) + BigInt(vote.totalPower), BigInt(0))
+      const totalWeight = res.reduce((acc, vote) => BigInt(acc) + BigInt(vote.totalWeight), BigInt(0))
 
-    const forVotesPercentage =
-      Number(BigInt(BigInt(forVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
-    const againstVotesPercentage =
-      Number(BigInt(BigInt(againstVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
-    const abstainVotesPercentage =
-      Number(BigInt(BigInt(abstainVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
+      const forVotesPercentage =
+        Number(BigInt(BigInt(forVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
+      const againstVotesPercentage =
+        Number(BigInt(BigInt(againstVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
+      const abstainVotesPercentage =
+        Number(BigInt(BigInt(abstainVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
 
-    return {
-      totalVoters,
-      totalPower,
-      totalWeight,
-      votes: {
-        for: {
-          totalWeight: forVotes?.totalWeight ?? "0",
-          voters: forVotes?.voters ?? 0,
-          percentage: forVotesPercentage,
+      return {
+        totalVoters,
+        totalPower,
+        totalWeight,
+        votes: {
+          for: {
+            totalWeight: forVotes?.totalWeight ?? "0",
+            voters: forVotes?.voters ?? 0,
+            percentage: forVotesPercentage,
+          },
+          against: {
+            totalWeight: againstVotes?.totalWeight ?? "0",
+            voters: againstVotes?.voters ?? 0,
+            percentage: againstVotesPercentage,
+          },
+          abstain: {
+            totalWeight: abstainVotes?.totalWeight ?? "0",
+            voters: abstainVotes?.voters ?? 0,
+            percentage: abstainVotesPercentage,
+          },
         },
-        against: {
-          totalWeight: againstVotes?.totalWeight ?? "0",
-          voters: againstVotes?.voters ?? 0,
-          percentage: againstVotesPercentage,
-        },
-        abstain: {
-          totalWeight: abstainVotes?.totalWeight ?? "0",
-          voters: abstainVotes?.voters ?? 0,
-          percentage: abstainVotesPercentage,
-        },
-      },
-    }
-  }, [proposalVotesQuery.data])
-
-  return {
-    ...proposalVotesQuery,
-    data: parsedProposalVotes,
-  }
+      }
+    },
+    enabled: !!proposalId,
+  })
 }
