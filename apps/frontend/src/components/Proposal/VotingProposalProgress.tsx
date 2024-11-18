@@ -26,7 +26,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   const { data: proposalVotes } = useProposalVotesIndexer({ proposalId })
 
   const totalVotes = useMemo(() => {
-    if (!proposalVotes || proposalVotes?.length !== 3) return BigInt(0)
+    if (!proposalVotes) return BigInt(0)
 
     const forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
     const againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
@@ -36,7 +36,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   }, [proposalVotes])
 
   const forVotesPercentage = useMemo(() => {
-    if (!proposalVotes || proposalVotes?.length !== 3 || totalVotes === BigInt(0)) return 0
+    if (!proposalVotes || totalVotes === BigInt(0)) return 0
 
     const forVotes = BigInt(proposalVotes[0]?.totalWeight ?? "0")
     const percentage = (forVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
@@ -45,7 +45,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   }, [proposalVotes, totalVotes])
 
   const againstVotesPercentage = useMemo(() => {
-    if (!proposalVotes || proposalVotes?.length !== 3 || totalVotes === BigInt(0)) return 0
+    if (!proposalVotes || totalVotes === BigInt(0)) return 0
 
     const againstVotes = BigInt(proposalVotes[1]?.totalWeight ?? "0")
     const percentage = (againstVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
@@ -54,7 +54,7 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   }, [proposalVotes, totalVotes])
 
   const abstainVotesPercentage = useMemo(() => {
-    if (!proposalVotes || proposalVotes?.length !== 3 || totalVotes === BigInt(0)) return 0
+    if (!proposalVotes || totalVotes === BigInt(0)) return 0
 
     const abstainVotes = BigInt(proposalVotes[2]?.totalWeight ?? "0")
     const percentage = (abstainVotes * BigInt(10000)) / totalVotes // Multiply by 10000 for precision, then divide
@@ -123,7 +123,11 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
             }, 0)
 
             const borderLeftRadius = index === 0 ? "md" : 0
-            const borderRightRadius = index === Object.keys(votes).length - 1 ? "md" : 0
+            const borderRightRadius =
+              index === Object.keys(votes).length - 1 ||
+              (index === Object.keys(votes).length - 2 && votes.abstain.percentage === 0)
+                ? "md"
+                : 0
             return (
               <Box
                 key={key}
