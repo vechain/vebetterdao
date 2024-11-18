@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next"
 export const TotalAllocations = () => {
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
-  const activeApps = xApps?.active
+  const activeApps = xApps?.allApps
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
