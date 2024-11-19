@@ -31,7 +31,7 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
     [XAppStatus.UNENDORSED_AND_ELIGIBLE]: {
       title: t("In grace period"),
       description:
-        "This app lost its score and must be re-endorsed by then end of {{roundReference}} to continue participating in allocation rounds.",
+        "This app lost its score and must be re-endorsed by the end of {{roundReference}} to continue participating in allocation rounds.",
       backgroundColor: "#FFF3E5",
       color: "#F29B32",
       icon: UilExclamationCircle,
