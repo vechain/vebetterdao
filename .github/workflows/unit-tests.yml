@@ -130,7 +130,8 @@ jobs:
           path: packages/contracts
           sparse-checkout: |
             packages/contracts
-
+          fetch-depth: 0
+          
       - name: Upload Coverage for ${{ matrix.shard }}
         uses: actions/upload-artifact@v3
         with:
