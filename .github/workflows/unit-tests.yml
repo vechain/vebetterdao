@@ -6,12 +6,10 @@ on:
     branches:
       - main
       - testnet
-      - gm-and-endorsements
   push:
     branches:
       - main
       - testnet
-      - Comment-only-solidity-changes
 
 jobs:
   check-changes:
@@ -128,7 +126,6 @@ jobs:
     name: Slither Analysis
     runs-on: ubuntu-latest
     needs: check-changes
-    if: needs.check-changes.outputs.contracts-changed == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -165,7 +162,7 @@ jobs:
       
       - name: Verify Slither Report
         run: cat slither-report.md
-        
+
       - name: Upload Slither report
         uses: actions/upload-artifact@v3
         with:
