@@ -17,7 +17,6 @@ import {
   waitForProposalToBeActive,
   ZERO_ADDRESS,
   participateInAllocationVoting,
-  upgradeGovernanceToV2,
   startNewAllocationRound,
   addNodeToken,
   bootstrapAndStartEmissions,
@@ -210,9 +209,9 @@ describe("VoterRewards - @shard7", () => {
       const receipt = await tx.wait()
       if (!receipt) throw new Error("No receipt")
 
-      let events = receipt?.logs
+      const events = receipt?.logs
 
-      let decodedEvents = events?.map(event => {
+      const decodedEvents = events?.map(event => {
         return voterRewards.interface.parseLog({
           topics: event?.topics as string[],
           data: event?.data as string,
@@ -454,6 +453,8 @@ describe("VoterRewards - @shard7", () => {
         emissions,
         b3tr,
         timeLock,
+        vechainNodesMock,
+        nodeManagement,
         vot3,
         treasury,
         x2EarnApps,
@@ -893,9 +894,14 @@ describe("VoterRewards - @shard7", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [
+          await vechainNodesMock.getAddress(),
+          await nodeManagement.getAddress(),
+          owner.address,
+          config.GM_NFT_NODE_TO_FREE_LEVEL,
+        ],
         { version: 2 },
-      )) as GalaxyMember
+      )) as unknown as GalaxyMember
 
       const voterRewardsV3 = (await upgradeProxy(
         "VoterRewardsV2",
@@ -1068,7 +1074,7 @@ describe("VoterRewards - @shard7", () => {
       expect(totalVotes).to.eql(ethers.parseEther("1400"))
 
       // Total voters should be tracked correctly
-      let totalVoters = await xAllocationVoting.totalVoters(roundId)
+      const totalVoters = await xAllocationVoting.totalVoters(roundId)
       expect(totalVoters).to.eql(BigInt(3))
 
       // Voter rewards checks
@@ -1267,7 +1273,7 @@ describe("VoterRewards - @shard7", () => {
       expect(totalVotes).to.eql(ethers.parseEther("1400"))
 
       // Total voters should be tracked correctly
-      let totalVoters = await xAllocationVoting.totalVoters(roundId)
+      const totalVoters = await xAllocationVoting.totalVoters(roundId)
       expect(totalVoters).to.eql(BigInt(3))
 
       // Voter rewards checks
@@ -1346,6 +1352,8 @@ describe("VoterRewards - @shard7", () => {
         minterAccount,
         x2EarnApps,
         veBetterPassport,
+        vechainNodesMock,
+        nodeManagement,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1575,6 +1583,8 @@ describe("VoterRewards - @shard7", () => {
         treasury,
         veBetterPassport,
         x2EarnApps,
+        nodeManagement,
+        vechainNodesMock,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1600,7 +1610,12 @@ describe("VoterRewards - @shard7", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [
+          await vechainNodesMock.getAddress(),
+          await nodeManagement.getAddress(),
+          owner.address,
+          config.GM_NFT_NODE_TO_FREE_LEVEL,
+        ],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -1719,6 +1734,8 @@ describe("VoterRewards - @shard7", () => {
         treasury,
         x2EarnApps,
         veBetterPassport,
+        vechainNodesMock,
+        nodeManagement,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1744,7 +1761,12 @@ describe("VoterRewards - @shard7", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [
+          await vechainNodesMock.getAddress(),
+          await nodeManagement.getAddress(),
+          owner.address,
+          config.GM_NFT_NODE_TO_FREE_LEVEL,
+        ],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -1870,6 +1892,8 @@ describe("VoterRewards - @shard7", () => {
         veBetterPassport,
         treasury,
         x2EarnApps,
+        nodeManagement,
+        vechainNodesMock,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -1896,7 +1920,12 @@ describe("VoterRewards - @shard7", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [
+          await vechainNodesMock.getAddress(),
+          await nodeManagement.getAddress(),
+          owner.address,
+          config.GM_NFT_NODE_TO_FREE_LEVEL,
+        ],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -2047,6 +2076,8 @@ describe("VoterRewards - @shard7", () => {
         treasury,
         veBetterPassport,
         x2EarnApps,
+        vechainNodesMock,
+        nodeManagement,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -2073,7 +2104,12 @@ describe("VoterRewards - @shard7", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [
+          await vechainNodesMock.getAddress(),
+          await nodeManagement.getAddress(),
+          owner.address,
+          config.GM_NFT_NODE_TO_FREE_LEVEL,
+        ],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -2193,6 +2229,8 @@ describe("VoterRewards - @shard7", () => {
         treasury,
         veBetterPassport,
         x2EarnApps,
+        vechainNodesMock,
+        nodeManagement,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -2219,7 +2257,12 @@ describe("VoterRewards - @shard7", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [
+          await vechainNodesMock.getAddress(),
+          await nodeManagement.getAddress(),
+          owner.address,
+          config.GM_NFT_NODE_TO_FREE_LEVEL,
+        ],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -2574,6 +2617,8 @@ describe("VoterRewards - @shard7", () => {
         treasury,
         xAllocationVoting,
         governor,
+        vechainNodesMock,
+        nodeManagement,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config: {
@@ -2604,7 +2649,12 @@ describe("VoterRewards - @shard7", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [
+          await vechainNodesMock.getAddress(),
+          await nodeManagement.getAddress(),
+          owner.address,
+          config.GM_NFT_NODE_TO_FREE_LEVEL,
+        ],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -2695,6 +2745,8 @@ describe("VoterRewards - @shard7", () => {
         voterRewards,
         xAllocationVoting,
         treasury,
+        vechainNodesMock,
+        nodeManagement,
         x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2726,7 +2778,12 @@ describe("VoterRewards - @shard7", () => {
         "GalaxyMemberV1",
         "GalaxyMember",
         await galaxyMemberV1.getAddress(),
-        [owner.address, owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+        [
+          await vechainNodesMock.getAddress(),
+          await nodeManagement.getAddress(),
+          owner.address,
+          config.GM_NFT_NODE_TO_FREE_LEVEL,
+        ],
         { version: 2 },
       )) as unknown as GalaxyMember
 
@@ -2878,6 +2935,7 @@ describe("VoterRewards - @shard7", () => {
         xAllocationVoting,
         veBetterPassport,
         treasury,
+        nodeManagement,
         x2EarnApps,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2912,7 +2970,12 @@ describe("VoterRewards - @shard7", () => {
               treasury: await treasury.getAddress(),
             },
           ],
-          [await vechainNodesMock.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+          [
+            await vechainNodesMock.getAddress(),
+            await nodeManagement.getAddress(),
+            owner.address,
+            config.GM_NFT_NODE_TO_FREE_LEVEL,
+          ],
         ],
         {
           versions: [undefined, 2],
@@ -3043,6 +3106,7 @@ describe("VoterRewards - @shard7", () => {
         vechainNodesMock,
         xAllocationVoting,
         treasury,
+        nodeManagement,
         x2EarnApps,
         veBetterPassport,
       } = await getOrDeployContractInstances({
@@ -3073,7 +3137,12 @@ describe("VoterRewards - @shard7", () => {
               treasury: await treasury.getAddress(),
             },
           ],
-          [await vechainNodesMock.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+          [
+            await vechainNodesMock.getAddress(),
+            await nodeManagement.getAddress(),
+            owner.address,
+            config.GM_NFT_NODE_TO_FREE_LEVEL,
+          ],
         ],
         {
           versions: [undefined, 2],
@@ -3231,6 +3300,7 @@ describe("VoterRewards - @shard7", () => {
         xAllocationVoting,
         treasury,
         x2EarnApps,
+        nodeManagement,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config: {
@@ -3261,7 +3331,12 @@ describe("VoterRewards - @shard7", () => {
               treasury: await treasury.getAddress(),
             },
           ],
-          [await vechainNodesMock.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
+          [
+            await vechainNodesMock.getAddress(),
+            await nodeManagement.getAddress(),
+            owner.address,
+            config.GM_NFT_NODE_TO_FREE_LEVEL,
+          ],
         ],
         {
           versions: [undefined, 2],
@@ -3472,18 +3547,18 @@ describe("VoterRewards - @shard7", () => {
 
       expect(await galaxyMember.levelOf(1)).to.equal(2) // Level 1
 
-      let nextCycle = await emissions.nextCycle() // next cycle round 2
+      const nextCycle = await emissions.nextCycle() // next cycle round 2
 
       await getVot3Tokens(voter1, "999")
       await getVot3Tokens(voter2, "1000")
       await getVot3Tokens(voter3, "1000")
 
       // Now we can create a new proposal
-      let tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [], nextCycle)
-      let proposalId = await getProposalIdFromTx(tx)
+      const tx = await createProposal(b3tr, B3trContract, voter1, description, functionToCall, [], nextCycle)
+      const proposalId = await getProposalIdFromTx(tx)
 
       const proposalState = await waitForProposalToBeActive(proposalId) // we are now in round 2
-      let xAllocationsRoundID = await xAllocationVoting.currentRoundId()
+      const xAllocationsRoundID = await xAllocationVoting.currentRoundId()
 
       expect(xAllocationsRoundID).to.equal(nextCycle)
       expect(proposalState).to.equal("1") // Active
@@ -3747,7 +3822,7 @@ describe("VoterRewards - @shard7", () => {
       expect(await voterRewards.getReward(xAllocationsRoundID, voter3.address)).to.equal(444444444444444444444444n)
 
       // Now we can create a new proposal
-      let tx = await createProposal(
+      const tx = await createProposal(
         b3tr,
         B3trContract,
         voter1,
@@ -3756,7 +3831,7 @@ describe("VoterRewards - @shard7", () => {
         [],
         xAllocationsRoundID + BigInt(2),
       )
-      let proposalId = await getProposalIdFromTx(tx)
+      const proposalId = await getProposalIdFromTx(tx)
 
       const proposalState = await waitForProposalToBeActive(proposalId)
 
