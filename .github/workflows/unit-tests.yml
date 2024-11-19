@@ -126,11 +126,99 @@ jobs:
       - name: Run Unit Tests and check Coverage for ${{ matrix.shard }}
         run: yarn test:coverage:solidity
 
+      - name: Checkout contracts folder only
+        uses: actions/checkout@v3
+        with:
+          path: packages/contracts
+          sparse-checkout: |
+            packages/contracts
+
       - name: Upload Coverage for ${{ matrix.shard }}
         uses: actions/upload-artifact@v3
         with:
           name: coverage-${{ matrix.shard }}
           path: coverage/coverage-final.json
+
+  combine-coverage:
+    name: Combine Coverage Reports
+    runs-on: ubuntu-latest
+    needs: run-coverage-shards
+    steps:
+      - name: Checkout contracts folder only
+        uses: actions/checkout@v3
+        with:
+          path: packages/contracts
+          sparse-checkout: |
+            packages/contracts
+
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Download All Coverage Artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for shard in shard1 shard2 shard3; do
+            echo "Downloading artifact coverage-$shard"
+            mkdir -p coverage-shards/$shard
+            gh run download --name "coverage-$shard" --dir coverage-shards/$shard
+          done
+
+      - name: Merge Coverage Reports
+        run: |
+          npx ts-node scripts/helpers/merge-coverage.ts
+
+      - name: Create .nyc_output Directory
+        run: mkdir -p .nyc_output
+
+      - name: Generate Final Coverage Report
+        run: |
+          yarn coverage:report
+
+      - name: Upload Unified Coverage Report to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          directory: coverage/
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+        name: Combine Coverage Reports
+        runs-on: ubuntu-latest
+        needs: run-coverage-shards
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v3
+
+          - name: Install Dependencies
+            run: yarn install --frozen-lockfile
+
+          - name: Download All Coverage Artifacts
+            env:
+              GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            run: |
+              for shard in shard1 shard2 shard3; do
+                echo "Downloading artifact coverage-$shard"
+                mkdir -p coverage-shards/$shard
+                gh run download --name "coverage-$shard" --dir coverage-shards/$shard
+              done
+
+          - name: Merge Coverage Reports
+            run: |
+              npx ts-node scripts/helpers/merge-coverage.ts
+
+          - name: Create .nyc_output Directory
+            run: mkdir -p .nyc_output
+
+          - name: Generate Final Coverage Report
+            run: |
+              yarn coverage:report
+
+          - name: Upload Unified Coverage Report to Codecov
+            uses: codecov/codecov-action@v4
+            with:
+              directory: coverage/
+            env:
+              CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   run-slither:
     name: Slither Analysis
