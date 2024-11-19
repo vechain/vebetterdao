@@ -128,7 +128,6 @@ jobs:
     name: Slither Analysis
     runs-on: ubuntu-latest
     needs: check-changes
-    if: needs.check-changes.outputs.contracts-changed == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
