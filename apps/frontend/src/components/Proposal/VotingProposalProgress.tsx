@@ -28,18 +28,18 @@ const VotingProposalProgress: React.FC<VotingProposalProgressProps> = ({ proposa
   const votes = {
     for: {
       color: forColor,
-      percentage: proposalVotes?.votes.for.percentage ?? 0,
+      percentage: proposalVotes?.votes.for.percentagePower ?? 0,
       icon: <Icon as={UilThumbsUp} boxSize={["20px", "20px", "16px"]} />,
     },
     against: {
       color: againstColor,
-      percentage: proposalVotes?.votes.against.percentage ?? 0,
+      percentage: proposalVotes?.votes.against.percentagePower ?? 0,
       icon: <Icon as={UilThumbsDown} boxSize={["20px", "20px", "16px"]} />,
     },
 
     abstain: {
       color: abstainColor,
-      percentage: proposalVotes?.votes.abstain.percentage ?? 0,
+      percentage: proposalVotes?.votes.abstain.percentagePower ?? 0,
       icon: <Image src={"/images/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
     },
   }
