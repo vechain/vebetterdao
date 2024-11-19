@@ -124,19 +124,11 @@ jobs:
       - name: Run Unit Tests and Check Coverage for ${{ matrix.shard }}
         run: yarn test:coverage:solidity
 
-      - name: Checkout contracts folder only
-        uses: actions/checkout@v3
-        with:
-          path: packages/contracts
-          sparse-checkout: |
-            packages/contracts
-          fetch-depth: 0
-          
       - name: Upload Coverage for ${{ matrix.shard }}
         uses: actions/upload-artifact@v3
         with:
           name: coverage-${{ matrix.shard }}
-          path: coverage/coverage-final.json
+          path: packages/contracts/coverage/coverage-final.json
 
   combine-coverage:
     name: Combine Coverage Reports
