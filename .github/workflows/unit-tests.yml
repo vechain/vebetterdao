@@ -168,6 +168,3 @@ jobs:
           with:
             name: slither-report
             path: slither-report.md
-
-        - name: Log Slither Report URL
-          run: echo "Slither analysis completed. Download the report from the 'Artifacts' tab or view the detailed markdown output at this URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts"
