@@ -759,7 +759,7 @@ export async function deployAll(config: ContractsConfig) {
           vechainNodesMock,
           shouldEndorseXApps(),
         )
-      } else await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock)
+      } else await setupTestEnvironment(emissions, x2EarnApps, vechainNodesMock, galaxyMember)
       break
     case "vechain_solo":
       await setupLocalEnvironment(

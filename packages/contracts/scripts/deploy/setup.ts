@@ -6,6 +6,7 @@ import {
   Treasury,
   VOT3,
   X2EarnApps,
+  GalaxyMember,
   X2EarnAppsV1,
   XAllocationVoting,
 } from "../../typechain-types"
@@ -15,6 +16,7 @@ import { endorseXApps, registerXDapps } from "../helpers/xApp"
 import { airdropB3trFromTreasury, airdropVTHO } from "../helpers/airdrop"
 import { mintVechainNodes, proposeUpgradeGovernance } from "../helpers"
 import { convertB3trForVot3 } from "../helpers/swap"
+import inquirer from "inquirer"
 
 const accounts = getTestKeys(13)
 
@@ -146,6 +148,7 @@ export const setupTestEnvironment = async (
   emissions: Emissions,
   x2EarnApps: X2EarnApps,
   vechainNodesMock: TokenAuction,
+  galaxyMember: GalaxyMember,
 ) => {
   console.log("================ Setup Testnet environment")
   const start = performance.now()
@@ -159,6 +162,29 @@ export const setupTestEnvironment = async (
   // Add x-apps to the XAllocationPool
   console.log("Adding x-apps...")
 
+  // Interactive CLI
+  const answers = await inquirer.prompt([
+    {
+      type: "checkbox",
+      name: "x2EarnApps",
+      message: "Select x2Earn apps to include:",
+      choices: APPS.map(app => app.name),
+    },
+    {
+      type: "confirm",
+      name: "mintNFT",
+      message: "Do you want to mint NFTs?",
+    },
+    {
+      type: "confirm",
+      name: "endorseApps",
+      message: "Do you want to endorse any apps?",
+    },
+  ])
+  console.log("Selected x2Earn apps:", answers.x2EarnApps)
+  console.log("Mint NFTs:", answers.mintNFT)
+  console.log("Endorse apps:", answers.endorseApps)
+
   // Add x-apps to the XAllocationPool
   const x2EarnAppsAddress = await x2EarnApps.getAddress()
   await registerXDapps(x2EarnAppsAddress, admin, APPS)
@@ -168,6 +194,27 @@ export const setupTestEnvironment = async (
   const allAccounts = getSeedAccounts(SeedStrategy.FIXED, 5 + APPS.length, 0)
   await mintVechainNodes(vechainNodesMock, allAccounts, padNodeTypes([7, 6, 5, 3, 2], allAccounts.length))
   console.log("NODE holders created")
+
+  // Endorsing all the accounts
+  const endorserAccounts = allAccounts
+
+  if (answers.mintNFT) {
+    await galaxyMember.freeMint()
+  }
+  if (answers.endorseApps) {
+    // Get unendorsed XAPPs
+    const unedorsedApps = await x2EarnApps.unendorsedAppIds()
+    const appsToEndorse = unedorsedApps.slice(0, unedorsedApps.length / 2)
+    await endorseXApps(endorserAccounts, x2EarnApps, appsToEndorse, vechainNodesMock)
+  }
+
+  // admin participates in governance
+  await galaxyMember.participatedInGovernance(admin.address)
+
+  // mint gm nfts
+  console.log("Minting GM NFTs to the admin...")
+  await galaxyMember.freeMint()
+  console.log("GM NFT minted")
 
   const end = performance.now()
   console.log(`Setup complete in ${end - start}ms`)
