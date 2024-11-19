@@ -149,7 +149,7 @@ jobs:
           key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
           restore-keys: |
             ${{ runner.os }}-solc-
-      
+
       - name: Compile contracts
         run: yarn contracts:compile
 
@@ -162,21 +162,12 @@ jobs:
           solc-version: "0.8.20"
           fail-on: none
           slither-args: --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
-          
-      - name: Upload Slither report
+
+      - name: Upload Slither Report
         uses: actions/upload-artifact@v3
         with:
           name: slither-report
           path: slither-report.md
 
-      - name: Create/update checklist as PR comment
-        uses: actions/github-script@v7
-        if: github.event_name == 'pull_request'
-        env:
-          REPORT: ${{ steps.slither.outputs.stdout }}
-        with:
-          script: |
-            const script = require('.github/scripts/comment')
-            const header = '# Slither report'
-            const body = process.env.REPORT
-            await script({ github, context, header, body })
+      - name: Log Slither Report URL
+        run: echo "Slither analysis completed. Download the report from the 'Artifacts' tab or view the detailed markdown output at this URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts"
