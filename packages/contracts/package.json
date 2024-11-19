@@ -9,6 +9,7 @@
     "test:hardhat": "npx hardhat test --network hardhat",
     "test:hardhat:shard": "npx hardhat test --network hardhat --grep \"$SHARD\"",
     "test:coverage:solidity": "hardhat coverage",
+    "coverage:report": "nyc report --reporter=lcov --reporter=text --reporter=html --temp-dir=./coverage",
     "compile": "npx hardhat compile",
     "deploy": "npx hardhat run scripts/deploy",
     "deploy:local": "npx hardhat run scripts/deploy --network vechain_solo",
@@ -72,7 +73,8 @@
     "solidity-docgen": "^0.6.0-beta.36",
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.0",
-    "typescript": ">=4.5.0"
+    "typescript": ">=4.5.0",
+    "nyc": "^17.1.0"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
