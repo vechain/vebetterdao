@@ -233,6 +233,16 @@ interface IVeBetterPassport {
   /// @return The cumulative score of the user
   function getCumulativeScoreWithDecay(address user, uint256 lastRound) external view returns (uint256);
 
+  /// @notice Gets the cumulative score of a user based on exponential decay and ignoring the score of specific apps
+  /// @param user - the user address
+  /// @param lastRound - the round to consider as a starting point for the cumulative score
+  /// @param appsToIgnore - the apps to ignore in the calculation
+  function getCumulativeScoreWithDecayAndExclusions(
+    address user,
+    uint256 lastRound,
+    bytes32[] memory appsToIgnore
+  ) external view returns (uint256);
+
   /// @notice Gets the round score of a user
   /// @param user The user address
   /// @param round The round to check
