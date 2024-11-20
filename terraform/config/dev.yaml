@@ -3,7 +3,6 @@ domain_name           : dev.b3tr.vechain.org
 origin_id             : dev.b3tr.vechain.org
 bucket_prefix         : dev.b3tr.vechain.org
 domain_zone           : Z09214252JN9OW8DF7KO4
-network               : testnet
 
 cloudwatch_alarms     : true
 slack_alert_channel   : C06M2KBPGSY
