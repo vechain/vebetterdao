@@ -1,8 +1,8 @@
 // import { useTranslation } from "react-i18next"
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { GalaxyCarrousel } from "./GalaxyCarrousel"
-import { Heading, Box, Text, Card, HStack, Input, Image, Stack, CardBody } from "@chakra-ui/react"
+import { Heading, Box, Card, HStack, Input, Image, Stack, CardBody, Spinner } from "@chakra-ui/react"
 
 // useAllocationsRoundsEvents
 // import { useVotingRewards } from "@/api"
@@ -20,7 +20,14 @@ export const GalaxyRewardsCalculator = () => {
   // const [selectedAccountRoundId, setselectedAccountRoundId] = useState<string | undefined>()
   // const [selectedRoundId, setselectedRoundId] = useState<string | undefined>()
   const [selectedGMLevel, setSelectedGMLevel] = useState<string | undefined>(undefined)
+  const [inputVOT3, setInputVOT3] = useState<number | undefined>(undefined)
+  const [estimateRewards, setEstimateRewards] = useState<number | undefined>(undefined)
+  const [isLoading, setLoading] = useState<boolean>(false)
 
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value
+    setInputVOT3(value ? parseFloat(value) : undefined)
+  }
   // const [b3TRRewardsApprox, setB3TRRewardsApprox] = useState<number | null>(null)
 
   // const { data: votingRewardsData, isLoading } = useVotingRewards(
@@ -54,10 +61,20 @@ export const GalaxyRewardsCalculator = () => {
   const handleNftSelect = (GMLevel: string | undefined) => {
     setSelectedGMLevel(GMLevel)
   }
+
+  useMemo(() => {
+    setLoading(true)
+    if (!selectedGMLevel || !inputVOT3) {
+      setEstimateRewards(undefined)
+      return
+    }
+    // Example calculation (TODO: replace with the usePotentialRewards once finished hook)
+    const _estimateRewards = (inputVOT3 * parseFloat(selectedGMLevel)).toFixed(2)
+    setEstimateRewards(parseFloat(_estimateRewards))
+    setLoading(false)
+  }, [selectedGMLevel, inputVOT3])
+
   console.log("selectedGMLevel", selectedGMLevel)
-
-  // TODO: remember to put in the PR the technical adaptation of the formula for the rewards calculation for each NFTMultiplier
-
   return (
     <Card
       variant="baseWithBorder"
@@ -103,12 +120,22 @@ export const GalaxyRewardsCalculator = () => {
                 display="flex"
                 flexDirection="column"
                 justifyContent="space-between">
-                <Heading fontSize="sm" fontWeight="light" color="gray.800">
-                  {t("VOT3 amount")}
-                </Heading>
+                <Heading fontSize="x-large">{t("VOT3 amount")}</Heading>
                 <HStack display="flex" alignItems="center">
                   <Image boxSize="7" rounded="full" bg="gray.800" src="/images/logo/vot3_logo.svg/" alt="" />
-                  <Input placeholder="Enter VOT3 Stack" />
+                  <Input
+                    type="number"
+                    bg="transparent"
+                    fontWeight="semibold"
+                    px={2}
+                    w="full"
+                    fontSize="4xl"
+                    placeholder="Powered VOT3"
+                    border="none"
+                    focusBorderColor="none"
+                    value={inputVOT3 !== undefined ? inputVOT3 : ""}
+                    onChange={handleInputChange}
+                  />
                 </HStack>
               </Box>
             </Box>
@@ -131,24 +158,26 @@ export const GalaxyRewardsCalculator = () => {
                 display="flex"
                 flexDirection="column"
                 justifyContent="space-between">
-                <Text fontSize="sm" fontWeight="light" color="gray.800">
-                  {t("Estimated Rewards")}
-                </Text>
+                <Heading fontSize="x-large">{t("Estimated Rewards")}</Heading>
                 <HStack display="flex" alignItems="center">
                   <Image boxSize="7" rounded="full" bg="gray.800" src="/images/logo/b3tr_logo.svg/" alt="" />
-                  <Input
-                    type="text"
-                    bg="transparent"
-                    color="gray.900"
-                    fontWeight="semibold"
-                    px={2}
-                    w="full"
-                    fontSize="4xl"
-                    focusBorderColor="none"
-                    placeholder="0"
-                    readOnly
-                    value="17.56" // TODO : Dynamic values
-                  />
+                  {isLoading ? (
+                    <Spinner />
+                  ) : (
+                    <Input
+                      type="text"
+                      bg="transparent"
+                      color="gray.900"
+                      fontWeight="semibold"
+                      px={2}
+                      w="full"
+                      fontSize="4xl"
+                      focusBorderColor="none"
+                      placeholder="0"
+                      readOnly
+                      value={estimateRewards} // TODO : Dynamic values
+                    />
+                  )}
                 </HStack>
               </Box>
             </Box>
@@ -263,5 +292,26 @@ export const GalaxyRewardsCalculator = () => {
     //     </HStack>
     //   </HStack>
     // </Box>
+  )
+}
+
+export type InputBoxProps = {
+  value?: string
+}
+export const InputBox = ({ value }: InputBoxProps) => {
+  return (
+    <Input
+      type="text"
+      bg="transparent"
+      color="gray.900"
+      fontWeight="semibold"
+      px={2}
+      w="full"
+      fontSize="4xl"
+      focusBorderColor="none"
+      placeholder="0"
+      readOnly
+      value={value} // TODO : Dynamic values
+    />
   )
 }
