@@ -5646,6 +5646,228 @@ describe("VeBetterPassport - @shard5", function () {
       expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 5)).to.equal(780)
     })
 
+    it("Should calculate cumulative score correctly excluding certain apps", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      await endorseApp(app1Id, otherAccounts[2])
+
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      await endorseApp(app2Id, otherAccounts[3])
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+      await endorseApp(app3Id, otherAccounts[4])
+
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner.address)).to.be
+        .true
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
+
+      // Sets app1 security to APP_SECURITY.LOW
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+
+      // Sets app2 security to APP_SECURITY.MEDIUM
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 2)
+
+      // Sets app3 security to APP_SECURITY.HIGH
+      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 3)
+
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 2)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app2Id, 3)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app2Id, 4)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app3Id, 5)
+
+      expect(await veBetterPassport.userRoundScore(otherAccount, 1)).to.equal(100)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 2)).to.equal(100)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 3)).to.equal(200)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 4)).to.equal(200)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 5)).to.equal(400)
+
+      /*
+        Round 1 score: 100
+        Round 2 score: 100
+        Round 3 score: 200
+        Round 4 score: 200
+        Round 5 score: 400
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        round 1 = 100 + (0 * 0.8) = 100
+        round 2 = 100 + (100 * 0.8) = 180
+        round 3 = 200 + (180 * 0.8) = 344
+        round 4 = 200 + (344 * 0.8) = 475,2 => 475 
+        round 5 = 400 + (475 * 0.8) = 780
+      */
+      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 5)).to.equal(780)
+
+      /*
+
+        Exclude app3 from cumaltive score calculation
+
+        Round 1 score: 100
+        Round 2 score: 100
+        Round 3 score: 200
+        Round 4 score: 200
+        Round 5 score: 0
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        round 1 = 100 + (0 * 0.8) = 100
+        round 2 = 100 + (100 * 0.8) = 180
+        round 3 = 200 + (180 * 0.8) = 344
+        round 4 = 200 + (344 * 0.8) = 475,2 => 475 
+        round 5 = 0 + (475 * 0.8) = 380
+      */
+      expect(await veBetterPassport.getCumulativeScoreWithDecayAndExclusions(otherAccount, 5, [app3Id])).to.equal(380)
+
+      /*
+        Exclude app1 and app3 from cumaltive score calculation
+
+        Round 1 score: 0
+        Round 2 score: 0
+        Round 3 score: 200
+        Round 4 score: 200
+        Round 5 score: 0
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        round 1 = 0 + (0 * 0.8) = 0
+        round 2 = 0 + (0 * 0.8) = 0
+        round 3 = 200 + (0 * 0.8) = 200
+        round 4 = 200 + (200 * 0.8) = 360
+        round 5 = 0 + (360 * 0.8) = 288
+      */
+      expect(
+        await veBetterPassport.getCumulativeScoreWithDecayAndExclusions(otherAccount, 5, [app1Id, app3Id]),
+      ).to.equal(288)
+    })
+
+    it("Should calculate cumulative score correctly excluding certain apps even if use never interacetd with app", async function () {
+      const config = createTestConfig()
+      config.VEPASSPORT_DECAY_RATE = 20
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      //Add apps
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+
+      await endorseApp(app1Id, otherAccounts[2])
+
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
+
+      await endorseApp(app2Id, otherAccounts[3])
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
+      await endorseApp(app3Id, otherAccounts[4])
+
+      const app4Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[5].address))
+
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
+      await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner.address)).to.be
+        .true
+      expect(await veBetterPassport.hasRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner.address)).to.be.true
+
+      // Sets app1 security to APP_SECURITY.LOW
+      await veBetterPassport.connect(owner).setAppSecurity(app1Id, 1)
+
+      // Sets app2 security to APP_SECURITY.MEDIUM
+      await veBetterPassport.connect(owner).setAppSecurity(app2Id, 2)
+
+      // Sets app3 security to APP_SECURITY.HIGH
+      await veBetterPassport.connect(owner).setAppSecurity(app3Id, 3)
+
+      // Round 1
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 1)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app3Id, 1)
+
+      // Round 2
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app2Id, 2)
+
+      // Round 3
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app2Id, 3)
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app3Id, 3)
+
+      // Round 4
+
+      // Round 5
+      await veBetterPassport.connect(owner).registerActionForRound(otherAccount, app1Id, 5)
+
+      expect(await veBetterPassport.userRoundScore(otherAccount, 1)).to.equal(500)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 2)).to.equal(200)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 3)).to.equal(600)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 4)).to.equal(0)
+      expect(await veBetterPassport.userRoundScore(otherAccount, 5)).to.equal(100)
+
+      /*
+        User has never interacted with app4 so should not have any impact on cumulative score
+
+        Round 1 score: 100 + 400 = 500
+        Round 2 score: 200 
+        Round 3 score: 200 + 400 = 600
+        Round 4 score: 0
+        Round 5 score: 100
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        round 1 = 500 + (0 * 0.8) = 500
+        round 2 = 200 + (500 * 0.8) = 600
+        round 3 = 600 + (600 * 0.8) = 1080
+        round 4 = 0 + (1080 * 0.8) = 864
+        round 5 = 100 + (864 * 0.8) = 791.2
+      */
+      expect(await veBetterPassport.getCumulativeScoreWithDecayAndExclusions(otherAccount, 5, [app4Id])).to.equal(791)
+
+      /*
+        Exclude app3 from cumaltive score calculation
+
+        Round 1 score: 100 + 400 = 500 - 400 = 100
+        Round 2 score: 200 
+        Round 3 score: 200 + 400 = 600 - 400 = 200
+        Round 4 score: 0
+        Round 5 score: 100
+
+        round N = [round N score] + ([cumulative score] * [1 - decay factor])
+
+        round 1 = 100 + (0 * 0.8) = 100
+        round 2 = 200 + (100 * 0.8) = 280
+        round 3 = 200 + (280 * 0.8) = 424
+        round 4 = 0 + (424 * 0.8) = 339.2
+        round 5 = 100 + (339.2 * 0.8) = 371.36
+      */
+      expect(await veBetterPassport.getCumulativeScoreWithDecayAndExclusions(otherAccount, 5, [app3Id])).to.equal(371)
+    })
+
     it("Should calculate decay from first round if last round specified is greater than cumulative rounds to look for", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
