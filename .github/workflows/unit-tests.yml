@@ -144,12 +144,12 @@ jobs:
 
       - name: Download All Coverage Artifacts
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Pass GitHub token
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p packages/contracts/coverage-shards
           for shard in shard0 shard2 shard3 shard4 shard5 shard6 shard7 shard8 shard9 shard10 shard11 shard12 shard13 shard14 shard15; do
             echo "Downloading artifact coverage-$shard"
-            gh run download --name "coverage-$shard" --dir packages/contracts/coverage-shards/$shard
+            gh run download --artifact="coverage-$shard" --dir packages/contracts/coverage-shards/$shard
           done
 
       - name: Debug Downloaded Artifacts
