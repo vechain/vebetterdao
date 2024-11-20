@@ -52,7 +52,7 @@ resource "aws_api_gateway_method_response" "mint_creator_nft_post_resp" {
 
 resource "aws_api_gateway_method" "mint_creator_nft_post_req" {
   api_key_required = "true"
-  authorization    = "NONE"
+  authorization    = "AWS_IAM"
   http_method      = "POST"
   resource_id      = aws_api_gateway_rest_api.mint_creator_nft_api.root_resource_id
   rest_api_id      = aws_api_gateway_rest_api.mint_creator_nft_api.id

@@ -81,3 +81,24 @@ resource "aws_iam_role_policy_attachment" "secrets_manager_policy_attachment" {
   role       = aws_iam_role.mint_creator_nft_role.name
   policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
 }
+
+resource "aws_lambda_function_url" "url" {
+  function_name      = aws_lambda_function.mint_creator_nft_function.function_name
+  authorization_type = "AWS_IAM"
+}
+
+resource "aws_lambda_permission" "allow_api_gw_access" {
+  statement_id  = "AllowAPIgatewayInvokation"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.mint_creator_nft_function.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.mint_creator_nft_api.execution_arn}/*/POST/"
+}
+
+resource "aws_lambda_permission" "function_url_access" {
+  statement_id           = "FunctionURLAllowPublicAccess"
+  action                 = "lambda:InvokeFunctionUrl"
+  function_name          = aws_lambda_function.mint_creator_nft_function.function_name
+  principal              = "*"
+  function_url_auth_type = "NONE"
+}
