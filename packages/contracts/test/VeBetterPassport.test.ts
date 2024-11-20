@@ -132,7 +132,7 @@ describe("VeBetterPassport - @shard5", function () {
         forceDeploy: true,
       })
 
-      expect(await veBetterPassport.version()).to.equal("2")
+      expect(await veBetterPassport.version()).to.equal("3")
     })
     it("Should not be able to initialize twice", async function () {
       const config = createTestConfig()
