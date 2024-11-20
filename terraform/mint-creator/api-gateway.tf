@@ -10,6 +10,11 @@ resource "aws_api_gateway_rest_api" "mint_creator_nft_api" {
   name = "Creator NFT API Gateway"
 }
 
+resource "aws_api_gateway_api_key" "freshdesk_api_key_name" {
+  name = "FreshdeskWebhookTrigger"
+  description = "Api Key for Freshdesk Webhook Trigger call"
+}
+
 resource "aws_api_gateway_resource" "mint_creator_nft_resource" {
   rest_api_id = aws_api_gateway_rest_api.mint_creator_nft_api.id
   parent_id   = aws_api_gateway_rest_api.mint_creator_nft_api.root_resource_id
@@ -34,7 +39,7 @@ resource "aws_api_gateway_stage" "mint_creator_nft_stage" {
   cache_cluster_enabled = "false"
   deployment_id         = aws_api_gateway_deployment.mint_creator_nft_deployment.id
   rest_api_id           = aws_api_gateway_rest_api.mint_creator_nft_api.id
-  stage_name            = "${local.config.network}-creator-nft"
+  stage_name            = "${local.network}-creator-nft"
   xray_tracing_enabled  = "false"
 }
 
@@ -77,7 +82,7 @@ resource "aws_api_gateway_model" "error_model" {
 resource "aws_api_gateway_usage_plan" "client_usage_plan" {
   api_stages {
     api_id = aws_api_gateway_rest_api.mint_creator_nft_api.id
-    stage  = "${local.config.network}-creator-nft"
+    stage  = "${local.network}-creator-nft"
   }
 
   name = "Freshdesk Webhook Client Usage Plan"
@@ -92,6 +97,12 @@ resource "aws_api_gateway_usage_plan" "client_usage_plan" {
     burst_limit = "60"
     rate_limit  = "30"
   }
+}
+
+resource "aws_api_gateway_usage_plan_key" "main" {
+  key_id        = aws_api_gateway_api_key.freshdesk_api_key_name.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.client_usage_plan.id
 }
 
 resource "aws_api_gateway_integration" "mint_creator_nft_api_integration" {
@@ -113,20 +124,4 @@ resource "aws_api_gateway_integration_response" "mint_creator_nft_api_integratio
   resource_id = aws_api_gateway_resource.mint_creator_nft_resource.id
   rest_api_id = aws_api_gateway_rest_api.mint_creator_nft_api.id
   status_code = "200"
-}
-
-resource "aws_api_gateway_api_key" "fresheshdesk_api_key" {
-  description = "Api Key for Freshdesk Webhook Trigger call"
-  enabled     = "true"
-  name        = "FreshdeskWebhookTrigger"
-  value       = jsondecode(data.aws_secretsmanager_secret_version.freshdesk_api_key_secret_value.secret_string)["mint_creator_nft_freshdesk_api_key"]
-}
-
-// Freshdesk API key
-data "aws_secretsmanager_secret" "freshdesk_api_key_secret" {
-  name = local.config.freshdesk_api_key_name
-}
-   
-data "aws_secretsmanager_secret_version" "freshdesk_api_key_secret_value" {
-  secret_id = data.aws_secretsmanager_secret.freshdesk_api_key_secret.id
 }

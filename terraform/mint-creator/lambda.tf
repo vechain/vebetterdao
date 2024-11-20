@@ -1,18 +1,24 @@
+
+locals {
+  env     = terraform.workspace
+  network = local.env == "prod" ? "mainnet" : "testnet"
+}
+
 resource "aws_lambda_function" "mint_creator_nft_function" {
   architectures = ["x86_64"]
-  filename = "../packages/lambda/dist/staging/mintCreatorNFT/index.zip"
-  source_code_hash = filebase64sha256("../packages/lambda/dist/staging/mintCreatorNFT/index.zip")
+  filename = "../../packages/lambda/dist/${local.network}/mintCreatorNFT/index.zip"
+  source_code_hash = filebase64sha256("../../packages/lambda/dist/${local.network}/mintCreatorNFT/index.zip")
 
   ephemeral_storage {
     size = "512"
   }
 
-  function_name = "mint-creator-nft-${local.config.network}"
+  function_name = "mint-creator-nft-${local.network}"
   handler       = "index.handler"
 
   logging_config {
     log_format = "Text"
-    log_group  = "/aws/lambda/mint-creator-nft-${local.config.network}"
+    log_group  = "/aws/lambda/mint-creator-nft-${local.network}"
   }
 
   memory_size                    = "128"
