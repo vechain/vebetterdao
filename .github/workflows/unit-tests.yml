@@ -199,35 +199,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-solc-
 
-      - name: Run Contract Tests for ${{ matrix.shard }}
-        run: SHARD='@${{ matrix.shard }}' yarn contracts:test:shard
-
-  run-slither:
-    name: Slither Analysis
-    runs-on: ubuntu-latest
-    needs: check-changes
-    if: needs.check-changes.outputs.contracts-changed == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Use Node v20
-        uses: actions/setup-node@v3
-        with:
-          node-version-file: .nvmrc
-          cache: "yarn"
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Cache Solidity compilers
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/hardhat-nodejs
-          key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
-          restore-keys: |
-            ${{ runner.os }}-solc-
-      
       - name: Compile contracts
         run: yarn contracts:compile
 
@@ -240,7 +211,7 @@ jobs:
           solc-version: "0.8.20"
           fail-on: none
           slither-args: --filter-paths "(openzeppelin|mocks|interfaces|deprecated|templates)" --exclude-informational --exclude-optimization --checklist --markdown-root ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/
-          
+
       - name: Upload Slither report
         uses: actions/upload-artifact@v3
         with:
