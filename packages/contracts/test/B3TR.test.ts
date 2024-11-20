@@ -6,7 +6,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
 describe("B3TR Token - @shard6", function () {
   describe("Deployment", function () {
-    it("should deploy the contract shard1t", async function () {
+    it("should deploy the contract", async function () {
       const { b3tr } = await getOrDeployContractInstances({ forceDeploy: false })
       await b3tr.waitForDeployment()
       const address = await b3tr.getAddress()

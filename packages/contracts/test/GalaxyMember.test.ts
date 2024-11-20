@@ -30,7 +30,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
 describe("Galaxy Member - @shard6", () => {
   describe("Contract parameters", () => {
-    it("Should have correct parameters set on deployment shard2t", async () => {
+    it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
       expect(await galaxyMember.name()).to.equal("GalaxyMember")

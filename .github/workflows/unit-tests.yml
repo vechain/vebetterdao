@@ -93,10 +93,11 @@ jobs:
     name: Contract Testing
     runs-on: ubuntu-latest
     needs: check-changes
+    if: needs.check-changes.outputs.contracts-changed == 'true'
     strategy:
       fail-fast: false
       matrix:
-        shard: [shard1t, shard2t]
+        shard: [shard1, shard2, shard3, shard4, shard5, shard6, shard7]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -146,7 +147,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Pass GitHub token
         run: |
           mkdir -p packages/contracts/coverage-shards
-          for shard in shard1t shard2t; do
+          for shard in shard1 shard2 shard3 shard4 shard5 shard6 shard7; do
             echo "Downloading artifact coverage-$shard"
             gh run download --name "coverage-$shard" --dir packages/contracts/coverage-shards/$shard
           done
