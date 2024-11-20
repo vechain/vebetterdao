@@ -4,10 +4,10 @@ resource "aws_api_gateway_rest_api" "mint_creator_nft_api" {
   disable_execute_api_endpoint = "false"
 
   endpoint_configuration {
-    types = ["REGIONAL"]
+    types = ["EDGE"]
   }
 
-  name = "Creator NFT API Gateway"
+  name = "mint-creator-nft-api-gateway"
 }
 
 resource "aws_api_gateway_api_key" "freshdesk_api_key_name" {
@@ -15,17 +15,11 @@ resource "aws_api_gateway_api_key" "freshdesk_api_key_name" {
   description = "Api Key for Freshdesk Webhook Trigger call"
 }
 
-resource "aws_api_gateway_resource" "mint_creator_nft_resource" {
-  rest_api_id = aws_api_gateway_rest_api.mint_creator_nft_api.id
-  parent_id   = aws_api_gateway_rest_api.mint_creator_nft_api.root_resource_id
-  path_part   = "/"
-}
-
 resource "aws_api_gateway_deployment" "mint_creator_nft_deployment" {
   rest_api_id = aws_api_gateway_rest_api.mint_creator_nft_api.id
   triggers = {
     redeployment = sha1(jsonencode([
-      aws_api_gateway_resource.mint_creator_nft_resource.id,
+      aws_api_gateway_rest_api.mint_creator_nft_api.root_resource_id,
       aws_api_gateway_method.mint_creator_nft_post_req.id,
       aws_api_gateway_integration.mint_creator_nft_api_integration.id,
     ]))
@@ -44,8 +38,9 @@ resource "aws_api_gateway_stage" "mint_creator_nft_stage" {
 }
 
 resource "aws_api_gateway_method_response" "mint_creator_nft_post_resp" {
+  depends_on = [aws_api_gateway_integration.mint_creator_nft_api_integration]
   http_method = "POST"
-  resource_id = aws_api_gateway_resource.mint_creator_nft_resource.id
+  resource_id = aws_api_gateway_rest_api.mint_creator_nft_api.root_resource_id
 
   response_models = {
     "application/json" = "Empty"
@@ -59,27 +54,12 @@ resource "aws_api_gateway_method" "mint_creator_nft_post_req" {
   api_key_required = "true"
   authorization    = "NONE"
   http_method      = "POST"
-  resource_id      = aws_api_gateway_resource.mint_creator_nft_resource.id
+  resource_id      = aws_api_gateway_rest_api.mint_creator_nft_api.root_resource_id
   rest_api_id      = aws_api_gateway_rest_api.mint_creator_nft_api.id
 }
 
-resource "aws_api_gateway_model" "empty_model" {
-  content_type = "application/json"
-  description  = "This is a default empty schema model"
-  name         = "Empty"
-  rest_api_id  = aws_api_gateway_rest_api.mint_creator_nft_api.id
-  schema       = "{\n  \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n  \"title\" : \"Empty Schema\",\n  \"type\" : \"object\"\n}"
-}
-
-resource "aws_api_gateway_model" "error_model" {
-  content_type = "application/json"
-  description  = "This is a default error schema model"
-  name         = "Error"
-  rest_api_id  = aws_api_gateway_rest_api.mint_creator_nft_api.id
-  schema       = "{\n  \"$schema\" : \"http://json-schema.org/draft-04/schema#\",\n  \"title\" : \"Error Schema\",\n  \"type\" : \"object\",\n  \"properties\" : {\n    \"message\" : { \"type\" : \"string\" }\n  }\n}"
-}
-
 resource "aws_api_gateway_usage_plan" "client_usage_plan" {
+  depends_on = [aws_api_gateway_stage.mint_creator_nft_stage]
   api_stages {
     api_id = aws_api_gateway_rest_api.mint_creator_nft_api.id
     stage  = "${local.network}-creator-nft"
@@ -106,13 +86,13 @@ resource "aws_api_gateway_usage_plan_key" "main" {
 }
 
 resource "aws_api_gateway_integration" "mint_creator_nft_api_integration" {
-  cache_namespace         = aws_api_gateway_resource.mint_creator_nft_resource.id
+  cache_namespace         = aws_api_gateway_rest_api.mint_creator_nft_api.root_resource_id
   connection_type         = "INTERNET"
   content_handling        = "CONVERT_TO_TEXT"
   http_method             = "POST"
   integration_http_method = "POST"
   passthrough_behavior    = "WHEN_NO_MATCH"
-  resource_id             = aws_api_gateway_resource.mint_creator_nft_resource.id
+  resource_id             = aws_api_gateway_rest_api.mint_creator_nft_api.root_resource_id
   rest_api_id             = aws_api_gateway_rest_api.mint_creator_nft_api.id
   timeout_milliseconds    = "29000"
   type                    = "AWS_PROXY"
@@ -120,8 +100,9 @@ resource "aws_api_gateway_integration" "mint_creator_nft_api_integration" {
 }
 
 resource "aws_api_gateway_integration_response" "mint_creator_nft_api_integration_resp" {
+  depends_on = [aws_api_gateway_integration.mint_creator_nft_api_integration]
   http_method = "POST"
-  resource_id = aws_api_gateway_resource.mint_creator_nft_resource.id
+  resource_id = aws_api_gateway_rest_api.mint_creator_nft_api.root_resource_id
   rest_api_id = aws_api_gateway_rest_api.mint_creator_nft_api.id
   status_code = "200"
 }
