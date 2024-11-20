@@ -143,31 +143,35 @@ jobs:
             packages/contracts
 
       - name: Install Dependencies
+        working-directory: packages/contracts
         run: yarn install --frozen-lockfile
 
       - name: Download All Coverage Artifacts
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          mkdir -p packages/contracts/coverage-shards
           for shard in shard1t shard2t; do
             echo "Downloading artifact coverage-$shard"
-            mkdir -p coverage-shards/$shard
-            gh run download --name "coverage-$shard" --dir coverage-shards/$shard
+            gh run download --name "coverage-$shard" --dir packages/contracts/coverage-shards/$shard
           done
 
+      - name: Debug Downloaded Artifacts
+        run: ls -la packages/contracts/coverage-shards
+
       - name: Merge Coverage Reports
+        working-directory: packages/contracts
         run: npx ts-node scripts/helpers/merge-coverage.ts
 
       - name: Create .nyc_output Directory
-        run: mkdir -p .nyc_output
+        run: mkdir -p packages/contracts/.nyc_output
 
       - name: Generate Final Coverage Report
+        working-directory: packages/contracts
         run: yarn coverage:report
 
       - name: Upload Unified Coverage Report to Codecov
         uses: codecov/codecov-action@v4
         with:
-          directory: coverage/
+          directory: packages/contracts/coverage/
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
