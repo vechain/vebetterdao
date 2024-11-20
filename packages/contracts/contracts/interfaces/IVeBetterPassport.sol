@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import { PassportTypes } from "../ve-better-passport/libraries/PassportTypes.sol";
 import { IX2EarnApps } from "./IX2EarnApps.sol";
 import { IXAllocationVotingGovernor } from "./IXAllocationVotingGovernor.sol";
+import { IGalaxyMember } from "./IGalaxyMember.sol";
 
 interface IVeBetterPassport {
   // ---------- Events ---------- //
