@@ -61,10 +61,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Set Node.js Memory Limit
-        env:
-          NODE_OPTIONS: --max-old-space-size=8192
-
       - name: Cache Solidity compilers
         uses: actions/cache@v3
         with:
@@ -98,6 +94,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: check-changes
     if: needs.check-changes.outputs.contracts-changed == 'true'
+    env:
+      NODE_OPTIONS: --max-old-space-size=8192
     strategy:
       fail-fast: false
       matrix:
