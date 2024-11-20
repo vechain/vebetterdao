@@ -36,7 +36,7 @@ import {
 } from "../typechain-types"
 import { endorseApp } from "./helpers/xnodes"
 
-describe("VeBetterPassport - @shard5", function () {
+describe("VeBetterPassport - @shard8", function () {
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
       const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await getOrDeployContractInstances({
