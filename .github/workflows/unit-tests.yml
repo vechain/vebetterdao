@@ -135,15 +135,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: run-contract-tests
     steps:
-      - name: Checkout contracts folder only
+      - name: Checkout contracts folder and root package.json
         uses: actions/checkout@v3
         with:
-          path: packages/contracts
           sparse-checkout: |
             packages/contracts
+            package.json
+            yarn.lock
 
-      - name: Install Dependencies
-        working-directory: packages/contracts
+      - name: Install Dependencies at Root
+        working-directory: .
         run: yarn install --frozen-lockfile
 
       - name: Download All Coverage Artifacts
