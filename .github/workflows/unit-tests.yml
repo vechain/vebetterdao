@@ -141,16 +141,16 @@ jobs:
       - name: Install Dependencies at Root
         run: yarn install --frozen-lockfile
 
-    - name: Download All Coverage Artifacts
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Pass GitHub token
-      run: |
-        mkdir -p packages/contracts/coverage-shards
-        for shard in shard1t shard2t; do
-          echo "Downloading artifact coverage-$shard"
-          gh run download --name "coverage-$shard" --dir packages/contracts/coverage-shards/$shard
-        done
-        
+      - name: Download All Coverage Artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Pass GitHub token
+        run: |
+          mkdir -p packages/contracts/coverage-shards
+          for shard in shard1t shard2t; do
+            echo "Downloading artifact coverage-$shard"
+            gh run download --name "coverage-$shard" --dir packages/contracts/coverage-shards/$shard
+          done
+
       - name: Debug Downloaded Artifacts
         run: ls -la packages/contracts/coverage-shards
 
