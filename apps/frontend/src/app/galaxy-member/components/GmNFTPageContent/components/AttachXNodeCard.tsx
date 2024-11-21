@@ -27,7 +27,7 @@ export const AttachXNodeCard = () => {
     return null
   }
   return (
-    <Card variant="baseWithBorder">
+    <Card variant="baseWithBorder" w="full">
       <CardBody>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
