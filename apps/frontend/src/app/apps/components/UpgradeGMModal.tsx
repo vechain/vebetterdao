@@ -17,12 +17,17 @@ import {
 
 interface UpgradeGMModalProps {
   tokenId: string
+  b3trToUpgradeGMToNextLevel: string
   upgradeGMModal: ReturnType<typeof useDisclosure>
 }
 
-export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({ tokenId, upgradeGMModal }) => {
+export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
+  tokenId,
+  b3trToUpgradeGMToNextLevel,
+  upgradeGMModal,
+}) => {
   const { t } = useTranslation()
-  const upgradeGMMutation = useUpgradeGM({ tokenId })
+  const upgradeGMMutation = useUpgradeGM({ tokenId, b3trToUpgrade: b3trToUpgradeGMToNextLevel })
 
   const handleUpgradeGM = useCallback(() => {
     upgradeGMMutation.sendTransaction({})
