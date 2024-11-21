@@ -27,12 +27,10 @@ export const getVoteRegisteredEvents = async (
   const eventFragment = VoterRewards__factory.createInterface().getEvent("VoteRegistered").format("json")
   const voteRegisteredEvent = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
 
-  console.log("voteRegisteredEvent", voteRegisteredEvent)
   const topics = voteRegisteredEvent.encode({
     cycle: filterOptions?.cycle ?? undefined,
     voter: filterOptions?.voter ?? undefined,
   })
-  console.log("topics", topics)
 
   const filterCriteria = [
     {
