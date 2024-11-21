@@ -1,15 +1,9 @@
 import { VoterRewards__factory } from "@repo/contracts"
-// import { abi } from "thor-devkit"
 import { getConfig } from "@repo/config"
-
 import { getCallKey, useCall } from "@/hooks"
 
 const method = "cycleToTotal"
-
 const voterRewardsInterface = VoterRewards__factory.createInterface()
-// const voteRewardFragment = voterRewardsInterface.getFunction("cycleToTotal").format("json")
-// const getReward = new abi.Function(JSON.parse(voteRewardFragment))
-
 const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
 
 /**
