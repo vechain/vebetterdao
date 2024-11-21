@@ -168,7 +168,7 @@ export const GmNFTAndNodeCard = () => {
                     </HStack>
                   </FeatureFlagWrapper>
                 </VStack>
-                {isXNodeHolder && <FaChevronRight size={"24px"} />}
+                <FaChevronRight size={"24px"} />
               </HStack>
             )}
 
