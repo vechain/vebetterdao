@@ -1,73 +1,83 @@
-import { useAllocationVoters, useVot3Balance, useAllocationAmount } from "@/api"
+import {
+  useAllocationAmount,
+  useCurrentAllocationsRoundId,
+  // useHasVotedInRound,
+} from "@/api"
 import { gmNfts } from "@/constants/gmNfts"
 import { useCycleToTotal } from "@/api"
-import { useMemo } from "react"
+import { useVoteRegisteredEvents } from "@/api"
+import { useState } from "react"
 
 /**
- * Hook to calculate the potential rewards based on the GM level and the rounds
- * in which the user has participated. This calculator uses the VOT3 tokens
- * delegated to the user.
+ * Hook to calculate the potential rewards based on the GM level and the n-1 round rewards
+ * This calculator uses the VOT3 tokens delegated to the user.
  *
- * Note: This calculator is based on rounds that have already been played.
- * Limitation: If the user has only voted once, the calculation will be based
- * on that single round for the given NFT.
+ * Note: This calculator is based on rounds that have already been voted.
+ * Limitation: The formula will not count the rewards of the current or upcoming rounds.
  *
- * Based on the formula:
- * const XAllocationReward = (1(square(totalVOT3) * NFTMultiplier))
- * const GovernanceRewards = totalParticipantCurrentRound * (1$(square(totalVOT3) * NFTMultiplier))
- * const TotalRewards = XAllocationReward + GovernanceRewards
- *
- * const B3TRRewards = totalRewards_i / ∑(totalRewards_j) * totalAllocation
- * Where the sum is taken over all users j participating in the voting
- * totalAllocation = 50 Million lately, but fetch that data
  */
 
-export const usePotentialRewards = (roundId?: string, voter?: string, GMlevel?: any) => {
-  const { data: totalRewardsSum } = useCycleToTotal(roundId)
-  // TotalVoter
-  const { data: voters } = useAllocationVoters(roundId)
-  const { data: v } = useVot3Balance(voter)
-  const { data: roundAmount } = useAllocationAmount(roundId)
-  const totalAllocation = useMemo(() => {
-    if (!roundAmount) return 0
-    return Object.values(roundAmount).reduce((acc, amount) => acc + Number(amount), 0)
-  }, [roundAmount])
+export const usePotentialRewards = (voter?: string, GMlevel?: any, inputVOT3?: number) => {
+  const [isLoading, setIsLoading] = useState(true)
+
+  // TODO 1 : try with the currentRoundId
+  // but i need to get one round at least where the user have voted to get the useCycleToTotal
+
+  // OK, but is it only the last round that will calculate the rewards ?
+  // const [roundId, setVotedRoundId] = useState<string | undefined>(undefined)
+  // const hasVoted = useHasVotedInRound(roundId, voter ?? undefined)
+  // if (hasVoted) {
+  //   setVotedRoundId(currentRoundId)
+  // } else {
+  //   setVotedRoundId(String(Number(currentRoundId) - 1))
+  //
+
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const roundId = currentRoundId
+  const v = inputVOT3
+
+  const { data: cycleToVoterToTotalEvents } = useVoteRegisteredEvents({ cycle: Number(roundId), voter: voter })
+  const cycleToVoterToTotal = cycleToVoterToTotalEvents?.reduce(
+    (acc, event) => acc + Number(event.rewardWeightedVote),
+    0,
+  )
+  console.log("cycleToVoterToTotal", cycleToVoterToTotal)
+
+  const { data: cycleToTotal } = useCycleToTotal(roundId)
+  const { data: emissionAmount } = useAllocationAmount(roundId)
+
+  const emissionAmount_voterRewards = emissionAmount?.voteX2Earn
+  // const emissionAmount_voterRewards = useMemo(() => {
+  //   if (!emissionAmount) return 0
+  //   return Object.values(emissionAmount).reduce((acc, amount) => acc + Number(amount), 0)
+  // }, [emissionAmount])
 
   // Get the GMMultiplier by mapping the GMlevel to the GMNFT
   if (!GMlevel) return null
   const gm = gmNfts.find((nft: { level: any }) => nft.level === GMlevel)
-  const GMMultiplier = gm?.multiplier //OK
+  const GMMultiplier = gm?.multiplier
 
-  // TODO: double check the format, and if it's fetching correctly the data
-
-  // Need to fetch the cycleToVoterToTotal from the contract
-  // ∑(totalRewards_j) maybe == cycleToTotal because it   /// @notice Get the total reward-weighted votes in a specific cycle.
-  // square(cycleToVoterToTotal) = totalVOT3 for the round
-
-  // TODO: double check how the type should be convert to
-  console.log("voter", voters)
-  // TODO: ask if in the formula it is well the vot3Balance : represents the VOT3 tokens delegated to a user for a given voting round
-
-  // Fetching the total allocation
-  // isLoading: roundAmountLoading, error: roundAmountError
-
-  // Do it in another way for the check of the data from hooks
   if (GMMultiplier === undefined) return null
-  if (totalRewardsSum === undefined) return null
+  if (cycleToTotal === undefined) return null
+  if (cycleToVoterToTotal === undefined) return null
+  if (emissionAmount_voterRewards === undefined) return null
   if (!v) return null
-  const xAllocationReward = 1 * Math.pow(totalRewardsSum, 2) * GMMultiplier
-  const gouvernanceRewards = Number(voters) * (1 * Math.pow(Number(v.formatted), 2) * GMMultiplier)
 
-  const totalAllocationFormatted = Number(totalAllocation)
+  const increase = cycleToVoterToTotal * (GMMultiplier / 100)
+  const cycleToVoterToTotal_enhanced = cycleToVoterToTotal + increase
+  const cycleToTotal_enhanced = cycleToTotal + increase
+  console.log("increase", increase)
+  console.log("cycleToVoterToTotal_enhanced", cycleToVoterToTotal_enhanced)
+  console.log("cycleToTotal_enhanced", cycleToTotal_enhanced)
 
-  const totalRewardsi = xAllocationReward + gouvernanceRewards
-  const totalRewardsj = 0 // Need to fetch that data
-  // How to fetch all the TotalRewards of every user j participating : costing too much time and energy
-  // TODO : think about another way to fetch that data, maybe use a hook. But again, it will maybe take too much time to loop over all the users the getRewards
-  // Take a look at the storage
-  // Add the sum
-  const B3TRRewards = (totalRewardsi / totalRewardsj) * totalAllocationFormatted
+  const reward_enhanced = (cycleToVoterToTotal_enhanced / cycleToTotal_enhanced) * Number(emissionAmount_voterRewards)
+  console.log("reward_enhanced", reward_enhanced)
+  setIsLoading(false)
+  // get the original reward to plot the difference and make an animation on another card
+  // const originalReward = ${rewardClaimed event}
+
   return {
-    rewards: B3TRRewards,
+    rewards: reward_enhanced,
+    isLoading: isLoading,
   }
 }

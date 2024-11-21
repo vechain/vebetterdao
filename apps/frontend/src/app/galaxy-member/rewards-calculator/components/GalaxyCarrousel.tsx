@@ -41,6 +41,7 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel }: Props) => {
     }
   }, [centeredNFT])
 
+  // change the size when it's smaller device ( mobile, the caroussel should be bigger)
   return (
     <Box position="relative" overflow="hidden" w={"full"} h={"full"}>
       <Flex>
