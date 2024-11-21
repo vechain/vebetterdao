@@ -5,14 +5,16 @@ import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-
+import { humanAddress } from "@repo/utils/FormattingUtils"
 type Props = {
   transaction: B3trTransaction
+  isConnectedUser?: boolean
+  address?: string
 }
 
 const compactFormatter = getCompactFormatter(2)
 
-export const UpgradeGMCard = ({ transaction }: Props) => {
+export const UpgradeGMCard = ({ transaction, isConnectedUser, address }: Props) => {
   const { t } = useTranslation()
 
   const actionModal = useDisclosure()
@@ -28,7 +30,9 @@ export const UpgradeGMCard = ({ transaction }: Props) => {
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
-                  {t("You upgraded a")}
+                  {t("{{value}} upgraded a", {
+                    value: isConnectedUser ? "You" : `${humanAddress(address ?? "", 6, 4)}`,
+                  })}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {t("GM NFT")}

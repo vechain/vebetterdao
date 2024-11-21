@@ -6,14 +6,17 @@ import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
 import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 
 type Props = {
   transaction: B3trTransaction
+  isConnectedUser?: boolean
+  address?: string
 }
 
 const compactFormatter = getCompactFormatter(2)
 
-export const SwapCard = ({ transaction }: Props) => {
+export const SwapCard = ({ transaction, isConnectedUser, address }: Props) => {
   const { t } = useTranslation()
   const vot3ToB3tr = useMemo(() => {
     if (!transaction?.amountB3TR || !transaction?.amountVOT3) return false
@@ -34,7 +37,9 @@ export const SwapCard = ({ transaction }: Props) => {
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
-                  {t("You converted")}
+                  {t("{{value}} converted", {
+                    value: isConnectedUser ? "You" : `${humanAddress(address ?? "", 6, 4)}`,
+                  })}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {vot3ToB3tr ? "VOT3" : "B3TR"} {t("to")} {vot3ToB3tr ? "B3TR" : "VOT3"}

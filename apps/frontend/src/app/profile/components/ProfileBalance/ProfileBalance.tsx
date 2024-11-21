@@ -31,7 +31,7 @@ export const ProfileBalance = ({ address }: Props) => {
           bgRepeat: "no-repeat",
         }}
       />
-      <UserTransactions address={address} />
+      <UserTransactions address={address} isConnectedUser={isConnectedUser} />
     </VStack>
   )
 }

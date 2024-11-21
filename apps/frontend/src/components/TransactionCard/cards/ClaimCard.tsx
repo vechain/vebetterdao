@@ -5,14 +5,16 @@ import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-
+import { humanAddress } from "@repo/utils/FormattingUtils"
 type Props = {
   transaction: B3trTransaction
+  isConnectedUser?: boolean
+  address?: string
 }
 
 const compactFormatter = getCompactFormatter(2)
 
-export const ClaimCard = ({ transaction }: Props) => {
+export const ClaimCard = ({ transaction, isConnectedUser, address }: Props) => {
   const { t } = useTranslation()
 
   const actionModal = useDisclosure()
@@ -28,7 +30,7 @@ export const ClaimCard = ({ transaction }: Props) => {
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
-                  {t("You claimed")}
+                  {t("{value} claimed", { value: isConnectedUser ? "You" : `${humanAddress(address ?? "", 6, 4)}` })}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {t("voting rewards")}

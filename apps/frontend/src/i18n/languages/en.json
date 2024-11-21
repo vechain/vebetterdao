@@ -1,4 +1,8 @@
 {
+  "{{value}} supported a": "{{value}} supported a",
+  "{value} claimed": "{value} claimed",
+  "{{value}} converted": "{{value}} converted",
+  "{{value}} tokens": "{{value}} tokens",
   "Try changing the filter": "Try changing the filter",
   "No results found": "No results found",
   "If it’s approved you’ll receive a Creator’s NFT and you’ll be able to submit your app to VeBetterDAO!": "If it’s approved you’ll receive a Creator’s NFT and you’ll be able to submit your app to VeBetterDAO!",
