@@ -11,7 +11,7 @@ export const gmNfts = [
     name: "Moon",
     image: "/images/nft-levels/1.png",
     multiplier: 1.1,
-    b3trToUpgrade: 20_000,
+    b3trToUpgrade: 25_000,
   },
   {
     level: "3",
