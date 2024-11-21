@@ -1,4 +1,4 @@
-import { Flex, Stack, VStack } from "@chakra-ui/react"
+import { Stack, VStack } from "@chakra-ui/react"
 import { XNodePageHeader } from "./components/XNodePageHeader"
 import { AttachGMNFTCard } from "./components/AttachGMNFTCard"
 import { EndorsingAppCard } from "./components/EndorsingAppCard"
@@ -25,11 +25,11 @@ export const XNodeContent = () => {
     <VStack align="stretch" flex="1" gap="4">
       <XNodePageHeader />
       <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
-        <Flex flex={3}>
-          <EndorsingAppCard />
-        </Flex>
-        <VStack flex={1.5} align={"stretch"}>
+        <VStack flex={3}>
           <AttachGMNFTCard />
+          <EndorsingAppCard />
+        </VStack>
+        <VStack flex={1.5} align={"stretch"}>
           <ConnectWithCreators />
           <EndorsementHistoryList />
         </VStack>
