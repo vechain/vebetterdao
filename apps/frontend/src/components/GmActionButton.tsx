@@ -23,9 +23,15 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   const mintNftModal = useDisclosure()
   const {
     sendTransaction: freeMint,
+    resetStatus: resetFreeMintStatus,
     isTxReceiptLoading,
     sendTransactionPending,
-  } = useMintNFT({ onFailure: mintNftModal.onClose })
+  } = useMintNFT({
+    onFailure: () => {
+      mintNftModal.onClose()
+      resetFreeMintStatus()
+    },
+  })
 
   const handleMintGM = useCallback(() => {
     freeMint({})
