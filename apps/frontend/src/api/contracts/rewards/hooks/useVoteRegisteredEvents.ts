@@ -5,13 +5,15 @@ import { useConnex } from "@vechain/dapp-kit-react"
 import { abi } from "thor-devkit"
 import { useQuery } from "@tanstack/react-query"
 
+import { ethers } from "ethers"
+
 const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
 
 export type VoteRegisteredEvent = {
   cycle: number
   voter: string
   votes: number
-  rewardWeightedVote: number
+  rewardWeightedVote: string
 }
 
 /**
@@ -51,12 +53,13 @@ export const getVoteRegisteredEvents = async (
     switch (event.topics[0]) {
       case voteRegisteredEvent.signature: {
         const decoded = voteRegisteredEvent.decode(event.data, event.topics)
+        const rewardWeightedVote = ethers.formatEther(decoded[3] as string)
 
         decodedVoteRegisteredEvents.push({
           cycle: decoded[0],
           voter: decoded[1],
           votes: decoded[2],
-          rewardWeightedVote: decoded[3],
+          rewardWeightedVote: rewardWeightedVote,
         })
         break
       }
