@@ -1,4 +1,4 @@
-import { useParticipatedInGovernance, useSelectedGmNft, useXNode } from "@/api"
+import { useParticipatedInGovernance, useSelectedGmNft, useXNode, useIsXNodeDelegated } from "@/api"
 import { GmActionButton } from "@/components/GmActionButton"
 import { Card, Flex, Heading, HStack, Image, Skeleton, Stack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { UilArrowCircleUp } from "@iconscout/react-unicons"
@@ -8,7 +8,8 @@ import { useTranslation } from "react-i18next"
 
 export const XNodePageHeader = () => {
   const { t } = useTranslation()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeLoading, isXNodeHolder } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeLoading, isXNodeHolder, xNodeId } = useXNode()
+  const { data: isXNodeDelegated } = useIsXNodeDelegated(xNodeId)
 
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
@@ -72,11 +73,12 @@ export const XNodePageHeader = () => {
           </Skeleton>
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
             <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" noOfLines={1} color="#FFFFFF80">
-              {"XNODE"}
+              {isXNodeDelegated ? "DELEGATED XNODE" : "XNODE"}
             </Text>
             <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "xl" : "md"}>
               {xNodeName}
             </Text>
+
             <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
               <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                 {xNodePoints}

@@ -1313,5 +1313,11 @@
   "Delegate your XNode to the account you use on VeBetterDAO to endorse apps or participate in governance.": "Delegate your XNode to the account you use on VeBetterDAO to endorse apps or participate in governance.",
   "XNode delegation": "XNode delegation",
   "Revoke delegation": "Revoke delegation",
-  "Your XNode is currently delegated to another address": "Your XNode is currently delegated to another address"
+  "Your XNode is currently delegated to another address": "Your XNode is currently delegated to another address",
+  "XNode delegation revoked!": "XNode delegation revoked!",
+  "Error revoking XNode delegation": "Error revoking XNode delegation",
+  "Revoking XNode delegation...": "Revoking XNode delegation...",
+  "Are you sure you want to revoke your XNode delegation?": "Are you sure you want to revoke your XNode delegation?",
+  "The delegated address will no longer be able to endorse and upgrade GM NFTs using your XNode": "The delegated address will no longer be able to endorse and upgrade GM NFTs using your XNode",
+  "once you have revoked the delegation.": "once you have revoked the delegation."
 }

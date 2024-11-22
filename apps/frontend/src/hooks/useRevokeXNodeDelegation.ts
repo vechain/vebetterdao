@@ -1,0 +1,48 @@
+import { useCallback, useMemo } from "react"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { useBuildTransaction } from "./useBuildTransaction"
+import { buildClause } from "@/utils/buildClause"
+import { getConfig } from "@repo/config"
+import { NodeManagement__factory } from "@repo/contracts"
+import { getUserXNodesQueryKey } from "@/api"
+
+const NodeManagementInterface = NodeManagement__factory.createInterface()
+const nodeManagementContractAddress = getConfig().nodeManagementContractAddress
+const method = "removeNodeDelegation"
+
+type UseRevokeXNodeDelegationProps = {
+  onSuccess?: () => void
+}
+
+/**
+ * Provides a React hook to revoke an XNode delegation using a blockchain transaction.
+ * This hook integrates with the blockchain wallet and manages transaction state.
+ *
+ * @param onSuccess - Optional callback to be executed after successful revocation
+ * @returns Transaction builder and status information
+ */
+export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegationProps = {}) => {
+  const { account } = useWallet()
+
+  const clauseBuilder = useCallback(() => {
+    if (!account) throw new Error("Account is required")
+
+    return [
+      buildClause({
+        to: nodeManagementContractAddress,
+        contractInterface: NodeManagementInterface,
+        method,
+        args: [],
+        comment: "revoke xnode delegation",
+      }),
+    ]
+  }, [account])
+
+  const refetchQueryKeys = useMemo(() => [getUserXNodesQueryKey(account || "")], [account])
+
+  return useBuildTransaction({
+    clauseBuilder,
+    refetchQueryKeys,
+    onSuccess,
+  })
+}
