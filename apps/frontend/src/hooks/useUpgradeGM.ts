@@ -3,7 +3,12 @@ import { GalaxyMember__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
-import { getB3TrBalanceQueryKey, getB3trToUpgradeQueryKey, getLevelOfTokenQueryKey } from "@/api"
+import {
+  getB3TrBalanceQueryKey,
+  getB3trToUpgradeQueryKey,
+  getLevelOfTokenQueryKey,
+  getTokensInfoByOwnerQueryKey,
+} from "@/api"
 import { B3TR__factory } from "@repo/contracts/typechain-types"
 import { ethers } from "ethers"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -43,7 +48,12 @@ export const useUpgradeGM = ({ tokenId, b3trToUpgrade, onSuccess }: Props) => {
   }, [b3trToUpgrade, tokenId])
 
   const refetchQueryKeys = useMemo(
-    () => [getLevelOfTokenQueryKey(tokenId), getB3trToUpgradeQueryKey(tokenId), getB3TrBalanceQueryKey(account ?? "")],
+    () => [
+      getLevelOfTokenQueryKey(tokenId),
+      getB3trToUpgradeQueryKey(tokenId),
+      getB3TrBalanceQueryKey(account ?? ""),
+      getTokensInfoByOwnerQueryKey(account),
+    ],
     [account, tokenId],
   )
 
