@@ -9,6 +9,8 @@ import {
   ModalOverlay,
   ModalBody,
   VStack,
+  HStack,
+  Box,
   Heading,
   Text,
   Button,
@@ -19,9 +21,10 @@ import {
   useBreakpointValue,
   Hide,
 } from "@chakra-ui/react"
-import { UilLink } from "@iconscout/react-unicons"
+import { UilLink, UilInfoCircle } from "@iconscout/react-unicons"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { BaseTooltip } from "@/components"
 
 type Props = {
   isOpen: boolean
@@ -87,7 +90,14 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         </ModalHeader>
         <ModalBody>
           <VStack align="stretch" gap={4}>
-            <Text>{t("Upgrade your GM NFT for free with the help of your Node!")}</Text>
+            <HStack>
+              <Text>{t("Upgrade your GM NFT for free with the help of your Node!")}</Text>
+              <BaseTooltip text={t("Once the GM NFT is attached to your XNode, it can't be transferred anymore")}>
+                <Box as="button">
+                  <UilInfoCircle color="#004CFC" />
+                </Box>
+              </BaseTooltip>
+            </HStack>
             <Stack align="stretch" direction={["column", "column", "row"]}>
               {steps.map((step, index) => (
                 <VStack

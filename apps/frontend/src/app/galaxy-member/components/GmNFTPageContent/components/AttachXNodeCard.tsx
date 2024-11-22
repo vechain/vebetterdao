@@ -3,12 +3,25 @@ import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 import { FeatureFlagWrapper } from "@/components"
 import { FeatureFlag } from "@/constants"
-import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  CardBody,
+  Flex,
+  Heading,
+  HStack,
+  Image,
+  Text,
+  useDisclosure,
+  VStack,
+  Box,
+} from "@chakra-ui/react"
 import { UilInfoCircle, UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
+import { BaseTooltip } from "@/components"
 
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
@@ -33,7 +46,11 @@ export const AttachXNodeCard = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached Node" : "Attach to upgrade")}</Heading>
-              <UilInfoCircle color="#004CFC" />
+              <BaseTooltip text={t("Once the GM NFT is attached to your XNode, it can't be transferred anymore")}>
+                <Box as="button">
+                  <UilInfoCircle color="#004CFC" />
+                </Box>
+              </BaseTooltip>
             </HStack>
             <Text fontSize="sm">
               {t(
