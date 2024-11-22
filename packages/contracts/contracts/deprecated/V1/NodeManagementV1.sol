@@ -5,11 +5,11 @@ pragma solidity 0.8.20;
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import { VechainNodesDataTypes } from "./libraries/VechainNodesDataTypes.sol";
-import { ITokenAuction } from "./interfaces/ITokenAuction.sol";
-import { INodeManagement } from "./interfaces/INodeManagement.sol";
+import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol";
+import { ITokenAuction } from "../../interfaces/ITokenAuction.sol";
+import { INodeManagementV1 } from "./interfaces/INodeManagementV1.sol";
 
-contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgradeable {
+contract NodeManagementV1 is INodeManagementV1, AccessControlUpgradeable, UUPSUpgradeable {
   using EnumerableSet for EnumerableSet.UintSet;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -223,16 +223,6 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   /**
-   * @notice Check if a node is delegated.
-   * @param nodeId The node ID to check for.
-   * @return bool True if the node is delegated.
-   */
-  function isNodeDelegated(uint256 nodeId) public view returns (bool) {
-    NodeManagementStorage storage $ = _getNodeManagementStorage();
-    return $.nodeIdToDelegatee[nodeId] != address(0);
-  }
-
-  /**
    * @notice Retrieves the node level of a given node ID.
    * @dev Internal function to get the node level of a token ID. The node level is determined based on the metadata associated with the token ID.
    * @param nodeId The token ID of the endorsing node.
@@ -273,32 +263,6 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   /**
-   * @notice Check if a user directly owns a node (not delegated).
-   * @param user The address of the user to check.
-   * @return bool True if the user directly owns a node.
-   * @return uint256 The ID of the owned node (0 if none).
-   */
-  function getDirectNodeOwnership(address user) public view returns (bool, uint256) {
-    NodeManagementStorage storage $ = _getNodeManagementStorage();
-    uint256 nodeId = $.vechainNodesContract.ownerToId(user);
-    return (nodeId != 0, nodeId);
-  }
-
-  /**
-   * @notice Get delegation details for a specific node.
-   * @param nodeId The ID of the node to check.
-   * @return bool Whether the node is delegated.
-   * @return address The delegatee address (zero address if not delegated).
-   * @return address The owner address of the node.
-   */
-  function getNodeDelegationDetails(uint256 nodeId) public view returns (bool, address, address) {
-    NodeManagementStorage storage $ = _getNodeManagementStorage();
-    address delegatee = $.nodeIdToDelegatee[nodeId];
-    address owner = $.vechainNodesContract.idToOwner(nodeId);
-    return (delegatee != address(0), delegatee, owner);
-  }
-
-  /**
    * @notice Returns the Vechain node contract instance.
    * @return ITokenAuction The instance of the Vechain node contract.
    */
@@ -312,7 +276,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    * @return string The current version of the contract.
    */
   function version() external pure virtual returns (string memory) {
-    return "2";
+    return "1";
   }
 
   // ---------- Internal ---------- //

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { useXNode } from "@/api"
 import { ConnectWithCreators } from "./components/ConnectWithCreators"
+import { DelegateXNodeCard } from "./components/XNodeDelegation"
 
 export const XNodeContent = () => {
   const { isXNodeHolder, isXNodeLoading } = useXNode()
@@ -27,6 +28,7 @@ export const XNodeContent = () => {
       <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
         <VStack flex={3}>
           <AttachGMNFTCard />
+          <DelegateXNodeCard />
           <EndorsingAppCard />
         </VStack>
         <VStack flex={1.5} align={"stretch"}>

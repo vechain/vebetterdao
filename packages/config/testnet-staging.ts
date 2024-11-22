@@ -4,7 +4,7 @@ const config: AppConfig = {
   basePath: "https://b3tr-frontend.vercel.app",
   ipfsPinningService: "https://api.dev.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
   ipfsFetchingService: "https://api.dev.gateway-proxy.vechain.org/ipfs",
-  b3trContractAddress: "0x4d31C4357A0e226586c0cfD169cFBe93a27C7c69",
+  b3trContractAddress: "",
   vot3ContractAddress: "0xC31A3128f7F1e4d87473B46c65E7290bEe0d1409",
   b3trGovernorAddress: "0x102323641ee8654B5d1f30240387e7187B87D8CA",
   timelockContractAddress: "0x2eD0f02ff91d4C7CbF511f6135E49588aD8bb31C",

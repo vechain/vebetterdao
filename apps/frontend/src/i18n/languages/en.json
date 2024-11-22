@@ -1299,5 +1299,19 @@
   "App submition": "App submition",
   "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.": "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.",
   "X Node Holders will use their NFTs to endorse your app. Once it reaches 100 points, it becomes eligible for allocations.": "X Node Holders will use their NFTs to endorse your app. Once it reaches 100 points, it becomes eligible for allocations.",
-  "The allocation rounds determine the resources and support your app receives from the ecosystem community.": "The allocation rounds determine the resources and support your app receives from the ecosystem community."
+  "The allocation rounds determine the resources and support your app receives from the ecosystem community.": "The allocation rounds determine the resources and support your app receives from the ecosystem community.",
+  "XNode delegation completed!": "XNode delegation completed!",
+  "Error delegating XNode": "Error delegating XNode",
+  "Delegating XNode...": "Delegating XNode...",
+  "Are you sure you want to delegate your XNode?": "Are you sure you want to delegate your XNode?",
+  "You're delegating it to": "You're delegating it to",
+  "The delegated address will be able to endorse and upgrade GM NFTs using your XNode": "The delegated address will be able to endorse and upgrade GM NFTs using your XNode",
+  "but won't be able to transfer or sell your XNode.": "but won't be able to transfer or sell your XNode.",
+  "Delegate your XNode": "Delegate your XNode",
+  "By delegating your XNode, another address will be able to endorse apps and upgrade GM NFTs using your XNode.": "By delegating your XNode, another address will be able to endorse apps and upgrade GM NFTs using your XNode.",
+  "They won't be able to transfer or sell your XNode.": "They won't be able to transfer or sell your XNode.",
+  "Delegate your XNode to the account you use on VeBetterDAO to endorse apps or participate in governance.": "Delegate your XNode to the account you use on VeBetterDAO to endorse apps or participate in governance.",
+  "XNode delegation": "XNode delegation",
+  "Revoke delegation": "Revoke delegation",
+  "Your XNode is currently delegated to another address": "Your XNode is currently delegated to another address"
 }
