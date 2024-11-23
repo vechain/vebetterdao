@@ -9,7 +9,6 @@ import {
   ModalOverlay,
   ModalBody,
   VStack,
-  HStack,
   Box,
   Heading,
   Text,
@@ -20,12 +19,13 @@ import {
   Stack,
   useBreakpointValue,
   Hide,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from "@chakra-ui/react"
-import { UilLink, UilInfoCircle } from "@iconscout/react-unicons"
+import { UilLink } from "@iconscout/react-unicons"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { BaseTooltip } from "@/components"
-
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -90,14 +90,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         </ModalHeader>
         <ModalBody>
           <VStack align="stretch" gap={4}>
-            <HStack>
-              <Text>{t("Upgrade your GM NFT for free with the help of your Node!")}</Text>
-              <BaseTooltip text={t("Once the GM NFT is attached to your XNode, it can't be transferred anymore")}>
-                <Box as="button">
-                  <UilInfoCircle color="#004CFC" />
-                </Box>
-              </BaseTooltip>
-            </HStack>
+            <Text>{t("Upgrade your GM NFT for free with the help of your Node!")}</Text>
             <Stack align="stretch" direction={["column", "column", "row"]}>
               {steps.map((step, index) => (
                 <VStack
@@ -137,6 +130,14 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         </ModalBody>
         <ModalFooter w="full">
           <VStack align="stretch" w="full">
+            <Alert status="info" borderRadius={["xl", "xl", "3xl"]}>
+              <AlertIcon w={5} h={5} />
+              <Box lineHeight={"1.20rem"} fontSize="sm">
+                <AlertDescription as="span">
+                  {t("Once the GM NFT is attached to your XNode, it can't be transferred anymore")}
+                </AlertDescription>
+              </Box>
+            </Alert>
             <Button variant={"primaryAction"} w={"full"} onClick={handleAttachment} leftIcon={<UilLink />}>
               {t("Attach now!")}
             </Button>

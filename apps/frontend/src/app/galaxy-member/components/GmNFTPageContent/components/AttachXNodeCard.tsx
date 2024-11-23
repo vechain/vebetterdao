@@ -60,7 +60,7 @@ export const AttachXNodeCard = () => {
               )}
             </Text>
           </VStack>
-          <Flex border="1px solid" rounded="12px" position="relative">
+          <Flex border="1px solid" rounded="12px" position="relative" cursor="pointer">
             <Image
               src={"/images/xnode-page-background.png"}
               alt="gm-nft-header"
