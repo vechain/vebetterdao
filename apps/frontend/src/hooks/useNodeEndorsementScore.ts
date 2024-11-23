@@ -8,7 +8,7 @@ const contractInterface = X2EarnApps__factory.createInterface()
 const method = "getNodeEndorsementScore"
 
 /**
- * Get the query key for the endorsersment score of a node ID.
+ * Get the query key for the endorsement score of a node ID.
  */
 export const getEndorsersQueryKey = (nodeId: string) => {
   getCallKey({ method, keyArgs: [nodeId] })
@@ -16,11 +16,11 @@ export const getEndorsersQueryKey = (nodeId: string) => {
 
 /**
  * Hook that fetches the endorsement score of a node ID
- * @param nodeId  the node Id of the endorser
+ * @param nodeId the node Id of the endorser
  *
  * @returns the endorsement score
  */
-export const useNodeEndorsementScore = (nodeId: string): UseQueryResult<string[], Error> => {
+export const useNodeEndorsementScore = (nodeId: string): UseQueryResult<string, Error> => {
   return useCall({
     contractInterface,
     contractAddress,

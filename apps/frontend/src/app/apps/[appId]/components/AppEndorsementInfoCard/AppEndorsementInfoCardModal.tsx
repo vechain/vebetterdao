@@ -1,5 +1,5 @@
-import { useAppEndorsers, useAppEndorsementStatus, useXNode } from "@/api"
-import { EndorsementInfo } from "./EndorsementInfo"
+import { useAppEndorsers, useAppEndorsementStatus, useXNode, useIsAppAdmin } from "@/api"
+import { EndorsersItem } from "./EndorsersItem"
 import { EndorsementHistory } from "./EndorsementHistory"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
@@ -38,32 +38,40 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
   const { t } = useTranslation()
   const { account } = useWallet()
 
+  // App endorsement data
+  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId ?? "")
+  const { data: endorsementEvents } = useAppEndorsedEvents({ appId })
   const {
     score: endorsementScore,
     status: endorsementStatus,
     threshold: endorsementThreshold,
     isLoading: isEndorsementStatusLoading,
   } = useAppEndorsementStatus(appId)
-  const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(appId ?? "")
-  const { data: endorsementEvents } = useAppEndorsedEvents({ appId })
+
+  // User roles data
+  const { data: isAppAdmin } = useIsAppAdmin(appId ?? "", account ?? "")
 
   // User xnodes, TODO support multiple xnodes
   const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints } = useXNode()
-
   const isUserAppEndorser = useMemo(() => {
     if (!appId || isXNodeLoading) return false
     return isXNodeHolder && isEndorsingApp && compareAddresses(appId, endorsedApp?.id)
   }, [appId, isXNodeLoading, isXNodeHolder, isEndorsingApp, endorsedApp])
 
+  // Confirm unendorsement, unendorsement modal controls
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [selectedEndorserAddress, setSelectedEndorserAddress] = useState("")
+  const [selectedEndorserNodePoints, setSelectedEndorserNodePoints] = useState("")
+  const handleCancelClick = () => {
+    setIsConfirmOpen(false)
+    setSelectedEndorserAddress("")
+    setSelectedEndorserNodePoints("")
+  }
   const {
     isOpen: isUnendorsementModalOpen,
     onOpen: onOpenUnendorsementModal,
     onClose: onCloseUnendorsementModal,
   } = useDisclosure()
-  const handleCancelClick = () => {
-    setIsConfirmOpen(false)
-  }
 
   return (
     <BaseModal
@@ -122,7 +130,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
 
               {appEndorsers && appEndorsers.length > 0 ? (
                 <VStack flex={1} w="full" overflowY="auto" h="full" spacing={2}>
-                  {account && isConfirmOpen && appEndorsers.includes(normalize(account)) && (
+                  {isAppAdmin && isConfirmOpen && (
                     <VStack
                       border={"1px solid #EC9BAF"}
                       p={4}
@@ -133,7 +141,10 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                       <Text mb={4} maxW="full">
                         <Trans
                           i18nKey="<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active"
-                          values={{ endorsedAddress: humanAddress(normalize(account), 6, 3), value: xNodePoints }}
+                          values={{
+                            endorsedAddress: humanAddress(normalize(selectedEndorserAddress), 6, 3),
+                            value: selectedEndorserNodePoints,
+                          }}
                           components={{ bold: <Text as="span" fontWeight={"600"} /> }}
                         />
                       </Text>
@@ -153,11 +164,14 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                     .slice()
                     .reverse()
                     .map((endorser, index) => (
-                      <EndorsementInfo
+                      <EndorsersItem
                         key={index}
-                        appId={appId}
+                        isAppAdmin={isAppAdmin || false}
                         endorserAddress={endorser}
+                        endorsementEvents={endorsementEvents || []}
                         setIsConfirmOpen={setIsConfirmOpen}
+                        setSelectedEndorserAddress={setSelectedEndorserAddress}
+                        setSelectedEndorserNodePoints={setSelectedEndorserNodePoints}
                       />
                     ))}
                 </VStack>
@@ -206,6 +220,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
           </VStack>
         </Stack>
       </VStack>
+
       {isUnendorsementModalOpen && (
         <UnendorseAppModal isOpen={isUnendorsementModalOpen} onClose={onCloseUnendorsementModal} />
       )}
