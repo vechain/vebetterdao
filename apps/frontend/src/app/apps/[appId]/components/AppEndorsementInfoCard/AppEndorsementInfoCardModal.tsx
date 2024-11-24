@@ -1,6 +1,6 @@
 import { useAppEndorsers, useAppEndorsementStatus, useXNode, useIsAppAdmin } from "@/api"
 import { EndorsersItem } from "./EndorsersItem"
-import { EndorsementHistory } from "./EndorsementHistory"
+import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
@@ -206,7 +206,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
             {endorsementEvents && endorsementEvents.length > 0 ? (
               <VStack flex={1} w="full" overflowY="auto" h="full">
                 {endorsementEvents.map((endorsementEvent, index) => (
-                  <EndorsementHistory key={index} event={endorsementEvent} />
+                  <EndorsementHistoryItem key={index} event={endorsementEvent} />
                 ))}
               </VStack>
             ) : (

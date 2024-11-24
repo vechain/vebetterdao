@@ -1,0 +1,74 @@
+import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { Text, HStack, VStack, Skeleton } from "@chakra-ui/react"
+import { Trans, useTranslation } from "react-i18next"
+import dayjs from "dayjs"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
+import { useGetNodeManager } from "@/api"
+
+type Props = {
+  event: AppEndorsedEvent
+}
+
+export const EndorsementHistoryItem = ({ event }: Props) => {
+  const { t } = useTranslation()
+
+  // Retrieve the nodeId, blockNumber, and endorsed from the event
+  const { nodeId, blockNumber, endorsed: isEndorsing } = event
+  const isEndorsingColor = isEndorsing ? "#3DBA67" : "#C84968"
+
+  // Obtain address managing the node, which is not necessarily the same as the event txOrigin
+  const { data: endorserAddress, isLoading: endorserAddressLoading } = useGetNodeManager(nodeId)
+
+  // Obtain the node points
+  const { data: nodePoints, isLoading: nodePointsLoading } = useNodeEndorsementScore(nodeId)
+
+  // Obtain the date
+  const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber })
+  const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
+
+  return (
+    <HStack
+      p={2}
+      borderRadius={"16px"}
+      borderBottom={"1px solid #EFEFEF"}
+      w={"full"}
+      alignItems={"center"}
+      justify={"space-between"}>
+      <VStack align="start" justifyContent={"flex-start"} spacing={0} flex={1}>
+        <Skeleton isLoaded={!endorserAddressLoading}>
+          <Text>{humanAddress(endorserAddress ?? "", 6, 3)}</Text>
+        </Skeleton>
+
+        <Text fontSize="xs" color="#6A6A6A">
+          {t("{{date}}", {
+            date: endorsingSince,
+          })}
+        </Text>
+      </VStack>
+      <VStack align="end" spacing={0} flex={1} w="full">
+        <HStack spacing={1} align="flex-start">
+          <Text fontWeight={600} color={isEndorsingColor}>
+            {`${isEndorsing ? "+" : "-"}`}
+          </Text>
+          <Skeleton isLoaded={!nodePointsLoading}>
+            <Text fontWeight={600} color={isEndorsingColor}>
+              <Trans
+                i18nKey="{{value}} pts."
+                values={{ value: nodePoints }}
+                components={{
+                  Text: <Text as="span" fontWeight={600} color={isEndorsingColor} />,
+                }}
+              />
+            </Text>
+          </Skeleton>
+        </HStack>
+
+        {/* <Text fontSize="xs" color="#6A6A6A">
+          {t("{{value}} pts in total.", { value: endorsementHistory.endorserTotalPoint })}
+        </Text> */}
+      </VStack>
+    </HStack>
+  )
+}
