@@ -49,8 +49,8 @@ export const EndorsersItem = ({
 
   // Find the first element in events (ie most recent) where the endorser endorsed the app
   const lastEndorsementEvent = endorsementEvents.find(event => event.nodeId === endorserNodeId && event.endorsed)
-  const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber: lastEndorsementEvent?.blockNumber })
-  const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
+  const lastEndorsementEpoch = useEstimateBlockTimestamp({ blockNumber: lastEndorsementEvent?.blockNumber })
+  const endorsingSince = dayjs(lastEndorsementEpoch).fromNow()
 
   const handleRemoveClick = () => {
     setIsConfirmOpen(true)

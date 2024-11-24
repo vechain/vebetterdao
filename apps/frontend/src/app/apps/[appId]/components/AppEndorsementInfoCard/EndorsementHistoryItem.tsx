@@ -25,8 +25,8 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
   const { data: nodePoints, isLoading: nodePointsLoading } = useNodeEndorsementScore(nodeId)
 
   // Obtain the date
-  const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber })
-  const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
+  const endorsementEpoch = useEstimateBlockTimestamp({ blockNumber })
+  const endorsingDate = dayjs(endorsementEpoch).format("MMM D, YYYY")
 
   return (
     <HStack
@@ -43,7 +43,7 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
 
         <Text fontSize="xs" color="#6A6A6A">
           {t("{{date}}", {
-            date: endorsingSince,
+            date: endorsingDate,
           })}
         </Text>
       </VStack>
