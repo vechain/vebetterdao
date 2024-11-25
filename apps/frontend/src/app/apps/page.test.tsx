@@ -14,11 +14,12 @@ describe("Apps", () => {
             id: "1",
             name: "Round 1",
             teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
-            createdAtTimestamp: 16347455,
+            createdAtTimestamp: "16347455",
             metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
           },
         ],
         unendorsed: [],
+        allApps: [],
       },
       isLoading: false,
       isError: false,
@@ -41,13 +42,12 @@ describe("Apps", () => {
             id: "1",
             name: "GreenCart",
             teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
-            createdAtTimestamp: 16347455,
+            createdAtTimestamp: "16347455",
             metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
           },
         },
       ],
       isLoading: false,
-      isError: false,
     })
 
     render(<Apps />)
@@ -70,9 +70,8 @@ describe("Apps", () => {
 
     //@ts-ignore
     vi.spyOn(hooks, "useMostVotedAppsInRound").mockReturnValue({
-      data: undefined,
+      data: [],
       isLoading: true,
-      isError: false,
     })
 
     render(<Apps />)
@@ -96,9 +95,8 @@ describe("Apps", () => {
 
     //@ts-ignore
     vi.spyOn(hooks, "useMostVotedAppsInRound").mockReturnValue({
-      data: undefined,
+      data: [],
       isLoading: false,
-      isError: false,
     })
 
     render(<Apps />)
