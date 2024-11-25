@@ -12,6 +12,7 @@ slack_alert_workspace : T03L3PQD8GK
 environment_name : b3tr-dev
 secret_id : arn:aws:secretsmanager:eu-west-1:211125319139:secret:dev/datadog_keys-fbWmra
 
+
 #thor solo settings
 image_tag: dev-latest
 cpu: 1024
