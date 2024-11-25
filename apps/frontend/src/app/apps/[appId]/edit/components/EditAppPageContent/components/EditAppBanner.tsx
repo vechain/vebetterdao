@@ -43,14 +43,7 @@ export const EditAppBanner = ({ form }: Props) => {
     [form, toast],
   )
 
-  const handleDownload = () => {
-    const link = document.createElement("a")
-    link.href = "/images/VeBetterDAO-Banner Size Guide.zip"
-    link.download = "VeBetterDAO-Banner Size Guide.zip"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
+  const handleDownload = () => {}
 
   return (
     <VStack gap={2} align={"start"}>
