@@ -232,7 +232,11 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
     NodeManagementStorage storage $ = _getNodeManagementStorage();
 
     // Retrieve the metadata for the specified node ID
-    (, uint8 nodeLevel, , , , , ) = $.vechainNodesContract.getMetadata(nodeId);
+    (, uint8 nodeLevel, bool onUpgrade, , , , ) = $.vechainNodesContract.getMetadata(nodeId);
+
+    if (onUpgrade && nodeLevel > 0) {
+      nodeLevel -= 1;
+    }
 
     // Cast the uint8 node level to VechainNodesDataTypes.NodeStrengthLevel enum and return
     return VechainNodesDataTypes.NodeStrengthLevel(nodeLevel);
@@ -292,7 +296,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    * @return string The current version of the contract.
    */
   function version() external pure virtual returns (string memory) {
-    return "1";
+    return "2";
   }
 
   // ---------- Internal ---------- //
