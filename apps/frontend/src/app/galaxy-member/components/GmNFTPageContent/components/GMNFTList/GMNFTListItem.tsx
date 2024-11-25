@@ -9,7 +9,7 @@ import { SelectGMButton } from "./SelectGMButton"
 import { gmNfts } from "@/constants/gmNfts"
 import { FeatureFlag, notFoundImage } from "@/constants"
 import { FeatureFlagWrapper } from "@/components"
-
+import { useSelectedGmNft } from "@/api"
 interface GMNFTListItemProps {
   token: {
     tokenId: string
@@ -24,6 +24,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { data: selectedTokenId } = useSelectedTokenId()
+  const { isXNodeAttachedToGM, gmRewardMultiplier } = useSelectedGmNft()
 
   const isGMSelected = useMemo(() => selectedTokenId === token.tokenId, [selectedTokenId, token.tokenId])
 
@@ -48,6 +49,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
     return `${nftName} #${token.tokenId}`
   }, [nftMetadata, token.tokenId, token.tokenLevel])
 
+  // todo: investigate why when minting a new GM, the tokenLevel, image and name are not updated ( needed to refresh the page )
   return (
     <Card variant={isGMSelected ? "primaryBoxShadow" : "baseWithBorder"} rounded="8px">
       <CardBody p={"4"}>
@@ -81,7 +83,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
               gap={1}>
               <VStack align={"flex-start"}>
                 <Text fontSize={"xs"} fontWeight="400" noOfLines={1} color="#6DCB09">
-                  {isGMSelected ? t("Active") : ""}
+                  {isGMSelected && isXNodeAttachedToGM ? t("Active and attached") : isGMSelected ? t("Active") : ""}
                 </Text>
                 <Text fontWeight={700} noOfLines={1} fontSize={"md"}>
                   {gmName}
@@ -91,7 +93,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                   <HStack gap={1}>
                     <Text fontSize={"xs"} fontWeight={600}>
-                      {token.tokenLevel}
+                      {gmRewardMultiplier}
                       {"x"}
                     </Text>
                     <Text fontSize={"xs"} fontWeight={400} noOfLines={1} whiteSpace={"nowrap"}>

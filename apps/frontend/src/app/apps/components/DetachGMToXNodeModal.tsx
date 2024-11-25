@@ -18,9 +18,10 @@ import { useTranslation } from "react-i18next"
 type Props = {
   isOpen: boolean
   onClose: () => void
+  detachToActive?: boolean
 }
 
-export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
+export const DetachGMToXNodeModal = ({ isOpen, onClose, detachToActive }: Props) => {
   const { t } = useTranslation()
 
   const detachGMFromXNodeMutation = useDetachGMFromXNode({
@@ -58,7 +59,13 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
           <Heading fontSize="lg">{t("Detach Node from GM NFT")}</Heading>
         </ModalHeader>
         <ModalBody>
-          <Text>{t("Detaching your Node will downgrade your GM level to the one it was before.")}</Text>
+          {detachToActive ? (
+            <Text>
+              {t("To active the selected GM NFT, you need to detach the node from the previous attached node.")}
+            </Text>
+          ) : (
+            <Text>{t("Detaching your Node will downgrade your GM level to the one it was before.")}</Text>
+          )}
         </ModalBody>
         <ModalFooter w="full">
           <VStack align="stretch" w="full">

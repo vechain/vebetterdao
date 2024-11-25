@@ -33,12 +33,16 @@ type Props = {
 
 export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
+  // const { isXNodeAttachedToGM } = useSelectedGmNft()
 
   const attachGMToXNodeMutation = useAttachGMToXNode({
     onSuccess: onClose,
   })
+  // console.log('attachGMToXNodeMutation.status', attachGMToXNodeMutation.status)
 
   const handleAttachment = useCallback(() => {
+    // todo : investigate why this is not working
+    // detaching -> attaching -> detaching again ( have to refresh the page to make it work )
     attachGMToXNodeMutation.resetStatus()
     attachGMToXNodeMutation.sendTransaction(undefined)
   }, [attachGMToXNodeMutation])
