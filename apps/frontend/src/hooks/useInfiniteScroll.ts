@@ -1,3 +1,4 @@
+"use client"
 import { useEffect, useCallback } from "react"
 
 type UseInfiniteScrollProps = {
