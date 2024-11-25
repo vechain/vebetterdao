@@ -94,7 +94,7 @@
     "d3-array": "^3.2.4",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
-    "happy-dom": "^15.10.2",
+    "happy-dom": "^14.12.3",
     "resize-observer-polyfill": "^1.5.1",
     "typescript": "^5",
     "typescript-eslint": "^7.15.0",
