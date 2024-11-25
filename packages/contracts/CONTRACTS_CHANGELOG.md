@@ -24,7 +24,6 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 ## Upgrade `X2EarnApps` to Version 3, and `NodeManagement` to Version 2
 
 This upgrade adds a cooldown mechanism to the X2Earn Apps contract to ensure nodes cannot endorse apps too frequently.
-Also when retrieving a node's level, we now check if the node is pending an upgrade.
 
 ### Changes 🚀
 
@@ -49,8 +48,7 @@ Also when retrieving a node's level, we now check if the node is pending an upgr
 
 ### Bug Fixes 🐛
   
-- **`NodeManagement.sol`**:
-  - Updated contract to take into account nodes that are currently pending an upgrade when determining their level. 
+- None.
 
 ---
 
