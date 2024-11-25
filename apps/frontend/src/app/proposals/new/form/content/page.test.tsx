@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import NewProposalPageDiscussion from "./page"
+import NewproposalContentPage from "./page"
 import { fireEvent, render, screen, waitFor, within } from "../../../../../../test"
 import * as router from "next/navigation"
 import * as dappKit from "@vechain/dapp-kit-react"
@@ -25,7 +25,7 @@ describe("NewProposalContent", async () => {
     })
     render(
       <FormProposalLayout>
-        <NewProposalPageDiscussion />
+        <NewproposalContentPage />
       </FormProposalLayout>,
     )
 
@@ -35,7 +35,7 @@ describe("NewProposalContent", async () => {
   it("form errors - should render correctly", async () => {
     render(
       <FormProposalLayout>
-        <NewProposalPageDiscussion />
+        <NewproposalContentPage />
       </FormProposalLayout>,
     )
     await screen.findByTestId("new-proposal-content-page")
@@ -62,7 +62,7 @@ describe("NewProposalContent", async () => {
   it("form ok - should navigate to the correct page", async () => {
     render(
       <FormProposalLayout>
-        <NewProposalPageDiscussion />
+        <NewproposalContentPage />
       </FormProposalLayout>,
     )
 
