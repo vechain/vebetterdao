@@ -58,12 +58,7 @@ console.error = (...args: any) => {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   // set color mode of @uiw/react-md-editor
-  useEffect(() => {
-    document.documentElement.setAttribute("data-color-mode", "light")
-    return () => {
-      document.documentElement.removeAttribute("data-color-mode")
-    }
-  }, [])
+  useEffect(() => {}, [])
 
   return (
     <html

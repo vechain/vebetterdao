@@ -46,12 +46,12 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   const bgColor = data.state === 0 ? "#B1F16C" : "#E1E1E1"
 
   // State to store the client width
-  const [clientWidth, setClientWidth] = useState(document.body.clientWidth)
+  const [clientWidth, setClientWidth] = useState("100px")
 
   // Effect to update the clientWidth state on window resize
   useEffect(() => {
     const updateWidth = () => {
-      setClientWidth(document.body.clientWidth)
+      setClientWidth("100px")
     }
 
     // Set initial width

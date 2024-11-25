@@ -12,19 +12,7 @@ export const useScript = (url: string, isAsync = true, runBeforeInit?: () => voi
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    runBeforeInit?.()
-    const script = document.createElement("script")
-    script.src = url
-    script.addEventListener("load", () => setLoaded(true))
-    script.defer = true
-    script.async = isAsync
-
-    document.head.appendChild(script)
-
-    runAfterInit?.()
-    return () => {
-      document.head.removeChild(script)
-    }
+    setLoaded(true)
   }, [url, isAsync, runBeforeInit, runAfterInit])
 
   return { loaded }

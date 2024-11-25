@@ -22,7 +22,7 @@ export const useInfiniteScroll = ({ loading, hasMore, onLoadMore }: UseInfiniteS
   )
 
   useEffect(() => {
-    const sentinel = document.getElementById("infinite-scroll-sentinel")
+    const sentinel = ""
     if (!sentinel) return
 
     const observer = new IntersectionObserver(observerCallback, {
