@@ -155,5 +155,7 @@ export function createLocalConfig() {
     VEPASSPORT_DECAY_RATE: 0,
 
     CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json",
+
+    X2EARN_NODE_COOLDOWN_PERIOD: 720, // 3 cycles in seconds
   })
 }

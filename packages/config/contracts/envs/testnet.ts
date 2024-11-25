@@ -85,7 +85,7 @@ export function createTestnetConfig() {
 
     // Endorsement
     VECHAIN_NODES_CONTRACT_ADDRESS: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302", // The contract address of the VeChainNodes contract on mainnet
-    XAPP_GRACE_PERIOD: 120960, // 2 weeks -> max time to be unendorsed by node before being removed from the XAlloction voting rounds
+    XAPP_GRACE_PERIOD: 120960, // 2 weeks -> max time to be unendorsed by node before being removed from the XAlloction voting rounds (blocks)
     // Passport
     VEPASSPORT_BOT_SIGNALING_THRESHOLD: 2, // Address must be signaled more than X times to be considered a bot
     VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE: 12,
@@ -96,5 +96,7 @@ export function createTestnetConfig() {
     VEPASSPORT_DECAY_RATE: 0,
 
     CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json",
+
+    X2EARN_NODE_COOLDOWN_PERIOD: 1814400, // 3 weeks in seconds
   })
 }
