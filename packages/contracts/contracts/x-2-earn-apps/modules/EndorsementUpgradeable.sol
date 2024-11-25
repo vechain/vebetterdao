@@ -63,39 +63,20 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
-   * @dev Sets the value for the grace period ane the endorsement score for each node level.
-   * @param gracePeriodDuration The initial grace period.
+   * @dev Sets the value for the cooldown period.
    */
-  function __Endorsement_init(
-    uint48 gracePeriodDuration,
-    address vechainNodesContract,
-    address veBetterPassportContract
+  function __Endorsement_init_v2(
+    uint48 _cooldownPeriod
   ) internal onlyInitializing {
-    __Endorsement_init_unchained(gracePeriodDuration, vechainNodesContract, veBetterPassportContract);
+    __Endorsement_init_unchained_v2(_cooldownPeriod);
   }
 
-  function __Endorsement_init_unchained(
-    uint48 gracePeriodDuration,
-    address nodeManagementContract,
-    address veBetterPassportContract
+  function __Endorsement_init_unchained_v2(
+    uint48 _cooldownPeriod
   ) internal onlyInitializing {
     EndorsementStorage storage $ = _getEndorsementStorage();
-    $._gracePeriodDuration = gracePeriodDuration;
-    $._nodeManagementContract = INodeManagement(nodeManagementContract);
-    $._veBetterPassport = IVeBetterPassport(veBetterPassportContract);
 
-    // Set the endorsement score for each node level
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Strength] = 2; // Strength Node score
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Thunder] = 13; // Thunder Node score
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.Mjolnir] = 50; // Mjolnir Node score
-
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.VeThorX] = 3; // VeThor X Node score
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.StrengthX] = 9; // Strength X Node score
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.ThunderX] = 35; // Thunder X Node score
-    $._nodeEnodorsmentScore[VechainNodesDataTypes.NodeStrengthLevel.MjolnirX] = 100; // Mjolnir X Node score
-
-    // Set the score threshold for an app to be eligible for voting
-    $._endorsementScoreThreshold = 100;
+    $._cooldownPeriod = _cooldownPeriod;
   }
 
   // ---------- Public ---------- //

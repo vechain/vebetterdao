@@ -63,24 +63,15 @@ contract X2EarnApps is
   }
 
   /**
-   * @notice Initialize the version 2 contract
-   * @param _gracePeriod the grace period to be reendorsed
-   * @param _nodeManagementContract the address of the vechain node management contract
-   * @param _veBetterPassportContract the address of the VeBetterPassport contract
+   * @notice Initialize the version 3 contract
+   * @param _cooldownPeriod the cooldown period for the endorsement
    *
-   * @dev This function is called only once during the contract deployment
+   * @dev This function is called only once during the contract upgrade
    */
-  function initializeV2(
-    uint48 _gracePeriod,
-    address _nodeManagementContract,
-    address _veBetterPassportContract,
-    address _x2EarnCreatorContract
-  ) public reinitializer(2) {
-    require(_nodeManagementContract != address(0), "X2EarnApps: Invalid Node Managementcontract address");
-    require(_veBetterPassportContract != address(0), "X2EarnApps: Invalid VeBetterPassport contract address");
-    require(_x2EarnCreatorContract != address(0), "X2EarnApps: Invalid X2EarnCreator contract address");
-    __Endorsement_init(_gracePeriod, _nodeManagementContract, _veBetterPassportContract);
-    __Administration_init_v2(_x2EarnCreatorContract);
+  function initializeV3(
+    uint48 _cooldownPeriod
+  ) public reinitializer(3) {
+    __Endorsement_init_v2(_cooldownPeriod);
   }
 
   // ---------- Modifiers ------------ //
@@ -122,7 +113,7 @@ contract X2EarnApps is
    * @return sting The version of the contract
    */
   function version() public pure virtual returns (string memory) {
-    return "2";
+    return "3";
   }
 
   // ---------- Overrides ------------ //
