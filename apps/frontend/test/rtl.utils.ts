@@ -6,7 +6,7 @@ const allQueries = {
   ...queries,
 }
 
-const customScreen = within(document.body, allQueries)
+const customScreen = within(document?.body, allQueries)
 const customWithin = (element: HTMLElement) => within(element, allQueries)
 const customRender = (ui: ReactElement, options?: Omit<RenderOptions, "queries">) =>
   render(ui, { wrapper: AllTheProviders, queries: allQueries, ...options })
