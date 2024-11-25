@@ -239,6 +239,22 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   /**
+   * @notice Retrieves the creation time of a given node ID.
+   * @dev This function retrieves the creation time of the specified node ID.
+   * @param nodeId The ID of the node for which the creation time is being retrieved.
+   * @return uint64 The creation time of the specified node ID.
+   */
+  function getNodeCreationTime(uint256 nodeId) public view returns (uint64) {
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
+
+    // Retrieve the metadata for the specified node ID
+    (, , , , , uint64 createdAt, ) = $.vechainNodesContract.getMetadata(nodeId);
+
+    // Return the creation time of the node
+    return createdAt;
+  }
+
+  /**
    * @notice Retrieves the node levels of a user's managed nodes.
    * @dev This function retrieves the node levels of the nodes managed by the specified user, either through ownership or delegation.
    * @param user The address of the user managing the nodes.

@@ -21,7 +21,7 @@ interface IX2EarnApps {
    */
   error X2EarnNonexistentApp(bytes32 appId);
 
-    /**
+  /**
    * @dev The creator of the app doesn't exist.
    */
   error X2EarnNonexistentCreator(bytes32 appId, address creator);
@@ -55,6 +55,11 @@ interface IX2EarnApps {
    * @dev An app with the specified `appId` already exists.
    */
   error X2EarnAppAlreadyExists(bytes32 appId);
+
+  /**
+   * @dev The Vechain Node is in a cooldown period, and the action cannot be performed.
+   */
+  error X2EarnNodeCooldownActive();
 
   /**
    * @dev The user is not authorized to perform the action.
@@ -604,4 +609,16 @@ interface IX2EarnApps {
    * @dev Get the X2EarnCreator contract address.
    */
   function x2EarnCreatorContract() external view returns (IX2EarnCreator);
+
+  /**
+   * @dev Get the cooldown period for a node in seconds.
+   */
+  function cooldownPeriod() external view returns (uint48);
+
+  /**
+   * @notice Check if a node is in a cooldown period. A node is in a cooldown period after it has endorsed an app or been created.
+   * @param nodeId The unique identifier of the node.
+   * @return bool True if the node is in a cooldown period.
+   */
+  function checkCooldown(uint256 nodeId) external view returns (bool);
 }

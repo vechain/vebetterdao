@@ -31,6 +31,7 @@ import { EndorsementUtils } from "../libraries/EndorsementUtils.sol";
 import { INodeManagement } from "../../interfaces/INodeManagement.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
 import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
+import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 
 abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable {
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Endorsment
@@ -41,12 +42,14 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     mapping(VechainNodesDataTypes.NodeStrengthLevel => uint256) _nodeEnodorsmentScore; // The endorsement score for each node level
     mapping(bytes32 => uint48) _appGracePeriodStart; // The grace period elapsed by the app since endorsed
     mapping(uint256 => bytes32) _nodeToEndorsedApp; // Maps a node ID to the app it currently endorses
-    uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in blocks
+    uint48 _gracePeriodDuration; // The grace period threshold for no endorsement in BLOCKS
     uint256 _endorsementScoreThreshold; // The endorsement score threshold for an app to be eligible for voting
     mapping(bytes32 => uint256) _appScores; // The score of each app
     mapping(bytes32 => PassportTypes.APP_SECURITY) _appSecurity; // The security score of each app
     INodeManagement _nodeManagementContract; // The token auction contract
     IVeBetterPassport _veBetterPassport; // The VeBetterPassport contract
+    mapping(uint256 => uint48) _endorsementTime; // The latest time is SECONDS at which the node endorsed an app
+    uint48 _cooldownPeriod; // Cooldown duration in SECONDS for a node to endorse an app
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Endorsement")) - 1)) & ~bytes32(uint256(0xff))
@@ -164,9 +167,15 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       revert X2EarnAlreadyEndorser();
     }
 
+    // Check if the callers Node ID is in a cooldown period and if so, revert
+    if (checkCooldown(nodeId)) {
+      revert X2EarnNodeCooldownActive();
+    }
+
     // Add the caller to the list of endorsers for the app
     $._appEndorsers[appId].push(nodeId);
     $._nodeToEndorsedApp[nodeId] = appId;
+    $._endorsementTime[nodeId] = Time.timestamp();
 
     // Calculate the score of the app, considering the new endorsement
     uint256 score = _getScoreAndRemoveEndorsement(appId, 0);
@@ -191,6 +200,11 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     // Check if the user is managing the specified nodeId either through delegation or ownership
     if (!$._nodeManagementContract.isNodeManager(msg.sender, nodeId)) {
       revert X2EarnNonNodeHolder();
+    }
+
+    // Check if the callers Node ID is in a cooldown period and if so, revert
+    if (checkCooldown(nodeId)) {
+      revert X2EarnNodeCooldownActive();
     }
 
     // Remove nodes delegation
@@ -457,6 +471,16 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   }
 
   /**
+   * @dev See {IX2EarnApps-gracePeriod}.
+   * @return The current cooldown period duration in seconds.
+   */
+  function cooldownPeriod() external view returns (uint48) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    return $._cooldownPeriod;
+  }
+
+  /**
    * @dev See {IX2EarnApps-isAppUnendorsed}.
    * @param appId The unique identifier of the app.
    * @return True if the app is pending endorsement.
@@ -471,6 +495,16 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
     // Check if the app is in the list of apps pending endorsement
     return $._unendorsedAppsIndex[appId] > 0;
+  }
+
+  /**
+   * @dev See {IX2EarnApps-checkCooldown}.
+   * @param nodeId The unique identifier of the node.
+   * @return True if the node is in a cooldown period.
+   */
+  function checkCooldown(uint256 nodeId) public view returns (bool) {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+    return EndorsementUtils.checkCooldown($._endorsementTime, $._cooldownPeriod, $._nodeManagementContract, nodeId);
   }
 
   /**
@@ -524,11 +558,17 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     return $._nodeEnodorsmentScore[nodeLevel];
   }
 
+  /**
+   * @dev See {IX2EarnApps-getNodeEndorsementScore}.
+   */
   function getNodeManagementContract() external view returns (INodeManagement) {
     EndorsementStorage storage $ = _getEndorsementStorage();
     return $._nodeManagementContract;
   }
 
+  /**
+   * @dev See {IX2EarnApps-getVeBetterPassportContract}.
+   */
   function getVeBetterPassportContract() external view returns (IVeBetterPassport) {
     EndorsementStorage storage $ = _getEndorsementStorage();
     return $._veBetterPassport;

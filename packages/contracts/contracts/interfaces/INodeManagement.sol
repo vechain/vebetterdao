@@ -105,4 +105,12 @@ interface INodeManagement {
    * @return VechainNodesDataTypes.NodeStrengthLevel The node level of the node managed by the user.
    */
   function getUsersNodeLevels(address user) external view returns (VechainNodesDataTypes.NodeStrengthLevel[] memory);
+
+  /**
+   * @notice Retrieves the creation time of a given node ID.
+   * @dev This function retrieves the creation time of the specified node ID.
+   * @param nodeId The ID of the node for which the creation time is being retrieved.
+   * @return uint64 The creation time of the specified node ID.
+   */
+  function getNodeCreationTime(uint256 nodeId) external view returns (uint64);
 }
