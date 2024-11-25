@@ -4,18 +4,53 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 ## Version History
 
-| Date                | Contract(s)                                               | Summary                                                     |
-| ------------------- | --------------------------------------------------------- | ----------------------------------------------------------- |
-| 15th November 2024  | `X2EarnApps` version `2`                                  | Added X2Earn Apps Vechain Node Endorsement feature          |
-| 21th October 2024   | `VeBetterPassport` version `2`                            | Check if the entity is a delegatee when request is created  |
-| 11th October 2024   | `XAllocationVoting` version `2`                           | Check isPerson when casting vote & fixed weight during vote |
-| 11th October 2024   | `B3TRGovernor` version `4`                                | Check isPerson when casting vote                            |
-| 11th October 2024   | `X2EarnRewardsPool` version `3`                           | Register action in VeBetter Passport contract               |
-| 27th September 2024 | `Emissions` version `2`                                   | Aligned emissions with the expected schedule                |
-| 13th September 2024 | `B3TRGovernor` version `3`, `XAllocationPool` version `2` | - Added toggling of quadratic voting and funding              |
-| 4th September 2024  | `X2EarnRewardsPool` version `2`                           | - Added impact key management and proof building              |
-| 31st August 2024    | `VoterRewards` version `2`                                | - Added quadratic rewarding features                          |
-| 29th August 2024    | `B3TRGovernor` version `2`                                | Updated access control modifiers                            |
+| Date                | Contract(s)                                               | Summary                                                           |
+| ------------------- | --------------------------------------------------------- | ----------------------------------------------------------------- |
+| 29th November 2024  | `X2EarnApps` version `3`, `NodeManagement` version `2`    | Added cooldown period so nodes cannot endorse apps too frequently |
+| 15th November 2024  | `X2EarnApps` version `2`                                  | Added X2Earn Apps Vechain Node Endorsement feature                |
+| 21th October 2024   | `VeBetterPassport` version `2`                            | Check if the entity is a delegatee when request is created        |
+| 11th October 2024   | `XAllocationVoting` version `2`                           | Check isPerson when casting vote & fixed weight during vote       |
+| 11th October 2024   | `B3TRGovernor` version `4`                                | Check isPerson when casting vote                                  |
+| 11th October 2024   | `X2EarnRewardsPool` version `3`                           | Register action in VeBetter Passport contract                     |
+| 27th September 2024 | `Emissions` version `2`                                   | Aligned emissions with the expected schedule                      |
+| 13th September 2024 | `B3TRGovernor` version `3`, `XAllocationPool` version `2` | - Added toggling of quadratic voting and funding                  |
+| 4th September 2024  | `X2EarnRewardsPool` version `2`                           | - Added impact key management and proof building                  |
+| 31st August 2024    | `VoterRewards` version `2`                                | - Added quadratic rewarding features                              |
+| 29th August 2024    | `B3TRGovernor` version `2`                                | Updated access control modifiers                                  |
+
+
+---
+
+## Upgrade `X2EarnApps` to Version 3, and `NodeManagement` to Version 2
+
+This upgrade adds a cooldown mechanism to the X2Earn Apps contract to ensure nodes cannot endorse apps too frequently.
+Also when retrieving a node's level, we now check if the node is pending an upgrade.
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `X2EarnApps.sol` to version `3`
+  - `NodeManagement.sol` to version `2`
+
+### Storage Changes 📦
+
+- **`EndorsementUpgradeable.sol`**:
+    - Added `_endorsementTime` to store mapping from vechian node to tiem it last endorsed an XApp.
+    - Added `_cooldownPeriod` to store the cooldown period threshold in which a node holder cannot endorse an XApp.
+
+### New Features 🚀
+
+- **`X2EarnApps.sol`**:
+  - In `EndorsementUpgradeable.sol` module introduced a `checkCooldown` function to validate if a node is eligible to endorse an app based on:
+    - The last endorsement time.
+    - The node creation time.
+- **`NodeManagement.sol`**:
+  - Added function `getNodeCreationTime` to get the time in seconds of when the Vechain node was created.
+
+### Bug Fixes 🐛
+  
+- **`NodeManagement.sol`**:
+  - Updated contract to take into account nodes that are currently pending an upgrade when determining their level. 
 
 ---
 
