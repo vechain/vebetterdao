@@ -24,8 +24,10 @@ import {
   AlertDescription,
 } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
-import { useCallback } from "react"
+import { useCallback, useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { useSelectedGmNft } from "@/api"
+import { useSelectedTokenId } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -33,12 +35,12 @@ type Props = {
 
 export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  // const { isXNodeAttachedToGM } = useSelectedGmNft()
+  const { isXNodeAttachedToGM } = useSelectedGmNft()
+  const { data: selectedTokenId } = useSelectedTokenId()
 
   const attachGMToXNodeMutation = useAttachGMToXNode({
     onSuccess: onClose,
   })
-  // console.log('attachGMToXNodeMutation.status', attachGMToXNodeMutation.status)
 
   const handleAttachment = useCallback(() => {
     // todo : investigate why this is not working
@@ -47,8 +49,12 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
     attachGMToXNodeMutation.sendTransaction(undefined)
   }, [attachGMToXNodeMutation])
 
+  useEffect(() => {
+    if (!isXNodeAttachedToGM && selectedTokenId != null) {
+      attachGMToXNodeMutation.resetStatus()
+    }
+  }, [isXNodeAttachedToGM, selectedTokenId])
   const iconSize = useBreakpointValue({ base: "48px", md: "108px" })
-
   if (attachGMToXNodeMutation.status !== "ready")
     return (
       <TransactionModal
