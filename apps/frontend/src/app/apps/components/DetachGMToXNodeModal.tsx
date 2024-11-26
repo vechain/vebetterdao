@@ -12,8 +12,9 @@ import {
   ModalHeader,
   ModalFooter,
 } from "@chakra-ui/react"
-import { useCallback } from "react"
+import { useCallback, useEffect } from "react"
 import { useTranslation } from "react-i18next"
+import { useSelectedGmNft } from "@/api"
 
 type Props = {
   isOpen: boolean
@@ -23,6 +24,7 @@ type Props = {
 
 export const DetachGMToXNodeModal = ({ isOpen, onClose, detachToActive }: Props) => {
   const { t } = useTranslation()
+  const { isXNodeAttachedToGM } = useSelectedGmNft()
 
   const detachGMFromXNodeMutation = useDetachGMFromXNode({
     onSuccess: onClose,
@@ -32,6 +34,12 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose, detachToActive }: Props)
     detachGMFromXNodeMutation.resetStatus()
     detachGMFromXNodeMutation.sendTransaction(undefined)
   }, [detachGMFromXNodeMutation])
+
+  useEffect(() => {
+    if (detachToActive && isXNodeAttachedToGM) {
+      detachGMFromXNodeMutation.resetStatus()
+    }
+  }, [detachToActive, isXNodeAttachedToGM])
 
   if (detachGMFromXNodeMutation.status !== "ready")
     return (
