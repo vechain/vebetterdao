@@ -80,9 +80,9 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         <ModalBody>
           <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgba(252, 238, 241, 1)"}>
             <IoWarningOutline size={24} color={"rgba(200, 73, 104, 1)"} />
-            <Text color={"rgba(200, 73, 104, 1)"}>
+            <Text color={"rgba(200, 73, 104, 1)"} fontSize={14}>
               <Trans
-                i18nKey="Detaching your Node will downgrade your GM level to <bold>level {{level}}</bold>."
+                i18nKey="Detaching your Node will downgrade the level of the GM attached to <bold>level {{level}}</bold>."
                 values={{ level: levelAfterDetach }}
                 components={{ bold: <Text as="span" fontWeight={"600"} /> }}
               />
