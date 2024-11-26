@@ -51,7 +51,7 @@ import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
  * ----- Version 4 -----
  * - Use new X2EarnApps interface that supports node endorsement
  */
-contract X2EarnRewardsPool is
+contract X2EarnRewardsPoolV4 is
   IX2EarnRewardsPool,
   UUPSUpgradeable,
   AccessControlUpgradeable,

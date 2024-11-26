@@ -116,7 +116,7 @@ describe("X-Allocation Voting - @shard4", function () {
       })
 
       expect(await xAllocationVoting.name()).to.eql("XAllocationVoting")
-      expect(await xAllocationVoting.version()).to.eql("3")
+      expect(await xAllocationVoting.version()).to.eql("4")
     })
 
     it("Counting mode is set correctly", async function () {

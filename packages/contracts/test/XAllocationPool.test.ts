@@ -224,7 +224,7 @@ describe("X-Allocation Pool - @shard3", async function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationPool.version()).to.equal("3")
+      expect(await xAllocationPool.version()).to.equal("4")
     })
 
     it("Should not have state conflict after upgrading to V2", async () => {

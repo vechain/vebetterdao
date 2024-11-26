@@ -71,7 +71,7 @@ describe("Node Management -@shard4", function () {
         forceDeploy: true,
       })
 
-      expect(await nodeManagement.version()).to.equal("1")
+      expect(await nodeManagement.version()).to.equal("2")
     })
   })
 
@@ -626,6 +626,28 @@ describe("Node Management -@shard4", function () {
 
       const manager = await nodeManagement.isNodeManager(otherAccounts[5].address, 1)
       expect(manager).to.equal(false)
+    })
+  })
+
+  describe("Node Creation Time", () => {
+    it("Should return the correct node creation time", async function () {
+      const { owner, nodeManagement, vechainNodesMock } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      const tx = await vechainNodesMock.addToken(owner.address, 7, false, 0, 0)
+      // Wait for the transaction to be mined
+      const receipt = await tx.wait()
+      if (!receipt) throw new Error("No receipt")
+
+      // Retrieve the block where the transaction was included
+      const block = await ethers.provider.getBlock(receipt.blockNumber)
+      if (!block) throw new Error("No block")
+
+      // Creation time should be the same as the block timestamp
+      const creationTime = await nodeManagement.getNodeCreationTime(1)
+      expect(creationTime).to.equal(block.timestamp)
     })
   })
 })

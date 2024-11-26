@@ -132,6 +132,6 @@ export function createTestConfig() {
 
     CREATOR_NFT_URI: "ipfs://BASE_URI",
 
-    X2EARN_NODE_COOLDOWN_PERIOD: 720, // 3 cycles in seconds
+    X2EARN_NODE_COOLDOWN_PERIOD: 0,
   })
 }
