@@ -33,11 +33,11 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
-import { IB3TRGovernor } from "./interfaces/IB3TRGovernor.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
-import { ITokenAuction } from "./interfaces/ITokenAuction.sol";
-import { INodeManagement } from "./interfaces/INodeManagement.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { IB3TRGovernor } from "../../interfaces/IB3TRGovernor.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
+import { ITokenAuction } from "../../interfaces/ITokenAuction.sol";
+import { INodeManagementV1 } from "../V1/interfaces/INodeManagementV1.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
@@ -45,7 +45,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * @notice This contract manages the unique assets owned by users within the Galaxy Member ecosystem.
  * @dev Extends ERC721 Non-Fungible Token Standard basic implementation with upgradeable pattern, burnable, pausable, and access control functionalities.
  *
- * --------------------------------- VERSION 2 ---------------------------------
+ * --------------------------------- VERSION ---------------------------------
  * - Added Vechain Nodes contract to attach and detach nodes to tokens
  * - Added NODES_MANAGER_ROLE to manage Vechain Nodes Contract address and free upgrade levels
  * - Added free upgrade levels for each Vechain node level
@@ -54,11 +54,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * - Core logic functions are now overridable through inheritance
  * - B3TRGovernor has been updated to V2 thus pointing to the new interface
  * - NodeManagement contract has been added to permit attaching and detaching nodes from managed nodes too
- *
- * --------------------------------- VERSION 3 ---------------------------------
- * - Updated Node Management interface to include get node creation time
  */
-contract GalaxyMember is
+contract GalaxyMemberV2 is
   ERC721Upgradeable,
   ERC721EnumerableUpgradeable,
   ERC721PausableUpgradeable,
@@ -91,7 +88,7 @@ contract GalaxyMember is
     bool isPublicMintingPaused; // Flag to pause public minting
     // --------------------------- V2 Additions --------------------------- //
     ITokenAuction vechainNodes; // Vechain Nodes contract
-    INodeManagement nodeManagement; // Node Management contract
+    INodeManagementV1 nodeManagement; // Node Management contract
     mapping(uint256 => uint256) _nodeToTokenId; // Mapping from Vechain node ID to GalaxyMember Token ID. Used to track the XNode tied to the GM token ID
     mapping(uint256 => uint256) _tokenIdToNode; // Mapping from GalaxyMember Token ID to Vechain node ID. Used to track the GM token ID tied to the XNode token ID
     mapping(uint8 => uint256) _nodeToFreeUpgradeLevel; // Mapping from Vechain node level to GalaxyMember level. Used to track the GM level that can be upgraded for free for a given Vechain node level
@@ -241,7 +238,7 @@ contract GalaxyMember is
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
     $.vechainNodes = ITokenAuction(_vechainNodes);
-    $.nodeManagement = INodeManagement(_nodesMangaement);
+    $.nodeManagement = INodeManagementV1(_nodesMangaement);
 
     $._nextTokenId = $._nextTokenId == 0 ? 1 : $._nextTokenId;
 
@@ -686,7 +683,7 @@ contract GalaxyMember is
   /// @dev This function is used to identify the version of the contract and should be updated in each new version
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
-    return "3";
+    return "2";
   }
 
   struct TokenInfo {

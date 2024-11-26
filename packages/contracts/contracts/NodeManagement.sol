@@ -1,5 +1,26 @@
 // SPDX-License-Identifier: MIT
 
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -9,6 +30,15 @@ import { VechainNodesDataTypes } from "./libraries/VechainNodesDataTypes.sol";
 import { ITokenAuction } from "./interfaces/ITokenAuction.sol";
 import { INodeManagement } from "./interfaces/INodeManagement.sol";
 
+/**
+ * @title NodeManagement
+ * @notice This contract manages node ownership and delegation within the VeBetter DAO ecosystem. It supports delegation,
+ *         retrieval of managed nodes, and integration with VeChain Nodes and token auction contracts.
+ * @dev The contract is upgradeable using the UUPS proxy pattern and implements role-based access control for secure upgrades.
+ *
+ * ------------------------ Version 2 ------------------------
+ * - Add functiont to get Node creation time
+ */
 contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgradeable {
   using EnumerableSet for EnumerableSet.UintSet;
 

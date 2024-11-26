@@ -41,6 +41,13 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
  * Only users with the DEFAULT_ADMIN_ROLE can add new apps, set the base URI and set the voting eligibility for an app.
  * Admins can also control the app metadata and management.
  * Each app has a set of admins and moderators that can manage the app and settings.
+ *
+ * -------------------- Version 2 --------------------
+ * - The contract has been upgraded to version 2 to include the X2Earn endorsement system.
+ * - Added libraries to reduce the contract size and improve readability.
+ *
+ * -------------------- Version 3 --------------------
+ * - The contract has been upgraded to version 3 to add node cooldown period.
  */
 contract X2EarnApps is
   X2EarnAppsUpgradeable,
