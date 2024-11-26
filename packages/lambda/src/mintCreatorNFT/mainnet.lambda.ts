@@ -5,12 +5,12 @@ import { addressUtils, clauseBuilder } from "@vechain/sdk-core"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { getSecret } from "../helpers/secret"
 import { X2EarnCreator__factory } from "@repo/contracts/typechain-types"
-import testnetConfig from "@repo/config/testnet"
+import mainnetConfig from "@repo/config/mainnet"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildResponse } from "../helpers/api/response"
 import { StandardApiError, CustomApiError, SuccessResponseType } from "../helpers/api.types"
 
-const nodeURL = "https://testnet.vechain.org/"
+const nodeURL = "https://mainnet.vechain.org/"
 
 const client = new SecretsManagerClient({ region: "eu-west-1" })
 const awsMinterPkSecretId = "mint_creator_nft_pk"
@@ -19,7 +19,7 @@ const awsMinterPkSecretName = "mint-creator-nft-pk"
 const mintCreatorNFT = async (thor: ThorClient, creatorWalletAddress: string) => {
   const privateKey = await getSecret(client, awsMinterPkSecretId, awsMinterPkSecretName)
   const clause = clauseBuilder.functionInteraction(
-    testnetConfig.x2EarnCreatorContractAddress,
+    mainnetConfig.x2EarnCreatorContractAddress,
     X2EarnCreator__factory.createInterface().getFunction("safeMint") as FunctionFragment,
     [creatorWalletAddress],
   )
