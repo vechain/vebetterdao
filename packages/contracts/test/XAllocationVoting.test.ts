@@ -37,7 +37,7 @@ import {
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 
-describe("X-Allocation Voting - @shard4", function () {
+describe("X-Allocation Voting - @shard14", function () {
   describe("Deployment", function () {
     it("Admins and addresses should be set correctly", async function () {
       const { xAllocationVoting, owner, timeLock, emissions, x2EarnApps } = await getOrDeployContractInstances({

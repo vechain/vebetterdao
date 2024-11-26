@@ -18,6 +18,7 @@ import { UpdateRoleCard } from "./components/UpdateRoleCard"
 import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport"
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 import { ManageCreatorsNFT } from "./components/ManageCreatorsNFT"
+import { GMSetMaxLevel } from "./components/GMSetMaxLevel"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -45,7 +46,7 @@ export const AdminPageContent = () => {
 
   const canSeeX2EarnCreatorUtils =
     permissions?.isAdminOfX2EarnCreator || permissions?.isMinterOfX2EarnCreator || permissions?.isBurnerOfX2EarnCreator
-
+  const canSeeGalaxyMemberTab = permissions?.isAdminOfGalaxyMember
   return (
     <Stack spacing={12} w={"full"} data-testid="admin-page">
       <Tabs>
@@ -64,6 +65,7 @@ export const AdminPageContent = () => {
           <Tab>{"Contracts"}</Tab>
           {canSeePauseTab && <Tab>{"Pausing"}</Tab>}
           {canSeeVeBetterPassportTab && <Tab>{"VeBetter Passport"}</Tab>}
+          {canSeeGalaxyMemberTab && <Tab>{"Galaxy Member"}</Tab>}
         </TabList>
 
         <TabPanels>
@@ -113,6 +115,13 @@ export const AdminPageContent = () => {
           {canSeeVeBetterPassportTab && (
             <TabPanel>
               <VeBetterPassport />
+            </TabPanel>
+          )}
+          {canSeeGalaxyMemberTab && (
+            <TabPanel>
+              <Grid templateColumns={["repeat(1, 1fr)", "repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+                <GMSetMaxLevel />
+              </Grid>
             </TabPanel>
           )}
         </TabPanels>
