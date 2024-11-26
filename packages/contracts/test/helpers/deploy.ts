@@ -73,10 +73,13 @@ import {
   AdministrationUtils,
   VoteEligibilityUtils,
   EndorsementUtils,
+  AdministrationUtilsV2,
+  VoteEligibilityUtilsV2,
+  EndorsementUtilsV2,
   X2EarnCreator,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
+import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deployAll"
@@ -84,7 +87,6 @@ import { B3TRGovernorV4 } from "../../typechain-types/contracts/deprecated/V4"
 import { VoterRewardsV2 } from "../../typechain-types/contracts/deprecated/V2/VoterRewardsV2"
 import { XAllocationVotingV2 } from "../../typechain-types/contracts/deprecated/V2/XAllocationVotingV2"
 import { XAllocationPoolV2 } from "../../typechain-types/contracts/deprecated/V2/XAllocationPoolV2"
-import { X2EarnAppsV1 } from "../../typechain-types/contracts/deprecated/V1/X2EarnAppsV1"
 import {
   GovernorClockLogicV4,
   GovernorVotesLogicV4,
@@ -172,6 +174,9 @@ interface DeployInstance {
   administrationUtils: AdministrationUtils
   endorsementUtils: EndorsementUtils
   voteEligibilityUtils: VoteEligibilityUtils
+  administrationUtilsV2: AdministrationUtilsV2
+  endorsementUtilsV2: EndorsementUtilsV2
+  voteEligibilityUtilsV2: VoteEligibilityUtilsV2
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
   vechainNodesMock: TokenAuction
@@ -256,7 +261,14 @@ export const getOrDeployContractInstances = async ({
     PassportWhitelistAndBlacklistLogic,
   } = await passportLibraries()
 
-  const { AdministrationUtils, EndorsementUtils, VoteEligibilityUtils } = await x2EarnLibraries()
+  const {
+    AdministrationUtils,
+    EndorsementUtils,
+    VoteEligibilityUtils,
+    AdministrationUtilsV2,
+    EndorsementUtilsV2,
+    VoteEligibilityUtilsV2,
+  } = await x2EarnLibraries()
 
   // ---------------------- Deploy Mocks ----------------------
 
@@ -343,11 +355,13 @@ export const getOrDeployContractInstances = async ({
   const x2EarnCreator = (await deployProxy("X2EarnCreator", [config.CREATOR_NFT_URI, owner.address])) as X2EarnCreator
 
   // Deploy NodeManagement
-  const nodeManagement = (await deployProxy("NodeManagement", [
-    await vechainNodesMock.getAddress(),
-    owner.address,
-    owner.address,
-  ])) as NodeManagement
+  const nodeManagement = (await deployAndUpgrade(
+    ["NodeManagementV1", "NodeManagement"],
+    [[await vechainNodesMock.getAddress(), owner.address, owner.address], []],
+    {
+      versions: [undefined, 2],
+    },
+  )) as NodeManagement
 
   const galaxyMember = (await upgradeProxy(
     "GalaxyMemberV1",
@@ -374,32 +388,33 @@ export const getOrDeployContractInstances = async ({
     PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
   })
 
-  // Deploy X2EarnAppsV1
-  const x2EarnAppsV1 = (await deployProxy("X2EarnAppsV1", [
-    "ipfs://",
-    [await timeLock.getAddress(), owner.address],
-    owner.address,
-    owner.address,
-  ])) as X2EarnAppsV1
-
-  // Upgrade X2EarnAppsV1 to X2EarnApps
-  const x2EarnApps = (await upgradeProxy(
-    "X2EarnAppsV1",
-    "X2EarnApps",
-    await x2EarnAppsV1.getAddress(),
+  const x2EarnApps = (await deployAndUpgrade(
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnApps"],
     [
-      config.XAPP_GRACE_PERIOD,
-      await nodeManagement.getAddress(),
-      veBetterPassportContractAddress,
-      await x2EarnCreator.getAddress(),
+      ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
+      [
+        config.XAPP_GRACE_PERIOD,
+        await nodeManagement.getAddress(),
+        veBetterPassportContractAddress,
+        await x2EarnCreator.getAddress(),
+      ],
+      [config.X2EARN_NODE_COOLDOWN_PERIOD],
     ],
     {
-      version: 2,
-      libraries: {
-        AdministrationUtils: await AdministrationUtils.getAddress(),
-        EndorsementUtils: await EndorsementUtils.getAddress(),
-        VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
-      },
+      versions: [undefined, 2, 3],
+      libraries: [
+        undefined,
+        {
+          AdministrationUtilsV2: await AdministrationUtilsV2.getAddress(),
+          EndorsementUtilsV2: await EndorsementUtilsV2.getAddress(),
+          VoteEligibilityUtilsV2: await VoteEligibilityUtilsV2.getAddress(),
+        },
+        {
+          AdministrationUtils: await AdministrationUtils.getAddress(),
+          EndorsementUtils: await EndorsementUtils.getAddress(),
+          VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
+        },
+      ],
     },
   )) as X2EarnApps
 
@@ -905,6 +920,9 @@ export const getOrDeployContractInstances = async ({
     administrationUtils: AdministrationUtils,
     endorsementUtils: EndorsementUtils,
     voteEligibilityUtils: VoteEligibilityUtils,
+    administrationUtilsV2: AdministrationUtilsV2,
+    endorsementUtilsV2: EndorsementUtilsV2,
+    voteEligibilityUtilsV2: VoteEligibilityUtilsV2,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vechainNodesMock,
