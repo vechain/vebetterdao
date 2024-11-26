@@ -4,7 +4,7 @@ import mainnetConfig from "@repo/config/mainnet"
 import { FunctionFragment } from "ethers"
 import { addressUtils, clauseBuilder } from "@vechain/sdk-core"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
-import { buildClaimClauses, getRoundXApps } from "../helpers/xApps"
+import { buildClaimClause, getAllApps } from "../helpers/xApps"
 import { getIdsOfUnclaimed } from "../helpers/xApps"
 import { getSecret } from "../helpers/secret"
 import { waitForRoundStart } from "../helpers/emissions"
@@ -55,7 +55,7 @@ async function distributeEmissions(thor: ThorClient) {
   }
 
   // Build the transaction body with the estimated gas
-  let txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas)
+  let txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas * 2)
 
   // Sign the transaction with the developer's private key
   let signedTx = await thor.transactions.signTransaction(txBody, privateKey)
@@ -89,13 +89,28 @@ async function distributeXAllocations(thor: ThorClient) {
   const previousRound = Number(currentRound[0]) - 1
 
   // Get the X-Apps for the current round
-  const xApps = await getRoundXApps(thor, previousRound.toString(), mainnetConfig)
+  const xApps = await getAllApps(thor, previousRound.toString(), mainnetConfig)
 
   // Get the IDs of the X-Apps that have not yet claimed their allocations
   const xAppIds = await getIdsOfUnclaimed(thor, xApps, previousRound.toString())
 
-  // Build the claim clauses for the X-Apps
-  const claimClauses = buildClaimClauses(xAppIds, previousRound.toString())
+  const claimClauses = []
+
+  // Build the claim clauses for the X-Apps that have not yet claimed their allocations and the gas estimation does not revert
+  for (const xAppId of xAppIds) {
+    const claimClause = buildClaimClause(xAppId, previousRound.toString())
+
+    // Estimate the gas cost for the transaction
+    const gasResult = await thor.gas.estimateGas(
+      [claimClause],
+      addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex")),
+    )
+
+    // Check if the transaction was estimated to revert and handle accordingly
+    if (!gasResult.reverted) {
+      claimClauses.push(claimClause)
+    }
+  }
 
   // Estimate the gas cost for the transaction
   const gasResult = await thor.gas.estimateGas(
@@ -117,7 +132,7 @@ async function distributeXAllocations(thor: ThorClient) {
   }
 
   // Build the transaction body with the estimated gas
-  const txBody = await thor.transactions.buildTransactionBody(claimClauses, gasResult.totalGas)
+  const txBody = await thor.transactions.buildTransactionBody(claimClauses, gasResult.totalGas * 2)
 
   // Sign the transaction with the developer's private key
   const signedTx = await thor.transactions.signTransaction(txBody, privateKey)
