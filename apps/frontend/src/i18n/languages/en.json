@@ -1331,5 +1331,6 @@
   "Delegate XNode": "Delegate XNode",
   "Remove the XNode delegation to attach GM NFT to this node": "Remove the XNode delegation to attach GM NFT to this node",
   "XNode is currently delegated to:": "XNode is currently delegated to:",
-  "Notice: your GM NFT will be detached from your XNode.": "Notice: your GM NFT will be detached from your XNode."
+  "Notice: your GM NFT will be detached from your XNode.": "Notice: your GM NFT will be detached from your XNode.",
+  "You are controlling a delegated XNode": "You are controlling a delegated XNode"
 }
