@@ -42,7 +42,7 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
  * Admins can also control the app metadata and management.
  * Each app has a set of admins and moderators that can manage the app and settings.
  */
-contract X2EarnApps is
+contract X2EarnAppsV2 is
   X2EarnAppsUpgradeable,
   AdministrationUpgradeable,
   ContractSettingsUpgradeable,

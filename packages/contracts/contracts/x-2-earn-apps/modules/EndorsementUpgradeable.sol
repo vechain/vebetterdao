@@ -339,6 +339,9 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
       _updateStatusIfThresholdNotMet(appId);
     }
 
+    // Reset the endorsement time of the node ID
+    $._endorsementTime[nodeId] = 0;
+
     return;
   }
 
