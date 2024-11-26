@@ -1,3 +1,5 @@
+import { useB3trDonated, useXNode } from "@/api"
+import { getGMLevel } from "@/api/contracts/galaxyMember/utils"
 import { CustomModalContent, TransactionModal } from "@/components"
 import { useDetachGMFromXNode } from "@/hooks"
 import {
@@ -11,9 +13,11 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalFooter,
+  HStack,
 } from "@chakra-ui/react"
-import { useCallback } from "react"
-import { useTranslation } from "react-i18next"
+import { useCallback, useMemo } from "react"
+import { useTranslation, Trans } from "react-i18next"
+import { IoWarningOutline } from "react-icons/io5"
 
 type Props = {
   isOpen: boolean
@@ -22,6 +26,14 @@ type Props = {
 
 export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
+
+  const { attachedGMTokenId } = useXNode()
+
+  const { data: b3trDonated } = useB3trDonated(attachedGMTokenId)
+
+  const levelAfterDetach = useMemo(() => {
+    return getGMLevel(1, Number(b3trDonated) ?? 0)
+  }, [b3trDonated])
 
   const detachGMFromXNodeMutation = useDetachGMFromXNode({
     onSuccess: () => {
@@ -66,7 +78,16 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
           <Heading fontSize="lg">{t("Detach Node from GM NFT")}</Heading>
         </ModalHeader>
         <ModalBody>
-          <Text>{t("Detaching your Node will downgrade your GM level to the one it was before.")}</Text>
+          <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgba(252, 238, 241, 1)"}>
+            <IoWarningOutline size={24} color={"rgba(200, 73, 104, 1)"} />
+            <Text color={"rgba(200, 73, 104, 1)"}>
+              <Trans
+                i18nKey="Detaching your Node will downgrade your GM level to <bold>level {{level}}</bold>."
+                values={{ level: levelAfterDetach }}
+                components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+              />
+            </Text>
+          </HStack>
         </ModalBody>
         <ModalFooter w="full">
           <VStack align="stretch" w="full">
