@@ -55,7 +55,7 @@ export const AttachGMNFTCard = () => {
                 isXNodeAttachedToGM
                   ? "Your GM NFT is attached to your Node"
                   : isXNodeDelegator
-                    ? "Remove thse XNode delegation to attach GM NFT to this node"
+                    ? "Remove the XNode delegation to attach GM NFT to this node"
                     : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
               )}
             </Text>
