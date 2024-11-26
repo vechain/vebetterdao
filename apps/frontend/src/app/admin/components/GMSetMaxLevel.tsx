@@ -39,6 +39,9 @@ export const GMSetMaxLevel = () => {
     defaultValues: { newMaxLevel: 1 },
   })
 
+  const GM_MAX_LEVEL_ALLOWED = 10 //Currently setting max level allowed to 10
+  const GM_MIN_LEVEL_ALLOWED = 1
+
   const newMaxLevel = watch("newMaxLevel")
   const { error, status, txReceipt, resetStatus, sendTransaction, isTxReceiptLoading } = useSetGMMaxLevel({
     maxLevel: newMaxLevel,
@@ -49,7 +52,6 @@ export const GMSetMaxLevel = () => {
   })
 
   const onSubmit = useCallback(() => {
-    console.log(newMaxLevel, currentMaxLevel)
     resetStatus()
     onOpen()
     sendTransaction(undefined)
@@ -57,7 +59,11 @@ export const GMSetMaxLevel = () => {
   const { data: currentMaxLevel } = useGMMaxLevel()
   const isFormValid = useMemo(
     //TODO: Check if contract max level is 10
-    () => newMaxLevel !== Number(currentMaxLevel ?? 1) && newMaxLevel >= 1 && newMaxLevel <= 10,
+    () =>
+      newMaxLevel !== Number(currentMaxLevel ?? GM_MIN_LEVEL_ALLOWED) &&
+      newMaxLevel > Number(currentMaxLevel ?? GM_MIN_LEVEL_ALLOWED) &&
+      newMaxLevel >= GM_MIN_LEVEL_ALLOWED &&
+      newMaxLevel <= GM_MAX_LEVEL_ALLOWED,
     [currentMaxLevel, newMaxLevel],
   )
   return (
@@ -78,10 +84,11 @@ export const GMSetMaxLevel = () => {
                   <InputGroup>
                     <NumberInput
                       w="full"
-                      min={1}
-                      max={10} //TODO: Check if contract max level is 10
-                      placeholder={t("Enter the new max level")}
-                      onChange={valueAsNumber => setValue("newMaxLevel", valueAsNumber, { shouldValidate: true })}>
+                      min={GM_MIN_LEVEL_ALLOWED}
+                      max={GM_MAX_LEVEL_ALLOWED}
+                      onChange={value =>
+                        setValue("newMaxLevel", Number(value ?? GM_MIN_LEVEL_ALLOWED), { shouldValidate: true })
+                      }>
                       <NumberInputField
                         {...register("newMaxLevel", {
                           required: t("This field is required"),
@@ -90,8 +97,11 @@ export const GMSetMaxLevel = () => {
                             if (!value) {
                               return t("This field is required")
                             }
-                            if (value === Number(currentMaxLevel ?? 1)) {
+                            if (value === Number(currentMaxLevel ?? GM_MIN_LEVEL_ALLOWED)) {
                               return t("Value must be different from the current max level")
+                            }
+                            if (value < Number(currentMaxLevel ?? GM_MIN_LEVEL_ALLOWED)) {
+                              return t("Value must be greater than the current max level")
                             }
                           },
                         })}
