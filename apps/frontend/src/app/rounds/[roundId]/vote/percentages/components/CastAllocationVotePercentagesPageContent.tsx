@@ -37,7 +37,7 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
   // Handle the case when user has data in LS but the app is not active anymore
   const parsedVotes: CastAllocationVoteFormData[] = useMemo(() => {
     return votes
-      .filter(vote => vote.rawValue > 0 && xAppsQuery.data?.find(app => app.id === vote.appId))
+      .filter(vote => xAppsQuery.data?.find(app => app.id === vote.appId))
       .map(vote => {
         return {
           appId: vote.appId,
