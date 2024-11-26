@@ -5,7 +5,7 @@ import { X2EarnApps__factory } from "@repo/contracts"
 
 const X2_EARN_APP_CONTRACT = getConfig().x2EarnAppsContractAddress
 
-export type AppGracePeriodStartedEvent = {
+export type GracePeriodStartedEvent = {
   appId: string
   startBlock: string
   endBlock: string
@@ -13,9 +13,9 @@ export type AppGracePeriodStartedEvent = {
   txOrigin: string
 }
 
-export const getGracePeriodEvent = async (thor: Connex.Thor, appId?: string): Promise<AppGracePeriodStartedEvent[]> => {
+export const getGracePeriodEvent = async (thor: Connex.Thor, appId?: string): Promise<GracePeriodStartedEvent[]> => {
   const eventFragment = X2EarnApps__factory.createInterface().getEvent("AppUnendorsedGracePeriodStarted").format("json")
-  const appGracePeriodStartedEvent = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
+  const gracePeriodStartedEvent = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
 
   const appIdBytes = appId ? `0x${BigInt(appId).toString(16).padStart(64, "0")}` : undefined
 
@@ -26,7 +26,7 @@ export const getGracePeriodEvent = async (thor: Connex.Thor, appId?: string): Pr
   const filterCriteria = [
     {
       address: X2_EARN_APP_CONTRACT,
-      topic0: appGracePeriodStartedEvent.signature,
+      topic0: gracePeriodStartedEvent.signature,
       topic1: appIdBytes,
     },
   ]
@@ -34,7 +34,7 @@ export const getGracePeriodEvent = async (thor: Connex.Thor, appId?: string): Pr
   const events = await getAllEvents({ thor, filterCriteria })
 
   return events.map(event => {
-    const decoded = appGracePeriodStartedEvent.decode(event.data, event.topics)
+    const decoded = gracePeriodStartedEvent.decode(event.data, event.topics)
     return {
       appId: decoded[0],
       startBlock: decoded[1].toString(),
