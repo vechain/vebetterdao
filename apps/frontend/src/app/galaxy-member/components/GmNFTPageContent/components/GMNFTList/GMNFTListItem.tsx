@@ -49,8 +49,6 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
     return `${nftName} #${token.tokenId}`
   }, [nftMetadata, token.tokenId, token.tokenLevel])
 
-  console.log("gmImage in List", gmImage)
-  // todo(p1): investigate why when minting a new GM, the tokenLevel, image and name are not updated ( needed to refresh the page )
   return (
     <Card variant={isGMSelected ? "primaryBoxShadow" : "baseWithBorder"} rounded="8px">
       <CardBody p={"4"}>

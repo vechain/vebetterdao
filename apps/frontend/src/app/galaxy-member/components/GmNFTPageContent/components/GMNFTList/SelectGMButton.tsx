@@ -20,13 +20,11 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
   const detachGMModal = useDisclosure()
   const [detachToActive, setDetachToActive] = useState(false)
 
+  // double check the flow if ok
   const handleSelectGM = useCallback(() => {
     if (isXNodeAttachedToGM) {
       setDetachToActive(true)
       detachGMModal.onOpen()
-      // todo(p0): for a smother flow -> just after the after the detach is done,
-      // sendTransaction the problem is that the sendTransaction is being called to soon
-      // selectGMMutation.status === "success" && selectGMMutation.sendTransaction({})
     } else {
       selectGMMutation.sendTransaction({})
       selectGMModal.onOpen()
