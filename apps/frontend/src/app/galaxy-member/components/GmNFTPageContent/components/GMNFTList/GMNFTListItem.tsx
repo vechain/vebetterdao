@@ -9,6 +9,7 @@ import { SelectGMButton } from "./SelectGMButton"
 import { gmNfts } from "@/constants/gmNfts"
 import { FeatureFlag, notFoundImage } from "@/constants"
 import { FeatureFlagWrapper } from "@/components"
+import { useLevelMultiplier } from "@/api"
 
 interface GMNFTListItemProps {
   token: {
@@ -24,6 +25,8 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { data: selectedTokenId } = useSelectedTokenId()
+
+  const { data: gmRewardMultiplier } = useLevelMultiplier(token.tokenLevel)
 
   const isGMSelected = useMemo(() => selectedTokenId === token.tokenId, [selectedTokenId, token.tokenId])
 
@@ -91,7 +94,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                   <HStack gap={1}>
                     <Text fontSize={"xs"} fontWeight={600}>
-                      {token.tokenLevel}
+                      {gmRewardMultiplier}
                       {"x"}
                     </Text>
                     <Text fontSize={"xs"} fontWeight={400} noOfLines={1} whiteSpace={"nowrap"}>

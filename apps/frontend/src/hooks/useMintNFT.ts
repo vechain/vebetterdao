@@ -11,6 +11,7 @@ const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
 type useMintNFTProps = {
   onFailure?: () => void
+  onSuccess?: () => void
   invalidateCache?: boolean
 }
 
@@ -20,7 +21,7 @@ type useMintNFTProps = {
  * @param onFailure callback to call when the NFT is failed or cancelled
  * @returns the result of the transaction
  */
-export const useMintNFT = ({ onFailure }: useMintNFTProps) => {
+export const useMintNFT = ({ onFailure, onSuccess }: useMintNFTProps) => {
   const { account } = useWallet()
   const clauseBuilder = useCallback(() => {
     return [
@@ -47,6 +48,7 @@ export const useMintNFT = ({ onFailure }: useMintNFTProps) => {
     clauseBuilder,
     refetchQueryKeys,
     onFailure: handleOnFailure,
+    onSuccess,
   })
 
   return result
