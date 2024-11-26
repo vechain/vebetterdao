@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { GalaxyMember__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
@@ -29,7 +29,7 @@ export const useSetGMMaxLevel = ({ maxLevel, onSuccess }: Props) => {
     ]
   }, [maxLevel])
 
-  const refetchQueryKeys = useMemo(() => [getGMMaxLevelQueryKey()], [maxLevel])
+  const refetchQueryKeys = getGMMaxLevelQueryKey()
 
   return useBuildTransaction({
     clauseBuilder,

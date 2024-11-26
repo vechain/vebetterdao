@@ -58,7 +58,6 @@ export const GMSetMaxLevel = () => {
   }, [resetStatus, sendTransaction, onOpen])
   const { data: currentMaxLevel } = useGMMaxLevel()
   const isFormValid = useMemo(
-    //TODO: Check if contract max level is 10
     () =>
       newMaxLevel !== Number(currentMaxLevel ?? GM_MIN_LEVEL_ALLOWED) &&
       newMaxLevel > Number(currentMaxLevel ?? GM_MIN_LEVEL_ALLOWED) &&
@@ -115,7 +114,6 @@ export const GMSetMaxLevel = () => {
                   {errors.newMaxLevel && <FormErrorMessage>{errors.newMaxLevel.message}</FormErrorMessage>}
                 </FormControl>
 
-                {/* Submit Button */}
                 <Button isDisabled={!isFormValid || isTxReceiptLoading} type="submit" colorScheme="blue" size="md">
                   {t("Set Max Level")}
                 </Button>
