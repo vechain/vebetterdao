@@ -49,6 +49,7 @@ export const AppsPageContent = () => {
       <VStack alignItems={"flex-start"} spacing={4} w="100%">
         <Heading size="lg">{t("All the apps")}</Heading>
         <AllApps
+          allApps={xApps?.allApps || []}
           activeApps={xApps?.active || []}
           gracePeriodApps={gracePeriodApps || []}
           lostEndorsementApps={lostEndorsementApps || []}

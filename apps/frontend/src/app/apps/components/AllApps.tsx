@@ -12,13 +12,14 @@ const FILTER_GRACE_PERIOD = "In grace period"
 const FILTER_ENDORSEMENT_LOST = "Endorsement lost"
 
 type Props = {
+  allApps: XApp[]
   activeApps: XApp[]
   gracePeriodApps: UnendorsedApp[]
   lostEndorsementApps: UnendorsedApp[]
   isXAppsLoading: boolean
 }
 
-export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXAppsLoading }: Props) => {
+export const AllApps = ({ allApps, activeApps, gracePeriodApps, lostEndorsementApps, isXAppsLoading }: Props) => {
   const [filter, setFilter] = useState(FILTER_ALL)
 
   const showCreatorBanner = useMemo(() => filter === FILTER_ALL, [filter])
@@ -26,15 +27,15 @@ export const AllApps = ({ activeApps, gracePeriodApps, lostEndorsementApps, isXA
   const displayApps = useMemo(() => {
     switch (filter) {
       case FILTER_ACTIVE_APPS:
-        return [...activeApps, ...gracePeriodApps]
+        return activeApps
       case FILTER_GRACE_PERIOD:
         return gracePeriodApps
       case FILTER_ENDORSEMENT_LOST:
         return lostEndorsementApps
       default:
-        return [...activeApps, ...gracePeriodApps, ...lostEndorsementApps]
+        return allApps
     }
-  }, [filter, activeApps, gracePeriodApps, lostEndorsementApps])
+  }, [filter, activeApps, gracePeriodApps, lostEndorsementApps, allApps])
 
   const appsSection = useMemo(() => {
     const isEmpty = !displayApps?.length

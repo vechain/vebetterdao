@@ -13,7 +13,7 @@ import { FaChevronRight } from "react-icons/fa6"
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
   const { isXNodeAttachedToGM } = useSelectedGmNft()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, attachedGMTokenId } = useXNode()
 
   const router = useRouter()
   const goToXnodePage = useCallback(() => {
@@ -109,7 +109,11 @@ export const AttachXNodeCard = () => {
           )}
         </VStack>
       </CardBody>
-      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
+      <AttachGMToXNodeModal
+        isOpen={attachGmToXNodeModal.isOpen}
+        onClose={attachGmToXNodeModal.onClose}
+        attachedGMTokenId={attachedGMTokenId}
+      />
       <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.isOpen} onClose={detachGmToXNodeModal.onClose} />
     </Card>
   )

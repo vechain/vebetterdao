@@ -12,6 +12,7 @@ import { getNodeIdAttachedQueryKey } from "@/api/contracts/galaxyMember/hooks/us
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
 type Props = {
+  attachedGMTokenId?: string
   onSuccess?: () => void
 }
 
@@ -25,7 +26,7 @@ type Props = {
  * @param {Function} [props.onSuccess] - Optional callback function to be called on successful transaction.
  * @returns {Object} An object containing the transaction builder and related data.
  */
-export const useAttachGMToXNode = ({ onSuccess }: Props) => {
+export const useAttachGMToXNode = ({ attachedGMTokenId, onSuccess }: Props) => {
   const { xNodeId } = useXNode()
   const { gmId } = useSelectedGmNft()
 
@@ -37,7 +38,21 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
       throw new Error("GM NFT ID is not available")
     }
 
-    return [
+    const clauses = []
+
+    if (attachedGMTokenId) {
+      clauses.push(
+        buildClause({
+          to: getConfig().galaxyMemberContractAddress,
+          contractInterface: GalaxyMemberInterface,
+          method: "detachNode",
+          args: [xNodeId, attachedGMTokenId],
+          comment: `Detach GM NFT id ${attachedGMTokenId} from XNode ${xNodeId}`,
+        }),
+      )
+    }
+
+    clauses.push(
       buildClause({
         to: getConfig().galaxyMemberContractAddress,
         contractInterface: GalaxyMemberInterface,
@@ -45,8 +60,10 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
         args: [xNodeId, gmId],
         comment: `Attach XNode ${xNodeId} to GM NFT id ${gmId}`,
       }),
-    ]
-  }, [xNodeId, gmId])
+    )
+
+    return clauses
+  }, [xNodeId, gmId, attachedGMTokenId])
 
   const { account } = useWallet()
 
