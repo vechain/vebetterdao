@@ -20,7 +20,7 @@ export const useSetGMMaxLevel = ({ maxLevel, onSuccess }: Props) => {
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({
-        to: getConfig().x2EarnAppsContractAddress,
+        to: getConfig().galaxyMemberContractAddress,
         contractInterface: GalaxyMemberInterface,
         method: "setMaxLevel",
         args: [maxLevel],
