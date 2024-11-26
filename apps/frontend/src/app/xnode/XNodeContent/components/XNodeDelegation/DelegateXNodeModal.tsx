@@ -43,10 +43,9 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   } = useForm<FormData>()
 
   const confirmationModal = useDisclosure()
-
   const delegatee = watch("walletAddress")
-
   const delegateXNode = useDelegateXNode({})
+  const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
   const openConfirmationModal = useCallback(() => {
     confirmationModal.onOpen()
@@ -55,8 +54,6 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   const handleDelegate = useCallback(() => {
     delegateXNode.sendTransaction({ delegatee })
   }, [delegateXNode, delegatee])
-
-  const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
   const handleClose = useCallback(() => {
     modal.onClose?.()
@@ -104,6 +101,11 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
                 {t("The delegated address will be able to endorse and upgrade GM NFTs using your XNode")}
               </AlertTitle>
               <AlertDescription as="span">{t("but won't be able to transfer or sell your XNode.")}</AlertDescription>
+              {isXNodeAttachedToGM && (
+                <Text fontSize="sm" color="#C84968">
+                  {t("Notice: your GM NFT will be detached from your XNode.")}
+                </Text>
+              )}
             </Box>
           </Alert>
           <VStack>

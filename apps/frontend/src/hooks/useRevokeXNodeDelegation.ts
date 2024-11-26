@@ -3,15 +3,22 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
-import { NodeManagement__factory } from "@repo/contracts"
-import { getUserNodeQueryKey, getUserXNodesQueryKey } from "@/api"
+import { NodeManagement__factory, GalaxyMember__factory } from "@repo/contracts"
+import { getLevelOfTokenQueryKey, getUserNodeQueryKey, getUserXNodesQueryKey, useSelectedGmNft } from "@/api"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
+const GmInterface = GalaxyMember__factory.createInterface()
 const nodeManagementContractAddress = getConfig().nodeManagementContractAddress
+const gmContractAddress = getConfig().galaxyMemberContractAddress
 const method = "removeNodeDelegation"
+const detachMethod = "detachNode"
 
 type UseRevokeXNodeDelegationProps = {
   onSuccess?: () => void
+}
+
+type ClausesParams = {
+  isAttachedToGM?: boolean
 }
 
 /**
@@ -23,25 +30,44 @@ type UseRevokeXNodeDelegationProps = {
  */
 export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegationProps = {}) => {
   const { account } = useWallet()
+  const { gmId } = useSelectedGmNft()
 
-  //TODO: if isXNodeAttachedToGM, then add clause to detach xnode from gm
-  const clauseBuilder = useCallback(() => {
-    if (!account) throw new Error("Account is required")
+  const clauseBuilder = useCallback(
+    ({ isAttachedToGM }: ClausesParams) => {
+      if (!account) throw new Error("Account is required")
 
-    return [
-      buildClause({
-        to: nodeManagementContractAddress,
-        contractInterface: NodeManagementInterface,
-        method,
-        args: [],
-        comment: "revoke xnode delegation",
-      }),
-    ]
-  }, [account])
+      const clauses = []
+
+      if (isAttachedToGM) {
+        clauses.push(
+          buildClause({
+            to: gmContractAddress,
+            contractInterface: GmInterface,
+            method: detachMethod,
+            args: [],
+            comment: "detach xnode from gm",
+          }),
+        )
+      }
+
+      clauses.push(
+        buildClause({
+          to: nodeManagementContractAddress,
+          contractInterface: NodeManagementInterface,
+          method,
+          args: [],
+          comment: "revoke xnode delegation",
+        }),
+      )
+
+      return clauses
+    },
+    [account],
+  )
 
   const refetchQueryKeys = useMemo(
-    () => [getUserXNodesQueryKey(account || ""), getUserNodeQueryKey(account || "")],
-    [account],
+    () => [getUserXNodesQueryKey(account || ""), getUserNodeQueryKey(account || ""), getLevelOfTokenQueryKey(gmId)],
+    [account, gmId],
   )
 
   return useBuildTransaction({

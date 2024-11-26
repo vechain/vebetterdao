@@ -10,20 +10,23 @@ import {
   AlertTitle,
   AlertDescription,
   useBreakpointValue,
+  Text,
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
 import { useRevokeXNodeDelegation } from "@/hooks"
+import { useSelectedGmNft } from "@/api"
 
 export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
+  const { isXNodeAttachedToGM } = useSelectedGmNft()
 
   const revokeXNodeDelegation = useRevokeXNodeDelegation({})
 
   const handleRevoke = useCallback(() => {
-    revokeXNodeDelegation.sendTransaction({})
-  }, [revokeXNodeDelegation])
+    revokeXNodeDelegation.sendTransaction({ isAttachedToGM: isXNodeAttachedToGM })
+  }, [revokeXNodeDelegation, isXNodeAttachedToGM])
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
@@ -42,7 +45,7 @@ export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProp
         errorDescription={revokeXNodeDelegation.error?.reason}
         errorTitle={revokeXNodeDelegation.error ? t("Error revoking XNode delegation") : undefined}
         showTryAgainButton
-        onTryAgain={() => revokeXNodeDelegation.sendTransaction({})}
+        onTryAgain={() => revokeXNodeDelegation.sendTransaction({ isXNodeAttachedToGM })}
         pendingTitle={t("Revoking XNode delegation...")}
         showExplorerButton
         txId={revokeXNodeDelegation.txReceipt?.meta.txID ?? revokeXNodeDelegation.sendTransactionTx?.txid}
@@ -66,6 +69,11 @@ export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProp
               {t("The delegated address will no longer be able to endorse and upgrade GM NFTs using your XNode")}
             </AlertTitle>
             <AlertDescription as="span">{t("once you have revoked the delegation.")}</AlertDescription>
+            {isXNodeAttachedToGM && (
+              <Text fontSize="sm" color="#C84968">
+                {t("Notice: your GM NFT will be detached from your XNode.")}
+              </Text>
+            )}
           </Box>
         </Alert>
         <VStack>

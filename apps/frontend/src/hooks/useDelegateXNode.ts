@@ -4,12 +4,15 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildClause } from "@/utils/buildClause"
-import { NodeManagement__factory } from "@repo/contracts"
-import { getUserNodeQueryKey, getUserXNodesQueryKey } from "@/api"
+import { GalaxyMember__factory, NodeManagement__factory } from "@repo/contracts"
+import { getLevelOfTokenQueryKey, getUserNodeQueryKey, getUserXNodesQueryKey, useSelectedGmNft } from "@/api"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
 const nodeManagementContractAddress = getConfig().nodeManagementContractAddress
-const method = "delegateNode"
+const GmInterface = GalaxyMember__factory.createInterface()
+const gmContractAddress = getConfig().galaxyMemberContractAddress
+const delegateMethod = "delegateNode"
+const detachMethod = "detachNode"
 
 type UseDelegateXNodeProps = {
   onSuccess?: () => void
@@ -17,6 +20,7 @@ type UseDelegateXNodeProps = {
 
 type ClausesParams = {
   delegatee: string
+  isAttachedToGM?: boolean
 }
 
 /**
@@ -28,29 +32,49 @@ type ClausesParams = {
  */
 export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
   const { account } = useWallet()
+  const { gmId } = useSelectedGmNft()
 
-  //TODO: if isXNodeAttachedToGM, then add clause to detach xnode from gm
   const clauseBuilder = useCallback(
-    ({ delegatee }: ClausesParams) => {
+    ({ delegatee, isAttachedToGM }: ClausesParams) => {
       if (!account) throw new Error("Account is required")
       if (!isValid(delegatee)) throw new Error("Invalid delegatee address")
 
-      return [
+      const clauses = []
+
+      if (isAttachedToGM) {
+        clauses.push(
+          buildClause({
+            to: gmContractAddress,
+            contractInterface: GmInterface,
+            method: detachMethod,
+            args: [],
+            comment: "detach xnode from gm",
+          }),
+        )
+      }
+
+      clauses.push(
         buildClause({
           to: nodeManagementContractAddress,
           contractInterface: NodeManagementInterface,
-          method,
+          method: delegateMethod,
           args: [delegatee],
           comment: "delegate xnode",
         }),
-      ]
+      )
+
+      return clauses
     },
     [account],
   )
 
   const refetchQueryKeys = useMemo(
-    () => [getUserXNodesQueryKey(account || ""), getUserNodeQueryKey(account || "")],
-    [account],
+    () => [
+      getUserXNodesQueryKey(account || ""),
+      getUserNodeQueryKey(account || ""),
+      getLevelOfTokenQueryKey(gmId || ""),
+    ],
+    [account, gmId],
   )
 
   return useBuildTransaction<ClausesParams>({
