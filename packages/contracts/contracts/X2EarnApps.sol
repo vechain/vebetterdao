@@ -68,9 +68,7 @@ contract X2EarnApps is
    *
    * @dev This function is called only once during the contract upgrade
    */
-  function initializeV3(
-    uint48 _cooldownPeriod
-  ) public reinitializer(3) {
+  function initializeV3(uint48 _cooldownPeriod) public reinitializer(3) {
     __Endorsement_init_v2(_cooldownPeriod);
   }
 
@@ -258,6 +256,13 @@ contract X2EarnApps is
    */
   function updateGracePeriod(uint48 _newGracePeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
     _setGracePeriod(_newGracePeriod);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-updateCooldownPeriod}.
+   */
+  function updateCooldownPeriod(uint48 _newCooldownPeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
+    _setCooldownPeriod(_newCooldownPeriod);
   }
 
   /**

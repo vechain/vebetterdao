@@ -197,6 +197,11 @@ interface IX2EarnApps {
   event BaseURIUpdated(string oldBaseURI, string newBaseURI);
 
   /**
+   * @dev Event fired when the cooldown period duration is updated.
+   */
+  event CooldownPeriodUpdated(uint256 oldCooldownPeriod, uint256 newCooldownPeriod);
+
+  /**
    * @dev Event fired when the grace period duration is updated.
    */
   event GracePeriodUpdated(uint256 oldGracePeriod, uint256 newGracePeriod);
@@ -621,4 +626,18 @@ interface IX2EarnApps {
    * @return bool True if the node is in a cooldown period.
    */
   function checkCooldown(uint256 nodeId) external view returns (bool);
+
+  /**
+   * @notice Function to update the grace period.
+   * @param _newGracePeriod The new grace period.
+   * Emits a {GracePeriodUpdated} event.
+   */
+  function updateGracePeriod(uint48 _newGracePeriod) external;
+
+  /**
+   * @notice Function to update the cooldown period.
+   * @param _newCooldownPeriod The new cooldown period.
+   * Emits a {CooldownPeriodUpdated} event.
+   */
+  function updateCooldownPeriod(uint48 _newCooldownPeriod) external;
 }

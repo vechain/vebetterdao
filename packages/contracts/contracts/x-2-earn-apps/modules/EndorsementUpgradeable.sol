@@ -65,18 +65,12 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
   /**
    * @dev Sets the value for the cooldown period.
    */
-  function __Endorsement_init_v2(
-    uint48 _cooldownPeriod
-  ) internal onlyInitializing {
+  function __Endorsement_init_v2(uint48 _cooldownPeriod) internal onlyInitializing {
     __Endorsement_init_unchained_v2(_cooldownPeriod);
   }
 
-  function __Endorsement_init_unchained_v2(
-    uint48 _cooldownPeriod
-  ) internal onlyInitializing {
-    EndorsementStorage storage $ = _getEndorsementStorage();
-
-    $._cooldownPeriod = _cooldownPeriod;
+  function __Endorsement_init_unchained_v2(uint48 _cooldownPeriod) internal onlyInitializing {
+    _setCooldownPeriod(_cooldownPeriod);
   }
 
   // ---------- Public ---------- //
@@ -280,6 +274,21 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
     emit GracePeriodUpdated($._gracePeriodDuration, gracePeriodDuration);
 
     $._gracePeriodDuration = gracePeriodDuration;
+  }
+
+  /**
+   * @dev Internal function to update the cooldown period.
+   *
+   * @param cooldownPeriodDuration The new cooldown period.
+   *
+   * Emits a {CooldownPeriodUpdated} event.
+   */
+  function _setCooldownPeriod(uint48 cooldownPeriodDuration) internal {
+    EndorsementStorage storage $ = _getEndorsementStorage();
+
+    emit CooldownPeriodUpdated($._cooldownPeriod, cooldownPeriodDuration);
+
+    $._cooldownPeriod = cooldownPeriodDuration;
   }
 
   /**
