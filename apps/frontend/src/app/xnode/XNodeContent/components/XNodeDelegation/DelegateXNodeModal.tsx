@@ -26,6 +26,7 @@ import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { useSelectedGmNft } from "@/api"
 
 type FormData = {
   walletAddress: string
@@ -34,6 +35,7 @@ type FormData = {
 export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { isXNodeAttachedToGM } = useSelectedGmNft()
   const {
     register,
     handleSubmit,
@@ -52,8 +54,8 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   }, [confirmationModal])
 
   const handleDelegate = useCallback(() => {
-    delegateXNode.sendTransaction({ delegatee })
-  }, [delegateXNode, delegatee])
+    delegateXNode.sendTransaction({ delegatee, isAttachedToGM: isXNodeAttachedToGM })
+  }, [delegateXNode, delegatee, isXNodeAttachedToGM])
 
   const handleClose = useCallback(() => {
     modal.onClose?.()
