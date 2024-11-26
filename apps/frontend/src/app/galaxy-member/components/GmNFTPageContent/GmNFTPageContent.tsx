@@ -1,4 +1,4 @@
-import { Flex, Stack, VStack } from "@chakra-ui/react"
+import { Stack, VStack } from "@chakra-ui/react"
 import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
 import { AttachXNodeCard } from "./components/AttachXNodeCard"
 import { GMNFTList } from "./components/GMNFTList/GMNFTList"
@@ -24,11 +24,11 @@ export const GmNFTPageContent = () => {
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader />
       <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
-        <Flex flex={3}>
-          <GMNFTList />
-        </Flex>
-        <VStack flex={1.5} align={"stretch"}>
+        <VStack flex={3}>
           <AttachXNodeCard />
+          <GMNFTList />
+        </VStack>
+        <VStack flex={1.5} align={"stretch"}>
           <GalaxyLevelsCard />
         </VStack>
       </Stack>
