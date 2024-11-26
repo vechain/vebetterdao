@@ -27,8 +27,16 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose, detachToActive }: Props)
   const { isXNodeAttachedToGM } = useSelectedGmNft()
 
   const detachGMFromXNodeMutation = useDetachGMFromXNode({
-    onSuccess: onClose,
+    onSuccess: () => {
+      detachGMFromXNodeMutation.resetStatus()
+      onClose()
+    },
   })
+
+  const handleClose = useCallback(() => {
+    detachGMFromXNodeMutation.resetStatus()
+    onClose()
+  }, [detachGMFromXNodeMutation, onClose])
 
   const handleDetachment = useCallback(() => {
     detachGMFromXNodeMutation.resetStatus()
@@ -45,7 +53,7 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose, detachToActive }: Props)
     return (
       <TransactionModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         successTitle={t("Detach GM from Node")}
         status={detachGMFromXNodeMutation.error ? "error" : detachGMFromXNodeMutation.status}
         errorDescription={detachGMFromXNodeMutation.error?.reason}
@@ -59,9 +67,9 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose, detachToActive }: Props)
     )
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={"2xl"}>
+    <Modal isOpen={isOpen} onClose={handleClose} size={"2xl"}>
       <ModalOverlay />
-      <CustomModalContent>
+      <CustomModalContent p={{ base: 3, md: 5 }}>
         <ModalCloseButton />
         <ModalHeader>
           <Heading fontSize="lg">{t("Detach Node from GM NFT")}</Heading>
@@ -80,7 +88,7 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose, detachToActive }: Props)
             <Button variant={"primaryAction"} w={"full"} onClick={handleDetachment}>
               {t("Detach my Node")}
             </Button>
-            <Button variant={"secondaryAction"} w={"full"} onClick={onClose}>
+            <Button variant={"secondaryAction"} w={"full"} onClick={handleClose}>
               {t("Maybe later")}
             </Button>
           </VStack>

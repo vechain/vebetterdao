@@ -9,7 +9,8 @@ import { SelectGMButton } from "./SelectGMButton"
 import { gmNfts } from "@/constants/gmNfts"
 import { FeatureFlag, notFoundImage } from "@/constants"
 import { FeatureFlagWrapper } from "@/components"
-import { useSelectedGmNft } from "@/api"
+import { useLevelMultiplier } from "@/api"
+
 interface GMNFTListItemProps {
   token: {
     tokenId: string
@@ -25,6 +26,8 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
 
   const { data: selectedTokenId } = useSelectedTokenId()
   const { isXNodeAttachedToGM, gmRewardMultiplier } = useSelectedGmNft()
+
+  const { data: gmRewardMultiplier } = useLevelMultiplier(token.tokenLevel)
 
   const isGMSelected = useMemo(() => selectedTokenId === token.tokenId, [selectedTokenId, token.tokenId])
 

@@ -26,7 +26,7 @@ import { BaseTooltip } from "@/components"
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
   const { isXNodeAttachedToGM } = useSelectedGmNft()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, attachedGMTokenId } = useXNode()
 
   const router = useRouter()
   const goToXnodePage = useCallback(() => {
@@ -123,7 +123,11 @@ export const AttachXNodeCard = () => {
           )}
         </VStack>
       </CardBody>
-      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
+      <AttachGMToXNodeModal
+        isOpen={attachGmToXNodeModal.isOpen}
+        onClose={attachGmToXNodeModal.onClose}
+        attachedGMTokenId={attachedGMTokenId}
+      />
       <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.isOpen} onClose={detachGmToXNodeModal.onClose} />
     </Card>
   )

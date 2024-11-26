@@ -3,11 +3,21 @@ import { GalaxyMember__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
-import { getLevelOfTokenQueryKey } from "@/api"
+import {
+  getB3TrBalanceQueryKey,
+  getB3trToUpgradeQueryKey,
+  getLevelOfTokenQueryKey,
+  getTokensInfoByOwnerQueryKey,
+} from "@/api"
+import { B3TR__factory } from "@repo/contracts/typechain-types"
+import { ethers } from "ethers"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
+const B3trInterface = B3TR__factory.createInterface()
+const galaxyMemberContractAddress = getConfig().galaxyMemberContractAddress
 
-type Props = { tokenId?: string; onSuccess?: () => void }
+type Props = { tokenId: string; b3trToUpgrade: string; onSuccess?: () => void }
 
 /**
  * Hook to upgrade a Galaxy Member NFT token
@@ -15,20 +25,37 @@ type Props = { tokenId?: string; onSuccess?: () => void }
  * @param onSuccess  the callback to call after the token is upgraded
  * @returns the upgrade transaction
  */
-export const useUpgradeGM = ({ tokenId, onSuccess }: Props) => {
+export const useUpgradeGM = ({ tokenId, b3trToUpgrade, onSuccess }: Props) => {
+  const { account } = useWallet()
+
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({
-        to: getConfig().galaxyMemberContractAddress,
+        to: getConfig().b3trContractAddress,
+        contractInterface: B3trInterface,
+        method: "approve",
+        args: [galaxyMemberContractAddress, ethers.parseEther(b3trToUpgrade.toString())],
+        comment: `Approve B3TR tokens to upgrade Galaxy Member token ${tokenId}`,
+      }),
+      buildClause({
+        to: galaxyMemberContractAddress,
         contractInterface: GalaxyMemberInterface,
         method: "upgrade",
         args: [tokenId],
         comment: `Upgrade Galaxy Member token ${tokenId}`,
       }),
     ]
-  }, [tokenId])
+  }, [b3trToUpgrade, tokenId])
 
-  const refetchQueryKeys = useMemo(() => [getLevelOfTokenQueryKey(tokenId)], [tokenId])
+  const refetchQueryKeys = useMemo(
+    () => [
+      getLevelOfTokenQueryKey(tokenId),
+      getB3trToUpgradeQueryKey(tokenId),
+      getB3TrBalanceQueryKey(account ?? ""),
+      getTokensInfoByOwnerQueryKey(account),
+    ],
+    [account, tokenId],
+  )
 
   return useBuildTransaction({
     clauseBuilder,

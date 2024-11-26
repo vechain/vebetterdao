@@ -31,16 +31,26 @@ import { useSelectedTokenId } from "@/api/contracts/galaxyMember/hooks/useSelect
 type Props = {
   isOpen: boolean
   onClose: () => void
+  attachedGMTokenId?: string
 }
 
-export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
+export const AttachGMToXNodeModal = ({ isOpen, onClose, attachedGMTokenId }: Props) => {
   const { t } = useTranslation()
   const { isXNodeAttachedToGM } = useSelectedGmNft()
   const { data: selectedTokenId } = useSelectedTokenId()
 
   const attachGMToXNodeMutation = useAttachGMToXNode({
-    onSuccess: onClose,
+    attachedGMTokenId,
+    onSuccess: () => {
+      attachGMToXNodeMutation.resetStatus()
+      onClose()
+    },
   })
+
+  const handleClose = useCallback(() => {
+    attachGMToXNodeMutation.resetStatus()
+    onClose()
+  }, [attachGMToXNodeMutation, onClose])
 
   const handleAttachment = useCallback(() => {
     attachGMToXNodeMutation.resetStatus()
@@ -57,7 +67,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
     return (
       <TransactionModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         successTitle={t("Attach GM to Node")}
         status={attachGMToXNodeMutation.error ? "error" : attachGMToXNodeMutation.status}
         errorDescription={attachGMToXNodeMutation.error?.reason}
@@ -89,9 +99,9 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   ]
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={"2xl"}>
+    <Modal isOpen={isOpen} onClose={handleClose} size={"2xl"}>
       <ModalOverlay />
-      <CustomModalContent>
+      <CustomModalContent p={{ base: 3, md: 5 }}>
         <ModalCloseButton />
         <ModalHeader>
           <Heading fontSize="lg">{t("Attaching Node to GM NFT")}</Heading>

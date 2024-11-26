@@ -137,8 +137,8 @@ export const GmNFTAndNodeCard = () => {
                 rounded="12px"
                 gap={6}
                 flex={1}
-                cursor={isXNodeHolder ? "pointer" : "default"}
-                onClick={isXNodeHolder ? goToGmNftPage : () => {}}>
+                cursor={"pointer"}
+                onClick={goToGmNftPage}>
                 <Skeleton isLoaded={!isGMLoading} w="68px" h="68px" rounded="8px">
                   <Box
                     w={"68px"}
@@ -167,7 +167,7 @@ export const GmNFTAndNodeCard = () => {
                     </HStack>
                   </FeatureFlagWrapper>
                 </VStack>
-                {isXNodeHolder && <FaChevronRight size={"24px"} />}
+                <FaChevronRight size={"24px"} />
               </HStack>
             )}
 

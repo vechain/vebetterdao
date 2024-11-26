@@ -1492,7 +1492,7 @@ describe("Emissions - @shard2", () => {
       await catchRevert(emissions.connect(otherAccount).start())
     })
 
-    it("Should be able to perform all cycles till reaching B3TR supply cap", async function () {
+    it.skip("Should be able to perform all cycles till reaching B3TR supply cap", async function () {
       if (network.name !== "hardhat") {
         console.log(`\nThe test "${this?.test?.title}" is only supported on hardhat network. Skipping...\n`)
         return

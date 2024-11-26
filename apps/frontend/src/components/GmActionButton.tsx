@@ -16,16 +16,29 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { isGMOwned, isEnoughBalanceToUpgradeGM, isXNodeAttachedToGM, gmId, isMaxGmLevelReached } = useSelectedGmNft()
+  const {
+    isGMOwned,
+    isEnoughBalanceToUpgradeGM,
+    isXNodeAttachedToGM,
+    gmId,
+    isMaxGmLevelReached,
+    b3trToUpgradeGMToNextLevel,
+  } = useSelectedGmNft()
   const { isXNodeHolder } = useXNode()
 
   const router = useRouter()
   const mintNftModal = useDisclosure()
   const {
     sendTransaction: freeMint,
+    resetStatus: resetFreeMintStatus,
     isTxReceiptLoading,
     sendTransactionPending,
-  } = useMintNFT({ onFailure: mintNftModal.onClose })
+  } = useMintNFT({
+    onFailure: () => {
+      mintNftModal.onClose()
+      resetFreeMintStatus()
+    },
+  })
 
   const handleMintGM = useCallback(() => {
     freeMint({})
@@ -111,7 +124,11 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
         sendTransactionPending={sendTransactionPending}
       />
       <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
-      <UpgradeGMModal tokenId={gmId} upgradeGMModal={upgradeGMModal} />
+      <UpgradeGMModal
+        tokenId={gmId}
+        upgradeGMModal={upgradeGMModal}
+        b3trToUpgradeGMToNextLevel={b3trToUpgradeGMToNextLevel}
+      />
     </>
   )
 }
