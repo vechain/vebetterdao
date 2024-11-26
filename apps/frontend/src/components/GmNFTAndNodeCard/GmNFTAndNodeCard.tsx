@@ -106,7 +106,7 @@ export const GmNFTAndNodeCard = () => {
               </Heading>
             </FeatureFlagWrapper>
 
-            {isAbove800 && isXNodeAttachedToGM && (
+            {isAbove800 && isXNodeAttachedToGM && isXNodeHolder && (
               <>
                 <Text fontSize="xs" fontWeight={600} color="#B1F16C">
                   {t("GM NFT attached to {{node}}", { node: xNodeName })}
