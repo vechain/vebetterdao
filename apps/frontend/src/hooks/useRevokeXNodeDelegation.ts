@@ -4,7 +4,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
-import { getUserXNodesQueryKey } from "@/api"
+import { getUserNodeQueryKey, getUserXNodesQueryKey } from "@/api"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
 const nodeManagementContractAddress = getConfig().nodeManagementContractAddress
@@ -24,6 +24,7 @@ type UseRevokeXNodeDelegationProps = {
 export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegationProps = {}) => {
   const { account } = useWallet()
 
+  //TODO: if isXNodeAttachedToGM, then add clause to detach xnode from gm
   const clauseBuilder = useCallback(() => {
     if (!account) throw new Error("Account is required")
 
@@ -38,7 +39,10 @@ export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegation
     ]
   }, [account])
 
-  const refetchQueryKeys = useMemo(() => [getUserXNodesQueryKey(account || "")], [account])
+  const refetchQueryKeys = useMemo(
+    () => [getUserXNodesQueryKey(account || ""), getUserNodeQueryKey(account || "")],
+    [account],
+  )
 
   return useBuildTransaction({
     clauseBuilder,

@@ -7,7 +7,7 @@ const contractAddress = getConfig().nodeManagementContractAddress
 const contractInterface = NodeManagement__factory.createInterface()
 const method = "getNodeDelegationDetails"
 
-type NodeDelegationDetails = {
+export type NodeDelegationDetails = {
   isDelegated: boolean
   delegatee: string
   owner: string

@@ -28,7 +28,7 @@ import { useTranslation } from "react-i18next"
 export const EndorsingAppCard = () => {
   const { t } = useTranslation()
 
-  const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeId } = useXNode()
+  const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeId, isXNodeDelegator } = useXNode()
   // get the number of endorsers for the endorsed app
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(endorsedApp?.id ?? "")
   // get app status and score
@@ -133,7 +133,11 @@ export const EndorsingAppCard = () => {
                       endorsers={appEndorsers || []}
                       isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
                   </Flex>
-                  <Button variant="dangerGhost" onClick={unendorseAppModal.onOpen} w={["full", "full", "auto"]}>
+                  <Button
+                    variant="dangerGhost"
+                    onClick={unendorseAppModal.onOpen}
+                    w={["full", "full", "auto"]}
+                    isDisabled={isXNodeDelegator}>
                     {t("Remove endorsement")}
                   </Button>
                 </Stack>

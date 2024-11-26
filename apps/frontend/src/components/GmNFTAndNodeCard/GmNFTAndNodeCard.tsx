@@ -34,7 +34,7 @@ export const GmNFTAndNodeCard = () => {
     useSelectedGmNft()
 
   //node
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator } = useXNode()
 
   const nodeAttachedColor = isXNodeAttachedToGM ? "#B1F16C" : "#FFFFFF80"
 
@@ -172,7 +172,7 @@ export const GmNFTAndNodeCard = () => {
               </HStack>
             )}
 
-            {isXNodeHolder && (
+            {(isXNodeHolder || isXNodeDelegator) && (
               <>
                 {isAbove800 ? (
                   <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<Box w={6} h={6}></Box>}>

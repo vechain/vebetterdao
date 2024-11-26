@@ -1,4 +1,4 @@
-import { useSelectedGmNft } from "@/api"
+import { useSelectedGmNft, useXNode } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
@@ -27,6 +27,7 @@ import { FaChevronRight } from "react-icons/fa6"
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
   const { gmId, gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, isXNodeAttachedToGM } = useSelectedGmNft()
+  const { isXNodeDelegator } = useXNode()
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
@@ -53,7 +54,9 @@ export const AttachGMNFTCard = () => {
               {t(
                 isXNodeAttachedToGM
                   ? "Your GM NFT is attached to your Node"
-                  : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
+                  : isXNodeDelegator
+                    ? "Remove thse XNode delegation to attach GM NFT to this node"
+                    : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
               )}
             </Text>
           </VStack>
@@ -120,7 +123,8 @@ export const AttachGMNFTCard = () => {
               <Button
                 leftIcon={<UilLink color="#004CFC" />}
                 variant={"primarySubtle"}
-                onClick={attachGmToXNodeModal.onOpen}>
+                onClick={attachGmToXNodeModal.onOpen}
+                isDisabled={isXNodeDelegator}>
                 {t("Attach now!")}
               </Button>
             </FeatureFlagWrapper>

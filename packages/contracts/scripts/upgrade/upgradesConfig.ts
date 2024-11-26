@@ -86,4 +86,12 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v2: "Vechain Nodes x GM upgrades feature",
     },
   },
+  "Node Management": {
+    name: "node-management",
+    configAddressField: "nodeManagementContractAddress",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Vechain Nodes x GM upgrades feature",
+    },
+  },
 } as const

@@ -13,7 +13,7 @@ import { FaChevronRight } from "react-icons/fa6"
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
   const { isXNodeAttachedToGM } = useSelectedGmNft()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator } = useXNode()
 
   const router = useRouter()
   const goToXnodePage = useCallback(() => {
@@ -39,7 +39,9 @@ export const AttachXNodeCard = () => {
               {t(
                 isXNodeAttachedToGM
                   ? "Your GM NFT is attached to your Node"
-                  : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
+                  : isXNodeDelegator
+                    ? "Remove the XNode delegation to attach GM NFT to this node"
+                    : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
               )}
             </Text>
           </VStack>
@@ -99,6 +101,7 @@ export const AttachXNodeCard = () => {
               <Button
                 leftIcon={<UilLinkBroken color="#004CFC" />}
                 variant={"primarySubtle"}
+                isDisabled={isXNodeDelegator}
                 onClick={attachGmToXNodeModal.onOpen}>
                 {t("Attach now!")}
               </Button>

@@ -1310,14 +1310,20 @@
   "Delegate your XNode": "Delegate your XNode",
   "By delegating your XNode, another address will be able to endorse apps and upgrade GM NFTs using your XNode.": "By delegating your XNode, another address will be able to endorse apps and upgrade GM NFTs using your XNode.",
   "They won't be able to transfer or sell your XNode.": "They won't be able to transfer or sell your XNode.",
-  "Delegate your XNode to the account you use on VeBetterDAO to endorse apps or participate in governance.": "Delegate your XNode to the account you use on VeBetterDAO to endorse apps or participate in governance.",
+  "Delegate your XNode to the primary account you use on VeBetterDAO to endorse apps or participate in governance.": "Delegate your XNode to the primary account you use on VeBetterDAO to endorse apps or participate in governance.",
   "XNode delegation": "XNode delegation",
-  "Revoke delegation": "Revoke delegation",
+  "Cancel delegation": "Cancel delegation",
   "Your XNode is currently delegated to another address": "Your XNode is currently delegated to another address",
   "XNode delegation revoked!": "XNode delegation revoked!",
   "Error revoking XNode delegation": "Error revoking XNode delegation",
   "Revoking XNode delegation...": "Revoking XNode delegation...",
   "Are you sure you want to revoke your XNode delegation?": "Are you sure you want to revoke your XNode delegation?",
   "The delegated address will no longer be able to endorse and upgrade GM NFTs using your XNode": "The delegated address will no longer be able to endorse and upgrade GM NFTs using your XNode",
-  "once you have revoked the delegation.": "once you have revoked the delegation."
+  "once you have revoked the delegation.": "once you have revoked the delegation.",
+  "DELEGATED": "DELEGATED",
+  "Delegation": "Delegation",
+  "XNode is currently delegated to you by:": "XNode is currently delegated to you by:",
+  "Delegate XNode": "Delegate XNode",
+  "Remove the XNode delegation to attach GM NFT to this node": "Remove the XNode delegation to attach GM NFT to this node",
+  "XNode is currently delegated to:": "XNode is currently delegated to:"
 }

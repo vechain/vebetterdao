@@ -24,7 +24,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     isMaxGmLevelReached,
     b3trToUpgradeGMToNextLevel,
   } = useSelectedGmNft()
-  const { isXNodeHolder } = useXNode()
+  const { isXNodeHolder, isXNodeDelegator } = useXNode()
 
   const router = useRouter()
   const mintNftModal = useDisclosure()
@@ -68,7 +68,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
         </Button>
       )
     }
-    if (isXNodeHolder && !isXNodeAttachedToGM) {
+    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator) {
       return (
         <FeatureFlagWrapper
           feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
@@ -113,6 +113,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     isXNodeHolder,
     t,
     upgradeGMModal.onOpen,
+    isXNodeDelegator,
   ])
 
   return (

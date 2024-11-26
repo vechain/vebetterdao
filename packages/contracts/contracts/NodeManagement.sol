@@ -233,6 +233,89 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   /**
+   * @notice Check if a user is a delegator.
+   * @param user The address of the user to check.
+   * @return bool True if the user is a delegator.
+   */
+  function isNodeDelegator(address user) public view returns (bool) {
+    // first we do direct call to check if user is node owner
+    uint256 nodeId = getDirectNodeOwnership(user);
+    // if it is then we check if node is delegated
+    if (nodeId != 0) {
+      // if node is delegated then we return true
+      return isNodeDelegated(nodeId);
+    }
+
+    // otherwise we return false
+    return false;
+  }
+
+  /**
+   * @notice Retrieves detailed information about a user's node, including node ID, level, owner, and delegation status.
+   * @param user The address of the user to check.
+   * @return uint256 The ID of the node.
+   * @return VechainNodesDataTypes.NodeStrengthLevel The level of the node.
+   * @return address The owner address of the node.
+   * @return bool Whether the user is a node holder.
+   * @return bool Whether the node is delegated.
+   * @return bool Whether the user is a delegator.
+   * @return bool Whether the user is a delegatee.
+   * @return address The delegatee address (zero address if not delegated).
+   */
+  function getUserNode(
+    address user
+  )
+    public
+    view
+    returns (
+      uint256 nodeId,
+      VechainNodesDataTypes.NodeStrengthLevel nodeLevel,
+      address xNodeOwner,
+      bool isXNodeHolder,
+      bool isXNodeDelegated,
+      bool isXNodeDelegator,
+      bool isXNodeDelegatee,
+      address delegatee
+    )
+  {
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
+
+    // Get directly owned node (if any)
+    uint256 ownedNodeId = getDirectNodeOwnership(user);
+
+    // Check if user is a delegator and set initial values
+    isXNodeDelegator = ownedNodeId != 0 && isNodeDelegated(ownedNodeId);
+    xNodeOwner = $.vechainNodesContract.idToOwner(ownedNodeId);
+
+    if (isXNodeDelegator) {
+      // If user is a delegator, use their owned node ID
+      nodeId = ownedNodeId;
+      nodeLevel = getNodeLevel(nodeId);
+      delegatee = $.nodeIdToDelegatee[nodeId];
+      isXNodeHolder = true;
+      isXNodeDelegated = true;
+      isXNodeDelegatee = false;
+    } else {
+      // Get all nodes (delegated to user + owned)
+      uint256[] memory nodeIds = getNodeIds(user);
+
+      // User is a node holder if they own a node or have delegated nodes
+      isXNodeHolder = nodeIds.length > 0;
+
+      // If user has any nodes (owned or delegated), get the first one's details
+      if (isXNodeHolder) {
+        nodeId = nodeIds[0];
+        nodeLevel = getNodeLevel(nodeId);
+        delegatee = $.nodeIdToDelegatee[nodeId];
+
+        // Set delegation status
+        isXNodeDelegated = isNodeDelegated(nodeId);
+        isXNodeDelegatee = nodeId != ownedNodeId;
+      }
+    }
+  }
+
+  /**
    * @notice Retrieves the node level of a given node ID.
    * @dev Internal function to get the node level of a token ID. The node level is determined based on the metadata associated with the token ID.
    * @param nodeId The token ID of the endorsing node.
@@ -275,13 +358,11 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   /**
    * @notice Check if a user directly owns a node (not delegated).
    * @param user The address of the user to check.
-   * @return bool True if the user directly owns a node.
    * @return uint256 The ID of the owned node (0 if none).
    */
-  function getDirectNodeOwnership(address user) public view returns (bool, uint256) {
+  function getDirectNodeOwnership(address user) public view returns (uint256) {
     NodeManagementStorage storage $ = _getNodeManagementStorage();
-    uint256 nodeId = $.vechainNodesContract.ownerToId(user);
-    return (nodeId != 0, nodeId);
+    return $.vechainNodesContract.ownerToId(user);
   }
 
   /**
