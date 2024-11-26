@@ -253,14 +253,14 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   /**
    * @notice Retrieves detailed information about a user's node, including node ID, level, owner, and delegation status.
    * @param user The address of the user to check.
-   * @return uint256 The ID of the node.
-   * @return VechainNodesDataTypes.NodeStrengthLevel The level of the node.
-   * @return address The owner address of the node.
-   * @return bool Whether the user is a node holder.
-   * @return bool Whether the node is delegated.
-   * @return bool Whether the user is a delegator.
-   * @return bool Whether the user is a delegatee.
-   * @return address The delegatee address (zero address if not delegated).
+   * @return nodeId The ID of the node.
+   * @return nodeLevel The level of the node.
+   * @return xNodeOwner The owner address of the node.
+   * @return isXNodeHolder Whether the user is a node holder.
+   * @return isXNodeDelegated Whether the node is delegated.
+   * @return isXNodeDelegator Whether the user is a delegator.
+   * @return isXNodeDelegatee Whether the user is a delegatee.
+   * @return delegatee The delegatee address (zero address if not delegated).
    */
   function getUserNode(
     address user
