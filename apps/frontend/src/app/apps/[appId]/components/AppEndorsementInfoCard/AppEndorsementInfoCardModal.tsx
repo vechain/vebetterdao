@@ -2,7 +2,6 @@ import { useAppEndorsers, useAppEndorsementStatus, useXNode, useIsAppAdmin } fro
 import { EndorsersItem } from "./EndorsersItem"
 import { EndorsementHistoryItem } from "./EndorsementHistoryItem"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { normalize } from "@repo/utils/HexUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
@@ -27,6 +26,7 @@ import { BaseModal } from "@/components/BaseModal"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { EndorsementDetails } from "./EndorsementDetails"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
+import { UnendorseAppModalAdminsOnly } from "./UnendorseAppModalAdminsOnly"
 
 type Props = {
   isOpen: boolean
@@ -61,10 +61,12 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
   // Confirm unendorsement, unendorsement modal controls
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [selectedEndorserAddress, setSelectedEndorserAddress] = useState("")
+  const [selectedEndorserNodeId, setSelectedEndorserNodeId] = useState("")
   const [selectedEndorserNodePoints, setSelectedEndorserNodePoints] = useState("")
   const handleCancelClick = () => {
     setIsConfirmOpen(false)
     setSelectedEndorserAddress("")
+    setSelectedEndorserNodeId("")
     setSelectedEndorserNodePoints("")
   }
   const {
@@ -140,7 +142,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                       alignItems="end">
                       <Text mb={4} maxW="full">
                         <Trans
-                          i18nKey="<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app will not more active"
+                          i18nKey="<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app may lose its endorsement"
                           values={{
                             endorsedAddress: humanAddress(normalize(selectedEndorserAddress), 6, 3),
                             value: selectedEndorserNodePoints,
@@ -171,6 +173,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                         endorsementEvents={endorsementEvents || []}
                         setIsConfirmOpen={setIsConfirmOpen}
                         setSelectedEndorserAddress={setSelectedEndorserAddress}
+                        setSelectedEndorserNodeId={setSelectedEndorserNodeId}
                         setSelectedEndorserNodePoints={setSelectedEndorserNodePoints}
                       />
                     ))}
@@ -221,9 +224,17 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
         </Stack>
       </VStack>
 
-      {isUnendorsementModalOpen && (
-        <UnendorseAppModal isOpen={isUnendorsementModalOpen} onClose={onCloseUnendorsementModal} />
-      )}
+      {isUnendorsementModalOpen &&
+        isAppAdmin(
+          <UnendorseAppModalAdminsOnly
+            isOpen={isUnendorsementModalOpen}
+            onClose={onCloseUnendorsementModal}
+            appId={appId}
+            endorserAddress={selectedEndorserAddress}
+            nodeId={selectedEndorserNodeId}
+            nodePoints={selectedEndorserNodePoints}
+          />,
+        )}
     </BaseModal>
   )
 }

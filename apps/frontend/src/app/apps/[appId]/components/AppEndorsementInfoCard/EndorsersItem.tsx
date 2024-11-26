@@ -27,6 +27,7 @@ type Props = {
   endorsementEvents: AppEndorsedEvent[]
   setIsConfirmOpen: (value: boolean) => void
   setSelectedEndorserAddress: (value: string) => void
+  setSelectedEndorserNodeId: (value: string) => void
   setSelectedEndorserNodePoints: (value: string) => void
 }
 
@@ -36,6 +37,7 @@ export const EndorsersItem = ({
   endorsementEvents,
   setIsConfirmOpen,
   setSelectedEndorserAddress,
+  setSelectedEndorserNodeId,
   setSelectedEndorserNodePoints,
 }: Props) => {
   const { t } = useTranslation()
@@ -55,6 +57,7 @@ export const EndorsersItem = ({
   const handleRemoveClick = () => {
     setIsConfirmOpen(true)
     setSelectedEndorserAddress(endorserAddress)
+    setSelectedEndorserNodeId(endorserNodeId ?? "")
     setSelectedEndorserNodePoints(nodePoints ?? "")
   }
 

@@ -22,7 +22,7 @@ type Props = { appId?: string; nodeId?: string; userAddress?: string; onSuccess?
  * Hook to unendorse an app
  * @param appId  the app id to unendorse
  * @param nodeId  the node id to unendorse with
- * @param userAddress  the user address
+ * @param userAddress  the address of the node holder (aka endorser)
  * @param onSuccess  the callback to call after the app is unendorsed
  * @returns the unendorse transaction
  */

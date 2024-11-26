@@ -1,11 +1,10 @@
-import { useXNode } from "@/api"
+import { useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
+import { PropsEndorsement } from "@/app/apps/components/UnendorseAppModal"
 import { TransactionModal } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
-
 import { useUnendorseApp } from "@/hooks"
 import { Text, Button, Image, Flex, HStack, Icon, VStack, Heading, Box } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
@@ -13,26 +12,23 @@ import { FaClock } from "react-icons/fa6"
 type Props = {
   isOpen: boolean
   onClose: () => void
+  appId: string
+  endorserAddress: string
+  nodeId: string
+  nodePoints: string
 }
 
-export type PropsEndorsement = {
-  isUnendorsing?: boolean
-  isEndorsing?: boolean
-  points?: number | string
-  endorsedAppName?: string
-  xNodeLevel?: number
-}
-
-export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
+export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, endorserAddress, nodeId, nodePoints }: Props) => {
   const { t } = useTranslation()
-  const { endorsedApp, xNodeId, xNodePoints, xNodeLevel } = useXNode()
-  const { data: logo } = useIpfsImage(endorsedApp?.logo)
-  const { account } = useWallet()
+
+  // App data
+  const { data: appMetadata } = useXAppMetadata(appId ?? "")
+  const { data: logo } = useIpfsImage(appMetadata?.logo)
 
   const unendorseAppMutation = useUnendorseApp({
-    appId: endorsedApp?.id,
-    nodeId: xNodeId,
-    userAddress: account ?? "",
+    appId,
+    nodeId,
+    userAddress: endorserAddress,
     onSuccess: onClose,
   })
 
@@ -44,22 +40,21 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
   const endorsementInfo: PropsEndorsement = {
     isUnendorsing: true,
     isEndorsing: false,
-    points: xNodePoints,
-    endorsedAppName: endorsedApp?.name,
-    xNodeLevel,
+    points: nodePoints,
+    endorsedAppName: appMetadata?.name,
   }
   if (unendorseAppMutation.status !== "ready")
     return (
       <TransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        successTitle={t("Unendorse app")}
+        successTitle={t("Remove endorsement")}
         status={unendorseAppMutation.error ? "error" : unendorseAppMutation.status}
         errorDescription={unendorseAppMutation.error?.reason}
         errorTitle={unendorseAppMutation.error ? t("Transaction error") : undefined}
         showTryAgainButton
         onTryAgain={handleUnendorsement}
-        pendingTitle={"Unendorsing app..."}
+        pendingTitle={t("Removing endorsement...")}
         showExplorerButton
         txId={unendorseAppMutation.txReceipt?.meta.txID ?? unendorseAppMutation.sendTransactionTx?.txid}
         endorsementInfo={endorsementInfo}
@@ -85,24 +80,24 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
             color="#D23F63"
             fontWeight="700">
             {"-"}
-            {xNodePoints}
+            {nodePoints}
           </Text>
         </Flex>
         <HStack bg="#FFF3E5" rounded="16px" py={6} px={4} spacing={4}>
           <Icon as={FaClock} boxSize={"36px"} color="#AF5F00" />
           <Box color="#AF5F00">
             <Text fontSize={"16px"} as="span">
-              {t("Withdrawing your endorsement from an app may result in it")}
+              {t("If you remove these points")}
             </Text>{" "}
             <Text fontSize={"16px"} as="span" fontWeight="600">
-              {t("no longer being selected for allocations.")}
+              {t("your app may lose its endorsement")}
             </Text>
           </Box>
         </HStack>
 
         <VStack align="stretch" w="full">
           <Button variant={"dangerFilled"} w={"full"} onClick={handleUnendorsement}>
-            {t("Unendorse now")}
+            {t("Remove endorsement")}
           </Button>
           <Button variant={"primaryGhost"} w={"full"} onClick={onClose}>
             {t("Cancel")}
