@@ -3345,7 +3345,7 @@ describe("X-Apps - @shard3", function () {
     })
   })
 
-  describe.only("XApp Endorsement", function () {
+  describe("XApp Endorsement", function () {
     it("If an XAPP is endorsed with a score of 100 they should be eligble for XAllocation Voting", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
