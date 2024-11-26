@@ -32,7 +32,7 @@ export const GmNFTAndNodeCard = () => {
 
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
     useSelectedGmNft()
-
+  console.log("gmImage", gmImage)
   //node
   const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder } = useXNode()
 
@@ -133,6 +133,7 @@ export const GmNFTAndNodeCard = () => {
                 bg="#0D5DFB"
                 p="9px 12px"
                 border="1px solid"
+                // todo : investigate: why the nodeAttachedColor is updating well
                 borderColor={nodeAttachedColor}
                 justify="space-between"
                 rounded="12px"
@@ -148,6 +149,7 @@ export const GmNFTAndNodeCard = () => {
                     bgGradient={getLevelGradient(Number(gmLevel))}
                     display="flex"
                     alignItems="center"
+                    // todo: investigate: why the image is not updating well ?
                     justifyContent="center">
                     <Image src={gmImage} alt="gm" w={"64px"} h={"64px"} rounded="7px" />
                   </Box>

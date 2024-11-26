@@ -24,7 +24,8 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
     if (isXNodeAttachedToGM) {
       setDetachToActive(true)
       detachGMModal.onOpen()
-      // todo : for a smother flow -> just after the after the detach is done, then sendTransaction the problem is that the sendTransaction is being called to soon
+      // todo(p0): for a smother flow -> just after the after the detach is done,
+      // sendTransaction the problem is that the sendTransaction is being called to soon
       // selectGMMutation.status === "success" && selectGMMutation.sendTransaction({})
     } else {
       selectGMMutation.sendTransaction({})
@@ -37,7 +38,6 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
     selectGMMutation.sendTransaction({})
   }, [selectGMMutation])
 
-  console.log("isSelected", isSelected, "isXNodeAttachedToGM", isXNodeAttachedToGM)
   return (
     <>
       <Tooltip

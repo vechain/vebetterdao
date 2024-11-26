@@ -15,7 +15,7 @@ const compactFormatter = getCompactFormatter(4)
 export const GmNFTPageHeader = () => {
   const { t } = useTranslation()
   const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, b3trToUpgradeGMToNextLevel } = useSelectedGmNft()
-
+  console.log("gmImage in the header", gmImage)
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { account } = useWallet()
@@ -124,6 +124,7 @@ export const GmNFTPageHeader = () => {
     t,
   ])
 
+  // todo : find out why the border is reactive, but the image is not refreshing well, tacking to much time to update
   return (
     <Card>
       <Image
