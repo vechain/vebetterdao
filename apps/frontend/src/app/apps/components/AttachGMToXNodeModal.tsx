@@ -26,12 +26,14 @@ import { useTranslation } from "react-i18next"
 type Props = {
   isOpen: boolean
   onClose: () => void
+  attachedGMTokenId?: string
 }
 
-export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
+export const AttachGMToXNodeModal = ({ isOpen, onClose, attachedGMTokenId }: Props) => {
   const { t } = useTranslation()
 
   const attachGMToXNodeMutation = useAttachGMToXNode({
+    attachedGMTokenId,
     onSuccess: () => {
       attachGMToXNodeMutation.resetStatus()
       onClose()

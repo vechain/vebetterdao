@@ -46,7 +46,7 @@ export const GMNFTList = () => {
     sendTransaction: freeMint,
     isTxReceiptLoading,
     sendTransactionPending,
-  } = useMintNFT({ onFailure: mintNftModal.onClose })
+  } = useMintNFT({ onFailure: mintNftModal.onClose, onSuccess: mintNftModal.onClose })
 
   const handleMintGM = useCallback(() => {
     freeMint({})
