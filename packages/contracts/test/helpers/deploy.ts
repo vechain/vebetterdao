@@ -350,16 +350,16 @@ export const getOrDeployContractInstances = async ({
   const x2EarnCreator = (await deployProxy("X2EarnCreator", [config.CREATOR_NFT_URI, owner.address])) as X2EarnCreator
 
   // Deploy NodeManagement
-  const nodeManagementv1 = (await deployProxy("NodeManagement", [
+  const nodeManagementV1 = (await deployProxy("NodeManagementV1", [
     await vechainNodesMock.getAddress(),
     owner.address,
     owner.address,
   ])) as NodeManagementV1
 
   const nodeManagement = (await upgradeProxy(
+    "NodeManagementV1",
     "NodeManagement",
-    "NodeManagementV2",
-    await nodeManagementv1.getAddress(),
+    await nodeManagementV1.getAddress(),
     [],
     {
       version: 2,
