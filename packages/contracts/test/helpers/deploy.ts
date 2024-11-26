@@ -74,6 +74,7 @@ import {
   VoteEligibilityUtils,
   EndorsementUtils,
   X2EarnCreator,
+  NodeManagementV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -87,6 +88,12 @@ import { XAllocationPoolV2 } from "../../typechain-types/contracts/deprecated/V2
 import { X2EarnAppsV1 } from "../../typechain-types/contracts/deprecated/V1/X2EarnAppsV1"
 import {
   GovernorClockLogicV4,
+  GovernorConfiguratorV4,
+  GovernorDepositLogicV4,
+  GovernorFunctionRestrictionsLogicV4,
+  GovernorProposalLogicV4,
+  GovernorQuorumLogicV4,
+  GovernorStateLogicV4,
   GovernorVotesLogicV4,
 } from "../../typechain-types/contracts/deprecated/V4/governance/libraries"
 import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
@@ -146,11 +153,11 @@ interface DeployInstance {
   governorStateLogicLibV3: GovernorStateLogicV3
   governorVotesLogicLibV3: GovernorVotesLogicV3
   governorClockLogicLibV4: GovernorClockLogicV4
-  governorConfiguratorLibV4: GovernorConfiguratorLibV4
-  governorDepositLogicLibV4: GovernorDepositLogicLibV4
-  governorFunctionRestrictionsLogicLibV4: GovernorFunctionRestrictionsLogicLibV4
-  governorProposalLogicLibV4: GovernorProposalLogicLibV4
-  governorQuorumLogicLibV4: GovernorQuorumLogicLibV4
+  governorConfiguratorLibV4: GovernorConfiguratorV4
+  governorDepositLogicLibV4: GovernorDepositLogicV4
+  governorFunctionRestrictionsLogicLibV4: GovernorFunctionRestrictionsLogicV4
+  governorProposalLogicLibV4: GovernorProposalLogicV4
+  governorQuorumLogicLibV4: GovernorQuorumLogicV4
   governorStateLogicLibV4: GovernorStateLogicV4
   governorVotesLogicLibV4: GovernorVotesLogicV4
   passportChecksLogic: PassportChecksLogic
@@ -343,11 +350,21 @@ export const getOrDeployContractInstances = async ({
   const x2EarnCreator = (await deployProxy("X2EarnCreator", [config.CREATOR_NFT_URI, owner.address])) as X2EarnCreator
 
   // Deploy NodeManagement
-  const nodeManagement = (await deployProxy("NodeManagement", [
+  const nodeManagementv1 = (await deployProxy("NodeManagement", [
     await vechainNodesMock.getAddress(),
     owner.address,
     owner.address,
-  ])) as NodeManagement
+  ])) as NodeManagementV1
+
+  const nodeManagement = (await upgradeProxy(
+    "NodeManagement",
+    "NodeManagementV2",
+    await nodeManagementv1.getAddress(),
+    [],
+    {
+      version: 2,
+    },
+  )) as NodeManagement
 
   const galaxyMember = (await upgradeProxy(
     "GalaxyMemberV1",
