@@ -224,17 +224,16 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
         </Stack>
       </VStack>
 
-      {isUnendorsementModalOpen &&
-        isAppAdmin(
-          <UnendorseAppModalAdminsOnly
-            isOpen={isUnendorsementModalOpen}
-            onClose={onCloseUnendorsementModal}
-            appId={appId}
-            endorserAddress={selectedEndorserAddress}
-            nodeId={selectedEndorserNodeId}
-            nodePoints={selectedEndorserNodePoints}
-          />,
-        )}
+      {isAppAdmin && isUnendorsementModalOpen && (
+        <UnendorseAppModalAdminsOnly
+          isOpen={isUnendorsementModalOpen}
+          onClose={onCloseUnendorsementModal}
+          appId={appId}
+          endorserAddress={selectedEndorserAddress}
+          nodeId={selectedEndorserNodeId}
+          nodePoints={selectedEndorserNodePoints}
+        />
+      )}
     </BaseModal>
   )
 }
