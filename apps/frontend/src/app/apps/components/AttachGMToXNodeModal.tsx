@@ -43,8 +43,6 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   })
 
   const handleAttachment = useCallback(() => {
-    // todo : investigate why this is not working
-    // detaching -> attaching -> detaching again ( have to refresh the page to make it work )
     attachGMToXNodeMutation.resetStatus()
     attachGMToXNodeMutation.sendTransaction(undefined)
   }, [attachGMToXNodeMutation])
