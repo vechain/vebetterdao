@@ -74,6 +74,9 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
     onOpen: onOpenUnendorsementModal,
     onClose: onCloseUnendorsementModal,
   } = useDisclosure()
+  const shouldShowUnendorsementModal = useMemo(() => {
+    return isAppAdmin && isUnendorsementModalOpen
+  }, [isAppAdmin, isUnendorsementModalOpen])
 
   return (
     <BaseModal
@@ -140,7 +143,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                       borderRadius={"16px"}
                       bg={"white"}
                       alignItems="end">
-                      <Text mb={4} maxW="full">
+                      <Text mb={2} maxW="full">
                         <Trans
                           i18nKey="<bold>Are you sure?</bold> If you remove {{endorsedAddress}} endorsement you'll lose {{value}} pts and your app may lose its endorsement"
                           values={{
@@ -151,11 +154,21 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                         />
                       </Text>
                       <HStack>
-                        <Button borderRadius="16px" bg="#C84968" color={"white"} onClick={onOpenUnendorsementModal}>
+                        <Button
+                          borderRadius="16px"
+                          bg="#C84968"
+                          color={"white"}
+                          onClick={onOpenUnendorsementModal}
+                          size={["md", "sm"]}>
                           <UilTrash />
                           {t("Remove")}
                         </Button>
-                        <Button borderRadius="16px" bg="#E0E9FE" color={"#004CFC"} onClick={handleCancelClick}>
+                        <Button
+                          borderRadius="16px"
+                          bg="#E0E9FE"
+                          color={"#004CFC"}
+                          onClick={handleCancelClick}
+                          size={["md", "sm"]}>
                           {t("Cancel")}
                         </Button>
                       </HStack>
@@ -224,7 +237,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
         </Stack>
       </VStack>
 
-      {isAppAdmin && isUnendorsementModalOpen && (
+      {shouldShowUnendorsementModal && (
         <UnendorseAppModalAdminsOnly
           isOpen={isUnendorsementModalOpen}
           onClose={onCloseUnendorsementModal}
