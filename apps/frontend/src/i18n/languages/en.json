@@ -1341,8 +1341,8 @@
   "You are controlling a delegated XNode": "You are controlling a delegated XNode",
   "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again.": "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again.",
   "Only the XNode owner can revoke the delegation.": "Only the XNode owner can revoke the delegation.",
-  "The allocation rounds determine the resources and support your app receives from the ecosystem community.": "The allocation rounds determine the resources and support your app receives from the ecosystem community.",
   "You have attached this Node to a different GM NFT. Detach it to attach to this GM NFT.": "You have attached this Node to a different GM NFT. Detach it to attach to this GM NFT.",
   "Your GM NFT is attached to this Node. You can detach it anytime.": "Your GM NFT is attached to this Node. You can detach it anytime.",
-  "Your GM NFT will be level {{value}} after attaching.": "Your GM NFT will be level {{value}} after attaching."
+  "Your GM NFT will be level {{value}} after attaching.": "Your GM NFT will be level {{value}} after attaching.",
+  "Your XNode is attached to the following GM NFT": "Your XNode is attached to the following GM NFT"
 }

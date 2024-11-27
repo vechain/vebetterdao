@@ -60,7 +60,7 @@ export const AttachGMNFTCard = () => {
             <Text fontSize="sm">
               {t(
                 isXNodeAttachedToGM
-                  ? "Your GM NFT is attached to your Node"
+                  ? "Your XNode is attached to the following GM NFT"
                   : isXNodeDelegator
                     ? "Remove the XNode delegation to attach GM NFT to this node"
                     : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
@@ -116,6 +116,7 @@ export const AttachGMNFTCard = () => {
               leftIcon={<UilLinkBroken color="#C84968" />}
               color="#C84968"
               variant={"link"}
+              isDisabled={isXNodeDelegator}
               onClick={detachGmToXNodeModal.onOpen}>
               {t("Detach")}
             </Button>
