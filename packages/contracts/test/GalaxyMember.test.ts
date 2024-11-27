@@ -28,7 +28,7 @@ import { GalaxyMember, GalaxyMemberV1, GalaxyMemberV2, MockERC721Receiver } from
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
-describe("Galaxy Member - @shard6", () => {
+describe("Galaxy Member - @shard3", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })

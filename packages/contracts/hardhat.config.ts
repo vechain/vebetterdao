@@ -53,6 +53,7 @@ module.exports = {
   },
   mocha: {
     timeout: 1800000,
+    grep: process.env.SHARD || undefined,
   },
   defaultNetwork: process.env.IS_TEST_COVERAGE ? "hardhat" : "vechain_solo",
   networks: {

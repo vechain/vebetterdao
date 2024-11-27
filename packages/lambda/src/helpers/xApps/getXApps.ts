@@ -1,6 +1,4 @@
 import { ThorClient } from "@vechain/sdk-network"
-import mainnetConfig from "@repo/config/mainnet"
-import { FunctionFragment } from "@vechain/sdk-core"
 import { XAllocationVoting__factory as XAllocationVoting, X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 import { AppConfig } from "@repo/config"
 
