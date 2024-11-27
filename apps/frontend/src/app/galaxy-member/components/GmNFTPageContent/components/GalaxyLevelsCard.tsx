@@ -24,8 +24,12 @@ export const GalaxyLevelsCard = () => {
   }, [gmLevel, maxGmLevel])
 
   useEffect(() => {
+    //Show all levels if max level is less than 4
+    if (maxGmLevel < 4 && showShortened) {
+      return setShowShortened(false)
+    }
     Number(gmLevel) < 8 && setShowShortened(true)
-  }, [gmLevel])
+  }, [gmLevel, showShortened, maxGmLevel])
 
   return (
     <Card variant="baseWithBorder">
