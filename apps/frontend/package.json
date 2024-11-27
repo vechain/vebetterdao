@@ -16,7 +16,7 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "test:coverage:fe": "vitest run",
+    "test:coverage:fe": "vitest run --coverage",
     "clean": "rm -rf .next node_modules dist",
     "generate-translations": "npx ts-node ./src/scripts/translations/generateTranslations.ts",
     "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts"
