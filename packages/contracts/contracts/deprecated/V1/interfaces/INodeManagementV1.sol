@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.20;
 
-import { VechainNodesDataTypes } from "../libraries/VechainNodesDataTypes.sol";
+import { VechainNodesDataTypes } from "../../../libraries/VechainNodesDataTypes.sol";
 
-interface INodeManagement {
+interface INodeManagementV1 {
   /**
    * @notice Error indicating that the caller does not own a node.
    */
@@ -91,13 +91,6 @@ interface INodeManagement {
    * @return bool True if the user is holding the node ID and it is a valid node.
    */
   function isNodeManager(address user, uint256 nodeId) external view returns (bool);
-
-  /**
-   * @notice Check if a node is delegated.
-   * @param nodeId The node ID to check for.
-   * @return bool True if the node is delegated.
-   */
-  function isNodeDelegated(uint256 nodeId) external view returns (bool);
 
   /**
    * @notice Retrieves the node level of a given node ID.

@@ -71,7 +71,7 @@ describe("Node Management -@shard5", function () {
         forceDeploy: true,
       })
 
-      expect(await nodeManagement.version()).to.equal("1")
+      expect(await nodeManagement.version()).to.equal("2")
     })
   })
 
@@ -626,6 +626,141 @@ describe("Node Management -@shard5", function () {
 
       const manager = await nodeManagement.isNodeManager(otherAccounts[5].address, 1)
       expect(manager).to.equal(false)
+    })
+  })
+
+  describe("Additional Node Management Functions", () => {
+    it("Should correctly identify if a node is delegated", async function () {
+      const { owner, otherAccount, nodeManagement } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      // Mock node ownership
+      await createNodeHolder(2, owner)
+
+      // Initially node should not be delegated
+      expect(await nodeManagement.isNodeDelegated(1)).to.equal(false)
+
+      // Delegate the node
+      await nodeManagement.connect(owner).delegateNode(otherAccount.address)
+
+      // Now node should be delegated
+      expect(await nodeManagement.isNodeDelegated(1)).to.equal(true)
+    })
+
+    it("Should correctly identify if a user is a node delegator", async function () {
+      const { owner, otherAccount, nodeManagement } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      // Mock node ownership
+      await createNodeHolder(2, owner)
+
+      // Initially owner should not be a delegator
+      expect(await nodeManagement.isNodeDelegator(owner.address)).to.equal(false)
+
+      // Delegate the node
+      await nodeManagement.connect(owner).delegateNode(otherAccount.address)
+
+      // Now owner should be a delegator
+      expect(await nodeManagement.isNodeDelegator(owner.address)).to.equal(true)
+
+      // Other account should not be a delegator
+      expect(await nodeManagement.isNodeDelegator(otherAccount.address)).to.equal(false)
+    })
+
+    it("Should return correct direct node ownership", async function () {
+      const { owner, otherAccount, nodeManagement } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      // Mock node ownership
+      await createNodeHolder(2, owner)
+
+      // Owner should have node ID 1
+      expect(await nodeManagement.getDirectNodeOwnership(owner.address)).to.equal(1n)
+
+      // Other account should have no node
+      expect(await nodeManagement.getDirectNodeOwnership(otherAccount.address)).to.equal(0n)
+    })
+
+    it("Should return correct user node details", async function () {
+      const { owner, otherAccount, nodeManagement } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      // Mock node ownership
+      await createNodeHolder(2, owner) // Level 2 = Thunder node
+
+      // Check owner's node details before delegation
+      const [
+        nodeId,
+        nodeLevel,
+        xNodeOwner,
+        isXNodeHolder,
+        isXNodeDelegated,
+        isXNodeDelegator,
+        isXNodeDelegatee,
+        delegatee,
+      ] = await nodeManagement.getUserNode(owner.address)
+
+      expect(nodeId).to.equal(1n)
+      expect(nodeLevel).to.equal(2) // Thunder node
+      expect(xNodeOwner).to.equal(owner.address)
+      expect(isXNodeHolder).to.equal(true)
+      expect(isXNodeDelegated).to.equal(false)
+      expect(isXNodeDelegator).to.equal(false)
+      expect(isXNodeDelegatee).to.equal(false)
+      expect(delegatee).to.equal(ZERO_ADDRESS)
+
+      // Delegate the node
+      await nodeManagement.connect(owner).delegateNode(otherAccount.address)
+
+      // Check owner's node details after delegation
+      const [
+        nodeId2,
+        nodeLevel2,
+        xNodeOwner2,
+        isXNodeHolder2,
+        isXNodeDelegated2,
+        isXNodeDelegator2,
+        isXNodeDelegatee2,
+        delegatee2,
+      ] = await nodeManagement.getUserNode(owner.address)
+
+      expect(nodeId2).to.equal(1n)
+      expect(nodeLevel2).to.equal(2) // Thunder node
+      expect(xNodeOwner2).to.equal(owner.address)
+      expect(isXNodeHolder2).to.equal(true)
+      expect(isXNodeDelegated2).to.equal(true)
+      expect(isXNodeDelegator2).to.equal(true)
+      expect(isXNodeDelegatee2).to.equal(false)
+      expect(delegatee2).to.equal(otherAccount.address)
+
+      // Check delegatee's node details
+      const [
+        nodeId3,
+        nodeLevel3,
+        xNodeOwner3,
+        isXNodeHolder3,
+        isXNodeDelegated3,
+        isXNodeDelegator3,
+        isXNodeDelegatee3,
+        delegatee3,
+      ] = await nodeManagement.getUserNode(otherAccount.address)
+
+      expect(nodeId3).to.equal(1n)
+      expect(nodeLevel3).to.equal(2) // Thunder node
+      expect(xNodeOwner3).to.equal(owner.address)
+      expect(isXNodeHolder3).to.equal(true)
+      expect(isXNodeDelegated3).to.equal(true)
+      expect(isXNodeDelegator3).to.equal(false)
+      expect(isXNodeDelegatee3).to.equal(true)
+      expect(delegatee3).to.equal(otherAccount.address)
     })
   })
 })

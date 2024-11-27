@@ -28,6 +28,7 @@ import { BaseTooltip } from "@/components"
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
   const { gmId, gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel } = useSelectedGmNft()
+  const { isXNodeDelegator } = useXNode()
 
   const { isXNodeAttachedToGM } = useXNode()
 
@@ -59,8 +60,10 @@ export const AttachGMNFTCard = () => {
             <Text fontSize="sm">
               {t(
                 isXNodeAttachedToGM
-                  ? "Your GM NFT is attached to your Node"
-                  : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
+                  ? "Your XNode is attached to the following GM NFT"
+                  : isXNodeDelegator
+                    ? "Remove the XNode delegation to attach GM NFT to this node"
+                    : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
               )}
             </Text>
           </VStack>
@@ -113,6 +116,7 @@ export const AttachGMNFTCard = () => {
               leftIcon={<UilLinkBroken color="#C84968" />}
               color="#C84968"
               variant={"link"}
+              isDisabled={isXNodeDelegator}
               onClick={detachGmToXNodeModal.onOpen}>
               {t("Detach")}
             </Button>
@@ -127,7 +131,8 @@ export const AttachGMNFTCard = () => {
               <Button
                 leftIcon={<UilLink color="#004CFC" />}
                 variant={"primarySubtle"}
-                onClick={attachGmToXNodeModal.onOpen}>
+                onClick={attachGmToXNodeModal.onOpen}
+                isDisabled={isXNodeDelegator}>
                 {t("Attach now!")}
               </Button>
             </FeatureFlagWrapper>

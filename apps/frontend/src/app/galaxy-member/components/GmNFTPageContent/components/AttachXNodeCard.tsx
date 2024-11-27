@@ -26,8 +26,9 @@ import { IoWarningOutline } from "react-icons/io5"
 
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
-  const { gmId } = useSelectedGmNft()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, attachedGMTokenId, isXNodeAttachedToGM } = useXNode()
+  const { isXNodeAttachedToGM, gmId } = useSelectedGmNft()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, attachedGMTokenId, isXNodeDelegatee } =
+    useXNode()
 
   const router = useRouter()
   const goToXnodePage = useCallback(() => {
@@ -44,8 +45,13 @@ export const AttachXNodeCard = () => {
       }
       return t("Your GM NFT is attached to this Node. You can detach it anytime.")
     }
+
+    if (isXNodeDelegator) {
+      return t("Remove the XNode delegation to attach GM NFT to this node")
+    }
+
     return t("Attach your Node to your GM NFT to upgrade it for free and earn more rewards!")
-  }, [attachedGMTokenId, gmId, isXNodeAttachedToGM, t])
+  }, [attachedGMTokenId, gmId, isXNodeAttachedToGM, isXNodeDelegator, t])
 
   if (!isXNodeHolder) {
     return null
@@ -87,9 +93,16 @@ export const AttachXNodeCard = () => {
               onClick={goToXnodePage}>
               <Image src={xNodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
               <VStack flex="1" align={"flex-start"}>
-                <Text fontWeight={700} noOfLines={1}>
-                  {xNodeName}
-                </Text>
+                <HStack>
+                  <Text fontWeight={700} noOfLines={1}>
+                    {xNodeName}
+                  </Text>
+                  {(isXNodeDelegator || isXNodeDelegatee) && (
+                    <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+                      <Text fontSize={"xs"}>{isXNodeDelegator ? "Delegator" : "Delegatee"}</Text>
+                    </HStack>
+                  )}
+                </HStack>
                 <HStack gap={1}>
                   <Text fontSize="sm" fontWeight={600}>
                     {xNodePoints}
@@ -132,6 +145,7 @@ export const AttachXNodeCard = () => {
               <Button
                 leftIcon={<UilLinkBroken color="#004CFC" />}
                 variant={"primarySubtle"}
+                isDisabled={isXNodeDelegator}
                 onClick={attachGmToXNodeModal.onOpen}>
                 {t("Attach now!")}
               </Button>

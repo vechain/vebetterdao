@@ -21,10 +21,10 @@ export const GmNFTPageHeader = () => {
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account ?? "")
 
   const { isMaxGmLevelReached } = useSelectedGmNft()
-  const { isXNodeHolder, isXNodeAttachedToGM } = useXNode()
+  const { isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
 
   const actionDescription = useMemo(() => {
-    if (isXNodeHolder && !isXNodeAttachedToGM) {
+    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator) {
       return (
         <>
           <HStack>
@@ -121,6 +121,7 @@ export const GmNFTPageHeader = () => {
     isXNodeAttachedToGM,
     isXNodeHolder,
     t,
+    isXNodeDelegator,
   ])
 
   return (

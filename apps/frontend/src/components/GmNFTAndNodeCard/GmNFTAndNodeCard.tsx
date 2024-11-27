@@ -34,7 +34,7 @@ export const GmNFTAndNodeCard = () => {
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
     useSelectedGmNft()
   //node
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, isXNodeDelegatee } = useXNode()
 
   const nodeAttachedColor = isXNodeAttachedToGM ? "#B1F16C" : "#FFFFFF80"
 
@@ -118,7 +118,7 @@ export const GmNFTAndNodeCard = () => {
               )}
             </FeatureFlagWrapper>
 
-            {isAbove800 && isXNodeAttachedToGM && (
+            {isAbove800 && isXNodeAttachedToGM && isXNodeHolder && (
               <>
                 <Text fontSize="xs" fontWeight={600} color="#B1F16C">
                   {t("GM NFT attached to {{node}}", { node: xNodeName })}
@@ -184,7 +184,7 @@ export const GmNFTAndNodeCard = () => {
               </HStack>
             )}
 
-            {isXNodeHolder && (
+            {(isXNodeHolder || isXNodeDelegator) && (
               <>
                 {isAbove800 ? (
                   <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<Box w={6} h={6}></Box>}>
@@ -218,9 +218,19 @@ export const GmNFTAndNodeCard = () => {
                   cursor="pointer">
                   <Image src={xNodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
                   <VStack flex="1" align={"flex-start"}>
-                    <Text fontWeight={700} noOfLines={1}>
-                      {xNodeName}
-                    </Text>
+                    <HStack>
+                      <Text fontWeight={700} noOfLines={1}>
+                        {xNodeName}
+                      </Text>
+                      {(isXNodeDelegator || isXNodeDelegatee) && (
+                        <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+                          <Text fontSize={"xs"} fontWeight={600}>
+                            {isXNodeDelegator ? "Delegator" : "Delegatee"}
+                          </Text>
+                        </HStack>
+                      )}
+                    </HStack>
+
                     <HStack gap={1}>
                       <Text fontSize="sm" fontWeight={600}>
                         {xNodePoints}
