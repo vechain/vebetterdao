@@ -6,6 +6,7 @@ import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
 import { getTokensInfoByOwnerQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokensInfoByOwner"
 import { buildClause } from "@/utils/buildClause"
+import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
@@ -36,7 +37,12 @@ export const useMintNFT = ({ onFailure, onSuccess }: useMintNFTProps) => {
   }, [])
 
   const refetchQueryKeys = useMemo(
-    () => [getTokenIdByAccountQueryKey(account), getGMbalanceQueryKey(account), getTokensInfoByOwnerQueryKey(account)],
+    () => [
+      getSelectedTokenIdQueryKey(account),
+      getTokenIdByAccountQueryKey(account),
+      getGMbalanceQueryKey(account),
+      getTokensInfoByOwnerQueryKey(account),
+    ],
     [account],
   )
 
