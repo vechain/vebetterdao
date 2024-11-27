@@ -74,9 +74,6 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
     onOpen: onOpenUnendorsementModal,
     onClose: onCloseUnendorsementModal,
   } = useDisclosure()
-  const shouldShowUnendorsementModal = useMemo(() => {
-    return isAppAdmin && isUnendorsementModalOpen
-  }, [isAppAdmin, isUnendorsementModalOpen])
 
   return (
     <BaseModal
@@ -237,7 +234,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
         </Stack>
       </VStack>
 
-      {shouldShowUnendorsementModal && (
+      {isAppAdmin && isUnendorsementModalOpen && (
         <UnendorseAppModalAdminsOnly
           isOpen={isUnendorsementModalOpen}
           onClose={onCloseUnendorsementModal}
