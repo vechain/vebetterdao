@@ -1349,5 +1349,8 @@
   "Your GM NFT is attached to this Node. You can detach it anytime.": "Your GM NFT is attached to this Node. You can detach it anytime.",
   "The GM NFT is <bold>not transferable</bold> while attached to a Node.": "The GM NFT is <bold>not transferable</bold> while attached to a Node.",
   "Your XNode is attached to the following GM NFT": "Your XNode is attached to the following GM NFT",
-  "Your GM NFT will be level {{value}} after attaching.": "Your GM NFT will be level {{value}} after attaching."
+  "Your GM NFT will be level {{value}} after attaching.": "Your GM NFT will be level {{value}} after attaching.",
+  "Currently, we only support one XNode per account.": "Currently, we only support one XNode per account.",
+  "This address already has an XNode. Please choose another address.": "This address already has an XNode. Please choose another address.",
+  "Error checking node holder status. Please try again.": "Error checking node holder status. Please try again."
 }

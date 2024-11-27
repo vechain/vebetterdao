@@ -1,3 +1,4 @@
 export * from "./useXNode"
 export * from "./useUserXNodes"
-export * from "./useGetUserNode"
+export * from "./useGetUserNodes"
+export * from "./useIsNodeHolder"
