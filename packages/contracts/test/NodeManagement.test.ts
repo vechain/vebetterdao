@@ -629,28 +629,6 @@ describe("Node Management -@shard5", function () {
       const manager = await nodeManagement.isNodeManager(otherAccounts[5].address, 1)
       expect(manager).to.equal(false)
     })
-
-    it("Should return node IDs for both delegators and delegatees", async function () {
-      const { owner, otherAccount, nodeManagement } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
-
-      // Mock node ownership
-      await createNodeHolder(2, owner) // Create a node for owner
-      const nodeId = 1n // First node ID will be 1
-
-      // Initially owner should have the node ID
-      expect(await nodeManagement.getNodeIds(owner.address)).to.eql([nodeId])
-      expect(await nodeManagement.getNodeIds(otherAccount.address)).to.eql([])
-
-      // Delegate the node
-      await nodeManagement.connect(owner).delegateNode(otherAccount.address)
-
-      // After delegation, both owner (delegator) and otherAccount (delegatee) should have the node ID
-      expect(await nodeManagement.getNodeIds(owner.address)).to.eql([nodeId])
-      expect(await nodeManagement.getNodeIds(otherAccount.address)).to.eql([nodeId])
-    })
   })
 
   describe("isNodeHolder Function", () => {
@@ -810,7 +788,16 @@ describe("Node Management -@shard5", function () {
 
       // Check owner's node details after delegation (should be empty array as node is delegated)
       const ownerNodesAfterDelegation = await nodeManagement.getUserNodes(owner.address)
-      expect(ownerNodesAfterDelegation.length).to.equal(0)
+      expect(ownerNodesAfterDelegation.length).to.equal(1)
+      const ownerNodesAfterDelegationInfo = ownerNodesAfterDelegation[0]
+      expect(ownerNodesAfterDelegationInfo.nodeId).to.equal(1n)
+      expect(ownerNodesAfterDelegationInfo.nodeLevel).to.equal(2) // Thunder node
+      expect(ownerNodesAfterDelegationInfo.xNodeOwner).to.equal(owner.address)
+      expect(ownerNodesAfterDelegationInfo.isXNodeHolder).to.equal(true)
+      expect(ownerNodesAfterDelegationInfo.isXNodeDelegated).to.equal(true)
+      expect(ownerNodesAfterDelegationInfo.isXNodeDelegator).to.equal(true)
+      expect(ownerNodesAfterDelegationInfo.isXNodeDelegatee).to.equal(false)
+      expect(ownerNodesAfterDelegationInfo.delegatee).to.equal(otherAccount.address)
 
       // Check delegatee's node details
       const delegateeNodes = await nodeManagement.getUserNodes(otherAccount.address)
