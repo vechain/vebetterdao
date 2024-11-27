@@ -2,13 +2,13 @@ import { useSelectedGmNft } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { gmNfts } from "@/constants/gmNfts"
 import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, VStack } from "@chakra-ui/react"
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 export const GalaxyLevelsCard = () => {
   const { gmLevel, maxGmLevel } = useSelectedGmNft()
   const { t } = useTranslation()
-  const [showShortened, setShowShortened] = useState(false)
+  const [showShortened, setShowShortened] = useState(true)
   const gmNftsShortened = useMemo(() => {
     const level = Number(gmLevel)
     if (level === 1) {
@@ -22,14 +22,6 @@ export const GalaxyLevelsCard = () => {
     }
     return gmNfts.slice(maxGmLevel - 4, maxGmLevel)
   }, [gmLevel, maxGmLevel])
-
-  useEffect(() => {
-    //Show all levels if max level is less than 4
-    if (maxGmLevel < 4 && showShortened) {
-      return setShowShortened(false)
-    }
-    Number(gmLevel) < 8 && setShowShortened(true)
-  }, [gmLevel, showShortened, maxGmLevel])
 
   return (
     <Card variant="baseWithBorder">
@@ -59,7 +51,7 @@ export const GalaxyLevelsCard = () => {
                       {gmNft.name}
                     </Text>
                     <Text fontSize="sm" color="#6A6A6A">
-                      {gmNft.level === maxGmLevel
+                      {Number(gmNft.level) === maxGmLevel
                         ? t("Max Level")
                         : t("{{b3trToUpgrade}} B3TR to upgrade", { b3trToUpgrade: gmNft.b3trToUpgrade })}
                     </Text>
