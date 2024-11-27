@@ -16,7 +16,7 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "test:coverage:fe": "vitest run --coverage",
+    "test:coverage:fe": "vitest run",
     "clean": "rm -rf .next node_modules dist",
     "generate-translations": "npx ts-node ./src/scripts/translations/generateTranslations.ts",
     "complete-translations": "npx ts-node ./src/scripts/translations/completeTranslations.ts"
@@ -94,7 +94,7 @@
     "d3-array": "^3.2.4",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
-    "happy-dom": "^15.10.2",
+    "happy-dom": "14.12.3",
     "resize-observer-polyfill": "^1.5.1",
     "typescript": "^5",
     "typescript-eslint": "^7.15.0",
