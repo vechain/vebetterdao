@@ -10,7 +10,6 @@ import {
   getNodeDelegationDetailsQueryKey,
   getUserNodeQueryKey,
   getUserXNodesQueryKey,
-  useSelectedGmNft,
   useXNode,
 } from "@/api"
 
@@ -39,8 +38,7 @@ type ClausesParams = {
  */
 export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
   const { account } = useWallet()
-  const { xNodeId } = useXNode()
-  const { gmId } = useSelectedGmNft()
+  const { xNodeId, attachedGMTokenId } = useXNode()
 
   const clauseBuilder = useCallback(
     ({ delegatee, isAttachedToGM }: ClausesParams) => {
@@ -55,8 +53,8 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
             to: gmContractAddress,
             contractInterface: GmInterface,
             method: detachMethod,
-            args: [xNodeId, gmId],
-            comment: `detach xnode #${xNodeId} from gm #${gmId}`,
+            args: [xNodeId, attachedGMTokenId],
+            comment: `detach xnode #${xNodeId} from gm #${attachedGMTokenId}`,
           }),
         )
       }
@@ -73,17 +71,17 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
 
       return clauses
     },
-    [account, xNodeId, gmId],
+    [account, xNodeId, attachedGMTokenId],
   )
 
   const refetchQueryKeys = useMemo(
     () => [
       getUserXNodesQueryKey(account || ""),
       getUserNodeQueryKey(account || ""),
-      getLevelOfTokenQueryKey(gmId || ""),
+      getLevelOfTokenQueryKey(attachedGMTokenId || ""),
       getNodeDelegationDetailsQueryKey(xNodeId),
     ],
-    [account, gmId, xNodeId],
+    [account, attachedGMTokenId, xNodeId],
   )
 
   return useBuildTransaction<ClausesParams>({

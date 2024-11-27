@@ -16,11 +16,11 @@ import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
 import { useRevokeXNodeDelegation } from "@/hooks"
-import { useSelectedGmNft } from "@/api"
+import { useXNode } from "@/api"
 
 export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
-  const { isXNodeAttachedToGM } = useSelectedGmNft()
+  const { isXNodeAttachedToGM } = useXNode()
 
   const revokeXNodeDelegation = useRevokeXNodeDelegation({})
 
@@ -70,8 +70,8 @@ export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProp
             </AlertTitle>
             <AlertDescription as="span">{t("once you have revoked the delegation.")}</AlertDescription>
             {isXNodeAttachedToGM && (
-              <Text fontSize="sm" color="#C84968" fontWeight={600}>
-                {t("Notice: your GM NFT will be detached from your XNode.")}
+              <Text mt={2} fontSize="sm" color="#C84968" fontWeight={600}>
+                {t("Notice: the GM NFT attached to this XNode will be detached and will lose the free levels.")}
               </Text>
             )}
           </Box>
