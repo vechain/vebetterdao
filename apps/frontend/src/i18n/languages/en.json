@@ -1353,5 +1353,15 @@
   "Your GM NFT will be level {{value}} after attaching.": "Your GM NFT will be level {{value}} after attaching.",
   "Currently, we only support one XNode per account.": "Currently, we only support one XNode per account.",
   "This address already has an XNode. Please choose another address.": "This address already has an XNode. Please choose another address.",
-  "Error checking node holder status. Please try again.": "Error checking node holder status. Please try again."
+  "Error checking node holder status. Please try again.": "Error checking node holder status. Please try again.",
+  "Delegated to": "Delegated to",
+  "Delegated by": "Delegated by",
+  "You are controlling multiple XNodes": "You are controlling multiple XNodes",
+  "We currently support only one XNode per account. Please cancel the delegation of the other XNodes to use your preferred one.": "We currently support only one XNode per account. Please cancel the delegation of the other XNodes to use your preferred one.",
+  "View Details": "View Details",
+  "Your XNodes": "Your XNodes",
+  "You currently have multiple XNodes under your control. We recommend keeping only one XNode per account for optimal functionality.": "You currently have multiple XNodes under your control. We recommend keeping only one XNode per account for optimal functionality.",
+  "Please cancel the delegation of the other XNodes to use your preferred one.": "Please cancel the delegation of the other XNodes to use your preferred one.",
+  "Close": "Close",
+  "Owned": "Owned"
 }

@@ -8,7 +8,7 @@ import { useEffect } from "react"
 import { useXNode } from "@/api"
 import { ConnectWithCreators } from "./components/ConnectWithCreators"
 import { DelegateXNodeCard } from "./components/XNodeDelegation"
-import { DelegationAlert } from "./components/XNodeDelegation/DelegationAlert"
+import { MultipleXNodesAlert } from "./components/XNodeDelegation/MultipleXNodesAlert"
 
 export const XNodeContent = () => {
   const { isXNodeHolder, isXNodeLoading, isXNodeDelegator } = useXNode()
@@ -28,7 +28,7 @@ export const XNodeContent = () => {
       <XNodePageHeader />
       <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
         <VStack flex={3}>
-          <DelegationAlert />
+          <MultipleXNodesAlert />
           <DelegateXNodeCard />
           <AttachGMNFTCard />
           <EndorsingAppCard />
