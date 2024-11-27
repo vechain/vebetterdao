@@ -6,7 +6,6 @@ import {
   TimeLock,
   VOT3,
   GalaxyMember,
-  GalaxyMemberV1,
   Emissions,
   XAllocationVoting,
   XAllocationPool,

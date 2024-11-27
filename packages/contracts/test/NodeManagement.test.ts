@@ -10,8 +10,10 @@ import {
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
+import { deployProxy, upgradeProxy } from "../scripts/helpers/upgrades"
+import { NodeManagement, NodeManagementV1 } from "../typechain-types"
 
-describe("Node Management -@shard4", function () {
+describe("Node Management - @shard4", function () {
   describe("Contract upgradeablity", () => {
     it("Cannot initialize twice", async function () {
       const { nodeManagement, vechainNodesMock, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -72,6 +74,83 @@ describe("Node Management -@shard4", function () {
       })
 
       expect(await nodeManagement.version()).to.equal("2")
+    })
+
+    it("Should be no state conflicts after upgrade", async () => {
+      const { owner, otherAccount, otherAccounts, vechainNodesMock } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      const nodeManagementV1 = (await deployProxy("NodeManagementV1", [
+        await vechainNodesMock.getAddress(),
+        owner.address,
+        owner.address,
+      ])) as NodeManagementV1
+
+      // Mock node ownership
+      await createNodeHolder(2, owner) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+      await createNodeHolder(4, otherAccounts[0]) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+      await createNodeHolder(7, otherAccounts[1]) // Node strength level 2 corresponds (Thunder) to an endorsement score of 13
+
+      const tx = await vechainNodesMock.addToken(otherAccounts[2].address, 7, false, 0, 0)
+
+      // Wait for the transaction to be mined
+      const receipt = await tx.wait()
+      if (!receipt) throw new Error("No receipt")
+
+      // Retrieve the block where the transaction was included
+      const block = await ethers.provider.getBlock(receipt.blockNumber)
+      if (!block) throw new Error("No block")
+
+      await nodeManagementV1.connect(owner).delegateNode(otherAccount.address)
+      await nodeManagementV1.connect(otherAccounts[0]).delegateNode(otherAccount.address)
+      await nodeManagementV1.connect(otherAccounts[1]).delegateNode(otherAccount.address)
+
+      let storageSlots = []
+
+      const initialSlot = BigInt("0x895b04a03424f581b1c6717e3715bbb5ceb9c40a4e5b61a13e84096251cf8f00") // Slot 0 of VoterRewards
+
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlots.push(await ethers.provider.getStorage(await nodeManagementV1.getAddress(), i))
+      }
+
+      storageSlots = storageSlots.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ) // removing empty slots
+
+      const nodeManagement = (await upgradeProxy(
+        "NodeManagementV1",
+        "NodeManagement",
+        await nodeManagementV1.getAddress(),
+        [],
+        {
+          version: 2,
+        },
+      )) as NodeManagement
+
+      const storageSlotsAfter = []
+
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlotsAfter.push(await ethers.provider.getStorage(await nodeManagement.getAddress(), i))
+      }
+
+      // Check if storage slots are the same after upgrade
+      for (let i = 0; i < storageSlots.length; i++) {
+        expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
+      }
+
+      // Creation time should be the same as the block timestamp
+      const creationTime = await nodeManagement.getNodeCreationTime(4)
+      expect(creationTime).to.equal(block.timestamp)
+
+      // Check if all nodes are delegated to the same address
+      expect(await nodeManagement.getNodeIds(otherAccount.address)).to.eql([1n, 2n, 3n])
+
+      // Check node owners are not delegated to themselves
+      expect(await nodeManagement.getNodeIds(owner.address)).to.eql([])
+      expect(await nodeManagement.getNodeIds(otherAccounts[0].address)).to.eql([])
+      expect(await nodeManagement.getNodeIds(otherAccounts[1].address)).to.eql([])
     })
   })
 
@@ -648,6 +727,17 @@ describe("Node Management -@shard4", function () {
       // Creation time should be the same as the block timestamp
       const creationTime = await nodeManagement.getNodeCreationTime(1)
       expect(creationTime).to.equal(block.timestamp)
+    })
+
+    it("Should return 0 if node does not exist", async function () {
+      const { nodeManagement } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      // Creation time should be the same as the block timestamp
+      const creationTime = await nodeManagement.getNodeCreationTime(1)
+      expect(creationTime).to.equal(0)
     })
   })
 })

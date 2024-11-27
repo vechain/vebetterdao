@@ -24,7 +24,7 @@ import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { GalaxyMember, GalaxyMemberV1, MockERC721Receiver } from "../typechain-types"
+import { GalaxyMember, GalaxyMemberV1, GalaxyMemberV2, MockERC721Receiver } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
@@ -757,17 +757,21 @@ describe("Galaxy Member - @shard6", () => {
 
       const galaxyMemberV2 = (await upgradeProxy(
         "GalaxyMemberV1",
-        "GalaxyMember",
+        "GalaxyMemberV2",
         await galaxyMember.getAddress(),
         [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMember
+      )) as unknown as GalaxyMemberV2
 
-      const storageSlotsAfter = []
+      let storageSlotsAfter = []
 
       for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
         storageSlotsAfter.push(await ethers.provider.getStorage(await galaxyMemberV2.getAddress(), i))
       }
+
+      storageSlotsAfter = storageSlotsAfter.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ) // removing empty slots
 
       // Check if storage slots are the same after upgrade
       for (let i = 0; i < storageSlots.length; i++) {
@@ -813,6 +817,54 @@ describe("Galaxy Member - @shard6", () => {
       expect(await galaxyMemberV2.levelOf(1)).to.equal(7)
 
       expect(await galaxyMemberV2.tokenURI(1)).to.equal(config.GM_NFT_BASE_URI + "7.json")
+
+      storageSlots = []
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlots.push(await ethers.provider.getStorage(await galaxyMemberV2.getAddress(), i))
+      }
+
+      storageSlots = storageSlots.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      )
+
+      const galaxyMemberV3 = (await upgradeProxy(
+        "GalaxyMemberV2",
+        "GalaxyMember",
+        await galaxyMember.getAddress(),
+        [],
+        { version: 3 },
+      )) as unknown as GalaxyMember
+
+      storageSlotsAfter = []
+      for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
+        storageSlotsAfter.push(await ethers.provider.getStorage(await galaxyMemberV3.getAddress(), i))
+      }
+
+      storageSlotsAfter = storageSlotsAfter.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      )
+
+      // Check if storage slots are the same after upgrade
+      for (let i = 0; i < storageSlots.length; i++) {
+        expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
+      }
+
+      expect(await galaxyMemberV3.balanceOf(await owner.getAddress())).to.equal(2)
+      expect(await galaxyMemberV3.balanceOf(await otherAccount.getAddress())).to.equal(1)
+      expect(await galaxyMemberV3.balanceOf(await otherAccounts[0].getAddress())).to.equal(1)
+      expect(await galaxyMemberV3.balanceOf(await otherAccounts[1].getAddress())).to.equal(1)
+
+      expect(await galaxyMemberV3.ownerOf(4)).to.equal(await owner.getAddress())
+      expect(await galaxyMemberV3.ownerOf(1)).to.equal(await otherAccount.getAddress())
+      expect(await galaxyMemberV3.ownerOf(2)).to.equal(await otherAccounts[0].getAddress())
+      expect(await galaxyMemberV3.ownerOf(3)).to.equal(await otherAccounts[1].getAddress())
+
+      await galaxyMemberV3.connect(owner).freeMint()
+
+      expect(await galaxyMemberV3.balanceOf(await owner.getAddress())).to.equal(3)
+      expect(await galaxyMemberV3.ownerOf(5)).to.equal(await owner.getAddress())
+
+      expect(await galaxyMemberV3.levelOf(1)).to.equal(7)
     })
   })
 
