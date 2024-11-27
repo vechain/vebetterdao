@@ -12,7 +12,7 @@ import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
 export const DelegateXNodeCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { xNodeId, isXNodeDelegator } = useXNode()
+  const { xNodeId, isXNodeDelegator, isXNodeDelegated } = useXNode()
   const { data: nodeDelegationDetails } = useGetNodeDelegationDetails(xNodeId)
 
   const delegateModal = useDisclosure()
