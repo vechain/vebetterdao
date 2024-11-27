@@ -19,9 +19,10 @@ import {
 import { UilInfoCircle, UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
-import { useTranslation } from "react-i18next"
+import { useTranslation, Trans } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
 import { BaseTooltip } from "@/components"
+import { IoWarningOutline } from "react-icons/io5"
 
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
@@ -114,6 +115,17 @@ export const AttachXNodeCard = () => {
               <FaChevronRight size={"24px"} />
             </HStack>
           </Flex>
+          {isXNodeAttachedToGM && (
+            <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgba(252, 238, 241, 1)"}>
+              <IoWarningOutline size={24} color={"rgba(200, 73, 104, 1)"} />
+              <Text color={"rgba(200, 73, 104, 1)"} fontSize={14}>
+                <Trans
+                  i18nKey="The GM NFT is <bold>not transferable</bold> while attached to a Node."
+                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                />
+              </Text>
+            </HStack>
+          )}
           {isXNodeAttachedToGM ? (
             <Button
               leftIcon={<UilLinkBroken color="#C84968" />}

@@ -1,4 +1,4 @@
-import { useSelectedGmNft, useXNode } from "@/api"
+import { useSelectedGmNft, useXNode, useParticipatedInGovernance } from "@/api"
 import {
   Box,
   Card,
@@ -30,6 +30,7 @@ export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
 
+  const { data: hasUserVoted } = useParticipatedInGovernance(account)
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
     useSelectedGmNft()
   //node
@@ -100,9 +101,21 @@ export const GmNFTAndNodeCard = () => {
                   {t("Your Galaxy Member")}
                 </Heading>
               }>
-              <Heading fontSize="xl" fontWeight={600}>
-                {t("You are on LEVEL {{level}}", { level: gmLevel })}
-              </Heading>
+              {!isGMOwned ? (
+                !hasUserVoted ? (
+                  <Heading fontSize="xl" fontWeight={600}>
+                    {t("Vote to be a galaxy member")}
+                  </Heading>
+                ) : (
+                  <Heading fontSize="xl" fontWeight={600}>
+                    {t("Mint GM to be a galaxy member")}
+                  </Heading>
+                )
+              ) : (
+                <Heading fontSize="xl" fontWeight={600}>
+                  {t("Your galaxy member")}
+                </Heading>
+              )}
             </FeatureFlagWrapper>
 
             {isAbove800 && isXNodeAttachedToGM && isXNodeHolder && (
