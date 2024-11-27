@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { Button, ButtonProps, useDisclosure, Text } from "@chakra-ui/react"
+import { Button, ButtonProps, useDisclosure, Text, HStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useMintNFT } from "@/hooks"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
@@ -96,18 +96,19 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
 
     if (isMaxGmLevelReached && isXNodeAttachedToGM) {
       return (
-        <Text
-          bg={getLevelGradient(1)} //Setting first gradient which is more visible
-          style={{
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-          alignSelf="center"
-          fontSize={"lg"}
-          fontWeight={"bold"}
-          noOfLines={1}>
-          {t("Max Level Reached!")}
-        </Text>
+        <HStack bg={"rgba(255, 255, 255, 0.1)"} alignSelf="start" rounded="8px" px={5} py={1} gap={1} justify="center">
+          <Text
+            bg={getLevelGradient(1)} //Setting first gradient which is more visible
+            style={{
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+            fontSize={"lg"}
+            fontWeight={"bold"}
+            noOfLines={1}>
+            {t("Max Level Reached!")}
+          </Text>
+        </HStack>
       )
     }
 
