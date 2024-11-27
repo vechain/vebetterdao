@@ -27,7 +27,7 @@ import { BaseTooltip } from "@/components"
 
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
-  const { gmId, gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, isXNodeAttachedToGM } = useSelectedGmNft()
+  const { gmId, gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel } = useSelectedGmNft()
   const { isXNodeDelegator } = useXNode()
 
   const { isXNodeAttachedToGM } = useXNode()
