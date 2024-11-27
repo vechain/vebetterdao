@@ -77,17 +77,17 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
           <Icon as={FaClock} boxSize={"36px"} color="#AF5F00" />
           <Box color="#AF5F00">
             <Text fontSize={"16px"} as="span">
-              {t("If you remove these points")}
+              {t("Removing this endorsement from your app may result in it")}
             </Text>{" "}
             <Text fontSize={"16px"} as="span" fontWeight="600">
-              {t("your app may lose its endorsement")}
+              {t("no longer being selected for allocations.")}
             </Text>
           </Box>
         </HStack>
 
         <VStack align="stretch" w="full">
           <Button variant={"dangerFilled"} w={"full"} onClick={handleUnendorsement}>
-            {t("Remove endorsement")}
+            {t("Remove now")}
           </Button>
           <Button variant={"primaryGhost"} w={"full"} onClick={onClose}>
             {t("Cancel")}

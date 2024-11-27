@@ -92,7 +92,7 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
           <Icon as={FaClock} boxSize={"36px"} color="#AF5F00" />
           <Box color="#AF5F00">
             <Text fontSize={"16px"} as="span">
-              {t("Withdrawing your endorsement from an app may result in it")}
+              {t("Removing your endorsement from an app may result in it")}
             </Text>{" "}
             <Text fontSize={"16px"} as="span" fontWeight="600">
               {t("no longer being selected for allocations.")}
