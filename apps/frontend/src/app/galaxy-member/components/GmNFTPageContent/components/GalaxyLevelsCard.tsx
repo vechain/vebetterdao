@@ -2,7 +2,7 @@ import { useSelectedGmNft } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { gmNfts } from "@/constants/gmNfts"
 import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, VStack } from "@chakra-ui/react"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { useTranslation } from "react-i18next"
 
 export const GalaxyLevelsCard = () => {
@@ -22,6 +22,10 @@ export const GalaxyLevelsCard = () => {
     }
     return gmNfts.slice(maxGmLevel - 4, maxGmLevel)
   }, [gmLevel, maxGmLevel])
+
+  useEffect(() => {
+    Number(gmLevel) < 8 && setShowShortened(true)
+  }, [gmLevel])
 
   return (
     <Card variant="baseWithBorder">
