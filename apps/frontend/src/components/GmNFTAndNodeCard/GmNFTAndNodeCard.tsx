@@ -113,7 +113,7 @@ export const GmNFTAndNodeCard = () => {
                 )
               ) : (
                 <Heading fontSize="xl" fontWeight={600}>
-                  {t("You are a galaxy member")}
+                  {t("You're galaxy member")}
                 </Heading>
               )}
             </FeatureFlagWrapper>
