@@ -13,7 +13,8 @@ import { FaChevronRight } from "react-icons/fa6"
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
   const { isXNodeAttachedToGM } = useSelectedGmNft()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, attachedGMTokenId } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, attachedGMTokenId, isXNodeDelegatee } =
+    useXNode()
 
   const router = useRouter()
   const goToXnodePage = useCallback(() => {
@@ -67,9 +68,16 @@ export const AttachXNodeCard = () => {
               onClick={goToXnodePage}>
               <Image src={xNodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
               <VStack flex="1" align={"flex-start"}>
-                <Text fontWeight={700} noOfLines={1}>
-                  {xNodeName}
-                </Text>
+                <HStack>
+                  <Text fontWeight={700} noOfLines={1}>
+                    {xNodeName}
+                  </Text>
+                  {(isXNodeDelegator || isXNodeDelegatee) && (
+                    <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+                      <Text fontSize={"xs"}>{isXNodeDelegator ? "Delegator" : "Delegatee"}</Text>
+                    </HStack>
+                  )}
+                </HStack>
                 <HStack gap={1}>
                   <Text fontSize="sm" fontWeight={600}>
                     {xNodePoints}

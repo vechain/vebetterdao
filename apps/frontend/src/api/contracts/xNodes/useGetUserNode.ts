@@ -42,7 +42,8 @@ export const useGetUserNode = (user?: string): UseQueryResult<UserNode, Error> =
       isXNodeHolder: response.decoded[3],
       isXNodeDelegated: response.decoded[4],
       isXNodeDelegator: response.decoded[5],
-      delegatee: response.decoded[6],
+      isXNodeDelegatee: response.decoded[6],
+      delegatee: response.decoded[7],
     }),
     enabled: !!user,
   })

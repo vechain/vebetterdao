@@ -8,7 +8,8 @@ import { useTranslation } from "react-i18next"
 
 export const XNodePageHeader = () => {
   const { t } = useTranslation()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeLoading, isXNodeHolder, isXNodeDelegator } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeLoading, isXNodeHolder, isXNodeDelegator, isXNodeDelegatee } =
+    useXNode()
 
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
@@ -79,13 +80,20 @@ export const XNodePageHeader = () => {
               {xNodeName}
             </Text>
 
-            <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
-              <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
-                {xNodePoints}
-              </Text>
-              <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
-                {t("points to endorse")}
-              </Text>
+            <HStack>
+              {(isXNodeDelegator || isXNodeDelegatee) && (
+                <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+                  <Text fontSize={isAbove800 ? "md" : "xs"}>{isXNodeDelegator ? "Delegator" : "Delegatee"}</Text>
+                </HStack>
+              )}
+              <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
+                  {xNodePoints}
+                </Text>
+                <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
+                  {t("points to endorse")}
+                </Text>
+              </HStack>
             </HStack>
           </VStack>
         </HStack>

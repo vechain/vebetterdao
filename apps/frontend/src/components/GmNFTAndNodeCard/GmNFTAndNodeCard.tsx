@@ -34,7 +34,7 @@ export const GmNFTAndNodeCard = () => {
     useSelectedGmNft()
 
   //node
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, isXNodeDelegatee } = useXNode()
 
   const nodeAttachedColor = isXNodeAttachedToGM ? "#B1F16C" : "#FFFFFF80"
 
@@ -206,9 +206,19 @@ export const GmNFTAndNodeCard = () => {
                   cursor="pointer">
                   <Image src={xNodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
                   <VStack flex="1" align={"flex-start"}>
-                    <Text fontWeight={700} noOfLines={1}>
-                      {xNodeName}
-                    </Text>
+                    <HStack>
+                      <Text fontWeight={700} noOfLines={1}>
+                        {xNodeName}
+                      </Text>
+                      {(isXNodeDelegator || isXNodeDelegatee) && (
+                        <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+                          <Text fontSize={"xs"} fontWeight={600}>
+                            {isXNodeDelegator ? "Delegator" : "Delegatee"}
+                          </Text>
+                        </HStack>
+                      )}
+                    </HStack>
+
                     <HStack gap={1}>
                       <Text fontSize="sm" fontWeight={600}>
                         {xNodePoints}
