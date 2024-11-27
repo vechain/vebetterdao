@@ -15,7 +15,6 @@ const compactFormatter = getCompactFormatter(4)
 export const GmNFTPageHeader = () => {
   const { t } = useTranslation()
   const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, b3trToUpgradeGMToNextLevel } = useSelectedGmNft()
-
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { account } = useWallet()

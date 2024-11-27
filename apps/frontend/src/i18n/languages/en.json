@@ -1,4 +1,10 @@
 {
+  "Active and attached": "Active and attached",
+  "Attached GM": "Attached GM",
+  "To active the selected GM NFT, you need to detach the node from the previous attached node.": "To active the selected GM NFT, you need to detach the node from the previous attached node.",
+  "Detach your GM before activating another one": "Detach your GM before activating another one",
+  "Active and attach NFT": "Active and attach NFT",
+  "Once the GM NFT is attached to your XNode, it can't be transferred anymore": "Once the GM NFT is attached to your XNode, it can't be transferred anymore",
   "Value must be greater than the current max level": "Value must be greater than the current max level",
   "Set Max Level": "Set Max Level",
   "Value must be different from the current max level": "Value must be different from the current max level",

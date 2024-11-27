@@ -32,7 +32,6 @@ export const GmNFTAndNodeCard = () => {
 
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
     useSelectedGmNft()
-
   //node
   const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder } = useXNode()
 
