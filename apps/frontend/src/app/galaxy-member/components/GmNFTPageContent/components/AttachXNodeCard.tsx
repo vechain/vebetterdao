@@ -44,8 +44,13 @@ export const AttachXNodeCard = () => {
       }
       return t("Your GM NFT is attached to this Node. You can detach it anytime.")
     }
+
+    if (isXNodeDelegator) {
+      return t("Remove the XNode delegation to attach GM NFT to this node")
+    }
+
     return t("Attach your Node to your GM NFT to upgrade it for free and earn more rewards!")
-  }, [attachedGMTokenId, gmId, isXNodeAttachedToGM, t])
+  }, [attachedGMTokenId, gmId, isXNodeAttachedToGM, isXNodeDelegator, t])
 
   if (!isXNodeHolder) {
     return null
@@ -63,15 +68,7 @@ export const AttachXNodeCard = () => {
                 </Box>
               </BaseTooltip>
             </HStack>
-            <Text fontSize="sm">
-              {t(
-                isXNodeAttachedToGM
-                  ? description
-                  : isXNodeDelegator
-                    ? "Remove the XNode delegation to attach GM NFT to this node"
-                    : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
-              )}
-            </Text>
+            <Text fontSize="sm">{description}</Text>
           </VStack>
           <Flex border="1px solid" rounded="12px" position="relative" cursor="pointer">
             <Image
