@@ -51,7 +51,7 @@ export const useSwitchEndorsement = ({ appIdToEndorse, appIdToUnendorse, nodeId,
       getIsAppUnendorsedQueryKey(appIdToEndorse),
       getAppEndorsementScoreQueryKey(appIdToEndorse),
       getEndorsersQueryKey(appIdToEndorse),
-      getAppEndorsedEventsQueryKey({ appId: appIdToEndorse, nodeId, endorsed: true }),
+      getAppEndorsedEventsQueryKey({ appId: appIdToEndorse }),
       // Refetch queries for the app being unendorsed
       getIsAppUnendorsedQueryKey(appIdToUnendorse),
       getAppEndorsementScoreQueryKey(appIdToUnendorse),

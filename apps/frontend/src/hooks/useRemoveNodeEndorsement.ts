@@ -49,7 +49,7 @@ export const useRemoveNodeEndorsement = ({ appId, nodeId, onSuccess }: Props) =>
       getXAppsQueryKey(),
       getAppIsBlacklistedQueryKey(appId ?? ""),
       getAppExistsQueryKey(appId ?? ""),
-      getAppEndorsedEventsQueryKey({ appId, nodeId, endorsed: false }),
+      getAppEndorsedEventsQueryKey({ appId }),
     ],
     [appId, nodeId],
   )

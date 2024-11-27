@@ -52,7 +52,7 @@ export const useEndorseApp = ({ appId, nodeId, userAddress, onSuccess }: Props) 
       getXAppsQueryKey(),
       getAppIsBlacklistedQueryKey(appId),
       getAppExistsQueryKey(appId),
-      getAppEndorsedEventsQueryKey({ appId, nodeId, endorsed: true }),
+      getAppEndorsedEventsQueryKey({ appId }),
     ],
     [appId, nodeId, userAddress],
   )
