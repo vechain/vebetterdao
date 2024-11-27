@@ -1,4 +1,4 @@
-import { useGetNodeDelegationDetails, useIsXNodeDelegated, useXNode } from "@/api"
+import { useGetNodeDelegationDetails, useXNode } from "@/api"
 import { Card, CardBody, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
@@ -13,7 +13,6 @@ export const DelegateXNodeCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { xNodeId, isXNodeDelegator } = useXNode()
-  const { data: isXNodeDelegated } = useIsXNodeDelegated(xNodeId)
   const { data: nodeDelegationDetails } = useGetNodeDelegationDetails(xNodeId)
 
   const delegateModal = useDisclosure()

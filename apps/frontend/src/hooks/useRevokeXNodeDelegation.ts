@@ -5,6 +5,7 @@ import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory, GalaxyMember__factory } from "@repo/contracts"
 import {
+  getIsXNodeDelegatedQueryKey,
   getLevelOfTokenQueryKey,
   getNodeDelegationDetailsQueryKey,
   getUserNodeQueryKey,
@@ -79,6 +80,7 @@ export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegation
       getUserNodeQueryKey(account || ""),
       getLevelOfTokenQueryKey(gmId),
       getNodeDelegationDetailsQueryKey(xNodeId),
+      getIsXNodeDelegatedQueryKey(xNodeId),
     ],
     [account, gmId, xNodeId],
   )

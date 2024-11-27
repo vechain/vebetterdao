@@ -6,6 +6,7 @@ import { isValid } from "@repo/utils/AddressUtils"
 import { buildClause } from "@/utils/buildClause"
 import { GalaxyMember__factory, NodeManagement__factory } from "@repo/contracts"
 import {
+  getIsXNodeDelegatedQueryKey,
   getLevelOfTokenQueryKey,
   getNodeDelegationDetailsQueryKey,
   getUserNodeQueryKey,
@@ -82,6 +83,7 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
       getUserNodeQueryKey(account || ""),
       getLevelOfTokenQueryKey(gmId || ""),
       getNodeDelegationDetailsQueryKey(xNodeId),
+      getIsXNodeDelegatedQueryKey(xNodeId),
     ],
     [account, gmId, xNodeId],
   )
