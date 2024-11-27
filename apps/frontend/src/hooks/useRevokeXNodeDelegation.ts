@@ -4,7 +4,14 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory, GalaxyMember__factory } from "@repo/contracts"
-import { getLevelOfTokenQueryKey, getUserNodeQueryKey, getUserXNodesQueryKey, useSelectedGmNft } from "@/api"
+import {
+  getLevelOfTokenQueryKey,
+  getNodeDelegationDetailsQueryKey,
+  getUserNodeQueryKey,
+  getUserXNodesQueryKey,
+  useSelectedGmNft,
+  useXNode,
+} from "@/api"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
 const GmInterface = GalaxyMember__factory.createInterface()
@@ -30,6 +37,7 @@ type ClausesParams = {
  */
 export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegationProps = {}) => {
   const { account } = useWallet()
+  const { xNodeId } = useXNode()
   const { gmId } = useSelectedGmNft()
 
   const clauseBuilder = useCallback(
@@ -66,8 +74,13 @@ export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegation
   )
 
   const refetchQueryKeys = useMemo(
-    () => [getUserXNodesQueryKey(account || ""), getUserNodeQueryKey(account || ""), getLevelOfTokenQueryKey(gmId)],
-    [account, gmId],
+    () => [
+      getUserXNodesQueryKey(account || ""),
+      getUserNodeQueryKey(account || ""),
+      getLevelOfTokenQueryKey(gmId),
+      getNodeDelegationDetailsQueryKey(xNodeId),
+    ],
+    [account, gmId, xNodeId],
   )
 
   return useBuildTransaction({

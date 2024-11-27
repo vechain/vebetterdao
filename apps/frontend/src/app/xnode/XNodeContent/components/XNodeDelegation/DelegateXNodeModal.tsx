@@ -135,7 +135,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
             )}
           </Text>
           <Text color="#6A6A6A" as="span" fontWeight="600">
-            {t("They won't be able to transfer or sell your XNode.")}
+            {t("The delegatee won't be able to transfer or sell your XNode.")}
           </Text>
         </Box>
         <VStack align="stretch">

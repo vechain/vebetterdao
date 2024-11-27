@@ -43,7 +43,7 @@ export const DelegateXNodeCard = () => {
             ) : (
               <Text fontSize="sm">
                 {t(
-                  "Delegate your XNode to the primary account you use on VeBetterDAO to endorse apps or participate in governance.",
+                  "Delegate your XNode to the primary account you use on VeBetterDAO to endorse apps or to participate in governance.",
                 )}
               </Text>
             )}

@@ -1314,8 +1314,8 @@
   "but won't be able to transfer or sell your XNode.": "but won't be able to transfer or sell your XNode.",
   "Delegate your XNode": "Delegate your XNode",
   "By delegating your XNode, another address will be able to endorse apps and upgrade GM NFTs using your XNode.": "By delegating your XNode, another address will be able to endorse apps and upgrade GM NFTs using your XNode.",
-  "They won't be able to transfer or sell your XNode.": "They won't be able to transfer or sell your XNode.",
-  "Delegate your XNode to the primary account you use on VeBetterDAO to endorse apps or participate in governance.": "Delegate your XNode to the primary account you use on VeBetterDAO to endorse apps or participate in governance.",
+  "The delegatee won't be able to transfer or sell your XNode.": "The delegatee won't be able to transfer or sell your XNode.",
+  "Delegate your XNode to the primary account you use on VeBetterDAO to endorse apps or to participate in governance.": "Delegate your XNode to the primary account you use on VeBetterDAO to endorse apps or to participate in governance.",
   "XNode delegation": "XNode delegation",
   "Cancel delegation": "Cancel delegation",
   "Your XNode is currently delegated to another address": "Your XNode is currently delegated to another address",
@@ -1332,5 +1332,6 @@
   "Remove the XNode delegation to attach GM NFT to this node": "Remove the XNode delegation to attach GM NFT to this node",
   "XNode is currently delegated to:": "XNode is currently delegated to:",
   "Notice: your GM NFT will be detached from your XNode.": "Notice: your GM NFT will be detached from your XNode.",
-  "You are controlling a delegated XNode": "You are controlling a delegated XNode"
+  "You are controlling a delegated XNode": "You are controlling a delegated XNode",
+  "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again.": "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again."
 }

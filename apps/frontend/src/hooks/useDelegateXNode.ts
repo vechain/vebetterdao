@@ -5,7 +5,14 @@ import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildClause } from "@/utils/buildClause"
 import { GalaxyMember__factory, NodeManagement__factory } from "@repo/contracts"
-import { getLevelOfTokenQueryKey, getUserNodeQueryKey, getUserXNodesQueryKey, useSelectedGmNft } from "@/api"
+import {
+  getLevelOfTokenQueryKey,
+  getNodeDelegationDetailsQueryKey,
+  getUserNodeQueryKey,
+  getUserXNodesQueryKey,
+  useSelectedGmNft,
+  useXNode,
+} from "@/api"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
 const nodeManagementContractAddress = getConfig().nodeManagementContractAddress
@@ -32,6 +39,7 @@ type ClausesParams = {
  */
 export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
   const { account } = useWallet()
+  const { xNodeId } = useXNode()
   const { gmId } = useSelectedGmNft()
 
   const clauseBuilder = useCallback(
@@ -73,8 +81,9 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
       getUserXNodesQueryKey(account || ""),
       getUserNodeQueryKey(account || ""),
       getLevelOfTokenQueryKey(gmId || ""),
+      getNodeDelegationDetailsQueryKey(xNodeId),
     ],
-    [account, gmId],
+    [account, gmId, xNodeId],
   )
 
   return useBuildTransaction<ClausesParams>({
