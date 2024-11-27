@@ -5,7 +5,9 @@ import { useMintNFT } from "@/hooks"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import {
+  getGMLevel,
   getLevelGradient,
+  useB3trDonated,
   useCurrentAllocationsRoundId,
   useParticipatedInGovernance,
   useSelectedGmNft,
@@ -16,15 +18,23 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { MintNFTModal } from "./MintNFTModal"
 import { FeatureFlagWrapper } from "./FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
+import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
 
 export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { isGMOwned, isEnoughBalanceToUpgradeGM, gmId, isMaxGmLevelReached, b3trToUpgradeGMToNextLevel } =
-    useSelectedGmNft()
-  const { isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
+  const {
+    isGMOwned,
+    isEnoughBalanceToUpgradeGM,
+    gmId,
+    gmLevel,
+    maxGmLevel,
+    isMaxGmLevelReached,
+    b3trToUpgradeGMToNextLevel,
+  } = useSelectedGmNft()
+  const { xNodeLevel, isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
   const router = useRouter()
   const mintNftModal = useDisclosure()
   const {
@@ -52,6 +62,22 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
 
   const upgradeGMModal = useDisclosure()
 
+  const canAttach = useMemo(
+    () => isXNodeHolder && !isXNodeDelegator && isGMOwned && !isXNodeAttachedToGM,
+    [isXNodeAttachedToGM, isXNodeDelegator, isXNodeHolder, isGMOwned],
+  )
+  const { data: b3trDonated } = useB3trDonated(gmId)
+
+  const gmStartingLevel = useMemo(() => {
+    const gmStartingLevel = xNodeToGMstartingLevel[xNodeLevel]
+
+    return Math.min(gmStartingLevel ?? 1, maxGmLevel ?? 1)
+  }, [maxGmLevel, xNodeLevel])
+
+  const levelAfterAttach = useMemo(() => {
+    return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0)) ?? 1
+  }, [b3trDonated, gmStartingLevel])
+
   const actionButton = useMemo(() => {
     if (!hasUserVoted && !isGMOwned) {
       return (
@@ -67,7 +93,41 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
         </Button>
       )
     }
-    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator) {
+
+    if (isMaxGmLevelReached && isXNodeAttachedToGM) {
+      return (
+        <Text
+          bg={getLevelGradient(1)} //Setting first gradient which is more visible
+          style={{
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+          alignSelf="center"
+          fontSize={"lg"}
+          fontWeight={"bold"}
+          noOfLines={1}>
+          {t("Max Level Reached!")}
+        </Text>
+      )
+    }
+
+    if (canAttach && gmLevel >= levelAfterAttach) {
+      return (
+        <FeatureFlagWrapper
+          feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+          fallback={
+            <Button {...buttonProps} isDisabled={true}>
+              {t("Coming soon!")}
+            </Button>
+          }>
+          <Button {...buttonProps} onClick={attachGmToXNodeModal.onOpen}>
+            {t("Attach now!")}
+          </Button>
+        </FeatureFlagWrapper>
+      )
+    }
+
+    if (canAttach && gmLevel < levelAfterAttach) {
       return (
         <FeatureFlagWrapper
           feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
@@ -91,27 +151,12 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
             {t("Coming soon!")}
           </Button>
         }>
-        {isMaxGmLevelReached ? (
-          <Text
-            bg={getLevelGradient(1)} //Setting first gradient which is more visible
-            style={{
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-            alignSelf="center"
-            fontSize={"lg"}
-            fontWeight={"bold"}
-            noOfLines={1}>
-            {t("Max Level Reached!")}
-          </Text>
-        ) : (
-          <Button
-            {...buttonProps}
-            isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
-            onClick={upgradeGMModal.onOpen}>
-            {t("Upgrade now!")}
-          </Button>
-        )}
+        <Button
+          {...buttonProps}
+          isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
+          onClick={upgradeGMModal.onOpen}>
+          {t("Upgrade now!")}
+        </Button>
       </FeatureFlagWrapper>
     )
   }, [
