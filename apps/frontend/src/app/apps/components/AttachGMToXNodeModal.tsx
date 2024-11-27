@@ -48,7 +48,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const gmStartingLevel = useMemo(() => {
     const gmStartingLevel = xNodeToGMstartingLevel[xNodeLevel]
 
-    return Math.min(gmStartingLevel ?? 1, gmMaxLevel)
+    return Math.min(gmStartingLevel ?? 1, gmMaxLevel ?? 1)
   }, [gmMaxLevel, xNodeLevel])
 
   const levelAfterDetach = useMemo(() => {
