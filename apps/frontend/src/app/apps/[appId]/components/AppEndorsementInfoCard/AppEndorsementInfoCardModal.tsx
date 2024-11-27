@@ -229,7 +229,6 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
           isOpen={isUnendorsementModalOpen}
           onClose={onCloseUnendorsementModal}
           appId={appId}
-          endorserAddress={selectedEndorserAddress}
           nodeId={selectedEndorserNodeId}
           nodePoints={selectedEndorserNodePoints}
         />
