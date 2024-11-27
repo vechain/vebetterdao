@@ -1,7 +1,10 @@
+import { getGMLevel, useB3trDonated, useSelectedGmNft, useXNode } from "@/api"
+import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { CustomModalContent, TransactionModal } from "@/components"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
 import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
+import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
 import { useAttachGMToXNode } from "@/hooks"
 import {
   Flex,
@@ -9,6 +12,7 @@ import {
   ModalOverlay,
   ModalBody,
   VStack,
+  Box,
   Heading,
   Text,
   Button,
@@ -18,22 +22,42 @@ import {
   Stack,
   useBreakpointValue,
   Hide,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-
 type Props = {
   isOpen: boolean
   onClose: () => void
-  attachedGMTokenId?: string
 }
 
-export const AttachGMToXNodeModal = ({ isOpen, onClose, attachedGMTokenId }: Props) => {
+export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
 
+  const { gmId } = useSelectedGmNft()
+
+  const { data: b3trDonated } = useB3trDonated(gmId)
+
+  const { xNodeLevel } = useXNode()
+
+  const { data: gmMaxLevel } = useGMMaxLevel()
+
+  const gmStartingLevel = useMemo(() => {
+    const gmStartingLevel = xNodeToGMstartingLevel[xNodeLevel]
+
+    return Math.min(gmStartingLevel ?? 1, gmMaxLevel)
+  }, [gmMaxLevel, xNodeLevel])
+
+  const levelAfterDetach = useMemo(() => {
+    return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0))
+  }, [b3trDonated, gmStartingLevel])
+
+  console.log({ gmStartingLevel, b3trDonated, levelAfterDetach })
+
   const attachGMToXNodeMutation = useAttachGMToXNode({
-    attachedGMTokenId,
     onSuccess: () => {
       attachGMToXNodeMutation.resetStatus()
       onClose()
@@ -51,7 +75,6 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose, attachedGMTokenId }: Pro
   }, [attachGMToXNodeMutation])
 
   const iconSize = useBreakpointValue({ base: "48px", md: "108px" })
-
   if (attachGMToXNodeMutation.status !== "ready")
     return (
       <TransactionModal
@@ -78,7 +101,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose, attachedGMTokenId }: Pro
     {
       Icon: CurveArrowIcon,
       title: t("Free upgrade"),
-      description: t("Your GM NFT will upgrade for free to a certain level depending on your Node"),
+      description: t("Your GM NFT will be level {{value}} after attaching.", { value: levelAfterDetach }),
     },
     {
       Icon: ThreeSparklesIcon,
@@ -137,6 +160,14 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose, attachedGMTokenId }: Pro
         </ModalBody>
         <ModalFooter w="full">
           <VStack align="stretch" w="full">
+            <Alert status="info" borderRadius={["xl", "xl", "3xl"]}>
+              <AlertIcon w={5} h={5} />
+              <Box lineHeight={"1.20rem"} fontSize="sm">
+                <AlertDescription as="span">
+                  {t("Once the GM NFT is attached to your XNode, it can't be transferred anymore")}
+                </AlertDescription>
+              </Box>
+            </Alert>
             <Button variant={"primaryAction"} w={"full"} onClick={handleAttachment} leftIcon={<UilLink />}>
               {t("Attach now!")}
             </Button>

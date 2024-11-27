@@ -32,7 +32,6 @@ export const GmNFTAndNodeCard = () => {
 
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
     useSelectedGmNft()
-
   //node
   const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, isXNodeDelegatee } = useXNode()
 
@@ -224,7 +223,7 @@ export const GmNFTAndNodeCard = () => {
                         {xNodePoints}
                       </Text>
                       <Text fontSize="sm" fontWeight={400} noOfLines={1}>
-                        {t("to endorse Apps")}
+                        {t("points to endorse Apps")}
                       </Text>
                     </HStack>
                   </VStack>

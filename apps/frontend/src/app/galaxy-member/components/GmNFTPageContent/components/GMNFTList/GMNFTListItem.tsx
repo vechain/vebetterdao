@@ -9,8 +9,7 @@ import { SelectGMButton } from "./SelectGMButton"
 import { gmNfts } from "@/constants/gmNfts"
 import { FeatureFlag, notFoundImage } from "@/constants"
 import { FeatureFlagWrapper } from "@/components"
-import { useLevelMultiplier } from "@/api"
-
+import { useLevelMultiplier, useSelectedGmNft } from "@/api"
 interface GMNFTListItemProps {
   token: {
     tokenId: string
@@ -25,6 +24,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { data: selectedTokenId } = useSelectedTokenId()
+  const { isXNodeAttachedToGM } = useSelectedGmNft()
 
   const { data: gmRewardMultiplier } = useLevelMultiplier(token.tokenLevel)
 
@@ -84,7 +84,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
               gap={1}>
               <VStack align={"flex-start"}>
                 <Text fontSize={"xs"} fontWeight="400" noOfLines={1} color="#6DCB09">
-                  {isGMSelected ? t("Active") : ""}
+                  {isGMSelected && isXNodeAttachedToGM ? t("Active and attached") : isGMSelected ? t("Active") : ""}
                 </Text>
                 <Text fontWeight={700} noOfLines={1} fontSize={"md"}>
                   {gmName}

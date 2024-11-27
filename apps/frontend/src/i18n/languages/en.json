@@ -1,4 +1,10 @@
 {
+  "Active and attached": "Active and attached",
+  "Attached GM": "Attached GM",
+  "To active the selected GM NFT, you need to detach the node from the previous attached node.": "To active the selected GM NFT, you need to detach the node from the previous attached node.",
+  "Detach your GM before activating another one": "Detach your GM before activating another one",
+  "Active and attach NFT": "Active and attach NFT",
+  "Once the GM NFT is attached to your XNode, it can't be transferred anymore": "Once the GM NFT is attached to your XNode, it can't be transferred anymore",
   "Value must be greater than the current max level": "Value must be greater than the current max level",
   "Set Max Level": "Set Max Level",
   "Value must be different from the current max level": "Value must be different from the current max level",
@@ -672,7 +678,7 @@
   "GM NFT selected": "GM NFT selected",
   "Not available": "Not available",
   "Detach GM from Node": "Detach GM from Node",
-  "Detaching your Node will downgrade your GM level to the one it was before.": "Detaching your Node will downgrade your GM level to the one it was before.",
+  "Detaching your Node will downgrade the level of the GM attached to <bold>level {{level}}</bold>.": "Detaching your Node will downgrade the level of the GM attached to <bold>level {{level}}</bold>.",
   "Detach Node from GM NFT": "Detach Node from GM NFT",
   "Detach my Node": "Detach my Node",
   "Error detaching": "Error detaching",
@@ -1156,7 +1162,7 @@
   "You are on LEVEL {{level}}": "You are on LEVEL {{level}}",
   "GM NFT attached to {{node}}": "GM NFT attached to {{node}}",
   "Voting reward multiplier": "Voting reward multiplier",
-  "to endorse Apps": "to endorse Apps",
+  "points to endorse Apps": "points to endorse Apps",
   "You need": "You need",
   "Wait for the next round to mint the GM NFT": "Wait for the next round to mint the GM NFT",
   "Vote now!": "Vote now!",
@@ -1334,5 +1340,9 @@
   "Notice: the GM NFT attached to this XNode will be detached and will lose the free levels.": "Notice: the GM NFT attached to this XNode will be detached and will lose the free levels.",
   "You are controlling a delegated XNode": "You are controlling a delegated XNode",
   "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again.": "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again.",
-  "Only the XNode owner can revoke the delegation.": "Only the XNode owner can revoke the delegation."
+  "Only the XNode owner can revoke the delegation.": "Only the XNode owner can revoke the delegation.",
+  "The allocation rounds determine the resources and support your app receives from the ecosystem community.": "The allocation rounds determine the resources and support your app receives from the ecosystem community.",
+  "You have attached this Node to a different GM NFT. Detach it to attach to this GM NFT.": "You have attached this Node to a different GM NFT. Detach it to attach to this GM NFT.",
+  "Your GM NFT is attached to this Node. You can detach it anytime.": "Your GM NFT is attached to this Node. You can detach it anytime.",
+  "Your GM NFT will be level {{value}} after attaching.": "Your GM NFT will be level {{value}} after attaching."
 }

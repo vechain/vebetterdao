@@ -3,16 +3,29 @@ import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 import { FeatureFlagWrapper } from "@/components"
 import { FeatureFlag } from "@/constants"
-import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  CardBody,
+  Flex,
+  Heading,
+  HStack,
+  Image,
+  Text,
+  useDisclosure,
+  VStack,
+  Box,
+} from "@chakra-ui/react"
 import { UilInfoCircle, UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
+import { BaseTooltip } from "@/components"
 
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
-  const { isXNodeAttachedToGM } = useSelectedGmNft()
+  const { isXNodeAttachedToGM, gmId } = useSelectedGmNft()
   const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, attachedGMTokenId, isXNodeDelegatee } =
     useXNode()
 
@@ -24,6 +37,16 @@ export const AttachXNodeCard = () => {
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()
 
+  const description = useMemo(() => {
+    if (isXNodeAttachedToGM) {
+      if (attachedGMTokenId && attachedGMTokenId !== gmId) {
+        return t("You have attached this Node to a different GM NFT. Detach it to attach to this GM NFT.")
+      }
+      return t("Your GM NFT is attached to this Node. You can detach it anytime.")
+    }
+    return t("Attach your Node to your GM NFT to upgrade it for free and earn more rewards!")
+  }, [attachedGMTokenId, gmId, isXNodeAttachedToGM, t])
+
   if (!isXNodeHolder) {
     return null
   }
@@ -34,19 +57,23 @@ export const AttachXNodeCard = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached Node" : "Attach to upgrade")}</Heading>
-              <UilInfoCircle color="#004CFC" />
+              <BaseTooltip text={t("Once the GM NFT is attached to your XNode, it can't be transferred anymore")}>
+                <Box as="button">
+                  <UilInfoCircle color="#004CFC" />
+                </Box>
+              </BaseTooltip>
             </HStack>
             <Text fontSize="sm">
               {t(
                 isXNodeAttachedToGM
-                  ? "Your GM NFT is attached to your Node"
+                  ? description
                   : isXNodeDelegator
                     ? "Remove the XNode delegation to attach GM NFT to this node"
                     : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
               )}
             </Text>
           </VStack>
-          <Flex border="1px solid" rounded="12px" position="relative">
+          <Flex border="1px solid" rounded="12px" position="relative" cursor="pointer">
             <Image
               src={"/images/xnode-page-background.png"}
               alt="gm-nft-header"
@@ -83,7 +110,7 @@ export const AttachXNodeCard = () => {
                     {xNodePoints}
                   </Text>
                   <Text fontSize="sm" fontWeight={400} noOfLines={1}>
-                    {t("to endorse Apps")}
+                    {t("points to endorse Apps")}
                   </Text>
                 </HStack>
               </VStack>
@@ -117,11 +144,7 @@ export const AttachXNodeCard = () => {
           )}
         </VStack>
       </CardBody>
-      <AttachGMToXNodeModal
-        isOpen={attachGmToXNodeModal.isOpen}
-        onClose={attachGmToXNodeModal.onClose}
-        attachedGMTokenId={attachedGMTokenId}
-      />
+      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
       <DetachGMToXNodeModal isOpen={detachGmToXNodeModal.isOpen} onClose={detachGmToXNodeModal.onClose} />
     </Card>
   )
