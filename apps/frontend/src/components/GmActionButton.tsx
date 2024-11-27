@@ -6,7 +6,6 @@ import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import {
   getGMLevel,
-  getLevelGradient,
   useB3trDonated,
   useCurrentAllocationsRoundId,
   useParticipatedInGovernance,
@@ -96,9 +95,9 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
 
     if (isMaxGmLevelReached && isXNodeAttachedToGM) {
       return (
-        <HStack bg={"rgba(255, 255, 255, 0.1)"} alignSelf="start" rounded="8px" px={5} py={1} gap={1} justify="center">
+        <HStack bg={"#ffffff4a"} alignSelf="start" rounded="8px" px={5} py={1} gap={1} justify="center">
           <Text
-            bg={getLevelGradient(1)} //Setting first gradient which is more visible
+            bg={"linear-gradient(135deg, #a8e5ff -2.65%, #8bff3b 98.11%)"}
             style={{
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -161,19 +160,20 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       </FeatureFlagWrapper>
     )
   }, [
-    attachGmToXNodeModal.onOpen,
-    buttonProps,
-    goToVote,
-    handleMintGM,
     hasUserVoted,
-    isEnoughBalanceToUpgradeGM,
     isGMOwned,
     isMaxGmLevelReached,
     isXNodeAttachedToGM,
-    isXNodeHolder,
+    canAttach,
+    gmLevel,
+    levelAfterAttach,
+    buttonProps,
     t,
+    isEnoughBalanceToUpgradeGM,
     upgradeGMModal.onOpen,
-    isXNodeDelegator,
+    goToVote,
+    handleMintGM,
+    attachGmToXNodeModal.onOpen,
   ])
 
   return (
