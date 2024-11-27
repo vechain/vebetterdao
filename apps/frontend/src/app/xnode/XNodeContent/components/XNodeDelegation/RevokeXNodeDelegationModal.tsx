@@ -70,7 +70,7 @@ export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProp
             </AlertTitle>
             <AlertDescription as="span">{t("once you have revoked the delegation.")}</AlertDescription>
             {isXNodeAttachedToGM && (
-              <Text fontSize="sm" color="#C84968">
+              <Text fontSize="sm" color="#C84968" fontWeight={600}>
                 {t("Notice: your GM NFT will be detached from your XNode.")}
               </Text>
             )}

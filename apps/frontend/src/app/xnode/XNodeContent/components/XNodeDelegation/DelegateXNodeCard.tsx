@@ -62,7 +62,6 @@ export const DelegateXNodeCard = () => {
                     : humanAddress(nodeDelegationDetails.owner, 4, 4)
               }
               onRevoke={revokeModal.onOpen}
-              buttonFullWidth={isOwner}
             />
           ) : (
             <Button
@@ -85,7 +84,6 @@ const DelegatedNodeDisplay = ({
   address,
   displayAddress,
   onRevoke,
-  buttonFullWidth,
 }: {
   address: string
   displayAddress: string
@@ -103,20 +101,17 @@ const DelegatedNodeDisplay = ({
         bg="#F8F8F8"
         rounded="xl"
         p={3}
+        w="full"
         gap={[2, 2, 6]}>
-        <HStack gap={4}>
+        <HStack gap={4} w="full">
           <AddressIcon address={address} w={12} h={12} rounded="full" />
           <VStack align="start" gap={0}>
-            <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
+            <Text fontWeight="600" fontSize={["md", "md", "lg"]}>
               {displayAddress}
             </Text>
           </VStack>
         </HStack>
-        <Button
-          variant="dangerGhost"
-          colorScheme="red"
-          onClick={onRevoke}
-          w={buttonFullWidth ? "fit-content" : undefined}>
+        <Button variant="dangerGhost" colorScheme="red" onClick={onRevoke} w={"fit-content"}>
           {t("Cancel delegation")}
         </Button>
       </Stack>

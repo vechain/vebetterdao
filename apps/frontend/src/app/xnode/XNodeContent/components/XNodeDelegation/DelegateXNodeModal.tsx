@@ -104,7 +104,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
               </AlertTitle>
               <AlertDescription as="span">{t("but won't be able to transfer or sell your XNode.")}</AlertDescription>
               {isXNodeAttachedToGM && (
-                <Text fontSize="sm" color="#C84968">
+                <Text fontSize="sm" color="#C84968" fontWeight={600}>
                   {t("Notice: your GM NFT will be detached from your XNode.")}
                 </Text>
               )}
