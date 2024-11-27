@@ -1333,5 +1333,6 @@
   "XNode is currently delegated to:": "XNode is currently delegated to:",
   "Notice: the GM NFT attached to this XNode will be detached and will lose the free levels.": "Notice: the GM NFT attached to this XNode will be detached and will lose the free levels.",
   "You are controlling a delegated XNode": "You are controlling a delegated XNode",
-  "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again.": "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again."
+  "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again.": "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again.",
+  "Only the XNode owner can revoke the delegation.": "Only the XNode owner can revoke the delegation."
 }

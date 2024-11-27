@@ -1,4 +1,4 @@
-import { Alert, AlertIcon, Box, AlertTitle } from "@chakra-ui/react"
+import { Alert, AlertIcon, Box, AlertTitle, Text } from "@chakra-ui/react"
 import { useXNode } from "@/api"
 import { useTranslation } from "react-i18next"
 
@@ -26,6 +26,7 @@ export const DelegationAlert = () => {
       <AlertIcon />
       <Box lineHeight="1.20rem" fontSize="sm">
         <AlertTitle as="span">{t("You are controlling a delegated XNode")}</AlertTitle>
+        <Text>{t("Only the XNode owner can revoke the delegation.")}</Text>
       </Box>
     </Alert>
   )

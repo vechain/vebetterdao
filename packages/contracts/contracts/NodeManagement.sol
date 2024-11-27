@@ -307,6 +307,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
         nodeId = nodeIds[0];
         nodeLevel = getNodeLevel(nodeId);
         delegatee = $.nodeIdToDelegatee[nodeId];
+        xNodeOwner = $.vechainNodesContract.idToOwner(nodeId);
 
         // Set delegation status
         isXNodeDelegated = isNodeDelegated(nodeId);
@@ -363,20 +364,6 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   function getDirectNodeOwnership(address user) public view returns (uint256) {
     NodeManagementStorage storage $ = _getNodeManagementStorage();
     return $.vechainNodesContract.ownerToId(user);
-  }
-
-  /**
-   * @notice Get delegation details for a specific node.
-   * @param nodeId The ID of the node to check.
-   * @return bool Whether the node is delegated.
-   * @return address The delegatee address (zero address if not delegated).
-   * @return address The owner address of the node.
-   */
-  function getNodeDelegationDetails(uint256 nodeId) public view returns (bool, address, address) {
-    NodeManagementStorage storage $ = _getNodeManagementStorage();
-    address delegatee = $.nodeIdToDelegatee[nodeId];
-    address owner = $.vechainNodesContract.idToOwner(nodeId);
-    return (delegatee != address(0), delegatee, owner);
   }
 
   /**

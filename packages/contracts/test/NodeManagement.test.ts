@@ -687,31 +687,6 @@ describe.only("Node Management -@shard5", function () {
       expect(await nodeManagement.getDirectNodeOwnership(otherAccount.address)).to.equal(0n)
     })
 
-    it("Should return correct node delegation details", async function () {
-      const { owner, otherAccount, nodeManagement } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        deployMocks: true,
-      })
-
-      // Mock node ownership
-      await createNodeHolder(2, owner)
-
-      // Initially node should not be delegated
-      const [isDelegated, delegatee, nodeOwner] = await nodeManagement.getNodeDelegationDetails(1)
-      expect(isDelegated).to.equal(false)
-      expect(delegatee).to.equal(ZERO_ADDRESS)
-      expect(nodeOwner).to.equal(owner.address)
-
-      // Delegate the node
-      await nodeManagement.connect(owner).delegateNode(otherAccount.address)
-
-      // Check updated delegation details
-      const [isDelegatedAfter, delegateeAfter, nodeOwnerAfter] = await nodeManagement.getNodeDelegationDetails(1)
-      expect(isDelegatedAfter).to.equal(true)
-      expect(delegateeAfter).to.equal(otherAccount.address)
-      expect(nodeOwnerAfter).to.equal(owner.address)
-    })
-
     it("Should return correct user node details", async function () {
       const { owner, otherAccount, nodeManagement } = await getOrDeployContractInstances({
         forceDeploy: true,

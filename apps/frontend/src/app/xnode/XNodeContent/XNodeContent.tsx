@@ -17,7 +17,7 @@ export const XNodeContent = () => {
   // Redirect to the dashboard if the user is not an X-Node holder
   useEffect(() => {
     if (!isXNodeHolder && !isXNodeLoading) {
-      router.back()
+      router.push("/")
     }
   }, [isXNodeHolder, isXNodeLoading, router])
 

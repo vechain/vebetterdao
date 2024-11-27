@@ -5,13 +5,7 @@ import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildClause } from "@/utils/buildClause"
 import { GalaxyMember__factory, NodeManagement__factory } from "@repo/contracts"
-import {
-  getLevelOfTokenQueryKey,
-  getNodeDelegationDetailsQueryKey,
-  getUserNodeQueryKey,
-  getUserXNodesQueryKey,
-  useXNode,
-} from "@/api"
+import { getLevelOfTokenQueryKey, getUserNodeQueryKey, getUserXNodesQueryKey, useXNode } from "@/api"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
 const nodeManagementContractAddress = getConfig().nodeManagementContractAddress
@@ -79,9 +73,8 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
       getUserXNodesQueryKey(account || ""),
       getUserNodeQueryKey(account || ""),
       getLevelOfTokenQueryKey(attachedGMTokenId || ""),
-      getNodeDelegationDetailsQueryKey(xNodeId),
     ],
-    [account, attachedGMTokenId, xNodeId],
+    [account, attachedGMTokenId],
   )
 
   return useBuildTransaction<ClausesParams>({

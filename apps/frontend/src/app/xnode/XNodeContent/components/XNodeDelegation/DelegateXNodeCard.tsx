@@ -1,4 +1,4 @@
-import { useGetNodeDelegationDetails, useXNode } from "@/api"
+import { useXNode } from "@/api"
 import { Card, CardBody, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
@@ -12,20 +12,19 @@ import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
 export const DelegateXNodeCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { xNodeId, isXNodeDelegator, isXNodeDelegated } = useXNode()
-  const { data: nodeDelegationDetails } = useGetNodeDelegationDetails(xNodeId)
+  const { isXNodeDelegator, isXNodeDelegated, delegatee, xNodeOwner } = useXNode()
 
   const delegateModal = useDisclosure()
   const revokeModal = useDisclosure()
 
   const { domain: delegateeDomain } = useVechainDomain({
-    addressOrDomain: nodeDelegationDetails?.delegatee,
+    addressOrDomain: delegatee,
   })
   const { domain: ownerDomain } = useVechainDomain({
-    addressOrDomain: nodeDelegationDetails?.owner,
+    addressOrDomain: xNodeOwner,
   })
 
-  const isOwner = compareAddresses(account ?? "", nodeDelegationDetails?.owner ?? "")
+  const isOwner = compareAddresses(account ?? "", xNodeOwner ?? "")
 
   return (
     <Card variant="baseWithBorder" w="full">
@@ -48,17 +47,17 @@ export const DelegateXNodeCard = () => {
             )}
           </VStack>
 
-          {nodeDelegationDetails?.isDelegated ? (
+          {isXNodeDelegated ? (
             <DelegatedNodeDisplay
-              address={nodeDelegationDetails.delegatee}
+              address={delegatee ?? ""}
               displayAddress={
                 isOwner
                   ? delegateeDomain
                     ? humanDomain(delegateeDomain, 4, 26)
-                    : humanAddress(nodeDelegationDetails.delegatee, 4, 4)
+                    : humanAddress(delegatee ?? "", 4, 4)
                   : ownerDomain
                     ? humanDomain(ownerDomain, 4, 26)
-                    : humanAddress(nodeDelegationDetails.owner, 4, 4)
+                    : humanAddress(xNodeOwner ?? "", 4, 4)
               }
               onRevoke={revokeModal.onOpen}
             />
