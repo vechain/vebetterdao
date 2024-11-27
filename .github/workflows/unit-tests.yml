@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - testnet
+      - gm
   push:
     branches:
       - main
@@ -138,6 +139,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+      
+      - name: Use Node v20
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .nvmrc
+          cache: "yarn"
 
       - name: Install Dependencies at Root
         run: yarn install --frozen-lockfile
