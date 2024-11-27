@@ -1,5 +1,26 @@
 // SPDX-License-Identifier: MIT
 
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -9,6 +30,19 @@ import { VechainNodesDataTypes } from "./libraries/VechainNodesDataTypes.sol";
 import { ITokenAuction } from "./interfaces/ITokenAuction.sol";
 import { INodeManagement } from "./interfaces/INodeManagement.sol";
 
+/**
+ * @title NodeManagement
+ * @notice This contract manages node ownership and delegation within the VeBetter DAO ecosystem. It supports delegation,
+ *         retrieval of managed nodes, and integration with VeChain Nodes and token auction contracts.
+ * @dev The contract is upgradeable using the UUPS proxy pattern and implements role-based access control for secure upgrades.
+ *
+ * ------------------------ Version 2 ------------------------
+ * - Add function to get Node creation time
+ * - Add function to check if Node is delegated
+ * - Add function to check if user is a delegator
+ * - Add function to get users owned node ID
+ * - 
+ */
 contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgradeable {
   using EnumerableSet for EnumerableSet.UintSet;
 
@@ -236,6 +270,22 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
 
     // Cast the uint8 node level to VechainNodesDataTypes.NodeStrengthLevel enum and return
     return VechainNodesDataTypes.NodeStrengthLevel(nodeLevel);
+  }
+
+  /**
+   * @notice Retrieves the creation time of a given node ID.
+   * @dev This function retrieves the creation time of the specified node ID.
+   * @param nodeId The ID of the node for which the creation time is being retrieved.
+   * @return uint64 The creation time of the specified node ID.
+   */
+  function getNodeCreationTime(uint256 nodeId) public view returns (uint64) {
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
+
+    // Retrieve the metadata for the specified node ID
+    (, , , , , uint64 createdAt, ) = $.vechainNodesContract.getMetadata(nodeId);
+
+    // Return the creation time of the node
+    return createdAt;
   }
 
   /**
