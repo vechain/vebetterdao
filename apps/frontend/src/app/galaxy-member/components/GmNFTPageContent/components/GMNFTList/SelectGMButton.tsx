@@ -1,8 +1,10 @@
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { Button, useDisclosure } from "@chakra-ui/react"
+import { Button, useDisclosure, Tooltip } from "@chakra-ui/react"
 import { TransactionModal } from "@/components"
 import { useSelectGM } from "@/hooks"
+import { useSelectedGmNft } from "@/api"
+import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 
 interface SelectGMButtonProps {
   tokenId: string
@@ -12,8 +14,11 @@ interface SelectGMButtonProps {
 export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelected }) => {
   const { t } = useTranslation()
   const selectGMMutation = useSelectGM({ tokenId })
+  const { isXNodeAttachedToGM } = useSelectedGmNft()
 
   const selectGMModal = useDisclosure()
+  const detachGMModal = useDisclosure()
+
   const handleSelectGM = useCallback(() => {
     selectGMMutation.sendTransaction({})
     selectGMModal.onOpen()
@@ -26,9 +31,18 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
 
   return (
     <>
-      <Button variant="primarySubtle" w="full" isDisabled={isSelected} onClick={handleSelectGM}>
-        {t(isSelected ? "Active NFT" : "Select as active")}
-      </Button>
+      <Tooltip
+        p={"2"}
+        rounded="10px"
+        label={t(isXNodeAttachedToGM ? "Detach the node from the NFT before activating a new one" : "", {
+          defaultValue: "",
+        })}
+        isDisabled={isSelected}>
+        <Button variant="primarySubtle" w="full" isDisabled={isSelected} onClick={handleSelectGM}>
+          {t(isSelected ? "Active NFT" : "Select as active")}
+        </Button>
+      </Tooltip>
+
       <TransactionModal
         isOpen={selectGMModal.isOpen}
         onClose={selectGMModal.onClose}
@@ -42,6 +56,7 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
         showExplorerButton
         txId={selectGMMutation.txReceipt?.meta.txID ?? selectGMMutation.sendTransactionTx?.txid}
       />
+      <DetachGMToXNodeModal isOpen={detachGMModal.isOpen} onClose={detachGMModal.onClose} />
     </>
   )
 }

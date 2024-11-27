@@ -12,6 +12,7 @@ import {
   ModalOverlay,
   ModalBody,
   VStack,
+  Box,
   Heading,
   Text,
   Button,
@@ -21,11 +22,13 @@ import {
   Stack,
   useBreakpointValue,
   Hide,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -45,7 +48,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const gmStartingLevel = useMemo(() => {
     const gmStartingLevel = xNodeToGMstartingLevel[xNodeLevel]
 
-    return Math.min(gmStartingLevel ?? 1, gmMaxLevel)
+    return Math.min(gmStartingLevel ?? 1, gmMaxLevel ?? 1)
   }, [gmMaxLevel, xNodeLevel])
 
   const levelAfterDetach = useMemo(() => {
@@ -72,7 +75,6 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   }, [attachGMToXNodeMutation])
 
   const iconSize = useBreakpointValue({ base: "48px", md: "108px" })
-
   if (attachGMToXNodeMutation.status !== "ready")
     return (
       <TransactionModal
@@ -158,6 +160,14 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         </ModalBody>
         <ModalFooter w="full">
           <VStack align="stretch" w="full">
+            <Alert status="info" borderRadius={["xl", "xl", "3xl"]}>
+              <AlertIcon w={5} h={5} />
+              <Box lineHeight={"1.20rem"} fontSize="sm">
+                <AlertDescription as="span">
+                  {t("Once the GM NFT is attached to your XNode, it can't be transferred anymore")}
+                </AlertDescription>
+              </Box>
+            </Alert>
             <Button variant={"primaryAction"} w={"full"} onClick={handleAttachment} leftIcon={<UilLink />}>
               {t("Attach now!")}
             </Button>

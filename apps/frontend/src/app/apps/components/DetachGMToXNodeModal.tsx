@@ -26,7 +26,6 @@ type Props = {
 
 export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-
   const { attachedGMTokenId } = useXNode()
 
   const { data: b3trDonated } = useB3trDonated(attachedGMTokenId)
