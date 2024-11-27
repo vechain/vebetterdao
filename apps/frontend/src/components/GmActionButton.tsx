@@ -16,14 +16,8 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const {
-    isGMOwned,
-    isEnoughBalanceToUpgradeGM,
-
-    gmId,
-    isMaxGmLevelReached,
-    b3trToUpgradeGMToNextLevel,
-  } = useSelectedGmNft()
+  const { isGMOwned, isEnoughBalanceToUpgradeGM, gmLevel, gmId, isMaxGmLevelReached, b3trToUpgradeGMToNextLevel } =
+    useSelectedGmNft()
   const { isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
 
   const router = useRouter()
@@ -53,6 +47,16 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
 
   const upgradeGMModal = useDisclosure()
 
+  const GM_START_LEVEL = 1
+  const isFreeLevelAttachAndUpgrade = useMemo(() => {
+    return hasUserVoted && gmLevel == GM_START_LEVEL
+  }, [gmLevel, hasUserVoted])
+
+  const canAttach = useMemo(
+    () => isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator && isGMOwned,
+    [isXNodeAttachedToGM, isXNodeDelegator, isXNodeHolder, isGMOwned],
+  )
+
   const actionButton = useMemo(() => {
     if (!hasUserVoted && !isGMOwned) {
       return (
@@ -68,7 +72,23 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
         </Button>
       )
     }
-    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator) {
+    if (canAttach && !isFreeLevelAttachAndUpgrade && !isEnoughBalanceToUpgradeGM) {
+      return (
+        <FeatureFlagWrapper
+          feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
+          fallback={
+            <Button {...buttonProps} isDisabled={true}>
+              {t("Coming soon!")}
+            </Button>
+          }>
+          <Button {...buttonProps} onClick={attachGmToXNodeModal.onOpen}>
+            {t("Attach Now!")}
+          </Button>
+        </FeatureFlagWrapper>
+      )
+    }
+
+    if (canAttach && (isEnoughBalanceToUpgradeGM || isFreeLevelAttachAndUpgrade)) {
       return (
         <FeatureFlagWrapper
           feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
