@@ -52,7 +52,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   }, [gmMaxLevel, xNodeLevel])
 
   const levelAfterDetach = useMemo(() => {
-    return getGMLevel(gmStartingLevel, Number(b3trDonated) ?? 0)
+    return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0))
   }, [b3trDonated, gmStartingLevel])
 
   console.log({ gmStartingLevel, b3trDonated, levelAfterDetach })
