@@ -1,5 +1,7 @@
 {
+  "detach": "detach",
   "Max Level Reached!": "Max Level Reached!",
+  "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>",
   "Attached to {{node}}": "Attached to {{node}}",
   "Your galaxy member": "Your galaxy member",
   "Mint GM to be a galaxy member": "Mint GM to be a galaxy member",
