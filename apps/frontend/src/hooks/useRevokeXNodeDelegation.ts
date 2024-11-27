@@ -52,8 +52,8 @@ export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegation
             to: gmContractAddress,
             contractInterface: GmInterface,
             method: detachMethod,
-            args: [],
-            comment: "detach xnode from gm",
+            args: [xNodeId, gmId],
+            comment: `detach xnode #${xNodeId} from gm #${gmId}`,
           }),
         )
       }
@@ -64,13 +64,13 @@ export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegation
           contractInterface: NodeManagementInterface,
           method,
           args: [],
-          comment: "revoke xnode delegation",
+          comment: `revoke xnode #${xNodeId} delegation`,
         }),
       )
 
       return clauses
     },
-    [account],
+    [account, xNodeId, gmId],
   )
 
   const refetchQueryKeys = useMemo(

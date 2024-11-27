@@ -90,7 +90,7 @@ const DelegatedNodeDisplay = ({
   buttonFullWidth?: boolean
 }) => {
   const { t } = useTranslation()
-
+  const { isXNodeDelegator } = useXNode()
   return (
     <VStack align="stretch" gap={4}>
       <Stack
@@ -110,9 +110,11 @@ const DelegatedNodeDisplay = ({
             </Text>
           </VStack>
         </HStack>
-        <Button variant="dangerGhost" colorScheme="red" onClick={onRevoke} w={"fit-content"}>
-          {t("Cancel delegation")}
-        </Button>
+        {isXNodeDelegator && (
+          <Button variant="dangerGhost" colorScheme="red" onClick={onRevoke} w={"fit-content"}>
+            {t("Cancel delegation")}
+          </Button>
+        )}
       </Stack>
     </VStack>
   )

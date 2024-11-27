@@ -55,8 +55,8 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
             to: gmContractAddress,
             contractInterface: GmInterface,
             method: detachMethod,
-            args: [],
-            comment: "detach xnode from gm",
+            args: [xNodeId, gmId],
+            comment: `detach xnode #${xNodeId} from gm #${gmId}`,
           }),
         )
       }
@@ -67,13 +67,13 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
           contractInterface: NodeManagementInterface,
           method: delegateMethod,
           args: [delegatee],
-          comment: "delegate xnode",
+          comment: `delegate xnode #${xNodeId} to ${delegatee}`,
         }),
       )
 
       return clauses
     },
-    [account],
+    [account, xNodeId, gmId],
   )
 
   const refetchQueryKeys = useMemo(
