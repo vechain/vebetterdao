@@ -1347,5 +1347,6 @@
   "You have attached this Node to a different GM NFT. Detach it to attach to this GM NFT.": "You have attached this Node to a different GM NFT. Detach it to attach to this GM NFT.",
   "Your GM NFT is attached to this Node. You can detach it anytime.": "Your GM NFT is attached to this Node. You can detach it anytime.",
   "The GM NFT is <bold>not transferable</bold> while attached to a Node.": "The GM NFT is <bold>not transferable</bold> while attached to a Node.",
-  "Your XNode is attached to the following GM NFT": "Your XNode is attached to the following GM NFT"
+  "Your XNode is attached to the following GM NFT": "Your XNode is attached to the following GM NFT",
+  "Your GM NFT will be level {{value}} after attaching.": "Your GM NFT will be level {{value}} after attaching."
 }
