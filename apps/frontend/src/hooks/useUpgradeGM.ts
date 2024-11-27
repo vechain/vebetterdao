@@ -5,6 +5,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import {
   getB3TrBalanceQueryKey,
+  getB3trDonatedQueryKey,
   getB3trToUpgradeQueryKey,
   getLevelOfTokenQueryKey,
   getTokensInfoByOwnerQueryKey,
@@ -53,6 +54,7 @@ export const useUpgradeGM = ({ tokenId, b3trToUpgrade, onSuccess }: Props) => {
       getB3trToUpgradeQueryKey(tokenId),
       getB3TrBalanceQueryKey(account ?? ""),
       getTokensInfoByOwnerQueryKey(account),
+      getB3trDonatedQueryKey(tokenId),
     ],
     [account, tokenId],
   )

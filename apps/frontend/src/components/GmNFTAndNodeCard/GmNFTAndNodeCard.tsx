@@ -213,7 +213,7 @@ export const GmNFTAndNodeCard = () => {
                         {xNodePoints}
                       </Text>
                       <Text fontSize="sm" fontWeight={400} noOfLines={1}>
-                        {t("to endorse Apps")}
+                        {t("points to endorse Apps")}
                       </Text>
                     </HStack>
                   </VStack>

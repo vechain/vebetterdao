@@ -19,12 +19,12 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   const {
     isGMOwned,
     isEnoughBalanceToUpgradeGM,
-    isXNodeAttachedToGM,
+
     gmId,
     isMaxGmLevelReached,
     b3trToUpgradeGMToNextLevel,
   } = useSelectedGmNft()
-  const { isXNodeHolder } = useXNode()
+  const { isXNodeHolder, isXNodeAttachedToGM } = useXNode()
 
   const router = useRouter()
   const mintNftModal = useDisclosure()

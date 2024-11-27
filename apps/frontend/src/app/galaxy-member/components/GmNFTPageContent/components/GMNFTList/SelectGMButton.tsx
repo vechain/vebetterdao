@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { Button, useDisclosure, Tooltip } from "@chakra-ui/react"
 import { TransactionModal } from "@/components"
@@ -18,18 +18,11 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
 
   const selectGMModal = useDisclosure()
   const detachGMModal = useDisclosure()
-  const [detachToActive, setDetachToActive] = useState(false)
 
-  // double check the flow if ok
   const handleSelectGM = useCallback(() => {
-    if (isXNodeAttachedToGM) {
-      setDetachToActive(true)
-      detachGMModal.onOpen()
-    } else {
-      selectGMMutation.sendTransaction({})
-      selectGMModal.onOpen()
-    }
-  }, [selectGMModal, selectGMMutation, detachGMModal, isXNodeAttachedToGM])
+    selectGMMutation.sendTransaction({})
+    selectGMModal.onOpen()
+  }, [selectGMModal, selectGMMutation])
 
   const onTryAgain = useCallback(() => {
     selectGMMutation.resetStatus()
@@ -63,11 +56,7 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
         showExplorerButton
         txId={selectGMMutation.txReceipt?.meta.txID ?? selectGMMutation.sendTransactionTx?.txid}
       />
-      <DetachGMToXNodeModal
-        isOpen={detachGMModal.isOpen}
-        onClose={detachGMModal.onClose}
-        detachToActive={detachToActive}
-      />
+      <DetachGMToXNodeModal isOpen={detachGMModal.isOpen} onClose={detachGMModal.onClose} />
     </>
   )
 }

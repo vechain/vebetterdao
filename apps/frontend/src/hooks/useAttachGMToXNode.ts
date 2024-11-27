@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react"
 import { GalaxyMember__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getLevelOfTokenQueryKey, getTokensInfoByOwnerQueryKey, useSelectedGmNft, useXNode } from "@/api"
+import { getLevelOfTokenQueryKey, useSelectedGmNft, useXNode } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -12,7 +12,6 @@ import { getNodeIdAttachedQueryKey } from "@/api/contracts/galaxyMember/hooks/us
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
 type Props = {
-  attachedGMTokenId?: string
   onSuccess?: () => void
 }
 
@@ -26,7 +25,7 @@ type Props = {
  * @param {Function} [props.onSuccess] - Optional callback function to be called on successful transaction.
  * @returns {Object} An object containing the transaction builder and related data.
  */
-export const useAttachGMToXNode = ({ attachedGMTokenId, onSuccess }: Props) => {
+export const useAttachGMToXNode = ({ onSuccess }: Props) => {
   const { xNodeId } = useXNode()
   const { gmId } = useSelectedGmNft()
 
@@ -38,21 +37,7 @@ export const useAttachGMToXNode = ({ attachedGMTokenId, onSuccess }: Props) => {
       throw new Error("GM NFT ID is not available")
     }
 
-    const clauses = []
-
-    if (attachedGMTokenId) {
-      clauses.push(
-        buildClause({
-          to: getConfig().galaxyMemberContractAddress,
-          contractInterface: GalaxyMemberInterface,
-          method: "detachNode",
-          args: [xNodeId, attachedGMTokenId],
-          comment: `Detach GM NFT id ${attachedGMTokenId} from XNode ${xNodeId}`,
-        }),
-      )
-    }
-
-    clauses.push(
+    return [
       buildClause({
         to: getConfig().galaxyMemberContractAddress,
         contractInterface: GalaxyMemberInterface,
@@ -60,10 +45,8 @@ export const useAttachGMToXNode = ({ attachedGMTokenId, onSuccess }: Props) => {
         args: [xNodeId, gmId],
         comment: `Attach XNode ${xNodeId} to GM NFT id ${gmId}`,
       }),
-    )
-
-    return clauses
-  }, [xNodeId, gmId, attachedGMTokenId])
+    ]
+  }, [xNodeId, gmId])
 
   const { account } = useWallet()
 
@@ -73,7 +56,6 @@ export const useAttachGMToXNode = ({ attachedGMTokenId, onSuccess }: Props) => {
       getLevelOfTokenQueryKey(gmId),
       getGetTokenIdAttachedToNodeQueryKey(xNodeId),
       getNodeIdAttachedQueryKey(gmId),
-      getTokensInfoByOwnerQueryKey(account),
     ],
     [account, gmId, xNodeId],
   )

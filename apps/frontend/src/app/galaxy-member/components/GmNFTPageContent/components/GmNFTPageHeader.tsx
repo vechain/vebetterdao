@@ -20,8 +20,8 @@ export const GmNFTPageHeader = () => {
   const { account } = useWallet()
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account ?? "")
 
-  const { isXNodeAttachedToGM, isMaxGmLevelReached } = useSelectedGmNft()
-  const { isXNodeHolder } = useXNode()
+  const { isMaxGmLevelReached } = useSelectedGmNft()
+  const { isXNodeHolder, isXNodeAttachedToGM } = useXNode()
 
   const actionDescription = useMemo(() => {
     if (isXNodeHolder && !isXNodeAttachedToGM) {

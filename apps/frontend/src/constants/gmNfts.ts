@@ -70,3 +70,16 @@ export const gmNfts = [
     b3trToUpgrade: Infinity,
   },
 ]
+
+/**
+ * Maps the XNode level to the GM starting level.
+ */
+export const xNodeToGMstartingLevel: Record<number, number> = {
+  1: 2,
+  2: 4,
+  3: 6,
+  4: 2,
+  5: 4,
+  6: 6,
+  7: 7,
+}
