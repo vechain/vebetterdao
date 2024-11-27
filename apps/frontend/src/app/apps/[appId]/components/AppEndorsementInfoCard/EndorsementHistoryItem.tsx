@@ -51,12 +51,12 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
       <VStack align="start" justifyContent={"flex-start"} spacing={0} flex={1}>
         <Skeleton isLoaded={!endorserAddressLoading}>
           <HStack>
+            <Text>{humanAddress(endorserAddress ?? "", 6, 3)}</Text>
             {showCopiedLink ? (
               <UilCheck size={"18px"} color="#6DCB09" />
             ) : (
               <UilCopy size={"18px"} color="#6A6A6A" onClick={handleCopyEndorserAddress} cursor="pointer" />
             )}
-            <Text>{humanAddress(endorserAddress ?? "", 6, 3)}</Text>
           </HStack>
         </Skeleton>
 
