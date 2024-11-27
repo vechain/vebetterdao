@@ -33,8 +33,6 @@ export const GmNFTAndNodeCard = () => {
   const { data: hasUserVoted } = useParticipatedInGovernance(account)
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
     useSelectedGmNft()
-
-  console.log("gmLevel", gmLevel)
   //node
   const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder } = useXNode()
 
@@ -106,16 +104,16 @@ export const GmNFTAndNodeCard = () => {
               {!isGMOwned ? (
                 !hasUserVoted ? (
                   <Heading fontSize="xl" fontWeight={600}>
-                    {t("Vote to be part of the galaxy")}
+                    {t("Vote to be a galaxy member")}
                   </Heading>
                 ) : (
                   <Heading fontSize="xl" fontWeight={600}>
-                    {t("Mint GM to be part of the galaxy")}
+                    {t("Mint GM to be a galaxy member")}
                   </Heading>
                 )
               ) : (
                 <Heading fontSize="xl" fontWeight={600}>
-                  {t("You are on LEVEL {{level}}", { level: gmLevel })}
+                  {t("You are a galaxy member")}
                 </Heading>
               )}
             </FeatureFlagWrapper>
