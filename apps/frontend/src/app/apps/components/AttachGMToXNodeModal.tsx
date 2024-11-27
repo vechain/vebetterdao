@@ -55,12 +55,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
     return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0))
   }, [b3trDonated, gmStartingLevel])
 
-  const attachGMToXNodeMutation = useAttachGMToXNode({
-    onSuccess: () => {
-      attachGMToXNodeMutation.resetStatus()
-      onClose()
-    },
-  })
+  const attachGMToXNodeMutation = useAttachGMToXNode({})
 
   const handleClose = useCallback(() => {
     attachGMToXNodeMutation.resetStatus()

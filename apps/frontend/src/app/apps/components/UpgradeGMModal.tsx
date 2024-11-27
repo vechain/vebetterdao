@@ -27,12 +27,19 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   upgradeGMModal,
 }) => {
   const { t } = useTranslation()
-  const upgradeGMMutation = useUpgradeGM({ tokenId, b3trToUpgrade: b3trToUpgradeGMToNextLevel })
+  const upgradeGMMutation = useUpgradeGM({
+    tokenId,
+    b3trToUpgrade: b3trToUpgradeGMToNextLevel,
+  })
 
   const handleUpgradeGM = useCallback(() => {
     upgradeGMMutation.sendTransaction({})
-    upgradeGMModal.onOpen()
-  }, [upgradeGMModal, upgradeGMMutation])
+  }, [upgradeGMMutation])
+
+  const handleClose = useCallback(() => {
+    upgradeGMMutation.resetStatus()
+    upgradeGMModal.onClose()
+  }, [upgradeGMMutation, upgradeGMModal])
 
   const onTryAgain = useCallback(() => {
     upgradeGMMutation.resetStatus()
@@ -43,7 +50,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
     return (
       <TransactionModal
         isOpen={upgradeGMModal.isOpen}
-        onClose={upgradeGMModal.onClose}
+        onClose={handleClose}
         successTitle={t("GM NFT upgraded")}
         status={upgradeGMMutation.error ? "error" : upgradeGMMutation.status}
         errorDescription={upgradeGMMutation.error?.reason}
@@ -58,7 +65,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
 
   return (
     <>
-      <Modal isOpen={upgradeGMModal.isOpen} onClose={upgradeGMModal.onClose} size={"2xl"}>
+      <Modal isOpen={upgradeGMModal.isOpen} onClose={handleClose} size={"2xl"}>
         <ModalOverlay />
         <CustomModalContent>
           <ModalCloseButton />
