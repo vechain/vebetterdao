@@ -3,17 +3,32 @@ import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 import { FeatureFlagWrapper } from "@/components"
 import { FeatureFlag } from "@/constants"
-import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  CardBody,
+  Flex,
+  Heading,
+  HStack,
+  Image,
+  Text,
+  useDisclosure,
+  VStack,
+  Box,
+} from "@chakra-ui/react"
 import { UilInfoCircle, UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
-import { useTranslation } from "react-i18next"
+import { useTranslation, Trans } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
+import { BaseTooltip } from "@/components"
+import { IoWarningOutline } from "react-icons/io5"
 
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
-  const { gmId } = useSelectedGmNft()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, attachedGMTokenId, isXNodeAttachedToGM } = useXNode()
+  const { isXNodeAttachedToGM, gmId } = useSelectedGmNft()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, attachedGMTokenId, isXNodeDelegatee } =
+    useXNode()
 
   const router = useRouter()
   const goToXnodePage = useCallback(() => {
@@ -30,8 +45,13 @@ export const AttachXNodeCard = () => {
       }
       return t("Your GM NFT is attached to this Node. You can detach it anytime.")
     }
+
+    if (isXNodeDelegator) {
+      return t("Remove the XNode delegation to attach GM NFT to this node")
+    }
+
     return t("Attach your Node to your GM NFT to upgrade it for free and earn more rewards!")
-  }, [attachedGMTokenId, gmId, isXNodeAttachedToGM, t])
+  }, [attachedGMTokenId, gmId, isXNodeAttachedToGM, isXNodeDelegator, t])
 
   if (!isXNodeHolder) {
     return null
@@ -43,11 +63,15 @@ export const AttachXNodeCard = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached Node" : "Attach to upgrade")}</Heading>
-              <UilInfoCircle color="#004CFC" />
+              <BaseTooltip text={t("Once the GM NFT is attached to your XNode, it can't be transferred anymore")}>
+                <Box as="button">
+                  <UilInfoCircle color="#004CFC" />
+                </Box>
+              </BaseTooltip>
             </HStack>
             <Text fontSize="sm">{description}</Text>
           </VStack>
-          <Flex border="1px solid" rounded="12px" position="relative">
+          <Flex border="1px solid" rounded="12px" position="relative" cursor="pointer">
             <Image
               src={"/images/xnode-page-background.png"}
               alt="gm-nft-header"
@@ -69,9 +93,16 @@ export const AttachXNodeCard = () => {
               onClick={goToXnodePage}>
               <Image src={xNodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
               <VStack flex="1" align={"flex-start"}>
-                <Text fontWeight={700} noOfLines={1}>
-                  {xNodeName}
-                </Text>
+                <HStack>
+                  <Text fontWeight={700} noOfLines={1}>
+                    {xNodeName}
+                  </Text>
+                  {(isXNodeDelegator || isXNodeDelegatee) && (
+                    <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+                      <Text fontSize={"xs"}>{isXNodeDelegator ? "Delegator" : "Delegatee"}</Text>
+                    </HStack>
+                  )}
+                </HStack>
                 <HStack gap={1}>
                   <Text fontSize="sm" fontWeight={600}>
                     {xNodePoints}
@@ -84,6 +115,17 @@ export const AttachXNodeCard = () => {
               <FaChevronRight size={"24px"} />
             </HStack>
           </Flex>
+          {isXNodeAttachedToGM && (
+            <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgb(255, 250, 235)"}>
+              <IoWarningOutline size={24} color={"rgb(217, 119, 6)"} />
+              <Text color={"rgb(217, 119, 6)"} fontSize={14}>
+                <Trans
+                  i18nKey="The GM NFT is <bold>not transferable</bold> while attached to a Node."
+                  components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                />
+              </Text>
+            </HStack>
+          )}
           {isXNodeAttachedToGM ? (
             <Button
               leftIcon={<UilLinkBroken color="#C84968" />}
@@ -103,6 +145,7 @@ export const AttachXNodeCard = () => {
               <Button
                 leftIcon={<UilLinkBroken color="#004CFC" />}
                 variant={"primarySubtle"}
+                isDisabled={isXNodeDelegator}
                 onClick={attachGmToXNodeModal.onOpen}>
                 {t("Attach now!")}
               </Button>

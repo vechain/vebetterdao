@@ -14,7 +14,7 @@ export const GmNFTPageContent = () => {
   // Redirect to the previous page if the user is not a GM NFT holder
   useEffect(() => {
     if (!Number(gmId) && !isLoading) {
-      router.back()
+      router.push("/")
     }
   }, [gmId, isLoading, router])
 

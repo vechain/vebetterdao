@@ -206,11 +206,13 @@ export async function deployAll(config: ContractsConfig) {
   )) as Treasury
 
   // Deploy NodeManagement
-  const nodeManagement = (await deployProxy(
-    "NodeManagement",
-    [vechainNodesAddress, config.CONTRACTS_ADMIN_ADDRESS, config.CONTRACTS_ADMIN_ADDRESS],
-    undefined,
-    true,
+  const nodeManagement = (await deployAndUpgrade(
+    ["NodeManagementV1", "NodeManagement"],
+    [[vechainNodesAddress, config.CONTRACTS_ADMIN_ADDRESS, config.CONTRACTS_ADMIN_ADDRESS], []],
+    {
+      versions: [undefined, 2],
+      logOutput: true,
+    },
   )) as NodeManagement
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
@@ -326,6 +328,7 @@ export async function deployAll(config: ContractsConfig) {
     ],
     {
       versions: [undefined, 2],
+      logOutput: true,
     },
   )) as GalaxyMember
 

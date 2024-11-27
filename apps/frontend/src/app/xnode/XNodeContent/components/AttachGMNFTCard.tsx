@@ -1,9 +1,9 @@
-import { useSelectedGmNft, useXNode } from "@/api"
+import { useIpfsImage, useIpfsMetadata, useLevelMultiplier, useLevelOfToken, useXNode } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 import { FeatureFlagWrapper } from "@/components"
-import { FeatureFlag } from "@/constants"
+import { FeatureFlag, notFoundImage } from "@/constants"
 import {
   Box,
   Button,
@@ -23,22 +23,40 @@ import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
+import { BaseTooltip } from "@/components"
+import { useNFTMetadataUri } from "@/api/contracts/galaxyMember/hooks/useNFTMetadataUri"
+import { NFTMetadata } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
+import { gmNfts } from "@/constants/gmNfts"
 
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
-  const { gmId, gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel } = useSelectedGmNft()
+  const { isXNodeDelegator, isXNodeAttachedToGM, attachedGMTokenId } = useXNode()
 
-  const { isXNodeAttachedToGM } = useXNode()
+  const { data: metadataURI, isLoading: isLoadingMetadataUri } = useNFTMetadataUri(attachedGMTokenId ?? null)
+  const { data: imageMetadata, isLoading: isLoadingMetadata } = useIpfsMetadata<NFTMetadata>(metadataURI)
+  const { data: imageData, isLoading: isLoadingImageData } = useIpfsImage(imageMetadata?.image ?? null)
+  const { data: gmLevel, isLoading: isLevelOfTokenLoading } = useLevelOfToken(attachedGMTokenId)
+  const { data: gmRewardMultiplier, isLoading: isGMLoadingMultiplier } = useLevelMultiplier(gmLevel)
+
+  const isGMLoading =
+    isLoadingMetadataUri || isLoadingMetadata || isLoadingImageData || isLevelOfTokenLoading || isGMLoadingMultiplier
+  const gmImage = imageData?.image || gmNfts[Number(gmLevel) - 1]?.image || notFoundImage
+  const nftName = imageMetadata?.name || gmNfts[Number(gmLevel) - 1]?.name
+  const gmName = `${nftName} #${attachedGMTokenId}`
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
+    // If I'm connected as a delegator, we cannot go to the GM NFT page of another token for now,
+    // because we do not have a page that displays GM NFT info based on the tokenId
+    if (isXNodeDelegator) return
+
     router.push("/galaxy-member")
-  }, [router])
+  }, [router, isXNodeDelegator])
 
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()
 
-  if (!Number(gmId)) {
+  if (!Number(attachedGMTokenId)) {
     return null
   }
 
@@ -48,14 +66,20 @@ export const AttachGMNFTCard = () => {
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached Node" : "Attach to upgrade")}</Heading>
-              <UilInfoCircle color="#004CFC" />
+              <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached GM" : "Attach to upgrade")}</Heading>
+              <BaseTooltip text={t("Once the GM NFT is attached to your XNode, it can't be transferred anymore")}>
+                <Box as="button">
+                  <UilInfoCircle color="#004CFC" />
+                </Box>
+              </BaseTooltip>
             </HStack>
             <Text fontSize="sm">
               {t(
                 isXNodeAttachedToGM
-                  ? "Your GM NFT is attached to your Node"
-                  : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
+                  ? "Your XNode is attached to the following GM NFT"
+                  : isXNodeDelegator
+                    ? "Remove the XNode delegation to attach GM NFT to this node"
+                    : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
               )}
             </Text>
           </VStack>
@@ -108,6 +132,7 @@ export const AttachGMNFTCard = () => {
               leftIcon={<UilLinkBroken color="#C84968" />}
               color="#C84968"
               variant={"link"}
+              isDisabled={isXNodeDelegator}
               onClick={detachGmToXNodeModal.onOpen}>
               {t("Detach")}
             </Button>
@@ -122,7 +147,8 @@ export const AttachGMNFTCard = () => {
               <Button
                 leftIcon={<UilLink color="#004CFC" />}
                 variant={"primarySubtle"}
-                onClick={attachGmToXNodeModal.onOpen}>
+                onClick={attachGmToXNodeModal.onOpen}
+                isDisabled={isXNodeDelegator}>
                 {t("Attach now!")}
               </Button>
             </FeatureFlagWrapper>

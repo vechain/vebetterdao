@@ -1,49 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-//                                      #######
-//                                 ################
-//                               ####################
-//                             ###########   #########
-//                            #########      #########
-//          #######          #########       #########
-//          #########       #########      ##########
-//           ##########     ########     ####################
-//            ##########   #########  #########################
-//              ################### ############################
-//               #################  ##########          ########
-//                 ##############      ###              ########
-//                  ############                       #########
-//                    ##########                     ##########
-//                     ########                    ###########
-//                       ###                    ############
-//                                          ##############
-//                                    #################
-//                                   ##############
-//                                   #########
-
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import { VechainNodesDataTypes } from "./libraries/VechainNodesDataTypes.sol";
-import { ITokenAuction } from "./interfaces/ITokenAuction.sol";
-import { INodeManagement } from "./interfaces/INodeManagement.sol";
+import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol";
+import { ITokenAuction } from "../../interfaces/ITokenAuction.sol";
+import { INodeManagementV1 } from "./interfaces/INodeManagementV1.sol";
 
-/**
- * @title NodeManagement
- * @notice This contract manages node ownership and delegation within the VeBetter DAO ecosystem. It supports delegation,
- *         retrieval of managed nodes, and integration with VeChain Nodes and token auction contracts.
- * @dev The contract is upgradeable using the UUPS proxy pattern and implements role-based access control for secure upgrades.
- *
- * ------------------------ Version 2 ------------------------
- * - Add function to get Node creation time
- * - Add function to check if Node is delegated
- * - Add function to check if user is a delegator
- * - Add function to get users owned node ID
- * - 
- */
-contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgradeable {
+contract NodeManagementV1 is INodeManagementV1, AccessControlUpgradeable, UUPSUpgradeable {
   using EnumerableSet for EnumerableSet.UintSet;
 
   /// @custom:oz-upgrades-unsafe-allow constructor
@@ -257,100 +223,6 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   /**
-   * @notice Check if a node is delegated.
-   * @param nodeId The node ID to check for.
-   * @return bool True if the node is delegated.
-   */
-  function isNodeDelegated(uint256 nodeId) public view returns (bool) {
-    NodeManagementStorage storage $ = _getNodeManagementStorage();
-    return $.nodeIdToDelegatee[nodeId] != address(0);
-  }
-
-  /**
-   * @notice Check if a user is a delegator.
-   * @param user The address of the user to check.
-   * @return bool True if the user is a delegator.
-   */
-  function isNodeDelegator(address user) public view returns (bool) {
-    // first we do direct call to check if user is node owner
-    uint256 nodeId = getDirectNodeOwnership(user);
-    // if it is then we check if node is delegated
-    if (nodeId != 0) {
-      // if node is delegated then we return true
-      return isNodeDelegated(nodeId);
-    }
-
-    // otherwise we return false
-    return false;
-  }
-
-  /**
-   * @notice Retrieves detailed information about a user's node, including node ID, level, owner, and delegation status.
-   * @param user The address of the user to check.
-   * @return nodeId The ID of the node.
-   * @return nodeLevel The level of the node.
-   * @return xNodeOwner The owner address of the node.
-   * @return isXNodeHolder Whether the user is a node holder.
-   * @return isXNodeDelegated Whether the node is delegated.
-   * @return isXNodeDelegator Whether the user is a delegator.
-   * @return isXNodeDelegatee Whether the user is a delegatee.
-   * @return delegatee The delegatee address (zero address if not delegated).
-   */
-  function getUserNode(
-    address user
-  )
-    public
-    view
-    returns (
-      uint256 nodeId,
-      VechainNodesDataTypes.NodeStrengthLevel nodeLevel,
-      address xNodeOwner,
-      bool isXNodeHolder,
-      bool isXNodeDelegated,
-      bool isXNodeDelegator,
-      bool isXNodeDelegatee,
-      address delegatee
-    )
-  {
-    NodeManagementStorage storage $ = _getNodeManagementStorage();
-
-    // Get directly owned node (if any)
-    uint256 ownedNodeId = getDirectNodeOwnership(user);
-
-    // Check if user is a delegator and set initial values
-    isXNodeDelegator = ownedNodeId != 0 && isNodeDelegated(ownedNodeId);
-    xNodeOwner = $.vechainNodesContract.idToOwner(ownedNodeId);
-
-    if (isXNodeDelegator) {
-      // If user is a delegator, use their owned node ID
-      nodeId = ownedNodeId;
-      nodeLevel = getNodeLevel(nodeId);
-      delegatee = $.nodeIdToDelegatee[nodeId];
-      isXNodeHolder = true;
-      isXNodeDelegated = true;
-      isXNodeDelegatee = false;
-    } else {
-      // Get all nodes (delegated to user + owned)
-      uint256[] memory nodeIds = getNodeIds(user);
-
-      // User is a node holder if they own a node or have delegated nodes
-      isXNodeHolder = nodeIds.length > 0;
-
-      // If user has any nodes (owned or delegated), get the first one's details
-      if (isXNodeHolder) {
-        nodeId = nodeIds[0];
-        nodeLevel = getNodeLevel(nodeId);
-        delegatee = $.nodeIdToDelegatee[nodeId];
-        xNodeOwner = $.vechainNodesContract.idToOwner(nodeId);
-
-        // Set delegation status
-        isXNodeDelegated = isNodeDelegated(nodeId);
-        isXNodeDelegatee = nodeId != ownedNodeId;
-      }
-    }
-  }
-
-  /**
    * @notice Retrieves the node level of a given node ID.
    * @dev Internal function to get the node level of a token ID. The node level is determined based on the metadata associated with the token ID.
    * @param nodeId The token ID of the endorsing node.
@@ -364,22 +236,6 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
 
     // Cast the uint8 node level to VechainNodesDataTypes.NodeStrengthLevel enum and return
     return VechainNodesDataTypes.NodeStrengthLevel(nodeLevel);
-  }
-
-  /**
-   * @notice Retrieves the creation time of a given node ID.
-   * @dev This function retrieves the creation time of the specified node ID.
-   * @param nodeId The ID of the node for which the creation time is being retrieved.
-   * @return uint64 The creation time of the specified node ID.
-   */
-  function getNodeCreationTime(uint256 nodeId) public view returns (uint64) {
-    NodeManagementStorage storage $ = _getNodeManagementStorage();
-
-    // Retrieve the metadata for the specified node ID
-    (, , , , , uint64 createdAt, ) = $.vechainNodesContract.getMetadata(nodeId);
-
-    // Return the creation time of the node
-    return createdAt;
   }
 
   /**
@@ -407,16 +263,6 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   /**
-   * @notice Check if a user directly owns a node (not delegated).
-   * @param user The address of the user to check.
-   * @return uint256 The ID of the owned node (0 if none).
-   */
-  function getDirectNodeOwnership(address user) public view returns (uint256) {
-    NodeManagementStorage storage $ = _getNodeManagementStorage();
-    return $.vechainNodesContract.ownerToId(user);
-  }
-
-  /**
    * @notice Returns the Vechain node contract instance.
    * @return ITokenAuction The instance of the Vechain node contract.
    */
@@ -430,7 +276,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
    * @return string The current version of the contract.
    */
   function version() external pure virtual returns (string memory) {
-    return "2";
+    return "1";
   }
 
   // ---------- Internal ---------- //

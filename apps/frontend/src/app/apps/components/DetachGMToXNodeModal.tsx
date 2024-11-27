@@ -26,13 +26,12 @@ type Props = {
 
 export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-
   const { attachedGMTokenId } = useXNode()
 
   const { data: b3trDonated } = useB3trDonated(attachedGMTokenId)
 
   const levelAfterDetach = useMemo(() => {
-    return getGMLevel(1, Number(b3trDonated) ?? 0)
+    return getGMLevel(1, Number(b3trDonated ?? 0))
   }, [b3trDonated])
 
   const detachGMFromXNodeMutation = useDetachGMFromXNode({

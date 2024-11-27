@@ -9,8 +9,8 @@ import { SelectGMButton } from "./SelectGMButton"
 import { gmNfts } from "@/constants/gmNfts"
 import { FeatureFlag, notFoundImage } from "@/constants"
 import { FeatureFlagWrapper } from "@/components"
-import { useLevelMultiplier } from "@/api"
-
+import { useLevelMultiplier, useSelectedGmNft, useXNode } from "@/api"
+import { useGetNodeIdAttached } from "@/api/contracts/galaxyMember/hooks/useGetNodeIdAttached"
 interface GMNFTListItemProps {
   token: {
     tokenId: string
@@ -25,10 +25,13 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { data: selectedTokenId } = useSelectedTokenId()
-
+  const { isXNodeAttachedToGM: isXNodeAttachedToSelectedGM } = useSelectedGmNft()
+  const { data: nodeIdAttachedToToken } = useGetNodeIdAttached(token.tokenId)
+  const { xNodeName, xNodeImage, xNodeId, attachedGMTokenId } = useXNode()
   const { data: gmRewardMultiplier } = useLevelMultiplier(token.tokenLevel)
 
   const isGMSelected = useMemo(() => selectedTokenId === token.tokenId, [selectedTokenId, token.tokenId])
+  const currentNFTAttachedToNode = nodeIdAttachedToToken === xNodeId && attachedGMTokenId === token.tokenId
 
   const actionButton = useMemo(() => {
     return (
@@ -79,16 +82,31 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
             <Stack
               direction={isAbove800 ? "row" : "column"}
               flex="1"
-              align={"flex-start"}
               justify={isAbove800 ? "space-between" : "center"}
+              align={isAbove800 ? "center" : "flex-start"}
               gap={1}>
               <VStack align={"flex-start"}>
                 <Text fontSize={"xs"} fontWeight="400" noOfLines={1} color="#6DCB09">
-                  {isGMSelected ? t("Active") : ""}
+                  {isGMSelected && isXNodeAttachedToSelectedGM
+                    ? t("Active and attached")
+                    : isGMSelected
+                      ? t("Active")
+                      : ""}
                 </Text>
-                <Text fontWeight={700} noOfLines={1} fontSize={"md"}>
-                  {gmName}
-                </Text>
+
+                <Stack direction={isAbove800 ? "column" : "column-reverse"} align={"flex-start"}>
+                  <Text fontWeight={700} noOfLines={1} fontSize={"md"}>
+                    {gmName}
+                  </Text>
+                  {currentNFTAttachedToNode ? (
+                    <HStack w="full" align={"flex-start"}>
+                      <Image src={xNodeImage} alt="gm" w={"20px"} h={"20px"} rounded="7px" />
+                      <Text fontSize={"xs"} fontWeight={600}>
+                        {t("Attached to {{node}}", { node: xNodeName })}
+                      </Text>
+                    </HStack>
+                  ) : null}
+                </Stack>
               </VStack>
               <HStack gap={6}>
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>

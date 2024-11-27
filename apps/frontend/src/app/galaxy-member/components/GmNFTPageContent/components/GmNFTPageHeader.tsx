@@ -15,17 +15,16 @@ const compactFormatter = getCompactFormatter(4)
 export const GmNFTPageHeader = () => {
   const { t } = useTranslation()
   const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, b3trToUpgradeGMToNextLevel } = useSelectedGmNft()
-
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { account } = useWallet()
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account ?? "")
 
   const { isMaxGmLevelReached } = useSelectedGmNft()
-  const { isXNodeHolder, isXNodeAttachedToGM } = useXNode()
+  const { isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
 
   const actionDescription = useMemo(() => {
-    if (isXNodeHolder && !isXNodeAttachedToGM) {
+    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator) {
       return (
         <>
           <HStack>
@@ -122,6 +121,7 @@ export const GmNFTPageHeader = () => {
     isXNodeAttachedToGM,
     isXNodeHolder,
     t,
+    isXNodeDelegator,
   ])
 
   return (
