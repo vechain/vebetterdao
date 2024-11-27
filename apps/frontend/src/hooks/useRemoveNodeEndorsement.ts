@@ -13,8 +13,10 @@ import {
   getNodesEndorsedAppsQueryKey,
   getXAppsQueryKey,
 } from "@/api"
+import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
+
 type Props = { appId?: string; nodeId?: string; onSuccess?: () => void }
 
 /**
@@ -32,7 +34,7 @@ export const useRemoveNodeEndorsement = ({ appId, nodeId, onSuccess }: Props) =>
         contractInterface: X2EarnAppsInterface,
         method: "removeNodeEndorsement",
         args: [appId, nodeId],
-        comment: `Remove endorsement from ${nodeId} for app ${appId}`,
+        comment: `Remove node ${nodeId} endorsement from app ${appId}`,
       }),
     ]
   }, [appId, nodeId])
@@ -47,6 +49,7 @@ export const useRemoveNodeEndorsement = ({ appId, nodeId, onSuccess }: Props) =>
       getXAppsQueryKey(),
       getAppIsBlacklistedQueryKey(appId ?? ""),
       getAppExistsQueryKey(appId ?? ""),
+      getAppEndorsedEventsQueryKey({ appId, nodeId, endorsed: false }),
     ],
     [appId, nodeId],
   )

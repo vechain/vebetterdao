@@ -14,8 +14,10 @@ import {
   getXAppsQueryKey,
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
+import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
+
 type Props = { appId?: string; nodeId?: string; userAddress?: string; onSuccess?: () => void }
 
 /**
@@ -50,6 +52,7 @@ export const useUnendorseApp = ({ appId, nodeId, userAddress, onSuccess }: Props
       getXAppsQueryKey(),
       getAppIsBlacklistedQueryKey(appId ?? ""),
       getAppExistsQueryKey(appId ?? ""),
+      getAppEndorsedEventsQueryKey({ appId, nodeId, endorsed: false }),
     ],
     [appId, nodeId, userAddress],
   )
