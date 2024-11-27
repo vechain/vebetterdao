@@ -629,6 +629,28 @@ describe("Node Management -@shard5", function () {
       const manager = await nodeManagement.isNodeManager(otherAccounts[5].address, 1)
       expect(manager).to.equal(false)
     })
+
+    it("Should return node IDs for both delegators and delegatees", async function () {
+      const { owner, otherAccount, nodeManagement } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        deployMocks: true,
+      })
+
+      // Mock node ownership
+      await createNodeHolder(2, owner) // Create a node for owner
+      const nodeId = 1n // First node ID will be 1
+
+      // Initially owner should have the node ID
+      expect(await nodeManagement.getNodeIds(owner.address)).to.eql([nodeId])
+      expect(await nodeManagement.getNodeIds(otherAccount.address)).to.eql([])
+
+      // Delegate the node
+      await nodeManagement.connect(owner).delegateNode(otherAccount.address)
+
+      // After delegation, both owner (delegator) and otherAccount (delegatee) should have the node ID
+      expect(await nodeManagement.getNodeIds(owner.address)).to.eql([nodeId])
+      expect(await nodeManagement.getNodeIds(otherAccount.address)).to.eql([nodeId])
+    })
   })
 
   describe("isNodeHolder Function", () => {

@@ -294,11 +294,23 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   function getUserNodes(address user) public view returns (NodeInfo[] memory) {
     NodeManagementStorage storage $ = _getNodeManagementStorage();
 
-    // Get all nodes (delegated to user + owned)
-    uint256[] memory nodeIds = getNodeIds(user);
+    // Get the set of node IDs delegated to the user
+    EnumerableSet.UintSet storage nodeIdsSet = $.delegateeToNodeIds[user];
+    // Calculate the total number of node IDs
+    uint256 count = nodeIdsSet.length();
+    // Create an array to hold the node IDs
+    uint256[] memory nodeIds = new uint256[](count);
+    // Populate the array with node IDs from the set
+    for (uint256 i = 0; i < count; i++) {
+      nodeIds[i] = nodeIdsSet.at(i);
+    }
 
-    // Get directly owned node (if any)
-    uint256 ownedNodeId = getDirectNodeOwnership(user);
+    // Get the node ID directly owned by the user
+    uint256 ownedNodeId = $.vechainNodesContract.ownerToId(user);
+    if (ownedNodeId != 0) {
+      // If the user directly owns a node, add it to the array
+      nodeIds = _appendToArray(nodeIds, ownedNodeId);
+    }
 
     // Create array to store node information
     NodeInfo[] memory nodesInfo = new NodeInfo[](nodeIds.length);
