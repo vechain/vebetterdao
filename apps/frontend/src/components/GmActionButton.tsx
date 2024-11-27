@@ -1,10 +1,16 @@
 import { useCallback, useMemo } from "react"
-import { Button, ButtonProps, useDisclosure } from "@chakra-ui/react"
+import { Button, ButtonProps, useDisclosure, Text, HStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useMintNFT } from "@/hooks"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
-import { useCurrentAllocationsRoundId, useParticipatedInGovernance, useSelectedGmNft, useXNode } from "@/api"
+import {
+  getLevelGradient,
+  useCurrentAllocationsRoundId,
+  useParticipatedInGovernance,
+  useSelectedGmNft,
+  useXNode,
+} from "@/api"
 import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { MintNFTModal } from "./MintNFTModal"
@@ -16,16 +22,9 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account)
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const {
-    isGMOwned,
-    isEnoughBalanceToUpgradeGM,
-
-    gmId,
-    isMaxGmLevelReached,
-    b3trToUpgradeGMToNextLevel,
-  } = useSelectedGmNft()
+  const { isGMOwned, isEnoughBalanceToUpgradeGM, gmId, isMaxGmLevelReached, b3trToUpgradeGMToNextLevel } =
+    useSelectedGmNft()
   const { isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
-
   const router = useRouter()
   const mintNftModal = useDisclosure()
   const {
@@ -92,12 +91,28 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
             {t("Coming soon!")}
           </Button>
         }>
-        <Button
-          {...buttonProps}
-          isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
-          onClick={upgradeGMModal.onOpen}>
-          {t("Upgrade now!")}
-        </Button>
+        {isMaxGmLevelReached ? (
+          <HStack alignSelf="center" rounded="8px" px={5} py={1} gap={1} justify="center">
+            <Text
+              bg={getLevelGradient(1)} //Setting first gradient which is more visible
+              style={{
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+              fontSize={"lg"}
+              fontWeight={"bold"}
+              noOfLines={1}>
+              {t("Max Level Reached!")}
+            </Text>
+          </HStack>
+        ) : (
+          <Button
+            {...buttonProps}
+            isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
+            onClick={upgradeGMModal.onOpen}>
+            {t("Upgrade now!")}
+          </Button>
+        )}
       </FeatureFlagWrapper>
     )
   }, [
