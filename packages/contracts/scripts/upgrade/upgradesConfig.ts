@@ -81,9 +81,10 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "Galaxy Member": {
     name: "galaxy-member",
     configAddressField: "galaxyMemberContractAddress",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Vechain Nodes x GM upgrades feature",
+      v3: "Use NodeManagement V2 interface",
     },
   },
   "Node Management": {

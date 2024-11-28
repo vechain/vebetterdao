@@ -1,5 +1,26 @@
 // SPDX-License-Identifier: MIT
 
+//                                      #######
+//                                 ################
+//                               ####################
+//                             ###########   #########
+//                            #########      #########
+//          #######          #########       #########
+//          #########       #########      ##########
+//           ##########     ########     ####################
+//            ##########   #########  #########################
+//              ################### ############################
+//               #################  ##########          ########
+//                 ##############      ###              ########
+//                  ############                       #########
+//                    ##########                     ##########
+//                     ########                    ###########
+//                       ###                    ############
+//                                          ##############
+//                                    #################
+//                                   ##############
+//                                   #########
+
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -9,6 +30,18 @@ import { VechainNodesDataTypes } from "./libraries/VechainNodesDataTypes.sol";
 import { ITokenAuction } from "./interfaces/ITokenAuction.sol";
 import { INodeManagement } from "./interfaces/INodeManagement.sol";
 
+/**
+ * @title NodeManagement
+ * @notice This contract manages node ownership and delegation within the VeBetter DAO ecosystem. It supports delegation,
+ *         retrieval of managed nodes, and integration with VeChain Nodes and token auction contracts.
+ * @dev The contract is upgradeable using the UUPS proxy pattern and implements role-based access control for secure upgrades.
+ *
+ * ------------------------ Version 2 ------------------------
+ * - Add function to check if Node is delegated
+ * - Add function to check if user is a delegator
+ * - Add function to get users owned node ID
+ * - Add function to retrieve detailed information about a user's nodes (both delegated and owned)
+ */
 contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgradeable {
   using EnumerableSet for EnumerableSet.UintSet;
 
@@ -106,7 +139,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
       // Emit event for delegation removal
       emit NodeDelegated(nodeId, $.nodeIdToDelegatee[nodeId], false);
       // Remove delegation
-      $.delegateeToNodeIds[delegatee].remove(nodeId);
+      $.delegateeToNodeIds[$.nodeIdToDelegatee[nodeId]].remove(nodeId);
     }
 
     // Update mappings for delegation
