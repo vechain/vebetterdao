@@ -37,11 +37,10 @@ import { INodeManagement } from "./interfaces/INodeManagement.sol";
  * @dev The contract is upgradeable using the UUPS proxy pattern and implements role-based access control for secure upgrades.
  *
  * ------------------------ Version 2 ------------------------
- * - Add function to get Node creation time
  * - Add function to check if Node is delegated
  * - Add function to check if user is a delegator
  * - Add function to get users owned node ID
- * - 
+ * - Add function to retrieve detailed information about a user's nodes (both delegated and owned)
  */
 contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgradeable {
   using EnumerableSet for EnumerableSet.UintSet;
