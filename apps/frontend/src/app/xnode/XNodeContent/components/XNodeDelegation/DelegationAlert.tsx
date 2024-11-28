@@ -16,6 +16,11 @@ export const DelegationAlert = () => {
         <AlertIcon />
         <Box lineHeight="1.20rem" fontSize="sm">
           <AlertTitle as="span">{t("Your Node is currently delegated to another address")}</AlertTitle>
+          <Text>
+            {t(
+              "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.",
+            )}
+          </Text>
         </Box>
       </Alert>
     )
