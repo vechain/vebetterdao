@@ -97,7 +97,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
 
   return (
     <>
-      <Modal isOpen={upgradeGMModal.isOpen} onClose={handleClose} size={"lg"}>
+      <Modal isOpen={upgradeGMModal.isOpen} onClose={handleClose} size={"2xl"}>
         <ModalOverlay />
         <CustomModalContent p={{ base: 3, md: 5 }}>
           <ModalCloseButton />
