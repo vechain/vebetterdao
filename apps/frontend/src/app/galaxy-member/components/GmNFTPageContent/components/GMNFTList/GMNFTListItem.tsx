@@ -1,5 +1,21 @@
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
-import { Box, Card, CardBody, HStack, Image, Skeleton, Stack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Card,
+  CardBody,
+  HStack,
+  Image,
+  Skeleton,
+  Stack,
+  Text,
+  useMediaQuery,
+  VStack,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalBody,
+} from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { NFTMetadata } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
@@ -11,6 +27,8 @@ import { FeatureFlag, notFoundImage } from "@/constants"
 import { FeatureFlagWrapper } from "@/components"
 import { useLevelMultiplier, useSelectedGmNft, useXNode } from "@/api"
 import { useGetNodeIdAttached } from "@/api/contracts/galaxyMember/hooks/useGetNodeIdAttached"
+import { motion } from "framer-motion"
+
 interface GMNFTListItemProps {
   token: {
     tokenId: string
@@ -30,6 +48,8 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   const { xNodeName, xNodeImage, xNodeId, attachedGMTokenId } = useXNode()
   const { data: gmRewardMultiplier } = useLevelMultiplier(token.tokenLevel)
 
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
   const isGMSelected = useMemo(() => selectedTokenId === token.tokenId, [selectedTokenId, token.tokenId])
   const currentNFTAttachedToNode = nodeIdAttachedToToken === xNodeId && attachedGMTokenId === token.tokenId
 
@@ -41,7 +61,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
     )
   }, [isGMSelected, token.tokenId])
 
-  const { data: nftMetadata } = useIpfsMetadata<NFTMetadata>(token.tokenURI)
+  const { data: nftMetadata, isLoading: isMetadataLoading } = useIpfsMetadata<NFTMetadata>(token.tokenURI)
 
   const { data: image } = useIpfsImage(nftMetadata?.image ?? null)
 
@@ -75,8 +95,11 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                 bgGradient={getLevelGradient(Number(token.tokenLevel))}
                 display="flex"
                 alignItems="center"
-                justifyContent="center">
-                <Image src={gmImage} alt="gm" w={"64px"} h={"64px"} rounded="7px" />
+                justifyContent="center"
+                onClick={onOpen}>
+                <Skeleton isLoaded={!isMetadataLoading} w={"64px"} h={"64px"} rounded={"7px"}>
+                  <Image src={gmImage} alt="gm" w={"64px"} h={"64px"} rounded="7px" />
+                </Skeleton>
               </Box>
             </Skeleton>
             <Stack
@@ -127,6 +150,35 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
           {!isAbove800 && actionButton}
         </VStack>
       </CardBody>
+      {/* Modal for Image Preview */}
+      <Modal isOpen={isOpen} onClose={onClose} isCentered size="xl">
+        <ModalOverlay />
+        <ModalContent
+          as={motion.div}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: "0.3", ease: "easeOut" }}
+          boxShadow="none"
+          background="transparent"
+          maxW="500px"
+          w="full"
+          p={0}
+          m={0}>
+          <ModalBody p={0}>
+            <Box
+              position="relative"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              overflow="hidden"
+              bgGradient={getLevelGradient(Number(token.tokenLevel))}
+              p={1}
+              rounded="16px">
+              <Image src={gmImage} alt="gm" w="100%" h="100%" objectFit="cover" rounded="16px" />
+            </Box>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Card>
   )
 }
