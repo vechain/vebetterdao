@@ -74,6 +74,10 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
     upgradeGMMutation.sendTransaction({})
   }, [upgradeGMMutation])
 
+  const levelBackground = useMemo(() => {
+    return getLevelGradient(Number(nextLevelGM?.level))
+  }, [nextLevelGM])
+
   if (upgradeGMMutation.status !== "ready")
     return (
       <TransactionModal
@@ -104,7 +108,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
             </VStack>
           </ModalHeader>
           <ModalBody gap={4}>
-            <Text size={"md"}>
+            <Text size={"md"} color="#6A6A6A">
               {t(
                 "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!",
               )}
@@ -114,13 +118,13 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                 {t("You'll donate")}
               </Text>
               <HStack>
-                <B3TRIcon boxSize={9} />
-                <Heading fontSize="xl" fontWeight={700}>
+                <B3TRIcon boxSize={7} />
+                <Heading fontSize="x-large" fontWeight={700}>
                   {compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}
                 </Heading>
               </HStack>
             </VStack>
-            <VStack align="stretch" w="full" py={5}>
+            <VStack align="stretch" py={5}>
               <Text color="#6A6A6A" size={"md"}>
                 {t("You’re upgrading to")}
               </Text>
@@ -130,54 +134,56 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                   src={"/images/nft-page-background.png"}
                   alt="gm-nft-header"
                   position={"absolute"}
-                  w="100%"
-                  h="100%"
-                  rounded={"16px"}
+                  w="full"
+                  h="full"
+                  rounded={"8px"}
                 />
                 <Stack
                   direction={isAbove800 ? "row" : "column"}
-                  p={isAbove800 ? "24px" : "16px"}
+                  p={isAbove800 ? "16px" : "12px"}
                   align={isAbove800 ? "stretch" : "flex-start"}
-                  spacing={4}
-                  zIndex={"2"}>
+                  spacing={2}
+                  zIndex={"2"}
+                  h={"full"}>
                   <HStack
                     align={isAbove800 ? "stretch" : "center"}
                     justify="space-between"
                     rounded="12px"
-                    gap={6}
+                    gap={isAbove800 ? 5 : 3}
                     flex={1}
                     color="#FFFFFF"
                     flexGrow={4}>
                     <Box
-                      w={isAbove800 ? "132px" : "68px"}
-                      h={isAbove800 ? "132px" : "68px"}
-                      rounded="8px"
-                      bgGradient={getLevelGradient(Number(levelAfterUpgrade))}
+                      w={isAbove800 ? "70px" : "46px"}
+                      h={isAbove800 ? "70px" : "46px"}
+                      rounded="5px"
+                      bgGradient={levelBackground}
                       display="flex"
+                      alignSelf="center"
                       alignItems="center"
                       justifyContent="center"
                       cursor="pointer">
                       <Image
                         src={nextLevelGM?.image}
                         alt="gm"
-                        w={isAbove800 ? "126px" : "64px"}
-                        h={isAbove800 ? "126px" : "64px"}
-                        rounded="7px"
+                        w={isAbove800 ? "62px" : "40px"}
+                        h={isAbove800 ? "62px" : "40px"}
+                        rounded="5px"
                       />
                     </Box>
 
-                    <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
-                      <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "xl" : "md"}>
+                    <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 0.5 : 0}>
+                      <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "x-large" : "md"}>
                         {nextLevelGM?.name}
                       </Text>
                       <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
-                        <HStack rounded="8px" padding="4px 8px" gap={1}>
+                        <HStack rounded="8px" gap={1} color={""}>
                           <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                             {nextLevelGM?.multiplier}
                             {"x"}
                           </Text>
                           <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
-                            {t("Voting reward multiplier")}
+                            {t("Voting reward multiplier").toLowerCase()}
                           </Text>
                         </HStack>
                       </FeatureFlagWrapper>
@@ -188,10 +194,10 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
               {/*END GM CARD */}
             </VStack>
             <VStack align="stretch" w="full" py={5}>
-              <Alert bg="#FFF3E5" borderRadius="2xl">
-                <UilInfoCircle color="#F29B32" size={"50px"} />
+              <Alert bg={"rgb(255, 250, 235)"} borderRadius="2xl">
+                <UilInfoCircle color={"rgb(217, 119, 6)"} size={"50px"} />
                 <Box lineHeight="1.20rem" fontSize="sm">
-                  <Text color="#F29B32">
+                  <Text px={3} color={"rgb(217, 119, 6)"}>
                     {t(
                       "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
                     )}
@@ -200,12 +206,13 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
               </Alert>
             </VStack>
           </ModalBody>
+
           <ModalFooter w="full">
             <VStack align="stretch" w="full">
               <Button variant={"primaryAction"} w={"full"} onClick={handleUpgradeGM}>
                 {t("Upgrade GM NFT")}
               </Button>
-              <Button variant={"secondaryAction"} w={"full"} onClick={upgradeGMModal.onClose}>
+              <Button variant={"secondaryAction"} color={"#004CFC"} w={"full"} onClick={upgradeGMModal.onClose}>
                 {t("Maybe later")}
               </Button>
             </VStack>
