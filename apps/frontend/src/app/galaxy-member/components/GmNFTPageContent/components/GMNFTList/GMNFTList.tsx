@@ -84,13 +84,13 @@ export const GMNFTList = () => {
               next={loadMore}
               hasMore={hasNextPage || false}
               loader={<Skeleton height="100px" />}>
-              <VStack align="stretch" gap={4} p={3}>
+              <VStack align="stretch" gap={4} p={[0, 3]}>
                 {tokens?.map((token, index) => <GMNFTListItem key={index} token={token} />)}
               </VStack>
             </InfiniteScroll>
             <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
               <Card
-                mx={3}
+                mx={[0, 3]}
                 rounded="8px"
                 style={{
                   backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23004CFC' stroke-width='1' stroke-dasharray='12%2c 15' stroke-dashoffset='2' stroke-linecap='square'/%3e%3c/svg%3e")`,
