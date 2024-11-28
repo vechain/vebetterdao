@@ -4,7 +4,7 @@ import { useGetTokenIdAttachedToNode } from "../galaxyMember/hooks/useGetTokenId
 import { useIpfsImage } from "@/api/ipfs"
 import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useGetUserNode } from "./useGetUserNode"
+import { useGetUserNodes } from "./useGetUserNodes"
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 
 /**
@@ -37,31 +37,41 @@ interface XNodeData {
   delegatee: string | undefined
   attachedGMTokenId: string | undefined
   isXNodeAttachedToGM: boolean
-  isLoadingAttachedGMTokenId: boolean
-  isErrorAttachedGMTokenId: boolean
-  errorAttachedGMTokenId: any
+  allNodes: Array<{
+    nodeId: string
+    nodeLevel: number
+    xNodeOwner: string
+    isXNodeHolder: boolean
+    isXNodeDelegated: boolean
+    isXNodeDelegator: boolean
+    isXNodeDelegatee: boolean
+    delegatee: string
+  }>
 }
 
 export const useXNode = (): XNodeData => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const userNodeDetails = useGetUserNode(account ?? "")
-  // const xNodes = useUserXNodes()
-  // TODO: in the future we will have multiple xNodes
-  // For now, we will use the first xNode as wont' consider delegated xnodes
-  const xNode = {
-    id: userNodeDetails?.data?.nodeId,
-    level: Number(userNodeDetails?.data?.nodeLevel),
-    image: NodeStrengthLevelToImage[Number(userNodeDetails?.data?.nodeLevel)] as string,
-    name: allNodeStrengthLevelToName[Number(userNodeDetails?.data?.nodeLevel)] as string,
-  }
+  const userNodeDetails = useGetUserNodes(account ?? "")
 
-  // get xNode name, image and level
+  // Store raw node data
+  const allNodes = userNodeDetails?.data ?? []
+
+  // Process first node for detailed view
+  const firstNode = allNodes[0]
+  const xNode = firstNode
+    ? {
+        id: firstNode.nodeId,
+        level: Number(firstNode.nodeLevel),
+        image: NodeStrengthLevelToImage[Number(firstNode.nodeLevel)] as string,
+        name: allNodeStrengthLevelToName[Number(firstNode.nodeLevel)] as string,
+      }
+    : undefined
+
   const xNodeName = xNode?.name ?? t("Not available")
   const xNodeImage = xNode?.image ?? notFoundImage
   const xNodeLevel = xNode?.level ?? 0
 
-  // get endorsed app for the xnode
   const endorsedAppId = useNodeEndorsedApp(xNode?.id ?? "").data
   const endorsedAppMetadata = useXAppMetadata(endorsedAppId ?? "")
   const { data: logo } = useIpfsImage(endorsedAppMetadata?.data?.logo)
@@ -74,11 +84,9 @@ export const useXNode = (): XNodeData => {
     : undefined
   const isEndorsingApp = !!endorsedAppId
 
-  // get xNode score points
   const nodeLevelToEndorsementScore = useNodesEndorsementScore()
   const xNodePoints = Number(nodeLevelToEndorsementScore?.data?.[xNode?.level ?? 0] ?? 0)
 
-  // get attached GM token id
   const {
     data: attachedGMTokenId,
     isLoading: isLoadingAttachedGMTokenId,
@@ -86,20 +94,11 @@ export const useXNode = (): XNodeData => {
     error: errorAttachedGMTokenId,
   } = useGetTokenIdAttachedToNode(xNode?.id ?? "")
 
-  const isXNodeLoading =
-    userNodeDetails.isLoading ||
-    endorsedAppMetadata.isLoading ||
-    nodeLevelToEndorsementScore.isLoading ||
-    isLoadingAttachedGMTokenId
-  const isXNodeError =
-    userNodeDetails.isError ||
-    endorsedAppMetadata.isError ||
-    nodeLevelToEndorsementScore.isError ||
-    isErrorAttachedGMTokenId
-  const xNodeError =
-    userNodeDetails.error || endorsedAppMetadata.error || nodeLevelToEndorsementScore.error || errorAttachedGMTokenId
-
   const isXNodeAttachedToGM = !!Number(attachedGMTokenId)
+
+  const isXNodeLoading = userNodeDetails.isLoading || isLoadingAttachedGMTokenId
+  const isXNodeError = userNodeDetails.isError || isErrorAttachedGMTokenId
+  const xNodeError = userNodeDetails.error || errorAttachedGMTokenId
 
   return {
     isXNodeLoading,
@@ -112,16 +111,14 @@ export const useXNode = (): XNodeData => {
     xNodePoints,
     endorsedApp,
     isEndorsingApp,
-    isXNodeHolder: userNodeDetails?.data?.isXNodeHolder ?? false,
-    isXNodeDelegator: userNodeDetails?.data?.isXNodeDelegator ?? false,
+    xNodeOwner: firstNode?.xNodeOwner,
+    isXNodeHolder: firstNode?.isXNodeHolder ?? false,
+    isXNodeDelegator: firstNode?.isXNodeDelegator ?? false,
+    isXNodeDelegated: firstNode?.isXNodeDelegated ?? false,
+    isXNodeDelegatee: firstNode?.isXNodeDelegatee ?? false,
+    delegatee: firstNode?.delegatee,
     attachedGMTokenId,
     isXNodeAttachedToGM,
-    isLoadingAttachedGMTokenId,
-    isErrorAttachedGMTokenId,
-    errorAttachedGMTokenId,
-    delegatee: userNodeDetails?.data?.delegatee,
-    xNodeOwner: userNodeDetails?.data?.xNodeOwner,
-    isXNodeDelegated: userNodeDetails?.data?.isXNodeDelegated ?? false,
-    isXNodeDelegatee: userNodeDetails?.data?.isXNodeDelegatee ?? false,
+    allNodes,
   }
 }
