@@ -184,7 +184,7 @@ interface IGalaxyMember {
   /// @param owner Address to query
   /// @param blockNumber Block number to query
   /// @return Selected token ID
-  function getSelectedTokenIdAtBlock(address owner, uint256 blockNumber) external view returns (uint256);
+  function getSelectedTokenIdAtBlock(address owner, uint48 blockNumber) external view returns (uint256);
 
   /// @notice Grants a role to an account
   /// @param role Role to grant
