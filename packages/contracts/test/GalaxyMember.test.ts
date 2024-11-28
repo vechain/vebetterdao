@@ -761,7 +761,7 @@ describe("Galaxy Member - @shard3", () => {
         await galaxyMember.getAddress(),
         [owner.address, await nodeManagement.getAddress(), owner.address, config.GM_NFT_NODE_TO_FREE_LEVEL],
         { version: 2 },
-      )) as unknown as GalaxyMemberV2
+      )) as unknown as GalaxyMember
 
       let storageSlotsAfter = []
 
@@ -1857,6 +1857,46 @@ describe("Galaxy Member - @shard3", () => {
       expect(selectedTokenInfo?.tokenURI.includes("ipfs://")).to.equal(true)
       expect(selectedTokenInfo?.tokenLevel).to.equal(1)
       expect(selectedTokenInfo?.b3trToUpgrade).to.equal(10000000000000000000000n)
+    })
+
+    it("Admin should be able to select a token for an account", async () => {
+      const { galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(otherAccount, true)
+
+      await galaxyMember.connect(otherAccount).freeMint() // Token id 1
+
+      await galaxyMember.connect(otherAccount).freeMint() // Token id 2
+
+      await galaxyMember.connect(owner).selectFor(await otherAccount.getAddress(), 2)
+
+      expect(await galaxyMember.getSelectedTokenId(await otherAccount.getAddress())).to.equal(2)
+
+      await galaxyMember.connect(owner).selectFor(await otherAccount.getAddress(), 1)
+
+      expect(await galaxyMember.getSelectedTokenId(await otherAccount.getAddress())).to.equal(1)
+    })
+
+    it("Admin should not be able to select a token for an account if the token is not owned by the account", async () => {
+      const { galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, true)
+
+      await galaxyMember.connect(owner).freeMint() // Token id 1
+
+      await expect(galaxyMember.connect(owner).selectFor(await otherAccount.getAddress(), 1)).to.be.reverted
     })
   })
 
