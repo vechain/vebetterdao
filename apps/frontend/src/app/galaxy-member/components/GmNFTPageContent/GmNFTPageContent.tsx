@@ -6,6 +6,7 @@ import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { useSelectedGmNft } from "@/api"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { MultipleXNodesAlert } from "@/app/xnode/XNodeContent/components/XNodeDelegation/MultipleXNodesAlert"
 
 export const GmNFTPageContent = () => {
   const { gmId, isLoading } = useSelectedGmNft()
@@ -25,6 +26,7 @@ export const GmNFTPageContent = () => {
       <GmNFTPageHeader />
       <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
         <VStack flex={3}>
+          <MultipleXNodesAlert />
           <AttachXNodeCard />
           <GMNFTList />
         </VStack>

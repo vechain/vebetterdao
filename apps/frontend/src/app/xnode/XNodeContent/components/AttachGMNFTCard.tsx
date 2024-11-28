@@ -1,9 +1,9 @@
-import { useIpfsImage, useIpfsMetadata, useLevelMultiplier, useLevelOfToken, useXNode } from "@/api"
+import { useXNode } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 import { FeatureFlagWrapper } from "@/components"
-import { FeatureFlag, notFoundImage } from "@/constants"
+import { FeatureFlag } from "@/constants"
 import {
   Box,
   Button,
@@ -24,25 +24,19 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
 import { BaseTooltip } from "@/components"
-import { useNFTMetadataUri } from "@/api/contracts/galaxyMember/hooks/useNFTMetadataUri"
-import { NFTMetadata } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
-import { gmNfts } from "@/constants/gmNfts"
+import { useGMNFTData } from "@/hooks/useGMNFTData"
 
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
   const { isXNodeDelegator, isXNodeAttachedToGM, attachedGMTokenId } = useXNode()
 
-  const { data: metadataURI, isLoading: isLoadingMetadataUri } = useNFTMetadataUri(attachedGMTokenId ?? null)
-  const { data: imageMetadata, isLoading: isLoadingMetadata } = useIpfsMetadata<NFTMetadata>(metadataURI)
-  const { data: imageData, isLoading: isLoadingImageData } = useIpfsImage(imageMetadata?.image ?? null)
-  const { data: gmLevel, isLoading: isLevelOfTokenLoading } = useLevelOfToken(attachedGMTokenId)
-  const { data: gmRewardMultiplier, isLoading: isGMLoadingMultiplier } = useLevelMultiplier(gmLevel)
-
-  const isGMLoading =
-    isLoadingMetadataUri || isLoadingMetadata || isLoadingImageData || isLevelOfTokenLoading || isGMLoadingMultiplier
-  const gmImage = imageData?.image || gmNfts[Number(gmLevel) - 1]?.image || notFoundImage
-  const nftName = imageMetadata?.name || gmNfts[Number(gmLevel) - 1]?.name
-  const gmName = `${nftName} #${attachedGMTokenId}`
+  const {
+    gmImage,
+    gmName,
+    gmLevel,
+    gmRewardMultiplier,
+    isLoading: isGMLoading,
+  } = useGMNFTData(attachedGMTokenId ?? null)
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
