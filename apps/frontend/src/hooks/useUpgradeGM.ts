@@ -8,6 +8,7 @@ import {
   getB3trDonatedQueryKey,
   getB3trToUpgradeQueryKey,
   getLevelOfTokenQueryKey,
+  getNFTMetadataUriQueryKey,
   getTokensInfoByOwnerQueryKey,
 } from "@/api"
 import { B3TR__factory } from "@repo/contracts/typechain-types"
@@ -55,6 +56,7 @@ export const useUpgradeGM = ({ tokenId, b3trToUpgrade, onSuccess }: Props) => {
       getB3TrBalanceQueryKey(account ?? ""),
       getTokensInfoByOwnerQueryKey(account),
       getB3trDonatedQueryKey(tokenId),
+      getNFTMetadataUriQueryKey(tokenId),
     ],
     [account, tokenId],
   )

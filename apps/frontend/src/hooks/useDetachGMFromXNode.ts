@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react"
 import { GalaxyMember__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getLevelOfTokenQueryKey, getTokensInfoByOwnerQueryKey, useXNode } from "@/api"
+import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, getTokensInfoByOwnerQueryKey, useXNode } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
@@ -56,6 +56,7 @@ export const useDetachGMFromXNode = ({ onSuccess }: Props) => {
       getGetTokenIdAttachedToNodeQueryKey(xNodeId),
       getNodeIdAttachedQueryKey(attachedGMTokenId),
       getTokensInfoByOwnerQueryKey(account),
+      getNFTMetadataUriQueryKey(attachedGMTokenId ?? ""),
     ],
     [account, attachedGMTokenId, xNodeId],
   )
