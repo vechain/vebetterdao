@@ -37,20 +37,22 @@ Updated `GalaxyMember` to use the new `NodeManagement` interface.
 - None.
 
 ### New Features 🚀
-
-- Added `isNodeDelegated()` to check if a specific node ID is delegated
-- Added `isNodeDelegator()` to check if a user has delegated their node
-- Added `getDirectNodeOwnership()` to check direct node ownership without delegation
-- Added `isNodeHolder()` to check if a user is a node holder (both directly owned and indirectly through delegation)
-- Added `getUserNodes()` to get comprehensive node information including:
-  - Node ID
-  - Node level
-  - Owner address
-  - Node holder status
-  - Delegation status
-  - Delegator status
-  - Delegatee status
-  - Delegatee address
+- **`NodeManagement`**:
+  - Added `isNodeDelegated()` to check if a specific node ID is delegated
+  - Added `isNodeDelegator()` to check if a user has delegated their node
+  - Added `getDirectNodeOwnership()` to check direct node ownership without delegation
+  - Added `isNodeHolder()` to check if a user is a node holder (both directly owned and indirectly through delegation)
+  - Added `getUserNodes()` to get comprehensive node information including:
+    - Node ID
+    - Node level
+    - Owner address
+    - Node holder status
+    - Delegation status
+    - Delegator status
+    - Delegatee status
+    - Delegatee address
+- **`GalaxyMember`**:
+  - Added `selectFor()` function to allow the admin to select a token for the user
 
 ### Bug Fixes 🐛
 
