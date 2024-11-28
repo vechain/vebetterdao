@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next"
 export const GalaxyLevelsCard = () => {
   const { gmLevel, maxGmLevel } = useSelectedGmNft()
   const { t } = useTranslation()
-  const [showShortened, setShowShortened] = useState(true)
+  const [showShortened, setShowShortened] = useState(false)
   const gmNftsShortened = useMemo(() => {
     const level = Number(gmLevel)
     if (level === 1) {
