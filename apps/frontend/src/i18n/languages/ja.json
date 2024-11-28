@@ -1357,5 +1357,18 @@
   "Owned": "所有済み",
   "detach": "切り離す",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "新しい<bold>{{gmSelectedName}} GM</bold>を取り付けるには、<bold>{{gmAttachedName}} GM</bold>を<detach>切り離す</detach>必要があります。",
-  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "ノードを委任している間は、アプリを承認したり、ギャラクシーメンバーNFTをアップグレードしたりできません。ノードを完全に制御するには委任を解除してください。"
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "ノードを委任している間は、アプリを承認したり、ギャラクシーメンバーNFTをアップグレードしたりできません。ノードを完全に制御するには委任を解除してください。",
+  "PENDING ACTIONS": "保留中のアクション",
+  "YOU CANNOT VOTE YET": "まだ投票できません",
+  "YOU ARE LAZY THIS WEEK!": "今週あなたは怠けています！",
+  "Increase your sustainable score to become eligible for voting.": "投票資格を得るために持続可能スコアを上げてください。",
+  "To be able to vote on the allocation rounds and proposals, you need to increase your sustainability score by doing more sustainable actions using the apps.": "配分ラウンドや提案に投票するためには、アプリを使用してより持続可能なアクションを行い、持続可能性スコアを上げる必要があります。",
+  "Do some Better Actions in our apps to become able to vote!": "投票できるようにするために、私たちのアプリで良いアクションをいくつか行ってください！",
+  "{{userScore}}/{{scoreThreshold}} action score reached": "{{userScore}}/{{scoreThreshold}} のアクションスコアに到達",
+  "Tell me more": "もっと教えて",
+  "Use Apps to earn B3TR tokens through your Better Actions": "アプリを利用して、より良いアクションでB3TRトークンを獲得しましょう",
+  "Copy team wallet address": "チームウォレットアドレスをコピー",
+  "To be able to vote on this round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!": "このラウンドの配分や提案に投票するには、アプリケーションでより良いアクションを行う必要があります。もっと持続可能になり、トークンを獲得しましょう！",
+  "Explore apps": "アプリを探検",
+  "Know more": "もっと知る"
 }

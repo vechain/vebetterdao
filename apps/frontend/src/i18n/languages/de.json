@@ -1360,5 +1360,20 @@
   "Owned": "Besessen",
   "detach": "trennen",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Sie müssen den <detach>{{gmAttachedName}} GM</detach> trennen, um den <bold>{{gmSelectedName}} GM</bold> zu verbinden.",
-  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Sie können Ihren Knoten nicht zum Unterstützen von Apps oder zum Aktualisieren Ihrer Galaxy Member NFTs verwenden, solange er delegiert ist. Brechen Sie die Delegation ab, um die volle Kontrolle über Ihren Knoten zu erlangen."
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Sie können Ihren Knoten nicht zum Unterstützen von Apps oder zum Aktualisieren Ihrer Galaxy Member NFTs verwenden, solange er delegiert ist. Brechen Sie die Delegation ab, um die volle Kontrolle über Ihren Knoten zu erlangen.",
+  "Error removing delegation request": "Fehler beim Entfernen der Delegierungsanfrage",
+  "Removing delegation request...": "Delegierungsanfrage wird entfernt...",
+  "Are you sure you want to remove the voting qualification request?": "Sind Sie sicher, dass Sie die Anfrage zur Wahlqualifikation entfernen möchten?",
+  "You're removing it to": "Sie entfernen es zu",
+  "The delegatee won't be able to vote using your voting qualification": "Der Delegierte kann nicht mit Ihrer Wahlqualifikation abstimmen",
+  "once you have removed the delegation request.": "sobald Sie die Delegierungsanfrage entfernt haben.",
+  "The delegatee won't be able to vote using your voting qualification once you have removed the delegation request.": "Der Delegierte kann Ihre Wahlqualifikation nicht mehr nutzen, sobald Sie die Delegierungsanfrage entfernt haben.",
+  "Your pending requests to delegate your qualification": "Ihre ausstehenden Anfragen zur Delegierung Ihrer Qualifikation",
+  "While you keep your qualification, they will be able to use your qualification to vote.": "Solange Sie Ihre Qualifikation behalten, können sie Ihre Qualifikation zur Abstimmung nutzen.",
+  "Get more VTHO to be able to vote!": "Holen Sie sich mehr VTHO, um abstimmen zu können!",
+  "Pending delegations for voting qualification": "Ausstehende Delegierungen für die Wahlqualifikation",
+  "Get more VTHO to be able to vote and perform transactions!": "Holen Sie sich mehr VTHO, um abstimmen und Transaktionen durchführen zu können!",
+  "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.": "Senden Sie B3TR-Token vom verbundenen Konto an die App und verwenden Sie sie zur Belohnungsverteilung.",
+  "Deposit B3TR to your app": "B3TR auf Ihre App einzahlen",
+  "Deposit": "Einzahlen"
 }

@@ -1371,5 +1371,15 @@
   "Owned": "소유함",
   "detach": "분리하다",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "{{gmSelectedName}} GM을(를) 연결하려면 <bold>{{gmAttachedName}} GM</bold>을(를) <detach>분리</detach>해야 합니다",
-  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "노드가 위임된 동안에는 앱을 승인하거나 Galaxy Member NFT를 업그레이드할 수 없습니다. 위임을 취소하여 노드에 대한 완전한 제어 권한을 얻으세요."
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "노드가 위임된 동안에는 앱을 승인하거나 Galaxy Member NFT를 업그레이드할 수 없습니다. 위임을 취소하여 노드에 대한 완전한 제어 권한을 얻으세요.",
+  "{{value}} points": "{{value}} 포인트",
+  "There is nothing to show here !": "여기에 보여줄 것이 없습니다!",
+  "With your endorsement, {{appName}} gets enough score to get into the next allocation round.": "귀하의 지지로 {{appName}}이(가) 다음 할당 라운드에 진입할 충분한 점수를 획득합니다.",
+  "Removing your endorsement from an app may result in it <strong>no longer being selected for allocations</strong>.": "앱에서 지지를 제거하면 <strong>더 이상 할당에 선택되지 않을 수 있습니다</strong>.",
+  "Switch endorsement to {{appName}}": "{{appName}}로 지지 전환",
+  "Switch Your Endorsement to Another App": "다른 앱으로 지지 전환",
+  "To start endorsing <strong>{{appToEndorse}}</strong>, you’ll have to withdraw your endorsement from <strong>{{appToUnendorse}}</strong> first.": "<strong>{{appToEndorse}}</strong>을(를) 지지하려면 먼저 <strong>{{appToUnendorse}}</strong>에서 지지를 철회해야 합니다.",
+  "As a Node holder, your unique NFT score can be used to endorse a single app of your choice within the ecosystem.": "노드 보유자로서 고유한 NFT 점수를 사용하여 생태계 내의 선택한 단일 앱을 지지할 수 있습니다.",
+  "This dApp won’t join next allocation round. The app will have to reach more than {{endorsementThreshold}} Endorsement score to be included on Allocations rounds. Know more.": "이 dApp은 다음 할당 라운드에 참여하지 않습니다. 앱은 할당 라운드에 포함되려면 {{endorsementThreshold}} 이상의 지지 점수를 획득해야 합니다. 자세히 알아보십시오.",
+  "This app lost the endorsement and will not join next allocation. The App will have to reach more than {{endorsementThreshold}} Endorsement score before {{date}} to be included on Allocations rounds. Know more.": "이 앱은 지지를 잃었으며 다음 할당에 참여하지 않습니다. 앱은 할당 라운드에 포함되려면 {{date}} 이전에 {{endorsementThreshold}} 이상의 지지 점수를 획득해야 합니다. 자세히 알아보십시오."
 }

@@ -1355,5 +1355,20 @@
   "Owned": "स्वामित्व",
   "detach": "वियोजित करें",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "आपको <detach>वियोजित करें</detach> <bold>{{gmAttachedName}} GM</bold> को <bold>{{gmSelectedName}} GM</bold> से जोड़ने के लिए वियोजित करना होगा।",
-  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "जब आपका नोड सौंपी गई हो, तो आप ऐप्स को समर्थन देने या अपने गैलेक्सी मेंबर NFT को उन्नत करने के लिए इसका उपयोग नहीं कर सकते। अपने नोड पर पूर्ण नियंत्रण प्राप्त करने के लिए सौंपी गई स्थिति रद्द करें।"
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "जब आपका नोड सौंपी गई हो, तो आप ऐप्स को समर्थन देने या अपने गैलेक्सी मेंबर NFT को उन्नत करने के लिए इसका उपयोग नहीं कर सकते। अपने नोड पर पूर्ण नियंत्रण प्राप्त करने के लिए सौंपी गई स्थिति रद्द करें।",
+  "Your votes": "आपके वोट",
+  "See proposal": "प्रस्ताव देखें",
+  "+{{value}}": "+{{value}}",
+  "received": "प्राप्त",
+  "Most voted apps": "अधिकतर वोट किए गए ऐप्स",
+  "You have {{value}} B3TR rewards pending claim.": "आपके पास {{value}} बी3टीआर पुरस्कार लंबित दावा हेतु हैं।",
+  "Voting rewards": "वोटिंग पुरस्कार",
+  "Claim rewards": "पुरस्कार का दावा करें",
+  "View it on the explorer": "एक्सप्लोरर पर इसे देखें",
+  "No votes to cast": "डालने के लिए कोई वोट नहीं",
+  "You have not voted": "आपने अभी तक वोट नहीं किया है",
+  "Once your vote has been cast, you will not be able to revert it.": "एक बार जब आपका वोट डाल दिया जाएगा, आप इसे वापस नहीं कर पाएंगे।",
+  "Show all apps": "सभी ऐप्स दिखाएं",
+  "No Apps found": "कोई ऐप्स नहीं मिले",
+  "=~ {{value}} votes": "=~ {{value}} वोट्स"
 }
