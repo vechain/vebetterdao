@@ -26,8 +26,16 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
   const rmNodeEndorsementMutation = useRemoveNodeEndorsement({
     appId,
     nodeId,
-    onSuccess: onClose,
+    onSuccess: () => {
+      rmNodeEndorsementMutation.resetStatus()
+      onClose()
+    },
   })
+
+  const handleClose = useCallback(() => {
+    rmNodeEndorsementMutation.resetStatus()
+    onClose()
+  }, [rmNodeEndorsementMutation, onClose])
 
   const handleUnendorsement = useCallback(() => {
     rmNodeEndorsementMutation.resetStatus()
@@ -38,7 +46,7 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
     return (
       <TransactionModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         successTitle={t("Remove endorsement")}
         status={rmNodeEndorsementMutation.error ? "error" : rmNodeEndorsementMutation.status}
         errorDescription={rmNodeEndorsementMutation.error?.reason}
@@ -52,7 +60,7 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
     )
 
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose}>
+    <BaseModal isOpen={isOpen} onClose={handleClose}>
       <VStack spacing={6} align="flex-start" w="full">
         <Heading fontSize="2xl">{t("Remove endorsement")}</Heading>
 
@@ -89,7 +97,7 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
           <Button variant={"dangerFilled"} w={"full"} onClick={handleUnendorsement}>
             {t("Remove now")}
           </Button>
-          <Button variant={"primaryGhost"} w={"full"} onClick={onClose}>
+          <Button variant={"primaryGhost"} w={"full"} onClick={handleClose}>
             {t("Cancel")}
           </Button>
         </VStack>

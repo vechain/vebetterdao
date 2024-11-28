@@ -49,7 +49,10 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
     appIdToEndorse: appIdToEndorse ?? "",
     appIdToUnendorse: appIdToUnendorse ?? "",
     nodeId,
-    onSuccess: onClose,
+    onSuccess: () => {
+      switchEndorsementMutation.resetStatus()
+      onClose()
+    },
   })
 
   const handleSwitchEndorsement = useCallback(() => {

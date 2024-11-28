@@ -33,7 +33,10 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
     appId: endorsedApp?.id,
     nodeId: xNodeId,
     userAddress: account ?? "",
-    onSuccess: onClose,
+    onSuccess: () => {
+      unendorseAppMutation.resetStatus()
+      onClose()
+    },
   })
 
   const handleUnendorsement = useCallback(() => {
