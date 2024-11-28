@@ -1370,5 +1370,6 @@
   "Owned": "Sahip Olunan",
   "detach": "ayırmak",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "<bold>{{gmAttachedName}} GM</bold>'yi <detach>ayırmanız</detach> gerekiyor ki <bold>{{gmSelectedName}} GM</bold>'yi ekleyebilesiniz",
-  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Node'unuzu uygulamaları desteklemek veya Galaxy Member NFT'lerinizi yükseltmek için kullanamazsınız çünkü bu durumda delegedir. Node'unuz üzerinde tam kontrol sağlamak için delegasyonu iptal edin."
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Node'unuzu uygulamaları desteklemek veya Galaxy Member NFT'lerinizi yükseltmek için kullanamazsınız çünkü bu durumda delegedir. Node'unuz üzerinde tam kontrol sağlamak için delegasyonu iptal edin.",
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "<bold>{{gmSelectedName}} GM</bold>'yi eklemek için <bold>{{gmAttachedName}} GM</bold>'yi çıkartmanız gerekiyor"
 }

@@ -1370,5 +1370,6 @@
   "Owned": "Sở hữu",
   "detach": "tách rời",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Bạn cần <detach>tách rời</detach> <bold>{{gmAttachedName}} GM</bold> để gắn <bold>{{gmSelectedName}} GM</bold>",
-  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Bạn không thể sử dụng Nút của mình để xác nhận ứng dụng hoặc nâng cấp NFT Thành viên Galaxy của mình khi nó đang được ủy quyền. Hủy bỏ ủy quyền để có toàn quyền kiểm soát Nút của bạn."
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Bạn không thể sử dụng Nút của mình để xác nhận ứng dụng hoặc nâng cấp NFT Thành viên Galaxy của mình khi nó đang được ủy quyền. Hủy bỏ ủy quyền để có toàn quyền kiểm soát Nút của bạn.",
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Bạn cần tách <bold>{{gmAttachedName}} GM</bold> để gắn <bold>{{gmSelectedName}} GM</bold>"
 }

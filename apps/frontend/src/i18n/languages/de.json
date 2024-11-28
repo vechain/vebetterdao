@@ -1375,5 +1375,6 @@
   "Get more VTHO to be able to vote and perform transactions!": "Holen Sie sich mehr VTHO, um abstimmen und Transaktionen durchführen zu können!",
   "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.": "Senden Sie B3TR-Token vom verbundenen Konto an die App und verwenden Sie sie zur Belohnungsverteilung.",
   "Deposit B3TR to your app": "B3TR auf Ihre App einzahlen",
-  "Deposit": "Einzahlen"
+  "Deposit": "Einzahlen",
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Sie müssen den <bold>{{gmAttachedName}} GM</bold> trennen, um den <bold>{{gmSelectedName}} GM</bold> zu verbinden."
 }
