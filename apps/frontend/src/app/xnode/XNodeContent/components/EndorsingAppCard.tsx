@@ -153,7 +153,7 @@ export const EndorsingAppCard = () => {
                 {isXNodeDelegator ? (
                   <Text color="#757575">
                     {t(
-                      "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again.",
+                      "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.",
                     )}
                   </Text>
                 ) : (

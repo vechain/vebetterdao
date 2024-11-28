@@ -24,6 +24,7 @@ interface XNodeData {
   xNodeError: any
   xNodeId: string | undefined
   xNodeName: string
+  nodeType: string
   xNodeImage: string
   xNodeLevel: number
   xNodePoints: number
@@ -69,6 +70,7 @@ export const useXNode = (): XNodeData => {
     : undefined
 
   const xNodeName = xNode?.name ?? t("Not available")
+  const nodeType = xNodeName?.toLowerCase().endsWith("x") ? "XNODE" : "ECONOMIC NODE"
   const xNodeImage = xNode?.image ?? notFoundImage
   const xNodeLevel = xNode?.level ?? 0
 
@@ -106,6 +108,7 @@ export const useXNode = (): XNodeData => {
     xNodeError,
     xNodeId: xNode?.id,
     xNodeName,
+    nodeType,
     xNodeImage,
     xNodeLevel,
     xNodePoints,

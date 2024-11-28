@@ -40,13 +40,13 @@ export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProp
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
-        successTitle={t("XNode delegation revoked!")}
+        successTitle={t("Node delegation revoked!")}
         status={revokeXNodeDelegation.status}
         errorDescription={revokeXNodeDelegation.error?.reason}
-        errorTitle={revokeXNodeDelegation.error ? t("Error revoking XNode delegation") : undefined}
+        errorTitle={revokeXNodeDelegation.error ? t("Error revoking Node delegation") : undefined}
         showTryAgainButton
         onTryAgain={() => revokeXNodeDelegation.sendTransaction({ isAttachedToGM: isXNodeAttachedToGM })}
-        pendingTitle={t("Revoking XNode delegation...")}
+        pendingTitle={t("Revoking Node delegation...")}
         showExplorerButton
         txId={revokeXNodeDelegation.txReceipt?.meta.txID ?? revokeXNodeDelegation.sendTransactionTx?.txid}
       />
@@ -59,19 +59,19 @@ export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProp
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />
           <Heading fontSize={["lg", "lg", "2xl"]} textAlign="center">
-            {t("Are you sure you want to revoke your XNode delegation?")}
+            {t("Are you sure you want to revoke your Node delegation?")}
           </Heading>
         </VStack>
         <Alert status="error" borderRadius="2xl">
           <AlertIcon w={9} h={9} />
           <Box lineHeight={"1.20rem"} color="#C84968" fontSize="sm">
             <AlertTitle as="span">
-              {t("The delegated address will no longer be able to endorse and upgrade GM NFTs using your XNode")}
+              {t("The delegated address will no longer be able to endorse and upgrade GM NFTs using your Node")}
             </AlertTitle>
             <AlertDescription as="span">{t("once you have revoked the delegation.")}</AlertDescription>
             {isXNodeAttachedToGM && (
               <Text mt={2} fontSize="sm" color="#C84968" fontWeight={600}>
-                {t("Notice: the GM NFT attached to this XNode will be detached and will lose the free levels.")}
+                {t("Notice: the GM NFT attached to this Node will be detached and will lose the free levels.")}
               </Text>
             )}
           </Box>

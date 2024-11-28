@@ -29,7 +29,7 @@ type ClausesParams = {
 }
 
 /**
- * Provides a React hook to revoke an XNode delegation using a blockchain transaction.
+ * Provides a React hook to revoke an Node delegation using a blockchain transaction.
  * This hook integrates with the blockchain wallet and manages transaction state.
  *
  * @param onSuccess - Optional callback to be executed after successful revocation
