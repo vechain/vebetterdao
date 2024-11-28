@@ -15,12 +15,7 @@ export const DelegationAlert = () => {
       <Alert status="warning" borderRadius="2xl">
         <AlertIcon />
         <Box lineHeight="1.20rem" fontSize="sm">
-          <AlertTitle as="span">{t("Your XNode is currently delegated to another address")}</AlertTitle>
-          <Text>
-            {t(
-              "You can't endorse apps with this account if you delegated your XNode. Cancel the delegation to be able to endorse apps with this account again.",
-            )}
-          </Text>
+          <AlertTitle as="span">{t("Your Node is currently delegated to another address")}</AlertTitle>
         </Box>
       </Alert>
     )
@@ -30,8 +25,8 @@ export const DelegationAlert = () => {
     <Alert status="info" borderRadius="2xl">
       <AlertIcon />
       <Box lineHeight="1.20rem" fontSize="sm">
-        <AlertTitle as="span">{t("You are controlling a delegated XNode")}</AlertTitle>
-        <Text>{t("Only the XNode owner can revoke the delegation.")}</Text>
+        <AlertTitle as="span">{t("You are controlling a delegated Node")}</AlertTitle>
+        <Text>{t("Only the Node owner can revoke the delegation.")}</Text>
       </Box>
     </Alert>
   )

@@ -35,14 +35,12 @@ export const DelegateXNodeCard = () => {
             <Heading fontSize="lg">{t("Delegation")}</Heading>
             {isXNodeDelegated ? (
               <Text fontSize="sm">
-                {isXNodeDelegator
-                  ? t("XNode is currently delegated to:")
-                  : t("XNode is currently delegated to you by:")}
+                {isXNodeDelegator ? t("Node is currently delegated to:") : t("Node is currently delegated to you by:")}
               </Text>
             ) : (
               <Text fontSize="sm">
                 {t(
-                  "Delegate your XNode to the primary account you use on VeBetterDAO to endorse apps or to participate in governance.",
+                  "Delegate your Node to the primary account you use on VeBetterDAO to endorse apps or to participate in governance.",
                 )}
               </Text>
             )}
@@ -67,7 +65,7 @@ export const DelegateXNodeCard = () => {
               leftIcon={<UilArrowUpRight color="#004CFC" />}
               variant="primarySubtle"
               onClick={delegateModal.onOpen}>
-              {t("Delegate XNode")}
+              {t("Delegate Node")}
             </Button>
           )}
 

@@ -61,7 +61,7 @@ export const AttachGMNFTCard = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached GM" : "Attach to upgrade")}</Heading>
-              <BaseTooltip text={t("Once the GM NFT is attached to your XNode, it can't be transferred anymore")}>
+              <BaseTooltip text={t("Once the GM NFT is attached to your Node, it can't be transferred anymore")}>
                 <Box as="button">
                   <UilInfoCircle color="#004CFC" />
                 </Box>
@@ -70,9 +70,9 @@ export const AttachGMNFTCard = () => {
             <Text fontSize="sm">
               {t(
                 isXNodeAttachedToGM
-                  ? "Your XNode is attached to the following GM NFT"
+                  ? "Your Node is attached to the following GM NFT"
                   : isXNodeDelegator
-                    ? "Remove the XNode delegation to attach GM NFT to this node"
+                    ? "Remove the Node delegation to attach GM NFT to this node"
                     : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
               )}
             </Text>
