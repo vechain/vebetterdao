@@ -696,7 +696,7 @@ describe("VeBetterPassport - @shard8", function () {
 
       // Whitelist function
       const funcSig = B3trContract.interface.getFunction("tokenDetails")?.selector
-      await governor.connect(owner).setWhitelistFunction(await b3tr.getAddress(), funcSig, true)
+      await governor.connect(owner).setWhitelistFunction(await b3tr.getAddress(), funcSig as string, true)
 
       // Create a proposal for next round
       // create a new proposal active from round 2

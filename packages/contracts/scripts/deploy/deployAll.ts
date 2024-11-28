@@ -115,6 +115,14 @@ export async function deployAll(config: ContractsConfig) {
     PassportPoPScoreLogicV1,
     PassportSignalingLogicV1,
     PassportWhitelistAndBlacklistLogicV1,
+    PassportChecksLogicV2,
+    PassportConfiguratorV2,
+    PassportEntityLogicV2,
+    PassportDelegationLogicV2,
+    PassportPersonhoodLogicV2,
+    PassportPoPScoreLogicV2,
+    PassportSignalingLogicV2,
+    PassportWhitelistAndBlacklistLogicV2,
     PassportChecksLogic,
     PassportConfigurator,
     PassportEntityLogic,
@@ -462,13 +470,33 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as VeBetterPassportV1
 
-  const veBetterPassport = (await upgradeProxy(
+  const veBetterPassportV2 = (await upgradeProxy(
     "VeBetterPassportV1",
-    "VeBetterPassport",
+    "VeBetterPassportV2",
     await veBetterPassportV1.getAddress(),
     [],
     {
       version: 2,
+      libraries: {
+        PassportChecksLogicV2: await PassportChecksLogicV2.getAddress(),
+        PassportConfiguratorV2: await PassportConfiguratorV2.getAddress(),
+        PassportEntityLogicV2: await PassportEntityLogicV2.getAddress(),
+        PassportDelegationLogicV2: await PassportDelegationLogicV2.getAddress(),
+        PassportPersonhoodLogicV2: await PassportPersonhoodLogicV2.getAddress(),
+        PassportPoPScoreLogicV2: await PassportPoPScoreLogicV2.getAddress(),
+        PassportSignalingLogicV2: await PassportSignalingLogicV2.getAddress(),
+        PassportWhitelistAndBlacklistLogicV2: await PassportWhitelistAndBlacklistLogicV2.getAddress(),
+      },
+    },
+  )) as VeBetterPassport
+
+  const veBetterPassport = (await upgradeProxy(
+    "VeBetterPassportV2",
+    "VeBetterPassport",
+    await veBetterPassportV1.getAddress(),
+    [],
+    {
+      version: 3,
       libraries: {
         PassportChecksLogic: await PassportChecksLogic.getAddress(),
         PassportConfigurator: await PassportConfigurator.getAddress(),
