@@ -26,9 +26,18 @@ import { IoWarningOutline } from "react-icons/io5"
 
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
-  const { isXNodeAttachedToGM, gmId } = useSelectedGmNft()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, attachedGMTokenId, isXNodeDelegatee } =
-    useXNode()
+  const { isXNodeAttachedToGM, gmId, gmName: selectedGmName } = useSelectedGmNft()
+  const {
+    xNodeName,
+    xNodeImage,
+    xNodePoints,
+    isXNodeHolder,
+    isXNodeDelegator,
+    attachedGMTokenId,
+    isXNodeDelegatee,
+    isXNodeAttachedToGM: xNodeHasGMAttached,
+    attachedGMTokenName: attachedGmName,
+  } = useXNode()
 
   const router = useRouter()
   const goToXnodePage = useCallback(() => {
@@ -142,13 +151,33 @@ export const AttachXNodeCard = () => {
                   {t("Coming soon!")}
                 </Button>
               }>
-              <Button
-                leftIcon={<UilLinkBroken color="#004CFC" />}
-                variant={"primarySubtle"}
-                isDisabled={isXNodeDelegator}
-                onClick={attachGmToXNodeModal.onOpen}>
-                {t("Attach now!")}
-              </Button>
+              {xNodeHasGMAttached ? (
+                <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgb(255, 250, 235)"}>
+                  <IoWarningOutline size={24} color={"rgb(217, 119, 6)"} />
+                  <Text color={"rgb(217, 119, 6)"} fontSize={14}>
+                    <Trans
+                      i18nKey="You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>"
+                      components={{
+                        detach: (
+                          <Text as="span" fontWeight={"800"} onClick={detachGmToXNodeModal.onOpen} cursor="pointer">
+                            {t("detach")}
+                          </Text>
+                        ),
+                        bold: <Text as="span" fontWeight={"600"} />,
+                      }}
+                      values={{ gmAttachedName: attachedGmName, gmSelectedName: selectedGmName }}
+                    />
+                  </Text>
+                </HStack>
+              ) : (
+                <Button
+                  leftIcon={<UilLinkBroken color="#004CFC" />}
+                  variant={"primarySubtle"}
+                  isDisabled={isXNodeDelegator}
+                  onClick={attachGmToXNodeModal.onOpen}>
+                  {t("Attach now!")}
+                </Button>
+              )}
             </FeatureFlagWrapper>
           )}
         </VStack>
