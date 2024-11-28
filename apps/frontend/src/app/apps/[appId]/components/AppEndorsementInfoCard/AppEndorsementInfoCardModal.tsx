@@ -63,17 +63,25 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
   const [selectedEndorserAddress, setSelectedEndorserAddress] = useState("")
   const [selectedEndorserNodeId, setSelectedEndorserNodeId] = useState("")
   const [selectedEndorserNodePoints, setSelectedEndorserNodePoints] = useState("")
-  const handleCancelClick = () => {
-    setIsConfirmOpen(false)
+  const resetSelectedEndorser = () => {
     setSelectedEndorserAddress("")
     setSelectedEndorserNodeId("")
     setSelectedEndorserNodePoints("")
+  }
+  const handleCancelClick = () => {
+    setIsConfirmOpen(false)
+    resetSelectedEndorser()
   }
   const {
     isOpen: isUnendorsementModalOpen,
     onOpen: onOpenUnendorsementModal,
     onClose: onCloseUnendorsementModal,
   } = useDisclosure()
+  const handleUnendorsementSuccess = () => {
+    onCloseUnendorsementModal()
+    setIsConfirmOpen(false)
+    resetSelectedEndorser()
+  }
 
   return (
     <BaseModal
@@ -237,7 +245,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
       {isAppAdmin && isUnendorsementModalOpen && (
         <UnendorseAppModalAdminsOnly
           isOpen={isUnendorsementModalOpen}
-          onClose={onCloseUnendorsementModal}
+          onClose={handleUnendorsementSuccess}
           appId={appId}
           nodeId={selectedEndorserNodeId}
           nodePoints={selectedEndorserNodePoints}
