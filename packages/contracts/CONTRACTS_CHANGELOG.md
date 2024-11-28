@@ -49,6 +49,7 @@ Added new functions to check node delegation status and improved node management
   - Delegator status
   - Delegatee status
   - Delegatee address
+- Added `getNodeCreationTime()` to get the time in seconds of when the Vechain node was created
 
 ### Bug Fixes 🐛
 
