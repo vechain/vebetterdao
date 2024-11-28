@@ -301,7 +301,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as XAllocationPool
 
   const galaxyMember = (await deployAndUpgrade(
-    ["GalaxyMemberV1", "GalaxyMember"],
+    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMember"],
     [
       [
         {
@@ -325,9 +325,10 @@ export async function deployAll(config: ContractsConfig) {
         TEMP_ADMIN,
         config.GM_NFT_NODE_TO_FREE_LEVEL,
       ],
+      [],
     ],
     {
-      versions: [undefined, 2],
+      versions: [undefined, 2, 3],
       logOutput: true,
     },
   )) as GalaxyMember
