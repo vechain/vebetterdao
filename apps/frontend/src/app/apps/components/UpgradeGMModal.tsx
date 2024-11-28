@@ -1,9 +1,12 @@
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { Button, useDisclosure } from "@chakra-ui/react"
 import { CustomModalContent, TransactionModal } from "@/components"
 import { useUpgradeGM } from "@/hooks"
 import {
+  Button,
+  useDisclosure,
+  Box,
+  Image,
   Modal,
   ModalOverlay,
   ModalCloseButton,
@@ -16,12 +19,14 @@ import {
 } from "@chakra-ui/react"
 
 interface UpgradeGMModalProps {
+  gmImage: string
   tokenId: string
   b3trToUpgradeGMToNextLevel: string
   upgradeGMModal: ReturnType<typeof useDisclosure>
 }
 
 export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
+  gmImage,
   tokenId,
   b3trToUpgradeGMToNextLevel,
   upgradeGMModal,
@@ -57,7 +62,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
         errorTitle={upgradeGMMutation.error ? "Error upgrading GM NFT" : undefined}
         showTryAgainButton
         onTryAgain={onTryAgain}
-        pendingTitle={"Upgradeing GM NFT..."}
+        pendingTitle={"Upgrading GM NFT..."}
         showExplorerButton
         txId={upgradeGMMutation.txReceipt?.meta.txID ?? upgradeGMMutation.sendTransactionTx?.txid}
       />
@@ -67,13 +72,30 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
     <>
       <Modal isOpen={upgradeGMModal.isOpen} onClose={handleClose} size={"2xl"}>
         <ModalOverlay />
-        <CustomModalContent>
+        <CustomModalContent p={{ base: 3, md: 5 }}>
           <ModalCloseButton />
           <ModalHeader>
             <Heading fontSize="lg">{t("Upgrade GM NFT")}</Heading>
           </ModalHeader>
           <ModalBody>
-            <Text>{t("Upgrading your GM NFT will increase its level and unlock new benefits.")}</Text>
+            <Text size={"md"}>{t("Upgrading your GM NFT will increase its level and unlock new benefits.")}</Text>
+            <VStack align="stretch" w="full" mt={4}>
+              <Box
+                alignSelf={"center"}
+                py={10}
+                px={7}
+                w={"200px"}
+                bgGradient={
+                  "linear-gradient(137deg, rgba(178, 242, 109, 0.6) 2.2%, rgba(0, 76, 252, 0.6) 98.29%), linear-gradient(137deg, rgba(178, 242, 109, 0.6) 2.2%, rgba(0, 76, 252, 0.6) 98.29%)"
+                }
+                rounded={34}>
+                <Box bgGradient={"linear-gradient(137deg, #B2F26D 2.2%, #004CFC 98.29%)"} p={5} rounded={34}>
+                  <Box bg={"#0B0D0C"} p={3} rounded={34}>
+                    <Image src={gmImage} maxW={"auto"} rounded={34} alt={`GM NFT #${tokenId}`} />
+                  </Box>
+                </Box>
+              </Box>
+            </VStack>
           </ModalBody>
           <ModalFooter w="full">
             <VStack align="stretch" w="full">
