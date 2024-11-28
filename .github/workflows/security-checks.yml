@@ -24,6 +24,8 @@ jobs:
       INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
       GIT_VECHAINCI_SSH_KEY: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
   sonar-scan:
-    uses: vechain/github-actions/.github/workflows/sonar-scan.yaml@3939ad6c427a0c3555e11cfe743c8f5eeefb5d2d # canary version to skip coverage report download
+    uses: vechain/github-actions/.github/workflows/sonar-scan.yaml@48dacbe5d804c6f95db743a19ddf3156b7e5fdbd # canary version to skip coverage report download
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     with:
       download-coverage-report: false
