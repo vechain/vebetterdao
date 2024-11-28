@@ -28,6 +28,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     isGMOwned,
     isEnoughBalanceToUpgradeGM,
     gmId,
+    gmImage,
     gmLevel,
     maxGmLevel,
     isMaxGmLevelReached,
@@ -186,6 +187,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       />
       <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
       <UpgradeGMModal
+        gmImage={gmImage}
         tokenId={gmId}
         upgradeGMModal={upgradeGMModal}
         b3trToUpgradeGMToNextLevel={b3trToUpgradeGMToNextLevel}
