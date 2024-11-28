@@ -56,7 +56,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * - NodeManagement contract has been added to permit attaching and detaching nodes from managed nodes too
  *
  * --------------------------------- VERSION 3 ---------------------------------
- * - Updated Node Management interface to include getters (getUserNode(), isNodeDelegator(), isNodeDelegated() and getNodeCreationTime())
+ * - Updated Node Management interface to include getters (isNodeDelegator() and isNodeDelegated())
  */
 contract GalaxyMember is
   ERC721Upgradeable,

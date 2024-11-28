@@ -140,10 +140,6 @@ describe("Node Management -@shard5", function () {
         expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
       }
 
-      // Creation time should be the same as the block timestamp
-      const creationTime = await nodeManagement.getNodeCreationTime(4)
-      expect(creationTime).to.equal(block.timestamp)
-
       // Check if all nodes are delegated to the same address
       expect(await nodeManagement.getNodeIds(otherAccount.address)).to.eql([1n, 2n, 3n])
 
