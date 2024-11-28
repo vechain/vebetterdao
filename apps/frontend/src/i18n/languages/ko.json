@@ -1303,5 +1303,6 @@
   "App submition": "앱 제출",
   "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.": "로고, 창작자 소개, 소셜 미디어 링크 등 모든 필수 정보를 포함하여 앱을 생태계에 제출하세요.",
   "X Node Holders will use their NFTs to endorse your app. Once it reaches 100 points, it becomes eligible for allocations.": "X 노드 보유자는 자신의 NFT로 앱을 지원합니다. 100점에 도달하면 할당 자격을 얻게 됩니다.",
-  "The allocation rounds determine the resources and support your app receives from the ecosystem community.": "할당 라운드는 귀하의 앱이 생태계 커뮤니티로부터 받는 자원과 지원을 결정합니다."
+  "The allocation rounds determine the resources and support your app receives from the ecosystem community.": "할당 라운드는 귀하의 앱이 생태계 커뮤니티로부터 받는 자원과 지원을 결정합니다.",
+  "#{{round}} allocation round": "#{{round}} 할당 라운드"
 }
