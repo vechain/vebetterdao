@@ -6,7 +6,6 @@ import {
   TimeLock,
   VOT3,
   GalaxyMember,
-  GalaxyMemberV1,
   Emissions,
   XAllocationVoting,
   XAllocationPool,
@@ -74,9 +73,10 @@ import {
   VoteEligibilityUtils,
   EndorsementUtils,
   X2EarnCreator,
+  NodeManagementV1,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
+import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deployAll"
@@ -87,6 +87,12 @@ import { XAllocationPoolV2 } from "../../typechain-types/contracts/deprecated/V2
 import { X2EarnAppsV1 } from "../../typechain-types/contracts/deprecated/V1/X2EarnAppsV1"
 import {
   GovernorClockLogicV4,
+  GovernorConfiguratorV4,
+  GovernorDepositLogicV4,
+  GovernorFunctionRestrictionsLogicV4,
+  GovernorProposalLogicV4,
+  GovernorQuorumLogicV4,
+  GovernorStateLogicV4,
   GovernorVotesLogicV4,
 } from "../../typechain-types/contracts/deprecated/V4/governance/libraries"
 import { x2EarnLibraries } from "../../scripts/libraries/x2EarnLibraries"
@@ -102,7 +108,6 @@ interface DeployInstance {
   governorV3: B3TRGovernorV3
   governorV4: B3TRGovernorV4
   galaxyMember: GalaxyMember
-  galaxyMemberV1: GalaxyMemberV1
   x2EarnApps: X2EarnApps
   xAllocationVoting: XAllocationVoting
   xAllocationPool: XAllocationPool
@@ -146,11 +151,11 @@ interface DeployInstance {
   governorStateLogicLibV3: GovernorStateLogicV3
   governorVotesLogicLibV3: GovernorVotesLogicV3
   governorClockLogicLibV4: GovernorClockLogicV4
-  governorConfiguratorLibV4: GovernorConfiguratorLibV4
-  governorDepositLogicLibV4: GovernorDepositLogicLibV4
-  governorFunctionRestrictionsLogicLibV4: GovernorFunctionRestrictionsLogicLibV4
-  governorProposalLogicLibV4: GovernorProposalLogicLibV4
-  governorQuorumLogicLibV4: GovernorQuorumLogicLibV4
+  governorConfiguratorLibV4: GovernorConfiguratorV4
+  governorDepositLogicLibV4: GovernorDepositLogicV4
+  governorFunctionRestrictionsLogicLibV4: GovernorFunctionRestrictionsLogicV4
+  governorProposalLogicLibV4: GovernorProposalLogicV4
+  governorQuorumLogicLibV4: GovernorQuorumLogicV4
   governorStateLogicLibV4: GovernorStateLogicV4
   governorVotesLogicLibV4: GovernorVotesLogicV4
   passportChecksLogic: PassportChecksLogic
@@ -322,44 +327,55 @@ export const getOrDeployContractInstances = async ({
     config.TREASURY_TRANSFER_LIMIT_VTHO,
   ])) as Treasury
 
-  // Deploy GalaxyMember
-  const galaxyMemberV1 = (await deployProxy("GalaxyMemberV1", [
-    {
-      name: NFT_NAME,
-      symbol: NFT_SYMBOL,
-      admin: owner.address,
-      upgrader: owner.address,
-      pauser: owner.address,
-      minter: owner.address,
-      contractsAddressManager: owner.address,
-      maxLevel: maxMintableLevel,
-      baseTokenURI: config.GM_NFT_BASE_URI,
-      b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
-      b3tr: await b3tr.getAddress(),
-      treasury: await treasury.getAddress(),
-    },
-  ])) as GalaxyMemberV1
-
   const x2EarnCreator = (await deployProxy("X2EarnCreator", [config.CREATOR_NFT_URI, owner.address])) as X2EarnCreator
 
   // Deploy NodeManagement
-  const nodeManagement = (await deployProxy("NodeManagement", [
+  const nodeManagementV1 = (await deployProxy("NodeManagementV1", [
     await vechainNodesMock.getAddress(),
     owner.address,
     owner.address,
-  ])) as NodeManagement
+  ])) as NodeManagementV1
 
-  const galaxyMember = (await upgradeProxy(
-    "GalaxyMemberV1",
-    "GalaxyMember",
-    await galaxyMemberV1.getAddress(),
+  const nodeManagement = (await upgradeProxy(
+    "NodeManagementV1",
+    "NodeManagement",
+    await nodeManagementV1.getAddress(),
+    [],
+    {
+      version: 2,
+    },
+  )) as NodeManagement
+
+  const galaxyMember = (await deployAndUpgrade(
+    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMember"],
     [
-      await vechainNodesMock.getAddress(),
-      await nodeManagement.getAddress(),
-      owner.address,
-      config.GM_NFT_NODE_TO_FREE_LEVEL,
+      [
+        {
+          name: NFT_NAME,
+          symbol: NFT_SYMBOL,
+          admin: owner.address,
+          upgrader: owner.address,
+          pauser: owner.address,
+          minter: owner.address,
+          contractsAddressManager: owner.address,
+          maxLevel: maxMintableLevel,
+          baseTokenURI: config.GM_NFT_BASE_URI,
+          b3trToUpgradeToLevel: config.GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL,
+          b3tr: await b3tr.getAddress(),
+          treasury: await treasury.getAddress(),
+        },
+      ],
+      [
+        await vechainNodesMock.getAddress(),
+        await nodeManagement.getAddress(),
+        owner.address,
+        config.GM_NFT_NODE_TO_FREE_LEVEL,
+      ],
+      [],
     ],
-    { version: 2 },
+    {
+      versions: [undefined, 2, 3],
+    },
   )) as GalaxyMember
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
@@ -836,7 +852,6 @@ export const getOrDeployContractInstances = async ({
     governorV3,
     governorV4,
     galaxyMember,
-    galaxyMemberV1,
     x2EarnApps,
     xAllocationVoting,
     nodeManagement,

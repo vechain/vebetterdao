@@ -26,10 +26,17 @@ const levelAttributes: Record<string, string | number>[] = [
   {
     Level: 1,
   },
+  {
+    Level: 2,
+  },
+  {
+    Level: 3,
+  },
 ]
 
-const levelNames = ["VeBetterDAO Galaxy Member"]
-const description = "GM Earth is a community of people who participated in voting for the governance of VeBetter DAO."
+const levelNames = ["Earth", "Moon", "Mercury"]
+const description =
+  "Galaxy Member is a membership NFT to the VeBetterDAO ecosystem. It grants you access to exclusive features and benefits."
 
 const METADATA_PATH = path.join(__dirname, "../../../metadata/galaxyMember/metadata")
 const IMAGE_ZIP_PATH = path.join(__dirname, "../../../metadata/galaxyMember/images.zip")

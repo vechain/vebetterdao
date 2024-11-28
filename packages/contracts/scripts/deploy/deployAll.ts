@@ -206,11 +206,13 @@ export async function deployAll(config: ContractsConfig) {
   )) as Treasury
 
   // Deploy NodeManagement
-  const nodeManagement = (await deployProxy(
-    "NodeManagement",
-    [vechainNodesAddress, config.CONTRACTS_ADMIN_ADDRESS, config.CONTRACTS_ADMIN_ADDRESS],
-    undefined,
-    true,
+  const nodeManagement = (await deployAndUpgrade(
+    ["NodeManagementV1", "NodeManagement"],
+    [[vechainNodesAddress, config.CONTRACTS_ADMIN_ADDRESS, config.CONTRACTS_ADMIN_ADDRESS], []],
+    {
+      versions: [undefined, 2],
+      logOutput: true,
+    },
   )) as NodeManagement
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
@@ -299,7 +301,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as XAllocationPool
 
   const galaxyMember = (await deployAndUpgrade(
-    ["GalaxyMemberV1", "GalaxyMember"],
+    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMember"],
     [
       [
         {
@@ -323,9 +325,11 @@ export async function deployAll(config: ContractsConfig) {
         TEMP_ADMIN,
         config.GM_NFT_NODE_TO_FREE_LEVEL,
       ],
+      [],
     ],
     {
-      versions: [undefined, 2],
+      versions: [undefined, 2, 3],
+      logOutput: true,
     },
   )) as GalaxyMember
 

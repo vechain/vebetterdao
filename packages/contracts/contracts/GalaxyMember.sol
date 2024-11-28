@@ -45,7 +45,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * @notice This contract manages the unique assets owned by users within the Galaxy Member ecosystem.
  * @dev Extends ERC721 Non-Fungible Token Standard basic implementation with upgradeable pattern, burnable, pausable, and access control functionalities.
  *
- * --------------------------------- VERSION ---------------------------------
+ * --------------------------------- VERSION 2 ---------------------------------
  * - Added Vechain Nodes contract to attach and detach nodes to tokens
  * - Added NODES_MANAGER_ROLE to manage Vechain Nodes Contract address and free upgrade levels
  * - Added free upgrade levels for each Vechain node level
@@ -54,6 +54,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * - Core logic functions are now overridable through inheritance
  * - B3TRGovernor has been updated to V2 thus pointing to the new interface
  * - NodeManagement contract has been added to permit attaching and detaching nodes from managed nodes too
+ *
+ * --------------------------------- VERSION 3 ---------------------------------
+ * - Updated Node Management interface to include getters (isNodeDelegator() and isNodeDelegated())
  */
 contract GalaxyMember is
   ERC721Upgradeable,
@@ -683,7 +686,7 @@ contract GalaxyMember is
   /// @dev This function is used to identify the version of the contract and should be updated in each new version
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
-    return "2";
+    return "3";
   }
 
   struct TokenInfo {

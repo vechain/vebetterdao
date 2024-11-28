@@ -28,7 +28,7 @@ import { useTranslation } from "react-i18next"
 export const EndorsingAppCard = () => {
   const { t } = useTranslation()
 
-  const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeId } = useXNode()
+  const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeId, isXNodeDelegator } = useXNode()
   // get the number of endorsers for the endorsed app
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(endorsedApp?.id ?? "")
   // get app status and score
@@ -133,7 +133,11 @@ export const EndorsingAppCard = () => {
                       endorsers={appEndorsers || []}
                       isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
                   </Flex>
-                  <Button variant="dangerGhost" onClick={unendorseAppModal.onOpen} w={["full", "full", "auto"]}>
+                  <Button
+                    variant="dangerGhost"
+                    onClick={unendorseAppModal.onOpen}
+                    w={["full", "full", "auto"]}
+                    isDisabled={isXNodeDelegator}>
                     {t("Remove endorsement")}
                   </Button>
                 </Stack>
@@ -146,14 +150,24 @@ export const EndorsingAppCard = () => {
                 <Heading fontSize="xl" color="#757575" fontWeight={"500"}>
                   {t("You’re not endorsing any app")}
                 </Heading>
-                <Text color="#757575">
-                  {t(
-                    "Browse the apps that are looking for endorsement and use your score to help them join the allocation rounds!",
-                  )}
-                </Text>
-                <Button variant="primaryAction" onClick={goToApps} mt={4} w={["full", "full", "auto"]}>
-                  {t("Browse apps")}
-                </Button>
+                {isXNodeDelegator ? (
+                  <Text color="#757575">
+                    {t(
+                      "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.",
+                    )}
+                  </Text>
+                ) : (
+                  <>
+                    <Text color="#757575">
+                      {t(
+                        "Browse the apps that are looking for endorsement and use your score to help them join the allocation rounds!",
+                      )}
+                    </Text>
+                    <Button variant="primaryAction" onClick={goToApps} mt={4} w={["full", "full", "auto"]}>
+                      {t("Browse apps")}
+                    </Button>
+                  </>
+                )}
               </VStack>
             </Flex>
           )}
