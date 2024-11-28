@@ -4,26 +4,27 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 ## Version History
 
-| Date                | Contract(s)                                               | Summary                                                                                        |
-| ------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| 28th November 2024  | `NodeManagement` version `2`                              | Added new functions to check node delegation status and improved node management capabilities. |
-| 15th November 2024  | `GalaxyMember` version `2`, `VoterRewards` version `3`, `B3TRGovernor` version `5` | Added Vechain Node Binding with Galaxy Member feature                                             |
-| 15th November 2024  | `X2EarnApps` version `2`                                  | Added X2Earn Apps Vechain Node Endorsement feature                                             |
-| 21th October 2024   | `VeBetterPassport` version `2`                            | Check if the entity is a delegatee when request is created                                     |
-| 11th October 2024   | `XAllocationVoting` version `2`                           | Check isPerson when casting vote & fixed weight during vote                                    |
-| 11th October 2024   | `B3TRGovernor` version `4`                                | Check isPerson when casting vote                                                               |
-| 11th October 2024   | `X2EarnRewardsPool` version `3`                           | Register action in VeBetter Passport contract                                                  |
-| 27th September 2024 | `Emissions` version `2`                                   | Aligned emissions with the expected schedule                                                   |
-| 13th September 2024 | `B3TRGovernor` version `3`, `XAllocationPool` version `2` | - Added toggling of quadratic voting and funding                                               |
-| 4th September 2024  | `X2EarnRewardsPool` version `2`                           | - Added impact key management and proof building                                               |
-| 31st August 2024    | `VoterRewards` version `2`                                | - Added quadratic rewarding features                                                           |
-| 29th August 2024    | `B3TRGovernor` version `2`                                | Updated access control modifiers                                                               |
+| Date                | Contract(s)                                                                        | Summary                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 28th November 2024  | `NodeManagement` version `2`, `GalaxyMember` version `3`                           | Added new functions to check node delegation status and improved node management capabilities. |
+| 15th November 2024  | `GalaxyMember` version `2`, `VoterRewards` version `3`, `B3TRGovernor` version `5` | Added Vechain Node Binding with Galaxy Member feature                                          |
+| 15th November 2024  | `X2EarnApps` version `2`                                                           | Added X2Earn Apps Vechain Node Endorsement feature                                             |
+| 21th October 2024   | `VeBetterPassport` version `2`                                                     | Check if the entity is a delegatee when request is created                                     |
+| 11th October 2024   | `XAllocationVoting` version `2`                                                    | Check isPerson when casting vote & fixed weight during vote                                    |
+| 11th October 2024   | `B3TRGovernor` version `4`                                                         | Check isPerson when casting vote                                                               |
+| 11th October 2024   | `X2EarnRewardsPool` version `3`                                                    | Register action in VeBetter Passport contract                                                  |
+| 27th September 2024 | `Emissions` version `2`                                                            | Aligned emissions with the expected schedule                                                   |
+| 13th September 2024 | `B3TRGovernor` version `3`, `XAllocationPool` version `2`                          | - Added toggling of quadratic voting and funding                                               |
+| 4th September 2024  | `X2EarnRewardsPool` version `2`                                                    | - Added impact key management and proof building                                               |
+| 31st August 2024    | `VoterRewards` version `2`                                                         | - Added quadratic rewarding features                                                           |
+| 29th August 2024    | `B3TRGovernor` version `2`                                                         | Updated access control modifiers                                                               |
 
 ---
 
-## Upgrade `NodeManagement` to Version 2
+## Upgrade `NodeManagement` to Version 2, and `GalaxyMember` to Version 3
 
 Added new functions to check node delegation status and improved node management capabilities.
+Updated `GalaxyMember` to use the new `NodeManagement` interface.
 
 ### Changes 🚀
 
@@ -67,7 +68,6 @@ Introduced a composition pattern to attach and detach Vechain nodes to/from Gala
   - `VoterRewards.sol` to version `3`
   - `B3TRGovernor.sol` to version `5`
 
-
 ### Storage Changes 📦
 
 - **`GalaxyMember.sol`**:
@@ -97,7 +97,7 @@ Introduced a composition pattern to attach and detach Vechain nodes to/from Gala
   - Added `getIdAttachedToNode()` to get GM NFT attached to Vechain node.
   - Added `getIdAttachedToNode()` to get Vechain node attached to GM NFT.
   - Added `getNodeToFreeLevel()` to get level in which GM NFT can be upgraded to for free if particular Vechain node is attached.
-  - Added `getB3TRdonated()` to get the B3TR donated by a GM NFT so far to reach ther aquired level. 
+  - Added `getB3TRdonated()` to get the B3TR donated by a GM NFT so far to reach ther aquired level.
   - Added `getTokenInfoByTokenId()` to get infomation on particular GM NFT.
   - Added `getSelectedTokenInfoByOwner()` to get GM NFT user is using for rewards boosts.
   - Added `getTokensInfoByOwner()` to get infomation on GM NFTs owned by a particular address.
@@ -114,7 +114,6 @@ Introduced a composition pattern to attach and detach Vechain nodes to/from Gala
   - In Version 1, transfers that occur from an approved address are subject to underflow issues when updating the `_ownedLevels` map. This is fixed with Version 2 by also asserting updates are made on the owner of the token ID rather than the auth of the internal `_update` function.
 
 ---
-
 
 ## Upgrade `X2EarnApps` to Version 2
 
