@@ -24,7 +24,7 @@
 pragma solidity 0.8.20;
 
 import { IXAllocationVotingGovernor } from "../../../../interfaces/IXAllocationVotingGovernor.sol";
-import { IGalaxyMember } from "../../../../interfaces/IGalaxyMember.sol";
+import { IGalaxyMemberV2 } from "../../../V2/interfaces/IGalaxyMemberV2.sol";
 import { IX2EarnApps } from "../../../../interfaces/IX2EarnApps.sol";
 import { PassportTypesV2 } from "./PassportTypesV2.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
@@ -52,7 +52,7 @@ library PassportStorageTypesV2 {
     // Address of the xAllocationVoting contract
     IXAllocationVotingGovernor xAllocationVoting;
     // Address of the galaxy member contract
-    IGalaxyMember galaxyMember;
+    IGalaxyMemberV2 galaxyMember;
     // Address of the x2EarnApps contract
     IX2EarnApps x2EarnApps;
     // ---------- Blacklisted and Whitelisted info ---------- //

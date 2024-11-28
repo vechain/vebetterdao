@@ -25,7 +25,7 @@ pragma solidity 0.8.20;
 
 import { IXAllocationVotingGovernor } from "../../../../interfaces/IXAllocationVotingGovernor.sol";
 import { IX2EarnApps } from "../../../../interfaces/IX2EarnApps.sol";
-import { IGalaxyMember } from "../../../../interfaces/IGalaxyMember.sol";
+import { IGalaxyMemberV2 } from "../../../V2/interfaces/IGalaxyMemberV2.sol";
 
 /**
  * @title PassportTypesV2
@@ -54,7 +54,7 @@ library PassportTypesV2 {
   struct InitializationData {
     IXAllocationVotingGovernor xAllocationVoting;
     IX2EarnApps x2EarnApps;
-    IGalaxyMember galaxyMember;
+    IGalaxyMemberV2 galaxyMember;
     uint256 signalingThreshold;
     uint256 roundsForCumulativeScore;
     uint256 minimumGalaxyMemberLevel;

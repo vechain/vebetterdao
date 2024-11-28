@@ -28,7 +28,7 @@ import { PassportTypesV2 } from "./PassportTypesV2.sol";
 import { PassportClockLogicV2 } from "./PassportClockLogicV2.sol";
 import { IX2EarnApps } from "../../../../interfaces/IX2EarnApps.sol";
 import { IXAllocationVotingGovernor } from "../../../../interfaces/IXAllocationVotingGovernor.sol";
-import { IGalaxyMember } from "../../../../interfaces/IGalaxyMember.sol";
+import { IGalaxyMemberV2 } from "../../../V2/interfaces/IGalaxyMemberV2.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 
 /// @title PassportConfiguratorV2 Library
@@ -51,7 +51,7 @@ library PassportConfiguratorV2 {
   }
 
   /// @notice Gets the galaxy member contract address
-  function getGalaxyMember(PassportStorageTypesV2.PassportStorage storage self) internal view returns (IGalaxyMember) {
+  function getGalaxyMember(PassportStorageTypesV2.PassportStorage storage self) internal view returns (IGalaxyMemberV2) {
     return self.galaxyMember;
   }
 
@@ -119,7 +119,7 @@ library PassportConfiguratorV2 {
   /// @notice Sets the galaxy member contract address
   /// @param self - the PassportStorage struct
   /// @param _galaxyMember - the galaxy member contract address
-  function setGalaxyMember(PassportStorageTypesV2.PassportStorage storage self, IGalaxyMember _galaxyMember) public {
+  function setGalaxyMember(PassportStorageTypesV2.PassportStorage storage self, IGalaxyMemberV2 _galaxyMember) public {
     require(address(_galaxyMember) != address(0), "VeBetterPassport: galaxyMember is the zero address");
 
     self.galaxyMember = _galaxyMember;

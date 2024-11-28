@@ -17,7 +17,7 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { IVeBetterPassportV2 } from "../interfaces/IVeBetterPassportV2.sol";
 import { IXAllocationVotingGovernor } from "../../../interfaces/IXAllocationVotingGovernor.sol";
-import { IGalaxyMember } from "../../../interfaces/IGalaxyMember.sol";
+import { IGalaxyMemberV2 } from "../../V2/interfaces/IGalaxyMemberV2.sol";
 import { IX2EarnApps } from "../../../interfaces/IX2EarnApps.sol";
 
 /// @title VeBetterPassportV2
@@ -429,7 +429,7 @@ contract VeBetterPassportV2 is AccessControlUpgradeable, UUPSUpgradeable, IVeBet
   }
 
   /// @notice Gets the galaxy member contract address
-  function getGalaxyMember() external view returns (IGalaxyMember) {
+  function getGalaxyMember() external view returns (IGalaxyMemberV2) {
     PassportStorageTypesV2.PassportStorage storage $ = getPassportStorage();
     return PassportConfiguratorV2.getGalaxyMember($);
   }
@@ -777,7 +777,7 @@ contract VeBetterPassportV2 is AccessControlUpgradeable, UUPSUpgradeable, IVeBet
 
   /// @dev Sets the galaxy member contract
   /// @param galaxyMember - the galaxy member contract address
-  function setGalaxyMember(IGalaxyMember galaxyMember) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+  function setGalaxyMember(IGalaxyMemberV2 galaxyMember) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
     PassportStorageTypesV2.PassportStorage storage $ = getPassportStorage();
     PassportConfiguratorV2.setGalaxyMember($, galaxyMember);
   }
