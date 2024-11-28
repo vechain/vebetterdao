@@ -83,10 +83,6 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
             </Text>
           </Skeleton>
         </HStack>
-
-        {/* <Text fontSize="xs" color="#6A6A6A">
-          {t("{{value}} pts in total.", { value: endorsementHistory.endorserTotalPoint })}
-        </Text> */}
       </VStack>
     </HStack>
   )
