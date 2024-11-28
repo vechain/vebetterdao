@@ -29,37 +29,41 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   XAllocationVoting: {
     name: "x-allocation-voting",
     configAddressField: "xAllocationVotingContractAddress",
-    versions: ["v2", "v3"],
+    versions: ["v2", "v3", "v4"],
     descriptions: {
       v2: "Integrate VeBetterPassport contract",
       v3: "Update X2Earn interface to include new endorsement feature",
+      v4: "Update X2Earn interface to include node cooldown feature",
     },
   },
   "XAllocation Pool": {
     name: "x-allocation-pool",
     configAddressField: "xAllocationPoolContractAddress",
-    versions: ["v2", "v3"],
+    versions: ["v2", "v3", "v4"],
     descriptions: {
       v2: "Add the abilty to toggle quadratic funding on and off.",
       v3: "Update X2Earn interface to include new endorsement feature",
+      v4: "Update X2Earn interface to include node cooldown feature",
     },
   },
   X2EarnApps: {
     name: "x2-earn-apps",
     configAddressField: "x2EarnAppsContractAddress",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Add xapp endorsement module",
+      v3: "Add node cooldown feature",
     },
   },
   "X2Earn Rewards Pool": {
     name: "x2-earn-rewards-pool",
     configAddressField: "x2EarnRewardsPoolContractAddress",
-    versions: ["v2", "v3", "v4"],
+    versions: ["v2", "v3", "v4", "v5"],
     descriptions: {
       v2: "Add onchain impacts and proof generation",
       v3: "Integrate VeBetterPassport contract",
       v4: "Update X2Earn interface to include new endorsement feature",
+      v5: "Update X2Earn interface to include node cooldown feature",
     },
   },
   Emissions: {
@@ -81,9 +85,18 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "Galaxy Member": {
     name: "galaxy-member",
     configAddressField: "galaxyMemberContractAddress",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Vechain Nodes x GM upgrades feature",
+      v3: "Update NodeManagement interface to include new node creation functoin",
+    },
+  },
+  "Node Management": {
+    name: "node-management",
+    configAddressField: "nodeManagementContractAddress",
+    versions: ["v2"],
+    descriptions: {
+      v2: "Add function to get node creation",
     },
   },
 } as const
