@@ -57,6 +57,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  *
  * --------------------------------- VERSION 3 ---------------------------------
  * - Updated Node Management interface to include getters (isNodeDelegator() and isNodeDelegated())
+ * - Added `selectFor` function to allow the admin to select a token for the user
  */
 contract GalaxyMember is
   ERC721Upgradeable,
@@ -310,6 +311,12 @@ contract GalaxyMember is
   /// @param tokenID Token ID to select
   function select(uint256 tokenID) public virtual {
     _select(msg.sender, tokenID);
+  }
+
+  /// @notice Allows the admin to select a token for the user
+  /// @param owner The address of the owner to check
+  function selectFor(address owner, uint256 tokenID) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    _select(owner, tokenID);
   }
 
   /// @notice selects the specified token for the user
