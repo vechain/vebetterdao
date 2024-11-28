@@ -128,7 +128,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
       // Emit event for delegation removal
       emit NodeDelegated(nodeId, $.nodeIdToDelegatee[nodeId], false);
       // Remove delegation
-      $.delegateeToNodeIds[delegatee].remove(nodeId);
+      $.delegateeToNodeIds[$.nodeIdToDelegatee[nodeId]].remove(nodeId);
     }
 
     // Update mappings for delegation

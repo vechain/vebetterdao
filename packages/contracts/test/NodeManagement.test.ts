@@ -327,6 +327,9 @@ describe("Node Management -@shard5", function () {
 
       const nodeDelegated = filterEventsByName(txReceipt.logs, "NodeDelegated")
       expect(nodeDelegated.length).to.eql(2)
+
+      // Other account should not be the manager
+      expect(await nodeManagement.getNodeIds(otherAccount.address)).to.eql([])
     })
 
     it("Should revert if non node owner is trying to remove delegation", async function () {
