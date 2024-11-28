@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { buildClause } from "@/utils/buildClause"
 import {
   getAppEndorsementScoreQueryKey,
   getAppExistsQueryKey,
@@ -10,51 +11,47 @@ import {
   getIsAppEligibleNowQueryKey,
   getIsAppUnendorsedQueryKey,
   getNodesEndorsedAppsQueryKey,
-  getUserXNodesQueryKey,
   getXAppsQueryKey,
 } from "@/api"
-import { buildClause } from "@/utils/buildClause"
 import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 
-type Props = { appId: string; nodeId: string; userAddress: string; onSuccess?: () => void }
+type Props = { appId?: string; nodeId?: string; onSuccess?: () => void }
 
 /**
- * Hook to endorse an app
- * @param appId  the app id to endorse
- * @param nodeId  the node id to endorse with
- * @param userAddress  the user address
- * @param onSuccess  the callback to call after the app is endorsed
- * @returns the endorse transaction
+ * Hook for app owners to remove an endorsement
+ * @param appId  the app id
+ * @param nodeId  the node id
+ * @param onSuccess  the callback to call after the endorsement is removed
+ * @returns the remove endorsement transaction
  */
-export const useEndorseApp = ({ appId, nodeId, userAddress, onSuccess }: Props) => {
+export const useRemoveNodeEndorsement = ({ appId, nodeId, onSuccess }: Props) => {
   const clauseBuilder = useCallback(() => {
     return [
       buildClause({
         to: getConfig().x2EarnAppsContractAddress,
         contractInterface: X2EarnAppsInterface,
-        method: "endorseApp",
+        method: "removeNodeEndorsement",
         args: [appId, nodeId],
-        comment: `Endorse app ${appId} with node ${nodeId}`,
+        comment: `Remove node ${nodeId} endorsement from app ${appId}`,
       }),
     ]
   }, [appId, nodeId])
 
   const refetchQueryKeys = useMemo(
     () => [
-      getUserXNodesQueryKey(userAddress),
-      getIsAppEligibleNowQueryKey(appId),
-      getIsAppUnendorsedQueryKey(appId),
+      getIsAppEligibleNowQueryKey(appId ?? ""),
+      getIsAppUnendorsedQueryKey(appId ?? ""),
       getAppEndorsementScoreQueryKey(appId),
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
-      getEndorsersQueryKey(appId),
+      getEndorsersQueryKey(appId ?? ""),
       getXAppsQueryKey(),
-      getAppIsBlacklistedQueryKey(appId),
-      getAppExistsQueryKey(appId),
+      getAppIsBlacklistedQueryKey(appId ?? ""),
+      getAppExistsQueryKey(appId ?? ""),
       getAppEndorsedEventsQueryKey({ appId }),
     ],
-    [appId, nodeId, userAddress],
+    [appId, nodeId],
   )
 
   return useBuildTransaction({
