@@ -2,7 +2,13 @@ import { useCallback, useMemo } from "react"
 import { GalaxyMember__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, useSelectedGmNft, useXNode } from "@/api"
+import {
+  getLevelOfTokenQueryKey,
+  getNFTMetadataUriQueryKey,
+  getTokensInfoByOwnerQueryKey,
+  useSelectedGmNft,
+  useXNode,
+} from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { useWallet } from "@vechain/dapp-kit-react"
@@ -57,6 +63,7 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
       getGetTokenIdAttachedToNodeQueryKey(xNodeId),
       getNodeIdAttachedQueryKey(gmId),
       getNFTMetadataUriQueryKey(gmId),
+      getTokensInfoByOwnerQueryKey(account),
     ],
     [account, gmId, xNodeId],
   )
