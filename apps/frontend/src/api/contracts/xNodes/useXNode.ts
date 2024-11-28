@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useGetUserNodes } from "./useGetUserNodes"
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
-import { useGetGmNameFromTokenId } from "./utils/useGetGmNameFromTokenId"
+import { useGMNFTData } from "@/hooks/useGMNFTData"
 
 /**
  * Custom hook for retrieving data related to an X-Node.
@@ -104,7 +104,7 @@ export const useXNode = (): XNodeData => {
   const isXNodeError = userNodeDetails.isError || isErrorAttachedGMTokenId
   const xNodeError = userNodeDetails.error || errorAttachedGMTokenId
 
-  const attachedGMTokenName = useGetGmNameFromTokenId(attachedGMTokenId)
+  const { gmName: attachedGMTokenName } = useGMNFTData(attachedGMTokenId)
 
   return {
     isXNodeLoading,
