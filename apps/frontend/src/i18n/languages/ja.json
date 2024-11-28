@@ -1370,5 +1370,6 @@
   "Copy team wallet address": "チームウォレットアドレスをコピー",
   "To be able to vote on this round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!": "このラウンドの配分や提案に投票するには、アプリケーションでより良いアクションを行う必要があります。もっと持続可能になり、トークンを獲得しましょう！",
   "Explore apps": "アプリを探検",
-  "Know more": "もっと知る"
+  "Know more": "もっと知る",
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "<bold>{{gmSelectedName}} GM</bold>をアタッチするには、<bold>{{gmAttachedName}} GM</bold>をデタッチする必要があります"
 }

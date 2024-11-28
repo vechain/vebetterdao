@@ -1370,5 +1370,6 @@
   "Owned": "Di proprietà",
   "detach": "staccare",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Devi <detach>staccare</detach> il <bold>{{gmAttachedName}} GM</bold> per collegare <bold>{{gmSelectedName}} GM</bold>",
-  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Non puoi utilizzare il tuo Nodo per approvare app o aggiornare i tuoi Galaxy Member NFT mentre è delegato. Annulla la delega per ottenere il pieno controllo del tuo Nodo."
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Non puoi utilizzare il tuo Nodo per approvare app o aggiornare i tuoi Galaxy Member NFT mentre è delegato. Annulla la delega per ottenere il pieno controllo del tuo Nodo.",
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Devi staccare il <bold>{{gmAttachedName}} GM</bold> per collegare il <bold>{{gmSelectedName}} GM</bold>"
 }

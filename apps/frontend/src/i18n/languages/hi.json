@@ -1370,5 +1370,6 @@
   "Once your vote has been cast, you will not be able to revert it.": "एक बार जब आपका वोट डाल दिया जाएगा, आप इसे वापस नहीं कर पाएंगे।",
   "Show all apps": "सभी ऐप्स दिखाएं",
   "No Apps found": "कोई ऐप्स नहीं मिले",
-  "=~ {{value}} votes": "=~ {{value}} वोट्स"
+  "=~ {{value}} votes": "=~ {{value}} वोट्स",
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "आपको <bold>{{gmAttachedName}} GM</bold> को अलग करना होगा ताकि <bold>{{gmSelectedName}} GM</bold> को जोड़ सकें।"
 }

@@ -1370,5 +1370,6 @@
   "Owned": "已擁有",
   "detach": "分離",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "您需要<detach>分離</detach><bold>{{gmAttachedName}} GM</bold>才能附加<bold>{{gmSelectedName}} GM</bold>",
-  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "在委派時，您無法使用您的節點來支持應用程序或升級您的Galaxy Member NFT。取消委派以完全控制您的節點。"
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "在委派時，您無法使用您的節點來支持應用程序或升級您的Galaxy Member NFT。取消委派以完全控制您的節點。",
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "您需要卸下 <bold>{{gmAttachedName}} GM</bold> 才能附加 <bold>{{gmSelectedName}} GM</bold>"
 }

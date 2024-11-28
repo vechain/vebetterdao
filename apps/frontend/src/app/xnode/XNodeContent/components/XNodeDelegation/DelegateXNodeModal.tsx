@@ -26,7 +26,7 @@ import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useSelectedGmNft } from "@/api"
+import { useXNode } from "@/api"
 import { getIsNodeHolder } from "@/api/contracts/xNodes/useIsNodeHolder"
 import { useConnex } from "@vechain/dapp-kit-react"
 
@@ -38,7 +38,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   const { t } = useTranslation()
   const { account } = useWallet()
   const { thor } = useConnex()
-  const { isXNodeAttachedToGM } = useSelectedGmNft()
+  const { isXNodeAttachedToGM } = useXNode()
   const {
     register,
     handleSubmit,

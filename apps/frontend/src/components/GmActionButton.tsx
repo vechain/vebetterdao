@@ -93,7 +93,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       )
     }
 
-    if (isMaxGmLevelReached && isXNodeAttachedToGM) {
+    if (isMaxGmLevelReached) {
       return (
         <HStack bg={"#ffffff4a"} alignSelf="start" rounded="8px" px={5} py={1} gap={1} justify="center">
           <Text
