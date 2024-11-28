@@ -8,8 +8,16 @@ import { useTranslation } from "react-i18next"
 
 export const XNodePageHeader = () => {
   const { t } = useTranslation()
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeLoading, isXNodeHolder, isXNodeDelegator, isXNodeDelegatee } =
-    useXNode()
+  const {
+    xNodeName,
+    xNodeImage,
+    xNodePoints,
+    isXNodeLoading,
+    isXNodeHolder,
+    isXNodeDelegator,
+    isXNodeDelegatee,
+    nodeType,
+  } = useXNode()
 
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
@@ -73,7 +81,7 @@ export const XNodePageHeader = () => {
           </Skeleton>
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
             <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight="400" noOfLines={1} color="#FFFFFF80">
-              {"XNODE"}
+              {nodeType}
             </Text>
 
             <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "xl" : "md"}>

@@ -17,10 +17,10 @@ export const MultipleXNodesAlert = () => {
       <Alert status="error" borderRadius="2xl">
         <AlertIcon />
         <Box lineHeight="1.20rem" fontSize="sm" flex={1}>
-          <AlertTitle as="span">{t("You are controlling multiple XNodes")}</AlertTitle>
+          <AlertTitle as="span">{t("You are controlling multiple Nodes")}</AlertTitle>
           <Text>
             {t(
-              "We currently support only one XNode per account. Please cancel the delegation of the other XNodes to use your preferred one.",
+              "We currently support only one Node per account. Please cancel the delegation of the other Nodes to use your preferred one.",
             )}
           </Text>
         </Box>

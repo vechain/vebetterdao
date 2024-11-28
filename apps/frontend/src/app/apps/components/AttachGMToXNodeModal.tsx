@@ -157,7 +157,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
               <AlertIcon w={5} h={5} />
               <Box lineHeight={"1.20rem"} fontSize="sm">
                 <AlertDescription as="span">
-                  {t("Once the GM NFT is attached to your XNode, it can't be transferred anymore")}
+                  {t("Once the GM NFT is attached to your Node, it can't be transferred anymore")}
                 </AlertDescription>
               </Box>
             </Alert>

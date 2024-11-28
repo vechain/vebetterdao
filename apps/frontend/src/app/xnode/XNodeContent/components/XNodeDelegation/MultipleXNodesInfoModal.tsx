@@ -29,10 +29,10 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
   return (
     <BaseModal isOpen={modal.isOpen ?? false} onClose={modal.onClose ?? (() => {})}>
       <VStack align="stretch" gap={6}>
-        <Heading fontSize="2xl">{t("Your XNodes")}</Heading>
+        <Heading fontSize="2xl">{t("Your Nodes")}</Heading>
         <Text>
           {t(
-            "You currently have multiple XNodes under your control. We recommend keeping only one XNode per account for optimal functionality.",
+            "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.",
           )}
         </Text>
         <VStack align="stretch" gap={4}>
@@ -91,7 +91,7 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
           <AlertIcon />
           <Box lineHeight="1.20rem" fontSize="sm">
             <AlertTitle as="span">
-              {t("Please cancel the delegation of the other XNodes to use your preferred one.")}
+              {t("Please cancel the delegation of the other Nodes to use your preferred one.")}
             </AlertTitle>
           </Box>
         </Alert>

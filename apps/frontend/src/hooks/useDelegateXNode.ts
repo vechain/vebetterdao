@@ -66,7 +66,7 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
           contractInterface: NodeManagementInterface,
           method: delegateMethod,
           args: [delegatee],
-          comment: `delegate xnode #${xNodeId} to ${delegatee}`,
+          comment: `Delegate Node #${xNodeId} to ${delegatee}`,
         }),
       )
 

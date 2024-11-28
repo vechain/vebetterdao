@@ -24,6 +24,7 @@ interface XNodeData {
   xNodeError: any
   xNodeId: string | undefined
   xNodeName: string
+  nodeType: string
   xNodeImage: string
   xNodeLevel: number
   xNodePoints: number
@@ -71,6 +72,7 @@ export const useXNode = (): XNodeData => {
   const xNodeName = xNode?.name ?? t("Not available")
   const xNodeImage = xNode?.image ?? notFoundImage
   const xNodeLevel = xNode?.level ?? 0
+  const nodeType = Number(xNodeLevel) >= 4 ? "XNODE" : "ECONOMIC NODE"
 
   const endorsedAppId = useNodeEndorsedApp(xNode?.id ?? "").data
   const endorsedAppMetadata = useXAppMetadata(endorsedAppId ?? "")
@@ -106,6 +108,7 @@ export const useXNode = (): XNodeData => {
     xNodeError,
     xNodeId: xNode?.id,
     xNodeName,
+    nodeType,
     xNodeImage,
     xNodeLevel,
     xNodePoints,
