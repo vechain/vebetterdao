@@ -8,6 +8,7 @@ import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useVechainDomain, useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
+import { DelegationAlert } from "./DelegationAlert"
 
 export const DelegateXNodeCard = () => {
   const { t } = useTranslation()
@@ -54,10 +55,10 @@ export const DelegateXNodeCard = () => {
                 isOwner
                   ? delegateeDomain
                     ? humanDomain(delegateeDomain, 4, 26)
-                    : humanAddress(delegatee ?? "", 4, 4)
+                    : humanAddress(delegatee ?? "", 8, 8)
                   : ownerDomain
                     ? humanDomain(ownerDomain, 4, 26)
-                    : humanAddress(xNodeOwner ?? "", 4, 4)
+                    : humanAddress(xNodeOwner ?? "", 8, 8)
               }
               onRevoke={revokeModal.onOpen}
             />
@@ -69,6 +70,8 @@ export const DelegateXNodeCard = () => {
               {t("Delegate XNode")}
             </Button>
           )}
+
+          <DelegationAlert />
         </VStack>
       </CardBody>
 

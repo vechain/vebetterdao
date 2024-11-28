@@ -5,7 +5,13 @@ import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildClause } from "@/utils/buildClause"
 import { GalaxyMember__factory, NodeManagement__factory } from "@repo/contracts"
-import { getLevelOfTokenQueryKey, getUserNodeQueryKey, getUserXNodesQueryKey, useXNode } from "@/api"
+import {
+  getIsNodeHolderQueryKey,
+  getLevelOfTokenQueryKey,
+  getUserNodesQueryKey,
+  getUserXNodesQueryKey,
+  useXNode,
+} from "@/api"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 
 const NodeManagementInterface = NodeManagement__factory.createInterface()
@@ -72,9 +78,10 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
   const refetchQueryKeys = useMemo(
     () => [
       getUserXNodesQueryKey(account || ""),
-      getUserNodeQueryKey(account || ""),
+      getUserNodesQueryKey(account || ""),
       getLevelOfTokenQueryKey(attachedGMTokenId || ""),
       getGetTokenIdAttachedToNodeQueryKey(xNodeId || ""),
+      getIsNodeHolderQueryKey(account || ""),
     ],
     [account, attachedGMTokenId, xNodeId],
   )

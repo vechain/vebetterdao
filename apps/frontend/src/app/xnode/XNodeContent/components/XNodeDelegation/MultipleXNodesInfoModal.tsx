@@ -1,0 +1,104 @@
+import { BaseModal } from "@/components/BaseModal"
+import {
+  VStack,
+  Heading,
+  Text,
+  Button,
+  UseDisclosureProps,
+  Box,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  HStack,
+  Image,
+} from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
+import { useNodesEndorsementScore, useXNode } from "@/api"
+import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+
+type Props = {
+  modal: UseDisclosureProps
+}
+
+export const MultipleXNodesInfoModal = ({ modal }: Props) => {
+  const { t } = useTranslation()
+  const { allNodes } = useXNode()
+  const nodeLevelToEndorsementScore = useNodesEndorsementScore()
+
+  return (
+    <BaseModal isOpen={modal.isOpen ?? false} onClose={modal.onClose ?? (() => {})}>
+      <VStack align="stretch" gap={6}>
+        <Heading fontSize="2xl">{t("Your XNodes")}</Heading>
+        <Text>
+          {t(
+            "You currently have multiple XNodes under your control. We recommend keeping only one XNode per account for optimal functionality.",
+          )}
+        </Text>
+        <VStack align="stretch" gap={4}>
+          {allNodes.map((node, index) => (
+            <Box key={index} p={4} bg="#FAFAFA" borderRadius="xl" backgroundImage={"/images/xnode-page-background.png"}>
+              <HStack align="stretch" gap={6}>
+                <Image
+                  src={NodeStrengthLevelToImage[Number(node.nodeLevel)] as string}
+                  w="68px"
+                  h="68px"
+                  rounded="8px"
+                  alt={node.nodeId}
+                />
+                <VStack flex="1" align="flex-start" justify="center" spacing={2}>
+                  <Text fontWeight={700} fontSize="md" color="#fff">
+                    {allNodeStrengthLevelToName[Number(node.nodeLevel)] as string}
+                  </Text>
+                  <HStack spacing={2}>
+                    {!node.isXNodeDelegated && (
+                      <Box bg="#FFFFFF4A" color="#fff" rounded="8px" padding="4px 8px">
+                        <Text fontSize="xs">{t("Owned")}</Text>
+                      </Box>
+                    )}
+                    {node.isXNodeDelegated && (
+                      <Box bg="#FFFFFF4A" color="#fff" rounded="8px" padding="4px 8px">
+                        {node.isXNodeDelegator && (
+                          <Text fontSize="xs" fontWeight={400}>
+                            {t("Delegated to")} {humanAddress(node.delegatee, 4, 4)}
+                          </Text>
+                        )}
+
+                        {node.isXNodeDelegatee && (
+                          <Text fontSize="xs" fontWeight={400}>
+                            {t("Delegated by")} {humanAddress(node.xNodeOwner, 4, 4)}
+                          </Text>
+                        )}
+                      </Box>
+                    )}
+                    <Box bg="#FFFFFF4A" color="#fff" rounded="8px" padding="4px 8px">
+                      <HStack spacing={1}>
+                        <Text fontSize="xs" fontWeight={600}>
+                          {Number(nodeLevelToEndorsementScore?.data?.[node.nodeLevel ?? 0] ?? 0)}
+                        </Text>
+                        <Text fontSize="xs" fontWeight={400}>
+                          {t("points to endorse")}
+                        </Text>
+                      </HStack>
+                    </Box>
+                  </HStack>
+                </VStack>
+              </HStack>
+            </Box>
+          ))}
+        </VStack>
+        <Alert status="warning" borderRadius="2xl">
+          <AlertIcon />
+          <Box lineHeight="1.20rem" fontSize="sm">
+            <AlertTitle as="span">
+              {t("Please cancel the delegation of the other XNodes to use your preferred one.")}
+            </AlertTitle>
+          </Box>
+        </Alert>
+        <Button variant="primaryGhost" onClick={modal.onClose}>
+          {t("Close")}
+        </Button>
+      </VStack>
+    </BaseModal>
+  )
+}

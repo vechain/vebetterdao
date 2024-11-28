@@ -27,6 +27,8 @@ import { ExclamationTriangle, TransactionModal } from "@/components"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useSelectedGmNft } from "@/api"
+import { getIsNodeHolder } from "@/api/contracts/xNodes/useIsNodeHolder"
+import { useConnex } from "@vechain/dapp-kit-react"
 
 type FormData = {
   walletAddress: string
@@ -35,6 +37,7 @@ type FormData = {
 export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { thor } = useConnex()
   const { isXNodeAttachedToGM } = useSelectedGmNft()
   const {
     register,
@@ -42,6 +45,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
     formState: { errors },
     watch,
     reset,
+    setError,
   } = useForm<FormData>()
 
   const confirmationModal = useDisclosure()
@@ -53,9 +57,34 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
     confirmationModal.onOpen()
   }, [confirmationModal])
 
-  const handleDelegate = useCallback(() => {
-    delegateXNode.sendTransaction({ delegatee, isAttachedToGM: isXNodeAttachedToGM })
-  }, [delegateXNode, delegatee, isXNodeAttachedToGM])
+  const handleDelegate = useCallback(async () => {
+    const delegatee = watch("walletAddress")
+    if (!isValid(delegatee) || compareAddresses(delegatee, account ?? "")) {
+      setError("walletAddress", {
+        type: "manual",
+        message: t("Please enter a valid wallet address"),
+      })
+      return
+    }
+
+    try {
+      const hasExistingXNode = await getIsNodeHolder(thor, delegatee)
+      if (hasExistingXNode) {
+        setError("walletAddress", {
+          type: "manual",
+          message: t("This address already has an XNode. Please choose another address."),
+        })
+        return
+      }
+      delegateXNode.sendTransaction({ delegatee, isAttachedToGM: isXNodeAttachedToGM })
+    } catch (error) {
+      console.error("Error checking node holder status:", error)
+      setError("walletAddress", {
+        type: "manual",
+        message: t("Error checking node holder status. Please try again."),
+      })
+    }
+  }, [delegateXNode, watch, account, isXNodeAttachedToGM, t, thor, setError])
 
   const handleClose = useCallback(() => {
     modal.onClose?.()
@@ -97,7 +126,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
             <Text fontSize="sm">{delegatee}</Text>
           </VStack>
           <Alert status="warning" borderRadius="2xl">
-            <AlertIcon w={9} h={9} />
+            <AlertIcon w={5} h={5} />
             <Box lineHeight={"1.20rem"} fontSize="sm">
               <AlertTitle as="span">
                 {t("The delegated address will be able to endorse and upgrade GM NFTs using your XNode")}
@@ -138,6 +167,14 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
             {t("The delegatee won't be able to transfer or sell your XNode.")}
           </Text>
         </Box>
+        <Alert status="warning" borderRadius="2xl">
+          <AlertIcon />
+          <Box>
+            <AlertDescription as="span" fontSize="sm">
+              {t("Currently, we only support one XNode per account.")}
+            </AlertDescription>
+          </Box>
+        </Alert>
         <VStack align="stretch">
           <Heading fontSize="lg">{t("Who do you want to delegate to?")}</Heading>
           <FormControl isInvalid={!!errors.walletAddress}>
@@ -147,16 +184,28 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
             <Input
               {...register("walletAddress", {
                 required: t("Wallet address is required"),
-                validate: value =>
-                  (isValid(value) && !compareAddresses(value, account ?? "")) ||
-                  t("Please enter a valid wallet address"),
+                validate: async value => {
+                  if (!isValid(value) || compareAddresses(value, account ?? "")) {
+                    return t("Please enter a valid wallet address")
+                  }
+                  try {
+                    const hasExistingXNode = await getIsNodeHolder(thor, value)
+                    if (hasExistingXNode) {
+                      return t("This address already has an XNode. Please choose another address.")
+                    }
+                    return true
+                  } catch (error) {
+                    console.error("Error checking node holder status:", error)
+                    return t("Error checking node holder status. Please try again.")
+                  }
+                },
               })}
             />
             <FormErrorMessage>{errors.walletAddress && errors.walletAddress.message}</FormErrorMessage>
           </FormControl>
         </VStack>
         <VStack align="stretch">
-          <Button variant="primaryAction" type="submit">
+          <Button variant="primaryAction" type="button" onClick={handleDelegate}>
             {t("Delegate")}
           </Button>
           <Button variant={"primaryGhost"} onClick={modal.onClose}>
