@@ -32,19 +32,19 @@ const getGmOwners = async () => {
     }
   }
 
-  const ownerSet = new Map<string, boolean>()
+  // Remove duplicate owners, keeping only the first occurrence
+  const uniqueOwners: Owner[] = []
+  const seenOwners = new Set<string>()
 
-  const ownersSet: Owner[] = []
-
-  for (const owner of owners) {
-    if (!ownerSet.has(owner.owner)) {
-      ownerSet.set(owner.owner, true)
-      ownersSet.push(owner)
+  for (const item of owners) {
+    if (!seenOwners.has(item.owner)) {
+      seenOwners.add(item.owner)
+      uniqueOwners.push(item)
     }
   }
 
-  // Save the owners to a file
-  await fs.writeFile("gmOwners.json", JSON.stringify({ recipients: ownersSet }, null, 2))
+  // Save the unique owners to a file
+  await fs.writeFile("gmOwners.json", JSON.stringify({ recipients: uniqueOwners }, null, 2))
 }
 
 getGmOwners()
