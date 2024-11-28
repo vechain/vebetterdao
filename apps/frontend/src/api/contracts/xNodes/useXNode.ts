@@ -70,9 +70,9 @@ export const useXNode = (): XNodeData => {
     : undefined
 
   const xNodeName = xNode?.name ?? t("Not available")
-  const nodeType = xNodeName?.toLowerCase().endsWith("x") ? "XNODE" : "ECONOMIC NODE"
   const xNodeImage = xNode?.image ?? notFoundImage
   const xNodeLevel = xNode?.level ?? 0
+  const nodeType = Number(xNodeLevel) >= 4 ? "XNODE" : "ECONOMIC NODE"
 
   const endorsedAppId = useNodeEndorsedApp(xNode?.id ?? "").data
   const endorsedAppMetadata = useXAppMetadata(endorsedAppId ?? "")
