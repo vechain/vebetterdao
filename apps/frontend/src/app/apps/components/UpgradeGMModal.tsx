@@ -70,7 +70,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
 
   return (
     <>
-      <Modal isOpen={upgradeGMModal.isOpen} onClose={handleClose} size={"2xl"}>
+      <Modal isOpen={upgradeGMModal.isOpen} onClose={handleClose} size={"lg"}>
         <ModalOverlay />
         <CustomModalContent p={{ base: 3, md: 5 }}>
           <ModalCloseButton />
@@ -84,15 +84,13 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                 alignSelf={"center"}
                 py={10}
                 px={7}
-                w={"200px"}
+                w={"full"}
                 bgGradient={
                   "linear-gradient(137deg, rgba(178, 242, 109, 0.6) 2.2%, rgba(0, 76, 252, 0.6) 98.29%), linear-gradient(137deg, rgba(178, 242, 109, 0.6) 2.2%, rgba(0, 76, 252, 0.6) 98.29%)"
                 }
                 rounded={34}>
-                <Box bgGradient={"linear-gradient(137deg, #B2F26D 2.2%, #004CFC 98.29%)"} p={5} rounded={34}>
-                  <Box bg={"#0B0D0C"} p={3} rounded={34}>
-                    <Image src={gmImage} maxW={"auto"} rounded={34} alt={`GM NFT #${tokenId}`} />
-                  </Box>
+                <Box bg={"#0B0D0C"} p={3} rounded={34}>
+                  <Image src={gmImage} maxW={"auto"} rounded={34} alt={`GM NFT #${tokenId}`} />
                 </Box>
               </Box>
             </VStack>

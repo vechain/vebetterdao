@@ -2,6 +2,7 @@ import {
   getAllocationVotersQueryKey,
   getAllocationVotesQueryKey,
   getHasVotedInRoundQueryKey,
+  getParticipatedInGovernanceQueryKey,
   getUserVotesInRoundQueryKey,
   getXAppRoundEarningsQueryKey,
   getXAppsSharesQueryKey,
@@ -119,6 +120,12 @@ export const useCastAllocationVotes = ({
       })
       await queryClient.refetchQueries({
         queryKey: getXAppRoundEarningsQueryKey(roundId),
+      })
+      await queryClient.cancelQueries({
+        queryKey: getParticipatedInGovernanceQueryKey(account),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getParticipatedInGovernanceQueryKey(account),
       })
     }
 

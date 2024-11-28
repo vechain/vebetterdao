@@ -18,12 +18,11 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { UilInfoCircle, UilLink, UilLinkBroken } from "@iconscout/react-unicons"
+import { UilLink, UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
-import { BaseTooltip } from "@/components"
 import { useGMNFTData } from "@/hooks/useGMNFTData"
 
 export const AttachGMNFTCard = () => {
@@ -61,11 +60,6 @@ export const AttachGMNFTCard = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached GM" : "Attach to upgrade")}</Heading>
-              <BaseTooltip text={t("Once the GM NFT is attached to your Node, it can't be transferred anymore")}>
-                <Box as="button">
-                  <UilInfoCircle color="#004CFC" />
-                </Box>
-              </BaseTooltip>
             </HStack>
             <Text fontSize="sm">
               {t(

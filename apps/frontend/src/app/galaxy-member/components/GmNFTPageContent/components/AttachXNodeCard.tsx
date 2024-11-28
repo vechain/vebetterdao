@@ -3,25 +3,12 @@ import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 import { FeatureFlagWrapper } from "@/components"
 import { FeatureFlag } from "@/constants"
-import {
-  Button,
-  Card,
-  CardBody,
-  Flex,
-  Heading,
-  HStack,
-  Image,
-  Text,
-  useDisclosure,
-  VStack,
-  Box,
-} from "@chakra-ui/react"
-import { UilInfoCircle, UilLinkBroken } from "@iconscout/react-unicons"
+import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, useDisclosure, VStack } from "@chakra-ui/react"
+import { UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation, Trans } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
-import { BaseTooltip } from "@/components"
 import { IoWarningOutline } from "react-icons/io5"
 
 export const AttachXNodeCard = () => {
@@ -72,11 +59,6 @@ export const AttachXNodeCard = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached Node" : "Attach to upgrade")}</Heading>
-              <BaseTooltip text={t("Once the GM NFT is attached to your Node, it can't be transferred anymore")}>
-                <Box as="button">
-                  <UilInfoCircle color="#004CFC" />
-                </Box>
-              </BaseTooltip>
             </HStack>
             <Text fontSize="sm">{description}</Text>
           </VStack>
@@ -159,7 +141,12 @@ export const AttachXNodeCard = () => {
                       i18nKey="You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>"
                       components={{
                         detach: (
-                          <Text as="span" fontWeight={"800"} onClick={detachGmToXNodeModal.onOpen} cursor="pointer">
+                          <Text
+                            as="span"
+                            fontWeight={"800"}
+                            onClick={detachGmToXNodeModal.onOpen}
+                            cursor="pointer"
+                            textDecoration={"underline"}>
                             {t("detach")}
                           </Text>
                         ),
