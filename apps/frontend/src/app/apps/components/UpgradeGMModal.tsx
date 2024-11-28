@@ -20,8 +20,9 @@ import {
   Stack,
   useMediaQuery,
   Card,
+  Alert,
 } from "@chakra-ui/react"
-import { UilArrowCircleUp } from "@iconscout/react-unicons"
+import { UilArrowCircleUp, UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { getLevelGradient } from "@/api"
 import { FeatureFlag } from "@/constants"
@@ -115,7 +116,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
               <HStack>
                 <B3TRIcon boxSize={9} />
                 <Heading fontSize="xl" fontWeight={700}>
-                  {compactFormatter.format(b3trToUpgradeGMToNextLevel)}
+                  {compactFormatter.format(Number(b3trToUpgradeGMToNextLevel))}
                 </Heading>
               </HStack>
             </VStack>
@@ -185,6 +186,18 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                 </Stack>
               </Card>
               {/*END GM CARD */}
+            </VStack>
+            <VStack align="stretch" w="full" py={5}>
+              <Alert bg="#FFF3E5" borderRadius="2xl">
+                <UilInfoCircle color="#F29B32" size={"50px"} />
+                <Box lineHeight="1.20rem" fontSize="sm">
+                  <Text color="#F29B32">
+                    {t(
+                      "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
+                    )}
+                  </Text>
+                </Box>
+              </Alert>
             </VStack>
           </ModalBody>
           <ModalFooter w="full">
