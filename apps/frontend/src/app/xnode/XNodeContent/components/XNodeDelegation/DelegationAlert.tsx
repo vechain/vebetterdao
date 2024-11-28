@@ -18,7 +18,7 @@ export const DelegationAlert = () => {
           <AlertTitle as="span">{t("Your Node is currently delegated to another address")}</AlertTitle>
           <Text>
             {t(
-              "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.",
+              "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.",
             )}
           </Text>
         </Box>

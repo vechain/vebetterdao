@@ -1364,5 +1364,8 @@
   "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.": "現在、複数のノードを管理しています。最適な機能性のために、アカウントごとに1つのノードのみを維持することをお勧めします。",
   "Please cancel the delegation of the other Nodes to use your preferred one.": "お好みのノードを使用するには、他のノードの委任をキャンセルしてください。",
   "Close": "閉じる",
-  "Owned": "所有済み"
+  "Owned": "所有済み",
+  "detach": "切り離す",
+  "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "新しい<bold>{{gmSelectedName}} GM</bold>を取り付けるには、<bold>{{gmAttachedName}} GM</bold>を<detach>切り離す</detach>必要があります。",
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "ノードを委任している間は、アプリを承認したり、ギャラクシーメンバーNFTをアップグレードしたりできません。ノードを完全に制御するには委任を解除してください。"
 }

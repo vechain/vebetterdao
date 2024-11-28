@@ -1364,5 +1364,8 @@
   "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.": "Actualmente tienes varios nodos bajo tu control. Recomendamos mantener solo un nodo por cuenta para un funcionamiento óptimo.",
   "Please cancel the delegation of the other Nodes to use your preferred one.": "Por favor, cancela la delegación de los otros nodos para usar tu preferido.",
   "Close": "Cerrar",
-  "Owned": "Propios"
+  "Owned": "Propios",
+  "detach": "desprender",
+  "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Necesitas <detach>desprender</detach> el <bold>{{gmAttachedName}} GM</bold> para adjuntar <bold>{{gmSelectedName}} GM</bold>",
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "No puedes usar tu Nodo para respaldar aplicaciones o actualizar tus NFTs de Galaxy Member mientras está delegado. Cancela la delegación para obtener el control total sobre tu Nodo."
 }

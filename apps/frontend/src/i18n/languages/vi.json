@@ -1364,5 +1364,8 @@
   "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.": "Hiện tại bạn có nhiều nút trong tầm kiểm soát của bạn. Chúng tôi khuyên bạn chỉ nên giữ một nút cho mỗi tài khoản để đạt hiệu suất tối ưu.",
   "Please cancel the delegation of the other Nodes to use your preferred one.": "Vui lòng hủy ủy quyền các nút khác để sử dụng nút ưu tiên của bạn.",
   "Close": "Đóng",
-  "Owned": "Sở hữu"
+  "Owned": "Sở hữu",
+  "detach": "tách rời",
+  "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Bạn cần <detach>tách rời</detach> <bold>{{gmAttachedName}} GM</bold> để gắn <bold>{{gmSelectedName}} GM</bold>",
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Bạn không thể sử dụng Nút của mình để xác nhận ứng dụng hoặc nâng cấp NFT Thành viên Galaxy của mình khi nó đang được ủy quyền. Hủy bỏ ủy quyền để có toàn quyền kiểm soát Nút của bạn."
 }

@@ -1365,5 +1365,6 @@
   "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.": "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.",
   "Please cancel the delegation of the other Nodes to use your preferred one.": "Please cancel the delegation of the other Nodes to use your preferred one.",
   "Close": "Close",
-  "Owned": "Owned"
+  "Owned": "Owned",
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node."
 }

@@ -1364,5 +1364,9 @@
   "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.": "Du har för närvarande flera noder under din kontroll. Vi rekommenderar att endast ha en nod per konto för optimal funktionalitet.",
   "Please cancel the delegation of the other Nodes to use your preferred one.": "Avbryt delegeringen av de andra noderna för att använda den du föredrar.",
   "Close": "Stäng",
-  "Owned": "Ägd"
+  "Owned": "Ägd",
+  "detach": "koppla loss",
+  "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Du måste <detach>koppla loss</detach> <bold>{{gmAttachedName}} GM</bold> för att fästa <bold>{{gmSelectedName}} GM</bold>",
+  "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.": "Du kan inte stödja appar med detta konto om du har delegerat din Nod. Avbryt delegeringen för att åter kunna stödja appar med detta konto.",
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Du kan inte använda din Nod för att stödja appar eller uppgradera dina Galaxy Member NFTs medan den är delegerad. Avbryt delegeringen för att få full kontroll över din Nod."
 }

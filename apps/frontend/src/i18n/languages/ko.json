@@ -1364,5 +1364,8 @@
   "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.": "현재 여러 개의 노드를 관리하고 있습니다. 최적의 기능을 위해 계정당 하나의 노드만 유지하는 것을 권장합니다.",
   "Please cancel the delegation of the other Nodes to use your preferred one.": "다른 노드의 위임을 취소하고 원하는 노드를 사용하세요.",
   "Close": "닫기",
-  "Owned": "소유함"
+  "Owned": "소유함",
+  "detach": "분리하다",
+  "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "{{gmSelectedName}} GM을(를) 연결하려면 <bold>{{gmAttachedName}} GM</bold>을(를) <detach>분리</detach>해야 합니다",
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "노드가 위임된 동안에는 앱을 승인하거나 Galaxy Member NFT를 업그레이드할 수 없습니다. 위임을 취소하여 노드에 대한 완전한 제어 권한을 얻으세요."
 }

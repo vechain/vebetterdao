@@ -1364,5 +1364,8 @@
   "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.": "您当前控制着多个节点。我们建议每个账户只保留一个节点以确保最佳功能。",
   "Please cancel the delegation of the other Nodes to use your preferred one.": "请取消其他节点的委托，以使用您的首选节点。",
   "Close": "关闭",
-  "Owned": "已拥有"
+  "Owned": "已拥有",
+  "detach": "分离",
+  "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "您需要<detach>分离</detach> <bold>{{gmAttachedName}} GM</bold> 以附加 <bold>{{gmSelectedName}} GM</bold>",
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "在节点被委托期间，您无法使用它来支持应用程序或升级您的银河成员NFT。取消委托以完全控制您的节点。"
 }

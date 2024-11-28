@@ -1364,5 +1364,8 @@
   "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.": "वर्तमान में आपके नियंत्रण में कई नोड्स हैं। इष्टतम कार्यक्षमता के लिए प्रति खाता केवल एक नोड रखने की सिफारिश की जाती है।",
   "Please cancel the delegation of the other Nodes to use your preferred one.": "कृपया अपनी पसंदीदा नोड का उपयोग करने के लिए अन्य नोड्स का प्रतिनिधान रद्द करें।",
   "Close": "बंद करें",
-  "Owned": "स्वामित्व"
+  "Owned": "स्वामित्व",
+  "detach": "वियोजित करें",
+  "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "आपको <detach>वियोजित करें</detach> <bold>{{gmAttachedName}} GM</bold> को <bold>{{gmSelectedName}} GM</bold> से जोड़ने के लिए वियोजित करना होगा।",
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "जब आपका नोड सौंपी गई हो, तो आप ऐप्स को समर्थन देने या अपने गैलेक्सी मेंबर NFT को उन्नत करने के लिए इसका उपयोग नहीं कर सकते। अपने नोड पर पूर्ण नियंत्रण प्राप्त करने के लिए सौंपी गई स्थिति रद्द करें।"
 }

@@ -1364,5 +1364,8 @@
   "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.": "U heeft momenteel meerdere knooppunten onder uw controle. We raden aan slechts één knooppunt per account te behouden voor optimale functionaliteit.",
   "Please cancel the delegation of the other Nodes to use your preferred one.": "Annuleer de delegatie van de andere knooppunten om uw voorkeursknooppunt te gebruiken.",
   "Close": "Sluiten",
-  "Owned": "In bezit"
+  "Owned": "In bezit",
+  "detach": "losmaken",
+  "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Je moet de <detach>losmaken</detach> van de <bold>{{gmAttachedName}} GM</bold> om de <bold>{{gmSelectedName}} GM</bold> te koppelen.",
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Je kunt je Node niet gebruiken om apps te ondersteunen of om je Galaxy Member NFT's te upgraden terwijl het gedelegeerd is. Annuleer de delegatie om volledige controle over je Node te krijgen."
 }

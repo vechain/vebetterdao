@@ -1364,5 +1364,8 @@
   "You currently have multiple Nodes under your control. We recommend keeping only one Node per account for optimal functionality.": "Şu anda kontrolünüz altında birden fazla düğüm var. Optimal işlevsellik için hesap başına yalnızca bir düğüm bulundurmanızı öneriyoruz.",
   "Please cancel the delegation of the other Nodes to use your preferred one.": "Tercih ettiğiniz düğümü kullanmak için diğer düğümlerin yetkilendirmesini iptal edin.",
   "Close": "Kapat",
-  "Owned": "Sahip Olunan"
+  "Owned": "Sahip Olunan",
+  "detach": "ayırmak",
+  "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "<bold>{{gmAttachedName}} GM</bold>'yi <detach>ayırmanız</detach> gerekiyor ki <bold>{{gmSelectedName}} GM</bold>'yi ekleyebilesiniz",
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Node'unuzu uygulamaları desteklemek veya Galaxy Member NFT'lerinizi yükseltmek için kullanamazsınız çünkü bu durumda delegedir. Node'unuz üzerinde tam kontrol sağlamak için delegasyonu iptal edin."
 }
