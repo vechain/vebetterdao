@@ -1,5 +1,8 @@
 # B3TR Monorepo
 
+![Scorecard Badge](https://github.com/vechain/b3tr/blob/feature/scorecard-action/.assets/scorecard-badge.svg)
+![Security Checks Badge](https://github.com/vechain/b3tr/actions/workflows/security-checks.yml/badge.svg)
+
 ```
                                       #######
                                  ################

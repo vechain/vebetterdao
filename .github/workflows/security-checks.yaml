@@ -1,0 +1,27 @@
+name: 'Security Checks'
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  gitleaks:
+    uses: vechain/github-actions/.github/workflows/gitleaks.yaml@b18636d7f782a0ce78f0d6f3a592952c4a271ff3 # v.1.3.1
+    secrets:
+       GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+  scorecard:
+    uses: vechain/github-actions/.github/workflows/scorecard.yaml@b18636d7f782a0ce78f0d6f3a592952c4a271ff3 # v.1.3.1
+    secrets:
+      app-id: ${{ secrets.SCORECARD_APPID }}
+      private-key: ${{ secrets.SCORECARD_PRIVATEKEY }}
+  checkov:
+      uses: vechain/github-actions/.github/workflows/checkov.yaml@b18636d7f782a0ce78f0d6f3a592952c4a271ff3 # v.1.3.1
+  infracost:
+    uses: vechain/github-actions/.github/workflows/infracost.yaml@b18636d7f782a0ce78f0d6f3a592952c4a271ff3 # v.1.3.1
+    secrets:
+      INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
+      GIT_VECHAINCI_SSH_KEY: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
+  sonar-scan:
+    uses: vechain/github-actions/.github/workflows/sonar-scan.yaml@b18636d7f782a0ce78f0d6f3a592952c4a271ff3 # v.1.3.1
