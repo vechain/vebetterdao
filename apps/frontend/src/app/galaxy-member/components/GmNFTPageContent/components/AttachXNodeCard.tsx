@@ -23,12 +23,10 @@ import { useTranslation, Trans } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
 import { BaseTooltip } from "@/components"
 import { IoWarningOutline } from "react-icons/io5"
-import { getGmNameFromTokenId } from "../utils/getGmNameFromTokenId"
-import { useLevelOfToken } from "@/api/contracts/galaxyMember/hooks/useLevelOfToken"
 
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
-  const { isXNodeAttachedToGM, gmId } = useSelectedGmNft()
+  const { isXNodeAttachedToGM, gmId, gmName: selectedGmName } = useSelectedGmNft()
   const {
     xNodeName,
     xNodeImage,
@@ -38,6 +36,7 @@ export const AttachXNodeCard = () => {
     attachedGMTokenId,
     isXNodeDelegatee,
     isXNodeAttachedToGM: xNodeHasGMAttached,
+    attachedGMTokenName: attachedGmName,
   } = useXNode()
 
   const router = useRouter()
@@ -45,14 +44,8 @@ export const AttachXNodeCard = () => {
     router.push("/xnode")
   }, [router])
 
-  const { data: gmLevelAttached } = useLevelOfToken(attachedGMTokenId)
-  const { data: gmLevelSelected } = useLevelOfToken(gmId)
-
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()
-
-  const attachedGmName = getGmNameFromTokenId(gmLevelAttached, attachedGMTokenId)
-  const selectedGmName = getGmNameFromTokenId(gmLevelSelected, gmId)
 
   const description = useMemo(() => {
     if (isXNodeAttachedToGM) {
@@ -159,9 +152,9 @@ export const AttachXNodeCard = () => {
                 </Button>
               }>
               {xNodeHasGMAttached ? (
-                <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"#FFF3E5"}>
-                  <IoWarningOutline size={24} color={"#F29B32"} />
-                  <Text color={"#F29B32"} fontSize={14}>
+                <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgb(255, 250, 235)"}>
+                  <IoWarningOutline size={24} color={"rgb(217, 119, 6)"} />
+                  <Text color={"rgb(217, 119, 6)"} fontSize={14}>
                     <Trans
                       i18nKey="You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>"
                       components={{

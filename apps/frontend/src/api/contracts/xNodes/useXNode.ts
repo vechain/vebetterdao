@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useGetUserNodes } from "./useGetUserNodes"
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
+import { useGetGmNameFromTokenId } from "./utils/useGetGmNameFromTokenId"
 
 /**
  * Custom hook for retrieving data related to an X-Node.
@@ -36,6 +37,7 @@ interface XNodeData {
   isXNodeDelegatee: boolean
   delegatee: string | undefined
   attachedGMTokenId: string | undefined
+  attachedGMTokenName: string
   isXNodeAttachedToGM: boolean
   allNodes: Array<{
     nodeId: string
@@ -100,6 +102,8 @@ export const useXNode = (): XNodeData => {
   const isXNodeError = userNodeDetails.isError || isErrorAttachedGMTokenId
   const xNodeError = userNodeDetails.error || errorAttachedGMTokenId
 
+  const attachedGMTokenName = useGetGmNameFromTokenId(attachedGMTokenId)
+
   return {
     isXNodeLoading,
     isXNodeError,
@@ -118,6 +122,7 @@ export const useXNode = (): XNodeData => {
     isXNodeDelegatee: firstNode?.isXNodeDelegatee ?? false,
     delegatee: firstNode?.delegatee,
     attachedGMTokenId,
+    attachedGMTokenName,
     isXNodeAttachedToGM,
     allNodes,
   }
