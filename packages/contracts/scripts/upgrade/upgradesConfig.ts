@@ -9,10 +9,11 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "Voter Rewards": {
     name: "voter-rewards",
     configAddressField: "voterRewardsContractAddress",
-    versions: ["v2", "v3"],
+    versions: ["v2", "v3", "v4"],
     descriptions: {
       v2: "Add the ability to toggle quadratic rewarding on and off.",
       v3: "Vechain Nodes x GM upgrades feature",
+      v4: "Update GalaxyMember interface to use version 3",
     },
   },
   B3TRGovernor: {

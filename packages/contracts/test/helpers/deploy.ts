@@ -83,6 +83,7 @@ import {
   PassportDelegationLogicV2,
   PassportChecksLogicV2,
   PassportSignalingLogicV2,
+  VoterRewardsV3,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -563,9 +564,12 @@ export const getOrDeployContractInstances = async ({
   ;(await upgradeProxy("VoterRewardsV1", "VoterRewardsV2", await voterRewardsV1.getAddress(), [], {
     version: 2,
   })) as VoterRewardsV2
-
-  const voterRewards = (await upgradeProxy("VoterRewardsV2", "VoterRewards", await voterRewardsV1.getAddress(), [], {
+  ;(await upgradeProxy("VoterRewardsV2", "VoterRewardsV3", await voterRewardsV1.getAddress(), [], {
     version: 3,
+  })) as VoterRewardsV3
+
+  const voterRewards = (await upgradeProxy("VoterRewardsV3", "VoterRewards", await voterRewardsV1.getAddress(), [], {
+    version: 4,
   })) as VoterRewards
 
   // Set vote 2 earn (VoterRewards deployed contract) address in emissions

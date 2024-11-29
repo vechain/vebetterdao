@@ -380,7 +380,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as Emissions
 
   const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewards"],
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewards"],
     [
       [
         TEMP_ADMIN, // admin
@@ -394,9 +394,10 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3],
+      versions: [undefined, 2, 3, 4],
       logOutput: true,
     },
   )) as VoterRewards
