@@ -6,7 +6,8 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                                                        | Summary                                                                                        |
 | ------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| 28th November 2024  | `NodeManagement` version `2`, `GalaxyMember` version `3`                           | Added new functions to check node delegation status and improved node management capabilities. |
+| 29th November 2024  | `VeBetterPassport` version `3`, and `GalaxyMember` version `3`                     | Added GM level as personhood check in VeBetter passport. |
+| 28th November 2024  | `NodeManagement` version `2`                                                       | Added new functions to check node delegation status and improved node management capabilities. |
 | 15th November 2024  | `GalaxyMember` version `2`, `VoterRewards` version `3`, `B3TRGovernor` version `5` | Added Vechain Node Binding with Galaxy Member feature                                          |
 | 15th November 2024  | `X2EarnApps` version `2`                                                           | Added X2Earn Apps Vechain Node Endorsement feature                                             |
 | 21th October 2024   | `VeBetterPassport` version `2`                                                     | Check if the entity is a delegatee when request is created                                     |
@@ -21,16 +22,45 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 ---
 
-## Upgrade `NodeManagement` to Version 2, and `GalaxyMember` to Version 3
+## Upgrade `VeBetterPassport` to Version 3, and `GalaxyMember` to Version 3
+
+Added new personhood check in VeBetter passport, if a user owns a GM with a level greater than 1 they are considered a person.
+<br>
+Updated `GalaxyMember` to checkpoint selected GM NFT and allow admin to select token for user for GM levels go live.
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `VeBetterPassport.sol` to version `3`
+  - `GalaxyMember.sol` to version `3`
+
+### Storage Changes 📦
+- **`GalaxyMember`**:
+  - Added `_selectedTokenIDCheckpoints` to store checkpoints for selected GM token ID of the user.
+
+### New Features 🚀
+- **`VeBetterPassport`**:
+  - Updated `PassportPersonhoodLogic.sol` library's function `_checkPassport()` to include check for GM level.
+- **`GalaxyMember`**:
+  - Added `selectFor()` function to allow the admin to select a token for the user.
+  - Added `clock()` and `CLOCK_MODE()` functions to allow for custom time tracking.
+  - Added `getSelectedTokenIdAtBlock()` to get the selected GM token ID for the user at a specific block number.
+  - Updated Node Management interface to include new getters of Node Management V2 contract.
+
+### Bug Fixes 🐛
+
+- None.
+
+---
+
+## Upgrade `NodeManagement` to Version 2
 
 Added new functions to check node delegation status and improved node management capabilities.
-Updated `GalaxyMember` to use the new `NodeManagement` interface.
 
 ### Changes 🚀
 
 - **Upgraded Contract(s):**
   - `NodeManagement.sol` to version `2`
-  - `GalaxyMember.sol` to version `3`
 
 ### Storage Changes 📦
 
@@ -51,8 +81,6 @@ Updated `GalaxyMember` to use the new `NodeManagement` interface.
     - Delegator status
     - Delegatee status
     - Delegatee address
-- **`GalaxyMember`**:
-  - Added `selectFor()` function to allow the admin to select a token for the user
 
 ### Bug Fixes 🐛
 
