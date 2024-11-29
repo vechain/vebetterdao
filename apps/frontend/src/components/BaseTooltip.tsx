@@ -4,9 +4,14 @@ type Props = {
   children: React.ReactNode
   text: string
   placement?: "top" | "bottom"
+  showTooltip?: boolean
 }
 
-export const BaseTooltip: React.FC<Props> = ({ children, text, placement = "bottom" }) => {
+export const BaseTooltip: React.FC<Props> = ({ children, text, placement = "bottom", showTooltip = true }) => {
+  if (!showTooltip) {
+    return <>{children}</>
+  }
+
   return (
     <Popover
       data-cy="base-tooltip"
