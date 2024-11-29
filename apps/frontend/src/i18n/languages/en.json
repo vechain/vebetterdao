@@ -1,4 +1,8 @@
 {
+  "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
+  "You’re upgrading to": "You’re upgrading to",
+  "You'll donate": "You'll donate",
+  "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!": "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!",
   "detach": "detach",
   "Max Level Reached!": "Max Level Reached!",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>",
