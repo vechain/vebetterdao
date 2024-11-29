@@ -7,12 +7,12 @@ import { useNFTMetadataUri } from "./useNFTMetadataUri"
 import { useIpfsImage, useIpfsMetadata } from "@/api/ipfs"
 import { useLevelOfToken } from "./useLevelOfToken"
 import { useLevelMultiplier } from "./useLevelMultiplier"
-import { useB3trToUpgradeToLevel } from "./useB3trToUpgradeToLevel"
 import { useGetNodeIdAttached } from "./useGetNodeIdAttached"
 import { useXNode } from "../../xNodes"
 import { useGMMaxLevel } from "./useGMMaxLevel"
 import { gmNfts } from "@/constants/gmNfts"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { useB3trToUpgrade } from "."
 
 /**
  * Custom hook for retrieving data related to a Galaxy Member NFT.
@@ -65,7 +65,7 @@ export const useSelectedGmNft = () => {
     isLoading: isB3trToUpgradeGMToNextLevelLoading,
     isError: isErrorB3trToUpgradeGMToNextLevel,
     error: errorB3trToUpgradeGMToNextLevel,
-  } = useB3trToUpgradeToLevel(gmLevel && String(Number(gmLevel) + 1))
+  } = useB3trToUpgrade(selectedTokenId)
 
   const {
     data: metadataURI,

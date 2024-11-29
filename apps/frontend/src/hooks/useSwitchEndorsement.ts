@@ -10,6 +10,7 @@ import {
   getXAppsQueryKey,
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
+import { getAppEndorsedEventsQueryKey } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 
@@ -46,12 +47,16 @@ export const useSwitchEndorsement = ({ appIdToEndorse, appIdToUnendorse, nodeId,
 
   const refetchQueryKeys = useMemo(
     () => [
+      // Refetch queries for the app being endorsed
       getIsAppUnendorsedQueryKey(appIdToEndorse),
       getAppEndorsementScoreQueryKey(appIdToEndorse),
       getEndorsersQueryKey(appIdToEndorse),
+      getAppEndorsedEventsQueryKey({ appId: appIdToEndorse }),
+      // Refetch queries for the app being unendorsed
       getIsAppUnendorsedQueryKey(appIdToUnendorse),
       getAppEndorsementScoreQueryKey(appIdToUnendorse),
       getEndorsersQueryKey(appIdToUnendorse),
+      // Other queries
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
       getXAppsQueryKey(),
     ],

@@ -3,29 +3,55 @@ import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "@/components"
 import { GmActionButton } from "@/components/GmActionButton"
 import { FeatureFlag } from "@/constants"
-import { Box, Card, Flex, HStack, Image, Skeleton, Stack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Card,
+  Flex,
+  HStack,
+  Image,
+  Skeleton,
+  Stack,
+  Text,
+  useMediaQuery,
+  VStack,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalBody,
+} from "@chakra-ui/react"
 import { UilArrowCircleUp, UilTimesCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { motion } from "framer-motion"
 
 const compactFormatter = getCompactFormatter(4)
 
 export const GmNFTPageHeader = () => {
   const { t } = useTranslation()
-  const { gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, b3trToUpgradeGMToNextLevel } = useSelectedGmNft()
-
+  const {
+    gmImage,
+    gmName,
+    gmRewardMultiplier,
+    isGMLoading,
+    gmLevel,
+    b3trToUpgradeGMToNextLevel,
+    isMaxGmLevelReached,
+    isLoading,
+  } = useSelectedGmNft()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { account } = useWallet()
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account ?? "")
 
-  const { isXNodeAttachedToGM, isMaxGmLevelReached } = useSelectedGmNft()
-  const { isXNodeHolder } = useXNode()
+  const { isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
+
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const actionDescription = useMemo(() => {
-    if (isXNodeHolder && !isXNodeAttachedToGM) {
+    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator) {
       return (
         <>
           <HStack>
@@ -122,6 +148,7 @@ export const GmNFTPageHeader = () => {
     isXNodeAttachedToGM,
     isXNodeHolder,
     t,
+    isXNodeDelegator,
   ])
 
   return (
@@ -146,7 +173,6 @@ export const GmNFTPageHeader = () => {
           rounded="12px"
           gap={6}
           flex={1}
-          cursor={"pointer"}
           color="#FFFFFF"
           flexGrow={4}>
           <Skeleton
@@ -161,14 +187,22 @@ export const GmNFTPageHeader = () => {
               bgGradient={getLevelGradient(Number(gmLevel))}
               display="flex"
               alignItems="center"
-              justifyContent="center">
-              <Image
-                src={gmImage}
-                alt="gm"
+              justifyContent="center"
+              onClick={onOpen}
+              cursor="pointer">
+              <Skeleton
+                isLoaded={!isLoading}
                 w={isAbove800 ? "126px" : "64px"}
                 h={isAbove800 ? "126px" : "64px"}
-                rounded="7px"
-              />
+                rounded={"7px"}>
+                <Image
+                  src={gmImage}
+                  alt="gm"
+                  w={isAbove800 ? "126px" : "64px"}
+                  h={isAbove800 ? "126px" : "64px"}
+                  rounded="7px"
+                />
+              </Skeleton>
             </Box>
           </Skeleton>
           <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 2 : 1}>
@@ -212,6 +246,35 @@ export const GmNFTPageHeader = () => {
           />
         </VStack>
       </Stack>
+      {/* Modal for Image Preview */}
+      <Modal isOpen={isOpen} onClose={onClose} isCentered size="xl">
+        <ModalOverlay />
+        <ModalContent
+          as={motion.div}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: "0.3", ease: "easeOut" }}
+          boxShadow="none"
+          background="transparent"
+          maxW="500px"
+          w="full"
+          p={0}
+          m={0}>
+          <ModalBody p={0}>
+            <Box
+              position="relative"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              overflow="hidden"
+              bgGradient={getLevelGradient(Number(gmLevel))}
+              p={1}
+              rounded="16px">
+              <Image src={gmImage} alt="gm" w="100%" h="100%" objectFit="cover" rounded="16px" />
+            </Box>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Card>
   )
 }

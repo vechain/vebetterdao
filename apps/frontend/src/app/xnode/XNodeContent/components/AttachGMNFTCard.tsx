@@ -1,4 +1,4 @@
-import { useSelectedGmNft } from "@/api"
+import { useXNode } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
@@ -18,42 +18,56 @@ import {
   useDisclosure,
   VStack,
 } from "@chakra-ui/react"
-import { UilInfoCircle, UilLink, UilLinkBroken } from "@iconscout/react-unicons"
+import { UilLink, UilLinkBroken } from "@iconscout/react-unicons"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
+import { useGMNFTData } from "@/hooks/useGMNFTData"
 
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
-  const { gmId, gmImage, gmName, gmRewardMultiplier, isGMLoading, gmLevel, isXNodeAttachedToGM } = useSelectedGmNft()
+  const { isXNodeDelegator, isXNodeAttachedToGM, attachedGMTokenId } = useXNode()
+
+  const {
+    gmImage,
+    gmName,
+    gmLevel,
+    gmRewardMultiplier,
+    isLoading: isGMLoading,
+  } = useGMNFTData(attachedGMTokenId ?? null)
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
+    // If I'm connected as a delegator, we cannot go to the GM NFT page of another token for now,
+    // because we do not have a page that displays GM NFT info based on the tokenId
+    if (isXNodeDelegator) return
+
     router.push("/galaxy-member")
-  }, [router])
+  }, [router, isXNodeDelegator])
 
   const attachGmToXNodeModal = useDisclosure()
   const detachGmToXNodeModal = useDisclosure()
 
-  if (!Number(gmId)) {
+  if (!Number(attachedGMTokenId)) {
     return null
   }
 
   return (
-    <Card variant="baseWithBorder">
+    <Card variant="baseWithBorder" w="full">
       <CardBody>
         <VStack align="stretch" gap={4}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached Node" : "Attach to upgrade")}</Heading>
-              <UilInfoCircle color="#004CFC" />
+              <Heading fontSize="lg">{t(isXNodeAttachedToGM ? "Attached GM" : "Attach to upgrade")}</Heading>
             </HStack>
             <Text fontSize="sm">
               {t(
                 isXNodeAttachedToGM
-                  ? "Your GM NFT is attached to your Node"
-                  : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
+                  ? "Your Node is attached to the following GM NFT"
+                  : isXNodeDelegator
+                    ? "Remove the Node delegation to attach GM NFT to this node"
+                    : "Attach your Node to your GM NFT to upgrade it for free and earn more rewards!",
               )}
             </Text>
           </VStack>
@@ -106,6 +120,7 @@ export const AttachGMNFTCard = () => {
               leftIcon={<UilLinkBroken color="#C84968" />}
               color="#C84968"
               variant={"link"}
+              isDisabled={isXNodeDelegator}
               onClick={detachGmToXNodeModal.onOpen}>
               {t("Detach")}
             </Button>
@@ -120,7 +135,8 @@ export const AttachGMNFTCard = () => {
               <Button
                 leftIcon={<UilLink color="#004CFC" />}
                 variant={"primarySubtle"}
-                onClick={attachGmToXNodeModal.onOpen}>
+                onClick={attachGmToXNodeModal.onOpen}
+                isDisabled={isXNodeDelegator}>
                 {t("Attach now!")}
               </Button>
             </FeatureFlagWrapper>

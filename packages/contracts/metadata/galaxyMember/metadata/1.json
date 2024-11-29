@@ -1,7 +1,7 @@
 {
-  "name": "VeBetterDAO Galaxy Member",
-  "description": "GM Earth is a community of people who participated in voting for the governance of VeBetter DAO.",
-  "image": "ipfs://bafybeihh7nenuhljj5d6ixfmf3b4ywmylpxvsgzntah6xjnk6fvdt3622i/images/1.png",
+  "name": "Earth",
+  "description": "Galaxy Member is a membership NFT to the VeBetterDAO ecosystem. It grants you access to exclusive features and benefits.",
+  "image": "ipfs://bafybeia2atzm45anaqlhrpnvxzpzrauknl6oyej5vc6w7bblyixetv3zju/images/1.png",
   "attributes": [
     {
       "trait_type": "Level",

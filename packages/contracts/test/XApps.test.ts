@@ -41,8 +41,9 @@ import { SeedAccount, getTestKeys } from "../scripts/helpers/seedAccounts"
 import { buildTxBody, signAndSendTx } from "../scripts/helpers/txHelper"
 import { APPS } from "../scripts/deploy/setup"
 import { clauseBuilder, unitsUtils, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
+import { airdropVTHO } from "../scripts/helpers/airdrop"
 
-describe("X-Apps - @shard3", function () {
+describe("X-Apps - @shard15", function () {
   describe("Deployment", function () {
     it("Clock mode is set correctly", async function () {
       const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })

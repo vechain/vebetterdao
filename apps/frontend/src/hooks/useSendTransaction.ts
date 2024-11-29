@@ -149,7 +149,7 @@ export const useSendTransaction = ({
       if (signerAccount) {
         let gasLimitNext
         try {
-          gasLimitNext = await estimateTxGasWithNext([...clauses], signerAccount, 1)
+          gasLimitNext = await estimateTxGasWithNext([...clauses], signerAccount)
         } catch (e) {
           console.error("Gas estimation failed", e)
         }

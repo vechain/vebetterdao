@@ -1,4 +1,4 @@
-import { Flex, Stack, VStack } from "@chakra-ui/react"
+import { Stack, VStack } from "@chakra-ui/react"
 import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
 import { AttachXNodeCard } from "./components/AttachXNodeCard"
 import { GMNFTList } from "./components/GMNFTList/GMNFTList"
@@ -6,6 +6,7 @@ import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
 import { useSelectedGmNft } from "@/api"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { MultipleXNodesAlert } from "@/app/xnode/XNodeContent/components/XNodeDelegation/MultipleXNodesAlert"
 
 export const GmNFTPageContent = () => {
   const { gmId, isLoading } = useSelectedGmNft()
@@ -14,7 +15,7 @@ export const GmNFTPageContent = () => {
   // Redirect to the previous page if the user is not a GM NFT holder
   useEffect(() => {
     if (!Number(gmId) && !isLoading) {
-      router.back()
+      router.push("/")
     }
   }, [gmId, isLoading, router])
 
@@ -24,11 +25,12 @@ export const GmNFTPageContent = () => {
     <VStack align="stretch" flex="1" gap="4">
       <GmNFTPageHeader />
       <Stack direction={["column", "column", "column", "row"]} spacing="4" align={"stretch"}>
-        <Flex flex={3}>
-          <GMNFTList />
-        </Flex>
-        <VStack flex={1.5} align={"stretch"}>
+        <VStack flex={3}>
+          <MultipleXNodesAlert />
           <AttachXNodeCard />
+          <GMNFTList />
+        </VStack>
+        <VStack flex={1.5} align={"stretch"}>
           <GalaxyLevelsCard />
         </VStack>
       </Stack>
