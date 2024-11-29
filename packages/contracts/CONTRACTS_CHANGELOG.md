@@ -6,7 +6,7 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                                                        | Summary                                                                                        |
 | ------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| 29th November 2024  | `VeBetterPassport` version `3`, and `GalaxyMember` version `3`                     | Added GM level as personhood check in VeBetter passport. |
+| 29th November 2024  | `VeBetterPassport` version `3`, `GalaxyMember` version `3`, and `VoterRewards` version 4  | Added GM level as personhood check in VeBetter passport. |
 | 28th November 2024  | `NodeManagement` version `2`                                                       | Added new functions to check node delegation status and improved node management capabilities. |
 | 15th November 2024  | `GalaxyMember` version `2`, `VoterRewards` version `3`, `B3TRGovernor` version `5` | Added Vechain Node Binding with Galaxy Member feature                                          |
 | 15th November 2024  | `X2EarnApps` version `2`                                                           | Added X2Earn Apps Vechain Node Endorsement feature                                             |
@@ -27,12 +27,15 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 Added new personhood check in VeBetter passport, if a user owns a GM with a level greater than 1 they are considered a person.
 <br>
 Updated `GalaxyMember` to checkpoint selected GM NFT and allow admin to select token for user for GM levels go live.
+<br>
+Updated `VoterRewards` to use version `3` of `GalaxyMember` interface.
 
 ### Changes 🚀
 
 - **Upgraded Contract(s):**
   - `VeBetterPassport.sol` to version `3`
   - `GalaxyMember.sol` to version `3`
+  - `VoterRewards.sol` to version `4`
 
 ### Storage Changes 📦
 - **`GalaxyMember`**:
