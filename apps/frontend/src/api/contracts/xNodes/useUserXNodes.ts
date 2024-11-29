@@ -50,11 +50,11 @@ export const getUserXNodes = async (thor: Connex.Thor, user?: string): Promise<U
 
   if (error) throw new Error(error ?? "Error fetching xApps")
 
-  if (!res[0] || !res[1]) throw new Error("Error fetching xNodes - Data is missing")
+  if (!res[0] || !res[1]) throw new Error("Error fetching Nodes - Data is missing")
   let nodeIds: string[] = getNodeIdsAbi.decode(res[0]?.data)[0]
   let levels: string[] = getNodeLevelsAbi.decode(res[1]?.data)[0]
 
-  if (nodeIds.length !== levels.length) throw new Error("Error fetching xNodes - Data is corrupted")
+  if (nodeIds.length !== levels.length) throw new Error("Error fetching Nodes - Data is corrupted")
 
   return nodeIds.map((id, index) => {
     return {

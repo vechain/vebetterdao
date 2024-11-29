@@ -33,7 +33,10 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
     appId: endorsedApp?.id,
     nodeId: xNodeId,
     userAddress: account ?? "",
-    onSuccess: onClose,
+    onSuccess: () => {
+      unendorseAppMutation.resetStatus()
+      onClose()
+    },
   })
 
   const handleUnendorsement = useCallback(() => {
@@ -56,7 +59,7 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
         successTitle={t("Unendorse app")}
         status={unendorseAppMutation.error ? "error" : unendorseAppMutation.status}
         errorDescription={unendorseAppMutation.error?.reason}
-        errorTitle={unendorseAppMutation.error ? "Error unendorsing" : undefined}
+        errorTitle={unendorseAppMutation.error ? t("Transaction error") : undefined}
         showTryAgainButton
         onTryAgain={handleUnendorsement}
         pendingTitle={"Unendorsing app..."}
@@ -92,7 +95,7 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
           <Icon as={FaClock} boxSize={"36px"} color="#AF5F00" />
           <Box color="#AF5F00">
             <Text fontSize={"16px"} as="span">
-              {t("Withdrawing your endorsement from an app may result in it")}
+              {t("Removing your endorsement from an app may result in it")}
             </Text>{" "}
             <Text fontSize={"16px"} as="span" fontWeight="600">
               {t("no longer being selected for allocations.")}

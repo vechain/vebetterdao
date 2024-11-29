@@ -20,8 +20,9 @@ import { GMNFTListItem } from "./GMNFTListItem"
 import { useCallback, useMemo } from "react"
 import { useMintNFT } from "@/hooks"
 import { MintNFTModal } from "@/components/MintNFTModal"
-import { FeatureFlagWrapper } from "@/components"
+import { FeatureFlagWrapper, BaseTooltip } from "@/components"
 import { FeatureFlag } from "@/constants"
+import { useSelectedGmNft, useParticipatedInGovernance } from "@/api"
 
 export const GMNFTList = () => {
   const { t } = useTranslation()
@@ -46,12 +47,15 @@ export const GMNFTList = () => {
     sendTransaction: freeMint,
     isTxReceiptLoading,
     sendTransactionPending,
-  } = useMintNFT({ onFailure: mintNftModal.onClose })
+  } = useMintNFT({ onFailure: mintNftModal.onClose, onSuccess: mintNftModal.onClose })
 
   const handleMintGM = useCallback(() => {
     freeMint({})
     mintNftModal.onOpen()
   }, [freeMint, mintNftModal])
+
+  const { gmName } = useSelectedGmNft()
+  const { data: hasUserVoted } = useParticipatedInGovernance(account)
 
   return (
     <Card variant="baseWithBorder">
@@ -60,7 +64,13 @@ export const GMNFTList = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t("My Galaxy NFTs")}</Heading>
-              <UilInfoCircle color="#004CFC" />
+              <BaseTooltip
+                text={t("{{gmName}} NFT is the one selected for rewards multiplier.", { gmName: gmName })}
+                showTooltip={!!gmName}>
+                <span>
+                  <UilInfoCircle color="#004CFC" />
+                </span>
+              </BaseTooltip>
             </HStack>
             <FeatureFlagWrapper
               feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
@@ -84,36 +94,41 @@ export const GMNFTList = () => {
               next={loadMore}
               hasMore={hasNextPage || false}
               loader={<Skeleton height="100px" />}>
-              <VStack align="stretch" gap={4} p={3}>
+              <VStack align="stretch" gap={4} p={[0, 3]}>
                 {tokens?.map((token, index) => <GMNFTListItem key={index} token={token} />)}
               </VStack>
             </InfiniteScroll>
-            <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
-              <Card
-                mx={3}
-                rounded="8px"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23004CFC' stroke-width='1' stroke-dasharray='12%2c 15' stroke-dashoffset='2' stroke-linecap='square'/%3e%3c/svg%3e")`,
-                }}>
-                <CardBody bg={"#EBF1FE"} rounded="8px">
-                  <Stack
-                    direction={isAbove800 ? "row" : "column"}
-                    justify={isAbove800 ? "space-between" : "flex-start"}
-                    align="stretch"
-                    gap={4}>
-                    <VStack align="stretch" gap={1}>
-                      <Heading fontSize="lg">{t("Mint a GM Earth NFT")}</Heading>
-                      <Text fontSize="sm" color="#6A6A6A">
-                        {t("To upgrade and sell in the secondary market")}
-                      </Text>
-                    </VStack>
-                    <Button variant="primaryAction" onClick={handleMintGM}>
-                      {t("Mint a GM Earth NFT")}
-                    </Button>
-                  </Stack>
-                </CardBody>
-              </Card>
-            </FeatureFlagWrapper>
+            {hasUserVoted && (
+              <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
+                <Card
+                  mx={[0, 3]}
+                  rounded="8px"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23004CFC' stroke-width='1' stroke-dasharray='12%2c 15' stroke-dashoffset='2' stroke-linecap='square'/%3e%3c/svg%3e")`,
+                  }}>
+                  <CardBody bg={"#EBF1FE"} rounded="8px">
+                    <Stack
+                      direction={isAbove800 ? "row" : "column"}
+                      justify={isAbove800 ? "space-between" : "flex-start"}
+                      align="stretch"
+                      gap={4}>
+                      <VStack align="stretch" gap={1}>
+                        <Heading fontSize="lg">{t("Mint a GM Earth NFT")}</Heading>
+                        <Text fontSize="sm" color="#6A6A6A">
+                          {hasUserVoted
+                            ? t("To upgrade and sell in the secondary market")
+                            : t("You need to vote to mint GM NFT")}
+                        </Text>
+                      </VStack>
+
+                      <Button variant="primaryAction" onClick={handleMintGM} isDisabled={!hasUserVoted}>
+                        {t("Mint a GM Earth NFT")}
+                      </Button>
+                    </Stack>
+                  </CardBody>
+                </Card>
+              </FeatureFlagWrapper>
+            )}
           </VStack>
         </VStack>
       </CardBody>

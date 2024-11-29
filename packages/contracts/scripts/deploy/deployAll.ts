@@ -115,6 +115,14 @@ export async function deployAll(config: ContractsConfig) {
     PassportPoPScoreLogicV1,
     PassportSignalingLogicV1,
     PassportWhitelistAndBlacklistLogicV1,
+    PassportChecksLogicV2,
+    PassportConfiguratorV2,
+    PassportEntityLogicV2,
+    PassportDelegationLogicV2,
+    PassportPersonhoodLogicV2,
+    PassportPoPScoreLogicV2,
+    PassportSignalingLogicV2,
+    PassportWhitelistAndBlacklistLogicV2,
     PassportChecksLogic,
     PassportConfigurator,
     PassportEntityLogic,
@@ -206,11 +214,13 @@ export async function deployAll(config: ContractsConfig) {
   )) as Treasury
 
   // Deploy NodeManagement
-  const nodeManagement = (await deployProxy(
-    "NodeManagement",
-    [vechainNodesAddress, config.CONTRACTS_ADMIN_ADDRESS, config.CONTRACTS_ADMIN_ADDRESS],
-    undefined,
-    true,
+  const nodeManagement = (await deployAndUpgrade(
+    ["NodeManagementV1", "NodeManagement"],
+    [[vechainNodesAddress, config.CONTRACTS_ADMIN_ADDRESS, config.CONTRACTS_ADMIN_ADDRESS], []],
+    {
+      versions: [undefined, 2],
+      logOutput: true,
+    },
   )) as NodeManagement
 
   // Initialization requires the address of the x2EarnRewardsPool, for this reason we will initialize it after
@@ -299,7 +309,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as XAllocationPool
 
   const galaxyMember = (await deployAndUpgrade(
-    ["GalaxyMemberV1", "GalaxyMember"],
+    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMember"],
     [
       [
         {
@@ -323,9 +333,11 @@ export async function deployAll(config: ContractsConfig) {
         TEMP_ADMIN,
         config.GM_NFT_NODE_TO_FREE_LEVEL,
       ],
+      [],
     ],
     {
-      versions: [undefined, 2],
+      versions: [undefined, 2, 3],
+      logOutput: true,
     },
   )) as GalaxyMember
 
@@ -368,7 +380,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as Emissions
 
   const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewards"],
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewards"],
     [
       [
         TEMP_ADMIN, // admin
@@ -382,9 +394,10 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3],
+      versions: [undefined, 2, 3, 4],
       logOutput: true,
     },
   )) as VoterRewards
@@ -458,13 +471,33 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as VeBetterPassportV1
 
-  const veBetterPassport = (await upgradeProxy(
+  const veBetterPassportV2 = (await upgradeProxy(
     "VeBetterPassportV1",
-    "VeBetterPassport",
+    "VeBetterPassportV2",
     await veBetterPassportV1.getAddress(),
     [],
     {
       version: 2,
+      libraries: {
+        PassportChecksLogicV2: await PassportChecksLogicV2.getAddress(),
+        PassportConfiguratorV2: await PassportConfiguratorV2.getAddress(),
+        PassportEntityLogicV2: await PassportEntityLogicV2.getAddress(),
+        PassportDelegationLogicV2: await PassportDelegationLogicV2.getAddress(),
+        PassportPersonhoodLogicV2: await PassportPersonhoodLogicV2.getAddress(),
+        PassportPoPScoreLogicV2: await PassportPoPScoreLogicV2.getAddress(),
+        PassportSignalingLogicV2: await PassportSignalingLogicV2.getAddress(),
+        PassportWhitelistAndBlacklistLogicV2: await PassportWhitelistAndBlacklistLogicV2.getAddress(),
+      },
+    },
+  )) as VeBetterPassport
+
+  const veBetterPassport = (await upgradeProxy(
+    "VeBetterPassportV2",
+    "VeBetterPassport",
+    await veBetterPassportV1.getAddress(),
+    [],
+    {
+      version: 3,
       libraries: {
         PassportChecksLogic: await PassportChecksLogic.getAddress(),
         PassportConfigurator: await PassportConfigurator.getAddress(),

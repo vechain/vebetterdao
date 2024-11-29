@@ -11,7 +11,7 @@ export const gmNfts = [
     name: "Moon",
     image: "/images/nft-levels/1.png",
     multiplier: 1.1,
-    b3trToUpgrade: 20_000,
+    b3trToUpgrade: 25_000,
   },
   {
     level: "3",
@@ -70,3 +70,16 @@ export const gmNfts = [
     b3trToUpgrade: Infinity,
   },
 ]
+
+/**
+ * Maps the XNode level to the GM starting level.
+ */
+export const xNodeToGMstartingLevel: Record<number, number> = {
+  1: 2,
+  2: 4,
+  3: 6,
+  4: 2,
+  5: 4,
+  6: 6,
+  7: 7,
+}
