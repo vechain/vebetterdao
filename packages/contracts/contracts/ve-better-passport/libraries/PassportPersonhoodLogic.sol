@@ -176,7 +176,8 @@ library PassportPersonhoodLogic {
       uint256 participationScore = PassportPoPScoreLogic._cumulativeScoreWithDecay(
         self,
         user,
-        self.xAllocationVoting.currentRoundId()
+        self.xAllocationVoting.currentRoundId(),
+        new bytes32[](0)
       );
 
       // If the user's cumulated score in the last rounds is greater than or equal to the threshold

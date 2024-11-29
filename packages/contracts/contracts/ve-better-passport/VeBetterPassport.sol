@@ -174,6 +174,19 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportPoPScoreLogic.getCumulativeScoreWithDecay($, user, lastRound);
   }
 
+  /// @notice Gets the cumulative score of a user based on exponential decay and ignoring the score of specific apps
+  /// @param user - the user address
+  /// @param lastRound - the round to consider as a starting point for the cumulative score
+  /// @param appsToIgnore - the apps to ignore in the calculation
+  function getCumulativeScoreWithDecayAndExclusions(
+    address user,
+    uint256 lastRound,
+    bytes32[] memory appsToIgnore
+  ) external view returns (uint256) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    return PassportPoPScoreLogic.getCumulativeScoreWithDecayAndExclusions($, user, lastRound, appsToIgnore);
+  }
+
   /// @notice Gets the round score of a user
   /// @param user - the user address
   /// @param round - the round

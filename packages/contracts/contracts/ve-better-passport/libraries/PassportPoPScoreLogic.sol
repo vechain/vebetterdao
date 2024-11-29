@@ -66,7 +66,20 @@ library PassportPoPScoreLogic {
     address user,
     uint256 lastRound
   ) external view returns (uint256) {
-    return _cumulativeScoreWithDecay(self, user, lastRound);
+    return _cumulativeScoreWithDecay(self, user, lastRound, new bytes32[](0));
+  }
+
+  /// @notice Gets the cumulative score of a user based on exponential decay and ignoring the score of specific apps
+  /// @param user - the user address
+  /// @param lastRound - the round to consider as a starting point for the cumulative score
+  /// @param appsToIgnore - the apps to ignore in the calculation
+  function getCumulativeScoreWithDecayAndExclusions(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    uint256 lastRound,
+    bytes32[] memory appsToIgnore
+  ) external view returns (uint256) {
+    return _cumulativeScoreWithDecay(self, user, lastRound, appsToIgnore);
   }
 
   /// @notice Gets the round score of a user
@@ -263,14 +276,16 @@ library PassportPoPScoreLogic {
 
   // ---------- Internal & Private ---------- //
 
-  /// @dev Gets the cumulative score of a user based on exponential decay for a number of last rounds
+  /// @dev Gets the cumulative score ignoring the score of specific apps
   /// @dev This function calculates the decayed score f(t) = a * (1 - r)^t
   /// @param user - the user address
   /// @param lastRound - the round to consider as a starting point for the cumulative score
+  /// @param appsToIgnore - the apps to ignore in the calculation
   function _cumulativeScoreWithDecay(
     PassportStorageTypes.PassportStorage storage self,
     address user,
-    uint256 lastRound
+    uint256 lastRound,
+    bytes32[] memory appsToIgnore
   ) internal view returns (uint256) {
     // Calculate the starting round for the cumulative score. If the last round is less than the rounds for cumulative score, start from the first round
     uint256 startingRound = lastRound <= self.roundsForCumulativeScore
@@ -279,10 +294,20 @@ library PassportPoPScoreLogic {
 
     uint256 decayFactor = ((100 - self.decayRate) * scalingFactor) / 100;
 
-    // Calculate the cumulative score with exponential decay
-    uint256 cumulativeScore = 0;
+    // Calculate the cumulative score for a user with exponential decay, ignoring the score of specific apps
+    uint256 cumulativeScore;
     for (uint256 round = startingRound; round <= lastRound; round++) {
-      cumulativeScore = self.userRoundScore[user][round] + (cumulativeScore * decayFactor) / scalingFactor;
+      // Calculate the score to ignore for the round
+      uint256 scoreToIgnore;
+      for (uint256 i; i < appsToIgnore.length; i++) {
+        scoreToIgnore += self.userAppRoundScore[user][round][appsToIgnore[i]];
+      }
+
+      // Calculate the round score for the user, ignoring the score of specific apps
+      uint256 roundScore = self.userRoundScore[user][round] - scoreToIgnore;
+
+      // Calculate the cumulative score with exponential decay
+      cumulativeScore = roundScore + (cumulativeScore * decayFactor) / scalingFactor;
     }
 
     return cumulativeScore;
