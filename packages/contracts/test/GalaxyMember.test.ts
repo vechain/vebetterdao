@@ -28,7 +28,7 @@ import { GalaxyMember, GalaxyMemberV1, MockERC721Receiver } from "../typechain-t
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
-describe("Galaxy Member - @shard3", () => {
+describe.only("Galaxy Member - @shard3", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { galaxyMember, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -665,7 +665,7 @@ describe("Galaxy Member - @shard3", () => {
       expect(await galaxyMember.version()).to.equal("3")
     })
 
-    it("Should not have state conflict after upgrading to V2", async () => {
+    it("Should not have state conflict after upgrading to V3", async () => {
       const config = createLocalConfig()
       const {
         owner,
@@ -865,6 +865,61 @@ describe("Galaxy Member - @shard3", () => {
       expect(await galaxyMemberV3.ownerOf(5)).to.equal(await owner.getAddress())
 
       expect(await galaxyMemberV3.levelOf(1)).to.equal(7)
+
+      // Get checkpointed token Id
+      const checkpointedTokenId = await galaxyMemberV3.getSelectedTokenIdAtBlock(
+        owner.address,
+        await ethers.provider.getBlockNumber(),
+      )
+      expect(checkpointedTokenId).to.equal(0n)
+
+      // admin selects users token as part of upgrade
+      await galaxyMemberV3.connect(owner).selectFor(owner.getAddress(), 4)
+      expect(await galaxyMemberV3.getSelectedTokenId(owner.getAddress())).to.equal(4)
+
+      // Get checkpointed token Id
+      const checkpointedTokenId2 = await galaxyMemberV3.getSelectedTokenIdAtBlock(
+        owner.address,
+        await ethers.provider.getBlockNumber(),
+      )
+      expect(checkpointedTokenId2).to.equal(4n)
+
+      await galaxyMemberV3.connect(owner).transferFrom(owner.address, otherAccounts[6].address, 4)
+
+      // Get checkpointed token Id
+      expect(
+        await galaxyMemberV3.getSelectedTokenIdAtBlock(owner.address, await ethers.provider.getBlockNumber()),
+      ).to.equal(6n)
+
+      expect(await galaxyMemberV3.getSelectedTokenId(owner.getAddress())).to.equal(6n)
+
+      // Check if the token is transferred
+      expect(await galaxyMemberV3.ownerOf(4)).to.equal(await otherAccounts[6].getAddress())
+
+      // Get checkpointed token Id
+      expect(
+        await galaxyMemberV3.getSelectedTokenIdAtBlock(
+          otherAccounts[6].address,
+          await ethers.provider.getBlockNumber(),
+        ),
+      ).to.equal(4n)
+
+      // Transfer the token
+      await galaxyMemberV3.connect(owner).transferFrom(owner.address, otherAccounts[6].address, 6)
+      await galaxyMemberV3.connect(owner).transferFrom(owner.address, otherAccounts[6].address, 5)
+
+      // Check if the token is transferred
+      expect(await galaxyMemberV3.ownerOf(4)).to.equal(await otherAccounts[6].getAddress())
+
+      expect(await galaxyMemberV3.getSelectedTokenId(owner.getAddress())).to.equal(0n)
+
+      // Get checkpointed token Id
+      expect(
+        await galaxyMemberV3.getSelectedTokenIdAtBlock(
+          otherAccounts[6].address,
+          await ethers.provider.getBlockNumber(),
+        ),
+      ).to.equal(4n)
     })
   })
 
@@ -1897,6 +1952,57 @@ describe("Galaxy Member - @shard3", () => {
       await galaxyMember.connect(owner).freeMint() // Token id 1
 
       await expect(galaxyMember.connect(owner).selectFor(await otherAccount.getAddress(), 1)).to.be.reverted
+    })
+
+    it("Should checkpoint selected token correctly", async () => {
+      const { galaxyMember, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // participation in governance is a requirement for minting
+      await participateInAllocationVoting(owner, true)
+
+      const blockNumber1 = await ethers.provider.getBlockNumber()
+
+      await galaxyMember.connect(owner).freeMint() // Token id 1
+
+      const blockNumber2 = await ethers.provider.getBlockNumber()
+
+      await galaxyMember.connect(owner).freeMint() // Token id 2
+
+      const blockNumber3 = await ethers.provider.getBlockNumber()
+
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(1)
+
+      await galaxyMember.connect(owner).transferFrom(await owner.getAddress(), await otherAccount.getAddress(), 1)
+
+      const blockNumber4 = await ethers.provider.getBlockNumber()
+
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(2)
+
+      expect(await galaxyMember.getSelectedTokenIdAtBlock(await owner.getAddress(), blockNumber1)).to.equal(0)
+
+      expect(await galaxyMember.getSelectedTokenIdAtBlock(await owner.getAddress(), blockNumber2)).to.equal(1)
+
+      expect(await galaxyMember.getSelectedTokenIdAtBlock(await owner.getAddress(), blockNumber3)).to.equal(1)
+
+      expect(await galaxyMember.getSelectedTokenIdAtBlock(await owner.getAddress(), blockNumber4)).to.equal(2)
+      expect(await galaxyMember.getSelectedTokenIdAtBlock(await otherAccount.getAddress(), blockNumber4)).to.equal(1)
+
+      await galaxyMember.connect(owner).burn(2)
+      expect(
+        await galaxyMember.getSelectedTokenIdAtBlock(await owner.getAddress(), await ethers.provider.getBlockNumber()),
+      ).to.equal(0)
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(0)
+
+      await galaxyMember.connect(owner).freeMint() // Token id 3
+      expect(await galaxyMember.getSelectedTokenId(await owner.getAddress())).to.equal(3)
+      expect(
+        await galaxyMember.getSelectedTokenIdAtBlock(await owner.getAddress(), await ethers.provider.getBlockNumber()),
+      ).to.equal(3)
     })
   })
 
