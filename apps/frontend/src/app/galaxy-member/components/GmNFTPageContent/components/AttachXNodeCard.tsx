@@ -35,19 +35,15 @@ export const AttachXNodeCard = () => {
   const detachGmToXNodeModal = useDisclosure()
 
   const description = useMemo(() => {
-    if (isXNodeAttachedToGM) {
+    if (isXNodeAttachedToGM || xNodeHasGMAttached) {
       if (attachedGMTokenId && attachedGMTokenId !== gmId) {
         return t("You have attached this Node to a different GM NFT. Detach it to attach to this GM NFT.")
       }
       return t("Your GM NFT is attached to this Node. You can detach it anytime.")
     }
 
-    if (isXNodeDelegator) {
-      return t("Remove the Node delegation to attach GM NFT to this node")
-    }
-
     return t("Attach your Node to your GM NFT to upgrade it for free and earn more rewards!")
-  }, [attachedGMTokenId, gmId, isXNodeAttachedToGM, isXNodeDelegator, t])
+  }, [attachedGMTokenId, gmId, isXNodeAttachedToGM, t, xNodeHasGMAttached])
 
   if (!isXNodeHolder) {
     return null
@@ -137,23 +133,27 @@ export const AttachXNodeCard = () => {
                 <HStack w={"full"} px={5} py={4} borderRadius={16} bg={"rgb(255, 250, 235)"}>
                   <IoWarningOutline size={24} color={"rgb(217, 119, 6)"} />
                   <Text color={"rgb(217, 119, 6)"} fontSize={14}>
-                    <Trans
-                      i18nKey="You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>"
-                      components={{
-                        detach: (
-                          <Text
-                            as="span"
-                            fontWeight={"800"}
-                            onClick={detachGmToXNodeModal.onOpen}
-                            cursor="pointer"
-                            textDecoration={"underline"}>
-                            {t("detach")}
-                          </Text>
-                        ),
-                        bold: <Text as="span" fontWeight={"600"} />,
-                      }}
-                      values={{ gmAttachedName: attachedGmName, gmSelectedName: selectedGmName }}
-                    />
+                    {isXNodeDelegator ? (
+                      <Text>{t("Remove the Node delegation to attach GM NFT to this node")}</Text>
+                    ) : (
+                      <Trans
+                        i18nKey="You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>"
+                        components={{
+                          detach: (
+                            <Text
+                              as="span"
+                              fontWeight={"800"}
+                              onClick={detachGmToXNodeModal.onOpen}
+                              cursor="pointer"
+                              textDecoration={"underline"}>
+                              {t("detach")}
+                            </Text>
+                          ),
+                          bold: <Text as="span" fontWeight={"600"} />,
+                        }}
+                        values={{ gmAttachedName: attachedGmName, gmSelectedName: selectedGmName }}
+                      />
+                    )}
                   </Text>
                 </HStack>
               ) : (
