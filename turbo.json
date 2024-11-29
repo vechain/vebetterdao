@@ -184,6 +184,10 @@
       "dependsOn": ["@repo/config#check-or-generate-local-config"],
       "cache": false
     },
+    "get-galaxy-member-selected-tokens": {
+      "dependsOn": ["@repo/config#check-or-generate-local-config"],
+      "cache": false
+    },
     "test": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]

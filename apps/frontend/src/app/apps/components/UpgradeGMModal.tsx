@@ -107,14 +107,14 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
               <Heading fontSize="xl">{t("Upgrade GM NFT")}</Heading>
             </VStack>
           </ModalHeader>
-          <ModalBody gap={4}>
-            <Text size={"md"} color="#6A6A6A">
+          <ModalBody gap={[0, 4]} pt={0}>
+            <Text fontSize={["16px"]} color="#6A6A6A">
               {t(
                 "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!",
               )}
             </Text>
-            <VStack align="stretch" w="full" py={5}>
-              <Text color="#6A6A6A" size={"md"}>
+            <VStack align="stretch" w="full" py={[2, 5]}>
+              <Text color="#6A6A6A" fontSize={["16px"]}>
                 {t("You'll donate")}
               </Text>
               <HStack>
@@ -124,7 +124,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                 </Heading>
               </HStack>
             </VStack>
-            <VStack align="stretch" py={5}>
+            <VStack align="stretch" py={[2, 5]}>
               <Text color="#6A6A6A" size={"md"}>
                 {t("You’re upgrading to")}
               </Text>
@@ -193,11 +193,11 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
               </Card>
               {/*END GM CARD */}
             </VStack>
-            <VStack align="stretch" w="full" py={5}>
+            <VStack align="stretch" w="full" py={[2, 5]}>
               <Alert bg={"rgb(255, 250, 235)"} borderRadius="2xl">
                 <UilInfoCircle color={"rgb(217, 119, 6)"} size={"50px"} />
-                <Box lineHeight="1.20rem" fontSize="sm">
-                  <Text px={3} color={"rgb(217, 119, 6)"}>
+                <Box lineHeight="1.20rem">
+                  <Text px={3} color={"rgb(217, 119, 6)"} fontSize={["12px", "16px"]}>
                     {t(
                       "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
                     )}
@@ -207,7 +207,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
             </VStack>
           </ModalBody>
 
-          <ModalFooter w="full">
+          <ModalFooter w="full" px={4} pt={1}>
             <VStack align="stretch" w="full">
               <Button variant={"primaryAction"} w={"full"} onClick={handleUpgradeGM}>
                 {t("Upgrade GM NFT")}

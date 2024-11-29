@@ -20,8 +20,9 @@ import { GMNFTListItem } from "./GMNFTListItem"
 import { useCallback, useMemo } from "react"
 import { useMintNFT } from "@/hooks"
 import { MintNFTModal } from "@/components/MintNFTModal"
-import { FeatureFlagWrapper } from "@/components"
+import { FeatureFlagWrapper, BaseTooltip } from "@/components"
 import { FeatureFlag } from "@/constants"
+import { useSelectedGmNft, useParticipatedInGovernance } from "@/api"
 
 export const GMNFTList = () => {
   const { t } = useTranslation()
@@ -53,6 +54,8 @@ export const GMNFTList = () => {
     mintNftModal.onOpen()
   }, [freeMint, mintNftModal])
 
+  const { gmName } = useSelectedGmNft()
+  const { data: hasUserVoted } = useParticipatedInGovernance(account)
   return (
     <Card variant="baseWithBorder">
       <CardBody>
@@ -60,7 +63,13 @@ export const GMNFTList = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t("My Galaxy NFTs")}</Heading>
-              <UilInfoCircle color="#004CFC" />
+              <BaseTooltip
+                text={t("{{gmName}} NFT is the one selected for rewards multiplier.", { gmName: gmName })}
+                showTooltip={hasUserVoted}>
+                <span>
+                  <UilInfoCircle color="#004CFC" />
+                </span>
+              </BaseTooltip>
             </HStack>
             <FeatureFlagWrapper
               feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
@@ -107,9 +116,11 @@ export const GMNFTList = () => {
                         {t("To upgrade and sell in the secondary market")}
                       </Text>
                     </VStack>
-                    <Button variant="primaryAction" onClick={handleMintGM}>
-                      {t("Mint a GM Earth NFT")}
-                    </Button>
+                    <BaseTooltip text={t("You need to vote to mint GM NFT")} showTooltip={!hasUserVoted}>
+                      <Button variant="primaryAction" onClick={handleMintGM} isDisabled={!hasUserVoted}>
+                        {t("Mint a GM Earth NFT")}
+                      </Button>
+                    </BaseTooltip>
                   </Stack>
                 </CardBody>
               </Card>
