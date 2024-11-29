@@ -22,7 +22,7 @@ import { useMintNFT } from "@/hooks"
 import { MintNFTModal } from "@/components/MintNFTModal"
 import { FeatureFlagWrapper, BaseTooltip } from "@/components"
 import { FeatureFlag } from "@/constants"
-import { useSelectedGmNft } from "@/api"
+import { useSelectedGmNft, useParticipatedInGovernance } from "@/api"
 
 export const GMNFTList = () => {
   const { t } = useTranslation()
@@ -55,7 +55,7 @@ export const GMNFTList = () => {
   }, [freeMint, mintNftModal])
 
   const { gmName } = useSelectedGmNft()
-
+  const { data: hasUserVoted } = useParticipatedInGovernance(account)
   return (
     <Card variant="baseWithBorder">
       <CardBody>
@@ -114,7 +114,7 @@ export const GMNFTList = () => {
                         {t("To upgrade and sell in the secondary market")}
                       </Text>
                     </VStack>
-                    <Button variant="primaryAction" onClick={handleMintGM}>
+                    <Button variant="primaryAction" onClick={handleMintGM} isDisabled={!hasUserVoted}>
                       {t("Mint a GM Earth NFT")}
                     </Button>
                   </Stack>
