@@ -63,7 +63,7 @@ export const GMNFTList = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t("My Galaxy NFTs")}</Heading>
-              <BaseTooltip text={t("{{gmName}} NFT is the one selected for voter reward.", { gmName: gmName })}>
+              <BaseTooltip text={t("{{gmName}} NFT is the one selected for rewards multiplier.", { gmName: gmName })}>
                 <span>
                   <UilInfoCircle color="#004CFC" />
                 </span>

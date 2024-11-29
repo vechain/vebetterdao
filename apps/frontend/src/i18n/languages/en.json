@@ -1374,5 +1374,5 @@
   "Owned": "Owned",
   "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.",
   "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>",
-  "{{gmName}} NFT is the one selected for voter reward.": "{{gmName}} NFT is the one selected for voter reward."
+  "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT is the one selected for rewards multiplier."
 }
