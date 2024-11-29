@@ -75,6 +75,14 @@ import {
   X2EarnCreator,
   NodeManagementV1,
   VeBetterPassportV2,
+  PassportConfiguratorV2,
+  PassportWhitelistAndBlacklistLogicV2,
+  PassportPoPScoreLogicV2,
+  PassportPersonhoodLogicV2,
+  PassportEntityLogicV2,
+  PassportDelegationLogicV2,
+  PassportChecksLogicV2,
+  PassportSignalingLogicV2,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -174,6 +182,14 @@ interface DeployInstance {
   passportSignalingLogicV1: PassportSignalingLogicV1
   passportWhitelistBlacklistLogicV1: PassportWhitelistAndBlacklistLogicV1
   passportConfiguratorV1: PassportConfiguratorV1
+  passportChecksLogicV2: PassportChecksLogicV2
+  passportDelegationLogicV2: PassportDelegationLogicV2
+  passportEntityLogicV2: PassportEntityLogicV2
+  passportPersonhoodLogicV2: PassportPersonhoodLogicV2
+  passportPoPScoreLogicV2: PassportPoPScoreLogicV2
+  passportSignalingLogicV2: PassportSignalingLogicV2
+  passportWhitelistBlacklistLogicV2: PassportWhitelistAndBlacklistLogicV2
+  passportConfiguratorV2: PassportConfiguratorV2
   passportConfigurator: any // no abi for this library, which means a typechain is not generated
   administrationUtils: AdministrationUtils
   endorsementUtils: EndorsementUtils
@@ -946,6 +962,14 @@ export const getOrDeployContractInstances = async ({
     passportPoPScoreLogicV1: PassportPoPScoreLogicV1,
     passportSignalingLogicV1: PassportSignalingLogicV1,
     passportWhitelistBlacklistLogicV1: PassportWhitelistAndBlacklistLogicV1,
+    passportChecksLogicV2: PassportChecksLogicV2,
+    passportDelegationLogicV2: PassportDelegationLogicV2,
+    passportEntityLogicV2: PassportEntityLogicV2,
+    passportPersonhoodLogicV2: PassportPersonhoodLogicV2,
+    passportPoPScoreLogicV2: PassportPoPScoreLogicV2,
+    passportSignalingLogicV2: PassportSignalingLogicV2,
+    passportWhitelistBlacklistLogicV2: PassportWhitelistAndBlacklistLogicV2,
+    passportConfiguratorV2: PassportConfiguratorV2,
     administrationUtils: AdministrationUtils,
     endorsementUtils: EndorsementUtils,
     voteEligibilityUtils: VoteEligibilityUtils,
