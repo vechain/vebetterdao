@@ -7,9 +7,9 @@ import { useTranslation } from "react-i18next"
 
 type Props = {
   address: string
-  isConnectedUser?: boolean
 }
-export const UserTransactions = ({ address, isConnectedUser }: Props) => {
+
+export const UserTransactions = ({ address }: Props) => {
   const { t } = useTranslation()
 
   const { data } = useTransactions({
@@ -38,12 +38,7 @@ export const UserTransactions = ({ address, isConnectedUser }: Props) => {
           </VStack>
           <VStack spacing={4} align="stretch">
             {last5Transactions.map(transaction => (
-              <TransactionCard
-                key={transaction.txId}
-                transaction={transaction}
-                isConnectedUser={isConnectedUser}
-                address={address}
-              />
+              <TransactionCard key={transaction.txId} transaction={transaction} />
             ))}
           </VStack>
           {transactions.length > 0 ? (

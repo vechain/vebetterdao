@@ -20,8 +20,8 @@ import { CurrentDelegation } from "./components/delegation/CurrentDelegation"
 import { VotingQualification } from "./components/delegation/VotingQualification"
 import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useIsUserConnectedProfil } from "@/app/profile/components/utils/useIsUserConnectedProfil"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
 
 enum ListView {
@@ -40,8 +40,8 @@ export const ProfileGovernance = ({ address }: Props) => {
   const { data: createdProposals } = useUserProposalsCreatedEvents(address ?? "")
   const { data: votedProposals } = useUserProposalsVoteEvents(address ?? "")
 
-  const { account: connectedAccount } = useWallet()
-  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
+  const isConnectedUser = useIsUserConnectedProfil(address)
+  console.log("isConnectedUser", isConnectedUser)
 
   const router = useRouter()
 
@@ -124,7 +124,9 @@ export const ProfileGovernance = ({ address }: Props) => {
           ) : (
             <EmptyStateGovernance
               title={t("Voted Proposals")}
-              description={t("Your voted proposals will appear here.")}
+              description={t("{{subject}} voted proposals will appear here.", {
+                subject: isConnectedUser ? "Your" : `${humanAddress(address ?? "", 4, 3)}`,
+              })}
               buttonText={t("Explore governance")}
               illustration={<HandPlantIcon color="rgba(117, 117, 117, 1)" />}
               buttonIcon={FaScaleBalanced}
@@ -140,7 +142,9 @@ export const ProfileGovernance = ({ address }: Props) => {
           ) : (
             <EmptyStateGovernance
               title={t("Most voted apps")}
-              description={t("Your top voted apps will appear here.")}
+              description={t("{{subject}} top voted apps will appear here.", {
+                subject: isConnectedUser ? "Your" : `${humanAddress(address ?? "", 4, 3)}`,
+              })}
               buttonText={t("Explore allocations")}
               illustration={<VoteBoxIcon color="rgba(117, 117, 117, 1)" />}
               buttonIcon={FaChartPie}

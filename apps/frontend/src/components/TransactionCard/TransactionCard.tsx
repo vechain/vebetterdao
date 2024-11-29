@@ -7,11 +7,9 @@ import { B3trTransaction } from "@/api"
 
 type Props = {
   transaction: B3trTransaction
-  isConnectedUser?: boolean
-  address?: string
 }
 
-export const TransactionCard = ({ transaction, isConnectedUser, address }: Props) => {
+export const TransactionCard = ({ transaction }: Props) => {
   switch (transaction.txType) {
     case "B3TR_ACTION": {
       return (
@@ -25,13 +23,13 @@ export const TransactionCard = ({ transaction, isConnectedUser, address }: Props
       )
     }
     case "SWAP":
-      return <SwapCard transaction={transaction} isConnectedUser={isConnectedUser} address={address} />
+      return <SwapCard transaction={transaction} />
     case "CLAIM_REWARD":
-      return <ClaimCard transaction={transaction} isConnectedUser={isConnectedUser} address={address} />
+      return <ClaimCard transaction={transaction} />
     case "PROPOSAL_SUPPORT":
-      return <SupportCard transaction={transaction} isConnectedUser={isConnectedUser} address={address} />
+      return <SupportCard transaction={transaction} />
     case "UPGRADE_GM":
-      return <UpgradeGMCard transaction={transaction} isConnectedUser={isConnectedUser} address={address} />
+      return <UpgradeGMCard transaction={transaction} />
     default:
       return null
   }

@@ -7,16 +7,15 @@ import { ActionModal } from "./BetterActionCard"
 import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-
+import { useIsUserConnectedProfil } from "@/app/profile/components/utils/useIsUserConnectedProfil"
+import { useParams } from "next/navigation"
 type Props = {
   transaction: B3trTransaction
-  isConnectedUser?: boolean
-  address?: string
 }
 
 const compactFormatter = getCompactFormatter(2)
 
-export const SwapCard = ({ transaction, isConnectedUser, address }: Props) => {
+export const SwapCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
   const vot3ToB3tr = useMemo(() => {
     if (!transaction?.amountB3TR || !transaction?.amountVOT3) return false
@@ -25,6 +24,8 @@ export const SwapCard = ({ transaction, isConnectedUser, address }: Props) => {
   }, [transaction.amountB3TR, transaction.amountVOT3])
 
   const actionModal = useDisclosure()
+  const { profile: address } = useParams<{ profile: string }>()
+  const isConnectedUser = useIsUserConnectedProfil(address)
 
   return (
     <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
@@ -38,7 +39,7 @@ export const SwapCard = ({ transaction, isConnectedUser, address }: Props) => {
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
                   {t("{{value}} converted", {
-                    value: isConnectedUser ? "You" : `${humanAddress(address ?? "", 6, 4)}`,
+                    value: isConnectedUser ? "You" : `${humanAddress(address ?? "", 4, 3)}`,
                   })}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
