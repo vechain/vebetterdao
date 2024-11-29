@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import { PassportTypes } from "../ve-better-passport/libraries/PassportTypes.sol";
 import { IX2EarnApps } from "./IX2EarnApps.sol";
 import { IXAllocationVotingGovernor } from "./IXAllocationVotingGovernor.sol";
+import { IGalaxyMember } from "./IGalaxyMember.sol";
 
 interface IVeBetterPassport {
   // ---------- Events ---------- //
@@ -185,6 +186,18 @@ interface IVeBetterPassport {
   /// @return True if the user is blacklisted
   function isBlacklisted(address _user) external view returns (bool);
 
+  /// @notice Checks if a passport is whitelisted.
+  /// @dev If passport is an entity, it will check the passport of the entity.
+  /// @param passport The address of the passport to check.
+  /// @return True if the passport is whitelisted, false otherwise.
+  function isPassportWhitelisted(address passport) external view returns (bool);
+
+  /// @notice Checks if a passport is blacklisted.
+  /// @dev If passport is an entity, it will check the passport of the entity.
+  /// @param passport The address of the passport to check.
+  /// @return True if the passport is blacklisted, false otherwise.
+  function isPassportBlacklisted(address passport) external view returns (bool);
+
   /// @notice Toggles the specified check
   function toggleCheck(PassportTypes.CheckType check) external;
 
@@ -232,6 +245,16 @@ interface IVeBetterPassport {
   /// @param lastRound The round to consider as a starting point for the cumulative score
   /// @return The cumulative score of the user
   function getCumulativeScoreWithDecay(address user, uint256 lastRound) external view returns (uint256);
+
+  /// @notice Gets the cumulative score of a user based on exponential decay and ignoring the score of specific apps
+  /// @param user - the user address
+  /// @param lastRound - the round to consider as a starting point for the cumulative score
+  /// @param appsToIgnore - the apps to ignore in the calculation
+  function getCumulativeScoreWithDecayAndExclusions(
+    address user,
+    uint256 lastRound,
+    bytes32[] memory appsToIgnore
+  ) external view returns (uint256);
 
   /// @notice Gets the round score of a user
   /// @param user The user address
@@ -327,6 +350,15 @@ interface IVeBetterPassport {
   /// @param reason The reason for the signal
   function signalUserWithReason(address _user, string memory reason) external;
 
+  /// @notice this method allows an app admin to assign a signaler to an app
+  /// @param app - the app to assign the signaler to
+  /// @param user - the signaler to assign to the app
+  function assignSignalerToAppByAppAdmin(bytes32 app, address user) external;
+
+  /// @notice this method allows an app admin to remove a signaler from an app
+  /// @param user - the signaler to remove from the app
+  function removeSignalerFromAppByAppAdmin(address user) external;
+
   /// @notice Assigns a signaler to an app
   /// @param app The app ID
   /// @param user The signaler address
@@ -336,10 +368,27 @@ interface IVeBetterPassport {
   /// @param user The signaler address
   function removeSignalerFromApp(address user) external;
 
+  /// @notice Resets the signals of a user by app admin
+  /// @param user - the user to reset the signals of
+  /// @param reason - the reason for resetting the signals
+  function resetUserSignalsByAppAdminWithReason(address user, string memory reason) external;
+
   /// @notice Resets the signals of a user with a given reason
   /// @param user The user address
   /// @param reason The reason for resetting the signals
   function resetUserSignalsWithReason(address user, string memory reason) external;
+
+  /// @notice user can be whitelisted but the counter will not be reset
+  function whitelist(address _user) external;
+
+  /// @notice Removes a user from the whitelist
+  function removeFromWhitelist(address _user) external;
+
+  /// @notice user can be blacklisted but the counter will not be reset
+  function blacklist(address _user) external;
+
+  /// @notice Removes a user from the blacklist
+  function removeFromBlacklist(address _user) external;
 
   /// @notice Gets the version of the contract
   /// @return The version of the contract as a string
@@ -356,6 +405,10 @@ interface IVeBetterPassport {
   /// @notice Sets the signaling threshold
   /// @param threshold The new signaling threshold
   function setSignalingThreshold(uint256 threshold) external;
+
+  /// @notice Sets the minimum galaxy member level
+  /// @param _minimumGalaxyMemberLevel The new minimum galaxy member level
+  function setMinimumGalaxyMemberLevel(uint256 _minimumGalaxyMemberLevel) external;
 
   /// @notice Sets the security multiplier for an app security level
   /// @param security The app security level
@@ -386,6 +439,10 @@ interface IVeBetterPassport {
   /// @notice Sets the xAllocationVoting contract address
   /// @param xAllocationVoting The xAllocationVoting contract address
   function setXAllocationVoting(IXAllocationVotingGovernor xAllocationVoting) external;
+
+  /// @dev Sets the galaxy member contract
+  /// @param galaxyMember - the galaxy member contract address
+  function setGalaxyMember(IGalaxyMember galaxyMember) external;
 
   /// @notice Link an account (which will become an entity) to a passport (an address that is not an enitity)
   /// After linking, the scores of the enitity will be stored to the linked account (passport)
@@ -464,6 +521,16 @@ interface IVeBetterPassport {
   /// @param delegatee - the delegatee address
   function delegatePassport(address delegatee) external;
 
+  /// @notice Delegate the passport to another address
+  /// The delegator must sign a message where he authorizes the delegatee to request the delegation:
+  /// this is done to avoid that a malicious user delegates the personhood to another user without his consent.
+  /// Eg: Alice has a personhood where she is not considered a person, she delegates her personhood to Bob, which
+  /// is considered a person. Bob now cannot vote because he is not considered a person anymore.
+  /// @param delegator - the delegator address
+  /// @param deadline - the deadline for the signature
+  /// @param signature - the signature of the delegation
+  function delegateWithSignature(address delegator, uint256 deadline, bytes memory signature) external;
+
   /// @notice Allow the delegatee to accept the delegation
   /// @param delegator - the delegator address
   function acceptDelegation(address delegator) external;
@@ -508,6 +575,15 @@ interface IVeBetterPassport {
   /// @param user The user address
   function isDelegator(address user) external view returns (bool);
 
+  /// @notice Returns the number of times a user has been signaled
+  function signaledCounter(address _user) external view returns (uint256);
+
+  /// @notice Returns the belonging app of a signaler
+  function appOfSignaler(address _signaler) external view returns (bytes32);
+
+  /// @notice Returns the number of times a user has been signaled by an app
+  function appSignalsCounter(bytes32 _app, address _user) external view returns (uint256);
+
   /// @notice Returns if a user is a delegator at a specific timepoint
   /// @param user The user address
   /// @param timepoint The timepoint to query
@@ -521,4 +597,13 @@ interface IVeBetterPassport {
   /// @param user The user address
   /// @param timepoint The timepoint to query
   function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool);
+
+  /// @notice Gets the x2EarnApps contract address
+  function getX2EarnApps() external view returns (IX2EarnApps);
+
+  /// @notice Gets the xAllocationVoting contract address
+  function getXAllocationVoting() external view returns (IXAllocationVotingGovernor);
+
+  /// @notice Gets the galaxy member contract address
+  function getGalaxyMember() external view returns (IGalaxyMember);
 }
