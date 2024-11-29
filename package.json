@@ -42,6 +42,7 @@
     "contracts:start-round:testnet-staging": "dotenv -e .env.example -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run start-round --filter=contracts",
     "contracts:get-galaxy-member-owners": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run get-galaxy-member-owners --filter=contracts",
     "contracts:get-galaxy-member-owners:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run get-galaxy-member-owners:staging --filter=contracts",
+    "contracts:get-galaxy-member-selected-tokens": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run get-galaxy-member-selected-tokens --filter=contracts",
     "contracts:test": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:hardhat --filter=contracts",
     "contracts:test:shard": "SHARD=$SHARD dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:hardhat:shard --filter=contracts",
     "contracts:test:thor-solo": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:thor-solo --filter=contracts",
