@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { upgradeProxy } from "../../../helpers"
-import { EnvConfig, getContractsConfig } from "@repo/config/contracts"
+import { EnvConfig } from "@repo/config/contracts"
 import { GalaxyMember } from "../../../../typechain-types"
 
 async function main() {

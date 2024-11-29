@@ -73,9 +73,10 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "VeBetter Passport": {
     name: "vebetter-passport",
     configAddressField: "veBetterPassportContractAddress",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Prevent delegation of passports to entities",
+      v3: "Add GM level to personhood check",
     },
   },
   "Galaxy Member": {
@@ -84,7 +85,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
     versions: ["v2", "v3"],
     descriptions: {
       v2: "Vechain Nodes x GM upgrades feature",
-      v3: "Use NodeManagement V2 interface",
+      v3: "Add functions to checkpoint GM selection",
     },
   },
   "Node Management": {

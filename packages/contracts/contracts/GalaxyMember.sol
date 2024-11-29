@@ -39,6 +39,7 @@ import { IB3TR } from "./interfaces/IB3TR.sol";
 import { ITokenAuction } from "./interfaces/ITokenAuction.sol";
 import { INodeManagement } from "./interfaces/INodeManagement.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 
 /**
  * @title GalaxyMember
@@ -58,6 +59,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
  * --------------------------------- VERSION 3 ---------------------------------
  * - Updated Node Management interface to include getters (isNodeDelegator() and isNodeDelegated())
  * - Added `selectFor` function to allow the admin to select a token for the user
+ * - Added checkpoints for the selected token ID of the user
+ * - Added `clock()` and `CLOCK_MODE()` functions to allow for custom time tracking
  */
 contract GalaxyMember is
   ERC721Upgradeable,
@@ -68,6 +71,8 @@ contract GalaxyMember is
   ReentrancyGuardUpgradeable,
   UUPSUpgradeable
 {
+  using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
+
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -97,7 +102,9 @@ contract GalaxyMember is
     mapping(uint256 => uint256) _tokenIdToNode; // Mapping from GalaxyMember Token ID to Vechain node ID. Used to track the GM token ID tied to the XNode token ID
     mapping(uint8 => uint256) _nodeToFreeUpgradeLevel; // Mapping from Vechain node level to GalaxyMember level. Used to track the GM level that can be upgraded for free for a given Vechain node level
     mapping(uint256 => uint256) _tokenIdToB3TRdonated; // Mapping from GM Token ID to B3TR donated for upgrading
-    mapping(address => uint256) _selectedTokenID; // Mapping from user address to selected GM token ID
+    mapping(address => uint256) _selectedTokenID_DEPRECATED; // Mapping from user address to selected GM token ID - DEPRECATED IN FAVOUR OF CHECKPOINTS
+    // --------------------------- V3 Additions --------------------------- //
+    mapping(address => Checkpoints.Trace208) _selectedTokenIDCheckpoints; // Checkpoints for selected GM token ID of the user
   }
 
   /// @notice Storage slot for GalaxyMemberStorage
@@ -327,7 +334,7 @@ contract GalaxyMember is
 
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
 
-    $._selectedTokenID[owner] = tokenId;
+    $._selectedTokenIDCheckpoints[owner].push(clock(), SafeCast.toUint208(tokenId));
 
     emit Selected(owner, tokenId);
   }
@@ -576,7 +583,15 @@ contract GalaxyMember is
   /// @param owner The address of the owner to check
   function getSelectedTokenId(address owner) public view virtual returns (uint256) {
     GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
-    return $._selectedTokenID[owner];
+    return $._selectedTokenIDCheckpoints[owner].latest();
+  }
+
+  /// @notice Gets the selected token ID for the user in a specific block number
+  /// @param owner The address of the owner to check
+  /// @param blockNumber The block number to check
+  function getSelectedTokenIdAtBlock(address owner, uint48 blockNumber) public view virtual returns (uint256) {
+    GalaxyMemberStorage storage $ = _getGalaxyMemberStorage();
+    return $._selectedTokenIDCheckpoints[owner].upperLookupRecent(blockNumber);
   }
 
   /// @notice Gets the level of the token after attaching a node
@@ -779,6 +794,18 @@ contract GalaxyMember is
     return tokens;
   }
 
+  /// @dev Clock used for flagging checkpoints.
+  function clock() public view virtual returns (uint48) {
+    return Time.blockNumber();
+  }
+
+  /**
+   * @dev Returns the mode of the clock.
+   */
+  function CLOCK_MODE() public view virtual returns (string memory) {
+    return "mode=blocknumber&from=default";
+  }
+
   // ---------- Overrides ---------- //
 
   /// @notice Performs automatic level updating upon token updates
@@ -802,7 +829,7 @@ contract GalaxyMember is
 
     // If the owner has no tokens, don't select any token
     if (_previousOwner != address(0) && balanceOf(_previousOwner) == 0) {
-      delete _getGalaxyMemberStorage()._selectedTokenID[_previousOwner];
+      _getGalaxyMemberStorage()._selectedTokenIDCheckpoints[_previousOwner].push(clock(), 0);
     }
 
     // If the owner transfers out the selected token, select the first token he owns
