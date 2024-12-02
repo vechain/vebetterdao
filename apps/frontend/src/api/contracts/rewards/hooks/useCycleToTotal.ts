@@ -1,6 +1,7 @@
 import { VoterRewards__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { getCallKey, useCall } from "@/hooks"
+import { ethers } from "ethers"
 
 const method = "cycleToTotal"
 const voterRewardsInterface = VoterRewards__factory.createInterface()
@@ -22,11 +23,12 @@ export const getCycleToTotal = (address?: string) => {
  * @returns {uint256} A uint256 that represents the total reward-weighted votes in a specific cycle.
  */
 export const useCycleToTotal = (cycle?: string) => {
-  return useCall({
+  const res = useCall({
     contractInterface: voterRewardsInterface,
     contractAddress: VOTER_REWARDS_CONTRACT,
     method,
     args: [cycle ?? ""],
     enabled: !!cycle,
   })
+  return ethers.formatEther(res.data)
 }
