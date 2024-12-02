@@ -40,7 +40,7 @@ async function main() {
     "X2EarnAppsV2",
     "X2EarnApps",
     config.x2EarnAppsContractAddress,
-    [contractsConfig.X2EARN_NODE_COOLDOWN_PERIOD],
+    [contractsConfig.X2EARN_NODE_COOLDOWN_PERIOD, config.xAllocationVotingContractAddress],
     {
       version: 3,
       libraries: {
