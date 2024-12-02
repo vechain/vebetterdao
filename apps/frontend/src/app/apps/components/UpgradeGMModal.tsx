@@ -31,7 +31,7 @@ import { gmNfts } from "@/constants/gmNfts"
 
 const compactFormatter = getCompactFormatter(2)
 interface UpgradeGMModalProps {
-  gmLevel: number
+  gmLevel: string
   tokenId: string
   b3trToUpgradeGMToNextLevel: string
   upgradeGMModal: ReturnType<typeof useDisclosure>
@@ -46,27 +46,27 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { t } = useTranslation()
+
   const upgradeGMMutation = useUpgradeGM({
     tokenId,
     b3trToUpgrade: b3trToUpgradeGMToNextLevel,
   })
+
+  // Get the next level GM NFT image
+  const { data: baseUri, isLoading: baseUriLoading } = useGMBaseUri()
+
+  const nextLevelGMImageUri = useMemo(() => {
+    if (baseUriLoading || !gmLevel) return null
+    return `${baseUri}${Number(gmLevel) + 1}.json`
+  }, [baseUriLoading, baseUri, gmLevel])
+  console.log("***************nextLevelGMImageUri", nextLevelGMImageUri)
+  const { data: nextLevelGMImage, isLoading: nextLevelGMImageLoading } = useIpfsImage(nextLevelGMImageUri)
 
   const levelAfterUpgrade = useMemo(() => {
     const currentLevel = Number(gmLevel ?? 1) - 1 // gmNfts start from 1
     const nextLevel = currentLevel + 1 // GMNFTs lists start from 0
     return nextLevel
   }, [gmLevel])
-
-  // Get the next level GM NFT image
-  const { data: baseUri, isLoading: baseUriLoading } = useGMBaseUri()
-  const { data: nextLevelGMImage, isLoading: nextLevelGMImageLoading } = useIpfsImage(
-    baseUriLoading ? null : `${baseUri}${levelAfterUpgrade}.json`,
-  )
-  console.log("********")
-  console.log("currentLevel", Number(gmLevel ?? 1) - 1)
-  console.log("nextLevel", Number(gmLevel ?? 1) - 1 + 1)
-  console.log("url", `${baseUri}${levelAfterUpgrade}.json`)
-  console.log({ nextLevelGMImage })
 
   const nextLevelGM = useMemo(() => {
     return gmNfts.at(levelAfterUpgrade)
