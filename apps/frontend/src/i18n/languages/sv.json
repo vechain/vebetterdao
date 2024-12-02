@@ -1372,5 +1372,13 @@
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Du måste <detach>koppla loss</detach> <bold>{{gmAttachedName}} GM</bold> för att fästa <bold>{{gmSelectedName}} GM</bold>",
   "You can't endorse apps with this account if you delegated your Node. Cancel the delegation to be able to endorse apps with this account again.": "Du kan inte stödja appar med detta konto om du har delegerat din Nod. Avbryt delegeringen för att åter kunna stödja appar med detta konto.",
   "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Du kan inte använda din Nod för att stödja appar eller uppgradera dina Galaxy Member NFTs medan den är delegerad. Avbryt delegeringen för att få full kontroll över din Nod.",
-  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Du måste koppla bort <bold>{{gmAttachedName}} GM</bold> för att fästa <bold>{{gmSelectedName}} GM</bold>"
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Du måste koppla bort <bold>{{gmAttachedName}} GM</bold> för att fästa <bold>{{gmSelectedName}} GM</bold>",
+  "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "Den B3TR du spenderar för att uppgradera din NFT kommer att tas från din plånbok. Du kan inte ångra denna åtgärd.",
+  "You’re upgrading to": "Du uppgraderar till",
+  "You'll donate": "Du kommer att donera",
+  "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!": "Donera B3TR för att uppgradera din GM NFT och tjäna extra belöningar varje gång du röstar på ett förslag eller en tilldelning!",
+  "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT är den som är vald för belöningsmultiplikator.",
+  "You need to vote to mint GM NFT": "Du måste rösta för att skapa GM NFT",
+  "Multiplier": "Multiplikator",
+  "Cost": "Kostnad"
 }

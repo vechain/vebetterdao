@@ -1371,5 +1371,13 @@
   "To be able to vote on this round’s allocations and proposals, you have to do Better actions in the applications. Be more sustainable and earn tokens!": "このラウンドの配分や提案に投票するには、アプリケーションでより良いアクションを行う必要があります。もっと持続可能になり、トークンを獲得しましょう！",
   "Explore apps": "アプリを探検",
   "Know more": "もっと知る",
-  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "<bold>{{gmSelectedName}} GM</bold>をアタッチするには、<bold>{{gmAttachedName}} GM</bold>をデタッチする必要があります"
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "<bold>{{gmSelectedName}} GM</bold>をアタッチするには、<bold>{{gmAttachedName}} GM</bold>をデタッチする必要があります",
+  "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "NFTをアップグレードするために使ったB3TRはあなたのウォレットから引き落とされます。この操作は取り消すことができません。",
+  "You’re upgrading to": "あなたは以下にアップグレードしています",
+  "You'll donate": "あなたは寄付します",
+  "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!": "提案や配分への投票ごとに追加報酬を得るために、GM NFTをアップグレードするためにB3TRを寄付しましょう！",
+  "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFTが報酬倍率に選ばれました。",
+  "You need to vote to mint GM NFT": "GM NFTを発行するには投票が必要です",
+  "Multiplier": "倍率",
+  "Cost": "費用"
 }

@@ -1376,5 +1376,13 @@
   "Send B3TR tokens from the connected account to the app, and use them for rewards distribution.": "Senden Sie B3TR-Token vom verbundenen Konto an die App und verwenden Sie sie zur Belohnungsverteilung.",
   "Deposit B3TR to your app": "B3TR auf Ihre App einzahlen",
   "Deposit": "Einzahlen",
-  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Sie müssen den <bold>{{gmAttachedName}} GM</bold> trennen, um den <bold>{{gmSelectedName}} GM</bold> zu verbinden."
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Sie müssen den <bold>{{gmAttachedName}} GM</bold> trennen, um den <bold>{{gmSelectedName}} GM</bold> zu verbinden.",
+  "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "Die B3TR, die Sie für das Upgrade Ihres NFT ausgeben, werden aus Ihrer Brieftasche entnommen. Diese Aktion kann nicht rückgängig gemacht werden.",
+  "You’re upgrading to": "Sie upgraden auf",
+  "You'll donate": "Sie werden spenden",
+  "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!": "Spenden Sie B3TR, um Ihr GM NFT zu upgraden und verdienen Sie zusätzliche Belohnungen, jedes Mal wenn Sie für einen Vorschlag oder eine Zuweisung abstimmen!",
+  "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT ist das ausgewählte für Belohnungsmultiplikatoren.",
+  "You need to vote to mint GM NFT": "Sie müssen abstimmen, um ein GM NFT zu prägen",
+  "Multiplier": "Multiplikator",
+  "Cost": "Kosten"
 }

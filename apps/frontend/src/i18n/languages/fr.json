@@ -1371,5 +1371,13 @@
   "detach": "détacher",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Vous devez <detach>détacher</detach> le <bold>{{gmAttachedName}} GM</bold> pour attacher le <bold>{{gmSelectedName}} GM</bold>",
   "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Vous ne pouvez pas utiliser votre nœud pour approuver des applications ou pour mettre à niveau vos NFTs de membre Galaxy tant qu'il est délégué. Annulez la délégation pour reprendre le contrôle total de votre nœud.",
-  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Vous devez détacher le <bold>{{gmAttachedName}} GM</bold> pour attacher le <bold>{{gmSelectedName}} GM</bold>"
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Vous devez détacher le <bold>{{gmAttachedName}} GM</bold> pour attacher le <bold>{{gmSelectedName}} GM</bold>",
+  "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "Les B3TR que vous dépensez pour améliorer votre NFT seront retirés de votre portefeuille. Vous ne pouvez pas annuler cette action.",
+  "You’re upgrading to": "Vous passez à",
+  "You'll donate": "Vous allez faire un don",
+  "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!": "Faites un don de B3TR pour améliorer votre GM NFT et gagnez des récompenses supplémentaires chaque fois que vous votez sur une proposition ou une allocation !",
+  "{{gmName}} NFT is the one selected for rewards multiplier.": "Le NFT {{gmName}} est celui sélectionné pour le multiplicateur de récompenses.",
+  "You need to vote to mint GM NFT": "Vous devez voter pour frapper le GM NFT",
+  "Multiplier": "Multiplicateur",
+  "Cost": "Coût"
 }
