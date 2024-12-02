@@ -320,8 +320,6 @@ library EndorsementUtils {
   /**
    * @dev Ensures that the cooldown period for a node has elapsed before performing an action.
    * @param nodeId The unique identifier of the node being checked.
-   * @notice This function checks both the last endorsement time and the node's creation time
-   *         to calculate the effective cooldown period.
    * @return True if the cooldown period has not yet elapsed, false otherwise.
    */
   function checkCooldown(

@@ -634,7 +634,7 @@ interface IX2EarnApps {
   function getXAllocationVotingGovernor() external view returns (IXAllocationVotingGovernor);
 
   /**
-   * @notice Check if a node is in a cooldown period. A node is in a cooldown period after it has endorsed an app or been created.
+   * @notice Check if a node is in a cooldown period. A node is in a cooldown period after it has endorsed an app.
    * @param nodeId The unique identifier of the node.
    * @return bool True if the node is in a cooldown period.
    */
