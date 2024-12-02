@@ -378,6 +378,9 @@ export const getOrDeployContractInstances = async ({
     PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
   })
 
+  // Set a temporary address for the xAllocationGovernor
+  const xAllocationGovernor = otherAccounts[1].address
+
   const x2EarnApps = (await deployAndUpgrade(
     ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnApps"],
     [
@@ -388,7 +391,7 @@ export const getOrDeployContractInstances = async ({
         veBetterPassportContractAddress,
         await x2EarnCreator.getAddress(),
       ],
-      [config.X2EARN_NODE_COOLDOWN_PERIOD],
+      [config.X2EARN_NODE_COOLDOWN_PERIOD, xAllocationGovernor],
     ],
     {
       versions: [undefined, 2, 3],
@@ -757,6 +760,9 @@ export const getOrDeployContractInstances = async ({
   // Setup XAllocationPool addresses
   await xAllocationPool.connect(owner).setXAllocationVotingAddress(await xAllocationVoting.getAddress())
   await xAllocationPool.connect(owner).setEmissionsAddress(await emissions.getAddress())
+
+  // Setup the X2EarnApps XAllocationVote address
+  await x2EarnApps.connect(owner).setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
 
   // Set up veBetterPassport
   await veBetterPassport

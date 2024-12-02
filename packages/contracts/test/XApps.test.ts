@@ -38,7 +38,6 @@ import {
   X2EarnRewardsPoolV4,
   XAllocationPool,
   XAllocationPoolV3,
-  XAllocationVoting,
   XAllocationVotingV3,
 } from "../typechain-types"
 import { SeedAccount, getTestKeys } from "../scripts/helpers/seedAccounts"
@@ -52,15 +51,29 @@ describe("X-Apps - @shard15", function () {
       const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
       expect(await x2EarnApps.CLOCK_MODE()).to.eql("mode=blocknumber&from=default")
     })
+
+    it("Node level to endorsement score mapping is correct", async function () {
+      const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
+      expect(await x2EarnApps.nodeLevelEndorsementScore(0)).to.eql(0n)
+      expect(await x2EarnApps.nodeLevelEndorsementScore(1)).to.eql(2n)
+      expect(await x2EarnApps.nodeLevelEndorsementScore(2)).to.eql(13n)
+      expect(await x2EarnApps.nodeLevelEndorsementScore(3)).to.eql(50n)
+      expect(await x2EarnApps.nodeLevelEndorsementScore(4)).to.eql(3n)
+      expect(await x2EarnApps.nodeLevelEndorsementScore(5)).to.eql(9n)
+      expect(await x2EarnApps.nodeLevelEndorsementScore(6)).to.eql(35n)
+      expect(await x2EarnApps.nodeLevelEndorsementScore(7)).to.eql(100n)
+    })
   })
 
   describe("Contract upgradeablity", () => {
     it("Cannot reinitialize twice", async function () {
       const config = createLocalConfig()
-      const { x2EarnApps } = await getOrDeployContractInstances({
+      const { x2EarnApps, xAllocationVoting } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      await catchRevert(x2EarnApps.initializeV3(config.X2EARN_NODE_COOLDOWN_PERIOD))
+      await catchRevert(
+        x2EarnApps.initializeV3(config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()),
+      )
     })
 
     it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
@@ -137,6 +150,7 @@ describe("X-Apps - @shard15", function () {
     it("X2Earn Apps Info added pre contract upgrade should should be same after upgrade", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1
       const {
         timeLock,
         owner,
@@ -150,6 +164,7 @@ describe("X-Apps - @shard15", function () {
         administrationUtilsV2,
         endorsementUtilsV2,
         voteEligibilityUtilsV2,
+        xAllocationVoting,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -217,7 +232,7 @@ describe("X-Apps - @shard15", function () {
         "X2EarnAppsV2",
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
-        [config.X2EARN_NODE_COOLDOWN_PERIOD],
+        [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
           version: 3,
           libraries: {
@@ -233,6 +248,9 @@ describe("X-Apps - @shard15", function () {
 
       const appsV3 = await x2EarnApps.apps()
       expect(appsV1).to.eql(appsV3)
+
+      const cooldownPeriod = await x2EarnApps.cooldownPeriod()
+      expect(cooldownPeriod).to.eql(1n)
     })
 
     it("X2Earn Apps added pre contract upgrade should need endorsement after upgrade and should be in grace period", async () => {
@@ -398,10 +416,10 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV2.isAppUnendorsed(app3Id)).to.eql(true)
     })
 
-    it("Vechain nodes that starting endorsing XApps priod to upgrade or not subject to cooldown period but will be after they perform an action, new nodes will be.", async () => {
+    it("Vechain nodes that starting endorsing XApps priod to upgrade or not subject to cooldown period but will be after they perform an action.", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 24
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1
       const {
         xAllocationVoting,
         x2EarnRewardsPool,
@@ -574,7 +592,7 @@ describe("X-Apps - @shard15", function () {
       await x2EarnAppsV2.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 100
       expect(await x2EarnAppsV2.isAppUnendorsed(app1Id)).to.eql(false)
 
-      // Create new node holders with an endorsement score of 100 they should be subject to the cooldown period after upgrade
+      // Create new node holders with an endorsement score of 100
       const nodeId1 = await createNodeHolder(7, otherAccounts[5]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
       const nodeId2 = await createNodeHolder(7, otherAccounts[6]) // Node strength level 7 corresponds (MjolnirX) to an endorsement score of 100
 
@@ -586,7 +604,7 @@ describe("X-Apps - @shard15", function () {
         "X2EarnAppsV2",
         "X2EarnApps",
         await x2EarnAppsV2.getAddress(),
-        [config.X2EARN_NODE_COOLDOWN_PERIOD],
+        [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
           version: 3,
           libraries: {
@@ -597,9 +615,9 @@ describe("X-Apps - @shard15", function () {
         },
       )) as X2EarnApps
 
-      // New node holders should be subject to cooldown period even if they endorse an app prior to upgrade
-      expect(await x2EarnAppsV3.checkCooldown(nodeId1)).to.eql(true)
-      expect(await x2EarnAppsV3.checkCooldown(nodeId2)).to.eql(true)
+      // New node holders should not be subject to cooldown period even if they endorse an app prior to upgrade
+      expect(await x2EarnAppsV3.checkCooldown(nodeId1)).to.eql(false)
+      expect(await x2EarnAppsV3.checkCooldown(nodeId2)).to.eql(false)
 
       // Node holders that endorsed an app prior to upgrade should not be subject to cooldown period
       expect(await x2EarnAppsV3.checkCooldown(1)).to.eql(false)
@@ -621,8 +639,11 @@ describe("X-Apps - @shard15", function () {
       // New node holders should be subject to cooldown period
       await catchRevert(x2EarnAppsV3.connect(otherAccounts[5]).endorseApp(app4Id, 5))
 
-      // Fast forward time to cooldown period end
-      await time.increase(config.X2EARN_NODE_COOLDOWN_PERIOD)
+      // Fast forward time to next round
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+
+      await startNewAllocationRound()
 
       // New node holders should not be subject to cooldown period
       expect(await x2EarnAppsV3.checkCooldown(nodeId1)).to.eql(false)
@@ -633,15 +654,13 @@ describe("X-Apps - @shard15", function () {
     it("Should not have state conflict after upgrading to V3", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 24
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1
       const {
         xAllocationVoting,
         x2EarnRewardsPool,
         xAllocationPool,
         timeLock,
         owner,
-        vechainNodesMock,
-        emissions,
         otherAccounts,
         veBetterPassport,
         endorsementUtils,
@@ -649,7 +668,6 @@ describe("X-Apps - @shard15", function () {
         voteEligibilityUtils,
         nodeManagement,
         x2EarnCreator,
-        voterRewards,
         administrationUtilsV2,
         endorsementUtilsV2,
         voteEligibilityUtilsV2,
@@ -758,7 +776,7 @@ describe("X-Apps - @shard15", function () {
         "X2EarnAppsV2",
         "X2EarnApps",
         await x2EarnAppsV2.getAddress(),
-        [config.X2EARN_NODE_COOLDOWN_PERIOD],
+        [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
           version: 3,
           libraries: {
@@ -784,13 +802,13 @@ describe("X-Apps - @shard15", function () {
       }
 
       expect(await x2EarnAppsV3.version()).to.equal("3")
-      expect(storageSlotsAfter[storageSlotsAfter.length - 1]).to.equal(BigInt(config.X2EARN_NODE_COOLDOWN_PERIOD))
+      expect(storageSlotsAfter[storageSlotsAfter.length - 2]).to.equal(BigInt(config.X2EARN_NODE_COOLDOWN_PERIOD))
     })
 
     it.skip("Check no issues upgrading to V3 with update of libraries", async function () {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 50
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 100
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1
       const {
         otherAccounts,
         otherAccount,
@@ -1365,7 +1383,7 @@ describe("X-Apps - @shard15", function () {
         "X2EarnAppsV2",
         "X2EarnApps",
         await x2EarnAppsV1.getAddress(),
-        [config.X2EARN_NODE_COOLDOWN_PERIOD],
+        [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
           version: 3,
           libraries: {
@@ -1449,7 +1467,6 @@ describe("X-Apps - @shard15", function () {
 
       // Should be 1 app pending endorsement
       expect(await x2EarnAppsV3.unendorsedAppIds()).to.deep.equal([newAppId])
-
       // Should not be recognised as part of ecosystem yet
       expect(await x2EarnAppsV3.apps()).to.not.include(newAppId)
 
@@ -1459,14 +1476,17 @@ describe("X-Apps - @shard15", function () {
       // Endorse the app
       await vechainNodesMock.addToken(otherAccount, 7, false, 0, 0)
       const tokenId = await vechainNodesMock.ownerToId(otherAccount.address)
-      await expect(x2EarnAppsV3.connect(otherAccount).endorseApp(newAppId, tokenId)).to.be.revertedWithCustomError(
+
+      // Wait for the cooldown period to end (1 round)
+      await waitForBlock(Number(await emissions.getNextCycleBlock()))
+      await emissions.distribute()
+      await x2EarnAppsV3.connect(otherAccount).endorseApp(newAppId, tokenId)
+
+      // Should not be able to unendorse the app
+      await expect(x2EarnAppsV3.connect(otherAccount).unendorseApp(newAppId, tokenId)).to.be.revertedWithCustomError(
         x2EarnAppsV3,
         "X2EarnNodeCooldownActive",
       )
-
-      // Wait for the cooldown period to end
-      await time.increase(config.X2EARN_NODE_COOLDOWN_PERIOD + 1)
-      await x2EarnAppsV3.connect(otherAccount).endorseApp(newAppId, tokenId)
 
       // Should be eligible
       expect(await x2EarnAppsV3.isEligibleNow(newAppId)).to.eql(true)
@@ -1567,6 +1587,40 @@ describe("X-Apps - @shard15", function () {
       await x2EarnApps.connect(owner).setVeBetterPassportContract(await otherAccount.getAddress())
 
       expect(await x2EarnApps.getVeBetterPassportContract()).to.eql(await otherAccount.getAddress())
+    })
+
+    it("Only admin can update x2Earn creator contract address", async function () {
+      const { x2EarnApps, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(x2EarnApps.connect(otherAccount).setX2EarnCreatorContract(otherAccount.address))
+
+      await x2EarnApps.connect(owner).setX2EarnCreatorContract(await otherAccount.getAddress())
+    })
+
+    it("Only admin can update xAllocation voting contract", async function () {
+      const { x2EarnApps, otherAccount, xAllocationVoting, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.getXAllocationVotingGovernor()).to.eql(await xAllocationVoting.getAddress())
+      await catchRevert(x2EarnApps.connect(otherAccount).setXAllocationVotingGovernor(otherAccount.address))
+
+      await x2EarnApps.connect(owner).setXAllocationVotingGovernor(await otherAccount.getAddress())
+
+      expect(await x2EarnApps.getXAllocationVotingGovernor()).to.eql(await otherAccount.getAddress())
+    })
+
+    it("Cannot set XAllocation voting to zero address", async function () {
+      const { x2EarnApps, xAllocationVoting } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      expect(await x2EarnApps.getXAllocationVotingGovernor()).to.eql(await xAllocationVoting.getAddress())
+      await catchRevert(x2EarnApps.setXAllocationVotingGovernor(ZERO_ADDRESS))
+
+      expect(await x2EarnApps.getXAllocationVotingGovernor()).to.eql(await xAllocationVoting.getAddress())
     })
   })
 
@@ -4357,7 +4411,7 @@ describe("X-Apps - @shard15", function () {
 
     it("If an XNode endorser transfers its XNode XApp will not enter grace period, they will remain endorsed", async function () {
       const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 20
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1
       const { x2EarnApps, xAllocationVoting, otherAccounts, owner, vechainNodesMock } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -4380,12 +4434,14 @@ describe("X-Apps - @shard15", function () {
       await createNodeHolder(3, otherAccounts[1]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
       await createNodeHolder(3, otherAccounts[2]) // Node strength level 3 corresponds (Mjolnir) to an endorsement score of 50
 
-      // Skip ahead by 20 seconds so node is no longer in cooldown
-      await time.increase(20)
+      // Skip ahead by a round so node is no longer in cooldown
+      await startNewAllocationRound()
 
       await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 50
       await x2EarnApps.connect(otherAccounts[2]).endorseApp(app1Id, 2) // Node holder endorsement score is 50
 
+      await waitForCurrentRoundToEnd()
+      // Skip ahead by a round so node is no longer in cooldown
       let round1 = await startNewAllocationRound()
 
       // app should be eligible for the current round
@@ -4479,7 +4535,7 @@ describe("X-Apps - @shard15", function () {
 
     it("If a XNode holder transfers/sells its XNode the XAPPs remains endorsed by XNode and new owner is endorser", async function () {
       const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 20
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1
       const { x2EarnApps, otherAccounts, owner, vechainNodesMock } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -4505,6 +4561,9 @@ describe("X-Apps - @shard15", function () {
 
       // App should be pending endorsement -> score is 0 never endorsed
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // Start allocation round
+      await startNewAllocationRound()
 
       // Endorse XAPP with MjölnirX node holder
       await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 100
@@ -4940,6 +4999,26 @@ describe("X-Apps - @shard15", function () {
       await expect(x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id, 1)).to.revertedWithCustomError(
         x2EarnApps,
         "X2EarnNonEndorser",
+      )
+    })
+
+    it("Cannot unendorse an XAPP if not a nodeholder", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      // Register XAPPs -> XAPP is pending endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      // AppId that does not exist
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Should revert as user is not an endorser
+      await expect(x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id, 1)).to.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnNonNodeHolder",
       )
     })
 
@@ -6306,8 +6385,8 @@ describe("X-Apps - @shard15", function () {
 
     it("Node holder cannot unendorse XAPP if they are in cooldown period", async function () {
       const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 24
-      const { x2EarnApps, owner, otherAccounts, xAllocationVoting } = await getOrDeployContractInstances({
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1
+      const { x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -6321,37 +6400,27 @@ describe("X-Apps - @shard15", function () {
 
       const node = await createNodeHolder(7, otherAccounts[1])
 
-      // Node should be in cooldown period after being minted
-      expect(await x2EarnApps.checkCooldown(node)).to.eql(true)
+      await startNewAllocationRound()
 
-      // Will revert if node holder tries to endorse XAPP
-      await expect(x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 1)).to.be.revertedWithCustomError(
-        x2EarnApps,
-        "X2EarnNodeCooldownActive",
-      )
-
-      // Node should be out of cooldown period after 24 seconds
-      await time.increase(24)
-
-      // Node should be out of cooldown period
+      // Node should NOT be in cooldown period after being minted
       expect(await x2EarnApps.checkCooldown(node)).to.eql(false)
 
-      // Node holder should be able to endorse XAPP
       await x2EarnApps.connect(otherAccounts[1]).endorseApp(app1Id, 1)
 
-      expect(await x2EarnApps.getEndorsers(app1Id)).to.eql([otherAccounts[1].address])
-
-      // Node should be in cooldown period after endorsing XAPP cannot unendorse
+      // Node should be in cooldown period -> New round has not yet started
       expect(await x2EarnApps.checkCooldown(node)).to.eql(true)
 
-      // Will revert if node holder tries to unendorse XAPP
+      // Node holder should not be able to unendorse XAPP
       await expect(x2EarnApps.connect(otherAccounts[1]).unendorseApp(app1Id, 1)).to.be.revertedWithCustomError(
         x2EarnApps,
         "X2EarnNodeCooldownActive",
       )
 
-      // Node should be out of cooldown period after 24 seconds
-      await time.increase(24)
+      expect(await x2EarnApps.getEndorsers(app1Id)).to.eql([otherAccounts[1].address])
+
+      // Node should be out of cooldown period when new round starts
+      await waitForCurrentRoundToEnd()
+      await startNewAllocationRound()
 
       // Node should be out of cooldown period
       expect(await x2EarnApps.checkCooldown(node)).to.eql(false)
@@ -6371,8 +6440,8 @@ describe("X-Apps - @shard15", function () {
 
     it("If XApp removes XAPP endorsment they are not no longer in cooldown period", async function () {
       const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 24
-      const { x2EarnApps, owner, otherAccounts, xAllocationVoting } = await getOrDeployContractInstances({
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1
+      const { x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -6391,11 +6460,7 @@ describe("X-Apps - @shard15", function () {
 
       const node = await createNodeHolder(7, otherAccounts[1])
 
-      // Node should be in cooldown period after being minted
-      expect(await x2EarnApps.checkCooldown(node)).to.eql(true)
-
-      // Node should be out of cooldown period after 24 seconds
-      await time.increase(24)
+      await startNewAllocationRound()
 
       // Node should be out of cooldown period
       expect(await x2EarnApps.checkCooldown(node)).to.eql(false)
@@ -6437,19 +6502,84 @@ describe("X-Apps - @shard15", function () {
 
     it("If cooldown period is updated all nodes that are in the cooldown period endtimes change accordingly", async function () {
       const config = createLocalConfig()
-      config.X2EARN_NODE_COOLDOWN_PERIOD = 24
-      const { x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 3
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
 
-      const node = await createNodeHolder(7, otherAccounts[1])
+      const node = await createNodeHolder(7, owner)
 
-      // Node should be in cooldown period after being minted
+      // Round 1
+      await startNewAllocationRound()
+      await waitForCurrentRoundToEnd()
+
+      // Round 2
+      await startNewAllocationRound()
+      await waitForCurrentRoundToEnd()
+
+      // Round 3
+      await startNewAllocationRound()
+      await waitForCurrentRoundToEnd()
+
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      await x2EarnApps.connect(owner).endorseApp(app1Id, node)
+
       expect(await x2EarnApps.checkCooldown(node)).to.eql(true)
 
       // Contract admin updates the cooldown period
       await x2EarnApps.updateCooldownPeriod(0)
+
+      // Node should no longer be in cooldown period
+      expect(await x2EarnApps.checkCooldown(node)).to.eql(false)
+    })
+
+    it("Cooldown period should end when a new round starts regardless of when app was last enedorsed", async function () {
+      const config = createLocalConfig()
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        config,
+      })
+
+      const node = await createNodeHolder(7, owner)
+
+      // Round 1
+      await startNewAllocationRound()
+      const app1Id = await x2EarnApps.hashAppName(otherAccounts[0].address)
+
+      // Register XAPP -> XAPP is pedning endorsement
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+
+      await x2EarnApps.connect(owner).endorseApp(app1Id, node)
+
+      // Should be in cooldown period
+      expect(await x2EarnApps.checkCooldown(node)).to.eql(true)
+
+      // Start new round
+      await waitForCurrentRoundToEnd()
+      await startNewAllocationRound()
+
+      // Node should no longer be in cooldown period
+      expect(await x2EarnApps.checkCooldown(node)).to.eql(false)
+
+      // Update cooldown period to 2 rounds
+      await x2EarnApps.updateCooldownPeriod(2)
+
+      // Node should no longer be in cooldown period
+      expect(await x2EarnApps.checkCooldown(node)).to.eql(true)
+
+      // Node should no longer be in cooldown period in the next round
+      await waitForCurrentRoundToEnd()
+      await startNewAllocationRound()
 
       // Node should no longer be in cooldown period
       expect(await x2EarnApps.checkCooldown(node)).to.eql(false)
