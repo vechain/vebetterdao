@@ -11,7 +11,7 @@ type FeatureFlagConfig = {
 
 export const featureFlags: FeatureFlagConfig = {
   [FeatureFlag.GALAXY_MEMBER_UPGRADES]: {
-    enabled: false,
+    enabled: true,
     comingSoonText: "GM upgrades coming soon!",
   },
 }

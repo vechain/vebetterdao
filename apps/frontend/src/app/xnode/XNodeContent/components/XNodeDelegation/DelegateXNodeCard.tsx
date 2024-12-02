@@ -1,0 +1,121 @@
+import { useXNode } from "@/api"
+import { Card, CardBody, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
+import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { useTranslation } from "react-i18next"
+import { DelegateXNodeModal } from "./DelegateXNodeModal"
+import { AddressIcon } from "@/components/AddressIcon"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
+import { useVechainDomain, useWallet } from "@vechain/dapp-kit-react"
+import { compareAddresses } from "@repo/utils/AddressUtils"
+import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
+import { DelegationAlert } from "./DelegationAlert"
+
+export const DelegateXNodeCard = () => {
+  const { t } = useTranslation()
+  const { account } = useWallet()
+  const { isXNodeDelegator, isXNodeDelegated, delegatee, xNodeOwner } = useXNode()
+
+  const delegateModal = useDisclosure()
+  const revokeModal = useDisclosure()
+
+  const { domain: delegateeDomain } = useVechainDomain({
+    addressOrDomain: delegatee,
+  })
+  const { domain: ownerDomain } = useVechainDomain({
+    addressOrDomain: xNodeOwner,
+  })
+
+  const isOwner = compareAddresses(account ?? "", xNodeOwner ?? "")
+
+  return (
+    <Card variant="baseWithBorder" w="full">
+      <CardBody>
+        <VStack align="stretch" gap={4}>
+          <VStack align="stretch">
+            <Heading fontSize="lg">{t("Delegation")}</Heading>
+            {isXNodeDelegated ? (
+              <Text fontSize="sm">
+                {isXNodeDelegator ? t("Node is currently delegated to:") : t("Node is currently delegated to you by:")}
+              </Text>
+            ) : (
+              <Text fontSize="sm">
+                {t(
+                  "Delegate your Node to the primary account you use on VeBetterDAO to endorse apps or to participate in governance.",
+                )}
+              </Text>
+            )}
+          </VStack>
+
+          {isXNodeDelegated ? (
+            <DelegatedNodeDisplay
+              address={delegatee ?? ""}
+              displayAddress={
+                isOwner
+                  ? delegateeDomain
+                    ? humanDomain(delegateeDomain, 4, 26)
+                    : humanAddress(delegatee ?? "", 8, 8)
+                  : ownerDomain
+                    ? humanDomain(ownerDomain, 4, 26)
+                    : humanAddress(xNodeOwner ?? "", 8, 8)
+              }
+              onRevoke={revokeModal.onOpen}
+            />
+          ) : (
+            <Button
+              leftIcon={<UilArrowUpRight color="#004CFC" />}
+              variant="primarySubtle"
+              onClick={delegateModal.onOpen}>
+              {t("Delegate Node")}
+            </Button>
+          )}
+
+          <DelegationAlert />
+        </VStack>
+      </CardBody>
+
+      <DelegateXNodeModal modal={delegateModal} />
+      <RevokeXNodeDelegationModal modal={revokeModal} />
+    </Card>
+  )
+}
+
+const DelegatedNodeDisplay = ({
+  address,
+  displayAddress,
+  onRevoke,
+}: {
+  address: string
+  displayAddress: string
+  onRevoke: () => void
+  buttonFullWidth?: boolean
+}) => {
+  const { t } = useTranslation()
+  const { isXNodeDelegator } = useXNode()
+  return (
+    <VStack align="stretch" gap={4}>
+      <Stack
+        direction={["column", "column", "row"]}
+        justify="space-between"
+        alignItems={"center"}
+        bg="#F8F8F8"
+        rounded="xl"
+        p={3}
+        w="full"
+        gap={[2, 2, 6]}>
+        <HStack gap={4} w="full">
+          <AddressIcon address={address} w={12} h={12} rounded="full" />
+          <VStack align="start" gap={0}>
+            <Text fontWeight="600" fontSize={["md", "md", "lg"]}>
+              {displayAddress}
+            </Text>
+          </VStack>
+        </HStack>
+        {isXNodeDelegator && (
+          <Button variant="dangerGhost" colorScheme="red" onClick={onRevoke} w={"fit-content"}>
+            {t("Cancel delegation")}
+          </Button>
+        )}
+      </Stack>
+    </VStack>
+  )
+}

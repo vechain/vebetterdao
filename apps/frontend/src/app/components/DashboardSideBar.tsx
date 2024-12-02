@@ -1,5 +1,4 @@
 import { Show, Spinner, VStack } from "@chakra-ui/react"
-import { GmNFT } from "../../components/GmNFT"
 import { ManagedAppsCard } from "../../components/ManagedAppsCard"
 import { YourBetterActionsCard } from "./YourBetterActionsCard"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
@@ -25,7 +24,6 @@ export const DashboardSideBar = () => {
       </Show>
       <YourBetterActionsCard address={account ?? ""} />
       <Leaderboard />
-      <GmNFT />
       <ManagedAppsCard />
       <SupplyBreakdownCard />
     </VStack>

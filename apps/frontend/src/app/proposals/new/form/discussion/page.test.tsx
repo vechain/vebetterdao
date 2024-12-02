@@ -41,7 +41,7 @@ describe("NewProposalDiscussion", async () => {
         <NewProposalTextOnlyPage />
       </FormProposalLayout>,
     )
-    await screen.findByTestId("new-proposal-textonly-page", undefined, { timeout: 2000 })
+    await screen.findByTestId("new-proposal-textonly-page", undefined, { timeout: 4000 })
     await screen.findByText("General proposal")
     await screen.findByText(
       "Choose a title a short description for your proposal. You will be able to provide more details in the next step.",

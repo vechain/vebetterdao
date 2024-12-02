@@ -1,7 +1,4 @@
-import { useHasRole } from "@/api/contracts/account"
-import { TransactionModal } from "@/components"
-import { CONTRACT_LIST } from "@/constants"
-import { useAccessControl } from "@/hooks"
+import { useForm, Controller } from "react-hook-form"
 import {
   Badge,
   Button,
@@ -17,43 +14,49 @@ import {
   Input,
   Select,
   Text,
-  useDisclosure,
   VStack,
+  useDisclosure,
 } from "@chakra-ui/react"
-import { type Icon as IconType, UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
+import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
+import { useMemo, useEffect, useCallback } from "react"
+import { useTranslation } from "react-i18next"
 import { AddressUtils } from "@repo/utils"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useHasRole } from "@/api/contracts/account"
+import { useAccessControl } from "@/hooks"
+import { CONTRACT_LIST } from "@/constants"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { useCallback, useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
+import { TransactionModal } from "@/components"
 
 export const UpdateRoleCard = () => {
-  const [selectedContractAddress, setSelectedContractAddress] = useState<string | undefined>()
-  const [selectedRole, setSelectedRole] = useState<string | undefined>()
-  const [walletAddress, setWalletAddress] = useState<string | undefined>()
-  const [newAddressFieldIsDirty, setNewAddressFieldIsDirty] = useState(false)
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      contract: "",
+      role: "",
+      walletAddress: "",
+    },
+  })
 
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { account } = useWallet()
 
-  const isValidAddress = useMemo(() => {
-    //Do not allow empty address or not connected account
-    if (!walletAddress || !account) return false
-
-    return AddressUtils.isValid(walletAddress)
-  }, [walletAddress, account])
-
-  const isFormValid = useMemo(
-    () => selectedContractAddress && selectedRole && isValidAddress,
-    [selectedContractAddress, selectedRole, isValidAddress],
-  )
+  const selectedContractAddress = watch("contract")
+  const selectedRole = watch("role")
+  const walletAddress = watch("walletAddress")
 
   const selectedContractObject = useMemo(
     () => CONTRACT_LIST.find(contract => compareAddresses(contract.contractAddress, selectedContractAddress)),
     [selectedContractAddress],
   )
+
   const { data: userAlreadyHasRole, error: hasRoleError } = useHasRole(
     selectedRole ?? "",
     selectedContractAddress ?? "",
@@ -69,9 +72,17 @@ export const UpdateRoleCard = () => {
       onClose()
     },
   })
+  const isFormValid =
+    !errors.contract &&
+    !errors.role &&
+    !errors.walletAddress &&
+    !!selectedContractAddress &&
+    !!selectedRole &&
+    !!walletAddress &&
+    !!account
 
   const accessControlAction = useMemo(() => {
-    if (compareAddresses(account ?? "", walletAddress)) {
+    if (userAlreadyHasRole && compareAddresses(account ?? "", walletAddress)) {
       return renounceRole
     }
 
@@ -81,37 +92,18 @@ export const UpdateRoleCard = () => {
     return revokeRole
   }, [userAlreadyHasRole, account, walletAddress, grantRole, renounceRole, revokeRole])
 
-  const handleSubmit = useCallback(
-    (event?: { preventDefault: () => void }) => {
-      if (event) event?.preventDefault()
-      accessControlAction.sendTransaction()
-      onOpen()
-    },
-    [accessControlAction, onOpen],
-  )
-
+  const handleFormSubmit = (_: any) => {
+    accessControlAction.sendTransaction()
+    onOpen()
+  }
   const handleClose = useCallback(() => {
     accessControlAction.resetStatus()
     onClose()
   }, [accessControlAction, onClose])
 
-  const renderBadge = (colorScheme: string, icon: IconType, text: string) => (
-    <Badge
-      textTransform="none"
-      fontSize="sm"
-      colorScheme={colorScheme}
-      display="flex"
-      alignItems="center"
-      borderRadius="12px"
-      p={2}>
-      <HStack align="start" spacing={2}>
-        <Icon as={icon} color={colorScheme === "green" ? "green" : "red"} alignSelf={"center"} />
-        <Text as="span" wordBreak="break-word" whiteSpace="normal">
-          {text}
-        </Text>
-      </HStack>
-    </Badge>
-  )
+  useEffect(() => {
+    setValue("role", "") // Reset role when contract changes
+  }, [selectedContractAddress, account, setValue])
 
   return (
     <>
@@ -122,82 +114,118 @@ export const UpdateRoleCard = () => {
         </CardHeader>
 
         <CardBody>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(handleFormSubmit)}>
             <VStack spacing={4} alignItems={"start"}>
-              <FormControl isRequired>
+              <FormControl isInvalid={!!errors.contract} isRequired>
                 <FormLabel>{t("Select Contract")}</FormLabel>
-                <Select
-                  placeholder={t("Select Contract")}
-                  onChange={e => {
-                    setSelectedContractAddress(e.target.value)
-                    setSelectedRole(undefined)
-                  }}
-                  value={selectedContractAddress}>
-                  {CONTRACT_LIST.map(contract => (
-                    <option key={contract.contractAddress} value={contract.contractAddress}>
-                      {contract.name}
-                    </option>
-                  ))}
-                </Select>
+                <Controller
+                  name="contract"
+                  control={control}
+                  rules={{ required: t("This field is required") }}
+                  render={({ field }) => (
+                    <Select {...field} placeholder={t("Select Contract")}>
+                      {CONTRACT_LIST.map(contract => (
+                        <option key={contract.contractAddress} value={contract.contractAddress}>
+                          {contract.name}
+                        </option>
+                      ))}
+                    </Select>
+                  )}
+                />
+                <FormErrorMessage>{errors.contract?.message}</FormErrorMessage>
               </FormControl>
 
               {selectedContractAddress && (
-                <FormControl isRequired>
+                <FormControl isInvalid={!!errors.role} isRequired>
                   <FormLabel>{t("Select Role")}</FormLabel>
-                  <Select
-                    placeholder={t("Select Role")}
-                    onChange={e => setSelectedRole(e.target.value)}
-                    value={selectedRole}>
-                    {selectedContractObject?.roles.map(role => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </Select>
+                  <Controller
+                    name="role"
+                    control={control}
+                    rules={{ required: t("This field is required") }}
+                    render={({ field }) => (
+                      <Select {...field} placeholder={t("Select Role")}>
+                        {selectedContractObject?.roles.map(role => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
+                      </Select>
+                    )}
+                  />
+                  <FormErrorMessage>{errors.role?.message}</FormErrorMessage>
                 </FormControl>
               )}
 
-              <FormControl isRequired isInvalid={!isValidAddress && newAddressFieldIsDirty}>
+              <FormControl isInvalid={!!errors.walletAddress} isRequired>
                 <FormLabel>{t("Wallet Address")}</FormLabel>
-                <Input
-                  placeholder={t("Enter wallet address to grant or revoke role")}
-                  value={walletAddress}
-                  onChange={e => {
-                    setWalletAddress(e.target.value)
-                    setNewAddressFieldIsDirty(true)
+                <Controller
+                  name="walletAddress"
+                  control={control}
+                  rules={{
+                    required: t("This field is required"),
+                    validate: value => AddressUtils.isValid(value) || t("Invalid address"),
                   }}
+                  render={({ field }) => (
+                    <Input {...field} placeholder={t("Enter wallet address to grant or revoke role")} />
+                  )}
                 />
-                <FormErrorMessage>{t("Invalid address")}</FormErrorMessage>
+                <FormErrorMessage>{errors.walletAddress?.message}</FormErrorMessage>
               </FormControl>
 
-              {isFormValid && (
+              {isFormValid && !hasRoleError && (
                 <VStack w="full" align="stretch" flexWrap="wrap">
-                  {!hasRoleError
-                    ? renderBadge(
-                        userAlreadyHasRole ? "green" : "red",
-                        userAlreadyHasRole ? UilCheckCircle : UilExclamationCircle,
-                        userAlreadyHasRole
-                          ? t("Wallet '{{humanAddress}}' already has '{{selectedRole}}' role", {
-                              humanAddress: humanAddress(walletAddress ?? ""),
-                              selectedRole,
-                            })
-                          : t("Wallet '{{humanAddress}}' doesn't have '{{selectedRole}}' role", {
-                              humanAddress: humanAddress(walletAddress ?? ""),
-                              selectedRole,
-                            }),
-                      )
-                    : renderBadge("red", UilExclamationCircle, t("Error getting state"))}
+                  {userAlreadyHasRole ? (
+                    <Badge
+                      textTransform="none"
+                      fontSize="sm"
+                      display="flex"
+                      alignItems="center"
+                      borderRadius="12px"
+                      p={2}
+                      colorScheme={"green"}>
+                      <HStack>
+                        <Icon as={UilCheckCircle} color="green" />
+                        <Text>
+                          {t("Wallet '{{humanAddress}}' already has '{{selectedRole}}' role", {
+                            humanAddress: humanAddress(walletAddress),
+                            selectedRole,
+                          })}
+                        </Text>
+                      </HStack>
+                    </Badge>
+                  ) : (
+                    <Badge
+                      textTransform="none"
+                      fontSize="sm"
+                      display="flex"
+                      alignItems="center"
+                      borderRadius="12px"
+                      p={2}
+                      colorScheme={"red"}>
+                      <HStack>
+                        <Icon as={UilExclamationCircle} color="red" />
+                        <Text>
+                          {t("Wallet '{{humanAddress}}' doesn't have '{{selectedRole}}' role", {
+                            humanAddress: humanAddress(walletAddress),
+                            selectedRole,
+                          })}
+                        </Text>
+                      </HStack>
+                    </Badge>
+                  )}
                 </VStack>
               )}
+
               <Button
+                isLoading={accessControlAction.isTxReceiptLoading}
                 isDisabled={!isFormValid || !!hasRoleError}
                 colorScheme={userAlreadyHasRole ? "red" : "green"}
                 type="submit">
-                {compareAddresses(account ?? "", walletAddress)
-                  ? t("Renounce Role")
-                  : userAlreadyHasRole
-                    ? t("Revoke Role")
-                    : t("Grant Role")}
+                {userAlreadyHasRole
+                  ? compareAddresses(account ?? "", walletAddress)
+                    ? t("Renounce Role")
+                    : t("Revoke Role")
+                  : t("Grant Role")}
               </Button>
             </VStack>
           </form>
@@ -209,7 +237,7 @@ export const UpdateRoleCard = () => {
         onClose={handleClose}
         status={accessControlAction.error ? "error" : accessControlAction.status}
         successTitle={t("Wallet address roles updated successfully")}
-        onTryAgain={handleSubmit}
+        onTryAgain={handleSubmit(handleFormSubmit)}
         showTryAgainButton
         showExplorerButton
         txId={accessControlAction.txReceipt?.meta?.txID ?? accessControlAction.sendTransactionTx?.txid}

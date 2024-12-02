@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "1.10.7",
+  "version": "1.11.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -54,7 +54,7 @@
     "jszip": "^3.10.1",
     "lodash": "^4.17.21",
     "mixpanel-browser": "^2.49.0",
-    "next": "14.2.3",
+    "next": "14.2.5",
     "next-auth": "^4.24.10",
     "next-remove-imports": "^1.0.12",
     "openai": "^4.52.4",
@@ -94,7 +94,7 @@
     "d3-array": "^3.2.4",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
-    "happy-dom": "^14.12.3",
+    "happy-dom": "14.12.3",
     "resize-observer-polyfill": "^1.5.1",
     "typescript": "^5",
     "typescript-eslint": "^7.15.0",

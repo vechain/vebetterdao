@@ -9,10 +9,11 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "Voter Rewards": {
     name: "voter-rewards",
     configAddressField: "voterRewardsContractAddress",
-    versions: ["v2", "v3"],
+    versions: ["v2", "v3", "v4"],
     descriptions: {
       v2: "Add the ability to toggle quadratic rewarding on and off.",
       v3: "Vechain Nodes x GM upgrades feature",
+      v4: "Update GalaxyMember interface to use version 3",
     },
   },
   B3TRGovernor: {
@@ -73,14 +74,24 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "VeBetter Passport": {
     name: "vebetter-passport",
     configAddressField: "veBetterPassportContractAddress",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Prevent delegation of passports to entities",
+      v3: "Add GM level to personhood check",
     },
   },
   "Galaxy Member": {
     name: "galaxy-member",
     configAddressField: "galaxyMemberContractAddress",
+    versions: ["v2", "v3"],
+    descriptions: {
+      v2: "Vechain Nodes x GM upgrades feature",
+      v3: "Add functions to checkpoint GM selection",
+    },
+  },
+  "Node Management": {
+    name: "node-management",
+    configAddressField: "nodeManagementContractAddress",
     versions: ["v2"],
     descriptions: {
       v2: "Vechain Nodes x GM upgrades feature",

@@ -1,4 +1,4 @@
-import { useSelectedGmNft, useXNode } from "@/api"
+import { useSelectedGmNft, useXNode, useParticipatedInGovernance } from "@/api"
 import {
   Box,
   Card,
@@ -30,11 +30,11 @@ export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
 
+  const { data: hasUserVoted } = useParticipatedInGovernance(account)
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
     useSelectedGmNft()
-
   //node
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, isXNodeDelegatee } = useXNode()
 
   const nodeAttachedColor = isXNodeAttachedToGM ? "#B1F16C" : "#FFFFFF80"
 
@@ -101,12 +101,24 @@ export const GmNFTAndNodeCard = () => {
                   {t("Your Galaxy Member")}
                 </Heading>
               }>
-              <Heading fontSize="xl" fontWeight={600}>
-                {t("You are on LEVEL {{level}}", { level: gmLevel })}
-              </Heading>
+              {!isGMOwned ? (
+                !hasUserVoted ? (
+                  <Heading fontSize="xl" fontWeight={600}>
+                    {t("Vote to be a galaxy member")}
+                  </Heading>
+                ) : (
+                  <Heading fontSize="xl" fontWeight={600}>
+                    {t("Mint GM to be a galaxy member")}
+                  </Heading>
+                )
+              ) : (
+                <Heading fontSize="xl" fontWeight={600}>
+                  {t("Your galaxy member")}
+                </Heading>
+              )}
             </FeatureFlagWrapper>
 
-            {isAbove800 && isXNodeAttachedToGM && (
+            {isAbove800 && isXNodeAttachedToGM && isXNodeHolder && (
               <>
                 <Text fontSize="xs" fontWeight={600} color="#B1F16C">
                   {t("GM NFT attached to {{node}}", { node: xNodeName })}
@@ -138,8 +150,8 @@ export const GmNFTAndNodeCard = () => {
                 rounded="12px"
                 gap={6}
                 flex={1}
-                cursor={isXNodeHolder ? "pointer" : "default"}
-                onClick={isXNodeHolder ? goToGmNftPage : () => {}}>
+                cursor={"pointer"}
+                onClick={goToGmNftPage}>
                 <Skeleton isLoaded={!isGMLoading} w="68px" h="68px" rounded="8px">
                   <Box
                     w={"68px"}
@@ -168,11 +180,11 @@ export const GmNFTAndNodeCard = () => {
                     </HStack>
                   </FeatureFlagWrapper>
                 </VStack>
-                {isXNodeHolder && <FaChevronRight size={"24px"} />}
+                <FaChevronRight size={"24px"} />
               </HStack>
             )}
 
-            {isXNodeHolder && (
+            {(isXNodeHolder || isXNodeDelegator) && (
               <>
                 {isAbove800 ? (
                   <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<Box w={6} h={6}></Box>}>
@@ -206,15 +218,25 @@ export const GmNFTAndNodeCard = () => {
                   cursor="pointer">
                   <Image src={xNodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
                   <VStack flex="1" align={"flex-start"}>
-                    <Text fontWeight={700} noOfLines={1}>
-                      {xNodeName}
-                    </Text>
+                    <HStack>
+                      <Text fontWeight={700} noOfLines={1}>
+                        {xNodeName}
+                      </Text>
+                      {(isXNodeDelegator || isXNodeDelegatee) && (
+                        <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
+                          <Text fontSize={"xs"} fontWeight={600}>
+                            {isXNodeDelegator ? "Delegator" : "Delegatee"}
+                          </Text>
+                        </HStack>
+                      )}
+                    </HStack>
+
                     <HStack gap={1}>
                       <Text fontSize="sm" fontWeight={600}>
                         {xNodePoints}
                       </Text>
                       <Text fontSize="sm" fontWeight={400} noOfLines={1}>
-                        {t("to endorse Apps")}
+                        {t("points to endorse Apps")}
                       </Text>
                     </HStack>
                   </VStack>

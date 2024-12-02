@@ -49,7 +49,10 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
     appIdToEndorse: appIdToEndorse ?? "",
     appIdToUnendorse: appIdToUnendorse ?? "",
     nodeId,
-    onSuccess: onClose,
+    onSuccess: () => {
+      switchEndorsementMutation.resetStatus()
+      onClose()
+    },
   })
 
   const handleSwitchEndorsement = useCallback(() => {
@@ -136,7 +139,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
           <Text color="#AF5F00">
             <Trans
               i18nKey={
-                "Withdrawing your endorsement from an app may result in it <strong>no longer being selected for allocations</strong>."
+                "Removing your endorsement from an app may result in it <strong>no longer being selected for allocations</strong>."
               }
             />
           </Text>

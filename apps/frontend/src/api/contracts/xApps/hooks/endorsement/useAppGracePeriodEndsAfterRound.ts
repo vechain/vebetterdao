@@ -22,7 +22,7 @@ export const useAppGracePeriodEndsAfterRound = (appId: string) => {
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
 
   // Extract relevant block numbers
-  const gracePeriodEndingBlockNum = Number(gracePeriodEvents?.gracePeriodEvent[0]?.endBlock)
+  const gracePeriodEndingBlockNum = Number(gracePeriodEvents?.[0]?.endBlock)
   const currentRoundEndingBlockNum = Number(currentRoundDeadline)
   const currentRoundIdNum = Number(currentRoundId)
 

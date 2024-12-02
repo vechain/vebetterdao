@@ -42,7 +42,10 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     appId: xApp?.id ?? "",
     nodeId,
     userAddress: account ?? "",
-    onSuccess: onClose,
+    onSuccess: () => {
+      endorseAppMutation.resetStatus()
+      onClose()
+    },
   })
 
   //TODO: Handle multiple xNodes on UI

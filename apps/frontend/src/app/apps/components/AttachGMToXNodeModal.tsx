@@ -1,7 +1,10 @@
+import { getGMLevel, useB3trDonated, useSelectedGmNft, useXNode } from "@/api"
+import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
 import { CustomModalContent, TransactionModal } from "@/components"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
 import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
+import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
 import { useAttachGMToXNode } from "@/hooks"
 import {
   Flex,
@@ -9,6 +12,7 @@ import {
   ModalOverlay,
   ModalBody,
   VStack,
+  Box,
   Heading,
   Text,
   Button,
@@ -18,11 +22,13 @@ import {
   Stack,
   useBreakpointValue,
   Hide,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -31,9 +37,30 @@ type Props = {
 export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
 
-  const attachGMToXNodeMutation = useAttachGMToXNode({
-    onSuccess: onClose,
-  })
+  const { gmId } = useSelectedGmNft()
+
+  const { data: b3trDonated } = useB3trDonated(gmId)
+
+  const { xNodeLevel } = useXNode()
+
+  const { data: gmMaxLevel } = useGMMaxLevel()
+
+  const gmStartingLevel = useMemo(() => {
+    const gmStartingLevel = xNodeToGMstartingLevel[xNodeLevel]
+
+    return Math.min(gmStartingLevel ?? 1, gmMaxLevel ?? 1)
+  }, [gmMaxLevel, xNodeLevel])
+
+  const levelAfterDetach = useMemo(() => {
+    return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0))
+  }, [b3trDonated, gmStartingLevel])
+
+  const attachGMToXNodeMutation = useAttachGMToXNode({})
+
+  const handleClose = useCallback(() => {
+    attachGMToXNodeMutation.resetStatus()
+    onClose()
+  }, [attachGMToXNodeMutation, onClose])
 
   const handleAttachment = useCallback(() => {
     attachGMToXNodeMutation.resetStatus()
@@ -41,12 +68,11 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   }, [attachGMToXNodeMutation])
 
   const iconSize = useBreakpointValue({ base: "48px", md: "108px" })
-
   if (attachGMToXNodeMutation.status !== "ready")
     return (
       <TransactionModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         successTitle={t("Attach GM to Node")}
         status={attachGMToXNodeMutation.error ? "error" : attachGMToXNodeMutation.status}
         errorDescription={attachGMToXNodeMutation.error?.reason}
@@ -68,7 +94,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
     {
       Icon: CurveArrowIcon,
       title: t("Free upgrade"),
-      description: t("Your GM NFT will upgrade for free to a certain level depending on your Node"),
+      description: t("Your GM NFT will be level {{value}} after attaching.", { value: levelAfterDetach }),
     },
     {
       Icon: ThreeSparklesIcon,
@@ -78,9 +104,9 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   ]
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={"2xl"}>
+    <Modal isOpen={isOpen} onClose={handleClose} size={"2xl"}>
       <ModalOverlay />
-      <CustomModalContent>
+      <CustomModalContent p={{ base: 3, md: 5 }}>
         <ModalCloseButton />
         <ModalHeader>
           <Heading fontSize="lg">{t("Attaching Node to GM NFT")}</Heading>
@@ -127,6 +153,14 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         </ModalBody>
         <ModalFooter w="full">
           <VStack align="stretch" w="full">
+            <Alert status="info" borderRadius={["xl", "xl", "3xl"]}>
+              <AlertIcon w={5} h={5} />
+              <Box lineHeight={"1.20rem"} fontSize="sm">
+                <AlertDescription as="span">
+                  {t("Once the GM NFT is attached to your Node, it can't be transferred anymore")}
+                </AlertDescription>
+              </Box>
+            </Alert>
             <Button variant={"primaryAction"} w={"full"} onClick={handleAttachment} leftIcon={<UilLink />}>
               {t("Attach now!")}
             </Button>

@@ -55,16 +55,19 @@ type ParsedProposalVotesResponse = {
       totalWeight: string
       voters: number
       percentage: number
+      percentagePower: number
     }
     against: {
       totalWeight: string
       voters: number
       percentage: number
+      percentagePower: number
     }
     abstain: {
       totalWeight: string
       voters: number
       percentage: number
+      percentagePower: number
     }
   }
 }
@@ -92,14 +95,31 @@ export const useProposalVotesIndexer = ({ proposalId }: ProposalVotesRequest) =>
         totalWeight === BigInt(0)
           ? 0
           : Number(BigInt(BigInt(forVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
+
+      const forVotesPowerPercentage =
+        totalPower === BigInt(0)
+          ? 0
+          : Number((BigInt(forVotes?.totalPower ?? 0) * BigInt(10000)) / BigInt(totalPower)) / 100
+
       const againstVotesPercentage =
         totalWeight === BigInt(0)
           ? 0
           : Number(BigInt(BigInt(againstVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
+
+      const againstVotesPowerPercentage =
+        totalPower === BigInt(0)
+          ? 0
+          : Number((BigInt(againstVotes?.totalPower ?? 0) * BigInt(10000)) / BigInt(totalPower)) / 100
+
       const abstainVotesPercentage =
         totalWeight === BigInt(0)
           ? 0
           : Number(BigInt(BigInt(abstainVotes?.totalWeight ?? 0) * BigInt(10000)) / BigInt(totalWeight)) / 100
+
+      const abstainVotesPowerPercentage =
+        totalPower === BigInt(0)
+          ? 0
+          : Number((BigInt(abstainVotes?.totalPower ?? 0) * BigInt(10000)) / BigInt(totalPower)) / 100
 
       return {
         totalVoters,
@@ -110,16 +130,19 @@ export const useProposalVotesIndexer = ({ proposalId }: ProposalVotesRequest) =>
             totalWeight: forVotes?.totalWeight ?? "0",
             voters: forVotes?.voters ?? 0,
             percentage: forVotesPercentage,
+            percentagePower: forVotesPowerPercentage,
           },
           against: {
             totalWeight: againstVotes?.totalWeight ?? "0",
             voters: againstVotes?.voters ?? 0,
             percentage: againstVotesPercentage,
+            percentagePower: againstVotesPowerPercentage,
           },
           abstain: {
             totalWeight: abstainVotes?.totalWeight ?? "0",
             voters: abstainVotes?.voters ?? 0,
             percentage: abstainVotesPercentage,
+            percentagePower: abstainVotesPowerPercentage,
           },
         },
       }

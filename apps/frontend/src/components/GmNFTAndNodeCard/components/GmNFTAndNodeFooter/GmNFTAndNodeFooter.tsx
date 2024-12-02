@@ -26,7 +26,7 @@ export const GmNFTAndNodeFooter = () => {
     isXNodeAttachedToGM,
     isMaxGmLevelReached,
   } = useSelectedGmNft()
-  const { isXNodeHolder } = useXNode()
+  const { isXNodeHolder, isXNodeDelegator } = useXNode()
 
   const { isLoading: isB3trBalanceLoading } = useB3trBalance(account ?? "")
 
@@ -68,7 +68,7 @@ export const GmNFTAndNodeFooter = () => {
       }
     }
 
-    if (isXNodeHolder && !isXNodeAttachedToGM) {
+    if (isXNodeHolder && !isXNodeAttachedToGM && !isXNodeDelegator) {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
@@ -144,6 +144,7 @@ export const GmNFTAndNodeFooter = () => {
     missingB3trToUpgrade,
     nextLevelGMRewardMultiplier,
     t,
+    isXNodeDelegator,
   ])
 
   return (
