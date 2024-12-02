@@ -51,11 +51,7 @@ export const GMNFTList = () => {
                   )}
                 </Text>
               }>
-              <Text fontSize="sm">
-                {t(
-                  "You can choose which NFT use for rewards multiplier. Also you can mint new earth to upgrade and sell them in the secondary market.",
-                )}
-              </Text>
+              <Text fontSize="sm">{t("You can choose which NFT use for rewards multiplier.")}</Text>
             </FeatureFlagWrapper>
           </VStack>
           <VStack align="stretch" gap={4}>
