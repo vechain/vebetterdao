@@ -99,7 +99,6 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
     versions: ["v2"],
     descriptions: {
       v2: "Vechain Nodes x GM upgrades feature",
-      v3: "Update NodeManagement interface to include new node creation functoin",
     },
   },
 } as const

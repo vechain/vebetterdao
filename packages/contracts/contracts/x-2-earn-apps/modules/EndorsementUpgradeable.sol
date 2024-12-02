@@ -484,7 +484,7 @@ abstract contract EndorsementUpgradeable is Initializable, X2EarnAppsUpgradeable
 
   /**
    * @dev See {IX2EarnApps-gracePeriod}.
-   * @return The current cooldown period duration in seconds.
+   * @return The current cooldown period duration in rounds.
    */
   function cooldownPeriod() external view returns (uint256) {
     EndorsementStorage storage $ = _getEndorsementStorage();
