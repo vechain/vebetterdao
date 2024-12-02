@@ -27,8 +27,7 @@ import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol
 import { PassportTypes } from "../../ve-better-passport/libraries/PassportTypes.sol";
 import { INodeManagement } from "../../interfaces/INodeManagement.sol";
 import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
-import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @title EndorsementUtils
@@ -326,22 +325,15 @@ library EndorsementUtils {
    * @return True if the cooldown period has not yet elapsed, false otherwise.
    */
   function checkCooldown(
-    mapping(uint256 => uint48) storage endorsementTime,
-    uint48 cooldownPeriod,
-    INodeManagement nodeManagementContract,
+    mapping(uint256 => uint256) storage endorsementRound,
+    uint256 cooldownPeriod,
+    IXAllocationVotingGovernor xAllocationVotingGovernor,
     uint256 nodeId
   ) external view returns (bool) {
-    // Fetch the last endorsement time and node creation time
-    uint48 lastEndorsementTime = endorsementTime[nodeId];
-    uint48 nodeCreationTime = SafeCast.toUint48(nodeManagementContract.getNodeCreationTime(nodeId));
+    // Calculate the required round for the cooldown period
+    uint256 requiredRound = endorsementRound[nodeId] + cooldownPeriod;
 
-    // Determine the effective cooldown period
-    uint48 effectiveCooldownEnd = (lastEndorsementTime > nodeCreationTime ? lastEndorsementTime : nodeCreationTime) +
-      cooldownPeriod;
-
-    // Return true if the effective cooldown period has not yet elapsed
-    if (effectiveCooldownEnd > Time.timestamp()) {
-      return true;
-    } else return false;
+    // Return true if the required round has not yet been reached
+    return requiredRound > xAllocationVotingGovernor.currentRoundId();
   }
 }

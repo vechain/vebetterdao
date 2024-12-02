@@ -4,6 +4,7 @@ pragma solidity 0.8.20;
 import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
 import { VechainNodesDataTypes } from "../libraries/VechainNodesDataTypes.sol";
 import { IX2EarnCreator } from "./IX2EarnCreator.sol";
+import { IXAllocationVotingGovernor } from "./IXAllocationVotingGovernor.sol";
 
 /**
  * @title IX2EarnApps
@@ -616,9 +617,21 @@ interface IX2EarnApps {
   function x2EarnCreatorContract() external view returns (IX2EarnCreator);
 
   /**
+   * @dev Update the XAllocationVotingGovernor contract address.
+   *
+   * @param _xAllocationVotingGovernor the address of the XAllocationVotingGovernor contract
+   */
+  function setXAllocationVotingGovernor(address _xAllocationVotingGovernor) external;
+
+  /**
    * @dev Get the cooldown period for a node in seconds.
    */
-  function cooldownPeriod() external view returns (uint48);
+  function cooldownPeriod() external view returns (uint256);
+
+  /**
+   * @dev Get the XAllocationVotingGovernor contract address.
+   */
+  function getXAllocationVotingGovernor() external view returns (IXAllocationVotingGovernor);
 
   /**
    * @notice Check if a node is in a cooldown period. A node is in a cooldown period after it has endorsed an app or been created.
@@ -639,5 +652,5 @@ interface IX2EarnApps {
    * @param _newCooldownPeriod The new cooldown period.
    * Emits a {CooldownPeriodUpdated} event.
    */
-  function updateCooldownPeriod(uint48 _newCooldownPeriod) external;
+  function updateCooldownPeriod(uint256 _newCooldownPeriod) external;
 }

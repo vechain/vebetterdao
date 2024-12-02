@@ -32,6 +32,7 @@ import { EndorsementUpgradeable } from "./x-2-earn-apps/modules/EndorsementUpgra
 import { VechainNodesDataTypes } from "./libraries/VechainNodesDataTypes.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @title X2EarnApps
@@ -75,8 +76,11 @@ contract X2EarnApps is
    *
    * @dev This function is called only once during the contract upgrade
    */
-  function initializeV3(uint48 _cooldownPeriod) public reinitializer(3) {
-    __Endorsement_init_v2(_cooldownPeriod);
+  function initializeV3(
+    uint48 _cooldownPeriod,
+    address _xAllocationVotingGovernor
+  ) public reinitializer(3) {
+    __Endorsement_init_v3(_cooldownPeriod, _xAllocationVotingGovernor);
   }
 
   // ---------- Modifiers ------------ //
@@ -268,7 +272,7 @@ contract X2EarnApps is
   /**
    * @dev See {IX2EarnApps-updateCooldownPeriod}.
    */
-  function updateCooldownPeriod(uint48 _newCooldownPeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
+  function updateCooldownPeriod(uint256 _newCooldownPeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
     _setCooldownPeriod(_newCooldownPeriod);
   }
 
@@ -324,6 +328,13 @@ contract X2EarnApps is
    */
   function setVeBetterPassportContract(address _veBetterPassportContract) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     _setVeBetterPassportContract(_veBetterPassportContract);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-setXAllocationVotingGovernor}.
+   */
+  function setXAllocationVotingGovernor(address _xAllocationVotingGovernor) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setXAllocationVotingGovernor(_xAllocationVotingGovernor);
   }
 
   /**
