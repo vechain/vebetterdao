@@ -18,12 +18,12 @@ export const MAX_IMAGE_SIZE = 1024 * 1024 * 10 // 10MB
  */
 export const getIpfsImage = async (uri?: string): Promise<IpfsImage> => {
   if (!uri) throw new Error("IPFS URI is required")
-
+  console.log("+++++++++++++++uri", convertUriToUrl(uri))
   const response = await axios.get(convertUriToUrl(uri), {
     responseType: "blob",
     maxContentLength: MAX_IMAGE_SIZE,
   })
-
+  console.log({ response })
   // Check if the MIME type is allowed
   const allowedMimeTypes = [
     "image/jpeg",

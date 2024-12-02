@@ -52,8 +52,8 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   })
 
   const levelAfterUpgrade = useMemo(() => {
-    const currentLevel = Number(gmLevel ?? 1) - 1 //gmNfts start from 1
-    const nextLevel = currentLevel + 1 //GMNFTs lists start from 0
+    const currentLevel = Number(gmLevel ?? 1) - 1 // gmNfts start from 1
+    const nextLevel = currentLevel + 1 // GMNFTs lists start from 0
     return nextLevel
   }, [gmLevel])
 
@@ -63,6 +63,8 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
     baseUriLoading ? null : `${baseUri}${levelAfterUpgrade}.json`,
   )
   console.log("********")
+  console.log("currentLevel", Number(gmLevel ?? 1) - 1)
+  console.log("nextLevel", Number(gmLevel ?? 1) - 1 + 1)
   console.log("url", `${baseUri}${levelAfterUpgrade}.json`)
   console.log({ nextLevelGMImage })
 
