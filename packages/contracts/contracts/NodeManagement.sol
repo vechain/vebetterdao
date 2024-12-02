@@ -37,7 +37,10 @@ import { INodeManagement } from "./interfaces/INodeManagement.sol";
  * @dev The contract is upgradeable using the UUPS proxy pattern and implements role-based access control for secure upgrades.
  *
  * ------------------------ Version 2 ------------------------
- * - Add functiont to get Node creation time
+ * - Add function to check if Node is delegated
+ * - Add function to check if user is a delegator
+ * - Add function to get users owned node ID
+ * - Add function to retrieve detailed information about a user's nodes (both delegated and owned)
  */
 contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgradeable {
   using EnumerableSet for EnumerableSet.UintSet;
@@ -48,6 +51,18 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+
+  // Struct used to format return values for getUserNodes
+  struct NodeInfo {
+    uint256 nodeId;
+    VechainNodesDataTypes.NodeStrengthLevel nodeLevel;
+    address xNodeOwner;
+    bool isXNodeHolder;
+    bool isXNodeDelegated;
+    bool isXNodeDelegator;
+    bool isXNodeDelegatee;
+    address delegatee;
+  }
 
   /// @custom:storage-location erc7201:b3tr.storage.NodeManagement
   struct NodeManagementStorage {
@@ -124,7 +139,7 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
       // Emit event for delegation removal
       emit NodeDelegated(nodeId, $.nodeIdToDelegatee[nodeId], false);
       // Remove delegation
-      $.delegateeToNodeIds[delegatee].remove(nodeId);
+      $.delegateeToNodeIds[$.nodeIdToDelegatee[nodeId]].remove(nodeId);
     }
 
     // Update mappings for delegation
@@ -253,6 +268,109 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
   }
 
   /**
+   * @notice Check if a node is delegated.
+   * @param nodeId The node ID to check for.
+   * @return bool True if the node is delegated.
+   */
+  function isNodeDelegated(uint256 nodeId) public view returns (bool) {
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
+    return $.nodeIdToDelegatee[nodeId] != address(0);
+  }
+
+  /**
+   * @notice Check if a user is a delegator.
+   * @param user The address of the user to check.
+   * @return bool True if the user is a delegator.
+   */
+  function isNodeDelegator(address user) public view returns (bool) {
+    // first we do direct call to check if user is node owner
+    uint256 nodeId = getDirectNodeOwnership(user);
+    // if it is then we check if node is delegated
+    if (nodeId != 0) {
+      // if node is delegated then we return true
+      return isNodeDelegated(nodeId);
+    }
+
+    // otherwise we return false
+    return false;
+  }
+
+  /**
+   * @notice Check if a user is a node holder (either directly or through delegation).
+   * @param user The address of the user to check.
+   * @return bool True if the user is a node holder.
+   */
+  function isNodeHolder(address user) public view returns (bool) {
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
+
+    // Check if the user directly owns a node
+    if ($.vechainNodesContract.ownerToId(user) != 0) {
+      return true;
+    }
+
+    // Check if the user is a delegatee of any node
+    uint256[] memory nodeIds = getNodeIds(user);
+    for (uint256 i = 0; i < nodeIds.length; i++) {
+      if ($.nodeIdToDelegatee[nodeIds[i]] == user) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * @notice Retrieves detailed information about all of a user's nodes, including owned and delegated nodes.
+   * @param user The address of the user to check.
+   * @return NodeInfo[] Array of node information structures.
+   */
+  function getUserNodes(address user) public view returns (NodeInfo[] memory) {
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
+
+    // Get the set of node IDs delegated to the user
+    EnumerableSet.UintSet storage nodeIdsSet = $.delegateeToNodeIds[user];
+    // Calculate the total number of node IDs
+    uint256 count = nodeIdsSet.length();
+    // Create an array to hold the node IDs
+    uint256[] memory nodeIds = new uint256[](count);
+    // Populate the array with node IDs from the set
+    for (uint256 i = 0; i < count; i++) {
+      nodeIds[i] = nodeIdsSet.at(i);
+    }
+
+    // Get the node ID directly owned by the user
+    uint256 ownedNodeId = $.vechainNodesContract.ownerToId(user);
+    if (ownedNodeId != 0) {
+      // If the user directly owns a node, add it to the array
+      nodeIds = _appendToArray(nodeIds, ownedNodeId);
+    }
+
+    // Create array to store node information
+    NodeInfo[] memory nodesInfo = new NodeInfo[](nodeIds.length);
+
+    // Populate information for each node
+    for (uint256 i = 0; i < nodeIds.length; i++) {
+      uint256 currentNodeId = nodeIds[i];
+      address currentNodeOwner = $.vechainNodesContract.idToOwner(currentNodeId);
+      address currentDelegatee = $.nodeIdToDelegatee[currentNodeId];
+      bool isCurrentNodeDelegated = currentDelegatee != address(0);
+
+      nodesInfo[i] = NodeInfo({
+        nodeId: currentNodeId,
+        nodeLevel: getNodeLevel(currentNodeId),
+        xNodeOwner: currentNodeOwner,
+        isXNodeHolder: true, // If it's in the nodeIds array, user is either owner or delegatee
+        isXNodeDelegated: isCurrentNodeDelegated,
+        isXNodeDelegator: currentNodeId == ownedNodeId && isCurrentNodeDelegated,
+        isXNodeDelegatee: currentNodeId != ownedNodeId,
+        delegatee: currentDelegatee
+      });
+    }
+
+    return nodesInfo;
+  }
+
+  /**
    * @notice Retrieves the node level of a given node ID.
    * @dev Internal function to get the node level of a token ID. The node level is determined based on the metadata associated with the token ID.
    * @param nodeId The token ID of the endorsing node.
@@ -266,22 +384,6 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
 
     // Cast the uint8 node level to VechainNodesDataTypes.NodeStrengthLevel enum and return
     return VechainNodesDataTypes.NodeStrengthLevel(nodeLevel);
-  }
-
-  /**
-   * @notice Retrieves the creation time of a given node ID.
-   * @dev This function retrieves the creation time of the specified node ID.
-   * @param nodeId The ID of the node for which the creation time is being retrieved.
-   * @return uint64 The creation time of the specified node ID.
-   */
-  function getNodeCreationTime(uint256 nodeId) public view returns (uint64) {
-    NodeManagementStorage storage $ = _getNodeManagementStorage();
-
-    // Retrieve the metadata for the specified node ID
-    (, , , , , uint64 createdAt, ) = $.vechainNodesContract.getMetadata(nodeId);
-
-    // Return the creation time of the node
-    return createdAt;
   }
 
   /**
@@ -306,6 +408,16 @@ contract NodeManagement is INodeManagement, AccessControlUpgradeable, UUPSUpgrad
 
     // Return the array of node levels
     return nodeLevels;
+  }
+
+  /**
+   * @notice Check if a user directly owns a node (not delegated).
+   * @param user The address of the user to check.
+   * @return uint256 The ID of the owned node (0 if none).
+   */
+  function getDirectNodeOwnership(address user) public view returns (uint256) {
+    NodeManagementStorage storage $ = _getNodeManagementStorage();
+    return $.vechainNodesContract.ownerToId(user);
   }
 
   /**

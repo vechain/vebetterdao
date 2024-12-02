@@ -54,7 +54,7 @@ export const AppEndorsementInfoCard = ({
   const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
   // User xnodes, TODO support multiple xnodes
-  const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints } = useXNode()
+  const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints, isXNodeDelegator } = useXNode()
 
   const isUserAppEndorser = useMemo(() => {
     if (!app || isXNodeLoading) return false
@@ -145,13 +145,21 @@ export const AppEndorsementInfoCard = ({
           <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading} w="full">
             <VStack spacing={2} w={"full"}>
               {shouldRenderEndorseButton && (
-                <Button variant={"primaryAction"} onClick={onOpenEndorsementModal} w="full">
+                <Button
+                  variant={"primaryAction"}
+                  onClick={onOpenEndorsementModal}
+                  isDisabled={isXNodeDelegator}
+                  w="full">
                   {t("Endorse with your {{value}} points", { value: xNodePoints })}
                 </Button>
               )}
 
               {shouldRenderSwitchEndorsementButton && (
-                <Button variant={"primaryAction"} onClick={onOpenSwitchEndorsementModal} w="full">
+                <Button
+                  variant={"primaryAction"}
+                  onClick={onOpenSwitchEndorsementModal}
+                  isDisabled={isXNodeDelegator}
+                  w="full">
                   {t("Switch endorsement to this app")}
                 </Button>
               )}
@@ -171,7 +179,12 @@ export const AppEndorsementInfoCard = ({
               )}
 
               {isUserAppEndorser && (
-                <Button variant={"link"} colorScheme="red" onClick={onOpenUnendorsementModal} w="full">
+                <Button
+                  variant={"link"}
+                  colorScheme="red"
+                  onClick={onOpenUnendorsementModal}
+                  w="full"
+                  isDisabled={isXNodeDelegator}>
                   {t("Remove endorsement")}
                 </Button>
               )}

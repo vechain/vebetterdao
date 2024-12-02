@@ -1,34 +1,19 @@
-import {
-  Button,
-  Card,
-  CardBody,
-  Heading,
-  HStack,
-  Skeleton,
-  Stack,
-  Text,
-  useDisclosure,
-  useMediaQuery,
-  VStack,
-} from "@chakra-ui/react"
+import { Card, CardBody, Heading, HStack, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { useGetTokensInfoByOwner } from "@/api/contracts/galaxyMember/hooks/useGetTokensInfoByOwner"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { GMNFTListItem } from "./GMNFTListItem"
-import { useCallback, useMemo } from "react"
-import { useMintNFT } from "@/hooks"
-import { MintNFTModal } from "@/components/MintNFTModal"
-import { FeatureFlagWrapper } from "@/components"
+import { useMemo } from "react"
+import { FeatureFlagWrapper, BaseTooltip } from "@/components"
 import { FeatureFlag } from "@/constants"
+import { useSelectedGmNft } from "@/api"
 
 export const GMNFTList = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: tokensInfo, isFetchingNextPage, fetchNextPage, hasNextPage } = useGetTokensInfoByOwner(account)
-
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const loadMore = () => {
     if (!isFetchingNextPage && hasNextPage) {
@@ -40,18 +25,7 @@ export const GMNFTList = () => {
     return tokensInfo?.pages.map(page => page.data).flat()
   }, [tokensInfo])
 
-  const mintNftModal = useDisclosure()
-
-  const {
-    sendTransaction: freeMint,
-    isTxReceiptLoading,
-    sendTransactionPending,
-  } = useMintNFT({ onFailure: mintNftModal.onClose })
-
-  const handleMintGM = useCallback(() => {
-    freeMint({})
-    mintNftModal.onOpen()
-  }, [freeMint, mintNftModal])
+  const { gmName } = useSelectedGmNft()
 
   return (
     <Card variant="baseWithBorder">
@@ -60,7 +34,13 @@ export const GMNFTList = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t("My Galaxy NFTs")}</Heading>
-              <UilInfoCircle color="#004CFC" />
+              <BaseTooltip
+                text={t("{{gmName}} NFT is the one selected for rewards multiplier.", { gmName: gmName })}
+                showTooltip={!!gmName}>
+                <span>
+                  <UilInfoCircle color="#004CFC" />
+                </span>
+              </BaseTooltip>
             </HStack>
             <FeatureFlagWrapper
               feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
@@ -84,44 +64,13 @@ export const GMNFTList = () => {
               next={loadMore}
               hasMore={hasNextPage || false}
               loader={<Skeleton height="100px" />}>
-              <VStack align="stretch" gap={4} p={3}>
+              <VStack align="stretch" gap={4} p={[0, 3]}>
                 {tokens?.map((token, index) => <GMNFTListItem key={index} token={token} />)}
               </VStack>
             </InfiniteScroll>
-            <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
-              <Card
-                mx={3}
-                rounded="8px"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23004CFC' stroke-width='1' stroke-dasharray='12%2c 15' stroke-dashoffset='2' stroke-linecap='square'/%3e%3c/svg%3e")`,
-                }}>
-                <CardBody bg={"#EBF1FE"} rounded="8px">
-                  <Stack
-                    direction={isAbove800 ? "row" : "column"}
-                    justify={isAbove800 ? "space-between" : "flex-start"}
-                    align="stretch"
-                    gap={4}>
-                    <VStack align="stretch" gap={1}>
-                      <Heading fontSize="lg">{t("Mint a GM Earth NFT")}</Heading>
-                      <Text fontSize="sm" color="#6A6A6A">
-                        {t("To upgrade and sell in the secondary market")}
-                      </Text>
-                    </VStack>
-                    <Button variant="primaryAction" onClick={handleMintGM}>
-                      {t("Mint a GM Earth NFT")}
-                    </Button>
-                  </Stack>
-                </CardBody>
-              </Card>
-            </FeatureFlagWrapper>
           </VStack>
         </VStack>
       </CardBody>
-      <MintNFTModal
-        mintNftModal={mintNftModal}
-        isTxReceiptLoading={isTxReceiptLoading}
-        sendTransactionPending={sendTransactionPending}
-      />
     </Card>
   )
 }

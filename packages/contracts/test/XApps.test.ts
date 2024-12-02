@@ -44,6 +44,7 @@ import { SeedAccount, getTestKeys } from "../scripts/helpers/seedAccounts"
 import { buildTxBody, signAndSendTx } from "../scripts/helpers/txHelper"
 import { APPS } from "../scripts/deploy/setup"
 import { clauseBuilder, unitsUtils, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
+import { airdropVTHO } from "../scripts/helpers/airdrop"
 
 describe("X-Apps - @shard15", function () {
   describe("Deployment", function () {

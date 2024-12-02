@@ -57,7 +57,7 @@ export function createTestnetStagingConfig() {
 
     INITIAL_X_ALLOCATION: BigInt("2000000000000000000000000"), // 2M B3TR
 
-    GM_NFT_BASE_URI: "ipfs://bafybeienna2npuyliqaqsrxziu4texyginznh5ewxcvlvlqcxfyw7ef52q/metadata/", // IPFS base URI for the GM NFT
+    GM_NFT_BASE_URI: "ipfs://bafybeicz4jdfmdksq537a3cumwprvaprfuy2unc34havamwdrl7dcnnami/metadata/", // IPFS base URI for the GM NFT
 
     /*
       Vechain Node => Free Upgrade Level
