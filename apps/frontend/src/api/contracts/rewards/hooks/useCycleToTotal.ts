@@ -30,5 +30,7 @@ export const useCycleToTotal = (cycle?: string) => {
     args: [cycle ?? ""],
     enabled: !!cycle,
   })
-  return ethers.formatEther(res.data)
+
+  const formattedResult = res.data ? ethers.formatEther(res.data) : null
+  return formattedResult
 }
