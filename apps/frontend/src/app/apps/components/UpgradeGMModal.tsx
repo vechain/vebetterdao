@@ -60,12 +60,10 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   // Get the next level GM NFT image
   const { data: baseUri, isLoading: baseUriLoading } = useGMBaseUri()
   const { data: nextLevelGMImage, isLoading: nextLevelGMImageLoading } = useIpfsImage(
-    baseUriLoading ? null : `${baseUri}/${levelAfterUpgrade}.json`,
+    baseUriLoading ? null : `${baseUri}${levelAfterUpgrade}.json`,
   )
   console.log("********")
-  console.log("baseUri", baseUri, typeof baseUri)
-  console.log("levelAfterUpgrade", levelAfterUpgrade, typeof levelAfterUpgrade)
-  console.log("url", `${baseUri}/${levelAfterUpgrade}.json`)
+  console.log("url", `${baseUri}${levelAfterUpgrade}.json`)
   console.log({ nextLevelGMImage })
 
   const nextLevelGM = useMemo(() => {
