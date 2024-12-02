@@ -21,10 +21,11 @@ import {
   useMediaQuery,
   Card,
   Alert,
+  Skeleton,
 } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { getLevelGradient } from "@/api"
+import { getLevelGradient, useGMBaseUri, useIpfsImage } from "@/api"
 import { FeatureFlag } from "@/constants"
 import { gmNfts } from "@/constants/gmNfts"
 
@@ -55,6 +56,12 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
     const nextLevel = currentLevel + 1 //GMNFTs lists start from 0
     return nextLevel
   }, [gmLevel])
+
+  // Get the next level GM NFT image
+  const { data: baseUri, isLoading: baseUriLoading } = useGMBaseUri()
+  const { data: nextLevelGMImage, isLoading: nextLevelGMImageLoading } = useIpfsImage(
+    baseUriLoading ? null : `${baseUri}/${levelAfterUpgrade}.json`,
+  )
 
   const nextLevelGM = useMemo(() => {
     return gmNfts.at(levelAfterUpgrade)
@@ -153,24 +160,26 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                     flex={1}
                     color="#FFFFFF"
                     flexGrow={4}>
-                    <Box
-                      w={isAbove800 ? "70px" : "46px"}
-                      h={isAbove800 ? "70px" : "46px"}
-                      rounded="5px"
-                      bgGradient={levelBackground}
-                      display="flex"
-                      alignSelf="center"
-                      alignItems="center"
-                      justifyContent="center"
-                      cursor="pointer">
-                      <Image
-                        src={nextLevelGM?.image}
-                        alt="gm"
-                        w={isAbove800 ? "62px" : "40px"}
-                        h={isAbove800 ? "62px" : "40px"}
+                    <Skeleton isLoaded={!nextLevelGMImageLoading}>
+                      <Box
+                        w={isAbove800 ? "70px" : "46px"}
+                        h={isAbove800 ? "70px" : "46px"}
                         rounded="5px"
-                      />
-                    </Box>
+                        bgGradient={levelBackground}
+                        display="flex"
+                        alignSelf="center"
+                        alignItems="center"
+                        justifyContent="center"
+                        cursor="pointer">
+                        <Image
+                          src={nextLevelGMImage?.image}
+                          alt="gm"
+                          w={isAbove800 ? "62px" : "40px"}
+                          h={isAbove800 ? "62px" : "40px"}
+                          rounded="5px"
+                        />
+                      </Box>
+                    </Skeleton>
 
                     <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 0.5 : 0}>
                       <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "x-large" : "md"}>
