@@ -233,6 +233,8 @@ export async function deployAll(config: ContractsConfig) {
     PassportWhitelistAndBlacklistLogicV1: await PassportWhitelistAndBlacklistLogicV1.getAddress(),
   })
 
+  // Set XAllocationVoting to temp address
+  const X_ALLOCATION_ADRESS_TEMP = TEMP_ADMIN
   const x2EarnApps = (await deployAndUpgrade(
     ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnApps"],
     [
@@ -248,7 +250,7 @@ export async function deployAll(config: ContractsConfig) {
         veBetterPassportContractAddress,
         await x2EarnCreator.getAddress(),
       ],
-      [config.X2EARN_NODE_COOLDOWN_PERIOD],
+      [config.X2EARN_NODE_COOLDOWN_PERIOD, X_ALLOCATION_ADRESS_TEMP],
     ],
     {
       versions: [undefined, 2, 3],
@@ -710,6 +712,12 @@ export async function deployAll(config: ContractsConfig) {
     .setVote2EarnAddress(await voterRewards.getAddress())
     .then(async tx => await tx.wait())
   console.log("XAllocationsGovernor and Vote2Earn address set in Emissions contract")
+
+  // Setup X2EarnApps addresses
+  await x2EarnApps
+    .connect(deployer)
+    .setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
 
   // Setup XAllocationPool addresses
   await xAllocationPool
