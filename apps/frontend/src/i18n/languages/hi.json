@@ -1371,5 +1371,13 @@
   "Show all apps": "सभी ऐप्स दिखाएं",
   "No Apps found": "कोई ऐप्स नहीं मिले",
   "=~ {{value}} votes": "=~ {{value}} वोट्स",
-  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "आपको <bold>{{gmAttachedName}} GM</bold> को अलग करना होगा ताकि <bold>{{gmSelectedName}} GM</bold> को जोड़ सकें।"
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "आपको <bold>{{gmAttachedName}} GM</bold> को अलग करना होगा ताकि <bold>{{gmSelectedName}} GM</bold> को जोड़ सकें।",
+  "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "आपके वॉलेट से NFT को अपग्रेड करने के लिए खर्च किया गया B3TR ले लिया जाएगा। आप इस क्रिया को पूर्ववत नहीं कर सकते।",
+  "You’re upgrading to": "आप इसमें अपग्रेड कर रहे हैं",
+  "You'll donate": "आप दान करेंगे",
+  "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!": "प्रस्ताव या आवंटन पर हर बार वोट करने पर अपने GM NFT को अपग्रेड करने के लिए B3TR दान करें और अतिरिक्त पुरस्कार अर्जित करें!",
+  "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT को पुरस्कार गुणक के लिए चुना गया है।",
+  "You need to vote to mint GM NFT": "GM NFT को मिंट करने के लिए आपको वोट करने की आवश्यकता है",
+  "Multiplier": "गुणक",
+  "Cost": "लागत"
 }

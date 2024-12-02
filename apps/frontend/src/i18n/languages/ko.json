@@ -1382,5 +1382,13 @@
   "As a Node holder, your unique NFT score can be used to endorse a single app of your choice within the ecosystem.": "노드 보유자로서 고유한 NFT 점수를 사용하여 생태계 내의 선택한 단일 앱을 지지할 수 있습니다.",
   "This dApp won’t join next allocation round. The app will have to reach more than {{endorsementThreshold}} Endorsement score to be included on Allocations rounds. Know more.": "이 dApp은 다음 할당 라운드에 참여하지 않습니다. 앱은 할당 라운드에 포함되려면 {{endorsementThreshold}} 이상의 지지 점수를 획득해야 합니다. 자세히 알아보십시오.",
   "This app lost the endorsement and will not join next allocation. The App will have to reach more than {{endorsementThreshold}} Endorsement score before {{date}} to be included on Allocations rounds. Know more.": "이 앱은 지지를 잃었으며 다음 할당에 참여하지 않습니다. 앱은 할당 라운드에 포함되려면 {{date}} 이전에 {{endorsementThreshold}} 이상의 지지 점수를 획득해야 합니다. 자세히 알아보십시오.",
-  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "<bold>{{gmSelectedName}} GM</bold>을(를) 첨부하려면 <bold>{{gmAttachedName}} GM</bold>을(를) 분리해야 합니다."
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "<bold>{{gmSelectedName}} GM</bold>을(를) 첨부하려면 <bold>{{gmAttachedName}} GM</bold>을(를) 분리해야 합니다.",
+  "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "NFT를 업그레이드하는 데 사용된 B3TR은 지갑에서 인출되며, 이 작업은 되돌릴 수 없습니다.",
+  "You’re upgrading to": "당신은 다음으로 업그레이드하고 있습니다:",
+  "You'll donate": "당신은 기부할 것입니다:",
+  "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!": "제안이나 할당에 투표할 때마다 추가 보상을 받으며 GM NFT를 업그레이드하기 위해 B3TR을 기부하세요!",
+  "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT가 보상 멀티플라이어에 선택되었습니다.",
+  "You need to vote to mint GM NFT": "GM NFT를 발행하려면 투표해야 합니다.",
+  "Multiplier": "멀티플라이어",
+  "Cost": "비용"
 }

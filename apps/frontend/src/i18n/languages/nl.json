@@ -1371,5 +1371,13 @@
   "detach": "losmaken",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Je moet de <detach>losmaken</detach> van de <bold>{{gmAttachedName}} GM</bold> om de <bold>{{gmSelectedName}} GM</bold> te koppelen.",
   "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Je kunt je Node niet gebruiken om apps te ondersteunen of om je Galaxy Member NFT's te upgraden terwijl het gedelegeerd is. Annuleer de delegatie om volledige controle over je Node te krijgen.",
-  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "U moet de <bold>{{gmAttachedName}} GM</bold> loskoppelen om de <bold>{{gmSelectedName}} GM</bold> te bevestigen"
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "U moet de <bold>{{gmAttachedName}} GM</bold> loskoppelen om de <bold>{{gmSelectedName}} GM</bold> te bevestigen",
+  "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "De B3TR die je uitgeeft om je NFT te upgraden, wordt van je wallet afgeschreven. Je kunt deze actie niet ongedaan maken.",
+  "You’re upgrading to": "Je upgrade naar",
+  "You'll donate": "Je zult doneren",
+  "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!": "Doneer B3TR om je GM NFT te upgraden en verdien extra beloningen elke keer dat je stemt op een voorstel of toewijzing!",
+  "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT is degene die geselecteerd is voor beloningsvermenigvuldiger.",
+  "You need to vote to mint GM NFT": "Je moet stemmen om GM NFT te minten",
+  "Multiplier": "Vermenigvuldiger",
+  "Cost": "Kosten"
 }

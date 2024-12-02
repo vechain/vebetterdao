@@ -1371,5 +1371,13 @@
   "detach": "tách rời",
   "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Bạn cần <detach>tách rời</detach> <bold>{{gmAttachedName}} GM</bold> để gắn <bold>{{gmSelectedName}} GM</bold>",
   "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Bạn không thể sử dụng Nút của mình để xác nhận ứng dụng hoặc nâng cấp NFT Thành viên Galaxy của mình khi nó đang được ủy quyền. Hủy bỏ ủy quyền để có toàn quyền kiểm soát Nút của bạn.",
-  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Bạn cần tách <bold>{{gmAttachedName}} GM</bold> để gắn <bold>{{gmSelectedName}} GM</bold>"
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "Bạn cần tách <bold>{{gmAttachedName}} GM</bold> để gắn <bold>{{gmSelectedName}} GM</bold>",
+  "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "B3TR bạn sử dụng để nâng cấp NFT của bạn sẽ được lấy từ ví của bạn. Bạn không thể hoàn tác hành động này.",
+  "You’re upgrading to": "Bạn đang nâng cấp lên",
+  "You'll donate": "Bạn sẽ quyên góp",
+  "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!": "Quyên góp B3TR để nâng cấp GM NFT của bạn và nhận thêm phần thưởng mỗi khi bạn bình chọn cho một đề xuất hoặc phân bổ!",
+  "{{gmName}} NFT is the one selected for rewards multiplier.": "NFT {{gmName}} là NFT được chọn để nhân đôi phần thưởng.",
+  "You need to vote to mint GM NFT": "Bạn cần bình chọn để mint GM NFT",
+  "Multiplier": "Hệ số nhân",
+  "Cost": "Chi phí"
 }
