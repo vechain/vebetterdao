@@ -129,6 +129,6 @@ export function createMainnetConfig() {
 
     CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json", // TODO: Update this with the actual IPFS URI
 
-    X2EARN_NODE_COOLDOWN_PERIOD: 1814400, // 3 weeks in seconds
+    X2EARN_NODE_COOLDOWN_PERIOD: 1, // 1 round
   })
 }
