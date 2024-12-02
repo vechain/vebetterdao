@@ -28,7 +28,7 @@ export const GMNFTList = () => {
   const { gmName } = useSelectedGmNft()
 
   return (
-    <Card variant="baseWithBorder">
+    <Card variant="baseWithBorder" w="full">
       <CardBody>
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
