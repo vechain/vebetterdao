@@ -8,23 +8,23 @@ on:
 
 jobs:
   gitleaks:
-    uses: vechain/github-actions/.github/workflows/gitleaks.yaml@b18636d7f782a0ce78f0d6f3a592952c4a271ff3 # v.1.3.1
+    uses: vechain/github-actions/.github/workflows/gitleaks.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
     secrets:
        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
   scorecard:
-    uses: vechain/github-actions/.github/workflows/scorecard.yaml@b18636d7f782a0ce78f0d6f3a592952c4a271ff3 # v.1.3.1
+    uses: vechain/github-actions/.github/workflows/scorecard.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
     secrets:
       app-id: ${{ secrets.SCORECARD_APPID }}
       private-key: ${{ secrets.SCORECARD_PRIVATEKEY }}
   checkov:
-      uses: vechain/github-actions/.github/workflows/checkov.yaml@b18636d7f782a0ce78f0d6f3a592952c4a271ff3 # v.1.3.1
+      uses: vechain/github-actions/.github/workflows/checkov.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
   infracost:
-    uses: vechain/github-actions/.github/workflows/infracost.yaml@b18636d7f782a0ce78f0d6f3a592952c4a271ff3 # v.1.3.1
+    uses: vechain/github-actions/.github/workflows/infracost.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
     secrets:
       INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
       GIT_VECHAINCI_SSH_KEY: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
   sonar-scan:
-    uses: vechain/github-actions/.github/workflows/sonar-scan.yaml@48dacbe5d804c6f95db743a19ddf3156b7e5fdbd # canary version to skip coverage report download
+    uses: vechain/github-actions/.github/workflows/sonar-scan.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     with:
