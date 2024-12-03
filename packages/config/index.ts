@@ -34,7 +34,6 @@ export type AppConfig = {
   basePath?: string
   ipfsPinningService: string
   ipfsFetchingService: string
-  mixPanelProjectToken?: string
   b3trContractAddress: string
   vot3ContractAddress: string
   b3trGovernorAddress: string
