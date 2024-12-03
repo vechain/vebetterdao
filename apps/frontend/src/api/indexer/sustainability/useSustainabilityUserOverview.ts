@@ -3,6 +3,7 @@ import { getConfig } from "@repo/config"
 import { useInfiniteQuery } from "@tanstack/react-query"
 
 import { z } from "zod"
+import { TotalImpactSchema } from "./schemas"
 
 const indexerUrl = getConfig().indexerUrl
 
@@ -10,21 +11,7 @@ export const SustainabilityMultipleUsersOverviewObjectSchema = z.object({
   entity: z.string(),
   actionsRewarded: z.number(),
   totalRewardAmount: z.number(),
-  totalImpact: z
-    .object({
-      carbon: z.number().optional(),
-      water: z.number().optional(),
-      energy: z.number().optional(),
-      waste_mass: z.number().optional(),
-      waste_items: z.number().optional(),
-      waste_reduction: z.number().optional(),
-      biodiversity: z.number().optional(),
-      people: z.number().optional(),
-      timber: z.number().optional(),
-      plastic: z.number().optional(),
-      learning_time: z.number().optional(),
-    })
-    .optional(),
+  totalImpact: TotalImpactSchema.optional(),
 })
 
 export const SustainabilityUserOverviewResponseSchema = z.object({
