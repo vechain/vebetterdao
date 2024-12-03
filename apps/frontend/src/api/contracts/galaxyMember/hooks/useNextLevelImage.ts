@@ -2,6 +2,14 @@ import { NFTMetadata, useIpfsImage, useIpfsMetadata } from "@/api"
 import { notFoundImage } from "@/constants"
 import { useGMBaseUri } from "./useGMBaseUri"
 
+/**
+ * Custom hook to fetch the next level Galaxy Member (GM) NFT image.
+ *
+ * @param {number} gmLevel - The current GM level.
+ * @returns {Object} An object containing:
+ * - `isLoading` (boolean): Indicates if any of the data fetching is in progress.
+ * - `nextLevelGMImage` (string): The URI of the next level GM NFT image or a fallback image if not found.
+ */
 export const useNextLevelImage = (gmLevel: number) => {
   // Fetch the base URI
   const { data: baseUri, isLoading: baseUriLoading } = useGMBaseUri()
@@ -37,10 +45,5 @@ export const useNextLevelImage = (gmLevel: number) => {
 }
 
 // TODO
-// * hook - remove console.log
-// * modal - refactor nft border
-// * modal - refactor paddings/margins
-// * modal - add nft id to title
-// * gms page - width of the card
 // * generate translation
 // * pr screenshots
