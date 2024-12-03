@@ -3,16 +3,12 @@ import { notFoundImage } from "@/constants"
 import { useGMBaseUri } from "./useGMBaseUri"
 
 export const useNextLevelImage = (gmLevel: number) => {
-  // Validate gmLevel is a number
-  if (typeof gmLevel !== "number" || isNaN(gmLevel)) {
-    throw new Error("Invalid gmLevel: Must be a valid number.")
-  }
-
   // Fetch the base URI
   const { data: baseUri, isLoading: baseUriLoading } = useGMBaseUri()
 
   // Construct the URI for the next level GM NFT metadata
-  const nextLevelGMMetadataUri = baseUri ? `${baseUri}${gmLevel + 1}.json` : undefined
+  const isValidGmLevel = typeof gmLevel === "number" && !isNaN(gmLevel)
+  const nextLevelGMMetadataUri = isValidGmLevel && baseUri ? `${baseUri}${gmLevel + 1}.json` : undefined
   console.log("***************nextLevelGMMetadataUri", nextLevelGMMetadataUri)
 
   // Fetch the next level GM NFT metadata
@@ -26,7 +22,16 @@ export const useNextLevelImage = (gmLevel: number) => {
   )
   console.log("***************nextLevelGMImage", nextLevelGMImage)
 
+  // Determine loading state
   const isLoading = baseUriLoading || nextLevelGMMetadataLoading || nextLevelGMImageLoading
+
+  // Return the next level GM NFT image
+  if (!isValidGmLevel) {
+    return {
+      isLoading: false,
+      nextLevelGMImage: notFoundImage,
+    }
+  }
 
   return {
     isLoading,
