@@ -43,7 +43,3 @@ export const useNextLevelImage = (gmLevel: number) => {
     nextLevelGMImage: nextLevelGMImage?.image || notFoundImage,
   }
 }
-
-// TODO
-// * generate translation
-// * pr screenshots
