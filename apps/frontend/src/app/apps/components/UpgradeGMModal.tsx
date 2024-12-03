@@ -157,7 +157,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                     <Box
                       w={isAbove800 ? "70px" : "46px"}
                       h={isAbove800 ? "70px" : "46px"}
-                      rounded="6px"
+                      rounded="16px"
                       bgGradient={
                         gmLevel && !isNaN(Number(gmLevel)) ? getLevelGradient(Number(gmLevel) + 1) : getLevelGradient(1)
                       }
@@ -168,13 +168,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                       cursor="pointer"
                       p={1}>
                       <Skeleton isLoaded={!nextLevelGMImageLoading}>
-                        <Image
-                          src={nextLevelGMImage}
-                          alt="gm"
-                          w={isAbove800 ? "62px" : "40px"}
-                          h={isAbove800 ? "62px" : "40px"}
-                          rounded="5px"
-                        />
+                        <Image src={nextLevelGMImage} alt="gm" w="100%" h="100%" objectFit="cover" rounded="16px" />
                       </Skeleton>
                     </Box>
 
