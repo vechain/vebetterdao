@@ -20,6 +20,7 @@ import { useXNodes } from "@/api"
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
+import { useRef } from "react"
 
 type Props = {
   isAppAdmin: boolean
@@ -54,8 +55,11 @@ export const EndorsersItem = ({
   const lastEndorsementEpoch = useEstimateBlockTimestamp({ blockNumber: lastEndorsementEvent?.blockNumber })
   const endorsingSince = dayjs(lastEndorsementEpoch).fromNow()
 
-  // Popover actions
+  // Popover
+  const popoverRef = useRef<HTMLButtonElement | null>(null)
+
   const handleRemoveClick = () => {
+    popoverRef.current?.blur()
     setIsConfirmOpen(true)
     setSelectedEndorserAddress(endorserAddress)
     setSelectedEndorserNodeId(endorserNodeId ?? "")
@@ -100,7 +104,7 @@ export const EndorsersItem = ({
 
         <Popover placement="bottom-end">
           <PopoverTrigger>
-            <Box as="button">
+            <Box as="button" ref={popoverRef}>
               <HiDotsVertical />
             </Box>
           </PopoverTrigger>
