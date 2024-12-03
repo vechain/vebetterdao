@@ -25,7 +25,7 @@ import {
 } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { getLevelGradient, useGMBaseUri, useIpfsImage } from "@/api"
+import { getLevelGradient, useNextLevelImage } from "@/api"
 import { FeatureFlag } from "@/constants"
 import { gmNfts } from "@/constants/gmNfts"
 
@@ -53,14 +53,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   })
 
   // Get the next level GM NFT image
-  const { data: baseUri, isLoading: baseUriLoading } = useGMBaseUri()
-
-  const nextLevelGMImageUri = useMemo(() => {
-    if (baseUriLoading || !gmLevel) return null
-    return `${baseUri}${Number(gmLevel) + 1}.json`
-  }, [baseUriLoading, baseUri, gmLevel])
-  console.log("***************nextLevelGMImageUri", nextLevelGMImageUri)
-  const { data: nextLevelGMImage, isLoading: nextLevelGMImageLoading } = useIpfsImage(nextLevelGMImageUri)
+  const { nextLevelGMImage, isLoading: nextLevelGMImageLoading } = useNextLevelImage(Number(gmLevel))
 
   const levelAfterUpgrade = useMemo(() => {
     const currentLevel = Number(gmLevel ?? 1) - 1 // gmNfts start from 1
@@ -177,7 +170,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                         justifyContent="center"
                         cursor="pointer">
                         <Image
-                          src={nextLevelGMImage?.image}
+                          src={nextLevelGMImage}
                           alt="gm"
                           w={isAbove800 ? "62px" : "40px"}
                           h={isAbove800 ? "62px" : "40px"}
