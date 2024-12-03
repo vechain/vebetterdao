@@ -1,0 +1,31 @@
+name: 'Security Checks'
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  gitleaks:
+    uses: vechain/github-actions/.github/workflows/gitleaks.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
+    secrets:
+       GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+  scorecard:
+    uses: vechain/github-actions/.github/workflows/scorecard.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
+    secrets:
+      app-id: ${{ secrets.SCORECARD_APPID }}
+      private-key: ${{ secrets.SCORECARD_PRIVATEKEY }}
+  checkov:
+      uses: vechain/github-actions/.github/workflows/checkov.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
+  infracost:
+    uses: vechain/github-actions/.github/workflows/infracost.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
+    secrets:
+      INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
+      GIT_VECHAINCI_SSH_KEY: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
+  sonar-scan:
+    uses: vechain/github-actions/.github/workflows/sonar-scan.yaml@f49d46852ef14c1e0cb46a49175c0fe897f4018c # v.1.4.0
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    with:
+      download-coverage-report: false

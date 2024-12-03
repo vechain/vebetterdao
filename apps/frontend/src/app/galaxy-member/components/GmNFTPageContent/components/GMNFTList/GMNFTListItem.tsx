@@ -75,7 +75,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   }, [nftMetadata, token.tokenId, token.tokenLevel])
 
   return (
-    <Card variant={isGMSelected ? "primaryBoxShadow" : "baseWithBorder"} rounded="8px">
+    <Card variant={isGMSelected ? "primaryBoxShadow" : "baseWithBorder"} rounded="8px" w="full">
       <CardBody p={"4"}>
         <VStack align="stretch" gap={4}>
           <HStack
@@ -131,14 +131,20 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                   ) : null}
                 </Stack>
               </VStack>
-              <HStack gap={6}>
+              <HStack gap={6} w={{ base: "full", md: "auto" }}>
                 <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
-                  <HStack gap={1}>
+                  <HStack gap={1} maxW={{ base: "full", md: "auto" }}>
                     <Text fontSize={"xs"} fontWeight={600}>
                       {gmRewardMultiplier}
                       {"x"}
                     </Text>
-                    <Text fontSize={"xs"} fontWeight={400} noOfLines={1} whiteSpace={"nowrap"}>
+                    <Text
+                      fontSize={"xs"}
+                      fontWeight={400}
+                      noOfLines={{ base: 2, md: 1 }}
+                      whiteSpace={["normal", "nowrap"]}
+                      wordBreak="break-word"
+                      overflowWrap="break-word">
                       {t("Voting reward multiplier")}
                     </Text>
                   </HStack>

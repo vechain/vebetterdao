@@ -1375,5 +1375,18 @@
   "You can't use your Node to endorse apps or to upgrade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Node'unuz delege edilmişken uygulamaları onaylayamaz veya Galaxy Üye NFT'lerinizi yükseltemezsiniz. Node'unuz üzerinde tam kontrol kazanmak için delege etmeyi iptal edin.",
   "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "<bold>{{gmSelectedName}} GM</bold>'i takmak için <bold>{{gmAttachedName}} GM</bold>'i ayırmanız gerekiyor.",
   "{{gmName}} NFT is the one selected for rewards multiplier.": "Ödül çarpanına seçilen {{gmName}} NFT'dir.",
-  "You need to vote to mint GM NFT": "GM NFT basmak için oy kullanmanız gerekiyor"
+  "You need to vote to mint GM NFT": "GM NFT basmak için oy kullanmanız gerekiyor",
+  "Owned": "Sahip Olunan",
+  "detach": "ayırmak",
+  "You need to <detach>detach</detach> the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "<bold>{{gmAttachedName}} GM</bold>'yi <detach>ayırmanız</detach> gerekiyor ki <bold>{{gmSelectedName}} GM</bold>'yi ekleyebilesiniz",
+  "You can't use your Node to endorse apps or to upgreade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "Node'unuzu uygulamaları desteklemek veya Galaxy Member NFT'lerinizi yükseltmek için kullanamazsınız çünkü bu durumda delegedir. Node'unuz üzerinde tam kontrol sağlamak için delegasyonu iptal edin.",
+  "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "<bold>{{gmSelectedName}} GM</bold>'yi eklemek için <bold>{{gmAttachedName}} GM</bold>'yi çıkartmanız gerekiyor",
+  "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "NFT'nizi yükseltmek için harcadığınız B3TR cüzdanınızdan alınacak. Bu işlemi geri alamazsınız.",
+  "You’re upgrading to": "Yükseltiyorsunuz",
+  "You'll donate": "Bağış yapacaksınız",
+  "Donate B3TR to upgrade your GM NFT and earn extra rewards each time you vote on a proposal or allocation!": "GM NFT'nizi yükseltmek için B3TR bağışlayın ve her teklif veya tahsise oy kullandığınızda ekstra ödüller kazanın!",
+  "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT ödül çarpanı olarak seçilen.",
+  "You need to vote to mint GM NFT": "GM NFT basmak için oy kullanmanız gerekiyor",
+  "Multiplier": "Çarpan",
+  "Cost": "Maliyet"
 }

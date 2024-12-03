@@ -1,9 +1,32 @@
 import { useSelectedGmNft } from "@/api"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
+import { BaseTooltip } from "@/components"
 import { gmNfts } from "@/constants/gmNfts"
-import { Button, Card, CardBody, Flex, Heading, HStack, Image, Text, VStack } from "@chakra-ui/react"
+import {
+  Button,
+  Card,
+  CardBody,
+  Flex,
+  Heading,
+  HStack,
+  Image,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  VStack,
+} from "@chakra-ui/react"
+import { UilInfoCircle } from "@iconscout/react-unicons"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+
+// Maximum precision of 4 decimals. Must also round down
+const compactFormatter = getCompactFormatter(0)
 
 export const GalaxyLevelsCard = () => {
   const { gmLevel, maxGmLevel } = useSelectedGmNft()
@@ -23,12 +46,63 @@ export const GalaxyLevelsCard = () => {
     return gmNfts.slice(maxGmLevel - 4, maxGmLevel)
   }, [gmLevel, maxGmLevel])
 
+  const getLevelText = (level: number, maxLevel: number, currentLevel: number) => {
+    if (level === maxLevel) {
+      return t("Max Level")
+    }
+    if (level === 1 || level <= currentLevel) {
+      return ""
+    }
+    return t("{{b3trToUpgrade}} B3TR to upgrade", {
+      b3trToUpgrade: compactFormatter.format(gmNfts[level - 1]?.b3trToUpgrade ?? 0),
+    })
+  }
+
   return (
     <Card variant="baseWithBorder">
       <CardBody>
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
-            <Heading fontSize="lg">{t("Galaxy Levels")}</Heading>
+            <HStack justify="space-between">
+              <Heading fontSize="lg">{t("Galaxy Levels")}</Heading>
+              <BaseTooltip
+                text={
+                  <TableContainer maxW="280px" maxH="400px" overflowY="auto">
+                    <Table variant="simple" size="sm">
+                      <Thead position="sticky" top={0}>
+                        <Tr>
+                          <Th color="white" py={2}>
+                            {t("Name")}
+                          </Th>
+                          <Th color="white" py={2} isNumeric>
+                            {t("Multiplier")}
+                          </Th>
+                          <Th color="white" py={2} isNumeric>
+                            {t("Cost")}
+                          </Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {gmNfts.map(nft => (
+                          <Tr key={nft.level} p={0}>
+                            <Td py={2}>{nft.name}</Td>
+                            <Td py={2} isNumeric>
+                              {nft.multiplier}
+                            </Td>
+                            <Td py={2} isNumeric>
+                              {compactFormatter.format(nft.b3trToUpgrade)}
+                            </Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
+                  </TableContainer>
+                }>
+                <span>
+                  <UilInfoCircle color="#004CFC" />
+                </span>
+              </BaseTooltip>
+            </HStack>
             <Text fontSize="sm" color="#6A6A6A">
               {t("Earn enough B3TR to upgrade your level and get multipliers for all your voting rewards!")}
             </Text>
@@ -36,7 +110,7 @@ export const GalaxyLevelsCard = () => {
           {(showShortened ? gmNftsShortened : gmNfts.slice(0, maxGmLevel)).map(gmNft => {
             const isCurrentLevel = gmNft.level === gmLevel
             return (
-              <HStack key={gmNft.level} justify="space-between">
+              <HStack key={gmNft.level} justify="space-between" opacity={isCurrentLevel ? 1 : 0.6}>
                 <HStack gap="4">
                   <Flex position="relative" w="10" h="10" rounded="full" overflow={"hidden"}>
                     <Image src={gmNft.image} alt={gmNft.name} w="10" h="10" position={"absolute"} />
@@ -51,9 +125,7 @@ export const GalaxyLevelsCard = () => {
                       {gmNft.name}
                     </Text>
                     <Text fontSize="sm" color="#6A6A6A">
-                      {Number(gmNft.level) === maxGmLevel
-                        ? t("Max Level")
-                        : t("{{b3trToUpgrade}} B3TR to upgrade", { b3trToUpgrade: gmNft.b3trToUpgrade })}
+                      {getLevelText(Number(gmNft.level), maxGmLevel, Number(gmLevel))}
                     </Text>
                   </VStack>
                 </HStack>

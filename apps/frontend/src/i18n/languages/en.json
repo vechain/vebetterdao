@@ -1375,5 +1375,7 @@
   "You can't use your Node to endorse apps or to upgrade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.": "You can't use your Node to endorse apps or to upgrade your Galaxy Member NFTs while it's delegated. Cancel the delegation to gain full control over your Node.",
   "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>",
   "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT is the one selected for rewards multiplier.",
-  "You need to vote to mint GM NFT": "You need to vote to mint GM NFT"
+  "You need to vote to mint GM NFT": "You need to vote to mint GM NFT",
+  "Multiplier": "Multiplier",
+  "Cost": "Cost"
 }
