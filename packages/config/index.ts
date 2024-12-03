@@ -5,6 +5,7 @@ import mainnetConfig from "./mainnet"
 import { EnvConfig, getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
 import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "./datadog"
+import { getEnvMixPanelEnv } from "./mixpanel"
 
 type B3TRGovernorLibraries = {
   governorClockLogicAddress: string
@@ -67,4 +68,4 @@ export const getConfig = (env?: EnvConfig): AppConfig => {
   throw new Error(`Unsupported NEXT_PUBLIC_APP_ENV ${appEnv}`)
 }
 
-export { getContractsConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv }
+export { getContractsConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanelEnv }
