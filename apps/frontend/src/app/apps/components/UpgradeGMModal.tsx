@@ -79,10 +79,6 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
     upgradeGMMutation.sendTransaction({})
   }, [upgradeGMMutation])
 
-  const levelBackground = useMemo(() => {
-    return getLevelGradient(Number(nextLevelGM?.level))
-  }, [nextLevelGM])
-
   if (upgradeGMMutation.status !== "ready")
     return (
       <TransactionModal
@@ -158,17 +154,20 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                     flex={1}
                     color="#FFFFFF"
                     flexGrow={4}>
-                    <Skeleton isLoaded={!nextLevelGMImageLoading}>
-                      <Box
-                        w={isAbove800 ? "70px" : "46px"}
-                        h={isAbove800 ? "70px" : "46px"}
-                        rounded="5px"
-                        bgGradient={levelBackground}
-                        display="flex"
-                        alignSelf="center"
-                        alignItems="center"
-                        justifyContent="center"
-                        cursor="pointer">
+                    <Box
+                      w={isAbove800 ? "70px" : "46px"}
+                      h={isAbove800 ? "70px" : "46px"}
+                      rounded="6px"
+                      bgGradient={
+                        gmLevel && !isNaN(Number(gmLevel)) ? getLevelGradient(Number(gmLevel) + 1) : getLevelGradient(1)
+                      }
+                      display="flex"
+                      alignSelf="center"
+                      alignItems="center"
+                      justifyContent="center"
+                      cursor="pointer"
+                      p={1}>
+                      <Skeleton isLoaded={!nextLevelGMImageLoading}>
                         <Image
                           src={nextLevelGMImage}
                           alt="gm"
@@ -176,12 +175,12 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                           h={isAbove800 ? "62px" : "40px"}
                           rounded="5px"
                         />
-                      </Box>
-                    </Skeleton>
+                      </Skeleton>
+                    </Box>
 
                     <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 0.5 : 0}>
                       <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "x-large" : "md"}>
-                        {nextLevelGM?.name}
+                        {`${nextLevelGM?.name} #${tokenId}`}
                       </Text>
                       <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                         <HStack rounded="8px" gap={1} color={""}>
