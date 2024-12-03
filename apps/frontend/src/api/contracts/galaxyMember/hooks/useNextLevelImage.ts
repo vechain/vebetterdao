@@ -9,18 +9,15 @@ export const useNextLevelImage = (gmLevel: number) => {
   // Construct the URI for the next level GM NFT metadata
   const isValidGmLevel = typeof gmLevel === "number" && !isNaN(gmLevel)
   const nextLevelGMMetadataUri = isValidGmLevel && baseUri ? `${baseUri}${gmLevel + 1}.json` : undefined
-  console.log("***************nextLevelGMMetadataUri", nextLevelGMMetadataUri)
 
   // Fetch the next level GM NFT metadata
   const { data: nextLevelGMMetadata, isLoading: nextLevelGMMetadataLoading } =
     useIpfsMetadata<NFTMetadata>(nextLevelGMMetadataUri)
-  console.log("***************nextLevelGMMetadata", nextLevelGMMetadata)
 
   // Fetch the next level GM NFT image
   const { data: nextLevelGMImage, isLoading: nextLevelGMImageLoading } = useIpfsImage(
     nextLevelGMMetadata?.image ?? null,
   )
-  console.log("***************nextLevelGMImage", nextLevelGMImage)
 
   // Determine loading state
   const isLoading = baseUriLoading || nextLevelGMMetadataLoading || nextLevelGMImageLoading
@@ -38,3 +35,12 @@ export const useNextLevelImage = (gmLevel: number) => {
     nextLevelGMImage: nextLevelGMImage?.image || notFoundImage,
   }
 }
+
+// TODO
+// * hook - remove console.log
+// * modal - refactor nft border
+// * modal - refactor paddings/margins
+// * modal - add nft id to title
+// * gms page - width of the card
+// * generate translation
+// * pr screenshots
