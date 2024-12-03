@@ -10,6 +10,7 @@ import { useCallback, useMemo } from "react"
 import { useTranslation, Trans } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
 import { IoWarningOutline } from "react-icons/io5"
+import { handleAttachOnClick, handleDetachOnClick } from "@/utils/AnalyticsUtils/gmButtonActions"
 
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
@@ -118,7 +119,7 @@ export const AttachXNodeCard = () => {
               leftIcon={<UilLinkBroken color="#C84968" />}
               color="#C84968"
               variant={"link"}
-              onClick={detachGmToXNodeModal.onOpen}>
+              onClick={() => handleDetachOnClick(detachGmToXNodeModal)}>
               {t("Detach")}
             </Button>
           ) : (
@@ -161,7 +162,7 @@ export const AttachXNodeCard = () => {
                   leftIcon={<UilLinkBroken color="#004CFC" />}
                   variant={"primarySubtle"}
                   isDisabled={isXNodeDelegator}
-                  onClick={attachGmToXNodeModal.onOpen}>
+                  onClick={() => handleAttachOnClick(attachGmToXNodeModal)}>
                   {t("Attach now!")}
                 </Button>
               )}

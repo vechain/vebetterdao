@@ -24,6 +24,7 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
 import { useGMNFTData } from "@/hooks/useGMNFTData"
+import { handleAttachOnClick, handleDetachOnClick } from "@/utils/AnalyticsUtils/gmButtonActions"
 
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()
@@ -121,7 +122,7 @@ export const AttachGMNFTCard = () => {
               color="#C84968"
               variant={"link"}
               isDisabled={isXNodeDelegator}
-              onClick={detachGmToXNodeModal.onOpen}>
+              onClick={() => handleDetachOnClick(detachGmToXNodeModal)}>
               {t("Detach")}
             </Button>
           ) : (
@@ -135,7 +136,7 @@ export const AttachGMNFTCard = () => {
               <Button
                 leftIcon={<UilLink color="#004CFC" />}
                 variant={"primarySubtle"}
-                onClick={attachGmToXNodeModal.onOpen}
+                onClick={() => handleAttachOnClick(attachGmToXNodeModal)}
                 isDisabled={isXNodeDelegator}>
                 {t("Attach now!")}
               </Button>

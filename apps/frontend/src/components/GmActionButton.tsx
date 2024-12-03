@@ -16,8 +16,9 @@ import { useTranslation } from "react-i18next"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { MintNFTModal } from "./MintNFTModal"
 import { FeatureFlagWrapper } from "./FeatureFlagWrapper"
-import { FeatureFlag } from "@/constants"
+import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
 import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
 export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) => {
   const { t } = useTranslation()
@@ -77,6 +78,25 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0)) ?? 1
   }, [b3trDonated, gmStartingLevel])
 
+  const handleOnClick = (action: string) => {
+    switch (action) {
+      case "UPGRADE_GM":
+        upgradeGMModal.onOpen()
+        AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.UPGRADING_NOW))
+        break
+      case "ATTACH_AND_UPGRADE_GM":
+        attachGmToXNodeModal.onOpen()
+        AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.ATTACH_AND_UPGRADE_NOW))
+        break
+      case "ATTACH_GM":
+        attachGmToXNodeModal.onOpen()
+        AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.ATTACH_NOW))
+        break
+      default:
+        break
+    }
+  }
+
   const actionButton = useMemo(() => {
     if (!hasUserVoted && !isGMOwned) {
       return (
@@ -120,7 +140,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
               {t("Coming soon!")}
             </Button>
           }>
-          <Button {...buttonProps} onClick={attachGmToXNodeModal.onOpen}>
+          <Button {...buttonProps} onClick={() => handleOnClick("ATTACH_GM")}>
             {t("Attach now!")}
           </Button>
         </FeatureFlagWrapper>
@@ -136,7 +156,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
               {t("Coming soon!")}
             </Button>
           }>
-          <Button {...buttonProps} onClick={attachGmToXNodeModal.onOpen}>
+          <Button {...buttonProps} onClick={() => handleOnClick("ATTACH_AND_UPGRADE_GM")}>
             {t("Attach and Upgrade!")}
           </Button>
         </FeatureFlagWrapper>
@@ -154,7 +174,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
         <Button
           {...buttonProps}
           isDisabled={!isEnoughBalanceToUpgradeGM || isMaxGmLevelReached}
-          onClick={upgradeGMModal.onOpen}>
+          onClick={() => handleOnClick("UPGRADE_GM")}>
           {t("Upgrade now!")}
         </Button>
       </FeatureFlagWrapper>
