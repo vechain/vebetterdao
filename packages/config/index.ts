@@ -5,7 +5,7 @@ import mainnetConfig from "./mainnet"
 import { EnvConfig, getContractsConfig } from "./contracts"
 import { Network } from "@repo/constants"
 import { getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv } from "./datadog"
-import { getEnvMixPanelEnv } from "./mixpanel"
+import { getEnvMixPanelEnv } from "./mixPanel"
 
 type B3TRGovernorLibraries = {
   governorClockLogicAddress: string

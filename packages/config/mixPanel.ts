@@ -1,3 +1,5 @@
+// config/mixpanel.ts
+
 /**
  * Retrieves the MixPanel environment variable from environment variables.
  *
