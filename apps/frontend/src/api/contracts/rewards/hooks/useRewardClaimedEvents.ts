@@ -4,6 +4,7 @@ import { getAllEvents } from "@/api/blockchain"
 import { useConnex } from "@vechain/dapp-kit-react"
 import { abi } from "thor-devkit"
 import { useQuery } from "@tanstack/react-query"
+import { ethers } from "ethers"
 
 const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
 
@@ -44,17 +45,16 @@ export const getRewardClaimedEvents = async (
   const events = await getAllEvents({ thor, filterCriteria })
   const decodedRewardClaimedEvents: RewardClaimed[] = []
 
-  console.log({ events })
   events.forEach(event => {
     switch (event.topics[0]) {
       case rewardClaimedEvent.signature: {
         const decoded = rewardClaimedEvent.decode(event.data, event.topics)
-        // const rewardFormatted = Number(ethers.formatEther(decoded[2] as string))
+        const rewardFormatted = Number(ethers.formatEther(decoded[2] as string))
 
         decodedRewardClaimedEvents.push({
           cycle: decoded[0],
           voter: decoded[1],
-          reward: decoded[2],
+          reward: rewardFormatted,
         })
         break
       }
