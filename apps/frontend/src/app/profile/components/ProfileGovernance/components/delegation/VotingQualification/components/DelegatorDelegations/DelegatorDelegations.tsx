@@ -1,15 +1,12 @@
-import { Button, Stack, useDisclosure } from "@chakra-ui/react"
-
 import { useGetDelegatee } from "@/api"
 import { AddressIcon } from "@/components/AddressIcon"
-import { Divider, HStack, Heading, Text, VStack } from "@chakra-ui/react"
+import { Divider, HStack, Heading, Text, VStack, Button, Stack, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { UilTimes } from "@iconscout/react-unicons"
 import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useWallet, useVechainDomain } from "@vechain/dapp-kit-react"
 
 type Props = {
   address: string
