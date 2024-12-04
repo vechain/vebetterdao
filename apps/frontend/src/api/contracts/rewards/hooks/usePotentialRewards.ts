@@ -1,6 +1,7 @@
 import {
   useAllocationAmount,
   useCurrentAllocationsRoundId,
+  useGetRewardsEventsOrFunction,
   // useHasVotedInRound,
 } from "@/api"
 import { gmNfts } from "@/constants/gmNfts"
@@ -17,24 +18,12 @@ import { useState } from "react"
  *
  */
 
-export const usePotentialRewards = (voter?: string, GMlevel?: any, inputVOT3?: number) => {
+export const usePotentialRewards = (voter?: string, GMlevel?: any) => {
   const [isLoading, setIsLoading] = useState(true)
 
-  // TODO 1 : try with the currentRoundId
-  // but i need to get one round at least where the user have voted to get the useCycleToTotal
-
-  // OK, but is it only the last round that will calculate the rewards ?
-  // const [roundId, setVotedRoundId] = useState<string | undefined>(undefined)
-  // const hasVoted = useHasVotedInRound(roundId, voter ?? undefined)
-  // if (hasVoted) {
-  //   setVotedRoundId(currentRoundId)
-  // } else {
-  //   setVotedRoundId(String(Number(currentRoundId) - 1))
-  //
-
+  // TODO : v1 taking the current round, but for other version, need to take the last round where the user have voted
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const roundId = currentRoundId
-  const v = inputVOT3
 
   const { data: cycleToVoterToTotalEvents } = useVoteRegisteredEvents({ cycle: Number(roundId), voter: voter })
   const cycleToVoterToTotal = cycleToVoterToTotalEvents?.reduce(
@@ -42,8 +31,9 @@ export const usePotentialRewards = (voter?: string, GMlevel?: any, inputVOT3?: n
     0,
   )
   console.log("cycleToVoterToTotal", cycleToVoterToTotal)
+  const actualRewards = useGetRewardsEventsOrFunction(roundId, voter)
 
-  const { data: cycleToTotal } = useCycleToTotal(roundId)
+  const cycleToTotal = useCycleToTotal(roundId)
   const { data: emissionAmount } = useAllocationAmount(roundId)
 
   const emissionAmount_voterRewards = emissionAmount?.voteX2Earn
@@ -61,7 +51,6 @@ export const usePotentialRewards = (voter?: string, GMlevel?: any, inputVOT3?: n
   if (cycleToTotal === undefined) return null
   if (cycleToVoterToTotal === undefined) return null
   if (emissionAmount_voterRewards === undefined) return null
-  if (!v) return null
 
   const increase = cycleToVoterToTotal * (GMMultiplier / 100)
   const cycleToVoterToTotal_enhanced = cycleToVoterToTotal + increase
@@ -77,7 +66,8 @@ export const usePotentialRewards = (voter?: string, GMlevel?: any, inputVOT3?: n
   // const originalReward = ${rewardClaimed event}
 
   return {
-    rewards: reward_enhanced,
+    actualRewards: actualRewards,
+    potentialRewards: reward_enhanced,
     isLoading: isLoading,
   }
 }

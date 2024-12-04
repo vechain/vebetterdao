@@ -31,37 +31,28 @@ export const GalaxyRewardsCalculator = () => {
   if (!account) throw new Error("Account is required")
 
   const [selectedGMLevel, setSelectedGMLevel] = useState<string | undefined>(undefined)
-  const [inputVOT3, setInputVOT3] = useState<number | undefined>(undefined)
   const [estimateRewards, setEstimateRewards] = useState<number | undefined>(undefined)
   const [isLoading, setLoading] = useState<boolean>(false)
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setLoading(true)
-    const value = event.target.value
-    setInputVOT3(value ? parseFloat(value) : undefined)
-    setLoading(false)
-  }
 
   const handleNftSelect = (GMLevel: string | undefined) => {
     setSelectedGMLevel(GMLevel)
   }
 
-  const estimatedRewards = usePotentialRewards(account, selectedGMLevel, inputVOT3)
-  console.log("estimatedRewards to see if it refresh when changing the gmlevel", estimatedRewards)
+  const estimatedRewards = usePotentialRewards(account, selectedGMLevel)
+  console.log({ estimatedRewards })
 
   useMemo(() => {
-    if (!selectedGMLevel || !inputVOT3) {
+    if (!selectedGMLevel) {
       setEstimateRewards(0)
       return
     }
     setLoading(true)
     // Example calculation (TODO: replace with the usePotentialRewards once finished hook)
-
-    const _estimateRewards = (inputVOT3 * parseFloat(selectedGMLevel)).toFixed(2)
+    const _estimateRewards = (1 * parseFloat(selectedGMLevel)).toFixed(2)
 
     setEstimateRewards(parseFloat(_estimateRewards))
     setLoading(false)
-  }, [selectedGMLevel, inputVOT3])
+  }, [selectedGMLevel])
 
   console.log("selectedGMLevel", selectedGMLevel)
   return (
@@ -83,45 +74,6 @@ export const GalaxyRewardsCalculator = () => {
 
           {/* TODO: SIZE of the 2 BOX SMALLER FOR SMALLER SCREENS  */}
           <Stack spacing={4} alignItems="center" justifyContent="flex-end" border={"1px solid yello"}>
-            {/* VOT3 Input Card */}
-
-            <Box
-              py={4}
-              px={4}
-              bg="gray.900"
-              shadow="lg"
-              rounded="lg"
-              h="32"
-              w="full"
-              style={{ backgroundImage: "linear-gradient(90deg, rgb(127, 140, 255), rgb(152, 163, 255))" }}>
-              <Box
-                borderLeft="4px"
-                borderColor="lime.300"
-                pl={4}
-                h="full"
-                display="flex"
-                flexDirection="column"
-                justifyContent="space-between">
-                <Heading fontSize="x-large">{t("VOT3 amount")}</Heading>
-                <HStack display="flex" alignItems="center">
-                  <Image boxSize="7" rounded="full" bg="gray.800" src="/images/logo/vot3_logo.svg/" alt="" />
-                  <Input
-                    type="number"
-                    bg="transparent"
-                    fontWeight="semibold"
-                    px={2}
-                    w="full"
-                    fontSize="4xl"
-                    placeholder="Powered VOT3"
-                    border="none"
-                    focusBorderColor="none"
-                    value={inputVOT3 !== undefined ? inputVOT3 : ""}
-                    onChange={handleInputChange}
-                  />
-                </HStack>
-              </Box>
-            </Box>
-
             {/* Estimated Rewards Output Card */}
             <Box
               py={4}
@@ -182,6 +134,9 @@ export const GalaxyRewardsCalculator = () => {
                 </HStack>
               </Box>
             </Box>
+
+            {/* Actual rewards Card */}
+            <Text color={"white"}>{t(`While, your actual reward was {actual rewards}`)}</Text>
           </Stack>
         </Stack>
       </CardBody>
