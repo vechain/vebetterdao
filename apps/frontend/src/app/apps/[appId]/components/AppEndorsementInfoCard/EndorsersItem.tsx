@@ -56,11 +56,11 @@ export const EndorsersItem = ({
   const endorsingSince = dayjs(lastEndorsementEpoch).fromNow()
 
   // Popover state
-  const [open, setOpen] = useState(false)
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
   // Popover actions
   const handleRemoveClick = () => {
-    setOpen(false)
+    setIsPopoverOpen(false)
     setIsConfirmOpen(true)
     setSelectedEndorserAddress(endorserAddress)
     setSelectedEndorserNodeId(endorserNodeId ?? "")
@@ -103,9 +103,9 @@ export const EndorsersItem = ({
           </Text>
         </Skeleton>
 
-        <Popover placement="bottom-end" isOpen={open}>
+        <Popover placement="bottom-end" isOpen={isPopoverOpen} onClose={() => setIsPopoverOpen(false)}>
           <PopoverTrigger>
-            <Box as="button" onClick={() => setOpen(true)}>
+            <Box as="button" onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
               <HiDotsVertical />
             </Box>
           </PopoverTrigger>
