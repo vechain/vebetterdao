@@ -6,10 +6,14 @@ import { abi } from "thor-devkit"
 import { useProposalFormStore } from "@/store"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
-import { updateMarkdownTemplatePlaceholders } from "@/constants"
 import { useWallet } from "@vechain/dapp-kit-react"
 
-import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
+import {
+  buttonClicked,
+  buttonClickActions,
+  ButtonClickProperties,
+  updateMarkdownTemplatePlaceholders,
+} from "@/constants"
 import { AnalyticsUtils } from "@/utils"
 
 export const NewProposalFormDetailsPageContent: React.FC = () => {
