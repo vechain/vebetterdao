@@ -11,20 +11,19 @@ import { useRewardClaimedEvents } from "./useRewardClaimedEvents"
  * @returns {object} An object containing the status and data of the queries. Refer to the react-query documentation for more details.
  */
 
-export const useGetRewardsEventsOrFunction = (cycle?: string, voter?: string) => {
+export const useGetRewardsEventsOrFunction = (cycle: string, voter: string) => {
   const { data: votingRewardsQuery } = useRoundReward(voter, cycle)
   const { data: rewardClaimedEvents } = useRewardClaimedEvents(Number(cycle), voter)
-  console.log({ votingRewardsQuery, rewardClaimedEvents })
 
   if (!votingRewardsQuery || !rewardClaimedEvents) return 0
-  // return { error: `No claiming reward in pending or claimed reward for ${cycle} round` }
 
-  if (votingRewardsQuery && votingRewardsQuery.rewards) {
+  // if multiple claimed rewards, we filter the one for the current cycle
+  if (Number(votingRewardsQuery.rewards) !== 0.0) {
     return votingRewardsQuery.rewards
   } else {
-    const claimedRewards = rewardClaimedEvents
-      .filter(event => event.cycle === Number(cycle))
-      .map(event => event.reward)[0]
-    return claimedRewards
+    console.log({ rewardClaimedEvents })
+    const claimedReward = rewardClaimedEvents[0]?.reward
+    console.log({ claimedReward })
+    return claimedReward
   }
 }
