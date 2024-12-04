@@ -28,7 +28,7 @@ export const NoLinkedAccount = ({ address }: Props) => {
         <Text fontSize="sm" color="#757575" textAlign="center">
           {isConnectedUser
             ? t("You can merge several secondary accounts with your main one")
-            : t("Several secondary accounts can be merged with your main one")}
+            : t("Several secondary accounts can be merged with the user's account.")}
         </Text>
         {isConnectedUser && (
           <Button variant="primaryAction" onClick={addLinkedAccountModal.onOpen}>
