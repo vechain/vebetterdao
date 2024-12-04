@@ -19,7 +19,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useIsUserConnectedProfil } from "@/app/profile/components/utils/useIsUserConnectedProfil"
+import { useIsUserConnectedProfile } from "@/app/profile/components/utils/useIsUserConnectedProfile"
 
 const compactFormatter = getCompactFormatter(4)
 type Props = {
@@ -40,7 +40,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
   const isLoading = isB3trBalanceLoading || isVot3BalanceLoading
 
   const isSwapDisabled = isLoading || hasNoBalance
-  const isConnectedUser = useIsUserConnectedProfil(address ?? "")
+  const isConnectedUser = useIsUserConnectedProfile(address ?? "")
 
   return (
     <>

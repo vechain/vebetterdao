@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useIsUserConnectedProfil } from "@/app/profile/components/utils/useIsUserConnectedProfil"
+import { useIsUserConnectedProfile } from "@/app/profile/components/utils/useIsUserConnectedProfile"
 import { useParams } from "next/navigation"
 type Props = {
   transaction: B3trTransaction
@@ -19,7 +19,7 @@ export const ClaimCard = ({ transaction }: Props) => {
 
   const actionModal = useDisclosure()
   const { profile: address } = useParams<{ profile: string }>()
-  const isConnectedUser = useIsUserConnectedProfil(address)
+  const isConnectedUser = useIsUserConnectedProfile(address)
 
   return (
     <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
