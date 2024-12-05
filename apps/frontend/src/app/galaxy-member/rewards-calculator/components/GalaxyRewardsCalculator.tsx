@@ -41,10 +41,10 @@ export const GalaxyRewardsCalculator = () => {
     return cycleToVoterToTotalEvents?.reduce((acc, event) => acc + event.rewardWeightedVote, 0)
   }, [cycleToVoterToTotalEvents])
 
-  // todo : cleanup type, rmv the conditionnal check, should return directly the right type
+  // todo : cleanup type, rmv the conditionnal check, should return directly the right
   const potentialRewards = usePotentialRewards(
+    cycleToTotal ?? "0",
     cycleToVoterToTotal ?? 0,
-    cycleToTotal ?? 0,
     emissionAmount_voterRewards,
     selectedGMLevel,
   )

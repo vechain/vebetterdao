@@ -46,6 +46,7 @@ export const usePotentialRewards = (
     const increase = cycleToVoterToTotal * (GMMultiplier / 100)
     const cycleToVoterToTotal_enhanced = cycleToVoterToTotal + increase
     const cycleToTotal_enhanced = cycleToTotal + increase
+    // todo: carefull with the division by 0, have to take a look at the case that could do that
     const reward_enhanced =
       (cycleToVoterToTotal_enhanced / Number(cycleToTotal_enhanced)) * Number(emissionAmount_voterRewards)
 
