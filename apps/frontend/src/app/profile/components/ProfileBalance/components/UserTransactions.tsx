@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 type Props = {
   address: string
 }
+
 export const UserTransactions = ({ address }: Props) => {
   const { t } = useTranslation()
 
