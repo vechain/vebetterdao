@@ -13,7 +13,7 @@ export type VoteRegisteredEvent = {
   cycle: number
   voter: string
   votes: number
-  rewardWeightedVote: string
+  rewardWeightedVote: number
 }
 
 /**
@@ -59,7 +59,7 @@ export const getVoteRegisteredEvents = async (
           cycle: decoded[0],
           voter: decoded[1],
           votes: decoded[2],
-          rewardWeightedVote: rewardWeightedVote,
+          rewardWeightedVote: Number(rewardWeightedVote),
         })
         break
       }

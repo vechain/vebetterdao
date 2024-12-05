@@ -9,13 +9,13 @@ import { gmNfts } from "@/constants/gmNfts"
  */
 
 type PotentialRewards = {
-  potentialRewards: number | null
+  potentialRewards: number | 0
   isLoading: boolean
   error?: any
 }
 
 export const usePotentialRewards = (
-  cycleToTotal: string,
+  cycleToTotal: number,
   emissionAmount_voterRewards: string,
   cycleToVoterToTotal?: number,
   GMlevel?: any,
@@ -45,7 +45,7 @@ export const usePotentialRewards = (
 
     const increase = cycleToVoterToTotal * (GMMultiplier / 100)
     const cycleToVoterToTotal_enhanced = cycleToVoterToTotal + increase
-    const cycleToTotal_enhanced = Number(cycleToTotal) + Number(increase)
+    const cycleToTotal_enhanced = cycleToTotal + increase
     const reward_enhanced =
       (cycleToVoterToTotal_enhanced / Number(cycleToTotal_enhanced)) * Number(emissionAmount_voterRewards)
 
