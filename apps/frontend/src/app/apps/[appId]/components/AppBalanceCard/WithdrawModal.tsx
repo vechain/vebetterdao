@@ -145,6 +145,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             <option value="Development">{t("Development")}</option>
             <option value="Reward distribution">{t("Reward distribution")}</option>
             <option value="Community airdrop">{t("Community airdrop")}</option>
+            <option value="Endorsers reward">{t("Endorsers reward")}</option>
             <option value="Reason not specified">{t("Other")}</option>
           </Select>
         )}

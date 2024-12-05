@@ -1377,5 +1377,14 @@
   "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT是已選擇的獎勵倍增器。",
   "You need to vote to mint GM NFT": "您需要投票以鑄造GM NFT",
   "Multiplier": "倍增器",
-  "Cost": "成本"
+  "Cost": "成本",
+  "{{value}} upgraded a": "{{value}} 升級了",
+  "{{value}} supported a": "{{value}} 支持了",
+  "{value} claimed": "{value} 已兌現",
+  "{{value}} converted": "{{value}} 轉換了",
+  "{{value}} tokens": "{{value}} 代幣",
+  "Several secondary accounts can be merged with the user's account.": "多個次要帳戶可以與用戶的帳戶合併。",
+  "{{subject}} voted proposals will appear here.": "{{subject}} 投票的提案將顯示在這裡。",
+  "{{subject}} top voted apps will appear here.": "{{subject}} 投票最高的應用將顯示在這裡。",
+  "Endorsers reward": "背書者的獎勵"
 }

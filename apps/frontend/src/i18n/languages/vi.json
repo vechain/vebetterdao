@@ -1377,5 +1377,14 @@
   "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT là NFT được chọn để nhân đôi phần thưởng.",
   "You need to vote to mint GM NFT": "Bạn cần bỏ phiếu để tạo GM NFT",
   "Multiplier": "Bội Số",
-  "Cost": "Chi Phí"
+  "Cost": "Chi Phí",
+  "{{value}} upgraded a": "{{value}} đã nâng cấp một",
+  "{{value}} supported a": "{{value}} đã hỗ trợ một",
+  "{value} claimed": "{value} đã yêu cầu",
+  "{{value}} converted": "{{value}} đã chuyển đổi",
+  "{{value}} tokens": "{{value}} mã thông báo",
+  "Several secondary accounts can be merged with the user's account.": "Một số tài khoản phụ có thể được gộp lại với tài khoản của người dùng.",
+  "{{subject}} voted proposals will appear here.": "Đề xuất đã được bình chọn bởi {{subject}} sẽ hiển thị ở đây.",
+  "{{subject}} top voted apps will appear here.": "Ứng dụng được đánh giá cao nhất bởi {{subject}} sẽ hiển thị ở đây.",
+  "Endorsers reward": "Phần thưởng cho người xác nhận"
 }

@@ -1377,5 +1377,14 @@
   "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT è quello selezionato per il moltiplicatore di ricompense.",
   "You need to vote to mint GM NFT": "Devi votare per coniare GM NFT",
   "Multiplier": "Moltiplicatore",
-  "Cost": "Costo"
+  "Cost": "Costo",
+  "{{value}} upgraded a": "{{value}} ha aggiornato un",
+  "{{value}} supported a": "{{value}} ha supportato un",
+  "{value} claimed": "{value} ha rivendicato",
+  "{{value}} converted": "{{value}} ha convertito",
+  "{{value}} tokens": "{{value}} token",
+  "Several secondary accounts can be merged with the user's account.": "Diversi account secondari possono essere uniti all'account dell'utente.",
+  "{{subject}} voted proposals will appear here.": "Le proposte votate da {{subject}} appariranno qui.",
+  "{{subject}} top voted apps will appear here.": "Le app più votate da {{subject}} appariranno qui.",
+  "Endorsers reward": "Ricompensa degli sponsor"
 }
