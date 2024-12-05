@@ -1386,5 +1386,6 @@
   "Several secondary accounts can be merged with the user's account.": "Plusieurs comptes secondaires peuvent être fusionnés avec le compte de l'utilisateur.",
   "{{subject}} voted proposals will appear here.": "Les propositions votées par {{subject}} apparaîtront ici.",
   "{{subject}} top voted apps will appear here.": "Les applications les mieux votées par {{subject}} apparaîtront ici.",
-  "Endorsers reward": "Récompense des soutiens"
+  "Endorsers reward": "Récompense des soutiens",
+  "Specify your reason": "Spécifiez votre raison"
 }

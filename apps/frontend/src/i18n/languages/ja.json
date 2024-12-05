@@ -1386,5 +1386,6 @@
   "Several secondary accounts can be merged with the user's account.": "いくつかのサブアカウントをユーザーのアカウントと統合することができます。",
   "{{subject}} voted proposals will appear here.": "{{subject}}が投票した提案がここに表示されます。",
   "{{subject}} top voted apps will appear here.": "{{subject}}のトップ投票アプリがここに表示されます。",
-  "Endorsers reward": "推薦者の報酬"
+  "Endorsers reward": "推薦者の報酬",
+  "Specify your reason": "理由を指定してください"
 }
