@@ -18,17 +18,21 @@ import {
   useBreakpointValue,
   useDisclosure,
   VStack,
+  Alert,
+  AlertDescription,
+  Box,
 } from "@chakra-ui/react"
-import { UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
+import { UilExclamationCircle, UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
-import { useTranslation } from "react-i18next"
+import { useCallback, useMemo } from "react"
+import { Trans, useTranslation } from "react-i18next"
 
 export const EndorsingAppCard = () => {
   const { t } = useTranslation()
 
-  const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeId, isXNodeDelegator } = useXNode()
+  const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeId, isXNodeDelegator, isXNodeOnCooldown } =
+    useXNode()
   // get the number of endorsers for the endorsed app
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(endorsedApp?.id ?? "")
   // get app status and score
@@ -57,6 +61,9 @@ export const EndorsingAppCard = () => {
   }, [router])
 
   const searchIconSize = useBreakpointValue({ base: "4rem", md: "6rem" })
+  const shouldDisableEndorsementButton = useMemo(() => {
+    return isXNodeDelegator || isXNodeOnCooldown
+  }, [isXNodeDelegator, isXNodeOnCooldown])
 
   return (
     <Card variant="baseWithBorder" w="full" h="min-content">
@@ -75,6 +82,22 @@ export const EndorsingAppCard = () => {
               </Text>
             )}
           </VStack>
+          {isXNodeOnCooldown ? (
+            <Alert status="warning" bg="#FFF3E5" borderRadius={["xl", "xl", "3xl"]}>
+              <Box px={2}>
+                <UilExclamationCircle size={24} color="#F29B32" />
+              </Box>
+              <Box lineHeight={"1.20rem"} fontSize="sm">
+                <AlertDescription as="span" color="#6A6A6A">
+                  <Trans
+                    i18nKey="Your Node is on <bold>cooldown</bold>. {{subject}} cannot make changes to app endorsements until the cooldown ends."
+                    components={{ bold: <Text as="span" fontWeight={"600"} /> }}
+                    values={{ subject: isXNodeDelegator ? t("You or the delegatee") : t("You") }}
+                  />
+                </AlertDescription>
+              </Box>
+            </Alert>
+          ) : null}
           {isEndorsingApp ? (
             <Card variant={"baseWithBorder"} p={4} rounded="lg">
               <VStack align="stretch" spacing={6}>
@@ -133,11 +156,12 @@ export const EndorsingAppCard = () => {
                       endorsers={appEndorsers || []}
                       isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
                   </Flex>
+
                   <Button
                     variant="dangerGhost"
                     onClick={unendorseAppModal.onOpen}
                     w={["full", "full", "auto"]}
-                    isDisabled={isXNodeDelegator}>
+                    isDisabled={shouldDisableEndorsementButton}>
                     {t("Remove endorsement")}
                   </Button>
                 </Stack>
