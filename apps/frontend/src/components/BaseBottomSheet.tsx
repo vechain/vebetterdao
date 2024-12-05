@@ -24,6 +24,7 @@ export const BaseBottomSheet = ({
     <Drawer.Root
       dismissible={isDismissable}
       shouldScaleBackground
+      repositionInputs={false}
       open={isOpen}
       onOpenChange={open => {
         if (!open) {
