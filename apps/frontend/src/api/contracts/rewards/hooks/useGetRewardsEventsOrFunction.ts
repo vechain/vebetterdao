@@ -10,13 +10,10 @@ import { useRewardClaimedEvents } from "./useRewardClaimedEvents"
  * @param {string} voter - The address of the voter. If not provided, the rewards for all voters will be fetched.
  * @returns {object} An object containing the status and data of the queries. Refer to the react-query documentation for more details.
  */
+export const useGetRewardsEventsOrFunction = (voter: string, cycle?: string) => {
+  const { data: votingRewardsQuery } = useRoundReward(voter, cycle ?? "")
+  const { data: rewardClaimedEvents } = useRewardClaimedEvents(cycle ? Number(cycle) : 0, voter)
 
-export const useGetRewardsEventsOrFunction = (cycle: string, voter: string) => {
-  const { data: votingRewardsQuery } = useRoundReward(voter, cycle)
-  const { data: rewardClaimedEvents } = useRewardClaimedEvents(Number(cycle), voter)
-
-  console.log("votingRewardsQuery", votingRewardsQuery)
-  console.log("rewardClaimedEvents", rewardClaimedEvents)
   if (!votingRewardsQuery || !rewardClaimedEvents) return 0
 
   // if multiple claimed rewards, we filter the one for the current cycle
