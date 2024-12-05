@@ -1,145 +1,185 @@
 import React, { useState, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import {
-  Box,
-  CardBody,
-  Input,
-  Image,
-  Text,
-  Card,
-  HStack,
-  Spinner,
-  Heading,
-  Stack,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverArrow,
-  PopoverBody,
-} from "@chakra-ui/react"
+import { Input, Image, Card, HStack, Heading, Stack } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { usePotentialRewards } from "@/api"
-
+import {
+  usePotentialRewards,
+  useCurrentAllocationsRoundId,
+  useVoteRegisteredEvents,
+  useGetRewardsEventsOrFunction,
+  useCycleToTotal,
+  useAllocationAmount,
+} from "@/api"
 import { GalaxyCarrousel } from "./GalaxyCarrousel"
+import { BaseTooltip } from "@/components"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+
+const DECIMAL_PLACES = 4
+const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 
 export const GalaxyRewardsCalculator = () => {
+  // TODO : Calculate rewards only if the user have already voted
   const { t } = useTranslation()
-
-  // Todo: test the page without the wallet connected
   const { account } = useWallet()
-  if (!account) throw new Error("Account is required")
 
-  const [selectedGMLevel, setSelectedGMLevel] = useState<string | undefined>(undefined)
-  const [estimateRewards, setEstimateRewards] = useState<number | undefined>(undefined)
-  const [isLoading, setLoading] = useState<boolean>(false)
+  const [selectedGMLevel, setSelectedGMLevel] = useState<string>()
+  // const [isLoading, setLoading] = useState<boolean>(false)
+
+  const { data: currentRound } = useCurrentAllocationsRoundId()
+  const { data: emissionAmount } = useAllocationAmount(currentRound)
+  const { data: cycleToVoterToTotalEvents } = useVoteRegisteredEvents({
+    cycle: Number(currentRound),
+    voter: account ?? "",
+  })
+
+  const currentReward = useGetRewardsEventsOrFunction(account ?? "", currentRound)
+  const cycleToTotal = useCycleToTotal(currentRound)
+  const emissionAmount_voterRewards = Number(emissionAmount?.voteX2Earn)
+
+  const cycleToVoterToTotal = useMemo(() => {
+    return cycleToVoterToTotalEvents?.reduce((acc, event) => acc + event.rewardWeightedVote, 0)
+  }, [cycleToVoterToTotalEvents])
+
+  // todo : cleanup type, rmv the conditionnal check, should return directly the right type
+  const potentialRewards = usePotentialRewards(
+    cycleToVoterToTotal ?? 0,
+    cycleToTotal ?? 0,
+    emissionAmount_voterRewards,
+    selectedGMLevel,
+  )
+
+  const estimatedRewards = useMemo(() => {
+    if (account && selectedGMLevel && cycleToVoterToTotal && cycleToTotal && emissionAmount_voterRewards) {
+      return potentialRewards
+    }
+    return null
+  }, [account, selectedGMLevel, cycleToVoterToTotal, cycleToTotal, emissionAmount_voterRewards, potentialRewards])
 
   const handleNftSelect = (GMLevel: string | undefined) => {
     setSelectedGMLevel(GMLevel)
   }
 
-  const estimatedRewards = usePotentialRewards(account, selectedGMLevel)
-  console.log({ estimatedRewards })
+  if (!account) return null
 
-  useMemo(() => {
-    if (!selectedGMLevel) {
-      setEstimateRewards(0)
-      return
-    }
-    setLoading(true)
-    // Example calculation (TODO: replace with the usePotentialRewards once finished hook)
-    const _estimateRewards = (1 * parseFloat(selectedGMLevel)).toFixed(2)
-
-    setEstimateRewards(parseFloat(_estimateRewards))
-    setLoading(false)
-  }, [selectedGMLevel])
-
-  console.log("selectedGMLevel", selectedGMLevel)
   return (
     <Card
+      p={7}
       variant="baseWithBorder"
-      overflow={"hidden"}
       alignItems="center"
-      w={"full"}
       style={{
         backgroundImage: `url('/images/stardust.jpg')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}>
-      <CardBody>
-        <Heading color={"white"}>{t("Rewards calculator")}</Heading>
-        <Stack direction={["column", "row", "row"]} gap={4} h={"full"} justifyContent={"space-between"}>
-          <GalaxyCarrousel setSelectedGMLevel={handleNftSelect} />
+      <Heading alignSelf={"flex-start"} color={"white"} pb={5}>
+        {t("Rewards calculator")}
+      </Heading>
+      <Stack direction={["column", "row", "row"]} gap={10} h={"full"} justifyContent={"space-between"}>
+        <GalaxyCarrousel setSelectedGMLevel={handleNftSelect} />
 
-          {/* TODO: SIZE of the 2 BOX SMALLER FOR SMALLER SCREENS  */}
-          <Stack spacing={4} alignItems="center" justifyContent="flex-end" border={"1px solid yello"}>
-            {/* Estimated Rewards Output Card */}
-            <Box
-              py={4}
-              px={4}
-              bg="gray.900"
-              shadow="lg"
-              rounded="lg"
-              h="32"
-              w="full"
-              style={{ backgroundImage: "linear-gradient(90deg, rgb(236, 255, 176), rgb(247, 255, 215))" }}>
-              <Box
-                borderLeft="4px"
-                borderColor="lime.300"
-                pl={4}
-                h="full"
-                display="flex"
-                flexDirection="column"
-                justifyContent="space-between">
-                <HStack position="relative">
-                  <Heading fontSize="x-large">{t("Estimated Rewards")}</Heading>
-                  <Popover>
-                    <PopoverTrigger>
-                      <UilInfoCircle style={{ marginRight: "8px", cursor: "pointer" }} />
-                    </PopoverTrigger>
-                    {/* TODO: polish for mobile and bg={"lime.300"} */}
-                    <PopoverContent position="absolute" p={2}>
-                      <PopoverArrow />
-                      <PopoverBody>
-                        <Text textAlign="justify">
-                          {t(
-                            "The rewards are estimated based on the previous week's voting participation. The exact rewards are only known when a round ends and all participants have cast their votes.",
-                          )}
-                        </Text>
-                      </PopoverBody>
-                    </PopoverContent>
-                  </Popover>
-                </HStack>
+        <Stack spacing={4} p={4} alignItems="center" justifyContent="flex-end">
+          {/* ESTIMATE CARD */}
+          <Card
+            variant={"primaryBoxShadow"}
+            rounded="8px"
+            w="full"
+            gap={7}
+            py={4}
+            px={4}
+            bg="whiteAlpha.50"
+            backdropFilter="blur(8px)"
+            borderRadius="lg"
+            border="1px solid"
+            borderColor="whiteAlpha.200">
+            <HStack position="relative">
+              <Heading color={"white"} fontSize="x-large">
+                {t("Estimated Rewards")}
+              </Heading>
+              <BaseTooltip
+                text={t(
+                  "The rewards are estimated based on the previous week's voting participation. The exact rewards are only known when a round ends and all participants have cast their votes.",
+                )}>
+                <span>
+                  <UilInfoCircle color={"white"} style={{ marginRight: "8px", cursor: "pointer" }} />
+                </span>
+              </BaseTooltip>
+            </HStack>
 
-                <HStack display="flex" alignItems="center">
-                  <Image boxSize="7" rounded="full" bg="gray.800" src="/images/logo/b3tr_logo.svg/" alt="" />
-                  {isLoading ? (
-                    <Spinner />
-                  ) : (
-                    <Input
-                      type="text"
-                      bg="transparent"
-                      color="gray.900"
-                      fontWeight="semibold"
-                      px={2}
-                      w="full"
-                      fontSize="4xl"
-                      focusBorderColor="none"
-                      placeholder="0"
-                      readOnly
-                      value={estimateRewards}
-                    />
-                  )}
-                </HStack>
-              </Box>
-            </Box>
+            <HStack display="flex" alignItems="center" borderLeft="4px" borderColor="white" pl={4}>
+              <Image boxSize="7" rounded="full" bg="gray.800" src="/images/logo/b3tr_logo.svg/" alt="" />
+              {/* {isLoading ? (
+                <Spinner />
+              ) : ( */}
+              <Input
+                type="text"
+                bg="transparent"
+                color="white"
+                fontWeight="semibold"
+                px={2}
+                w="full"
+                fontSize="4xl"
+                focusBorderColor="none"
+                placeholder="0"
+                readOnly
+                value={compactFormatter.format(estimatedRewards?.potentialRewards ?? 0)}
+              />
+              {/* )} */}
+            </HStack>
+          </Card>
+          {/* END ESTIMATED CARD */}
 
-            {/* Actual rewards Card */}
-            <Text color={"white"}>{t(`While, your actual reward was {actual rewards}`)}</Text>
-          </Stack>
+          {/* ACTUAL CARD */}
+          <Card
+            variant={"primaryBoxShadow"}
+            rounded="8px"
+            w="full"
+            gap={7}
+            py={4}
+            px={4}
+            bg="whiteAlpha.50"
+            backdropFilter="blur(8px)"
+            borderRadius="lg"
+            borderColor="whiteAlpha.200">
+            <HStack position="relative">
+              <Heading color={"white"} fontSize="x-large">
+                {t("Actual Rewards")}
+              </Heading>
+              <BaseTooltip
+                text={t(
+                  "The rewards are estimated based on the previous week's voting participation. The exact rewards are only known when a round ends and all participants have cast their votes.",
+                )}>
+                <span>
+                  <UilInfoCircle color={"white"} style={{ marginRight: "8px", cursor: "pointer" }} />
+                </span>
+              </BaseTooltip>
+            </HStack>
+
+            <HStack display="flex" alignItems="center" borderLeft="4px" borderColor="white" pl={4}>
+              <Image boxSize="7" rounded="full" bg="gray.800" src="/images/logo/b3tr_logo.svg/" alt="" />
+              {/* {isLoading ? (
+                <Spinner />
+              ) : ( */}
+              <Input
+                type="text"
+                bg="transparent"
+                color="white"
+                fontWeight="semibold"
+                px={2}
+                w="full"
+                fontSize="4xl"
+                focusBorderColor="none"
+                placeholder="0"
+                readOnly
+                value={compactFormatter.format(Number(currentReward ?? 0))}
+              />
+              {/* )} */}
+            </HStack>
+          </Card>
+          {/* END ACTUAL CARD */}
         </Stack>
-      </CardBody>
+      </Stack>
     </Card>
   )
 }
