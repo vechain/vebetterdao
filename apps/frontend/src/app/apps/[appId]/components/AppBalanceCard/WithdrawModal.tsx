@@ -62,15 +62,17 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     return availableB3trToWithdraw?.scaled ?? "0"
   }, [availableB3trToWithdraw?.scaled])
 
-  const formData = useForm<{ amount: string; reason: string }>({
+  const formData = useForm<{ amount: string; reason: string; customReason: string }>({
     defaultValues: {
       amount: "",
       reason: "",
+      customReason: "",
     },
   })
   const { watch, setValue, control } = formData
   const reason = watch("reason")
   const amount = watch("amount")
+  const customReason = watch("customReason")
   const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
 
   const b3trBalanceAfterSwap = useMemo(() => {
@@ -96,7 +98,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const { sendTransaction, resetStatus, status, error, txReceipt, sendTransactionTx } = useWithdrawAppBalance({
     appId,
     amount,
-    reason,
+    reason: reason === "Other" ? customReason : reason,
   })
 
   const handleWithdraw = useCallback(() => {
@@ -109,6 +111,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     onClose()
     setValue("amount", "")
     setValue("reason", "")
+    setValue("customReason", "")
   }, [resetStatus, onClose, setValue])
 
   const amountInput = useMemo(() => {
@@ -135,23 +138,63 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
 
   const reasonInput = useMemo(() => {
     return (
-      <Controller
-        name="reason"
-        control={control}
-        render={({ field: { onChange } }) => (
-          <Select placeholder="Select a withdraw reason" onChange={e => onChange(e.target.value)}>
-            <option value="Team allocation share">{t("Team allocation share")}</option>
-            <option value="Marketing">{t("Marketing")}</option>
-            <option value="Development">{t("Development")}</option>
-            <option value="Reward distribution">{t("Reward distribution")}</option>
-            <option value="Community airdrop">{t("Community airdrop")}</option>
-            <option value="Endorsers reward">{t("Endorsers reward")}</option>
-            <option value="Reason not specified">{t("Other")}</option>
-          </Select>
+      <VStack w="full" spacing={2}>
+        <Controller
+          name="reason"
+          control={control}
+          render={({ field: { onChange } }) => (
+            <Select placeholder="Select a withdraw reason" onChange={e => onChange(e.target.value)}>
+              <option value="Team allocation share">{t("Team allocation share")}</option>
+              <option value="Marketing">{t("Marketing")}</option>
+              <option value="Development">{t("Development")}</option>
+              <option value="Reward distribution">{t("Reward distribution")}</option>
+              <option value="Community airdrop">{t("Community airdrop")}</option>
+              <option value="Endorsers reward">{t("Endorsers reward")}</option>
+              <option value="Other">{t("Other")}</option>
+            </Select>
+          )}
+        />
+        {reason === "Other" && (
+          <Controller
+            name="customReason"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <VStack
+                py={3}
+                h="full"
+                w="full"
+                align="flex-start"
+                spacing={12}
+                borderBottomWidth={2}
+                borderColor={"rgba(213, 213, 213, 1)"}>
+                <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
+                  <VStack justify="stretch" flex={1} gap={1}>
+                    <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
+                      <Text fontSize={14} fontWeight={400}>
+                        {t("Specify your reason")}
+                      </Text>
+                    </HStack>
+                    <HStack w="full">
+                      <Input
+                        h="50px"
+                        fontSize={{ base: 30, md: 36 }}
+                        fontWeight={700}
+                        type="text"
+                        value={value}
+                        onChange={e => onChange(e.target.value)}
+                        variant="unstyled"
+                        _placeholder={{ color: "black" }}
+                      />
+                    </HStack>
+                  </VStack>
+                </HStack>
+              </VStack>
+            )}
+          />
         )}
-      />
+      </VStack>
     )
-  }, [control, t])
+  }, [control, t, reason])
 
   const renderCardContent = useCallback(() => {
     return (
@@ -233,7 +276,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             variant={"primaryAction"}
             w={"full"}
             rounded={"full"}
-            isDisabled={invalidAmount || reason.length === 0}
+            isDisabled={invalidAmount || reason.length === 0 || (reason === "Other" && !customReason)}
             size={"lg"}>
             <Icon as={IoWalletOutline} mr={2} />
             <Text fontSize={{ base: 14, md: 18 }}>{t("Withdraw now")}</Text>
@@ -253,6 +296,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     reasonInput,
     reason,
     setValue,
+    customReason,
   ])
 
   if (status !== "ready")
