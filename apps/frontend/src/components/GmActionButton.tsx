@@ -163,7 +163,6 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     hasUserVoted,
     isGMOwned,
     isMaxGmLevelReached,
-    isXNodeAttachedToGM,
     canAttach,
     gmLevel,
     levelAfterAttach,
