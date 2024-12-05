@@ -7,7 +7,11 @@ const contractAddress = getConfig().galaxyMemberContractAddress
 const contractInterface = GalaxyMember__factory.createInterface()
 const method = "baseURI"
 
-export const getGMBaseUriQueryKey = () => getCallKey({ method, keyArgs: [] })
+/**
+ * Query key for the `baseURI` method on the Galaxy Member contract.
+ * Using a different name to avoid conflicts with the `baseURI` property on ERC721 contracts.
+ */
+export const getGMBaseUriQueryKey = () => getCallKey({ method: "getGMBaseUri", keyArgs: [] })
 
 /**
  * Custom hook that retrieves the base URI for the Galaxy Member NFT.
