@@ -1,6 +1,6 @@
 import { useXNode } from "@/api"
 import { Card, CardBody, VStack, Heading, Text, Button, useDisclosure, HStack, Stack } from "@chakra-ui/react"
-import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { UilArrowUpRight, UilCheck, UilCopy } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { DelegateXNodeModal } from "./DelegateXNodeModal"
 import { AddressIcon } from "@/components/AddressIcon"
@@ -9,6 +9,7 @@ import { useVechainDomain, useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
 import { DelegationAlert } from "./DelegationAlert"
+import { useState, useCallback } from "react"
 
 export const DelegateXNodeCard = () => {
   const { t } = useTranslation()
@@ -26,6 +27,8 @@ export const DelegateXNodeCard = () => {
   })
 
   const isOwner = compareAddresses(account ?? "", xNodeOwner ?? "")
+  const displayAddress = isOwner ? delegateeDomain ?? delegatee : ownerDomain ?? xNodeOwner
+  const isDomain = isOwner ? !!delegateeDomain : !!ownerDomain
 
   return (
     <Card variant="baseWithBorder" w="full">
@@ -48,16 +51,8 @@ export const DelegateXNodeCard = () => {
 
           {isXNodeDelegated ? (
             <DelegatedNodeDisplay
-              address={delegatee ?? ""}
-              displayAddress={
-                isOwner
-                  ? delegateeDomain
-                    ? humanDomain(delegateeDomain, 4, 26)
-                    : humanAddress(delegatee ?? "", 8, 8)
-                  : ownerDomain
-                    ? humanDomain(ownerDomain, 4, 26)
-                    : humanAddress(xNodeOwner ?? "", 8, 8)
-              }
+              displayAddress={displayAddress ?? ""}
+              isDomain={isDomain}
               onRevoke={revokeModal.onOpen}
             />
           ) : (
@@ -80,17 +75,27 @@ export const DelegateXNodeCard = () => {
 }
 
 const DelegatedNodeDisplay = ({
-  address,
   displayAddress,
+  isDomain,
   onRevoke,
 }: {
-  address: string
   displayAddress: string
+  isDomain: boolean
   onRevoke: () => void
-  buttonFullWidth?: boolean
 }) => {
   const { t } = useTranslation()
   const { isXNodeDelegator } = useXNode()
+
+  // Allow users to copy delegation addresses to clipboard
+  const [showCopiedLink, setShowCopiedLink] = useState(false)
+  const handleCopyAddress = useCallback(async () => {
+    await navigator.clipboard.writeText(displayAddress ?? "")
+    setShowCopiedLink(true)
+    setTimeout(() => {
+      setShowCopiedLink(false)
+    }, 2000)
+  }, [displayAddress])
+
   return (
     <VStack align="stretch" gap={4}>
       <Stack
@@ -103,12 +108,15 @@ const DelegatedNodeDisplay = ({
         w="full"
         gap={[2, 2, 6]}>
         <HStack gap={4} w="full">
-          <AddressIcon address={address} w={12} h={12} rounded="full" />
-          <VStack align="start" gap={0}>
-            <Text fontWeight="600" fontSize={["md", "md", "lg"]}>
-              {displayAddress}
-            </Text>
-          </VStack>
+          <AddressIcon address={isDomain ? "" : displayAddress} w={8} h={8} rounded="full" />
+          <HStack>
+            <Text>{isDomain ? humanDomain(displayAddress, 4, 26) : humanAddress(displayAddress, 8, 8)}</Text>
+            {showCopiedLink ? (
+              <UilCheck size={"18px"} color="#6DCB09" />
+            ) : (
+              <UilCopy size={"18px"} color="#6A6A6A" onClick={handleCopyAddress} cursor="pointer" />
+            )}
+          </HStack>
         </HStack>
         {isXNodeDelegator && (
           <Button variant="dangerGhost" colorScheme="red" onClick={onRevoke} w={"fit-content"}>
