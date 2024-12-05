@@ -15,15 +15,15 @@ export const useGetRewardsEventsOrFunction = (cycle: string, voter: string) => {
   const { data: votingRewardsQuery } = useRoundReward(voter, cycle)
   const { data: rewardClaimedEvents } = useRewardClaimedEvents(Number(cycle), voter)
 
+  console.log("votingRewardsQuery", votingRewardsQuery)
+  console.log("rewardClaimedEvents", rewardClaimedEvents)
   if (!votingRewardsQuery || !rewardClaimedEvents) return 0
 
   // if multiple claimed rewards, we filter the one for the current cycle
   if (Number(votingRewardsQuery.rewards) !== 0.0) {
     return votingRewardsQuery.rewards
   } else {
-    console.log({ rewardClaimedEvents })
     const claimedReward = rewardClaimedEvents[0]?.reward
-    console.log({ claimedReward })
     return claimedReward
   }
 }
