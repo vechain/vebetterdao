@@ -248,7 +248,7 @@ export const GmNFTAndNodeCard = () => {
           <GmNFTAndNodeFooter />
         </VStack>
         <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />
-        {account && <SwapB3trVot3 address={account} isConnectedUser={true} />}
+        {account && <SwapB3trVot3 address={account} />}
       </Stack>
     </Card>
   )

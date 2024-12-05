@@ -6,7 +6,9 @@ import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
 import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useIsUserConnectedProfile } from "@/app/profile/components/utils/useIsUserConnectedProfile"
+import { useParams } from "next/navigation"
 type Props = {
   transaction: B3trTransaction
 }
@@ -22,6 +24,8 @@ export const SwapCard = ({ transaction }: Props) => {
   }, [transaction.amountB3TR, transaction.amountVOT3])
 
   const actionModal = useDisclosure()
+  const { profile: address } = useParams<{ profile: string }>()
+  const isConnectedUser = useIsUserConnectedProfile(address)
 
   return (
     <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
@@ -34,7 +38,9 @@ export const SwapCard = ({ transaction }: Props) => {
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
-                  {t("You converted")}
+                  {t("{{value}} converted", {
+                    value: isConnectedUser ? "You" : `${humanAddress(address ?? "", 4, 3)}`,
+                  })}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {vot3ToB3tr ? "VOT3" : "B3TR"} {t("to")} {vot3ToB3tr ? "B3TR" : "VOT3"}
