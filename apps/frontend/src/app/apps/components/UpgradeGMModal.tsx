@@ -21,17 +21,18 @@ import {
   useMediaQuery,
   Card,
   Alert,
+  Skeleton,
 } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { getLevelGradient } from "@/api"
+import { getLevelGradient, useNextLevelImage } from "@/api"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
 import { gmNfts } from "@/constants/gmNfts"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
 const compactFormatter = getCompactFormatter(2)
 interface UpgradeGMModalProps {
-  gmLevel: number
+  gmLevel: string
   tokenId: string
   b3trToUpgradeGMToNextLevel: string
   upgradeGMModal: ReturnType<typeof useDisclosure>
@@ -46,14 +47,18 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { t } = useTranslation()
+
   const upgradeGMMutation = useUpgradeGM({
     tokenId,
     b3trToUpgrade: b3trToUpgradeGMToNextLevel,
   })
 
+  // Get the next level GM NFT image
+  const { nextLevelGMImage, isLoading: nextLevelGMImageLoading } = useNextLevelImage(Number(gmLevel))
+
   const levelAfterUpgrade = useMemo(() => {
-    const currentLevel = Number(gmLevel ?? 1) - 1 //gmNfts start from 1
-    const nextLevel = currentLevel + 1 //GMNFTs lists start from 0
+    const currentLevel = Number(gmLevel ?? 1) - 1 // gmNfts start from 1
+    const nextLevel = currentLevel + 1 // GMNFTs lists start from 0
     return nextLevel
   }, [gmLevel])
 
@@ -75,10 +80,6 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
     upgradeGMMutation.resetStatus()
     upgradeGMMutation.sendTransaction({})
   }, [upgradeGMMutation])
-
-  const levelBackground = useMemo(() => {
-    return getLevelGradient(Number(nextLevelGM?.level))
-  }, [nextLevelGM])
 
   if (upgradeGMMutation.status !== "ready")
     return (
@@ -158,25 +159,28 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                     <Box
                       w={isAbove800 ? "70px" : "46px"}
                       h={isAbove800 ? "70px" : "46px"}
-                      rounded="5px"
-                      bgGradient={levelBackground}
+                      rounded="8px"
+                      bgGradient={
+                        gmLevel && !isNaN(Number(gmLevel)) ? getLevelGradient(Number(gmLevel) + 1) : getLevelGradient(1)
+                      }
                       display="flex"
                       alignSelf="center"
                       alignItems="center"
-                      justifyContent="center"
-                      cursor="pointer">
-                      <Image
-                        src={nextLevelGM?.image}
-                        alt="gm"
-                        w={isAbove800 ? "62px" : "40px"}
-                        h={isAbove800 ? "62px" : "40px"}
-                        rounded="5px"
-                      />
+                      justifyContent="center">
+                      <Skeleton isLoaded={!nextLevelGMImageLoading}>
+                        <Image
+                          src={nextLevelGMImage}
+                          alt="gm"
+                          w={isAbove800 ? "64px" : "42px"}
+                          h={isAbove800 ? "64px" : "42px"}
+                          rounded="7px"
+                        />
+                      </Skeleton>
                     </Box>
 
                     <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 0.5 : 0}>
                       <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "x-large" : "md"}>
-                        {nextLevelGM?.name}
+                        {`${nextLevelGM?.name} #${tokenId}`}
                       </Text>
                       <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
                         <HStack rounded="8px" gap={1} color={""}>
