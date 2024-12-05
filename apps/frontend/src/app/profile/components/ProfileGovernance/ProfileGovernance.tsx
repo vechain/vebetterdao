@@ -41,7 +41,6 @@ export const ProfileGovernance = ({ address }: Props) => {
   const { data: votedProposals } = useUserProposalsVoteEvents(address ?? "")
 
   const isConnectedUser = useIsUserConnectedProfile(address)
-  console.log("isConnectedUser", isConnectedUser)
 
   const router = useRouter()
 
