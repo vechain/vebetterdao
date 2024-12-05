@@ -43,7 +43,7 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
       const clauses = []
 
       if (creatorsToBeRemoved?.length) {
-        creatorsToBeRemoved.map(creator => {
+        creatorsToBeRemoved.forEach(creator => {
           clauses.push(
             buildClause({
               to: getConfig().x2EarnAppsContractAddress,
@@ -57,7 +57,7 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
       }
 
       if (creatorsToBeAdded?.length) {
-        creatorsToBeAdded.map(creator => {
+        creatorsToBeAdded.forEach(creator => {
           clauses.push(
             buildClause({
               to: getConfig().x2EarnAppsContractAddress,
@@ -71,7 +71,7 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
       }
 
       if (moderatorsToBeRemoved?.length) {
-        moderatorsToBeRemoved.map(moderator => {
+        moderatorsToBeRemoved.forEach(moderator => {
           clauses.push(
             buildClause({
               to: getConfig().x2EarnAppsContractAddress,
@@ -85,7 +85,7 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
       }
 
       if (moderatorsToBeAdded?.length) {
-        moderatorsToBeAdded.map(moderator => {
+        moderatorsToBeAdded.forEach(moderator => {
           clauses.push(
             buildClause({
               to: getConfig().x2EarnAppsContractAddress,
@@ -99,7 +99,7 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
       }
 
       if (distributorsToBeRemoved?.length) {
-        distributorsToBeRemoved.map(distributor => {
+        distributorsToBeRemoved.forEach(distributor => {
           clauses.push(
             buildClause({
               to: getConfig().x2EarnAppsContractAddress,
@@ -113,7 +113,7 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
       }
 
       if (distributorsToBeAdded?.length) {
-        distributorsToBeAdded.map(distributor => {
+        distributorsToBeAdded.forEach(distributor => {
           clauses.push(
             buildClause({
               to: getConfig().x2EarnAppsContractAddress,
