@@ -10,7 +10,8 @@ import { useCallback, useMemo } from "react"
 import { useTranslation, Trans } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
 import { IoWarningOutline } from "react-icons/io5"
-import { handleAttachOnClick, handleDetachOnClick } from "@/utils/AnalyticsUtils/gmButtonActions"
+import { AnalyticsUtils } from "@/utils"
+import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
 
 export const AttachXNodeCard = () => {
   const { t } = useTranslation()
@@ -45,6 +46,15 @@ export const AttachXNodeCard = () => {
 
     return t("Attach your Node to your GM NFT to upgrade it for free and earn more rewards!")
   }, [attachedGMTokenId, gmId, isXNodeAttachedToGM, t, xNodeHasGMAttached])
+
+  const handleDetachOnClick = () => {
+    detachGmToXNodeModal.onOpen()
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHING_GM_FROM_XNODE))
+  }
+  const handleAttachOnClick = () => {
+    attachGmToXNodeModal.onOpen()
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHING_GM_FROM_XNODE))
+  }
 
   if (!isXNodeHolder) {
     return null
@@ -119,7 +129,7 @@ export const AttachXNodeCard = () => {
               leftIcon={<UilLinkBroken color="#C84968" />}
               color="#C84968"
               variant={"link"}
-              onClick={() => handleDetachOnClick(detachGmToXNodeModal)}>
+              onClick={() => handleDetachOnClick()}>
               {t("Detach")}
             </Button>
           ) : (
@@ -162,7 +172,7 @@ export const AttachXNodeCard = () => {
                   leftIcon={<UilLinkBroken color="#004CFC" />}
                   variant={"primarySubtle"}
                   isDisabled={isXNodeDelegator}
-                  onClick={() => handleAttachOnClick(attachGmToXNodeModal)}>
+                  onClick={() => handleAttachOnClick()}>
                   {t("Attach now!")}
                 </Button>
               )}

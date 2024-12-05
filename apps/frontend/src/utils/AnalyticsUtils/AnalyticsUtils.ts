@@ -1,8 +1,8 @@
-import { getEnvMixPanelEnv } from "@repo/config"
+import { getEnvMixPanel } from "@repo/config"
 import mixpanel, { Dict } from "mixpanel-browser"
 import * as uuid from "uuid"
 
-const MIX_PANEL_TOKEN = getEnvMixPanelEnv()
+const MIX_PANEL_TOKEN = getEnvMixPanel()
 let isInitialized = false
 
 export interface Properties {

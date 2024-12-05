@@ -10,7 +10,7 @@ import duration from "dayjs/plugin/duration"
 import { Footer } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
-import { getConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanelEnv } from "@repo/config"
+import { getConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel } from "@repo/config"
 import "@/i18n"
 import { useEffect } from "react"
 import { t } from "i18next"
@@ -19,7 +19,7 @@ import { datadogRum } from "@datadog/browser-rum"
 dayjs.extend(relativeTime)
 dayjs.extend(duration)
 
-const mixpanelToken = getEnvMixPanelEnv()
+const mixpanelToken = getEnvMixPanel()
 const isProduction = process.env.NODE_ENV === "production"
 const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navbar), { ssr: false })
 const FreshDeskWidget = dynamic(() => import("@/components/FreshDeskWidget").then(mod => mod.FreshDeskWidget), {
