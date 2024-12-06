@@ -26,7 +26,7 @@ export const registerXDapps = async (contractAddress: string, account: TestPk, a
   for (const appChunk of appChunks) {
     const clauses: TransactionClause[] = []
 
-    appChunk.map(app => {
+    appChunk.forEach(app => {
       clauses.push(
         clauseBuilder.functionInteraction(
           contractAddress,

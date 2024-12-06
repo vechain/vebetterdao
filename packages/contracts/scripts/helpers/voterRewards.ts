@@ -18,7 +18,7 @@ export const claimVoterRewards = async (
   for (const accountChunk of accountChunks) {
     const clauses: TransactionClause[] = []
 
-    accountChunk.map(account => {
+    accountChunk.forEach(account => {
       clauses.push(
         clauseBuilder.functionInteraction(
           contractAddress,
