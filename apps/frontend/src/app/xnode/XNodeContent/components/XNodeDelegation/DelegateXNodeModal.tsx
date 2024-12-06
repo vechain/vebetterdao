@@ -67,7 +67,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
     ) {
       setError("walletAddress", {
         type: "manual",
-        message: t("Please enter a validd wallet address"),
+        message: t("Please enter a valid wallet address"),
       })
       return
     }
@@ -201,7 +201,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
                 required: t("Wallet address is required"),
                 validate: async value => {
                   if (!isValid(value) || compareAddresses(value, account ?? "")) {
-                    return t("Please enter a validdd wallet address")
+                    return t("Please enter a valid wallet address")
                   }
                   try {
                     const hasExistingXNode = await getIsNodeHolder(thor, value)
