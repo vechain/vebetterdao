@@ -47,6 +47,15 @@ export enum ButtonClickProperties {
   EXPLORE_BALANCE_FROM_PROFILE = "Explore Balance From Profile",
   EXPLORE_BETTER_ACTIONS_FROM_PROFILE = "Explore Better Actions From Profile",
   EXPLORE_GOVERNANCE_FROM_PROFILE = "Explore Governance From Profile",
+
+  //GM
+  UPGRADING_NOW = "Upgrading GM",
+  UPGRADED_GM = "Upgraded GM",
+  ATTACHED_GM_TO_XNODE = "Attached GM to XNode",
+  ATTACH_NOW = "Attach now",
+  ATTACH_AND_UPGRADE_NOW = "Attach and Upgrade now",
+  DETACHING_GM_FROM_XNODE = "Detaching GM from XNode",
+  DETACHED_GM_FROM_XNODE = "Detached GM from XNode",
 }
 
 export const buttonClickActions = (property: ButtonClickProperties) => ({

@@ -26,8 +26,9 @@ import {
 import { UilArrowCircleUp, UilInfoCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { getLevelGradient, useNextLevelImage } from "@/api"
-import { FeatureFlag } from "@/constants"
+import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
 import { gmNfts } from "@/constants/gmNfts"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 
 const compactFormatter = getCompactFormatter(2)
 interface UpgradeGMModalProps {
@@ -66,6 +67,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   }, [levelAfterUpgrade])
 
   const handleUpgradeGM = useCallback(() => {
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.UPGRADED_GM))
     upgradeGMMutation.sendTransaction({})
   }, [upgradeGMMutation])
 
