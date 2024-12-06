@@ -16,7 +16,7 @@ type PotentialRewards = {
 
 export const usePotentialRewards = (
   cycleToTotal: number,
-  emissionAmount_voterRewards: string,
+  emissionAmount_voterRewards: number,
   cycleToVoterToTotal?: number,
   GMlevel?: any,
 ): PotentialRewards => {
@@ -31,12 +31,7 @@ export const usePotentialRewards = (
     const gm = gmNfts.find((nft: { level: any }) => nft.level === GMlevel)
     const GMMultiplier = gm?.multiplier
 
-    if (
-      GMMultiplier === undefined ||
-      cycleToTotal === undefined ||
-      cycleToVoterToTotal === undefined ||
-      emissionAmount_voterRewards === undefined
-    ) {
+    if (!GMMultiplier || !cycleToTotal || !cycleToVoterToTotal || !emissionAmount_voterRewards) {
       return {
         potentialRewards: 0,
         isLoading: false,
@@ -46,9 +41,7 @@ export const usePotentialRewards = (
     const increase = cycleToVoterToTotal * (GMMultiplier / 100)
     const cycleToVoterToTotal_enhanced = cycleToVoterToTotal + increase
     const cycleToTotal_enhanced = cycleToTotal + increase
-    // todo: carefull with the division by 0, have to take a look at the case that could do that
-    const reward_enhanced =
-      (cycleToVoterToTotal_enhanced / Number(cycleToTotal_enhanced)) * Number(emissionAmount_voterRewards)
+    const reward_enhanced = (cycleToVoterToTotal_enhanced / cycleToTotal_enhanced) * emissionAmount_voterRewards
 
     return {
       potentialRewards: reward_enhanced,
