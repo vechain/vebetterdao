@@ -1376,5 +1376,5 @@
   "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>": "You need to detach the <bold>{{gmAttachedName}} GM</bold> to attach <bold>{{gmSelectedName}} GM</bold>",
   "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT is the one selected for rewards multiplier.",
   "You need to vote to mint GM NFT": "You need to vote to mint GM NFT",
-  "Your Node is on <bold>cooldown</bold>. {{subject}} cannot make changes to app endorsements until the cooldown ends.": "Your Node is on <bold>cooldown</bold>. {{subject}} cannot make changes to app endorsements until the cooldown ends."
+  "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.": "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}."
 }

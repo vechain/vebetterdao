@@ -1,4 +1,11 @@
-import { useAppEndorsers, useIsAppAdmin, useIsAppModerator, useXNode } from "@/api"
+import {
+  useAllocationsRound,
+  useAppEndorsers,
+  useCurrentAllocationsRoundId,
+  useIsAppAdmin,
+  useIsAppModerator,
+  useXNode,
+} from "@/api"
 import { XAppStatus } from "@/types"
 import {
   Button,
@@ -16,10 +23,9 @@ import {
   Alert,
   AlertDescription,
   Box,
-  Text,
 } from "@chakra-ui/react"
 import { useMemo } from "react"
-import { useTranslation, Trans } from "react-i18next"
+import { useTranslation } from "react-i18next"
 import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
@@ -32,6 +38,7 @@ import { EndorsementDetails } from "./EndorsementDetails"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, DISCORD_URL } from "@/constants"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
+import dayjs from "dayjs"
 
 type Props = {
   endorsementScore?: string
@@ -52,7 +59,8 @@ export const AppEndorsementInfoCard = ({
 
   // App endorsement data
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
-
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
   // User roles data
   const { data: isAppModerator, isLoading: isAppModeratorLoading } = useIsAppModerator(app?.id ?? "", account ?? "")
   const { data: isAppAdmin, isLoading: isAppAdminLoading } = useIsAppAdmin(app?.id ?? "", account ?? "")
@@ -107,6 +115,9 @@ export const AppEndorsementInfoCard = ({
     return isXNodeDelegator || isXNodeOnCooldown
   }, [isXNodeDelegator, isXNodeOnCooldown])
 
+  const shouldDisplayCooldownAlert = useMemo(() => {
+    return !isXNodeOnCooldown && !isEndorsingApp
+  }, [isXNodeOnCooldown, isEndorsingApp])
   // Modals
   const {
     isOpen: isEndorsementModalOpen,
@@ -133,22 +144,25 @@ export const AppEndorsementInfoCard = ({
   const actionButtons = useMemo(() => {
     const buttonComponents = []
 
-    if (isXNodeOnCooldown) {
+    if (shouldDisplayCooldownAlert) {
       buttonComponents.push(
-        <Alert status="warning" bg="#FFF3E5" borderRadius={["xl", "xl", "3xl"]}>
-          <Box px={2}>
-            <UilExclamationCircle size={24} color="#F29B32" />
-          </Box>
-          <Box lineHeight={"1.20rem"} fontSize="sm">
-            <AlertDescription as="span" color="#6A6A6A">
-              <Trans
-                i18nKey="Your Node is on <bold>cooldown</bold>. {{subject}} cannot make changes to app endorsements until the cooldown ends."
-                components={{ bold: <Text as="span" fontWeight={"600"} /> }}
-                values={{ subject: isXNodeDelegator ? t("You or the delegatee") : t("You") }}
-              />
-            </AlertDescription>
-          </Box>
-        </Alert>,
+        <Skeleton isLoaded={!roundInfoLoading} key="nodeCooldownSkeleton">
+          <Alert bg="#FFF3E5" borderRadius="8px" my={3} key="nodeCooldownAlert">
+            <HStack justify="space-between">
+              <Box>
+                <UilExclamationCircle size={30} color="#F29B32" />
+              </Box>
+              <AlertDescription as="span" fontSize="sm" color="#6A6A6A">
+                {t(
+                  "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
+                  {
+                    roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+                  },
+                )}
+              </AlertDescription>
+            </HStack>
+          </Alert>
+        </Skeleton>,
       )
     }
 
@@ -211,6 +225,7 @@ export const AppEndorsementInfoCard = ({
 
     return buttonComponents
   }, [
+    shouldDisplayCooldownAlert,
     shouldRenderEndorseButton,
     shouldRenderSwitchEndorsementButton,
     shouldRenderLookForEndorsersButton,

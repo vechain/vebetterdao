@@ -1,4 +1,10 @@
-import { useAppEndorsementStatus, useAppEndorsers, useXNode } from "@/api"
+import {
+  useAllocationsRound,
+  useAppEndorsementStatus,
+  useAppEndorsers,
+  useCurrentAllocationsRoundId,
+  useXNode,
+} from "@/api"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
 import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
@@ -21,12 +27,13 @@ import {
   Alert,
   AlertDescription,
   Box,
+  Skeleton,
 } from "@chakra-ui/react"
 import { UilExclamationCircle, UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
-import { Trans, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
 
 export const EndorsingAppCard = () => {
   const { t } = useTranslation()
@@ -54,6 +61,8 @@ export const EndorsingAppCard = () => {
 
   const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber: appEndorsedEvents?.[0]?.blockNumber })
   const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
 
   const router = useRouter()
   const goToApps = useCallback(() => {
@@ -64,7 +73,9 @@ export const EndorsingAppCard = () => {
   const shouldDisableEndorsementButton = useMemo(() => {
     return isXNodeDelegator || isXNodeOnCooldown
   }, [isXNodeDelegator, isXNodeOnCooldown])
-
+  const shouldDisplayCooldownAlert = useMemo(() => {
+    return !isXNodeOnCooldown && !isEndorsingApp && !isXNodeDelegator
+  }, [isXNodeOnCooldown, isEndorsingApp, isXNodeDelegator])
   return (
     <Card variant="baseWithBorder" w="full" h="min-content">
       <CardBody>
@@ -82,21 +93,24 @@ export const EndorsingAppCard = () => {
               </Text>
             )}
           </VStack>
-          {isXNodeOnCooldown ? (
-            <Alert status="warning" bg="#FFF3E5" borderRadius={["xl", "xl", "3xl"]}>
-              <Box px={2}>
-                <UilExclamationCircle size={24} color="#F29B32" />
-              </Box>
-              <Box lineHeight={"1.20rem"} fontSize="sm">
-                <AlertDescription as="span" color="#6A6A6A">
-                  <Trans
-                    i18nKey="Your Node is on <bold>cooldown</bold>. {{subject}} cannot make changes to app endorsements until the cooldown ends."
-                    components={{ bold: <Text as="span" fontWeight={"600"} /> }}
-                    values={{ subject: isXNodeDelegator ? t("You or the delegatee") : t("You") }}
-                  />
-                </AlertDescription>
-              </Box>
-            </Alert>
+          {shouldDisplayCooldownAlert ? (
+            <Skeleton isLoaded={!roundInfoLoading} key="nodeCooldownSkeleton">
+              <Alert bg="#FFF3E5" borderRadius="8px" my={3} key="nodeCooldownAlert">
+                <HStack justify="space-between">
+                  <Box>
+                    <UilExclamationCircle size={30} color="#F29B32" />
+                  </Box>
+                  <AlertDescription as="span" fontSize="sm" color="#6A6A6A">
+                    {t(
+                      "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
+                      {
+                        roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+                      },
+                    )}
+                  </AlertDescription>
+                </HStack>
+              </Alert>
+            </Skeleton>
           ) : null}
           {isEndorsingApp ? (
             <Card variant={"baseWithBorder"} p={4} rounded="lg">
