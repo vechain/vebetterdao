@@ -25,7 +25,7 @@ import { useDelegateXNode } from "@/hooks/useDelegateXNode"
 import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useVechainDomain, useWallet } from "@vechain/dapp-kit-react"
 import { useXNode } from "@/api"
 import { getIsNodeHolder } from "@/api/contracts/xNodes/useIsNodeHolder"
 import { useConnex } from "@vechain/dapp-kit-react"
@@ -49,26 +49,31 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   } = useForm<FormData>()
 
   const confirmationModal = useDisclosure()
-  const delegatee = watch("walletAddress")
+  const delegateeAddressOrDomain = watch("walletAddress")
   const delegateXNode = useDelegateXNode({})
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
+  const { domain: delegateeDomain, address: delegateeAddress } = useVechainDomain({
+    addressOrDomain: delegateeAddressOrDomain,
+  })
 
   const openConfirmationModal = useCallback(() => {
     confirmationModal.onOpen()
   }, [confirmationModal])
 
   const handleDelegate = useCallback(async () => {
-    const delegatee = watch("walletAddress")
-    if (!isValid(delegatee) || compareAddresses(delegatee, account ?? "")) {
+    if (
+      !delegateeDomain &&
+      (!isValid(delegateeAddressOrDomain) || compareAddresses(delegateeAddressOrDomain, account ?? ""))
+    ) {
       setError("walletAddress", {
         type: "manual",
-        message: t("Please enter a valid wallet address"),
+        message: t("Please enter a validd wallet address"),
       })
       return
     }
-
+    const delegateeWalletAddress = delegateeAddress || delegateeAddressOrDomain
     try {
-      const hasExistingXNode = await getIsNodeHolder(thor, delegatee)
+      const hasExistingXNode = await getIsNodeHolder(thor, delegateeWalletAddress)
       if (hasExistingXNode) {
         setError("walletAddress", {
           type: "manual",
@@ -76,7 +81,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
         })
         return
       }
-      delegateXNode.sendTransaction({ delegatee, isAttachedToGM: isXNodeAttachedToGM })
+      delegateXNode.sendTransaction({ delegatee: delegateeWalletAddress, isAttachedToGM: isXNodeAttachedToGM })
     } catch (error) {
       console.error("Error checking node holder status:", error)
       setError("walletAddress", {
@@ -84,7 +89,17 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
         message: t("Error checking node holder status. Please try again."),
       })
     }
-  }, [delegateXNode, watch, account, isXNodeAttachedToGM, t, thor, setError])
+  }, [
+    delegateeDomain,
+    delegateeAddress,
+    delegateeAddressOrDomain,
+    delegateXNode,
+    account,
+    isXNodeAttachedToGM,
+    t,
+    thor,
+    setError,
+  ])
 
   const handleClose = useCallback(() => {
     modal.onClose?.()
@@ -103,7 +118,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
         errorDescription={delegateXNode.error?.reason}
         errorTitle={delegateXNode.error ? t("Error delegating Node") : undefined}
         showTryAgainButton
-        onTryAgain={() => delegateXNode.sendTransaction({ delegatee })}
+        onTryAgain={() => delegateXNode.sendTransaction({ delegatee: delegateeAddressOrDomain })}
         pendingTitle={t("Delegating Node...")}
         showExplorerButton
         txId={delegateXNode.txReceipt?.meta.txID ?? delegateXNode.sendTransactionTx?.txid}
@@ -123,7 +138,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
           </VStack>
           <VStack align="stretch">
             <Text fontWeight="600">{t("You're delegating it to")}</Text>
-            <Text fontSize="sm">{delegatee}</Text>
+            <Text fontSize="sm">{delegateeAddressOrDomain}</Text>
           </VStack>
           <Alert status="warning" borderRadius="2xl">
             <AlertIcon w={5} h={5} />
@@ -186,7 +201,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
                 required: t("Wallet address is required"),
                 validate: async value => {
                   if (!isValid(value) || compareAddresses(value, account ?? "")) {
-                    return t("Please enter a valid wallet address")
+                    return t("Please enter a validdd wallet address")
                   }
                   try {
                     const hasExistingXNode = await getIsNodeHolder(thor, value)
