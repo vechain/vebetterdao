@@ -7,7 +7,7 @@ import { useBreakpoints } from "@/hooks"
 
 type PercentageSelectorButtonsProps = {
   availableAmount: string
-  setValue: UseFormSetValue<{ amount: string; reason: string }>
+  setValue: UseFormSetValue<{ amount: string; reason: string; customReason: string }>
 }
 
 export const WithdrawPercentageSelectorButtons: React.FC<PercentageSelectorButtonsProps> = ({

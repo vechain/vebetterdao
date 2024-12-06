@@ -1376,5 +1376,16 @@
   "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT is geselecteerd voor beloningenvermenigvuldiger.",
   "You need to vote to mint GM NFT": "U moet stemmen om GM NFT te minten",
   "Multiplier": "Vermenigvuldiger",
-  "Cost": "Kosten"
+  "Cost": "Kosten",
+  "{{value}} upgraded a": "{{value}} heeft een upgrade uitgevoerd op een",
+  "{{value}} supported a": "{{value}} heeft een ondersteund",
+  "{value} claimed": "{value} geclaimd",
+  "{{value}} converted": "{{value}} omgezet",
+  "{{value}} tokens": "{{value}} tokens",
+  "Several secondary accounts can be merged with the user's account.": "Verschillende secundaire accounts kunnen worden samengevoegd met het account van de gebruiker.",
+  "{{subject}} voted proposals will appear here.": "{{subject}} gestemde voorstellen zullen hier verschijnen.",
+  "{{subject}} top voted apps will appear here.": "{{subject}} top gestemde apps zullen hier verschijnen.",
+  "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.": "Dien uw app in het ecosysteem in met alle benodigde informatie, inclusief logo, maker bio, en social media links.",
+  "Endorsers reward": "Beloning voor supporters",
+  "Specify your reason": "Geef uw reden op"
 }

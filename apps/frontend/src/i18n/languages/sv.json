@@ -1377,5 +1377,15 @@
   "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT är den som är vald för belöningsmultiplikator.",
   "You need to vote to mint GM NFT": "Du måste rösta för att skapa GM NFT",
   "Multiplier": "Multiplikator",
-  "Cost": "Kostnad"
+  "Cost": "Kostnad",
+  "{{value}} upgraded a": "{{value}} uppgraderade en",
+  "{{value}} supported a": "{{value}} stödde en",
+  "{value} claimed": "{value} hävdade",
+  "{{value}} converted": "{{value}} konverterade",
+  "{{value}} tokens": "{{value}} tokens",
+  "Several secondary accounts can be merged with the user's account.": "Flera sekundära konton kan slås samman med användarens konto.",
+  "{{subject}} voted proposals will appear here.": "{{subject}} röstat på förslag kommer att visas här.",
+  "{{subject}} top voted apps will appear here.": "{{subject}} högst röstat appar kommer att visas här.",
+  "Endorsers reward": "Godkännare belöning",
+  "Specify your reason": "Ange din anledning"
 }
