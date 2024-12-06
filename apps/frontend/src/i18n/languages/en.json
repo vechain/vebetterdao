@@ -1,7 +1,7 @@
 {
   "{{value}} upgraded a": "{{value}} upgraded a",
   "{{value}} supported a": "{{value}} supported a",
-  "{value} claimed": "{value} claimed",
+  "{{value}} claimed": "{{value}} claimed",
   "{{value}} converted": "{{value}} converted",
   "{{value}} tokens": "{{value}} tokens",
   "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
