@@ -9,6 +9,7 @@ import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/us
 import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
 import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+import { GenericAlert } from "@/app/components/Alert"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import {
   Button,
@@ -24,12 +25,8 @@ import {
   useBreakpointValue,
   useDisclosure,
   VStack,
-  Alert,
-  AlertDescription,
-  Box,
-  Skeleton,
 } from "@chakra-ui/react"
-import { UilExclamationCircle, UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
+import { UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -94,23 +91,16 @@ export const EndorsingAppCard = () => {
             )}
           </VStack>
           {shouldDisplayCooldownAlert ? (
-            <Skeleton isLoaded={!roundInfoLoading} key="nodeCooldownSkeleton">
-              <Alert bg="#FFF3E5" borderRadius="8px" my={3} key="nodeCooldownAlert">
-                <HStack justify="space-between">
-                  <Box>
-                    <UilExclamationCircle size={30} color="#F29B32" />
-                  </Box>
-                  <AlertDescription as="span" fontSize="sm" color="#6A6A6A">
-                    {t(
-                      "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
-                      {
-                        roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
-                      },
-                    )}
-                  </AlertDescription>
-                </HStack>
-              </Alert>
-            </Skeleton>
+            <GenericAlert
+              type="warning"
+              isLoading={roundInfoLoading}
+              message={t(
+                "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
+                {
+                  roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+                },
+              )}
+            />
           ) : null}
           {isEndorsingApp ? (
             <Card variant={"baseWithBorder"} p={4} rounded="lg">

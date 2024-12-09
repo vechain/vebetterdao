@@ -20,9 +20,6 @@ import {
   Stack,
   VStack,
   useDisclosure,
-  Alert,
-  AlertDescription,
-  Box,
 } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -37,8 +34,8 @@ import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 import { EndorsementDetails } from "./EndorsementDetails"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, DISCORD_URL } from "@/constants"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import { UilExclamationCircle } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
+import { GenericAlert } from "@/app/components/Alert"
 
 type Props = {
   endorsementScore?: string
@@ -146,23 +143,16 @@ export const AppEndorsementInfoCard = ({
 
     if (shouldDisplayCooldownAlert) {
       buttonComponents.push(
-        <Skeleton isLoaded={!roundInfoLoading} key="nodeCooldownSkeleton">
-          <Alert bg="#FFF3E5" borderRadius="8px" my={3} key="nodeCooldownAlert">
-            <HStack justify="space-between">
-              <Box>
-                <UilExclamationCircle size={30} color="#F29B32" />
-              </Box>
-              <AlertDescription as="span" fontSize="sm" color="#6A6A6A">
-                {t(
-                  "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
-                  {
-                    roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
-                  },
-                )}
-              </AlertDescription>
-            </HStack>
-          </Alert>
-        </Skeleton>,
+        <GenericAlert
+          type="warning"
+          isLoading={roundInfoLoading}
+          message={t(
+            "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
+            {
+              roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+            },
+          )}
+        />,
       )
     }
 
@@ -229,15 +219,16 @@ export const AppEndorsementInfoCard = ({
     shouldRenderEndorseButton,
     shouldRenderSwitchEndorsementButton,
     shouldRenderLookForEndorsersButton,
-    isUserAppEndorser,
-    isXNodeDelegator,
     xNodePoints,
     onOpenEndorsementModal,
     onOpenSwitchEndorsementModal,
     onOpenUnendorsementModal,
     lookForEndorsersButtonVariant,
-    DISCORD_URL,
     t,
+    roundInfo,
+    roundInfoLoading,
+    shouldDisableEndorsementButton,
+    shouldRenderRemoveEndorsementButton,
   ])
 
   return (
