@@ -10,7 +10,6 @@ import { gmNfts } from "@/constants/gmNfts"
 
 type PotentialRewards = {
   potentialRewards: number | 0
-  isLoading: boolean
   error?: any
 }
 
@@ -24,47 +23,32 @@ export const usePotentialRewards = (
   if (!cycleToTotal || !emissionAmount_voterRewards || !cycleToVoterToTotal || !GMlevel) {
     return {
       potentialRewards: 0,
-      isLoading: true,
     }
   }
 
-  try {
-    const gm = gmNfts.find((nft: { level: any }) => nft.level === GMlevel)
-    const GMMultiplier = gm?.multiplier
-    if (!GMMultiplier || !cycleToTotal || !cycleToVoterToTotal || !emissionAmount_voterRewards) {
-      return {
-        potentialRewards: 0,
-        isLoading: false,
-      }
-    }
-
-    const increase = cycleToVoterToTotal * (GMMultiplier / 100)
-    let potentialRewards
-
-    switch (true) {
-      case Number(GMUserLevel) === Number(GMlevel):
-        potentialRewards = (cycleToVoterToTotal / cycleToTotal) * emissionAmount_voterRewards
-        break
-      case Number(GMUserLevel) < Number(GMlevel):
-        const cycleToVoterToTotal_enhanced = cycleToVoterToTotal + increase
-        const cycleToTotal_enhanced = cycleToTotal + increase
-        potentialRewards = (cycleToVoterToTotal_enhanced / cycleToTotal_enhanced) * emissionAmount_voterRewards
-        break
-      default:
-        potentialRewards = 0
-        break
-    }
-
-    return {
-      potentialRewards,
-      isLoading: false,
-    }
-  } catch (error) {
-    console.error("Error calculating rewards:", error)
+  const gm = gmNfts.find((nft: { level: any }) => nft.level === GMlevel)
+  const GMMultiplier = gm?.multiplier
+  if (!GMMultiplier || !cycleToTotal || !cycleToVoterToTotal || !emissionAmount_voterRewards) {
     return {
       potentialRewards: 0,
-      isLoading: false,
-      error,
     }
   }
+
+  const increase = cycleToVoterToTotal * (GMMultiplier / 100)
+  let potentialRewards
+  switch (true) {
+    case Number(GMUserLevel) === Number(GMlevel):
+      potentialRewards = (cycleToVoterToTotal / cycleToTotal) * emissionAmount_voterRewards
+      break
+    case Number(GMUserLevel) < Number(GMlevel):
+      const cycleToVoterToTotal_enhanced = cycleToVoterToTotal + increase
+      const cycleToTotal_enhanced = cycleToTotal + increase
+      potentialRewards = (cycleToVoterToTotal_enhanced / cycleToTotal_enhanced) * emissionAmount_voterRewards
+      break
+    default:
+      potentialRewards = 0
+      break
+  }
+
+  return { potentialRewards: potentialRewards ?? 0 }
 }

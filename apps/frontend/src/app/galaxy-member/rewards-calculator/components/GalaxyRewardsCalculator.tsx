@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { Image, Card, HStack, Heading, Stack, Spinner, Text } from "@chakra-ui/react"
+import { Image, Card, HStack, Heading, Stack, Text } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/dapp-kit-react"
 import {
@@ -13,6 +13,7 @@ import {
   useAllocationAmount,
   useParticipatedInGovernance,
   useLatestVotingRound,
+  useSelectedGmNft,
 } from "@/api"
 import { GalaxyCarrousel } from "./GalaxyCarrousel"
 import { BaseTooltip } from "@/components"
@@ -22,13 +23,13 @@ const DECIMAL_PLACES = 2
 const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 
 export const GalaxyRewardsCalculator = () => {
-  const router = useRouter()
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { gmLevel, gmId, b3trToUpgradeGMToNextLevel } = useSelectedGmNft()
+  const usersGM = { gmLevel, gmId, b3trToUpgradeGMToNextLevel }
+  const router = useRouter()
 
   const [selectedGMLevel, setSelectedGMLevel] = useState<string>()
-  const [isLoading, setLoading] = useState<boolean>(false)
-
   const { data: currentRound } = useCurrentAllocationsRoundId()
   const latestRounds = useLatestVotingRound(currentRound ?? "", account ?? "")
 
@@ -38,9 +39,9 @@ export const GalaxyRewardsCalculator = () => {
     voter: account ?? "",
   })
   const { data: hasVoted } = useParticipatedInGovernance(account)
+  const cycleToTotal = useCycleToTotal(latestRounds.roundId)
 
   const currentReward = useGetRewardsEventsOrFunction(account ?? "", latestRounds.roundId)
-  const cycleToTotal = useCycleToTotal(latestRounds.roundId)
   const emissionAmount_voterRewards = Number(emissionAmount?.voteX2Earn)
 
   const cycleToVoterToTotal = useMemo(() => {
@@ -52,6 +53,7 @@ export const GalaxyRewardsCalculator = () => {
     emissionAmount_voterRewards,
     cycleToVoterToTotal ?? 0,
     selectedGMLevel,
+    gmLevel,
   )
 
   const estimatedRewards = useMemo(() => {
@@ -64,10 +66,6 @@ export const GalaxyRewardsCalculator = () => {
   const handleNftSelect = (GMLevel: string | undefined) => {
     setSelectedGMLevel(GMLevel)
   }
-
-  useEffect(() => {
-    setLoading(estimatedRewards?.isLoading ?? false)
-  }, [estimatedRewards?.isLoading])
 
   useEffect(() => {
     if (!hasVoted) router.push("/")
@@ -97,7 +95,7 @@ export const GalaxyRewardsCalculator = () => {
         w={"full"}
         justifyContent={"space-between"}
         alignItems={"center"}>
-        <GalaxyCarrousel setSelectedGMLevel={handleNftSelect} />
+        <GalaxyCarrousel setSelectedGMLevel={handleNftSelect} usersGM={usersGM} />
 
         <Stack spacing={4} p={4} alignItems="center" justifyContent="flex-end" w="full">
           {/* ESTIMATE CARD */}
@@ -117,13 +115,9 @@ export const GalaxyRewardsCalculator = () => {
 
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
               <Image boxSize="7" rounded="full" src="/images/logo/b3tr_logo.svg/" alt="b3tr" />
-              {isLoading ? (
-                <Spinner />
-              ) : (
-                <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
-                  {compactFormatter.format(estimatedRewards?.potentialRewards ?? 0)}
-                </Text>
-              )}
+              <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
+                {compactFormatter.format(estimatedRewards?.potentialRewards ?? 0)}
+              </Text>
             </HStack>
           </Card>
           {/* END ESTIMATED CARD */}
@@ -141,13 +135,10 @@ export const GalaxyRewardsCalculator = () => {
 
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
               <Image boxSize="7" rounded="full" src="/images/logo/b3tr_logo.svg/" alt="b3tr" />
-              {isLoading ? (
-                <Spinner />
-              ) : (
-                <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
-                  {compactFormatter.format(Number(currentReward ?? 0))}
-                </Text>
-              )}
+
+              <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
+                {compactFormatter.format(Number(currentReward ?? 0))}
+              </Text>
             </HStack>
           </Card>
           {/* END ACTUAL CARD */}
