@@ -77,7 +77,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
       if (hasExistingXNode) {
         setError("walletAddress", {
           type: "manual",
-          message: t("This address already has an Node. Please choose another address."),
+          message: t("This address already has a Node. Please choose another address."),
         })
         return
       }
