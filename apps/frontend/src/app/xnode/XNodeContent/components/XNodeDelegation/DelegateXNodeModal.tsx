@@ -206,7 +206,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
                   try {
                     const hasExistingXNode = await getIsNodeHolder(thor, value)
                     if (hasExistingXNode) {
-                      return t("This address already has an Node. Please choose another address.")
+                      return t("This address already has a Node. Please choose another address.")
                     }
                     return true
                   } catch (error) {
