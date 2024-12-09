@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { Input, Image, Card, HStack, Heading, Stack } from "@chakra-ui/react"
+import { Image, Card, HStack, Heading, Stack, Spinner, Text } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/dapp-kit-react"
 import {
@@ -10,42 +11,46 @@ import {
   useGetRewardsEventsOrFunction,
   useCycleToTotal,
   useAllocationAmount,
+  useParticipatedInGovernance,
+  useLatestVotingRound,
 } from "@/api"
 import { GalaxyCarrousel } from "./GalaxyCarrousel"
 import { BaseTooltip } from "@/components"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 
-const DECIMAL_PLACES = 4
+const DECIMAL_PLACES = 2
 const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 
 export const GalaxyRewardsCalculator = () => {
-  // TODO : Calculate rewards only if the user have already voted
+  const router = useRouter()
   const { t } = useTranslation()
   const { account } = useWallet()
 
   const [selectedGMLevel, setSelectedGMLevel] = useState<string>()
-  // const [isLoading, setLoading] = useState<boolean>(false)
+  const [isLoading, setLoading] = useState<boolean>(false)
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
-  const { data: emissionAmount } = useAllocationAmount(currentRound)
+  const latestRounds = useLatestVotingRound(currentRound ?? "", account ?? "")
+
+  const { data: emissionAmount } = useAllocationAmount(latestRounds?.roundId)
   const { data: cycleToVoterToTotalEvents } = useVoteRegisteredEvents({
-    cycle: Number(currentRound),
+    cycle: Number(latestRounds?.roundId),
     voter: account ?? "",
   })
+  const { data: hasVoted } = useParticipatedInGovernance(account)
 
-  const currentReward = useGetRewardsEventsOrFunction(account ?? "", currentRound)
-  const cycleToTotal = useCycleToTotal(currentRound)
+  const currentReward = useGetRewardsEventsOrFunction(account ?? "", latestRounds.roundId)
+  const cycleToTotal = useCycleToTotal(latestRounds.roundId)
   const emissionAmount_voterRewards = Number(emissionAmount?.voteX2Earn)
 
   const cycleToVoterToTotal = useMemo(() => {
     return cycleToVoterToTotalEvents?.reduce((acc, event) => acc + event.rewardWeightedVote, 0)
   }, [cycleToVoterToTotalEvents])
 
-  // todo : cleanup type, rmv the conditionnal check, should return directly the right
   const potentialRewards = usePotentialRewards(
-    cycleToTotal ?? "0",
-    cycleToVoterToTotal ?? 0,
+    cycleToTotal,
     emissionAmount_voterRewards,
+    cycleToVoterToTotal ?? 0,
     selectedGMLevel,
   )
 
@@ -60,7 +65,15 @@ export const GalaxyRewardsCalculator = () => {
     setSelectedGMLevel(GMLevel)
   }
 
-  if (!account) return null
+  useEffect(() => {
+    setLoading(estimatedRewards?.isLoading ?? false)
+  }, [estimatedRewards?.isLoading])
+
+  useEffect(() => {
+    if (!hasVoted) router.push("/")
+  }, [hasVoted])
+
+  if (!account || !hasVoted) return <></>
 
   return (
     <Card
@@ -72,114 +85,75 @@ export const GalaxyRewardsCalculator = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-      }}>
-      <Heading alignSelf={"flex-start"} color={"white"} pb={5}>
+      }}
+      w="full">
+      <Heading alignSelf={"flex-start"} pb={5} color={"white"}>
         {t("Rewards calculator")}
       </Heading>
-      <Stack direction={["column", "row", "row"]} gap={10} h={"full"} justifyContent={"space-between"}>
+      <Stack
+        direction={["column", "column", "row", "row"]}
+        gap={3}
+        h={"full"}
+        w={"full"}
+        justifyContent={"space-between"}
+        alignItems={"center"}>
         <GalaxyCarrousel setSelectedGMLevel={handleNftSelect} />
 
-        <Stack spacing={4} p={4} alignItems="center" justifyContent="flex-end">
+        <Stack spacing={4} p={4} alignItems="center" justifyContent="flex-end" w="full">
           {/* ESTIMATE CARD */}
-          <Card
-            variant={"primaryBoxShadow"}
-            rounded="8px"
-            w="full"
-            gap={7}
-            py={4}
-            px={4}
-            bg="whiteAlpha.50"
-            backdropFilter="blur(8px)"
-            borderRadius="lg"
-            border="1px solid"
-            borderColor="whiteAlpha.200">
-            <HStack position="relative">
-              <Heading color={"white"} fontSize="x-large">
-                {t("Estimated Rewards")}
-              </Heading>
+          <Card rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
+            <HStack position="relative" justify="space-between">
+              <Heading fontSize="x-large">{t("Estimated Rewards")}</Heading>
               <BaseTooltip
                 text={t(
-                  "The rewards are estimated based on the previous week's voting participation. The exact rewards are only known when a round ends and all participants have cast their votes.",
+                  "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.",
+                  { round: latestRounds?.roundId },
                 )}>
                 <span>
-                  <UilInfoCircle color={"white"} style={{ marginRight: "8px", cursor: "pointer" }} />
+                  <UilInfoCircle style={{ marginRight: "8px", cursor: "pointer" }} />
                 </span>
               </BaseTooltip>
             </HStack>
 
-            <HStack display="flex" alignItems="center" borderLeft="4px" borderColor="white" pl={4}>
-              <Image boxSize="7" rounded="full" bg="gray.800" src="/images/logo/b3tr_logo.svg/" alt="" />
-              {/* {isLoading ? (
+            <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
+              <Image boxSize="7" rounded="full" src="/images/logo/b3tr_logo.svg/" alt="b3tr" />
+              {isLoading ? (
                 <Spinner />
-              ) : ( */}
-              <Input
-                type="text"
-                bg="transparent"
-                color="white"
-                fontWeight="semibold"
-                px={2}
-                w="full"
-                fontSize="4xl"
-                focusBorderColor="none"
-                placeholder="0"
-                readOnly
-                value={compactFormatter.format(estimatedRewards?.potentialRewards ?? 0)}
-              />
-              {/* )} */}
+              ) : (
+                <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
+                  {compactFormatter.format(estimatedRewards?.potentialRewards ?? 0)}
+                </Text>
+              )}
             </HStack>
           </Card>
           {/* END ESTIMATED CARD */}
 
           {/* ACTUAL CARD */}
-          <Card
-            variant={"primaryBoxShadow"}
-            rounded="8px"
-            w="full"
-            gap={7}
-            py={4}
-            px={4}
-            bg="whiteAlpha.50"
-            backdropFilter="blur(8px)"
-            borderRadius="lg"
-            borderColor="whiteAlpha.200">
-            <HStack position="relative">
-              <Heading color={"white"} fontSize="x-large">
-                {t("Actual Rewards")}
-              </Heading>
-              <BaseTooltip
-                text={t(
-                  "The rewards are estimated based on the previous week's voting participation. The exact rewards are only known when a round ends and all participants have cast their votes.",
-                )}>
+          <Card rounded="8px" w="full" gap={3} py={4} px={4} bg="rgba(255, 255, 255, 0.4)">
+            <HStack position="relative" justify="space-between">
+              <Heading fontSize="x-large">{t("Actual Rewards")}</Heading>
+              <BaseTooltip text={t("The actual reward from the round {{round}}", { round: latestRounds?.roundId })}>
                 <span>
-                  <UilInfoCircle color={"white"} style={{ marginRight: "8px", cursor: "pointer" }} />
+                  <UilInfoCircle style={{ marginRight: "8px", cursor: "pointer" }} />
                 </span>
               </BaseTooltip>
             </HStack>
 
-            <HStack display="flex" alignItems="center" borderLeft="4px" borderColor="white" pl={4}>
-              <Image boxSize="7" rounded="full" bg="gray.800" src="/images/logo/b3tr_logo.svg/" alt="" />
-              {/* {isLoading ? (
+            <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
+              <Image boxSize="7" rounded="full" src="/images/logo/b3tr_logo.svg/" alt="b3tr" />
+              {isLoading ? (
                 <Spinner />
-              ) : ( */}
-              <Input
-                type="text"
-                bg="transparent"
-                color="white"
-                fontWeight="semibold"
-                px={2}
-                w="full"
-                fontSize="4xl"
-                focusBorderColor="none"
-                placeholder="0"
-                readOnly
-                value={compactFormatter.format(Number(currentReward ?? 0))}
-              />
-              {/* )} */}
+              ) : (
+                <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
+                  {compactFormatter.format(Number(currentReward ?? 0))}
+                </Text>
+              )}
             </HStack>
           </Card>
           {/* END ACTUAL CARD */}
         </Stack>
       </Stack>
+      <Text fontSize="xs" color="white" textAlign="center"></Text>
     </Card>
   )
 }

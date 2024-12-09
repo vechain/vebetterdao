@@ -46,8 +46,8 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel }: Props) => {
   }, [centeredNFT])
 
   return (
-    <Box position="relative" w={"full"} h={"full"}>
-      <Flex>
+    <Box position="relative">
+      <Flex justify="center" align="center">
         {getVisibleNFTs().map((nft, index) => (
           <Box
             key={nft?.level}
@@ -67,7 +67,8 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel }: Props) => {
               }
             }}
             alignContent={"center"}
-            cursor="pointer">
+            cursor="pointer"
+            _hover={{ filter: "blur(2px)" }}>
             {nft ? (
               <Flex direction="column" alignItems="center">
                 <Text fontSize="xl" fontWeight="bold" color="white">
@@ -101,7 +102,7 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel }: Props) => {
         icon={<FaChevronLeft />}
         position="absolute"
         left="10px"
-        top="50%"
+        top="55%"
         transform="translateY(-50%)"
         onClick={prevCard}
         colorScheme="whiteAlpha"
@@ -112,7 +113,7 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel }: Props) => {
         icon={<FaChevronRight />}
         position="absolute"
         right="10px"
-        top="50%"
+        top="55%"
         transform="translateY(-50%)"
         onClick={nextCard}
         colorScheme="whiteAlpha"
