@@ -32,7 +32,7 @@ export const ClaimCard = ({ transaction }: Props) => {
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
-                  {t("{value} claimed", { value: isConnectedUser ? "You" : `${humanAddress(address ?? "", 4, 3)}` })}
+                  {t("{{value}} claimed", { value: isConnectedUser ? "You" : `${humanAddress(address ?? "", 4, 3)}` })}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {t("voting rewards")}

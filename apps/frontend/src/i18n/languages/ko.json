@@ -1377,5 +1377,15 @@
   "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFT가 보상 배율로 선택되었습니다.",
   "You need to vote to mint GM NFT": "GM NFT를 만들기 위해 투표가 필요합니다.",
   "Multiplier": "배수",
-  "Cost": "비용"
+  "Cost": "비용",
+  "{{value}} upgraded a": "{{value}}가 업그레이드했습니다",
+  "{{value}} supported a": "{{value}}가 지원했습니다",
+  "{value} claimed": "{value}이(가) 주장했습니다",
+  "{{value}} converted": "{{value}}가 변환했습니다",
+  "{{value}} tokens": "{{value}} 토큰",
+  "Several secondary accounts can be merged with the user's account.": "여러 부계정을 사용자의 계정과 통합할 수 있습니다.",
+  "{{subject}} voted proposals will appear here.": "{{subject}}가 투표한 제안이 여기에 표시됩니다.",
+  "{{subject}} top voted apps will appear here.": "{{subject}}가 최다 투표한 앱이 여기에 표시됩니다.",
+  "Endorsers reward": "보증인 보상",
+  "Specify your reason": "이유를 명시하세요"
 }

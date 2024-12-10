@@ -1,7 +1,7 @@
 {
   "{{value}} upgraded a": "{{value}} upgraded a",
   "{{value}} supported a": "{{value}} supported a",
-  "{value} claimed": "{value} claimed",
+  "{{value}} claimed": "{{value}} claimed",
   "{{value}} converted": "{{value}} converted",
   "{{value}} tokens": "{{value}} tokens",
   "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
@@ -1393,6 +1393,8 @@
   "You need to vote to mint GM NFT": "You need to vote to mint GM NFT",
   "Multiplier": "Multiplier",
   "Cost": "Cost",
+  "Endorsers reward": "Endorsers reward",
+  "Specify your reason": "Specify your reason",
   "Actual Rewards": "Actual Rewards",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes."
 }

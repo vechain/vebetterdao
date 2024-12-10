@@ -1377,5 +1377,15 @@
   "{{gmName}} NFT is the one selected for rewards multiplier.": "{{gmName}} NFTは報酬の倍率として選択されています。",
   "You need to vote to mint GM NFT": "GM NFTを発行するために投票する必要があります",
   "Multiplier": "倍率",
-  "Cost": "コスト"
+  "Cost": "コスト",
+  "{{value}} upgraded a": "{{value}}がアップグレードしました",
+  "{{value}} supported a": "{{value}}がサポートしました",
+  "{value} claimed": "{value}を請求しました",
+  "{{value}} converted": "{{value}}に変換されました",
+  "{{value}} tokens": "{{value}}トークン",
+  "Several secondary accounts can be merged with the user's account.": "いくつかのサブアカウントをユーザーのアカウントと統合することができます。",
+  "{{subject}} voted proposals will appear here.": "{{subject}}が投票した提案がここに表示されます。",
+  "{{subject}} top voted apps will appear here.": "{{subject}}のトップ投票アプリがここに表示されます。",
+  "Endorsers reward": "推薦者の報酬",
+  "Specify your reason": "理由を指定してください"
 }
