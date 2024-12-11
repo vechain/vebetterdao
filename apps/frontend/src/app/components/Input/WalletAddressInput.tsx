@@ -1,18 +1,14 @@
 import { useEffect, useId } from "react"
 import { Input } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { UseFormClearErrors, UseFormRegister, UseFormSetError, UseFormWatch } from "react-hook-form"
+import { UseFormRegister, UseFormWatch } from "react-hook-form"
 import { useVechainDomain } from "@vechain/dapp-kit-react"
-import { isValidDomain } from "@/utils/VetDomainUtils"
-import { useConnex } from "@vechain/dapp-kit-react"
 import { isValid } from "@repo/utils/AddressUtils"
 
 type Props = {
   inputName: string
   //TODO: Replace any with the correct type
   register: UseFormRegister<any>
-  setError: UseFormSetError<any>
-  clearErrors: UseFormClearErrors<any>
   watch: UseFormWatch<any>
   customValidation?: (value: string) => boolean | string | Promise<boolean | string>
   onDomainResolved?: (domain?: string) => void
@@ -22,8 +18,6 @@ type Props = {
 export const WalletAddressInput = ({
   inputName,
   register,
-  setError,
-  clearErrors,
   watch,
   customValidation,
   onDomainResolved,
@@ -31,7 +25,6 @@ export const WalletAddressInput = ({
 }: Props) => {
   const id = useId()
   const { t } = useTranslation()
-  const { thor } = useConnex()
 
   // Watch the input value directly from react-hook-form
   const inputValue = watch(inputName)
@@ -55,26 +48,6 @@ export const WalletAddressInput = ({
     }
   }
 
-  //OnBlur Validation for domain and wallet address
-  const checkInputOnBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
-    clearErrors(inputName)
-    const value = e.target.value
-    if (value.startsWith("0x") && !isValid(value)) {
-      setError(inputName, {
-        type: "manual",
-        message: t("Please enter a valid wallet address"),
-      })
-    }
-    const isDomainValid = await isValidDomain(value, thor)
-
-    if (!isDomainValid) {
-      setError(inputName, {
-        type: "manual",
-        message: t("Please enter a valid domain"),
-      })
-    }
-  }
-
   return (
     <Input
       id={id}
@@ -88,13 +61,11 @@ export const WalletAddressInput = ({
             const result = await customValidation(value)
             if (result !== true) return result
           }
-
           return true
         },
       })}
       value={inputValue}
       placeholder={t("Enter your wallet address or domain")}
-      onBlur={e => checkInputOnBlur(e)}
     />
   )
 }

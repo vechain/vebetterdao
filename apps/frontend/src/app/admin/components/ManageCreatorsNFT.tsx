@@ -43,8 +43,6 @@ export const ManageCreatorsNFT = () => {
     register,
     handleSubmit,
     watch,
-    setError,
-    clearErrors,
     formState: { errors },
   } = useForm<NFTFormInputs>({
     defaultValues: { walletAddress: "", tokenId: "", lookupAddress: "", actionType: "mint" },
@@ -124,8 +122,6 @@ export const ManageCreatorsNFT = () => {
                       <WalletAddressInput
                         inputName="walletAddress"
                         watch={watch}
-                        setError={setError}
-                        clearErrors={clearErrors}
                         register={register}
                         onAddressResolved={address => setCreatorWalletAddress(address ?? "")}
                       />
@@ -158,8 +154,6 @@ export const ManageCreatorsNFT = () => {
                       <WalletAddressInput
                         inputName="lookupAddress"
                         watch={watch}
-                        setError={setError}
-                        clearErrors={clearErrors}
                         register={register}
                         onAddressResolved={address => setLookupAddress(address ?? "")}
                       />
