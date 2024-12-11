@@ -18,16 +18,17 @@ import { UilExchangeAlt } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useIsUserConnectedProfile } from "@/app/profile/components/utils/useIsUserConnectedProfile"
 
 const compactFormatter = getCompactFormatter(4)
-
 type Props = {
   containerProps?: StackProps
   innerContent?: React.ReactNode
   address: string
-  isConnectedUser: boolean
 }
-export const SwapB3trVot3 = ({ address, isConnectedUser, containerProps, innerContent }: Props) => {
+
+export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
@@ -39,13 +40,14 @@ export const SwapB3trVot3 = ({ address, isConnectedUser, containerProps, innerCo
   const isLoading = isB3trBalanceLoading || isVot3BalanceLoading
 
   const isSwapDisabled = isLoading || hasNoBalance
+  const isConnectedUser = useIsUserConnectedProfile(address ?? "")
 
   return (
     <>
       <VStack flex="2" align={"stretch"} gap="24px" {...containerProps}>
         {innerContent}
         <Text fontSize="xl" fontWeight={700}>
-          {t("Your tokens")}
+          {t("{{value}} tokens", { value: isConnectedUser ? "Your" : `${humanAddress(address ?? "", 4, 3)}` })}
         </Text>
         <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
           <VStack

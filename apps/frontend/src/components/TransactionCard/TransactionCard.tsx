@@ -8,6 +8,7 @@ import { B3trTransaction } from "@/api"
 type Props = {
   transaction: B3trTransaction
 }
+
 export const TransactionCard = ({ transaction }: Props) => {
   switch (transaction.txType) {
     case "B3TR_ACTION": {

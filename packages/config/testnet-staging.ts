@@ -20,7 +20,6 @@ const config: AppConfig = {
   veBetterPassportContractAddress: "0x4C8C61121c34d555780cc7ffC73dCd7E33c11d6e",
   x2EarnCreatorContractAddress: "0xD0D02Eb9bf83adb0eA0EaB42875B9CE4FFd9A924",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
-  mixPanelProjectToken: "e03f4f5f6a753dae2dac30a69dfe21f7",
   nodeUrl: "https://testnet.vechain.org",
   network: {
     id: "testnet",

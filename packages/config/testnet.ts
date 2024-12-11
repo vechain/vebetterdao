@@ -5,7 +5,6 @@ const config: AppConfig = {
   basePath: "https://governance.vebetterdao.org",
   ipfsPinningService: IPFS_PINNING_SERVICE_DEV,
   ipfsFetchingService: IPFS_FETCHING_SERVICE_DEV,
-  mixPanelProjectToken: "949d49f83d7168260973a1c170f1f28d",
   b3trContractAddress: "0xaC0CA2a5148E15EF913F9f5Cf8Eb3cf763f5a43f",
   vot3ContractAddress: "0x9dF69AD8fF89063869E04164A11579c0a8532e84",
   b3trGovernorAddress: "0x102A7B7f771d904034471431b2F67e661f1bAB1e",
