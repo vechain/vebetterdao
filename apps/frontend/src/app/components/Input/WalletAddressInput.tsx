@@ -1,7 +1,7 @@
 import { useEffect, useId } from "react"
 import { Input } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { UseFormRegister, UseFormSetError, UseFormWatch } from "react-hook-form"
+import { UseFormClearErrors, UseFormRegister, UseFormSetError, UseFormWatch } from "react-hook-form"
 import { useVechainDomain } from "@vechain/dapp-kit-react"
 import { isValidDomain } from "@/utils/VetDomainUtils"
 import { useConnex } from "@vechain/dapp-kit-react"
@@ -12,6 +12,7 @@ type Props = {
   //TODO: Replace any with the correct type
   register: UseFormRegister<any>
   setError: UseFormSetError<any>
+  clearErrors: UseFormClearErrors<any>
   watch: UseFormWatch<any>
   customValidation?: (value: string) => boolean | string | Promise<boolean | string>
   onDomainResolved?: (domain?: string) => void
@@ -22,6 +23,7 @@ export const WalletAddressInput = ({
   inputName,
   register,
   setError,
+  clearErrors,
   watch,
   customValidation,
   onDomainResolved,
@@ -55,6 +57,7 @@ export const WalletAddressInput = ({
 
   //OnBlur Validation for domain and wallet address
   const checkInputOnBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    clearErrors(inputName)
     const value = e.target.value
     if (value.startsWith("0x") && !isValid(value)) {
       setError(inputName, {
