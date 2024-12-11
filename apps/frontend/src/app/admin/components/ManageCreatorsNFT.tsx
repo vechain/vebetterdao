@@ -20,13 +20,13 @@ import {
   Icon,
   As,
 } from "@chakra-ui/react"
-import { AddressUtils } from "@repo/utils"
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
-import { useCallback, useMemo } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
 import { useAdminCreatorNFT } from "@/hooks/useAdminCreatorNFT"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { WalletAddressInput } from "@/app/components/Input"
 
 type NFTFormInputs = {
   walletAddress?: string
@@ -43,19 +43,18 @@ export const ManageCreatorsNFT = () => {
     register,
     handleSubmit,
     watch,
+    setError,
     formState: { errors },
   } = useForm<NFTFormInputs>({
     defaultValues: { walletAddress: "", tokenId: "", lookupAddress: "", actionType: "mint" },
   })
 
-  const [walletAddress, tokenId, actionType, lookupAddress] = watch([
-    "walletAddress",
-    "tokenId",
-    "actionType",
-    "lookupAddress",
-  ])
+  const [creatorWalletAddress, setCreatorWalletAddress] = useState<string>("")
+  const [lookupAddress, setLookupAddress] = useState<string>("")
+
+  const [tokenId, actionType] = watch(["tokenId", "actionType"])
   const { mintNFT, burnNFT } = useAdminCreatorNFT({
-    walletAddress: walletAddress ?? "",
+    walletAddress: creatorWalletAddress ?? "",
     tokenId: tokenId ?? "",
     onSuccess: onClose,
   })
@@ -122,12 +121,12 @@ export const ManageCreatorsNFT = () => {
                       <strong>{t("Wallet Address")}</strong>
                     </FormLabel>
                     <InputGroup>
-                      <Input
-                        placeholder={t("Enter the wallet address")}
-                        {...register("walletAddress", {
-                          required: actionType === "mint",
-                          validate: value => AddressUtils.isValid(value) || t("Invalid address"),
-                        })}
+                      <WalletAddressInput
+                        inputName="walletAddress"
+                        watch={watch}
+                        setError={setError}
+                        register={register}
+                        onAddressResolved={address => setCreatorWalletAddress(address ?? "")}
                       />
                     </InputGroup>
                     {errors.walletAddress && <FormErrorMessage>{errors.walletAddress.message}</FormErrorMessage>}
@@ -155,15 +154,12 @@ export const ManageCreatorsNFT = () => {
                       <strong>{t("Lookup Wallet Address")}</strong>
                     </FormLabel>
                     <InputGroup>
-                      <Input
-                        placeholder={t("Enter wallet address to check")}
-                        {...register("lookupAddress", {
-                          validate: value => {
-                            if (!AddressUtils.isValid(value)) {
-                              return t("Invalid address")
-                            }
-                          },
-                        })}
+                      <WalletAddressInput
+                        inputName="lookupAddress"
+                        watch={watch}
+                        setError={setError}
+                        register={register}
+                        onAddressResolved={address => setLookupAddress(address ?? "")}
                       />
                     </InputGroup>
                     {errors.lookupAddress && <FormErrorMessage>{errors.lookupAddress.message}</FormErrorMessage>}
