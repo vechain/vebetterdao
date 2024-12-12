@@ -29,9 +29,9 @@ import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft
 import { WalletAddressInput } from "@/app/components/Input"
 
 type NFTFormInputs = {
-  walletAddress?: string
+  creatorInput?: string
   tokenId?: string
-  lookupAddress?: string
+  lookupInput?: string
   actionType?: string
 }
 
@@ -45,7 +45,7 @@ export const ManageCreatorsNFT = () => {
     watch,
     formState: { errors },
   } = useForm<NFTFormInputs>({
-    defaultValues: { walletAddress: "", tokenId: "", lookupAddress: "", actionType: "mint" },
+    defaultValues: { creatorInput: "", tokenId: "", lookupInput: "", actionType: "mint" },
   })
   const [creatorWalletAddress, setCreatorWalletAddress] = useState<string>("")
   const [lookupAddress, setLookupAddress] = useState<string>("")
@@ -114,19 +114,19 @@ export const ManageCreatorsNFT = () => {
             <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
               <VStack spacing={4} align="start">
                 {actionType === "mint" && (
-                  <FormControl isRequired isInvalid={Boolean(errors.walletAddress)}>
+                  <FormControl isRequired isInvalid={Boolean(errors.creatorInput)}>
                     <FormLabel>
                       <strong>{t("Wallet Address")}</strong>
                     </FormLabel>
                     <InputGroup>
                       <WalletAddressInput
-                        inputName="walletAddress"
+                        inputName="creatorInput"
                         watch={watch}
                         register={register}
                         onAddressResolved={address => setCreatorWalletAddress(address ?? "")}
                       />
                     </InputGroup>
-                    {errors.walletAddress && <FormErrorMessage>{errors.walletAddress.message}</FormErrorMessage>}
+                    {errors.creatorInput && <FormErrorMessage>{errors.creatorInput.message}</FormErrorMessage>}
                   </FormControl>
                 )}
                 {actionType === "burn" && (
@@ -146,19 +146,19 @@ export const ManageCreatorsNFT = () => {
                   </FormControl>
                 )}
                 {actionType === "check" && (
-                  <FormControl isInvalid={Boolean(errors.lookupAddress)}>
+                  <FormControl isInvalid={Boolean(errors.lookupInput)}>
                     <FormLabel>
                       <strong>{t("Lookup Wallet Address")}</strong>
                     </FormLabel>
                     <InputGroup>
                       <WalletAddressInput
-                        inputName="lookupAddress"
+                        inputName="lookupInput"
                         watch={watch}
                         register={register}
                         onAddressResolved={address => setLookupAddress(address ?? "")}
                       />
                     </InputGroup>
-                    {errors.lookupAddress && <FormErrorMessage>{errors.lookupAddress.message}</FormErrorMessage>}
+                    {errors.lookupInput && <FormErrorMessage>{errors.lookupInput.message}</FormErrorMessage>}
                     {lookupAddress && (
                       <VStack mt={2} align="start">
                         {renderBadge(
@@ -171,7 +171,7 @@ export const ManageCreatorsNFT = () => {
                   </FormControl>
                 )}
                 {actionType !== "check" && (
-                  <Button colorScheme="blue" type="submit">
+                  <Button colorScheme="blue" type="submit" isDisabled={!creatorWalletAddress}>
                     {t(actionType === "mint" ? "Mint" : "Burn")}
                   </Button>
                 )}
