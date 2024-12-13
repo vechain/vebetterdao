@@ -67,6 +67,13 @@ export const GmNFTAndNodeCard = () => {
     )
   }, [isAbove800, isXNodeAttachedToGM, isGMOwned])
 
+  const headingText = useMemo(() => {
+    if (!isGMOwned) {
+      return !hasUserVoted ? t("Vote to be a galaxy member") : t("Mint GM to be a galaxy member")
+    }
+    return t("Your galaxy member")
+  }, [isGMOwned, hasUserVoted, t])
+
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
     router.push("/galaxy-member")
@@ -101,21 +108,9 @@ export const GmNFTAndNodeCard = () => {
                   {t("Your Galaxy Member")}
                 </Heading>
               }>
-              {!isGMOwned ? (
-                !hasUserVoted ? (
-                  <Heading fontSize="xl" fontWeight={600}>
-                    {t("Vote to be a galaxy member")}
-                  </Heading>
-                ) : (
-                  <Heading fontSize="xl" fontWeight={600}>
-                    {t("Mint GM to be a galaxy member")}
-                  </Heading>
-                )
-              ) : (
-                <Heading fontSize="xl" fontWeight={600}>
-                  {t("Your galaxy member")}
-                </Heading>
-              )}
+              <Heading fontSize="xl" fontWeight={600}>
+                {headingText}
+              </Heading>
             </FeatureFlagWrapper>
 
             {isAbove800 && isXNodeAttachedToGM && isXNodeHolder && (
