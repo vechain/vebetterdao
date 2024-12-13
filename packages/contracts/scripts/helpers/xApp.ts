@@ -54,6 +54,7 @@ export const endorseXApps = async (
 ): Promise<void> => {
   console.log("Endorsing x-apps...")
 
+  let xAppEndorsed = true
   for (let i = 0; i < apps.length; i++) {
     const owner = endorsers[i].key.address
     const nodeId = await vechainNodesMock.ownerToId(owner)
@@ -68,10 +69,15 @@ export const endorseXApps = async (
       await signAndSendTx(body, endorsers[i].key.pk)
     } catch (e) {
       console.log("Endorsing x-apps failed with error: ", e)
+      xAppEndorsed = false
     }
   }
 
-  console.log("x-apps endorsed.")
+  if (xAppEndorsed) {
+    console.log("All x-apps endorsed successfully.")
+  } else {
+    console.log("Some x-apps failed to endorse.")
+  }
 }
 
 export const castVotesToXDapps = async (

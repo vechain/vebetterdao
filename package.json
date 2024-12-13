@@ -44,6 +44,7 @@
     "contracts:get-galaxy-member-owners:staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run get-galaxy-member-owners:staging --filter=contracts",
     "contracts:get-galaxy-member-selected-tokens": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run get-galaxy-member-selected-tokens --filter=contracts",
     "contracts:test": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:hardhat --filter=contracts",
+    "contracts:test:select": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- ts-node packages/contracts/scripts/test/select-and-test.ts",
     "contracts:test:shard": "SHARD=$SHARD dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:hardhat:shard --filter=contracts",
     "contracts:test:thor-solo": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:thor-solo --filter=contracts",
     "contracts:generate-galaxy-member-metadata:ipfs-dev": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run generate-galaxy-member-metadata --filter=contracts",
