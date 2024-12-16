@@ -52,10 +52,10 @@ interface XNodeData {
   }>
 }
 
-export const useXNode = (): XNodeData => {
+export const useXNode = (profile?: string | null): XNodeData => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const userNodeDetails = useGetUserNodes(account ?? "")
+  const userNodeDetails = useGetUserNodes(profile ?? account ?? "")
 
   // Store raw node data
   const allNodes = userNodeDetails?.data ?? []

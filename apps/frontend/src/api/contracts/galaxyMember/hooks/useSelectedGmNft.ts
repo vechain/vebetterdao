@@ -27,7 +27,7 @@ import { useB3trToUpgrade } from "."
  *   - isGMClaimable: A boolean indicating whether the Galaxy Member NFT is claimable.
  *   - attachedNodeId: The ID of the node attached to the Galaxy Member NFT.
  */
-export const useSelectedGmNft = () => {
+export const useSelectedGmNft = (profile?: string | null) => {
   const { account } = useWallet()
   const { isOwned: isGMOwned } = useIsGMclaimable()
   const { isLoading: isGMLoading } = useNFTImage()
@@ -37,7 +37,7 @@ export const useSelectedGmNft = () => {
     isLoading: isSelectedTokenIdLoading,
     isError: isErrorSelectedTokenId,
     error: errorSelectedTokenIdError,
-  } = useSelectedTokenId()
+  } = useSelectedTokenId(profile)
 
   const {
     data: gmLevel,
