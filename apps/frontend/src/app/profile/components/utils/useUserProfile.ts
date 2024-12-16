@@ -8,6 +8,7 @@ type Profile = {
   profile: string | null
   isConnectedUser: boolean
   domain?: string
+  onProfilePage?: boolean
 }
 
 export const useUserProfile = (): Profile => {
@@ -25,13 +26,15 @@ export const useUserProfile = (): Profile => {
     return {
       profile: account,
       isConnectedUser: true,
-      domain: humanDomain(domain ?? "", 4, 26),
+      domain: humanDomain(!!domain ? domain : "", 4, 26),
+      onProfilePage: false,
     }
   }
 
   return {
     profile: profile,
     isConnectedUser,
-    domain: humanDomain(domain ?? "", 4, 26),
+    domain: humanDomain(!!domain ? domain : "", 4, 26),
+    onProfilePage: true,
   }
 }
