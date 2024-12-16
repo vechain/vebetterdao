@@ -20,7 +20,7 @@ import { CurrentDelegation } from "./components/delegation/CurrentDelegation"
 import { VotingQualification } from "./components/delegation/VotingQualification"
 import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import { useIsUserConnectedProfile } from "@/app/profile/components/utils/useIsUserConnectedProfile"
+import { useUserProfile } from "@/app/profile/components/utils/useUserProfile"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { t } from "i18next"
 
@@ -40,7 +40,7 @@ export const ProfileGovernance = ({ address }: Props) => {
   const { data: createdProposals } = useUserProposalsCreatedEvents(address ?? "")
   const { data: votedProposals } = useUserProposalsVoteEvents(address ?? "")
 
-  const isConnectedUser = useIsUserConnectedProfile(address)
+  const { isConnectedUser } = useUserProfile()
 
   const router = useRouter()
 

@@ -4,10 +4,8 @@ import { UilGift } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useIsUserConnectedProfile } from "@/app/profile/components/utils/useIsUserConnectedProfile"
-import { useParams } from "next/navigation"
+import { getCompactFormatter, humanAddress } from "@repo/utils/FormattingUtils"
+import { useUserProfile } from "@/app/profile/components/utils/useUserProfile"
 type Props = {
   transaction: B3trTransaction
 }
@@ -18,8 +16,7 @@ export const ClaimCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
 
   const actionModal = useDisclosure()
-  const { profile: address } = useParams<{ profile: string }>()
-  const isConnectedUser = useIsUserConnectedProfile(address)
+  const { profile, domain, isConnectedUser } = useUserProfile()
 
   return (
     <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
@@ -32,7 +29,9 @@ export const ClaimCard = ({ transaction }: Props) => {
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
-                  {t("{{value}} claimed", { value: isConnectedUser ? "You" : `${humanAddress(address ?? "", 4, 3)}` })}
+                  {t("{{value}} claimed", {
+                    value: isConnectedUser ? "You" : `${domain ?? humanAddress(profile ?? "", 4, 3)}`,
+                  })}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {t("voting rewards")}
