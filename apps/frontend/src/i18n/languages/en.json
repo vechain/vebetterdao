@@ -1190,7 +1190,7 @@
   "to upgrade your NFT to the next level": "to upgrade your NFT to the next level",
   "Upgrade now!": "Upgrade now!",
   "B3TR needed to upgrade your GM level": "B3TR needed to upgrade your GM level",
-  "You need to mint an NFT to get reward multipliers": "You need to mint an NFT to get reward multipliers",
+  "You need to {{value}} an NFT to get reward multipliers": "You need to {{value}} an NFT to get reward multipliers",
   "{{b3trToUpgradeGM}} B3TR": "{{b3trToUpgradeGM}} B3TR",
   "Your token balance": "Your token balance",
   "{{userActions}}/{{totalActions}} actions performed": "{{userActions}}/{{totalActions}} actions performed",
@@ -1385,5 +1385,10 @@
   "Endorsers reward": "Endorsers reward",
   "Specify your reason": "Specify your reason",
   "This address already has a Node. Please choose another address.": "This address already has a Node. Please choose another address.",
-  "GM Level": "GM Level"
+  "GM Level": "GM Level",
+  "{{value}} needs to vote to be a galaxy member": "{{value}} needs to vote to be a galaxy member",
+  "{{value}} is a galaxy member": "{{value}} is a galaxy member",
+  "{{value}} needs to mint GM to be a galaxy member": "{{value}} needs to mint GM to be a galaxy member",
+  "vote and mint": "vote and mint",
+  "mint": "mint"
 }
