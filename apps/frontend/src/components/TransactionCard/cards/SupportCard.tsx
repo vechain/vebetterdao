@@ -36,7 +36,13 @@ export const SupportCard = ({ transaction }: Props) => {
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
+<<<<<<< HEAD
                   {isConnectedUser ? t("You supported a") : t("Supported a")}
+=======
+                  {t("{{value}} supported a", {
+                    value: isConnectedUser ? "You" : !!domain ? domain : humanAddress(profile ?? "", 6, 3),
+                  })}
+>>>>>>> b4cfea76 (fix: changing condition (??) to (!!))
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {t("proposal")}

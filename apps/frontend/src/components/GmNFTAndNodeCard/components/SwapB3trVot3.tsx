@@ -39,9 +39,13 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
   const isLoading = isB3trBalanceLoading || isVot3BalanceLoading
 
   const isSwapDisabled = isLoading || hasNoBalance
+<<<<<<< HEAD
 
   const { isConnectedUser, domain, profile, isOnProfilePage } = useRetrieveProfilIdentity()
   const domainOrAddress = domain && domain !== "" ? domain : humanAddress(profile ?? "", 6, 3)
+=======
+  const { isConnectedUser, domain, profile } = useUserProfile()
+>>>>>>> b4cfea76 (fix: changing condition (??) to (!!))
 
   console.log({ isConnectedUser, domain, profile, isOnProfilePage })
   console.log(!profile)
@@ -52,7 +56,11 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
         {innerContent}
         <Text fontSize="xl" fontWeight={700}>
           {t("{{value}} tokens", {
+<<<<<<< HEAD
             value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
+=======
+            value: isConnectedUser ? "Your" : !!domain ? domain : humanAddress(profile ?? "", 6, 3),
+>>>>>>> b4cfea76 (fix: changing condition (??) to (!!))
           })}
         </Text>
         <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
