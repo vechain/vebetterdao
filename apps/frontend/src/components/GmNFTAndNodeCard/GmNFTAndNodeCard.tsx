@@ -25,16 +25,18 @@ import { useRouter } from "next/navigation"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "../FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
+import { useUserProfile } from "@/app/profile/components/utils/useUserProfile"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
-
-  const { data: hasUserVoted } = useParticipatedInGovernance(account)
+  const { isConnectedUser, domain, profile, onProfilePage } = useUserProfile()
+  const { data: hasUserVoted } = useParticipatedInGovernance(profile)
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
-    useSelectedGmNft()
+    useSelectedGmNft(profile)
   //node
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, isXNodeDelegatee } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, isXNodeDelegatee } = useXNode(profile)
 
   const nodeAttachedColor = isXNodeAttachedToGM ? "#B1F16C" : "#FFFFFF80"
 
@@ -67,12 +69,26 @@ export const GmNFTAndNodeCard = () => {
     )
   }, [isAbove800, isXNodeAttachedToGM, isGMOwned])
 
+  // todo: refactor
   const headingText = useMemo(() => {
+    // const displayValue = !!domain ? domain : humanAddress(profile ?? "", 6, 3)
+
     if (!isGMOwned) {
-      return !hasUserVoted ? t("Vote to be a galaxy member") : t("Mint GM to be a galaxy member")
+      return !hasUserVoted
+        ? t(isConnectedUser ? "Vote to be a galaxy member" : "{{value}} needs to vote to be a galaxy member", {
+            value: !!domain ? domain : humanAddress(profile ?? "", 6, 3),
+          })
+        : isConnectedUser
+          ? t("Mint GM to be a galaxy member")
+          : t("{{value}} needs to mint GM to be a galaxy member", {
+              value: !!domain ? domain : humanAddress(profile ?? "", 6, 3),
+            })
     }
-    return t("Your galaxy member")
-  }, [isGMOwned, hasUserVoted, t])
+
+    return isConnectedUser
+      ? t("Your galaxy member")
+      : t("{{value}} is a galaxy member", { value: !!domain ? domain : humanAddress(profile ?? "", 6, 3) })
+  }, [isGMOwned, hasUserVoted, t, isConnectedUser, domain, profile])
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
@@ -133,7 +149,11 @@ export const GmNFTAndNodeCard = () => {
                   backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23FFFFFF80' stroke-width='1' stroke-dasharray='12%2c 20' stroke-dashoffset='2' stroke-linecap='square'/%3e%3c/svg%3e")`,
                 }}>
                 <UilPolygon size={"36px"} color={"#FFFFFF80"} style={{ transform: "rotate(90deg)" }} />
-                <Text color={"#FFFFFF80"}>{t("You need to mint an NFT to get reward multipliers")}</Text>
+                <Text color={"#FFFFFF80"}>
+                  {t("You need to {{value}} an NFT to get reward multipliers", {
+                    value: !hasUserVoted ? t("vote and mint") : t("mint"),
+                  })}
+                </Text>
               </HStack>
             ) : (
               <HStack
@@ -240,10 +260,10 @@ export const GmNFTAndNodeCard = () => {
               </>
             )}
           </Stack>
-          <GmNFTAndNodeFooter />
+          {isConnectedUser && <GmNFTAndNodeFooter />}
         </VStack>
         <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />
-        {account && <SwapB3trVot3 address={account} />}
+        {account && !onProfilePage && <SwapB3trVot3 address={account} />}
       </Stack>
     </Card>
   )
