@@ -52,7 +52,7 @@ export const GenericAlert = ({ isLoading = false, title, message, type }: Props)
               </Text>
             )}
           </HStack>
-          <AlertDescription as="span" fontSize="sm" color="#6A6A6A">
+          <AlertDescription as="span" fontSize="sm" color="#6A6A6A" alignSelf={title ? "flex-start" : "center"}>
             {message}
           </AlertDescription>
         </Stack>
