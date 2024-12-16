@@ -15,11 +15,10 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { UilExchangeAlt } from "@iconscout/react-unicons"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useIsUserConnectedProfile } from "@/app/profile/components/utils/useIsUserConnectedProfile"
+import { humanAddress, getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useUserProfile } from "@/app/profile/components/utils/useUserProfile"
 
 const compactFormatter = getCompactFormatter(4)
 type Props = {
@@ -40,14 +39,15 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
   const isLoading = isB3trBalanceLoading || isVot3BalanceLoading
 
   const isSwapDisabled = isLoading || hasNoBalance
-  const isConnectedUser = useIsUserConnectedProfile(address ?? "")
-
+  const { isConnectedUser, domain } = useUserProfile()
   return (
     <>
       <VStack flex="2" align={"stretch"} gap="24px" {...containerProps}>
         {innerContent}
         <Text fontSize="xl" fontWeight={700}>
-          {t("{{value}} tokens", { value: isConnectedUser ? "Your" : `${humanAddress(address ?? "", 4, 3)}` })}
+          {t("{{value}} tokens", {
+            value: isConnectedUser ? "Your" : `${domain ?? humanAddress(address ?? "", 4, 3)}`,
+          })}
         </Text>
         <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
           <VStack
