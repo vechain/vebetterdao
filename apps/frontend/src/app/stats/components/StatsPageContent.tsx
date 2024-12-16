@@ -44,7 +44,7 @@ export const StatsPageContent = () => {
     if (currentRoundId) {
       const rounds = Array.from({ length: 20 }, (_, i) => Number(currentRoundId) - i) // Show up to 20 rounds back
       setRoundOptions(rounds)
-      setStartRound(rounds?.[7] ?? 0) // Default to 7 rounds back
+      setStartRound(rounds?.[1] ?? 0) // Default to 1 rounds back
       setEndRound(rounds?.[0] ?? 0) // Default to current round
     }
   }, [currentRoundId])

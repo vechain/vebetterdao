@@ -130,6 +130,7 @@ export const TransactionsContent = ({ address }: Props) => {
             dataLength={transactions.length}
             next={fetchNextPage}
             hasMore={!!hasNextPage}
+            style={{ overflowY: "hidden" }}
             loader={
               <Center>
                 <Spinner size="md" mt={4} alignSelf="center" />

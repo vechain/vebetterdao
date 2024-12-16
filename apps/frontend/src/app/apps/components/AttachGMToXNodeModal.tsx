@@ -29,6 +29,8 @@ import {
 import { UilLink } from "@iconscout/react-unicons"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -63,6 +65,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   }, [attachGMToXNodeMutation, onClose])
 
   const handleAttachment = useCallback(() => {
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.ATTACHED_GM_TO_XNODE))
     attachGMToXNodeMutation.resetStatus()
     attachGMToXNodeMutation.sendTransaction(undefined)
   }, [attachGMToXNodeMutation])

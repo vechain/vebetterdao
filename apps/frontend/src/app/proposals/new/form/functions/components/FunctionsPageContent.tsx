@@ -14,7 +14,6 @@ import {
 } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useProposalFormStore } from "@/store"
-import { getEnvWhitelistedContractsWithFunctions } from "@/constants"
 import { useRouter } from "next/navigation"
 
 import { getConfig } from "@repo/config"
@@ -22,7 +21,12 @@ import { useTranslation } from "react-i18next"
 import { EnvConfig, EnvConfigValues } from "@repo/config/contracts"
 import { ContractsWithFunctions, SelectedFunction } from "./ContractsWithFunctions"
 
-import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
+import {
+  buttonClicked,
+  buttonClickActions,
+  ButtonClickProperties,
+  getEnvWhitelistedContractsWithFunctions,
+} from "@/constants"
 import { AnalyticsUtils } from "@/utils"
 
 const devEnvs: EnvConfig[] = ["local", "e2e", "testnet-staging"]

@@ -2,7 +2,7 @@ import { Popover, PopoverArrow, PopoverBody, PopoverContent, PopoverTrigger } fr
 
 type Props = {
   children: React.ReactNode
-  text: string
+  text: string | React.ReactNode
   placement?: "top" | "bottom"
   showTooltip?: boolean
 }

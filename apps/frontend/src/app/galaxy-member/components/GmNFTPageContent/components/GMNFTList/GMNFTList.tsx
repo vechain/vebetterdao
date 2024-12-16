@@ -28,7 +28,7 @@ export const GMNFTList = () => {
   const { gmName } = useSelectedGmNft()
 
   return (
-    <Card variant="baseWithBorder">
+    <Card variant="baseWithBorder" w="full">
       <CardBody>
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
@@ -51,11 +51,7 @@ export const GMNFTList = () => {
                   )}
                 </Text>
               }>
-              <Text fontSize="sm">
-                {t(
-                  "You can choose which NFT use for rewards multiplier. Also you can mint new earth to upgrade and sell them in the secondary market.",
-                )}
-              </Text>
+              <Text fontSize="sm">{t("You can choose which NFT use for rewards multiplier.")}</Text>
             </FeatureFlagWrapper>
           </VStack>
           <VStack align="stretch" gap={4}>

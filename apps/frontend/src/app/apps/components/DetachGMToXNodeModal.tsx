@@ -2,6 +2,8 @@ import { useB3trDonated, useXNode } from "@/api"
 import { getGMLevel } from "@/api/contracts/galaxyMember/utils"
 import { CustomModalContent, TransactionModal } from "@/components"
 import { useDetachGMFromXNode } from "@/hooks"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import {
   Modal,
   ModalOverlay,
@@ -47,6 +49,7 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   }, [detachGMFromXNodeMutation, onClose])
 
   const handleDetachment = useCallback(() => {
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHED_GM_FROM_XNODE))
     detachGMFromXNodeMutation.resetStatus()
     detachGMFromXNodeMutation.sendTransaction(undefined)
   }, [detachGMFromXNodeMutation])
