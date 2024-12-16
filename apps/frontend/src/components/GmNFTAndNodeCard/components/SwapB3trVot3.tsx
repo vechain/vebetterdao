@@ -56,11 +56,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
         {innerContent}
         <Text fontSize="xl" fontWeight={700}>
           {t("{{value}} tokens", {
-<<<<<<< HEAD
             value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
-=======
-            value: isConnectedUser ? "Your" : !!domain ? domain : humanAddress(profile ?? "", 6, 3),
->>>>>>> b4cfea76 (fix: changing condition (??) to (!!))
           })}
         </Text>
         <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
