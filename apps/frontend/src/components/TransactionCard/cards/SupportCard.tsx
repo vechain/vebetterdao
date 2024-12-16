@@ -30,7 +30,7 @@ export const SupportCard = ({ transaction }: Props) => {
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
                   {t("{{value}} supported a", {
-                    value: isConnectedUser ? "You" : `${domain ?? humanAddress(profile ?? "", 4, 3)}`,
+                    value: isConnectedUser ? "You" : !!domain ? domain : humanAddress(profile ?? "", 6, 3),
                   })}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
