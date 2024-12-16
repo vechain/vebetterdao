@@ -1,4 +1,4 @@
-import { VStack, HStack, Button } from "@chakra-ui/react"
+import { VStack, HStack, Button, Box } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
 import { useMemo, useEffect, useCallback } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
@@ -126,19 +126,30 @@ export const ProfilePageContent = ({ address }: Props) => {
         </Button>
       )}
       <ProfileHeader address={parsedAddress} />
-      <HStack justify="space-between">
-        {tabs.map(({ tab, label }) => (
-          <Button
-            key={tab}
-            variant={"primaryGhost"}
-            borderBottom={selectedTab === tab ? "2px solid #004CFC" : "none"}
-            rounded="none"
-            fontSize={["xs", "xs", "md"]}
-            onClick={() => handleTabChange(tab)}>
-            {label}
-          </Button>
-        ))}
-      </HStack>
+
+      <Box
+        w="full"
+        overflowX="auto"
+        whiteSpace="nowrap"
+        css={{
+          "&::-webkit-scrollbar": { display: "none" },
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}>
+        <HStack spacing={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
+          {tabs.map(({ tab, label }) => (
+            <Button
+              key={tab}
+              variant={"primaryGhost"}
+              borderBottom={selectedTab === tab ? "2px solid #004CFC" : "none"}
+              rounded="none"
+              fontSize={["xs", "xs", "md"]}
+              onClick={() => handleTabChange(tab)}>
+              {label}
+            </Button>
+          ))}
+        </HStack>
+      </Box>
       {selectedTabContent}
     </VStack>
   )
