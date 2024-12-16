@@ -113,8 +113,8 @@ export const AppEndorsementInfoCard = ({
   }, [isXNodeDelegator, isXNodeOnCooldown])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
-    return !isXNodeOnCooldown && !isEndorsingApp
-  }, [isXNodeOnCooldown, isEndorsingApp])
+    return account && isXNodeOnCooldown && isUserAppEndorser
+  }, [account, isXNodeOnCooldown, isUserAppEndorser])
   // Modals
   const {
     isOpen: isEndorsementModalOpen,
@@ -144,14 +144,11 @@ export const AppEndorsementInfoCard = ({
     if (shouldDisplayCooldownAlert) {
       buttonComponents.push(
         <GenericAlert
-          type="warning"
+          type="error"
           isLoading={roundInfoLoading}
-          message={t(
-            "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
-            {
-              roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
-            },
-          )}
+          message={t("You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.", {
+            roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+          })}
         />,
       )
     }

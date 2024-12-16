@@ -1,9 +1,12 @@
 import {
   UnendorsedApp,
+  useAllocationsRound,
   useAppEndorsementScore,
+  useCurrentAllocationsRoundId,
   useEndorsementScoreThreshold,
   useUserEndorsementScore,
   useUserXNodes,
+  useXNodeCheckCooldown,
   XApp,
 } from "@/api"
 import { TransactionModal } from "@/components"
@@ -16,6 +19,8 @@ import { t } from "i18next"
 import { useCallback, useMemo } from "react"
 import { Trans } from "react-i18next"
 import { BaseModal } from "@/components/BaseModal"
+import { GenericAlert } from "@/app/components/Alert"
+import dayjs from "dayjs"
 
 type Props = {
   isOpen: boolean
@@ -36,6 +41,10 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const firstNode = userDelegatedNodes?.[0]
 
   const nodeId = userDelegatedNodes?.[0]?.id ?? "0"
+
+  const { data: isXNodeOnCooldown } = useXNodeCheckCooldown(nodeId ?? "")
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
 
   //TODO: Multiple nodes
   const endorseAppMutation = useEndorseApp({
@@ -71,6 +80,10 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     endorsedAppName: xApp?.name,
     xNodeLevel: firstNode?.level,
   }
+
+  const shouldDisplayCooldownAlert = useMemo(() => {
+    return account && !isXNodeOnCooldown
+  }, [account, isXNodeOnCooldown])
 
   if (endorseAppMutation.status !== "ready")
     return (
@@ -217,6 +230,18 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
               })}
             </Text>
           </HStack>
+        ) : null}
+        {shouldDisplayCooldownAlert ? (
+          <GenericAlert
+            type="warning"
+            isLoading={roundInfoLoading}
+            message={t(
+              "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
+              {
+                roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+              },
+            )}
+          />
         ) : null}
         <Skeleton w="full" isLoaded={!isUserNodesLoading && !isEndorsementDataLoading}>
           <Button variant={"primaryAction"} w={"full"} onClick={handleEndorsement}>

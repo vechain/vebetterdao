@@ -27,6 +27,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
+import { useWallet } from "@vechain/dapp-kit-react"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -34,6 +35,7 @@ import { useTranslation } from "react-i18next"
 
 export const EndorsingAppCard = () => {
   const { t } = useTranslation()
+  const { account } = useWallet()
 
   const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeId, isXNodeDelegator, isXNodeOnCooldown } =
     useXNode()
@@ -71,8 +73,8 @@ export const EndorsingAppCard = () => {
     return isXNodeDelegator || isXNodeOnCooldown
   }, [isXNodeDelegator, isXNodeOnCooldown])
   const shouldDisplayCooldownAlert = useMemo(() => {
-    return !isXNodeOnCooldown && !isEndorsingApp && !isXNodeDelegator
-  }, [isXNodeOnCooldown, isEndorsingApp, isXNodeDelegator])
+    return account && !isXNodeDelegator
+  }, [account, isXNodeDelegator])
   return (
     <Card variant="baseWithBorder" w="full" h="min-content">
       <CardBody>
@@ -80,9 +82,9 @@ export const EndorsingAppCard = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t("Endorsing app")}</Heading>
-              {isEndorsingApp && <UilInfoCircle color="#004CFC" />}
+              {!isEndorsingApp && <UilInfoCircle color="#004CFC" />}
             </HStack>
-            {isEndorsingApp && (
+            {!isEndorsingApp && (
               <Text fontSize="sm">
                 {t(
                   "As the owner of an Node, you can use your points to endorse apps and help them be voted in allocation rounds.",
@@ -92,14 +94,20 @@ export const EndorsingAppCard = () => {
           </VStack>
           {shouldDisplayCooldownAlert ? (
             <GenericAlert
-              type="warning"
+              type={!isXNodeOnCooldown ? "warning" : "error"}
               isLoading={roundInfoLoading}
-              message={t(
-                "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
-                {
-                  roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
-                },
-              )}
+              message={
+                isXNodeOnCooldown
+                  ? t("You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.", {
+                      roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+                    })
+                  : t(
+                      "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
+                      {
+                        roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+                      },
+                    )
+              }
             />
           ) : null}
           {isEndorsingApp ? (
