@@ -61,7 +61,8 @@
     "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo run playwright:e2e",
     "generate-translations": "dotenv -e .env -- turbo generate-translations",
     "complete-translations": "dotenv -e .env -- turbo complete-translations",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "reboot-solo": "make solo-down && make solo-clean && make solo-up && yarn && dotenv -v NEXT_PUBLIC_APP_ENV=local -v ENDORSE_XAPPS=true -e .env -- turbo dev --"
   },
   "devDependencies": {
     "@datadog/browser-rum": "^5.23.0",
