@@ -5,7 +5,7 @@ import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useUserProfile } from "@/app/profile/components/utils/useUserProfile"
+import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 type Props = {
   transaction: B3trTransaction
 }
@@ -16,7 +16,7 @@ export const ClaimCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
 
   const actionModal = useDisclosure()
-  const { isConnectedUser } = useUserProfile()
+  const { isConnectedUser } = useRetrieveProfilIdentity()
 
   return (
     <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>

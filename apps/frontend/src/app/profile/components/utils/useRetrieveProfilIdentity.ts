@@ -11,24 +11,27 @@ type Profile = {
   isOnProfilePage?: boolean // true if the user is on profile page
 }
 
-export const useUserProfile = (): Profile => {
-  // Comparing the connected use with the profile page params
+export const useRetrieveProfilIdentity = (): Profile => {
+  // Comparing the connected user with the profile page params
   const params = useParams<{ address: string }>()
   const pathname = usePathname()
   const profile = params?.address
 
   const { account } = useWallet()
-  const { domain } = useVechainDomain({ addressOrDomain: profile ?? account })
 
   const isConnectedUser = useMemo(() => compareAddresses(profile, account ?? ""), [account, profile])
   const isOnProfilePage = useMemo(() => (pathname ? pathname.includes("profile") : false), [pathname])
 
-  // Not in the profil page, so on the connected user page profile
-  if (!profile && account) {
+  const { domain: domainFromAccount } = useVechainDomain({ addressOrDomain: account })
+  const { domain } = useVechainDomain({ addressOrDomain: profile })
+
+  // if i'm in the profile page, but the 'profile' is empty, then I'm in the profile page of the connected user
+  // see url be like : /profile?tab...
+  if (!profile && isOnProfilePage) {
     return {
       profile: account,
       isConnectedUser: true,
-      domain: humanDomain(domain ?? "", 3, 10),
+      domain: humanDomain(domainFromAccount ?? "", 3, 10),
       isOnProfilePage,
     }
   }

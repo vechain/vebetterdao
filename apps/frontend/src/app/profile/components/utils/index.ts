@@ -1,1 +1,1 @@
-export * from "./useUserProfile"
+export * from "./useRetrieveProfilIdentity"

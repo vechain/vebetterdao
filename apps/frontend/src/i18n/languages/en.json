@@ -1,8 +1,8 @@
 {
-  "{{value}} upgraded a": "{{value}} upgraded a",
-  "{{value}} supported a": "{{value}} supported a",
-  "{{value}} claimed": "{{value}} claimed",
-  "{{value}} converted": "{{value}} converted",
+  "{{value}} upgraded a": "{{value}} UPppgkutfraded a",
+  "{{value}} supported a": "{{value}} Supported a",
+  "{{value}} claimed": "{{value}} Claimed",
+  "{{value}} converted": "{{value}} Converted",
   "{{value}} tokens": "{{value}} tokens",
   "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.": "The B3TR you spend to upgrade your NFT will be taken from your wallet. You cannot undo this action.",
   "You’re upgrading to": "You’re upgrading to",
@@ -1384,5 +1384,9 @@
   "Cost": "Cost",
   "Endorsers reward": "Endorsers reward",
   "Specify your reason": "Specify your reason",
-  "This address already has a Node. Please choose another address.": "This address already has a Node. Please choose another address."
+  "This address already has a Node. Please choose another address.": "This address already has a Node. Please choose another address.",
+  "Claimed": "Claimed",
+  "Converted": "Converted",
+  "Supported a": "Supported a",
+  "Upgraded a": "Upgraded a"
 }

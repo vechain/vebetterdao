@@ -18,7 +18,7 @@ import { UilExchangeAlt } from "@iconscout/react-unicons"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { humanAddress, getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useUserProfile } from "@/app/profile/components/utils/useUserProfile"
+import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 
 const compactFormatter = getCompactFormatter(4)
 type Props = {
@@ -39,15 +39,18 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
   const isLoading = isB3trBalanceLoading || isVot3BalanceLoading
 
   const isSwapDisabled = isLoading || hasNoBalance
-  const { isConnectedUser, domain, profile } = useUserProfile()
+  const { isConnectedUser, domain, profile, isOnProfilePage } = useRetrieveProfilIdentity()
 
+  console.log({ isConnectedUser, domain, profile, isOnProfilePage })
+  console.log(!profile)
+  console.log("isConnectedUser in the SwapB3trVot3 component", isConnectedUser)
   return (
     <>
       <VStack flex="2" align={"stretch"} gap="24px" {...containerProps}>
         {innerContent}
         <Text fontSize="xl" fontWeight={700}>
           {t("{{value}} tokens", {
-            value: isConnectedUser ? "Your" : !!domain ? domain : humanAddress(profile ?? "", 6, 3),
+            value: isConnectedUser || !isOnProfilePage ? "Your" : domain ?? humanAddress(profile ?? "", 6, 3),
           })}
         </Text>
         <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
@@ -88,7 +91,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
             </HStack>
           </VStack>
         </Stack>
-        {isConnectedUser && (
+        {(isConnectedUser || !isOnProfilePage) && (
           <Button
             isDisabled={isSwapDisabled}
             onClick={onOpen}
