@@ -5,8 +5,8 @@ import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
 import { useMemo } from "react"
-import { getCompactFormatter, humanAddress } from "@repo/utils/FormattingUtils"
-import { useUserProfile } from "@/app/profile/components/utils/useUserProfile"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 type Props = {
   transaction: B3trTransaction
 }
@@ -22,22 +22,27 @@ export const SwapCard = ({ transaction }: Props) => {
   }, [transaction.amountB3TR, transaction.amountVOT3])
 
   const actionModal = useDisclosure()
-  const { profile, domain, isConnectedUser } = useUserProfile()
+  const { isConnectedUser } = useRetrieveProfilIdentity()
 
   return (
     <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
       <CardBody>
         <HStack spacing={3} w="full" justify="space-between">
           <HStack spacing={4}>
-            <Flex w={8} h={8} bg="#DDEFFF" align="center" justify="center" borderRadius={"full"}>
+            <Flex
+              w="fit-content"
+              h="fit-content"
+              p={2}
+              bg="#DDEFFF"
+              align="center"
+              justify="center"
+              borderRadius={"full"}>
               <UilExchangeAlt size={"1rem"} color="#004CFC" />
             </Flex>
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
-                  {t("{{value}} converted", {
-                    value: isConnectedUser ? "You" : !!domain ? domain : humanAddress(profile ?? "", 6, 3),
-                  })}
+                  {isConnectedUser ? t("You converted") : t("Converted")}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {vot3ToB3tr ? "VOT3" : "B3TR"} {t("to")} {vot3ToB3tr ? "B3TR" : "VOT3"}
