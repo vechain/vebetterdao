@@ -4,7 +4,7 @@ import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 import { B3trTransaction } from "@/api"
 import { ActionModal } from "./BetterActionCard"
-import { getCompactFormatter, humanAddress } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useUserProfile } from "@/app/profile/components/utils/useUserProfile"
 type Props = {
   transaction: B3trTransaction
@@ -16,7 +16,7 @@ export const SupportCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
 
   const actionModal = useDisclosure()
-  const { profile, domain, isConnectedUser } = useUserProfile()
+  const { isConnectedUser } = useUserProfile()
 
   return (
     <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
@@ -29,9 +29,7 @@ export const SupportCard = ({ transaction }: Props) => {
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
-                  {t("{{value}} supported a", {
-                    value: isConnectedUser ? "You" : !!domain ? domain : humanAddress(profile ?? "", 6, 3),
-                  })}
+                  {isConnectedUser ? t("You supported a") : t("Supported a")}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {t("proposal")}

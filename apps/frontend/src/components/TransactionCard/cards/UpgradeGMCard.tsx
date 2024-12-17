@@ -5,7 +5,6 @@ import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useUserProfile } from "@/app/profile/components/utils/useUserProfile"
 type Props = {
   transaction: B3trTransaction
@@ -17,7 +16,7 @@ export const UpgradeGMCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
 
   const actionModal = useDisclosure()
-  const { profile, domain, isConnectedUser } = useUserProfile()
+  const { isConnectedUser } = useUserProfile()
 
   return (
     <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
@@ -30,9 +29,7 @@ export const UpgradeGMCard = ({ transaction }: Props) => {
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
-                  {t("{{value}} upgraded a", {
-                    value: isConnectedUser ? "You" : !!domain ? domain : humanAddress(profile ?? "", 6, 3),
-                  })}
+                  {isConnectedUser ? t("You upgraded a") : t("Upgraded a")}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {t("GM NFT")}
