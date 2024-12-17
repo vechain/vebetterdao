@@ -59,12 +59,13 @@ export const ManageCreatorsNFT = () => {
 
   const hasNFT = useHasCreatorNFT(lookupAddress ?? "")
 
-  const { error, status, txReceipt, sendTransaction } = useMemo(() => {
+  const { error, status, txReceipt, sendTransaction, resetStatus } = useMemo(() => {
     return actionType === "mint" ? mintNFT : burnNFT
   }, [actionType, mintNFT, burnNFT])
 
   const onSubmit = useCallback(() => {
     if (actionType !== "check") {
+      resetStatus()
       sendTransaction()
       onOpen()
     }
@@ -171,7 +172,10 @@ export const ManageCreatorsNFT = () => {
                   </FormControl>
                 )}
                 {actionType !== "check" && (
-                  <Button colorScheme="blue" type="submit" isDisabled={!creatorWalletAddress}>
+                  <Button
+                    colorScheme="blue"
+                    type="submit"
+                    isDisabled={actionType === "mint" ? !creatorWalletAddress : !tokenId}>
                     {t(actionType === "mint" ? "Mint" : "Burn")}
                   </Button>
                 )}
