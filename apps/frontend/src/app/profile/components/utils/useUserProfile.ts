@@ -28,7 +28,7 @@ export const useUserProfile = (): Profile => {
     return {
       profile: account,
       isConnectedUser: true,
-      domain: humanDomain(domain ?? "", 4, 26),
+      domain: humanDomain(domain ?? "", 3, 10),
       isOnProfilePage,
     }
   }
@@ -36,7 +36,7 @@ export const useUserProfile = (): Profile => {
   return {
     profile: profile,
     isConnectedUser,
-    domain: humanDomain(domain ?? "", 4, 26),
+    domain: humanDomain(domain ?? "", 3, 10),
     isOnProfilePage,
   }
 }
