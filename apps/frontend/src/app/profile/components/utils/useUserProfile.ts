@@ -1,4 +1,4 @@
-import { useParams } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 import { useVechainDomain, useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useMemo } from "react"
@@ -8,33 +8,35 @@ type Profile = {
   profile: string | null
   isConnectedUser: boolean
   domain?: string
-  onProfilePage?: boolean
+  isOnProfilePage?: boolean // true if the user is on profile page
 }
 
 export const useUserProfile = (): Profile => {
   // Comparing the connected use with the profile page params
   const params = useParams<{ address: string }>()
+  const pathname = usePathname()
   const profile = params?.address
 
   const { account } = useWallet()
   const { domain } = useVechainDomain({ addressOrDomain: profile ?? account })
 
   const isConnectedUser = useMemo(() => compareAddresses(profile, account ?? ""), [account, profile])
+  const isOnProfilePage = pathname.includes("profile")
 
   // Not in the profil page, so on the connected user page profile
   if (!profile && account) {
     return {
       profile: account,
       isConnectedUser: true,
-      domain: humanDomain(!!domain ? domain : "", 4, 26),
-      onProfilePage: false,
+      domain: humanDomain(domain ?? "", 4, 26),
+      isOnProfilePage,
     }
   }
 
   return {
     profile: profile,
     isConnectedUser,
-    domain: humanDomain(!!domain ? domain : "", 4, 26),
-    onProfilePage: true,
+    domain: humanDomain(domain ?? "", 4, 26),
+    isOnProfilePage,
   }
 }
