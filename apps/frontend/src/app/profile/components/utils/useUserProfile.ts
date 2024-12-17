@@ -21,7 +21,7 @@ export const useUserProfile = (): Profile => {
   const { domain } = useVechainDomain({ addressOrDomain: profile ?? account })
 
   const isConnectedUser = useMemo(() => compareAddresses(profile, account ?? ""), [account, profile])
-  const isOnProfilePage = pathname.includes("profile")
+  const isOnProfilePage = useMemo(() => (pathname ? pathname.includes("profile") : false), [pathname])
 
   // Not in the profil page, so on the connected user page profile
   if (!profile && account) {
