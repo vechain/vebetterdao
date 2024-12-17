@@ -23,7 +23,14 @@ export const ClaimCard = ({ transaction }: Props) => {
       <CardBody>
         <HStack spacing={3} w="full" justify="space-between">
           <HStack spacing={4}>
-            <Flex w={8} h={8} bg="#DDEFFF" align="center" justify="center" borderRadius={"full"}>
+            <Flex
+              w="fit-content"
+              h="fit-content"
+              p={2}
+              bg="#DDEFFF"
+              align="center"
+              justify="center"
+              borderRadius={"full"}>
               <UilGift size={"1rem"} color="#004CFC" />
             </Flex>
             <VStack spacing={0} align="stretch">
