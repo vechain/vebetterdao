@@ -31,7 +31,8 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
-  const { isConnectedUser, domain, profile, onProfilePage } = useUserProfile()
+  const { isConnectedUser, domain, profile, isOnProfilePage } = useUserProfile()
+
   const { data: hasUserVoted } = useParticipatedInGovernance(profile)
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
     useSelectedGmNft(profile)
@@ -69,7 +70,6 @@ export const GmNFTAndNodeCard = () => {
     )
   }, [isAbove800, isXNodeAttachedToGM, isGMOwned])
 
-  // todo: refactor
   const headingText = useMemo(() => {
     // const displayValue = !!domain ? domain : humanAddress(profile ?? "", 6, 3)
 
@@ -98,7 +98,7 @@ export const GmNFTAndNodeCard = () => {
     router.push("/xnode")
   }, [router])
 
-  if (!account) {
+  if (!account && !isOnProfilePage) {
     return <NotConnectedWallet />
   }
 
@@ -260,10 +260,10 @@ export const GmNFTAndNodeCard = () => {
               </>
             )}
           </Stack>
-          {isConnectedUser && <GmNFTAndNodeFooter />}
+          {!isOnProfilePage && <GmNFTAndNodeFooter />}
         </VStack>
         <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />
-        {account && !onProfilePage && <SwapB3trVot3 address={account} />}
+        {account && !isOnProfilePage && <SwapB3trVot3 address={account} />}
       </Stack>
     </Card>
   )
