@@ -46,6 +46,7 @@
     "contracts:test": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:hardhat --filter=contracts",
     "contracts:test:shard": "SHARD=$SHARD dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:hardhat:shard --filter=contracts",
     "contracts:test:thor-solo": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run test:thor-solo --filter=contracts",
+    "contracts:select-and-test": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- yarn workspace @repo/contracts ts-node scripts/tests/select-and-test.ts",
     "contracts:generate-galaxy-member-metadata:ipfs-dev": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run generate-galaxy-member-metadata --filter=contracts",
     "contracts:upload-galaxy-member-metadata:ipfs-dev": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run upload-galaxy-member-metadata --filter=contracts",
     "contracts:generate-xapp-metadata:ipfs-dev": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run generate-xapp-metadata --filter=contracts",
