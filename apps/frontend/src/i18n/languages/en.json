@@ -1375,7 +1375,6 @@
   "Your Node is attached to the following GM NFT": "Your Node is attached to the following GM NFT",
   "Your GM NFT will be level {{value}} after attaching.": "Your GM NFT will be level {{value}} after attaching.",
   "Currently, we only support one Node per account.": "Currently, we only support one Node per account.",
-  "This address already has an Node. Please choose another address.": "This address already has an Node. Please choose another address.",
   "Error checking node holder status. Please try again.": "Error checking node holder status. Please try again.",
   "Delegated to": "Delegated to",
   "Delegated by": "Delegated by",
@@ -1394,6 +1393,7 @@
   "Multiplier": "Multiplier",
   "Cost": "Cost",
   "Endorsers reward": "Endorsers reward",
+  "This address already has a Node. Please choose another address.": "This address already has a Node. Please choose another address.",
   "Specify your reason": "Specify your reason",
   "Actual Rewards": "Actual Rewards",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes."

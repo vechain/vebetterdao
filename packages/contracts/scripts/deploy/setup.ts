@@ -125,15 +125,14 @@ export const setupLocalEnvironment = async (
    */
   await mintVechainNodes(vechainNodesMock, endorserAccounts, padNodeTypes([7, 6, 5, 3, 1], endorserAccounts.length))
 
+  await startEmissions(emissionsContract, admin)
+
   if (endorseApps) {
     // Get unendorsed XAPPs
     const unedorsedApps = await x2EarnApps.unendorsedAppIds()
     const appsToEndorse = unedorsedApps.slice(0, unedorsedApps.length / 2)
     await endorseXApps(endorserAccounts, x2EarnApps, appsToEndorse, vechainNodesMock)
   }
-
-  await startEmissions(emissionsContract, admin)
-
   await proposeUpgradeGovernance(governor, xAllocationVoting)
 
   const end = new Date(performance.now() - start)

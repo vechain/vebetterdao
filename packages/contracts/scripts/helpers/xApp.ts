@@ -10,6 +10,8 @@ import { clauseBuilder, type TransactionClause, type TransactionBody, coder, Fun
 import { buildTxBody, signAndSendTx } from "./txHelper"
 import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
+import { getContractsConfig } from "@repo/config"
+import { EnvConfig } from "@repo/config/contracts"
 
 export type App = {
   admin: string
@@ -26,7 +28,7 @@ export const registerXDapps = async (contractAddress: string, account: TestPk, a
   for (const appChunk of appChunks) {
     const clauses: TransactionClause[] = []
 
-    appChunk.map(app => {
+    appChunk.forEach(app => {
       clauses.push(
         clauseBuilder.functionInteraction(
           contractAddress,
@@ -52,6 +54,11 @@ export const endorseXApps = async (
   apps: string[],
   vechainNodesMock: TokenAuction,
 ): Promise<void> => {
+  const contractsConfig = getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
+
+  if (contractsConfig.X2EARN_NODE_COOLDOWN_PERIOD > 1) {
+    return console.warn("Endorsement cooldown period is greater than 1. Skipping endorsement.")
+  }
   console.log("Endorsing x-apps...")
 
   for (let i = 0; i < apps.length; i++) {
