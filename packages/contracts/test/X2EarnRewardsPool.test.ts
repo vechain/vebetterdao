@@ -10,7 +10,7 @@ import {
 import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { deployProxy, upgradeProxy } from "../scripts/helpers"
-import { X2EarnRewardsPool, X2EarnRewardsPoolV2, X2EarnRewardsPoolV3 } from "../typechain-types"
+import { X2EarnRewardsPool, X2EarnRewardsPoolV2, X2EarnRewardsPoolV3, X2EarnRewardsPoolV4 } from "../typechain-types"
 import { X2EarnRewardsPoolV1 } from "../typechain-types/contracts/depreceated/V1"
 import { endorseApp } from "./helpers/xnodes"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
@@ -58,7 +58,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       const { x2EarnRewardsPool } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
-      expect(await x2EarnRewardsPool.version()).to.equal("4")
+      expect(await x2EarnRewardsPool.version()).to.equal("5")
     })
 
     it("X2EarnApps should be set correctly", async function () {
@@ -133,11 +133,11 @@ describe("X2EarnRewardsPool - @shard12", function () {
     })
 
     it("Should return correct version of the contract", async () => {
-      const { x2EarnApps } = await getOrDeployContractInstances({
+      const { x2EarnRewardsPool } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      expect(await x2EarnApps.version()).to.equal("2")
+      expect(await x2EarnRewardsPool.version()).to.equal("5")
     })
 
     it("Storage should be preserved after upgrade", async () => {
@@ -210,6 +210,21 @@ describe("X2EarnRewardsPool - @shard12", function () {
       // upgrade to new version
       const x2EarnRewardsPoolV4 = (await upgradeProxy(
         "X2EarnRewardsPoolV3",
+        "X2EarnRewardsPoolV4",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [],
+        {
+          version: 4,
+        },
+      )) as X2EarnRewardsPoolV4
+
+      expect(await x2EarnRewardsPoolV4.version()).to.equal("4")
+      expect(await x2EarnRewardsPoolV4.x2EarnApps()).to.equal(x2EarnAppsAddress)
+      expect(await x2EarnRewardsPoolV4.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
+
+      // upgrade to new version
+      const x2EarnRewardsPool = (await upgradeProxy(
+        "X2EarnRewardsPoolV4",
         "X2EarnRewardsPool",
         await x2EarnRewardsPoolV1.getAddress(),
         [],
@@ -218,9 +233,9 @@ describe("X2EarnRewardsPool - @shard12", function () {
         },
       )) as X2EarnRewardsPool
 
-      expect(await x2EarnRewardsPoolV4.version()).to.equal("4")
-      expect(await x2EarnRewardsPoolV4.x2EarnApps()).to.equal(x2EarnAppsAddress)
-      expect(await x2EarnRewardsPoolV4.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
+      expect(await x2EarnRewardsPool.version()).to.equal("5")
+      expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
+      expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
     })
 
     it("Should not be able to upgrade if initial impact keys is empty", async () => {
