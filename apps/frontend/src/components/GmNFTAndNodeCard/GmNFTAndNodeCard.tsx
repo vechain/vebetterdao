@@ -32,17 +32,20 @@ export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const { isConnectedUser, domain, profile, isOnProfilePage } = useUserProfile()
+  const viewMode = isOnProfilePage && !isConnectedUser
 
-  const { data: hasUserVoted } = useParticipatedInGovernance(profile)
+  // watch out for fallback for this one
+  const { data: hasUserVoted } = useParticipatedInGovernance(profile ?? account)
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
     useSelectedGmNft(profile)
   //node
   const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, isXNodeDelegatee } = useXNode(profile)
-
   const nodeAttachedColor = isXNodeAttachedToGM ? "#B1F16C" : "#FFFFFF80"
 
   const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
+
+  console.log({ gmName, hasUserVoted, profile, isOnProfilePage, isConnectedUser, viewMode, isGMOwned })
 
   const nodeSeparator = useMemo(() => {
     return (
@@ -71,23 +74,23 @@ export const GmNFTAndNodeCard = () => {
   }, [isAbove800, isXNodeAttachedToGM, isGMOwned])
 
   const headingText = useMemo(() => {
-    // const displayValue = !!domain ? domain : humanAddress(profile ?? "", 6, 3)
+    const displayValue = !!domain ? domain : humanAddress(profile ?? "", 6, 3)
 
     if (!isGMOwned) {
-      return !hasUserVoted
-        ? t(isConnectedUser ? "Vote to be a galaxy member" : "{{value}} needs to vote to be a galaxy member", {
-            value: !!domain ? domain : humanAddress(profile ?? "", 6, 3),
-          })
-        : isConnectedUser
+      if (!hasUserVoted) {
+        return t(isConnectedUser ? "Vote to be a galaxy member" : "{{value}} needs to vote to be a galaxy member", {
+          value: displayValue,
+        })
+      } else {
+        return isConnectedUser
           ? t("Mint GM to be a galaxy member")
           : t("{{value}} needs to mint GM to be a galaxy member", {
-              value: !!domain ? domain : humanAddress(profile ?? "", 6, 3),
+              value: displayValue,
             })
+      }
     }
 
-    return isConnectedUser
-      ? t("Your galaxy member")
-      : t("{{value}} is a galaxy member", { value: !!domain ? domain : humanAddress(profile ?? "", 6, 3) })
+    return isConnectedUser ? t("Your galaxy member") : t("{{value}} is a galaxy member", { value: displayValue })
   }, [isGMOwned, hasUserVoted, t, isConnectedUser, domain, profile])
 
   const router = useRouter()
@@ -138,7 +141,10 @@ export const GmNFTAndNodeCard = () => {
               </>
             )}
           </HStack>
+
+          {/* GM AND XNODE  */}
           <Stack gap="0" direction={isAbove800 ? "row" : "column"} align="stretch" justify="stretch">
+            {/* GM  */}
             {!isGMOwned ? (
               <HStack
                 rounded="12px"
@@ -165,8 +171,8 @@ export const GmNFTAndNodeCard = () => {
                 rounded="12px"
                 gap={6}
                 flex={1}
-                cursor={"pointer"}
-                onClick={goToGmNftPage}>
+                cursor={viewMode ? "default" : "pointer"}
+                onClick={viewMode ? undefined : goToGmNftPage}>
                 <Skeleton isLoaded={!isGMLoading} w="68px" h="68px" rounded="8px">
                   <Box
                     w={"68px"}
@@ -199,6 +205,7 @@ export const GmNFTAndNodeCard = () => {
               </HStack>
             )}
 
+            {/* XNODE  */}
             {(isXNodeHolder || isXNodeDelegator) && (
               <>
                 {isAbove800 ? (
@@ -229,8 +236,8 @@ export const GmNFTAndNodeCard = () => {
                   rounded="12px"
                   gap={6}
                   flex={1}
-                  onClick={goToXNodePage}
-                  cursor="pointer">
+                  onClick={viewMode ? undefined : goToXNodePage}
+                  cursor={viewMode ? "default" : "pointer"}>
                   <Image src={xNodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
                   <VStack flex="1" align={"flex-start"}>
                     <HStack>
