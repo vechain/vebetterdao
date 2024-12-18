@@ -33,6 +33,7 @@ import {
   VoterRewardsV1,
   XAllocationVoting,
   XAllocationVotingV1,
+  xAllocationVotingV4,
 } from "../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createTestConfig } from "./helpers/config"
@@ -116,7 +117,7 @@ describe("X-Allocation Voting - @shard14", function () {
       })
 
       expect(await xAllocationVoting.name()).to.eql("XAllocationVoting")
-      expect(await xAllocationVoting.version()).to.eql("3")
+      expect(await xAllocationVoting.version()).to.eql("4")
     })
 
     it("Counting mode is set correctly", async function () {
@@ -490,7 +491,7 @@ describe("X-Allocation Voting - @shard14", function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationVoting.version()).to.equal("3")
+      expect(await xAllocationVoting.version()).to.equal("4")
     })
 
     it("Should not break storage when upgrading to V3", async () => {
@@ -579,7 +580,7 @@ describe("X-Allocation Voting - @shard14", function () {
 
       // const deploy V1 contract
       const xAllocationVotingV2 = (await deployAndUpgrade(
-        ["XAllocationVotingV1", "XAllocationVotingV2"],
+        ["XAllocationVotingV1", "XAllocationVotingV2", "XAllocationVotingV3"],
         [
           [
             {
@@ -599,12 +600,13 @@ describe("X-Allocation Voting - @shard14", function () {
             },
           ],
           [await veBetterPassport.getAddress()],
+          [],
         ],
         {
-          versions: [undefined, 2],
+          versions: [undefined, 2, 3],
         },
       )) as XAllocationVoting
-      expect(await xAllocationVotingV2.version()).to.equal("2")
+      expect(await xAllocationVotingV2.version()).to.equal("3")
 
       await emissions.setXAllocationsGovernorAddress(await xAllocationVotingV2.getAddress())
       expect(await emissions.xAllocationsGovernor()).to.eql(await xAllocationVotingV2.getAddress())
@@ -687,32 +689,32 @@ describe("X-Allocation Voting - @shard14", function () {
         .castVote(1, [app1Id, app2Id], [ethers.parseEther("100"), ethers.parseEther("200")])
 
       // upgrade to V2
-      const xAllocationVotingV3 = (await upgradeProxy(
-        "XAllocationVotingV2",
+      const xAllocationVotingV4 = (await upgradeProxy(
+        "XAllocationVotingV3",
         "XAllocationVoting",
         await xAllocationVotingV2.getAddress(),
         [],
         {
-          version: 3,
+          version: 4,
         },
       )) as XAllocationVoting
-      expect(await xAllocationVotingV3.version()).to.equal("3")
+      expect(await xAllocationVotingV4.version()).to.equal("4")
 
       // check that round is ok
-      expect(await xAllocationVotingV3.currentRoundId()).to.equal(1n)
-      expect(await xAllocationVotingV3.state(1n)).to.equal(0n) // Active
+      expect(await xAllocationVotingV4.currentRoundId()).to.equal(1n)
+      expect(await xAllocationVotingV4.state(1n)).to.equal(0n) // Active
 
-      expect(await xAllocationVotingV3.hasVoted(1, user1.address)).to.be.true
-      expect(await xAllocationVotingV3.hasVoted(1, user2.address)).to.be.true
-      expect(await xAllocationVotingV3.hasVoted(1, user3.address)).to.be.false
+      expect(await xAllocationVotingV4.hasVoted(1, user1.address)).to.be.true
+      expect(await xAllocationVotingV4.hasVoted(1, user2.address)).to.be.true
+      expect(await xAllocationVotingV4.hasVoted(1, user3.address)).to.be.false
 
-      expect(await xAllocationVotingV3.getAppVotes(1, app1Id)).to.equal(ethers.parseEther("200"))
-      expect(await xAllocationVotingV3.getAppVotes(1, app2Id)).to.equal(ethers.parseEther("200"))
-      expect(await xAllocationVotingV3.getAppVotes(1, app3Id)).to.equal(ethers.parseEther("0"))
+      expect(await xAllocationVotingV4.getAppVotes(1, app1Id)).to.equal(ethers.parseEther("200"))
+      expect(await xAllocationVotingV4.getAppVotes(1, app2Id)).to.equal(ethers.parseEther("200"))
+      expect(await xAllocationVotingV4.getAppVotes(1, app3Id)).to.equal(ethers.parseEther("0"))
 
       // check that can still vote on the new round
-      await xAllocationVotingV3.connect(user3).castVote(1, [app1Id], [ethers.parseEther("100")])
-      expect(await xAllocationVotingV3.getAppVotes(1, app1Id)).to.equal(ethers.parseEther("300"))
+      await xAllocationVotingV4.connect(user3).castVote(1, [app1Id], [ethers.parseEther("100")])
+      expect(await xAllocationVotingV4.getAppVotes(1, app1Id)).to.equal(ethers.parseEther("300"))
 
       // check that round is over correctly
       const blockNextCycle = await emissions.getNextCycleBlock()
@@ -720,7 +722,7 @@ describe("X-Allocation Voting - @shard14", function () {
       expect(await emissions.isCycleEnded(1)).to.be.true
 
       await emissions.distribute()
-      expect(await xAllocationVotingV3.currentRoundId()).to.equal(2n)
+      expect(await xAllocationVotingV4.currentRoundId()).to.equal(2n)
 
       // check that rewards are distributed correctly
       await expect(xAllocationPool.claim(1, app1Id)).to.not.be.reverted
@@ -728,7 +730,7 @@ describe("X-Allocation Voting - @shard14", function () {
       await expect(xAllocationPool.claim(1, app3Id)).to.not.be.reverted
 
       // can cast vote for round 2
-      await xAllocationVotingV3.connect(user1).castVote(2, [app1Id], [ethers.parseEther("100")])
+      await xAllocationVotingV4.connect(user1).castVote(2, [app1Id], [ethers.parseEther("100")])
     })
   })
 
