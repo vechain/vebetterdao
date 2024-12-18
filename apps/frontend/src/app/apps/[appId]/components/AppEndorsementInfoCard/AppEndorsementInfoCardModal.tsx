@@ -183,9 +183,9 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
                   {appEndorsers
                     .slice()
                     .reverse()
-                    .map((endorser, index) => (
+                    .map(endorser => (
                       <EndorsersItem
-                        key={index}
+                        key={endorser}
                         isAppAdmin={isAppAdmin || false}
                         endorserAddress={endorser}
                         endorsementEvents={endorsementEvents || []}
@@ -226,8 +226,11 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
 
             {endorsementEvents && endorsementEvents.length > 0 ? (
               <VStack flex={1} w="full" overflowY="auto" h="full">
-                {endorsementEvents.map((endorsementEvent, index) => (
-                  <EndorsementHistoryItem key={index} event={endorsementEvent} />
+                {endorsementEvents.map(endorsementEvent => (
+                  <EndorsementHistoryItem
+                    key={`${endorsementEvent.appId}-${endorsementEvent.nodeId}-${endorsementEvent.blockNumber}`}
+                    event={endorsementEvent}
+                  />
                 ))}
               </VStack>
             ) : (
