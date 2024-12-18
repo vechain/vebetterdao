@@ -20,14 +20,14 @@ export type NFTMetadata = {
   }[]
 }
 
-export const useNFTImage = () => {
+export const useNFTImage = (profile?: string) => {
   const { account } = useWallet()
   const {
     data: tokenID,
     isLoading: isLoadingTokenID,
     isError: isErrorTokenID,
     error: errorTokenID,
-  } = useTokenIdByAccount(account, 0)
+  } = useTokenIdByAccount(profile ?? account, 0)
 
   const {
     data: metadataURI,

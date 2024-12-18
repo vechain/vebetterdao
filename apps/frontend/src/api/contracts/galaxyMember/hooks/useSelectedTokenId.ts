@@ -15,7 +15,7 @@ export const getSelectedTokenIdQueryKey = (account?: string | null) => getCallKe
  * @param enabled - Determines whether the hook is enabled or not. Default is true.
  * @returns The selected token ID for the galaxy member.
  */
-export const useSelectedTokenId = (profile?: string | null, enabled = true) => {
+export const useSelectedTokenId = (profile?: string, enabled = true) => {
   const { account } = useWallet()
   return useCall({
     contractInterface,

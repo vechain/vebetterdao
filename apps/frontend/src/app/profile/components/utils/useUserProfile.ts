@@ -5,7 +5,7 @@ import { useMemo } from "react"
 import { humanDomain } from "@repo/utils/FormattingUtils"
 
 type Profile = {
-  profile: string | null
+  profile: string | undefined
   isConnectedUser: boolean
   domain?: string
   isOnProfilePage?: boolean // true if the user is on profile page
