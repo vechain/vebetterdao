@@ -69,7 +69,7 @@ export const GalaxyRewardsCalculator = () => {
 
   useEffect(() => {
     if (!hasVoted) router.push("/")
-  }, [hasVoted])
+  }, [hasVoted, router])
 
   if (!account || !hasVoted) return <></>
 
