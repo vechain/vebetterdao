@@ -21,42 +21,6 @@ resource "aws_route53_record" "vebetterdao_org_ns" {
   ]
 }
 
-# CNAME Record for mainnet.live pointing to ALB
-resource "aws_route53_record" "mainnet_live" {
-  zone_id = module.b3tr_vechain_zone.public_zone_id
-  name    = "mainnet.live.b3tr.vechain.org"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["green-main-api-b3tr-alb-1559474217.eu-west-1.elb.amazonaws.com"]
-}
-
-# CNAME Record for testnet.live pointing to ALB
-resource "aws_route53_record" "testnet_live" {
-  zone_id = module.b3tr_vechain_zone.public_zone_id
-  name    = "testnet.live.b3tr.vechain.org"
-  type    = "CNAME"
-  ttl     = 300
-  records = ["green-test-api-b3tr-alb-101845078.eu-west-1.elb.amazonaws.com"]
-}
-
-# Service Discovery Records for API endpoints
-resource "aws_route53_record" "service_discovery_records" {
-  for_each = {
-    "main-api" = "blue-main-api-b3tr-alb-53924463.eu-west-1.elb.amazonaws.com"
-    "test-api" = "blue-test-api-b3tr-alb-109727172.eu-west-1.elb.amazonaws.com"
-  }
-
-  zone_id = module.b3tr_blue_zone.private_zone_id
-  name    = each.key
-  type    = "A"
-
-  alias {
-    name                   = each.value
-    zone_id                = data.aws_lb_hosted_zone_id.current.id
-    evaluate_target_health = true
-  }
-}
-
 # DNS TXT Record for vebetterdao.org
 resource "aws_route53_record" "vebetterdao_org_txt" {
   zone_id = module.vebetterdao_zone.public_zone_id

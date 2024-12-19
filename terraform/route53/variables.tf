@@ -8,7 +8,7 @@ variable "domain_name_data" {
 
 locals {
   env    = terraform.workspace
-  config = yamldecode(file("${path.module}/../config/${local.env}.yaml"))
+  config = yamldecode(file("${path.module}/config/${local.env}.config"))
 }
 
 data "aws_lb_hosted_zone_id" "current" {} 
