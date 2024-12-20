@@ -42,9 +42,6 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
   const { isConnectedUser, domain, profile, isOnProfilePage } = useRetrieveProfilIdentity()
   const domainOrAddress = domain && domain !== "" ? domain : humanAddress(profile ?? "", 6, 3)
 
-  console.log({ isConnectedUser, domain, profile, isOnProfilePage })
-  console.log(!profile)
-  console.log("isConnectedUser in the SwapB3trVot3 component", isConnectedUser)
   return (
     <>
       <VStack flex="2" align={"stretch"} gap="24px" {...containerProps}>
@@ -92,6 +89,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
             </HStack>
           </VStack>
         </Stack>
+        {(isConnectedUser || !isOnProfilePage) && (
         {(isConnectedUser || !isOnProfilePage) && (
           <Button
             isDisabled={isSwapDisabled}
