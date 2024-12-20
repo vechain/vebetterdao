@@ -28,7 +28,7 @@ records:
     type: CNAME
     ttl: 300
     records:
-      - "vebetterdao.org"
+      - "sites.framer.app"
     routing_policy: simple
 
   - name: "docs.vebetterdao.org"
@@ -69,3 +69,31 @@ records:
       zone_id: "Z2FDTNDATAQYW2" 
       evaluate_target_health: false
     routing_policy: simple 
+
+  - name: "vebetterdao.org"
+    type: SOA
+    ttl: 300
+    records:
+      - "ns-913.awsdns-50.net. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400"
+    routing_policy: simple
+
+  - name: "_3b7436900dfe04b337a656b730c4a0a5.www.connect.vebetterdao.org"
+    type: CNAME
+    ttl: 60
+    records:
+      - "_78087cb9a070b7a490345fd609c4d00c.mhbtsbpdnt.acm-validations.aws."
+    routing_policy: simple
+
+  - name: "_5baee9415052592f8da7d302d8de92be.vebetterdao.org"
+    type: CNAME
+    ttl: 300
+    records:
+      - "_937fe70fc578a333e689049b838eee2a.mhbtsbpdnt.acm-validations.aws."
+    routing_policy: simple
+
+  - name: "_d30b8d36816e53adffd35443f7d93510.connect.vebetterdao.org"
+    type: CNAME
+    ttl: 60
+    records:
+      - "_272d18636cdea37b3274b7490c14c87b.mhbtsbpdnt.acm-validations.aws."
+    routing_policy: simple
