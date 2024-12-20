@@ -1385,6 +1385,8 @@
   "Endorsers reward": "Endorsers reward",
   "Specify your reason": "Specify your reason",
   "This address already has a Node. Please choose another address.": "This address already has a Node. Please choose another address.",
+  "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.": "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
+  "You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.": "You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
   "Claimed": "Claimed",
   "Converted": "Converted",
   "Supported a": "Supported a",

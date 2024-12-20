@@ -1,16 +1,25 @@
-import { useUserEndorsementScore, useUserXNodes, useXAppMetadata } from "@/api"
+import {
+  useAllocationsRound,
+  useCurrentAllocationsRoundId,
+  useUserEndorsementScore,
+  useUserXNodes,
+  useXAppMetadata,
+  useXNodeCheckCooldown,
+} from "@/api"
 import { TransactionModal } from "@/components"
 import { useSwitchEndorsement } from "@/hooks"
 import { VStack, Heading, HStack, Box, Text, Button, Skeleton, Image } from "@chakra-ui/react"
 import { UilClock } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { Trans } from "react-i18next"
 import { ArrowRightIcon } from "@/components/Icons/ArrowRightIcon"
 import { useIpfsImage } from "@/api/ipfs"
 import { notFoundImage } from "@/constants"
 import { BaseModal } from "@/components/BaseModal"
+import { GenericAlert } from "@/app/components/Alert"
+import dayjs from "dayjs"
 
 type Props = {
   isOpen: boolean
@@ -40,6 +49,9 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
   const userDelegatedNodes = useUserXNodes()
 
   const nodeId = userDelegatedNodes.data?.[0]?.id ?? "0"
+  const { data: isXNodeOnCooldown } = useXNodeCheckCooldown(nodeId ?? "")
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
 
   const buttonTextSize = appToEndorseMetadata?.name && appToEndorseMetadata.name.length > 20 ? "12px" : "16px"
 
@@ -59,6 +71,10 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
     switchEndorsementMutation.resetStatus()
     switchEndorsementMutation.sendTransaction(undefined)
   }, [switchEndorsementMutation])
+
+  const shouldDisplayCooldownAlert = useMemo(() => {
+    return account && !isXNodeOnCooldown
+  }, [account, isXNodeOnCooldown])
 
   if (switchEndorsementMutation.status !== "ready")
     return (
@@ -144,6 +160,18 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
             />
           </Text>
         </HStack>
+        {shouldDisplayCooldownAlert ? (
+          <GenericAlert
+            type="warning"
+            isLoading={roundInfoLoading}
+            message={t(
+              "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
+              {
+                roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+              },
+            )}
+          />
+        ) : null}
 
         <Skeleton
           w={"full"}

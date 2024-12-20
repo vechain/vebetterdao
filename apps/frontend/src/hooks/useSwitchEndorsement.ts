@@ -6,6 +6,7 @@ import {
   getAppEndorsementScoreQueryKey,
   getEndorsersQueryKey,
   getIsAppUnendorsedQueryKey,
+  getNodeCheckCooldownQueryKey,
   getNodesEndorsedAppsQueryKey,
   getXAppsQueryKey,
 } from "@/api"
@@ -59,6 +60,7 @@ export const useSwitchEndorsement = ({ appIdToEndorse, appIdToUnendorse, nodeId,
       // Other queries
       getNodesEndorsedAppsQueryKey(nodeId ? [nodeId] : []),
       getXAppsQueryKey(),
+      getNodeCheckCooldownQueryKey(nodeId),
     ],
     [appIdToEndorse, appIdToUnendorse, nodeId],
   )
