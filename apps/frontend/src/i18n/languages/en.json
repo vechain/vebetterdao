@@ -1391,6 +1391,8 @@
   "{{value}} needs to mint GM to be a galaxy member": "{{value}} needs to mint GM to be a galaxy member",
   "vote and mint": "vote and mint",
   "mint": "mint",
+  "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.": "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
+  "You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.": "You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
   "Claimed": "Claimed",
   "Converted": "Converted",
   "Supported a": "Supported a",
