@@ -5,10 +5,7 @@ import dayjs from "dayjs"
 import { useTranslation } from "react-i18next"
 import { ActionModal } from "./BetterActionCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useIsUserConnectedProfile } from "@/app/profile/components/utils/useIsUserConnectedProfile"
-import { useParams } from "next/navigation"
-
+import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 type Props = {
   transaction: B3trTransaction
 }
@@ -17,25 +14,29 @@ const compactFormatter = getCompactFormatter(2)
 
 export const UpgradeGMCard = ({ transaction }: Props) => {
   const { t } = useTranslation()
-  const { profile: address } = useParams<{ profile: string }>()
 
   const actionModal = useDisclosure()
-  const isConnectedUser = useIsUserConnectedProfile(address ?? "")
+  const { isConnectedUser } = useRetrieveProfilIdentity()
 
   return (
     <Card variant={"filledSmall"} w="full" cursor="pointer" onClick={actionModal.onOpen}>
       <CardBody>
         <HStack spacing={3} w="full" justify="space-between">
           <HStack spacing={4}>
-            <Flex w={8} h={8} bg="#DDEFFF" align="center" justify="center" borderRadius={"full"}>
+            <Flex
+              w="fit-content"
+              h="fit-content"
+              p={2}
+              bg="#DDEFFF"
+              align="center"
+              justify="center"
+              borderRadius={"full"}>
               <UilGlobe size={"1rem"} color="#004CFC" />
             </Flex>
             <VStack spacing={0} align="stretch">
               <HStack gap={0} flexWrap={"wrap"}>
                 <Text fontSize={"sm"} mr="1">
-                  {t("{{value}} upgraded a", {
-                    value: isConnectedUser ? "You" : `${humanAddress(address ?? "", 4, 3)}`,
-                  })}
+                  {isConnectedUser ? t("You upgraded a") : t("Upgraded a")}
                 </Text>
                 <Text fontSize={"sm"} fontWeight={600}>
                   {t("GM NFT")}
