@@ -39,6 +39,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
   const isLoading = isB3trBalanceLoading || isVot3BalanceLoading
 
   const isSwapDisabled = isLoading || hasNoBalance
+
   const { isConnectedUser, domain, profile, isOnProfilePage } = useRetrieveProfilIdentity()
   const domainOrAddress = domain && domain !== "" ? domain : humanAddress(profile ?? "", 6, 3)
 
