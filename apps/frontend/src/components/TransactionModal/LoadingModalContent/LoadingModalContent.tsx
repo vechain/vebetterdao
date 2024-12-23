@@ -38,7 +38,7 @@ export const LoadingModalContent = ({
         />
         {showExplorerButton && txId && (
           <Link
-            href={`${getConfig().network.explorerUrl}/txs/${txId}`}
+            href={`${getConfig().network.explorerUrl}/transaction/${txId}`}
             isExternal
             color="gray.500"
             fontSize={"14px"}
