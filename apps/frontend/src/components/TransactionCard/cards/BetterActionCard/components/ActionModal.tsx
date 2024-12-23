@@ -9,7 +9,7 @@ import { EmbeddedTweet, useTweet } from "react-tweet"
 import { BaseModal } from "@/components/BaseModal"
 import { isEmpty } from "lodash"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
-import { getConfig } from "@repo/config"
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
 const compactFormatter = getCompactFormatter(2)
 
@@ -22,9 +22,6 @@ type Props = {
   b3trAmount?: number
   txId?: string
 }
-
-const explorerUrl = getConfig().network.explorerUrl
-const network = getConfig().network.type
 
 export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNumber, b3trAmount, txId }: Props) => {
   const { data: apps } = useXApps()
@@ -91,9 +88,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
   const onTransactionDetailClick = useCallback(() => {
     if (!txId) return
 
-    if (network === "main") window.open(`${explorerUrl}/transaction/${txId}`, "_blank")
-
-    if (network === "test") window.open(`${explorerUrl}/transactions/${txId}`, "_blank")
+    window.open(getExplorerTxLink(txId), "_blank")
   }, [txId])
 
   return (

@@ -1,5 +1,5 @@
 import { VStack, Text, Image, HStack, Flex, Button, Link } from "@chakra-ui/react"
-import { getConfig } from "@repo/config"
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
@@ -98,7 +98,7 @@ export const SuccessConvertModalContent = ({
       </VStack>
       <Flex w={"full"} justifyContent={"center"} mt={6}>
         <Link
-          href={`${getConfig().network.explorerUrl}/txs/${txId}`}
+          href={getExplorerTxLink(txId)}
           isExternal
           color="gray.500"
           fontSize={"14px"}
