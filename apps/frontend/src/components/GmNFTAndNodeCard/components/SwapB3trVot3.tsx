@@ -91,7 +91,6 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
           </VStack>
         </Stack>
         {(isConnectedUser || !isOnProfilePage) && (
-        {(isConnectedUser || !isOnProfilePage) && (
           <Button
             isDisabled={isSwapDisabled}
             onClick={onOpen}
