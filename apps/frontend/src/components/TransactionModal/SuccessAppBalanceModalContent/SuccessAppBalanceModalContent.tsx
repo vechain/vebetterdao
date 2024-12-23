@@ -1,6 +1,6 @@
 import { B3TRIcon } from "@/components/Icons"
 import { VStack, Text, Image, Flex, Button, Link, HStack } from "@chakra-ui/react"
-import { getConfig } from "@repo/config"
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
@@ -66,7 +66,7 @@ export const SuccessAppBalanceModalContent = ({
 
       <Flex w={"full"} justifyContent={"center"} mt={6}>
         <Link
-          href={`${getConfig().network.explorerUrl}/transaction/${txId}`}
+          href={getExplorerTxLink(txId)}
           isExternal
           color="gray.500"
           fontSize={"14px"}

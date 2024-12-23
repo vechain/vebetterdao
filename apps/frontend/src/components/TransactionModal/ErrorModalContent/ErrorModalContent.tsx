@@ -4,7 +4,7 @@ import errorAnimation from "./error.json"
 import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
-import { getConfig } from "@repo/config"
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 import { useTranslation } from "react-i18next"
 
 export type ErrorModalContentProps = {
@@ -58,7 +58,7 @@ export const ErrorModalContent = ({
           {description && <Text size="sm">{description}</Text>}
           {showExplorerButton && txId && (
             <Link
-              href={`${getConfig().network.explorerUrl}/transaction/${txId}`}
+              href={getExplorerTxLink(txId)}
               isExternal
               color="gray.500"
               fontSize={"14px"}

@@ -5,7 +5,7 @@ import { ShareButtons } from "../../ShareButtons"
 import { ReactNode, useState } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
-import { getConfig } from "@repo/config"
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 import { useTranslation } from "react-i18next"
 import { PropsEndorsement } from "@/app/apps/components/UnendorseAppModal"
 import { AnalyticsUtils } from "@/utils"
@@ -79,7 +79,7 @@ export const SuccessModalContent = ({
         </motion.div>
         {showExplorerButton && txId && (
           <Link
-            href={`${getConfig().network.explorerUrl}/transaction/${txId}`}
+            href={getExplorerTxLink(txId)}
             isExternal
             color="gray.500"
             fontSize={"14px"}

@@ -4,8 +4,8 @@ import unknownAnimation from "./unknown.json"
 import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
 import { motion } from "framer-motion"
-import { getConfig } from "@repo/config"
 import { useTranslation } from "react-i18next"
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
 export type UnknownModalContentProps = {
   title?: ReactNode
@@ -56,7 +56,7 @@ export const UnknownModalContent = ({
           )}
           {txId && showExplorerButton && (
             <Link
-              href={`${getConfig().network.explorerUrl}/transaction/${txId}`}
+              href={getExplorerTxLink(txId)}
               isExternal
               color="gray.500"
               fontSize={"14px"}
