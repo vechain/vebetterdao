@@ -40,6 +40,12 @@ async function selectAndTest() {
       choices: testChoices,
     })
 
+    // can be extended to other environments
+    const validEnvs = ["local"]
+    if (!validEnvs.includes(env)) {
+      throw new Error(`Invalid environment: ${env}`)
+    }
+
     // Run the selected test file
     console.log(`Running tests in ${userChoice.testFile}...`)
     execSync(
