@@ -1,13 +1,24 @@
-import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show, useMediaQuery } from "@chakra-ui/react"
-import { useTranslation } from "react-i18next"
 import { useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
-import { UilGift } from "@iconscout/react-unicons"
 import { TransactionModal } from "@/components"
-import { useDisclosure } from "@chakra-ui/react"
-import { useCallback } from "react"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
-import { useWallet } from "@vechain/dapp-kit-react"
+import {
+  Button,
+  Card,
+  CardBody,
+  Heading,
+  HStack,
+  Image,
+  Show,
+  Text,
+  useDisclosure,
+  useMediaQuery,
+  VStack,
+} from "@chakra-ui/react"
+import { UilGift } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { useCallback } from "react"
+import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(4)
 
