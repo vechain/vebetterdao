@@ -25,16 +25,19 @@ import { useRouter } from "next/navigation"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "../FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
+import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
+import { humanAddress } from "@repo/utils/FormattingUtils"
 
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
+  const { isConnectedUser, domain, profile, isOnProfilePage, viewMode } = useRetrieveProfilIdentity()
 
-  const { data: hasUserVoted } = useParticipatedInGovernance(account)
+  const { data: hasUserVoted } = useParticipatedInGovernance(profile ?? account)
   const { gmImage, gmName, gmLevel, gmRewardMultiplier, isGMLoading, isGMOwned, isXNodeAttachedToGM } =
-    useSelectedGmNft()
+    useSelectedGmNft(profile)
   //node
-  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, isXNodeDelegatee } = useXNode()
+  const { xNodeName, xNodeImage, xNodePoints, isXNodeHolder, isXNodeDelegator, isXNodeDelegatee } = useXNode(profile)
 
   const nodeAttachedColor = isXNodeAttachedToGM ? "#B1F16C" : "#FFFFFF80"
 
@@ -66,6 +69,28 @@ export const GmNFTAndNodeCard = () => {
       </Flex>
     )
   }, [isAbove800, isXNodeAttachedToGM, isGMOwned])
+
+  const headingText = useMemo(() => {
+    const domainOrAddress = domain && domain !== "" ? domain : humanAddress(profile ?? "", 6, 3)
+
+    if (!isGMOwned) {
+      if (!hasUserVoted) {
+        return t(isConnectedUser ? "Vote to be a galaxy member" : "{{value}} needs to vote to be a galaxy member", {
+          value: domainOrAddress,
+        })
+      } else {
+        return isConnectedUser
+          ? t("Mint GM to be a galaxy member")
+          : t("{{value}} needs to mint GM to be a galaxy member", {
+              value: domainOrAddress,
+            })
+      }
+    }
+
+    return isConnectedUser || !isOnProfilePage
+      ? t("Your galaxy member")
+      : t("{{value}} is a galaxy member", { value: domainOrAddress })
+  }, [isGMOwned, hasUserVoted, t, isConnectedUser, domain, profile, isOnProfilePage])
 
   const router = useRouter()
   const goToGmNftPage = useCallback(() => {
@@ -101,21 +126,9 @@ export const GmNFTAndNodeCard = () => {
                   {t("Your Galaxy Member")}
                 </Heading>
               }>
-              {!isGMOwned ? (
-                !hasUserVoted ? (
-                  <Heading fontSize="xl" fontWeight={600}>
-                    {t("Vote to be a galaxy member")}
-                  </Heading>
-                ) : (
-                  <Heading fontSize="xl" fontWeight={600}>
-                    {t("Mint GM to be a galaxy member")}
-                  </Heading>
-                )
-              ) : (
-                <Heading fontSize="xl" fontWeight={600}>
-                  {t("Your galaxy member")}
-                </Heading>
-              )}
+              <Heading fontSize="xl" fontWeight={600}>
+                {headingText}
+              </Heading>
             </FeatureFlagWrapper>
 
             {isAbove800 && isXNodeAttachedToGM && isXNodeHolder && (
@@ -150,8 +163,8 @@ export const GmNFTAndNodeCard = () => {
                 rounded="12px"
                 gap={6}
                 flex={1}
-                cursor={"pointer"}
-                onClick={goToGmNftPage}>
+                cursor={viewMode ? "default" : "pointer"}
+                onClick={viewMode ? undefined : goToGmNftPage}>
                 <Skeleton isLoaded={!isGMLoading} w="68px" h="68px" rounded="8px">
                   <Box
                     w={"68px"}
@@ -214,8 +227,8 @@ export const GmNFTAndNodeCard = () => {
                   rounded="12px"
                   gap={6}
                   flex={1}
-                  onClick={goToXNodePage}
-                  cursor="pointer">
+                  onClick={viewMode ? undefined : goToXNodePage}
+                  cursor={viewMode ? "default" : "pointer"}>
                   <Image src={xNodeImage} alt="gm" w="68px" h="68px" rounded="8px" />
                   <VStack flex="1" align={"flex-start"}>
                     <HStack>
@@ -245,10 +258,10 @@ export const GmNFTAndNodeCard = () => {
               </>
             )}
           </Stack>
-          <GmNFTAndNodeFooter />
+          {!isOnProfilePage && <GmNFTAndNodeFooter />}
         </VStack>
         <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />
-        {account && <SwapB3trVot3 address={account} />}
+        {account && !isOnProfilePage && <SwapB3trVot3 address={account} />}
       </Stack>
     </Card>
   )
