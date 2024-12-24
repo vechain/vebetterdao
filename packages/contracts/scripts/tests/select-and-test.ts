@@ -1,7 +1,7 @@
 import inquirer from "inquirer"
-import { execSync } from "child_process"
+import { spawnSync } from "child_process"
+import path from "path"
 
-// Define the test files
 const testFiles: Record<string, string> = {
   "Test XApps": "test/XApps.test.ts",
   "Test XAllocationVoting": "test/XAllocationPool.test.ts",
@@ -24,6 +24,12 @@ async function selectAndTest() {
     const env = process.env.NEXT_PUBLIC_APP_ENV
     if (!env) throw new Error("Environment variable NEXT_PUBLIC_APP_ENV is not set.")
 
+    // Validate environment
+    const validEnvs = ["local"]
+    if (!validEnvs.includes(env)) {
+      throw new Error(`Invalid environment: ${env}`)
+    }
+
     console.log("Running tests in environment:", env)
 
     // Create choices for the inquirer prompt
@@ -40,18 +46,40 @@ async function selectAndTest() {
       choices: testChoices,
     })
 
-    // can be extended to other environments
-    const validEnvs = ["local"]
-    if (!validEnvs.includes(env)) {
-      throw new Error(`Invalid environment: ${env}`)
+    // Validate test file path
+    const testFilePath = path.resolve(userChoice.testFile)
+    if (!testFilePath.startsWith(path.resolve("test/"))) {
+      throw new Error("Invalid test file path")
     }
 
-    // Run the selected test file
     console.log(`Running tests in ${userChoice.testFile}...`)
-    execSync(
-      `dotenv -v NEXT_PUBLIC_APP_ENV=${env} -- turbo run test:hardhat --filter=contracts -- ${userChoice.testFile}`,
-      { stdio: "inherit" },
+
+    const result = spawnSync(
+      "dotenv",
+      [
+        "-v",
+        `NEXT_PUBLIC_APP_ENV=${env}`,
+        "--",
+        "turbo",
+        "run",
+        "test:hardhat",
+        "--filter=contracts",
+        "--",
+        userChoice.testFile,
+      ],
+      {
+        stdio: "inherit",
+        shell: false, // disabled shell for security mesures
+      },
     )
+
+    if (result.error) {
+      throw result.error
+    }
+
+    if (result.status !== 0) {
+      throw new Error(`Process exited with code ${result.status}`)
+    }
 
     console.log("\nTest complete!")
   } catch (error) {
