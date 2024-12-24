@@ -27,17 +27,17 @@ import { useB3trToUpgrade } from "."
  *   - isGMClaimable: A boolean indicating whether the Galaxy Member NFT is claimable.
  *   - attachedNodeId: The ID of the node attached to the Galaxy Member NFT.
  */
-export const useSelectedGmNft = () => {
+export const useSelectedGmNft = (profile?: string) => {
   const { account } = useWallet()
-  const { isOwned: isGMOwned } = useIsGMclaimable()
-  const { isLoading: isGMLoading } = useNFTImage()
+  const { isOwned: isGMOwned } = useIsGMclaimable(profile)
+  const { isLoading: isGMLoading } = useNFTImage(profile)
   const { data: b3trBalance } = useB3trBalance(account ?? "")
   const {
     data: selectedTokenId,
     isLoading: isSelectedTokenIdLoading,
     isError: isErrorSelectedTokenId,
     error: errorSelectedTokenIdError,
-  } = useSelectedTokenId()
+  } = useSelectedTokenId(profile)
 
   const {
     data: gmLevel,
@@ -103,7 +103,7 @@ export const useSelectedGmNft = () => {
   } = useGMMaxLevel()
 
   // INFO: workaround to get the NFT image and token ID
-  const { imageData, tokenID, isLoading: isLoadingNFT } = useNFTImage()
+  const { imageData, tokenID, isLoading: isLoadingNFT } = useNFTImage(profile)
 
   const isLoading =
     isGMLoading ||
