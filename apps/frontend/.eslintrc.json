@@ -8,6 +8,7 @@
     "react/no-children-prop": "warn",
     "react/no-unescaped-entities": "warn",
     "react/jsx-no-literals": "error",
+    "react/no-array-index-key": "warn",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
