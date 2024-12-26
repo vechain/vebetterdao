@@ -1,15 +1,16 @@
-import { VECHAIN_URL_SOLO, VECHAIN_URL_MAINNET, VECHAIN_URL_TESTNET } from "@vechain/hardhat-vechain"
+import { getConfig } from "@repo/config"
+import { EnvConfig } from "@repo/config/contracts"
+import { VECHAIN_URL_SOLO } from "@vechain/hardhat-vechain"
 import { HardhatUserConfig } from "hardhat/config"
+
 import "@nomicfoundation/hardhat-toolbox"
 import "@nomiclabs/hardhat-truffle5"
-import "@vechain/hardhat-vechain"
 import "@vechain/hardhat-ethers"
+import "@vechain/hardhat-vechain"
 import "hardhat-contract-sizer"
 import "hardhat-ignore-warnings"
-import { getConfig } from "@repo/config"
 import "solidity-coverage"
 import "solidity-docgen"
-import { EnvConfig } from "@repo/config/contracts"
 
 const config: HardhatUserConfig = {
   solidity: "0.8.20",
