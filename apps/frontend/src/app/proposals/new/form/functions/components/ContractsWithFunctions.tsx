@@ -35,7 +35,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
       return (
         <Grid templateColumns={["repeat(1, 1fr)", `repeat(${gridSize}, 1fr)`]} gap={[4, 4, 8]} w="full">
           {contractsWithFunctionsToRender.map(contract => {
-            return contract.functions.map((func, index) => {
+            return contract.functions.map(func => {
               const isSelectedIndex = actions?.findIndex(
                 action => action.contractAddress === contract.contract.address && action.name === func.name,
               )
@@ -56,7 +56,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
                 checked: isSelected,
               }
               return (
-                <GridItem colSpan={1} key={index}>
+                <GridItem colSpan={1} key={`contract-functions-${contract.name}-${func.name}`}>
                   <CheckableCard
                     {...step}
                     inputType="checkbox"
@@ -72,8 +72,8 @@ export const ContractsWithFunctions: React.FC<Props> = ({
       )
     }
   }
-  return contractsWithFunctionsToRender.map((contract, index) => (
-    <VStack key={index} spacing={4} align="flex-start" w="full">
+  return contractsWithFunctionsToRender.map(contract => (
+    <VStack key={contract.name} spacing={4} align="flex-start" w="full">
       <Box>
         <Heading size="sm">{contract.name}</Heading>
         <Text fontSize="sm" fontWeight={400} color={"gray.500"}>
@@ -81,7 +81,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
         </Text>
       </Box>
       <VStack spacing={4} align="flex-start" divider={<Divider />} w="full">
-        {contract.functions.map((func, index) => {
+        {contract.functions.map(func => {
           const isSelectedIndex = actions?.findIndex(
             action => action.contractAddress === contract.contract.address && action.name === func.name,
           )
@@ -92,7 +92,7 @@ export const ContractsWithFunctions: React.FC<Props> = ({
               borderRadius={"xl"}
               w="full"
               variant="baseWithBorder"
-              key={index}
+              key={`${contract.name}-${func.name}`}
               _hover={{
                 borderColor: "primary.200",
                 transition: "all 0.2s",

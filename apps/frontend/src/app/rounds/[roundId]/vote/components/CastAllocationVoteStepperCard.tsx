@@ -70,9 +70,9 @@ export const CastAllocationVoteStepperCard = () => {
           variant="primaryVertical"
           gap={0}
           height={isDesktop ? height : "auto"}>
-          {Steps.map((step, index) => (
+          {Steps.map(step => (
             <Step
-              key={index}
+              key={`cast-vote-step-${step.key}`}
               {...(!isDesktop && {
                 style: {
                   gap: 0,

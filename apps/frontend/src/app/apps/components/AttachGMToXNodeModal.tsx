@@ -4,33 +4,35 @@ import { CustomModalContent, TransactionModal } from "@/components"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
 import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
+import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
 import { useAttachGMToXNode } from "@/hooks"
+import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import {
-  Flex,
-  Modal,
-  ModalOverlay,
-  ModalBody,
-  VStack,
-  Box,
-  Heading,
-  Text,
-  Button,
-  ModalCloseButton,
-  ModalHeader,
-  ModalFooter,
-  Stack,
-  useBreakpointValue,
-  Hide,
   Alert,
-  AlertIcon,
   AlertDescription,
+  AlertIcon,
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Hide,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Stack,
+  Text,
+  useBreakpointValue,
+  VStack,
 } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import { v4 as uuid } from "uuid"
+
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -120,7 +122,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
             <Stack align="stretch" direction={["column", "column", "row"]}>
               {steps.map((step, index) => (
                 <VStack
-                  key={index}
+                  key={`step-${uuid()}`}
                   flex={1}
                   bg="#FAFAFA"
                   p={[3, 3, 6]}

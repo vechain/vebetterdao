@@ -36,14 +36,14 @@ export const AllManagedAppsModal = ({ userAppRoles, isOpen, onClose }: Props) =>
         <ModalCloseButton />
         <ModalBody>
           <VStack spacing={12}>
-            {userAppRoles.map((role, index) => {
+            {userAppRoles.map(role => {
               if (role.isAdmin || role.isModerator) {
                 return (
                   <AppDetails
                     appId={role.appId}
                     isAdmin={role.isAdmin}
                     isModerator={role.isModerator}
-                    key={index}
+                    key={`managed-app-${role.appId}`}
                     showDivider={true}
                   />
                 )

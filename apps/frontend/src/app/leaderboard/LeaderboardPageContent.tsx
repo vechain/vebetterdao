@@ -120,7 +120,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
                 address: ranking?.entity ?? "",
                 score: ranking?.actionsRewarded ?? 0,
               }}
-              key={idx}
+              key={`leaderboard-${ranking?.entity}-${ranking?.roundId}`}
               isYourRanking={AddressUtils.compareAddresses(ranking?.entity ?? "", account ?? "")}
             />
           ))}
