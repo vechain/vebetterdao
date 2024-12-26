@@ -53,25 +53,14 @@ async function selectAndTest() {
     }
 
     console.log(`Running tests in ${userChoice.testFile}...`)
-
-    const result = spawnSync(
-      "dotenv",
-      [
-        "-v",
-        `NEXT_PUBLIC_APP_ENV=${env}`,
-        "--",
-        "turbo",
-        "run",
-        "test:hardhat",
-        "--filter=contracts",
-        "--",
-        userChoice.testFile,
-      ],
-      {
-        stdio: "inherit",
-        shell: false, // disabled shell for security mesures
+    const result = spawnSync("turbo", ["run", "test:hardhat", "--filter=contracts", "--", userChoice.testFile], {
+      stdio: "inherit",
+      shell: false,
+      env: {
+        ...process.env,
+        NEXT_PUBLIC_APP_ENV: env,
       },
-    )
+    })
 
     if (result.error) {
       throw result.error
