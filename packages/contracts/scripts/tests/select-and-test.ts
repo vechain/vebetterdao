@@ -53,7 +53,10 @@ async function selectAndTest() {
     }
 
     console.log(`Running tests in ${userChoice.testFile}...`)
-    const result = spawnSync("turbo", ["run", "test:hardhat", "--filter=contracts", "--", userChoice.testFile], {
+    const rootDir = path.resolve(process.cwd(), "../..")
+    const turboPath = path.join(rootDir, "node_modules", ".bin", "turbo")
+
+    const result = spawnSync(turboPath, ["run", "test:hardhat", "--filter=contracts", "--", userChoice.testFile], {
       stdio: "inherit",
       shell: false,
       env: {
