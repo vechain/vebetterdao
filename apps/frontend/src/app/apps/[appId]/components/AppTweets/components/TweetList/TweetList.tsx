@@ -5,7 +5,6 @@ import { Dispatch, SetStateAction, useCallback, useMemo, useState } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
 
 import { TweetCard } from "./components/TweetCard"
-
 type Props = {
   editMode: boolean
   tweets: string[]
@@ -45,7 +44,7 @@ export const TweetList = ({ editMode, tweets, setTweets }: Props) => {
       <VStack alignItems="stretch" py={3} gap={4}>
         {visibleTweets?.map((tweetQuery, index) => (
           <TweetCard
-            key={`tweet-card-${tweetQuery.data?.id_str}`}
+            key={`tweet-card-${tweetQuery.data?.id_str ?? index}`}
             tweetQuery={tweetQuery}
             editMode={editMode}
             index={index}

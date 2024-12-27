@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { FiArrowUpRight } from "react-icons/fi"
+import { v4 as uuid } from "uuid"
 
 type Props = {
   maxApps?: number
@@ -59,7 +60,7 @@ export const DashboardXApps = ({ maxApps = 4 }: Props) => {
       </CardHeader>
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-          {slicedXApps?.map(xApp => <DashboardXAppCard key={`xApp-${xApp?.id}`} xApp={xApp.app} />)}
+          {slicedXApps?.map(xApp => <DashboardXAppCard key={`xApp-${xApp?.id ?? uuid()}`} xApp={xApp.app} />)}
         </Grid>
       </CardBody>
     </Card>
