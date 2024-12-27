@@ -1395,5 +1395,6 @@
   "{{value}} needs to vote to be a galaxy member": "{{value}} needs to vote to be a galaxy member",
   "{{value}} needs to mint GM to be a galaxy member": "{{value}} needs to mint GM to be a galaxy member",
   "{{value}} is a galaxy member": "{{value}} is a galaxy member",
-  "GM Level": "GM Level"
+  "GM Level": "GM Level",
+  "{{value}} needs to mint an NFT to get reward multipliers": "{{value}} needs to mint an NFT to get reward multipliers"
 }
