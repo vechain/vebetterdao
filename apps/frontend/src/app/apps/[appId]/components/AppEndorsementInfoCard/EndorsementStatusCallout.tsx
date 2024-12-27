@@ -19,11 +19,14 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
   const { app } = useCurrentAppInfo()
   const { roundId, isLoading, isCurrentRound, isNextRound } = useAppGracePeriodEndsAfterRound(app?.id ?? "")
 
-  const roundReference = isCurrentRound
-    ? t("the current round")
-    : isNextRound
-      ? t("the next round")
-      : `${t("round")} ${roundId}`
+  let roundReference: string
+  if (isCurrentRound) {
+    roundReference = t("the current round")
+  } else if (isNextRound) {
+    roundReference = t("the next round")
+  } else {
+    roundReference = `${t("round")} ${roundId}`
+  }
 
   const { title, description, backgroundColor, color, icon } = STATUS_CONFIG[endorsementStatus] ?? {
     title: t("Endorsement coming soon"),
