@@ -3,7 +3,7 @@ import { VStack, Grid, GridItem, Heading, useDisclosure, Text, Button, Image, Bo
 import { useForm } from "react-hook-form"
 import { AppPreviewDetailCard } from "@/components/AppPreviewDetailCard"
 import { useTranslation } from "react-i18next"
-import { useSubmitNewApp, useUploadAppMetadata } from "@/hooks"
+import { useSubmitNewApp, useUploadAppMetadata, useTransactionStatus, useTransactionError } from "@/hooks"
 import { TransactionModal } from "@/components"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -153,21 +153,16 @@ export const NewAppPageFormContent = () => {
         onClose={onConfirmationClose}
         confirmationTitle="Submit App"
         successTitle="App submitted"
-        status={
-          metadataUploading
-            ? "uploadingMetadata"
-            : submitAppMutation.error || metadataUploadError
-              ? "error"
-              : submitAppMutation.status
-        }
+        status={useTransactionStatus([
+          { status: metadataUploading ? "uploadingMetadata" : undefined },
+          { status: submitAppMutation.error || metadataUploadError ? "error" : undefined },
+          { status: submitAppMutation.status },
+        ])}
         errorDescription={metadataUploadError?.message ?? submitAppMutation.error?.reason}
-        errorTitle={
-          metadataUploadError
-            ? "Error uploading metadata"
-            : submitAppMutation.error
-              ? "Error submitting app"
-              : undefined
-        }
+        errorTitle={useTransactionError([
+          { error: metadataUploadError, title: "Error uploading metadata" },
+          { error: submitAppMutation.error, title: "Error submitting app" },
+        ])}
         showTryAgainButton={true}
         pendingTitle="Submitting new app..."
         txId={submitAppMutation.txReceipt?.meta.txID}

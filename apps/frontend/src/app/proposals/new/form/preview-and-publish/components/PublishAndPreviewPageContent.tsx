@@ -8,7 +8,7 @@ import { useProposalFormStore } from "@/store"
 import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { useCreateProposal, useUploadProposalMetadata } from "@/hooks"
+import { useCreateProposal, useUploadProposalMetadata, useTransactionError, useTransactionStatus } from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useForm } from "react-hook-form"
 import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
@@ -99,6 +99,17 @@ export const PublishAndPreviewPageContent = () => {
     handleSubmit(onSubmit)()
   }, [createProposalMutation, handleSubmit, onSubmit])
 
+  const modalStatus = useTransactionStatus([
+    { status: metadataUploading ? "uploadingMetadata" : undefined },
+    { status: createProposalMutation.error || metadataUploadError ? "error" : undefined },
+    { status: createProposalMutation.status },
+  ])
+
+  const errorTitle = useTransactionError([
+    { error: metadataUploadError, title: t("Error uploading metadata") },
+    { error: createProposalMutation.error, title: t("Error creating proposal") },
+  ])
+
   return (
     <>
       <TransactionModal
@@ -106,21 +117,9 @@ export const PublishAndPreviewPageContent = () => {
         onClose={onConfirmationClose}
         confirmationTitle={t("Create a proposal")}
         successTitle={t("Proposal created!")}
-        status={
-          metadataUploading
-            ? "uploadingMetadata"
-            : createProposalMutation.error || metadataUploadError
-              ? "error"
-              : createProposalMutation.status
-        }
+        status={modalStatus}
         errorDescription={metadataUploadError?.message ?? createProposalMutation.error?.reason}
-        errorTitle={
-          metadataUploadError
-            ? t("Error uploading metadata")
-            : createProposalMutation.error
-              ? t("Error uploading proposal metadata")
-              : undefined
-        }
+        errorTitle={errorTitle}
         showTryAgainButton={true}
         onTryAgain={onTryAgain}
         pendingTitle={t("Creating proposal...")}

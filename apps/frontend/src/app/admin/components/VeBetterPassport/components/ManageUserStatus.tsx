@@ -1,6 +1,6 @@
 import { useUserStatus } from "@/api"
 import { TransactionModal } from "@/components"
-import { UserStatus, useWhitelistBlacklistUser } from "@/hooks"
+import { UserStatus, useWhitelistBlacklistUser, useEnumMapping } from "@/hooks"
 import {
   Button,
   Card,
@@ -72,6 +72,36 @@ export const ManageUserStatus = () => {
   const isLoading = isTxReceiptLoading || sendTransactionPending
   const isFormValid = isValidAddress
 
+  const buttonColorScheme = useEnumMapping(actionType, {
+    [UserStatus.WHITELIST]: "green",
+    [UserStatus.BLACKLIST]: "red",
+    default: "blue",
+  })
+
+  const buttonText = useEnumMapping(actionType, {
+    [UserStatus.WHITELIST]: t("Whitelist User"),
+    [UserStatus.BLACKLIST]: t("Blacklist User"),
+    default: t("Remove Status"),
+  })
+
+  const modalSuccessTitle = useEnumMapping(actionType, {
+    [UserStatus.WHITELIST]: "User Whitelisted",
+    [UserStatus.BLACKLIST]: "User Blacklisted",
+    default: "User Status Removed",
+  })
+
+  const modalPendingTitle = useEnumMapping(actionType, {
+    [UserStatus.WHITELIST]: "Whitelisting user...",
+    [UserStatus.BLACKLIST]: "Blacklisting user...",
+    default: "Removing user status...",
+  })
+
+  const modalErrorTitle = useEnumMapping(actionType, {
+    [UserStatus.WHITELIST]: "Error whitelisting user",
+    [UserStatus.BLACKLIST]: "Error blacklisting user",
+    default: "Error removing user status",
+  })
+
   return (
     <>
       <Card w={"full"}>
@@ -121,16 +151,10 @@ export const ManageUserStatus = () => {
 
               <Button
                 isDisabled={!isFormValid || actionType === userStatus}
-                colorScheme={
-                  actionType === UserStatus.WHITELIST ? "green" : actionType === UserStatus.BLACKLIST ? "red" : "blue"
-                }
+                colorScheme={buttonColorScheme}
                 type="submit"
                 isLoading={isLoading}>
-                {actionType === UserStatus.WHITELIST
-                  ? t("Whitelist User")
-                  : actionType === UserStatus.BLACKLIST
-                    ? t("Blacklist User")
-                    : t("Remove Status")}
+                {buttonText}
               </Button>
             </VStack>
           </form>
@@ -141,31 +165,13 @@ export const ManageUserStatus = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? "error" : status}
-        successTitle={
-          actionType === UserStatus.WHITELIST
-            ? "User Whitelisted"
-            : actionType === UserStatus.BLACKLIST
-              ? "User Blacklisted"
-              : "User Status Removed"
-        }
+        successTitle={modalSuccessTitle}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
-        pendingTitle={
-          actionType === UserStatus.WHITELIST
-            ? "Whitelisting user..."
-            : actionType === UserStatus.BLACKLIST
-              ? "Blacklisting user..."
-              : "Removing user status..."
-        }
-        errorTitle={
-          actionType === UserStatus.WHITELIST
-            ? "Error whitelisting user"
-            : actionType === UserStatus.BLACKLIST
-              ? "Error blacklisting user"
-              : "Error removing user status"
-        }
+        pendingTitle={modalPendingTitle}
+        errorTitle={modalErrorTitle}
         errorDescription={error?.reason}
       />
     </>

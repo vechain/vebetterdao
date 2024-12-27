@@ -1,6 +1,8 @@
 import { TransactionModal } from "@/components"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { useDisclosure } from "@chakra-ui/react"
+import { useTransactionError } from "@/hooks/useTransactionError"
+import { useTransactionStatus } from "@/hooks/useTransactionStatus"
 
 type Props = {
   transactionModal: ReturnType<typeof useDisclosure>
@@ -17,27 +19,26 @@ export const UpdateAppMetadataTransactionModal = ({
   updateAppDetailsMutation,
   onTryAgain,
 }: Props) => {
+  const modalStatus = useTransactionStatus([
+    { status: uploadMetadataMutation.metadataUploading ? "uploadingMetadata" : undefined },
+    { status: updateAppDetailsMutation.error || uploadMetadataMutation.metadataUploadError ? "error" : undefined },
+    { status: updateAppDetailsMutation.status },
+  ])
+
+  const errorTitle = useTransactionError([
+    { error: uploadMetadataMutation.metadataUploadError, title: "Error uploading metadata" },
+    { error: updateAppDetailsMutation.error, title: "Error updating app details" },
+  ])
+
   return (
     <TransactionModal
       isOpen={transactionModal.isOpen}
       onClose={handleClose}
       confirmationTitle="Update App details"
       successTitle="App details updated!"
-      status={
-        uploadMetadataMutation.metadataUploading
-          ? "uploadingMetadata"
-          : updateAppDetailsMutation.error || uploadMetadataMutation.metadataUploadError
-            ? "error"
-            : updateAppDetailsMutation.status
-      }
+      status={modalStatus}
       errorDescription={uploadMetadataMutation.metadataUploadError?.message ?? updateAppDetailsMutation.error?.reason}
-      errorTitle={
-        uploadMetadataMutation.metadataUploadError
-          ? "Error uploading metadata"
-          : updateAppDetailsMutation.error
-            ? "Error updating app details"
-            : undefined
-      }
+      errorTitle={errorTitle}
       showTryAgainButton={true}
       onTryAgain={onTryAgain}
       pendingTitle="Updating app details..."

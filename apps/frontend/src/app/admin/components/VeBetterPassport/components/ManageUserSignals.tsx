@@ -1,6 +1,6 @@
 import { useUserBotSignals } from "@/api"
 import { TransactionModal } from "@/components"
-import { useResetUserBotSignals, useSignalBotUser } from "@/hooks"
+import { useResetUserBotSignals, useSignalBotUser, useConditionalTitle } from "@/hooks"
 import {
   Button,
   Card,
@@ -90,6 +90,30 @@ export const ManageUserSignals = () => {
   const isSignalResetEnabled = signals > 0
   const isLoading = isResetTxLoading || isSignalTxLoading || isResetPending || isSignalPending
 
+  const successTitle = useConditionalTitle(
+    [
+      { condition: resetStatus === "success", title: "Signals Reset" },
+      { condition: signalStatus === "success", title: "User Signaled" },
+    ],
+    "Action Completed",
+  )
+
+  const pendingTitle = useConditionalTitle(
+    [
+      { condition: resetStatus === "pending", title: "Resetting signals..." },
+      { condition: signalStatus === "pending", title: "Signaling user..." },
+    ],
+    "Processing action...",
+  )
+
+  const errorTitle = useConditionalTitle(
+    [
+      { condition: !!resetError, title: "Error resetting signals" },
+      { condition: !!signalError, title: "Error signaling user" },
+    ],
+    "Error processing action",
+  )
+
   return (
     <>
       <Card w={"full"}>
@@ -171,13 +195,7 @@ export const ManageUserSignals = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={resetError || signalError ? "error" : resetStatus || signalStatus}
-        successTitle={
-          resetStatus === "success"
-            ? "Signals Reset"
-            : signalStatus === "success"
-              ? "User Signaled"
-              : "Action Completed"
-        }
+        successTitle={successTitle}
         onTryAgain={resetStatus === "error" ? handleResetSignalsSubmit : handleSignalUserSubmit}
         showTryAgainButton
         showExplorerButton
@@ -187,16 +205,8 @@ export const ManageUserSignals = () => {
           resetTxTransaction?.txid ??
           signalTxTransaction?.txid
         }
-        pendingTitle={
-          resetStatus === "pending"
-            ? "Resetting signals..."
-            : signalStatus === "pending"
-              ? "Signaling user..."
-              : "Processing action..."
-        }
-        errorTitle={
-          resetError ? "Error resetting signals" : signalError ? "Error signaling user" : "Error processing action"
-        }
+        pendingTitle={pendingTitle}
+        errorTitle={errorTitle}
         errorDescription={resetError?.reason || signalError?.reason}
       />
     </>
