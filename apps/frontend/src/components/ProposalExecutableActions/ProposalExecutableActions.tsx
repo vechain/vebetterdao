@@ -15,6 +15,18 @@ type Props = {
   actions: ProposalFormAction[]
 }
 
+const getParamValue = (decoded: abi.Decoded, paramName: string, requiresEthParse?: boolean) => {
+  if (!decoded[paramName]) {
+    return undefined
+  }
+
+  if (requiresEthParse) {
+    return ethers.formatEther(decoded[paramName])
+  }
+
+  return decoded[paramName]
+}
+
 export const ProposalExecutableActions: React.FC<Props> = ({ actions }) => {
   const { t } = useTranslation()
   // This is to reuse the same components of the form. This is a read-only version of the form
@@ -35,20 +47,15 @@ export const ProposalExecutableActions: React.FC<Props> = ({ actions }) => {
       } catch (e) {
         console.error("Error decoding call data", e)
       }
+
       return {
         ...action,
-        params: action.abiDefinition.inputs.map(param => {
-          return {
-            name: param.name,
-            type: param.type,
-            value: decoded[param.name]
-              ? param.requiresEthParse
-                ? ethers.formatEther(decoded[param.name])
-                : decoded[param.name]
-              : undefined,
-            requiresEthParse: param.requiresEthParse,
-          }
-        }),
+        params: action.abiDefinition.inputs.map(param => ({
+          name: param.name,
+          type: param.type,
+          value: getParamValue(decoded, param.name, param.requiresEthParse),
+          requiresEthParse: param.requiresEthParse,
+        })),
       }
     })
     setValue("actions", formActions)
