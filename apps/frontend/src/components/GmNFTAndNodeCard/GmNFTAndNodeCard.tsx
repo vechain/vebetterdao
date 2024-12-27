@@ -19,8 +19,6 @@ export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const { isConnectedUser, domain, profile, isOnProfilePage, viewMode } = useRetrieveProfilIdentity()
-  console.log({ viewMode })
-  console.log({ isConnectedUser, domain, profile, isOnProfilePage, viewMode })
 
   const {
     hasUserVoted,
@@ -120,6 +118,8 @@ export const GmNFTAndNodeCard = () => {
               nodeAttachedColor={nodeAttachedColor}
               viewMode={viewMode}
               onCardClick={goToGmNftPage}
+              domain={domain}
+              profile={profile}
             />
 
             {(isXNodeHolder || isXNodeDelegator) && (
@@ -144,7 +144,7 @@ export const GmNFTAndNodeCard = () => {
           </Stack>
           {!isOnProfilePage && <GmNFTAndNodeFooter />}
         </VStack>
-        <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />
+        {!isOnProfilePage && <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />}
         {account && !isOnProfilePage && <SwapB3trVot3 address={account} />}
       </Stack>
     </Card>

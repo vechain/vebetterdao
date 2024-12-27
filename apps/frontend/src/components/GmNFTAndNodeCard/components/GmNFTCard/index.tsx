@@ -5,7 +5,7 @@ import { FaChevronRight } from "react-icons/fa6"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
-
+import { humanAddress } from "@repo/utils/FormattingUtils"
 interface GmNFTCardProps {
   isGMOwned: boolean
   isGMLoading: boolean
@@ -16,6 +16,8 @@ interface GmNFTCardProps {
   nodeAttachedColor: string
   viewMode?: boolean
   onCardClick?: () => void
+  domain?: string
+  profile?: string
 }
 
 export const GmNFTCard = ({
@@ -28,6 +30,8 @@ export const GmNFTCard = ({
   nodeAttachedColor,
   viewMode,
   onCardClick,
+  domain,
+  profile,
 }: GmNFTCardProps) => {
   const { t } = useTranslation()
 
@@ -42,7 +46,13 @@ export const GmNFTCard = ({
           backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='12' ry='12' stroke='%23FFFFFF80' stroke-width='1' stroke-dasharray='12%2c 20' stroke-dashoffset='2' stroke-linecap='square'/%3e%3c/svg%3e")`,
         }}>
         <UilPolygon size={"36px"} color={"#FFFFFF80"} style={{ transform: "rotate(90deg)" }} />
-        <Text color={"#FFFFFF80"}>{t("You need to mint an NFT to get reward multipliers")}</Text>
+        <Text color={"#FFFFFF80"}>
+          {viewMode
+            ? t("{{value}} needs to mint an NFT to get reward multipliers", {
+                value: !!domain || humanAddress(profile ?? "", 6, 3),
+              })
+            : t("You need to mint an NFT to get reward multipliers")}
+        </Text>
       </HStack>
     )
   }
