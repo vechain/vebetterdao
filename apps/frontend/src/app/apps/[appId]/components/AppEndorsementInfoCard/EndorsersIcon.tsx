@@ -1,5 +1,5 @@
 import { AddressIcon } from "@/components/AddressIcon"
-import { HStack, Text, Flex } from "@chakra-ui/react"
+import { Flex, HStack, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 
 export const EndorsersIcon = ({ endorsers, maxToRender = 3 }: { endorsers: string[]; maxToRender?: number }) => {
@@ -15,7 +15,7 @@ export const EndorsersIcon = ({ endorsers, maxToRender = 3 }: { endorsers: strin
     <HStack spacing={0}>
       {endorsersToRender.map((endorser: string, index: number) => {
         const ml = index > 0 ? `-${marginleft}px` : "0"
-        return <AddressIcon key={index} address={endorser} rounded="full" boxSize={`${boxSize}px`} ml={ml} />
+        return <AddressIcon key={endorser} address={endorser} rounded="full" boxSize={`${boxSize}px`} ml={ml} />
       })}
       {endorsers.length > maxToRender && (
         <Flex

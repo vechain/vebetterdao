@@ -148,7 +148,7 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
             const borderRadiusRight = index === baseAmountsInfo.length - 1 ? "full" : "none"
             return (
               <Box
-                key={index}
+                key={`distribution-chart-amount-${info.amount}-${info.color}`}
                 bg={info.color}
                 h="8px"
                 borderLeftRadius={borderRadiusLeft}
@@ -163,8 +163,8 @@ export const AllocationXAppsDistributionChart = ({ roundId }: Props) => {
         </Skeleton>
       </VStack>
       <Stack direction={["column", "column", "row"]} w="full" spacing={[4, 4, 8]}>
-        {baseAmountsInfo.map((info, index) => (
-          <Skeleton isLoaded={!info.isLoading} key={index}>
+        {baseAmountsInfo.map(info => (
+          <Skeleton isLoaded={!info.isLoading} key={`distribution-chart-amount-${info.amount}-${info.color}`}>
             <HStack w="full" spacing={1} color="#252525">
               <DotSymbol size={4} color={info.color} />
               <Text ml={1} fontSize="md" fontWeight={600}>

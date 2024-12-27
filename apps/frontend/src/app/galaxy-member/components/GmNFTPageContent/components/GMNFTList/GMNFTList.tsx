@@ -61,7 +61,7 @@ export const GMNFTList = () => {
               hasMore={hasNextPage || false}
               loader={<Skeleton height="100px" />}>
               <VStack align="stretch" gap={4} p={[0, 3]}>
-                {tokens?.map((token, index) => <GMNFTListItem key={index} token={token} />)}
+                {tokens?.map(token => <GMNFTListItem key={token.tokenId} token={token} />)}
               </VStack>
             </InfiniteScroll>
           </VStack>

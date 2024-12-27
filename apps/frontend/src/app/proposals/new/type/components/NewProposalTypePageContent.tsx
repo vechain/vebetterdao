@@ -8,7 +8,7 @@ import { useNewProposalPageGuard } from "../../form/hooks/useNewProposalPageGuar
 import { TFunction } from "i18next"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
-
+import { v4 as uuid } from "uuid"
 export const Steps: (t: TFunction<"translation", undefined>) => (Omit<CheckableCardProps, "checked" | "onChange"> & {
   route: string
 })[] = t => [
@@ -77,13 +77,13 @@ export const NewProposalTypePageContent = () => {
             <VStack spacing={8} align="flex-start">
               <Heading size={["md", "lg"]}>{t("Select proposal type")}</Heading>
               <Stack direction={["column", "column", "row"]} w="full" spacing={4}>
-                {Steps(t).map((step, index) => (
+                {Steps(t).map(step => (
                   <CheckableCard
                     {...step}
                     cardProps={{
                       flex: 1,
                     }}
-                    key={index}
+                    key={`proposal-step-${step.inputType}-${uuid()}`}
                     onChange={onChange(step.route)}
                     checked={selectedRoute === step.route}
                   />

@@ -73,9 +73,9 @@ export const ActivityList = ({ address, setIsCalendarView }: Props) => {
                     <Text fontWeight="600" color="#848484">
                       {dayjs(day).format("MMMM D YYYY").toUpperCase()}
                     </Text>
-                    {dayActions.map((action, index) => (
+                    {dayActions.map(action => (
                       <BetterActionCard
-                        key={`${day}-${index}`}
+                        key={`action-${day}-${action.appId}-${action.blockTimestamp}`}
                         amountB3tr={action.amount}
                         appId={action.appId}
                         blockNumber={action.blockNumber}

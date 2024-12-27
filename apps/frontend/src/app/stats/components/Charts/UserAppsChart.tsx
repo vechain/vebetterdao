@@ -18,6 +18,8 @@ export const UserAppsChart: React.FC<Props> = ({ userId, appActions, type }) => 
 
   const { t } = useTranslation()
 
+  const dataType = type == "actions" ? "totalActions" : "totalRewardAmount"
+
   const onAddressClick = useCallback(() => {
     navigator.clipboard.writeText(userId)
 
@@ -39,10 +41,10 @@ export const UserAppsChart: React.FC<Props> = ({ userId, appActions, type }) => 
           <YAxis type="category" dataKey="appName" tick={{ fontSize: 12 }} width={150} />
           <XAxis type="number" />
           <Tooltip />
-          <Bar dataKey={type == "actions" ? "totalActions" : "totalRewardAmount"} fill="#8884d8">
-            <LabelList dataKey={type == "actions" ? "totalActions" : "totalRewardAmount"} position="insideRight" />
-            {appActions.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          <Bar dataKey={dataType} fill="#8884d8">
+            <LabelList dataKey={dataType} position="insideRight" />
+            {appActions.map((action, index) => (
+              <Cell key={`${dataType}-cell-${action.appName}-${action.user}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Bar>
         </BarChart>
