@@ -1,34 +1,32 @@
-import { BaseModal } from "@/components/BaseModal"
-import {
-  Heading,
-  Text,
-  UseDisclosureProps,
-  VStack,
-  FormControl,
-  FormLabel,
-  Input,
-  Button,
-  FormErrorMessage,
-  Box,
-  useDisclosure,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-  useBreakpointValue,
-} from "@chakra-ui/react"
-import { UilArrowUpRight } from "@iconscout/react-unicons"
-import { useTranslation } from "react-i18next"
-import { useForm } from "react-hook-form"
-import { isValid } from "@repo/utils/AddressUtils"
-import { useDelegateXNode } from "@/hooks/useDelegateXNode"
-import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal } from "@/components"
-import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useVechainDomain, useWallet } from "@vechain/dapp-kit-react"
 import { useXNode } from "@/api"
 import { getIsNodeHolder } from "@/api/contracts/xNodes/useIsNodeHolder"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { ExclamationTriangle, TransactionModal } from "@/components"
+import { BaseModal } from "@/components/BaseModal"
+import { useDelegateXNode } from "@/hooks/useDelegateXNode"
+import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  Button,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Heading,
+  Input,
+  Text,
+  useBreakpointValue,
+  useDisclosure,
+  UseDisclosureProps,
+  VStack,
+} from "@chakra-ui/react"
+import { UilArrowUpRight } from "@iconscout/react-unicons"
+import { compareAddresses, isValid } from "@repo/utils/AddressUtils"
+import { useConnex, useVechainDomain, useWallet } from "@vechain/dapp-kit-react"
+import { useCallback } from "react"
+import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 
 type FormData = {
   walletAddress: string
