@@ -3,7 +3,7 @@ data "aws_route53_zone" "vebetterdao_zone" {
 }
 
 locals {
-  route53_records = yamldecode(file("${path.module}/route53_records.yaml"))
+  route53_records = yamldecode(file("./route53_records.yaml"))
 }
 
 resource "aws_route53_record" "dns_records" {

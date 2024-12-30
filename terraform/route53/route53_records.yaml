@@ -49,7 +49,7 @@ records:
     type: CNAME
     ttl: 300
     records:
-      - "cname.vercel-dns.com"
+      - "cname.vercel-dns.com."
     routing_policy: simple
 
   - name: "www.connect.vebetterdao.org"

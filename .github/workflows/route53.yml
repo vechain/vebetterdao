@@ -51,7 +51,7 @@ jobs:
       - name: Terraform Workspace
         working-directory: terraform
         id: workspace
-        run: terraform workspace select ${ENVIRONMENT}
+        run: terraform workspace select prod
     
       - name: Terraform Validate
         working-directory: terraform
@@ -116,9 +116,12 @@ jobs:
         working-directory: terraform
         run: |
           terraform init
-          terraform workspace select ${ENVIRONMENT}
+          terraform workspace select prod
+      
+      - name: Terraform Plan
+        working-directory: terraform
+        run: terraform plan -target="module.route53"
 
-    # TODO: Uncomment this when we want to deploy the route53 records
-    #  - name: Terraform Apply Route53
-    #    working-directory: terraform
-    #    run: terraform apply -target="module.route53" -auto-approve
+      - name: Terraform Apply Route53
+        working-directory: terraform
+        run: terraform apply -target="module.route53"
