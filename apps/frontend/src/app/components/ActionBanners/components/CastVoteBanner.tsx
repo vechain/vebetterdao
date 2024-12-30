@@ -17,8 +17,14 @@ export const CastVoteBanner = () => {
   }, [router, roundId])
 
   return (
-    <Card bg="#B1F16C" borderRadius="xl" w="full">
-      <CardBody position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
+    <Card bg="#B1F16C" borderRadius="xl" w="full" h="full">
+      <CardBody
+        position="relative"
+        overflow="hidden"
+        alignContent={"center"}
+        justifyContent={"center"}
+        borderRadius="xl"
+        padding={{ base: 4, md: 6 }}>
         <Image
           src="/images/community-green-blob.png"
           alt="cloud-background"

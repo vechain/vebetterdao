@@ -17,8 +17,14 @@ export const CreatorApplicationApprovedBanner = () => {
   const doAction = t("Submit app")
 
   return (
-    <Card bg="#C8DDFF" borderRadius="xl" w="full">
-      <CardBody position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
+    <Card bg="#C8DDFF" borderRadius="xl" w="full" h="full">
+      <CardBody
+        position="relative"
+        overflow="hidden"
+        alignContent={"center"}
+        justifyContent={"center"}
+        borderRadius="xl"
+        padding={{ base: 4, md: 6 }}>
         <Image
           src="/images/cloud-background.png"
           alt="cloud-background"

@@ -63,8 +63,14 @@ export const LowVthoBanner = () => {
   }, [initTransak])
 
   return (
-    <Card bg="#FFD979" borderRadius="xl" w="full">
-      <CardBody position="relative" overflow="hidden" borderRadius="xl" padding={{ base: 4, md: 6 }}>
+    <Card bg="#FFD979" borderRadius="xl" w="full" h="full">
+      <CardBody
+        position="relative"
+        overflow="hidden"
+        alignContent={"center"}
+        justifyContent={"center"}
+        borderRadius="xl"
+        padding={{ base: 4, md: 6 }}>
         <Image
           src="/images/cloud-background-orange.png"
           alt="cloud-background-orange"
