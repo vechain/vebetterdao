@@ -71,7 +71,7 @@ async function zipFolder(sourceDir: string, outPath: fs.PathLike): Promise<void>
   return new Promise<void>((resolve, reject) => {
     archive
       .directory(sourceDir, path.basename(sourceDir)) // Keeps the root folder
-      .on("error", (err: any) => reject(err))
+      .on("error", err => reject(err))
       .pipe(stream)
 
     stream.on("close", () => resolve())

@@ -1,24 +1,28 @@
-import { useAppsSustainabilityActions, useCurrentAllocationsRoundId, AppUsersData } from "@/api"
+import { AppUsersData, useAppsSustainabilityActions, useCurrentAllocationsRoundId } from "@/api"
 import {
-  Heading,
-  VStack,
-  HStack,
-  Text,
-  Select,
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  Box,
   CircularProgress,
   CircularProgressLabel,
   Grid,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionPanel,
-  AccordionIcon,
-  Box,
+  Heading,
+  HStack,
+  Select,
+  Text,
+  VStack,
 } from "@chakra-ui/react"
+import { median } from "d3-array"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+
 import {
   ActionsSharePieChart,
   ActiveUsersPerAppChart,
+  DrillDownBarChart,
   RewardPerActionChart,
   TopUsersByRewardsChart,
   TopUsersChart,
@@ -26,9 +30,6 @@ import {
   TotalRewardsPerAppChart,
   UserAppsChart,
 } from "./Charts"
-import { useTranslation } from "react-i18next"
-import { median } from "d3-array"
-import { DrillDownBarChart } from "./Charts"
 
 export const StatsPageContent = () => {
   const { t } = useTranslation()

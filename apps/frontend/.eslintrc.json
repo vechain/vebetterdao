@@ -16,6 +16,7 @@
         "argsIgnorePattern": "^_",
         "destructuredArrayIgnorePattern": "^_"
       }
-    ]
+    ],
+    "no-duplicate-imports": "error"
   }
 }
