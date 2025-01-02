@@ -1,78 +1,203 @@
 import { expect, test, describe } from "vitest"
 import Apps from "./page"
 import { render, screen } from "../../../test"
-import * as hooks from "@/api/contracts/xApps"
-import * as allocationHooks from "@/api/contracts/xAllocations"
+import * as apiHooks from "@/api"
+import { NFTMediaType, XAppStatus } from "@/types"
+import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 
 describe("Apps", () => {
   test("XApps available - Renders correctly", async () => {
+    const activeApps = [
+      {
+        id: "1",
+        name: "Test Active App",
+        teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+        createdAtTimestamp: "16347455",
+        metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+      },
+    ]
+
+    const unendorsedApps = [
+      {
+        id: "2",
+        name: "Test Unendorsed App",
+        teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+        createdAtTimestamp: "0",
+        metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+      },
+    ]
     //@ts-ignore
-    vi.spyOn(hooks, "useXApps").mockReturnValue({
+    vi.spyOn(apiHooks, "useXApps").mockReturnValue({
       data: {
-        active: [
-          {
-            id: "1",
-            name: "Round 1",
-            teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
-            createdAtTimestamp: "16347455",
-            metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
-          },
-        ],
+        active: activeApps,
         unendorsed: [],
-        allApps: [],
+        allApps: [...activeApps, ...unendorsedApps],
+        endorsed: activeApps,
       },
       isLoading: false,
       isError: false,
     })
 
     //@ts-ignore
-    vi.spyOn(allocationHooks, "usePreviousAllocationRoundId").mockReturnValue({
-      data: "1",
-      isLoading: false,
-      isError: false,
+    vi.spyOn(apiHooks, "useXNode").mockReturnValue({
+      xNodeId: "1",
+      xNodeName: "Node 1",
+      nodeType: "XNODE",
+      xNodeImage: "image",
+      xNodeLevel: 1,
+      xNodePoints: 100,
+      endorsedApp: undefined,
+      isEndorsingApp: false,
+      xNodeOwner: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+      isXNodeHolder: true,
+      isXNodeDelegator: false,
+      isXNodeDelegated: false,
+      isXNodeDelegatee: false,
+      delegatee: undefined,
+      attachedGMTokenId: undefined,
+      attachedGMTokenName: "GM Token",
+      isXNodeOnCooldown: false,
+      isXNodeLoading: false,
     })
 
     //@ts-ignore
-    vi.spyOn(hooks, "useMostVotedAppsInRound").mockReturnValue({
-      data: [
-        {
-          id: "1",
-          percentage: 20,
-          app: {
-            id: "1",
-            name: "GreenCart",
-            teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
-            createdAtTimestamp: "16347455",
-            metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
-          },
-        },
-      ],
+    vi.spyOn(apiHooks, "useAppEndorsementStatus").mockReturnValue({
+      threshold: "100",
+      score: "100",
+      status: XAppStatus.ENDORSED_AND_ELIGIBLE,
       isLoading: false,
     })
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useXAppMetadata").mockReturnValue({
+      data: {
+        logo: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+        name: "",
+        description: "",
+        external_url: "",
+        banner: "",
+        screenshots: [],
+        social_urls: [],
+        app_urls: [],
+        tweets: [],
+        ve_world: {
+          banner: "",
+        },
+      },
+      isLoading: false,
+      error: null,
+    })
+
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useIpfsImage").mockReturnValue({
+      data: {
+        image: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+        mime: "image/png",
+        mediaType: NFTMediaType.IMAGE,
+      },
+      isLoading: false,
+      error: null,
+    })
+
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useCreatorSubmission").mockReturnValue({
+      data: {
+        submissions: [
+          {
+            id: 0,
+            status: HumanizedTicketStatus.Resolved,
+            createdAt: new Date().toString(),
+            adminWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+          },
+        ],
+      },
+      isLoading: false,
+    })
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useHasCreatorNFT").mockReturnValue(false)
 
     render(<Apps />)
+
     expect(await screen.findByTestId("apps-page")).toBeInTheDocument()
   })
   test("isLoading - Renders correctly", async () => {
     //@ts-ignore
-    vi.spyOn(hooks, "useXApps").mockReturnValue({
+    vi.spyOn(apiHooks, "useXApps").mockReturnValue({
       data: undefined,
       isLoading: true,
       isError: false,
     })
 
     //@ts-ignore
-    vi.spyOn(allocationHooks, "usePreviousAllocationRoundId").mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      isError: false,
+    vi.spyOn(apiHooks, "useXNode").mockReturnValue({
+      xNodeId: "1",
+      xNodeName: "Node 1",
+      nodeType: "XNODE",
+      xNodeImage: "image",
+      xNodeLevel: 1,
+      xNodePoints: 100,
+      endorsedApp: undefined,
+      isEndorsingApp: false,
+      xNodeOwner: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+      isXNodeHolder: true,
+      isXNodeDelegator: false,
+      isXNodeDelegated: false,
+      isXNodeDelegatee: false,
+      delegatee: undefined,
+      attachedGMTokenId: undefined,
+      attachedGMTokenName: "GM Token",
+      isXNodeOnCooldown: false,
+      isXNodeLoading: true,
     })
 
     //@ts-ignore
-    vi.spyOn(hooks, "useMostVotedAppsInRound").mockReturnValue({
-      data: [],
+    vi.spyOn(apiHooks, "useAppEndorsementStatus").mockReturnValue({
+      threshold: "100",
+      score: "100",
+      status: XAppStatus.ENDORSED_AND_ELIGIBLE,
       isLoading: true,
     })
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useXAppMetadata").mockReturnValue({
+      data: {
+        logo: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+        name: "",
+        description: "",
+        external_url: "",
+        banner: "",
+        screenshots: [],
+        social_urls: [],
+        app_urls: [],
+        tweets: [],
+        ve_world: {
+          banner: "",
+        },
+      },
+      isLoading: true,
+      error: null,
+    })
+
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useIpfsImage").mockReturnValue({
+      data: {
+        image: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+        mime: "image/png",
+        mediaType: NFTMediaType.IMAGE,
+      },
+      isLoading: true,
+      error: null,
+    })
+
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useCreatorSubmission").mockReturnValue({
+      data: {
+        submissions: [],
+      },
+      isLoading: true,
+      error: null,
+    })
+
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useHasCreatorNFT").mockReturnValue(false)
 
     render(<Apps />)
     expect(await screen.findByTestId("apps-page-loading")).toBeInTheDocument()
@@ -80,24 +205,83 @@ describe("Apps", () => {
 
   test("no dapps - Renders correctly", async () => {
     //@ts-ignore
-    vi.spyOn(hooks, "useXApps").mockReturnValue({
+    vi.spyOn(apiHooks, "useXApps").mockReturnValue({
       data: undefined,
       isLoading: false,
       isError: false,
     })
 
     //@ts-ignore
-    vi.spyOn(allocationHooks, "usePreviousAllocationRoundId").mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      isError: false,
+    vi.spyOn(apiHooks, "useXNode").mockReturnValue({
+      xNodeId: "1",
+      xNodeName: "Node 1",
+      nodeType: "XNODE",
+      xNodeImage: "image",
+      xNodeLevel: 1,
+      xNodePoints: 100,
+      endorsedApp: undefined,
+      isEndorsingApp: false,
+      xNodeOwner: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+      isXNodeHolder: true,
+      isXNodeDelegator: false,
+      isXNodeDelegated: false,
+      isXNodeDelegatee: false,
+      delegatee: undefined,
+      attachedGMTokenId: undefined,
+      attachedGMTokenName: "GM Token",
+      isXNodeOnCooldown: false,
+      isXNodeLoading: false,
     })
 
     //@ts-ignore
-    vi.spyOn(hooks, "useMostVotedAppsInRound").mockReturnValue({
-      data: [],
+    vi.spyOn(apiHooks, "useAppEndorsementStatus").mockReturnValue({
+      threshold: "100",
+      score: "100",
+      status: XAppStatus.ENDORSED_AND_ELIGIBLE,
       isLoading: false,
     })
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useXAppMetadata").mockReturnValue({
+      data: {
+        logo: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+        name: "",
+        description: "",
+        external_url: "",
+        banner: "",
+        screenshots: [],
+        social_urls: [],
+        app_urls: [],
+        tweets: [],
+        ve_world: {
+          banner: "",
+        },
+      },
+      isLoading: false,
+      error: null,
+    })
+
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useIpfsImage").mockReturnValue({
+      data: {
+        image: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+        mime: "image/png",
+        mediaType: NFTMediaType.IMAGE,
+      },
+      isLoading: false,
+      error: null,
+    })
+
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useCreatorSubmission").mockReturnValue({
+      data: {
+        submissions: [],
+      },
+      isLoading: false,
+      error: null,
+    })
+
+    //@ts-ignore
+    vi.spyOn(apiHooks, "useHasCreatorNFT").mockReturnValue(false)
 
     render(<Apps />)
     expect(screen.queryByTestId("apps-page-loading")).not.toBeInTheDocument()
