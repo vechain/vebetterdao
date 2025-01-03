@@ -128,10 +128,10 @@ type VotingSupportProgress = {
   state: ProposalState
 }
 
-enum IconColor {
-  DEPOSIT_REACHED = "rgba(0, 76, 252, 1)",
-  NOT_PENDING = "rgba(210, 63, 99, 1)",
-  DEFAULT = "#F29B32",
+enum DepositStateColor {
+  DEPOSIT_REACHED = "rgba(0, 76, 252, 1)", // Blue
+  NOT_PENDING = "rgba(210, 63, 99, 1)", // Red
+  DEFAULT = "#F29B32", // Orange
 }
 
 const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposalId, proposalState }) => {
@@ -151,22 +151,22 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
     return proposalDepositEvent.userSupport > 0
   }, [proposalDepositEvent])
 
-  const iconColor = useMemo(() => {
+  const stateColor = useMemo(() => {
     if (isDepositReached) {
-      return IconColor.DEPOSIT_REACHED
+      return DepositStateColor.DEPOSIT_REACHED
     } else if (proposalState !== ProposalState.Pending) {
-      return IconColor.NOT_PENDING
+      return DepositStateColor.NOT_PENDING
     } else {
-      return IconColor.DEFAULT
+      return DepositStateColor.DEFAULT
     }
   }, [isDepositReached, proposalState])
 
   return (
     <VStack w={"full"} spacing={1}>
       <HStack w="full">
-        <Icon as={FaRegHeart} boxSize={["20px", "20px", "16px"]} color={iconColor} />
+        <Icon as={FaRegHeart} boxSize={["20px", "20px", "16px"]} color={stateColor} />
 
-        <Text fontSize={"16px"} fontWeight={400} color={iconColor}>
+        <Text fontSize={"16px"} fontWeight={400} color={stateColor}>
           <b>{isDepositReached ? 100 : communityDepositPercentage}</b> {t("%")}
         </Text>
       </HStack>
@@ -174,7 +174,7 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
         <Box
           height="100%"
           width={`${communityDepositPercentage}%`}
-          bg={iconColor}
+          bg={stateColor}
           borderRadius="md"
           position="absolute" //inverse if isForGreaterThanAgainst is true
           style={{ left: 0 }}
