@@ -1391,5 +1391,14 @@
   "Converted": "Converted",
   "Supported a": "Supported a",
   "Upgraded a": "Upgraded a",
-  "Your": "Your"
+  "Your": "Your",
+  "User Status Removed": "User Status Removed",
+  "User Whitelisted": "User Whitelisted",
+  "User Blacklisted": "User Blacklisted",
+  "Removing user status...": "Removing user status...",
+  "Whitelisting user...": "Whitelisting user...",
+  "Blacklisting user...": "Blacklisting user...",
+  "Error removing user status": "Error removing user status",
+  "Error whitelisting user": "Error whitelisting user",
+  "Error blacklisting user": "Error blacklisting user"
 }
