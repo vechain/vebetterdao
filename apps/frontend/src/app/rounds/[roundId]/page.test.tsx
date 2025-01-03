@@ -2,28 +2,59 @@ import { expect, test } from "vitest"
 import AllocationDetail from "./page"
 import { render, screen } from "../../../../test"
 
-import * as hooks from "@/api"
+import * as apiHooks from "@/api"
 import dayjs from "dayjs"
 
 test("Allocations", async () => {
   const roundId = "1"
   //@ts-ignore
-  vi.spyOn(hooks, "useAllocationsRoundState").mockReturnValue({
-    data: 0,
+  vi.spyOn(apiHooks, "useAllocationsRoundState").mockReturnValue({
+    data: 0, //Active
     isLoading: false,
     isError: false,
   })
 
   //@ts-ignore
-  vi.spyOn(hooks, "useHasVotedInRound").mockReturnValue({
+  vi.spyOn(apiHooks, "useHasVotedInRound").mockReturnValue({
+    data: true, //Has voted
+    isLoading: false,
+    isError: false,
+  })
+  //@ts-ignore
+  vi.spyOn(apiHooks, "useAccountLinking").mockReturnValue({
+    isLinked: false,
+    isLoading: false,
+    passport: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+    isPassport: true,
+    isEntity: false,
+    passportLinkedEntities: [],
+    incomingPendingLinkings: [],
+    outgoingPendingLink: undefined,
+  })
+  //@ts-ignore
+  vi.spyOn(apiHooks, "useUserDelegation").mockReturnValue({
+    delegator: null,
+    delegatee: null,
+    isLoading: false,
+    isDelegator: false,
+    isDelegatee: false,
+  })
+  //@ts-ignore
+  vi.spyOn(apiHooks, "useCanUserVote").mockReturnValue({
     data: true,
+    hasVotesAtSnapshot: true,
     isLoading: false,
-    isError: false,
+    isPerson: true,
   })
 
   //@ts-ignore
-  vi.spyOn(hooks, "useAllocationsRound").mockReturnValue({
+  vi.spyOn(apiHooks, "useAllocationsRound").mockReturnValue({
     data: {
+      state: 0, //Active
+      isCurrent: false,
+      roundId,
+      appsIds: ["0x123"],
+      proposer: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
       voteStartTimestamp: dayjs(),
       voteEndTimestamp: dayjs(),
       isFirstRound: false,
@@ -34,10 +65,10 @@ test("Allocations", async () => {
   })
 
   //@ts-ignore
-  vi.spyOn(hooks, "useUserVotesInRound").mockReturnValue({
+  vi.spyOn(apiHooks, "useUserVotesInRound").mockReturnValue({
     data: {
       voter: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
-      roundId: "1",
+      roundId,
       appsIds: ["0x123"],
       voteWeights: ["1"],
     },
@@ -46,58 +77,92 @@ test("Allocations", async () => {
   })
 
   //@ts-ignore
-  vi.spyOn(hooks, "useGetVotesOnBlock").mockReturnValue({
-    data: "1",
+  vi.spyOn(apiHooks, "useGetVotesOnBlock").mockReturnValue({
+    data: "110",
     isLoading: false,
     isError: false,
   })
 
   //@ts-ignore
-  vi.spyOn(hooks, "useRoundReward").mockReturnValue({
+  vi.spyOn(apiHooks, "useRoundReward").mockReturnValue({
     data: {
-      roundId: "1",
+      roundId,
       rewards: "1",
     },
     isLoading: false,
     isError: false,
   })
 
+  //@ts-ignore
+  vi.spyOn(apiHooks, "useAllocationVotes").mockReturnValue({
+    data: "110",
+    status: "success",
+    isLoading: false,
+    isError: false,
+  })
+  //@ts-ignore
+  vi.spyOn(apiHooks, "useAllocationRoundQuorum").mockReturnValue({
+    data: "100",
+    status: "success",
+    isLoading: false,
+    isError: false,
+  })
+  //@ts-ignore
+  vi.spyOn(apiHooks, "useVot3PastSupply").mockReturnValue({
+    data: "1000",
+    status: "success",
+    isLoading: false,
+    isError: false,
+  })
+
   const activeApps = [
     {
-      id: "1",
+      id: "0x123",
       name: "Test Active App",
       teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
       createdAtTimestamp: "16347455",
       metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
     },
   ]
+
+  const unendorsedApps = [
+    {
+      id: "0x321",
+      name: "Test Unendorsed App",
+      teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+      createdAtTimestamp: "0",
+      metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+      appAvailableForAllocationVoting: false,
+    },
+  ]
   //@ts-ignore
-  vi.spyOn(hooks, "useXApps").mockReturnValue({
+  vi.spyOn(apiHooks, "useXApps").mockReturnValue({
     data: {
       active: activeApps,
-      unendorsed: [],
-      allApps: activeApps,
+      unendorsed: unendorsedApps,
+      allApps: [...activeApps, ...unendorsedApps],
       endorsed: activeApps,
     },
     isLoading: false,
     isError: false,
   })
+
   //@ts-ignore
-  vi.spyOn(hooks, "useXAppRoundEarnings").mockReturnValue({
+  vi.spyOn(apiHooks, "useXAppRoundEarnings").mockReturnValue({
     data: {
       amount: "1",
-      xAppId: "1",
+      appId: "0x123",
     },
     isLoading: false,
     isError: false,
   })
   //@ts-ignore
-  vi.spyOn(hooks, "useRoundAppVotes").mockReturnValue({
+  vi.spyOn(apiHooks, "useRoundAppVotes").mockReturnValue({
     data: [
       {
         appId: "1",
         voters: 1,
-        roundId: 0,
+        roundId: Number(roundId),
         totalVotes: "1",
       },
     ],
@@ -106,7 +171,7 @@ test("Allocations", async () => {
   })
 
   //@ts-ignore
-  vi.spyOn(hooks, "useXAppMetadata").mockReturnValue({
+  vi.spyOn(apiHooks, "useXAppMetadata").mockReturnValue({
     data: {
       logo: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
       name: "",
