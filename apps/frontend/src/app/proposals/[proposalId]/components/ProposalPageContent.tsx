@@ -42,14 +42,9 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
   if (!proposalCreatedEvent) return null
 
-  let quorumRenderState: "none" | "upcoming" | "active"
-  if (shouldNotRenderQuorum) {
-    quorumRenderState = "none"
-  } else if (isUpcoming) {
-    quorumRenderState = "upcoming"
-  } else {
-    quorumRenderState = "active"
-  }
+  let quorumRenderState: "none" | "upcoming" | "active" = "active"
+  if (shouldNotRenderQuorum) quorumRenderState = "none"
+  if (isUpcoming) quorumRenderState = "upcoming"
 
   return (
     <VStack w="full" alignItems="stretch" gap={8}>
