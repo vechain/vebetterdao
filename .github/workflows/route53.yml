@@ -41,25 +41,26 @@ jobs:
 
       - name: Terraform Format
         id: fmt
+        working-directory: terraform/route53
         run: terraform fmt -check -recursive
         continue-on-error: true
 
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: terraform/route53
         run: terraform init
 
       - name: Terraform Workspace
-        working-directory: terraform
+        working-directory: terraform/route53
         id: workspace
         run: terraform workspace select prod
     
       - name: Terraform Validate
-        working-directory: terraform
+        working-directory: terraform/route53
         id: validate
         run: terraform validate
 
       - name: Terraform Plan Route53
-        working-directory: terraform
+        working-directory: terraform/route53
         id: plan
         run: terraform plan -target="module.route53" -out=route53.tfplan -detailed-exitcode
     
@@ -113,15 +114,15 @@ jobs:
           terraform_version: 1.7.3
 
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: terraform/route53
         run: |
           terraform init
           terraform workspace select prod
       
       - name: Terraform Plan
-        working-directory: terraform
+        working-directory: terraform/route53
         run: terraform plan -target="module.route53"
 
       - name: Terraform Apply Route53
-        working-directory: terraform
+        working-directory: terraform/route53
         run: terraform apply -target="module.route53"
