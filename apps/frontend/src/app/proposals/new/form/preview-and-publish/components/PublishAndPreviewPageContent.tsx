@@ -8,7 +8,12 @@ import { useProposalFormStore } from "@/store"
 import { NewProposalForm } from "../../functions/details/components/NewProposalForm"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
-import { useCreateProposal, useUploadProposalMetadata, useTransactionError, useTransactionStatus } from "@/hooks"
+import {
+  useCreateProposal,
+  useUploadProposalMetadata,
+  useTransactionModalErrorTitle,
+  useTransactionModalStatus,
+} from "@/hooks"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useForm } from "react-hook-form"
 import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
@@ -99,13 +104,13 @@ export const PublishAndPreviewPageContent = () => {
     handleSubmit(onSubmit)()
   }, [createProposalMutation, handleSubmit, onSubmit])
 
-  const modalStatus = useTransactionStatus([
+  const modalStatus = useTransactionModalStatus([
     { status: metadataUploading ? "uploadingMetadata" : undefined },
     { status: createProposalMutation.error || metadataUploadError ? "error" : undefined },
     { status: createProposalMutation.status },
   ])
 
-  const errorTitle = useTransactionError([
+  const errorTitle = useTransactionModalErrorTitle([
     { error: metadataUploadError, title: t("Error uploading metadata") },
     { error: createProposalMutation.error, title: t("Error creating proposal") },
   ])

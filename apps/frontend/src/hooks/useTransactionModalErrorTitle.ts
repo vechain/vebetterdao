@@ -5,7 +5,7 @@ type ErrorState = {
   title: string
 }
 
-export const useTransactionError = (errorStates: ErrorState[]) => {
+export const useTransactionModalErrorTitle = (errorStates: ErrorState[]) => {
   return useMemo(() => {
     const activeError = errorStates.find(state => state.error)
     return activeError ? activeError.title : undefined

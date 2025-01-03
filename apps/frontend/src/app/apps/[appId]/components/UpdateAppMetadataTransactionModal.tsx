@@ -1,8 +1,11 @@
 import { TransactionModal } from "@/components"
-import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { useDisclosure } from "@chakra-ui/react"
-import { useTransactionError } from "@/hooks/useTransactionError"
-import { useTransactionStatus } from "@/hooks/useTransactionStatus"
+import {
+  useUpdateAppDetails,
+  useUploadAppMetadata,
+  useTransactionModalErrorTitle,
+  useTransactionModalStatus,
+} from "@/hooks"
 
 type Props = {
   transactionModal: ReturnType<typeof useDisclosure>
@@ -19,13 +22,13 @@ export const UpdateAppMetadataTransactionModal = ({
   updateAppDetailsMutation,
   onTryAgain,
 }: Props) => {
-  const modalStatus = useTransactionStatus([
+  const modalStatus = useTransactionModalStatus([
     { status: uploadMetadataMutation.metadataUploading ? "uploadingMetadata" : undefined },
     { status: updateAppDetailsMutation.error || uploadMetadataMutation.metadataUploadError ? "error" : undefined },
     { status: updateAppDetailsMutation.status },
   ])
 
-  const errorTitle = useTransactionError([
+  const errorTitle = useTransactionModalErrorTitle([
     { error: uploadMetadataMutation.metadataUploadError, title: "Error uploading metadata" },
     { error: updateAppDetailsMutation.error, title: "Error updating app details" },
   ])

@@ -1,6 +1,6 @@
 import { useUserStatus } from "@/api"
 import { TransactionModal } from "@/components"
-import { UserStatus, useWhitelistBlacklistUser, useEnumMapping } from "@/hooks"
+import { UserStatus, useWhitelistBlacklistUser } from "@/hooks"
 import {
   Button,
   Card,
@@ -71,36 +71,40 @@ export const ManageUserStatus = () => {
 
   const isLoading = isTxReceiptLoading || sendTransactionPending
   const isFormValid = isValidAddress
+  let buttonColorScheme: string = "gray"
+  if (actionType === UserStatus.WHITELIST) {
+    buttonColorScheme = "green"
+  } else if (actionType === UserStatus.BLACKLIST) {
+    buttonColorScheme = "red"
+  }
 
-  const buttonColorScheme = useEnumMapping(actionType, {
-    [UserStatus.WHITELIST]: "green",
-    [UserStatus.BLACKLIST]: "red",
-    default: "blue",
-  })
+  let buttonText: string = t("Remove Status")
+  if (actionType === UserStatus.WHITELIST) {
+    buttonText = t("Whitelist User")
+  } else if (actionType === UserStatus.BLACKLIST) {
+    buttonText = t("Blacklist User")
+  }
 
-  const buttonText = useEnumMapping(actionType, {
-    [UserStatus.WHITELIST]: t("Whitelist User"),
-    [UserStatus.BLACKLIST]: t("Blacklist User"),
-    default: t("Remove Status"),
-  })
+  let modalSuccessTitle: string = t("User Status Removed")
+  if (actionType === UserStatus.WHITELIST) {
+    modalSuccessTitle = t("User Whitelisted")
+  } else if (actionType === UserStatus.BLACKLIST) {
+    modalSuccessTitle = t("User Blacklisted")
+  }
 
-  const modalSuccessTitle = useEnumMapping(actionType, {
-    [UserStatus.WHITELIST]: "User Whitelisted",
-    [UserStatus.BLACKLIST]: "User Blacklisted",
-    default: "User Status Removed",
-  })
+  let modalPendingTitle: string = t("Removing user status...")
+  if (actionType === UserStatus.WHITELIST) {
+    modalPendingTitle = t("Whitelisting user...")
+  } else if (actionType === UserStatus.BLACKLIST) {
+    modalPendingTitle = t("Blacklisting user...")
+  }
 
-  const modalPendingTitle = useEnumMapping(actionType, {
-    [UserStatus.WHITELIST]: "Whitelisting user...",
-    [UserStatus.BLACKLIST]: "Blacklisting user...",
-    default: "Removing user status...",
-  })
-
-  const modalErrorTitle = useEnumMapping(actionType, {
-    [UserStatus.WHITELIST]: "Error whitelisting user",
-    [UserStatus.BLACKLIST]: "Error blacklisting user",
-    default: "Error removing user status",
-  })
+  let modalErrorTitle: string = t("Error removing user status")
+  if (actionType === UserStatus.WHITELIST) {
+    modalErrorTitle = t("Error whitelisting user")
+  } else if (actionType === UserStatus.BLACKLIST) {
+    modalErrorTitle = t("Error blacklisting user")
+  }
 
   return (
     <>
