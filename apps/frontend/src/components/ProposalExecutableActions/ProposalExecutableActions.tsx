@@ -16,9 +16,7 @@ type Props = {
 }
 
 const getParamValue = (decoded: abi.Decoded, paramName: string, requiresEthParse?: boolean) => {
-  if (!decoded[paramName]) {
-    return undefined
-  }
+  if (!decoded[paramName]) return
 
   if (requiresEthParse) {
     return ethers.formatEther(decoded[paramName])
