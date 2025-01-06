@@ -1,6 +1,6 @@
 import { useUserStatus } from "@/api"
 import { TransactionModal } from "@/components"
-import { UserStatus, useWhitelistBlacklistUser } from "@/hooks"
+import { UserStatus, useWhitelistBlacklistUser, useUserStatusConfig } from "@/hooks"
 import {
   Button,
   Card,
@@ -35,6 +35,8 @@ export const ManageUserStatus = () => {
   }, [user])
 
   const { t } = useTranslation()
+  const statusConfig = useUserStatusConfig()
+  const currentConfig = statusConfig[actionType]
 
   const {
     sendTransaction,
@@ -71,40 +73,6 @@ export const ManageUserStatus = () => {
 
   const isLoading = isTxReceiptLoading || sendTransactionPending
   const isFormValid = isValidAddress
-  let buttonColorScheme: string = "gray"
-  if (actionType === UserStatus.WHITELIST) {
-    buttonColorScheme = "green"
-  } else if (actionType === UserStatus.BLACKLIST) {
-    buttonColorScheme = "red"
-  }
-
-  let buttonText: string = t("Remove Status")
-  if (actionType === UserStatus.WHITELIST) {
-    buttonText = t("Whitelist User")
-  } else if (actionType === UserStatus.BLACKLIST) {
-    buttonText = t("Blacklist User")
-  }
-
-  let modalSuccessTitle: string = t("User Status Removed")
-  if (actionType === UserStatus.WHITELIST) {
-    modalSuccessTitle = t("User Whitelisted")
-  } else if (actionType === UserStatus.BLACKLIST) {
-    modalSuccessTitle = t("User Blacklisted")
-  }
-
-  let modalPendingTitle: string = t("Removing user status...")
-  if (actionType === UserStatus.WHITELIST) {
-    modalPendingTitle = t("Whitelisting user...")
-  } else if (actionType === UserStatus.BLACKLIST) {
-    modalPendingTitle = t("Blacklisting user...")
-  }
-
-  let modalErrorTitle: string = t("Error removing user status")
-  if (actionType === UserStatus.WHITELIST) {
-    modalErrorTitle = t("Error whitelisting user")
-  } else if (actionType === UserStatus.BLACKLIST) {
-    modalErrorTitle = t("Error blacklisting user")
-  }
 
   return (
     <>
@@ -155,10 +123,10 @@ export const ManageUserStatus = () => {
 
               <Button
                 isDisabled={!isFormValid || actionType === userStatus}
-                colorScheme={buttonColorScheme}
+                colorScheme={currentConfig.buttonColorScheme}
                 type="submit"
                 isLoading={isLoading}>
-                {buttonText}
+                {currentConfig.buttonText}
               </Button>
             </VStack>
           </form>
@@ -169,13 +137,13 @@ export const ManageUserStatus = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? "error" : status}
-        successTitle={modalSuccessTitle}
+        successTitle={currentConfig.modalSuccessTitle}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
-        pendingTitle={modalPendingTitle}
-        errorTitle={modalErrorTitle}
+        pendingTitle={currentConfig.modalPendingTitle}
+        errorTitle={currentConfig.modalErrorTitle}
         errorDescription={error?.reason}
       />
     </>
