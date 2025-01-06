@@ -21,8 +21,8 @@ export const ActiveUsersPerAppChart: React.FC<Props> = ({ data }) => {
         <Tooltip />
         <Bar dataKey="users" name="Active Users" fill="#82ca9d">
           <LabelList dataKey="users" position="top" />
-          {sortedData.map((_, index) => (
-            <Cell key={`cell-${index}`} fill="#82ca9d" />
+          {sortedData.map(data => (
+            <Cell key={`active-users-cell-${data.appId}`} fill="#82ca9d" />
           ))}
         </Bar>
       </BarChart>

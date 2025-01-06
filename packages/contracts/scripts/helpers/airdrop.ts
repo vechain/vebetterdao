@@ -20,7 +20,7 @@ export const airdropVTHO = async (accounts: SeedAccount[], signingAcct: TestPk) 
   for (const accountChunk of accountChunks) {
     const clauses: TransactionClause[] = []
 
-    accountChunk.map(account => {
+    accountChunk.forEach(account => {
       clauses.push(clauseBuilder.transferToken(VTHO_ADDRESS, account.key.address, unitsUtils.parseVET("50")))
     })
 
@@ -57,7 +57,7 @@ export const airdropB3trFromTreasury = async (treasuryAddress: string, admin: Te
   for (const accountChunk of accountChunks) {
     const clauses: TransactionClause[] = []
 
-    accountChunk.map(account => {
+    accountChunk.forEach(account => {
       clauses.push(
         clauseBuilder.functionInteraction(
           treasuryAddress,

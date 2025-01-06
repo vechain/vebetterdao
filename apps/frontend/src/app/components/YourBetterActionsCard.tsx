@@ -56,9 +56,9 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
                       {t("Last actions")}
                     </Heading>
                     {lastActionsData.length > 0 ? (
-                      lastActionsData.map((action, index) => (
+                      lastActionsData.map(action => (
                         <BetterActionCard
-                          key={index}
+                          key={`last-action-${action.appId}-${action.blockTimestamp}`}
                           amountB3tr={action.amount}
                           appId={action.appId}
                           blockNumber={action.blockNumber}

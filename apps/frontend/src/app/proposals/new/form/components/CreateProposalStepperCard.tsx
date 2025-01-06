@@ -97,8 +97,8 @@ export const CreateProposalStepperCard = () => {
           gap="0"
           height={height}
           mt={4}>
-          {steps.map((step, index) => (
-            <Step key={index}>
+          {steps.map(step => (
+            <Step key={step.key}>
               <StepIndicator>
                 <StepStatus
                   complete={<Circle bg="#004CFC" size={"30%"} />}

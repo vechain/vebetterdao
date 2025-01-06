@@ -6,6 +6,7 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                                                        | Summary                                                                                        |
 | ------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 4th December 2024  | `X2EarnApps` version `3`, `XAllocationVoting` version `4`, `XAllocationPool` version `4`, and `X2EarnRewardsPool` version `5`  | Added endorsement cooldown feature to X2Earn contracts. |
 | 29th November 2024  | `VeBetterPassport` version `3`, `GalaxyMember` version `3`, and `VoterRewards` version 4  | Added GM level as personhood check in VeBetter passport. |
 | 28th November 2024  | `NodeManagement` version `2`                                                       | Added new functions to check node delegation status and improved node management capabilities. |
 | 15th November 2024  | `GalaxyMember` version `2`, `VoterRewards` version `3`, `B3TRGovernor` version `5` | Added Vechain Node Binding with Galaxy Member feature                                          |
@@ -19,6 +20,40 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 | 4th September 2024  | `X2EarnRewardsPool` version `2`                                                    | - Added impact key management and proof building                                               |
 | 31st August 2024    | `VoterRewards` version `2`                                                         | - Added quadratic rewarding features                                                           |
 | 29th August 2024    | `B3TRGovernor` version `2`                                                         | Updated access control modifiers                                                               |
+
+---
+
+## Upgrade `X2EarnApps` to Version 3, `XAllocationVoting` to version `4`, `XAllocationPool` to version `4`, and `X2EarnRewardsPool` to version `5`
+
+Added new endorsement cooldown feature to X2EarnApps, in which vechain nodes enter a cooldown period after endorsing an XApp.
+<br>
+Updated `XAllocationVoting`, `XAllocationPool` and `X2EarnRewardsPool` to use version `3` of `X2EarnApps` interface.
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `X2EarnApps.sol` to version `3`
+  - `XAllocationVoting.sol` to version `4`
+  - `XAllocationPool.sol` to version `4`
+  - `X2EarnRewardsPool.sol` to version `5`
+
+### Storage Changes 📦
+- **`X2EarnApps`**:
+  - Added `_endorsementRound` to store latest round Vechain Node endorsed an XApp.
+  - Added `_cooldownPeriod` to store cooldown period in terms of rounds.
+  - Added `_xAllocationVotingGovernor` to store `XAllocationVoting` address.
+
+### New Features 🚀
+- **`X2EarnApps`**:
+  - Added `checkCooldown()` to check if a vechain node is currently in cooldown period, this is a public function that is also used inside `endorseApp()` and `unendorseApp()`.
+  - Added `getXAllocationVotingGovernor()` to get the address of the `XAllocationVoting` contract.
+  - Added `cooldownPeriod()` to get the cooldown period in rounds.
+  - Added `setXAllocationVotingGovernor()` to set `XAllocationVoting` address.
+  - Added `updateCooldownPeriod()` to update cooldown period.
+
+### Bug Fixes 🐛
+
+- None.
 
 ---
 

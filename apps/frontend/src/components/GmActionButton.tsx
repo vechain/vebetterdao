@@ -78,24 +78,27 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0)) ?? 1
   }, [b3trDonated, gmStartingLevel])
 
-  const handleOnClick = (action: string) => {
-    switch (action) {
-      case "UPGRADE_GM":
-        upgradeGMModal.onOpen()
-        AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.UPGRADING_NOW))
-        break
-      case "ATTACH_AND_UPGRADE_GM":
-        attachGmToXNodeModal.onOpen()
-        AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.ATTACH_AND_UPGRADE_NOW))
-        break
-      case "ATTACH_GM":
-        attachGmToXNodeModal.onOpen()
-        AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.ATTACH_NOW))
-        break
-      default:
-        break
-    }
-  }
+  const handleOnClick = useCallback(
+    (action: string) => {
+      switch (action) {
+        case "UPGRADE_GM":
+          upgradeGMModal.onOpen()
+          AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.UPGRADING_NOW))
+          break
+        case "ATTACH_AND_UPGRADE_GM":
+          attachGmToXNodeModal.onOpen()
+          AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.ATTACH_AND_UPGRADE_NOW))
+          break
+        case "ATTACH_GM":
+          attachGmToXNodeModal.onOpen()
+          AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.ATTACH_NOW))
+          break
+        default:
+          break
+      }
+    },
+    [attachGmToXNodeModal, upgradeGMModal],
+  )
 
   const actionButton = useMemo(() => {
     if (!hasUserVoted && !isGMOwned) {
@@ -189,10 +192,9 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     buttonProps,
     t,
     isEnoughBalanceToUpgradeGM,
-    upgradeGMModal.onOpen,
     goToVote,
     handleMintGM,
-    attachGmToXNodeModal.onOpen,
+    handleOnClick,
   ])
 
   return (

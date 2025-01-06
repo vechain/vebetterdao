@@ -19,7 +19,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 import { ActivityDayModal } from "../../ActivityDayModal"
 import { useSustainabilitySingleUserOverviewByDay } from "@/api"
-
+import { v4 as uuid } from "uuid"
 // configure dayjs to start the week on Monday
 dayjs.extend(updateLocale)
 dayjs.updateLocale("en", {
@@ -152,8 +152,8 @@ export const ActivityCalendar = ({ address, setIsCalendarView }: Props) => {
                   </Text>
                 </Box>
               ))}
-              {Array.from({ length: (firstDayOfMonth + 6) % 7 }).map((_, index) => (
-                <Box key={`empty-${index}`} h="10" />
+              {Array.from({ length: (firstDayOfMonth + 6) % 7 }).map(() => (
+                <Box key={`empty-${uuid()}`} h="10" />
               ))}
               {Array.from({ length: daysInMonth }).map((_, index) => {
                 const day = index + 1

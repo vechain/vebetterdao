@@ -48,6 +48,10 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * - Added onchain proof and impact tracking
  * ----- Version 3 -----
  * - Added VeBetterPassport integration
+ * ----- Version 4 -----
+ * - Updated the X2EarnApps interface to support node endorsement feature
+ * ----- Version 5 -----
+ * - Updated the X2EarnApps interface to support node cooldown functionality
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
@@ -492,7 +496,7 @@ contract X2EarnRewardsPool is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "4";
+    return "5";
   }
 
   /**

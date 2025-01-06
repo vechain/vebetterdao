@@ -132,7 +132,7 @@ export function createTestnetStagingConfig() {
 
     // Version 2
     VECHAIN_NODES_CONTRACT_ADDRESS: "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302", // The contract address of the VeChainNodes contract on mainnet
-    XAPP_GRACE_PERIOD: 120960, // 2 weeks -> max time to be unendorsed by node before being removed from the XAlloction voting rounds
+    XAPP_GRACE_PERIOD: 17280, // 2 days -> max time in blocks to be unendorsed by node before being removed from the XAlloction voting rounds
     // X 2 Earn Rewards Pool
     X_2_EARN_INITIAL_IMPACT_KEYS: [
       "carbon",
@@ -155,5 +155,7 @@ export function createTestnetStagingConfig() {
     VEPASSPORT_DECAY_RATE: 0,
 
     CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json",
+
+    X2EARN_NODE_COOLDOWN_PERIOD: 1, // 1 round
   })
 }

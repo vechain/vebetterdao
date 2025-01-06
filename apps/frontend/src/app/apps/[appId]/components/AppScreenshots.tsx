@@ -1,5 +1,7 @@
 import { Box, Card, CardBody, Heading, Image, useDisclosure, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+import { v4 as uuid } from "uuid"
+
 import { useCurrentAppScreenshots } from "../hooks/useCurrentAppScreenshots"
 import { AppScreenshotModal } from "./AppScreenshotModal"
 
@@ -22,7 +24,7 @@ export const AppScreenshots = () => {
           <Box overflowX="auto" gap={4} whiteSpace={"nowrap"} onClick={onOpen} cursor={"pointer"}>
             {screenshots.map((screenshot, index) => (
               <Box
-                key={index}
+                key={`screenshot-${uuid()}`}
                 w="auto"
                 maxW="700px"
                 h="400px"

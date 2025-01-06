@@ -7,6 +7,7 @@ import { useWallet } from "@vechain/dapp-kit-react"
 import { useGetUserNodes } from "./useGetUserNodes"
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 import { useGMNFTData } from "@/hooks/useGMNFTData"
+import { useXNodeCheckCooldown } from "./useXNodeCheckCooldown"
 
 /**
  * Custom hook for retrieving data related to an X-Node.
@@ -40,6 +41,7 @@ interface XNodeData {
   attachedGMTokenId: string | undefined
   attachedGMTokenName: string
   isXNodeAttachedToGM: boolean
+  isXNodeOnCooldown: boolean
   allNodes: Array<{
     nodeId: string
     nodeLevel: number
@@ -106,6 +108,8 @@ export const useXNode = (): XNodeData => {
 
   const { gmName: attachedGMTokenName } = useGMNFTData(attachedGMTokenId)
 
+  const { data: isXNodeOnCooldown } = useXNodeCheckCooldown(xNode?.id ?? "")
+
   return {
     isXNodeLoading,
     isXNodeError,
@@ -127,6 +131,7 @@ export const useXNode = (): XNodeData => {
     attachedGMTokenId,
     attachedGMTokenName,
     isXNodeAttachedToGM,
+    isXNodeOnCooldown,
     allNodes,
   }
 }

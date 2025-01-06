@@ -1,4 +1,11 @@
-import { useAppEndorsers, useIsAppAdmin, useIsAppModerator, useXNode } from "@/api"
+import {
+  useAllocationsRound,
+  useAppEndorsers,
+  useCurrentAllocationsRoundId,
+  useIsAppAdmin,
+  useIsAppModerator,
+  useXNode,
+} from "@/api"
 import { XAppStatus } from "@/types"
 import {
   Button,
@@ -27,6 +34,8 @@ import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 import { EndorsementDetails } from "./EndorsementDetails"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, DISCORD_URL } from "@/constants"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
+import dayjs from "dayjs"
+import { GenericAlert } from "@/app/components/Alert"
 
 type Props = {
   endorsementScore?: string
@@ -47,14 +56,23 @@ export const AppEndorsementInfoCard = ({
 
   // App endorsement data
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(app?.id ?? "")
-
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
   // User roles data
   const { data: isAppModerator, isLoading: isAppModeratorLoading } = useIsAppModerator(app?.id ?? "", account ?? "")
   const { data: isAppAdmin, isLoading: isAppAdminLoading } = useIsAppAdmin(app?.id ?? "", account ?? "")
   const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
   // User xnodes, TODO support multiple xnodes
-  const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints, isXNodeDelegator } = useXNode()
+  const {
+    isXNodeLoading,
+    isEndorsingApp,
+    isXNodeHolder,
+    endorsedApp,
+    xNodePoints,
+    isXNodeDelegator,
+    isXNodeOnCooldown,
+  } = useXNode()
 
   const isUserAppEndorser = useMemo(() => {
     if (!app || isXNodeLoading) return false
@@ -83,9 +101,20 @@ export const AppEndorsementInfoCard = ({
   const shouldRenderLookForEndorsersButton = useMemo(() => {
     return (isAppModerator || isAppAdmin) && appUnendorsedStatus
   }, [isAppModerator, isAppAdmin, appUnendorsedStatus])
+
+  const shouldRenderRemoveEndorsementButton = useMemo(() => {
+    return isUserAppEndorser
+  }, [isUserAppEndorser])
   const lookForEndorsersButtonVariant =
     !shouldRenderEndorseButton && !shouldRenderSwitchEndorsementButton ? "primaryAction" : "primarySubtle"
 
+  const shouldDisableEndorsementButton = useMemo(() => {
+    return isXNodeDelegator || isXNodeOnCooldown
+  }, [isXNodeDelegator, isXNodeOnCooldown])
+
+  const shouldDisplayCooldownAlert = useMemo(() => {
+    return account && isXNodeOnCooldown && isUserAppEndorser
+  }, [account, isXNodeOnCooldown, isUserAppEndorser])
   // Modals
   const {
     isOpen: isEndorsementModalOpen,
@@ -108,6 +137,96 @@ export const AppEndorsementInfoCard = ({
     onOpen: onOpenEndorsementInfoModal,
     onClose: onCloseEndorsementInfoModal,
   } = useDisclosure()
+
+  const actionButtons = useMemo(() => {
+    const buttonComponents = []
+
+    if (shouldDisplayCooldownAlert) {
+      buttonComponents.push(
+        <GenericAlert
+          type="error"
+          isLoading={roundInfoLoading}
+          message={t("You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.", {
+            roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+          })}
+        />,
+      )
+    }
+
+    if (shouldRenderEndorseButton) {
+      buttonComponents.push(
+        <Button
+          key="endorseButton"
+          variant="primaryAction"
+          onClick={onOpenEndorsementModal}
+          isDisabled={shouldDisableEndorsementButton}
+          w="full">
+          {t("Endorse with your {{value}} points", { value: xNodePoints })}
+        </Button>,
+      )
+    }
+
+    if (shouldRenderSwitchEndorsementButton) {
+      buttonComponents.push(
+        <Button
+          key="switchEndorsementButton"
+          variant="primaryAction"
+          onClick={onOpenSwitchEndorsementModal}
+          isDisabled={shouldDisableEndorsementButton}
+          w="full">
+          {t("Switch endorsement to this app")}
+        </Button>,
+      )
+    }
+
+    if (shouldRenderLookForEndorsersButton) {
+      buttonComponents.push(
+        <Link
+          key="lookForEndorsersButton"
+          href={DISCORD_URL}
+          isExternal
+          w="full"
+          onClick={() =>
+            AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_DISCORD))
+          }>
+          <Button w="full" variant={lookForEndorsersButtonVariant}>
+            {t("Look for endorsers")}
+          </Button>
+        </Link>,
+      )
+    }
+
+    if (shouldRenderRemoveEndorsementButton) {
+      buttonComponents.push(
+        <Button
+          key="removeEndorsementButton"
+          variant="link"
+          colorScheme="red"
+          onClick={onOpenUnendorsementModal}
+          w="full"
+          isDisabled={shouldDisableEndorsementButton}>
+          {t("Remove endorsement")}
+        </Button>,
+      )
+    }
+
+    return buttonComponents
+  }, [
+    shouldDisplayCooldownAlert,
+    shouldRenderEndorseButton,
+    shouldRenderSwitchEndorsementButton,
+    shouldRenderLookForEndorsersButton,
+    xNodePoints,
+    onOpenEndorsementModal,
+    onOpenSwitchEndorsementModal,
+    onOpenUnendorsementModal,
+    lookForEndorsersButtonVariant,
+    t,
+    roundInfo,
+    roundInfoLoading,
+    shouldDisableEndorsementButton,
+    shouldRenderRemoveEndorsementButton,
+  ])
 
   return (
     <>
@@ -144,50 +263,7 @@ export const AppEndorsementInfoCard = ({
         <CardFooter>
           <Skeleton isLoaded={!isUserRolesDataLoading && !isEndorsementStatusLoading && !isXNodeLoading} w="full">
             <VStack spacing={2} w={"full"}>
-              {shouldRenderEndorseButton && (
-                <Button
-                  variant={"primaryAction"}
-                  onClick={onOpenEndorsementModal}
-                  isDisabled={isXNodeDelegator}
-                  w="full">
-                  {t("Endorse with your {{value}} points", { value: xNodePoints })}
-                </Button>
-              )}
-
-              {shouldRenderSwitchEndorsementButton && (
-                <Button
-                  variant={"primaryAction"}
-                  onClick={onOpenSwitchEndorsementModal}
-                  isDisabled={isXNodeDelegator}
-                  w="full">
-                  {t("Switch endorsement to this app")}
-                </Button>
-              )}
-
-              {shouldRenderLookForEndorsersButton && (
-                <Link
-                  href={DISCORD_URL}
-                  isExternal
-                  w={"full"}
-                  onClick={() =>
-                    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.JOIN_DISCORD))
-                  }>
-                  <Button w={"full"} variant={lookForEndorsersButtonVariant}>
-                    {t("Look for endorsers")}
-                  </Button>
-                </Link>
-              )}
-
-              {isUserAppEndorser && (
-                <Button
-                  variant={"link"}
-                  colorScheme="red"
-                  onClick={onOpenUnendorsementModal}
-                  w="full"
-                  isDisabled={isXNodeDelegator}>
-                  {t("Remove endorsement")}
-                </Button>
-              )}
+              {actionButtons}
             </VStack>
           </Skeleton>
         </CardFooter>

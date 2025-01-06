@@ -30,7 +30,14 @@ export const BetterActionCard = ({ appId, blockNumber, blockTimestamp, amountB3t
       <CardBody>
         <HStack spacing={3} w="full" justify="space-between">
           <HStack spacing={4}>
-            <Flex w={8} h={8} bg="#CDFF9F" align="center" justify="center" borderRadius={"full"}>
+            <Flex
+              w="fit-content"
+              h="fit-content"
+              p={2}
+              bg="#CDFF9F"
+              align="center"
+              justify="center"
+              borderRadius={"full"}>
               <LeafIcon size={"1rem"} />
             </Flex>
             <VStack spacing={0} align="stretch">

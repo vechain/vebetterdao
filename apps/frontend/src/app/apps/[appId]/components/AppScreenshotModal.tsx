@@ -8,10 +8,11 @@ import {
   ModalCloseButton,
   ModalContent,
   ModalHeader,
-  VStack,
   useColorModeValue,
+  VStack,
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+import { v4 as uuid } from "uuid"
 
 type Props = {
   images: string[]
@@ -35,9 +36,9 @@ export const AppScreenshotModal = ({ images, isOpen, onClose }: Props) => {
               {images.map((image, index) => (
                 <Image
                   borderRadius={"8px"}
-                  key={index}
+                  key={`screenshot-modal-${uuid()}`}
                   src={image ?? notFoundImage}
-                  alt={`Screenshot ${index}`}
+                  alt={`Screenshot ${index + 1}`}
                   w="auto"
                   h="auto"
                   maxH="100vh"
