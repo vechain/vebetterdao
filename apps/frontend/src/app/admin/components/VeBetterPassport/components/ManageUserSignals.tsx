@@ -1,6 +1,6 @@
 import { useUserBotSignals } from "@/api"
 import { TransactionModal } from "@/components"
-import { useResetUserBotSignals, useSignalBotUser, useConditionalTitle } from "@/hooks"
+import { useResetUserBotSignals, useSignalBotUser } from "@/hooks"
 import {
   Button,
   Card,
@@ -90,29 +90,26 @@ export const ManageUserSignals = () => {
   const isSignalResetEnabled = signals > 0
   const isLoading = isResetTxLoading || isSignalTxLoading || isResetPending || isSignalPending
 
-  const successTitle = useConditionalTitle(
-    [
-      { condition: resetStatus === "success", title: "Signals Reset" },
-      { condition: signalStatus === "success", title: "User Signaled" },
-    ],
-    "Action Completed",
-  )
+  let successTitle = "Action Completed"
+  if (resetStatus === "success") {
+    successTitle = "Signals Reset"
+  } else if (signalStatus === "success") {
+    successTitle = "User Signaled"
+  }
 
-  const pendingTitle = useConditionalTitle(
-    [
-      { condition: resetStatus === "pending", title: "Resetting signals..." },
-      { condition: signalStatus === "pending", title: "Signaling user..." },
-    ],
-    "Processing action...",
-  )
+  let pendingTitle = "Processing action..."
+  if (resetStatus === "pending") {
+    pendingTitle = "Resetting signals..."
+  } else if (signalStatus === "pending") {
+    pendingTitle = "Signaling user..."
+  }
 
-  const errorTitle = useConditionalTitle(
-    [
-      { condition: !!resetError, title: "Error resetting signals" },
-      { condition: !!signalError, title: "Error signaling user" },
-    ],
-    "Error processing action",
-  )
+  let errorTitle = "Error processing action"
+  if (resetError) {
+    errorTitle = "Error resetting signals"
+  } else if (signalError) {
+    errorTitle = "Error signaling user"
+  }
 
   return (
     <>
