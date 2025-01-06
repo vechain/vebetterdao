@@ -535,6 +535,12 @@ contract X2EarnRewardsPool is
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.availableFunds[appId];
   }
+  // get the locked founds 
+  function lockedFunds(bytes32 appId) external view returns (uint256) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.lockedFunds[appId];
+  }
+
   /**
    * @dev See {IX2EarnRewardsPool-version}
    */
