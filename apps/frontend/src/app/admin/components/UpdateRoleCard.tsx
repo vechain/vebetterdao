@@ -11,16 +11,14 @@ import {
   Heading,
   HStack,
   Icon,
-  Input,
   Select,
   Text,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react"
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
-import { useMemo, useEffect, useCallback } from "react"
+import { useMemo, useState, useEffect, useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { AddressUtils } from "@repo/utils"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useHasRole } from "@/api/contracts/account"
@@ -28,6 +26,13 @@ import { useAccessControl } from "@/hooks"
 import { CONTRACT_LIST } from "@/constants"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { TransactionModal } from "@/components"
+import { WalletAddressInput } from "@/app/components/Input"
+
+type UpdateRoleCardInput = {
+  contract?: string
+  role?: string
+  walletInput?: string
+}
 
 export const UpdateRoleCard = () => {
   const {
@@ -36,21 +41,22 @@ export const UpdateRoleCard = () => {
     watch,
     setValue,
     formState: { errors },
-  } = useForm({
+    register,
+  } = useForm<UpdateRoleCardInput>({
     defaultValues: {
       contract: "",
       role: "",
-      walletAddress: "",
+      walletInput: "",
     },
   })
 
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { account } = useWallet()
+  const [walletAddress, setWalletAddress] = useState<string>("")
 
   const selectedContractAddress = watch("contract")
   const selectedRole = watch("role")
-  const walletAddress = watch("walletAddress")
 
   const selectedContractObject = useMemo(
     () => CONTRACT_LIST.find(contract => compareAddresses(contract.contractAddress, selectedContractAddress)),
@@ -75,7 +81,7 @@ export const UpdateRoleCard = () => {
   const isFormValid =
     !errors.contract &&
     !errors.role &&
-    !errors.walletAddress &&
+    !errors.walletInput &&
     !!selectedContractAddress &&
     !!selectedRole &&
     !!walletAddress &&
@@ -156,20 +162,17 @@ export const UpdateRoleCard = () => {
                 </FormControl>
               )}
 
-              <FormControl isInvalid={!!errors.walletAddress} isRequired>
+              <FormControl isInvalid={!!errors.walletInput} isRequired>
                 <FormLabel>{t("Wallet Address")}</FormLabel>
-                <Controller
-                  name="walletAddress"
-                  control={control}
-                  rules={{
-                    required: t("This field is required"),
-                    validate: value => AddressUtils.isValid(value) || t("Invalid address"),
-                  }}
-                  render={({ field }) => (
-                    <Input {...field} placeholder={t("Enter wallet address to grant or revoke role")} />
-                  )}
+                <WalletAddressInput
+                  inputName="walletInput"
+                  watch={watch}
+                  register={register}
+                  onAddressResolved={address => setWalletAddress(address ?? "")}
+                  placeholder={t("Enter wallet address or domain to grant or revoke role")}
                 />
-                <FormErrorMessage>{errors.walletAddress?.message}</FormErrorMessage>
+
+                <FormErrorMessage>{errors.walletInput?.message}</FormErrorMessage>
               </FormControl>
 
               {isFormValid && !hasRoleError && (
