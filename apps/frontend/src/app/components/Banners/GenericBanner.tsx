@@ -35,7 +35,16 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
   const hasButton = buttonLabel ?? buttonIcon
 
   return (
-    <Card bg={backgroundColor} borderRadius="xl" w="full" h="auto">
+    <Card
+      bg={backgroundColor}
+      borderRadius="xl"
+      w="full"
+      h="full"
+      minH={{
+        base: "30vh",
+        sm: "30vh",
+        md: "auto",
+      }}>
       <CardBody
         position="relative"
         overflow="hidden"
