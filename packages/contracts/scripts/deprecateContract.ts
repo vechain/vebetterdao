@@ -82,183 +82,84 @@ function findContractHighestVersion(contractName: string, deprecatedDir: string)
 }
 
 /**
- * Checks if a contract is an interface
- * @param contractPath Path to the contract
- * @returns True if the contract is an interface
- */
-function isInterface(contractPath: string): boolean {
-  return (
-    path.basename(contractPath).startsWith("I") &&
-    (contractPath.includes("/interfaces/") || contractPath.includes("/interface/"))
-  )
-}
-
-/**
- * Gets the version history from a contract's content
+ * Updates import paths in deprecated contract
  * @param content Contract content
- * @returns Array of version entries, each containing version number and description
+ * @param version Version number
+ * @returns Updated content with versioned import paths
  */
-function getVersionHistory(content: string): { version: number; description: string }[] {
-  const commentStart = content.indexOf("/**")
-  const commentEnd = content.indexOf("*/", commentStart)
-
-  if (commentStart === -1 || commentEnd === -1) {
-    return []
-  }
-
-  const commentBlock = content.substring(commentStart, commentEnd)
-  // Look for version entries in the format: "----- Version X -----" followed by "- Description"
-  const versionPattern = /-{5}\s*Version\s+(\d+)\s*-{5}[\s\n]+\*\s*-\s*([^\n]+)/g
-  const versions: { version: number; description: string }[] = []
-
-  let match
-  while ((match = versionPattern.exec(commentBlock)) !== null) {
-    const version = parseInt(match[1])
-    const description = match[2].trim()
-    if (version && description) {
-      versions.push({ version, description })
-    }
-  }
-
-  return versions.sort((a, b) => a.version - b.version)
+function updateImportPaths(content: string, version: number): string {
+  // For each interface import, find its highest version in the deprecated directory
+  return content.replace(/from ["'](\.\/interfaces\/[^"']+)\.sol["']/g, (match, path) => {
+    const interfaceName = path.split("/").pop()
+    // Don't increment interface version, use the current version
+    return `from "../../interfaces/${interfaceName}.sol"`
+  })
 }
 
 /**
- * Updates version history in comments
+ * Updates version history in comments and version() function
  * @param content Contract content
  * @param newVersion New version number
  * @param description Description of the new version
- * @param previousVersions Previous version entries to include
  */
-function updateVersionHistory(
-  content: string,
-  newVersion: number,
-  description: string,
-  previousVersions: { version: number; description: string }[] = [],
-): string {
-  // Find the comment block containing version history
-  const commentStart = content.indexOf("/**")
-  const commentEnd = content.indexOf("*/", commentStart)
+function updateVersionHistory(content: string, newVersion: number, description: string): string {
+  // Add new version entry before the last */
+  const versionEntry = ` * ----- Version ${newVersion} -----\n * - ${description}\n */`
+  let updatedContent = content.replace(/\s*\*\//, "\n" + versionEntry)
 
-  if (commentStart === -1 || commentEnd === -1) {
-    return content
-  }
+  // Update version() function - more flexible pattern
+  updatedContent = updatedContent.replace(
+    /function version\(\)[^{]*{[^}]*return\s+["'](\d+)["']\s*;/,
+    `function version() external pure virtual returns (string memory) {\n    return "${newVersion}";`,
+  )
 
-  // Get the comment header (everything before the first version entry)
-  const commentBlock = content.substring(commentStart, commentEnd)
-  const firstVersionIndex = commentBlock.indexOf("----- Version")
-  const headerContent = firstVersionIndex === -1 ? commentBlock : commentBlock.substring(0, firstVersionIndex)
-
-  // Build the version history, including previous versions
-  let versionHistory = ""
-  for (const { version, description } of previousVersions) {
-    versionHistory += `----- Version ${version} -----\n * - ${description}\n * `
-  }
-  versionHistory += `----- Version ${newVersion} -----\n * - ${description}`
-
-  // Reconstruct the comment, ensuring proper formatting
-  return (
-    content.substring(0, commentStart) +
-    "/**" +
-    headerContent +
-    versionHistory +
-    "\n */" +
-    content.substring(commentEnd + 2)
-  ).replace(/\/\*\*\/\*\*/g, "/**") // Remove any double comment starts
-}
-
-/**
- * Gets the target directory for a deprecated contract
- * @param contractPath Original contract path
- * @param version Version number
- * @param deprecatedDir Base deprecated directory
- * @returns Path to the target directory
- */
-function getDeprecatedTargetDir(contractPath: string, version: number, deprecatedDir: string): string {
-  const isInterfaceFile = isInterface(contractPath)
-
-  if (isInterfaceFile) {
-    // For interfaces, maintain the interfaces directory structure
-    const relativeDir = path.relative(
-      path.resolve(deprecatedDir, ".."), // Go up one level from deprecated dir
-      path.dirname(contractPath),
-    )
-    return path.join(deprecatedDir, `V${version}`, relativeDir)
-  }
-
-  // For regular contracts, just use the version directory
-  return path.join(deprecatedDir, `V${version}`)
-}
-
-/**
- * Ensures a directory exists, creating it and its parents if necessary
- * @param dir Directory path to ensure
- */
-function ensureDirectoryExists(dir: string) {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true })
-  }
+  return updatedContent
 }
 
 /**
  * Deprecates a single contract
  * @param contractPath Path to the contract
  * @param description Version description
- * @param deprecatedDir Path to deprecated directory
+ * @param deprecatedDir Directory where deprecated contracts are stored
  * @returns The new version number
  */
-async function deprecateSingleContract(
-  contractPath: string,
-  description: string,
-  deprecatedDir: string,
-): Promise<number> {
-  const contractName = path.basename(contractPath, ".sol").replace(/V\d+$/, "") // Remove any version suffix
-  const isInterfaceFile = isInterface(contractPath)
+function deprecateContract(contractPath: string, description: string, deprecatedDir: string): number {
+  // Get contract name without version suffix
+  const contractName = path.basename(contractPath, ".sol").replace(/V\d+$/, "")
 
-  // Find current version and source for deprecated version
+  // Find current version
   const currentVersion = findContractHighestVersion(contractName, deprecatedDir)
   const nextVersion = currentVersion > 0 ? currentVersion + 1 : 1
+
+  // Read original content
   const originalContent = fs.readFileSync(contractPath, "utf8")
 
-  // Get existing version history
-  const previousVersions = getVersionHistory(originalContent)
+  // Create deprecated version directory
+  const targetDir = path.join(deprecatedDir, `V${nextVersion}`)
+  fs.mkdirSync(targetDir, { recursive: true })
 
-  // Get the target directory and ensure it exists
-  const targetDir = getDeprecatedTargetDir(contractPath, nextVersion, deprecatedDir)
-  ensureDirectoryExists(targetDir)
-
-  // Create the deprecated contract name and update its content
+  // Create deprecated contract
   const deprecatedContractName = `${contractName}V${nextVersion}.sol`
   const deprecatedPath = path.join(targetDir, deprecatedContractName)
 
-  // Update the contract content for deprecated version
+  // Update deprecated contract content
   let deprecatedContent = originalContent
-  if (!isInterfaceFile) {
-    // Only update contract name and version for non-interface files
-    deprecatedContent = deprecatedContent
-      .replace(new RegExp(`contract ${contractName}(V\\d+)?( is| {)`), `contract ${contractName}V${nextVersion}$2`)
-      .replace(/return ["']\d+["'];/, `return "${nextVersion}";`)
-  }
+  // Update contract name
+  deprecatedContent = deprecatedContent.replace(
+    new RegExp(`contract ${contractName}( is| {)`),
+    `contract ${contractName}V${nextVersion}$1`,
+  )
+  // Update import paths
+  deprecatedContent = updateImportPaths(deprecatedContent, nextVersion)
 
-  // Write the deprecated version
+  // Write deprecated version
   fs.writeFileSync(deprecatedPath, deprecatedContent)
 
-  // Update the original contract
-  let updatedContent = originalContent
-  if (!isInterfaceFile) {
-    // Only update version history and version number for non-interface files
-    updatedContent = updateVersionHistory(originalContent, nextVersion + 1, description, previousVersions).replace(
-      /return ["']\d+["'];/,
-      `return "${nextVersion + 1}";`,
-    )
-  }
-
-  // Write the updated original contract
+  // Update main contract
+  const updatedContent = updateVersionHistory(originalContent, nextVersion + 1, description)
   fs.writeFileSync(contractPath, updatedContent)
 
-  console.log(
-    `📁 ${isInterfaceFile ? "Interface" : "Contract"} ${contractName}: V${currentVersion || "main"} -> V${nextVersion}`,
-  )
+  console.log(`📁 Contract ${contractName}: V${currentVersion || "main"} -> V${nextVersion}`)
   return nextVersion
 }
 
@@ -267,7 +168,7 @@ async function deprecateSingleContract(
  * @param contractPath Path to the contract to deprecate
  * @param description Description of what's new in this version
  */
-async function deprecateContract(contractPath: string, description: string) {
+async function deprecateContractAndRelated(contractPath: string, description: string) {
   const contractDir = path.dirname(contractPath)
   const projectRoot = path.resolve(contractDir, "..")
   const deprecatedDir = path.join(projectRoot, "contracts/deprecated")
@@ -276,17 +177,18 @@ async function deprecateContract(contractPath: string, description: string) {
   const relatedContracts = findRelatedContracts(contractPath)
   console.log("\n📦 Found related contracts:", relatedContracts.length ? relatedContracts : "none")
 
+  // TODO : needs to deprecated every contracts in order for it to work
   // Deprecate related contracts first
-  if (relatedContracts.length > 0) {
-    console.log("\n🔄 Deprecating related contracts...")
-    for (const relatedPath of relatedContracts) {
-      await deprecateSingleContract(relatedPath, `Updated with ${path.basename(contractPath)}`, deprecatedDir)
-    }
-  }
+  // if (relatedContracts.length > 0) {
+  //   console.log("\n🔄 Deprecating related contracts...")
+  //   for (const relatedPath of relatedContracts) {
+  //     deprecateContract(relatedPath, `Updated with ${path.basename(contractPath)}`, deprecatedDir)
+  //   }
+  // }
 
   // Deprecate the main contract
   console.log("\n🎯 Deprecating main contract...")
-  const mainVersion = await deprecateSingleContract(contractPath, description, deprecatedDir)
+  const mainVersion = deprecateContract(contractPath, description, deprecatedDir)
 
   console.log("\n✅ Deprecation completed successfully!")
   console.log(`📝 Main contract updated to version ${mainVersion + 1}`)
@@ -301,7 +203,7 @@ if (require.main === module) {
     console.error('Usage: yarn deprecate <contract-path> "Description of what\'s new"')
     process.exit(1)
   }
-  deprecateContract(contractPath, description).catch(console.error)
+  deprecateContractAndRelated(contractPath, description)
 }
 
-export { deprecateContract }
+export { deprecateContractAndRelated }
