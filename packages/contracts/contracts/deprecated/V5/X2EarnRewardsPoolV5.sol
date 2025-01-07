@@ -52,10 +52,8 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * - Updated the X2EarnApps interface to support node endorsement feature
  * ----- Version 5 -----
  * - Updated the X2EarnApps interface to support node cooldown functionality
- * ----- Version 6 -----
- * - Added funds locking mechanism to protect against exploits
  */
-contract X2EarnRewardsPool is
+contract X2EarnRewardsPoolV5 is
   IX2EarnRewardsPool,
   UUPSUpgradeable,
   AccessControlUpgradeable,
@@ -498,7 +496,7 @@ contract X2EarnRewardsPool is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "6";
+    return "5";
   }
 
   /**
