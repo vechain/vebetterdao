@@ -35,7 +35,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
   const hasButton = buttonLabel ?? buttonIcon
 
   return (
-    <Card bg={backgroundColor} borderRadius="xl" w="full" h="full">
+    <Card bg={backgroundColor} borderRadius="xl" w="full" h="auto">
       <CardBody
         position="relative"
         overflow="hidden"
