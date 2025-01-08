@@ -42,6 +42,8 @@ export const UpdateRoleCard = () => {
     setValue,
     formState: { errors },
     register,
+    setError,
+    clearErrors,
   } = useForm<UpdateRoleCardInput>({
     defaultValues: {
       contract: "",
@@ -168,6 +170,8 @@ export const UpdateRoleCard = () => {
                   inputName="walletInput"
                   watch={watch}
                   register={register}
+                  setError={setError}
+                  clearErrors={clearErrors}
                   onAddressResolved={address => setWalletAddress(address ?? "")}
                   placeholder={t("Enter wallet address or domain to grant or revoke role")}
                 />
