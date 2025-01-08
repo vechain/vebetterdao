@@ -51,7 +51,7 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * ----- Version 4 -----
  * - Updated the X2EarnApps interface to support node endorsement feature
  * ----- Version 5 -----
- * - Updated the X2EarnApps interface to support node cooldown functionalityå
+ * - Updated the X2EarnApps interface to support node cooldown functionality
  * ----- Version 6 -----
  * - Added funds locking mechanism to protect against exploits
  */
@@ -535,7 +535,10 @@ contract X2EarnRewardsPool is
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.availableFunds[appId];
   }
-  // get the locked founds 
+  
+  /**
+   * @dev Gets the locked founds
+   */
   function lockedFunds(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.lockedFunds[appId];
