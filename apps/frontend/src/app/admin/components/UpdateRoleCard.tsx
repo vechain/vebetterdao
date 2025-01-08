@@ -17,7 +17,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
-import { useMemo, useState, useEffect, useCallback } from "react"
+import { useMemo, useEffect, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
@@ -31,7 +31,7 @@ import { WalletAddressInput } from "@/app/components/Input"
 type UpdateRoleCardInput = {
   contract?: string
   role?: string
-  walletInput?: string
+  walletAddress?: string
 }
 
 export const UpdateRoleCard = () => {
@@ -41,22 +41,19 @@ export const UpdateRoleCard = () => {
     watch,
     setValue,
     formState: { errors },
-    register,
-    setError,
-    clearErrors,
   } = useForm<UpdateRoleCardInput>({
     defaultValues: {
       contract: "",
       role: "",
-      walletInput: "",
+      walletAddress: "",
     },
   })
 
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { account } = useWallet()
-  const [walletAddress, setWalletAddress] = useState("")
 
+  const walletAddress = watch("walletAddress")
   const selectedContractAddress = watch("contract")
   const selectedRole = watch("role")
 
@@ -83,7 +80,7 @@ export const UpdateRoleCard = () => {
   const isFormValid =
     !errors.contract &&
     !errors.role &&
-    !errors.walletInput &&
+    !errors.walletAddress &&
     !!selectedContractAddress &&
     !!selectedRole &&
     !!walletAddress &&
@@ -164,19 +161,12 @@ export const UpdateRoleCard = () => {
                 </FormControl>
               )}
 
-              <FormControl isInvalid={!!errors.walletInput} isRequired>
+              <FormControl>
                 <FormLabel>{t("Wallet Address")}</FormLabel>
                 <WalletAddressInput
-                  inputName="walletInput"
-                  watch={watch}
-                  register={register}
-                  setError={setError}
-                  clearErrors={clearErrors}
-                  onAddressResolved={address => setWalletAddress(address ?? "")}
+                  onAddressResolved={address => setValue("walletAddress", address ?? "")}
                   placeholder={t("Enter wallet address or domain to grant or revoke role")}
                 />
-
-                <FormErrorMessage>{errors.walletInput?.message}</FormErrorMessage>
               </FormControl>
 
               {isFormValid && !hasRoleError && (

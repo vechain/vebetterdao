@@ -21,7 +21,7 @@ import {
   As,
 } from "@chakra-ui/react"
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
 import { useAdminCreatorNFT } from "@/hooks/useAdminCreatorNFT"
@@ -29,10 +29,10 @@ import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft
 import { WalletAddressInput } from "@/app/components/Input"
 
 type NFTFormInputs = {
-  creatorInput?: string
-  tokenId?: string
-  lookupInput?: string
-  actionType?: string
+  creatorWalletAddress: string
+  tokenId: string
+  lookupAddress: string
+  actionType: string
 }
 
 export const ManageCreatorsNFT = () => {
@@ -43,16 +43,18 @@ export const ManageCreatorsNFT = () => {
     register,
     handleSubmit,
     watch,
-    setError,
-    clearErrors,
+    setValue,
     formState: { errors },
   } = useForm<NFTFormInputs>({
-    defaultValues: { creatorInput: "", tokenId: "", lookupInput: "", actionType: "mint" },
+    defaultValues: { creatorWalletAddress: "", tokenId: "", lookupAddress: "", actionType: "mint" },
   })
-  const [creatorWalletAddress, setCreatorWalletAddress] = useState<string>("")
-  const [lookupAddress, setLookupAddress] = useState<string>("")
 
-  const [tokenId, actionType] = watch(["tokenId", "actionType"])
+  const [tokenId, actionType, lookupAddress, creatorWalletAddress] = watch([
+    "tokenId",
+    "actionType",
+    "lookupAddress",
+    "creatorWalletAddress",
+  ])
   const { mintNFT, burnNFT } = useAdminCreatorNFT({
     walletAddress: creatorWalletAddress ?? "",
     tokenId: tokenId ?? "",
@@ -117,21 +119,15 @@ export const ManageCreatorsNFT = () => {
             <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
               <VStack spacing={4} align="start">
                 {actionType === "mint" && (
-                  <FormControl isRequired isInvalid={Boolean(errors.creatorInput)}>
+                  <FormControl>
                     <FormLabel>
                       <strong>{t("Wallet Address")}</strong>
                     </FormLabel>
                     <InputGroup>
                       <WalletAddressInput
-                        inputName="creatorInput"
-                        watch={watch}
-                        register={register}
-                        setError={setError}
-                        clearErrors={clearErrors}
-                        onAddressResolved={address => setCreatorWalletAddress(address ?? "")}
+                        onAddressResolved={address => setValue("creatorWalletAddress", address ?? "")}
                       />
                     </InputGroup>
-                    {errors.creatorInput && <FormErrorMessage>{errors.creatorInput.message}</FormErrorMessage>}
                   </FormControl>
                 )}
                 {actionType === "burn" && (
@@ -151,21 +147,13 @@ export const ManageCreatorsNFT = () => {
                   </FormControl>
                 )}
                 {actionType === "check" && (
-                  <FormControl isInvalid={Boolean(errors.lookupInput)}>
+                  <FormControl>
                     <FormLabel>
                       <strong>{t("Lookup Wallet Address")}</strong>
                     </FormLabel>
                     <InputGroup>
-                      <WalletAddressInput
-                        inputName="lookupInput"
-                        watch={watch}
-                        setError={setError}
-                        clearErrors={clearErrors}
-                        register={register}
-                        onAddressResolved={address => setLookupAddress(address ?? "")}
-                      />
+                      <WalletAddressInput onAddressResolved={address => setValue("lookupAddress", address ?? "")} />
                     </InputGroup>
-                    {errors.lookupInput && <FormErrorMessage>{errors.lookupInput.message}</FormErrorMessage>}
                     {lookupAddress && (
                       <VStack mt={2} align="start">
                         {renderBadge(

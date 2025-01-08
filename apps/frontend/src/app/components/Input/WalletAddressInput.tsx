@@ -1,108 +1,117 @@
-import { useEffect, useId } from "react"
-import { Input, InputProps } from "@chakra-ui/react"
+import { useId, useState, useEffect, useRef, useCallback } from "react"
+import { Input, InputProps, FormControl, FormErrorMessage } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import {
-  UseFormClearErrors,
-  UseFormRegister,
-  UseFormSetError,
-  UseFormWatch,
-  type FieldValues as TFieldValues,
-} from "react-hook-form"
-import { useVechainDomain, useConnex } from "@vechain/dapp-kit-react"
-import { isValid } from "@repo/utils/AddressUtils"
-import { isValidDomain } from "@/utils/VetDomainUtils/VetDomainUtils"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { isValid as isWalletAddressValid } from "@repo/utils/AddressUtils"
 
 type Props = InputProps & {
-  inputName: string
-  register: UseFormRegister<TFieldValues>
-  watch: UseFormWatch<TFieldValues>
-  setError: UseFormSetError<TFieldValues>
-  clearErrors: UseFormClearErrors<TFieldValues>
   onDomainResolved?: (domain?: string) => void
   onAddressResolved?: (address?: string) => void
 }
 
-export const WalletAddressInput = ({
-  inputName,
-  register,
-  watch,
-  setError,
-  clearErrors,
-  onDomainResolved,
-  onAddressResolved,
-  ...props
-}: Props) => {
+export const WalletAddressInput = ({ onDomainResolved, onAddressResolved, ...props }: Props) => {
   const id = useId()
   const { t } = useTranslation()
-  const { thor } = useConnex()
 
-  // Watch the input value directly from react-hook-form
-  const inputValue = watch(inputName)
+  const [inputValue, setInputValue] = useState("")
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  // Resolve the domain or address based on the current input value
+  // Tracks last resolved value (address or domain)
+  const lastResolvedValue = useRef<string | undefined>()
+  // Tracks if the parent was notified of invalid input
+  const hasNotifiedInvalid = useRef(false)
+
+  // Resolve the domain or address using the input value
   const { domain, address } = useVechainDomain({
     addressOrDomain: inputValue,
   })
 
-  // Notify parent components when the domain or address changes
+  /**
+   * Notify the parent if the input resolves to a wallet address or a domain with an associated address
+   * - Notify the parent only once when the input transitions to a valid state
+   * - Reset the last resolved value when the input is invalid
+   */
+  const notifyParentResolved = useCallback(() => {
+    const resolvedValue = address ?? domain
+
+    if ((isWalletAddressValid(inputValue) && inputValue === address) || (domain && address)) {
+      //If already resolved, do not notify parent again
+      if (resolvedValue === lastResolvedValue.current) return
+
+      lastResolvedValue.current = resolvedValue
+
+      if (domain) onDomainResolved?.(domain)
+      if (address) onAddressResolved?.(address)
+
+      // Reset invalidation flag when resolved
+      hasNotifiedInvalid.current = false
+    }
+  }, [inputValue, domain, address, onDomainResolved, onAddressResolved])
+
+  /**
+   * Notify the parent of invalid input
+   * - Notify the parent only once when input transitions to invalid
+   * - Reset last resolved value when invalid
+   * - Reset invalidation flag when resolved
+   **/
+  const notifyInvalidInput = useCallback(() => {
+    // Notify parent only once when input transitions to invalid
+    if (!hasNotifiedInvalid.current) {
+      onDomainResolved?.(undefined)
+      onAddressResolved?.(undefined)
+      hasNotifiedInvalid.current = true
+    }
+
+    // Reset last resolved value when invalid
+    lastResolvedValue.current = undefined
+  }, [onDomainResolved, onAddressResolved])
+
+  /**
+   * Validate the input value on every change
+   */
   useEffect(() => {
-    onDomainResolved?.(domain)
-    onAddressResolved?.(address)
-  }, [domain, address, onDomainResolved, onAddressResolved])
-
-  useEffect(() => {
-    const validateInput = async () => {
-      //Clear Previous Errors
-      if (clearErrors) clearErrors(inputName)
-
-      //Skip Validation if no input
-      if (!inputValue) return
-
-      //If the setError function is not provided, skip the validation
-      if (!setError) {
+    const validateInput = () => {
+      if (!inputValue) {
+        setErrorMessage(null)
+        notifyInvalidInput()
         return
       }
 
-      //Not Valid Address or Domain
-      if (!isValid(inputValue) && !inputValue.endsWith(".vet")) {
-        setError(inputName, { type: "manual", message: t("Please enter a valid wallet address or domain") })
+      if (!inputValue.startsWith("0x") && inputValue.endsWith(".vet") && !domain) {
+        setErrorMessage(t("Please enter a valid domain"))
+        notifyInvalidInput()
+        return
       }
 
-      //Not Valid Address
-      if (inputValue.startsWith("0x") && !isValid(inputValue)) {
-        setError(inputName, { type: "manual", message: t("Please enter a valid wallet address") })
+      if (!isWalletAddressValid(inputValue) && !inputValue.endsWith(".vet")) {
+        setErrorMessage(t("Please enter a valid wallet address or domain"))
+        notifyInvalidInput()
+        return
       }
 
-      //Not Valid Domain
-      if (!inputValue.startsWith("0x") && inputValue.endsWith(".vet")) {
-        const isDomainValid = await isValidDomain(inputValue, thor)
-        if (!isDomainValid) {
-          setError(inputName, { type: "manual", message: t("Please enter a valid domain") })
-        }
+      if (inputValue.startsWith("0x") && !isWalletAddressValid(inputValue)) {
+        setErrorMessage(t("Please enter a valid wallet address"))
+        notifyInvalidInput()
+        return
       }
+
+      setErrorMessage(null)
+      notifyParentResolved()
     }
 
     validateInput()
-  }, [inputValue, setError, clearErrors, inputName, t, thor])
+  }, [inputValue, domain, address, t, notifyParentResolved, notifyInvalidInput])
 
   return (
-    <Input
-      {...props}
-      id={id}
-      {...register(inputName, {
-        required: t("Wallet address or domain is required"),
-        validate: (value: string) => {
-          if (!isValid(value) && !value.endsWith(".vet")) {
-            return t("Please enter a valid wallet address or domain")
-          }
-
-          if (value.startsWith("0x") && !isValid(value)) {
-            return t("Please enter a valid wallet address")
-          }
-        },
-      })}
-      value={inputValue}
-      placeholder={props?.placeholder ?? t("Enter a wallet address or domain")}
-    />
+    <FormControl isInvalid={!!errorMessage}>
+      <Input
+        {...props}
+        id={id}
+        value={inputValue}
+        onChange={e => setInputValue(e.target?.value)}
+        placeholder={props?.placeholder ?? t("Enter a wallet address or domain")}
+      />
+      {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
+    </FormControl>
   )
 }
