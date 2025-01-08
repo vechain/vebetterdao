@@ -53,7 +53,7 @@ export const UpdateRoleCard = () => {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { account } = useWallet()
-  const [walletAddress, setWalletAddress] = useState<string>("")
+  const [walletAddress, setWalletAddress] = useState("")
 
   const selectedContractAddress = watch("contract")
   const selectedRole = watch("role")
