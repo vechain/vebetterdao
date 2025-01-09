@@ -1,4 +1,5 @@
 import { useB3trAllowance, useB3trBalance } from "@/api"
+import { useForm } from "react-hook-form"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useB3trApprove } from "@/hooks"
 import {
@@ -27,14 +28,29 @@ import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { WalletAddressInput } from "@/app/components/Input"
+
+type SpenderValue = {
+  spender?: string
+}
 
 export const B3trAllowance = () => {
+  const {
+    handleSubmit,
+    watch,
+    formState: { errors },
+    setValue,
+  } = useForm<SpenderValue>({
+    defaultValues: {
+      spender: "",
+    },
+  })
+  const spender = watch("spender")
+
   const { account } = useWallet()
   const { data: b3trBalance } = useB3trBalance(account ?? undefined)
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const [spender, setSpender] = useState<string>("")
   const [amount, setAmount] = useState<number>(0)
-  const [spenderFieldIsDirty, setSpenderFieldIsDirty] = useState<boolean>(false)
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)
   const { t } = useTranslation()
 
@@ -69,14 +85,13 @@ export const B3trAllowance = () => {
 
   const isFormValid = useMemo(() => isValidAddress && isAmountValid, [isValidAddress, isAmountValid])
 
-  const handleSubmit = useCallback(
-    (event?: { preventDefault: () => void }) => {
-      if (event) event.preventDefault()
-
+  const handleFormSubmit = useCallback(
+    (_: SpenderValue) => {
+      if (!isValidAddress) return
       sendTransaction(undefined)
       onOpen()
     },
-    [sendTransaction, onOpen],
+    [sendTransaction, onOpen, isValidAddress],
   )
 
   const handleClose = useCallback(() => {
@@ -94,7 +109,7 @@ export const B3trAllowance = () => {
           <Text fontSize="sm">{t("Allow an external address to spend your B3TR tokens.")}</Text>
         </CardHeader>
         <CardBody>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(handleFormSubmit)}>
             <VStack spacing={4} alignItems={"start"}>
               <HStack spacing={4} alignItems={"start"}>
                 <FormControl>
@@ -118,19 +133,14 @@ export const B3trAllowance = () => {
               </HStack>
 
               <HStack spacing={4} alignItems={"start"} w={"full"}>
-                <FormControl isRequired isInvalid={!isValidAddress && spenderFieldIsDirty}>
+                <FormControl isInvalid={!!errors.spender} isRequired>
                   <FormLabel>
                     <strong>{t("Spender")}</strong>
                   </FormLabel>
                   <InputGroup>
-                    <Input
+                    <WalletAddressInput
+                      onAddressResolved={address => setValue("spender", address ?? "")}
                       placeholder={t("Who should be able to use the tokens?")}
-                      value={spender}
-                      onChange={e => {
-                        setSpender(e.target.value)
-                        setSpenderFieldIsDirty(true)
-                      }}
-                      disabled={isLoading}
                     />
                   </InputGroup>
                   <FormErrorMessage>{t("Address not valid")}</FormErrorMessage>
@@ -195,7 +205,7 @@ export const B3trAllowance = () => {
         onClose={handleClose}
         status={error ? "error" : status}
         successTitle={t("B3TR tokens allowance updated successfully")}
-        onTryAgain={handleSubmit}
+        onTryAgain={handleSubmit(handleFormSubmit)}
         showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
