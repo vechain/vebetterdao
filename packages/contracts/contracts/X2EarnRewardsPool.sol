@@ -561,6 +561,16 @@ contract X2EarnRewardsPool is
     return $.veBetterPassport;
   }
 
+  function lockedFundsPercentage(bytes32 appId) external view returns (uint256) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.lockedFundsPercentage[appId];
+  }
+
+  function allowance(bytes32 appId) external view returns (uint256) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.availableFunds[appId] * $.lockedFundsPercentage[appId] / 10000;
+  }
+
   // ---------- Fallbacks ---------- //
 
   /**
