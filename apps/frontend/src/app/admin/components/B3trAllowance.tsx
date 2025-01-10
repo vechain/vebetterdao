@@ -27,14 +27,14 @@ import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { WalletAddressInput } from "@/app/components/Input"
 
 export const B3trAllowance = () => {
   const { account } = useWallet()
   const { data: b3trBalance } = useB3trBalance(account ?? undefined)
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const [spender, setSpender] = useState<string>("")
   const [amount, setAmount] = useState<number>(0)
-  const [spenderFieldIsDirty, setSpenderFieldIsDirty] = useState<boolean>(false)
+  const [spender, setSpender] = useState<string>("")
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)
   const { t } = useTranslation()
 
@@ -73,10 +73,11 @@ export const B3trAllowance = () => {
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
 
+      if (!isValidAddress) return
       sendTransaction(undefined)
       onOpen()
     },
-    [sendTransaction, onOpen],
+    [sendTransaction, onOpen, isValidAddress],
   )
 
   const handleClose = useCallback(() => {
@@ -118,19 +119,14 @@ export const B3trAllowance = () => {
               </HStack>
 
               <HStack spacing={4} alignItems={"start"} w={"full"}>
-                <FormControl isRequired isInvalid={!isValidAddress && spenderFieldIsDirty}>
+                <FormControl isRequired>
                   <FormLabel>
                     <strong>{t("Spender")}</strong>
                   </FormLabel>
                   <InputGroup>
-                    <Input
+                    <WalletAddressInput
+                      onAddressResolved={address => setSpender(address ?? "")}
                       placeholder={t("Who should be able to use the tokens?")}
-                      value={spender}
-                      onChange={e => {
-                        setSpender(e.target.value)
-                        setSpenderFieldIsDirty(true)
-                      }}
-                      disabled={isLoading}
                     />
                   </InputGroup>
                   <FormErrorMessage>{t("Address not valid")}</FormErrorMessage>
