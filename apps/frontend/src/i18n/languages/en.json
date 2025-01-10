@@ -1395,7 +1395,7 @@
   "Manage rewards distribution": "Manage rewards distribution",
   "Actual locked percentage: {{value}} % ": "Actual locked percentage: {{value}} % ",
   "Some funds are locked": "Some funds are locked",
-  "Available for withdrawal": "Available for withdrawal",
+  "Available for withdrawal: {{value}} B3TR": "Available for withdrawal: {{value}} B3TR",
   "Amount exceeds available allowance ({{percentage}} % = {{allowance}} b3tr). Some funds are locked.": "Amount exceeds available allowance ({{percentage}} % = {{allowance}} b3tr). Some funds are locked.",
   "Lock funds": "Lock funds"
 }
