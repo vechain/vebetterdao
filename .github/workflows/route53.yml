@@ -1,0 +1,128 @@
+name: Route53 Records Management
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/route53/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  route53-plan:
+    name: Route53 Plan
+    runs-on: ubuntu-latest
+    outputs:
+      plan_changes_detected: ${{ steps.check_changes.outputs.plan_changes_detected }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ACCESS_ROLE }}
+          aws-region: eu-west-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.3
+    
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
+
+      - name: Terraform Format
+        id: fmt
+        working-directory: terraform/route53
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        working-directory: terraform/route53
+        run: terraform init
+
+      - name: Terraform Workspace
+        working-directory: terraform/route53
+        id: workspace
+        run: terraform workspace select prod
+    
+      - name: Terraform Validate
+        working-directory: terraform/route53
+        id: validate
+        run: terraform validate
+
+      - name: Terraform Plan Route53
+        working-directory: terraform/route53
+        id: plan
+        run: terraform plan -out=route53.tfplan -detailed-exitcode
+    
+      - name: Check for plan changes
+        id: check_changes
+        run: |
+          if [ ${{ steps.plan.outcome }} == 'success' ] && [ ${{ steps.plan.outputs.exitcode }} == 2 ]; then
+            echo "Changes detected"
+            echo "plan_changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes detected"
+            echo "plan_changes_detected=false" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+        continue-on-error: false
+
+      - name: Upload Plan
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: route53-plan
+          path: terraform/route53.tfplan
+          retention-days: 5
+
+  route53-apply:
+    name: Route53 Deploy Records
+    runs-on: ubuntu-latest
+    needs: route53-plan
+    if: |
+      needs.route53-plan.outputs.plan_changes_detected == 'true' && 
+      github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ACCESS_ROLE }}
+          aws-region: eu-west-1
+
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.3
+
+      - name: Terraform Init
+        working-directory: terraform/route53
+        run: |
+          terraform init
+          terraform workspace select prod
+      
+      - name: Terraform Plan
+        working-directory: terraform/route53
+        run: terraform plan
+
+      - name: Terraform Apply Route53
+        working-directory: terraform/route53
+        run: terraform apply -auto-approve

@@ -2,22 +2,22 @@ import { CustomModalContent, ExclamationTriangle } from "@/components"
 import { AddressIcon } from "@/components/AddressIcon"
 import {
   Button,
-  HStack,
   Heading,
+  HStack,
   IconButton,
   Modal,
   ModalBody,
   ModalOverlay,
   Show,
   Text,
-  VStack,
+  useBreakpointValue,
   useDisclosure,
+  VStack,
 } from "@chakra-ui/react"
 import { UilTrash } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useTranslation } from "react-i18next"
-import { useBreakpointValue } from "@chakra-ui/react"
 import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useTranslation } from "react-i18next"
 
 type Props = {
   distributor: string

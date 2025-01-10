@@ -1389,16 +1389,8 @@
   "You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.": "다음 라운드가 시작될 때까지 {{roundStartDate}}까지 지지를 변경할 수 없습니다.",
   "Claimed": "청구됨",
   "Converted": "변환됨",
-  "Supported a": "지지함",
-  "Upgraded a": "업그레이드됨",
+  "Supported a": "지원한",
+  "Upgraded a": "업그레이드한",
   "Your": "당신의",
-  "User Status Removed": "사용자 상태 제거됨",
-  "User Whitelisted": "사용자 화이트리스트 등재됨",
-  "User Blacklisted": "사용자가 블랙리스트에 올랐습니다",
-  "Removing user status...": "사용자 상태를 제거하는 중...",
-  "Whitelisting user...": "사용자를 화이트리스트에 추가하는 중...",
-  "Blacklisting user...": "사용자를 블랙리스트에 추가하는 중...",
-  "Error removing user status": "사용자 상태 제거 오류",
-  "Error whitelisting user": "사용자 화이트리스트 추가 오류",
-  "Error blacklisting user": "사용자 블랙리스트 추가 오류"
+  "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.": "로고, 제작자 소개 및 소셜 미디어 링크를 포함하여 필요한 모든 정보를 가지고 앱을 생태계에 제출하세요."
 }

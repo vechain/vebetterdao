@@ -1,0 +1,99 @@
+records:
+  - name: "vebetterdao.org"
+    type: A
+    ttl: 300
+    records: 
+      - "35.71.142.77"
+      - "52.223.52.2"
+    routing_policy: simple
+
+  - name: "vebetterdao.org"
+    type: NS
+    ttl: 300
+    records:
+      - "ns-1091.awsdns-08.org."
+      - "ns-1940.awsdns-50.co.uk."
+      - "ns-489.awsdns-61.com."
+      - "ns-913.awsdns-50.net."
+    routing_policy: simple
+
+  - name: "vebetterdao.org"
+    type: TXT
+    ttl: 60
+    records:
+      - "google-site-verification=mpFDV_wgT2zoCcAP-Lhbw9VG87_1UfUPhvGYODacaqk"
+    routing_policy: simple
+
+  - name: "www.vebetterdao.org"
+    type: CNAME
+    ttl: 300
+    records:
+      - "sites.framer.app"
+    routing_policy: simple
+
+  - name: "docs.vebetterdao.org"
+    type: CNAME
+    ttl: 60
+    records:
+      - "143e8c3363-hosting.gitbook.io"
+    routing_policy: simple
+
+  - name: "governance.vebetterdao.org"
+    type: CNAME
+    ttl: 300
+    records:
+      - "cname.vercel-dns.com"
+    routing_policy: simple
+
+  - name: "dev.testnet.governance.vebetterdao.org"
+    type: CNAME
+    ttl: 300
+    records:
+      - "cname.vercel-dns.com."
+    routing_policy: simple
+
+  - name: "www.connect.vebetterdao.org"
+    type: A
+    ttl: null
+    alias_target:
+      dns_name: "d27haz8ccqrb4e.cloudfront.net"
+      zone_id: "Z2FDTNDATAQYW2"
+      evaluate_target_health: false
+    routing_policy: simple
+
+  - name: "connect.vebetterdao.org"
+    type: A
+    ttl: null
+    alias_target:
+      dns_name: "d27haz8ccqrb4e.cloudfront.net"
+      zone_id: "Z2FDTNDATAQYW2" 
+      evaluate_target_health: false
+    routing_policy: simple 
+
+  - name: "vebetterdao.org"
+    type: SOA
+    ttl: 300
+    records:
+      - "ns-913.awsdns-50.net. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400"
+    routing_policy: simple
+
+  - name: "_3b7436900dfe04b337a656b730c4a0a5.www.connect.vebetterdao.org"
+    type: CNAME
+    ttl: 60
+    records:
+      - "_78087cb9a070b7a490345fd609c4d00c.mhbtsbpdnt.acm-validations.aws."
+    routing_policy: simple
+
+  - name: "_5baee9415052592f8da7d302d8de92be.vebetterdao.org"
+    type: CNAME
+    ttl: 300
+    records:
+      - "_937fe70fc578a333e689049b838eee2a.mhbtsbpdnt.acm-validations.aws."
+    routing_policy: simple
+
+  - name: "_d30b8d36816e53adffd35443f7d93510.connect.vebetterdao.org"
+    type: CNAME
+    ttl: 60
+    records:
+      - "_272d18636cdea37b3274b7490c14c87b.mhbtsbpdnt.acm-validations.aws."
+    routing_policy: simple

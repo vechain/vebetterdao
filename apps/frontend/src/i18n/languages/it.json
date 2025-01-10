@@ -1392,13 +1392,5 @@
   "Supported a": "Sostenuto un",
   "Upgraded a": "Aggiornato un",
   "Your": "Il tuo",
-  "User Status Removed": "Stato utente rimosso",
-  "User Whitelisted": "Utente autorizzato",
-  "User Blacklisted": "Utente nella lista nera",
-  "Removing user status...": "Rimozione dello stato utente...",
-  "Whitelisting user...": "Aggiunta utente alla lista bianca...",
-  "Blacklisting user...": "Aggiunta utente alla lista nera...",
-  "Error removing user status": "Errore nella rimozione dello stato utente",
-  "Error whitelisting user": "Errore nell'aggiunta dell'utente alla lista bianca",
-  "Error blacklisting user": "Errore nell'aggiunta dell'utente alla lista nera"
+  "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.": "Inserisci la tua app nell'ecosistema con tutte le informazioni necessarie, inclusi logo, biografia del creatore e link ai social media."
 }

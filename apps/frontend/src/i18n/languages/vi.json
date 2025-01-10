@@ -1392,13 +1392,5 @@
   "Supported a": "Đã hỗ trợ một",
   "Upgraded a": "Đã nâng cấp một",
   "Your": "Của bạn",
-  "User Status Removed": "Trạng thái người dùng đã bị loại bỏ",
-  "User Whitelisted": "Người dùng trong danh sách trắng",
-  "User Blacklisted": "Người dùng bị đưa vào danh sách đen",
-  "Removing user status...": "Đang xóa trạng thái người dùng...",
-  "Whitelisting user...": "Đang đưa người dùng vào danh sách trắng...",
-  "Blacklisting user...": "Đang đưa người dùng vào danh sách đen...",
-  "Error removing user status": "Lỗi khi xóa trạng thái người dùng",
-  "Error whitelisting user": "Lỗi khi đưa người dùng vào danh sách trắng",
-  "Error blacklisting user": "Lỗi khi đưa người dùng vào danh sách đen"
+  "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.": "Gửi ứng dụng của bạn vào hệ sinh thái với tất cả các thông tin cần thiết, bao gồm logo, tiểu sử người sáng tạo và các liên kết mạng xã hội."
 }

@@ -11,7 +11,6 @@ import {
   Heading,
   HStack,
   Icon,
-  Input,
   Select,
   Text,
   VStack,
@@ -20,7 +19,6 @@ import {
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import { useMemo, useEffect, useCallback } from "react"
 import { useTranslation } from "react-i18next"
-import { AddressUtils } from "@repo/utils"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useHasRole } from "@/api/contracts/account"
@@ -28,6 +26,13 @@ import { useAccessControl } from "@/hooks"
 import { CONTRACT_LIST } from "@/constants"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { TransactionModal } from "@/components"
+import { WalletAddressInput } from "@/app/components/Input"
+
+type UpdateRoleCardInput = {
+  contract?: string
+  role?: string
+  walletAddress?: string
+}
 
 export const UpdateRoleCard = () => {
   const {
@@ -36,7 +41,7 @@ export const UpdateRoleCard = () => {
     watch,
     setValue,
     formState: { errors },
-  } = useForm({
+  } = useForm<UpdateRoleCardInput>({
     defaultValues: {
       contract: "",
       role: "",
@@ -48,9 +53,9 @@ export const UpdateRoleCard = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { account } = useWallet()
 
+  const walletAddress = watch("walletAddress")
   const selectedContractAddress = watch("contract")
   const selectedRole = watch("role")
-  const walletAddress = watch("walletAddress")
 
   const selectedContractObject = useMemo(
     () => CONTRACT_LIST.find(contract => compareAddresses(contract.contractAddress, selectedContractAddress)),
@@ -163,20 +168,12 @@ export const UpdateRoleCard = () => {
                 </FormControl>
               )}
 
-              <FormControl isInvalid={!!errors.walletAddress} isRequired>
+              <FormControl>
                 <FormLabel>{t("Wallet Address")}</FormLabel>
-                <Controller
-                  name="walletAddress"
-                  control={control}
-                  rules={{
-                    required: t("This field is required"),
-                    validate: value => AddressUtils.isValid(value) || t("Invalid address"),
-                  }}
-                  render={({ field }) => (
-                    <Input {...field} placeholder={t("Enter wallet address to grant or revoke role")} />
-                  )}
+                <WalletAddressInput
+                  onAddressResolved={address => setValue("walletAddress", address ?? "")}
+                  placeholder={t("Enter wallet address or domain to grant or revoke role")}
                 />
-                <FormErrorMessage>{errors.walletAddress?.message}</FormErrorMessage>
               </FormControl>
 
               {isFormValid && !hasRoleError && (

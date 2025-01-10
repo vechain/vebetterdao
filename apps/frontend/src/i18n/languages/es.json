@@ -1388,16 +1388,8 @@
   "You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.": "No puedes cambiar tu respaldo hasta el comienzo de la próxima ronda, el {{roundStartDate}}.",
   "Claimed": "Reclamado",
   "Converted": "Convertido",
-  "Supported a": "Apoyado a",
-  "Upgraded a": "Actualizado a",
+  "Supported a": "Apoyó un",
+  "Upgraded a": "Actualizó un",
   "Your": "Tu",
-  "User Status Removed": "Estado de Usuario Eliminado",
-  "User Whitelisted": "Usuario en Lista Blanca",
-  "User Blacklisted": "Usuario en la lista negra",
-  "Removing user status...": "Eliminando estado del usuario...",
-  "Whitelisting user...": "Añadiendo usuario a la lista blanca...",
-  "Blacklisting user...": "Añadiendo usuario a la lista negra...",
-  "Error removing user status": "Error al eliminar el estado del usuario",
-  "Error whitelisting user": "Error al añadir usuario a la lista blanca",
-  "Error blacklisting user": "Error al añadir usuario a la lista negra"
+  "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.": "Envía tu aplicación al ecosistema con toda la información necesaria, incluyendo el logo, biografía del creador y enlaces a redes sociales."
 }
