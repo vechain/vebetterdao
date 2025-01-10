@@ -198,8 +198,8 @@ contract X2EarnRewardsPool is
     address teamWalletAddress = $.x2EarnApps.teamWalletAddress(appId);
 
     uint256 lockedFunds = $.availableFunds[appId] * $.lockedFundsPercentage[appId] / 10000;
-    uint256 allowance =  $.availableFunds[appId] - lockedFunds; 
-    require (allowance >= amount, "X2EarnRewardsPool: too much funds requested for withdrawal");
+    uint256 unlockedFunds =  $.availableFunds[appId] - lockedFunds; 
+    require (unlockedFunds >= amount, "X2EarnRewardsPool: too much funds requested for withdrawal");
 
     $.availableFunds[appId] -= amount;
     $.totalAllocatedFunds -= amount;
@@ -265,8 +265,8 @@ contract X2EarnRewardsPool is
 
     // check if the funds are above the allowance of the app 
     uint256 lockedFunds = $.availableFunds[appId] * $.lockedFundsPercentage[appId] / 10000;
-    uint256 allowance = $.availableFunds[appId] - lockedFunds;
-    require(allowance > amount, "X2EarnRewardsPool: insufficient unlocked funds");
+    uint256 unlockedFunds = $.availableFunds[appId] - lockedFunds;
+    require(unlockedFunds > amount, "X2EarnRewardsPool: insufficient unlocked funds");
     
     // check if the app has enough available funds to distribute
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
@@ -563,12 +563,12 @@ contract X2EarnRewardsPool is
 
   function lockedFundsPercentage(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.lockedFundsPercentage[appId];
+    return $.lockedFundsPercentage[appId] / 100;
   }
 
   function allowance(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.availableFunds[appId] * $.lockedFundsPercentage[appId] / 10000;
+    return $.availableFunds[appId] * (10000 - $.lockedFundsPercentage[appId]) / 10000;
   }
 
   // ---------- Fallbacks ---------- //
@@ -616,7 +616,5 @@ contract X2EarnRewardsPool is
     revert("X2EarnRewardsPool: contract does not accept batch transfers of ERC1155 tokens");
   }
 
-  event FundsLocked(bytes32 indexed appId, uint256 amount, address locker);
-  event FundsUnlocked(bytes32 indexed appId, uint256 amount, address unlocker);
   event LockedFundsPercentageSet(bytes32 indexed appId, uint256 percentage);
 }
