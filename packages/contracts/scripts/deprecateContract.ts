@@ -87,9 +87,9 @@ function findContractHighestVersion(contractName: string, deprecatedDir: string)
  * @param version Version number
  * @returns Updated content with versioned import paths
  */
-function updateImportPaths(content: string, version: number): string {
+function updateImportPaths(content: string): string {
   // For each interface import, find its highest version in the deprecated directory
-  return content.replace(/from ["'](\.\/interfaces\/[^"']+)\.sol["']/g, (match, path) => {
+  return content.replace(/from ["'](\.\/interfaces\/[^"']+)\.sol["']/g, (_, path) => {
     const interfaceName = path.split("/").pop()
     // Don't increment interface version, use the current version
     return `from "../../interfaces/${interfaceName}.sol"`
@@ -103,15 +103,28 @@ function updateImportPaths(content: string, version: number): string {
  * @param description Description of the new version
  */
 function updateVersionHistory(content: string, newVersion: number, description: string): string {
-  // Add new version entry before the last */
-  const versionEntry = ` * ----- Version ${newVersion} -----\n * - ${description}\n */`
-  let updatedContent = content.replace(/\s*\*\//, "\n" + versionEntry)
+  // Find the last comment end marker using string search instead of regex
+  const commentEnd = "*/"
+  const lastCommentEndIndex = content.lastIndexOf(commentEnd)
+  if (lastCommentEndIndex === -1) {
+    return content
+  }
 
-  // Update version() function - more flexible pattern
-  updatedContent = updatedContent.replace(
-    /function version\(\)[^{]*{[^}]*return\s+["'](\d+)["']\s*;/,
-    `function version() external pure virtual returns (string memory) {\n    return "${newVersion}";`,
-  )
+  // Insert new version entry
+  const versionEntry = ` * ----- Version ${newVersion} -----\n * - ${description}\n */`
+  let updatedContent =
+    content.slice(0, lastCommentEndIndex) + "\n" + versionEntry + content.slice(lastCommentEndIndex + commentEnd.length)
+
+  // Update version in the SC function version()
+  const versionFuncPattern =
+    /function\s+version\s*\(\s*\)\s*(?:external|public|view)?\s*returns\s*\(string\s+memory\)\s*{[^}]*return\s+["']\d+["']\s*;/
+
+  const replacement = `function version() external pure virtual returns (string memory) {\n    return "${newVersion}";`
+
+  // Only attempt replacement if pattern is found
+  if (versionFuncPattern.test(updatedContent)) {
+    updatedContent = updatedContent.replace(versionFuncPattern, replacement)
+  }
 
   return updatedContent
 }
@@ -150,7 +163,7 @@ function deprecateContract(contractPath: string, description: string, deprecated
     `contract ${contractName}V${nextVersion}$1`,
   )
   // Update import paths
-  deprecatedContent = updateImportPaths(deprecatedContent, nextVersion)
+  deprecatedContent = updateImportPaths(deprecatedContent)
 
   // Write deprecated version
   fs.writeFileSync(deprecatedPath, deprecatedContent)
@@ -177,7 +190,7 @@ async function deprecateContractAndRelated(contractPath: string, description: st
   const relatedContracts = findRelatedContracts(contractPath)
   console.log("\n📦 Found related contracts:", relatedContracts.length ? relatedContracts : "none")
 
-  // TODO : needs to deprecated every contracts in order for it to work
+  // It needs to deprecated every contracts in order for it to work
   // Deprecate related contracts first
   // if (relatedContracts.length > 0) {
   //   console.log("\n🔄 Deprecating related contracts...")
