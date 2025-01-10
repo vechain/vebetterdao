@@ -1,2 +1,3 @@
 export * from "./useAppBalance"
-export * from "./useAppLockedFunds"
+export * from "./useAppAllowance"
+export * from "./useAppLockedPercentage"

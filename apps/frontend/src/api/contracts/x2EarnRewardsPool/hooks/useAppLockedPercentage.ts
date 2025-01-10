@@ -6,26 +6,25 @@ const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddres
 const X2EarnRewardsPoolInterface = X2EarnRewardsPool__factory.createInterface()
 
 /**
- * Returns the query key for fetching the locked funds.
+ * Returns the query key for fetching the percentage of locked funds.
  * @param appId - The xApp id.
- * @returns The query key for fetching the locked funds.
  */
-export const getAppLockedFundsQueryKey = (appId?: string) => {
-  return getCallKey({ method: "lockedFunds", keyArgs: [appId] })
+export const getAppLockedPercentageQueryKey = (appId?: string) => {
+  return getCallKey({ method: "lockedFundsPercentage", keyArgs: [appId] })
 }
 
 /**
- * Get the founds locked in the x2Earn rewards pool contract for a specific xApp
+ * Get the percentage of funds locked in the x2Earn rewards pool contract for a specific xApp
  *
  * @param thor  the connex instance
  * @param xAppId  the xApp id
- * @returns the founds locked in the x2Earn rewards pool contract for a specific xApp
+ * @returns the percentage of funds locked in the x2Earn rewards pool contract for a specific xApp
  */
-export const useAppLockedFunds = (appId: string) => {
+export const useAppLockedPercentage = (appId: string) => {
   return useCall({
     contractInterface: X2EarnRewardsPoolInterface,
     contractAddress: X2EARN_REWARDS_POOL_CONTRACT,
-    method: "lockedFunds",
+    method: "lockedFundsPercentage",
     args: [appId],
   })
 }
