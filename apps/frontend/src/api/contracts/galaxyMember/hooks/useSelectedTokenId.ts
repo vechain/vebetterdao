@@ -22,6 +22,6 @@ export const useSelectedTokenId = (profile?: string, enabled = true) => {
     contractAddress,
     method,
     args: [profile ?? account],
-    enabled: !!account && enabled,
+    enabled: (!!profile || !!account) && enabled,
   })
 }
