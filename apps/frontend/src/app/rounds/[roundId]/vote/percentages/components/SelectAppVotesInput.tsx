@@ -42,8 +42,8 @@ export const SelectAppVotesInput = ({ onChange, vote, isDisabled = false, totalV
       spacing={4}
       justify={"space-between"}
       align={["flex-start", "flex-start", "center"]}
-      py={[0, 0, "16px"]}
-      px={[0, 0, "24px"]}
+      py={[4, 4, "16px"]}
+      px={[4, 4, "24px"]}
       borderRadius={"16px"}
       w="full"
       bg="#F8F8F8">
