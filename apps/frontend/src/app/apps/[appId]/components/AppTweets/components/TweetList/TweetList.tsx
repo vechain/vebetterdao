@@ -3,8 +3,8 @@ import { useCurrentAppMetadata } from "@/app/apps/[appId]/hooks"
 import { Center, Spinner, VStack } from "@chakra-ui/react"
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from "react"
 import InfiniteScroll from "react-infinite-scroll-component"
-import { TweetCard } from "./components/TweetCard"
 
+import { TweetCard } from "./components/TweetCard"
 type Props = {
   editMode: boolean
   tweets: string[]
@@ -44,7 +44,7 @@ export const TweetList = ({ editMode, tweets, setTweets }: Props) => {
       <VStack alignItems="stretch" py={3} gap={4}>
         {visibleTweets?.map((tweetQuery, index) => (
           <TweetCard
-            key={index}
+            key={`tweet-card-${tweetQuery.data?.id_str ?? index}`}
             tweetQuery={tweetQuery}
             editMode={editMode}
             index={index}

@@ -3,6 +3,7 @@ import { motion } from "framer-motion"
 import { getConfig } from "@repo/config"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { v4 as uuid } from "uuid"
 
 const isTestnetPhase = ["test", "solo", "custom", "main"].includes(getConfig().network.type)
 const MotionHStack = motion(HStack)
@@ -66,9 +67,9 @@ export const AlphaTestnetBanner = () => {
           repeat: Infinity,
           repeatType: "loop",
         }}>
-        {texts.map((text, index) => (
+        {texts.map(text => (
           <Text
-            key={index}
+            key={`alpha-testnet-banner-text-${uuid()}`}
             fontSize={["sm", "md"]}
             color="secondary.500"
             whiteSpace="nowrap"

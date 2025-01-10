@@ -1,7 +1,7 @@
 import { AppImage } from "@/components/AppImage/AppImage"
 import { Flex, HStack, Skeleton, Text, useBreakpointValue } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-
+import { v4 as uuid } from "uuid"
 type Props = {
   appsIds: string[]
   isLoading?: boolean
@@ -36,8 +36,8 @@ export const OverlappedAppsImages: React.FC<Props> = ({
   if (isLoading)
     return (
       <HStack spacing={0}>
-        {Array.from({ length: maxAppsToShow }).map((_, index) => (
-          <Skeleton key={index} boxSize={`${boxSize}px`} borderRadius={`${borderRadius}px`} />
+        {Array.from({ length: maxAppsToShow }).map(_ => (
+          <Skeleton key={`loading-${uuid()}`} boxSize={`${boxSize}px`} borderRadius={`${borderRadius}px`} />
         ))}
       </HStack>
     )
@@ -49,7 +49,7 @@ export const OverlappedAppsImages: React.FC<Props> = ({
           const ml = index > 0 ? `-${marginleft}px` : "0"
           return (
             <AppImage
-              key={index}
+              key={`app-image-${appId}`}
               appId={appId}
               boxSize={`${boxSize}px`}
               borderRadius={`${borderRadius}px`}

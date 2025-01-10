@@ -21,8 +21,8 @@ export const TotalRewardsPerAppChart: React.FC<Props> = ({ data }) => {
         <Tooltip formatter={(value: number) => [`${value.toFixed(2)}`, "Rewards"]} />
         <Bar dataKey="rewards" name="Total Rewards" fill="#ffc658">
           <LabelList dataKey="rewards" position="top" formatter={(value: number) => value.toFixed(2)} />
-          {sortedData.map((_, index) => (
-            <Cell key={`cell-${index}`} fill="#ffc658" />
+          {sortedData.map(data => (
+            <Cell key={`total-rewards-cell-${data.appId}`} fill="#ffc658" />
           ))}
         </Bar>
       </BarChart>

@@ -1,7 +1,3 @@
-import { useState, useCallback, useMemo, useRef } from "react"
-import { IconButton, Hide } from "@chakra-ui/react"
-import { DoActionBanner } from "./components/DoActionBanner"
-import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
 import {
   useAccountBalance,
   useB3trBalance,
@@ -12,25 +8,31 @@ import {
   useVotingRewards,
   useXApps,
 } from "@/api"
-import { CastVoteBanner } from "./components/CastVoteBanner"
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
-// Import Swiper React components
-import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
-// import Swiper core and required modules
-import { A11y } from "swiper/modules"
-
-// Import Swiper styles
-import "swiper/css"
-import "@/app/theme/swiper-custom.css"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { LowVthoBanner } from "./components/LowVthoBanner"
-import { CreatorApplicationRejectedBanner } from "./components/CreatorNFTBanner/CreatorApplicationRejectedBanner"
-import { CreatorApplicationApprovedBanner } from "./components/CreatorNFTBanner/CreatorApplicationApprovedBanner"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/hooks/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
-import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
-import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
+import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
+import { Hide, IconButton } from "@chakra-ui/react"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { useCallback, useMemo, useRef, useState } from "react"
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
+// import Swiper core and required modules
+import { A11y } from "swiper/modules"
+// Import Swiper React components
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
+
+import { CastVoteBanner } from "./components/CastVoteBanner"
+import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
+import { CreatorApplicationApprovedBanner } from "./components/CreatorNFTBanner/CreatorApplicationApprovedBanner"
+import { CreatorApplicationRejectedBanner } from "./components/CreatorNFTBanner/CreatorApplicationRejectedBanner"
+import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
+import { DoActionBanner } from "./components/DoActionBanner"
+import { LowVthoBanner } from "./components/LowVthoBanner"
+
+import "@/app/theme/swiper-custom.css"
+// Import Swiper styles
+import "swiper/css"
+
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
 
@@ -131,9 +133,9 @@ export const ActionBanner = () => {
       onSlideChange={handleSliderChange}
       style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }} // Ensure swiper itself takes full width
     >
-      {slides.map((slide, index) => (
+      {slides.map(slide => (
         <SwiperSlide
-          key={index}
+          key={`slide-${slide.key}`}
           className="slide"
           style={{
             display: "flex",

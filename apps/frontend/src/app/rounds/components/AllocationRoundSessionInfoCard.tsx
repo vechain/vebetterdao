@@ -20,6 +20,7 @@ import {
 import { useWallet } from "@vechain/dapp-kit-react"
 import { t } from "i18next"
 import { useMemo } from "react"
+import { v4 as uuid } from "uuid"
 
 type Props = {
   roundId: string
@@ -99,8 +100,8 @@ const AllocationRoundTimeline = ({ roundId }: Props) => {
       height="200px"
       mt={4}
       variant="primaryVertical">
-      {steps.map((step, index) => (
-        <Step key={index}>
+      {steps.map(step => (
+        <Step key={`allocation-round-session-step-${uuid()}`}>
           <StepIndicator>
             <StepStatus complete={<Circle bg="#004CFC" size={"30%"} />} active={<Circle bg="#004CFC" size={"60%"} />} />
           </StepIndicator>

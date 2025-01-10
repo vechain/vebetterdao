@@ -116,7 +116,7 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
             const borderRadiusRight = index === baseAmountsInfo.length - 1 ? "full" : "none"
             return (
               <Box
-                key={index}
+                key={`allocation-chart-amount-${info.amount}-${info.color}`}
                 bg={info.color}
                 h="8px"
                 borderLeftRadius={borderRadiusLeft}
@@ -131,8 +131,11 @@ export const AllocationRoundBreakdownChart = ({ roundId }: Props) => {
         </Skeleton>
       </VStack>
       <VStack w="full" spacing={4}>
-        {baseAmountsInfo.map((info, index) => (
-          <Skeleton isLoaded={!roundAmountLoading} key={index} w="full">
+        {baseAmountsInfo.map(info => (
+          <Skeleton
+            isLoaded={!roundAmountLoading}
+            key={`allocation-chart-amount-${info.amount}-${info.color}`}
+            w="full">
             <HStack w="full" spacing={1} color="#252525">
               <DotSymbol size={4} color={info.color} />
               <Text ml={1} fontSize="md" fontWeight={600}>

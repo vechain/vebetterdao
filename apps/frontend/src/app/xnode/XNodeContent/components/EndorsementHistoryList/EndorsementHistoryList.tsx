@@ -26,7 +26,12 @@ export const EndorsementHistoryList = () => {
           </Heading>
 
           {events?.length ? (
-            events.map((event, index) => <EndorsementHistoryItem key={index} event={event} />)
+            events.map(event => (
+              <EndorsementHistoryItem
+                key={`endorsement-history-${event.appId}-${event.nodeId}-${event.blockNumber}`}
+                event={event}
+              />
+            ))
           ) : (
             <Text>{t("No endorsement events")}</Text>
           )}
