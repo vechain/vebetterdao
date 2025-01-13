@@ -116,7 +116,7 @@ describe("X-Allocation Voting - @shard14", function () {
       })
 
       expect(await xAllocationVoting.name()).to.eql("XAllocationVoting")
-      expect(await xAllocationVoting.version()).to.eql("4")
+      expect(await xAllocationVoting.version()).to.eql("5")
     })
 
     it("Counting mode is set correctly", async function () {
@@ -490,7 +490,7 @@ describe("X-Allocation Voting - @shard14", function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationVoting.version()).to.equal("45")
+      expect(await xAllocationVoting.version()).to.equal("5")
     })
 
     it("Should not break storage when upgrading to V2, V3, V4 and V5", async () => {
