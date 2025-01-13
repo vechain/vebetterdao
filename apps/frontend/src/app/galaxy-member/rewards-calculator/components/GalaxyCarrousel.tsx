@@ -3,6 +3,7 @@ import { Box, Flex, IconButton, useBreakpointValue, Image, Text } from "@chakra-
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 import { gmNfts } from "@/constants/gmNfts"
 import { useTranslation } from "react-i18next"
+import { useSelectedGmNft } from "@/api"
 
 type Props = {
   setSelectedGMLevel: (GMLevel: string | undefined) => void
@@ -11,10 +12,13 @@ type Props = {
 
 export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
   const { t } = useTranslation()
+  const { maxGmLevel } = useSelectedGmNft()
 
   const upgradableNfts = useMemo(() => {
-    return gmNfts.filter(nft => parseInt(nft.level, 10) >= Number(usersGM.gmLevel))
-  }, [usersGM.gmLevel])
+    return gmNfts.filter(
+      nft => parseInt(nft.level, 10) >= Number(usersGM.gmLevel) && parseInt(nft.level, 10) <= Number(maxGmLevel),
+    )
+  }, [usersGM.gmLevel, maxGmLevel])
 
   const visibleCards = useBreakpointValue({ base: 3, md: 3, lg: 3 }) || 1
   const initialIndex = upgradableNfts.findIndex(nft => nft.level === usersGM.gmLevel)
@@ -106,18 +110,21 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
           size="sm"
           _hover={{ bg: "whiteAlpha.200" }}
         />
-        {upgradableNfts.map((nft, index) => (
-          <Box
-            key={`gm-level-${nft.level}`}
-            w="2"
-            h="2"
-            borderRadius="full"
-            bg={index === currentIndex ? "white" : "whiteAlpha.400"}
-            transition="all 0.2s"
-            cursor="pointer"
-            onClick={() => setCurrentIndex(index)}
-          />
-        ))}
+        {upgradableNfts.map((nft, index) => {
+          const adjustedIndex = index === 0 ? upgradableNfts.length - 1 : index - 1
+          return (
+            <Box
+              key={`gm-level-${nft.level}`}
+              w="2"
+              h="2"
+              borderRadius="full"
+              bg={adjustedIndex === currentIndex ? "white" : "whiteAlpha.400"}
+              transition="all 0.2s"
+              cursor="pointer"
+              onClick={() => setCurrentIndex(adjustedIndex)}
+            />
+          )
+        })}
         <IconButton
           aria-label="Next card"
           icon={<FaChevronRight size={16} />}
