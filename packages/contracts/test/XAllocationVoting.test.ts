@@ -493,7 +493,7 @@ describe("X-Allocation Voting - @shard14", function () {
       expect(await xAllocationVoting.version()).to.equal("45")
     })
 
-    it.only("Should not break storage when upgrading to V2, V3, V4 and V5", async () => {
+    it("Should not break storage when upgrading to V2, V3, V4 and V5", async () => {
       const config = createTestConfig()
       const {
         otherAccounts,
