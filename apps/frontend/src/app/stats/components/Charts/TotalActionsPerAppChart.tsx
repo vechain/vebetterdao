@@ -21,8 +21,8 @@ export const TotalActionsPerAppChart: React.FC<Props> = ({ data }) => {
         <Tooltip />
         <Bar dataKey="actions" name="Total Actions" fill="#8884d8">
           <LabelList dataKey="actions" position="top" />
-          {sortedData.map((_, index) => (
-            <Cell key={`cell-${index}`} fill="#8884d8" />
+          {sortedData.map(data => (
+            <Cell key={`total-actions-cell-${data.appId}`} fill="#8884d8" />
           ))}
         </Bar>
       </BarChart>

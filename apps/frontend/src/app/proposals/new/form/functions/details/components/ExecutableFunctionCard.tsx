@@ -70,7 +70,7 @@ export const ExecutableFunctionCard: React.FC<Props> = ({
               return (
                 <GenerateFunctionToCallParamsInput
                   actionIndex={index}
-                  key={paramIndex}
+                  key={`proposal-field-${field.id}-${param.name}-${param.type}`}
                   field={param}
                   index={paramIndex}
                   error={errors?.actions?.[index]?.params?.[paramIndex]?.value as FieldError}

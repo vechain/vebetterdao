@@ -3,7 +3,9 @@ import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
 import { FeatureFlagWrapper } from "@/components"
-import { FeatureFlag } from "@/constants"
+import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
+import { useGMNFTData } from "@/hooks/useGMNFTData"
+import { AnalyticsUtils } from "@/utils"
 import {
   Box,
   Button,
@@ -23,9 +25,6 @@ import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaChevronRight } from "react-icons/fa6"
-import { useGMNFTData } from "@/hooks/useGMNFTData"
-import { AnalyticsUtils } from "@/utils"
-import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/constants"
 
 export const AttachGMNFTCard = () => {
   const { t } = useTranslation()

@@ -95,8 +95,8 @@ export const FunctionsPageContent = () => {
                     placeholder={t("Select an environment")}
                     value={featuredFunctionsEnv}
                     onChange={e => setFeaturedFunctionsEnv(e.target.value as EnvConfig)}>
-                    {EnvConfigValues.map((env, index) => (
-                      <option key={index} value={env}>
+                    {EnvConfigValues.map(env => (
+                      <option key={env} value={env}>
                         {env}
                       </option>
                     ))}

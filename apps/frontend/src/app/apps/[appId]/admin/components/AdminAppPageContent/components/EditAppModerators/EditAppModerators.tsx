@@ -28,13 +28,7 @@ export const EditAppModerators = ({ form }: Props) => {
         {t("Moderators")}
       </Heading>
       <Text color="#6A6A6A">
-        {moderators?.length
-          ? t(
-              "These users will be able to manage the information in the feed and update the visual data on the profile.",
-            )
-          : t(
-              "These users will be able to manage the information in the feed and update the visual data on the profile.",
-            )}
+        {t("These users will be able to manage the information in the feed and update the visual data on the profile.")}
       </Text>
       <VStack align="stretch" spacing={4} my={4} gap={4}>
         {moderators?.map((moderator, index) => (

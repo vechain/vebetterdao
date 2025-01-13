@@ -1,8 +1,15 @@
-import { useAppEndorsementStatus, useAppEndorsers, useXNode } from "@/api"
+import {
+  useAllocationsRound,
+  useAppEndorsementStatus,
+  useAppEndorsers,
+  useCurrentAllocationsRoundId,
+  useXNode,
+} from "@/api"
 import { useAppEndorsedEvents } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
 import { EndorsementDetails } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementDetails"
 import { EndorsementStatusCallout } from "@/app/apps/[appId]/components/AppEndorsementInfoCard/EndorsementStatusCallout"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
+import { GenericAlert } from "@/app/components/Alert"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import {
   Button,
@@ -20,15 +27,18 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
+import { useWallet } from "@vechain/dapp-kit-react"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
 export const EndorsingAppCard = () => {
   const { t } = useTranslation()
+  const { account } = useWallet()
 
-  const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeId, isXNodeDelegator } = useXNode()
+  const { isXNodeLoading, isEndorsingApp, endorsedApp, xNodePoints, xNodeId, isXNodeDelegator, isXNodeOnCooldown } =
+    useXNode()
   // get the number of endorsers for the endorsed app
   const { data: appEndorsers, isLoading: isAppEndorsersLoading } = useAppEndorsers(endorsedApp?.id ?? "")
   // get app status and score
@@ -50,6 +60,8 @@ export const EndorsingAppCard = () => {
 
   const lastEndorsementTimestamp = useEstimateBlockTimestamp({ blockNumber: appEndorsedEvents?.[0]?.blockNumber })
   const endorsingSince = dayjs(lastEndorsementTimestamp).fromNow()
+  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+  const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
 
   const router = useRouter()
   const goToApps = useCallback(() => {
@@ -57,7 +69,12 @@ export const EndorsingAppCard = () => {
   }, [router])
 
   const searchIconSize = useBreakpointValue({ base: "4rem", md: "6rem" })
-
+  const shouldDisableEndorsementButton = useMemo(() => {
+    return isXNodeDelegator || isXNodeOnCooldown
+  }, [isXNodeDelegator, isXNodeOnCooldown])
+  const shouldDisplayCooldownAlert = useMemo(() => {
+    return account && !isXNodeDelegator
+  }, [account, isXNodeDelegator])
   return (
     <Card variant="baseWithBorder" w="full" h="min-content">
       <CardBody>
@@ -65,9 +82,9 @@ export const EndorsingAppCard = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t("Endorsing app")}</Heading>
-              {isEndorsingApp && <UilInfoCircle color="#004CFC" />}
+              {!isEndorsingApp && <UilInfoCircle color="#004CFC" />}
             </HStack>
-            {isEndorsingApp && (
+            {!isEndorsingApp && (
               <Text fontSize="sm">
                 {t(
                   "As the owner of an Node, you can use your points to endorse apps and help them be voted in allocation rounds.",
@@ -75,6 +92,24 @@ export const EndorsingAppCard = () => {
               </Text>
             )}
           </VStack>
+          {shouldDisplayCooldownAlert ? (
+            <GenericAlert
+              type={!isXNodeOnCooldown ? "warning" : "error"}
+              isLoading={roundInfoLoading}
+              message={
+                isXNodeOnCooldown
+                  ? t("You cannot change your endorsement until the start of the next round, on {{roundStartDate}}.", {
+                      roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+                    })
+                  : t(
+                      "Once endorsed you cannot change your endorsement until the start of the next round, on {{roundStartDate}}.",
+                      {
+                        roundStartDate: dayjs(roundInfo?.voteEndTimestamp).format("MMMM D"),
+                      },
+                    )
+              }
+            />
+          ) : null}
           {isEndorsingApp ? (
             <Card variant={"baseWithBorder"} p={4} rounded="lg">
               <VStack align="stretch" spacing={6}>
@@ -133,11 +168,12 @@ export const EndorsingAppCard = () => {
                       endorsers={appEndorsers || []}
                       isAppEndorsersLoading={isAppEndorsersLoading}></EndorsementDetails>
                   </Flex>
+
                   <Button
                     variant="dangerGhost"
                     onClick={unendorseAppModal.onOpen}
                     w={["full", "full", "auto"]}
-                    isDisabled={isXNodeDelegator}>
+                    isDisabled={shouldDisableEndorsementButton}>
                     {t("Remove endorsement")}
                   </Button>
                 </Stack>

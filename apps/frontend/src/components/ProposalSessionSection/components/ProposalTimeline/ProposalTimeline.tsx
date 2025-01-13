@@ -106,8 +106,8 @@ export const ProposalTimeline = () => {
         {t("Timeline")}
       </Heading>
       <Stepper index={activeStep} orientation="vertical" height={height} gap="0" variant="primaryVertical">
-        {steps.map((step, index) => (
-          <Step key={index} style={{ width: "100%" }}>
+        {steps.map(step => (
+          <Step key={`proposal-timeline-step-${step.key}`} style={{ width: "100%" }}>
             <StepIndicator>
               <StepStatus
                 complete={<Circle bg="#004CFC" size={"30%"} />}

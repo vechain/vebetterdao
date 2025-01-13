@@ -36,8 +36,13 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
           )}
         </Text>
         <VStack align="stretch" gap={4}>
-          {allNodes.map((node, index) => (
-            <Box key={index} p={4} bg="#FAFAFA" borderRadius="xl" backgroundImage={"/images/xnode-page-background.png"}>
+          {allNodes.map(node => (
+            <Box
+              key={`node-info-${node.nodeId}`}
+              p={4}
+              bg="#FAFAFA"
+              borderRadius="xl"
+              backgroundImage={"/images/xnode-page-background.png"}>
               <HStack align="stretch" gap={6}>
                 <Image
                   src={NodeStrengthLevelToImage[Number(node.nodeLevel)] as string}

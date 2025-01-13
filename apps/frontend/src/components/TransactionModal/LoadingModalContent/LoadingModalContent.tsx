@@ -3,8 +3,8 @@ import Lottie from "react-lottie"
 import loadingAnimation from "./loading.json"
 import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
-import { getConfig } from "@repo/config"
 import { useTranslation } from "react-i18next"
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 
 export type LoadingModalContentProps = {
   title?: ReactNode
@@ -38,7 +38,7 @@ export const LoadingModalContent = ({
         />
         {showExplorerButton && txId && (
           <Link
-            href={`${getConfig().network.explorerUrl}/txs/${txId}`}
+            href={getExplorerTxLink(txId)}
             isExternal
             color="gray.500"
             fontSize={"14px"}

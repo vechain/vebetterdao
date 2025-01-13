@@ -48,9 +48,9 @@ export const ActivityDayModal = ({ address, isOpen, onClose, date }: Props) => {
         <Text fontWeight="600" color="#848484">
           {dayjs(date).format("MMMM D YYYY").toUpperCase()}
         </Text>
-        {flatActions.map((action, index) => (
+        {flatActions.map(action => (
           <BetterActionCard
-            key={index}
+            key={`action-day-${action.appId}-${action.blockTimestamp}`}
             amountB3tr={action.amount}
             appId={action.appId}
             blockNumber={action.blockNumber}
