@@ -36,7 +36,7 @@ import { Math } from "@openzeppelin/contracts/utils/math/Math.sol";
  * In every round users can vote a fraction of their balance for the eligible apps in that round.
  *
  * ----- Version 5 -----
- * - Fixed duplicate app voting in same transaction in {RoundVotesCountingUpgradeable.castVote}
+ * - Fixed duplicate app voting in same transaction in {_countVote}
  */
 abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVotingGovernor {
   struct RoundVote {

@@ -52,7 +52,7 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
  * - Integrated VeBetterPassport
  *
  * ----- Version 5 -----
- * - Fixed duplicate app voting in same transaction in {RoundVotesCountingUpgradeable.castVote}
+ * - Fixed duplicate app voting in same transaction in {RoundVotesCountingUpgradeable._countVote}
  */
 abstract contract XAllocationVotingGovernor is
   Initializable,
