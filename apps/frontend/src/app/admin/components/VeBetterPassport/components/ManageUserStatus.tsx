@@ -1,4 +1,5 @@
 import { useUserStatus } from "@/api"
+import { WalletAddressInput } from "@/app/components/Input"
 import { TransactionModal } from "@/components"
 import { UserStatus, useWhitelistBlacklistUser } from "@/hooks"
 import {
@@ -7,11 +8,9 @@ import {
   CardBody,
   CardHeader,
   FormControl,
-  FormErrorMessage,
   FormLabel,
   Heading,
   HStack,
-  Input,
   InputGroup,
   Select,
   Text,
@@ -24,7 +23,6 @@ import { useTranslation } from "react-i18next"
 
 export const ManageUserStatus = () => {
   const [user, setUser] = useState<string>("")
-  const [userFieldIsDirty, setUserFieldIsDirty] = useState<boolean>(false)
   const [actionType, setActionType] = useState(UserStatus.NONE)
   const { isOpen, onClose, onOpen } = useDisclosure()
 
@@ -85,22 +83,13 @@ export const ManageUserStatus = () => {
           <form onSubmit={handleSubmit}>
             <VStack spacing={4} alignItems={"start"}>
               <HStack spacing={4} alignItems={"start"} w={"full"}>
-                <FormControl isRequired isInvalid={!isValidAddress && userFieldIsDirty}>
+                <FormControl isRequired isInvalid={!isValidAddress}>
                   <FormLabel>
                     <strong>{t("User address")}</strong>
                   </FormLabel>
                   <InputGroup>
-                    <Input
-                      placeholder={t("Enter the user address")}
-                      value={user}
-                      onChange={e => {
-                        setUser(e.target.value)
-                        setUserFieldIsDirty(true)
-                      }}
-                      disabled={isLoading}
-                    />
+                    <WalletAddressInput onAddressResolved={address => setUser(address ?? "")} isDisabled={isLoading} />
                   </InputGroup>
-                  <FormErrorMessage>{t("Address not valid")}</FormErrorMessage>
                 </FormControl>
               </HStack>
 

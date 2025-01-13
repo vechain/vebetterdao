@@ -2,10 +2,8 @@ import { CustomModalContent } from "@/components"
 import {
   Button,
   FormControl,
-  FormErrorMessage,
   HStack,
   Heading,
-  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -15,26 +13,27 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
-import { compareAddresses, isValid } from "@repo/utils/AddressUtils"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../../../AdminAppPageContent"
 import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { WalletAddressInput } from "@/app/components/Input"
 
 type Props = {
   editAdminForm: UseFormReturn<AdminAppForm>
 }
-
 export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
   const { t } = useTranslation()
   const { isOpen, onClose, onOpen } = useDisclosure()
   const addressForm = useForm<{ creatorAddress: string }>()
-  const {
-    formState: { errors },
-  } = addressForm
+  const { watch, setValue, handleSubmit, formState } = addressForm
 
-  const { domain } = useVechainDomain({ addressOrDomain: addressForm.watch("creatorAddress") })
+  const creatorAddress = watch("creatorAddress")
+  const { isValid } = formState
+
+  const { domain } = useVechainDomain({ addressOrDomain: creatorAddress })
 
   const onSubmit = useCallback(
     (data: { creatorAddress: string }) => {
@@ -70,25 +69,24 @@ export const AddCreatorNFTButton = ({ editAdminForm }: Props) => {
                     </Text>
                   )}
                 </HStack>
-                <FormControl isInvalid={!!errors.creatorAddress}>
-                  <Input
-                    {...addressForm.register("creatorAddress", {
-                      required: {
-                        value: true,
-                        message: t("Address required"),
-                      },
-                      validate: {
-                        validAddress: value => isValid(value) || t("Invalid address"),
-                        alreadyPresent: value =>
-                          !editAdminForm.getValues("creators").some(creator => compareAddresses(creator, value)) ||
-                          t("Creator NFT already present"),
-                      },
-                    })}></Input>
-                  <FormErrorMessage>{errors.creatorAddress?.message}</FormErrorMessage>
+                <FormControl isRequired isInvalid={!isValid}>
+                  <WalletAddressInput
+                    onAddressResolved={address => setValue("creatorAddress", address ?? "")}
+                    customValidation={({ address }) => {
+                      if (!address) return "Invalid address"
+                      return editAdminForm.getValues("creators").some(creator => compareAddresses(creator, address))
+                        ? t("Creator NFT already present")
+                        : ""
+                    }}
+                  />
                 </FormControl>
               </VStack>
               <VStack align="stretch">
-                <Button variant="primaryAction" type="submit" onClick={addressForm.handleSubmit(onSubmit)}>
+                <Button
+                  isDisabled={!isValid || !creatorAddress}
+                  variant="primaryAction"
+                  type="submit"
+                  onClick={handleSubmit(onSubmit)}>
                   {t("Add creator")}
                 </Button>
                 <Button variant="primaryGhost" onClick={handleClose}>

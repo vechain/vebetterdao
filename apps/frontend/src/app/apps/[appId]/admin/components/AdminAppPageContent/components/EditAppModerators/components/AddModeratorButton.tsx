@@ -2,10 +2,8 @@ import { CustomModalContent } from "@/components"
 import {
   Button,
   FormControl,
-  FormErrorMessage,
   HStack,
   Heading,
-  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -15,12 +13,13 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { UilPlus, UilUser } from "@iconscout/react-unicons"
-import { compareAddresses, isValid } from "@repo/utils/AddressUtils"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../../../AdminAppPageContent"
 import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { WalletAddressInput } from "@/app/components/Input"
 
 type Props = {
   editAdminForm: UseFormReturn<AdminAppForm>
@@ -30,11 +29,9 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
   const { t } = useTranslation()
   const { isOpen, onClose, onOpen } = useDisclosure()
   const addressForm = useForm<{ moderatorAddress: string }>()
-  const {
-    formState: { errors },
-  } = addressForm
-  const { domain } = useVechainDomain({ addressOrDomain: addressForm.watch("moderatorAddress") })
-
+  const { setValue, watch } = addressForm
+  const moderatorAddress = watch("moderatorAddress")
+  const { domain } = useVechainDomain({ addressOrDomain: moderatorAddress })
   const onSubmit = useCallback(
     (data: { moderatorAddress: string }) => {
       editAdminForm.setValue("moderators", [...editAdminForm.getValues("moderators"), data.moderatorAddress])
@@ -69,26 +66,26 @@ export const AddModeratorButton = ({ editAdminForm }: Props) => {
                     </Text>
                   )}
                 </HStack>
-                <FormControl isInvalid={!!errors.moderatorAddress}>
-                  <Input
-                    {...addressForm.register("moderatorAddress", {
-                      required: {
-                        value: true,
-                        message: t("Address required"),
-                      },
-                      validate: {
-                        validAddress: value => isValid(value) || t("Invalid address"),
-                        alreadyPresent: value =>
-                          !editAdminForm
-                            .getValues("moderators")
-                            .some(moderator => compareAddresses(moderator, value)) || t("Moderator already present"),
-                      },
-                    })}></Input>
-                  <FormErrorMessage>{errors.moderatorAddress?.message}</FormErrorMessage>
+                <FormControl isRequired isInvalid={!moderatorAddress}>
+                  <WalletAddressInput
+                    onAddressResolved={address => setValue("moderatorAddress", address ?? "")}
+                    customValidation={({ address }) => {
+                      if (!address) return "Invalid address"
+                      return editAdminForm
+                        .getValues("moderators")
+                        .some(moderator => compareAddresses(moderator, address))
+                        ? t("Moderator already present")
+                        : ""
+                    }}
+                  />
                 </FormControl>
               </VStack>
               <VStack align="stretch">
-                <Button variant="primaryAction" type="submit" onClick={addressForm.handleSubmit(onSubmit)}>
+                <Button
+                  isDisabled={!moderatorAddress}
+                  variant="primaryAction"
+                  type="submit"
+                  onClick={addressForm.handleSubmit(onSubmit)}>
                   {t("Add moderator")}
                 </Button>
                 <Button variant="primaryGhost" onClick={onClose}>
