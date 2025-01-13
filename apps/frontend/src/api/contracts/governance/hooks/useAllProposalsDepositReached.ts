@@ -4,6 +4,7 @@ import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { abi } from "thor-devkit"
 import { getIsDepositReachedQueryKey } from "./useIsDepositReached"
+import { getMultiClauseReading } from "@/api/blockchain"
 
 const b3trGovernorInterface = B3TRGovernor__factory.createInterface()
 const proposalSDepositReachedFragment = b3trGovernorInterface.getFunction("proposalDepositReached").format("json")
@@ -31,9 +32,9 @@ export const useAllProposalsDepositReached = (proposalsIds: string[]) => {
     queryKey: getAllProposalsDepositReachedQueryKey(),
     queryFn: async () => {
       const clauses = getAllProposalsDepositReachedClauses(proposalsIds)
-      const res = await thor.explain(clauses).execute()
+      const res = await getMultiClauseReading(thor, clauses)
 
-      const depositsReached = res.map((r, index) => {
+      const depositsReached = res.results.map((r, index) => {
         if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
         const decoded = proposalDepositReachedAbi.decode(r.data)
         const proposalId = proposalsIds[index] as string
