@@ -7,13 +7,14 @@ import { isValid as isWalletAddressValid } from "@repo/utils/AddressUtils"
 type Props = InputProps & {
   onDomainResolved?: (domain?: string) => void
   onAddressResolved?: (address?: string) => void
+  customValidation?: ({ address }: { address?: string }) => string
 }
 
-export const WalletAddressInput = ({ onDomainResolved, onAddressResolved, ...props }: Props) => {
+export const WalletAddressInput = ({ onDomainResolved, onAddressResolved, customValidation, ...props }: Props) => {
   const id = useId()
   const { t } = useTranslation()
 
-  const [inputValue, setInputValue] = useState("")
+  const [inputValue, setInputValue] = useState((props?.defaultValue as string) ?? "")
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // Tracks last resolved value (address or domain)
@@ -25,6 +26,10 @@ export const WalletAddressInput = ({ onDomainResolved, onAddressResolved, ...pro
   const { domain, address } = useVechainDomain({
     addressOrDomain: inputValue,
   })
+
+  const handleOnChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value)
+  }, [])
 
   /**
    * Notify the parent if the input resolves to a wallet address or a domain with an associated address
@@ -76,6 +81,14 @@ export const WalletAddressInput = ({ onDomainResolved, onAddressResolved, ...pro
         notifyInvalidInput()
         return
       }
+      if (customValidation) {
+        const errorMsg = customValidation({ address })
+        if (errorMsg) {
+          setErrorMessage(errorMsg ?? t("Invalid address"))
+          notifyInvalidInput()
+          return
+        }
+      }
 
       if (!inputValue.startsWith("0x") && inputValue.endsWith(".vet") && !domain) {
         setErrorMessage(t("Please enter a valid domain"))
@@ -100,7 +113,7 @@ export const WalletAddressInput = ({ onDomainResolved, onAddressResolved, ...pro
     }
 
     validateInput()
-  }, [inputValue, domain, address, t, notifyParentResolved, notifyInvalidInput])
+  }, [inputValue, domain, address, t, notifyParentResolved, notifyInvalidInput, customValidation])
 
   return (
     <FormControl isInvalid={!!errorMessage}>
@@ -108,8 +121,10 @@ export const WalletAddressInput = ({ onDomainResolved, onAddressResolved, ...pro
         {...props}
         id={id}
         value={inputValue}
-        onChange={e => setInputValue(e.target?.value)}
+        onChange={handleOnChange}
         placeholder={props?.placeholder ?? t("Enter a wallet address or domain")}
+        isDisabled={props?.isDisabled}
+        isRequired={props?.isRequired ?? true}
       />
       {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
     </FormControl>
