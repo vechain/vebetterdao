@@ -1395,5 +1395,7 @@
   "Supported a": "Supported a",
   "Upgraded a": "Upgraded a",
   "Your": "Your",
-  "Please enter a valid wallet address or domain": "Please enter a valid wallet address or domain"
+  "Please enter a valid wallet address or domain": "Please enter a valid wallet address or domain",
+  "Where should the allocation tokens be sent?": "Where should the allocation tokens be sent?",
+  "Invalid input": "Invalid input"
 }
