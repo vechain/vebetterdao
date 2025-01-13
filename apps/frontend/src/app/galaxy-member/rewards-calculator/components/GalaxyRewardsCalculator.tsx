@@ -90,7 +90,7 @@ export const GalaxyRewardsCalculator = () => {
       </Heading>
       <Stack
         direction={["column", "column", "row", "row"]}
-        gap={3}
+        gap={10}
         h={"full"}
         w={"full"}
         justifyContent={"space-between"}

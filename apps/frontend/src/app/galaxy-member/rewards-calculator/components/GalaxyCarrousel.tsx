@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, useCallback } from "react"
 import { Box, Flex, IconButton, useBreakpointValue, Image, Text } from "@chakra-ui/react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 import { gmNfts } from "@/constants/gmNfts"
@@ -11,9 +11,10 @@ type Props = {
 
 export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
   const { t } = useTranslation()
+
   const upgradableNfts = useMemo(() => {
     return gmNfts.filter(nft => parseInt(nft.level, 10) >= Number(usersGM.gmLevel))
-  }, [gmNfts, usersGM.gmLevel])
+  }, [usersGM.gmLevel])
 
   const visibleCards = useBreakpointValue({ base: 3, md: 3, lg: 3 }) || 1
   const initialIndex = upgradableNfts.findIndex(nft => nft.level === usersGM.gmLevel)
@@ -22,16 +23,23 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
 
   const getVisibleNFTs = () => {
     const visibleNFTs = []
+    const totalNFTs = upgradableNfts.length
+
     for (let i = 0; i < visibleCards; i++) {
-      const index = (currentIndex + i) % upgradableNfts.length
+      let index = (currentIndex + i) % totalNFTs
+      if (index < 0) index = totalNFTs + index
       visibleNFTs.push(upgradableNfts[index])
     }
     return visibleNFTs
   }
 
-  const handleSelect = (GMLevel: string | undefined) => {
-    setSelectedGMLevel(GMLevel)
-  }
+  const handleSelect = useCallback(
+    (GMLevel: string | undefined) => {
+      setSelectedGMLevel(GMLevel)
+    },
+    [setSelectedGMLevel],
+  )
+
   const nextCard = () => {
     setCurrentIndex(prevIndex => (prevIndex + 1 >= upgradableNfts.length ? 0 : prevIndex + 1))
   }
@@ -43,100 +51,83 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
     if (centeredNFT) {
       handleSelect(centeredNFT)
     }
-  }, [centeredNFT])
+  }, [centeredNFT, handleSelect])
 
   return (
     <Box position="relative">
       <Flex justify="center" align="center">
-        {getVisibleNFTs().map((nft, index) => (
-          <Box
-            key={nft?.level}
-            w={{ base: "30vw", md: "20vw", lg: "15vw" }}
-            h={{ base: "30vw", md: "20vw", lg: "15vw" }}
-            transform={index === Math.floor(visibleCards / 2) ? "scale(1.5)" : "scale(0.7)"}
-            transformOrigin="center"
-            transition="all 0.3s ease"
-            onTransitionEnd={() => {
-              if (index === Math.floor(visibleCards / 2)) {
-                setCenteredNFT(nft?.level)
-              }
-            }}
-            onClick={() => {
-              if (index === Math.floor(visibleCards / 2)) {
-                handleSelect(nft?.level)
-              }
-            }}
-            // onMouseEnter={() => setShowUpgradeButton(true)}
-            // onMouseLeave={() => setShowUpgradeButton(false)}
-            alignContent={"center"}
-            cursor="pointer">
-            {nft ? (
-              <Flex direction="column" alignItems="center">
-                <Text fontSize="xl" fontWeight="bold" color="white">
-                  {t("{{name}}", { name: nft?.name })}
-                </Text>
-                <Image
-                  w={{ base: "20vw", md: "15vw", lg: "10vw" }}
-                  h={{ base: "20vw", md: "15vw", lg: "10vw" }}
-                  src={nft?.image}
-                  alt={nft?.name}
-                  objectFit="contain"
-                  borderRadius="20px"
-                />
-                {/* TODO : check if ok to upgrade */}
-                {/* {showUpgradeButton &&
-                    nft?.level !== usersGM.gmLevel &&
-                    Number(nft?.level) === Number(usersGM.gmLevel) + 1 && (
-                      <GmActionButton
-                        buttonProps={{
-                          variant: "tertiaryAction",
-                          w: "full",
-                          boxShadow: "0px 0px 9.4px 0px #B1F16C",
-                          color: "#080F1E",
-                          fontSize: "sm",
-                          h: "30px",
-                          mt: 2,
-                        }}>
-                        {t("Upgrade now!")}
-                      </GmActionButton>
-                    )} */}
-              </Flex>
-            ) : (
+        {getVisibleNFTs().map(
+          (nft, index) =>
+            nft && (
               <Box
-                w={{ base: "30vw", md: "15vw", lg: "10vw" }}
-                h={{ base: "30vw", md: "15vw", lg: "10vw" }}
-                borderRadius="20px"
-                background="linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%)"
-                border="1px solid rgba(255, 255, 255, 0.2)"
-                backdropFilter="blur(10px)"
-              />
-            )}
-          </Box>
-        ))}
+                key={nft.level}
+                w={{ base: "120px", md: "150px", lg: "180px" }}
+                h={{ base: "120px", md: "150px", lg: "180px" }}
+                transform={index === Math.floor(visibleCards / 2) ? "scale(1.3)" : "scale(0.8)"}
+                transformOrigin="center"
+                transition="all 0.3s ease"
+                onTransitionEnd={() => {
+                  if (index === Math.floor(visibleCards / 2)) {
+                    setCenteredNFT(nft.level)
+                  }
+                }}
+                onClick={() => {
+                  if (index === Math.floor(visibleCards / 2)) {
+                    handleSelect(nft.level)
+                  }
+                }}
+                alignContent={"center"}
+                cursor="pointer">
+                <Flex direction="column" alignItems="center">
+                  <Text fontSize="xl" fontWeight="bold" color="white">
+                    {t("{{name}}", { name: nft.name })}
+                  </Text>
+                  <Image
+                    w={{ base: "100px", md: "130px", lg: "160px" }}
+                    h={{ base: "100px", md: "130px", lg: "160px" }}
+                    src={nft.image}
+                    alt={nft.name}
+                    objectFit="contain"
+                    borderRadius="20px"
+                  />
+                </Flex>
+              </Box>
+            ),
+        )}
       </Flex>
 
-      <IconButton
-        aria-label="Previous card"
-        icon={<FaChevronLeft />}
-        position="absolute"
-        left="10px"
-        top="55%"
-        transform="translateY(-50%)"
-        onClick={prevCard}
-        colorScheme="whiteAlpha"
-        rounded="full"
-      />
-      <IconButton
-        aria-label="Next card"
-        icon={<FaChevronRight />}
-        position="absolute"
-        right="10px"
-        top="55%"
-        transform="translateY(-50%)"
-        onClick={nextCard}
-        colorScheme="whiteAlpha"
-        rounded="full"
-      />
+      <Flex justify="center" align="center" mt={12} gap={2}>
+        <IconButton
+          aria-label="Previous card"
+          icon={<FaChevronLeft size={16} />}
+          onClick={prevCard}
+          variant="ghost"
+          color="white"
+          size="sm"
+          _hover={{ bg: "whiteAlpha.200" }}
+        />
+        {upgradableNfts.map((nft, index) => (
+          <Box
+            key={`gm-level-${nft.level}`}
+            w="2"
+            h="2"
+            borderRadius="full"
+            bg={index === currentIndex ? "white" : "whiteAlpha.400"}
+            transition="all 0.2s"
+            cursor="pointer"
+            onClick={() => setCurrentIndex(index)}
+          />
+        ))}
+        <IconButton
+          aria-label="Next card"
+          icon={<FaChevronRight size={16} />}
+          onClick={nextCard}
+          variant="ghost"
+          color="white"
+          size="sm"
+          _hover={{ bg: "whiteAlpha.200" }}
+        />
+      </Flex>
     </Box>
   )
 }
