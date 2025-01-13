@@ -2530,6 +2530,74 @@ describe("X-Allocation Voting - @shard14", function () {
       await emissions.distribute()
       expect(await xAllocationVoting.getRoundAppSharesCap(2)).to.eql(60n)
     })
+
+    it("User can not vote for same app multiple times in same transaction", async function () {
+      const { xAllocationVoting, x2EarnApps, otherAccount, otherAccounts, owner, veBetterPassport } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      // Bootstrap emissions
+      await bootstrapEmissions()
+
+      // Whitelist voter
+      await veBetterPassport.whitelist(otherAccount.address)
+      await veBetterPassport.toggleCheck(1)
+
+      // Submit multiple apps
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
+      await endorseApp(app1Id, otherAccounts[0])
+
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
+      await endorseApp(app2Id, otherAccounts[1])
+
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      await endorseApp(app3Id, otherAccounts[2])
+
+      // Get voting tokens
+      await getVot3Tokens(otherAccount, "1000")
+
+      // Start new round
+      const roundId = await startNewAllocationRound()
+
+      // Try to vote for the same app twice in the same transaction
+      await expect(
+        xAllocationVoting
+          .connect(otherAccount)
+          .castVote(roundId, [app1Id, app1Id], [ethers.parseEther("500"), ethers.parseEther("500")]),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "DuplicateAppVote")
+
+      // Also verify that non-adjacent duplicates are caught
+      await expect(
+        xAllocationVoting
+          .connect(otherAccount)
+          .castVote(
+            roundId,
+            [app1Id, app2Id, app1Id],
+            [ethers.parseEther("300"), ethers.parseEther("400"), ethers.parseEther("300")],
+          ),
+      ).to.be.revertedWithCustomError(xAllocationVoting, "DuplicateAppVote")
+
+      // Verify that a normal vote still works
+      await expect(
+        xAllocationVoting
+          .connect(otherAccount)
+          .castVote(
+            roundId,
+            [app1Id, app2Id, app3Id],
+            [ethers.parseEther("300"), ethers.parseEther("400"), ethers.parseEther("300")],
+          ),
+      ).to.not.be.reverted
+    })
   })
 
   describe("Allocation Voting finalization", function () {

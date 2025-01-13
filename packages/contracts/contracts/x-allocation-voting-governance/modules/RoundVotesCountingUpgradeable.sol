@@ -71,6 +71,9 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
   //@notice emitted when a the minimum number of tokens needed to cast a vote is updated
   event VotingThresholdSet(uint256 oldVotingThreshold, uint256 newVotingThreshold);
 
+  /// @dev Error thrown when trying to vote for the same app multiple times in one transaction
+  error DuplicateAppVote();
+
   /**
    * @dev Initializes the contract
    */
@@ -160,7 +163,13 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
 
     // Iterate through the apps and weights to calculate the total weight of votes cast by the voter
     for (uint256 i; i < apps.length; i++) {
-      // Update the total weight of votes cast by the voter
+      // Check current app against ALL previous apps
+      for (uint256 j; j < i; j++) {
+        if (apps[i] == apps[j]) {
+          revert DuplicateAppVote();
+        }
+      }
+
       totalWeight += weights[i];
 
       if (totalWeight > voterAvailableVotes) {
