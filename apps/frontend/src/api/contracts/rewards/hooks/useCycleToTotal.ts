@@ -23,14 +23,12 @@ export const getCycleToTotal = (address?: string) => {
  * @returns {uint256} A uint256 that represents the total reward-weighted votes in a specific cycle.
  */
 export const useCycleToTotal = (cycle?: string) => {
-  const res = useCall({
+  return useCall({
     contractInterface: voterRewardsInterface,
     contractAddress: VOTER_REWARDS_CONTRACT,
     method,
     args: [cycle ?? ""],
     enabled: !!cycle,
+    mapResponse: res => ethers.formatEther(res.decoded[0]),
   })
-
-  const formattedResult = res.data ? Number(ethers.formatEther(res.data)) : 0
-  return formattedResult
 }
