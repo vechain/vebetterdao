@@ -1,18 +1,18 @@
 import { gmNfts } from "@/constants/gmNfts"
+
+type PotentialRewards = {
+  potentialRewards: number
+  error?: any
+}
+
 /**
- * Hook to calculate the potential rewards based on the GM level and the n-1 round rewards
+ * Hook to calculate the potential rewards based on the GM level and the latest voted round
  * This calculator uses the VOT3 tokens delegated to the user.
  *
  * Note: This calculator is based on rounds that have already been voted.
  * Limitation: The formula will not count the rewards of the current or upcoming rounds.
  *
  */
-
-type PotentialRewards = {
-  potentialRewards: number | 0
-  error?: any
-}
-
 export const usePotentialRewards = (
   cycleToTotal: number,
   emissionAmount_voterRewards: number,
@@ -20,15 +20,10 @@ export const usePotentialRewards = (
   GMlevel?: any,
   GMUserLevel?: any,
 ): PotentialRewards => {
-  if (!cycleToTotal || !emissionAmount_voterRewards || !cycleToVoterToTotal || !GMlevel) {
-    return {
-      potentialRewards: 0,
-    }
-  }
-
   const gm = gmNfts.find((nft: { level: any }) => nft.level === GMlevel)
   const GMMultiplier = gm?.multiplier
-  if (!GMMultiplier || !cycleToTotal || !cycleToVoterToTotal || !emissionAmount_voterRewards) {
+
+  if (!cycleToTotal || !emissionAmount_voterRewards || !cycleToVoterToTotal || !GMlevel || !GMMultiplier) {
     return {
       potentialRewards: 0,
     }
@@ -38,13 +33,14 @@ export const usePotentialRewards = (
   let potentialRewards
   switch (true) {
     case Number(GMUserLevel) === Number(GMlevel):
-      potentialRewards = (cycleToVoterToTotal / cycleToTotal) * emissionAmount_voterRewards
+      potentialRewards = (cycleToVoterToTotal / Number(cycleToTotal)) * emissionAmount_voterRewards
       break
-    case Number(GMUserLevel) < Number(GMlevel):
+    case Number(GMUserLevel) < Number(GMlevel): {
       const cycleToVoterToTotal_enhanced = cycleToVoterToTotal + increase
-      const cycleToTotal_enhanced = cycleToTotal + increase
-      potentialRewards = (cycleToVoterToTotal_enhanced / cycleToTotal_enhanced) * emissionAmount_voterRewards
+      const cycleToTotal_enhanced = Number(cycleToTotal) + increase
+      potentialRewards = (cycleToVoterToTotal_enhanced / Number(cycleToTotal_enhanced)) * emissionAmount_voterRewards
       break
+    }
     default:
       potentialRewards = 0
       break
