@@ -6,6 +6,7 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                                                        | Summary                                                                                        |
 | ------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 14th January 2025   | `X2EarnRewardsPool` version `6`                                                    | Adding locking mechanism |
 | 4th December 2024  | `X2EarnApps` version `3`, `XAllocationVoting` version `4`, `XAllocationPool` version `4`, and `X2EarnRewardsPool` version `5`  | Added endorsement cooldown feature to X2Earn contracts. |
 | 29th November 2024  | `VeBetterPassport` version `3`, `GalaxyMember` version `3`, and `VoterRewards` version 4  | Added GM level as personhood check in VeBetter passport. |
 | 28th November 2024  | `NodeManagement` version `2`                                                       | Added new functions to check node delegation status and improved node management capabilities. |
@@ -20,6 +21,32 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 | 4th September 2024  | `X2EarnRewardsPool` version `2`                                                    | - Added impact key management and proof building                                               |
 | 31st August 2024    | `VoterRewards` version `2`                                                         | - Added quadratic rewarding features                                                           |
 | 29th August 2024    | `B3TRGovernor` version `2`                                                         | Updated access control modifiers                                                               |
+
+## Upgrade `X2EarnRewardsPool` to Version 6
+
+Added locking mechanism to control funds availability in the rewards pool.
+
+### Breaking Changes ⚠️
+
+- None.
+
+### Bug Fixes 🐛
+
+- None.
+
+### New Features 🚀
+
+- **`X2EarnRewardsPool.sol`**:
+  - Added `setLockedFundsPercentage()` to set the locked percentage of funds for an app
+  - Added `lockedFundsPercentage()` to retrieved the locked percentage of funds for an app
+  - Added `allowance` to retrieve the amount of funds available for withdrawal
+  - Added checks to `withdraw()` to ensure withdrawals respect locked funds
+  - Added checks to `_distributeRewards()` to ensure locked funds are not distributed
+
+### Storage Changes 
+
+- **`X2EarnRewardsPool.sol`**:
+  - Added `lockedFundsPercentage` storage to track app-specific locked percentages
 
 ---
 

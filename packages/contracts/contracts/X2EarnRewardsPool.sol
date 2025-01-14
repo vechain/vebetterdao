@@ -75,7 +75,6 @@ contract X2EarnRewardsPool is
     IB3TR b3tr;
     IX2EarnApps x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
-    uint256 totalAllocatedFunds; // Track total funds allocated across all apps
     mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
     string[] allowedImpactKeys; // Array storing impact keys
     IVeBetterPassport veBetterPassport;
@@ -167,7 +166,6 @@ contract X2EarnRewardsPool is
 
     // increase available amount for the app
     $.availableFunds[appId] += amount;
-    $.totalAllocatedFunds += amount;
 
     // transfer tokens to this contract
     require($.b3tr.transferFrom(msg.sender, address(this), amount), "X2EarnRewardsPool: deposit transfer failed");
@@ -202,7 +200,6 @@ contract X2EarnRewardsPool is
     require (unlockedFunds >= amount, "X2EarnRewardsPool: too much funds requested for withdrawal");
 
     $.availableFunds[appId] -= amount;
-    $.totalAllocatedFunds -= amount;
 
     // Transfer the funds to the team wallet
     require($.b3tr.transfer(teamWalletAddress, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
@@ -266,7 +263,7 @@ contract X2EarnRewardsPool is
     // check if the funds are above the allowance of the app 
     uint256 lockedFunds = $.availableFunds[appId] * $.lockedFundsPercentage[appId] / 10000;
     uint256 unlockedFunds = $.availableFunds[appId] - lockedFunds;
-    require(unlockedFunds > amount, "X2EarnRewardsPool: insufficient unlocked funds");
+    require(unlockedFunds > amount, "X2EarnRewardsPool: Amount to distribute is above the allowance");
     
     // check if the app has enough available funds to distribute
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
@@ -616,5 +613,4 @@ contract X2EarnRewardsPool is
     revert("X2EarnRewardsPool: contract does not accept batch transfers of ERC1155 tokens");
   }
 
-  event LockedFundsPercentageSet(bytes32 indexed appId, uint256 percentage);
 }
