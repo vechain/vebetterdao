@@ -116,8 +116,7 @@ function updateVersionHistory(content: string, newVersion: number, description: 
     content.slice(0, lastCommentEndIndex) + "\n" + versionEntry + content.slice(lastCommentEndIndex + commentEnd.length)
 
   // Update version in the SC function version()
-  const versionFuncPattern =
-    /function\s+version\s*\(\s*\)\s*(?:external|public|view)?\s*returns\s*\(string\s+memory\)\s*{[^}]*return\s+["']\d+["']\s*;/
+  const versionFuncPattern = /function\s+version\(\)\s*{[^}]*return\s*["'](\d+)["']\s*;/
 
   const replacement = `function version() external pure virtual returns (string memory) {\n    return "${newVersion}";`
 
