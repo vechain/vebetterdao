@@ -39,7 +39,8 @@
     "generate-docs": "npx hardhat docgen",
     "upgrade:contract": "npx hardhat run scripts/upgrade/upgrades/\"$CONTRACT_TO_UPGRADE\"/\"$CONTRACT_TO_UPGRADE\"-\"$CONTRACT_VERSION\".ts",
     "deploy:contract": "npx hardhat run scripts/deploy/deploys/\"$CONTRACT_TO_DEPLOY\".ts",
-    "rename-contracts": "ts-node scripts/renameContracts.ts"
+    "rename-contracts": "ts-node scripts/renameContracts.ts",
+    "deprecate": "ts-node scripts/deprecateContract.ts"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
