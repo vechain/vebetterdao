@@ -26,13 +26,13 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IB3TR } from "../../interfaces/IB3TR.sol";
-import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
-import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
+import { IB3TRV5 } from "./interfaces/IB3TRV5.sol";
+import { IX2EarnAppsV5 } from "./interfaces/IX2EarnAppsV5.sol";
+import { IX2EarnRewardsPoolV5 } from "./interfaces/IX2EarnRewardsPoolV5.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
+import { IVeBetterPassportV5 } from "./interfaces/IVeBetterPassportV5.sol";
 
 /**
  * @title X2EarnRewardsPool
@@ -54,7 +54,7 @@ import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
  * - Updated the X2EarnApps interface to support node cooldown functionalityå
  */
 contract X2EarnRewardsPoolV5 is
-  IX2EarnRewardsPool,
+  IX2EarnRewardsPoolV5,
   UUPSUpgradeable,
   AccessControlUpgradeable,
   ReentrancyGuardUpgradeable
@@ -70,14 +70,14 @@ contract X2EarnRewardsPoolV5 is
 
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnRewardsPool
   struct X2EarnRewardsPoolStorage {
-    IB3TR b3tr;
-    IX2EarnApps x2EarnApps;
+    IB3TRV5 b3tr;
+    IX2EarnAppsV5 x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
     mapping(bytes32 appId => uint256) lockedFunds; // Amount of funds locked by the app owner
     uint256 totalAllocatedFunds; // Track total funds allocated across all apps
     mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
     string[] allowedImpactKeys; // Array storing impact keys
-    IVeBetterPassport veBetterPassport;
+    IVeBetterPassportV5 veBetterPassport;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -94,8 +94,8 @@ contract X2EarnRewardsPoolV5 is
     address _admin,
     address _contractsManagerAdmin,
     address _upgrader,
-    IB3TR _b3tr,
-    IX2EarnApps _x2EarnApps
+    IB3TRV5 _b3tr,
+    IX2EarnAppsV5 _x2EarnApps
   ) external initializer {
     require(_admin != address(0), "X2EarnRewardsPool: admin is the zero address");
     require(_contractsManagerAdmin != address(0), "X2EarnRewardsPool: contracts manager admin is the zero address");
@@ -133,7 +133,7 @@ contract X2EarnRewardsPoolV5 is
     require(address(_veBetterPassport) != address(0), "X2EarnRewardsPool: veBetterPassport is the zero address");
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    $.veBetterPassport = IVeBetterPassport(_veBetterPassport);
+    $.veBetterPassport = IVeBetterPassportV5(_veBetterPassport);
   }
 
   // ---------- Modifiers ---------- //
@@ -430,7 +430,7 @@ contract X2EarnRewardsPoolV5 is
    *
    * @param _x2EarnApps the new X2EarnApps contract
    */
-  function setX2EarnApps(IX2EarnApps _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setX2EarnApps(IX2EarnAppsV5 _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(address(_x2EarnApps) != address(0), "X2EarnRewardsPool: x2EarnApps is the zero address");
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
@@ -481,7 +481,7 @@ contract X2EarnRewardsPoolV5 is
    *
    * @param _veBetterPassport the new VeBetterPassport contract
    */
-  function setVeBetterPassport(IVeBetterPassport _veBetterPassport) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setVeBetterPassport(IVeBetterPassportV5 _veBetterPassport) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(address(_veBetterPassport) != address(0), "X2EarnRewardsPool: veBetterPassport is the zero address");
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
@@ -549,7 +549,7 @@ contract X2EarnRewardsPoolV5 is
   /**
    * @dev Retrieves the B3TR token contract.
    */
-  function b3tr() external view returns (IB3TR) {
+  function b3tr() external view returns (IB3TRV5) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.b3tr;
   }
@@ -557,7 +557,7 @@ contract X2EarnRewardsPoolV5 is
   /**
    * @dev Retrieves the X2EarnApps contract.
    */
-  function x2EarnApps() external view returns (IX2EarnApps) {
+  function x2EarnApps() external view returns (IX2EarnAppsV5) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.x2EarnApps;
   }
@@ -573,7 +573,7 @@ contract X2EarnRewardsPoolV5 is
   /**
    * @dev Retrieves the VeBetterPassport contract.
    */
-  function veBetterPassport() external view returns (IVeBetterPassport) {
+  function veBetterPassport() external view returns (IVeBetterPassportV5) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.veBetterPassport;
   }

@@ -8,16 +8,7 @@ pragma solidity 0.8.20;
  * Funds can be deposited into this contract by specifying the app id that can access the funds.
  * Admins of x2EarnApps can withdraw funds from the rewards pool, whihc are sent to the team wallet.
  */
-interface IX2EarnRewardsPool {
-  
-  /**
-   * @dev Event emitted when the locked funds percentage is set.
-   *
-   * @param appId The ID of the app.
-   * @param percentage The locked funds percentage.
-   */
-   event LockedFundsPercentageSet(bytes32 appId, uint256 percentage);
-
+interface IX2EarnRewardsPoolV5 {
   /**
    * @dev Event emitted when a new deposit is made into the rewards pool.
    *
