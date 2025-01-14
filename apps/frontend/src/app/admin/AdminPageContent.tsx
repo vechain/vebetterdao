@@ -19,6 +19,7 @@ import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 import { ManageCreatorsNFT } from "./components/ManageCreatorsNFT"
 import { GMSetMaxLevel } from "./components/GMSetMaxLevel"
+import { ManageRewardsApps } from "./components/ManageRewardsApps"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -81,6 +82,7 @@ export const AdminPageContent = () => {
               <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
                 <ClaimXAppAllocations />
                 <BulkClaimXAppsAllocations />
+                <ManageRewardsApps />
               </Grid>
             </TabPanel>
           )}
