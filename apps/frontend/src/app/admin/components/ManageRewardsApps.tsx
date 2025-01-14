@@ -70,8 +70,8 @@ export const ManageRewardsApps = () => {
     return appAllowance?.formatted
   }, [appAllowance])
   // {/* todo: filter the select with only the xapp admin owns */}
-
   const isValidInteger = percentage ? Number.isInteger(Number(percentage)) && !percentage.includes(".") : true
+
   return (
     <>
       <Card w="full">
