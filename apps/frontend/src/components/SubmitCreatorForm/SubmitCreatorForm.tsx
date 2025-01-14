@@ -13,7 +13,6 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react"
-import { isValid } from "@repo/utils/AddressUtils"
 import {
   Control,
   FieldErrors,
@@ -29,6 +28,7 @@ import { useCreatorSubmissionFormStore } from "@/store"
 import { UilGithub } from "@iconscout/react-unicons"
 import { FaXTwitter } from "react-icons/fa6"
 import { AddressUtils } from "@/utils"
+import { WalletAddressInput } from "@/app/components/Input"
 
 export type SubmitCreatorFormData = {
   appName: string
@@ -262,16 +262,14 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
 
           <FormControl isInvalid={!!errors.adminWalletAddress}>
             <FormLabel>{t("Wallet Address")}</FormLabel>
-            <Input
-              placeholder={t("Wallet Address")}
+            <WalletAddressInput
+              onAddressResolved={address => {
+                setValue("adminWalletAddress", address ?? "")
+                onBlur("adminWalletAddress")
+              }}
               rounded={"xl"}
-              {...register("adminWalletAddress", {
-                required: t("Account address is required"),
-                validate: value => isValid(value) || t("Please enter a valid wallet address"),
-              })}
               onBlur={() => onBlur("adminWalletAddress")}
             />
-            {errors.adminWalletAddress && <FormErrorMessage>{errors.adminWalletAddress.message}</FormErrorMessage>}
           </FormControl>
         </VStack>
       </CardBody>
