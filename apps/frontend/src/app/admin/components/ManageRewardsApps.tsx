@@ -15,20 +15,26 @@ import {
   InputRightAddon,
   Button,
   Text,
+  Icon,
 } from "@chakra-ui/react"
-import { useCallback, useState } from "react"
+import { useCallback, useState, useMemo } from "react"
 import { TransactionModal } from "@/components"
-import { useXApps } from "@/api"
-import { useAppLockedPercentage } from "@/api/contracts/x2EarnRewardsPool"
+import { useXApps, useAppAdmin } from "@/api"
+import { useAppLockedPercentage, useAppAllowance } from "@/api/contracts/x2EarnRewardsPool"
 import { useAdminLockedFundsPercentage } from "@/hooks"
+import { useWallet } from "@vechain/dapp-kit-react"
+import { UilLock } from "@iconscout/react-unicons"
 
 export const ManageRewardsApps = () => {
   const { onOpen, onClose, isOpen } = useDisclosure()
   const { t } = useTranslation()
+  const { account } = useWallet()
 
   const [appId, setAppId] = useState<string | undefined>()
   const [percentage, setPercentage] = useState<string | undefined>()
   const { data: xApps } = useXApps()
+  const { data: appAdmin } = useAppAdmin(appId ?? "")
+  const { data: appAllowance } = useAppAllowance(appId ?? "", true)
 
   const {
     sendTransaction,
@@ -56,8 +62,16 @@ export const ManageRewardsApps = () => {
     [sendTransaction, onOpen],
   )
 
+  const isUserConnectedAdmin = useMemo(() => {
+    return appAdmin?.toLowerCase() === account?.toLowerCase()
+  }, [appAdmin, account])
+
+  const allowance = useMemo(() => {
+    return appAllowance?.formatted
+  }, [appAllowance])
   // {/* todo: filter the select with only the xapp admin owns */}
 
+  const isValidInteger = percentage ? Number.isInteger(Number(percentage)) && !percentage.includes(".") : true
   return (
     <>
       <Card w="full">
@@ -67,10 +81,6 @@ export const ManageRewardsApps = () => {
 
         <CardBody>
           <VStack flex={1} align="flex-start" spacing={8}>
-            <VStack align={"flex-start"} flex={1} spacing={4}>
-              <Text>{t("Actual locked percentage: {{value}} % ", { value: lockedFundsPercentage })}</Text>
-            </VStack>
-
             <form onSubmit={handleSubmit}>
               <VStack spacing={4} alignItems={"start"}>
                 <HStack w={"full"}>
@@ -94,34 +104,68 @@ export const ManageRewardsApps = () => {
                   </FormControl>
                 </HStack>
 
-                <FormControl isRequired>
-                  <FormLabel>
-                    <strong>{"Percentage"}</strong>
-                  </FormLabel>
-                  <InputGroup size="md">
-                    <Input
-                      pr="4.5rem"
-                      type="number"
-                      placeholder="percentage"
-                      isDisabled={isLoading}
-                      onChange={e => setPercentage(e.target.value)}
-                      value={percentage}
-                    />
-                    <InputRightAddon
-                      pointerEvents="none"
-                      pl={1}
-                      pr={1}
-                      ml={0}
-                      backgroundColor={"transparent"}
-                      borderColor={"inherit"}
-                      borderLeft={"none"}>
-                      {"%"}
-                    </InputRightAddon>
-                  </InputGroup>
-                </FormControl>
-                <Button type="submit" colorScheme="blue" isLoading={isLoading} disabled={isLoading}>
-                  {t("Lock funds")}
-                </Button>
+                {isUserConnectedAdmin ? (
+                  <>
+                    <FormControl isRequired isInvalid={!isValidInteger || Number(percentage) > 100}>
+                      <FormLabel>
+                        <strong>{"Percentage"}</strong>
+                      </FormLabel>
+                      <InputGroup size="md">
+                        <Input
+                          pr="4.5rem"
+                          type="number"
+                          step="1"
+                          min="0"
+                          placeholder="percentage"
+                          max={100}
+                          isDisabled={isLoading}
+                          onChange={e => setPercentage(e.target.value)}
+                          value={percentage}
+                        />
+                        <InputRightAddon
+                          pointerEvents="none"
+                          pl={1}
+                          pr={1}
+                          ml={0}
+                          backgroundColor={"transparent"}
+                          borderColor={"inherit"}
+                          borderLeft={"none"}>
+                          {"%"}
+                        </InputRightAddon>
+                      </InputGroup>
+                      {Number(percentage) > 100 && (
+                        <Text color="red.500" fontSize="sm" mt={1}>
+                          {t("You can't lock more than 100%")}
+                        </Text>
+                      )}
+                      {!isValidInteger && percentage && (
+                        <Text color="red.500" fontSize="sm" mt={1}>
+                          {t("Percentage must be an integer")}
+                        </Text>
+                      )}
+                    </FormControl>
+                    <VStack align={"flex-start"} flex={1} spacing={4}>
+                      <Text>{t("Actual locked percentage: {{value}} % ", { value: lockedFundsPercentage })}</Text>
+                      <Text>
+                        {t("Allowance available: {{value}} ", {
+                          value: allowance ?? "0",
+                        })}
+                      </Text>
+                    </VStack>
+                    <Button
+                      type="submit"
+                      colorScheme="blue"
+                      isLoading={isLoading}
+                      disabled={!isValidInteger || Number(percentage) > 100}>
+                      {t("Lock funds")}
+                    </Button>
+                  </>
+                ) : (
+                  <HStack flex={1} align="center" justify="center">
+                    <Icon as={UilLock} color="red.500" boxSize={["20px"]} />
+                    <Text>{t("Only selected app admin can have access to this functionnality")}</Text>
+                  </HStack>
+                )}
               </VStack>
             </form>
           </VStack>

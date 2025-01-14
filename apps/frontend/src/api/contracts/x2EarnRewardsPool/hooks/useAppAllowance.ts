@@ -21,11 +21,12 @@ export const getAppAllowanceQueryKey = (appId?: string) => {
  * @param xAppId  the xApp id
  * @returns the allowance in the x2Earn rewards pool contract for a specific xApp
  */
-export const useAppAllowance = (appId: string) => {
+export const useAppAllowance = (appId: string, formattedVersion?: boolean) => {
   return useCall({
     contractInterface: X2EarnRewardsPoolInterface,
     contractAddress: X2EARN_REWARDS_POOL_CONTRACT,
     method: "allowance",
     args: [appId],
+    formattedVersion: formattedVersion,
   })
 }
