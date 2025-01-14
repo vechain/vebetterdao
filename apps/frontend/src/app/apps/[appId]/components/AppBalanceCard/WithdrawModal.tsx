@@ -12,6 +12,10 @@ import {
   Skeleton,
   Icon,
   Select,
+  Alert,
+  AlertIcon,
+  FormControl,
+  FormErrorMessage,
 } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import { useWithdrawAppBalance } from "@/hooks"
@@ -20,7 +24,7 @@ import { TransactionModal, CustomModalContent, B3TRIcon } from "@/components"
 import BigNumber from "bignumber.js"
 import { useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
-import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
+import { useAppBalance, useAppAllowance, useAppLockedPercentage } from "@/api/contracts/x2EarnRewardsPool"
 import { TeamWalletAddress } from "./components/TeamWalletAddress"
 import { IoWalletOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
@@ -58,9 +62,13 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const { t } = useTranslation()
 
   const { data: availableB3trToWithdraw, isLoading: isBalanceLoading } = useAppBalance(appId)
-  const availableB3trToWithdrawScaled = useMemo(() => {
-    return availableB3trToWithdraw?.scaled ?? "0"
-  }, [availableB3trToWithdraw?.scaled])
+  const { data: allowance } = useAppAllowance(appId)
+  const { data: percentageToWithdraw } = useAppLockedPercentage(appId)
+
+  const availableBalance = useMemo(() => {
+    if (!availableB3trToWithdraw?.scaled || !allowance?.scaled) return "0"
+    return (Number(availableB3trToWithdraw.scaled) - Number(allowance.scaled)).toString()
+  }, [availableB3trToWithdraw, allowance])
 
   const formData = useForm<{ amount: string; reason: string; customReason: string }>({
     defaultValues: {
@@ -75,9 +83,14 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const customReason = watch("customReason")
   const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
 
+  const isAmountTooHigh = useMemo(() => {
+    if (!amount || !availableBalance) return false
+    return Number(amount) > Number(availableBalance)
+  }, [amount, availableBalance])
+
   const b3trBalanceAfterSwap = useMemo(() => {
-    return new BigNumber(availableB3trToWithdrawScaled).minus(amount).toString()
-  }, [availableB3trToWithdrawScaled, amount])
+    return new BigNumber(availableBalance).minus(amount).toString()
+  }, [availableBalance, amount])
 
   const filterAmount = useCallback(
     (text: string) => {
@@ -87,12 +100,12 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         .replace(/\.(?=.*\.)/g, "") // Filter out duplicate decimal separators
         .replace(/(\.\d{18})\d+/, "$1") // remove digits after 18th decimal
 
-      if (Number(filteredAmount) > Number(availableB3trToWithdrawScaled)) {
-        return availableB3trToWithdrawScaled
+      if (Number(filteredAmount) > Number(availableBalance)) {
+        return availableBalance
       }
       return filteredAmount
     },
-    [availableB3trToWithdrawScaled],
+    [availableBalance],
   )
 
   const { sendTransaction, resetStatus, status, error, txReceipt, sendTransactionTx } = useWithdrawAppBalance({
@@ -214,7 +227,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             <HStack>
               <Skeleton isLoaded={!isBalanceLoading}>
                 <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
-                  {FormattingUtils.humanNumber(Number(availableB3trToWithdrawScaled))}
+                  {FormattingUtils.humanNumber(Number(availableB3trToWithdraw?.scaled ?? 0))}
                 </Text>
               </Skeleton>
             </HStack>
@@ -223,6 +236,20 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
               {t("Current B3TR Balance")}
             </Text>
           </VStack>
+
+          {allowance && Number(allowance.scaled) > 0 && (
+            <Alert status="info" borderRadius="md">
+              <AlertIcon />
+              <VStack align="start" spacing={0}>
+                <Text fontWeight="medium">{t("Some funds are locked")}</Text>
+                <Text fontSize="sm">
+                  {t("Available for withdrawal: {{value}} B3TR", {
+                    value: FormattingUtils.humanNumber(Number(allowance.scaled)),
+                  })}
+                </Text>
+              </VStack>
+            </Alert>
+          )}
 
           <motion.div initial="initial" animate="animate" variants={containerVariants} style={{ width: "100%" }}>
             <motion.div layout transition={layoutTransition}>
@@ -257,8 +284,21 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
                       </Text>
                     </HStack>
                     <HStack w="full">
-                      <B3TRIcon boxSize={"30px"} />
-                      {amountInput}
+                      <FormControl isInvalid={isAmountTooHigh}>
+                        <B3TRIcon boxSize={"30px"} />
+                        {amountInput}
+                        {isAmountTooHigh && (
+                          <FormErrorMessage>
+                            {t(
+                              "Amount exceeds available allowance ({{percentage}} % = {{allowance}} b3tr). Some funds are locked.",
+                              {
+                                percentage: percentageToWithdraw.toString(),
+                                allowance: availableBalance.toString(),
+                              },
+                            )}
+                          </FormErrorMessage>
+                        )}
+                      </FormControl>
                     </HStack>
                   </VStack>
                 </HStack>
@@ -266,7 +306,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             </motion.div>
           </motion.div>
 
-          <WithdrawPercentageSelectorButtons availableAmount={availableB3trToWithdrawScaled} setValue={setValue} />
+          <WithdrawPercentageSelectorButtons availableAmount={availableBalance} setValue={setValue} />
 
           <TeamWalletAddress teamWalletAddress={teamWalletAddress} />
 
@@ -276,7 +316,9 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
             variant={"primaryAction"}
             w={"full"}
             rounded={"full"}
-            isDisabled={invalidAmount || reason.length === 0 || (reason === "Other" && !customReason)}
+            isDisabled={
+              invalidAmount || reason.length === 0 || (reason === "Other" && !customReason) || isAmountTooHigh
+            }
             size={"lg"}>
             <Icon as={IoWalletOutline} mr={2} />
             <Text fontSize={{ base: 14, md: 18 }}>{t("Withdraw now")}</Text>
@@ -288,7 +330,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     formData,
     handleWithdraw,
     invalidAmount,
-    availableB3trToWithdrawScaled,
+    availableB3trToWithdraw,
     t,
     amountInput,
     isBalanceLoading,
@@ -297,6 +339,10 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     reason,
     setValue,
     customReason,
+    allowance,
+    percentageToWithdraw,
+    availableBalance,
+    isAmountTooHigh,
   ])
 
   if (status !== "ready")
@@ -316,7 +362,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
         b3trAmount={amount}
         b3trBalanceAfterSwap={b3trBalanceAfterSwap}
-        b3trBalance={availableB3trToWithdrawScaled}
+        b3trBalance={availableB3trToWithdraw?.scaled ?? "0"}
       />
     )
 
