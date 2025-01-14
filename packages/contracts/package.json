@@ -39,15 +39,14 @@
     "generate-docs": "npx hardhat docgen",
     "upgrade:contract": "npx hardhat run scripts/upgrade/upgrades/\"$CONTRACT_TO_UPGRADE\"/\"$CONTRACT_TO_UPGRADE\"-\"$CONTRACT_VERSION\".ts",
     "deploy:contract": "npx hardhat run scripts/deploy/deploys/\"$CONTRACT_TO_DEPLOY\".ts",
-    "rename-contracts": "ts-node scripts/renameContracts.ts",
-    "deprecate": "ts-node scripts/deprecateContract.ts"
+    "rename-contracts": "ts-node scripts/renameContracts.ts"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.2",
     "@nomicfoundation/hardhat-ethers": "^3.0.4",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
+    "@nomicfoundation/hardhat-truffle5": "^2.0.7",
     "@nomiclabs/hardhat-etherscan": "^3.0.0",
-    "@nomiclabs/hardhat-truffle5": "^2.0.7",
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/contracts": "^5.0.2",
     "@openzeppelin/contracts-upgradeable": "^5.0.2",

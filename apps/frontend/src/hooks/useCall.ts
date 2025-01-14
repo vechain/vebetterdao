@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-import { Interface, ethers } from "ethers"
+import { Interface } from "ethers"
 import { useCallback, useMemo } from "react"
-import { FormattingUtils } from "@repo/utils"
 
 // Define a type to infer method names from the function definition
 type MethodName<T> = T extends (nameOrSignature: infer U) => any ? U : never
@@ -18,7 +17,6 @@ export type UseCallParams<T extends Interface> = {
   keyArgs?: unknown[] // Optional key arguments for the query key
   enabled?: boolean // Whether the query should be enabled
   mapResponse?: (_res: Connex.VM.Output & Connex.Thor.Account.WithDecoded) => any // Optional functon to map the response
-  formattedVersion?: boolean // Whether to return formatted versions of the result
 }
 
 /**
@@ -26,12 +24,11 @@ export type UseCallParams<T extends Interface> = {
  * @param contractInterface - The cotract interface.
  * @param contractAddress - The contract address.
  * @param method - The method name.
- * @param args - Optional arguments for the method.
- * @param keyArgs - Optional key arguments for the query key.
+ * @param rgs - Optional arguments for the method.
+ *@param keyArgs - Optional key arguments for the query key.
  * @param enabled - Whether the query should be enabled.
  * @param mapResponse - Optional function to map the response.
- * @param formattedVersion - Whether to return formatted versions of the result.
- * @returns The query result. If formattedVersion is true, returns [original, scaled, formatted].
+ * @returns The query result.
  */
 export const useCall = <T extends Interface>({
   contractInterface,
@@ -41,7 +38,6 @@ export const useCall = <T extends Interface>({
   keyArgs,
   enabled = true,
   mapResponse,
-  formattedVersion = false,
 }: UseCallParams<T>) => {
   const { thor } = useConnex()
 
@@ -59,24 +55,7 @@ export const useCall = <T extends Interface>({
 
       if (mapResponse) return mapResponse(res)
 
-      const result = res.decoded[0]
-
-      if (formattedVersion) {
-        try {
-          const scaled = ethers.formatEther(result)
-          const formatted = scaled === "0" ? "0" : FormattingUtils.humanNumber(scaled)
-          return {
-            original: result,
-            scaled,
-            formatted,
-          }
-        } catch (e) {
-          console.log("Failed to format value:", result)
-          return result
-        }
-      }
-
-      return result
+      return res.decoded[0]
     } catch (error) {
       console.error(
         `Error calling ${method}: ${(error as Error)?.message} with args: ${JSON.stringify(args)}`,
@@ -84,7 +63,7 @@ export const useCall = <T extends Interface>({
       )
       throw error
     }
-  }, [args, contractAddress, contractInterface, mapResponse, method, thor, formattedVersion])
+  }, [args, contractAddress, contractInterface, mapResponse, method, thor])
 
   const queryKey = useMemo(() => getCallKey({ method, keyArgs: keyArgs || args }), [method, keyArgs, args])
 
