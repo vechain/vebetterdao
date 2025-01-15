@@ -2,10 +2,8 @@ import { CustomModalContent } from "@/components"
 import {
   Button,
   FormControl,
-  FormErrorMessage,
   HStack,
   Heading,
-  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -15,12 +13,13 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { UilFileContract, UilPlus } from "@iconscout/react-unicons"
-import { compareAddresses, isValid } from "@repo/utils/AddressUtils"
+import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../../../AdminAppPageContent"
 import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { WalletAddressInput } from "@/app/components/Input"
 
 type Props = {
   editAdminForm: UseFormReturn<AdminAppForm>
@@ -30,10 +29,9 @@ export const AddRewardDistributorButton = ({ editAdminForm }: Props) => {
   const { t } = useTranslation()
   const { isOpen, onClose, onOpen } = useDisclosure()
   const addressForm = useForm<{ distributorAddress: string }>()
-  const {
-    formState: { errors },
-  } = addressForm
-  const { domain } = useVechainDomain({ addressOrDomain: addressForm.watch("distributorAddress") })
+  const { watch, setValue } = addressForm
+  const distributorAddress = watch("distributorAddress")
+  const { domain } = useVechainDomain({ addressOrDomain: distributorAddress })
 
   const onSubmit = useCallback(
     (data: { distributorAddress: string }) => {
@@ -69,27 +67,27 @@ export const AddRewardDistributorButton = ({ editAdminForm }: Props) => {
                     </Text>
                   )}
                 </HStack>
-                <FormControl isInvalid={!!errors.distributorAddress}>
-                  <Input
-                    {...addressForm.register("distributorAddress", {
-                      required: {
-                        value: true,
-                        message: t("Address required"),
-                      },
-                      validate: {
-                        validAddress: value => isValid(value) || t("Invalid address"),
-                        alreadyPresent: value =>
-                          !editAdminForm
-                            .getValues("distributors")
-                            .some(distributor => compareAddresses(distributor, value)) ||
-                          t("Rewards distributor already present"),
-                      },
-                    })}></Input>
-                  <FormErrorMessage>{errors.distributorAddress?.message}</FormErrorMessage>
+
+                <FormControl isRequired isInvalid={!distributorAddress}>
+                  <WalletAddressInput
+                    onAddressResolved={address => setValue("distributorAddress", address ?? "")}
+                    customValidation={({ address }) => {
+                      if (!address) return "Invalid address"
+                      return editAdminForm
+                        .getValues("distributors")
+                        .some(distributor => compareAddresses(distributor, address))
+                        ? t("Rewards distributor already present")
+                        : ""
+                    }}
+                  />
                 </FormControl>
               </VStack>
               <VStack align="stretch">
-                <Button variant="primaryAction" type="submit" onClick={addressForm.handleSubmit(onSubmit)}>
+                <Button
+                  variant="primaryAction"
+                  isDisabled={!distributorAddress}
+                  type="submit"
+                  onClick={addressForm.handleSubmit(onSubmit)}>
                   {t("Add distributor")}
                 </Button>
                 <Button variant="primaryGhost" onClick={onClose}>

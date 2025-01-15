@@ -1396,6 +1396,8 @@
   "Upgraded a": "Upgraded a",
   "Your": "Your",
   "Please enter a valid wallet address or domain": "Please enter a valid wallet address or domain",
+  "Where should the allocation tokens be sent?": "Where should the allocation tokens be sent?",
+  "Invalid input": "Invalid input",
   "{{value}} needs to vote to be a galaxy member": "{{value}} needs to vote to be a galaxy member",
   "{{value}} needs to mint GM to be a galaxy member": "{{value}} needs to mint GM to be a galaxy member",
   "{{value}} is a galaxy member": "{{value}} is a galaxy member",

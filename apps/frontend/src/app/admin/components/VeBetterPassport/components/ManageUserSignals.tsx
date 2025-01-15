@@ -1,4 +1,5 @@
 import { useUserBotSignals } from "@/api"
+import { WalletAddressInput } from "@/app/components/Input"
 import { TransactionModal } from "@/components"
 import { useResetUserBotSignals, useSignalBotUser } from "@/hooks"
 import {
@@ -22,7 +23,6 @@ import { useTranslation } from "react-i18next"
 
 export const ManageUserSignals = () => {
   const [user, setUser] = useState<string>("")
-  const [userFieldIsDirty, setUserFieldIsDirty] = useState<boolean>(false)
   const [reason, setReason] = useState<string>("")
   const { isOpen, onClose, onOpen } = useDisclosure()
 
@@ -105,19 +105,15 @@ export const ManageUserSignals = () => {
           <form>
             <VStack spacing={4} alignItems={"start"}>
               <HStack spacing={4} alignItems={"start"} w={"full"}>
-                <FormControl isRequired isInvalid={!isValidAddress && userFieldIsDirty}>
+                <FormControl isRequired isInvalid={!isValidAddress}>
                   <FormLabel>
                     <strong>{t("User address")}</strong>
                   </FormLabel>
                   <InputGroup>
-                    <Input
+                    <WalletAddressInput
                       placeholder={t("Enter the user address")}
-                      value={user}
-                      onChange={e => {
-                        setUser(e.target.value)
-                        setUserFieldIsDirty(true)
-                      }}
-                      disabled={signalsLoading || isLoading}
+                      isDisabled={signalsLoading || isLoading}
+                      onAddressResolved={address => setUser(address ?? "")}
                     />
                   </InputGroup>
                 </FormControl>

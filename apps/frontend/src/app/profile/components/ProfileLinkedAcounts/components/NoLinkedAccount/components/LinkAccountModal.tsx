@@ -1,20 +1,9 @@
+import { WalletAddressInput } from "@/app/components/Input"
 import { TransactionModal } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 import { useLinkEntityToPassport } from "@/hooks/useLinkEntityToPassport"
-import {
-  UseDisclosureReturn,
-  VStack,
-  Heading,
-  Box,
-  Text,
-  FormControl,
-  FormLabel,
-  Input,
-  FormErrorMessage,
-  Button,
-} from "@chakra-ui/react"
+import { UseDisclosureReturn, VStack, Heading, Box, Text, FormControl, FormLabel, Button } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
-import { isValid } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -25,13 +14,7 @@ type FormData = {
 
 export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
   const { t } = useTranslation()
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    reset,
-  } = useForm<FormData>()
+  const { handleSubmit, setValue, watch, reset } = useForm<FormData>()
 
   const accountToConnect = watch("accountToConnect")
 
@@ -79,17 +62,11 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
         </Box>
         <VStack align="stretch">
           <Heading fontSize="lg">{t("Which Primary Account would you like to link to?")}</Heading>
-          <FormControl isInvalid={!!errors.accountToConnect}>
+          <FormControl isInvalid={!accountToConnect}>
             <FormLabel color="#6A6A6A" fontSize="sm">
               {t("Wallet address")}
             </FormLabel>
-            <Input
-              {...register("accountToConnect", {
-                required: t("Account address is required"),
-                validate: value => isValid(value) || t("Please enter a valid wallet address"),
-              })}
-            />
-            <FormErrorMessage>{errors.accountToConnect && errors.accountToConnect.message}</FormErrorMessage>
+            <WalletAddressInput onAddressResolved={address => setValue("accountToConnect", address ?? "")} />
           </FormControl>
         </VStack>
         <VStack align="stretch">
