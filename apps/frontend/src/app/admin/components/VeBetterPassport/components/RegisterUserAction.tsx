@@ -1,4 +1,5 @@
 import { useXApps } from "@/api"
+import { WalletAddressInput } from "@/app/components/Input"
 import { TransactionModal } from "@/components"
 import { useRegisterUserAction } from "@/hooks"
 import {
@@ -11,7 +12,6 @@ import {
   FormLabel,
   Heading,
   HStack,
-  Input,
   InputGroup,
   NumberDecrementStepper,
   NumberIncrementStepper,
@@ -29,7 +29,6 @@ import { useTranslation } from "react-i18next"
 
 export const RegisterUserAction = () => {
   const [user, setUser] = useState<string>("")
-  const [userFieldIsDirty, setUserFieldIsDirty] = useState<boolean>(false)
   const [appId, setAppId] = useState<string | undefined>()
   const [round, setRound] = useState<number | undefined>()
   const [roundFieldIsDirty, setRoundFieldIsDirty] = useState<boolean>(false)
@@ -93,22 +92,17 @@ export const RegisterUserAction = () => {
           <form onSubmit={handleSubmit}>
             <VStack spacing={4} alignItems={"start"}>
               <HStack spacing={4} alignItems={"start"} w={"full"}>
-                <FormControl isRequired isInvalid={!isValidAddress && userFieldIsDirty}>
+                <FormControl isRequired isInvalid={!isValidAddress}>
                   <FormLabel>
                     <strong>{t("User address")}</strong>
                   </FormLabel>
                   <InputGroup>
-                    <Input
+                    <WalletAddressInput
                       placeholder={t("Who are we registering the action for?")}
-                      value={user}
-                      onChange={e => {
-                        setUser(e.target.value)
-                        setUserFieldIsDirty(true)
-                      }}
-                      disabled={isLoading}
+                      onAddressResolved={address => setUser(address ?? "")}
+                      isDisabled={isLoading}
                     />
                   </InputGroup>
-                  <FormErrorMessage>{t("Address not valid")}</FormErrorMessage>
                 </FormControl>
               </HStack>
 

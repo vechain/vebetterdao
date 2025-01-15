@@ -1,5 +1,5 @@
 import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useAppEndorsedEvents"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { Text, HStack, VStack, Skeleton } from "@chakra-ui/react"
 import { UilCheck, UilCopy } from "@iconscout/react-unicons"
 import { useCallback, useState } from "react"
@@ -8,6 +8,7 @@ import dayjs from "dayjs"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
 import { useGetNodeManager } from "@/api"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 
 type Props = {
   event: AppEndorsedEvent
@@ -40,6 +41,8 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
     }, 2000)
   }, [endorserAddress])
 
+  const { domain } = useVechainDomain({ addressOrDomain: endorserAddress })
+
   return (
     <HStack
       p={2}
@@ -51,7 +54,7 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
       <VStack align="start" justifyContent={"flex-start"} spacing={0} flex={1}>
         <Skeleton isLoaded={!endorserAddressLoading}>
           <HStack>
-            <Text>{humanAddress(endorserAddress ?? "", 6, 3)}</Text>
+            <Text>{domain ? humanDomain(domain, 4, 26) : humanAddress(endorserAddress ?? "", 6, 3)}</Text>
             {showCopiedLink ? (
               <UilCheck size={"18px"} color="#6DCB09" />
             ) : (

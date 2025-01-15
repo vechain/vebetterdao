@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 type Props = {
   text: string
   percentage: number
+  voters: number
   color: string
   icon: ReactElement
   isLoading?: boolean
@@ -13,7 +14,7 @@ type Props = {
 
 const compactFormatter = getCompactFormatter(1)
 
-export const ProposalVotesProgressBar = ({ isLoading, text, percentage, color, icon }: Props) => {
+export const ProposalVotesProgressBar = ({ isLoading, text, percentage, voters, color, icon }: Props) => {
   const { t } = useTranslation()
   return (
     <VStack alignItems={"stretch"}>
@@ -25,7 +26,14 @@ export const ProposalVotesProgressBar = ({ isLoading, text, percentage, color, i
         <HStack alignItems={"baseline"} gap={1}>
           <Skeleton isLoaded={!isLoading}>
             <Text color={color} fontSize="14px">
-              {t("{{percentage}}%", { percentage: compactFormatter.format(Number(percentage)) })}
+              {t("{{percentage}}%", {
+                percentage: compactFormatter.format(Number(percentage)),
+              })}
+              {voters
+                ? `(${t("{{value}} votes", {
+                    value: compactFormatter.format(Number(voters)),
+                  })})`
+                : null}
             </Text>
           </Skeleton>
         </HStack>

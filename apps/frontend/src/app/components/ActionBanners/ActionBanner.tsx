@@ -8,7 +8,7 @@ import {
   useVotingRewards,
   useXApps,
 } from "@/api"
-import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/hooks/useCreatorSubmission"
+import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"

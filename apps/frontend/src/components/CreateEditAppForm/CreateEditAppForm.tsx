@@ -18,7 +18,6 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react"
-import { isValid } from "@repo/utils/AddressUtils"
 import {
   Control,
   Controller,
@@ -36,6 +35,7 @@ import { notFoundImage } from "@/constants"
 import { useDropzone } from "react-dropzone"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { useTranslation } from "react-i18next"
+import { WalletAddressInput } from "@/app/components/Input"
 
 // Validate image uploads with size and type
 const validateImageUpload = async (
@@ -121,6 +121,8 @@ export const CreateEditAppForm = ({
 
   const { open: openUploadBanner } = useDropzone({ onDrop: onDrop("banner") })
 
+  const teamWalletAddress = watch("teamWalletAddress")
+
   return (
     <Card>
       <CardHeader>
@@ -169,21 +171,20 @@ export const CreateEditAppForm = ({
             />
             {errors.projectUrl && <FormErrorMessage>{errors.projectUrl.message}</FormErrorMessage>}
           </FormControl>
-          <FormControl isInvalid={!!errors.teamWalletAddress}>
+          <FormControl isInvalid={!teamWalletAddress}>
             <FormLabel>{t("Treasury address")}</FormLabel>
             <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <AddressIcon borderRadius={"full"} boxSize={6} address={watch("teamWalletAddress")} />
-              </InputLeftElement>
-              <Input
+              <WalletAddressInput
+                inputLeftElement={
+                  <InputLeftElement pointerEvents="none">
+                    <AddressIcon borderRadius={"full"} boxSize={6} address={teamWalletAddress} />
+                  </InputLeftElement>
+                }
                 isDisabled={isReceiverAddressDisabled}
                 rounded={"xl"}
-                {...register("teamWalletAddress", {
-                  validate: value => isValid(value) || "Invalid address",
-                })}
+                onAddressResolved={address => setValue("teamWalletAddress", address ?? "")}
               />
             </InputGroup>
-            {errors.teamWalletAddress && <FormErrorMessage>{errors.teamWalletAddress.message}</FormErrorMessage>}
           </FormControl>
           <Stack direction={["column", "row"]} w="full" justify={"space-between"} align={"flex-start"} spacing={4}>
             <Controller

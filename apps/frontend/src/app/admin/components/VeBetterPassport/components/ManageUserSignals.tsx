@@ -1,4 +1,5 @@
 import { useUserBotSignals } from "@/api"
+import { WalletAddressInput } from "@/app/components/Input"
 import { TransactionModal } from "@/components"
 import { useResetUserBotSignals, useSignalBotUser } from "@/hooks"
 import {
@@ -22,7 +23,6 @@ import { useTranslation } from "react-i18next"
 
 export const ManageUserSignals = () => {
   const [user, setUser] = useState<string>("")
-  const [userFieldIsDirty, setUserFieldIsDirty] = useState<boolean>(false)
   const [reason, setReason] = useState<string>("")
   const { isOpen, onClose, onOpen } = useDisclosure()
 
@@ -90,6 +90,27 @@ export const ManageUserSignals = () => {
   const isSignalResetEnabled = signals > 0
   const isLoading = isResetTxLoading || isSignalTxLoading || isResetPending || isSignalPending
 
+  let successTitle = "Action Completed"
+  if (resetStatus === "success") {
+    successTitle = "Signals Reset"
+  } else if (signalStatus === "success") {
+    successTitle = "User Signaled"
+  }
+
+  let pendingTitle = "Processing action..."
+  if (resetStatus === "pending") {
+    pendingTitle = "Resetting signals..."
+  } else if (signalStatus === "pending") {
+    pendingTitle = "Signaling user..."
+  }
+
+  let errorTitle = "Error processing action"
+  if (resetError) {
+    errorTitle = "Error resetting signals"
+  } else if (signalError) {
+    errorTitle = "Error signaling user"
+  }
+
   return (
     <>
       <Card w={"full"}>
@@ -105,19 +126,15 @@ export const ManageUserSignals = () => {
           <form>
             <VStack spacing={4} alignItems={"start"}>
               <HStack spacing={4} alignItems={"start"} w={"full"}>
-                <FormControl isRequired isInvalid={!isValidAddress && userFieldIsDirty}>
+                <FormControl isRequired isInvalid={!isValidAddress}>
                   <FormLabel>
                     <strong>{t("User address")}</strong>
                   </FormLabel>
                   <InputGroup>
-                    <Input
+                    <WalletAddressInput
                       placeholder={t("Enter the user address")}
-                      value={user}
-                      onChange={e => {
-                        setUser(e.target.value)
-                        setUserFieldIsDirty(true)
-                      }}
-                      disabled={signalsLoading || isLoading}
+                      isDisabled={signalsLoading || isLoading}
+                      onAddressResolved={address => setUser(address ?? "")}
                     />
                   </InputGroup>
                 </FormControl>
@@ -171,13 +188,7 @@ export const ManageUserSignals = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={resetError || signalError ? "error" : resetStatus || signalStatus}
-        successTitle={
-          resetStatus === "success"
-            ? "Signals Reset"
-            : signalStatus === "success"
-              ? "User Signaled"
-              : "Action Completed"
-        }
+        successTitle={successTitle}
         onTryAgain={resetStatus === "error" ? handleResetSignalsSubmit : handleSignalUserSubmit}
         showTryAgainButton
         showExplorerButton
@@ -187,16 +198,8 @@ export const ManageUserSignals = () => {
           resetTxTransaction?.txid ??
           signalTxTransaction?.txid
         }
-        pendingTitle={
-          resetStatus === "pending"
-            ? "Resetting signals..."
-            : signalStatus === "pending"
-              ? "Signaling user..."
-              : "Processing action..."
-        }
-        errorTitle={
-          resetError ? "Error resetting signals" : signalError ? "Error signaling user" : "Error processing action"
-        }
+        pendingTitle={pendingTitle}
+        errorTitle={errorTitle}
         errorDescription={resetError?.reason || signalError?.reason}
       />
     </>

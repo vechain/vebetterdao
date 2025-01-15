@@ -128,6 +128,12 @@ type VotingSupportProgress = {
   state: ProposalState
 }
 
+enum DepositStateColor {
+  DEPOSIT_REACHED = "rgba(0, 76, 252, 1)", // Blue
+  NOT_PENDING = "rgba(210, 63, 99, 1)", // Red
+  DEFAULT = "#F29B32", // Orange
+}
+
 const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposalId, proposalState }) => {
   const { t } = useTranslation()
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
@@ -145,31 +151,22 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
     return proposalDepositEvent.userSupport > 0
   }, [proposalDepositEvent])
 
+  const stateColor = useMemo(() => {
+    if (isDepositReached) {
+      return DepositStateColor.DEPOSIT_REACHED
+    } else if (proposalState !== ProposalState.Pending) {
+      return DepositStateColor.NOT_PENDING
+    } else {
+      return DepositStateColor.DEFAULT
+    }
+  }, [isDepositReached, proposalState])
+
   return (
     <VStack w={"full"} spacing={1}>
       <HStack w="full">
-        <Icon
-          as={FaRegHeart}
-          boxSize={["20px", "20px", "16px"]}
-          color={
-            isDepositReached
-              ? "rgba(0, 76, 252, 1)"
-              : proposalState !== ProposalState.Pending
-                ? "rgba(210, 63, 99, 1)"
-                : "#F29B32"
-          }
-        />
+        <Icon as={FaRegHeart} boxSize={["20px", "20px", "16px"]} color={stateColor} />
 
-        <Text
-          fontSize={"16px"}
-          fontWeight={400}
-          color={
-            isDepositReached
-              ? "rgba(0, 76, 252, 1)"
-              : proposalState !== ProposalState.Pending
-                ? "rgba(210, 63, 99, 1)"
-                : "#F29B32"
-          }>
+        <Text fontSize={"16px"} fontWeight={400} color={stateColor}>
           <b>{isDepositReached ? 100 : communityDepositPercentage}</b> {t("%")}
         </Text>
       </HStack>
@@ -177,13 +174,7 @@ const VotingSupportProgress: React.FC<VotingProposalProgressProps> = ({ proposal
         <Box
           height="100%"
           width={`${communityDepositPercentage}%`}
-          bg={
-            isDepositReached
-              ? "rgba(0, 76, 252, 1)"
-              : proposalState !== ProposalState.Pending
-                ? "rgba(210, 63, 99, 1)"
-                : "#F29B32"
-          }
+          bg={stateColor}
           borderRadius="md"
           position="absolute" //inverse if isForGreaterThanAgainst is true
           style={{ left: 0 }}

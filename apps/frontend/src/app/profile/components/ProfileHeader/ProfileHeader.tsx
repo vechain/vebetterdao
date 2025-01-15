@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { Text, VStack, HStack, Card, CardBody, useClipboard, IconButton, Stack, Heading } from "@chakra-ui/react"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { UilCopy, UilCheck } from "@iconscout/react-unicons"
 import { useVechainDomain } from "@vechain/dapp-kit-react"
@@ -37,7 +37,7 @@ export const ProfileHeader = ({ address }: Props) => {
               align={["flex-start", "flex-start", "column"]}
               w="full"
               spacing={1}>
-              <Heading fontSize="xl">{domain}</Heading>
+              <Heading fontSize="xl">{humanDomain(domain ?? "", 15)}</Heading>
               <HStack spacing={2}>
                 <Text fontSize="xl" fontWeight="500">
                   {humanAddress(address ?? "", 6, 4)}

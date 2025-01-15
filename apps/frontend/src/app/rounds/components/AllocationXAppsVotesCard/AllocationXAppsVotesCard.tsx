@@ -38,6 +38,37 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
 
   const title = roundInfo.isCurrent && roundInfo.state === 0 ? t("Real time votes") : t("Votes")
 
+  const renderContent = () => {
+    if (isLoading) {
+      return <Spinner size="lg" />
+    }
+
+    if (error) {
+      return (
+        <Alert
+          w={["80%", "70%", "50%"]}
+          status="error"
+          variant="subtle"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          textAlign="center"
+          height="200px"
+          borderRadius={"xl"}>
+          <AlertIcon boxSize="40px" mr={0} />
+          <AlertTitle mt={4} mb={1} fontSize="lg">
+            {t("Error loading votes")}
+          </AlertTitle>
+          <AlertDescription maxWidth="sm">
+            {error.message || "An error occurred while loading the votes"}
+          </AlertDescription>
+        </Alert>
+      )
+    }
+
+    return null
+  }
+
   return (
     <Card flex={1} h="full" w="full" variant={"baseWithBorder"}>
       <CardHeader>
@@ -76,28 +107,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
           align="center"
           justify="center"
           borderRadius={"lg"}>
-          {isLoading || roundInfoLoading ? (
-            <Spinner size="lg" />
-          ) : error ? (
-            <Alert
-              w={["80%", "70%", "50%"]}
-              status="error"
-              variant="subtle"
-              flexDirection="column"
-              alignItems="center"
-              justifyContent="center"
-              textAlign="center"
-              height="200px"
-              borderRadius={"xl"}>
-              <AlertIcon boxSize="40px" mr={0} />
-              <AlertTitle mt={4} mb={1} fontSize="lg">
-                {t("Error loading votes")}
-              </AlertTitle>
-              <AlertDescription maxWidth="sm">
-                {error.message || "An error occurred while loading the votes"}
-              </AlertDescription>
-            </Alert>
-          ) : null}
+          {renderContent()}
         </Flex>
       )}
     </Card>

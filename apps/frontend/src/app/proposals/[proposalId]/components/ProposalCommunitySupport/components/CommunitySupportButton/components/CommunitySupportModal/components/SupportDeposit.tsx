@@ -6,7 +6,7 @@ import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { ethers } from "ethers"
-
+import { BigNumber } from "bignumber.js"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
 
 export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => void }) => {
@@ -15,11 +15,11 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
   const [amount, setAmount] = useState("")
   const { account } = useWallet()
   const { data: vot3Balance } = useVot3Balance(account ?? undefined)
+
   const missingSupport = useMemo(
     () => proposal.depositThreshold - proposal.communityDeposits,
     [proposal.communityDeposits, proposal.depositThreshold],
   )
-
   const parsedAmount = useMemo(() => {
     if (!amount || !ethers) return "0"
 
@@ -31,20 +31,31 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
   }, [amount])
 
   const depositMax = useCallback(() => {
-    if (!vot3Balance) return "0"
+    if (!vot3Balance) return
 
-    if (missingSupport < Number(vot3Balance?.scaled)) {
-      setAmount(`${missingSupport.toLocaleString("fullwide", { useGrouping: false })}`) // "fullwide" and "useGrouping" are used to display without scientific notation
+    const scaledBalanceBN = BigNumber(vot3Balance.scaled)
+    const missingSupportBN = BigNumber(missingSupport)
+
+    if (scaledBalanceBN.gt(missingSupportBN)) {
+      setAmount(missingSupportBN.toString())
       return
     }
-
-    setAmount(vot3Balance?.original)
+    setAmount(scaledBalanceBN.toString())
   }, [vot3Balance, missingSupport])
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setAmount(filterAmountInput(e.target.value, { maxBalance: vot3Balance?.scaled })),
-    [vot3Balance?.scaled],
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!e.target.value) return setAmount("0")
+      const input = filterAmountInput(e.target.value, { maxBalance: vot3Balance?.scaled })
+      const scaledBalanceBN = BigNumber(vot3Balance?.scaled ?? 0)
+      const missingSupportBN = BigNumber(missingSupport ?? 0)
+
+      // Get the minimum value, between the input, the scaled balance and the missing support
+      const cappedAmountBN = BigNumber.min(BigNumber(input), scaledBalanceBN, missingSupportBN)
+
+      setAmount(cappedAmountBN.toString())
+    },
+    [missingSupport, vot3Balance?.scaled],
   )
 
   const handleSubmit = useCallback(
