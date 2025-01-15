@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react"
 import { UseSendTransactionReturnValue } from "./useSendTransaction"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getAppLockedPercentageQueryKey } from "../api/contracts/x2EarnRewardsPool/hooks/useAppLockedPercentage"
+import { getAppAllowanceQueryKey } from "../api/contracts/x2EarnRewardsPool/hooks/useAppAllowance"
 import { buildClause } from "@/utils/buildClause"
 
 const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddress
@@ -36,7 +37,10 @@ export const useAdminLockedFundsPercentage = ({
     ]
   }, [appId, percentage])
 
-  const refetchQueryKeys = useMemo(() => [getAppLockedPercentageQueryKey(appId)], [appId])
+  const refetchQueryKeys = useMemo(
+    () => [getAppLockedPercentageQueryKey(appId), getAppAllowanceQueryKey(appId)],
+    [appId],
+  )
 
   return useBuildTransaction({
     clauseBuilder,

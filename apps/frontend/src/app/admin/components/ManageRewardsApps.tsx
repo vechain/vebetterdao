@@ -16,11 +16,12 @@ import {
   Button,
   Text,
   Icon,
+  Skeleton,
 } from "@chakra-ui/react"
-import { useCallback, useState, useMemo, useEffect } from "react"
+import { useCallback, useState, useMemo } from "react"
 import { TransactionModal } from "@/components"
 import { useXApps, useAppAdmin } from "@/api"
-import { useAppLockedPercentage, useAppAllowance, useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
+import { useAppLockedPercentage, useAppAllowance } from "@/api/contracts/x2EarnRewardsPool"
 import { useAdminLockedFundsPercentage } from "@/hooks"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { UilLock } from "@iconscout/react-unicons"
@@ -34,8 +35,7 @@ export const ManageRewardsApps = () => {
   const [percentage, setPercentage] = useState<string | undefined>()
   const { data: xApps } = useXApps()
   const { data: appAdmin } = useAppAdmin(appId ?? "")
-  const { data: appAllowance } = useAppAllowance(appId ?? "", true)
-  const { data: balance } = useAppBalance(appId ?? "")
+  const { data: appAllowance, isLoading: isAppAllowanceLoading } = useAppAllowance(appId ?? "", true)
 
   const {
     sendTransaction,
@@ -67,9 +67,9 @@ export const ManageRewardsApps = () => {
     return appAdmin?.toLowerCase() === account?.toLowerCase()
   }, [appAdmin, account])
 
-  const allowance = useEffect(() => {
+  const allowance = useMemo(() => {
     return appAllowance?.formatted
-  }, [appAllowance, balance])
+  }, [appAllowance])
 
   const isValidInteger = percentage ? Number.isInteger(Number(percentage)) && !percentage.includes(".") : true
   return (
@@ -146,11 +146,13 @@ export const ManageRewardsApps = () => {
                     </FormControl>
                     <VStack align={"flex-start"} flex={1} spacing={4}>
                       <Text>{t("Actual locked percentage: {{value}} % ", { value: lockedFundsPercentage })}</Text>
-                      <Text>
-                        {t("Allowance available: {{value}} ", {
-                          value: allowance,
-                        })}
-                      </Text>
+                      <Skeleton height="20px" isLoaded={!isAppAllowanceLoading}>
+                        <Text>
+                          {t("Allowance available: {{value}} ", {
+                            value: allowance,
+                          })}
+                        </Text>
+                      </Skeleton>
                     </VStack>
                     <Button
                       type="submit"
