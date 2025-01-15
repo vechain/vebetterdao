@@ -42,6 +42,10 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
 
   if (!proposalCreatedEvent) return null
 
+  let quorumRenderState: "none" | "upcoming" | "active" = "active"
+  if (shouldNotRenderQuorum) quorumRenderState = "none"
+  if (isUpcoming) quorumRenderState = "upcoming"
+
   return (
     <VStack w="full" alignItems="stretch" gap={8}>
       {proposal.state === ProposalState.Canceled && <ProposalCanceledAlert />}
@@ -62,7 +66,7 @@ export const ProposalPageContent: React.FC<Props> = ({ proposalId }) => {
               quorumQuery={proposal.quorumQuery}
               votesAtSnapshotQuery={votesAtSnapshotQuery}
               userVotesAtSnapshotQuery={proposal.snapshotVotesQuery}
-              renderQuroum={shouldNotRenderQuorum ? "none" : isUpcoming ? "upcoming" : "active"}
+              renderQuroum={quorumRenderState}
               isEnded={isEnded}
               currentVotesQuery={totalVotesQuery}
               renderTimeline={<ProposalTimeline />}

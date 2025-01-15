@@ -52,6 +52,19 @@ vi.mock("next/navigation", async () => {
     usePathname: mockedUsePathname,
   }
 })
+//mock useDisclosure
+vi.mock("@chakra-ui/hooks", async importOriginal => {
+  const mod = await importOriginal<typeof import("@chakra-ui/hooks")>()
+  return {
+    ...mod,
+    useDisclosure: () => ({
+      isOpen: false,
+      onOpen: vi.fn(),
+      onClose: vi.fn(),
+      onToggle: vi.fn(),
+    }),
+  }
+})
 
 //mock dappkit
 vi.mock("@vechain/dapp-kit-react", async importOriginal => {

@@ -6,9 +6,7 @@ import {
   VStack,
   FormControl,
   FormLabel,
-  Input,
   Button,
-  FormErrorMessage,
   Box,
   useDisclosure,
   Alert,
@@ -20,11 +18,11 @@ import {
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
-import { isValid } from "@repo/utils/AddressUtils"
 import { useDelegatePassport } from "@/hooks/useDelegatePassport"
 import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
 import { useAccountLinking } from "@/api"
+import { WalletAddressInput } from "@/app/components/Input"
 
 type FormData = {
   walletAddress: string
@@ -32,13 +30,7 @@ type FormData = {
 
 export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    reset,
-  } = useForm<FormData>()
+  const { handleSubmit, setValue, watch, reset } = useForm<FormData>()
   const { isEntity } = useAccountLinking()
 
   const confirmationModal = useDisclosure()
@@ -133,30 +125,26 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
         </Box>
         <VStack align="stretch">
           <Heading fontSize="lg">{t("Who do you want to delegate to?")}</Heading>
-          <FormControl isInvalid={!!errors.walletAddress}>
+          <FormControl isInvalid={!delegatee}>
             <FormLabel color="#6A6A6A" fontSize="sm">
               {t("User wallet address")}
             </FormLabel>
-            <Input
-              disabled={isEntity}
-              {...register("walletAddress", {
-                required: t("Wallet address is required"),
-                validate: value => isValid(value) || t("Please enter a valid wallet address"),
-              })}
+            <WalletAddressInput
+              isDisabled={isEntity}
+              onAddressResolved={address => setValue("walletAddress", address ?? "")}
             />
             {isEntity ? (
               <Text color="#C84968" fontSize="sm">
                 {t("You can't delegate from an account linked as a secondary account")}
               </Text>
-            ) : (
-              <FormErrorMessage>{errors.walletAddress && errors.walletAddress.message}</FormErrorMessage>
-            )}
+            ) : null}
           </FormControl>
         </VStack>
         <VStack align="stretch">
-          <Button variant="primaryAction" type="submit" isDisabled={isEntity}>
+          <Button variant="primaryAction" type="submit" isDisabled={isEntity || !delegatee}>
             {t("Send request")}
           </Button>
+
           <Button variant={"primaryGhost"} onClick={modal.onClose}>
             {t("Cancel")}
           </Button>

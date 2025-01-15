@@ -8,7 +8,6 @@ import { GMNFTListItem } from "./GMNFTListItem"
 import { useMemo } from "react"
 import { FeatureFlagWrapper, BaseTooltip } from "@/components"
 import { FeatureFlag } from "@/constants"
-import { useSelectedGmNft } from "@/api"
 
 export const GMNFTList = () => {
   const { t } = useTranslation()
@@ -25,8 +24,6 @@ export const GMNFTList = () => {
     return tokensInfo?.pages.map(page => page.data).flat()
   }, [tokensInfo])
 
-  const { gmName } = useSelectedGmNft()
-
   return (
     <Card variant="baseWithBorder" w="full">
       <CardBody>
@@ -34,9 +31,8 @@ export const GMNFTList = () => {
           <VStack align="stretch">
             <HStack justify="space-between">
               <Heading fontSize="lg">{t("My Galaxy NFTs")}</Heading>
-              <BaseTooltip
-                text={t("{{gmName}} NFT is the one selected for rewards multiplier.", { gmName: gmName })}
-                showTooltip={!!gmName}>
+
+              <BaseTooltip text={t("The active NFT is selected for rewards multiplier.")}>
                 <span>
                   <UilInfoCircle color="#004CFC" />
                 </span>

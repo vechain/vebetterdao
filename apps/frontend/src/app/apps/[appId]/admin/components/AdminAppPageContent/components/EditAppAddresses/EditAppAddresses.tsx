@@ -1,24 +1,14 @@
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Text,
-  VStack,
-  useDisclosure,
-} from "@chakra-ui/react"
+import { Button, FormControl, InputGroup, InputRightElement, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../../AdminAppPageContent"
 import { useCurrentAppAdmin } from "@/app/apps/[appId]/hooks"
 import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
-import { isValid } from "@repo/utils/AddressUtils"
 import { useCallback } from "react"
 import { ModalEditTeamWalletAddress } from "./components/ModalEditTeamWalletAddress"
 import { UilPen } from "@iconscout/react-unicons"
 import { ModalEditAdminAddress } from "./components/ModalEditAdminAddress"
+import { WalletAddressInput } from "@/app/components/Input"
 
 type Props = {
   form: UseFormReturn<AdminAppForm>
@@ -38,7 +28,6 @@ export const EditAppAddresses = ({
   const { t } = useTranslation()
   const { admin } = useCurrentAppAdmin()
   const { app } = useCurrentAppInfo()
-  const { errors } = form.formState
 
   const modalEditAdminAddress = useDisclosure()
   const handleEditAdminAddress = useCallback(() => {
@@ -62,18 +51,14 @@ export const EditAppAddresses = ({
           {t("Treasury address")}
         </Text>
         <Text fontSize="sm">{t("B3TR tokens will be sent to this address when withdrawing allocations.")}</Text>
-        <FormControl isInvalid={!!errors.teamWalletAddress}>
+        <FormControl>
           <InputGroup>
-            <Input
-              {...form.register("teamWalletAddress", {
-                required: {
-                  value: true,
-                  message: t("Address required"),
-                },
-                validate: value => isValid(value) || t("Invalid address"),
-              })}
+            <WalletAddressInput
+              onAddressResolved={address => form.setValue("teamWalletAddress", address ?? "")}
               isDisabled={!editTeamWalletAddress}
-              defaultValue={app?.teamWalletAddress}></Input>
+              isRequired={true}
+              defaultValue={app?.teamWalletAddress}
+            />
             {!editTeamWalletAddress && (
               <InputRightElement width="auto">
                 <Button
@@ -91,7 +76,6 @@ export const EditAppAddresses = ({
               </InputRightElement>
             )}
           </InputGroup>
-          <FormErrorMessage>{errors.teamWalletAddress?.message}</FormErrorMessage>
         </FormControl>
       </VStack>
       <VStack align="stretch">
@@ -103,18 +87,14 @@ export const EditAppAddresses = ({
             "This address has control over the app and can perform sensitive operations, as updating treasury, distributor, and moderators addresses or transfer ownership.",
           )}
         </Text>
-        <FormControl isInvalid={!!errors.adminAddress}>
+        <FormControl>
           <InputGroup>
-            <Input
-              {...form.register("adminAddress", {
-                required: {
-                  value: true,
-                  message: t("Address required"),
-                },
-                validate: value => isValid(value) || t("Invalid address"),
-              })}
+            <WalletAddressInput
+              onAddressResolved={address => form.setValue("adminAddress", address ?? "")}
               isDisabled={!editAdminAddress}
-              defaultValue={admin}></Input>
+              isRequired={true}
+              defaultValue={admin}
+            />
             {!editAdminAddress && (
               <InputRightElement width="auto">
                 <Button
@@ -132,7 +112,6 @@ export const EditAppAddresses = ({
               </InputRightElement>
             )}
           </InputGroup>
-          <FormErrorMessage>{errors.adminAddress?.message}</FormErrorMessage>
         </FormControl>
       </VStack>
       <ModalEditTeamWalletAddress

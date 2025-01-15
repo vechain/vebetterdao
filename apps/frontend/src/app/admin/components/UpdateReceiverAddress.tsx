@@ -1,4 +1,5 @@
 import { useXApps } from "@/api"
+import { WalletAddressInput } from "@/app/components/Input"
 import { TransactionModal } from "@/components/TransactionModal"
 import { useUpdateXAppReceiverAddress } from "@/hooks"
 import {
@@ -9,7 +10,6 @@ import {
   InputGroup,
   Input,
   Heading,
-  FormErrorMessage,
   Select,
   Card,
   CardHeader,
@@ -23,7 +23,6 @@ import { useTranslation } from "react-i18next"
 export const UpdateReceiverAddress = () => {
   const [appId, setAppId] = useState<string | undefined>()
   const [newAddress, setNewAddress] = useState("")
-  const [newAddressFieldIsDirty, setNewAddressFieldIsDirty] = useState(false)
   const { isOpen, onClose, onOpen } = useDisclosure()
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
@@ -115,22 +114,17 @@ export const UpdateReceiverAddress = () => {
                   </InputGroup>
                 </FormControl>
 
-                <FormControl isRequired isInvalid={!isValidAddress && newAddressFieldIsDirty}>
+                <FormControl isRequired isInvalid={!isValidAddress}>
                   <FormLabel>
                     <strong>{"New Address"}</strong>
                   </FormLabel>
                   <InputGroup>
-                    <Input
-                      placeholder="Where should the allocation tokens be sent?"
-                      value={newAddress}
-                      onChange={e => {
-                        setNewAddress(e.target.value)
-                        setNewAddressFieldIsDirty(true)
-                      }}
-                      disabled={isLoading}
+                    <WalletAddressInput
+                      placeholder={t("Where should the allocation tokens be sent?")}
+                      onAddressResolved={address => setNewAddress(address ?? "")}
+                      isDisabled={isLoading}
                     />
                   </InputGroup>
-                  <FormErrorMessage>{"Address not valid"}</FormErrorMessage>
                 </FormControl>
 
                 <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
