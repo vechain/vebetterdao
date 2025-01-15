@@ -16,7 +16,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { IoAddCircleOutline, IoWalletOutline } from "react-icons/io5"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
-import { useAppBalance, useAppAllowance } from "@/api/contracts/x2EarnRewardsPool"
+import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 import { WithdrawModal } from "./WithdrawModal"
 import { DepositModal } from "./DepositModal"
 import { B3TRIcon, BaseTooltip } from "@/components"
@@ -34,21 +34,13 @@ export const AppBalanceCard = () => {
   const { app } = useCurrentAppInfo()
   const { data: balance, isLoading: isBalanceLoading } = useAppBalance(app?.id ?? "")
   const { account } = useWallet()
-  const { data: allowance, isLoading: isAllowanceLoading } = useAppAllowance(app?.id ?? "")
+
   const { data: appPermissions } = useAccountAppPermissions(account ?? "")
 
   const isAppAdmin = useMemo(() => {
     if (!appPermissions || !app) return false
     return appPermissions[app.id]?.isAdmin
   }, [appPermissions, app])
-
-  // verify the allowance, if the amount to withdraw is higher than the amount allowed, the border turn red and the withdraw button is disabled
-  const isAllowanceSufficient = useMemo(() => {
-    if (!allowance?.scaled || !balance?.scaled) return false
-    return Number(allowance.scaled) > Number(balance.scaled)
-  }, [allowance, balance])
-
-  console.log({ allowance, balance, isAllowanceSufficient, isAllowanceLoading })
 
   return (
     <>
@@ -64,18 +56,16 @@ export const AppBalanceCard = () => {
           </HStack>
         </CardHeader>
         <CardBody py={0}>
-          <VStack spacing={4} w="full">
-            <VStack bg={"#E5EEFF"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"} align="start">
-              <Text fontSize="12px" fontWeight="400">
-                {t("Total B3TR Balance")}
-              </Text>
-              <HStack>
-                <B3TRIcon boxSize={"30px"} />
-                <Skeleton isLoaded={!isBalanceLoading}>
-                  <Heading size={{ base: "2xl", md: "xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
-                </Skeleton>
-              </HStack>
-            </VStack>
+          <VStack bg={"#E5EEFF"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"} align="start">
+            <Text fontSize="12px" fontWeight="400">
+              {t("Total B3TR Balance")}
+            </Text>
+            <HStack>
+              <B3TRIcon boxSize={"30px"} />
+              <Skeleton isLoaded={!isBalanceLoading}>
+                <Heading size={{ base: "2xl", md: "xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
+              </Skeleton>
+            </HStack>
           </VStack>
         </CardBody>
         <CardFooter>

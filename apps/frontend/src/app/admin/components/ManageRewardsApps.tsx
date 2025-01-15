@@ -17,10 +17,10 @@ import {
   Text,
   Icon,
 } from "@chakra-ui/react"
-import { useCallback, useState, useMemo } from "react"
+import { useCallback, useState, useMemo, useEffect } from "react"
 import { TransactionModal } from "@/components"
 import { useXApps, useAppAdmin } from "@/api"
-import { useAppLockedPercentage, useAppAllowance } from "@/api/contracts/x2EarnRewardsPool"
+import { useAppLockedPercentage, useAppAllowance, useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 import { useAdminLockedFundsPercentage } from "@/hooks"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { UilLock } from "@iconscout/react-unicons"
@@ -35,6 +35,7 @@ export const ManageRewardsApps = () => {
   const { data: xApps } = useXApps()
   const { data: appAdmin } = useAppAdmin(appId ?? "")
   const { data: appAllowance } = useAppAllowance(appId ?? "", true)
+  const { data: balance } = useAppBalance(appId ?? "")
 
   const {
     sendTransaction,
@@ -66,12 +67,11 @@ export const ManageRewardsApps = () => {
     return appAdmin?.toLowerCase() === account?.toLowerCase()
   }, [appAdmin, account])
 
-  const allowance = useMemo(() => {
+  const allowance = useEffect(() => {
     return appAllowance?.formatted
-  }, [appAllowance])
-  // {/* todo: filter the select with only the xapp admin owns */}
-  const isValidInteger = percentage ? Number.isInteger(Number(percentage)) && !percentage.includes(".") : true
+  }, [appAllowance, balance])
 
+  const isValidInteger = percentage ? Number.isInteger(Number(percentage)) && !percentage.includes(".") : true
   return (
     <>
       <Card w="full">
