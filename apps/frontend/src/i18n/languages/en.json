@@ -1402,5 +1402,14 @@
   "{{value}} needs to mint GM to be a galaxy member": "{{value}} needs to mint GM to be a galaxy member",
   "{{value}} is a galaxy member": "{{value}} is a galaxy member",
   "GM Level": "GM Level",
-  "{{value}} needs to mint an NFT to get reward multipliers": "{{value}} needs to mint an NFT to get reward multipliers"
+  "{{value}} needs to mint an NFT to get reward multipliers": "{{value}} needs to mint an NFT to get reward multipliers",
+  "User Status Removed": "User Status Removed",
+  "User Whitelisted": "User Whitelisted",
+  "User Blacklisted": "User Blacklisted",
+  "Removing user status...": "Removing user status...",
+  "Whitelisting user...": "Whitelisting user...",
+  "Blacklisting user...": "Blacklisting user...",
+  "Error removing user status": "Error removing user status",
+  "Error whitelisting user": "Error whitelisting user",
+  "Error blacklisting user": "Error blacklisting user"
 }

@@ -90,6 +90,27 @@ export const ManageUserSignals = () => {
   const isSignalResetEnabled = signals > 0
   const isLoading = isResetTxLoading || isSignalTxLoading || isResetPending || isSignalPending
 
+  let successTitle = "Action Completed"
+  if (resetStatus === "success") {
+    successTitle = "Signals Reset"
+  } else if (signalStatus === "success") {
+    successTitle = "User Signaled"
+  }
+
+  let pendingTitle = "Processing action..."
+  if (resetStatus === "pending") {
+    pendingTitle = "Resetting signals..."
+  } else if (signalStatus === "pending") {
+    pendingTitle = "Signaling user..."
+  }
+
+  let errorTitle = "Error processing action"
+  if (resetError) {
+    errorTitle = "Error resetting signals"
+  } else if (signalError) {
+    errorTitle = "Error signaling user"
+  }
+
   return (
     <>
       <Card w={"full"}>
@@ -167,13 +188,7 @@ export const ManageUserSignals = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={resetError || signalError ? "error" : resetStatus || signalStatus}
-        successTitle={
-          resetStatus === "success"
-            ? "Signals Reset"
-            : signalStatus === "success"
-              ? "User Signaled"
-              : "Action Completed"
-        }
+        successTitle={successTitle}
         onTryAgain={resetStatus === "error" ? handleResetSignalsSubmit : handleSignalUserSubmit}
         showTryAgainButton
         showExplorerButton
@@ -183,16 +198,8 @@ export const ManageUserSignals = () => {
           resetTxTransaction?.txid ??
           signalTxTransaction?.txid
         }
-        pendingTitle={
-          resetStatus === "pending"
-            ? "Resetting signals..."
-            : signalStatus === "pending"
-              ? "Signaling user..."
-              : "Processing action..."
-        }
-        errorTitle={
-          resetError ? "Error resetting signals" : signalError ? "Error signaling user" : "Error processing action"
-        }
+        pendingTitle={pendingTitle}
+        errorTitle={errorTitle}
         errorDescription={resetError?.reason || signalError?.reason}
       />
     </>

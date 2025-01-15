@@ -1,7 +1,7 @@
 import { useUserStatus } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
 import { TransactionModal } from "@/components"
-import { UserStatus, useWhitelistBlacklistUser } from "@/hooks"
+import { UserStatus, useWhitelistBlacklistUser, useUserStatusConfig } from "@/hooks"
 import {
   Button,
   Card,
@@ -33,6 +33,8 @@ export const ManageUserStatus = () => {
   }, [user])
 
   const { t } = useTranslation()
+  const statusConfig = useUserStatusConfig()
+  const currentConfig = statusConfig[actionType]
 
   const {
     sendTransaction,
@@ -110,16 +112,10 @@ export const ManageUserStatus = () => {
 
               <Button
                 isDisabled={!isFormValid || actionType === userStatus}
-                colorScheme={
-                  actionType === UserStatus.WHITELIST ? "green" : actionType === UserStatus.BLACKLIST ? "red" : "blue"
-                }
+                colorScheme={currentConfig.buttonColorScheme}
                 type="submit"
                 isLoading={isLoading}>
-                {actionType === UserStatus.WHITELIST
-                  ? t("Whitelist User")
-                  : actionType === UserStatus.BLACKLIST
-                    ? t("Blacklist User")
-                    : t("Remove Status")}
+                {currentConfig.buttonText}
               </Button>
             </VStack>
           </form>
@@ -130,31 +126,13 @@ export const ManageUserStatus = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? "error" : status}
-        successTitle={
-          actionType === UserStatus.WHITELIST
-            ? "User Whitelisted"
-            : actionType === UserStatus.BLACKLIST
-              ? "User Blacklisted"
-              : "User Status Removed"
-        }
+        successTitle={currentConfig.modalSuccessTitle}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
-        pendingTitle={
-          actionType === UserStatus.WHITELIST
-            ? "Whitelisting user..."
-            : actionType === UserStatus.BLACKLIST
-              ? "Blacklisting user..."
-              : "Removing user status..."
-        }
-        errorTitle={
-          actionType === UserStatus.WHITELIST
-            ? "Error whitelisting user"
-            : actionType === UserStatus.BLACKLIST
-              ? "Error blacklisting user"
-              : "Error removing user status"
-        }
+        pendingTitle={currentConfig.modalPendingTitle}
+        errorTitle={currentConfig.modalErrorTitle}
         errorDescription={error?.reason}
       />
     </>

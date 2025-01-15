@@ -110,6 +110,13 @@ export const UpdateRoleCard = () => {
     setValue("role", "") // Reset role when contract changes
   }, [selectedContractAddress, account, setValue])
 
+  const getButtonText = () => {
+    if (userAlreadyHasRole) {
+      return compareAddresses(account ?? "", walletAddress) ? t("Renounce Role") : t("Revoke Role")
+    }
+    return t("Grant Role")
+  }
+
   return (
     <>
       <Card w={"full"}>
@@ -218,11 +225,7 @@ export const UpdateRoleCard = () => {
                 isDisabled={!isFormValid || !!hasRoleError}
                 colorScheme={userAlreadyHasRole ? "red" : "green"}
                 type="submit">
-                {userAlreadyHasRole
-                  ? compareAddresses(account ?? "", walletAddress)
-                    ? t("Renounce Role")
-                    : t("Revoke Role")
-                  : t("Grant Role")}
+                {getButtonText()}
               </Button>
             </VStack>
           </form>
