@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react"
 import { Trans, useTranslation } from "react-i18next"
 import { AddressIcon } from "@/components/AddressIcon"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { HiDotsVertical } from "react-icons/hi"
 import { UilTrash, UilCheck } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
@@ -21,6 +21,7 @@ import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useApp
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
 import { useState } from "react"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 
 type Props = {
   isAppAdmin: boolean
@@ -67,8 +68,9 @@ export const EndorsersItem = ({
     setSelectedEndorserNodePoints(nodePoints ?? "")
   }
   const goToEndorserUserProfilePage = () => {
-    router.push("/profile/" + endorserAddress)
+    router.push("/profile/" + endorserAddress + "?tab=gm")
   }
+  const { domain } = useVechainDomain({ addressOrDomain: endorserAddress })
 
   return (
     <HStack
@@ -82,7 +84,7 @@ export const EndorsersItem = ({
       <HStack alignItems={"center"} gap={4}>
         <AddressIcon address={endorserAddress} rounded="full" h="28px" w="28px" />
         <VStack align="start" justify={"center"} spacing={0}>
-          <Text>{humanAddress(endorserAddress, 6, 3)}</Text>
+          <Text>{domain ? humanDomain(domain, 4, 26) : humanAddress(endorserAddress, 6, 3)}</Text>
           <Skeleton isLoaded={!endorserNodesLoading}>
             <Text fontSize="12" fontWeight={400} color="#6A6A6A">
               {t("Endorsing since {{date}}", { date: endorsingSince })}
