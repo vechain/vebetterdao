@@ -263,10 +263,12 @@ contract X2EarnRewardsPool is
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
 
-    // check if the funds are above the allowance of the app 
-    uint256 allowedToDistribute = $.availableFunds[appId] - $.lockedFunds[appId] ;
-    require(allowedToDistribute >= amount, "X2EarnRewardsPool: Amount to distribute is above the allowance");
-    
+    if ($.lockedFundsPercentage[appId] > 0) {
+      // check if the funds are above the allowance of the app 
+      uint256 allowedToDistribute = $.availableFunds[appId] - $.lockedFunds[appId];
+      require(allowedToDistribute >= amount, "X2EarnRewardsPool: Amount to distribute is above the allowance");
+    }
+
     // check if the app has enough available funds to distribute
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
@@ -509,7 +511,7 @@ contract X2EarnRewardsPool is
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
     require(percentage * 100 <= 10000, "X2EarnRewardsPool: percentage cannot exceed 100%");
-    require($.lockedFunds[appId] - $.availableFunds[appId] == 0, "X2EarnRewardsPool: allowance have been spent");
+    require($.availableFunds[appId] - $.lockedFunds[appId]  == 0, "X2EarnRewardsPool: allowance have been spent");
 
     $.lockedFundsPercentage[appId] = percentage * 100;
 
@@ -582,7 +584,7 @@ contract X2EarnRewardsPool is
 
   function allowance(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.lockedFunds[appId] - $.availableFunds[appId];
+    return $.availableFunds[appId] - $.lockedFunds[appId];
   }
 
   // ---------- Fallbacks ---------- //
