@@ -79,6 +79,7 @@ contract X2EarnRewardsPool is
     string[] allowedImpactKeys; // Array storing impact keys
     IVeBetterPassport veBetterPassport;
     mapping(bytes32 appId => uint256) lockedFundsPercentage; // Percentage of funds that must be locked (in basis points, 1% = 100)
+    mapping(bytes32 appId => uint256) lockedFunds; // Funds that are locked by the app owner
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -166,6 +167,8 @@ contract X2EarnRewardsPool is
 
     // increase available amount for the app
     $.availableFunds[appId] += amount;
+    //increase locked funds for the app
+    $.lockedFunds[appId] += amount;
 
     // transfer tokens to this contract
     require($.b3tr.transferFrom(msg.sender, address(this), amount), "X2EarnRewardsPool: deposit transfer failed");
@@ -181,6 +184,7 @@ contract X2EarnRewardsPool is
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
+
     require(
       $.x2EarnApps.isAppAdmin(appId, msg.sender) || $.x2EarnApps.isRewardDistributor(appId, msg.sender),
       "X2EarnRewardsPool: not an app admin nor a reward distributor"
@@ -195,13 +199,12 @@ contract X2EarnRewardsPool is
     // Get the team wallet address
     address teamWalletAddress = $.x2EarnApps.teamWalletAddress(appId);
 
-    uint256 lockedFunds = $.availableFunds[appId] * $.lockedFundsPercentage[appId] / 10000;
-    uint256 unlockedFunds =  $.availableFunds[appId] - lockedFunds; 
-    require (unlockedFunds >= amount, "X2EarnRewardsPool: too much funds requested for withdrawal");
-
+    // transfer the rewards to the team wallet
     $.availableFunds[appId] -= amount;
 
-    // Transfer the funds to the team wallet
+    // Reallocate locked funds to the app
+    $.lockedFunds[appId] = ($.lockedFundsPercentage[appId] * $.availableFunds[appId]) / 10000;
+
     require($.b3tr.transfer(teamWalletAddress, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
     emit TeamWithdrawal(amount, appId, teamWalletAddress, msg.sender, reason);
@@ -261,9 +264,8 @@ contract X2EarnRewardsPool is
     require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
 
     // check if the funds are above the allowance of the app 
-    uint256 lockedFunds = $.availableFunds[appId] * $.lockedFundsPercentage[appId] / 10000;
-    uint256 unlockedFunds = $.availableFunds[appId] - lockedFunds;
-    require(unlockedFunds > amount, "X2EarnRewardsPool: Amount to distribute is above the allowance");
+    uint256 allowedToDistribute = $.availableFunds[appId] - $.lockedFunds[appId] ;
+    require(allowedToDistribute >= amount, "X2EarnRewardsPool: Amount to distribute is above the allowance");
     
     // check if the app has enough available funds to distribute
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
@@ -497,6 +499,9 @@ contract X2EarnRewardsPool is
    * @dev Sets the locked funds percentage for an app as an admin
    * @param appId The ID of the app
    * @param percentage The percentage of funds that must be locked [0, 100]
+   * 
+   * @notice if the allowance have been spent it reverts to set the locked funds percentage
+   * @notice returns the locked funds percentage in basis points
    */
   function setLockedFundsPercentage(bytes32 appId, uint256 percentage) external {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
@@ -504,9 +509,15 @@ contract X2EarnRewardsPool is
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
     require(percentage * 100 <= 10000, "X2EarnRewardsPool: percentage cannot exceed 100%");
+    require($.lockedFunds[appId] - $.availableFunds[appId] == 0, "X2EarnRewardsPool: allowance have been spent");
+
     $.lockedFundsPercentage[appId] = percentage * 100;
 
+    // Reallocate locked funds to the app
+    $.lockedFunds[appId] = ($.lockedFundsPercentage[appId] * $.availableFunds[appId]) / 10000;
+
     emit LockedFundsPercentageSet(appId, percentage);
+    emit LockedFundsSet(appId, $.lockedFunds[appId]);
   }
 
   // ---------- Getters ---------- //
@@ -563,9 +574,15 @@ contract X2EarnRewardsPool is
     return $.lockedFundsPercentage[appId] / 100;
   }
 
+  function lockedFunds(bytes32 appId) external view returns (uint256) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    // locked funds + lockedFundsPercentage of $ available funds 
+    return $.lockedFundsPercentage[appId];
+  }
+
   function allowance(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.availableFunds[appId] * (10000 - $.lockedFundsPercentage[appId]) / 10000;
+    return $.lockedFunds[appId] - $.availableFunds[appId];
   }
 
   // ---------- Fallbacks ---------- //
