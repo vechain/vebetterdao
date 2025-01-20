@@ -1995,6 +1995,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
   //   expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
   // })
 
+  // allowance and locked funds
   describe("Locking pool", async function () {
     it("Admin can lock percentage of funds ", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
@@ -2085,8 +2086,11 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
       await x2EarnRewardsPool.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
 
+      // locked funds = 0
       await x2EarnRewardsPool.connect(owner).setLockedFundsPercentage(appId, 10)
-      // the allowance = 100 - 10% = 90
+      // locked funds = 10% of the available funds(100) = 10
+      const lockedFunds = await x2EarnRewardsPool.lockedFunds(appId)
+      expect(lockedFunds).to.equal(ethers.parseEther("10"))
 
       await b3tr.connect(minterAccount).mint(owner.address, amount)
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
@@ -2145,7 +2149,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
         forceDeploy: true,
         bootstrapAndStartEmissions: true,
       })
-      const amount = ethers.parseEther("100")
+      const amount = ethers.parseEther("240000")
 
       //create app
       await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
@@ -2158,16 +2162,14 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
       await x2EarnRewardsPool.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
 
-      await x2EarnRewardsPool.connect(owner).setLockedFundsPercentage(appId, 10)
-      // the allowance = 100 - 10% = 90
+      await x2EarnRewardsPool.connect(owner).setLockedFundsPercentage(appId, 51)
       const allowance1 = await x2EarnRewardsPool.connect(owner).allowance(appId)
+      expect(allowance1).to.equal(ethers.parseEther("117600"))
 
-      await x2EarnRewardsPool.connect(owner).setLockedFundsPercentage(appId, 20)
-      // the allowance = 100 - 20% = 80
+      await x2EarnRewardsPool.connect(owner).setLockedFundsPercentage(appId, 40)
+
       const allowance2 = await x2EarnRewardsPool.connect(owner).allowance(appId)
-
-      expect(allowance1).to.equal(ethers.parseEther("90"))
-      expect(allowance2).to.equal(ethers.parseEther("80"))
+      expect(allowance2).to.equal(ethers.parseEther("144000"))
     })
 
     it("Should set the correct allowance", async function () {
@@ -2196,11 +2198,13 @@ describe("X2EarnRewardsPool - @shard12", function () {
     })
 
     it("Should not be able to set locking percentage if the allowance have been spent", async function () {
-      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        bootstrapAndStartEmissions: true,
-      })
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
       const amount = ethers.parseEther("500000")
+      const appDistributor = otherAccounts[12]
 
       //create app
       await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
@@ -2214,6 +2218,16 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await x2EarnRewardsPool.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
 
       await x2EarnRewardsPool.connect(owner).setLockedFundsPercentage(appId, 51)
+      // set the app distributor
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, appDistributor.address)
+      await x2EarnRewardsPool
+        .connect(appDistributor)
+        .distributeReward(appId, ethers.parseEther("245000"), appDistributor.address, "")
+
+      const allowance = await x2EarnRewardsPool.connect(owner).allowance(appId)
+      expect(allowance).to.equal(ethers.parseEther("0"))
+
+      await expect(x2EarnRewardsPool.connect(owner).setLockedFundsPercentage(appId, 40)).to.be.reverted
     })
   })
 })
