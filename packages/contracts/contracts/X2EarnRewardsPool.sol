@@ -599,45 +599,6 @@ contract X2EarnRewardsPool is
   }
 
 
-    /**
-   * @dev Adds a new allowed proof key.
-   * @param newKey the new key to add
-   */
-  function addProofKey(string memory newKey) external onlyRoleOrAdmin(IMPACT_KEY_MANAGER_ROLE) {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    _addProofKey(newKey, $);
-  }
-
-  /**
-   * @dev Internal function to add a new allowed proof key.
-   * @param key the new key to add
-   * @param $ the storage pointer
-   */
-  function _addProofKey(string memory key, X2EarnRewardsPoolStorage storage $) internal {
-    require($.metadataKeyIndex[key] == 0, "X2EarnRewardsPool: Key already exists");
-    $.allowedMetadataKeys.push(key);
-    $.metadataKeyIndex[key] = $.allowedMetadataKeys.length; // Store 1-based index
-  }
-
-  /**
-   * @dev Removes an allowed proof key.
-   * @param keyToRemove the key to remove
-   */
-  function removeProofKey(string memory keyToRemove) external onlyRoleOrAdmin(IMPACT_KEY_MANAGER_ROLE) {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    uint256 index = $.metadataKeyIndex[keyToRemove];
-    require(index > 0, "X2EarnRewardsPool: Key not found");
-
-    // Move the last element into the place to delete
-    string memory lastKey = $.allowedMetadataKeys[$.allowedMetadataKeys.length - 1];
-    $.allowedMetadataKeys[index - 1] = lastKey;
-    $.metadataKeyIndex[lastKey] = index; // Update the index of the last key
-
-    // Remove the last element
-    $.allowedMetadataKeys.pop();
-    delete $.metadataKeyIndex[keyToRemove];
-  }
-
 
   /**
    * @dev Sets the VeBetterPassport contract address.
