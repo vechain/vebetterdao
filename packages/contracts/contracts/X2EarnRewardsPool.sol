@@ -510,9 +510,9 @@ contract X2EarnRewardsPool is
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
     require(percentage * 100 <= 10000, "X2EarnRewardsPool: percentage cannot exceed 100%");
-        
-    // check if the locked funds have been initialized
-    if ($.lockedFundsPercentage[appId] != 0) {
+
+    // check if the allowance have been spent     
+    if ($.lockedFundsPercentage[appId] != 0 || $.lockedFundsPercentage[appId] != 100) {
       require($.availableFunds[appId] - $.lockedFunds[appId] > 0 , "X2EarnRewardsPool: allowance have been spent");
     }
     
