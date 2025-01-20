@@ -1405,5 +1405,6 @@
   "Allowance available: {{value}} ": "Allowance available: {{value}} ",
   "Percentage must be an integer": "Percentage must be an integer",
   "You can't lock more than 100%": "You can't lock more than 100%",
-  "Only selected app admin can have access to this functionnality": "Only selected app admin can have access to this functionnality"
+  "Only selected app admin can have access to this functionnality": "Only selected app admin can have access to this functionnality",
+  "Allowance have been spent": "Allowance have been spent"
 }
