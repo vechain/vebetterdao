@@ -27,8 +27,8 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import { IB3TR } from "../../interfaces/IB3TR.sol";
-import { IX2EarnAppsV2 } from "../V2/interfaces/IX2EarnAppsV2.sol";
-import { IX2EarnRewardsPoolV5 } from "../V5/interfaces/IX2EarnRewardsPoolV5.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
+import { IX2EarnRewardsPoolV5 } from "./interfaces/IX2EarnRewardsPoolV5.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import { IERC721Receiver } from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -49,9 +49,11 @@ import { IVeBetterPassport } from "../../interfaces/IVeBetterPassport.sol";
  * ----- Version 3 -----
  * - Added VeBetterPassport integration
  * ----- Version 4 -----
- * - Use new X2EarnApps interface that supports node endorsement
+ * - Updated the X2EarnApps interface to support node endorsement feature
+ * ----- Version 5 -----
+ * - Updated the X2EarnApps interface to support node cooldown functionality
  */
-contract X2EarnRewardsPoolV4 is
+contract X2EarnRewardsPoolV5 is
   IX2EarnRewardsPoolV5,
   UUPSUpgradeable,
   AccessControlUpgradeable,
@@ -69,7 +71,7 @@ contract X2EarnRewardsPoolV4 is
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnRewardsPool
   struct X2EarnRewardsPoolStorage {
     IB3TR b3tr;
-    IX2EarnAppsV2 x2EarnApps;
+    IX2EarnApps x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
     mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
     string[] allowedImpactKeys; // Array storing impact keys
@@ -91,7 +93,7 @@ contract X2EarnRewardsPoolV4 is
     address _contractsManagerAdmin,
     address _upgrader,
     IB3TR _b3tr,
-    IX2EarnAppsV2 _x2EarnApps
+    IX2EarnApps _x2EarnApps
   ) external initializer {
     require(_admin != address(0), "X2EarnRewardsPool: admin is the zero address");
     require(_contractsManagerAdmin != address(0), "X2EarnRewardsPool: contracts manager admin is the zero address");
@@ -422,7 +424,7 @@ contract X2EarnRewardsPoolV4 is
    *
    * @param _x2EarnApps the new X2EarnApps contract
    */
-  function setX2EarnApps(IX2EarnAppsV2 _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
+  function setX2EarnApps(IX2EarnApps _x2EarnApps) external onlyRole(CONTRACTS_ADDRESS_MANAGER_ROLE) {
     require(address(_x2EarnApps) != address(0), "X2EarnRewardsPool: x2EarnApps is the zero address");
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
@@ -494,7 +496,7 @@ contract X2EarnRewardsPoolV4 is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "4";
+    return "5";
   }
 
   /**
@@ -508,7 +510,7 @@ contract X2EarnRewardsPoolV4 is
   /**
    * @dev Retrieves the X2EarnApps contract.
    */
-  function x2EarnApps() external view returns (IX2EarnAppsV2) {
+  function x2EarnApps() external view returns (IX2EarnApps) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.x2EarnApps;
   }
