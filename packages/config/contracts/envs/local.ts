@@ -144,6 +144,7 @@ export function createLocalConfig() {
       "plastic",
       "trees_planted",
     ],
+    X_2_EARN_INITIAL_METADATA_KEYS: ["country", "city"],
 
     // VeBetterPassport
     VEPASSPORT_BOT_SIGNALING_THRESHOLD: 2,

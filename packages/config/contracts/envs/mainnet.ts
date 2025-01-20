@@ -117,7 +117,7 @@ export function createMainnetConfig() {
       "plastic",
       "trees_planted",
     ],
-
+    X_2_EARN_INITIAL_METADATA_KEYS: ["country", "city"],
     // VeBetterPassport
     VEPASSPORT_BOT_SIGNALING_THRESHOLD: 2, // Address must be signaled more than X times to be considered a bot
     VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE: 12,
