@@ -52,6 +52,8 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * - Updated the X2EarnApps interface to support node endorsement feature
  * ----- Version 5 -----
  * - Updated the X2EarnApps interface to support node cooldown functionality
+ * ----- Version 6 -----
+ * - Added metadata to the proof
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
@@ -62,6 +64,7 @@ contract X2EarnRewardsPool is
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
   bytes32 public constant IMPACT_KEY_MANAGER_ROLE = keccak256("IMPACT_KEY_MANAGER_ROLE");
+  bytes32 public constant METADATA_KEY_MANAGER_ROLE = keccak256("METADATA_KEY_MANAGER_ROLE");
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -76,6 +79,8 @@ contract X2EarnRewardsPool is
     mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
     string[] allowedImpactKeys; // Array storing impact keys
     IVeBetterPassport veBetterPassport;
+    mapping(string => uint256) metadataKeyIndex; // Mapping from metadata key to its index (1-based to distinguish from non-existent)
+    string[] allowedMetadataKeys; // Array storing metadata keys
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -132,6 +137,19 @@ contract X2EarnRewardsPool is
 
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.veBetterPassport = IVeBetterPassport(_veBetterPassport);
+  }
+
+  function initializeV6(address _metadataKeyManager, string[] memory _initialMetadataKeys) external reinitializer(6) {
+    require(_metadataKeyManager != address(0), "X2EarnRewardsPool: metadataKeyManager is the zero address");
+    require(_initialMetadataKeys.length > 0, "X2EarnRewardsPool: initialMetadataKeys is empty");
+
+    _grantRole(METADATA_KEY_MANAGER_ROLE , _metadataKeyManager);
+
+    
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    for (uint256 i; i < _initialMetadataKeys.length; i++) {
+        _addMetadataKey(_initialMetadataKeys[i], $);
+    }
   }
 
   // ---------- Modifiers ---------- //
@@ -223,6 +241,26 @@ contract X2EarnRewardsPool is
     _distributeReward(appId, amount, receiver);
   }
 
+  
+
+  /**
+   * @dev See {IX2EarnRewardsPool-distributeRewardWithProof}
+   * @notice This function is deprecated and kept for backwards compatibility, will be removed in future versions.
+   */
+  function distributeRewardWithProofDeprecated(
+    bytes32 appId,
+    uint256 amount,
+    address receiver,
+    string[] memory proofTypes,
+    string[] memory proofValues,
+    string[] memory impactCodes,
+    uint256[] memory impactValues,
+    string memory description
+  ) external {
+    _emitProof(appId, amount, receiver, proofTypes, proofValues, impactCodes, impactValues, description, new string[](0), new string[](0));
+    _distributeReward(appId, amount, receiver);
+  }
+
   /**
    * @dev See {IX2EarnRewardsPool-distributeRewardWithProof}
    */
@@ -234,9 +272,11 @@ contract X2EarnRewardsPool is
     string[] memory proofValues,
     string[] memory impactCodes,
     uint256[] memory impactValues,
-    string memory description
+    string memory description,
+    string[] memory metadataKeys,
+    string[] memory metadataValues
   ) external {
-    _emitProof(appId, amount, receiver, proofTypes, proofValues, impactCodes, impactValues, description);
+    _emitProof(appId, amount, receiver, proofTypes, proofValues, impactCodes, impactValues, description, metadataKeys, metadataValues);
     _distributeReward(appId, amount, receiver);
   }
 
@@ -275,7 +315,7 @@ contract X2EarnRewardsPool is
   }
 
   /**
-   * @dev Emits the RewardDistributed event with the provided proofs and impacts.
+   * @dev Emits the RewardDistributed event with the provided proofs, impacts and metadata.
    */
   function _emitProof(
     bytes32 appId,
@@ -285,10 +325,12 @@ contract X2EarnRewardsPool is
     string[] memory proofValues,
     string[] memory impactCodes,
     uint256[] memory impactValues,
-    string memory description
+    string memory description,
+    string[] memory metadataKeys,
+    string[] memory metadataValues
   ) internal {
     // Build the JSON proof string from the proof and impact data
-    string memory jsonProof = buildProof(proofTypes, proofValues, impactCodes, impactValues, description);
+    string memory jsonProof = buildProof(proofTypes, proofValues, impactCodes, impactValues, description, metadataKeys, metadataValues);
 
     // emit event
     emit RewardDistributed(amount, appId, receiver, jsonProof, msg.sender);
@@ -302,11 +344,14 @@ contract X2EarnRewardsPool is
     string[] memory proofValues,
     string[] memory impactCodes,
     uint256[] memory impactValues,
-    string memory description
+    string memory description,
+    string[] memory metadataKeys,
+    string[] memory metadataValues
   ) public view virtual returns (string memory) {
     bool hasProof = proofTypes.length > 0 && proofValues.length > 0;
     bool hasImpact = impactCodes.length > 0 && impactValues.length > 0;
     bool hasDescription = bytes(description).length > 0;
+    bool hasMetadata = metadataKeys.length > 0 && metadataValues.length > 0;
 
     // If neither proof nor impact is provided, return an empty string
     if (!hasProof && !hasImpact) {
@@ -333,6 +378,11 @@ contract X2EarnRewardsPool is
       bytes memory jsonImpact = _buildImpactJson(impactCodes, impactValues);
 
       json = abi.encodePacked(json, ',"impact": ', jsonImpact);
+    }
+
+    if(hasMetadata) {
+      bytes memory jsonMetadata = _buildMetadataJson(metadataKeys, metadataValues);
+      json = abi.encodePacked(json, ',"metadata": ', jsonMetadata);
     }
 
     // Close the JSON object
@@ -400,12 +450,50 @@ contract X2EarnRewardsPool is
     return json;
   }
 
+    /**
+   * @dev Builds the metadata JSON string from the metadata.
+   *
+   * @param metadataKeys the metadata codes
+   * @param metadataValues the metadata values
+   */
+  function _buildMetadataJson(
+    string[] memory metadataKeys,
+    string[] memory metadataValues
+  ) internal view returns (bytes memory) {
+    require(metadataKeys.length == metadataValues.length, "X2EarnRewardsPool: Mismatched input lengths for Metadata");
+
+    bytes memory json = abi.encodePacked("{");
+
+    for (uint256 i; i < metadataValues.length; i++) {
+      if (_isAllowedMetadataKey(metadataKeys[i])) {
+        json = abi.encodePacked(json, '"', metadataKeys[i], '":', '"', metadataValues[i], '"');
+        if (i < metadataValues.length - 1) {
+          json = abi.encodePacked(json, ",");
+        }
+      } else {
+        revert("X2EarnRewardsPool: Invalid metadata key");
+      }
+    }
+
+    json = abi.encodePacked(json, "}");
+
+    return json;
+  }
+
   /**
    * @dev Checks if the key is allowed.
    */
   function _isAllowedImpactKey(string memory key) internal view returns (bool) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.impactKeyIndex[key] > 0;
+  }
+
+    /**
+   * @dev Checks if the key is allowed.
+   */
+  function _isAllowedMetadataKey(string memory key) internal view returns (bool) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.metadataKeyIndex[key] > 0;
   }
 
   /**
@@ -430,6 +518,46 @@ contract X2EarnRewardsPool is
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     $.x2EarnApps = _x2EarnApps;
   }
+
+  /**
+   * @dev Adds a new allowed metadata key.
+   * @param newKey the new key to add
+   */
+  function addMetadataKey(string memory newKey) external onlyRoleOrAdmin(METADATA_KEY_MANAGER_ROLE) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    _addMetadataKey(newKey, $);
+  }
+
+  /**
+   * @dev Internal function to add a new allowed metadata key.
+   * @param key the new key to add
+   * @param $ the storage pointer
+   */
+  function _addMetadataKey(string memory key, X2EarnRewardsPoolStorage storage $) internal {
+    require($.metadataKeyIndex[key] == 0, "X2EarnRewardsPool: Key already exists");
+    $.allowedMetadataKeys.push(key);
+    $.metadataKeyIndex[key] = $.allowedMetadataKeys.length; // Store 1-based index
+  }
+
+  /**
+   * @dev Removes an allowed metadata key.
+   * @param keyToRemove the key to remove
+   */
+  function removeMetadataKey(string memory keyToRemove) external onlyRoleOrAdmin(METADATA_KEY_MANAGER_ROLE) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    uint256 index = $.metadataKeyIndex[keyToRemove];
+    require(index > 0, "X2EarnRewardsPool: Key not found");
+
+    // Move the last element into the place to delete
+    string memory lastKey = $.allowedMetadataKeys[$.allowedMetadataKeys.length - 1];
+    $.allowedMetadataKeys[index - 1] = lastKey;
+    $.metadataKeyIndex[lastKey] = index; // Update the index of the last key
+
+    // Remove the last element
+    $.allowedMetadataKeys.pop();
+    delete $.metadataKeyIndex[keyToRemove];
+  }
+
 
   /**
    * @dev Adds a new allowed impact key.
@@ -470,6 +598,47 @@ contract X2EarnRewardsPool is
     delete $.impactKeyIndex[keyToRemove];
   }
 
+
+    /**
+   * @dev Adds a new allowed proof key.
+   * @param newKey the new key to add
+   */
+  function addProofKey(string memory newKey) external onlyRoleOrAdmin(IMPACT_KEY_MANAGER_ROLE) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    _addProofKey(newKey, $);
+  }
+
+  /**
+   * @dev Internal function to add a new allowed proof key.
+   * @param key the new key to add
+   * @param $ the storage pointer
+   */
+  function _addProofKey(string memory key, X2EarnRewardsPoolStorage storage $) internal {
+    require($.metadataKeyIndex[key] == 0, "X2EarnRewardsPool: Key already exists");
+    $.allowedMetadataKeys.push(key);
+    $.metadataKeyIndex[key] = $.allowedMetadataKeys.length; // Store 1-based index
+  }
+
+  /**
+   * @dev Removes an allowed proof key.
+   * @param keyToRemove the key to remove
+   */
+  function removeProofKey(string memory keyToRemove) external onlyRoleOrAdmin(IMPACT_KEY_MANAGER_ROLE) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    uint256 index = $.metadataKeyIndex[keyToRemove];
+    require(index > 0, "X2EarnRewardsPool: Key not found");
+
+    // Move the last element into the place to delete
+    string memory lastKey = $.allowedMetadataKeys[$.allowedMetadataKeys.length - 1];
+    $.allowedMetadataKeys[index - 1] = lastKey;
+    $.metadataKeyIndex[lastKey] = index; // Update the index of the last key
+
+    // Remove the last element
+    $.allowedMetadataKeys.pop();
+    delete $.metadataKeyIndex[keyToRemove];
+  }
+
+
   /**
    * @dev Sets the VeBetterPassport contract address.
    *
@@ -496,7 +665,7 @@ contract X2EarnRewardsPool is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "5";
+    return "6";
   }
 
   /**
@@ -522,6 +691,15 @@ contract X2EarnRewardsPool is
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.allowedImpactKeys;
   }
+
+    /**
+   * @dev Retrieves the allowed reward metadata keys.
+   */
+  function getAllowedMetadataKeys() external view returns (string[] memory) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.allowedMetadataKeys;
+  }
+  
 
   /**
    * @dev Retrieves the VeBetterPassport contract.
