@@ -106,7 +106,13 @@ export const ManageRewardsApps = () => {
 
                 {isUserConnectedAdmin ? (
                   <>
-                    <FormControl isRequired isInvalid={!isValidInteger || Number(percentage) > 100}>
+                    <FormControl
+                      isRequired
+                      isInvalid={
+                        !isValidInteger ||
+                        Number(percentage) > 100 ||
+                        (Number(allowance) === 0 && Number(lockedFundsPercentage) > 0)
+                      }>
                       <FormLabel>
                         <strong>{"Percentage"}</strong>
                       </FormLabel>
@@ -118,7 +124,7 @@ export const ManageRewardsApps = () => {
                           min="0"
                           placeholder="percentage"
                           max={100}
-                          isDisabled={isLoading}
+                          isDisabled={isLoading || (Number(allowance) === 0 && Number(lockedFundsPercentage) > 0)}
                           onChange={e => setPercentage(e.target.value)}
                           value={percentage}
                         />
@@ -143,6 +149,11 @@ export const ManageRewardsApps = () => {
                           {t("Percentage must be an integer")}
                         </Text>
                       )}
+                      {Number(allowance) === 0 && Number(lockedFundsPercentage) > 0 && (
+                        <Text color="red.500" fontSize="sm" mt={1}>
+                          {t("Allowance have been spent")}
+                        </Text>
+                      )}
                     </FormControl>
                     <VStack align={"flex-start"} flex={1} spacing={4}>
                       <Text>{t("Actual locked percentage: {{value}} % ", { value: lockedFundsPercentage })}</Text>
@@ -158,7 +169,11 @@ export const ManageRewardsApps = () => {
                       type="submit"
                       colorScheme="blue"
                       isLoading={isLoading}
-                      disabled={!isValidInteger || Number(percentage) > 100}>
+                      disabled={
+                        !isValidInteger ||
+                        Number(percentage) > 100 ||
+                        (Number(allowance) === 0 && Number(lockedFundsPercentage) > 0)
+                      }>
                       {t("Lock funds")}
                     </Button>
                   </>
