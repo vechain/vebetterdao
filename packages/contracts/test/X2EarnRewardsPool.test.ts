@@ -64,7 +64,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       const { x2EarnRewardsPool } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
-      expect(await x2EarnRewardsPool.version()).to.equal("5")
+      expect(await x2EarnRewardsPool.version()).to.equal("6")
     })
 
     it("X2EarnApps should be set correctly", async function () {
@@ -143,7 +143,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
         forceDeploy: true,
       })
 
-      expect(await x2EarnRewardsPool.version()).to.equal("5")
+      expect(await x2EarnRewardsPool.version()).to.equal("6")
     })
 
     it("Storage should be preserved after upgrade", async () => {
@@ -2197,6 +2197,8 @@ describe("X2EarnRewardsPool - @shard12", function () {
           ["carbon", "water"],
           [100, 200],
           "The description of the action",
+          [],
+          [],
         ),
       )
 
