@@ -176,6 +176,8 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
               placeholder={t("App Name")}
               {...register("appName", {
                 required: "App Name is required",
+                minLength: { value: 2, message: t("{{fieldName}} is too short", { fieldName: t("App Name") }) },
+                maxLength: { value: 30, message: t("{{fieldName}} is too long", { fieldName: t("App Name") }) },
                 validate: value => {
                   if (value && AddressUtils.isValid(value)) {
                     //Prevent user from entering wallet address in app name field
@@ -196,7 +198,14 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
               placeholder={t("App Description")}
               {...register("appDescription", {
                 required: "App Description is required",
-                min: { value: 100, message: "App Description is too short" },
+                minLength: {
+                  value: 100,
+                  message: t("{{fieldName}} is too short", { fieldName: t("App Description") }),
+                },
+                maxLength: {
+                  value: 1000,
+                  message: t("{{fieldName}} is too long", { fieldName: t("App Description") }),
+                },
               })}
               onBlur={() => onBlur("appDescription")}
             />
@@ -210,6 +219,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
               rounded={"xl"}
               {...register("projectUrl", {
                 required: t("Project URL is required"),
+                maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Project URL") }) },
                 validate: value => {
                   try {
                     new URL(value)
@@ -230,6 +240,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
               rounded={"xl"}
               placeholder={t("Your Name")}
               {...register("adminName", {
+                maxLength: { value: 100, message: t("{{fieldName}} is too long", { fieldName: t("Name") }) },
                 validate: (value: string) => {
                   if (value && AddressUtils.isValid(value)) {
                     // Prevent user from entering wallet address in admin name field
@@ -250,6 +261,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
               rounded={"xl"}
               {...register("adminEmail", {
                 required: t("Admin Email is required"),
+                maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Email") }) },
                 validate: value => {
                   const emailRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)
                   return emailRegex.test(value) || t("Please enter a valid email")

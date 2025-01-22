@@ -47,7 +47,6 @@ export async function POST(request: NextRequest) {
       email: adminEmail,
       custom_fields: {
         cf_app_name: appName,
-        cf_app_description: appDescription,
         cf_app_creator_email: adminEmail,
         cf_app_creator_name_optional: adminName,
         cf_app_url_optional: projectUrl,
