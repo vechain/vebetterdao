@@ -97,3 +97,10 @@ records:
     records:
       - "_272d18636cdea37b3274b7490c14c87b.mhbtsbpdnt.acm-validations.aws."
     routing_policy: simple
+
+  - name: "support.vebetterdao.org"
+    type: CNAME
+    ttl: 300
+    records:
+      - "399994ebbc7ed932c94b96556ad87f33.freshdesk.com"
+    routing_policy: simple
