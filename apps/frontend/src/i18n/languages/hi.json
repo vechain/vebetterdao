@@ -1411,5 +1411,8 @@
   "Blacklisting user...": "उपयोगकर्ता को ब्लैकलिस्ट कर रहा है...",
   "Error removing user status": "उपयोगकर्ता की स्थिति हटाने में त्रुटि",
   "Error whitelisting user": "उपयोगकर्ता को श्वेतसूची में डालने में त्रुटि",
-  "Error blacklisting user": "उपयोगकर्ता को काली सूची में डालने में त्रुटि"
+  "Error blacklisting user": "उपयोगकर्ता को काली सूची में डालने में त्रुटि",
+  "GitHub Username is required": "GitHub उपयोगकर्ता नाम आवश्यक है",
+  "{{fieldName}} is too short": "{{fieldName}} बहुत छोटा है",
+  "{{fieldName}} is too long": "{{fieldName}} बहुत लंबा है"
 }

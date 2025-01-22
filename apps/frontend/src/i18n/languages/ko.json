@@ -1411,5 +1411,8 @@
   "Blacklisting user...": "사용자를 블랙리스트에 추가하는 중...",
   "Error removing user status": "사용자 상태 제거 오류",
   "Error whitelisting user": "사용자 화이트리스트 추가 오류",
-  "Error blacklisting user": "사용자 블랙리스트 추가 오류"
+  "Error blacklisting user": "사용자 블랙리스트 추가 오류",
+  "GitHub Username is required": "GitHub 사용자 이름이 필요합니다",
+  "{{fieldName}} is too short": "{{fieldName}}이(가) 너무 짧습니다",
+  "{{fieldName}} is too long": "{{fieldName}}이(가) 너무 깁니다"
 }
