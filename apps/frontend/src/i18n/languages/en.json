@@ -1411,5 +1411,8 @@
   "Blacklisting user...": "Blacklisting user...",
   "Error removing user status": "Error removing user status",
   "Error whitelisting user": "Error whitelisting user",
-  "Error blacklisting user": "Error blacklisting user"
+  "Error blacklisting user": "Error blacklisting user",
+  "GitHub Username is required": "GitHub Username is required",
+  "{{fieldName}} is too short": "{{fieldName}} is too short",
+  "{{fieldName}} is too long": "{{fieldName}} is too long"
 }
