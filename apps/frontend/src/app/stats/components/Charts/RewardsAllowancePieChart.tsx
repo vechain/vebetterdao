@@ -9,8 +9,8 @@ export const RewardsAllowancePieChart: React.FC<Props> = ({ pieData }) => {
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>
         <Pie data={pieData} dataKey="value" nameKey="name" outerRadius={80} innerRadius={60}>
-          {pieData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.color} />
+          {pieData.map(entry => (
+            <Cell key={entry.name} fill={entry.color} />
           ))}
         </Pie>
         <Tooltip formatter={(value: any) => `${value}%`} />
