@@ -1411,5 +1411,8 @@
   "Blacklisting user...": "Gebruiker op de blacklist zetten...",
   "Error removing user status": "Fout bij het verwijderen van gebruikersstatus",
   "Error whitelisting user": "Fout bij het toevoegen van gebruiker aan de witte lijst",
-  "Error blacklisting user": "Fout bij het toevoegen van gebruiker aan de zwarte lijst"
+  "Error blacklisting user": "Fout bij het toevoegen van gebruiker aan de zwarte lijst",
+  "GitHub Username is required": "GitHub-gebruikersnaam is verplicht",
+  "{{fieldName}} is too short": "{{fieldName}} is te kort",
+  "{{fieldName}} is too long": "{{fieldName}} is te lang"
 }

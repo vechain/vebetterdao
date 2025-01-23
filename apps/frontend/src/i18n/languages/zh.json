@@ -1411,5 +1411,8 @@
   "Blacklisting user...": "正在将用户加入黑名单...",
   "Error removing user status": "移除用户状态错误",
   "Error whitelisting user": "将用户加入白名单错误",
-  "Error blacklisting user": "将用户加入黑名单错误"
+  "Error blacklisting user": "将用户加入黑名单错误",
+  "GitHub Username is required": "GitHub 用户名是必需的",
+  "{{fieldName}} is too short": "{{fieldName}} 太短",
+  "{{fieldName}} is too long": "{{fieldName}} 太长"
 }

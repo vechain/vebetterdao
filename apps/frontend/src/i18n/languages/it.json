@@ -1411,5 +1411,8 @@
   "Blacklisting user...": "Inserimento utente nella lista nera in corso...",
   "Error removing user status": "Errore nella rimozione dello stato dell'utente",
   "Error whitelisting user": "Errore nell'inserimento dell'utente nella lista bianca",
-  "Error blacklisting user": "Errore nell'inserimento dell'utente nella lista nera"
+  "Error blacklisting user": "Errore nell'inserimento dell'utente nella lista nera",
+  "GitHub Username is required": "Nome utente GitHub obbligatorio",
+  "{{fieldName}} is too short": "{{fieldName}} è troppo corto",
+  "{{fieldName}} is too long": "{{fieldName}} è troppo lungo"
 }

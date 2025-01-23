@@ -159,7 +159,7 @@
   "Your App is almost ready!": "Uygulamanız neredeyse hazır!",
   "The allocation rounds determine the resources and support your dApp receives from the ecosystem community.": "Tahsis turları, dApp'inizin ekosistem topluluğundan aldığı kaynakları ve desteği belirler.",
   "X Node Holders will use their NFTs to endorse your dApp. Once it reaches {{value}} points, it becomes eligible for allocations.": "X Node Sahipleri, NFT'lerini kullanarak dApp'inizi onaylayacaktır. {{value}} puanına ulaştığında, tahsisler için uygun hale gelir.",
-  "Submit your app into the ecosystem with all the necessary information, including logo, creator bio, and social media links.": "Logo, yaratıcı biyografisi ve sosyal medya bağlantıları gibi gerekli tüm bilgileri içeren uygulamanızı ekosisteme gönderin.",
+  "Submit your app into the ecosystem with all the necessary information, including logo, creator bio, and social media links.": "Uygulamanızı logonuz, geliştirici biyografiniz ve sosyal medya bağlantılarınız dahil olmak üzere gerekli tüm bilgilerle ekosisteme gönderin.",
   "STEP {{value}}": "ADIM {{value}}",
   "Endorsement": "Onay",
   "Allocation voting": "Tahsis oylaması",
@@ -1410,5 +1410,8 @@
   "Blacklisting user...": "Kullanıcı kara listeye alınıyor...",
   "Error removing user status": "Kullanıcı durumu kaldırırken hata",
   "Error whitelisting user": "Kullanıcı beyaz listeye alınırken hata",
-  "Error blacklisting user": "Kullanıcı kara listeye alınırken hata"
+  "Error blacklisting user": "Kullanıcı kara listeye alınırken hata",
+  "GitHub Username is required": "GitHub Kullanıcı Adı gereklidir",
+  "{{fieldName}} is too short": "{{fieldName}} çok kısa",
+  "{{fieldName}} is too long": "{{fieldName}} çok uzun"
 }
