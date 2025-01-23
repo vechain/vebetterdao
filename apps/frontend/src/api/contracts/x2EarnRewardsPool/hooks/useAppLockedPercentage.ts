@@ -26,5 +26,6 @@ export const useAppLockedPercentage = (appId: string) => {
     contractAddress: X2EARN_REWARDS_POOL_CONTRACT,
     method: "lockedFundsPercentage",
     args: [appId],
+    enabled: !!appId,
   })
 }

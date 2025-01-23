@@ -28,5 +28,6 @@ export const useAppAllowance = (appId: string, formattedVersion?: boolean) => {
     method: "allowance",
     args: [appId],
     formattedVersion: formattedVersion,
+    enabled: !!appId,
   })
 }
