@@ -3,6 +3,7 @@ import { ManagedAppsCard } from "../../components/ManagedAppsCard"
 import { YourBetterActionsCard } from "./YourBetterActionsCard"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
+import { CountdownVoting } from "./CountdownVoting"
 import { useWallet } from "@vechain/dapp-kit-react"
 import dynamic from "next/dynamic"
 
@@ -23,6 +24,7 @@ export const DashboardSideBar = () => {
         <CantVoteCard />
       </Show>
       <YourBetterActionsCard address={account ?? ""} />
+      <CountdownVoting />
       <Leaderboard />
       <ManagedAppsCard />
       <SupplyBreakdownCard />

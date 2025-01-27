@@ -1414,5 +1414,11 @@
   "Error blacklisting user": "Error blacklisting user",
   "GitHub Username is required": "GitHub Username is required",
   "{{fieldName}} is too short": "{{fieldName}} is too short",
-  "{{fieldName}} is too long": "{{fieldName}} is too long"
+  "{{fieldName}} is too long": "{{fieldName}} is too long",
+  "Seconds": "Seconds",
+  "Minutes": "Minutes",
+  "Hours": "Hours",
+  "Days": "Days",
+  "Vote before the round ends!": "Vote before the round ends!",
+  "Remaining Time": "Remaining Time"
 }
