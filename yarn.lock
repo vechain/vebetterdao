@@ -7876,22 +7876,6 @@
     events "^3.3.0"
     valtio "1.11.2"
 
-"@vechain/dapp-kit@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@vechain/dapp-kit/-/dapp-kit-1.4.1.tgz#7a4548a0b64086dcdc52368393f46d9657321bcc"
-  integrity sha512-hzzvceiOa068RoXvPUcWOqrxymeHtfACcVp1+g22TnahgxUgfrfhURaaxQ59jJGrV3+ZdnNEtDDFpnVsgnQGzw==
-  dependencies:
-    "@vechain/connex" "2.1.0"
-    "@vechain/connex-driver" "2.1.0"
-    "@vechain/connex-framework" "2.1.0"
-    "@vechain/connex-types" "^2.1.0"
-    "@vechain/sdk-core" "1.0.0-beta.32"
-    "@walletconnect/modal" "2.6.2"
-    "@walletconnect/sign-client" "2.11.3"
-    "@walletconnect/utils" "2.11.3"
-    events "^3.3.0"
-    valtio "1.11.2"
-
 "@vechain/ethers@^4.0.27-5":
   version "4.0.27-5"
   resolved "https://registry.yarnpkg.com/@vechain/ethers/-/ethers-4.0.27-5.tgz#2e7d40294b2e14ddf4cf6f6094bbdc871e26e299"
