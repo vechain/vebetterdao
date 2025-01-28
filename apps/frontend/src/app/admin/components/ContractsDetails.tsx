@@ -6,7 +6,7 @@ import { getConfig } from "@repo/config"
 import { useMemo } from "react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useHasRoles } from "@/api/contracts/account"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { getContractByAddress } from "@/constants"
 
 // Maximum precision of 4 decimals. Must also round down
@@ -128,7 +128,7 @@ const ContractDetailsCard = ({ title, address, roles = [] }: ContractDetailsCard
   const { data: version } = useContractVersion(address)
 
   // Get user roles
-  const userHasRoles = useHasRoles(roles, address, account ?? "")
+  const userHasRoles = useHasRoles(roles, address, account?.address ?? "")
   // iterate over the roles and get the data
   const userRoles = useMemo(() => {
     return userHasRoles.map((role, index) => ({

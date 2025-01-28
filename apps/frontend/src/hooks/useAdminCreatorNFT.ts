@@ -1,7 +1,7 @@
 import { getHasCreatorNFTQueryKey } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { X2EarnCreator__factory } from "@repo/contracts/typechain-types"
 import { useQueryClient } from "@tanstack/react-query"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { useCallback } from "react"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -63,12 +63,12 @@ export const useAdminCreatorNFT = ({ walletAddress, tokenId, onSuccess, invalida
   }, [performCacheInvalidation, onSuccess])
 
   const mintNFT: UseSendTransactionReturnValue = useSendTransaction({
-    signerAccount,
+    signerAccount: signerAccount?.address,
     onTxConfirmed: handleOnSuccess,
   })
 
   const burnNFT: UseSendTransactionReturnValue = useSendTransaction({
-    signerAccount,
+    signerAccount: signerAccount?.address,
     onTxConfirmed: handleOnSuccess,
   })
 

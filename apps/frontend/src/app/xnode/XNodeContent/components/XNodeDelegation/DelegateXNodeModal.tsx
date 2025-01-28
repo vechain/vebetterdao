@@ -23,7 +23,8 @@ import {
 } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { compareAddresses, isValid } from "@repo/utils/AddressUtils"
-import { useConnex, useVechainDomain, useWallet } from "@vechain/dapp-kit-react"
+import { useConnex, useVechainDomain } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -61,7 +62,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   const handleDelegate = useCallback(async () => {
     if (
       !delegateeDomain &&
-      (!isValid(delegateeAddressOrDomain) || compareAddresses(delegateeAddressOrDomain, account ?? ""))
+      (!isValid(delegateeAddressOrDomain) || compareAddresses(delegateeAddressOrDomain, account?.address ?? ""))
     ) {
       setError("walletAddress", {
         type: "manual",
@@ -198,7 +199,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
               {...register("walletAddress", {
                 required: t("Wallet address is required"),
                 validate: async value => {
-                  if (!isValid(value) || compareAddresses(value, account ?? "")) {
+                  if (!isValid(value) || compareAddresses(value, account?.address ?? "")) {
                     return t("Please enter a valid wallet address")
                   }
                   try {

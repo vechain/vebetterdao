@@ -2,7 +2,7 @@ import { buildClaimRoundReward, getB3TrBalanceQueryKey, getRoundRewardQueryKey }
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { address } from "thor-devkit"
 
 type useClaimRewardProps = {
@@ -36,34 +36,34 @@ export const useClaimReward = ({
   const buildClauses = useCallback(() => {
     if (!address) throw new Error("address is required")
 
-    const clauses = buildClaimRoundReward(roundId, account ?? "")
+    const clauses = buildClaimRoundReward(roundId, account?.address ?? "")
     return [clauses]
-  }, [account, roundId])
+  }, [account?.address, roundId])
 
   // Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
       await queryClient.cancelQueries({
-        queryKey: getRoundRewardQueryKey(roundId, account ?? undefined),
+        queryKey: getRoundRewardQueryKey(roundId, account?.address ?? undefined),
       })
       await queryClient.refetchQueries({
-        queryKey: getRoundRewardQueryKey(roundId, account ?? undefined),
+        queryKey: getRoundRewardQueryKey(roundId, account?.address ?? undefined),
       })
     }
 
     await queryClient.cancelQueries({
-      queryKey: getB3TrBalanceQueryKey(account ?? ""),
+      queryKey: getB3TrBalanceQueryKey(account?.address ?? ""),
     })
 
     await queryClient.refetchQueries({
-      queryKey: getB3TrBalanceQueryKey(account ?? ""),
+      queryKey: getB3TrBalanceQueryKey(account?.address ?? ""),
     })
 
     onSuccess?.()
-  }, [account, invalidateCache, onSuccess, queryClient, roundId])
+  }, [account?.address, invalidateCache, onSuccess, queryClient, roundId])
 
   const result = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     onTxConfirmed: handleOnSuccess,
     onTxFailedOrCancelled: onFailure,
   })

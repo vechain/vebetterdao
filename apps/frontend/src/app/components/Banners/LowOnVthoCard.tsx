@@ -2,7 +2,7 @@ import { getAccountBalanceQueryKey, useAccountBalance, useB3trBalance, useVot3Ba
 import { Button, Card, CardBody, Grid, GridItem, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
 import BigNumber from "bignumber.js"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
@@ -16,9 +16,9 @@ export const LowOnVthoCard: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const { account } = useWallet()
-  const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
-  const { data: b3trBalance } = useB3trBalance(account ?? undefined)
-  const { data: vot3Balance } = useVot3Balance(account ?? undefined)
+  const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
+  const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
+  const { data: vot3Balance } = useVot3Balance(account?.address ?? undefined)
 
   const ownsTokens = useMemo(() => {
     if (!b3trBalance || !vot3Balance) return false
@@ -47,7 +47,7 @@ export const LowOnVthoCard: React.FC = () => {
   const transakConfig: TransakConfig = useMemo(
     () => ({
       apiKey,
-      walletAddress: account ?? "",
+      walletAddress: account?.address ?? "",
       productsAvailed: "BUY",
       networks: "vechain",
       paymentMethod: "credit_debit_card",
@@ -76,11 +76,11 @@ export const LowOnVthoCard: React.FC = () => {
     Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
       // Refresh user balance
       queryClient.cancelQueries({
-        queryKey: getAccountBalanceQueryKey(account ?? undefined),
+        queryKey: getAccountBalanceQueryKey(account?.address ?? undefined),
       })
 
       queryClient.refetchQueries({
-        queryKey: getAccountBalanceQueryKey(account ?? undefined),
+        queryKey: getAccountBalanceQueryKey(account?.address ?? undefined),
       })
     })
   }, [transakConfig, account, queryClient])
@@ -89,7 +89,7 @@ export const LowOnVthoCard: React.FC = () => {
     initTransak()
   }
 
-  if (!account || balanceLoading || !isLowOnVtho || !ownsTokens) return null
+  if (!account?.address || balanceLoading || !isLowOnVtho || !ownsTokens) return null
 
   return (
     <Card

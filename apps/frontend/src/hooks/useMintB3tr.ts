@@ -3,8 +3,9 @@ import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/dapp-kit-react"
 import { FormattingUtils } from "@repo/utils"
+import { useWallet } from "@vechain/vechain-kit"
 
 type useMintB3trProps = {
   address?: string
@@ -52,10 +53,10 @@ export const useMintB3tr = ({
         queryKey: getB3TrTokenDetailsQueryKey(),
       })
       await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? undefined),
+        queryKey: getB3TrBalanceQueryKey(account?.address ?? undefined),
       })
       await queryClient.refetchQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? undefined),
+        queryKey: getB3TrBalanceQueryKey(account?.address ?? undefined),
       })
     }
 
@@ -71,10 +72,10 @@ export const useMintB3tr = ({
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, account, amount, address])
+  }, [invalidateCache, queryClient, toast, onSuccess, account?.address, amount, address])
 
   const result = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
   })

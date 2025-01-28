@@ -1,4 +1,4 @@
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useTokenIdByAccount } from "./useTokenIdByAccount"
 import { useNFTMetadataUri } from "./useNFTMetadataUri"
 import { useIpfsImage } from "@/api/ipfs/hooks/useIpfsImage"
@@ -27,7 +27,7 @@ export const useNFTImage = (profile?: string) => {
     isLoading: isLoadingTokenID,
     isError: isErrorTokenID,
     error: errorTokenID,
-  } = useTokenIdByAccount(profile ?? account, 0)
+  } = useTokenIdByAccount(profile ?? account?.address ?? "", 0)
 
   const {
     data: metadataURI,

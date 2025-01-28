@@ -1,9 +1,10 @@
 import { buildB3trApprovesTx } from "@/api"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/dapp-kit-react"
 import { getB3TrAllowanceQueryKey } from "@/api/contracts/b3tr/hooks/useB3trAllowance"
 import { useQueryClient } from "@tanstack/react-query"
+import { useWallet } from "@vechain/vechain-kit"
 
 type useB3trApproveProps = {
   spender: string
@@ -34,19 +35,19 @@ export const useB3trApprove = ({
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
       await queryClient.cancelQueries({
-        queryKey: getB3TrAllowanceQueryKey(account ?? undefined, spender),
+        queryKey: getB3TrAllowanceQueryKey(account?.address ?? undefined, spender),
       })
 
       await queryClient.refetchQueries({
-        queryKey: getB3TrAllowanceQueryKey(account ?? undefined, spender),
+        queryKey: getB3TrAllowanceQueryKey(account?.address ?? undefined, spender),
       })
     }
 
     onSuccess?.()
-  }, [invalidateCache, onSuccess, account, spender, queryClient])
+  }, [invalidateCache, onSuccess, account?.address, spender, queryClient])
 
   const result = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
   })

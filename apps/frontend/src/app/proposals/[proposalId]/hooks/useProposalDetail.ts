@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { useParams } from "next/navigation"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { toIPFSURL } from "@/utils"
 import { useIpfsMetadata } from "@/api/ipfs"
 import {
@@ -33,7 +33,7 @@ export const useProposalDetailById = (proposalId: string) => {
   const proposalQueuedEvent = useProposalQueuedEvent(proposalId)
   const proposalExecutedEvent = useProposalExecutedEvent(proposalId)
   const proposalDepositEvent = useProposalDepositEvent(proposalId)
-  const proposalUserDeposit = useProposalUserDeposit(proposalId, account || "")
+  const proposalUserDeposit = useProposalUserDeposit(proposalId, account?.address || "")
   const proposalSnapshot = useProposalSnapshot(proposalId)
   const proposalSnapshotBlock = useMemo(() => Number(proposalSnapshot.data), [proposalSnapshot.data])
   const isDepositReached = useIsDepositReached(proposalId)
@@ -42,7 +42,11 @@ export const useProposalDetailById = (proposalId: string) => {
   const isQuorumReached = useIsProposalQuorumReached(proposalId)
   const proposalSnapshotVotingPower = useProposalSnapshotVotingPower(proposalSnapshotBlock, isProposalActive)
   const { data: proposalVotes, isLoading: isVotesLoading } = useProposalVotesIndexer({ proposalId })
-  const proposalSnapshotVot3 = useGetVotesOnBlock(proposalSnapshotBlock, account ?? undefined, isProposalActive)
+  const proposalSnapshotVot3 = useGetVotesOnBlock(
+    proposalSnapshotBlock,
+    account?.address ?? undefined,
+    isProposalActive,
+  )
 
   const roundIdVoteStart = useMemo(
     () => proposalCreatedEvent.data?.roundIdVoteStart,

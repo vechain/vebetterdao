@@ -2,7 +2,7 @@ import { buildClaimXAppAllocationTx, getB3TrBalanceQueryKey, getHasXAppClaimedQu
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 
 type useClaimAllocationsProps = {
@@ -54,11 +54,11 @@ export const useClaimXAppsAllocations = ({
       }
 
       await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? ""),
+        queryKey: getB3TrBalanceQueryKey(account?.address ?? ""),
       })
 
       await queryClient.refetchQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? ""),
+        queryKey: getB3TrBalanceQueryKey(account?.address ?? ""),
       })
 
       await queryClient.cancelQueries({
@@ -71,10 +71,10 @@ export const useClaimXAppsAllocations = ({
     }
 
     onSuccess?.()
-  }, [account, invalidateCache, onSuccess, queryClient, appIds, roundId, config])
+  }, [account?.address, invalidateCache, onSuccess, queryClient, appIds, roundId, config])
 
   const result = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     onTxConfirmed: handleOnSuccess,
     onTxFailedOrCancelled: onFailure,
   })

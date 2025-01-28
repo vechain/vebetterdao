@@ -10,7 +10,7 @@ import {
   useTransactionModalErrorTitle,
 } from "@/hooks"
 import { TransactionModal } from "@/components"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { PreviewAppCard } from "./PreviewAppCard"
@@ -44,7 +44,7 @@ export const NewAppPageFormContent = () => {
 
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
-  const hasCreatorNft = useHasCreatorNFT(account ?? "")
+  const hasCreatorNft = useHasCreatorNFT(account?.address ?? "")
 
   useEffect(() => {
     //Users without Creator NFT should be redirected to home
@@ -91,7 +91,7 @@ export const NewAppPageFormContent = () => {
 
       submitAppMutation.sendTransaction({
         teamWalletAddress: data.teamWalletAddress,
-        adminAddress: account ?? data.teamWalletAddress,
+        adminAddress: account?.address ?? data.teamWalletAddress,
         appName: data.name,
         appMetadataUri: metadataUri,
       })

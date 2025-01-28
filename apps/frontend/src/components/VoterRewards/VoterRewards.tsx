@@ -1,6 +1,6 @@
 import { useAllocationsRoundsEvents, useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
 import { Card, CardBody, Heading, VStack, Text, Button, Box, Image, useDisclosure } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import React, { useCallback } from "react"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 import { B3TRIcon } from "../Icons"
@@ -18,7 +18,7 @@ export const VoterRewards: React.FC = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { account } = useWallet()
 
-  const roundsRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
+  const roundsRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
 
   const { isOpen, onClose, onOpen } = useDisclosure()

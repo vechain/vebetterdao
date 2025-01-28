@@ -18,7 +18,7 @@ import {
   UseDisclosureReturn,
   VStack,
 } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { motion } from "framer-motion"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -39,8 +39,8 @@ export const MintNFTModal = ({
 }: Props) => {
   const { account } = useWallet()
 
-  const { isLoading: isLoadingNftBalance } = useGMbalance(account)
-  const { isLoading: isLoadingHasVoted } = useParticipatedInGovernance(account)
+  const { isLoading: isLoadingNftBalance } = useGMbalance(account?.address ?? "")
+  const { isLoading: isLoadingHasVoted } = useParticipatedInGovernance(account?.address ?? "")
 
   const isClaimLoading = useMemo(() => {
     return isLoadingNftBalance || isLoadingHasVoted || sendTransactionPending

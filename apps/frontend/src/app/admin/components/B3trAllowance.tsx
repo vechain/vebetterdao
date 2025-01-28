@@ -24,21 +24,24 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { WalletAddressInput } from "@/app/components/Input"
 
 export const B3trAllowance = () => {
   const { account } = useWallet()
-  const { data: b3trBalance } = useB3trBalance(account ?? undefined)
+  const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
   const { isOpen, onClose, onOpen } = useDisclosure()
   const [amount, setAmount] = useState<number>(0)
   const [spender, setSpender] = useState<string>("")
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)
   const { t } = useTranslation()
 
-  const { data: allowedAmount, isLoading: allowedAmountLoading } = useB3trAllowance(account ?? undefined, spender)
+  const { data: allowedAmount, isLoading: allowedAmountLoading } = useB3trAllowance(
+    account?.address ?? undefined,
+    spender,
+  )
   const allowedAmountScaled = useMemo(() => {
     return allowedAmount?.scaled ?? "0"
   }, [allowedAmount])

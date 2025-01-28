@@ -4,23 +4,31 @@ import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import { HStack, Text, Badge, Heading, Button, useDisclosure, Stack, Show } from "@chakra-ui/react"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useWallet, useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 import { useTranslation } from "react-i18next"
 import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassportPOV"
 import { UilLinkBroken } from "@iconscout/react-unicons"
 import { useMemo } from "react"
 import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
 import { RemoveLinkModalEntityPOV } from "./components/RemoveLinkModalEntityPOV"
+import { useWallet } from "@vechain/vechain-kit"
 
 type Props = { isConnectedUser: boolean; account: string; pending?: boolean }
 
 export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }: Props) => {
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
-  const { domain } = useVechainDomain({ addressOrDomain: account || "" })
+  const { domain } = useVechainDomain({ addressOrDomain: userAccount?.address ?? "" })
   const isUserAccountCard = compareAddresses(account, userAccount)
-  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentRoundOverview(account)
-  const { isPassport, isEntity, outgoingPendingLink, isLoading: isAccountLinkingLoading } = useAccountLinking(account)
+  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentRoundOverview(
+    userAccount?.address,
+  )
+  const {
+    isPassport,
+    isEntity,
+    outgoingPendingLink,
+    isLoading: isAccountLinkingLoading,
+  } = useAccountLinking(userAccount?.address)
   const removeLinkModalPassportPOV = useDisclosure()
   const removeLinkModalEntityPOV = useDisclosure()
   const removePendingRequestModal = useDisclosure()

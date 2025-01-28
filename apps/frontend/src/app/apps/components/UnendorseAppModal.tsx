@@ -5,7 +5,7 @@ import { BaseModal } from "@/components/BaseModal"
 
 import { useUnendorseApp } from "@/hooks"
 import { Text, Button, Image, Flex, HStack, Icon, VStack, Heading, Box } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
@@ -32,7 +32,7 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
   const unendorseAppMutation = useUnendorseApp({
     appId: endorsedApp?.id,
     nodeId: xNodeId,
-    userAddress: account ?? "",
+    userAddress: account?.address ?? "",
     onSuccess: () => {
       unendorseAppMutation.resetStatus()
       onClose()

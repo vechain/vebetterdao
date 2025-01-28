@@ -21,7 +21,7 @@ import {
 } from "@chakra-ui/react"
 import { UilInfoCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { FormEvent, useCallback, useLayoutEffect, useState } from "react"
 import { useTranslation } from "react-i18next"

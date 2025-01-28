@@ -9,9 +9,10 @@ import {
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { removingExcessDecimals } from "@/utils/MathUtils"
+import { useWallet } from "@vechain/vechain-kit"
 
 const config = getConfig()
 
@@ -56,28 +57,28 @@ export const useConvertB3tr = ({
     if (invalidateCache) {
       //b3tr user balance
       await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? undefined),
+        queryKey: getB3TrBalanceQueryKey(account?.address ?? undefined),
       })
 
       await queryClient.refetchQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? undefined),
+        queryKey: getB3TrBalanceQueryKey(account?.address ?? undefined),
       })
 
       // vot3 balance
       await queryClient.cancelQueries({
-        queryKey: getVot3BalanceQueryKey(account ?? ""),
+        queryKey: getVot3BalanceQueryKey(account?.address ?? ""),
       })
 
       await queryClient.refetchQueries({
-        queryKey: getVot3BalanceQueryKey(account ?? ""),
+        queryKey: getVot3BalanceQueryKey(account?.address ?? ""),
       })
 
       //user votes
       await queryClient.cancelQueries({
-        queryKey: getVotesQueryKey(account ?? undefined),
+        queryKey: getVotesQueryKey(account?.address ?? undefined),
       })
       await queryClient.refetchQueries({
-        queryKey: getVotesQueryKey(account ?? undefined),
+        queryKey: getVotesQueryKey(account?.address ?? undefined),
       })
 
       //global locked b3tr => vot3
@@ -99,10 +100,10 @@ export const useConvertB3tr = ({
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess, account])
+  }, [invalidateCache, queryClient, onSuccess, account?.address])
 
   const result = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
     // suggestedMaxGas,

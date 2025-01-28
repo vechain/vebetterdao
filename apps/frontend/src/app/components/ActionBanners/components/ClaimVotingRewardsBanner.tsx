@@ -5,7 +5,7 @@ import { useDisclosure } from "@chakra-ui/react"
 import { UilGift } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { GenericBanner } from "../../Banners/GenericBanner"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -16,7 +16,7 @@ export const ClaimVotingRewardsBanner = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { account } = useWallet()
 
-  const roundsRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
+  const roundsRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 

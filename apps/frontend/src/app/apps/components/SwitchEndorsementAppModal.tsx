@@ -10,7 +10,7 @@ import { TransactionModal } from "@/components"
 import { useSwitchEndorsement } from "@/hooks"
 import { VStack, Heading, HStack, Box, Text, Button, Skeleton, Image } from "@chakra-ui/react"
 import { UilClock } from "@iconscout/react-unicons"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
 import { useCallback, useMemo } from "react"
 import { Trans } from "react-i18next"
@@ -45,7 +45,9 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
   const isAppToEndorseLoading = isAppToEndorseMetadataLoading || isAppToEndorseLogoLoading
 
   //Hooks to fetch user endorsement score
-  const { data: userEndorsementScore, isLoading: isUserEndorsementScoreLoading } = useUserEndorsementScore(account)
+  const { data: userEndorsementScore, isLoading: isUserEndorsementScoreLoading } = useUserEndorsementScore(
+    account?.address,
+  )
   const userDelegatedNodes = useUserXNodes()
 
   const nodeId = userDelegatedNodes.data?.[0]?.id ?? "0"

@@ -21,10 +21,11 @@ import { ProposalOverviewCommunitySupport } from "./components/ProposalOverviewC
 import { useTranslation } from "react-i18next"
 import { CastProposalVoteButton } from "./components/CastProposalVoteButton"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet, useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 import { useProposalDetail } from "../../hooks"
 import { ProposalShareButton } from "./components/ProposalShareButton"
 import { ProposalStatusBadge, ProposalYourVote } from "@/components"
+import { useWallet } from "@vechain/vechain-kit"
 
 export const ProposalOverview = () => {
   const { t } = useTranslation()
@@ -81,7 +82,7 @@ export const ProposalOverview = () => {
                   <Skeleton isLoaded={!proposal.isProposerLoading}>
                     <HStack>
                       <AddressIcon address={proposal.proposer} rounded="full" h="20px" w="20px" />
-                      {compareAddresses(proposal.proposer, account || "") ? (
+                      {compareAddresses(proposal.proposer, account?.address || "") ? (
                         <Text color="#252525">{t("You")}</Text>
                       ) : (
                         <Text color="#252525">{proposerName || humanAddress(proposal.proposer, 4, 6)}</Text>
@@ -97,7 +98,7 @@ export const ProposalOverview = () => {
                 <ProposalYourVote proposalId={proposal.id} />
               </Stack>
 
-              {account && <CastProposalVoteButton proposalId={proposal.id} />}
+              {account?.address && <CastProposalVoteButton proposalId={proposal.id} />}
             </Stack>
           </VStack>
           <VStack flex={1} h="full">

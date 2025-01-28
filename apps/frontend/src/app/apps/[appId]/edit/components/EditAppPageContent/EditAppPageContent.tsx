@@ -35,7 +35,7 @@ import { useIsFormChanged } from "./hooks/useIsFormChanged"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 import { UpdateAppMetadataTransactionModal } from "../../../components/UpdateAppMetadataTransactionModal"
 import { useAccountPermissions } from "@/api/contracts/account"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
 
 export type EditAppForm = {
@@ -69,7 +69,7 @@ export const EditAppPageContent = () => {
   const transactionModal = useDisclosure()
   const { isAdminOrModerator } = useCurrentAppRole()
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account || "")
+  const { data: permissions } = useAccountPermissions(account?.address || "")
   const { appId } = useParams<{ appId: string }>()
 
   const form = useForm<EditAppForm>({

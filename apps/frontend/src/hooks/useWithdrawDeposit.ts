@@ -1,6 +1,6 @@
 import { getProposalUserDepositQueryKey } from "@/api"
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
@@ -44,7 +44,7 @@ export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3Dep
   }, [account, proposalId])
 
   const refetchQueryKeys = useMemo(
-    () => [getProposalUserDepositQueryKey(proposalId, account ?? "")],
+    () => [getProposalUserDepositQueryKey(proposalId, account?.address ?? "")],
     [account, proposalId],
   )
 

@@ -2,7 +2,7 @@ import { ProposalDeposit, buildClaimDepositsTx, getProposalUserDepositQueryKey, 
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { address } from "thor-devkit"
 
 /**
@@ -46,29 +46,29 @@ export const useWithdrawDeposits = ({
   const buildClauses = useCallback(() => {
     if (!address) throw new Error("address is required")
 
-    const clauses = buildClaimDepositsTx(proposalDeposits, account ?? "")
+    const clauses = buildClaimDepositsTx(proposalDeposits, account?.address ?? "")
 
     return clauses
-  }, [account, proposalDeposits])
+  }, [account?.address, proposalDeposits])
 
   // Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
       for (const proposalDeposit of proposalDeposits) {
         await queryClient.cancelQueries({
-          queryKey: getProposalUserDepositQueryKey(proposalDeposit.proposalId, account ?? ""),
+          queryKey: getProposalUserDepositQueryKey(proposalDeposit.proposalId, account?.address ?? ""),
         })
         await queryClient.refetchQueries({
-          queryKey: getProposalUserDepositQueryKey(proposalDeposit.proposalId, account ?? ""),
+          queryKey: getProposalUserDepositQueryKey(proposalDeposit.proposalId, account?.address ?? ""),
         })
       }
 
       await queryClient.cancelQueries({
-        queryKey: getVot3BalanceQueryKey(account ?? ""),
+        queryKey: getVot3BalanceQueryKey(account?.address ?? ""),
       })
 
       await queryClient.refetchQueries({
-        queryKey: getVot3BalanceQueryKey(account ?? ""),
+        queryKey: getVot3BalanceQueryKey(account?.address ?? ""),
       })
     }
 
@@ -76,7 +76,7 @@ export const useWithdrawDeposits = ({
   }, [account, invalidateCache, onSuccess, proposalDeposits, queryClient])
 
   const result = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     onTxConfirmed: handleOnSuccess,
     onTxFailedOrCancelled: onFailure,
   })

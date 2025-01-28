@@ -22,7 +22,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { IoArrowBackOutline } from "react-icons/io5"
 import { BalanceInfo, TokenInfoCard } from "./components"
 import { useB3trBalance, useB3trConverted, useVot3Balance } from "@/api"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { FiInfo } from "react-icons/fi"
 import { motion } from "framer-motion"
 import BigNumber from "bignumber.js"
@@ -53,9 +53,9 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
 
   const { account } = useWallet()
 
-  const { data: b3trBalance } = useB3trBalance(account ?? undefined)
-  const { data: vot3Balance } = useVot3Balance(account ?? undefined)
-  const { data: swappableVot3Balance } = useB3trConverted(account ?? undefined)
+  const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
+  const { data: vot3Balance } = useVot3Balance(account?.address ?? undefined)
+  const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
 
   const b3trBalanceScaled = useMemo(() => {
     return b3trBalance?.scaled ?? "0"

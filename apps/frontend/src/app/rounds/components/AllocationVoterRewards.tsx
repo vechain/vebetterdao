@@ -1,6 +1,6 @@
 import { useAllocationsRound, useAllocationsRoundState, useRoundReward } from "@/api"
 import { Box, Button, Image, Text, VStack, useDisclosure } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { FaRegClock } from "react-icons/fa"
 import { useClaimReward } from "@/hooks/useClaimReward"
@@ -27,7 +27,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
   const { data: allocationRound } = useAllocationsRound(roundId)
 
-  const { data: roundReward, isLoading: isRoundRewardLoading } = useRoundReward(account ?? "", roundId)
+  const { data: roundReward, isLoading: isRoundRewardLoading } = useRoundReward(account?.address ?? "", roundId)
 
   const { t } = useTranslation()
 

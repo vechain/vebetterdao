@@ -2,8 +2,9 @@ import { Button, useDisclosure } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { CommunitySupportModal } from "./components/CommunitySupportModal"
 import { useCallback } from "react"
-import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
+import { useWalletModal } from "@vechain/dapp-kit-react"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { useWallet } from "@vechain/vechain-kit"
 
 export const CommunitySupportButton = () => {
   const { account } = useWallet()
@@ -13,12 +14,12 @@ export const CommunitySupportButton = () => {
   const { t } = useTranslation()
 
   const handleClick = useCallback(() => {
-    if (!account) {
+    if (!account?.address) {
       openConnectModal()
       return
     }
     onOpen()
-  }, [account, onOpen, openConnectModal])
+  }, [account?.address, onOpen, openConnectModal])
 
   return (
     <>

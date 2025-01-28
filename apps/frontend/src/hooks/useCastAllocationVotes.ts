@@ -10,7 +10,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { XAllocationVoting__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
@@ -102,17 +102,17 @@ export const useCastAllocationVotes = ({
       })
 
       await queryClient.cancelQueries({
-        queryKey: getUserVotesInRoundQueryKey(roundId, account ?? undefined),
+        queryKey: getUserVotesInRoundQueryKey(roundId, account?.address ?? undefined),
       })
       await queryClient.refetchQueries({
-        queryKey: getUserVotesInRoundQueryKey(roundId, account ?? undefined),
+        queryKey: getUserVotesInRoundQueryKey(roundId, account?.address ?? undefined),
       })
 
       await queryClient.cancelQueries({
-        queryKey: getHasVotedInRoundQueryKey(roundId, account ?? undefined),
+        queryKey: getHasVotedInRoundQueryKey(roundId, account?.address ?? undefined),
       })
       await queryClient.refetchQueries({
-        queryKey: getHasVotedInRoundQueryKey(roundId, account ?? undefined),
+        queryKey: getHasVotedInRoundQueryKey(roundId, account?.address ?? undefined),
       })
 
       await queryClient.cancelQueries({
@@ -122,18 +122,18 @@ export const useCastAllocationVotes = ({
         queryKey: getXAppRoundEarningsQueryKey(roundId),
       })
       await queryClient.cancelQueries({
-        queryKey: getParticipatedInGovernanceQueryKey(account),
+        queryKey: getParticipatedInGovernanceQueryKey(account?.address ?? ""),
       })
       await queryClient.refetchQueries({
-        queryKey: getParticipatedInGovernanceQueryKey(account),
+        queryKey: getParticipatedInGovernanceQueryKey(account?.address ?? ""),
       })
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess, account, roundId])
+  }, [invalidateCache, queryClient, onSuccess, account?.address, roundId])
 
   const result = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     onTxConfirmed: handleOnSuccess,
     // suggestedMaxGas,
   })

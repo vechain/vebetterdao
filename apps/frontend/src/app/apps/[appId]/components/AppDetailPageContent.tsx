@@ -1,6 +1,6 @@
 import { useAppEndorsementStatus, useAppExists, useIsAppAdmin, useIsAppModerator } from "@/api"
 import { Grid, GridItem, Stack } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useCurrentAppInfo } from "../hooks/useCurrentAppInfo"
 import { AppCreationSteps } from "./AppCreationSteps/AppCreationSteps"
@@ -13,8 +13,8 @@ import { AppBalanceCard } from "./AppBalanceCard"
 export const AppDetailPageContent = () => {
   const { app } = useCurrentAppInfo()
   const { account } = useWallet()
-  const { data: isAppModerator } = useIsAppModerator(app?.id ?? "", account ?? "")
-  const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account ?? "")
+  const { data: isAppModerator } = useIsAppModerator(app?.id ?? "", account?.address ?? "")
+  const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
   const { data: appHasBeenIntoAllocationRounds } = useAppExists(app?.id ?? "")
   const {
     score: endorsementScore,

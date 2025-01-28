@@ -14,7 +14,7 @@ import { useEndorseApp } from "@/hooks"
 import { VStack, Heading, HStack, Box, Text, Button, Skeleton, Icon } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
 import { PropsEndorsement } from "./UnendorseAppModal"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
 import { useCallback, useMemo } from "react"
 import { Trans } from "react-i18next"
@@ -50,7 +50,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const endorseAppMutation = useEndorseApp({
     appId: xApp?.id ?? "",
     nodeId,
-    userAddress: account ?? "",
+    userAddress: account?.address ?? "",
     onSuccess: () => {
       endorseAppMutation.resetStatus()
       onClose()
@@ -58,7 +58,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   })
 
   //TODO: Handle multiple xNodes on UI
-  const userEndorsementScore = useUserEndorsementScore(account)
+  const userEndorsementScore = useUserEndorsementScore(account?.address)
 
   const appScore = useMemo(() => Number(endorsementScore ?? 0), [endorsementScore])
   const endorsementThreshold = useMemo(() => Number(endorsementScoreThreshold ?? 0), [endorsementScoreThreshold])

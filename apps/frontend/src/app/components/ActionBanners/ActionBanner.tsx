@@ -13,7 +13,7 @@ import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { Hide, IconButton } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 // import Swiper core and required modules
@@ -50,12 +50,12 @@ export const ActionBanner = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { account } = useWallet()
 
-  const votingRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
-  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account)
+  const votingRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
+  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
 
-  const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
-  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account ?? undefined)
-  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account ?? undefined)
+  const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
+  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account?.address ?? undefined)
+  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps()
 
   const ownsTokens = useMemo(() => {
@@ -72,10 +72,10 @@ export const ActionBanner = () => {
     return balanceLoading || b3trBalanceLoading || vot3BalanceLoading
   }, [balanceLoading, b3trBalanceLoading, vot3BalanceLoading])
 
-  const { data: canUserVote, isPerson, isLoading } = useCanUserVote(account ?? undefined, delegateeAddress)
+  const { data: canUserVote, isPerson, isLoading } = useCanUserVote(account?.address ?? undefined, delegateeAddress)
 
   // Creator banners
-  const { data: submissions, isLoading: submissionsLoading } = useCreatorSubmission(account ?? "")
+  const { data: submissions, isLoading: submissionsLoading } = useCreatorSubmission(account?.address ?? "")
   const latestSubmissionStatus = submissions?.submissions[0]?.status // Only take into account the latest submission
   const isLatestSubmissionRejected = latestSubmissionStatus === HumanizedTicketStatus.Closed
   const isLatestSubmissionOngoing =
@@ -83,7 +83,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.Pending ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
-  const hasCreatorNFT = useHasCreatorNFT(account ?? "") // No loading state
+  const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
   const userHasApp = !!account && !!xApps?.allApps?.find(app => compareAddresses(app.teamWalletAddress, account))
 
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading

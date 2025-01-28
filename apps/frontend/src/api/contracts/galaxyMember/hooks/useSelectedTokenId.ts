@@ -1,5 +1,5 @@
 import { getConfig } from "@repo/config"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { GalaxyMember__factory } from "@repo/contracts"
 import { getCallKey, useCall } from "@/hooks"
 
@@ -21,7 +21,7 @@ export const useSelectedTokenId = (profile?: string, enabled = true) => {
     contractInterface,
     contractAddress,
     method,
-    args: [profile ?? account],
-    enabled: (!!profile || !!account) && enabled,
+    args: [profile ?? account?.address ?? ""],
+    enabled: (!!profile || !!account?.address) && enabled,
   })
 }

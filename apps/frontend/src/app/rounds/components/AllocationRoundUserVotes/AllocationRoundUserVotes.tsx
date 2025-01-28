@@ -2,7 +2,7 @@ import { useAllocationsRound, useGetVotesOnBlock, useHasVotedInRound, useUserVot
 import { Button, Card, CardBody, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useMemo } from "react"
 import { AppVotesBreakdown, AppVotesBreakdownProps } from "../AppVotesBreakdown/AppVotesBreakdown"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 import BigNumber from "bignumber.js"
 import { scaledDivision } from "@/utils/MathUtils"
@@ -33,10 +33,13 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
     Number(roundInfo.voteStart),
-    account ?? undefined,
+    account?.address ?? undefined,
   )
 
-  const { data: castVotesEvent, isLoading: castVotesEventLoading } = useUserVotesInRound(roundId, account ?? undefined)
+  const { data: castVotesEvent, isLoading: castVotesEventLoading } = useUserVotesInRound(
+    roundId,
+    account?.address ?? undefined,
+  )
 
   const totalVotesCast = useMemo(
     () => castVotesEvent?.voteWeights.reduce((acc, vote) => acc + Number(ethers.formatEther(vote)), 0),
@@ -45,7 +48,7 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
 
   const totalAppsVoted = useMemo(() => castVotesEvent?.appsIds.length, [castVotesEvent])
 
-  const { data: hasVoted } = useHasVotedInRound(roundId, account ?? undefined)
+  const { data: hasVoted } = useHasVotedInRound(roundId, account?.address ?? undefined)
 
   const parsedCastVotes: AppVotesBreakdownProps["votes"] = useMemo(() => {
     if (castVotesEvent?.appsIds && votesAtSnapshot) {

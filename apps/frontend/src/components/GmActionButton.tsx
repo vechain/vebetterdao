@@ -13,7 +13,7 @@ import {
   useXNode,
 } from "@/api"
 import { useTranslation } from "react-i18next"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { MintNFTModal } from "./MintNFTModal"
 import { FeatureFlagWrapper } from "./FeatureFlagWrapper"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
@@ -23,7 +23,7 @@ import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: hasUserVoted } = useParticipatedInGovernance(account)
+  const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const {
     isGMOwned,

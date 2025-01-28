@@ -1,4 +1,4 @@
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useGetPassportForEntity } from "./useGetPassportForEntity"
 import { useGetUserPendingLinkings } from "./useGetPendingLinkings"
 import { useIsUserEntity } from "./useIsEntity"
@@ -11,7 +11,7 @@ import { useMemo } from "react"
  */
 export const useAccountLinking = (user?: string) => {
   const { account } = useWallet()
-  const parsedAccount = user ?? account
+  const parsedAccount = user ?? account?.address
 
   const { data: isEntity, isLoading: isEntityLoading } = useIsUserEntity()
   const { data: userLinkedEntities, isLoading: isUserLinkedEntitiesLoading } =

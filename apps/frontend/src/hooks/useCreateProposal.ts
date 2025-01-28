@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
@@ -76,13 +76,13 @@ export const useCreateProposal = ({
   }, [invalidateCache, queryClient, onSuccess])
 
   const result = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     onTxConfirmed: handleOnSuccess,
   })
 
   const buildClauses = useCallback(
     ({ description, actions, startRoundId, depositAmount }: BuildClausesProps) => {
-      if (!account) throw new Error("Account is required")
+      if (!account?.address) throw new Error("Account is required")
 
       const clauses: EnhancedClause[] = []
       const parsedDepositAmount = ethers.parseEther(depositAmount).toString()
@@ -125,7 +125,7 @@ export const useCreateProposal = ({
 
       return clauses
     },
-    [account],
+    [account?.address],
   )
 
   const onMutate = useCallback(

@@ -23,7 +23,7 @@ import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
 import { useB3trBalance, useXApp } from "@/api"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
 
 export type Props = {
@@ -59,7 +59,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
 
   const { data: app } = useXApp(appId)
 
-  const { data: availableBalanceToDeposit } = useB3trBalance(account ?? "")
+  const { data: availableBalanceToDeposit } = useB3trBalance(account?.address ?? "")
 
   const { data: appBalance, isLoading: isAppBalanceLoading } = useAppBalance(appId)
 

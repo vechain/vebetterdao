@@ -4,7 +4,7 @@ import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getLevelOfTokenQueryKey, getNFTMetadataUriQueryKey, getTokensInfoByOwnerQueryKey, useXNode } from "@/api"
 import { buildClause } from "@/utils/buildClause"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import { getNodeIdAttachedQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetNodeIdAttached"
@@ -51,11 +51,11 @@ export const useDetachGMFromXNode = ({ onSuccess }: Props) => {
 
   const refetchQueryKeys = useMemo(
     () => [
-      getSelectedTokenIdQueryKey(account),
+      getSelectedTokenIdQueryKey(account?.address),
       getLevelOfTokenQueryKey(attachedGMTokenId),
       getGetTokenIdAttachedToNodeQueryKey(xNodeId),
       getNodeIdAttachedQueryKey(attachedGMTokenId),
-      getTokensInfoByOwnerQueryKey(account),
+      getTokensInfoByOwnerQueryKey(account?.address),
       getNFTMetadataUriQueryKey(attachedGMTokenId ?? ""),
     ],
     [account, attachedGMTokenId, xNodeId],

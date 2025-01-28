@@ -4,14 +4,14 @@ import { useIsGMpaused } from "@/api/contracts/galaxyMember"
 import { usePauseContract } from "@/hooks"
 import { Button, HStack, VStack, Text, Show, Card, CardHeader, Heading, CardBody } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import React, { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 export const Pause: React.FC = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account ?? "")
+  const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
   const { data: isGalaxyMemberPaused, isLoading: isGalaxyMemberPausedLoading } = useIsGMpaused()
 

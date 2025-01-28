@@ -5,7 +5,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { getProposalsEventsQueryKey, getProposalVotesQuerykey, getUserProposalsVoteEventsQueryKey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { getIsProposalQuorumReachedQueryKey } from "@/api/contracts/governance/hooks/useIsProposalQuorumReached"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
@@ -42,7 +42,7 @@ export const useProposalCastVote = ({ proposalId, onSuccess }: Props) => {
     () => [
       getProposalVotesQuerykey(proposalId),
       getIsProposalQuorumReachedQueryKey(proposalId),
-      getUserProposalsVoteEventsQueryKey(account ?? undefined),
+      getUserProposalsVoteEventsQueryKey(account?.address ?? undefined),
       getProposalsEventsQueryKey(),
     ],
     [proposalId, account],

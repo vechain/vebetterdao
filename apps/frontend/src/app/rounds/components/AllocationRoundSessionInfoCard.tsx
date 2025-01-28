@@ -17,7 +17,7 @@ import {
   StepTitle,
   Stepper,
 } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
 import { useMemo } from "react"
 import { v4 as uuid } from "uuid"
@@ -32,7 +32,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   const currentVotesQuery = useAllocationVotes(roundId)
   const quorumQuery = useAllocationRoundQuorum(roundId)
   const votesAtSnapshotQuery = useVot3PastSupply(roundInfo.voteStart)
-  const userVotesAtSnapshotQuery = useGetVotesOnBlock(Number(roundInfo.voteStart), account ?? "")
+  const userVotesAtSnapshotQuery = useGetVotesOnBlock(Number(roundInfo.voteStart), account?.address ?? "")
 
   const isRoundActive = useMemo(() => {
     return roundInfo?.state === 0

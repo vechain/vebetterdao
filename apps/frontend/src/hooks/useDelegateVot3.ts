@@ -3,8 +3,9 @@ import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/dapp-kit-react"
 import { FormattingUtils } from "@repo/utils"
+import { useWallet } from "@vechain/vechain-kit"
 
 type useMintB3trProps = {
   address?: string
@@ -41,11 +42,11 @@ export const useDelegateVot3 = ({
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
       await queryClient.cancelQueries({
-        queryKey: getVotesQueryKey(account ?? ""),
+        queryKey: getVotesQueryKey(account?.address ?? ""),
       })
 
       await queryClient.refetchQueries({
-        queryKey: getVotesQueryKey(account ?? ""),
+        queryKey: getVotesQueryKey(account?.address ?? ""),
       })
     }
 
@@ -60,10 +61,10 @@ export const useDelegateVot3 = ({
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, account, address])
+  }, [invalidateCache, queryClient, toast, onSuccess, account?.address, address])
 
   const result = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
   })

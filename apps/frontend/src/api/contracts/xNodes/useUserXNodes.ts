@@ -2,7 +2,8 @@ import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constant
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
 import { useQuery } from "@tanstack/react-query"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { abi } from "thor-devkit"
 const NODEMANAGEMENT_CONTRACT = getConfig().nodeManagementContractAddress
 const getNodeIdsFragment = NodeManagement__factory.createInterface().getFunction("getNodeIds").format("json")
@@ -89,5 +90,5 @@ export const useXNodes = (user?: string) => {
  */
 export const useUserXNodes = () => {
   const { account } = useWallet()
-  return useXNodes(account || undefined)
+  return useXNodes(account?.address || undefined)
 }

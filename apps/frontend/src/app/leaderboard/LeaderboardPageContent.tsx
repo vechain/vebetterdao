@@ -6,7 +6,7 @@ import {
 import { LeaderboardRankingComponent, MockLeaderboard } from "@/components/Leaderboard"
 import { Button, Center, Heading, HStack, Icon, IconButton, Skeleton, Spinner, Text, VStack } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { t } from "i18next"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
@@ -35,15 +35,18 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
     setSelectedRoundId(roundId)
   }
 
-  const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId: selectedRoundId })
+  const userRoundOverview = useSustainabilitySingleUserOverview({
+    wallet: account?.address ?? "",
+    roundId: selectedRoundId,
+  })
 
   const yourRaking = useMemo(() => {
-    if (!account) return undefined
+    if (!account?.address) return undefined
     if (userRoundOverview.isLoading) return undefined
     if (userRoundOverview.isError) return undefined
     return {
       position: userRoundOverview.data?.rankByActionsRewarded ?? 0,
-      address: account ?? "",
+      address: account?.address ?? "",
       score: userRoundOverview.data?.actionsRewarded ?? 0,
     }
   }, [userRoundOverview, account])
@@ -61,7 +64,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
         <Skeleton key={ranking.position} borderRadius={"lg"}>
           <LeaderboardRankingComponent
             ranking={ranking}
-            isYourRanking={AddressUtils.compareAddresses(ranking.address, account ?? "")}
+            isYourRanking={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
           />
         </Skeleton>
       ))
@@ -91,7 +94,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
             <LeaderboardRankingComponent
               key={ranking.position}
               ranking={ranking}
-              isYourRanking={AddressUtils.compareAddresses(ranking.address, account ?? "")}
+              isYourRanking={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
             />
           ))}
         </VStack>
@@ -121,7 +124,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
                 score: ranking?.actionsRewarded ?? 0,
               }}
               key={`leaderboard-${ranking?.entity ?? idx}-${ranking?.roundId ?? idx}`}
-              isYourRanking={AddressUtils.compareAddresses(ranking?.entity ?? "", account ?? "")}
+              isYourRanking={AddressUtils.compareAddresses(ranking?.entity ?? "", account?.address ?? "")}
             />
           ))}
         </VStack>

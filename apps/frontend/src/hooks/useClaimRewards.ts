@@ -2,7 +2,7 @@ import { RoundReward, buildClaimRewardsTx, getB3TrBalanceQueryKey, getRoundRewar
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { address } from "thor-devkit"
 
 type useClaimRewardsProps = {
@@ -41,28 +41,28 @@ export const useClaimRewards = ({
     (roundRewards: RoundReward[]) => {
       if (!address) throw new Error("address is required")
 
-      const clauses = buildClaimRewardsTx(roundRewards, account ?? "")
+      const clauses = buildClaimRewardsTx(roundRewards, account?.address ?? "")
       return clauses
     },
-    [account],
+    [account?.address],
   )
 
   // Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
       await queryClient.cancelQueries({
-        queryKey: getRoundRewardQueryKey("ALL", account ?? undefined),
+        queryKey: getRoundRewardQueryKey("ALL", account?.address ?? undefined),
       })
       await queryClient.refetchQueries({
-        queryKey: getRoundRewardQueryKey("ALL", account ?? undefined),
+        queryKey: getRoundRewardQueryKey("ALL", account?.address ?? undefined),
       })
 
       await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? ""),
+        queryKey: getB3TrBalanceQueryKey(account?.address ?? ""),
       })
 
       await queryClient.refetchQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? ""),
+        queryKey: getB3TrBalanceQueryKey(account?.address ?? ""),
       })
     }
 
@@ -70,7 +70,7 @@ export const useClaimRewards = ({
   }, [account, invalidateCache, onSuccess, queryClient])
 
   const result = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     onTxConfirmed: handleOnSuccess,
     onTxFailedOrCancelled: onFailure,
     // suggestedMaxGas,

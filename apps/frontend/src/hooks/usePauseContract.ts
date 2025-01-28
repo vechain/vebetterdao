@@ -1,4 +1,4 @@
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { EnhancedClause, useSendTransaction } from "./useSendTransaction"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -159,12 +159,12 @@ export const usePauseContract = ({ contract, contractName, onSuccess, invalidate
   }, [toast, onSuccess, contractName, performCacheInvalidation])
 
   const pauseTxResult = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     onTxConfirmed: handleOnSuccessPause,
   })
 
   const unpauseTxResult = useSendTransaction({
-    signerAccount: account,
+    signerAccount: account?.address,
     onTxConfirmed: handleOnSuccessUnpause,
   })
 

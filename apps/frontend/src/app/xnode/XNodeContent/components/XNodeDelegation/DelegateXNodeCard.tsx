@@ -5,11 +5,12 @@ import { useTranslation } from "react-i18next"
 import { DelegateXNodeModal } from "./DelegateXNodeModal"
 import { AddressIcon } from "@/components/AddressIcon"
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
-import { useVechainDomain, useWallet } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { RevokeXNodeDelegationModal } from "./RevokeXNodeDelegationModal"
 import { DelegationAlert } from "./DelegationAlert"
 import { useState, useCallback } from "react"
+import { useWallet } from "@vechain/vechain-kit"
 
 export const DelegateXNodeCard = () => {
   const { t } = useTranslation()
@@ -26,7 +27,7 @@ export const DelegateXNodeCard = () => {
     addressOrDomain: xNodeOwner,
   })
 
-  const isOwner = compareAddresses(account ?? "", xNodeOwner ?? "")
+  const isOwner = compareAddresses(account?.address ?? "", xNodeOwner ?? "")
   const displayAddress = isOwner ? delegateeDomain ?? delegatee : ownerDomain ?? xNodeOwner
   const isDomain = isOwner ? !!delegateeDomain : !!ownerDomain
 

@@ -3,7 +3,7 @@ import { notFoundImage } from "@/constants"
 import { useGetTokenIdAttachedToNode } from "../galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import { useIpfsImage } from "@/api/ipfs"
 import { useTranslation } from "react-i18next"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useGetUserNodes } from "./useGetUserNodes"
 import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constants/XNode"
 import { useGMNFTData } from "@/hooks/useGMNFTData"
@@ -57,7 +57,7 @@ interface XNodeData {
 export const useXNode = (profile?: string): XNodeData => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const userNodeDetails = useGetUserNodes(profile ?? account ?? "")
+  const userNodeDetails = useGetUserNodes(profile ?? account?.address ?? "")
 
   // Store raw node data
   const allNodes = userNodeDetails?.data ?? []
