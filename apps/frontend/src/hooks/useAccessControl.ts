@@ -1,11 +1,9 @@
 import { DEFAULT_ADMIN_ROLE, hasRoleQueryKey } from "@/api/contracts/account"
 import { AccessControl__factory } from "@repo/contracts/typechain-types"
 import { useQueryClient } from "@tanstack/react-query"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { ethers } from "ethers"
 import { useCallback, useMemo } from "react"
-import { EnhancedClause, useSendTransaction, UseSendTransactionReturnValue } from "./useSendTransaction"
-
+import { useWallet, useSendTransaction, UseSendTransactionReturnValue, EnhancedClause } from "@vechain/vechain-kit"
 type Props = {
   contractAddress: string
   walletAddress: string
@@ -92,17 +90,17 @@ export const useAccessControl = ({
   }, [performCacheInvalidation, onSuccess])
 
   const grantRole: UseSendTransactionReturnValue = useSendTransaction({
-    signerAccount: account,
+    signerAccountAddress: account?.address ?? "",
     onTxConfirmed: handleOnSuccess,
   })
 
   const revokeRole: UseSendTransactionReturnValue = useSendTransaction({
-    signerAccount: account,
+    signerAccountAddress: account?.address ?? "",
     onTxConfirmed: handleOnSuccess,
   })
 
   const renounceRole: UseSendTransactionReturnValue = useSendTransaction({
-    signerAccount: account,
+    signerAccountAddress: account?.address ?? "",
     onTxConfirmed: handleOnSuccess,
   })
 

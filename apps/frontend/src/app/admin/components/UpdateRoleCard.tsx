@@ -14,7 +14,6 @@ import {
   Select,
   Text,
   VStack,
-  useDisclosure,
 } from "@chakra-ui/react"
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import { useMemo, useEffect, useCallback } from "react"
@@ -24,10 +23,8 @@ import { humanAddress } from "@repo/utils/FormattingUtils"
 import { useHasRole } from "@/api/contracts/account"
 import { useAccessControl } from "@/hooks"
 import { CONTRACT_LIST } from "@/constants"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { TransactionModal } from "@/components"
 import { WalletAddressInput } from "@/app/components/Input"
-
+import { useWallet, TransactionModal, useTransactionModal } from "@vechain/vechain-kit"
 type UpdateRoleCardInput = {
   contract?: string
   role?: string
@@ -50,8 +47,12 @@ export const UpdateRoleCard = () => {
   })
 
   const { t } = useTranslation()
-  const { isOpen, onOpen, onClose } = useDisclosure()
   const { account } = useWallet()
+  const {
+    open: openTransactionModal,
+    close: closeTransactionModal,
+    isOpen: isTransactionModalOpen,
+  } = useTransactionModal()
 
   const walletAddress = watch("walletAddress")
   const selectedContractAddress = watch("contract")
@@ -74,7 +75,7 @@ export const UpdateRoleCard = () => {
     role: selectedRole ?? "",
     onSuccess: () => {
       accessControlAction.resetStatus()
-      onClose()
+      closeTransactionModal()
     },
   })
   const isFormValid =
@@ -84,10 +85,10 @@ export const UpdateRoleCard = () => {
     !!selectedContractAddress &&
     !!selectedRole &&
     !!walletAddress &&
-    !!account
+    !!account?.address
 
   const accessControlAction = useMemo(() => {
-    if (userAlreadyHasRole && compareAddresses(account ?? "", walletAddress)) {
+    if (userAlreadyHasRole && compareAddresses(account?.address ?? "", walletAddress)) {
       return renounceRole
     }
 
@@ -95,24 +96,24 @@ export const UpdateRoleCard = () => {
       return grantRole
     }
     return revokeRole
-  }, [userAlreadyHasRole, account, walletAddress, grantRole, renounceRole, revokeRole])
+  }, [userAlreadyHasRole, account?.address, walletAddress, grantRole, renounceRole, revokeRole])
 
   const handleFormSubmit = (_: any) => {
     accessControlAction.sendTransaction()
-    onOpen()
+    openTransactionModal()
   }
   const handleClose = useCallback(() => {
     accessControlAction.resetStatus()
-    onClose()
-  }, [accessControlAction, onClose])
+    closeTransactionModal()
+  }, [accessControlAction, closeTransactionModal])
 
   useEffect(() => {
     setValue("role", "") // Reset role when contract changes
-  }, [selectedContractAddress, account, setValue])
+  }, [selectedContractAddress, account?.address, setValue])
 
   const getButtonText = () => {
     if (userAlreadyHasRole) {
-      return compareAddresses(account ?? "", walletAddress) ? t("Renounce Role") : t("Revoke Role")
+      return compareAddresses(account?.address ?? "", walletAddress) ? t("Renounce Role") : t("Revoke Role")
     }
     return t("Grant Role")
   }
@@ -221,7 +222,7 @@ export const UpdateRoleCard = () => {
               )}
 
               <Button
-                isLoading={accessControlAction.isTxReceiptLoading}
+                isLoading={accessControlAction.isTransactionPending}
                 isDisabled={!isFormValid || !!hasRoleError}
                 colorScheme={userAlreadyHasRole ? "red" : "green"}
                 type="submit">
@@ -233,17 +234,18 @@ export const UpdateRoleCard = () => {
       </Card>
 
       <TransactionModal
-        isOpen={isOpen}
+        isOpen={isTransactionModalOpen}
         onClose={handleClose}
-        status={accessControlAction.error ? "error" : accessControlAction.status}
-        successTitle={t("Wallet address roles updated successfully")}
+        status={accessControlAction.status}
+        progress={accessControlAction.progress}
+        txId={accessControlAction?.txReceipt?.meta.txID}
+        errorDescription={accessControlAction?.error?.reason ?? "Unknown error"}
+        showSocialButtons
+        showExplorerButton
         onTryAgain={handleSubmit(handleFormSubmit)}
         showTryAgainButton
-        showExplorerButton
-        txId={accessControlAction.txReceipt?.meta?.txID ?? accessControlAction.sendTransactionTx?.txid}
         pendingTitle={t("Updating wallet address role...")}
         errorTitle={t("Error updating role")}
-        errorDescription={accessControlAction.error?.reason}
       />
     </>
   )
