@@ -1,13 +1,14 @@
 "use client"
 
 import { useColorMode } from "@chakra-ui/react"
+import { getConfig } from "@repo/config"
 import dynamic from "next/dynamic"
 
 // Dynamic import is used here for several reasons:
 // 1. The VechainKit component uses browser-specific APIs that aren't available during server-side rendering
 // 2. Code splitting - this component will only be loaded when needed, reducing initial bundle size
 // 3. The 'ssr: false' option ensures this component is only rendered on the client side
-const VeChainKitProvider = dynamic(async () => (await import("@vechain/vechain-kit")).VeChainKitProvider, {
+const VeChainKitProvider = dynamic(() => import("@vechain/vechain-kit").then(mod => mod.VeChainKitProvider), {
   ssr: false,
 })
 
@@ -22,8 +23,29 @@ export function VechainKitProviderWrapper({ children }: Props) {
 
   const appLogo = "https://i.ibb.co/ncysMF9/vechain-kit-logo-transparent.png"
 
+  const networkType = getConfig().network.type as "main" | "test" | "solo"
+
   return (
     <VeChainKitProvider
+      privy={{
+        appId: process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
+        clientId: process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID!,
+        loginMethods: ["google", "twitter", "email", "discord", "farcaster", "tiktok", "wallet"],
+        appearance: {
+          walletList: [
+            "metamask",
+            "rainbow",
+            "coinbase_wallet",
+            "detected_ethereum_wallets",
+            "rabby_wallet",
+            "safe",
+            "uniswap",
+          ],
+          accentColor: "#696FFD",
+          loginMessage: "Select a login method",
+          logo: "https://i.ibb.co/0Mxcw49/V-color.png",
+        },
+      }}
       feeDelegation={{
         delegatorUrl: process.env.NEXT_PUBLIC_DELEGATOR_URL!,
         delegateAllTransactions: false,
@@ -32,15 +54,14 @@ export function VechainKitProviderWrapper({ children }: Props) {
         allowedWallets: ["veworld", "wallet-connect", "sync2"],
       }}
       loginModalUI={{
-        variant: "vechain",
+        variant: "vechain-wallet-ecosystem",
         logo: appLogo,
         description: "Choose between social login through VeChain or by connecting your wallet.",
       }}
-      privyEcosystemAppIDS={[]}
       darkMode={isDarkMode}
       language={"en"}
       network={{
-        type: "test",
+        type: networkType,
       }}>
       {children}
     </VeChainKitProvider>
