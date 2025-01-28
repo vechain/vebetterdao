@@ -1,13 +1,13 @@
-import { Box, HStack, Text, VStack, Flex, Button, Image } from "@chakra-ui/react"
+import { Box, HStack, Text, VStack, Flex, Image } from "@chakra-ui/react"
 import { AddressIcon } from "../AddressIcon"
-import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { FaChevronRight } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { WalletIcon } from "../Icons/WalletIcon"
-import { VeBetterIcon } from "../Icons/VeBetterIcon"
+import { ConnectWalletButton } from "../ConnectWalletButton"
 
 type Props = {
   onMenuClose?: () => void
@@ -16,7 +16,6 @@ type Props = {
 export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
   const { account } = useWallet()
   const { t } = useTranslation()
-  const { open } = useWalletModal()
   const router = useRouter()
 
   const onClick = useCallback(() => {
@@ -24,12 +23,7 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
     onMenuClose?.()
   }, [onMenuClose, router])
 
-  const handleConnectWallet = useCallback(() => {
-    open()
-    onMenuClose?.()
-  }, [open, onMenuClose])
-
-  if (!account)
+  if (!account?.address)
     return (
       <Flex
         borderRadius={"lg"}
@@ -61,15 +55,7 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
               </Text>
             </VStack>
           </HStack>
-          <Button
-            bg={"#E0E9FE"}
-            color="#004CFC"
-            leftIcon={<VeBetterIcon size={20} />}
-            rounded={"full"}
-            _hover={{ bg: "#E0E9FEDD" }}
-            onClick={handleConnectWallet}>
-            {t("Connect Wallet")}
-          </Button>
+          <ConnectWalletButton />
         </VStack>
       </Flex>
     )
@@ -79,11 +65,11 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
       <HStack p={2} spacing={2} w={"full"} justifyContent={"space-between"} px={3.5} py={4}>
         <HStack spacing={3}>
           <Box h={14}>
-            <AddressIcon address={account ?? ""} borderRadius={"full"} />
+            <AddressIcon address={account?.address ?? ""} borderRadius={"full"} />
           </Box>
           <VStack spacing={0} align={"flex-start"}>
             <Text fontSize={18} fontWeight={600}>
-              {humanAddress(account ?? "", 4, 6)}
+              {humanAddress(account?.address ?? "", 4, 6)}
             </Text>
             <Text fontSize={12} fontWeight={400}>
               {t("View your Better Profile")}

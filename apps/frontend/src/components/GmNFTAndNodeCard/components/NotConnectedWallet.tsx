@@ -1,13 +1,11 @@
+import { ConnectWalletButton } from "@/components/ConnectWalletButton"
 import { WalletIcon } from "@/components/Icons/WalletIcon"
-import { Button, Card, Stack, Text, useMediaQuery } from "@chakra-ui/react"
-import { UilWallet } from "@iconscout/react-unicons"
-import { useWalletModal } from "@vechain/dapp-kit-react"
+import { Card, Stack, Text, useMediaQuery } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export const NotConnectedWallet = () => {
   const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
   const { t } = useTranslation()
-  const { open } = useWalletModal()
   return (
     <Card
       bg="#004CFC"
@@ -32,15 +30,7 @@ export const NotConnectedWallet = () => {
             </Text>
           </Stack>
         </Stack>
-        <Button
-          onClick={open}
-          leftIcon={<UilWallet size={"16px"} />}
-          variant={"whiteAction"}
-          rounded={"full"}
-          fontWeight={500}
-          px="24px">
-          {t("Connect Wallet")}
-        </Button>
+        <ConnectWalletButton />
       </Stack>
     </Card>
   )
