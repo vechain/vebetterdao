@@ -9,7 +9,6 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import dynamic from "next/dynamic"
 
-import { DappKitWithChakraProvider } from "@/providers/DappKitWithChakraProvider"
 import { lightTheme } from "./theme"
 import { AuthSessionProvider } from "@/providers/AuthSessionProvider"
 
@@ -26,11 +25,9 @@ export function Providers({ children }: { readonly children: React.ReactNode }) 
       <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
         <ReactQueryDevtools initialIsOpen={false} />
         <ChakraProvider theme={lightTheme}>
-          <DappKitWithChakraProvider>
-            <VechainKitProviderWrapper>
-              <AuthSessionProvider>{children}</AuthSessionProvider>
-            </VechainKitProviderWrapper>
-          </DappKitWithChakraProvider>
+          <VechainKitProviderWrapper>
+            <AuthSessionProvider>{children}</AuthSessionProvider>
+          </VechainKitProviderWrapper>
         </ChakraProvider>
       </PersistQueryClientProvider>
     </CacheProvider>
