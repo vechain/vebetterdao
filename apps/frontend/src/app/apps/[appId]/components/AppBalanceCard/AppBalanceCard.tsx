@@ -14,16 +14,17 @@ import {
 } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
-import { IoAddCircleOutline, IoWalletOutline } from "react-icons/io5"
+import { IoAddCircleOutline, IoWalletOutline, IoLockClosedOutline } from "react-icons/io5"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
-import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 import { WithdrawModal } from "./WithdrawModal"
 import { DepositModal } from "./DepositModal"
+import { LockAppTreasuryModal } from "./LockAppTreasuryModal"
 import { B3TRIcon, BaseTooltip } from "@/components"
 import { FiInfo } from "react-icons/fi"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useAccountAppPermissions } from "@/api"
 import { useMemo } from "react"
+import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -31,6 +32,7 @@ export const AppBalanceCard = () => {
   const { t } = useTranslation()
   const { isOpen: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
   const { isOpen: isOpenDeposit, onOpen: onOpenDeposit, onClose: onCloseDeposit } = useDisclosure()
+  const { isOpen: isOpenLock, onOpen: onOpenLock, onClose: onCloseLock } = useDisclosure()
   const { app } = useCurrentAppInfo()
   const { data: balance, isLoading: isBalanceLoading } = useAppBalance(app?.id ?? "")
   const { account } = useWallet()
@@ -75,16 +77,28 @@ export const AppBalanceCard = () => {
               {t("Deposit")}
             </Button>
             {isAppAdmin && (
-              <Button
-                mt={2}
-                isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading}
-                onClick={onOpenWithdraw}
-                variant={"primaryAction"}
-                borderRadius={"full"}
-                w={"full"}>
-                <Icon as={IoWalletOutline} mr={2} />
-                {t("Withdraw")}
-              </Button>
+              <>
+                <Button
+                  mt={2}
+                  isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading}
+                  onClick={onOpenWithdraw}
+                  variant={"primaryAction"}
+                  borderRadius={"full"}
+                  w={"full"}>
+                  <Icon as={IoWalletOutline} mr={2} />
+                  {t("Withdraw")}
+                </Button>
+                <Button
+                  mt={2}
+                  isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading}
+                  onClick={onOpenLock}
+                  variant={"primaryAction"}
+                  borderRadius={"full"}
+                  w={"full"}>
+                  <Icon as={IoLockClosedOutline} mr={2} />
+                  {t("Lock a treasury")}
+                </Button>
+              </>
             )}
           </VStack>
         </CardFooter>
@@ -99,6 +113,7 @@ export const AppBalanceCard = () => {
             isOpen={isOpenWithdraw}
             onClose={onCloseWithdraw}
           />
+          <LockAppTreasuryModal appId={app.id} isOpen={isOpenLock} onClose={onCloseLock} />
         </>
       )}
     </>

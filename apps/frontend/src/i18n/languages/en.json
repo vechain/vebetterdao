@@ -1412,5 +1412,13 @@
   "Current percentage: ": "Current percentage: ",
   "Allowance for Distribution :": "Allowance for Distribution :",
   "Locked Amount :": "Locked Amount :",
-  "Available Funds :": "Available Funds :"
+  "Available Funds :": "Available Funds :",
+  "Lock a treasury": "Lock a treasury",
+  "Lock B3TR tokens to secure the app's funds and enable rewards distribution.": "Lock B3TR tokens to secure the app's funds and enable rewards distribution.",
+  "App current B3TR locked": "App current B3TR locked",
+  "You'll lock": "You'll lock",
+  "Details": "Details",
+  "Locked funds percentage : {{values}}%": "Locked funds percentage : {{values}}%",
+  "Lock now": "Lock now",
+  "Lock B3TR to {{name}} app": "Lock B3TR to {{name}} app"
 }
