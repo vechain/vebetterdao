@@ -3,14 +3,15 @@ import { Text, VStack, HStack, Card, CardBody, useClipboard, IconButton, Stack, 
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { UilCopy, UilCheck } from "@iconscout/react-unicons"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 
 type Props = {
   address: string
 }
 
 export const ProfileHeader = ({ address }: Props) => {
-  const { domain } = useVechainDomain({ addressOrDomain: address ?? "" })
+  const { data: vnsData } = useVechainDomain(address ?? "")
+  const domain = vnsData?.domain
   const { onCopy } = useClipboard(address ?? "")
   const [isCopied, setIsCopied] = useState(false)
 

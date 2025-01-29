@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle, TransactionModal } from "@/components"
 import { useAcceptEntityLink } from "@/hooks"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 
 export const AcceptLinkingModal = ({
   modal,
@@ -26,7 +26,8 @@ export const AcceptLinkingModal = ({
   secondaryAccount: string
 }) => {
   const { t } = useTranslation()
-  const { domain } = useVechainDomain({ addressOrDomain: secondaryAccount || "" })
+  const { data: vnsData } = useVechainDomain(secondaryAccount || "")
+  const domain = vnsData?.domain
 
   const acceptLinking = useAcceptEntityLink({})
 

@@ -6,13 +6,14 @@ import dayjs from "dayjs"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ethers } from "ethers"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 
 const compactFormatter = getCompactFormatter(2)
 
 export const ProposalVoteComment = ({ vote }: { vote: ProposalComment }) => {
   const { t } = useTranslation()
-  const { domain: accountName } = useVechainDomain({ addressOrDomain: vote.voter })
+  const { data: vnsVoterData } = useVechainDomain(vote.voter)
+  const accountName = vnsVoterData?.domain
 
   const voteType = vote.support
 

@@ -7,7 +7,7 @@ import { Stack, HStack, VStack, Text, Button, useDisclosure } from "@chakra-ui/r
 import { QualificationBadge } from "../../QualificationBadges"
 import { UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { useCanUserVote } from "@/api"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 
 type Props = { address: string; isConnectedUser: boolean; delegationAddress: string }
 export const PendingDelegationItemDelegateePOV = ({ address, isConnectedUser, delegationAddress }: Props) => {
@@ -15,7 +15,8 @@ export const PendingDelegationItemDelegateePOV = ({ address, isConnectedUser, de
   //TODo: IS this right?
   const { isPerson, isLoading: isScoreLoading } = useCanUserVote(address, delegationAddress)
 
-  const { domain } = useVechainDomain({ addressOrDomain: delegationAddress })
+  const { data: vnsData } = useVechainDomain(delegationAddress)
+  const domain = vnsData?.domain
 
   const acceptDelegationModal = useDisclosure()
   const rejectDelegationModal = useDisclosure()

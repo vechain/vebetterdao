@@ -21,18 +21,18 @@ import { ProposalOverviewCommunitySupport } from "./components/ProposalOverviewC
 import { useTranslation } from "react-i18next"
 import { CastProposalVoteButton } from "./components/CastProposalVoteButton"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useProposalDetail } from "../../hooks"
 import { ProposalShareButton } from "./components/ProposalShareButton"
 import { ProposalStatusBadge, ProposalYourVote } from "@/components"
-import { useWallet } from "@vechain/vechain-kit"
 
 export const ProposalOverview = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
 
   const { proposal } = useProposalDetail()
-  const { domain: proposerName } = useVechainDomain({ addressOrDomain: proposal.proposer })
+  const { data: vnsData } = useVechainDomain(proposal.proposer)
+  const proposerName = vnsData?.domain
 
   return (
     <Card variant="baseWithBorder" w="full" borderRadius={"3xl"}>

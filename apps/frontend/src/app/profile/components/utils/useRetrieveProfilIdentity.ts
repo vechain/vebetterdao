@@ -1,9 +1,8 @@
 import { useParams, usePathname } from "next/navigation"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useMemo } from "react"
 import { humanDomain } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/vechain-kit"
 
 type Profile = {
   profile: string | undefined
@@ -25,9 +24,10 @@ export const useRetrieveProfilIdentity = (): Profile => {
   const isOnProfilePage = useMemo(() => (pathname ? pathname.includes("profile") : false), [pathname])
 
   const viewMode = isOnProfilePage && !!profile
-  const { domain: domainFromAccount } = useVechainDomain({ addressOrDomain: account?.address })
-  const { domain } = useVechainDomain({ addressOrDomain: profile })
-
+  const { data: vnsAccountData } = useVechainDomain(account?.address)
+  const domainFromAccount = vnsAccountData?.domain
+  const { data: vnsProfileData } = useVechainDomain(profile)
+  const domainFromProfile = vnsProfileData?.domain
   // if i'm in the profile page, but the 'profile' is empty, then I'm in the profile page of the connected user
   // see url be like : /profile?tab...
   if (!profile && isOnProfilePage && account?.address) {
@@ -43,7 +43,7 @@ export const useRetrieveProfilIdentity = (): Profile => {
   return {
     profile: profile,
     isConnectedUser,
-    domain: humanDomain(domain ?? "", 3, 10),
+    domain: humanDomain(domainFromProfile ?? "", 3, 10),
     isOnProfilePage,
     viewMode,
   }

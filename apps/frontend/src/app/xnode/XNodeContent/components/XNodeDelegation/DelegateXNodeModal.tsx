@@ -23,8 +23,7 @@ import {
 } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import { compareAddresses, isValid } from "@repo/utils/AddressUtils"
-import { useConnex, useVechainDomain } from "@vechain/dapp-kit-react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useConnex, useVechainDomain } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -51,9 +50,9 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   const delegateeAddressOrDomain = watch("walletAddress")
   const delegateXNode = useDelegateXNode({})
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
-  const { domain: delegateeDomain, address: delegateeAddress } = useVechainDomain({
-    addressOrDomain: delegateeAddressOrDomain,
-  })
+  const { data: vnsData } = useVechainDomain(delegateeAddressOrDomain)
+  const delegateeDomain = vnsData?.domain
+  const delegateeAddress = vnsData?.address
 
   const openConfirmationModal = useCallback(() => {
     confirmationModal.onOpen()

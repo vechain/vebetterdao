@@ -6,8 +6,7 @@ import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { UilTimes } from "@iconscout/react-unicons"
 import { RevokeDelegationDelegatorPOVModal } from "./components/RevokeDelegationDelegatorPOVModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 
 type Props = {
   address: string
@@ -22,7 +21,8 @@ export const DelegatorDelegations = ({ address }: Props) => {
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
   const isDelegator = !isDelegateeLoading && !!delegateeAddress
 
-  const { domain: delegateeDomain } = useVechainDomain({ addressOrDomain: delegateeAddress })
+  const { data: vnsData } = useVechainDomain(delegateeAddress)
+  const delegateeDomain = vnsData?.domain
 
   const revokeDelegationModal = useDisclosure()
 
