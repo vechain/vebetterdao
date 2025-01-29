@@ -23,8 +23,6 @@ export function VechainKitProviderWrapper({ children }: Props) {
 
   const appLogo = "https://i.ibb.co/ncysMF9/vechain-kit-logo-transparent.png"
 
-  const networkType = getConfig().network.type as "main" | "test" | "solo"
-
   return (
     <VeChainKitProvider
       privy={{
@@ -61,7 +59,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
       darkMode={isDarkMode}
       language={"en"}
       network={{
-        type: networkType,
+        type: getConfig().network.type,
       }}>
       {children}
     </VeChainKitProvider>
