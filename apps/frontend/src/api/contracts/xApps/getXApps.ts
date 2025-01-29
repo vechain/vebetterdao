@@ -6,6 +6,7 @@ const unendorsedAppsFragment = X2EarnApps.createInterface().getFunction("unendor
 const unendorsedAppsAbi = new abi.Function(JSON.parse(unendorsedAppsFragment))
 const allAppsFragment = X2EarnApps.createInterface().getFunction("apps").format("json")
 const allAppsAbi = new abi.Function(JSON.parse(allAppsFragment))
+const NEW_APP_TIMESTAMP_IN_SECOND = 604800 // Considering a new app is defined as 7 days
 
 /**
  * xApp type
@@ -21,6 +22,7 @@ export type XApp = {
   name: string
   metadataURI: string
   createdAtTimestamp: string
+  isNew: boolean
 }
 
 export type UnendorsedApp = XApp & {
@@ -39,6 +41,7 @@ type GetAllApps = {
   unendorsed: UnendorsedApp[]
   allApps: (XApp | UnendorsedApp)[]
   endorsed: XApp[]
+  newApps: XApp[]
 }
 export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
   const clauses = [
@@ -72,6 +75,7 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
         name: app[2],
         metadataURI: app[3],
         createdAtTimestamp: app[4],
+        isNew: Date.now() / 1000 - Number(app[4]) <= NEW_APP_TIMESTAMP_IN_SECOND,
       }))
     }
   }
@@ -93,10 +97,14 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
     (app, index, self) => self.findIndex(a => a.id === app.id) === index,
   ) // all apps is a union of active and unendorsed apps with deduplication
 
+  // all apps created within the last NEW_APP_TIMESTAMP_IN_SECOND
+  const newApps = apps.filter(app => Date.now() / 1000 - Number(app.createdAtTimestamp) <= NEW_APP_TIMESTAMP_IN_SECOND)
+
   return {
     allApps: allApps,
     active: apps,
     unendorsed: unendorsedApps,
     endorsed: apps.filter(app => !unendorsedApps.some(unendorsedApp => unendorsedApp.id === app.id)),
+    newApps: newApps,
   }
 }

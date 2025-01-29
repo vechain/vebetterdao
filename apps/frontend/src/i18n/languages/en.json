@@ -1414,5 +1414,10 @@
   "Error blacklisting user": "Error blacklisting user",
   "GitHub Username is required": "GitHub Username is required",
   "{{fieldName}} is too short": "{{fieldName}} is too short",
-  "{{fieldName}} is too long": "{{fieldName}} is too long"
+  "{{fieldName}} is too long": "{{fieldName}} is too long",
+  "New !": "New !",
+  "{{value}} has joined the DAO, take part in the new app now!": "{{value}} has joined the DAO, take part in the new app now!",
+  "{{name}} and {{count}} more have joined the DAO, take part in the new apps now!": "{{name}} and {{count}} more have joined the DAO, take part in the new apps now!",
+  "NEW APP AVAILABLE! 🎉": "NEW APP AVAILABLE! 🎉",
+  "Explore": "Explore"
 }
