@@ -9,8 +9,7 @@ import {
 } from "@/api"
 
 import { Button, Icon } from "@chakra-ui/react"
-import { useWalletModal } from "@vechain/dapp-kit-react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"

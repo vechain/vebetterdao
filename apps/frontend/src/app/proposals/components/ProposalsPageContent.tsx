@@ -5,12 +5,11 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
-import { useWalletModal } from "@vechain/dapp-kit-react"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
 import { useProposalFilters } from "@/store"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
-import { useWallet } from "@vechain/vechain-kit"
 
 export const ProposalsPageContent = () => {
   const { account } = useWallet()
