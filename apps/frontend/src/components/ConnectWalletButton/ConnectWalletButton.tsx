@@ -1,8 +1,9 @@
-import { Button, Fade, IconButton, Img, Skeleton, useMediaQuery } from "@chakra-ui/react"
+import { Button, Fade, IconButton, Skeleton, useMediaQuery } from "@chakra-ui/react"
 import { FaWallet } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 import dynamic from "next/dynamic"
 import { useWalletModal, useWallet } from "@vechain/vechain-kit"
+import { AddressIcon } from "../AddressIcon"
 
 const DesktopConnectedUserButton = dynamic(
   () => import("./components/DesktopConnectedUserButton").then(mod => mod.DesktopConnectedUserButton),
@@ -56,7 +57,7 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
         </Fade>
       )
 
-  if (shouldRenderDesktop) return <DesktopConnectedUserButton account={account?.address} />
+  if (shouldRenderDesktop) return <DesktopConnectedUserButton account={account} />
 
   return (
     <Fade in={true}>
@@ -65,16 +66,7 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
         rounded={"md"}
         border={"1px solid #EEEEEE"}
         bg={"rgba(255, 255, 255, 0.50)"}
-        icon={
-          <Img
-            data-cy={`address-icon-${account?.address}`}
-            objectFit={"cover"}
-            src={account?.image}
-            h={"100%"}
-            boxSize={6}
-            rounded={"full"}
-          />
-        }
+        icon={<AddressIcon address={account?.address} imageUrl={account?.image} />}
         aria-label="Connect wallet"
       />
     </Fade>

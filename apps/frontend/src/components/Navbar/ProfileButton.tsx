@@ -1,6 +1,6 @@
 import { Box, HStack, Text, VStack, Flex, Button, Image } from "@chakra-ui/react"
 import { AddressIcon } from "../AddressIcon"
-import { useWallet, useWalletModal } from "@vechain/vechain-kit"
+import { useWallet, useWalletModal, useVechainDomain } from "@vechain/vechain-kit"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { FaChevronRight } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
@@ -15,6 +15,8 @@ type Props = {
 
 export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
   const { account } = useWallet()
+  const { data: vnsData } = useVechainDomain(account?.address)
+  const domain = vnsData?.domain
   const { t } = useTranslation()
   const { open } = useWalletModal()
   const router = useRouter()
@@ -79,11 +81,11 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
       <HStack p={2} spacing={2} w={"full"} justifyContent={"space-between"} px={3.5} py={4}>
         <HStack spacing={3}>
           <Box h={14}>
-            <AddressIcon address={account?.address ?? ""} borderRadius={"full"} />
+            <AddressIcon address={account?.address ?? ""} imageUrl={account?.image} borderRadius={"full"} />
           </Box>
           <VStack spacing={0} align={"flex-start"}>
             <Text fontSize={18} fontWeight={600}>
-              {humanAddress(account?.address ?? "", 4, 6)}
+              {domain ?? humanAddress(account?.address ?? "", 4, 6)}
             </Text>
             <Text fontSize={12} fontWeight={400}>
               {t("View your Better Profile")}

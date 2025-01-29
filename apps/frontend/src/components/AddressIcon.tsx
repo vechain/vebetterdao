@@ -5,20 +5,22 @@ const { getPicassoImgSrc } = PicassoUtils
 
 export interface IAddressIcon extends HTMLChakraProps<"img"> {
   address: string
+  imageUrl?: string
 }
-export const AddressIcon: React.FC<IAddressIcon> = ({ address, ...props }) => {
-  return <Picasso address={address} {...props} />
+export const AddressIcon: React.FC<IAddressIcon> = ({ address, imageUrl, ...props }) => {
+  return <Picasso address={address} imageUrl={imageUrl} {...props} />
 }
 
 interface IPicasso extends HTMLChakraProps<"img"> {
   address: string
+  imageUrl?: string
 }
-const Picasso: React.FC<IPicasso> = ({ address, ...props }) => {
+const Picasso: React.FC<IPicasso> = ({ address, imageUrl, ...props }) => {
   return (
     <Img
       data-cy={`address-icon-${address}`}
       objectFit={"cover"}
-      src={getPicassoImgSrc(address)}
+      src={imageUrl ?? getPicassoImgSrc(address)}
       h={"100%"}
       {...props}
     />
