@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { getConfig } from "@repo/config"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { GalaxyMember__factory } from "@repo/contracts"
 
 const GALAXY_MEMBER_CONTRACT = getConfig().galaxyMemberContractAddress

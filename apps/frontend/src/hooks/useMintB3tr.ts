@@ -3,9 +3,8 @@ import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex } from "@vechain/dapp-kit-react"
 import { FormattingUtils } from "@repo/utils"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useConnex } from "@vechain/vechain-kit"
 
 type useMintB3trProps = {
   address?: string

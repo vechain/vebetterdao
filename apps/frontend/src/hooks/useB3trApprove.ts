@@ -1,10 +1,9 @@
 import { buildB3trApprovesTx } from "@/api"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useConnex } from "@vechain/dapp-kit-react"
 import { getB3TrAllowanceQueryKey } from "@/api/contracts/b3tr/hooks/useB3trAllowance"
 import { useQueryClient } from "@tanstack/react-query"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useConnex } from "@vechain/vechain-kit"
 
 type useB3trApproveProps = {
   spender: string

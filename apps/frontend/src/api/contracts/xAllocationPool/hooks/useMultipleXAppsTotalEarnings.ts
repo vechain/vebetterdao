@@ -1,5 +1,5 @@
 import { useQueryClient, useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { getXAppRoundEarningsQueryKey } from "./useXAppRoundEarnings"
 import { getXAppTotalEarningsClauses } from "./useXAppTotalEarnings"
 import { XAllocationPool__factory } from "@repo/contracts"

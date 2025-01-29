@@ -1,4 +1,4 @@
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 
 import { useQuery } from "@tanstack/react-query"
 import { getProposalsCreatedEvents } from ".."

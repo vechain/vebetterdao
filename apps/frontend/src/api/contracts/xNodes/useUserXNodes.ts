@@ -2,8 +2,7 @@ import { allNodeStrengthLevelToName, NodeStrengthLevelToImage } from "@/constant
 import { getConfig } from "@repo/config"
 import { NodeManagement__factory } from "@repo/contracts"
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useConnex } from "@vechain/vechain-kit"
 import { abi } from "thor-devkit"
 const NODEMANAGEMENT_CONTRACT = getConfig().nodeManagementContractAddress
 const getNodeIdsFragment = NodeManagement__factory.createInterface().getFunction("getNodeIds").format("json")

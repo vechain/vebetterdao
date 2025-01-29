@@ -1,8 +1,7 @@
-import { useConnex } from "@vechain/dapp-kit-react"
 import { useQuery } from "@tanstack/react-query"
 import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
 import { useMemo } from "react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useConnex } from "@vechain/vechain-kit"
 
 export const getUserProposalsVoteEventsQueryKey = (user?: string) => ["PROPOSALS", "ALL", "VOTES", user]
 

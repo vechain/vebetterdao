@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { getRoundRewardQueryKey } from "./useVotingRoundReward"
 import { VoterRewards__factory } from "@repo/contracts"
