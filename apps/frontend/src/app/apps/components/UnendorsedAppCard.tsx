@@ -51,6 +51,11 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
     router.push(`/apps/${xApp.id}`)
   }, [router, xApp.id])
 
+  const isNewApp = useMemo(() => {
+    if (!xApp || isXNodeLoading) return false
+    return xApp.isNew
+  }, [xApp, isXNodeLoading])
+
   return (
     <Card
       variant={"baseWithBorder"}
@@ -78,9 +83,24 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
 
             <Stack flex="1" align="stretch" justify="center">
               <Skeleton isLoaded={!appMetadataLoading}>
-                <Heading fontWeight={700} fontSize="20px" noOfLines={1}>
-                  {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
-                </Heading>
+                <HStack spacing={4}>
+                  <Heading fontWeight={700} fontSize="20px" noOfLines={1}>
+                    {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
+                  </Heading>
+                  {isNewApp && (
+                    <HStack
+                      fontWeight={700}
+                      color={"#3B3B3B"}
+                      bg={"#B1F16C"}
+                      px={2}
+                      py={1}
+                      borderRadius={"16px"}
+                      fontSize="12px">
+                      <Image src="/images/new-app-gray.svg" alt="new" />
+                      <Text>{t("New !")}</Text>
+                    </HStack>
+                  )}
+                </HStack>
               </Skeleton>
               <Skeleton isLoaded={!appMetadataLoading}>
                 <Text fontSize="14px" color="#6A6A6A" fontWeight={400} noOfLines={2}>
