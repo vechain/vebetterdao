@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "../../../../../test"
 import { AllocationRoundHeaderCard } from "./AllocationRoundHeaderCard"
 import * as apiHooks from "../../../../api"
-import * as dappKit from "@vechain/dapp-kit-react"
+import * as vechainKit from "@vechain/vechain-kit"
 import * as router from "next/navigation"
 import dayjs from "dayjs"
 import { APPS } from "../../../../../__mocks__/Apps"
@@ -137,7 +137,7 @@ describe("AllocationRoundHeaderCard", () => {
 
   it("no account - should render correctly", async () => {
     //@ts-ignore
-    vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
+    vi.spyOn(vechainKit, "useWallet").mockReturnValueOnce({
       account: null,
     })
     render(<AllocationRoundHeaderCard roundId={roundId} />)
