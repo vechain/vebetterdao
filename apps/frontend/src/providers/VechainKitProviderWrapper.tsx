@@ -52,7 +52,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
         allowedWallets: ["veworld", "wallet-connect", "sync2"],
       }}
       loginModalUI={{
-        variant: "vechain-wallet-ecosystem",
+        variant: "full",
         logo: appLogo,
         description: "Choose between social login through VeChain or by connecting your wallet.",
       }}
