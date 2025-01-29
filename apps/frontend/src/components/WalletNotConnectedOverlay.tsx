@@ -1,10 +1,12 @@
-import { Flex, Heading, Text, Box, Stack } from "@chakra-ui/react"
+import { Flex, Heading, Text, Box, Stack, Button } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { WalletIcon } from "./Icons/WalletIcon"
-import { ConnectWalletButton } from "./ConnectWalletButton"
+import { VeBetterIcon } from "./Icons/VeBetterIcon"
+import { useWalletModal } from "@vechain/vechain-kit"
 
 export const WalletNotConnectedOverlay = () => {
   const { t } = useTranslation()
+  const { open } = useWalletModal()
   return (
     <Flex
       borderRadius={"lg"}
@@ -37,7 +39,15 @@ export const WalletNotConnectedOverlay = () => {
             </Text>
           </Box>
         </Stack>
-        <ConnectWalletButton />
+        <Button
+          bg={"#E0E9FE"}
+          color="#004CFC"
+          leftIcon={<VeBetterIcon size={20} />}
+          rounded={"full"}
+          _hover={{ bg: "#E0E9FEDD" }}
+          onClick={open}>
+          {t("Connect Wallet")}
+        </Button>
       </Stack>
     </Flex>
   )

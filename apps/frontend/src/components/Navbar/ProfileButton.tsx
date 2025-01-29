@@ -1,13 +1,13 @@
-import { Box, HStack, Text, VStack, Flex, Image } from "@chakra-ui/react"
+import { Box, HStack, Text, VStack, Flex, Button, Image } from "@chakra-ui/react"
 import { AddressIcon } from "../AddressIcon"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { FaChevronRight } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { WalletIcon } from "../Icons/WalletIcon"
-import { ConnectWalletButton } from "../ConnectWalletButton"
+import { VeBetterIcon } from "../Icons/VeBetterIcon"
 
 type Props = {
   onMenuClose?: () => void
@@ -16,12 +16,18 @@ type Props = {
 export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
   const { account } = useWallet()
   const { t } = useTranslation()
+  const { open } = useWalletModal()
   const router = useRouter()
 
   const onClick = useCallback(() => {
     router.push("/profile")
     onMenuClose?.()
   }, [onMenuClose, router])
+
+  const handleConnectWallet = useCallback(() => {
+    open()
+    onMenuClose?.()
+  }, [open, onMenuClose])
 
   if (!account?.address)
     return (
@@ -55,7 +61,15 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
               </Text>
             </VStack>
           </HStack>
-          <ConnectWalletButton />
+          <Button
+            bg={"#E0E9FE"}
+            color="#004CFC"
+            leftIcon={<VeBetterIcon size={20} />}
+            rounded={"full"}
+            _hover={{ bg: "#E0E9FEDD" }}
+            onClick={handleConnectWallet}>
+            {t("Connect Wallet")}
+          </Button>
         </VStack>
       </Flex>
     )
