@@ -36,10 +36,11 @@ export const ParticipationScoreThreshold = () => {
   const { data: participationScoreThreshold } = useParticipationScoreThreshold()
   const { t } = useTranslation()
 
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
-    useSetParticipationThreshold({
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useSetParticipationThreshold(
+    {
       participationThreshold: threshold ?? 0,
-    })
+    },
+  )
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -113,7 +114,7 @@ export const ParticipationScoreThreshold = () => {
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={t(`Updating participation score threshold...`)}
         errorTitle={t("Error updating threshold")}
         errorDescription={error?.reason}

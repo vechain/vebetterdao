@@ -13,8 +13,7 @@ export const StartRoundButton = () => {
     return currentRound?.state === 0
   }, [currentRound])
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const { sendTransaction, isTransactionPending, resetStatus, status, error, txReceipt, sendTransactionTx } =
-    useDistributeEmission({})
+  const { sendTransaction, isTransactionPending, resetStatus, status, error, txReceipt } = useDistributeEmission({})
   const distributionLoading = isTransactionPending || status === "pending"
 
   const handleClose = useCallback(() => {
@@ -64,7 +63,7 @@ export const StartRoundButton = () => {
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle="Starting round..."
         errorTitle={"Error starting round"}
         errorDescription={error?.reason}

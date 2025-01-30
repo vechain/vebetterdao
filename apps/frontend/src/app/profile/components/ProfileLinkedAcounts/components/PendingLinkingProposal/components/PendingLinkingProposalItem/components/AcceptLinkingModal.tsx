@@ -55,7 +55,7 @@ export const AcceptLinkingModal = ({
         onTryAgain={() => acceptLinking.sendTransaction({ entity: secondaryAccount })}
         pendingTitle={t("Linking account...")}
         showExplorerButton
-        txId={acceptLinking.txReceipt?.meta.txID ?? acceptLinking.sendTransactionTx?.txid}
+        txId={acceptLinking.txReceipt?.meta.txID}
       />
     )
   }

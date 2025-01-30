@@ -52,7 +52,7 @@ export const RevokeDelegationDelegateePOVModal = ({
         onTryAgain={() => revokeDelegation.sendTransaction({})}
         pendingTitle={t("Revoking delegation...")}
         showExplorerButton
-        txId={revokeDelegation.txReceipt?.meta.txID ?? revokeDelegation.sendTransactionTx?.txid}
+        txId={revokeDelegation.txReceipt?.meta.txID}
       />
     )
   }

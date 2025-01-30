@@ -54,7 +54,7 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
         onTryAgain={onTryAgain}
         pendingTitle={"Selecting GM NFT..."}
         showExplorerButton
-        txId={selectGMMutation.txReceipt?.meta.txID ?? selectGMMutation.sendTransactionTx?.txid}
+        txId={selectGMMutation.txReceipt?.meta.txID}
       />
       <DetachGMToXNodeModal isOpen={detachGMModal.isOpen} onClose={detachGMModal.onClose} />
     </>

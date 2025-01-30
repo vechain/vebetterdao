@@ -46,11 +46,10 @@ export const B3trAllowance = () => {
     return allowedAmount?.scaled ?? "0"
   }, [allowedAmount])
 
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
-    useB3trApprove({
-      spender: spender ?? "",
-      amount: amount ?? 0,
-    })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useB3trApprove({
+    spender: spender ?? "",
+    amount: amount ?? 0,
+  })
 
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(spender)
@@ -189,7 +188,7 @@ export const B3trAllowance = () => {
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={t(`Updating B3TR tokens allowance...`)}
         errorTitle={t("Error updating allowance")}
         errorDescription={error?.reason}

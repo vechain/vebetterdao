@@ -46,7 +46,7 @@ export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosu
         onTryAgain={() => removeDelegation.sendTransaction({})}
         pendingTitle={t("Removing delegation request...")}
         showExplorerButton
-        txId={removeDelegation.txReceipt?.meta.txID ?? removeDelegation.sendTransactionTx?.txid}
+        txId={removeDelegation.txReceipt?.meta.txID}
       />
     )
   }

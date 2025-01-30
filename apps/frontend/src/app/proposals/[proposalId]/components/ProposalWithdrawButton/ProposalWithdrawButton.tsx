@@ -36,7 +36,7 @@ export const ProposalWithdrawButton = () => {
         errorTitle={withdrawMutation.error ? t("Error Withdrawing") : undefined}
         pendingTitle={t("Withdrawing...")}
         showExplorerButton
-        txId={withdrawMutation.txReceipt?.meta.txID ?? withdrawMutation.sendTransactionTx?.txid}
+        txId={withdrawMutation.txReceipt?.meta.txID}
       />
       <Button variant="primaryAction" onClick={withdraw}>
         {t("Claim your tokens back")}

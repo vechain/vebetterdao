@@ -95,7 +95,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     [availableB3trToWithdrawScaled],
   )
 
-  const { sendTransaction, resetStatus, status, error, txReceipt, sendTransactionTx } = useWithdrawAppBalance({
+  const { sendTransaction, resetStatus, status, error, txReceipt } = useWithdrawAppBalance({
     appId,
     amount,
     reason: reason === "Other" ? customReason : reason,
@@ -313,7 +313,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         pendingTitle={t("Withdrawing...")}
         showExplorerButton
         isAppWithdraw
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         b3trAmount={amount}
         b3trBalanceAfterSwap={b3trBalanceAfterSwap}
         b3trBalance={availableB3trToWithdrawScaled}

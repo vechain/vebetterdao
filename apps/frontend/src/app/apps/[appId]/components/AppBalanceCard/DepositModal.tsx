@@ -100,7 +100,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
     [availableB3trToDepositScaled],
   )
 
-  const { sendTransaction, resetStatus, status, error, txReceipt, sendTransactionTx } = useDepositToAppBalance({
+  const { sendTransaction, resetStatus, status, error, txReceipt } = useDepositToAppBalance({
     appId,
     amount,
   })
@@ -236,7 +236,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         pendingTitle={t("Depositing...")}
         showExplorerButton
         isAppDeposit
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         b3trAmount={amount}
         b3trBalanceAfterSwap={appBalanceAfterSwap}
         b3trBalance={appBalanceScaled}

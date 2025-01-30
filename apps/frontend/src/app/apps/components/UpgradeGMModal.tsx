@@ -94,7 +94,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
         onTryAgain={onTryAgain}
         pendingTitle={"Upgrading GM NFT..."}
         showExplorerButton
-        txId={upgradeGMMutation.txReceipt?.meta.txID ?? upgradeGMMutation.sendTransactionTx?.txid}
+        txId={upgradeGMMutation.txReceipt?.meta.txID}
       />
     )
 

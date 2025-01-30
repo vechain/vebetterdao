@@ -55,7 +55,7 @@ export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; on
           "🔄 Just supported a proposal on #VeBetterDAO! \n\n🌱 Explore and join us at https://vebetterdao.org.\n\n#VeBetterDAO #Vechain",
         )}
         showExplorerButton
-        txId={depositMutation.txReceipt?.meta.txID ?? depositMutation.sendTransactionTx?.txid}
+        txId={depositMutation.txReceipt?.meta.txID}
       />
     )
 

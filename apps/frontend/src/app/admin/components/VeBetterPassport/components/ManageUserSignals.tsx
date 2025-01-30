@@ -35,7 +35,6 @@ export const ManageUserSignals = () => {
     status: resetStatus,
     error: resetError,
     txReceipt: resetTxReceipt,
-    sendTransactionTx: resetTxTransaction,
   } = useResetUserBotSignals({
     address: user,
     reason,
@@ -49,7 +48,6 @@ export const ManageUserSignals = () => {
     status: signalStatus,
     error: signalError,
     txReceipt: signalTxReceipt,
-    sendTransactionTx: signalTxTransaction,
   } = useSignalBotUser({
     address: user,
     reason,
@@ -192,12 +190,7 @@ export const ManageUserSignals = () => {
         onTryAgain={resetStatus === "error" ? handleResetSignalsSubmit : handleSignalUserSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={
-          resetTxReceipt?.meta.txID ??
-          signalTxReceipt?.meta.txID ??
-          resetTxTransaction?.txid ??
-          signalTxTransaction?.txid
-        }
+        txId={resetTxReceipt?.meta.txID ?? signalTxReceipt?.meta.txID}
         pendingTitle={pendingTitle}
         errorTitle={errorTitle}
         errorDescription={resetError?.reason || signalError?.reason}

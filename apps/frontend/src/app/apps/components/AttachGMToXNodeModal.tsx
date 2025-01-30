@@ -86,7 +86,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         onTryAgain={handleAttachment}
         pendingTitle={"Attaching GM to XNode..."}
         showExplorerButton
-        txId={attachGMToXNodeMutation.txReceipt?.meta.txID ?? attachGMToXNodeMutation.sendTransactionTx?.txid}
+        txId={attachGMToXNodeMutation.txReceipt?.meta.txID}
       />
     )
 

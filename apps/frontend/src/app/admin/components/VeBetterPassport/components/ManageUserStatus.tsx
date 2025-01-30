@@ -36,12 +36,11 @@ export const ManageUserStatus = () => {
   const statusConfig = useUserStatusConfig()
   const currentConfig = statusConfig[actionType]
 
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
-    useWhitelistBlacklistUser({
-      address: user,
-      currentStatus: userStatus,
-      newStatus: actionType,
-    })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useWhitelistBlacklistUser({
+    address: user,
+    currentStatus: userStatus,
+    newStatus: actionType,
+  })
 
   const handleSetActionType = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setActionType(e.target.value as UserStatus)
@@ -122,7 +121,7 @@ export const ManageUserStatus = () => {
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={currentConfig.modalPendingTitle}
         errorTitle={currentConfig.modalErrorTitle}
         errorDescription={error?.reason}

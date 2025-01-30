@@ -27,11 +27,10 @@ export const AppSecurity = () => {
   const { data: selectedAppSecurityLevel } = useAppSecurityLevel(appId ?? "")
   const { t } = useTranslation()
 
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
-    useUpdateAppSecurityLevel({
-      appId: appId ?? "",
-      securityLevel: appSecurityLevel ?? 0,
-    })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useUpdateAppSecurityLevel({
+    appId: appId ?? "",
+    securityLevel: appSecurityLevel ?? 0,
+  })
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -121,7 +120,7 @@ export const AppSecurity = () => {
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={t(`Registering user action...`)}
         errorTitle={t("Error registering action")}
         errorDescription={error?.reason}

@@ -87,13 +87,7 @@ export const ClaimXAppAllocations = () => {
 
   const modalContent = useMemo(() => {
     if (status === "success") {
-      return (
-        <SuccessModalContent
-          title={"Allocations claimed"}
-          showExplorerButton
-          txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
-        />
-      )
+      return <SuccessModalContent title={"Allocations claimed"} showExplorerButton txId={txReceipt?.meta.txID} />
     }
 
     if (isLoading)
@@ -114,7 +108,7 @@ export const ClaimXAppAllocations = () => {
           </VStack>{" "}
         </ModalBody>
       )
-  }, [status, isLoading, isTransactionPending, txReceipt, sendTransactionTx, t])
+  }, [status, isLoading, isTransactionPending, txReceipt, t])
 
   return (
     <>

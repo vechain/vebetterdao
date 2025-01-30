@@ -98,7 +98,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         onTryAgain={handleEndorsement}
         pendingTitle={"Endorsing app..."}
         showExplorerButton
-        txId={endorseAppMutation.txReceipt?.meta.txID ?? endorseAppMutation.sendTransactionTx?.txid}
+        txId={endorseAppMutation.txReceipt?.meta.txID}
         endorsementInfo={endorsementInfo}
       />
     )

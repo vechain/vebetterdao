@@ -50,13 +50,12 @@ export const UpdateAppsEligibility = () => {
 
 const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; isEligible: boolean }) => {
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
-    useSetVotingEligibility({
-      appId: id,
-      isEligible: !isEligible,
-      appName: name,
-      invalidateCache: true,
-    })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useSetVotingEligibility({
+    appId: id,
+    isEligible: !isEligible,
+    appName: name,
+    invalidateCache: true,
+  })
 
   const handleEligibilityChange = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -94,7 +93,7 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
         onTryAgain={handleEligibilityChange}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={
           isEligible ? `Enabling voting eligibility for ${name}...` : `Disabling voting eligibility for ${name}...`
         }

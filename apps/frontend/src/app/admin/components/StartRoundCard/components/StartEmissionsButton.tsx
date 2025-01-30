@@ -9,8 +9,7 @@ export const StartEmissionsButton = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { isOpen, onClose, onOpen } = useDisclosure()
   const { t } = useTranslation()
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
-    useStartEmission({})
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useStartEmission({})
 
   const handleStartEmissions = useCallback(() => {
     sendTransaction(undefined)
@@ -45,7 +44,7 @@ export const StartEmissionsButton = () => {
         onTryAgain={handleStartEmissions}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle="Starting emissions and rounds..."
         errorTitle={"Error starting emissions and rounds"}
         errorDescription={error?.reason}

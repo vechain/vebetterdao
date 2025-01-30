@@ -50,7 +50,7 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
         onTryAgain={handleUnendorsement}
         pendingTitle={t("Removing endorsement...")}
         showExplorerButton
-        txId={rmNodeEndorsementMutation.txReceipt?.meta.txID ?? rmNodeEndorsementMutation.sendTransactionTx?.txid}
+        txId={rmNodeEndorsementMutation.txReceipt?.meta.txID}
       />
     )
 

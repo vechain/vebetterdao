@@ -69,7 +69,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
         onTryAgain={() => delegatePassport.sendTransaction({ delegatee })}
         pendingTitle={t("Delegating...")}
         showExplorerButton
-        txId={delegatePassport.txReceipt?.meta.txID ?? delegatePassport.sendTransactionTx?.txid}
+        txId={delegatePassport.txReceipt?.meta.txID}
       />
     )
   }

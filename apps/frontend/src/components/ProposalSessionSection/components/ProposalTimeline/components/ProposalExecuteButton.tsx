@@ -57,7 +57,7 @@ export const ProposalExecuteButton = () => {
         errorTitle={executeMutation.error ? t("Error executing proposal") : undefined}
         pendingTitle={t("Executing...")}
         showExplorerButton
-        txId={executeMutation.txReceipt?.meta.txID ?? executeMutation.sendTransactionTx?.txid}
+        txId={executeMutation.txReceipt?.meta.txID}
       />
     </Box>
   )

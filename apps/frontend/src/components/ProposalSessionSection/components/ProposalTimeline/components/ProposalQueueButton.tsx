@@ -31,7 +31,7 @@ export const ProposalQueueButton = () => {
         errorTitle={queueMutation.error ? t("Error queueing proposal") : undefined}
         pendingTitle={t("Queueing...")}
         showExplorerButton
-        txId={queueMutation.txReceipt?.meta.txID ?? queueMutation.sendTransactionTx?.txid}
+        txId={queueMutation.txReceipt?.meta.txID}
       />
     </>
   )

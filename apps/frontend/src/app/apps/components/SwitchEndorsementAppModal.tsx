@@ -90,7 +90,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
         onTryAgain={handleSwitchEndorsement}
         pendingTitle={t("Switching Endorsement...")}
         showExplorerButton
-        txId={switchEndorsementMutation.txReceipt?.meta.txID ?? switchEndorsementMutation.sendTransactionTx?.txid}
+        txId={switchEndorsementMutation.txReceipt?.meta.txID}
       />
     )
 

@@ -119,7 +119,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
         onTryAgain={() => delegateXNode.sendTransaction({ delegatee: delegateeAddressOrDomain })}
         pendingTitle={t("Delegating Node...")}
         showExplorerButton
-        txId={delegateXNode.txReceipt?.meta.txID ?? delegateXNode.sendTransactionTx?.txid}
+        txId={delegateXNode.txReceipt?.meta.txID}
       />
     )
   }

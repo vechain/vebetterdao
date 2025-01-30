@@ -73,10 +73,9 @@ type PassportCheckProps = {
 
 const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) => {
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
-    useTogglePassportCheck({
-      checkToToggle,
-    })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useTogglePassportCheck({
+    checkToToggle,
+  })
 
   const handleToggle = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -112,7 +111,7 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
         onTryAgain={handleToggle}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={isEnabled ? `Enabling ${name}...` : `Disabling ${name}...`}
         errorTitle={"Error toggling check"}
         errorDescription={error?.reason}

@@ -64,7 +64,7 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
         onTryAgain={handleUnendorsement}
         pendingTitle={"Unendorsing app..."}
         showExplorerButton
-        txId={unendorseAppMutation.txReceipt?.meta.txID ?? unendorseAppMutation.sendTransactionTx?.txid}
+        txId={unendorseAppMutation.txReceipt?.meta.txID}
         endorsementInfo={endorsementInfo}
       />
     )

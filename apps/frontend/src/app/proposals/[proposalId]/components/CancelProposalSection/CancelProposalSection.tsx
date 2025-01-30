@@ -118,7 +118,7 @@ export const CancelProposalSection = () => {
         onTryAgain={handleCancelProposal}
         showTryAgainButton
         showExplorerButton
-        txId={cancelProposalMutation.txReceipt?.meta.txID ?? cancelProposalMutation.sendTransactionTx?.txid}
+        txId={cancelProposalMutation.txReceipt?.meta.txID}
         pendingTitle={t("Cancelling proposal...")}
         errorTitle={t("Error cancelling proposal")}
         errorDescription={cancelProposalMutation.error?.reason}

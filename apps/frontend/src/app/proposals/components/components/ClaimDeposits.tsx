@@ -32,7 +32,7 @@ export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props
     return proposals
   }, [userProposalDeposits])
 
-  const { sendTransaction, resetStatus, status, txReceipt, sendTransactionTx, error } = useWithdrawDeposits({
+  const { sendTransaction, resetStatus, status, txReceipt, error } = useWithdrawDeposits({
     proposalDeposits: userProposalsDeposited,
   })
 
@@ -88,7 +88,7 @@ export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props
         errorTitle={error ? t("Error Withdrawing") : undefined}
         pendingTitle={t("Withdrawing...")}
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
       />
     </>
   )

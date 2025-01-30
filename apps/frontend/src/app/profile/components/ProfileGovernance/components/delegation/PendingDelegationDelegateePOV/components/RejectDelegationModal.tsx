@@ -46,7 +46,7 @@ export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
         onTryAgain={() => rejectDelegation.sendTransaction({ delegator })}
         pendingTitle={t("Rejecting delegation...")}
         showExplorerButton
-        txId={rejectDelegation.txReceipt?.meta.txID ?? rejectDelegation.sendTransactionTx?.txid}
+        txId={rejectDelegation.txReceipt?.meta.txID}
       />
     )
   }

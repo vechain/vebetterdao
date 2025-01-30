@@ -46,12 +46,11 @@ export const RegisterUserAction = () => {
   const { data: xApps } = useXApps()
   const { t } = useTranslation()
 
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
-    useRegisterUserAction({
-      address: user,
-      appId: appId ?? "",
-      roundId: round ?? 0,
-    })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useRegisterUserAction({
+    address: user,
+    appId: appId ?? "",
+    roundId: round ?? 0,
+  })
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -157,7 +156,7 @@ export const RegisterUserAction = () => {
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={t(`Registering user action...`)}
         errorTitle={t("Error registering action")}
         errorDescription={error?.reason}

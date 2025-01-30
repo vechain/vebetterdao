@@ -26,10 +26,9 @@ export const XAppCheckEndorsement = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
-  const { sendTransaction, resetStatus, isTransactionPending, status, txReceipt, sendTransactionTx, error } =
-    useCheckEndorsement({
-      appId: appId ?? "",
-    })
+  const { sendTransaction, resetStatus, isTransactionPending, status, txReceipt, error } = useCheckEndorsement({
+    appId: appId ?? "",
+  })
   const isLoading = isTransactionPending || status === "pending"
 
   const handleSubmit = useCallback(
@@ -118,7 +117,7 @@ export const XAppCheckEndorsement = () => {
         onTryAgain={handleCheckEndorsement}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={t("Checking endorsement...")}
         errorTitle={t("Error checking endorsement")}
         errorDescription={error?.reason}

@@ -139,7 +139,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
         onTryAgain={onTryAgain}
         showTryAgainButton
         showExplorerButton
-        txId={castAllocationVotes.txReceipt?.meta.txID ?? castAllocationVotes.sendTransactionTx?.txid}
+        txId={castAllocationVotes.txReceipt?.meta.txID}
         isSuccessBeenTrack={true}
       />
 

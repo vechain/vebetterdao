@@ -27,12 +27,13 @@ export const UpdateReceiverAddress = () => {
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
 
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
-    useUpdateXAppReceiverAddress({
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useUpdateXAppReceiverAddress(
+    {
       appId: appId ?? "",
       newAddress,
       invalidateCache: true,
-    })
+    },
+  )
   const isLoading = isTransactionPending || status === "pending"
 
   const handleSubmit = useCallback(
@@ -136,7 +137,7 @@ export const UpdateReceiverAddress = () => {
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={`Updating team wallet address...`}
         errorTitle={"Error updating address"}
         errorDescription={error?.reason}

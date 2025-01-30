@@ -39,7 +39,7 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
         onTryAgain={() => linkEntityToPassport.sendTransaction({ passport: accountToConnect })}
         pendingTitle={t("Linking account...")}
         showExplorerButton
-        txId={linkEntityToPassport.txReceipt?.meta.txID ?? linkEntityToPassport.sendTransactionTx?.txid}
+        txId={linkEntityToPassport.txReceipt?.meta.txID}
       />
     )
   }
