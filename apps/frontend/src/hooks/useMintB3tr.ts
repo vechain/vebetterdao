@@ -74,7 +74,7 @@ export const useMintB3tr = ({
   }, [invalidateCache, queryClient, toast, onSuccess, account?.address, amount, address])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
   })

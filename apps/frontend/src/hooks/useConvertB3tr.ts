@@ -102,7 +102,7 @@ export const useConvertB3tr = ({
   }, [invalidateCache, queryClient, onSuccess, account?.address])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
     // suggestedMaxGas,

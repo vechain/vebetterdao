@@ -75,7 +75,7 @@ export const useCreateProposal = ({
   }, [invalidateCache, queryClient, onSuccess])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
   })
 

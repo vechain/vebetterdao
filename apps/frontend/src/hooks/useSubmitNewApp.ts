@@ -81,7 +81,7 @@ export const useSubmitNewApp = ({ onSuccess, invalidateCache = true }: useSubmit
   }, [invalidateCache, onSuccess, queryClient])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
   })
 

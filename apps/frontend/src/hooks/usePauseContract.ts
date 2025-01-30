@@ -158,12 +158,12 @@ export const usePauseContract = ({ contract, contractName, onSuccess, invalidate
   }, [toast, onSuccess, contractName, performCacheInvalidation])
 
   const pauseTxResult = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccessPause,
   })
 
   const unpauseTxResult = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccessUnpause,
   })
 

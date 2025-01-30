@@ -132,7 +132,7 @@ export const useCastAllocationVotes = ({
   }, [invalidateCache, queryClient, onSuccess, account?.address, roundId])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
     // suggestedMaxGas,
   })

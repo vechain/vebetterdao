@@ -62,12 +62,12 @@ export const useAdminCreatorNFT = ({ walletAddress, tokenId, onSuccess, invalida
   }, [performCacheInvalidation, onSuccess])
 
   const mintNFT: UseSendTransactionReturnValue = useSendTransaction({
-    signerAccount: signerAccount?.address,
+    signerAccountAddress: signerAccount?.address,
     onTxConfirmed: handleOnSuccess,
   })
 
   const burnNFT: UseSendTransactionReturnValue = useSendTransaction({
-    signerAccount: signerAccount?.address,
+    signerAccountAddress: signerAccount?.address,
     onTxConfirmed: handleOnSuccess,
   })
 

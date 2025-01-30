@@ -74,7 +74,7 @@ export const useClaimXAppsAllocations = ({
   }, [account?.address, invalidateCache, onSuccess, queryClient, appIds, roundId, config])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
     onTxFailedOrCancelled: onFailure,
   })

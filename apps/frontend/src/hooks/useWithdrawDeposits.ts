@@ -76,7 +76,7 @@ export const useWithdrawDeposits = ({
   }, [account, invalidateCache, onSuccess, proposalDeposits, queryClient])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
     onTxFailedOrCancelled: onFailure,
   })

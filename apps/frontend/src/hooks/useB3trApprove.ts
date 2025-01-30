@@ -45,7 +45,7 @@ export const useB3trApprove = ({
   }, [invalidateCache, onSuccess, account?.address, spender, queryClient])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
   })

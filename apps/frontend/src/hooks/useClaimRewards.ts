@@ -70,7 +70,7 @@ export const useClaimRewards = ({
   }, [account, invalidateCache, onSuccess, queryClient])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
     onTxFailedOrCancelled: onFailure,
     // suggestedMaxGas,

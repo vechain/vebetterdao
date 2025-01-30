@@ -52,7 +52,7 @@ export const useBuildTransaction = <ClausesParams>({
   }, [invalidateCache, onSuccess, queryClient, refetchQueryKeys])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
     suggestedMaxGas,
     onTxFailedOrCancelled: onFailure,

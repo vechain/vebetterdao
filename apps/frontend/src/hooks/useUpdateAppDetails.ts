@@ -75,7 +75,7 @@ export const useUpdateAppDetails = ({
   }, [invalidateCache, onSuccess, queryClient, app?.metadataURI])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
   })
 

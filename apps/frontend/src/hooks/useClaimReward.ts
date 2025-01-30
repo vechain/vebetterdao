@@ -63,7 +63,7 @@ export const useClaimReward = ({
   }, [account?.address, invalidateCache, onSuccess, queryClient, roundId])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
     onTxFailedOrCancelled: onFailure,
   })

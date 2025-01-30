@@ -63,7 +63,7 @@ export const useDelegateVot3 = ({
   }, [invalidateCache, queryClient, toast, onSuccess, account?.address, address])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
   })

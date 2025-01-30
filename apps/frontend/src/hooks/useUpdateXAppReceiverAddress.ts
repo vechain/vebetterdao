@@ -55,7 +55,7 @@ export const useUpdateXAppReceiverAddress = ({
   }, [invalidateCache, queryClient, onSuccess])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
   })

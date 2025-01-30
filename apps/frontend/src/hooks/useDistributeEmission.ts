@@ -91,7 +91,7 @@ export const useDistributeEmission = ({
   }, [invalidateCache, queryClient, onSuccess, currendRoundId])
 
   const result = useSendTransaction({
-    signerAccount: account?.address,
+    signerAccountAddress: account?.address,
     clauses: buildClauses,
     onTxConfirmed: handleOnSuccess,
   })
