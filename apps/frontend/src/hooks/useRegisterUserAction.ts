@@ -1,4 +1,4 @@
-import { UseSendTransactionReturnValue } from ".@vechain/vechain-kit"
+import { UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"

@@ -63,7 +63,7 @@ export const useBuildTransaction = <ClausesParams>({
    * @param props - The parameters to be passed to the `clauseBuilder` function.
    */
   const sendTransaction = useCallback(
-    (props: ClausesParams) => {
+    async (props: ClausesParams) => {
       result.sendTransaction(clauseBuilder(props))
     },
     [clauseBuilder, result],
