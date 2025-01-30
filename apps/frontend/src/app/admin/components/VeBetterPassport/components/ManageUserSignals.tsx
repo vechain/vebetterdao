@@ -54,7 +54,7 @@ export const ManageUserSignals = () => {
     address: user,
     reason,
   })
-  const isResetPending = signalStatus === "pending"
+  const isSignalPending = signalStatus === "pending"
 
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(user)
