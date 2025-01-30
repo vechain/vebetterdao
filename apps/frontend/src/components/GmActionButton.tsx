@@ -40,7 +40,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   const {
     sendTransaction: freeMint,
     resetStatus: resetFreeMintStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
   } = useMintNFT({
     onFailure: () => {
@@ -202,7 +202,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       {actionButton}
       <MintNFTModal
         mintNftModal={mintNftModal}
-        isTxReceiptLoading={isTxReceiptLoading}
+        isTransactionPending={isTransactionPending}
         sendTransactionPending={sendTransactionPending}
       />
       <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />

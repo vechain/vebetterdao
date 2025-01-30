@@ -29,7 +29,7 @@ export const XAppCheckEndorsement = () => {
   const {
     sendTransaction,
     resetStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     status,
     txReceipt,
@@ -38,7 +38,7 @@ export const XAppCheckEndorsement = () => {
   } = useCheckEndorsement({
     appId: appId ?? "",
   })
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || sendTransactionPending
 
   const handleSubmit = useCallback(
     (event: { preventDefault: () => void }) => {

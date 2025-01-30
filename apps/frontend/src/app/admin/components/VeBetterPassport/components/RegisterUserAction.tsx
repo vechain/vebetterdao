@@ -49,7 +49,7 @@ export const RegisterUserAction = () => {
   const {
     sendTransaction,
     resetStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     status,
     error,
@@ -76,7 +76,7 @@ export const RegisterUserAction = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || sendTransactionPending
   const isFormValid = useMemo(() => isValidAddress && appId !== undefined && appId !== "", [appId, isValidAddress])
 
   return (

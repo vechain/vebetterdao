@@ -76,7 +76,7 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
   const {
     sendTransaction,
     resetStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     status,
     error,
@@ -108,7 +108,7 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
         <Switch
           isChecked={isEnabled}
           onChange={event => handleToggle(event)}
-          disabled={isTxReceiptLoading || sendTransactionPending}
+          disabled={isTransactionPending || sendTransactionPending}
         />
       </HStack>
       <Divider />

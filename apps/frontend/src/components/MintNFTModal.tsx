@@ -29,13 +29,13 @@ const MotionImage = motion(Image)
 type Props = {
   mintNftModal: UseDisclosureReturn
   sendTransactionPending: boolean
-  isTxReceiptLoading: boolean
+  isTransactionPending: boolean
 }
 
 export const MintNFTModal = ({
   mintNftModal: { isOpen, onClose },
   sendTransactionPending,
-  isTxReceiptLoading,
+  isTransactionPending,
 }: Props) => {
   const { account } = useWallet()
 
@@ -60,7 +60,7 @@ export const MintNFTModal = ({
               {t("Please confirm the transaction in your wallet")}
             </Text>
           )}
-          {(isLoadingNFT || isTxReceiptLoading) && (
+          {(isLoadingNFT || isTransactionPending) && (
             <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
               {t("Almost there...")}
             </Text>
@@ -123,7 +123,7 @@ export const MintNFTModal = ({
         </ModalFooter>
       </ModalContent>
     )
-  }, [showLoader, isClaimLoading, t, isLoadingNFT, isTxReceiptLoading, imageData?.image, tokenID])
+  }, [showLoader, isClaimLoading, t, isLoadingNFT, isTransactionPending, imageData?.image, tokenID])
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} trapFocus={false} isCentered={true}>

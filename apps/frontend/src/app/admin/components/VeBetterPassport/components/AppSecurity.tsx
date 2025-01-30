@@ -30,7 +30,7 @@ export const AppSecurity = () => {
   const {
     sendTransaction,
     resetStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     status,
     error,
@@ -56,7 +56,7 @@ export const AppSecurity = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || sendTransactionPending
   const isFormValid = useMemo(
     () => appSecurityLevel && appSecurityLevel !== selectedAppSecurityLevel,
     [appSecurityLevel, selectedAppSecurityLevel],

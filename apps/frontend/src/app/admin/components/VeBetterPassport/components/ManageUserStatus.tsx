@@ -39,7 +39,7 @@ export const ManageUserStatus = () => {
   const {
     sendTransaction,
     resetStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     status,
     error,
@@ -69,7 +69,7 @@ export const ManageUserStatus = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || sendTransactionPending
   const isFormValid = isValidAddress
 
   return (

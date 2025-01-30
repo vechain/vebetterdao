@@ -43,29 +43,29 @@ export const Pause: React.FC = () => {
 
   const isToggleB3trPausedLoading =
     isB3trPausedLoading ||
-    pauseB3trTxResult.isTxReceiptLoading ||
-    unpauseB3trTxResult.isTxReceiptLoading ||
+    pauseB3trTxResult.isTransactionPending ||
+    unpauseB3trTxResult.isTransactionPending ||
     pauseB3trTxResult.sendTransactionPending ||
     unpauseB3trTxResult.sendTransactionPending
 
   const isToggleVot3PausedLoading =
     isVot3PausedLoading ||
-    pauseVot3TxResult.isTxReceiptLoading ||
-    unpauseVot3TxResult.isTxReceiptLoading ||
+    pauseVot3TxResult.isTransactionPending ||
+    unpauseVot3TxResult.isTransactionPending ||
     pauseVot3TxResult.sendTransactionPending ||
     unpauseVot3TxResult.sendTransactionPending
 
   const isToggleGalaxyMemberPausedLoading =
     isGalaxyMemberPausedLoading ||
-    pauseGalaxyMemberTxResult.isTxReceiptLoading ||
-    unpauseGalaxyMemberTxResult.isTxReceiptLoading ||
+    pauseGalaxyMemberTxResult.isTransactionPending ||
+    unpauseGalaxyMemberTxResult.isTransactionPending ||
     pauseGalaxyMemberTxResult.sendTransactionPending ||
     unpauseGalaxyMemberTxResult.sendTransactionPending
 
   const isToggleB3TRGovernorPausedLoading =
     isB3TRGovernorPausedLoading ||
-    pauseB3TRGovernorTxResult.isTxReceiptLoading ||
-    unpauseB3TRGovernorTxResult.isTxReceiptLoading ||
+    pauseB3TRGovernorTxResult.isTransactionPending ||
+    unpauseB3TRGovernorTxResult.isTransactionPending ||
     pauseB3TRGovernorTxResult.sendTransactionPending ||
     unpauseB3TRGovernorTxResult.sendTransactionPending
 

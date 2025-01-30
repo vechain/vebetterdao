@@ -58,7 +58,7 @@ export const ClaimXAppAllocations = () => {
   const {
     sendTransaction,
     resetStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     status,
     txReceipt,
@@ -67,7 +67,7 @@ export const ClaimXAppAllocations = () => {
     roundId: roundId?.toString() ?? "",
     appIds: appId ? [appId] : [],
   })
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || sendTransactionPending
 
   const handleSubmit = useCallback(
     (event: { preventDefault: () => void }) => {
@@ -114,7 +114,7 @@ export const ClaimXAppAllocations = () => {
                 {t("Please confirm the transaction in your wallet")}
               </Text>
             )}
-            {isTxReceiptLoading && (
+            {isTransactionPending && (
               <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
                 {t("Almost there...")}
               </Text>
@@ -122,7 +122,7 @@ export const ClaimXAppAllocations = () => {
           </VStack>{" "}
         </ModalBody>
       )
-  }, [status, isLoading, isTxReceiptLoading, sendTransactionPending, txReceipt, sendTransactionTx, t])
+  }, [status, isLoading, isTransactionPending, sendTransactionPending, txReceipt, sendTransactionTx, t])
 
   return (
     <>

@@ -49,7 +49,7 @@ export const B3trAllowance = () => {
   const {
     sendTransaction,
     resetStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     status,
     error,
@@ -88,7 +88,7 @@ export const B3trAllowance = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || sendTransactionPending
 
   return (
     <>

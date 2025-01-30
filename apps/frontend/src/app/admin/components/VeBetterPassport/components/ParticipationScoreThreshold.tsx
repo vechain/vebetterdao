@@ -39,7 +39,7 @@ export const ParticipationScoreThreshold = () => {
   const {
     sendTransaction,
     resetStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     status,
     error,
@@ -64,7 +64,7 @@ export const ParticipationScoreThreshold = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || sendTransactionPending
   const isFormValid = useMemo(() => isThresholdValid, [isThresholdValid])
 
   return (

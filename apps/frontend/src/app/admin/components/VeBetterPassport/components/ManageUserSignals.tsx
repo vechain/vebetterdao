@@ -31,7 +31,7 @@ export const ManageUserSignals = () => {
   const {
     sendTransaction: resetSignalsTransaction,
     resetStatus: resetSignalsStatus,
-    isTxReceiptLoading: isResetTxLoading,
+    isTransactionPending: isResetTxLoading,
     sendTransactionPending: isResetPending,
     status: resetStatus,
     error: resetError,
@@ -45,7 +45,7 @@ export const ManageUserSignals = () => {
   const {
     sendTransaction: signalUserTransaction,
     resetStatus: signalUserStatus,
-    isTxReceiptLoading: isSignalTxLoading,
+    isTransactionPending: isSignalTxLoading,
     sendTransactionPending: isSignalPending,
     status: signalStatus,
     error: signalError,

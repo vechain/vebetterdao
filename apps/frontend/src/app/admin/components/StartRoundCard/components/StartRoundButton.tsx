@@ -15,7 +15,7 @@ export const StartRoundButton = () => {
   const { isOpen, onClose, onOpen } = useDisclosure()
   const {
     sendTransaction,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     resetStatus,
     status,
@@ -23,7 +23,7 @@ export const StartRoundButton = () => {
     txReceipt,
     sendTransactionTx,
   } = useDistributeEmission({})
-  const distributionLoading = isTxReceiptLoading || sendTransactionPending
+  const distributionLoading = isTransactionPending || sendTransactionPending
 
   const handleClose = useCallback(() => {
     resetStatus()

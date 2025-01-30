@@ -33,7 +33,7 @@ export const VoterRewards: React.FC = () => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CLAIM_REWARDS))
   }, [claimRewardsMutation, onOpen])
 
-  const isClaimRewardsLoading = claimRewardsMutation.isTxReceiptLoading || claimRewardsMutation.sendTransactionPending
+  const isClaimRewardsLoading = claimRewardsMutation.isTransactionPending || claimRewardsMutation.sendTransactionPending
 
   const handleClose = useCallback(() => {
     claimRewardsMutation.resetStatus()

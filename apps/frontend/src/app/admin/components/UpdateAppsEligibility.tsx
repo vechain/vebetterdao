@@ -53,7 +53,7 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
   const {
     sendTransaction,
     resetStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     status,
     error,
@@ -88,7 +88,7 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
         <Switch
           isChecked={isEligible}
           onChange={event => handleEligibilityChange(event)}
-          disabled={isTxReceiptLoading || sendTransactionPending}
+          disabled={isTransactionPending || sendTransactionPending}
         />
       </HStack>
       <Divider />

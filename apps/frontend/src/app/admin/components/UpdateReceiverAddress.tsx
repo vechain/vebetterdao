@@ -30,7 +30,7 @@ export const UpdateReceiverAddress = () => {
   const {
     sendTransaction,
     resetStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     status,
     error,
@@ -41,7 +41,7 @@ export const UpdateReceiverAddress = () => {
     newAddress,
     invalidateCache: true,
   })
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || sendTransactionPending
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {

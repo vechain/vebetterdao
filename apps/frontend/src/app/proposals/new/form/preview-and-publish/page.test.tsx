@@ -51,7 +51,7 @@ describe("NewProposalPreviewAndPublish", async () => {
 
     //@ts-ignore
     spyOnuseCreateProposal.mockReturnValue({
-      isTxReceiptLoading: false,
+      isTransactionPending: false,
       txReceipt: null,
       txReceiptError: null,
       sendTransaction: mockSendTransaction,

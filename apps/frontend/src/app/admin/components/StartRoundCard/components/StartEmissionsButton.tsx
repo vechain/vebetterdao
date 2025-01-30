@@ -12,7 +12,7 @@ export const StartEmissionsButton = () => {
   const {
     sendTransaction,
     resetStatus,
-    isTxReceiptLoading,
+    isTransactionPending,
     sendTransactionPending,
     status,
     error,
@@ -30,7 +30,7 @@ export const StartEmissionsButton = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const loading = isTxReceiptLoading || sendTransactionPending
+  const loading = isTransactionPending || sendTransactionPending
 
   if (parseInt(currentRoundId ?? "0") > 0) return null
 

@@ -43,7 +43,7 @@ export const GMSetMaxLevel = () => {
   const GM_MIN_LEVEL_ALLOWED = 1
 
   const newMaxLevel = watch("newMaxLevel")
-  const { error, status, txReceipt, resetStatus, sendTransaction, isTxReceiptLoading } = useSetGMMaxLevel({
+  const { error, status, txReceipt, resetStatus, sendTransaction, isTransactionPending } = useSetGMMaxLevel({
     maxLevel: newMaxLevel,
     onSuccess: () => {
       resetStatus()
@@ -114,7 +114,7 @@ export const GMSetMaxLevel = () => {
                   {errors.newMaxLevel && <FormErrorMessage>{errors.newMaxLevel.message}</FormErrorMessage>}
                 </FormControl>
 
-                <Button isDisabled={!isFormValid || isTxReceiptLoading} type="submit" colorScheme="blue" size="md">
+                <Button isDisabled={!isFormValid || isTransactionPending} type="submit" colorScheme="blue" size="md">
                   {t("Set Max Level")}
                 </Button>
               </VStack>
