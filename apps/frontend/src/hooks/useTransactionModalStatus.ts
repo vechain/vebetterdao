@@ -1,5 +1,5 @@
 import { useMemo } from "react"
-import { TransactionStatus } from "@/hooks"
+import { TransactionStatus } from "@vechain/vechain-kit"
 
 export type TransactionState = {
   status?: TransactionStatus | "uploadingMetadata"
