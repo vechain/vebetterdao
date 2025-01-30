@@ -7,9 +7,8 @@ import {
   getAllocationAmountQueryKey,
 } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
-import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "@vechain/vechain-kit"
 import { Emissions__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 

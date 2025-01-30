@@ -1,10 +1,9 @@
 import { getHasCreatorNFTQueryKey } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { X2EarnCreator__factory } from "@repo/contracts/typechain-types"
 import { useQueryClient } from "@tanstack/react-query"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { useCallback } from "react"
-import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 
 const X2EarnCreatorNftInterface = X2EarnCreator__factory.createInterface()
 

@@ -1,6 +1,5 @@
 import { useCallback } from "react"
-import { EnhancedClause, useSendTransaction } from "./useSendTransaction"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { useQueryClient } from "@tanstack/react-query"
 
 export type BuildTransactionProps<ClausesParams> = {

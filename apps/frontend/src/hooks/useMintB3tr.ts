@@ -1,10 +1,10 @@
 import { getB3TrTokenDetailsQueryKey, getB3TrBalanceQueryKey, buildMintB3trTx } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
-import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
+
 import { useCallback } from "react"
 import { FormattingUtils } from "@repo/utils"
-import { useWallet, useConnex } from "@vechain/vechain-kit"
+import { useWallet, useConnex, UseSendTransactionReturnValue, useSendTransaction } from "@vechain/vechain-kit"
 
 type useMintB3trProps = {
   address?: string

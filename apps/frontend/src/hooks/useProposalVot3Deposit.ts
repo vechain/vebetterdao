@@ -1,7 +1,6 @@
 import { getProposalsEventsQueryKey, getProposalUserDepositQueryKey, getVot3BalanceQueryKey } from "@/api"
-import { UseSendTransactionReturnValue } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"

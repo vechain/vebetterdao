@@ -1,10 +1,10 @@
 import { buildDelegateVot3Tx, getVotesQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
-import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
+
 import { useCallback } from "react"
 import { FormattingUtils } from "@repo/utils"
-import { useWallet, useConnex } from "@vechain/vechain-kit"
+import { useWallet, useConnex, useSendTransaction, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 
 type useMintB3trProps = {
   address?: string

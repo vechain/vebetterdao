@@ -6,11 +6,11 @@ import {
   getB3TrTokenDetailsQueryKey,
 } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
-import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
+
 import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
 import { removingExcessDecimals } from "@/utils/MathUtils"
-import { useWallet, useConnex } from "@vechain/vechain-kit"
+import { useWallet, useConnex, UseSendTransactionReturnValue, useSendTransaction } from "@vechain/vechain-kit"
 
 const config = getConfig()
 

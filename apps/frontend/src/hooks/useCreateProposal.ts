@@ -1,7 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useWallet, EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "@vechain/vechain-kit"
 import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"

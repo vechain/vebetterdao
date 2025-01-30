@@ -1,8 +1,8 @@
 import { buildClaimRoundReward, getB3TrBalanceQueryKey, getRoundRewardQueryKey } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
-import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
+
 import { useCallback } from "react"
-import { useWallet } from "@vechain/vechain-kit"
+import { useSendTransaction, UseSendTransactionReturnValue, useWallet } from "@vechain/vechain-kit"
 import { address } from "thor-devkit"
 
 type useClaimRewardProps = {

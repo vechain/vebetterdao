@@ -1,5 +1,4 @@
-import { useWallet } from "@vechain/vechain-kit"
-import { EnhancedClause, useSendTransaction } from "./useSendTransaction"
+import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useCallback, useMemo } from "react"
