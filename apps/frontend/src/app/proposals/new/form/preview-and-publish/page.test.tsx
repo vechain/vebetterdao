@@ -56,7 +56,6 @@ describe("NewProposalPreviewAndPublish", async () => {
       txReceiptError: null,
       sendTransaction: mockSendTransaction,
       sendTransactionError: null,
-      sendTransactionPending: false,
       sendTransactionTx: null,
       resetStatus: vi.fn(),
       status: "pending",

@@ -27,21 +27,13 @@ export const UpdateReceiverAddress = () => {
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTransactionPending,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useUpdateXAppReceiverAddress({
-    appId: appId ?? "",
-    newAddress,
-    invalidateCache: true,
-  })
-  const isLoading = isTransactionPending || sendTransactionPending
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
+    useUpdateXAppReceiverAddress({
+      appId: appId ?? "",
+      newAddress,
+      invalidateCache: true,
+    })
+  const isLoading = isTransactionPending || status === "pending"
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {

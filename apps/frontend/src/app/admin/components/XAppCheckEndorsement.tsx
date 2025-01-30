@@ -26,19 +26,11 @@ export const XAppCheckEndorsement = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTransactionPending,
-    sendTransactionPending,
-    status,
-    txReceipt,
-    sendTransactionTx,
-    error,
-  } = useCheckEndorsement({
-    appId: appId ?? "",
-  })
-  const isLoading = isTransactionPending || sendTransactionPending
+  const { sendTransaction, resetStatus, isTransactionPending, status, txReceipt, sendTransactionTx, error } =
+    useCheckEndorsement({
+      appId: appId ?? "",
+    })
+  const isLoading = isTransactionPending || status === "pending"
 
   const handleSubmit = useCallback(
     (event: { preventDefault: () => void }) => {

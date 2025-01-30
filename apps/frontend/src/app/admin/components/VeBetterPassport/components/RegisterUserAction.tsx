@@ -46,20 +46,12 @@ export const RegisterUserAction = () => {
   const { data: xApps } = useXApps()
   const { t } = useTranslation()
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTransactionPending,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useRegisterUserAction({
-    address: user,
-    appId: appId ?? "",
-    roundId: round ?? 0,
-  })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
+    useRegisterUserAction({
+      address: user,
+      appId: appId ?? "",
+      roundId: round ?? 0,
+    })
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -76,7 +68,7 @@ export const RegisterUserAction = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTransactionPending || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
   const isFormValid = useMemo(() => isValidAddress && appId !== undefined && appId !== "", [appId, isValidAddress])
 
   return (

@@ -36,18 +36,10 @@ export const ParticipationScoreThreshold = () => {
   const { data: participationScoreThreshold } = useParticipationScoreThreshold()
   const { t } = useTranslation()
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTransactionPending,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useSetParticipationThreshold({
-    participationThreshold: threshold ?? 0,
-  })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
+    useSetParticipationThreshold({
+      participationThreshold: threshold ?? 0,
+    })
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -64,7 +56,7 @@ export const ParticipationScoreThreshold = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTransactionPending || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
   const isFormValid = useMemo(() => isThresholdValid, [isThresholdValid])
 
   return (

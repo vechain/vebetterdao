@@ -46,19 +46,11 @@ export const B3trAllowance = () => {
     return allowedAmount?.scaled ?? "0"
   }, [allowedAmount])
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTransactionPending,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useB3trApprove({
-    spender: spender ?? "",
-    amount: amount ?? 0,
-  })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
+    useB3trApprove({
+      spender: spender ?? "",
+      amount: amount ?? 0,
+    })
 
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(spender)
@@ -88,7 +80,7 @@ export const B3trAllowance = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTransactionPending || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
 
   return (
     <>

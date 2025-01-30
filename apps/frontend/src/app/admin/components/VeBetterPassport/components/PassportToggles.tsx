@@ -73,18 +73,10 @@ type PassportCheckProps = {
 
 const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) => {
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const {
-    sendTransaction,
-    resetStatus,
-    isTransactionPending,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useTogglePassportCheck({
-    checkToToggle,
-  })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
+    useTogglePassportCheck({
+      checkToToggle,
+    })
 
   const handleToggle = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -108,7 +100,7 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
         <Switch
           isChecked={isEnabled}
           onChange={event => handleToggle(event)}
-          disabled={isTransactionPending || sendTransactionPending}
+          disabled={isTransactionPending || status === "pending"}
         />
       </HStack>
       <Divider />

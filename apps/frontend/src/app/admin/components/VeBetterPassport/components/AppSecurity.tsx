@@ -27,19 +27,11 @@ export const AppSecurity = () => {
   const { data: selectedAppSecurityLevel } = useAppSecurityLevel(appId ?? "")
   const { t } = useTranslation()
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTransactionPending,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useUpdateAppSecurityLevel({
-    appId: appId ?? "",
-    securityLevel: appSecurityLevel ?? 0,
-  })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
+    useUpdateAppSecurityLevel({
+      appId: appId ?? "",
+      securityLevel: appSecurityLevel ?? 0,
+    })
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -56,7 +48,7 @@ export const AppSecurity = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTransactionPending || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
   const isFormValid = useMemo(
     () => appSecurityLevel && appSecurityLevel !== selectedAppSecurityLevel,
     [appSecurityLevel, selectedAppSecurityLevel],

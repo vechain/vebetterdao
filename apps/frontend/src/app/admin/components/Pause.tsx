@@ -45,29 +45,29 @@ export const Pause: React.FC = () => {
     isB3trPausedLoading ||
     pauseB3trTxResult.isTransactionPending ||
     unpauseB3trTxResult.isTransactionPending ||
-    pauseB3trTxResult.sendTransactionPending ||
-    unpauseB3trTxResult.sendTransactionPending
+    pauseB3trTxResult.status === "pending" ||
+    unpauseB3trTxResult.status === "pending"
 
   const isToggleVot3PausedLoading =
     isVot3PausedLoading ||
     pauseVot3TxResult.isTransactionPending ||
     unpauseVot3TxResult.isTransactionPending ||
-    pauseVot3TxResult.sendTransactionPending ||
-    unpauseVot3TxResult.sendTransactionPending
+    pauseVot3TxResult.status === "pending" ||
+    unpauseVot3TxResult.status === "pending"
 
   const isToggleGalaxyMemberPausedLoading =
     isGalaxyMemberPausedLoading ||
     pauseGalaxyMemberTxResult.isTransactionPending ||
     unpauseGalaxyMemberTxResult.isTransactionPending ||
-    pauseGalaxyMemberTxResult.sendTransactionPending ||
-    unpauseGalaxyMemberTxResult.sendTransactionPending
+    pauseGalaxyMemberTxResult.status === "pending" ||
+    unpauseGalaxyMemberTxResult.status === "pending"
 
   const isToggleB3TRGovernorPausedLoading =
     isB3TRGovernorPausedLoading ||
     pauseB3TRGovernorTxResult.isTransactionPending ||
     unpauseB3TRGovernorTxResult.isTransactionPending ||
-    pauseB3TRGovernorTxResult.sendTransactionPending ||
-    unpauseB3TRGovernorTxResult.sendTransactionPending
+    pauseB3TRGovernorTxResult.status === "pending" ||
+    unpauseB3TRGovernorTxResult.status === "pending"
 
   const handleToggleB3trPause = useCallback(() => {
     if (isB3trPaused) {

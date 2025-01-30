@@ -9,16 +9,8 @@ export const StartEmissionsButton = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { isOpen, onClose, onOpen } = useDisclosure()
   const { t } = useTranslation()
-  const {
-    sendTransaction,
-    resetStatus,
-    isTransactionPending,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useStartEmission({})
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
+    useStartEmission({})
 
   const handleStartEmissions = useCallback(() => {
     sendTransaction(undefined)
@@ -30,7 +22,7 @@ export const StartEmissionsButton = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const loading = isTransactionPending || sendTransactionPending
+  const loading = isTransactionPending || status === "pending"
 
   if (parseInt(currentRoundId ?? "0") > 0) return null
 

@@ -13,17 +13,9 @@ export const StartRoundButton = () => {
     return currentRound?.state === 0
   }, [currentRound])
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const {
-    sendTransaction,
-    isTransactionPending,
-    sendTransactionPending,
-    resetStatus,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useDistributeEmission({})
-  const distributionLoading = isTransactionPending || sendTransactionPending
+  const { sendTransaction, isTransactionPending, resetStatus, status, error, txReceipt, sendTransactionTx } =
+    useDistributeEmission({})
+  const distributionLoading = isTransactionPending || status === "pending"
 
   const handleClose = useCallback(() => {
     resetStatus()

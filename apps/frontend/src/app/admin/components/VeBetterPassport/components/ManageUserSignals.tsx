@@ -32,7 +32,6 @@ export const ManageUserSignals = () => {
     sendTransaction: resetSignalsTransaction,
     resetStatus: resetSignalsStatus,
     isTransactionPending: isResetTxLoading,
-    sendTransactionPending: isResetPending,
     status: resetStatus,
     error: resetError,
     txReceipt: resetTxReceipt,
@@ -41,12 +40,12 @@ export const ManageUserSignals = () => {
     address: user,
     reason,
   })
+  const isResetPending = resetStatus === "pending"
 
   const {
     sendTransaction: signalUserTransaction,
     resetStatus: signalUserStatus,
     isTransactionPending: isSignalTxLoading,
-    sendTransactionPending: isSignalPending,
     status: signalStatus,
     error: signalError,
     txReceipt: signalTxReceipt,
@@ -55,6 +54,7 @@ export const ManageUserSignals = () => {
     address: user,
     reason,
   })
+  const isResetPending = signalStatus === "pending"
 
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(user)

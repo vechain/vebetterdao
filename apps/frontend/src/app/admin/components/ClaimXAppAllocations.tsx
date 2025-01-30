@@ -55,19 +55,11 @@ export const ClaimXAppAllocations = () => {
 
   const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTransactionPending,
-    sendTransactionPending,
-    status,
-    txReceipt,
-    sendTransactionTx,
-  } = useClaimXAppsAllocations({
+  const { sendTransaction, resetStatus, isTransactionPending, status, txReceipt } = useClaimXAppsAllocations({
     roundId: roundId?.toString() ?? "",
     appIds: appId ? [appId] : [],
   })
-  const isLoading = isTransactionPending || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
 
   const handleSubmit = useCallback(
     (event: { preventDefault: () => void }) => {
@@ -109,7 +101,7 @@ export const ClaimXAppAllocations = () => {
         <ModalBody py={6} px={12}>
           <VStack alignItems={"center"}>
             <MotionImage {...coinFlipAnimation} src="/images/b3tr-token-3d.png" maxH="250px" />
-            {sendTransactionPending /* sendTransactionPending */ && (
+            {status === "pending" /* sendTransactionPending */ && (
               <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
                 {t("Please confirm the transaction in your wallet")}
               </Text>
@@ -122,7 +114,7 @@ export const ClaimXAppAllocations = () => {
           </VStack>{" "}
         </ModalBody>
       )
-  }, [status, isLoading, isTransactionPending, sendTransactionPending, txReceipt, sendTransactionTx, t])
+  }, [status, isLoading, isTransactionPending, txReceipt, sendTransactionTx, t])
 
   return (
     <>

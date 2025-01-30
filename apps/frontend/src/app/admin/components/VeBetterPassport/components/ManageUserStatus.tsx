@@ -36,20 +36,12 @@ export const ManageUserStatus = () => {
   const statusConfig = useUserStatusConfig()
   const currentConfig = statusConfig[actionType]
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTransactionPending,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useWhitelistBlacklistUser({
-    address: user,
-    currentStatus: userStatus,
-    newStatus: actionType,
-  })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
+    useWhitelistBlacklistUser({
+      address: user,
+      currentStatus: userStatus,
+      newStatus: actionType,
+    })
 
   const handleSetActionType = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setActionType(e.target.value as UserStatus)
@@ -69,7 +61,7 @@ export const ManageUserStatus = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTransactionPending || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
   const isFormValid = isValidAddress
 
   return (

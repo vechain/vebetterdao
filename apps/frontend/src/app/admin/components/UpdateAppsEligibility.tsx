@@ -50,21 +50,13 @@ export const UpdateAppsEligibility = () => {
 
 const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; isEligible: boolean }) => {
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const {
-    sendTransaction,
-    resetStatus,
-    isTransactionPending,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useSetVotingEligibility({
-    appId: id,
-    isEligible: !isEligible,
-    appName: name,
-    invalidateCache: true,
-  })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt, sendTransactionTx } =
+    useSetVotingEligibility({
+      appId: id,
+      isEligible: !isEligible,
+      appName: name,
+      invalidateCache: true,
+    })
 
   const handleEligibilityChange = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -88,7 +80,7 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
         <Switch
           isChecked={isEligible}
           onChange={event => handleEligibilityChange(event)}
-          disabled={isTransactionPending || sendTransactionPending}
+          disabled={isTransactionPending || status === "pending"}
         />
       </HStack>
       <Divider />
