@@ -1,4 +1,4 @@
-import { EnhancedClause } from "@/hooks"
+import { EnhancedClause } from "@vechain/vechain-kit"
 import { buildClaimRoundReward } from "./buildClaimRoundReward"
 
 /**
