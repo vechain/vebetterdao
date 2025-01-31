@@ -6,95 +6,57 @@ import {
   getRoundXAppsQueryKey,
   getAllocationAmountQueryKey,
 } from "@/api"
-import { useQueryClient } from "@tanstack/react-query"
-import { useCallback } from "react"
-import { useWallet, EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+import { useWallet } from "@vechain/vechain-kit"
 import { Emissions__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
+import { useBuildTransaction } from "./useBuildTransaction"
+import { buildClause } from "@/utils/buildClause"
 
 const EmissionsInterface = Emissions__factory.createInterface()
 
 type useDistributeEmissionsProps = {
   onSuccess?: () => void
-  invalidateCache?: boolean
-  onSuccessMessageTitle?: string
 }
+
 /**
  * Hook to mint a certain amount of B3TR tokens
  * This hook will send a mint transaction to the blockchain and wait for the txConfirmation
  * @param onSuccess callback to run when the upgrade is successful
- * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useDistributeEmission = ({
-  onSuccess,
-  invalidateCache = true,
-}: useDistributeEmissionsProps): UseSendTransactionReturnValue => {
+export const useDistributeEmission = ({ onSuccess }: useDistributeEmissionsProps) => {
   const { account } = useWallet()
   const { data: currendRoundId } = useCurrentAllocationsRoundId()
-  const queryClient = useQueryClient()
 
-  const buildClauses = useCallback(() => {
-    const clauses: EnhancedClause[] = [
-      {
+  const clauseBuilder = useCallback(() => {
+    if (!account?.address) throw new Error("Account is required")
+
+    return [
+      buildClause({
         to: getConfig().emissionsContractAddress,
-        value: 0,
-        data: EmissionsInterface.encodeFunctionData("distribute"),
+        contractInterface: EmissionsInterface,
+        method: "distribute",
+        args: [],
         comment: "Distribute emissions",
-        abi: JSON.parse(JSON.stringify(EmissionsInterface.getFunction("distribute"))),
-      },
+      }),
     ]
+  }, [account?.address])
 
-    return clauses
-  }, [])
+  const refetchQueryKeys = useMemo(
+    () => [
+      getCurrentAllocationsRoundIdQueryKey(),
+      getAllocationsRoundsEventsQueryKey(),
+      currentBlockQueryKey(),
+      getRoundXAppsQueryKey(currendRoundId ?? "0"),
+      getAllocationAmountQueryKey(currendRoundId ?? "0"),
+    ],
+    [currendRoundId],
+  )
 
-  //Refetch queries to update ui after the tx is confirmed
-  const handleOnSuccess = useCallback(async () => {
-    if (invalidateCache) {
-      await queryClient.cancelQueries({
-        queryKey: getCurrentAllocationsRoundIdQueryKey(),
-      })
-
-      await queryClient.refetchQueries({
-        queryKey: getCurrentAllocationsRoundIdQueryKey(),
-      })
-      await queryClient.cancelQueries({
-        queryKey: getAllocationsRoundsEventsQueryKey(),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getAllocationsRoundsEventsQueryKey(),
-      })
-
-      await queryClient.cancelQueries({
-        queryKey: currentBlockQueryKey(),
-      })
-      await queryClient.refetchQueries({
-        queryKey: currentBlockQueryKey(),
-      })
-
-      await queryClient.cancelQueries({
-        queryKey: getRoundXAppsQueryKey(currendRoundId ?? "0"),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getRoundXAppsQueryKey(currendRoundId ?? "0"),
-      })
-
-      await queryClient.cancelQueries({
-        queryKey: getAllocationAmountQueryKey(currendRoundId ?? "0"),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getAllocationAmountQueryKey(currendRoundId ?? "0"),
-      })
-    }
-
-    onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess, currendRoundId])
-
-  const result = useSendTransaction({
-    signerAccountAddress: account?.address,
-    clauses: buildClauses,
-    onTxConfirmed: handleOnSuccess,
+  return useBuildTransaction({
+    clauseBuilder,
+    refetchQueryKeys,
+    onSuccess,
   })
-
-  return result
 }

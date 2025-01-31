@@ -31,7 +31,6 @@ export const UpdateReceiverAddress = () => {
     {
       appId: appId ?? "",
       newAddress,
-      invalidateCache: true,
     },
   )
   const isLoading = isTransactionPending || status === "pending"

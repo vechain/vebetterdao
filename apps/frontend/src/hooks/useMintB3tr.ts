@@ -1,39 +1,29 @@
 import { getB3TrTokenDetailsQueryKey, getB3TrBalanceQueryKey, buildMintB3trTx } from "@/api"
 import { useToast } from "@chakra-ui/react"
-import { useQueryClient } from "@tanstack/react-query"
 
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { FormattingUtils } from "@repo/utils"
-import { useWallet, useConnex, UseSendTransactionReturnValue, useSendTransaction } from "@vechain/vechain-kit"
+import { useWallet, useConnex, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { useBuildTransaction } from "./useBuildTransaction"
 
 type useMintB3trProps = {
   address?: string
   amount?: string | number
   onSuccess?: () => void
-  invalidateCache?: boolean
-  onSuccessMessageTitle?: string
 }
 /**
  * Hook to mint a certain amount of B3TR tokens
  * This hook will send a mint transaction to the blockchain and wait for the txConfirmation
  * @param address the address to mint the tokens to
  * @param amount the amount of tokens to mint. Should not already include decimals
- * @param onSuccess callback to run when the upgrade is successful
- * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useMintB3tr = ({
-  address,
-  amount,
-  onSuccess,
-  invalidateCache = true,
-}: useMintB3trProps): UseSendTransactionReturnValue => {
+export const useMintB3tr = ({ address, amount, onSuccess }: useMintB3trProps): UseSendTransactionReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
   const toast = useToast()
-  const queryClient = useQueryClient()
 
-  const buildClauses = useCallback(() => {
+  const clauseBuilder = useCallback(() => {
     if (!address) throw new Error("address is required")
     if (!amount) throw new Error("amount is required")
 
@@ -43,22 +33,6 @@ export const useMintB3tr = ({
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
-    if (invalidateCache) {
-      await queryClient.cancelQueries({
-        queryKey: getB3TrTokenDetailsQueryKey(),
-      })
-
-      await queryClient.refetchQueries({
-        queryKey: getB3TrTokenDetailsQueryKey(),
-      })
-      await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(account?.address ?? undefined),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getB3TrBalanceQueryKey(account?.address ?? undefined),
-      })
-    }
-
     const formattedAmount = FormattingUtils.humanNumber(amount ?? 0, amount)
     const formattedAddress = FormattingUtils.humanAddress(address ?? "")
 
@@ -71,13 +45,16 @@ export const useMintB3tr = ({
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, account?.address, amount, address])
+  }, [toast, onSuccess, amount, address])
 
-  const result = useSendTransaction({
-    signerAccountAddress: account?.address,
-    clauses: buildClauses,
-    onTxConfirmed: handleOnSuccess,
+  const refetchQueryKeys = useMemo(
+    () => [getB3TrBalanceQueryKey(account?.address ?? undefined), getB3TrTokenDetailsQueryKey()],
+    [account?.address],
+  )
+
+  return useBuildTransaction({
+    clauseBuilder,
+    refetchQueryKeys,
+    onSuccess: handleOnSuccess,
   })
-
-  return result
 }

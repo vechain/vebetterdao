@@ -1,36 +1,28 @@
 import { buildDelegateVot3Tx, getVotesQueryKey } from "@/api"
 import { useToast } from "@chakra-ui/react"
-import { useQueryClient } from "@tanstack/react-query"
 
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { FormattingUtils } from "@repo/utils"
-import { useWallet, useConnex, useSendTransaction, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { useWallet, useConnex, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { useBuildTransaction } from "./useBuildTransaction"
 
 type useMintB3trProps = {
   address?: string
   onSuccess?: () => void
-  invalidateCache?: boolean
 }
 /**
  * Hook to mint a certain amount of B3TR tokens
  * This hook will send a mint transaction to the blockchain and wait for the txConfirmation
  * @param address the address to mint the tokens to
- * @param amount the amount of tokens to mint. Should not already include decimals
  * @param onSuccess callback to run when the upgrade is successful
- * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useDelegateVot3 = ({
-  address,
-  onSuccess,
-  invalidateCache = true,
-}: useMintB3trProps): UseSendTransactionReturnValue => {
+export const useDelegateVot3 = ({ address, onSuccess }: useMintB3trProps): UseSendTransactionReturnValue => {
   const { thor } = useConnex()
   const { account } = useWallet()
   const toast = useToast()
-  const queryClient = useQueryClient()
 
-  const buildClauses = useCallback(() => {
+  const clauseBuilder = useCallback(() => {
     if (!address) throw new Error("address is required")
 
     const clauses = buildDelegateVot3Tx(thor, address)
@@ -39,16 +31,6 @@ export const useDelegateVot3 = ({
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
-    if (invalidateCache) {
-      await queryClient.cancelQueries({
-        queryKey: getVotesQueryKey(account?.address ?? ""),
-      })
-
-      await queryClient.refetchQueries({
-        queryKey: getVotesQueryKey(account?.address ?? ""),
-      })
-    }
-
     const formattedAddress = FormattingUtils.humanAddress(address ?? "")
 
     toast({
@@ -60,13 +42,13 @@ export const useDelegateVot3 = ({
       isClosable: true,
     })
     onSuccess?.()
-  }, [invalidateCache, queryClient, toast, onSuccess, account?.address, address])
+  }, [toast, onSuccess, address])
 
-  const result = useSendTransaction({
-    signerAccountAddress: account?.address,
-    clauses: buildClauses,
-    onTxConfirmed: handleOnSuccess,
+  const refetchQueryKeys = useMemo(() => [getVotesQueryKey(account?.address ?? "")], [account?.address])
+
+  return useBuildTransaction({
+    clauseBuilder,
+    refetchQueryKeys,
+    onSuccess: handleOnSuccess,
   })
-
-  return result
 }

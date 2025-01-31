@@ -54,7 +54,6 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
     appId: id,
     isEligible: !isEligible,
     appName: name,
-    invalidateCache: true,
   })
 
   const handleEligibilityChange = useCallback(
