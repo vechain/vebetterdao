@@ -1410,5 +1410,9 @@
   "Blacklisting user...": "Đang đưa người dùng vào danh sách đen...",
   "Error removing user status": "Lỗi khi xóa trạng thái người dùng",
   "Error whitelisting user": "Lỗi khi đưa người dùng vào danh sách trắng",
-  "Error blacklisting user": "Lỗi khi đưa người dùng vào danh sách đen"
+  "Error blacklisting user": "Lỗi khi đưa người dùng vào danh sách đen",
+  "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.": "Gửi ứng dụng của bạn vào hệ sinh thái với tất cả thông tin cần thiết, bao gồm logo, tiểu sử người tạo và liên kết mạng xã hội.",
+  "GitHub Username is required": "Tên người dùng GitHub là bắt buộc",
+  "{{fieldName}} is too short": "{{fieldName}} quá ngắn",
+  "{{fieldName}} is too long": "{{fieldName}} quá dài"
 }
