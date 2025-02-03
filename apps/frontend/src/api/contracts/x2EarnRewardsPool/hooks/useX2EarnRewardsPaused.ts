@@ -27,7 +27,7 @@ export const getIsX2EarnRewardsPaused = async (thor: Connex.Thor): Promise<boole
  * Returns the query key for fetching the paused status of the x2EarnRewardsPool contract.
  * @param appId - The xApp id.
  */
-export const getIsX2EarnRewardsPausedQueryKey = (appId: string) => ["x2EarnRewardsPool", "paused", appId]
+export const getIsX2EarnRewardsPausedQueryKey = (appId: string | undefined) => ["x2EarnRewardsPool", "paused", appId]
 
 /**
  * Custom hook to fetch the paused status of the x2Earn rewards pool contract
@@ -36,7 +36,7 @@ export const getIsX2EarnRewardsPausedQueryKey = (appId: string) => ["x2EarnRewar
  * @param xAppId  the xApp id
  * @returns the paused status of the x2Earn rewards pool contract
  */
-export const useX2EarnRewardsPaused = (appId: string) => {
+export const useX2EarnRewardsPaused = (appId: string | undefined) => {
   const { thor } = useConnex()
 
   return useQuery({
