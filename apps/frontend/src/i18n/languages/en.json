@@ -1418,7 +1418,10 @@
   "App current B3TR locked": "App current B3TR locked",
   "You'll lock": "You'll lock",
   "Details": "Details",
-  "Locked funds percentage : {{values}}%": "Locked funds percentage : {{values}}%",
+  "Current locked treasury percentage : {{values}}%": "Current locked treasury percentage : {{values}}%",
   "Lock now": "Lock now",
-  "Lock B3TR to {{name}} app": "Lock B3TR to {{name}} app"
+  "Lock B3TR to {{name}} app": "Lock B3TR to {{name}} app",
+  "Pausing disables: Distribute Rewards": "Pausing disables: Distribute Rewards",
+  "This locking funds will not be able to be distributed for apps rewards. Withdrawing or depositing the funds will recalculate the funds": "This locking funds will not be able to be distributed for apps rewards. Withdrawing or depositing the funds will recalculate the funds",
+  "Current allowance available to distribute rewards : {{values}}": "Current allowance available to distribute rewards : {{values}}"
 }
