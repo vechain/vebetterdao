@@ -549,7 +549,7 @@
   "Quorum needed": "Quorum needed",
   "Votes casted": "Votes casted",
   "by": "by",
-  "2024 VeBetterDAO. All rights reserved.": "2024 VeBetterDAO. All rights reserved.",
+  "{{currentYear}} VeBetterDAO. All rights reserved.": "{{currentYear}} VeBetterDAO. All rights reserved.",
   "Privacy & Policy": "Privacy & Policy",
   "Terms & Conditions": "Terms & Conditions",
   "Join Discord Community": "Join Discord Community",
