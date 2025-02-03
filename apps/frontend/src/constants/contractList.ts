@@ -83,7 +83,13 @@ export const CONTRACT_LIST = [
   {
     name: "X2Earn Rewards Pool",
     contractAddress: config.x2EarnRewardsPoolContractAddress,
-    roles: ["DEFAULT_ADMIN_ROLE", "UPGRADER_ROLE", "CONTRACTS_ADDRESS_MANAGER_ROLE", "IMPACT_KEY_MANAGER_ROLE"],
+    roles: [
+      "DEFAULT_ADMIN_ROLE",
+      "UPGRADER_ROLE",
+      "CONTRACTS_ADDRESS_MANAGER_ROLE",
+      "IMPACT_KEY_MANAGER_ROLE",
+      "PAUSER_ROLE",
+    ],
   },
   {
     name: "VeBetterPassport",

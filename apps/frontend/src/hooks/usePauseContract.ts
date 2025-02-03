@@ -4,13 +4,20 @@ import { useToast } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
-import { GalaxyMember__factory, B3TR__factory, VOT3__factory, B3TRGovernor__factory } from "@repo/contracts"
+import {
+  GalaxyMember__factory,
+  B3TR__factory,
+  VOT3__factory,
+  B3TRGovernor__factory,
+  X2EarnRewardsPool__factory,
+} from "@repo/contracts"
 import {
   currentBlockQueryKey,
   getIsGMPausedQueryKey,
   getIsB3trPausedQueryKey,
   getIsVot3PausedQueryKey,
   getIsB3TRGovernorPausedQueryKey,
+  getIsX2EarnRewardsPausedQueryKey,
 } from "@/api"
 
 type Props = {
@@ -18,6 +25,7 @@ type Props = {
   contractName: string
   onSuccess?: () => void
   invalidateCache?: boolean
+  xAppId?: string
 }
 
 const B3TRInterface = B3TR__factory.createInterface()
@@ -27,6 +35,8 @@ const VOT3Interface = VOT3__factory.createInterface()
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
 const B3TRGovernorInterface = B3TRGovernor__factory.createInterface()
+
+const X2EarnRewardsPoolInterface = X2EarnRewardsPool__factory.createInterface()
 
 /**
  * getInterface is a function that returns the contract interface based on the contract address.
@@ -43,6 +53,8 @@ const getInterface = (contract: string) => {
       return GalaxyMemberInterface
     case getConfig().b3trGovernorAddress:
       return B3TRGovernorInterface
+    case getConfig().x2EarnRewardsPoolContractAddress:
+      return X2EarnRewardsPoolInterface
     default:
       throw new Error("Invalid contract address")
   }
@@ -53,7 +65,7 @@ const getInterface = (contract: string) => {
  * @param contract - The contract address
  * @returns The query key to invalidate based on the contract address
  */
-const getQueryToInvalidate = (contract: string) => {
+const getQueryToInvalidate = (contract: string, xAppId?: string) => {
   switch (contract) {
     case getConfig().b3trContractAddress:
       return getIsB3trPausedQueryKey()
@@ -63,6 +75,8 @@ const getQueryToInvalidate = (contract: string) => {
       return getIsGMPausedQueryKey()
     case getConfig().b3trGovernorAddress:
       return getIsB3TRGovernorPausedQueryKey()
+    case getConfig().x2EarnRewardsPoolContractAddress:
+      return getIsX2EarnRewardsPausedQueryKey(xAppId)
     default:
       return ""
   }
@@ -72,7 +86,7 @@ const getQueryToInvalidate = (contract: string) => {
  * usePauseContract is a custom hook that pauses and unpauses a contract.
  * It uses the useSendTransaction hook to send the transaction and the useQueryClient hook to invalidate the queries after the transaction.
  */
-export const usePauseContract = ({ contract, contractName, onSuccess, invalidateCache = true }: Props) => {
+export const usePauseContract = ({ contract, contractName, onSuccess, invalidateCache = true, xAppId }: Props) => {
   const { account } = useWallet()
   const toast = useToast()
   const queryClient = useQueryClient()
@@ -116,7 +130,7 @@ export const usePauseContract = ({ contract, contractName, onSuccess, invalidate
         queryKey: currentBlockQueryKey(),
       })
 
-      const queryToInvalidate = getQueryToInvalidate(contract)
+      const queryToInvalidate = getQueryToInvalidate(contract, xAppId)
 
       if (queryToInvalidate) {
         await queryClient.cancelQueries({
@@ -127,7 +141,7 @@ export const usePauseContract = ({ contract, contractName, onSuccess, invalidate
         })
       }
     }
-  }, [invalidateCache, queryClient, contract])
+  }, [invalidateCache, queryClient, contract, xAppId])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccessPause = useCallback(async () => {

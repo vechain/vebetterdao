@@ -43,6 +43,8 @@ type AccountPermissionResponse = {
   isMinterOfX2EarnCreator: boolean
   isBurnerOfX2EarnCreator: boolean
   isAdminOfX2EarnCreator: boolean
+  isPauserRoleX2EarnAppRewards: boolean
+  isAdminOfX2EarnRewardsPool: boolean
 }
 
 const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; contractAddress: string }> = {
@@ -178,6 +180,14 @@ const CLAUSES_DATA: Record<keyof AccountPermissionResponse, { role: string; cont
     role: "DEFAULT_ADMIN_ROLE",
     contractAddress: config.x2EarnCreatorContractAddress,
   },
+  isPauserRoleX2EarnAppRewards: {
+    role: "PAUSER_ROLE",
+    contractAddress: config.x2EarnRewardsPoolContractAddress,
+  },
+  isAdminOfX2EarnRewardsPool: {
+    role: "DEFAULT_ADMIN_ROLE",
+    contractAddress: config.x2EarnRewardsPoolContractAddress,
+  },
 }
 
 export const getAccountPermissionsQueryKey = (address: string) => ["ACCOUNT_PERMISSIONS", address]
@@ -231,7 +241,8 @@ export const useAccountPermissions = (
         roles.isAdminOfVoterRewards ||
         roles.isAdminOfX2EarnApps ||
         roles.isAdminOfVeBetterPassport ||
-        roles.isAdminOfX2EarnCreator
+        roles.isAdminOfX2EarnCreator ||
+        roles.isAdminOfX2EarnRewardsPool
 
       return {
         isAdmin,
