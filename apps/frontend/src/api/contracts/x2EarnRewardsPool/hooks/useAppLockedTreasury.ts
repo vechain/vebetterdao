@@ -27,5 +27,6 @@ export const useAppLockedTreasury = (appId: string) => {
     method: "treasuryLocked",
     args: [appId],
     enabled: !!appId,
+    formattedVersion: true,
   })
 }

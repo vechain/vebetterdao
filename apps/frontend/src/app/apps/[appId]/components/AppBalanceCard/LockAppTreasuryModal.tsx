@@ -19,7 +19,12 @@ import {
 } from "@chakra-ui/react"
 import { useMemo, useCallback, useState, useEffect } from "react"
 import { Trans } from "react-i18next"
-import { useAppLockedPercentage, useAppAllowance, useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
+import {
+  useAppLockedPercentage,
+  useAppAllowance,
+  useAppBalance,
+  useAppLockedTreasury,
+} from "@/api/contracts/x2EarnRewardsPool"
 import { useAdminLockedFundsPercentage } from "@/hooks"
 import { TransactionModal, CustomModalContent, B3TRIcon, BaseTooltip } from "@/components"
 import { useXApp } from "@/api"
@@ -71,7 +76,8 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
   })
 
   const { data: appAllowance, isLoading: isAppAllowanceLoading } = useAppAllowance(appId, true)
-  const { data: lockedFundsPercentage } = useAppLockedPercentage(appId)
+  const { data: lockedPercentage } = useAppLockedPercentage(appId)
+  const { data: treasuryLocked, isLoading: isTreasuryLockedLoading } = useAppLockedTreasury(appId)
   const { data: balance } = useAppBalance(appId)
   const { data: app } = useXApp(appId)
 
@@ -83,11 +89,9 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
     return balance
   }, [balance])
 
-  const lockedFunds = useMemo(() => {
-    if (!availableFunds?.scaled || !allowance?.scaled) return "0"
-    const value = Number(availableFunds.scaled) - Number(allowance.scaled)
-    return FormattingUtils.humanNumber(String(value))
-  }, [availableFunds, allowance])
+  const lockedTreasury = useMemo(() => {
+    return treasuryLocked
+  }, [treasuryLocked])
 
   const estimatedAllowance = useMemo(() => {
     if (!availableFunds?.scaled || !percentage) return "0"
@@ -99,10 +103,8 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
     setPercentage(String(Math.round(value)))
   }, [])
 
-  // todo: not sure of that, let's leave it for now
-  const isSliderDisabled = Number(allowance?.scaled) === 0 && Number(lockedFundsPercentage) > 0
+  const isSliderDisabled = false
 
-  // todo: handle if user resend the transaction
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
@@ -117,36 +119,51 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
   }, [resetStatus, onClose])
 
   useEffect(() => {
-    if (lockedFundsPercentage) {
-      setPercentage(lockedFundsPercentage)
+    if (lockedPercentage) {
+      setPercentage(lockedPercentage)
     }
-  }, [lockedFundsPercentage])
+  }, [lockedPercentage])
+
+  useEffect(() => {
+    if (status === "success") {
+      resetStatus()
+    }
+  }, [status, resetStatus])
+
+  console.log({ treasuryLocked })
+  console.log({ allowance, estimatedAllowance })
 
   const sliderValue = useMemo(() => {
     return (
-      <Slider
-        aria-label="lock-percentage-slider"
-        value={Number(percentage)}
-        onChange={handleSliderChange}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-        min={0}
-        max={100}
-        step={1}
-        isDisabled={isSliderDisabled}>
-        <SliderTrack bg={COLORS.available}>
-          <SliderFilledTrack bg={COLORS.locked} />
-        </SliderTrack>
-        <Tooltip
-          hasArrow
-          bg={COLORS.locked}
-          color="white"
-          placement="top"
-          isOpen={showTooltip}
-          label={`${percentage || "0"}%`}>
-          <SliderThumb boxSize={6} />
-        </Tooltip>
-      </Slider>
+      <HStack w="full" align="center" spacing={4}>
+        <Slider
+          flex="1"
+          aria-label="lock-percentage-slider"
+          value={Number(percentage)}
+          onChange={handleSliderChange}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+          min={0}
+          max={100}
+          step={1}
+          isDisabled={isSliderDisabled}>
+          <SliderTrack bg={COLORS.available}>
+            <SliderFilledTrack bg={COLORS.locked} />
+          </SliderTrack>
+          <Tooltip
+            hasArrow
+            bg={COLORS.locked}
+            color="white"
+            placement="top"
+            isOpen={showTooltip}
+            label={`${percentage || "0"}%`}>
+            <SliderThumb boxSize={6} />
+          </Tooltip>
+        </Slider>
+        <Text fontWeight="bold" minW="60px">
+          {`${percentage || "0"}%`}
+        </Text>
+      </HStack>
     )
   }, [percentage, isSliderDisabled, handleSliderChange, showTooltip])
 
@@ -166,9 +183,9 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
 
           <VStack bg={"#E5EEFF"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
-              <Skeleton isLoaded={!isAppAllowanceLoading}>
+              <Skeleton isLoaded={!isTreasuryLockedLoading}>
                 <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
-                  {lockedFunds}
+                  {lockedTreasury.formatted}
                 </Text>
               </Skeleton>
             </HStack>
@@ -213,9 +230,9 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
           <VStack w={"full"} spacing={4} align={"flex-start"}>
             <VStack align={"stretch"} w={"full"} justify={"start"}>
               <BaseTooltip
-                text={
-                  "This locking funds will not be abla to be distributed for apps rewards. Withdrawing or depositing the funds will recalculate the funds"
-                }>
+                text={t(
+                  "This locking funds will not be able to be distributed for apps rewards. Withdrawing or depositing the funds will recalculate the funds",
+                )}>
                 <Flex w={"fit-content"} justifyContent={"center"} mt={1}>
                   <HStack alignSelf={"center"} w={"fit-content"}>
                     <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A" w={"full"}>
@@ -228,9 +245,12 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
 
               <HStack>
                 <Text fontSize="12px" fontWeight="400" opacity={0.7}>
-                  {t("Locked funds percentage : {{values}}%", { values: lockedFundsPercentage })}
+                  {t("Current locked treasury percentage : {{values}}%", { values: lockedPercentage })}
                 </Text>
               </HStack>
+              <Text fontSize="12px" fontWeight="400" opacity={0.7}>
+                {t("Current allowance available to distribute rewards : {{values}}", { values: allowance.formatted })}
+              </Text>
             </VStack>
           </VStack>
 
@@ -254,35 +274,38 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
     handleSubmit,
     estimatedAllowance,
     sliderValue,
-    lockedFunds,
-    lockedFundsPercentage,
+    lockedTreasury,
+    lockedPercentage,
     isAppAllowanceLoading,
     app?.name,
+    isTreasuryLockedLoading,
+    allowance.formatted,
   ])
-
-  if (status !== "ready")
-    return (
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={onClose}
-        status={error ? "error" : status}
-        successTitle={t("Transaction successful")}
-        onTryAgain={handleSubmit}
-        showTryAgainButton
-        showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
-        pendingTitle={t("Processing transaction...")}
-        errorTitle={t("Transaction error")}
-        errorDescription={error?.reason}
-      />
-    )
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
       <CustomModalContent w={"auto"} maxW={"container.md"}>
         <Card rounded={20}>
-          <CardBody>{renderCardContent()}</CardBody>
+          <CardBody>
+            {status !== "ready" ? (
+              <TransactionModal
+                isOpen={isOpen}
+                onClose={onClose}
+                status={error ? "error" : status}
+                successTitle={t("Transaction successful")}
+                onTryAgain={handleSubmit}
+                showTryAgainButton
+                showExplorerButton
+                txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+                pendingTitle={t("Processing transaction...")}
+                errorTitle={t("Transaction error")}
+                errorDescription={error?.reason}
+              />
+            ) : (
+              renderCardContent()
+            )}
+          </CardBody>
         </Card>
       </CustomModalContent>
     </Modal>

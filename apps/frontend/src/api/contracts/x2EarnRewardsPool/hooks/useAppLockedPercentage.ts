@@ -10,7 +10,7 @@ const X2EarnRewardsPoolInterface = X2EarnRewardsPool__factory.createInterface()
  * @param appId - The xApp id.
  */
 export const getAppLockedPercentageQueryKey = (appId?: string) => {
-  return getCallKey({ method: "lockedFundsPercentage", keyArgs: [appId] })
+  return getCallKey({ method: "lockedPercentage", keyArgs: [appId] })
 }
 
 /**
@@ -24,7 +24,7 @@ export const useAppLockedPercentage = (appId: string) => {
   return useCall({
     contractInterface: X2EarnRewardsPoolInterface,
     contractAddress: X2EARN_REWARDS_POOL_CONTRACT,
-    method: "lockedFundsPercentage",
+    method: "lockedPercentage",
     args: [appId],
     enabled: !!appId,
   })
