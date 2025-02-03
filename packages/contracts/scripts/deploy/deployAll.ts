@@ -285,7 +285,7 @@ export async function deployAll(config: ContractsConfig) {
       "X2EarnRewardsPoolV2",
       "X2EarnRewardsPoolV3",
       "X2EarnRewardsPoolV4",
-      "X2EarnRewardsPool5",
+      "X2EarnRewardsPoolV5",
       "X2EarnRewardsPool",
     ],
     [
