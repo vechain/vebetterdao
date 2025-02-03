@@ -303,7 +303,7 @@ export async function deployAll(config: ContractsConfig) {
       [veBetterPassportContractAddress],
       [],
       [],
-      [config.X_2_EARN_INITIAL_METADATA_KEYS],
+      [],
     ],
     {
       logOutput: true,

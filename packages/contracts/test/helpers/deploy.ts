@@ -467,7 +467,7 @@ export const getOrDeployContractInstances = async ({
       [veBetterPassportContractAddress],
       [],
       [],
-      [config.X_2_EARN_INITIAL_METADATA_KEYS],
+      [],
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6],

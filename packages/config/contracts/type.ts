@@ -50,7 +50,6 @@ export type ContractsConfig = {
 
   // X 2 Earn Rewards Pool
   X_2_EARN_INITIAL_IMPACT_KEYS: string[]
-  X_2_EARN_INITIAL_METADATA_KEYS: string[]
 
   // Endorsement
   VECHAIN_NODES_CONTRACT_ADDRESS: string
