@@ -176,7 +176,7 @@ interface IX2EarnRewardsPool {
     uint256[] memory impactValues, // 100, 200, etc.,
     string memory description,
     string[] memory metadataKeys, // country, city, etc.
-    string[] memory metadataValues // Brazil, Brasília, etc.
+    string[] memory metadataValues // Brazil, Brasilia, etc.
   ) external;
 
   /**
@@ -206,6 +206,6 @@ interface IX2EarnRewardsPool {
    */
   function buildMetadata(
     string[] memory metadataKeys, // country, city, etc.
-    string[] memory metadataValues // Brazil, Brasília, etc.
+    string[] memory metadataValues // Brazil, Brasilia, etc.
   ) external returns (string memory);
 }
