@@ -227,7 +227,7 @@ contract X2EarnRewardsPool is
     _distributeReward(appId, amount, receiver);
   }
 
-  
+   
 
   /**
    * @dev See {IX2EarnRewardsPool-distributeRewardWithProof}
@@ -481,7 +481,7 @@ contract X2EarnRewardsPool is
   function _buildMetadataJson(
     string[] memory metadataKeys,
     string[] memory metadataValues
-  ) internal view returns (bytes memory) {
+  ) internal pure returns (bytes memory) {
     require(metadataKeys.length == metadataValues.length, "X2EarnRewardsPool: Mismatched input lengths for Metadata");
 
     bytes memory json = abi.encodePacked("{");
