@@ -362,7 +362,7 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
         "X2EarnRewardsPoolV5",
         "X2EarnRewardsPool",
         await x2EarnRewardsPoolV1.getAddress(),
-        [["country", "city"]],
+        [],
         {
           version: 6,
         },
@@ -371,7 +371,6 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPool.version()).to.equal("6")
       expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
-      expect(await x2EarnRewardsPool.getAllowedMetadataKeys()).to.deep.equal(["country", "city"])
 
       const user = otherAccounts[12]
 
@@ -527,7 +526,7 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
         "X2EarnRewardsPoolV5",
         "X2EarnRewardsPool",
         await x2EarnRewardsPoolV1.getAddress(),
-        [["country", "city"]],
+        [],
         {
           version: 6,
         },
@@ -536,7 +535,6 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPool.version()).to.equal("6")
       expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
-      expect(await x2EarnRewardsPool.getAllowedMetadataKeys()).to.deep.equal(["country", "city"])
 
       const user = otherAccounts[12]
 
@@ -765,60 +763,6 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       ).to.eql(false)
 
       await catchRevert(x2EarnRewardsPool.connect(otherAccount).setX2EarnApps(await otherAccount.getAddress()))
-    })
-
-    it("IMPACT_KEY_MANAGER_ROLE can set new metadata keys", async function () {
-      const { x2EarnRewardsPool, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      expect(await x2EarnRewardsPool.hasRole(await x2EarnRewardsPool.IMPACT_KEY_MANAGER_ROLE(), owner.address)).to.eql(
-        true,
-      )
-      await x2EarnRewardsPool.connect(owner).addMetadataKey("newKey")
-
-      expect(await x2EarnRewardsPool.getAllowedMetadataKeys()).to.deep.equal(["country", "city", "newKey"])
-    })
-
-    it("Only IMPACT_KEY_MANAGER_ROLE can set new metadata keys", async function () {
-      const { x2EarnRewardsPool, otherAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      expect(
-        await x2EarnRewardsPool.hasRole(await x2EarnRewardsPool.IMPACT_KEY_MANAGER_ROLE(), otherAccount.address),
-      ).to.eql(false)
-
-      await catchRevert(x2EarnRewardsPool.connect(otherAccount).addMetadataKey("otherKey"))
-    })
-
-    it("New Metadata Key cannot be a duplicate", async function () {
-      const { x2EarnRewardsPool, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      expect(await x2EarnRewardsPool.hasRole(await x2EarnRewardsPool.IMPACT_KEY_MANAGER_ROLE(), owner.address)).to.eql(
-        true,
-      )
-
-      await x2EarnRewardsPool.connect(owner).addMetadataKey("dupp")
-
-      await catchRevert(x2EarnRewardsPool.connect(owner).addMetadataKey("dupp"))
-    })
-
-    it("Manager Should be able to remove Metadata Key", async function () {
-      const { x2EarnRewardsPool, owner } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
-
-      expect(await x2EarnRewardsPool.hasRole(await x2EarnRewardsPool.IMPACT_KEY_MANAGER_ROLE(), owner.address)).to.eql(
-        true,
-      )
-
-      await x2EarnRewardsPool.connect(owner).addMetadataKey("newKey")
-      expect(await x2EarnRewardsPool.getAllowedMetadataKeys()).to.deep.equal(["country", "city", "newKey"])
-      await x2EarnRewardsPool.connect(owner).removeMetadataKey("newKey")
-      expect(await x2EarnRewardsPool.getAllowedMetadataKeys()).to.deep.equal(["country", "city"])
     })
 
     it("New x2EarnApps address cannot be the zero address", async function () {
@@ -2331,7 +2275,7 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       )
     })
 
-    it("If a non valid metadata key is passed, it reverts", async function () {
+    it("If a non valid metadata is passed, it reverts", async function () {
       const { x2EarnRewardsPool, x2EarnApps, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
         bootstrapAndStartEmissions: true,
@@ -2349,7 +2293,7 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
             ["carbon", "water"],
             [100, 200],
             "The description of the action",
-            ["InvalidKey", "city"],
+            ["city"],
             ["InvalidValue", "Brasília"],
           ),
       )
@@ -2419,17 +2363,6 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
         "plastic",
         "trees_planted",
       ])
-    })
-
-    it("Anyone can index available metadata keys", async function () {
-      const { x2EarnRewardsPool } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        bootstrapAndStartEmissions: true,
-      })
-
-      const impactCodes = await x2EarnRewardsPool.getAllowedMetadataKeys()
-
-      expect(impactCodes).to.eql(["country", "city"])
     })
 
     it("IMPACT_KEY_MANAGER_ROLE and DEFAULT_ADMIN can remove an impact code", async function () {
