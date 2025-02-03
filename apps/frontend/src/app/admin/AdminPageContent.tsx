@@ -3,7 +3,7 @@
 import { useCurrentAllocationsRoundId } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { AnalyticsUtils } from "@/utils"
-import { Grid, GridItem, Stack, Tab, TabList, TabPanel, TabPanels, Tabs, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useEffect } from "react"
 import { B3trAllowance } from "./components/B3trAllowance"
@@ -19,7 +19,6 @@ import { VeBetterPassport } from "./components/VeBetterPassport/VeBetterPassport
 import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 import { ManageCreatorsNFT } from "./components/ManageCreatorsNFT"
 import { GMSetMaxLevel } from "./components/GMSetMaxLevel"
-import { ManageRewardsApps } from "./components/ManageRewardsApps"
 
 export const AdminPageContent = () => {
   useEffect(() => {
@@ -31,12 +30,15 @@ export const AdminPageContent = () => {
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
+  // if isPauserRole, show only a specific pause tab ( distribute rewards of the apps owner)
   const canSeePauseTab =
     permissions?.isAdminOfB3tr ||
     permissions?.isAdminOfGalaxyMember ||
     permissions?.isAdminOfVot3 ||
     permissions?.isAdminOfB3TRGovernor
 
+  const canSeeDistributeRewardsPause = permissions?.isPauserRoleX2EarnAppRewards
+  console.log({ canSeeDistributeRewardsPause })
   const canSeeVeBetterPassportTab =
     permissions?.isAdminOfVeBetterPassport ||
     permissions?.isPassportSettingsManager ||
@@ -79,13 +81,10 @@ export const AdminPageContent = () => {
 
           {Number(currentRoundId) > 0 && (
             <TabPanel>
-              <VStack spacing={6} w="full">
-                <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-                  <ClaimXAppAllocations />
-                  <BulkClaimXAppsAllocations />
-                </Grid>
-                <ManageRewardsApps />
-              </VStack>
+              <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
+                <ClaimXAppAllocations />
+                <BulkClaimXAppsAllocations />
+              </Grid>
             </TabPanel>
           )}
           {permissions?.isAdminOfX2EarnApps && (
