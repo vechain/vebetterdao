@@ -29,9 +29,9 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 Added locking mechanism to control funds availability in the rewards pool.
 
-### Breaking Changes ⚠️
-
-- None.
+### Changes 🚀
+- **Upgraded Contract(s):**
+  - `X2EarnRewardsPool.sol` to version `6`
 
 ### Bug Fixes 🐛
 
@@ -40,16 +40,19 @@ Added locking mechanism to control funds availability in the rewards pool.
 ### New Features 🚀
 
 - **`X2EarnRewardsPool.sol`**:
-  - Added `setLockedFundsPercentage()` to set the locked percentage of funds for an app
-  - Added `lockedFundsPercentage()` to retrieved the locked percentage of funds for an app
-  - Added `allowance` to retrieve the amount of funds available for withdrawal
-  - Added checks to `withdraw()` to ensure withdrawals respect locked funds
-  - Added checks to `_distributeRewards()` to ensure locked funds are not distributed
+  - Added `setLockedPercentage()` **setter** to set the locked percentage of funds for an app
+  - Added `lockedPercentage()` **getter** to retrieved the locked percentage of funds for an app
+  - Added `allowance()` **getter** to retrieve the amount of funds available for rewards distribution, based on the locked treasury
+  - `treasuryLocked` pool reallocation within `deposit()` and `withdraw()`
+  - Added checks to `_distributeRewards()` to ensure only the allowance is distributed
+  - Added `pause()`, `unpause()` **setter** for apps admin or pauser role to toggle the pause state for the rewards distribution.
+
 
 ### Storage Changes 
 
 - **`X2EarnRewardsPool.sol`**:
-  - Added `lockedFundsPercentage` storage to track app-specific locked percentages
+  - Added `lockedPercentage` storage to track app-specific locked percentages
+  - Added `treasuryLocked` storage to track app-specific locked amounts
 
 ---
 
@@ -75,33 +78,6 @@ Fixed issue with duplicate app voting in the same transaction.
 - **`RoundVotesCountingUpgradeable.sol`**:
   - Updated `_countVote` function to check each app against all previous apps in the transaction to prevent duplicate voting.
   - Added new `DuplicateAppVote` error
-
-## Upgrade `X2EarnRewardsPool` to Version 6
-
-Added locking mechanism to control funds availability in the rewards pool.
-
-### Breaking Changes ⚠️
-
-- None.
-
-### Bug Fixes 🐛
-
-- None.
-
-### New Features 🚀
-
-- **`X2EarnRewardsPool.sol`**:
-  - Added `setLockedFundsPercentage()` to set the locked percentage of funds for an app
-  - Added `lockedFundsPercentage()` to retrieved the locked percentage of funds for an app
-  - Added `allowance` to retrieve the amount of funds available for withdrawal
-  - Added checks to `withdraw()` to ensure withdrawals respect locked funds
-  - Added checks to `_distributeRewards()` to ensure locked funds are not distributed
-
-### Storage Changes 
-
-- **`X2EarnRewardsPool.sol`**:
-  - Added `lockedFundsPercentage` storage to track app-specific locked percentages
-
 ---
 
 ## Upgrade `X2EarnApps` to Version 3, `XAllocationVoting` to version `4`, `XAllocationPool` to version `4`, and `X2EarnRewardsPool` to version `5`

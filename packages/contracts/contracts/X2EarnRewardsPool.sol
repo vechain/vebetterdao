@@ -26,6 +26,7 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import { IB3TR } from "./interfaces/IB3TR.sol";
 import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
@@ -59,11 +60,17 @@ contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
   UUPSUpgradeable,
   AccessControlUpgradeable,
-  ReentrancyGuardUpgradeable
+  ReentrancyGuardUpgradeable, 
+  PausableUpgradeable
 {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
   bytes32 public constant IMPACT_KEY_MANAGER_ROLE = keccak256("IMPACT_KEY_MANAGER_ROLE");
+  bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+
+  // ---------------- Errors ----------------
+  /// @dev Error thrown when the user does not have the required role or is the DEFAULT_ADMIN_ROLE
+  error X2EarnRewardsPoolUnauthorizedUser(address user);
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -78,8 +85,8 @@ contract X2EarnRewardsPool is
     mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
     string[] allowedImpactKeys; // Array storing impact keys
     IVeBetterPassport veBetterPassport;
-    mapping(bytes32 appId => uint256) lockedFundsPercentage; // Percentage of funds that must be locked (in basis points, 1% = 100)
-    mapping(bytes32 appId => uint256) lockedFunds; // Funds that are locked by the app owner
+    mapping(bytes32 appId => uint256) lockedPercentage; // Percentage of funds that must be locked (in basis points, 1% = 100)
+    mapping(bytes32 appId => uint256) treasuryLocked; // Calculated amount that are locked by the app owner, based on the lockedPercentage
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -104,10 +111,10 @@ contract X2EarnRewardsPool is
     require(_upgrader != address(0), "X2EarnRewardsPool: upgrader is the zero address");
     require(address(_b3tr) != address(0), "X2EarnRewardsPool: b3tr is the zero address");
     require(address(_x2EarnApps) != address(0), "X2EarnRewardsPool: x2EarnApps is the zero address");
-
     __UUPSUpgradeable_init();
     __AccessControl_init();
     __ReentrancyGuard_init();
+    __Pausable_init();
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, _upgrader);
@@ -139,13 +146,11 @@ contract X2EarnRewardsPool is
   }
 
   // ---------- Modifiers ---------- //
-  /**
-   * @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
-   * @param role - the role to check
-   */
+  /// @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
+  /// @param role - the role to check
   modifier onlyRoleOrAdmin(bytes32 role) {
     if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
-      revert("X2EarnRewardsPool: sender is not an admin nor has the required role");
+      revert X2EarnRewardsPoolUnauthorizedUser(msg.sender );
     }
     _;
   }
@@ -155,6 +160,18 @@ contract X2EarnRewardsPool is
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}
 
   // ---------- Setters ---------- //
+
+  /// @notice Pauses rewards distribution
+  /// @dev Only callable by accounts with the PAUSER_ROLE or the DEFAULT_ADMIN_ROLE
+  function pause() public onlyRoleOrAdmin(PAUSER_ROLE) {
+    _pause();
+  }
+
+  /// @notice Unpauses the contract to resume distribution
+  /// @dev Only callable by accounts with the PAUSER_ROLE or the DEFAULT_ADMIN_ROLE
+  function unpause() public onlyRoleOrAdmin(PAUSER_ROLE) {
+    _unpause();
+  }
 
   /**
    * @dev See {IX2EarnRewardsPool-deposit}
@@ -167,8 +184,8 @@ contract X2EarnRewardsPool is
 
     // increase available amount for the app
     $.availableFunds[appId] += amount;
-    // update locked funds
-    $.lockedFunds[appId] = ($.lockedFundsPercentage[appId] * $.availableFunds[appId]) / 10000;
+    // Reallocate locked funds to the app
+    $.treasuryLocked[appId] = ($.lockedPercentage[appId] * $.availableFunds[appId]) / 10000;
     // transfer tokens to this contract
     require($.b3tr.transferFrom(msg.sender, address(this), amount), "X2EarnRewardsPool: deposit transfer failed");
 
@@ -202,7 +219,7 @@ contract X2EarnRewardsPool is
     $.availableFunds[appId] -= amount;
 
     // Reallocate locked funds to the app
-    $.lockedFunds[appId] = ($.lockedFundsPercentage[appId] * $.availableFunds[appId]) / 10000;
+    $.treasuryLocked[appId] = ($.lockedPercentage[appId] * $.availableFunds[appId]) / 10000;
 
     require($.b3tr.transfer(teamWalletAddress, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
@@ -255,16 +272,16 @@ contract X2EarnRewardsPool is
    * The codes are predefined and the values are the impact values.
    * Example: ["carbon", "water", "energy"], [100, 200, 300]
    */
-  function _distributeReward(bytes32 appId, uint256 amount, address receiver) internal nonReentrant {
+  function _distributeReward(bytes32 appId, uint256 amount, address receiver) internal nonReentrant whenNotPaused {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     // check authorization
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
 
-    if ($.lockedFundsPercentage[appId] > 0) {
-      // check if the funds are above the allowance of the app 
-      uint256 allowedToDistribute = $.availableFunds[appId] - $.lockedFunds[appId];
+    if ($.lockedPercentage[appId] > 0) {
+      // check if the funds are above the allowance of the app
+      uint256 allowedToDistribute = $.availableFunds[appId] - $.treasuryLocked[appId];
       require(allowedToDistribute >= amount, "X2EarnRewardsPool: Amount to distribute is above the allowance");
     }
 
@@ -500,7 +517,7 @@ contract X2EarnRewardsPool is
    * @dev Sets the locked funds percentage for an app as an admin
    * @param appId The ID of the app
    * @param percentage The percentage of funds that must be locked [0, 100]
-   * 
+   *
    * @notice if the allowance have been spent it reverts to set the locked funds percentage
    * @notice returns the locked funds percentage in basis points
    */
@@ -511,18 +528,18 @@ contract X2EarnRewardsPool is
     require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
     require(percentage * 100 <= 10000, "X2EarnRewardsPool: percentage cannot exceed 100%");
 
-    // check if the allowance have been spent     
-    if ($.lockedFundsPercentage[appId] != 0 && $.lockedFundsPercentage[appId] != 100) {
-      require($.availableFunds[appId] - $.lockedFunds[appId] > 0 , "X2EarnRewardsPool: allowance have been spent");
+    // check if the allowance have been spent
+    if ($.lockedPercentage[appId] != 0 && $.lockedPercentage[appId] != 100) {
+      require($.availableFunds[appId] - $.treasuryLocked[appId] > 0, "X2EarnRewardsPool: allowance have been spent");
     }
-    
-    $.lockedFundsPercentage[appId] = percentage * 100;
+
+    $.lockedPercentage[appId] = percentage * 100;
 
     // Reallocate locked funds to the app
-    $.lockedFunds[appId] = ($.lockedFundsPercentage[appId] * $.availableFunds[appId]) / 10000;
+    $.treasuryLocked[appId] = ($.lockedPercentage[appId] * $.availableFunds[appId]) / 10000;
 
     emit LockedFundsPercentageSet(appId, percentage);
-    emit LockedFundsSet(appId, $.lockedFunds[appId]);
+    emit LockedFundsSet(appId, $.treasuryLocked[appId]);
   }
 
   // ---------- Getters ---------- //
@@ -574,19 +591,19 @@ contract X2EarnRewardsPool is
     return $.veBetterPassport;
   }
 
-  function lockedFundsPercentage(bytes32 appId) external view returns (uint256) {
+  function lockedPercentage(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.lockedFundsPercentage[appId] / 100;
+    return $.lockedPercentage[appId] / 100;
   }
 
-  function lockedFunds(bytes32 appId) external view returns (uint256) {
+  function treasuryLocked(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.lockedFunds[appId];
+    return $.treasuryLocked[appId];
   }
 
   function allowance(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.availableFunds[appId] - $.lockedFunds[appId];
+    return $.availableFunds[appId] - $.treasuryLocked[appId];
   }
 
   // ---------- Fallbacks ---------- //
@@ -633,5 +650,4 @@ contract X2EarnRewardsPool is
   ) public virtual returns (bytes4) {
     revert("X2EarnRewardsPool: contract does not accept batch transfers of ERC1155 tokens");
   }
-
 }
