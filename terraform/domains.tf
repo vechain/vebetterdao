@@ -5,7 +5,7 @@ locals {
     { name : "insight.${var.domain_name_data[terraform.workspace].suffix}", zone : var.domain_name_data[terraform.workspace].zone_id },
     { name : "inspector.${var.domain_name_data[terraform.workspace].suffix}", zone : var.domain_name_data[terraform.workspace].zone_id },
   ]
-  base_registry_url = "${module.ecr.registry_id[0]}.dkr.ecr.eu-west-1.amazonaws.com"
+  base_registry_url = "${module.ecr.registry_id}.dkr.ecr.eu-west-1.amazonaws.com"
 }
 module "thor-solo_domain" {
   source     = "git@github.com:vechain/terraform_infrastructure_modules.git//domains?ref=677fbdb"
