@@ -16,7 +16,9 @@
     "SHARD",
     "CONTRACT_TO_UPGRADE",
     "CONTRACT_TO_DEPLOY",
-    "CONTRACT_VERSION"
+    "CONTRACT_VERSION",
+    "CONTRACT_NAME",
+    "CONTRACT_ADDRESS"
   ],
   "pipeline": {
     "install": {
@@ -250,6 +252,14 @@
     },
     "complete-translations": {
       "cache": false
+    },
+    "verify-contract": {
+      "cache": false,
+      "dependsOn": []
+    },
+    "deploy:hardhat": {
+      "cache": false,
+      "dependsOn": []
     }
   }
 }

@@ -27,6 +27,7 @@
     "contracts:compile": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run compile --filter=contracts",
     "contracts:deploy": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run deploy --filter=contracts",
     "contracts:deploy:local": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run deploy --filter=contracts",
+    "contracts:deploy:hardhat": "dotenv -v NEXT_PUBLIC_APP_ENV=local -- turbo run deploy:hardhat --filter=contracts",
     "contracts:deploy:testnet-staging": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet-staging -- turbo run deploy --filter=contracts",
     "contracts:deploy:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run deploy:testnet --filter=contracts",
     "contracts:deploy:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run deploy:mainnet --filter=contracts",
@@ -61,7 +62,8 @@
     "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo run playwright:e2e",
     "generate-translations": "dotenv -e .env -- turbo generate-translations",
     "complete-translations": "dotenv -e .env -- turbo complete-translations",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "contracts:verify": "./scripts/verify-contract.sh"
   },
   "devDependencies": {
     "@datadog/browser-rum": "^5.23.0",

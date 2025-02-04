@@ -4,6 +4,7 @@ import { VECHAIN_URL_SOLO } from "@vechain/hardhat-vechain"
 import { HardhatUserConfig } from "hardhat/config"
 
 import "@nomicfoundation/hardhat-toolbox"
+import "@nomicfoundation/hardhat-verify"
 import "@nomiclabs/hardhat-truffle5"
 import "@vechain/hardhat-ethers"
 import "@vechain/hardhat-vechain"
