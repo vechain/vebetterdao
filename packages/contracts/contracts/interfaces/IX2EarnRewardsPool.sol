@@ -11,12 +11,12 @@ pragma solidity 0.8.20;
 interface IX2EarnRewardsPool {
 
   /**
-   * @dev Event emitted when the locked funds amount is set.
+   * @dev Event emitted when the distribution allowance is set.
    *
    * @param appId The ID of the app.
-   * @param amount The locked funds amount.
+   * @param amount The distribution allowance amount.
    */
-  event LockedFundsSet(bytes32 appId, uint256 amount);
+  event DistributionAllowanceSet(bytes32 appId, uint256 amount);
 
   
   /**
