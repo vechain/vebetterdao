@@ -16,12 +16,12 @@ import {
   X2EarnRewardsPoolV2,
   X2EarnRewardsPoolV3,
   X2EarnRewardsPoolV4,
+  X2EarnRewardsPoolV5,
 } from "../typechain-types"
 import { endorseApp } from "./helpers/xnodes"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { X2EarnRewardsPoolV5 } from "../typechain-types/contracts/deprecated/V5/X2EarnRewardsPoolV5.sol"
 
-describe.only("X2EarnRewardsPool - @shard12", function () {
+describe("X2EarnRewardsPool - @shard12", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {
@@ -547,18 +547,20 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
       // distribute reward
-      const tx = await x2EarnRewardsPool.connect(owner).distributeRewardWithProofAndMetadata(
-        appId,
-        ethers.parseEther("1"),
-        user.address,
-        ["image"],
-        ["https://image.png"],
-        ["carbon", "water"],
-        [100, 200],
-        "The description of the action",
-        ["country"], //Only one of the allowed metadata keys
-        ["Brazil"],
-      )
+      const tx = await x2EarnRewardsPool
+        .connect(owner)
+        .distributeRewardWithProofAndMetadata(
+          appId,
+          ethers.parseEther("1"),
+          user.address,
+          ["image"],
+          ["https://image.png"],
+          ["carbon", "water"],
+          [100, 200],
+          "The description of the action",
+          ["country"],
+          ["Brazil"],
+        )
 
       const receipt = await tx.wait()
 
@@ -2122,6 +2124,74 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       expect(event[0].args[1]).to.equal(appId)
       expect(event[0].args[2]).to.equal(user.address)
       expect(event[0].args[3]).to.equal("")
+    })
+
+    it("If no metadata is passed, metadata event is not emitted", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccounts[10]
+      const user = otherAccounts[11]
+      const amount = ethers.parseEther("100")
+
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await endorseApp(appId, owner)
+
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
+      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
+
+      // fill the pool
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      const tx = await x2EarnRewardsPool
+        .connect(owner)
+        .distributeRewardWithProofAndMetadata(
+          appId,
+          ethers.parseEther("1"),
+          user.address,
+          ["image", "link"],
+          ["https://image.png", "https://twitter.com/tweet/1"],
+          [],
+          [],
+          "The description of the action",
+          ["", ""],
+          ["", ""],
+        )
+
+      const receipt = await tx.wait()
+
+      expect(await b3tr.balanceOf(user.address)).to.equal(ethers.parseEther("1"))
+      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(ethers.parseEther("99"))
+
+      // event emitted
+      if (!receipt) throw new Error("No receipt")
+
+      let event = filterEventsByName(receipt.logs, "RewardDistributed")
+
+      expect(event).not.to.eql([])
+      expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
+      expect(event[0].args[1]).to.equal(appId)
+      expect(event[0].args[2]).to.equal(user.address)
+      expect(event[0].args[3]).to.equal("")
+
+      let eventMetadata = filterEventsByName(receipt.logs, "RewardMetadata")
+
+      expect(eventMetadata).not.to.eql([])
+      expect(eventMetadata[0].args[0]).to.equal(ethers.parseEther("1"))
+      expect(eventMetadata[0].args[1]).to.equal(appId)
+      expect(eventMetadata[0].args[2]).to.equal(user.address)
+
+      const emittedMetadata = JSON.parse(eventMetadata[0].args[3])
+      expect(emittedMetadata).to.have.property("version")
+      expect(emittedMetadata.version).to.equal(1)
+      expect(emittedMetadata).to.have.deep.property("metadata", { "": "" })
     })
 
     it("If a non valid proof type is passed, it reverts", async function () {
