@@ -54,7 +54,7 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * ----- Version 5 -----
  * - Updated the X2EarnApps interface to support node cooldown functionality
  * ----- Version 6 -----
- * - Added funds locking mechanism to protect against exploits
+ * - Added allowance mechanism to distribute rewards and protect against exploits
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
@@ -85,8 +85,7 @@ contract X2EarnRewardsPool is
     mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
     string[] allowedImpactKeys; // Array storing impact keys
     IVeBetterPassport veBetterPassport;
-    mapping(bytes32 appId => uint256) lockedPercentage; // Percentage of funds that must be locked (in basis points, 1% = 100)
-    mapping(bytes32 appId => uint256) treasuryLocked; // Calculated amount that are locked by the app owner, based on the lockedPercentage
+    mapping(bytes32 appId => uint256) distributionAllowance; // Fixed amount that can be distributed, independent of total funds
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -184,8 +183,6 @@ contract X2EarnRewardsPool is
 
     // increase available amount for the app
     $.availableFunds[appId] += amount;
-    // Reallocate locked funds to the app
-    $.treasuryLocked[appId] = ($.lockedPercentage[appId] * $.availableFunds[appId]) / 10000;
     // transfer tokens to this contract
     require($.b3tr.transferFrom(msg.sender, address(this), amount), "X2EarnRewardsPool: deposit transfer failed");
 
@@ -206,21 +203,20 @@ contract X2EarnRewardsPool is
       "X2EarnRewardsPool: not an app admin nor a reward distributor"
     );
 
-    // check if the app has enough available funds to withdraw
-    require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
+    // Check if withdrawal would affect distribution allowance
+    require(
+      $.availableFunds[appId] - amount >= $.distributionAllowance[appId],
+      "X2EarnRewardsPool: withdrawal would affect distribution allowance"
+    );
 
     // check if the contract has enough funds
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
 
-    // Get the team wallet address
+    // Get the team wallet address and update state
     address teamWalletAddress = $.x2EarnApps.teamWalletAddress(appId);
-
-    // transfer the rewards to the team wallet
     $.availableFunds[appId] -= amount;
 
-    // Reallocate locked funds to the app
-    $.treasuryLocked[appId] = ($.lockedPercentage[appId] * $.availableFunds[appId]) / 10000;
-
+    // transfer the rewards to the team wallet
     require($.b3tr.transfer(teamWalletAddress, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
     emit TeamWithdrawal(amount, appId, teamWalletAddress, msg.sender, reason);
@@ -279,18 +275,18 @@ contract X2EarnRewardsPool is
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
 
-    if ($.lockedPercentage[appId] > 0) {
-      // check if the funds are above the allowance of the app
-      uint256 allowedToDistribute = $.availableFunds[appId] - $.treasuryLocked[appId];
-      require(allowedToDistribute >= amount, "X2EarnRewardsPool: Amount to distribute is above the allowance");
-    }
-
     // check if the app has enough available funds to distribute
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
 
-    // Transfer the rewards to the receiver
+    // check if the amount is within the allowance
+    require($.distributionAllowance[appId] >= amount, "X2EarnRewardsPool: amount exceeds distribution allowance");
+
+    // Update state
     $.availableFunds[appId] -= amount;
+    $.distributionAllowance[appId] -= amount;
+
+    // Transfer the rewards to the receiver
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
     // Try to register the action in the veBetterPassport contract
@@ -514,32 +510,19 @@ contract X2EarnRewardsPool is
   }
 
   /**
-   * @dev Sets the locked funds percentage for an app as an admin
+   * @dev Sets the distribution allowance for an app
    * @param appId The ID of the app
-   * @param percentage The percentage of funds that must be locked [0, 100]
-   *
-   * @notice if the allowance have been spent it reverts to set the locked funds percentage
-   * @notice returns the locked funds percentage in basis points
+   * @param amount The amount to reserve for rewards distribution
    */
-  function setLockedFundsPercentage(bytes32 appId, uint256 percentage) external {
+  function setDistributionAllowance(bytes32 appId, uint256 amount) external {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
-    require(percentage * 100 <= 10000, "X2EarnRewardsPool: percentage cannot exceed 100%");
+    require(amount <= $.availableFunds[appId], "X2EarnRewardsPool: amount exceeds available funds");
 
-    // check if the allowance have been spent
-    if ($.lockedPercentage[appId] != 0 && $.lockedPercentage[appId] != 100) {
-      require($.availableFunds[appId] - $.treasuryLocked[appId] > 0, "X2EarnRewardsPool: allowance have been spent");
-    }
-
-    $.lockedPercentage[appId] = percentage * 100;
-
-    // Reallocate locked funds to the app
-    $.treasuryLocked[appId] = ($.lockedPercentage[appId] * $.availableFunds[appId]) / 10000;
-
-    emit LockedFundsPercentageSet(appId, percentage);
-    emit LockedFundsSet(appId, $.treasuryLocked[appId]);
+    $.distributionAllowance[appId] = amount;
+    emit DistributionAllowanceSet(appId, amount);
   }
 
   // ---------- Getters ---------- //
@@ -591,19 +574,9 @@ contract X2EarnRewardsPool is
     return $.veBetterPassport;
   }
 
-  function lockedPercentage(bytes32 appId) external view returns (uint256) {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.lockedPercentage[appId] / 100;
-  }
-
-  function treasuryLocked(bytes32 appId) external view returns (uint256) {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.treasuryLocked[appId];
-  }
-
   function allowance(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.availableFunds[appId] - $.treasuryLocked[appId];
+    return $.distributionAllowance[appId];
   }
 
   // ---------- Fallbacks ---------- //
