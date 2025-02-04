@@ -9,36 +9,36 @@ import { useWithdrawDeposits } from "@/hooks/useWithdrawDeposits"
 import { TransactionModal } from "@/components"
 
 type Props = {
-  claimableDeposits: bigint
-  userProposalDeposits: UseQueryResult<ProposalDeposit[], Error>
+  userClaimableDeposits: bigint
+  userProposalClaimableDeposits: UseQueryResult<ProposalDeposit[], Error>
 }
 
 const compactFormatter = getCompactFormatter(2)
 
-export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props) => {
+export const ClaimDeposits = ({ userClaimableDeposits, userProposalClaimableDeposits }: Props) => {
   const { t } = useTranslation()
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
-  const userProposalsDeposited = useMemo(() => {
+  const filteredProposalClaimableDeposits = useMemo(() => {
     const proposals: ProposalDeposit[] = []
-    if (!userProposalDeposits.data) return proposals
-    for (const proposal of userProposalDeposits.data) {
+    if (!userProposalClaimableDeposits.data) return proposals
+    for (const proposal of userProposalClaimableDeposits.data) {
       if (proposal && proposal.deposit !== "0") {
         proposals.push(proposal)
       }
     }
 
     return proposals
-  }, [userProposalDeposits])
-
-  const { sendTransaction, resetStatus, status, txReceipt, sendTransactionTx, error } = useWithdrawDeposits({
-    proposalDeposits: userProposalsDeposited,
-  })
+  }, [userProposalClaimableDeposits])
 
   const formattedDeposits = useMemo(() => {
-    return Number(ethers.formatEther(claimableDeposits))
-  }, [claimableDeposits])
+    return Number(ethers.formatEther(userClaimableDeposits))
+  }, [userClaimableDeposits])
+
+  const { sendTransaction, resetStatus, status, txReceipt, sendTransactionTx, error } = useWithdrawDeposits({
+    proposalDeposits: filteredProposalClaimableDeposits,
+  })
 
   const handleClaim = useCallback(() => {
     sendTransaction()
@@ -69,9 +69,9 @@ export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props
           <b>
             {compactFormatter.format(formattedDeposits)} {t("VOT3")}
           </b>{" "}
-          {t("that you used to support")} {userProposalsDeposited.length}
+          {t("that you used to support")} {filteredProposalClaimableDeposits.length}
           {t(" proposal")}
-          {(userProposalDeposits.data?.length ?? 0) > 1 ? "s" : ""}
+          {(filteredProposalClaimableDeposits.length ?? 0) > 1 ? "s" : ""}
           {t(".")}
         </Text>
         <Button onClick={handleClaim} w={"full"} variant={"primaryAction"} mt={5}>

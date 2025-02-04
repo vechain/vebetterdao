@@ -4,6 +4,8 @@ import { useMemo } from "react"
 import { getProposalUserDepositQueryKey, proposalDepositAbi } from "./useProposalUserDeposit"
 import { queryClient } from "@/api/QueryProvider"
 import { useProposalsEvents } from "./useProposalsEvents"
+import { useAllProposalsState } from "./useAllProposalsState"
+import { ProposalState } from "./useProposalState"
 import { getConfig } from "@repo/config"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress
@@ -27,15 +29,19 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
     return proposals?.created.map(proposal => proposal.proposalId) ?? []
   }, [proposals])
 
+  const { data: proposalStates, isLoading: proposalStatesLoading } = useAllProposalsState(proposalIds)
+
   return useQuery({
     queryKey: getProposalUserDepositQueryKey("ALL", userAddress),
-    enabled: !!thor && !!userAddress && !!proposalIds,
+    enabled: !!thor && !!userAddress && !!proposalIds && !proposalStatesLoading,
     queryFn: async () => {
-      const clauses = proposalIds.map(proposalId => ({
-        to: GOVERNOR_CONTRACT,
-        value: "0x0",
-        data: proposalDepositAbi.encode(proposalId, userAddress),
-      }))
+      const clauses = proposalIds
+        .filter(proposalId => proposalStates?.find(p => p.proposalId === proposalId)?.state !== ProposalState.Pending)
+        .map(proposalId => ({
+          to: GOVERNOR_CONTRACT,
+          value: "0x0",
+          data: proposalDepositAbi.encode(proposalId, userAddress),
+        }))
 
       const res = await thor.explain(clauses).execute()
 

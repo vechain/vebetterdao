@@ -20,14 +20,14 @@ export const ProposalsPageContent = () => {
   const { selectedFilter } = useProposalFilters()
   const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
 
-  const userProposalDepositsQuery = useProposalClaimableUserDeposits(account ?? "")
+  const userProposalClaimableDeposits = useProposalClaimableUserDeposits(account ?? "")
 
-  const userTotalDeposits = useMemo(() => {
-    if (!userProposalDepositsQuery.data) return BigInt(0)
-    return userProposalDepositsQuery.data.reduce((acc, deposit) => {
+  const userClaimableDeposits = useMemo(() => {
+    if (!userProposalClaimableDeposits.data) return BigInt(0)
+    return userProposalClaimableDeposits.data.reduce((acc, deposit) => {
       return BigInt(acc) + BigInt(deposit.deposit ?? 0)
     }, BigInt(0))
-  }, [userProposalDepositsQuery])
+  }, [userProposalClaimableDeposits])
 
   const onNewClick = useCallback(() => {
     if (!account) {
@@ -81,9 +81,12 @@ export const ProposalsPageContent = () => {
       </VStack>
       <ProposalsFilters alignSelf={"flex-start"} w="full" />
       <Show below="sm">
-        {userTotalDeposits > 0 && (
+        {userClaimableDeposits > 0 && (
           <Box mb={2} mt={3}>
-            <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDepositsQuery} />
+            <ClaimDeposits
+              userClaimableDeposits={userClaimableDeposits}
+              userProposalClaimableDeposits={userProposalClaimableDeposits}
+            />
           </Box>
         )}
       </Show>
@@ -113,8 +116,11 @@ export const ProposalsPageContent = () => {
         </VStack>
         <Show above="sm">
           <VStack flex={2} alignSelf="flex-start" spacing={6} position={"sticky"} top={24}>
-            {userTotalDeposits > 0 && (
-              <ClaimDeposits claimableDeposits={userTotalDeposits} userProposalDeposits={userProposalDepositsQuery} />
+            {userClaimableDeposits > 0 && (
+              <ClaimDeposits
+                userClaimableDeposits={userClaimableDeposits}
+                userProposalClaimableDeposits={userProposalClaimableDeposits}
+              />
             )}
             {sortedProposals.length > 0 && <CreateProposalCard />}
             <JoinCommunity />
