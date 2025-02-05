@@ -1,6 +1,7 @@
 import { useCallback } from "react"
-import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
+import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { useQueryClient } from "@tanstack/react-query"
+import { useConfirmAndSendTransaction } from "./useConfirmAndSendTransaction"
 
 export type BuildTransactionProps<ClausesParams> = {
   clauseBuilder: (props: ClausesParams) => EnhancedClause[]
@@ -51,7 +52,7 @@ export const useBuildTransaction = <ClausesParams>({
     onSuccess?.()
   }, [invalidateCache, onSuccess, queryClient, refetchQueryKeys])
 
-  const result = useSendTransaction({
+  const result = useConfirmAndSendTransaction({
     signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
     suggestedMaxGas,

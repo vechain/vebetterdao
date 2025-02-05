@@ -1414,5 +1414,6 @@
   "Error blacklisting user": "Error blacklisting user",
   "GitHub Username is required": "GitHub Username is required",
   "{{fieldName}} is too short": "{{fieldName}} is too short",
-  "{{fieldName}} is too long": "{{fieldName}} is too long"
+  "{{fieldName}} is too long": "{{fieldName}} is too long",
+  "Confirm this transaction?": "Confirm this transaction?"
 }
