@@ -68,7 +68,7 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
         transition: "all 0.3s",
       }}>
       <CardBody py="16px" px="24px">
-        <Stack direction={{ base: "column", md: "row" }} align="stretch" w="full" h="full">
+        <Stack direction={{ base: "column", lg: "row" }} align="stretch" w="full" h="full">
           <Stack direction="row" spacing={4} align="center" flex="1">
             <Skeleton isLoaded={!isLogoLoading}>
               <Image
@@ -76,6 +76,7 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
                 alt="logo"
                 h="72px"
                 w="72px"
+                minW="72px"
                 borderRadius="9px"
                 objectFit="contain"
               />
@@ -83,8 +84,14 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
 
             <Stack flex="1" align="stretch" justify="center">
               <Skeleton isLoaded={!appMetadataLoading}>
-                <HStack spacing={4}>
-                  <Heading fontWeight={700} fontSize="20px" noOfLines={1}>
+                <HStack spacing={4} align="center">
+                  <Heading
+                    fontWeight={700}
+                    fontSize="20px"
+                    noOfLines={1}
+                    maxW={{ base: "full", md: "150px", lg: "200px" }}
+                    overflow="hidden"
+                    textOverflow="ellipsis">
                     {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
                   </Heading>
                   {isNewApp && (
@@ -95,9 +102,11 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
                       px={2}
                       py={1}
                       borderRadius={"16px"}
-                      fontSize="12px">
-                      <Image src="/images/new-app-gray.svg" alt="new" />
-                      <Text>{t("New !")}</Text>
+                      fontSize="12px"
+                      spacing={1}
+                      flexShrink={0}>
+                      <Image src="/images/new-app-gray.svg" alt="new" boxSize={3} mr={1} />
+                      <Text>{t("New!")}</Text>
                     </HStack>
                   )}
                 </HStack>

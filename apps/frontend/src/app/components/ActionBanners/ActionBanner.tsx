@@ -119,6 +119,7 @@ export const ActionBanner = () => {
     showCreatorRejectedBanner,
     showCreatorApprovedBanner,
     showCreatorUnderReviewBanner,
+    showNewAppBanner,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
