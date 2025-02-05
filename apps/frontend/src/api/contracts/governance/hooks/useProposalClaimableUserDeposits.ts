@@ -10,6 +10,12 @@ import { getConfig } from "@repo/config"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress
 
+// Base key for claimable deposits queries, using the user's address
+export const getProposalClaimableUserDepositsKey = (userAddress: string) => [
+  "proposalClaimableUserDeposits",
+  userAddress,
+]
+
 /**
  * Custom React hook that fetches and monitors claimable user deposits for each proposal.
  *
@@ -31,10 +37,18 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
 
   const { data: proposalStates, isLoading: proposalStatesLoading } = useAllProposalsState(proposalIds)
 
+  // Build the composite query key by appending dynamic data to the base key
+  const compositeQueryKey = [
+    ...getProposalClaimableUserDepositsKey(userAddress),
+    JSON.stringify(proposalIds),
+    JSON.stringify(proposalStates?.map(p => `${p.proposalId}:${p.state}`) ?? []),
+  ]
+
   return useQuery({
-    queryKey: getProposalUserDepositQueryKey("ALL", userAddress),
-    enabled: !!thor && !!userAddress && !!proposalIds && !proposalStatesLoading,
+    queryKey: compositeQueryKey,
+    enabled: !!thor && !!userAddress && proposalIds.length > 0 && !proposalStatesLoading,
     queryFn: async () => {
+      // Only build clauses for proposals that are not in the Pending state
       const clauses = proposalIds
         .filter(proposalId => proposalStates?.find(p => p.proposalId === proposalId)?.state !== ProposalState.Pending)
         .map(proposalId => ({
@@ -46,12 +60,16 @@ export const useProposalClaimableUserDeposits = (userAddress: string) => {
       const res = await thor.explain(clauses).execute()
 
       const proposalsDeposit = res.map((r, index) => {
+        if (r.reverted) {
+          throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
+        }
         const decoded = proposalDepositAbi.decode(r.data)
-        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
         const proposalId = proposalIds[index] as string
         const deposit = decoded[0] as string
 
+        // Update the cache for the individual proposal deposit query
         queryClient.setQueryData(getProposalUserDepositQueryKey(proposalId, userAddress), deposit)
+
         return {
           proposalId,
           deposit,
