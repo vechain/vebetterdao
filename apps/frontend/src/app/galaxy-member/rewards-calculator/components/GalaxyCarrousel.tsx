@@ -29,9 +29,9 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
     const visibleNFTs = []
     const totalNFTs = upgradableNfts.length
 
-    for (let i = 0; i < visibleCards; i++) {
-      let index = (currentIndex + i) % totalNFTs
-      if (index < 0) index = totalNFTs + index
+    const normalizedIndex = ((currentIndex % totalNFTs) + totalNFTs) % totalNFTs
+    for (let i = 0; i < Math.min(visibleCards, totalNFTs); i++) {
+      const index = (normalizedIndex + i) % totalNFTs
       visibleNFTs.push(upgradableNfts[index])
     }
     return visibleNFTs
@@ -45,10 +45,17 @@ export const GalaxyCarrousel = ({ setSelectedGMLevel, usersGM }: Props) => {
   )
 
   const nextCard = () => {
-    setCurrentIndex(prevIndex => (prevIndex + 1 >= upgradableNfts.length ? 0 : prevIndex + 1))
+    setCurrentIndex(prevIndex => {
+      const nextIndex = prevIndex + 1
+      return nextIndex >= upgradableNfts.length ? 0 : nextIndex
+    })
   }
+
   const prevCard = () => {
-    setCurrentIndex(prevIndex => (prevIndex - 1 < 0 ? upgradableNfts.length - 1 : prevIndex - 1))
+    setCurrentIndex(prevIndex => {
+      const nextIndex = prevIndex - 1
+      return nextIndex < 0 ? upgradableNfts.length - 1 : nextIndex
+    })
   }
 
   useEffect(() => {
