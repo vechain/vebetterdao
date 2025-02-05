@@ -11,10 +11,15 @@ import dynamic from "next/dynamic"
 
 import { lightTheme } from "./theme"
 import { AuthSessionProvider } from "@/providers/AuthSessionProvider"
-import { TransactionProvider } from "@/providers/TransactionProvider"
 
 const VechainKitProviderWrapper = dynamic(
   async () => (await import("../providers/VechainKitProviderWrapper")).VechainKitProviderWrapper,
+  {
+    ssr: false,
+  },
+)
+const TransactionProvider = dynamic(
+  async () => (await import("../providers/TransactionProvider")).TransactionProvider,
   {
     ssr: false,
   },
