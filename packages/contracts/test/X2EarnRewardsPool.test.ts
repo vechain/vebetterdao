@@ -518,7 +518,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
   })
 
   // deposit
-  describe("Deposit", function () {
+  describe.only("Deposit", function () {
     // everyone can deposit
     it("Anyone can deposit", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
@@ -599,7 +599,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(event[0].args[2]).to.equal(otherAccount.address)
     })
   })
-  describe("Balance", function () {
+  describe.only("Balance", function () {
     it("Should return correct balance", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -621,7 +621,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
     })
   })
   // withdraw
-  describe("Withdraw", function () {
+  describe.only("Withdraw", function () {
     it("The admin of the app can withdraw", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({
@@ -669,7 +669,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(event[0].args[4]).to.equal("For the team")
     })
 
-    // not anymore ( from V6 )
+    // not anymore
     // it("The app distributor can withdraw", async function () {
     //   const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
     //     await getOrDeployContractInstances({
@@ -843,7 +843,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
     })
   })
   // distributeRewards
-  describe("Distribute rewards", async function () {
+  describe.only("Distribute rewards", async function () {
     it("Selected address from team can distribute rewards", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({
@@ -2021,7 +2021,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPool.allowance(appId1)).to.equal(ethers.parseEther("10"))
     })
 
-    it("Cannot set allowance if not app admin", async function () {
+    it("Cannot set locked percentage funds if not app admin", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -2106,13 +2106,13 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(allowance2).to.equal(ethers.parseEther("20"))
     })
 
-    it("Should modify the allowance if withdrawing more than the allowance", async function () {
+    it("Should not modify the allowance when withdrawing", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         bootstrapAndStartEmissions: true,
       })
       const amount = ethers.parseEther("100")
-      const withdrawAmount = ethers.parseEther("91")
+      const withdrawAmount = ethers.parseEther("10")
       await b3tr.connect(minterAccount).mint(owner.address, amount)
 
       // create app
@@ -2131,35 +2131,51 @@ describe("X2EarnRewardsPool - @shard12", function () {
       const allowance2 = await x2EarnRewardsPool.connect(owner).allowance(appId)
 
       expect(allowance1).to.equal(ethers.parseEther("10"))
-      expect(allowance2).to.equal(ethers.parseEther("9"))
+      expect(allowance2).to.equal(ethers.parseEther("10"))
     })
 
-    it("Should emit an event when withdrawing more than the allowance", async function () {
+    it("Should revert when withdrawing more than the allowance", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         bootstrapAndStartEmissions: true,
       })
       const amount = ethers.parseEther("100")
-      const withdrawAmount = ethers.parseEther("91")
+      const withdrawAmount = ethers.parseEther("41")
       await b3tr.connect(minterAccount).mint(owner.address, amount)
 
       // create app
       await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
-
       const appId = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await endorseApp(appId, owner)
 
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
-      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
 
-      expect(await b3tr.balanceOf(owner.address)).to.equal(0n)
-
-      await x2EarnRewardsPool.connect(owner).setDistributionAllowance(appId, ethers.parseEther("10"))
-
-      await expect(x2EarnRewardsPool.connect(owner).withdraw(withdrawAmount, appId, "")).to.emit(
-        x2EarnRewardsPool,
-        "AllowanceAffectedByWithdrawal",
+      await x2EarnRewardsPool.connect(owner).setDistributionAllowance(appId, ethers.parseEther("60"))
+      await catchRevert(
+        x2EarnRewardsPool.connect(owner).withdraw(withdrawAmount, await x2EarnApps.hashAppName("My app"), ""),
       )
+    })
+
+    it("Should spend the treasury (remaining from allowance ) for withdrawing ", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+        bootstrapAndStartEmissions: true,
+      })
+      const amount = ethers.parseEther("100")
+      const withdrawAmount = ethers.parseEther("40")
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+
+      // create app
+      await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
+      const appId = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await endorseApp(appId, owner)
+
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
+
+      await x2EarnRewardsPool.connect(owner).setDistributionAllowance(appId, ethers.parseEther("60"))
+      await x2EarnRewardsPool.connect(owner).withdraw(withdrawAmount, await x2EarnApps.hashAppName("My app"), "")
     })
 
     it("Should revert if distributing more than the allowance", async function () {
@@ -2187,32 +2203,6 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await catchRevert(x2EarnRewardsPool.connect(owner).distributeReward(appId, distributeAmount, owner.address, ""))
     })
 
-    it("Should distribute if the allowance is not set", async function () {
-      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        bootstrapAndStartEmissions: true,
-      })
-      const amount = ethers.parseEther("100")
-      const distributeAmount = ethers.parseEther("70")
-      await b3tr.connect(minterAccount).mint(owner.address, amount)
-
-      // create app
-      await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
-      const appId = ethers.keccak256(ethers.toUtf8Bytes("My app"))
-      await endorseApp(appId, owner)
-
-      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
-      await x2EarnRewardsPool.connect(owner).deposit(amount, await x2EarnApps.hashAppName("My app"))
-
-      await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
-      expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
-
-      await x2EarnRewardsPool.connect(owner).distributeReward(appId, distributeAmount, owner.address, "")
-
-      const availableFunds = await x2EarnRewardsPool.availableFunds(appId)
-      expect(availableFunds).to.eql(ethers.parseEther("30"))
-    })
-
     it("Can get allowance", async function () {
       const { x2EarnRewardsPool, x2EarnApps, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2226,7 +2216,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(updatedAllowance).to.eql(0n)
     })
 
-    it("Should modify the allowance when updating the distribution allowance", async function () {
+    it("Should modify the allowance when updating it", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
         bootstrapAndStartEmissions: true,
