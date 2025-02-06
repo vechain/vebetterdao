@@ -255,11 +255,10 @@ contract X2EarnRewardsPool is
     string[] memory impactCodes,
     uint256[] memory impactValues,
     string memory description,
-    string[] memory metadataKeys,
-    string[] memory metadataValues
+    string memory metadata
   ) external {
     _emitProof(appId, amount, receiver, proofTypes, proofValues, impactCodes, impactValues, description);
-    _emitMetadata(appId, amount, receiver, metadataKeys, metadataValues);
+    _emitMetadata(appId, amount, receiver, metadata);
     _distributeReward(appId, amount, receiver);
   }
 
@@ -325,14 +324,10 @@ contract X2EarnRewardsPool is
     bytes32 appId,
     uint256 amount,
     address receiver,
-    string[] memory metadataKeys,
-    string[] memory metadataValues
+    string memory metadata
   ) internal {
-    // Build the JSON metadata string from the metadata keys and values
-    string memory jsonMetadata = buildMetadata(metadataKeys, metadataValues);
-
     // emit event
-    emit RewardMetadata(amount, appId, receiver, jsonMetadata, msg.sender);
+    emit RewardMetadata(amount, appId, receiver, metadata, msg.sender);
   }
 
   /**
@@ -343,7 +338,6 @@ contract X2EarnRewardsPool is
     string[] memory metadataValues
   ) public view virtual returns (string memory) {
     bool hasMetadata = metadataKeys.length > 0 && metadataValues.length > 0;
-
     // If metadata is not provided, return an empty string
     if (!hasMetadata) {
       return "";
@@ -351,7 +345,6 @@ contract X2EarnRewardsPool is
 
     // Initialize an empty JSON bytes array with version
     bytes memory json = abi.encodePacked('{"version": 1');
-
 
     // Add metadata
     bytes memory jsonMetadata = _buildMetadataJson(metadataKeys, metadataValues);
@@ -470,7 +463,7 @@ contract X2EarnRewardsPool is
   }
 
     /**
-   * @dev Builds the metadata JSON string from the metadata.
+   * @dev Builds the metadata JSON string from the metadata keys and values.
    *
    * @param metadataKeys the metadata keys
    * @param metadataValues the metadata values

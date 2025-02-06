@@ -558,8 +558,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
           ["carbon", "water"],
           [100, 200],
           "The description of the action",
-          ["country"],
-          ["Brazil"],
+          '{"country":"Brazil"}',
         )
 
       const receipt = await tx.wait()
@@ -594,9 +593,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(eventMetadata[0].args[2]).to.equal(user.address)
 
       const emittedMetadata = JSON.parse(eventMetadata[0].args[3])
-      expect(emittedMetadata).to.have.property("version")
-      expect(emittedMetadata.version).to.equal(1)
-      expect(emittedMetadata).to.have.deep.property("metadata", { country: "Brazil" })
+      expect(emittedMetadata).to.have.deep.property("country", "Brazil")
 
       expect(event[0].args[4]).to.equal(owner.address)
     })
@@ -1487,8 +1484,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
           ["carbon", "water"],
           [100, 200],
           "The description of the action",
-          ["country", "city"],
-          ["Brazil", "Brasília"],
+          '{"country":"Brazil","city":"Brasília"}',
         )
 
       const receipt = await tx.wait()
@@ -1525,9 +1521,8 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(event[0].args[2]).to.equal(user.address)
 
       const emittedMetadata = JSON.parse(eventMetadata[0].args[3])
-      expect(emittedMetadata).to.have.property("version")
-      expect(emittedMetadata.version).to.equal(1)
-      expect(emittedMetadata).to.have.deep.property("metadata", { country: "Brazil", city: "Brasília" })
+      expect(emittedMetadata).to.have.deep.property("country", "Brazil")
+      expect(emittedMetadata).to.have.deep.property("city", "Brasília")
     })
 
     it("App can provide multiple proofs", async function () {
@@ -1760,8 +1755,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
           ["carbon", "water"],
           [100, 200],
           "The description of the action",
-          ["country", "city"],
-          ["Brazil", "Brasília"],
+          '{"country":"Brazil","city":"Brasília"}',
         )
 
       const receipt = await tx.wait()
@@ -1800,9 +1794,8 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(eventMetadata[0].args[2]).to.equal(user.address)
 
       const emittedMetadata = JSON.parse(eventMetadata[0].args[3])
-      expect(emittedMetadata).to.have.property("version")
-      expect(emittedMetadata.version).to.equal(1)
-      expect(emittedMetadata).to.have.deep.property("metadata", { country: "Brazil", city: "Brasília" })
+      expect(emittedMetadata).to.have.deep.property("country", "Brazil")
+      expect(emittedMetadata).to.have.deep.property("city", "Brasília")
     })
 
     it("App can provide multiple proofs with same metadata keys but only the latest is considered", async function () {
@@ -1840,8 +1833,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
           ["carbon", "water"],
           [100, 200],
           "The description of the action",
-          ["country", "country"],
-          ["Brazil", "Brazil2"],
+          '{"country":"Brazil","country":"Brazil2"}',
         )
 
       const receipt = await tx.wait()
@@ -1881,9 +1873,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(eventMetadata[0].args[2]).to.equal(user.address)
 
       const emittedMetadata = JSON.parse(eventMetadata[0].args[3])
-      expect(emittedMetadata).to.have.property("version")
-      expect(emittedMetadata.version).to.equal(1)
-      expect(emittedMetadata).to.have.deep.property("metadata", { country: "Brazil2" })
+      expect(emittedMetadata).to.have.deep.property("country", "Brazil2")
     })
 
     it("App can provide only proofs without impact and with metadata", async function () {
@@ -1921,8 +1911,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
           [],
           [],
           "The description of the action",
-          ["country", "city"],
-          ["Brazil", "Brasília"],
+          '{"country":"Brazil","city":"Brasília"}',
         )
 
       const receipt = await tx.wait()
@@ -1959,9 +1948,8 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(eventMetadata[0].args[2]).to.equal(user.address)
 
       const emittedMetadata = JSON.parse(eventMetadata[0].args[3])
-      expect(emittedMetadata).to.have.property("version")
-      expect(emittedMetadata.version).to.equal(1)
-      expect(emittedMetadata).to.have.deep.property("metadata", { country: "Brazil", city: "Brasília" })
+      expect(emittedMetadata).to.have.deep.property("country", "Brazil")
+      expect(emittedMetadata).to.have.deep.property("city", "Brasília")
     })
 
     it("If only description is passed, without proofs and impact, nothing is emitted", async function () {
@@ -2161,8 +2149,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
           [],
           [],
           "The description of the action",
-          ["", ""],
-          ["", ""],
+          '{"":""}',
         )
 
       const receipt = await tx.wait()
@@ -2179,7 +2166,17 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
       expect(event[0].args[1]).to.equal(appId)
       expect(event[0].args[2]).to.equal(user.address)
-      expect(event[0].args[3]).to.equal("")
+
+      const emittedProof = JSON.parse(event[0].args[3])
+
+      expect(emittedProof).to.have.property("version")
+      expect(emittedProof.version).to.equal(2)
+      expect(emittedProof).to.have.deep.property("proof", {
+        image: "https://image.png",
+        link: "https://twitter.com/tweet/1",
+      })
+      expect(emittedProof).to.have.property("description")
+      expect(emittedProof.description).to.equal("The description of the action")
 
       let eventMetadata = filterEventsByName(receipt.logs, "RewardMetadata")
 
@@ -2189,9 +2186,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(eventMetadata[0].args[2]).to.equal(user.address)
 
       const emittedMetadata = JSON.parse(eventMetadata[0].args[3])
-      expect(emittedMetadata).to.have.property("version")
-      expect(emittedMetadata.version).to.equal(1)
-      expect(emittedMetadata).to.have.deep.property("metadata", { "": "" })
+      expect(emittedMetadata).to.have.deep.property("", "")
     })
 
     it("If a non valid proof type is passed, it reverts", async function () {
@@ -2363,8 +2358,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
             ["carbon", "water"],
             [100, 200],
             "The description of the action",
-            ["city"],
-            ["InvalidValue", "Brasília"],
+            '{"city":"InvalidValue""Brasilia"}',
           ),
       )
     })
@@ -2387,8 +2381,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
             ["carbon", "water"],
             [100, 200],
             "The description of the action",
-            ["country", "city"],
-            ["Brazil", "Brazil", "Brasília"],
+            '{"country":"Brazil","city":"Brasília"}',
           ),
       )
     })

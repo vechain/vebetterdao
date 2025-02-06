@@ -163,8 +163,7 @@ interface IX2EarnRewardsPool {
    * @param impactCodes the codes of the impacts of the sustainable action
    * @param impactValues the values of the impacts of the sustainable action
    * @param description the description of the sustainable action
-   * @param metadataKeys the metadata keys of the sustainable action
-   * @param metadataValues the metadata values of the sustainable action
+   * @param metadata the metadata of the sustainable action
    */
   function distributeRewardWithProofAndMetadata(
     bytes32 appId,
@@ -175,8 +174,7 @@ interface IX2EarnRewardsPool {
     string[] memory impactCodes, // carbon, water, etc.
     uint256[] memory impactValues, // 100, 200, etc.,
     string memory description,
-    string[] memory metadataKeys, // country, city, etc.
-    string[] memory metadataValues // Brazil, Brasilia, etc.
+    string memory metadata // "{'country': 'Brazil', 'city': 'Brasilia'}"
   ) external;
 
   /**
