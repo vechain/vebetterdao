@@ -283,12 +283,14 @@ contract X2EarnRewardsPool is
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
     
-    // check if the amount is within the allowance
-    require($.distributionAllowance[appId] >= amount, "X2EarnRewardsPool: amount exceeds distribution allowance");
+    // only if the allowance is set, then check if the amount is within the allowance
+    if ($.distributionAllowance[appId] > 0) {
+        require($.distributionAllowance[appId] >= amount, "X2EarnRewardsPool: amount exceeds distribution allowance");
+        $.distributionAllowance[appId] -= amount;
+    }
     
     // Update state
     $.availableFunds[appId] -= amount;
-    $.distributionAllowance[appId] -= amount;
 
     // Transfer the rewards to the receiver
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
