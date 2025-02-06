@@ -60,7 +60,7 @@ contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
   UUPSUpgradeable,
   AccessControlUpgradeable,
-  ReentrancyGuardUpgradeable, 
+  ReentrancyGuardUpgradeable,
   PausableUpgradeable
 {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -149,7 +149,7 @@ contract X2EarnRewardsPool is
   /// @param role - the role to check
   modifier onlyRoleOrAdmin(bytes32 role) {
     if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
-      revert X2EarnRewardsPoolUnauthorizedUser(msg.sender );
+      revert X2EarnRewardsPoolUnauthorizedUser(msg.sender);
     }
     _;
   }
@@ -197,28 +197,21 @@ contract X2EarnRewardsPool is
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
+
+    require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: not an app admin");
+
+    // Check if withdrawal would affect distribution allowance
     require(
-      $.x2EarnApps.isAppAdmin(appId, msg.sender),
-      "X2EarnRewardsPool: not an app admin"
+      $.availableFunds[appId] - amount >= $.distributionAllowance[appId],
+      "X2EarnRewardsPool: withdrawal would affect distribution allowance"
     );
 
     // check if the contract has enough funds
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
-    require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: insufficient funds for app");
-
-    uint256 previousAllowance = $.distributionAllowance[appId];
-    uint256 remainingFunds = $.availableFunds[appId] - amount;
-    
-    // If withdrawal affects allowance, adjust it and emit event
-    if (remainingFunds < previousAllowance) {
-      uint256 newAllowance = remainingFunds;
-      $.distributionAllowance[appId] = newAllowance;
-      emit AllowanceAffectedByWithdrawal(appId, previousAllowance, newAllowance, amount);
-    }
 
     // Get the team wallet address and update state
     address teamWalletAddress = $.x2EarnApps.teamWalletAddress(appId);
-    $.availableFunds[appId] = remainingFunds;
+    $.availableFunds[appId] -= amount;
 
     // transfer the rewards to the team wallet
     require($.b3tr.transfer(teamWalletAddress, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
@@ -282,13 +275,13 @@ contract X2EarnRewardsPool is
     // check if the app has enough available funds to distribute
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
-    
-    // only if the allowance is set, then check if the amount is within the allowance
+
     if ($.distributionAllowance[appId] > 0) {
-        require($.distributionAllowance[appId] >= amount, "X2EarnRewardsPool: amount exceeds distribution allowance");
-        $.distributionAllowance[appId] -= amount;
+      // check if the amount is within the allowance
+      require($.distributionAllowance[appId] >= amount, "X2EarnRewardsPool: amount exceeds distribution allowance");
+      $.distributionAllowance[appId] -= amount;
     }
-    
+
     // Update state
     $.availableFunds[appId] -= amount;
 
