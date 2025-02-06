@@ -136,7 +136,6 @@ contract X2EarnRewardsPool is
     $.veBetterPassport = IVeBetterPassport(_veBetterPassport);
   }
 
-
   // ---------- Modifiers ---------- //
   /**
    * @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
@@ -226,8 +225,6 @@ contract X2EarnRewardsPool is
 
     _distributeReward(appId, amount, receiver);
   }
-
-   
 
   /**
    * @dev See {IX2EarnRewardsPool-distributeRewardWithProof}
@@ -529,8 +526,6 @@ contract X2EarnRewardsPool is
     $.x2EarnApps = _x2EarnApps;
   }
 
-
-
   /**
    * @dev Adds a new allowed impact key.
    * @param newKey the new key to add
@@ -569,8 +564,6 @@ contract X2EarnRewardsPool is
     $.allowedImpactKeys.pop();
     delete $.impactKeyIndex[keyToRemove];
   }
-
-
 
   /**
    * @dev Sets the VeBetterPassport contract address.
