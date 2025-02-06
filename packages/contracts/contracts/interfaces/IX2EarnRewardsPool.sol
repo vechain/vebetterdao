@@ -14,6 +14,16 @@ interface IX2EarnRewardsPool {
    * @dev Event emitted when the distribution allowance is set.
    *
    * @param appId The ID of the app.
+   * @param previousAllowance The previous distribution allowance.
+   * @param newAllowance The new distribution allowance.
+   * @param withdrawalAmount The amount of funds withdrawn.
+   */
+ event AllowanceAffectedByWithdrawal(bytes32 indexed appId, uint256 previousAllowance, uint256 newAllowance, uint256 withdrawalAmount);
+
+  /**
+   * @dev Event emitted when the distribution allowance is set.
+   *
+   * @param appId The ID of the app.
    * @param amount The distribution allowance amount.
    */
   event DistributionAllowanceSet(bytes32 appId, uint256 amount);
