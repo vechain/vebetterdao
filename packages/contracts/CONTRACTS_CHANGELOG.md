@@ -27,10 +27,10 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 ## Upgrade `X2EarnRewardsPool` to Version 6
 
-Added locking mechanism to control funds availability in the rewards pool.
+Added allowance mechanism to distribute rewards and protect against exploits
 
 ### Changes 🚀
-- **Upgraded Contract(s):**
+- **Upgraded Contract(s):**  
   - `X2EarnRewardsPool.sol` to version `6`
 
 ### Bug Fixes 🐛
@@ -40,19 +40,18 @@ Added locking mechanism to control funds availability in the rewards pool.
 ### New Features 🚀
 
 - **`X2EarnRewardsPool.sol`**:
-  - Added `setLockedPercentage()` **setter** to set the locked percentage of funds for an app
-  - Added `lockedPercentage()` **getter** to retrieved the locked percentage of funds for an app
-  - Added `allowance()` **getter** to retrieve the amount of funds available for rewards distribution, based on the locked treasury
-  - `treasuryLocked` pool reallocation within `deposit()` and `withdraw()`
-  - Added checks to `_distributeRewards()` to ensure only the allowance is distributed
-  - Added `pause()`, `unpause()` **setter** for apps admin or pauser role to toggle the pause state for the rewards distribution.
-
+  - Added checks on `distributeReward()` to ensure funds that are distributed are equal or under the allowance.
+  - Added checks on `withdraw()` to ensure funds withdrawn are not the allowance.
+  - **Getter**: 
+    - `allowance()`: Returns the amount of funds available for rewards distribution.
+  - **Setter**: 
+    - `setDistributionAllowance(uint256 _allowance)`: Sets the amount of funds available for rewards distribution.
+    - `pause()`, `unpause()` **setter** for apps admin or pauser role to toggle the pause state for the rewards distribution.
 
 ### Storage Changes 
 
 - **`X2EarnRewardsPool.sol`**:
-  - Added `lockedPercentage` storage to track app-specific locked percentages
-  - Added `treasuryLocked` storage to track app-specific locked amounts
+  - Added `distributionAllowance` mapping storage to track app-specific distribution allowances
 
 ---
 
