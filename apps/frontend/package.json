@@ -43,7 +43,7 @@
     "@vechain/connex-driver": "^2.1.0",
     "@vechain/connex-framework": "^2.1.0",
     "@vechain/picasso": "^2.1.1",
-    "@vechain/vechain-kit": "^1.3.0",
+    "@vechain/vechain-kit": "^1.4.0",
     "axios": "^1.7.4",
     "browser-image-compression": "^2.0.2",
     "dayjs": "^1.11.10",
