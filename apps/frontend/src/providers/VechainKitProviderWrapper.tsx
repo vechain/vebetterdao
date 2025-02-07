@@ -24,6 +24,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
   const isDarkMode = colorMode === "dark"
 
   const appLogo = "https://i.ibb.co/ncysMF9/vechain-kit-logo-transparent.png"
+  const coloredLogo = "https://i.ibb.co/7G4PQNZ/vechain-kit-logo-colored-circle.png"
 
   return (
     <VeChainKitProvider
@@ -52,6 +53,15 @@ export function VechainKitProviderWrapper({ children }: Props) {
       }}
       dappKit={{
         allowedWallets: ["veworld", "wallet-connect", "sync2"],
+        walletConnectOptions: {
+          projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
+          metadata: {
+            name: "VeChainKit Demo App",
+            description: "This is a demo app to show you how the VechainKit works.",
+            url: typeof window !== "undefined" ? window.location.origin : "",
+            icons: [typeof window !== "undefined" ? coloredLogo : ""],
+          },
+        },
       }}
       loginModalUI={{
         logo: appLogo,
