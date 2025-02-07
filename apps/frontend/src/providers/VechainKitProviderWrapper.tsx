@@ -46,6 +46,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
           loginMessage: "Select a login method",
           logo: "https://i.ibb.co/0Mxcw49/V-color.png",
         },
+        allowPasskeyLinking: true,
       }}
       feeDelegation={{
         delegatorUrl: process.env.NEXT_PUBLIC_DELEGATOR_URL!,
