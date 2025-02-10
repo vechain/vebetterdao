@@ -7,7 +7,7 @@ const unendorsedAppsFragment = X2EarnApps.createInterface().getFunction("unendor
 const unendorsedAppsAbi = new abi.Function(JSON.parse(unendorsedAppsFragment))
 const allAppsFragment = X2EarnApps.createInterface().getFunction("apps").format("json")
 const allAppsAbi = new abi.Function(JSON.parse(allAppsFragment))
-const NEW_APP_TIMESTAMP_IN_SECOND = 604800 // Considering a new app is defined as 7 days
+const NEW_APP_PERIOD_SECONDS = 604800 // Considering a new app is defined as 7 days
 
 /**
  * xApp type
@@ -76,7 +76,7 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
         name: app[2],
         metadataURI: app[3],
         createdAtTimestamp: app[4],
-        isNew: dayjs().unix() - Number(app[4]) <= NEW_APP_TIMESTAMP_IN_SECOND,
+        isNew: dayjs().unix() - Number(app[4]) <= NEW_APP_PERIOD_SECONDS,
       }))
     }
   }
@@ -98,8 +98,8 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
     (app, index, self) => self.findIndex(a => a.id === app.id) === index,
   ) // all apps is a union of active and unendorsed apps with deduplication
 
-  // all apps created within the last NEW_APP_TIMESTAMP_IN_SECOND
-  const newApps = apps.filter(app => dayjs().unix() - Number(app.createdAtTimestamp) <= NEW_APP_TIMESTAMP_IN_SECOND)
+  // apps created within the last NEW_APP_PERIOD_SECONDS
+  const newApps = apps.filter(app => dayjs().unix() - Number(app.createdAtTimestamp) <= NEW_APP_PERIOD_SECONDS)
 
   return {
     allApps: allApps,

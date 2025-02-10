@@ -86,7 +86,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
   const hasCreatorNFT = useHasCreatorNFT(account ?? "") // No loading state
   const userHasApp = !!account && !!xApps?.allApps?.find(app => compareAddresses(app.teamWalletAddress, account))
-  const isNewApp = (xApps?.newApps ?? []).length > 0
+  const newApps = (xApps?.newApps ?? []).length > 0
 
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
@@ -97,7 +97,6 @@ export const ActionBanner = () => {
   const showCreatorApprovedBanner = !userHasApp && !!account && hasCreatorNFT
   const showCreatorUnderReviewBanner =
     !userHasApp && !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
-  const showNewAppBanner = !!account && isNewApp
 
   const slides = useMemo(() => {
     const bannerComponents = []
@@ -109,7 +108,7 @@ export const ActionBanner = () => {
     if (showCreatorApprovedBanner) bannerComponents.push(<CreatorApplicationApprovedBanner key="creator-approved" />)
     if (showCreatorUnderReviewBanner)
       bannerComponents.push(<CreatorApplicationUnderReviewBanner key="creator-under-review" />)
-    if (showNewAppBanner) bannerComponents.push(<NewAppBanner key="new-app" />)
+    if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     return bannerComponents
   }, [
     showDoActionBanner,
@@ -119,7 +118,7 @@ export const ActionBanner = () => {
     showCreatorRejectedBanner,
     showCreatorApprovedBanner,
     showCreatorUnderReviewBanner,
-    showNewAppBanner,
+    newApps,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1

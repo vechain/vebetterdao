@@ -52,9 +52,9 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
   }, [router, xApp.id])
 
   const isNewApp = useMemo(() => {
-    if (!xApp || isXNodeLoading) return false
+    if (!xApp) return false
     return xApp.isNew
-  }, [xApp, isXNodeLoading])
+  }, [xApp])
 
   return (
     <Card

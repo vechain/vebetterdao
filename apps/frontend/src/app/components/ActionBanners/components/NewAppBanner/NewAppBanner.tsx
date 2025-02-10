@@ -6,22 +6,19 @@ import { useXApps } from "@/api"
 import { UilArrowRight } from "@iconscout/react-unicons"
 interface NewApp {
   name: string
+  id: string
 }
 
 export const NewAppBanner = () => {
   const router = useRouter()
   const { data: xApps } = useXApps()
 
-  const GOTOAPPS = () => {
-    router.push("/apps")
-  }
-
   const newAppsList = useMemo((): NewApp[] | undefined => {
     return xApps?.newApps
   }, [xApps])
 
   const areManyNewApps = useMemo(() => {
-    return newAppsList ? newAppsList.length > 1 : false
+    return (newAppsList?.length ?? 0) > 1
   }, [newAppsList])
 
   const newAppsListNames = useMemo(() => {
@@ -29,11 +26,12 @@ export const NewAppBanner = () => {
   }, [newAppsList])
 
   const description = useMemo(() => {
-    if (!newAppsList || newAppsList?.length === 0 || !newAppsListNames?.length) return ""
+    if (newAppsList?.length === 0) return ""
 
-    const firstAppName = newAppsListNames[0]
-    const count = newAppsListNames.length - 1
+    const firstAppName = newAppsList?.[0]?.name
     if (!firstAppName) return ""
+
+    const count = (newAppsListNames?.length ?? 0) - 1
 
     if (areManyNewApps) {
       return `${firstAppName} ${t("and {{count}} more just joined the DAO! Get involved in the app now!", {
@@ -43,6 +41,14 @@ export const NewAppBanner = () => {
 
     return `${firstAppName} ${t("just joined the DAO! Get involved in the app now!")}`
   }, [newAppsList, areManyNewApps, newAppsListNames])
+
+  const GOTOAPPS = () => {
+    if (areManyNewApps) {
+      router.push("/apps")
+    } else {
+      router.push(`/apps/${newAppsList?.[0]?.id}`)
+    }
+  }
 
   return (
     <GenericBanner
