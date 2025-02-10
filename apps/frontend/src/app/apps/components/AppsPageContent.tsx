@@ -38,7 +38,7 @@ export const AppsPageContent = () => {
           <Text color="#6a6a6a">
             {t("With your Node, you endorse apps to allow them to participate in governance")}
           </Text>
-          <UnendorsedAppCard xApp={endorsedApp} />
+          <UnendorsedAppCard xApp={endorsedApp} layout="endorser" />
         </VStack>
       )}
 

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react"
 import { Box, HStack, VStack, Grid, Spinner, GridItem } from "@chakra-ui/react"
 import { FilterAppsTypeButton } from "./FilterAppsTypeButton"
-import { XApp, UnendorsedApp } from "@/api"
+import { XApp, UnendorsedApp, useXNode } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { AppsEmptyState } from "./AppsEmptyState"
 import { CreatorBanner } from "./CreatorBanner"
@@ -18,6 +18,8 @@ type Props = {
   lostEndorsementApps: UnendorsedApp[]
   isXAppsLoading: boolean
 }
+
+type LayoutKey = "endorser" | "default"
 
 export const AllApps = ({ allApps, activeApps, gracePeriodApps, lostEndorsementApps, isXAppsLoading }: Props) => {
   const [filter, setFilter] = useState(FILTER_ALL)
@@ -37,6 +39,9 @@ export const AllApps = ({ allApps, activeApps, gracePeriodApps, lostEndorsementA
     }
   }, [filter, activeApps, gracePeriodApps, lostEndorsementApps, allApps])
 
+  const { isEndorsingApp } = useXNode()
+  const layout: LayoutKey = isEndorsingApp ? "endorser" : "default"
+
   const appsSection = useMemo(() => {
     const isEmpty = !displayApps?.length
     return isXAppsLoading ? (
@@ -53,13 +58,13 @@ export const AllApps = ({ allApps, activeApps, gracePeriodApps, lostEndorsementA
           <>
             {showCreatorBanner ? <CreatorBanner /> : undefined}
             {displayApps.map((xApp, _) => (
-              <UnendorsedAppCard key={xApp.id} xApp={xApp} />
+              <UnendorsedAppCard key={xApp.id} xApp={xApp} layout={layout} />
             ))}
           </>
         )}
       </Grid>
     )
-  }, [displayApps, isXAppsLoading, showCreatorBanner])
+  }, [displayApps, isXAppsLoading, showCreatorBanner, layout])
 
   return (
     <VStack spacing={8} w="full" data-testid="apps-page">

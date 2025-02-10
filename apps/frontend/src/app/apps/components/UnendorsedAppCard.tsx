@@ -23,9 +23,10 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
   xApp: XApp | UnendorsedApp
+  layout?: "endorser" | "default"
 }
 
-export const UnendorsedAppCard = ({ xApp }: Props) => {
+export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
 
@@ -68,7 +69,11 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
         transition: "all 0.3s",
       }}>
       <CardBody py="16px" px="24px">
-        <Stack direction={{ base: "column", lg: "row" }} align="stretch" w="full" h="full">
+        <Stack
+          direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
+          align="stretch"
+          w="full"
+          h="full">
           <Stack direction="row" spacing={4} align="center" flex="1">
             <Skeleton isLoaded={!isLogoLoading}>
               <Image
@@ -129,9 +134,9 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
           {/* Right Section: Score */}
           <Stack direction="row" align="center" justify="center">
             <Stack
-              direction={{ base: "row", md: "column" }}
+              direction={layout === "endorser" ? "row" : { base: "row", lg: "column", md: "column" }}
               spacing={3}
-              align={{ base: "center", md: "stretch" }}
+              align={{ base: "center", lg: "stretch", md: "stretch" }}
               justify={{ base: "space-between", md: "stretch" }}
               w="full">
               <VStack gap={0} alignItems="flex-start">
