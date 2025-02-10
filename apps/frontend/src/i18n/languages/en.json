@@ -1415,5 +1415,6 @@
   "GitHub Username is required": "GitHub Username is required",
   "{{fieldName}} is too short": "{{fieldName}} is too short",
   "{{fieldName}} is too long": "{{fieldName}} is too long",
-  "Confirm this transaction?": "Confirm this transaction?"
+  "Confirm the operation to complete the transaction": "Confirm the operation to complete the transaction",
+  "Confirm": "Confirm"
 }
