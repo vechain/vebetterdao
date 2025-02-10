@@ -31,19 +31,13 @@ export const usePotentialRewards = (
 
   const increase = cycleToVoterToTotal * (GMMultiplier / 100)
   let potentialRewards
-  switch (true) {
-    case Number(GMUserLevel) === Number(GMlevel):
-      potentialRewards = (cycleToVoterToTotal / Number(cycleToTotal)) * emissionAmount_voterRewards
-      break
-    case Number(GMUserLevel) < Number(GMlevel): {
-      const cycleToVoterToTotal_enhanced = cycleToVoterToTotal + increase
-      const cycleToTotal_enhanced = Number(cycleToTotal) + increase
-      potentialRewards = (cycleToVoterToTotal_enhanced / Number(cycleToTotal_enhanced)) * emissionAmount_voterRewards
-      break
-    }
-    default:
-      potentialRewards = 0
-      break
+
+  if (Number(GMUserLevel) === Number(GMlevel)) {
+    potentialRewards = (cycleToVoterToTotal / Number(cycleToTotal)) * emissionAmount_voterRewards
+  } else {
+    const cycleToVoterToTotal_enhanced = cycleToVoterToTotal + increase
+    const cycleToTotal_enhanced = Number(cycleToTotal) + increase
+    potentialRewards = (cycleToVoterToTotal_enhanced / Number(cycleToTotal_enhanced)) * emissionAmount_voterRewards
   }
 
   return { potentialRewards: potentialRewards ?? 0 }
