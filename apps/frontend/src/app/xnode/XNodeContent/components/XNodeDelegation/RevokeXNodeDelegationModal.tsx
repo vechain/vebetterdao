@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal } from "@/components"
+import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
 import { useRevokeXNodeDelegation } from "@/hooks"
 import { useXNode } from "@/api"
 
@@ -41,7 +41,7 @@ export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProp
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
         successTitle={t("Node delegation revoked!")}
-        status={revokeXNodeDelegation.status}
+        status={revokeXNodeDelegation.status as TransactionModalStatus}
         errorDescription={revokeXNodeDelegation.error?.reason}
         errorTitle={revokeXNodeDelegation.error ? t("Error revoking Node delegation") : undefined}
         showTryAgainButton

@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal } from "@/components"
+import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
 import { useRejectEntityLink } from "@/hooks"
 
 export const RejectLinkingModal = ({
@@ -45,7 +45,7 @@ export const RejectLinkingModal = ({
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
         successTitle={t("Linking rejected!")}
-        status={rejectLinking.status}
+        status={rejectLinking.status as TransactionModalStatus}
         errorDescription={rejectLinking.error?.reason}
         errorTitle={rejectLinking.error ? t("Error rejecting linking") : undefined}
         showTryAgainButton

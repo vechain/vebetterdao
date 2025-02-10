@@ -1,6 +1,6 @@
 import { useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 import { useRemoveNodeEndorsement } from "@/hooks"
 import { Text, Button, Image, Flex, HStack, Icon, VStack, Heading, Box } from "@chakra-ui/react"
@@ -43,7 +43,11 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
         isOpen={isOpen}
         onClose={onClose}
         successTitle={t("Remove endorsement")}
-        status={rmNodeEndorsementMutation.error ? "error" : rmNodeEndorsementMutation.status}
+        status={
+          rmNodeEndorsementMutation.error
+            ? TransactionModalStatus.Error
+            : (rmNodeEndorsementMutation.status as TransactionModalStatus)
+        }
         errorDescription={rmNodeEndorsementMutation.error?.reason}
         errorTitle={rmNodeEndorsementMutation.error ? t("Transaction error") : undefined}
         showTryAgainButton

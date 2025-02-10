@@ -20,7 +20,7 @@ import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
 import { useDelegatePassport } from "@/hooks/useDelegatePassport"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal } from "@/components"
+import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
 import { useAccountLinking } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
 
@@ -62,7 +62,7 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
         successTitle={t("Delegation completed!")}
-        status={delegatePassport.status}
+        status={delegatePassport.status as TransactionModalStatus}
         errorDescription={delegatePassport.error?.reason}
         errorTitle={delegatePassport.error ? t("Error delegating") : undefined}
         showTryAgainButton

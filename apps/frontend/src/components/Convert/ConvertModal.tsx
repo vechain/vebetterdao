@@ -17,7 +17,7 @@ import { FaArrowRight } from "react-icons/fa6"
 import { useForm } from "react-hook-form"
 import { CustomModalContent } from "../CustomModalContent"
 import { TokenCards } from "./TokenCards"
-import { TransactionModal } from "../TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "../TransactionModal"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { IoArrowBackOutline } from "react-icons/io5"
 import { BalanceInfo, TokenInfoCard } from "./components"
@@ -298,9 +298,11 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
+        onApprove={mutationData?.onApprove}
+        onReject={mutationData?.onReject}
         confirmationTitle={swapText}
         successTitle={t("Swap Completed!")}
-        status={mutationData.error ? "error" : mutationData.status}
+        status={mutationData.error ? TransactionModalStatus.Error : (mutationData.status as TransactionModalStatus)}
         errorDescription={mutationData.error?.reason}
         errorTitle={mutationData.error ? t("Error swapping") : undefined}
         showTryAgainButton

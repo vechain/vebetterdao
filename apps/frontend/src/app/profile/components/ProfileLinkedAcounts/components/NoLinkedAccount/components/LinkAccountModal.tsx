@@ -1,5 +1,5 @@
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 import { useLinkEntityToPassport } from "@/hooks/useLinkEntityToPassport"
 import { UseDisclosureReturn, VStack, Heading, Box, Text, FormControl, FormLabel, Button } from "@chakra-ui/react"
@@ -32,7 +32,7 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
         successTitle={t("Account linked successfully!")}
-        status={linkEntityToPassport.status}
+        status={linkEntityToPassport.status as TransactionModalStatus}
         errorDescription={linkEntityToPassport.error?.reason}
         errorTitle={linkEntityToPassport.error ? t("Error linking account") : undefined}
         showTryAgainButton

@@ -1,6 +1,6 @@
 import { useProposalOperationState } from "@/api/contracts/governance/hooks/useProposalOperationState"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useExecuteProposal } from "@/hooks/useExecuteProposal"
 import { timestampToTimeLeft } from "@/utils"
 import { Box, Button, Text, useDisclosure } from "@chakra-ui/react"
@@ -52,7 +52,9 @@ export const ProposalExecuteButton = () => {
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Execute proposal completed!")}
-        status={executeMutation.error ? "error" : executeMutation.status}
+        status={
+          executeMutation.error ? TransactionModalStatus.Error : (executeMutation.status as TransactionModalStatus)
+        }
         errorDescription={executeMutation.error?.reason}
         errorTitle={executeMutation.error ? t("Error executing proposal") : undefined}
         pendingTitle={t("Executing...")}

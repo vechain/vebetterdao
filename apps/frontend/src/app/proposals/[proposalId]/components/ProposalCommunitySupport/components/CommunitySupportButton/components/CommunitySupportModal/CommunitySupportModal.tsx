@@ -3,7 +3,7 @@ import { SupportInstructions } from "./components/SupportInstructions"
 import { Modal, ModalBody, ModalCloseButton, ModalOverlay } from "@chakra-ui/react"
 import { CustomModalContent } from "@/components"
 import { SupportDeposit } from "./components/SupportDeposit"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { useTranslation } from "react-i18next"
@@ -46,7 +46,9 @@ export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; on
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Deposit Completed!")}
-        status={depositMutation.error ? "error" : depositMutation.status}
+        status={
+          depositMutation.error ? TransactionModalStatus.Error : (depositMutation.status as TransactionModalStatus)
+        }
         errorDescription={depositMutation.error?.reason}
         errorTitle={depositMutation.error ? t("Error Depositing") : undefined}
         pendingTitle={t("Depositing...")}

@@ -1,5 +1,5 @@
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useSetGMMaxLevel } from "@/hooks/useSetGMMaxLevel"
 import {
   Button,
@@ -43,13 +43,14 @@ export const GMSetMaxLevel = () => {
   const GM_MIN_LEVEL_ALLOWED = 1
 
   const newMaxLevel = watch("newMaxLevel")
-  const { error, status, txReceipt, resetStatus, sendTransaction, isTransactionPending } = useSetGMMaxLevel({
-    maxLevel: newMaxLevel,
-    onSuccess: () => {
-      resetStatus()
-      onClose()
-    },
-  })
+  const { error, status, txReceipt, resetStatus, sendTransaction, onApprove, onReject, isTransactionPending } =
+    useSetGMMaxLevel({
+      maxLevel: newMaxLevel,
+      onSuccess: () => {
+        resetStatus()
+        onClose()
+      },
+    })
 
   const onSubmit = useCallback(() => {
     resetStatus()
@@ -126,7 +127,9 @@ export const GMSetMaxLevel = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        status={error ? "error" : status}
+        onApprove={onApprove}
+        onReject={onReject}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("Transaction successful")}
         onTryAgain={handleSubmit(onSubmit)}
         showTryAgainButton

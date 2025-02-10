@@ -1,5 +1,5 @@
 import { ProposalState } from "@/api"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useCancelProposal } from "@/hooks/useCancelProposal"
 import {
   Button,
@@ -113,7 +113,11 @@ export const CancelProposalSection = () => {
       <TransactionModal
         isOpen={transactionModal.isOpen}
         onClose={handleCloseTransactionModal}
-        status={cancelProposalMutation.error ? "error" : cancelProposalMutation.status}
+        status={
+          cancelProposalMutation.error
+            ? TransactionModalStatus.Error
+            : (cancelProposalMutation.status as TransactionModalStatus)
+        }
         successTitle={t("Proposal canceled!")}
         onTryAgain={handleCancelProposal}
         showTryAgainButton

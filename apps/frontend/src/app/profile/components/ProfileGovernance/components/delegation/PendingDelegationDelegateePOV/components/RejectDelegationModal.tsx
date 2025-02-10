@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal } from "@/components"
+import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
 import { useRemovePendingDelegationDelegateePOV } from "@/hooks/useRemovePendingDelegationDelegateePOV"
 
 export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
@@ -39,7 +39,7 @@ export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
         successTitle={t("Delegation rejected!")}
-        status={rejectDelegation.status}
+        status={rejectDelegation.status as TransactionModalStatus}
         errorDescription={rejectDelegation.error?.reason}
         errorTitle={rejectDelegation.error ? t("Error rejecting delegation") : undefined}
         showTryAgainButton

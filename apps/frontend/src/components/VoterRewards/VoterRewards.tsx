@@ -5,7 +5,7 @@ import React, { useCallback } from "react"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 import { B3TRIcon } from "../Icons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { TransactionModal } from "../TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "../TransactionModal"
 import { Trans, useTranslation } from "react-i18next"
 import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
@@ -53,7 +53,11 @@ export const VoterRewards: React.FC = () => {
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Rewards claimed!")}
-        status={claimRewardsMutation.error ? "error" : claimRewardsMutation.status}
+        status={
+          claimRewardsMutation.error
+            ? TransactionModalStatus.Error
+            : (claimRewardsMutation.status as TransactionModalStatus)
+        }
         errorDescription={claimRewardsMutation.error?.reason}
         errorTitle={claimRewardsMutation.error ? t("Error claiming") : undefined}
         showTryAgainButton

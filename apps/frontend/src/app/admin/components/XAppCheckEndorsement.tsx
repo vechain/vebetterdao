@@ -1,5 +1,5 @@
 import { useAllocationsRound, useCurrentAllocationsRoundId, useXApps } from "@/api"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import {
   VStack,
   Button,
@@ -113,7 +113,7 @@ export const XAppCheckEndorsement = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         onTryAgain={handleCheckEndorsement}
         showTryAgainButton
         showExplorerButton

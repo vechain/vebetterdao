@@ -14,6 +14,7 @@ import {
   Select,
   Text,
   VStack,
+  useDisclosure,
 } from "@chakra-ui/react"
 import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import { useMemo, useEffect, useCallback } from "react"
@@ -24,7 +25,8 @@ import { useHasRole } from "@/api/contracts/account"
 import { useAccessControl } from "@/hooks"
 import { CONTRACT_LIST } from "@/constants"
 import { WalletAddressInput } from "@/app/components/Input"
-import { useWallet, TransactionModal, useTransactionModal } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 type UpdateRoleCardInput = {
   contract?: string
   role?: string
@@ -49,10 +51,10 @@ export const UpdateRoleCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const {
-    open: openTransactionModal,
-    close: closeTransactionModal,
     isOpen: isTransactionModalOpen,
-  } = useTransactionModal()
+    onOpen: openTransactionModal,
+    onClose: closeTransactionModal,
+  } = useDisclosure()
 
   const walletAddress = watch("walletAddress")
   const selectedContractAddress = watch("contract")
@@ -236,8 +238,7 @@ export const UpdateRoleCard = () => {
       <TransactionModal
         isOpen={isTransactionModalOpen}
         onClose={handleClose}
-        status={accessControlAction.status}
-        progress={accessControlAction.progress}
+        status={accessControlAction.status as TransactionModalStatus}
         txId={accessControlAction?.txReceipt?.meta.txID}
         errorDescription={accessControlAction?.error?.reason ?? "Unknown error"}
         showSocialButtons

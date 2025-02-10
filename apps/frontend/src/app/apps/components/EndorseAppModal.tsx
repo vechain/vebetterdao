@@ -9,7 +9,7 @@ import {
   useXNodeCheckCooldown,
   XApp,
 } from "@/api"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useEndorseApp } from "@/hooks"
 import { VStack, Heading, HStack, Box, Text, Button, Skeleton, Icon } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
@@ -91,7 +91,11 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         isOpen={isOpen}
         onClose={onClose}
         successTitle={t("Endorse dApp")}
-        status={endorseAppMutation.error ? "error" : endorseAppMutation.status}
+        status={
+          endorseAppMutation.error
+            ? TransactionModalStatus.Error
+            : (endorseAppMutation.status as TransactionModalStatus)
+        }
         errorDescription={endorseAppMutation.error?.reason}
         errorTitle={endorseAppMutation.error ? "Error endorsing" : undefined}
         showTryAgainButton

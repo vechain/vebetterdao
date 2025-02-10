@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal } from "@/components"
+import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
 import { useAcceptDelegation } from "@/hooks"
 import { useVechainDomain } from "@vechain/vechain-kit"
 
@@ -42,7 +42,7 @@ export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
         successTitle={t("Delegation accepted!")}
-        status={acceptDelegation.status}
+        status={acceptDelegation.status as TransactionModalStatus}
         errorDescription={acceptDelegation.error?.reason}
         errorTitle={acceptDelegation.error ? t("Error accepting delegation") : undefined}
         showTryAgainButton

@@ -1,5 +1,5 @@
 import { useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 import { useDisclosure } from "@chakra-ui/react"
 import { UilGift } from "@iconscout/react-unicons"
@@ -45,7 +45,11 @@ export const ClaimVotingRewardsBanner = () => {
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Rewards claimed!")}
-        status={claimRewardsMutation.error ? "error" : claimRewardsMutation.status}
+        status={
+          claimRewardsMutation.error
+            ? TransactionModalStatus.Error
+            : (claimRewardsMutation.status as TransactionModalStatus)
+        }
         errorDescription={claimRewardsMutation.error?.reason}
         errorTitle={claimRewardsMutation.error ? t("Error claiming") : undefined}
         showTryAgainButton

@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
 import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
-import { ResponsiveCard, TransactionModal } from "@/components"
+import { ResponsiveCard, TransactionModal, TransactionModalStatus } from "@/components"
 import { useCastAllocationVotes, CastAllocationVotesProps } from "@/hooks"
 import { scaledDivision } from "@/utils/MathUtils"
 import { FiArrowUpRight } from "react-icons/fi"
@@ -129,7 +129,11 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
       <TransactionModal
         isOpen={transactionModal.isOpen}
         onClose={handleClose}
-        status={castAllocationVotes.error ? "error" : castAllocationVotes.status}
+        status={
+          castAllocationVotes.error
+            ? TransactionModalStatus.Error
+            : (castAllocationVotes.status as TransactionModalStatus)
+        }
         confirmationTitle={t("Confirm Vote")}
         successTitle={t("Vote Cast!")}
         errorTitle={t("Error casting vote")}

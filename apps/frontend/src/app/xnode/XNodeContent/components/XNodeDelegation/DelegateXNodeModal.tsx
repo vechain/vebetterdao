@@ -1,6 +1,6 @@
 import { useXNode } from "@/api"
 import { getIsNodeHolder } from "@/api/contracts/xNodes/useIsNodeHolder"
-import { ExclamationTriangle, TransactionModal } from "@/components"
+import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 import { useDelegateXNode } from "@/hooks/useDelegateXNode"
 import {
@@ -112,7 +112,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
         successTitle={t("Node delegation completed!")}
-        status={delegateXNode.status}
+        status={delegateXNode.status as TransactionModalStatus}
         errorDescription={delegateXNode.error?.reason}
         errorTitle={delegateXNode.error ? t("Error delegating Node") : undefined}
         showTryAgainButton

@@ -1,6 +1,6 @@
 import { useXApps } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useUpdateXAppReceiverAddress } from "@/hooks"
 import {
   VStack,
@@ -131,7 +131,7 @@ export const UpdateReceiverAddress = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={"Treasury address updated"}
         onTryAgain={handleSubmit}
         showTryAgainButton

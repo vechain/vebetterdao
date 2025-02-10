@@ -1,6 +1,6 @@
 import { useUserStatus } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { UserStatus, useWhitelistBlacklistUser, useUserStatusConfig } from "@/hooks"
 import {
   Button,
@@ -116,7 +116,7 @@ export const ManageUserStatus = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={currentConfig.modalSuccessTitle}
         onTryAgain={handleSubmit}
         showTryAgainButton

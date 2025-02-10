@@ -1,5 +1,5 @@
 import { APP_SECURITY_LEVELS, useAppSecurityLevel, useXApps } from "@/api"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useUpdateAppSecurityLevel } from "@/hooks"
 import {
   Button,
@@ -115,7 +115,7 @@ export const AppSecurity = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("User action registered")}
         onTryAgain={handleSubmit}
         showTryAgainButton

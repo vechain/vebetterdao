@@ -1,5 +1,5 @@
 import { useAppsEligibleInNextRound, useXApps } from "@/api"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useSetVotingEligibility } from "@/hooks"
 import {
   VStack,
@@ -85,7 +85,7 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={
           isEligible ? `${name} will be eligible from next round` : `${name} will not be eligible from next round`
         }

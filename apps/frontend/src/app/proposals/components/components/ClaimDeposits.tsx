@@ -6,7 +6,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { UseQueryResult } from "@tanstack/react-query"
 import { ProposalDeposit } from "@/api"
 import { useWithdrawDeposits } from "@/hooks/useWithdrawDeposits"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 
 type Props = {
   claimableDeposits: bigint
@@ -83,7 +83,7 @@ export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Deposits Withdraw Completed!")}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         errorDescription={error?.reason}
         errorTitle={error ? t("Error Withdrawing") : undefined}
         pendingTitle={t("Withdrawing...")}

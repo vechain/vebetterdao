@@ -1,6 +1,6 @@
 import { ProposalState, useUserSingleProposalVoteEvent, useIsQuadraticVotingDisabled } from "@/api"
 import { AbstainedIcon, VoteIcon } from "@/components"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
 import {
   Box,
@@ -240,7 +240,9 @@ export const ProposalVote = ({ proposalId }: Props) => {
           isOpen={isOpen}
           onClose={handleClose}
           successTitle={t("Vote Completed!")}
-          status={castVoteMutation.error ? "error" : castVoteMutation.status}
+          status={
+            castVoteMutation.error ? TransactionModalStatus.Error : (castVoteMutation.status as TransactionModalStatus)
+          }
           errorDescription={castVoteMutation.error?.reason}
           errorTitle={castVoteMutation.error ? t("Error voting") : undefined}
           showTryAgainButton

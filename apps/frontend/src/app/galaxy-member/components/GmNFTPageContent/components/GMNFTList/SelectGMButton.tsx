@@ -1,7 +1,7 @@
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { Button, useDisclosure, Tooltip } from "@chakra-ui/react"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useSelectGM } from "@/hooks"
 import { useSelectedGmNft } from "@/api"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
@@ -47,7 +47,9 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
         isOpen={selectGMModal.isOpen}
         onClose={selectGMModal.onClose}
         successTitle={t("GM NFT selected")}
-        status={selectGMMutation.error ? "error" : selectGMMutation.status}
+        status={
+          selectGMMutation.error ? TransactionModalStatus.Error : (selectGMMutation.status as TransactionModalStatus)
+        }
         errorDescription={selectGMMutation.error?.reason}
         errorTitle={selectGMMutation.error ? "Error selecting GM NFT" : undefined}
         showTryAgainButton

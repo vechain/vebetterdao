@@ -1,5 +1,5 @@
 import { useB3trAllowance, useB3trBalance } from "@/api"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useB3trApprove } from "@/hooks"
 import {
   VStack,
@@ -46,10 +46,11 @@ export const B3trAllowance = () => {
     return allowedAmount?.scaled ?? "0"
   }, [allowedAmount])
 
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useB3trApprove({
-    spender: spender ?? "",
-    amount: amount ?? 0,
-  })
+  const { sendTransaction, onApprove, onReject, resetStatus, isTransactionPending, status, error, txReceipt } =
+    useB3trApprove({
+      spender: spender ?? "",
+      amount: amount ?? 0,
+    })
 
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(spender)
@@ -183,7 +184,9 @@ export const B3trAllowance = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        onApprove={onApprove}
+        onReject={onReject}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("B3TR tokens allowance updated successfully")}
         onTryAgain={handleSubmit}
         showTryAgainButton

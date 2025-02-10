@@ -6,7 +6,7 @@ import {
   useXAppMetadata,
   useXNodeCheckCooldown,
 } from "@/api"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useSwitchEndorsement } from "@/hooks"
 import { VStack, Heading, HStack, Box, Text, Button, Skeleton, Image } from "@chakra-ui/react"
 import { UilClock } from "@iconscout/react-unicons"
@@ -83,7 +83,11 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
       <TransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        status={switchEndorsementMutation.error ? "error" : switchEndorsementMutation.status}
+        status={
+          switchEndorsementMutation.error
+            ? TransactionModalStatus.Error
+            : (switchEndorsementMutation.status as TransactionModalStatus)
+        }
         errorDescription={switchEndorsementMutation.error?.reason}
         errorTitle={switchEndorsementMutation.error ? t("Error switching endorsement") : undefined}
         showTryAgainButton

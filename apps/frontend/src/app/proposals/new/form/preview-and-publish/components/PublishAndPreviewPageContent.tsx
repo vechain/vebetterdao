@@ -14,7 +14,7 @@ import {
   useTransactionModalErrorTitle,
   useTransactionModalStatus,
 } from "@/hooks"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useForm } from "react-hook-form"
 import { SelectedRoundRadioCard } from "../../round/components/SelectedRoundRadioCard"
 import { ProposalSupportProgressChart } from "@/components/ProposalSupportProgressChart/ProposalSupportProgressChart"
@@ -105,9 +105,9 @@ export const PublishAndPreviewPageContent = () => {
   }, [createProposalMutation, handleSubmit, onSubmit])
 
   const modalStatus = useTransactionModalStatus([
-    { status: metadataUploading ? "uploadingMetadata" : undefined },
-    { status: createProposalMutation.error || metadataUploadError ? "error" : undefined },
-    { status: createProposalMutation.status },
+    { status: metadataUploading ? TransactionModalStatus.UploadingMetadata : undefined },
+    { status: createProposalMutation.error || metadataUploadError ? TransactionModalStatus.Error : undefined },
+    { status: createProposalMutation.status as TransactionModalStatus },
   ])
 
   const errorTitle = useTransactionModalErrorTitle([
@@ -122,7 +122,7 @@ export const PublishAndPreviewPageContent = () => {
         onClose={onConfirmationClose}
         confirmationTitle={t("Create a proposal")}
         successTitle={t("Proposal created!")}
-        status={modalStatus}
+        status={modalStatus as TransactionModalStatus}
         errorDescription={metadataUploadError?.message ?? createProposalMutation.error?.reason}
         errorTitle={errorTitle}
         showTryAgainButton={true}

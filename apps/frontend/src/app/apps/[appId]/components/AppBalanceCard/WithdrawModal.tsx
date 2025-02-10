@@ -16,7 +16,7 @@ import {
 import { useCallback, useMemo } from "react"
 import { useWithdrawAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
-import { TransactionModal, CustomModalContent, B3TRIcon } from "@/components"
+import { TransactionModal, TransactionModalStatus, CustomModalContent, B3TRIcon } from "@/components"
 import BigNumber from "bignumber.js"
 import { useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
@@ -305,7 +305,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Withdraw completed!")}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         errorDescription={error?.reason}
         errorTitle={error ? t("Error withdrawing") : undefined}
         showTryAgainButton

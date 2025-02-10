@@ -9,7 +9,7 @@ import {
   useTransactionModalStatus,
   useTransactionModalErrorTitle,
 } from "@/hooks"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -159,9 +159,9 @@ export const NewAppPageFormContent = () => {
         confirmationTitle="Submit App"
         successTitle="App submitted"
         status={useTransactionModalStatus([
-          { status: metadataUploading ? "uploadingMetadata" : undefined },
-          { status: submitAppMutation.error || metadataUploadError ? "error" : undefined },
-          { status: submitAppMutation.status },
+          { status: metadataUploading ? TransactionModalStatus.UploadingMetadata : undefined },
+          { status: submitAppMutation.error || metadataUploadError ? TransactionModalStatus.Error : undefined },
+          { status: submitAppMutation.status as TransactionModalStatus },
         ])}
         errorDescription={metadataUploadError?.message ?? submitAppMutation.error?.reason}
         errorTitle={useTransactionModalErrorTitle([

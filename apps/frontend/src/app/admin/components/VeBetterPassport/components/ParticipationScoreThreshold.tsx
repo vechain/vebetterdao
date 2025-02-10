@@ -1,5 +1,5 @@
 import { useParticipationScoreThreshold } from "@/api"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useSetParticipationThreshold } from "@/hooks"
 import {
   Button,
@@ -109,7 +109,7 @@ export const ParticipationScoreThreshold = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("Participation score threshold updated")}
         onTryAgain={handleSubmit}
         showTryAgainButton

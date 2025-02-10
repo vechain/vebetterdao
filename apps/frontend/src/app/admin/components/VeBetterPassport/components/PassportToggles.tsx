@@ -1,5 +1,5 @@
 import { usePassportChecks } from "@/api"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { TogglePassportCheck } from "@/constants"
 import { useTogglePassportCheck } from "@/hooks"
 import {
@@ -106,7 +106,7 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={isEnabled ? `${name} is now active` : `${name} is now deactivated`}
         onTryAgain={handleToggle}
         showTryAgainButton

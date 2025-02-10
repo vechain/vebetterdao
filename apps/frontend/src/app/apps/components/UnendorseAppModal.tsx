@@ -1,6 +1,6 @@
 import { useXNode } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 
 import { useUnendorseApp } from "@/hooks"
@@ -57,7 +57,11 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
         isOpen={isOpen}
         onClose={onClose}
         successTitle={t("Unendorse app")}
-        status={unendorseAppMutation.error ? "error" : unendorseAppMutation.status}
+        status={
+          unendorseAppMutation.error
+            ? TransactionModalStatus.Error
+            : (unendorseAppMutation.status as TransactionModalStatus)
+        }
         errorDescription={unendorseAppMutation.error?.reason}
         errorTitle={unendorseAppMutation.error ? t("Transaction error") : undefined}
         showTryAgainButton

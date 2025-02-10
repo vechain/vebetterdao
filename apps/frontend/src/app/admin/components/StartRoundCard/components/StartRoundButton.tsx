@@ -1,5 +1,5 @@
 import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useDistributeEmission } from "@/hooks"
 import { VStack, Button, Text, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo } from "react"
@@ -58,7 +58,7 @@ export const StartRoundButton = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={"Round started!"}
         onTryAgain={handleSubmit}
         showTryAgainButton

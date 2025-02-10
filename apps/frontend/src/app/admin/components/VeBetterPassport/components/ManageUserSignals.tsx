@@ -1,6 +1,6 @@
 import { useUserBotSignals } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useResetUserBotSignals, useSignalBotUser } from "@/hooks"
 import {
   Button,
@@ -185,7 +185,11 @@ export const ManageUserSignals = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={resetError || signalError ? "error" : resetStatus || signalStatus}
+        status={
+          resetError || signalError
+            ? TransactionModalStatus.Error
+            : (resetStatus as TransactionModalStatus) || (signalStatus as TransactionModalStatus)
+        }
         successTitle={successTitle}
         onTryAgain={resetStatus === "error" ? handleResetSignalsSubmit : handleSignalUserSubmit}
         showTryAgainButton

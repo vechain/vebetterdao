@@ -4,7 +4,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { FaRegClock } from "react-icons/fa"
 import { useClaimReward } from "@/hooks/useClaimReward"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { AnalyticsUtils } from "@/utils"
@@ -184,7 +184,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Rewards claimed!")}
-        status={claimRewardError ? "error" : claimRewardsStatus}
+        status={claimRewardError ? TransactionModalStatus.Error : (claimRewardsStatus as TransactionModalStatus)}
         errorDescription={claimRewardError?.reason}
         errorTitle={claimRewardError ? t("Error claiming") : undefined}
         showTryAgainButton

@@ -1,4 +1,4 @@
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useWithdrawDeposit } from "@/hooks/useWithdrawDeposit"
 import { Button, useDisclosure } from "@chakra-ui/react"
 import { useCallback } from "react"
@@ -31,7 +31,9 @@ export const ProposalWithdrawButton = () => {
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Deposit Withdraw Completed!")}
-        status={withdrawMutation.error ? "error" : withdrawMutation.status}
+        status={
+          withdrawMutation.error ? TransactionModalStatus.Error : (withdrawMutation.status as TransactionModalStatus)
+        }
         errorDescription={withdrawMutation.error?.reason}
         errorTitle={withdrawMutation.error ? t("Error Withdrawing") : undefined}
         pendingTitle={t("Withdrawing...")}

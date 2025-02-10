@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal } from "@/components"
+import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
 import { useRemoveEntityLink } from "@/hooks"
 
 export const RemoveLinkModalEntityPOV = ({ modal, entity }: { modal: UseDisclosureProps; entity: string }) => {
@@ -39,7 +39,7 @@ export const RemoveLinkModalEntityPOV = ({ modal, entity }: { modal: UseDisclosu
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
         successTitle={t("Linking rejected!")}
-        status={removeLinking.status}
+        status={removeLinking.status as TransactionModalStatus}
         errorDescription={removeLinking.error?.reason}
         errorTitle={removeLinking.error ? t("Error removing linking") : undefined}
         showTryAgainButton

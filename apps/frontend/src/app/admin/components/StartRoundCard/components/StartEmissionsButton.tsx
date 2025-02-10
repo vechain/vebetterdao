@@ -1,5 +1,5 @@
 import { useCurrentAllocationsRoundId } from "@/api"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useStartEmission } from "@/hooks"
 import { HStack, Button, useDisclosure } from "@chakra-ui/react"
 import { useCallback } from "react"
@@ -39,7 +39,7 @@ export const StartEmissionsButton = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={"Emissions and rounds started!"}
         onTryAgain={handleStartEmissions}
         showTryAgainButton

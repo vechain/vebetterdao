@@ -15,7 +15,7 @@ import {
 import { useCallback, useMemo } from "react"
 import { useDepositToAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
-import { TransactionModal, CustomModalContent, B3TRIcon } from "@/components"
+import { TransactionModal, TransactionModalStatus, CustomModalContent, B3TRIcon } from "@/components"
 import BigNumber from "bignumber.js"
 import { Trans, useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
@@ -228,7 +228,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Deposit completed!")}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         errorDescription={error?.reason}
         errorTitle={error ? t("Error depositing") : undefined}
         showTryAgainButton
