@@ -5,10 +5,11 @@ import { useMemo } from "react"
 import { humanDomain } from "@repo/utils/FormattingUtils"
 
 type Profile = {
-  profile: string | null
+  profile: string | undefined
   isConnectedUser: boolean
   domain?: string
   isOnProfilePage?: boolean // true if the user is on profile page
+  viewMode?: boolean
 }
 
 export const useRetrieveProfilIdentity = (): Profile => {
@@ -22,17 +23,19 @@ export const useRetrieveProfilIdentity = (): Profile => {
   const isConnectedUser = useMemo(() => compareAddresses(profile, account ?? ""), [account, profile])
   const isOnProfilePage = useMemo(() => (pathname ? pathname.includes("profile") : false), [pathname])
 
+  const viewMode = isOnProfilePage && !!profile
   const { domain: domainFromAccount } = useVechainDomain({ addressOrDomain: account })
   const { domain } = useVechainDomain({ addressOrDomain: profile })
 
   // if i'm in the profile page, but the 'profile' is empty, then I'm in the profile page of the connected user
   // see url be like : /profile?tab...
-  if (!profile && isOnProfilePage) {
+  if (!profile && isOnProfilePage && account) {
     return {
       profile: account,
       isConnectedUser: true,
       domain: humanDomain(domainFromAccount ?? "", 3, 10),
       isOnProfilePage,
+      viewMode,
     }
   }
 
@@ -41,5 +44,6 @@ export const useRetrieveProfilIdentity = (): Profile => {
     isConnectedUser,
     domain: humanDomain(domain ?? "", 3, 10),
     isOnProfilePage,
+    viewMode,
   }
 }

@@ -6,8 +6,7 @@ import {
   CreatorApplicationRejected,
   CreatorApplyNow,
 } from "./creatorBanners"
-import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/hooks/useCreatorSubmission"
-import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
+import { useHasCreatorNFT, useCreatorSubmission } from "@/api/contracts/x2EarnCreator"
 
 export const CreatorBanner = () => {
   const { account } = useWallet()

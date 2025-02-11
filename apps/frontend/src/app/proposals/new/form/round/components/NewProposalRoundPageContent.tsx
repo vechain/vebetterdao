@@ -76,6 +76,45 @@ export const NewProposalRoundPageContent = () => {
 
   const isLoading = isCurrentRoundIdLoading || isCanStartInNextRoundLoading
 
+  const renderRoundContent = () => {
+    if (isLoading) {
+      return [...Array(roundsToRender).keys()].map(index => (
+        <SelectedRoundRadioCard
+          key={index}
+          roundId={index}
+          selected={false}
+          onSelect={() => {}}
+          renderSkeleton={true}
+        />
+      ))
+    }
+
+    if (rounds.length === 0) {
+      return (
+        <Alert status="error" borderRadius={"lg"}>
+          <AlertIcon />
+          <AlertTitle>{t("No rounds available")}</AlertTitle>
+          <AlertDescription>
+            {currentRoundIdError?.message ??
+              canStartInNextRoundError?.message ??
+              t("Emissions have propably not started yet")}
+          </AlertDescription>
+        </Alert>
+      )
+    }
+
+    return rounds.map(round => (
+      <SelectedRoundRadioCard
+        key={round.id}
+        roundId={round.id}
+        selected={round.id === votingStartRoundId}
+        onSelect={onSelectRound(round.id)}
+        isSelectable={true}
+        renderSkeleton={false}
+      />
+    ))
+  }
+
   return (
     <Card variant="baseWithBorder">
       <CardBody py={8}>
@@ -93,38 +132,7 @@ export const NewProposalRoundPageContent = () => {
             </Text>
           </VStack>
 
-          {isLoading ? (
-            [...Array(roundsToRender).keys()].map(index => (
-              <SelectedRoundRadioCard
-                key={index}
-                roundId={index}
-                selected={false}
-                onSelect={() => {}}
-                renderSkeleton={true}
-              />
-            ))
-          ) : rounds.length === 0 ? (
-            <Alert status="error" borderRadius={"lg"}>
-              <AlertIcon />
-              <AlertTitle>{t("No rounds available")}</AlertTitle>
-              <AlertDescription>
-                {currentRoundIdError?.message ??
-                  canStartInNextRoundError?.message ??
-                  t("Emissions have propably not started yet")}
-              </AlertDescription>
-            </Alert>
-          ) : (
-            rounds.map(round => (
-              <SelectedRoundRadioCard
-                key={round.id}
-                roundId={round.id}
-                selected={round.id === votingStartRoundId}
-                onSelect={onSelectRound(round.id)}
-                isSelectable={true}
-                renderSkeleton={false}
-              />
-            ))
-          )}
+          {renderRoundContent()}
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
             <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
