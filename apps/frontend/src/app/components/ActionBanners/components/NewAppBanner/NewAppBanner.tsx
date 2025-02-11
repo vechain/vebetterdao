@@ -17,13 +17,8 @@ export const NewAppBanner = () => {
     return xApps?.newApps
   }, [xApps])
 
-  const areManyNewApps = useMemo(() => {
-    return (newAppsList?.length ?? 0) > 1
-  }, [newAppsList])
-
-  const newAppsListNames = useMemo(() => {
-    return newAppsList?.map(app => app.name)
-  }, [newAppsList])
+  const areManyNewApps = newAppsList && newAppsList.length > 1
+  const newAppsListNames: string[] | undefined = newAppsList?.map(app => app.name)
 
   const description = useMemo(() => {
     if (newAppsList?.length === 0) return ""

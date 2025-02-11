@@ -99,7 +99,7 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
   ) // all apps is a union of active and unendorsed apps with deduplication
 
   // apps created within the last NEW_APP_PERIOD_SECONDS
-  const newApps = apps.filter(app => dayjs().unix() - Number(app.createdAtTimestamp) <= NEW_APP_PERIOD_SECONDS)
+  const newApps = allApps.filter(app => app.isNew)
 
   return {
     allApps: allApps,
