@@ -1,14 +1,10 @@
 import {
-  Slider,
-  Tooltip,
   Modal,
   ModalOverlay,
   Button,
   Card,
   CardBody,
-  SliderFilledTrack,
-  SliderTrack,
-  SliderThumb,
+  Input,
   HStack,
   VStack,
   Text,
@@ -17,22 +13,16 @@ import {
   ModalCloseButton,
   Flex,
 } from "@chakra-ui/react"
-import { useMemo, useCallback, useState, useEffect } from "react"
-import { Trans } from "react-i18next"
-import {
-  useAppLockedPercentage,
-  useAppAllowance,
-  useAppBalance,
-  useAppLockedTreasury,
-} from "@/api/contracts/x2EarnRewardsPool"
-import { useAdminLockedFundsPercentage } from "@/hooks"
-import { TransactionModal, CustomModalContent, B3TRIcon, BaseTooltip } from "@/components"
-import { useXApp } from "@/api"
-import { FormattingUtils } from "@repo/utils"
-import { motion } from "framer-motion"
+import { Controller, useForm } from "react-hook-form"
 import { IoLockClosedOutline } from "react-icons/io5"
-import { t } from "i18next"
 import { FiInfo } from "react-icons/fi"
+import { useMemo, useCallback, useEffect } from "react"
+import { Trans } from "react-i18next"
+import { useAppAllowance, useAppBalance, useSetDistributionAllowance, useXApp } from "@/api"
+import { TransactionModal, CustomModalContent, B3TRIcon, BaseTooltip } from "@/components"
+import { GenericPercentageSelectorButtons } from "./components/GenericPercentageSelectorButtons"
+import { motion } from "framer-motion"
+import { t } from "i18next"
 
 export const COLORS = {
   available: "#e5eeff",
@@ -67,43 +57,42 @@ const layoutTransition = {
 }
 
 export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
-  const [percentage, setPercentage] = useState<string>("0")
-  const [showTooltip, setShowTooltip] = useState(false)
-
-  const { sendTransaction, status, error, txReceipt, resetStatus, sendTransactionTx } = useAdminLockedFundsPercentage({
-    appId: appId ?? "",
-    percentage: percentage,
-  })
-
   const { data: appAllowance, isLoading: isAppAllowanceLoading } = useAppAllowance(appId, true)
-  const { data: lockedPercentage } = useAppLockedPercentage(appId)
-  const { data: treasuryLocked, isLoading: isTreasuryLockedLoading } = useAppLockedTreasury(appId)
   const { data: balance } = useAppBalance(appId)
   const { data: app } = useXApp(appId)
 
-  const allowance = useMemo(() => {
-    return appAllowance
-  }, [appAllowance])
+  const appAllowanceScaled = useMemo(() => {
+    return appAllowance?.scaled ?? "0"
+  }, [appAllowance?.scaled])
 
-  const availableFunds = useMemo(() => {
-    return balance
-  }, [balance])
+  const formData = useForm<{ amount: string }>({
+    defaultValues: {
+      amount: "",
+    },
+  })
+  const { watch, setValue, control } = formData
+  const amount = watch("amount")
+  const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
+  const filterAmount = useCallback(
+    (text: string) => {
+      const filteredAmount = text
+        .replace(",", ".") // Replace comma with dot
+        .replace(/[^\d\\.]/g, "") // Filter out non-numeric characters except for decimal separator
+        .replace(/\.(?=.*\.)/g, "") // Filter out duplicate decimal separators
+        .replace(/(\.\d{18})\d+/, "$1") // remove digits after 18th decimal
 
-  const lockedTreasury = useMemo(() => {
-    return treasuryLocked
-  }, [treasuryLocked])
+      if (Number(filteredAmount) > Number(appAllowanceScaled)) {
+        return appAllowanceScaled
+      }
+      return filteredAmount
+    },
+    [appAllowanceScaled],
+  )
 
-  const estimatedAllowance = useMemo(() => {
-    if (!availableFunds?.scaled || !percentage) return "0"
-    const value = Number(availableFunds.scaled) * (Number(percentage) / 100)
-    return FormattingUtils.humanNumber(String(value))
-  }, [availableFunds, percentage])
-
-  const handleSliderChange = useCallback((value: number) => {
-    setPercentage(String(Math.round(value)))
-  }, [])
-
-  const isSliderDisabled = false
+  const { sendTransaction, status, error, txReceipt, resetStatus, sendTransactionTx } = useSetDistributionAllowance({
+    appId,
+    amount,
+  })
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -116,13 +105,8 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
   const handleClose = useCallback(() => {
     resetStatus()
     onClose()
-  }, [resetStatus, onClose])
-
-  useEffect(() => {
-    if (lockedPercentage) {
-      setPercentage(lockedPercentage)
-    }
-  }, [lockedPercentage])
+    setValue("amount", "")
+  }, [resetStatus, onClose, setValue])
 
   useEffect(() => {
     if (status === "success") {
@@ -130,42 +114,27 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
     }
   }, [status, resetStatus])
 
-  console.log({ treasuryLocked })
-  console.log({ allowance, estimatedAllowance })
-
-  const sliderValue = useMemo(() => {
+  const allowanceValue = useMemo(() => {
     return (
-      <HStack w="full" align="center" spacing={4}>
-        <Slider
-          flex="1"
-          aria-label="lock-percentage-slider"
-          value={Number(percentage)}
-          onChange={handleSliderChange}
-          onMouseEnter={() => setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
-          min={0}
-          max={100}
-          step={1}
-          isDisabled={isSliderDisabled}>
-          <SliderTrack bg={COLORS.available}>
-            <SliderFilledTrack bg={COLORS.locked} />
-          </SliderTrack>
-          <Tooltip
-            hasArrow
-            bg={COLORS.locked}
-            color="white"
-            placement="top"
-            isOpen={showTooltip}
-            label={`${percentage || "0"}%`}>
-            <SliderThumb boxSize={6} />
-          </Tooltip>
-        </Slider>
-        <Text fontWeight="bold" minW="60px">
-          {`${percentage || "0"}%`}
-        </Text>
-      </HStack>
+      <Controller
+        name="amount"
+        control={control}
+        render={({ field: { onChange, value } }) => (
+          <Input
+            h="50px"
+            placeholder="0"
+            fontSize={{ base: 30, md: 36 }}
+            fontWeight={700}
+            type="text"
+            value={value}
+            onChange={e => onChange(filterAmount(e.target.value))}
+            variant="unstyled"
+            _placeholder={{ color: "black" }}
+          />
+        )}
+      />
     )
-  }, [percentage, isSliderDisabled, handleSliderChange, showTooltip])
+  }, [filterAmount, control])
 
   const renderCardContent = useCallback(() => {
     return (
@@ -174,24 +143,24 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
         <VStack align={"flex-start"} maxW={["450px", "590px"]} px={{ base: 0, md: 4 }}>
           <HStack>
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
-              <Trans i18nKey={"Lock B3TR to {{name}} app"} values={{ name: app?.name ?? "" }} t={t} />
+              <Trans i18nKey={"Set B3TR allowance to {{name}} app"} values={{ name: app?.name ?? "" }} t={t} />
             </Text>
           </HStack>
           <Text fontSize={{ base: 14, md: 16 }} fontWeight={400} opacity={0.7}>
-            {t("Lock B3TR tokens to secure the app's funds and enable rewards distribution.")}
+            {t("Allow B3TR tokens for rewards distribution to secure the app's funds and enable rewards distribution.")}
           </Text>
 
           <VStack bg={"#E5EEFF"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
-              <Skeleton isLoaded={!isTreasuryLockedLoading}>
+              <Skeleton isLoaded={!isAppAllowanceLoading}>
                 <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
-                  {lockedTreasury.formatted}
+                  {appAllowance?.formatted}
                 </Text>
               </Skeleton>
             </HStack>
 
             <Text fontSize="12px" fontWeight="400" opacity={0.7}>
-              {t("App current B3TR locked")}
+              {t("App current allowance")}
             </Text>
           </VStack>
 
@@ -207,19 +176,16 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
                 borderColor={"rgba(213, 213, 213, 1)"}>
                 <HStack align={"stretch"} justify={"stretch"} spacing={4} w="full">
                   <VStack justify="stretch" flex={1} gap={1}>
-                    {sliderValue}
                     <HStack justify={"space-between"} alignItems={"flex-start"} w="full">
                       <Skeleton isLoaded={!isAppAllowanceLoading}>
                         <Text fontSize={14} fontWeight={400}>
-                          {t("You'll lock")}
+                          {t("You'll allow")}
                         </Text>
                       </Skeleton>
                     </HStack>
                     <HStack w="full">
                       <B3TRIcon boxSize={"30px"} />
-                      <Text fontSize={{ base: 30, md: 36 }} fontWeight={700} h="50px">
-                        {estimatedAllowance}
-                      </Text>
+                      {allowanceValue}
                     </HStack>
                   </VStack>
                 </HStack>
@@ -227,11 +193,17 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
             </motion.div>
           </motion.div>
 
+          <GenericPercentageSelectorButtons
+            availableAmount={balance?.scaled ?? "0"}
+            setValue={setValue}
+            maxButtonText={t("Allow all")}
+          />
+
           <VStack w={"full"} spacing={4} align={"flex-start"}>
             <VStack align={"stretch"} w={"full"} justify={"start"}>
               <BaseTooltip
                 text={t(
-                  "This locking funds will not be able to be distributed for apps rewards. Withdrawing or depositing the funds will recalculate the funds",
+                  "This allowance will only be used to distribute rewards to the app's users and to secure the app's funds.",
                 )}>
                 <Flex w={"fit-content"} justifyContent={"center"} mt={1}>
                   <HStack alignSelf={"center"} w={"fit-content"}>
@@ -243,13 +215,11 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
                 </Flex>
               </BaseTooltip>
 
-              <HStack>
-                <Text fontSize="12px" fontWeight="400" opacity={0.7}>
-                  {t("Current locked treasury percentage : {{values}}%", { values: lockedPercentage })}
-                </Text>
-              </HStack>
+              <HStack></HStack>
               <Text fontSize="12px" fontWeight="400" opacity={0.7}>
-                {t("Current allowance available to distribute rewards : {{values}}", { values: allowance.formatted })}
+                {t("Current allowance available to distribute rewards : {{values}}", {
+                  values: appAllowance?.formatted,
+                })}
               </Text>
             </VStack>
           </VStack>
@@ -261,25 +231,23 @@ export const LockAppTreasuryModal = ({ appId, isOpen, onClose }: Props) => {
             w={"full"}
             rounded={"full"}
             onClick={handleSubmit}
-            // todo : find condition to disable the button
-            // isDisabled={}
+            isDisabled={invalidAmount || isAppAllowanceLoading}
             size={"lg"}>
             <Icon as={IoLockClosedOutline} mr={2} />
-            <Text fontSize={{ base: 14, md: 18 }}>{t("Lock now")}</Text>
+            <Text fontSize={{ base: 14, md: 18 }}>{t("Allow now")}</Text>
           </Button>
         </VStack>
       </form>
     )
   }, [
     handleSubmit,
-    estimatedAllowance,
-    sliderValue,
-    lockedTreasury,
-    lockedPercentage,
     isAppAllowanceLoading,
     app?.name,
-    isTreasuryLockedLoading,
-    allowance.formatted,
+    appAllowance?.formatted,
+    invalidAmount,
+    setValue,
+    allowanceValue,
+    balance?.scaled,
   ])
 
   return (

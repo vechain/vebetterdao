@@ -24,7 +24,7 @@ import { FiInfo } from "react-icons/fi"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useAccountAppPermissions } from "@/api"
 import { useMemo } from "react"
-import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
+import { useAppAllowance } from "@/api/contracts/x2EarnRewardsPool"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -34,7 +34,9 @@ export const AppBalanceCard = () => {
   const { isOpen: isOpenDeposit, onOpen: onOpenDeposit, onClose: onCloseDeposit } = useDisclosure()
   const { isOpen: isOpenLock, onOpen: onOpenLock, onClose: onCloseLock } = useDisclosure()
   const { app } = useCurrentAppInfo()
-  const { data: balance, isLoading: isBalanceLoading } = useAppBalance(app?.id ?? "")
+  // const { data: balance, isLoading: isBalanceLoading } = useAppBalance(app?.id ?? "")
+  const { data: appAllowance, isLoading: isAppAllowanceLoading } = useAppAllowance(app?.id ?? "", true)
+  console.log(appAllowance)
   const { account } = useWallet()
 
   const { data: appPermissions } = useAccountAppPermissions(account ?? "")
@@ -64,8 +66,10 @@ export const AppBalanceCard = () => {
             </Text>
             <HStack>
               <B3TRIcon boxSize={"30px"} />
-              <Skeleton isLoaded={!isBalanceLoading}>
-                <Heading size={{ base: "2xl", md: "xl" }}>{compactFormatter.format(Number(balance?.scaled))}</Heading>
+              <Skeleton isLoaded={!isAppAllowanceLoading}>
+                <Heading size={{ base: "2xl", md: "xl" }}>
+                  {compactFormatter.format(Number(appAllowance?.scaled))}
+                </Heading>
               </Skeleton>
             </HStack>
           </VStack>
@@ -80,7 +84,7 @@ export const AppBalanceCard = () => {
               <>
                 <Button
                   mt={2}
-                  isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading}
+                  isDisabled={appAllowance?.scaled === "0.0" || !appAllowance || isAppAllowanceLoading}
                   onClick={onOpenWithdraw}
                   variant={"primaryAction"}
                   borderRadius={"full"}
@@ -90,13 +94,13 @@ export const AppBalanceCard = () => {
                 </Button>
                 <Button
                   mt={2}
-                  isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading}
+                  isDisabled={appAllowance?.scaled === "0.0" || !appAllowance || isAppAllowanceLoading}
                   onClick={onOpenLock}
                   variant={"primaryAction"}
                   borderRadius={"full"}
                   w={"full"}>
                   <Icon as={IoLockClosedOutline} mr={2} />
-                  {t("Lock a treasury")}
+                  {t("Set an allowance")}
                 </Button>
               </>
             )}

@@ -20,7 +20,7 @@ import { TransactionModal, CustomModalContent, B3TRIcon } from "@/components"
 import BigNumber from "bignumber.js"
 import { useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
-import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
+import { useAppBalance, useAppAllowance } from "@/api/contracts/x2EarnRewardsPool"
 import { TeamWalletAddress } from "./components/TeamWalletAddress"
 import { IoWalletOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
@@ -58,9 +58,12 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   const { t } = useTranslation()
 
   const { data: availableB3trToWithdraw, isLoading: isBalanceLoading } = useAppBalance(appId)
+  const { data: appAllowance, isLoading: isAppAllowanceLoading } = useAppAllowance(appId, true)
+
   const availableB3trToWithdrawScaled = useMemo(() => {
-    return availableB3trToWithdraw?.scaled ?? "0"
-  }, [availableB3trToWithdraw?.scaled])
+    const remainToWithdraw = new BigNumber(availableB3trToWithdraw?.scaled ?? 0).minus(appAllowance?.scaled ?? 0)
+    return remainToWithdraw.toString()
+  }, [availableB3trToWithdraw?.scaled, appAllowance?.scaled])
 
   const formData = useForm<{ amount: string; reason: string; customReason: string }>({
     defaultValues: {
@@ -212,7 +215,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
 
           <VStack bg={"#E5EEFF"} py={{ base: 3, md: 4 }} px={6} h="full" w="full" borderRadius={"2xl"}>
             <HStack>
-              <Skeleton isLoaded={!isBalanceLoading}>
+              <Skeleton isLoaded={!isBalanceLoading && !isAppAllowanceLoading}>
                 <Text fontSize={{ base: "2xl", md: "xl" }} fontWeight={"500"}>
                   {FormattingUtils.humanNumber(Number(availableB3trToWithdrawScaled))}
                 </Text>
@@ -292,6 +295,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     t,
     amountInput,
     isBalanceLoading,
+    isAppAllowanceLoading,
     teamWalletAddress,
     reasonInput,
     reason,

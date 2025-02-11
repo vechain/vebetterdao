@@ -1,6 +1,4 @@
 export * from "./useAppBalance"
-export * from "./useAppLockedPercentage"
 export * from "./useAppAllowance"
-export * from "./useAppLockedPercentage"
-export * from "./useAppLockedTreasury"
 export * from "./useX2EarnRewardsPaused"
+export * from "./useSetDistributionAllowance"

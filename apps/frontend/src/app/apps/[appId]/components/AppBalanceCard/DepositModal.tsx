@@ -24,7 +24,7 @@ import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
 import { useB3trBalance, useXApp } from "@/api"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
+import { GenericPercentageSelectorButtons } from "./components/GenericPercentageSelectorButtons"
 
 export type Props = {
   appId: string
@@ -193,7 +193,11 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
             </motion.div>
           </motion.div>
 
-          <DepositPercentageSelectorButtons availableAmount={availableB3trToDepositScaled} setValue={setValue} />
+          <GenericPercentageSelectorButtons
+            availableAmount={availableB3trToDepositScaled}
+            setValue={setValue}
+            maxButtonText={t("Deposit all")}
+          />
 
           <Button
             mt={2}

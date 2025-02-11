@@ -8,11 +8,13 @@ import { useBreakpoints } from "@/hooks"
 type PercentageSelectorButtonsProps = {
   availableAmount: string
   setValue: UseFormSetValue<{ amount: string }>
+  maxButtonText: string
 }
 
-export const DepositPercentageSelectorButtons: React.FC<PercentageSelectorButtonsProps> = ({
+export const GenericPercentageSelectorButtons: React.FC<PercentageSelectorButtonsProps> = ({
   availableAmount,
   setValue,
+  maxButtonText,
 }) => {
   const { t } = useTranslation()
   const { isMobile } = useBreakpoints()
@@ -81,11 +83,11 @@ export const DepositPercentageSelectorButtons: React.FC<PercentageSelectorButton
     () => (
       <Button onClick={() => setValue("amount", availableAmount)} variant={"secondary"} w={"full"} h={"30px"}>
         <Text fontSize={14} fontWeight={400}>
-          {isMobile ? t("100%") : t("Deposit all")}
+          {isMobile ? t("100%") : maxButtonText}
         </Text>
       </Button>
     ),
-    [availableAmount, setValue, t, isMobile],
+    [availableAmount, setValue, t, isMobile, maxButtonText],
   )
 
   return (
