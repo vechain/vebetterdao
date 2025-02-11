@@ -13,7 +13,6 @@ import { ConfirmationAppBalanceModalContent } from "./ConfirmationAppBalanceModa
 import { SuccessAppBalanceModalContent } from "./SuccessAppBalanceModalContent"
 import { CoinsFlipModalContent } from "./CoinsFlipModalContent/CoinsFlipModalContent"
 import { PropsEndorsement } from "@/app/apps/components/UnendorseAppModal"
-import { TransactionApprovalModal } from "./TransactionApprovalModal/TransactionApprovalModal"
 
 export enum TransactionModalStatus {
   Ready = "ready",
@@ -22,13 +21,10 @@ export enum TransactionModalStatus {
   Error = "error",
   Success = "success",
   UploadingMetadata = "uploadingMetadata",
-  KitConfirmation = "kitConfirmation",
   Unknown = "unknown",
 }
 
 export type TransactionModalProps = {
-  onApprove?: () => void //TODO: Make it required
-  onReject?: () => void //TODO: Make it required
   isOpen: boolean
   onClose: () => void
   status: TransactionModalStatus
@@ -57,8 +53,6 @@ export type TransactionModalProps = {
 }
 
 export const TransactionModal = ({
-  onApprove,
-  onReject,
   isOpen,
   onClose,
   status,
@@ -204,20 +198,11 @@ export const TransactionModal = ({
       [TransactionModalStatus.WaitingConfirmation]: handleWaitingConfirmationStatus(),
       [TransactionModalStatus.Error]: handleErrorStatus(),
       [TransactionModalStatus.Success]: handleSuccessStatus(),
-      [TransactionModalStatus.KitConfirmation]: <TransactionApprovalModal onApprove={onApprove} onReject={onReject} />,
       [TransactionModalStatus.Ready]: undefined, //TODO: add a default component
       [TransactionModalStatus.Unknown]: undefined, //TODO: add a default component
     }
     return statusComponentMap[status] || null
-  }, [
-    handleErrorStatus,
-    handlePendingStatus,
-    handleSuccessStatus,
-    handleWaitingConfirmationStatus,
-    onApprove,
-    onReject,
-    status,
-  ])
+  }, [handleErrorStatus, handlePendingStatus, handleSuccessStatus, handleWaitingConfirmationStatus, status])
   if (!modalContent) return null
   return (
     <Modal

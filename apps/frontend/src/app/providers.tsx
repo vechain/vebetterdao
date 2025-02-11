@@ -18,12 +18,6 @@ const VechainKitProviderWrapper = dynamic(
     ssr: false,
   },
 )
-const TransactionProvider = dynamic(
-  async () => (await import("../providers/TransactionProvider")).TransactionProvider,
-  {
-    ssr: false,
-  },
-)
 
 export function Providers({ children }: { readonly children: React.ReactNode }) {
   return (
@@ -32,9 +26,7 @@ export function Providers({ children }: { readonly children: React.ReactNode }) 
         <ReactQueryDevtools initialIsOpen={false} />
         <ChakraProvider theme={lightTheme}>
           <VechainKitProviderWrapper>
-            <AuthSessionProvider>
-              <TransactionProvider>{children}</TransactionProvider>
-            </AuthSessionProvider>
+            <AuthSessionProvider>{children}</AuthSessionProvider>
           </VechainKitProviderWrapper>
         </ChakraProvider>
       </PersistQueryClientProvider>
