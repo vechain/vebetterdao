@@ -28,7 +28,7 @@ export const VoterRewards: React.FC = () => {
   })
 
   const handleClaim = useCallback(() => {
-    claimRewardsMutation.sendTransaction()
+    claimRewardsMutation.sendTransaction(undefined)
     onOpen()
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CLAIM_REWARDS))
   }, [claimRewardsMutation, onOpen])

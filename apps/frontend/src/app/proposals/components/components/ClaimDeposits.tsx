@@ -41,7 +41,7 @@ export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props
   }, [claimableDeposits])
 
   const handleClaim = useCallback(() => {
-    sendTransaction()
+    sendTransaction(undefined)
     onOpen()
   }, [sendTransaction, onOpen])
 

@@ -25,7 +25,7 @@ export const ClaimVotingRewardsBanner = () => {
   })
 
   const handleClaim = useCallback(() => {
-    claimRewardsMutation.sendTransaction()
+    claimRewardsMutation.sendTransaction(undefined)
     onOpen()
   }, [claimRewardsMutation, onOpen])
 

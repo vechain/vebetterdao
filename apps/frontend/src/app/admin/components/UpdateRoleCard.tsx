@@ -101,7 +101,7 @@ export const UpdateRoleCard = () => {
   }, [userAlreadyHasRole, account?.address, walletAddress, grantRole, renounceRole, revokeRole])
 
   const handleFormSubmit = (_: any) => {
-    accessControlAction.sendTransaction()
+    accessControlAction.sendTransaction(undefined)
     openTransactionModal()
   }
   const handleClose = useCallback(() => {

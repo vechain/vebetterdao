@@ -42,7 +42,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
   const { isOpen, onClose, onOpen } = useDisclosure()
 
   const handleClaim = useCallback(() => {
-    sendTransaction()
+    sendTransaction(undefined)
     onOpen()
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CLAIM_REWARDS))
   }, [onOpen, sendTransaction])

@@ -298,8 +298,6 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        onApprove={mutationData?.onApprove}
-        onReject={mutationData?.onReject}
         confirmationTitle={swapText}
         successTitle={t("Swap Completed!")}
         status={mutationData.error ? TransactionModalStatus.Error : (mutationData.status as TransactionModalStatus)}

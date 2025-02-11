@@ -63,7 +63,7 @@ export const ManageCreatorsNFT = () => {
 
   const hasNFT = useHasCreatorNFT(lookupAddress ?? "")
 
-  const { error, status, txReceipt, sendTransaction, onApprove, onReject, resetStatus } = useMemo(() => {
+  const { error, status, txReceipt, sendTransaction, resetStatus } = useMemo(() => {
     return actionType === "mint" ? mintNFT : burnNFT
   }, [actionType, mintNFT, burnNFT])
 
@@ -182,8 +182,6 @@ export const ManageCreatorsNFT = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        onApprove={onApprove}
-        onReject={onReject}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("Transaction successful")}
         onTryAgain={handleSubmit(onSubmit)}

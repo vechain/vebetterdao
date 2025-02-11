@@ -46,11 +46,10 @@ export const B3trAllowance = () => {
     return allowedAmount?.scaled ?? "0"
   }, [allowedAmount])
 
-  const { sendTransaction, onApprove, onReject, resetStatus, isTransactionPending, status, error, txReceipt } =
-    useB3trApprove({
-      spender: spender ?? "",
-      amount: amount ?? 0,
-    })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useB3trApprove({
+    spender: spender ?? "",
+    amount: amount ?? 0,
+  })
 
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(spender)
@@ -184,8 +183,6 @@ export const B3trAllowance = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        onApprove={onApprove}
-        onReject={onReject}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("B3TR tokens allowance updated successfully")}
         onTryAgain={handleSubmit}
