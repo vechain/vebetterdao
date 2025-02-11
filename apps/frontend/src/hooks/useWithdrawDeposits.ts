@@ -1,9 +1,9 @@
 import { ProposalDeposit, buildClaimDepositsTx, getProposalUserDepositQueryKey, getVot3BalanceQueryKey } from "@/api"
-import { useQueryClient } from "@tanstack/react-query"
 
-import { useCallback } from "react"
-import { useSendTransaction, UseSendTransactionReturnValue, useWallet } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+import { useWallet } from "@vechain/vechain-kit"
 import { address } from "thor-devkit"
+import { useBuildTransaction } from "./useBuildTransaction"
 
 /**
  * Type definition for properties accepted by the `useWithdrawDeposits` hook.
@@ -12,16 +12,8 @@ type useClaimRewardsProps = {
   proposalDeposits: ProposalDeposit[]
   onSuccess?: () => void
   onFailure?: () => void
-  invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
-
-/**
- * Type definition for the return value of the `useWithdrawDeposits` hook.
- */
-type useClaimRewardsReturnValue = {
-  sendTransaction: () => Promise<void>
-} & Omit<UseSendTransactionReturnValue, "sendTransaction">
 
 /**
  * A custom React hook that enables a user to withdraw deposits associated with proposals.
@@ -34,14 +26,8 @@ type useClaimRewardsReturnValue = {
  * @param invalidateCache - Flag to determine whether to invalidate and refresh the related cache. Defaults to true.
  * @returns An object containing functions and properties for transaction management.
  */
-export const useWithdrawDeposits = ({
-  proposalDeposits,
-  onSuccess,
-  onFailure,
-  invalidateCache = true,
-}: useClaimRewardsProps): useClaimRewardsReturnValue => {
+export const useWithdrawDeposits = ({ proposalDeposits, onSuccess, onFailure }: useClaimRewardsProps) => {
   const { account } = useWallet()
-  const queryClient = useQueryClient()
 
   const buildClauses = useCallback(() => {
     if (!address) throw new Error("address is required")
@@ -51,40 +37,20 @@ export const useWithdrawDeposits = ({
     return clauses
   }, [account?.address, proposalDeposits])
 
-  // Refetch queries to update ui after the tx is confirmed
-  const handleOnSuccess = useCallback(async () => {
-    if (invalidateCache) {
-      for (const proposalDeposit of proposalDeposits) {
-        await queryClient.cancelQueries({
-          queryKey: getProposalUserDepositQueryKey(proposalDeposit.proposalId, account?.address ?? ""),
-        })
-        await queryClient.refetchQueries({
-          queryKey: getProposalUserDepositQueryKey(proposalDeposit.proposalId, account?.address ?? ""),
-        })
-      }
+  const refetchQueryKeys = useMemo(() => {
+    const queryKeys = proposalDeposits.map(proposalDeposit =>
+      getProposalUserDepositQueryKey(proposalDeposit.proposalId, account?.address ?? ""),
+    )
 
-      await queryClient.cancelQueries({
-        queryKey: getVot3BalanceQueryKey(account?.address ?? ""),
-      })
+    queryKeys.push(getVot3BalanceQueryKey(account?.address ?? ""))
 
-      await queryClient.refetchQueries({
-        queryKey: getVot3BalanceQueryKey(account?.address ?? ""),
-      })
-    }
+    return queryKeys
+  }, [account, proposalDeposits])
 
-    onSuccess?.()
-  }, [account, invalidateCache, onSuccess, proposalDeposits, queryClient])
-
-  const result = useSendTransaction({
-    signerAccountAddress: account?.address,
-    onTxConfirmed: handleOnSuccess,
-    onTxFailedOrCancelled: onFailure,
+  return useBuildTransaction({
+    clauseBuilder: buildClauses,
+    onSuccess,
+    refetchQueryKeys,
+    onFailure,
   })
-
-  const onMutate = useCallback(async () => {
-    const clauses = buildClauses()
-    return result.sendTransaction(clauses)
-  }, [buildClauses, result])
-
-  return { ...result, sendTransaction: onMutate }
 }

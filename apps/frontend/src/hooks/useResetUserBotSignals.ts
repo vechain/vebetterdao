@@ -1,4 +1,3 @@
-import { UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
@@ -24,7 +23,7 @@ type Props = {
  * @param {string} props.reason - the reason for signaling the user
  * @returns the return value of the send transaction hook and the result of the transaction
  */
-export const useResetUserBotSignals = ({ address, reason, onSuccess }: Props): UseSendTransactionReturnValue => {
+export const useResetUserBotSignals = ({ address, reason, onSuccess }: Props) => {
   const clauseBuilder = useCallback(() => {
     const clauses = buildClause({
       contractInterface: VeBetterPassportInterface,

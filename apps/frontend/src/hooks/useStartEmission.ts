@@ -1,6 +1,6 @@
 import { getCurrentAllocationsRoundIdQueryKey, getAllocationsRoundsEventsQueryKey, currentBlockQueryKey } from "@/api"
 import { useCallback, useMemo } from "react"
-import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { EnhancedClause } from "@vechain/vechain-kit"
 import { Emissions__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { buildClause } from "@/utils/buildClause"
@@ -14,9 +14,8 @@ type useStartEmissionsProps = {
 /**
  * Hook to start the emissions
  * @param onSuccess callback to run when the upgrade is successful
- * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useStartEmission = ({ onSuccess }: useStartEmissionsProps): UseSendTransactionReturnValue => {
+export const useStartEmission = ({ onSuccess }: useStartEmissionsProps) => {
   const clauseBuilder = useCallback(() => {
     const clauses: EnhancedClause[] = [
       buildClause({

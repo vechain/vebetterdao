@@ -1,4 +1,3 @@
-import { UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
@@ -25,7 +24,7 @@ type Props = {
  * @param {string} props.checkFunction - the check function to invalidate
  * @returns the return value of the send transaction hook and the result of the transaction
  */
-export const useTogglePassportCheck = ({ checkToToggle, onSuccess }: Props): UseSendTransactionReturnValue => {
+export const useTogglePassportCheck = ({ checkToToggle, onSuccess }: Props) => {
   const clauseBuilder = useCallback(() => {
     const clauses = buildClause({
       contractInterface: VeBetterPassportInterface,

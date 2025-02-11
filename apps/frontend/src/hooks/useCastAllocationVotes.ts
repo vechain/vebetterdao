@@ -7,12 +7,12 @@ import {
   getXAppRoundEarningsQueryKey,
   getXAppsSharesQueryKey,
 } from "@/api"
-import { useQueryClient } from "@tanstack/react-query"
-import { useCallback } from "react"
-import { useWallet, EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+import { useWallet, EnhancedClause } from "@vechain/vechain-kit"
 import { XAllocationVoting__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
+import { useBuildTransaction } from "./useBuildTransaction"
 
 // const buffer = 1.01
 // Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
@@ -31,30 +31,20 @@ export type CastAllocationVotesProps = {
 type useCastAllocationVotesProps = {
   roundId: string
   onSuccess?: () => void
-  invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
 
 const XAllocationVotingInterface = XAllocationVoting__factory.createInterface()
 
-type useCastAllocationVotesReturnValue = {
-  sendTransaction: (data: CastAllocationVotesProps) => Promise<void>
-} & Omit<UseSendTransactionReturnValue, "sendTransaction">
 /**
  * Hook to cast votes to one or more apps in a round
  * This hook will send a vote transaction to the blockchain and wait for the txConfirmation
  * @param roundId the id of the round to cast the votes
  * @param onSuccess callback to run when the upgrade is successful
  * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
- * @returns see {@link useCastAllocationVotesReturnValue}
  */
-export const useCastAllocationVotes = ({
-  roundId,
-  onSuccess,
-  invalidateCache = true,
-}: useCastAllocationVotesProps): useCastAllocationVotesReturnValue => {
+export const useCastAllocationVotes = ({ roundId, onSuccess }: useCastAllocationVotesProps) => {
   const { account } = useWallet()
-  const queryClient = useQueryClient()
 
   const buildClauses = useCallback(
     (data: CastAllocationVotesProps) => {
@@ -76,80 +66,21 @@ export const useCastAllocationVotes = ({
     [roundId],
   )
 
-  //Refetch queries to update ui after the tx is confirmed
-  const handleOnSuccess = useCallback(async () => {
-    if (invalidateCache) {
-      await queryClient.cancelQueries({
-        queryKey: getAllocationVotesQueryKey(roundId),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getAllocationVotesQueryKey(roundId),
-      })
+  const refetchQueryKeys = useMemo(() => {
+    return [
+      getAllocationVotesQueryKey(roundId),
+      getAllocationVotersQueryKey(roundId),
+      getXAppsSharesQueryKey(roundId),
+      getUserVotesInRoundQueryKey(roundId, account?.address ?? undefined),
+      getHasVotedInRoundQueryKey(roundId, account?.address ?? undefined),
+      getXAppRoundEarningsQueryKey(roundId),
+      getParticipatedInGovernanceQueryKey(account?.address ?? ""),
+    ]
+  }, [roundId, account?.address])
 
-      await queryClient.cancelQueries({
-        queryKey: getAllocationVotersQueryKey(roundId),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getAllocationVotersQueryKey(roundId),
-      })
-
-      await queryClient.cancelQueries({
-        queryKey: getXAppsSharesQueryKey(roundId),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getXAppsSharesQueryKey(roundId),
-      })
-
-      await queryClient.cancelQueries({
-        queryKey: getUserVotesInRoundQueryKey(roundId, account?.address ?? undefined),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getUserVotesInRoundQueryKey(roundId, account?.address ?? undefined),
-      })
-
-      await queryClient.cancelQueries({
-        queryKey: getHasVotedInRoundQueryKey(roundId, account?.address ?? undefined),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getHasVotedInRoundQueryKey(roundId, account?.address ?? undefined),
-      })
-
-      await queryClient.cancelQueries({
-        queryKey: getXAppRoundEarningsQueryKey(roundId),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getXAppRoundEarningsQueryKey(roundId),
-      })
-      await queryClient.cancelQueries({
-        queryKey: getParticipatedInGovernanceQueryKey(account?.address ?? ""),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getParticipatedInGovernanceQueryKey(account?.address ?? ""),
-      })
-    }
-
-    onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess, account?.address, roundId])
-
-  const result = useSendTransaction({
-    signerAccountAddress: account?.address,
-    onTxConfirmed: handleOnSuccess,
-    // suggestedMaxGas,
+  return useBuildTransaction({
+    clauseBuilder: buildClauses,
+    refetchQueryKeys,
+    onSuccess,
   })
-
-  /**
-   * Send a transaction with the given clauses (in case you need to pass data to build the clauses to mutate directly)
-   * @param vote the vote to cast
-   * @param reason the reason for the vote
-   * @returns see x@xxxx UseSendTransactionReturnValue}
-   */
-  const onMutate = useCallback(
-    async (data: CastAllocationVotesProps) => {
-      const clauses = buildClauses(data)
-      return result.sendTransaction(clauses)
-    },
-    [buildClauses, result],
-  )
-
-  return { ...result, sendTransaction: onMutate }
 }

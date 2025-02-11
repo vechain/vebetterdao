@@ -1,4 +1,3 @@
-import { UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
@@ -14,7 +13,6 @@ type Props = {
   appId: string
   securityLevel: number
   onSuccess?: () => void
-  invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
 
@@ -25,11 +23,7 @@ type Props = {
  * @param {number} props.securityLevel - the new security level
  * @returns the return value of the send transaction hook and the result of the transaction
  */
-export const useUpdateAppSecurityLevel = ({
-  appId,
-  securityLevel,
-  onSuccess,
-}: Props): UseSendTransactionReturnValue => {
+export const useUpdateAppSecurityLevel = ({ appId, securityLevel, onSuccess }: Props) => {
   const clauseBuilder = useCallback(() => {
     const clauses = buildClause({
       contractInterface: VeBetterPassportInterface,

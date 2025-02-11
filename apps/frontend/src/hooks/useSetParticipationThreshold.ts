@@ -1,4 +1,3 @@
-import { UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
@@ -23,10 +22,7 @@ type Props = {
  * @param {number} props.participationThreshold - the new participation threshold
  * @returns the return value of the send transaction hook and the result of the transaction
  */
-export const useSetParticipationThreshold = ({
-  participationThreshold,
-  onSuccess,
-}: Props): UseSendTransactionReturnValue => {
+export const useSetParticipationThreshold = ({ participationThreshold, onSuccess }: Props) => {
   const clauseBuilder = useCallback(() => {
     const clauses = buildClause({
       contractInterface: VeBetterPassportInterface,

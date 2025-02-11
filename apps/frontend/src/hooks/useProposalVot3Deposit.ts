@@ -1,6 +1,6 @@
 import { getProposalsEventsQueryKey, getProposalUserDepositQueryKey, getVot3BalanceQueryKey } from "@/api"
 import { useCallback, useMemo } from "react"
-import { useWallet, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
+import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
@@ -26,19 +26,7 @@ type UseProposalVot3DepositProps = {
   onSuccess?: () => void
 }
 
-type SendTransactionProps = {
-  amount: string | number
-  proposalId: string
-}
-
-type UseProposalVot3DepositReturnValue = {
-  sendTransaction: (props: SendTransactionProps) => void
-} & Omit<UseSendTransactionReturnValue, "sendTransaction">
-
-export const useProposalVot3Deposit = ({
-  proposalId,
-  onSuccess,
-}: UseProposalVot3DepositProps): UseProposalVot3DepositReturnValue => {
+export const useProposalVot3Deposit = ({ proposalId, onSuccess }: UseProposalVot3DepositProps) => {
   const { account } = useWallet()
 
   const clauseBuilder = useCallback(({ amount, proposalId }: { amount: string | number; proposalId: string }) => {

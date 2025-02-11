@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { useCallback } from "react"
-import { useWallet, EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "@vechain/vechain-kit"
+import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
@@ -41,11 +41,6 @@ type BuildClausesProps = {
   startRoundId: number | string
   depositAmount: string
 }
-
-type useCreateProposalReturnValue = {
-  sendTransaction: (props: BuildClausesProps) => Promise<void>
-} & Omit<UseSendTransactionReturnValue, "sendTransaction">
-
 /**
  * Hook to create a proposal with the given calldata or actions. I.e functions to call if the proposal is executed
  * @param description The description of the proposal
@@ -53,10 +48,7 @@ type useCreateProposalReturnValue = {
  * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useCreateProposal = ({
-  invalidateCache = true,
-  onSuccess,
-}: useCreateProposalProps): useCreateProposalReturnValue => {
+export const useCreateProposal = ({ invalidateCache = true, onSuccess }: useCreateProposalProps) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
 
@@ -139,6 +131,6 @@ export const useCreateProposal = ({
     },
     [buildClauses, result],
   )
-
+  //TODO: Refactor to use `useBuildTransaction`
   return { ...result, sendTransaction: onMutate }
 }
