@@ -101,6 +101,7 @@ export const ActionBanner = () => {
   const slides = useMemo(() => {
     const bannerComponents = []
     if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
+    if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
@@ -108,17 +109,16 @@ export const ActionBanner = () => {
     if (showCreatorApprovedBanner) bannerComponents.push(<CreatorApplicationApprovedBanner key="creator-approved" />)
     if (showCreatorUnderReviewBanner)
       bannerComponents.push(<CreatorApplicationUnderReviewBanner key="creator-under-review" />)
-    if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     return bannerComponents
   }, [
     showDoActionBanner,
+    newApps,
     showClaimB3trBanner,
     showCastVoteBanner,
     showLowVthoBanner,
     showCreatorRejectedBanner,
     showCreatorApprovedBanner,
     showCreatorUnderReviewBanner,
-    newApps,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
