@@ -25,7 +25,7 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
   }
   if (isNextRound) {
     roundReference = t("the next round")
-  } 
+  }
 
   const { title, description, backgroundColor, color, icon } = STATUS_CONFIG[endorsementStatus] ?? {
     title: t("Endorsement coming soon"),
