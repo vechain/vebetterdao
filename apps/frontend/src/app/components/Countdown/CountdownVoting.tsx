@@ -1,13 +1,13 @@
 import { useCurrentAllocationsRoundId, useAllocationsRound } from "@/api"
 import React, { useEffect, useState } from "react"
-import { Card, CardBody, Heading, Text, VStack, HStack, Icon, useDisclosure } from "@chakra-ui/react"
+import { Text, HStack, Image, useDisclosure, useMediaQuery } from "@chakra-ui/react"
 import { CountdownModal } from "./CountdownModal"
-import { FiPlusCircle } from "react-icons/fi"
 import { t } from "i18next"
 
 export const CountdownVoting = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: allocationRound } = useAllocationsRound(currentRoundId)
+  const [isAbove500] = useMediaQuery("(min-width: 500px)")
 
   const estimatedEndTimestamp = allocationRound?.voteEndTimestamp?.valueOf()
   const [timeLeft, setTimeLeft] = useState<number>(estimatedEndTimestamp ? estimatedEndTimestamp - Date.now() : 0)
@@ -28,6 +28,7 @@ export const CountdownVoting = () => {
 
     return () => clearInterval(interval)
   }, [timeLeft])
+
   const getFormattedTime = (milliseconds: number | undefined) => {
     if (!milliseconds) return { days: 0, hours: 0, minutes: 0, seconds: 0 }
 
@@ -44,52 +45,54 @@ export const CountdownVoting = () => {
   }
   const { days, hours, minutes, seconds } = getFormattedTime(timeLeft)
 
-  const isNearEnd = timeLeft <= 3600000
-  const isNearEndColor = isNearEnd ? "#D23F63" : "#373edf"
+  const isNearEnd = timeLeft <= 60000
+  const isNearEndText = isNearEnd ? "#C84968" : "#004CFC"
+  const isNearEndBg = isNearEnd ? "#FCEEF1" : "#E5EEFF"
+  const isNearEndIcon = isNearEnd ? "/images/clock-red.svg" : "/images/clock-blue.svg"
+
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   return (
-    <Card w={"full"} variant={"baseWithBorder"}>
-      <CardBody>
-        <HStack w="full" justify={"space-between"} mb={4}>
-          <Heading size="md">{t("Remaining Time")}</Heading>
-          <Icon as={FiPlusCircle} color="rgba(0, 76, 252, 1)" position={"relative"} onClick={onOpen} />
-          {isOpen && <CountdownModal isOpen={isOpen} onClose={onClose} />}
+    <>
+      <HStack justify={"space-between"} onClick={onOpen} cursor={"pointer"}>
+        <HStack
+          justify={"space-between"}
+          px={3}
+          py={1}
+          rounded={"full"}
+          textColor={isNearEndText}
+          bg={isNearEndBg}
+          borderColor={"#F2F2F2"}
+          fontSize={isAbove500 ? "13px" : "10px"}
+          fontWeight={600}
+          spacing={1}>
+          <Image src={isNearEndIcon} alt="clock" boxSize={"20px"} />
+
+          <Text>{t("Next snapshot")}</Text>
+          <HStack spacing={1}>
+            <HStack spacing={0}>
+              <Text>{days}</Text>
+              <Text>{"d"}</Text>
+            </HStack>
+
+            <HStack spacing={0}>
+              <Text>{hours}</Text>
+              <Text>{"h"}</Text>
+            </HStack>
+
+            <HStack spacing={0}>
+              <Text>{minutes}</Text>
+              <Text>{"m"}</Text>
+            </HStack>
+
+            <HStack spacing={0}>
+              <Text minW={seconds >= 10 ? "1.4em" : "0.8em"}>{seconds}</Text>
+              <Text>{"s"}</Text>
+            </HStack>
+          </HStack>
         </HStack>
-        <HStack spacing={4} justify={"space-between"} p={4} borderRadius={"10px"} borderColor={"#F2F2F2"}>
-          <VStack textAlign={"center"} fontSize={"2rem"} color={"#333"}>
-            <Heading color={isNearEndColor}>{days}</Heading>
-            <Text fontSize={"1rem"} color={isNearEnd ? "linear-gradient(to right, blue, red)" : "#6A6A6A"}>
-              {t("Days")}
-            </Text>
-          </VStack>
-
-          <VStack textAlign={"center"} fontSize={"2rem"} color={"#333"}>
-            <Heading color={isNearEndColor}>{hours}</Heading>
-            <Text fontSize={"1rem"} color={"#6A6A6A"}>
-              {t("Hours")}
-            </Text>
-          </VStack>
-
-          <VStack textAlign={"center"} fontSize={"2rem"} color={"#333"}>
-            <Heading color={isNearEndColor}>{minutes}</Heading>
-            <Text fontSize={"1rem"} color={"#6A6A6A"}>
-              {t("Minutes")}
-            </Text>
-          </VStack>
-
-          <VStack textAlign={"center"} fontSize={"2rem"} color={"#333"}>
-            <Heading color={isNearEndColor}>{seconds}</Heading>
-            <Text fontSize={"1rem"} color={"#6A6A6A"}>
-              {t("Seconds")}
-            </Text>
-          </VStack>
-        </HStack>
-
-        <Text textAlign={"center"} color={"#6A6A6A"}>
-          {t("⚖️ Vote your favorite app before the round ends!")}
-        </Text>
-      </CardBody>
-    </Card>
+      </HStack>
+      <CountdownModal isOpen={isOpen} onClose={onClose} />
+    </>
   )
 }

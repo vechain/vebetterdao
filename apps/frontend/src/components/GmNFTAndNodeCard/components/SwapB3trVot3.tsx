@@ -19,6 +19,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { humanAddress, getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
+import { CountdownVoting } from "@/app/components/Countdown/CountdownVoting"
 
 const compactFormatter = getCompactFormatter(4)
 type Props = {
@@ -29,7 +30,8 @@ type Props = {
 
 export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) => {
   const { t } = useTranslation()
-  const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove800] = useMediaQuery("(min-width: 500px)")
+  const [isAbove600] = useMediaQuery("(min-width: 600px)")
 
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(address)
   const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(address)
@@ -47,11 +49,14 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
     <>
       <VStack flex="2" align={"stretch"} gap="24px" {...containerProps}>
         {innerContent}
-        <Text fontSize="xl" fontWeight={700}>
-          {t("{{value}} tokens", {
-            value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
-          })}
-        </Text>
+        <Stack direction={isAbove600 ? "row" : "column"} justify={"space-between"}>
+          <Text fontSize="xl" fontWeight={700}>
+            {t("{{value}} tokens", {
+              value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
+            })}
+          </Text>
+          <CountdownVoting />
+        </Stack>
         <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
           <VStack
             align={"stretch"}
