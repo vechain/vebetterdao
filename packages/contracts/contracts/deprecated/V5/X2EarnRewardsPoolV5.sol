@@ -26,7 +26,7 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IB3TRV5 } from "./interfaces/IB3TRV5.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
 import { IX2EarnAppsV5 } from "./interfaces/IX2EarnAppsV5.sol";
 import { IX2EarnRewardsPoolV5 } from "./interfaces/IX2EarnRewardsPoolV5.sol";
 import { IERC1155Receiver } from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
@@ -70,7 +70,7 @@ contract X2EarnRewardsPoolV5 is
 
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnRewardsPool
   struct X2EarnRewardsPoolStorage {
-    IB3TRV5 b3tr;
+    IB3TR b3tr;
     IX2EarnAppsV5 x2EarnApps;
     mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
     mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
@@ -92,7 +92,7 @@ contract X2EarnRewardsPoolV5 is
     address _admin,
     address _contractsManagerAdmin,
     address _upgrader,
-    IB3TRV5 _b3tr,
+    IB3TR _b3tr,
     IX2EarnAppsV5 _x2EarnApps
   ) external initializer {
     require(_admin != address(0), "X2EarnRewardsPool: admin is the zero address");
@@ -502,7 +502,7 @@ contract X2EarnRewardsPoolV5 is
   /**
    * @dev Retrieves the B3TR token contract.
    */
-  function b3tr() external view returns (IB3TRV5) {
+  function b3tr() external view returns (IB3TR) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.b3tr;
   }
