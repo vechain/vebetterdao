@@ -329,33 +329,6 @@ contract X2EarnRewardsPool is
     // emit event
     emit RewardMetadata(amount, appId, receiver, metadata, msg.sender);
   }
-
-  /**
-   * @dev see {IX2EarnRewardsPool-buildMetadata}
-   */
-  function buildMetadata(
-    string[] memory metadataKeys,
-    string[] memory metadataValues
-  ) public view virtual returns (string memory) {
-    bool hasMetadata = metadataKeys.length > 0 && metadataValues.length > 0;
-    // If metadata is not provided, return an empty string
-    if (!hasMetadata) {
-      return "";
-    }
-
-    // Initialize an empty JSON bytes array with version
-    bytes memory json = abi.encodePacked('{"version": 1');
-
-    // Add metadata
-    bytes memory jsonMetadata = _buildMetadataJson(metadataKeys, metadataValues);
-
-    json = abi.encodePacked(json, ',"metadata": ', jsonMetadata);
-
-    // Close the JSON object
-    json = abi.encodePacked(json, "}");
-
-    return string(json);
-  }
   /**
    * @dev see {IX2EarnRewardsPool-buildProof}
    */
@@ -456,32 +429,6 @@ contract X2EarnRewardsPool is
         revert("X2EarnRewardsPool: Invalid impact key");
       }
     }
-
-    json = abi.encodePacked(json, "}");
-
-    return json;
-  }
-
-    /**
-   * @dev Builds the metadata JSON string from the metadata keys and values.
-   *
-   * @param metadataKeys the metadata keys
-   * @param metadataValues the metadata values
-   */
-  function _buildMetadataJson(
-    string[] memory metadataKeys,
-    string[] memory metadataValues
-  ) internal pure returns (bytes memory) {
-    require(metadataKeys.length == metadataValues.length, "X2EarnRewardsPool: Mismatched input lengths for Metadata");
-
-    bytes memory json = abi.encodePacked("{");
-
-    for (uint256 i; i < metadataValues.length; i++) {
-        json = abi.encodePacked(json, '"', metadataKeys[i], '":', '"', metadataValues[i], '"');
-        if (i < metadataValues.length - 1) {
-          json = abi.encodePacked(json, ",");
-        }
-      } 
 
     json = abi.encodePacked(json, "}");
 

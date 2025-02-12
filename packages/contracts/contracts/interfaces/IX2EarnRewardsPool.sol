@@ -194,16 +194,4 @@ interface IX2EarnRewardsPool {
     uint256[] memory impactValues, // 100, 200, etc.,
     string memory description
   ) external returns (string memory);
-
-    /**
-   * @dev Builds the JSON metadata string that will be stored
-   * on chain regarding extra information of the sustainable action.
-   *
-   * @param metadataKeys the metadata keys of the sustainable action
-   * @param metadataValues the metadata values of the sustainable action
-   */
-  function buildMetadata(
-    string[] memory metadataKeys, // country, city, etc.
-    string[] memory metadataValues // Brazil, Brasilia, etc.
-  ) external returns (string memory);
 }
