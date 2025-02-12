@@ -9,6 +9,12 @@ pragma solidity 0.8.20;
  * Admins of x2EarnApps can withdraw funds from the rewards pool, whihc are sent to the team wallet.
  */
 interface IX2EarnRewardsPool {
+  /**
+   * @dev Error emitted when a user is neither the admin, nor the owner of the app.
+   *
+   * @param user The address of the user.
+   */
+  error X2EarnRewardsPoolUnauthorizedUser(address user);
 
   /**
    * @dev Event emitted when the distribution allowance is set.
@@ -18,14 +24,13 @@ interface IX2EarnRewardsPool {
    */
   event DistributionAllowanceSet(bytes32 appId, uint256 amount);
 
-  
   /**
    * @dev Event emitted when the locked funds percentage is set.
    *
    * @param appId The ID of the app.
    * @param percentage The locked funds percentage.
    */
-   event LockedFundsPercentageSet(bytes32 appId, uint256 percentage);
+  event LockedFundsPercentageSet(bytes32 appId, uint256 percentage);
 
   /**
    * @dev Event emitted when a new deposit is made into the rewards pool.
@@ -170,4 +175,6 @@ interface IX2EarnRewardsPool {
     uint256[] memory impactValues, // 100, 200, etc.,
     string memory description
   ) external returns (string memory);
+
+
 }

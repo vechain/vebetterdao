@@ -68,10 +68,6 @@ contract X2EarnRewardsPool is
   bytes32 public constant IMPACT_KEY_MANAGER_ROLE = keccak256("IMPACT_KEY_MANAGER_ROLE");
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-  // ---------------- Errors ----------------
-  /// @dev Error thrown when the user does not have the required role or is the DEFAULT_ADMIN_ROLE
-  error X2EarnRewardsPoolUnauthorizedUser(address user);
-
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
