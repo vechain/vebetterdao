@@ -109,7 +109,6 @@ contract X2EarnRewardsPool is
     __UUPSUpgradeable_init();
     __AccessControl_init();
     __ReentrancyGuard_init();
-    __Pausable_init();
 
     _grantRole(DEFAULT_ADMIN_ROLE, _admin);
     _grantRole(UPGRADER_ROLE, _upgrader);
@@ -141,8 +140,10 @@ contract X2EarnRewardsPool is
   }
 
   // ---------- Modifiers ---------- //
-  /// @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
-  /// @param role - the role to check
+  /**
+   * @notice Modifier to check if the user has the required role or is the DEFAULT_ADMIN_ROLE
+   * @param role - the role to check
+   */
   modifier onlyRoleOrAdmin(bytes32 role) {
     if (!hasRole(role, msg.sender) && !hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
       revert X2EarnRewardsPoolUnauthorizedUser(msg.sender);
@@ -155,15 +156,18 @@ contract X2EarnRewardsPool is
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}
 
   // ---------- Setters ---------- //
-
-  /// @notice Pauses rewards distribution
-  /// @dev Only callable by accounts with the PAUSER_ROLE or the DEFAULT_ADMIN_ROLE
+  /**
+   * @notice Pauses rewards distribution
+   * @dev Only callable by accounts with the PAUSER_ROLE or the DEFAULT_ADMIN_ROLE
+   */
   function pause() public onlyRoleOrAdmin(PAUSER_ROLE) {
     _pause();
   }
 
-  /// @notice Unpauses the contract to resume distribution
-  /// @dev Only callable by accounts with the PAUSER_ROLE or the DEFAULT_ADMIN_ROLE
+  /**
+   * @notice Unpauses the contract to resume distribution
+   * @dev Only callable by accounts with the PAUSER_ROLE or the DEFAULT_ADMIN_ROLE
+   */
   function unpause() public onlyRoleOrAdmin(PAUSER_ROLE) {
     _unpause();
   }

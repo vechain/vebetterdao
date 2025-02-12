@@ -518,7 +518,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
   })
 
   // deposit
-  describe.only("Deposit", function () {
+  describe("Deposit", function () {
     // everyone can deposit
     it("Anyone can deposit", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
@@ -599,7 +599,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(event[0].args[2]).to.equal(otherAccount.address)
     })
   })
-  describe.only("Balance", function () {
+  describe("Balance", function () {
     it("Should return correct balance", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -621,7 +621,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
     })
   })
   // withdraw
-  describe.only("Withdraw", function () {
+  describe("Withdraw", function () {
     it("The admin of the app can withdraw", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({
@@ -843,7 +843,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
     })
   })
   // distributeRewards
-  describe.only("Distribute rewards", async function () {
+  describe("Distribute rewards", async function () {
     it("Selected address from team can distribute rewards", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({
@@ -1997,7 +1997,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
   })
 
   // allowance on distribution
-  describe.only("Allowance pool", async function () {
+  describe("Allowance pool", async function () {
     it("Admin can set an allowance pool for distribution ", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, minterAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -2245,7 +2245,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
     })
   })
 
-  describe.only("Pauser", function () {
+  describe("Pauser", function () {
     it("Only PAUSER_ROLE or DEFAULT_ADMIN_ROLE should be able to pause and unpause the contract", async () => {
       const { x2EarnRewardsPool, otherAccount, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
