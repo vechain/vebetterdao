@@ -1426,5 +1426,10 @@
   "{{fieldName}} is too short": "{{fieldName}} is too short",
   "{{fieldName}} is too long": "{{fieldName}} is too long",
   "Actual Rewards": "Actual Rewards",
-  "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes."
+  "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.",
+  "just joined the DAO! Get involved in the app now!": "just joined the DAO! Get involved in the app now!",
+  "and {{count}} more just joined the DAO! Get involved in the app now!": "and {{count}} more just joined the DAO! Get involved in the app now!",
+  "NEW APP AVAILABLE": "NEW APP AVAILABLE",
+  "Explore": "Explore",
+  "New!": "New!"
 }
