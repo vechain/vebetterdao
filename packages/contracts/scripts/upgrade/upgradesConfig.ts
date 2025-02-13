@@ -67,7 +67,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v4: "Update X2Earn interface to include new endorsement feature",
       v5: "Update X2Earn interface to include node cooldown feature",
       v6: "Add onchain metadata for rewards",
-      v7: "Added optionality to split app balance between rewards distribution pool and protected treasury pool",
+      v7: "feat: split app balance into rewards distribution and protected treasury pools",
     },
   },
   Emissions: {
