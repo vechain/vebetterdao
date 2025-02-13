@@ -10,6 +10,14 @@ pragma solidity 0.8.20;
  */
 interface IX2EarnRewardsPool {
   /**
+   * @dev Event emitted when the balance of the rewards pool for an app is initialized or updated.
+   *
+   * @param appId The ID of the app for which the balance was updated.
+   * @param amount The new balance of the rewards pool for the app.
+   */
+  event RewardsPoolBalanceUpdated(bytes32 indexed appId, uint256 amount);
+
+  /**
    * @dev Event emitted when a new deposit is made into the rewards pool.
    *
    * @param amount The amount of $B3TR deposited.
@@ -103,10 +111,33 @@ interface IX2EarnRewardsPool {
 
   /**
    * @dev Gets the amount of funds available for an app to reward users.
+   * Note: Deprecated since V7 for consistency with the new rewards pool features. Instead, use `totalBalance`.
    *
    * @param appId The ID of the app.
    */
   function availableFunds(bytes32 appId) external view returns (uint256);
+
+  /**
+   * @dev Gets the amount of total app funds received by the DAO
+   * Note: Deprecated since V7 for consistency with the new rewards pool features
+   *
+   * @param appId The ID of the app.
+   */
+  function totalBalance(bytes32 appId) external view returns (uint256);
+
+  /**
+   * @dev Gets the amount of funds available for an app to reward users.
+   *
+   * @param appId The ID of the app.
+   */
+  function rewardsPoolBalance(bytes32 appId) external view returns (uint256);
+
+  /**
+   * @dev Gets the amount of funds available for the app treasury.
+   * @dev If the rewards pool is set, this treasury balance is the withdrawal balance. 
+   * @param appId The ID of the app.
+   */
+  function appTreasuryBalance(bytes32 appId) external view returns (uint256);
 
   /**
    * @dev Function used by x2earn apps to reward users that performed sustainable actions.

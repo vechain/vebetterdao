@@ -54,6 +54,8 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * - Updated the X2EarnApps interface to support node cooldown functionality
  * ----- Version 6 -----
  * - Added distribute with metadata functionality
+ * ----- Version 7 -----
+ * - Added optionality to split app balance between rewards distribution pool and protected treasury pool
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
@@ -74,10 +76,11 @@ contract X2EarnRewardsPool is
   struct X2EarnRewardsPoolStorage {
     IB3TR b3tr;
     IX2EarnApps x2EarnApps;
-    mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
+    mapping(bytes32 appId => uint256) totalBalance; // Total app balance
     mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
     string[] allowedImpactKeys; // Array storing impact keys
     IVeBetterPassport veBetterPassport;
+    mapping(bytes32 appId => uint256) rewardsPoolBalance; // Funds that the app can use to reward users
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -164,7 +167,7 @@ contract X2EarnRewardsPool is
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
 
     // increase available amount for the app
-    $.availableFunds[appId] += amount;
+    $.totalBalance[appId] += amount;
 
     // transfer tokens to this contract
     require($.b3tr.transferFrom(msg.sender, address(this), amount), "X2EarnRewardsPool: deposit transfer failed");
@@ -182,14 +185,10 @@ contract X2EarnRewardsPool is
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
 
-    require(
-      $.x2EarnApps.isAppAdmin(appId, msg.sender) || $.x2EarnApps.isRewardDistributor(appId, msg.sender),
-      "X2EarnRewardsPool: not an app admin nor a reward distributor"
-    );
+    require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: not an app admin");
 
-    // check if the app has enough available funds to withdraw
-    require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
-
+    // check if the app has enough funds to withdraw
+    require($.totalBalance[appId] - amount >= $.rewardsPoolBalance[appId], "X2EarnRewardsPool: withdrawal would affect rewards pool balance");
     // check if the contract has enough funds
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
 
@@ -197,7 +196,7 @@ contract X2EarnRewardsPool is
     address teamWalletAddress = $.x2EarnApps.teamWalletAddress(appId);
 
     // transfer the rewards to the team wallet
-    $.availableFunds[appId] -= amount;
+    $.totalBalance[appId] -= amount;
     require($.b3tr.transfer(teamWalletAddress, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
     emit TeamWithdrawal(amount, appId, teamWalletAddress, msg.sender, reason);
@@ -277,11 +276,17 @@ contract X2EarnRewardsPool is
     require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
 
     // check if the app has enough available funds to distribute
-    require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
+    require($.totalBalance[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
 
+    // Checking that the rewards pool have been set
+    if ($.rewardsPoolBalance[appId] > 0) {
+      require($.rewardsPoolBalance[appId] >= amount, "X2EarnRewardsPool: amount exceeds the rewards pool balance");
+      $.rewardsPoolBalance[appId] -= amount;
+    }
+
     // Transfer the rewards to the receiver
-    $.availableFunds[appId] -= amount;
+    $.totalBalance[appId] -= amount;
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
     // Try to register the action in the veBetterPassport contract
@@ -517,21 +522,59 @@ contract X2EarnRewardsPool is
     $.veBetterPassport = _veBetterPassport;
   }
 
+  function setRewardsPoolBalance(bytes32 appId, uint256 amount) external {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+
+
+    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
+    require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
+    require(amount <= $.totalBalance[appId], "X2EarnRewardsPool: amount exceeds available funds");
+
+    $.rewardsPoolBalance[appId] = amount;
+    emit RewardsPoolBalanceUpdated(appId, amount);
+  }
+
   // ---------- Getters ---------- //
 
   /**
    * @dev See {IX2EarnRewardsPool-availableFunds}
+   *
+   * Note: Deprecated since V7 for consistency with the new rewards pool features
    */
   function availableFunds(bytes32 appId) external view returns (uint256) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.availableFunds[appId];
+    return $.totalBalance[appId];
+  }
+
+  /**
+   * @dev See {IX2EarnRewardsPool-totalBalance}
+   */
+  function totalBalance(bytes32 appId) external view returns (uint256) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.totalBalance[appId];
+  }
+
+  /**
+   * @dev See {IX2EarnRewardsPool-rewardsPoolBalance}
+   */
+  function rewardsPoolBalance(bytes32 appId) external view returns (uint256) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.rewardsPoolBalance[appId];
+  }
+
+  /**
+   * @dev See {IX2EarnRewardsPool- appTreasuryBalance}
+   */
+  function appTreasuryBalance(bytes32 appId) external view returns (uint256) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.totalBalance[appId] - $.rewardsPoolBalance[appId];
   }
 
   /**
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "6";
+    return "7";
   }
 
   /**
