@@ -3,6 +3,7 @@ import { GmNFTPageHeader } from "./components/GmNFTPageHeader"
 import { AttachXNodeCard } from "./components/AttachXNodeCard"
 import { GMNFTList } from "./components/GMNFTList/GMNFTList"
 import { GalaxyLevelsCard } from "./components/GalaxyLevelsCard"
+import { GalaxyRewardCalculatorCard } from "./components/GalaxyRewardCalculatorCard"
 import { useSelectedGmNft } from "@/api"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -32,6 +33,7 @@ export const GmNFTPageContent = () => {
         </VStack>
         <VStack flex={1.5} align={"stretch"}>
           <GalaxyLevelsCard />
+          <GalaxyRewardCalculatorCard />
         </VStack>
       </Stack>
     </VStack>
