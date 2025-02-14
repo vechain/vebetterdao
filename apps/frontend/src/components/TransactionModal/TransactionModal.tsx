@@ -191,6 +191,14 @@ export const TransactionModal = ({
     vot3Balance,
   ])
 
+  const handleReadyStatus = useCallback(() => {
+    return <ConfirmationModalContent title={"Transaction Ready"} description="" />
+  }, [])
+
+  const handleUnknownStatus = useCallback(() => {
+    return <ConfirmationModalContent title={"Unknown Status"} description="" />
+  }, [])
+
   const modalContent = useMemo(() => {
     const statusComponentMap: Record<TransactionModalStatus, ReactNode> = {
       [TransactionModalStatus.UploadingMetadata]: <UploadingMetadataModalContent />,
@@ -198,11 +206,19 @@ export const TransactionModal = ({
       [TransactionModalStatus.WaitingConfirmation]: handleWaitingConfirmationStatus(),
       [TransactionModalStatus.Error]: handleErrorStatus(),
       [TransactionModalStatus.Success]: handleSuccessStatus(),
-      [TransactionModalStatus.Ready]: undefined, //TODO: add a default component
-      [TransactionModalStatus.Unknown]: undefined, //TODO: add a default component
+      [TransactionModalStatus.Ready]: handleReadyStatus(),
+      [TransactionModalStatus.Unknown]: handleUnknownStatus(),
     }
     return statusComponentMap[status] || null
-  }, [handleErrorStatus, handlePendingStatus, handleSuccessStatus, handleWaitingConfirmationStatus, status])
+  }, [
+    handleErrorStatus,
+    handlePendingStatus,
+    handleReadyStatus,
+    handleSuccessStatus,
+    handleUnknownStatus,
+    handleWaitingConfirmationStatus,
+    status,
+  ])
   if (!modalContent) return null
   return (
     <Modal
