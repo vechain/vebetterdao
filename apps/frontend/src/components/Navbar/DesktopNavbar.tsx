@@ -1,9 +1,12 @@
-import { HStack, useMediaQuery } from "@chakra-ui/react"
+import { HStack, useMediaQuery, Box } from "@chakra-ui/react"
 import { NavbarLogo } from "./NavbarLogo"
 import { NavbarMenu } from "./NavbarMenu"
 import dynamic from "next/dynamic"
 import { Route } from "./Routes"
 import { NavbarBalance } from "./NavbarBalance"
+import { SocialLoginTooltip } from "../SocialLoginTooltip"
+import { FeatureFlag } from "@/constants"
+import { useFeatureFlag } from "@/hooks"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
@@ -15,6 +18,10 @@ type Props = {
 }
 export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
   const [isLargerThan1800] = useMediaQuery("(min-width: 1800px)")
+
+  //VechainKit feature flag
+  const { isEnabled: showVechainKitTooltip } = useFeatureFlag(FeatureFlag.VECHAIN_KIT)
+
   return (
     <>
       <HStack flex={1} justifyContent={"start"}>
@@ -38,7 +45,11 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
       <HStack flex={1} spacing={4} justifyContent={"end"}>
         {/* <ThemeSwitcher /> */}
         {isLargerThan1800 && <NavbarBalance />}
-        <ConnectWalletButton />
+        <SocialLoginTooltip isOpen={showVechainKitTooltip}>
+          <Box as="span">
+            <ConnectWalletButton />
+          </Box>
+        </SocialLoginTooltip>
       </HStack>
     </>
   )

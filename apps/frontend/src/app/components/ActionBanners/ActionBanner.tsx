@@ -32,9 +32,6 @@ import { LowVthoBanner } from "./components/LowVthoBanner"
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
 import "swiper/css"
-import { FeatureFlag } from "@/constants"
-import { useFeatureFlag } from "@/hooks"
-import { VechainKitBanner } from "./components/VechainKitBanner"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -89,9 +86,6 @@ export const ActionBanner = () => {
   const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
   const userHasApp = !!account && !!xApps?.allApps?.find(app => compareAddresses(app.teamWalletAddress, account))
 
-  //VechainKit feature flag
-  const { isEnabled: showVechainKitBanner } = useFeatureFlag(FeatureFlag.VECHAIN_KIT)
-
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
   const showCastVoteBanner = !!account && !isLoading && canUserVote
@@ -104,7 +98,6 @@ export const ActionBanner = () => {
 
   const slides = useMemo(() => {
     const bannerComponents = []
-    if (showVechainKitBanner) bannerComponents.push(<VechainKitBanner key="vechain-kit" />)
     if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
@@ -122,7 +115,6 @@ export const ActionBanner = () => {
     showCreatorRejectedBanner,
     showCreatorApprovedBanner,
     showCreatorUnderReviewBanner,
-    showVechainKitBanner,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1

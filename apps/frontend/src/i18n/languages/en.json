@@ -1416,5 +1416,7 @@
   "{{fieldName}} is too short": "{{fieldName}} is too short",
   "{{fieldName}} is too long": "{{fieldName}} is too long",
   "Confirm the operation to complete the transaction": "Confirm the operation to complete the transaction",
-  "Confirm": "Confirm"
+  "Confirm": "Confirm",
+  "NEW LOG IN IS OUT!": "NEW LOG IN IS OUT!",
+  "Log in with your social media and start earning rewards!": "Log in with your social media and start earning rewards!"
 }
