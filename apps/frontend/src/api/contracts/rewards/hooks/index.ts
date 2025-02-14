@@ -1,2 +1,7 @@
 export * from "./useVotingRewards"
 export * from "./useVotingRoundReward"
+export * from "./useCycleToTotal"
+export * from "./usePotentialRewards"
+export * from "./useVoteRegisteredEvents"
+export * from "./useGetRewardsEventsOrFunction"
+export * from "./useRewardClaimedEvents"

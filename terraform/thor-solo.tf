@@ -109,7 +109,7 @@ module "ecs-lb-service-thor-solo" {
   app_subnets                = local.config.private_subnets
   env                        = local.env
   is_create_repo             = false
-  ecr_repo_uri               = module.ecr.repository_url[0]
+  ecr_repo_uri               = module.ecr.repository_url
   secrets_enable             = false
   assign_public_ip           = false
   app_name                   = "thor-solo"

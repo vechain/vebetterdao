@@ -1,11 +1,13 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 import { abi } from "thor-devkit"
+import dayjs from "dayjs"
 const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
 const unendorsedAppsFragment = X2EarnApps.createInterface().getFunction("unendorsedApps").format("json")
 const unendorsedAppsAbi = new abi.Function(JSON.parse(unendorsedAppsFragment))
 const allAppsFragment = X2EarnApps.createInterface().getFunction("apps").format("json")
 const allAppsAbi = new abi.Function(JSON.parse(allAppsFragment))
+const NEW_APP_PERIOD_SECONDS = 604800 // Considering a new app is defined as 7 days
 
 /**
  * xApp type
@@ -21,6 +23,7 @@ export type XApp = {
   name: string
   metadataURI: string
   createdAtTimestamp: string
+  isNew: boolean
 }
 
 export type UnendorsedApp = XApp & {
@@ -39,6 +42,7 @@ type GetAllApps = {
   unendorsed: UnendorsedApp[]
   allApps: (XApp | UnendorsedApp)[]
   endorsed: XApp[]
+  newApps: XApp[]
 }
 export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
   const clauses = [
@@ -72,6 +76,7 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
         name: app[2],
         metadataURI: app[3],
         createdAtTimestamp: app[4],
+        isNew: dayjs().unix() - Number(app[4]) <= NEW_APP_PERIOD_SECONDS,
       }))
     }
   }
@@ -93,10 +98,14 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
     (app, index, self) => self.findIndex(a => a.id === app.id) === index,
   ) // all apps is a union of active and unendorsed apps with deduplication
 
+  // apps created within the last NEW_APP_PERIOD_SECONDS
+  const newApps = allApps.filter(app => app.isNew)
+
   return {
     allApps: allApps,
     active: apps,
     unendorsed: unendorsedApps,
     endorsed: apps.filter(app => !unendorsedApps.some(unendorsedApp => unendorsedApp.id === app.id)),
+    newApps: newApps,
   }
 }

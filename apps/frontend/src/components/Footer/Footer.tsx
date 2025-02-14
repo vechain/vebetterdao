@@ -9,9 +9,11 @@ import { PRIVACY_POLICY_LINK, TERMS_AND_CONDITIONS_LINK } from "@/constants"
 import { useTranslation } from "react-i18next"
 import { LanguageSelector } from "./components/LanguageSelector"
 import packageJson from "../../../package.json"
+import dayjs from "dayjs"
 
 export const Footer: React.FC = () => {
   const { t } = useTranslation()
+  const currentYear = dayjs().format("YYYY")
 
   const desktopContent = (
     <VStack>
@@ -42,7 +44,7 @@ export const Footer: React.FC = () => {
         py={8}>
         <VStack align={"start"}>
           <Text fontWeight={400} fontSize="14px" color="#8c8c8c">
-            {t("2024 VeBetterDAO. All rights reserved.")}
+            {t("{{currentYear}} VeBetterDAO. All rights reserved.", { currentYear })}
           </Text>
           <Text fontSize="14px" color="#8c8c8c">
             {t("Version")} {packageJson.version}
@@ -100,7 +102,7 @@ export const Footer: React.FC = () => {
           </Text>
         </Link>
         <Text fontWeight={400} fontSize="14px" lineHeight="17px" color="#8c8c8c" mt={6}>
-          {t("2024 VeBetterDAO. All rights reserved.")}
+          {t("{{currentYear}} VeBetterDAO. All rights reserved.", { currentYear })}
         </Text>
         <Text fontSize="14px" color="#8c8c8c">
           {t("Version")} {packageJson.version}
