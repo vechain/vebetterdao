@@ -55,7 +55,7 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * ----- Version 6 -----
  * - Added distribute with metadata functionality
  * ----- Version 7 -----
- * - Added optionality to split app balance between rewards distribution pool and protected treasury pool
+ * - Added configurable reward distribution pool and treasury pool from apps rewards
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
