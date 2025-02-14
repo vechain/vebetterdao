@@ -1427,5 +1427,11 @@
   "<bold>Cast</bold> your vote to your favorite app": "<bold>Cast</bold> your vote to your favorite app",
   "<bold>Convert</bold> your B3TR to VOT3": "<bold>Convert</bold> your B3TR to VOT3",
   "<bold>Claim</bold> your rewards": "<bold>Claim</bold> your rewards",
-  "How to VOT3?": "How to VOT3?"
+  "What is a snapshot ?": "What is a snapshot ?",
+  "Swap your B3TR for VOT3 before the snapshot to increase your voting power.": "Swap your B3TR for VOT3 before the snapshot to increase your voting power.",
+  "Claim your rewards": "Claim your rewards",
+  "Cast your vote to your favorite app": "Cast your vote to your favorite app",
+  "Convert your B3TR to VOT3": "Convert your B3TR to VOT3",
+  "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.": "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.",
+  "Next snapshot": "Next snapshot"
 }
