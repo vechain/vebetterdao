@@ -11,6 +11,7 @@ import dynamic from "next/dynamic"
 
 import { lightTheme } from "./theme"
 import { AuthSessionProvider } from "@/providers/AuthSessionProvider"
+import { Analytics } from "@vercel/analytics/react"
 
 const VechainKitProviderWrapper = dynamic(
   async () => (await import("../providers/VechainKitProviderWrapper")).VechainKitProviderWrapper,
@@ -30,6 +31,7 @@ export function Providers({ children }: { readonly children: React.ReactNode }) 
           </VechainKitProviderWrapper>
         </ChakraProvider>
       </PersistQueryClientProvider>
+      <Analytics />
     </CacheProvider>
   )
 }

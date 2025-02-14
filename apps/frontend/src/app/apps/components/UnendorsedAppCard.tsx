@@ -23,9 +23,10 @@ import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
   xApp: XApp | UnendorsedApp
+  layout?: "endorser" | "default"
 }
 
-export const UnendorsedAppCard = ({ xApp }: Props) => {
+export const UnendorsedAppCard = ({ xApp, layout = "default" }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
 
@@ -51,6 +52,11 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
     router.push(`/apps/${xApp.id}`)
   }, [router, xApp.id])
 
+  const isNewApp = useMemo(() => {
+    if (!xApp) return false
+    return xApp.isNew
+  }, [xApp])
+
   return (
     <Card
       variant={"baseWithBorder"}
@@ -63,7 +69,11 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
         transition: "all 0.3s",
       }}>
       <CardBody py="16px" px="24px">
-        <Stack direction={{ base: "column", md: "row" }} align="stretch" w="full" h="full">
+        <Stack
+          direction={layout === "endorser" ? "column" : { base: "column", lg: "row" }}
+          align="stretch"
+          w="full"
+          h="full">
           <Stack direction="row" spacing={4} align="center" flex="1">
             <Skeleton isLoaded={!isLogoLoading}>
               <Image
@@ -71,6 +81,7 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
                 alt="logo"
                 h="72px"
                 w="72px"
+                minW="72px"
                 borderRadius="9px"
                 objectFit="contain"
               />
@@ -78,9 +89,32 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
 
             <Stack flex="1" align="stretch" justify="center">
               <Skeleton isLoaded={!appMetadataLoading}>
-                <Heading fontWeight={700} fontSize="20px" noOfLines={1}>
-                  {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
-                </Heading>
+                <HStack spacing={4} align="center">
+                  <Heading
+                    fontWeight={700}
+                    fontSize="20px"
+                    noOfLines={1}
+                    maxW={{ base: "full", md: "150px", lg: "200px" }}
+                    overflow="hidden"
+                    textOverflow="ellipsis">
+                    {appMetadata?.name ?? appMetadataError?.message ?? "Error loading name"}
+                  </Heading>
+                  {isNewApp && (
+                    <HStack
+                      fontWeight={700}
+                      color={"#3B3B3B"}
+                      bg={"#B1F16C"}
+                      px={2}
+                      py={1}
+                      borderRadius={"16px"}
+                      fontSize="12px"
+                      spacing={1}
+                      flexShrink={0}>
+                      <Image src="/images/new-app-gray.svg" alt="new" boxSize={3} mr={1} />
+                      <Text>{t("New!")}</Text>
+                    </HStack>
+                  )}
+                </HStack>
               </Skeleton>
               <Skeleton isLoaded={!appMetadataLoading}>
                 <Text fontSize="14px" color="#6A6A6A" fontWeight={400} noOfLines={2}>
@@ -100,9 +134,9 @@ export const UnendorsedAppCard = ({ xApp }: Props) => {
           {/* Right Section: Score */}
           <Stack direction="row" align="center" justify="center">
             <Stack
-              direction={{ base: "row", md: "column" }}
+              direction={layout === "endorser" ? "row" : { base: "row", lg: "column", md: "column" }}
               spacing={3}
-              align={{ base: "center", md: "stretch" }}
+              align={{ base: "center", lg: "stretch", md: "stretch" }}
               justify={{ base: "space-between", md: "stretch" }}
               w="full">
               <VStack gap={0} alignItems="flex-start">

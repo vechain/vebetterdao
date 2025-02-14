@@ -28,6 +28,7 @@ import { CreatorApplicationRejectedBanner } from "./components/CreatorNFTBanner/
 import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
 import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
+import { NewAppBanner } from "./components/NewAppBanner"
 
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
@@ -85,6 +86,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
   const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
   const userHasApp = !!account && !!xApps?.allApps?.find(app => compareAddresses(app.teamWalletAddress, account))
+  const newApps = (xApps?.newApps ?? []).length > 0
 
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
@@ -99,6 +101,7 @@ export const ActionBanner = () => {
   const slides = useMemo(() => {
     const bannerComponents = []
     if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
+    if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
@@ -109,6 +112,7 @@ export const ActionBanner = () => {
     return bannerComponents
   }, [
     showDoActionBanner,
+    newApps,
     showClaimB3trBanner,
     showCastVoteBanner,
     showLowVthoBanner,
