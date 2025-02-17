@@ -10,6 +10,14 @@ pragma solidity 0.8.20;
  */
 interface IX2EarnRewardsPool {
   /**
+   * @dev Event emitted when the admin configure the rewards pool balance
+   *
+   * @param appId - the app ID
+   * @param enable - true to enable, false to disable
+   */
+  event RewardsPoolBalanceToggled(bytes32 indexed appId, bool enable);
+
+  /**
    * @dev Event emitted when the balance of the rewards pool for an app is initialized or updated.
    *
    * @param appId The ID of the app for which the balance was updated.
