@@ -93,9 +93,9 @@ export const ActionBanner = () => {
   } = useCanUserVote(account ?? undefined, delegateeAddress)
 
   const userCanVoteInProposals = useMemo<boolean>(() => {
-    const invalidUser =
-      isEntity || isDelegator || !hasVotesAtSnapshot || !isPerson || isLoadingAccountLinking || isLoadingDelegator
-    return !invalidUser
+    const isLoading = isLoadingAccountLinking || isLoadingDelegator
+    const isValidUser = !isEntity && !isDelegator && hasVotesAtSnapshot && isPerson
+    return !isLoading && isValidUser
   }, [isEntity, isDelegator, hasVotesAtSnapshot, isPerson, isLoadingAccountLinking, isLoadingDelegator])
 
   // Creator banners
@@ -135,11 +135,11 @@ export const ActionBanner = () => {
   const slides = useMemo(() => {
     const bannerComponents = []
     if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
+    if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
+    if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
-    if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
-    if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCreatorRejectedBanner) bannerComponents.push(<CreatorApplicationRejectedBanner key="creator-rejected" />)
     if (showCreatorApprovedBanner) bannerComponents.push(<CreatorApplicationApprovedBanner key="creator-approved" />)
     if (showCreatorUnderReviewBanner)
