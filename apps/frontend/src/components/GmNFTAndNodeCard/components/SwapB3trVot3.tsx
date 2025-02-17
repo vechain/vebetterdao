@@ -31,7 +31,7 @@ type Props = {
 
 export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) => {
   const { t } = useTranslation()
-  const [isAbove800] = useMediaQuery("(min-width: 500px)")
+  const [isAbove800] = useMediaQuery("(min-width: 800px)")
   const [isAbove600] = useMediaQuery("(min-width: 600px)")
 
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(address)
