@@ -23,7 +23,7 @@ interface Props {
 
 export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
   const LINK_TO_DOCS = () => {
-    window.open("https://docs.vebetterdao.org/vebetterdao/b3tr-and-vot3-tokens", "_blank", "noopener")
+    window.open("https://docs.vebetterdao.org/vebetterdao/x2earn-allocations", "_blank", "noopener")
   }
 
   const renderStep = (step: number) => (
