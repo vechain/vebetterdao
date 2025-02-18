@@ -1,9 +1,11 @@
 import {
   useAccountBalance,
+  useAccountLinking,
   useB3trBalance,
   useCanUserVote,
   useCurrentAllocationsRoundId,
   useGetDelegatee,
+  useUserDelegation,
   useVot3Balance,
   useVotingRewards,
   useXApps,
@@ -33,6 +35,9 @@ import { NewAppBanner } from "./components/NewAppBanner"
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
 import "swiper/css"
+import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
+import { ProposalFilter } from "@/store"
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -59,6 +64,13 @@ export const ActionBanner = () => {
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account ?? undefined)
   const { data: xApps } = useXApps()
 
+  const { filteredProposals, isLoading: isLoadingProposals } = useFilteredProposals([ProposalFilter.InThisRound])
+
+  const hasProposals = filteredProposals?.length > 0 && !isLoadingProposals
+
+  const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
+  const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
+
   const ownsTokens = useMemo(() => {
     if (!b3trBalance || !vot3Balance) return false
 
@@ -73,7 +85,18 @@ export const ActionBanner = () => {
     return balanceLoading || b3trBalanceLoading || vot3BalanceLoading
   }, [balanceLoading, b3trBalanceLoading, vot3BalanceLoading])
 
-  const { data: canUserVote, isPerson, isLoading } = useCanUserVote(account ?? undefined, delegateeAddress)
+  const {
+    data: canUserVote,
+    hasVotesAtSnapshot,
+    isPerson,
+    isLoading,
+  } = useCanUserVote(account ?? undefined, delegateeAddress)
+
+  const userCanVoteInProposals = useMemo<boolean>(() => {
+    const isLoading = isLoadingAccountLinking || isLoadingDelegator
+    const isValidUser = !isEntity && !isDelegator && hasVotesAtSnapshot && isPerson
+    return !isLoading && isValidUser
+  }, [isEntity, isDelegator, hasVotesAtSnapshot, isPerson, isLoadingAccountLinking, isLoadingDelegator])
 
   // Creator banners
   const { data: submissions, isLoading: submissionsLoading } = useCreatorSubmission(account ?? "")
@@ -98,27 +121,41 @@ export const ActionBanner = () => {
   const showCreatorUnderReviewBanner =
     !userHasApp && !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
+  const showCastVoteInProposalBanners = !!account && hasProposals && userCanVoteInProposals
+
+  //Custom compute proposal banners
+  const proposalsToVoteBanners = filteredProposals.map(proposal => (
+    <CastProposalVoteBanners
+      key={`cast-vote-in-proposal-${proposal?.proposalId}`}
+      id={proposal?.proposalId}
+      description={proposal?.description}
+    />
+  ))
+
   const slides = useMemo(() => {
     const bannerComponents = []
     if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
+    if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
+    if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showLowVthoBanner) bannerComponents.push(<LowVthoBanner key="low-vtho" />)
     if (showDoActionBanner) bannerComponents.push(<DoActionBanner key="do-action" />)
-    if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCreatorRejectedBanner) bannerComponents.push(<CreatorApplicationRejectedBanner key="creator-rejected" />)
     if (showCreatorApprovedBanner) bannerComponents.push(<CreatorApplicationApprovedBanner key="creator-approved" />)
     if (showCreatorUnderReviewBanner)
       bannerComponents.push(<CreatorApplicationUnderReviewBanner key="creator-under-review" />)
     return bannerComponents
   }, [
-    showDoActionBanner,
-    newApps,
     showClaimB3trBanner,
-    showCastVoteBanner,
+    newApps,
     showLowVthoBanner,
+    showCastVoteInProposalBanners,
+    showDoActionBanner,
+    showCastVoteBanner,
     showCreatorRejectedBanner,
     showCreatorApprovedBanner,
     showCreatorUnderReviewBanner,
+    proposalsToVoteBanners,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
