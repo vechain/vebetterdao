@@ -20,12 +20,9 @@ export const ProposalsPageContent = () => {
   const { selectedFilter } = useProposalFilters()
   const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
 
-  const { data: claimableDeposits } = useProposalClaimableUserDeposits(account ?? "")
-
-  const totalClaimableDeposits = useMemo(
-    () => claimableDeposits?.reduce((acc, { deposit }) => acc + BigInt(deposit), BigInt(0)) ?? BigInt(0),
-    [claimableDeposits],
-  )
+  const { data } = useProposalClaimableUserDeposits(account ?? "")
+  const claimableDeposits = data?.claimableDeposits ?? []
+  const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
 
   const onNewClick = useCallback(() => {
     if (!account) {
@@ -81,10 +78,7 @@ export const ProposalsPageContent = () => {
       <Show below="sm">
         {totalClaimableDeposits > 0 && (
           <Box mb={2} mt={3}>
-            <ClaimDeposits
-              totalClaimableDeposits={totalClaimableDeposits}
-              claimableDeposits={claimableDeposits ?? []}
-            />
+            <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
           </Box>
         )}
       </Show>
@@ -115,10 +109,7 @@ export const ProposalsPageContent = () => {
         <Show above="sm">
           <VStack flex={2} alignSelf="flex-start" spacing={6} position={"sticky"} top={24}>
             {totalClaimableDeposits > 0 && (
-              <ClaimDeposits
-                totalClaimableDeposits={totalClaimableDeposits}
-                claimableDeposits={claimableDeposits ?? []}
-              />
+              <ClaimDeposits totalClaimableDeposits={totalClaimableDeposits} claimableDeposits={claimableDeposits} />
             )}
             {sortedProposals.length > 0 && <CreateProposalCard />}
             <JoinCommunity />
