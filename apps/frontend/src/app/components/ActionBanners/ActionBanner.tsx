@@ -38,6 +38,7 @@ import "swiper/css"
 import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { UserSignaledBanner } from "./components/UserSignaledBanner"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -122,7 +123,7 @@ export const ActionBanner = () => {
     !userHasApp && !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
   const showCastVoteInProposalBanners = !!account && hasProposals && userCanVoteInProposals
-
+  const showSignaledBanner = !!account
   //Custom compute proposal banners
   const proposalsToVoteBanners = filteredProposals.map(proposal => (
     <CastProposalVoteBanners
@@ -134,6 +135,7 @@ export const ActionBanner = () => {
 
   const slides = useMemo(() => {
     const bannerComponents = []
+    if (showSignaledBanner) bannerComponents.push(<UserSignaledBanner key="user-signaled" />)
     if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)

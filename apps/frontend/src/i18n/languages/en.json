@@ -1451,5 +1451,7 @@
   "Cast your vote to your favorite app": "Cast your vote to your favorite app",
   "Convert your B3TR to VOT3": "Convert your B3TR to VOT3",
   "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.": "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.",
-  "Next snapshot": "Next snapshot"
+  "Next snapshot": "Next snapshot",
+  "YOU HAVE BEEN SIGNALED": "YOU HAVE BEEN SIGNALED",
+  "You have been signaled by the following apps: {{appSignals}}. Please get in touch with them to sort it out.": "You have been signaled by the following apps: {{appSignals}}. Please get in touch with them to sort it out."
 }
