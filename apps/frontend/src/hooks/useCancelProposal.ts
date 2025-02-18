@@ -46,7 +46,7 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
     () => [
       getProposalStateQueryKey(proposalId),
       getAllProposalsStateQueryKey(),
-      getProposalUserDepositQueryKey("proposalClaimableDeposits", account ?? ""),
+      getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
     ],
     [proposalId, account],
   )

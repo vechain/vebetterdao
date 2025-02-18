@@ -46,7 +46,7 @@ export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3Dep
   const refetchQueryKeys = useMemo(
     () => [
       getProposalUserDepositQueryKey(proposalId, account ?? ""),
-      getProposalUserDepositQueryKey("proposalClaimableDeposits", account ?? ""),
+      getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
     ],
     [account, proposalId],
   )

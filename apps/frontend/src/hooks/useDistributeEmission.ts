@@ -97,10 +97,10 @@ export const useDistributeEmission = ({
         queryKey: getAllProposalsStateQueryKey(),
       })
       await queryClient.cancelQueries({
-        queryKey: getProposalUserDepositQueryKey("proposalClaimableDeposits", account ?? ""),
+        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
       })
       await queryClient.refetchQueries({
-        queryKey: getProposalUserDepositQueryKey("proposalClaimableDeposits", account ?? ""),
+        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
       })
     }
 

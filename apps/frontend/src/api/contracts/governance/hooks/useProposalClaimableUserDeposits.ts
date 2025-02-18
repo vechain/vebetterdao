@@ -4,12 +4,13 @@ import { getProposalUserDepositQueryKey, proposalDepositAbi } from "./useProposa
 import { queryClient } from "@/api/QueryProvider"
 import { getConfig } from "@repo/config"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
-import { StateFilter } from "@/store"
+import { ProposalFilter, StateFilter } from "@/store"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress
 
 // Filters for proposals that have claimable deposits
 const CLAIMABLE_STATES = [
+  ProposalFilter.InThisRound, // Active
   StateFilter.Canceled,
   StateFilter.Defeated,
   StateFilter.Succeeded,
