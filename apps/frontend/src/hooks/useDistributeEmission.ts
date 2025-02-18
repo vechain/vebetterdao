@@ -5,6 +5,8 @@ import {
   useCurrentAllocationsRoundId,
   getRoundXAppsQueryKey,
   getAllocationAmountQueryKey,
+  getAllProposalsStateQueryKey,
+  getProposalUserDepositQueryKey,
 } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
@@ -86,10 +88,24 @@ export const useDistributeEmission = ({
       await queryClient.refetchQueries({
         queryKey: getAllocationAmountQueryKey(currendRoundId ?? "0"),
       })
+
+      // Refresh user proposa claimable deposits (states needed)
+      await queryClient.cancelQueries({
+        queryKey: getAllProposalsStateQueryKey(),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getAllProposalsStateQueryKey(),
+      })
+      await queryClient.cancelQueries({
+        queryKey: getProposalUserDepositQueryKey("proposalClaimableDeposits", account ?? ""),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getProposalUserDepositQueryKey("proposalClaimableDeposits", account ?? ""),
+      })
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess, currendRoundId])
+  }, [invalidateCache, queryClient, onSuccess, currendRoundId, account])
 
   const result = useSendTransaction({
     signerAccount: account,
