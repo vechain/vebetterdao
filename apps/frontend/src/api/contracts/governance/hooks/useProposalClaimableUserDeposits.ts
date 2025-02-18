@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
+import { useMemo } from "react"
 import { getProposalUserDepositQueryKey, proposalDepositAbi } from "./useProposalUserDeposit"
 import { queryClient } from "@/api/QueryProvider"
 import { useAllProposalsState } from "./useAllProposalsState"
 import { ProposalState } from "./useProposalState"
+import { useProposalsEvents } from "./useProposalsEvents"
 import { getConfig } from "@repo/config"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress
@@ -17,11 +19,15 @@ const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress
  * state is not pending.
  *
  * @param userAddress - The address of the user whose deposits are to be fetched.
- * @param proposalIds - An array of proposal IDs for which the deposits are to be fetched.
  * @returns An array of results from the `useQueries` function, each corresponding to a proposal's deposit data.
  */
-export const useProposalClaimableUserDeposits = (userAddress: string, proposalIds: string[]) => {
+export const useProposalClaimableUserDeposits = (userAddress: string) => {
   const { thor } = useConnex()
+  const { data: proposals } = useProposalsEvents()
+
+  const proposalIds = useMemo(() => {
+    return proposals?.created.map(proposal => proposal.proposalId) ?? []
+  }, [proposals])
 
   const { data: proposalStates, isLoading: proposalStatesLoading } = useAllProposalsState(proposalIds)
 

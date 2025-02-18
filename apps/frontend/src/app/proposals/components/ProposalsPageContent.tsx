@@ -1,4 +1,4 @@
-import { ProposalState, useProposalClaimableUserDeposits, useProposalsEvents } from "@/api"
+import { ProposalState, useProposalClaimableUserDeposits } from "@/api"
 import { ProposalInfoCard, JoinCommunity } from "@/components"
 import { VStack, HStack, Heading, Box, Button, Show, Spinner, Text } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
@@ -20,9 +20,7 @@ export const ProposalsPageContent = () => {
   const { selectedFilter } = useProposalFilters()
   const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
 
-  const { data: proposals } = useProposalsEvents()
-  const proposalIds = useMemo(() => proposals?.created.map(proposal => proposal.proposalId) ?? [], [proposals])
-  const { data: claimableDeposits } = useProposalClaimableUserDeposits(account ?? "", proposalIds)
+  const { data: claimableDeposits } = useProposalClaimableUserDeposits(account ?? "")
 
   const totalClaimableDeposits = useMemo(
     () => claimableDeposits?.reduce((acc, { deposit }) => acc + BigInt(deposit), BigInt(0)) ?? BigInt(0),
