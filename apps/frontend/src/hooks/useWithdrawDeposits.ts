@@ -1,10 +1,4 @@
-import {
-  ProposalDeposit,
-  buildClaimDepositsTx,
-  getProposalClaimableUserDepositsKey,
-  getProposalUserDepositQueryKey,
-  getVot3BalanceQueryKey,
-} from "@/api"
+import { ProposalDeposit, buildClaimDepositsTx, getProposalUserDepositQueryKey, getVot3BalanceQueryKey } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
@@ -68,13 +62,6 @@ export const useWithdrawDeposits = ({
           queryKey: getProposalUserDepositQueryKey(proposalDeposit.proposalId, account ?? ""),
         })
       }
-
-      await queryClient.cancelQueries({
-        queryKey: getProposalClaimableUserDepositsKey(account ?? ""),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getProposalClaimableUserDepositsKey(account ?? ""),
-      })
 
       await queryClient.cancelQueries({
         queryKey: getVot3BalanceQueryKey(account ?? ""),

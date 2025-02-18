@@ -1,4 +1,4 @@
-import { ProposalState, useProposalClaimableUserDeposits } from "@/api"
+import { ProposalState, useProposalClaimableUserDeposits, useProposalsEvents } from "@/api"
 import { ProposalInfoCard, JoinCommunity } from "@/components"
 import { VStack, HStack, Heading, Box, Button, Show, Spinner, Text } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
@@ -20,14 +20,14 @@ export const ProposalsPageContent = () => {
   const { selectedFilter } = useProposalFilters()
   const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
 
-  const userProposalClaimableDeposits = useProposalClaimableUserDeposits(account ?? "")
+  const { data: proposals } = useProposalsEvents()
+  const proposalIds = useMemo(() => proposals?.created.map(proposal => proposal.proposalId) ?? [], [proposals])
+  const { data: claimableDeposits } = useProposalClaimableUserDeposits(account ?? "", proposalIds)
 
-  const userClaimableDeposits = useMemo(() => {
-    if (!userProposalClaimableDeposits.data) return BigInt(0)
-    return userProposalClaimableDeposits.data.reduce((acc, deposit) => {
-      return BigInt(acc) + BigInt(deposit.deposit ?? 0)
-    }, BigInt(0))
-  }, [userProposalClaimableDeposits])
+  const totalClaimableDeposits = useMemo(
+    () => claimableDeposits?.reduce((acc, { deposit }) => acc + BigInt(deposit), BigInt(0)) ?? BigInt(0),
+    [claimableDeposits],
+  )
 
   const onNewClick = useCallback(() => {
     if (!account) {
@@ -81,11 +81,11 @@ export const ProposalsPageContent = () => {
       </VStack>
       <ProposalsFilters alignSelf={"flex-start"} w="full" />
       <Show below="sm">
-        {userClaimableDeposits > 0 && (
+        {totalClaimableDeposits > 0 && (
           <Box mb={2} mt={3}>
             <ClaimDeposits
-              userClaimableDeposits={userClaimableDeposits}
-              userProposalClaimableDeposits={userProposalClaimableDeposits}
+              totalClaimableDeposits={totalClaimableDeposits}
+              claimableDeposits={claimableDeposits ?? []}
             />
           </Box>
         )}
@@ -116,10 +116,10 @@ export const ProposalsPageContent = () => {
         </VStack>
         <Show above="sm">
           <VStack flex={2} alignSelf="flex-start" spacing={6} position={"sticky"} top={24}>
-            {userClaimableDeposits > 0 && (
+            {totalClaimableDeposits > 0 && (
               <ClaimDeposits
-                userClaimableDeposits={userClaimableDeposits}
-                userProposalClaimableDeposits={userProposalClaimableDeposits}
+                totalClaimableDeposits={totalClaimableDeposits}
+                claimableDeposits={claimableDeposits ?? []}
               />
             )}
             {sortedProposals.length > 0 && <CreateProposalCard />}
