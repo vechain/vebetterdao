@@ -46,6 +46,37 @@ export const timestampToTimeLeft = (endDate: number, startDate: number = new Dat
 }
 
 /**
+ * Converts a timestamp to a time left object with decomposed units.
+ * @param endDate - The end date timestamp.
+ * @param startDate - The start date timestamp. Defaults to the current time.
+ * @returns An object with decomposed time units.
+ * @example timestampToTimeLeftDecomposed(1634025600000) => { days: 3, hours: 16, minutes: 12, seconds: 0 }
+ */
+export interface TimeLeft {
+  days: number
+  hours: number
+  minutes: number
+  seconds: number
+}
+
+export const timestampToTimeLeftDecomposed = (endDate: number, startDate: number = new Date().getTime()): TimeLeft => {
+  let difference = endDate - startDate
+
+  if (difference < 0) {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 }
+  }
+
+  const dayjsObject = dayjs.duration(difference, "milliseconds")
+
+  return {
+    days: dayjsObject.days(),
+    hours: dayjsObject.hours(),
+    minutes: dayjsObject.minutes(),
+    seconds: dayjsObject.seconds(),
+  }
+}
+
+/**
  * Parses a date (provided as a Unix timestamp) and formats it to a human-readable string.
  * The formatted date string will be in the format "D MMM", where "D" is the day of the month
  * and "MMM" is the abbreviated month name.

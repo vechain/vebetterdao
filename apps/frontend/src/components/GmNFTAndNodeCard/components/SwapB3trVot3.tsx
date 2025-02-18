@@ -19,6 +19,8 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { humanAddress, getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
+import { Countdown } from "@/app/components/Countdown/Countdown"
+import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
 
 const compactFormatter = getCompactFormatter(4)
 type Props = {
@@ -30,6 +32,7 @@ type Props = {
 export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) => {
   const { t } = useTranslation()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
+  const [isAbove600] = useMediaQuery("(min-width: 600px)")
 
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(address)
   const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(address)
@@ -43,15 +46,21 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
   const { isConnectedUser, domain, profile, isOnProfilePage } = useRetrieveProfilIdentity()
   const domainOrAddress = domain && domain !== "" ? domain : humanAddress(profile ?? "", 6, 3)
 
+  const { isOpen: isOpenSnapshot, onOpen: onOpenSnapshot, onClose: onCloseSnapshot } = useDisclosure()
+
   return (
     <>
       <VStack flex="2" align={"stretch"} gap="24px" {...containerProps}>
         {innerContent}
-        <Text fontSize="xl" fontWeight={700}>
-          {t("{{value}} tokens", {
-            value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
-          })}
-        </Text>
+        <Stack direction={isAbove600 ? "row" : "column"} justify={"space-between"}>
+          <Text fontSize="xl" fontWeight={700}>
+            {t("{{value}} tokens", {
+              value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
+            })}
+          </Text>
+          <Countdown onOpen={onOpenSnapshot} />
+          <SnapshotExplainationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
+        </Stack>
         <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
           <VStack
             align={"stretch"}
