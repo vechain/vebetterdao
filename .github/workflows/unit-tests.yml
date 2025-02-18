@@ -61,7 +61,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Cache Solidity compilers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/hardhat-nodejs
           key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
@@ -113,7 +113,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Cache Solidity compilers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/hardhat-nodejs
           key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
@@ -199,7 +199,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Cache Solidity compilers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/hardhat-nodejs
           key: ${{ runner.os }}-solc-${{ hashFiles('./packages/contracts/hardhat.config.ts') }}
