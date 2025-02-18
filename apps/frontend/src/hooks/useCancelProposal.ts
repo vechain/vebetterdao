@@ -3,7 +3,7 @@ import { B3TRGovernor__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import {
-  getProposalsEventsQueryKey,
+  getAllProposalsStateQueryKey,
   getProposalStateQueryKey,
   getProposalUserDepositQueryKey,
   useProposalCreatedEvent,
@@ -45,8 +45,8 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
   const refetchQueryKeys = useMemo(
     () => [
       getProposalStateQueryKey(proposalId),
+      getAllProposalsStateQueryKey(),
       getProposalUserDepositQueryKey("proposalClaimableDeposits", account ?? ""),
-      getProposalsEventsQueryKey(),
     ],
     [proposalId, account],
   )

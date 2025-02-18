@@ -64,6 +64,12 @@ export const useWithdrawDeposits = ({
       }
 
       await queryClient.cancelQueries({
+        queryKey: getProposalUserDepositQueryKey("proposalClaimableDeposits", account ?? ""),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getProposalUserDepositQueryKey("proposalClaimableDeposits", account ?? ""),
+      })
+      await queryClient.cancelQueries({
         queryKey: getVot3BalanceQueryKey(account ?? ""),
       })
       await queryClient.refetchQueries({
