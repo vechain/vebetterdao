@@ -21,11 +21,9 @@ export const AppsPageContent = () => {
   const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
   const { data: xApps, isLoading: isXAppsLoading } = useXApps()
 
-  const newApps = xApps?.unendorsed.filter(xApp => xApp.createdAtTimestamp === "0")
-
-  const unendorsedApps = xApps?.unendorsed.filter(xApp => xApp.createdAtTimestamp !== "0")
-  const gracePeriodApps = unendorsedApps?.filter(xApp => xApp.appAvailableForAllocationVoting === true)
-  const lostEndorsementApps = unendorsedApps?.filter(xApp => xApp.appAvailableForAllocationVoting === false)
+  const newApps = xApps?.newLookingForEndorsement
+  const gracePeriodApps = xApps?.gracePeriod
+  const lostEndorsementApps = xApps?.endorsementLost
   const hasNewApps = newApps && newApps?.length > 0
   // TODO: Pagination, search, filters
   return (
