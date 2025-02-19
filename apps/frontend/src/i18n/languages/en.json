@@ -1453,5 +1453,5 @@
   "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.": "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.",
   "Next snapshot": "Next snapshot",
   "YOU HAVE BEEN SIGNALED": "YOU HAVE BEEN SIGNALED",
-  "You have been signaled by the following apps: {{appSignals}}. Please get in touch with them to sort it out.": "You have been signaled by the following apps: {{appSignals}}. Please get in touch with them to sort it out."
+  "You have been signaled by <em>{{appSignals}}</em>. <br/>If you believe this signal is unfair, please reach out to them to resolve the issue.": "You have been signaled by <em>{{appSignals}}</em>. <br/>If you believe this signal is unfair, please reach out to them to resolve the issue."
 }

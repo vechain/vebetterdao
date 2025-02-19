@@ -3,7 +3,7 @@ import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show, use
 type GenericBannerProps = {
   title: string
   titleColor?: string
-  description: string
+  description: string | React.ReactElement
   descriptionColor?: string
   logoSrc?: string
   backgroundColor?: string
@@ -33,6 +33,15 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
   const isOutlineBtn = buttonVariant === "outline"
   const isIconLeft = buttonIconPosition === "left"
   const hasButton = buttonLabel ?? buttonIcon
+
+  const descriptionElement =
+    typeof description === "string" ? (
+      <Heading fontSize="lg" fontWeight="700" color={descriptionColor}>
+        {description}
+      </Heading>
+    ) : (
+      description
+    )
 
   return (
     <Card
@@ -69,9 +78,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
                 <Text size="xs" color={titleColor} fontWeight="600">
                   {title}
                 </Text>
-                <Heading fontSize="lg" fontWeight="700" color={descriptionColor}>
-                  {description}
-                </Heading>
+                {descriptionElement}
               </VStack>
               {hasButton && (
                 <Button
