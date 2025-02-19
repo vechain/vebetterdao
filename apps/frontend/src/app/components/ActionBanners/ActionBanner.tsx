@@ -5,6 +5,7 @@ import {
   useCanUserVote,
   useCurrentAllocationsRoundId,
   useGetDelegatee,
+  useUserBotSignals,
   useUserDelegation,
   useVot3Balance,
   useVotingRewards,
@@ -72,6 +73,12 @@ export const ActionBanner = () => {
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
 
+  const { data: userSignalCounter } = useUserBotSignals(account ?? "")
+
+  const isUserSignaled = useMemo(() => {
+    return userSignalCounter && userSignalCounter > 0
+  }, [userSignalCounter])
+
   const ownsTokens = useMemo(() => {
     if (!b3trBalance || !vot3Balance) return false
 
@@ -123,7 +130,7 @@ export const ActionBanner = () => {
     !userHasApp && !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
   const showCastVoteInProposalBanners = !!account && hasProposals && userCanVoteInProposals
-  const showSignaledBanner = !!account
+  const showSignaledBanner = !!account && isUserSignaled
   //Custom compute proposal banners
   const proposalsToVoteBanners = filteredProposals.map(proposal => (
     <CastProposalVoteBanners
