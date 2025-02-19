@@ -66,6 +66,17 @@ const variants = {
         padding: "24px",
       },
     }),
+  errorWithBorder: (props: StyleFunctionProps) =>
+    definePartsStyle({
+      container: {
+        bg: props.colorMode === "dark" ? "#1A1A1A" : "#FFF",
+        borderWidth: "1px",
+        borderColor: props.colorMode === "dark" ? "#2D2D2F" : "#C84968",
+      },
+      body: {
+        padding: "24px",
+      },
+    }),
   secondaryBoxShadow: (props: StyleFunctionProps) =>
     definePartsStyle({
       container: {
