@@ -124,7 +124,7 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
   })
 
   // Filter out blacklisted apps
-  const allAppsFiltered = allApps.filter((_app, index) => blacklistedApps[index] && !blacklistedApps[index][0])
+  const allAppsFiltered = allApps.filter((_app, index) => blacklistedApps[index]?.[0] === false)
   const allowedAppIds = new Set(allAppsFiltered.map(app => app.id))
 
   // Filter apps and unendorsed apps based on allowedAppIds
