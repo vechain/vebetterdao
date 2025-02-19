@@ -1451,5 +1451,7 @@
   "Cast your vote to your favorite app": "Cast your vote to your favorite app",
   "Convert your B3TR to VOT3": "Convert your B3TR to VOT3",
   "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.": "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.",
-  "Next snapshot": "Next snapshot"
+  "Next snapshot": "Next snapshot",
+  "This GM is attached to your newly received XNode. Detach it to start fresh with your own GM 🔄": "This GM is attached to your newly received XNode. Detach it to start fresh with your own GM 🔄",
+  "This GM is still attached to an XNode you no longer own. Please detach it 🔓": "This GM is still attached to an XNode you no longer own. Please detach it 🔓"
 }

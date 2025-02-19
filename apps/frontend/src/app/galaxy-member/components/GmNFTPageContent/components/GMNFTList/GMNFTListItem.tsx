@@ -17,7 +17,7 @@ import {
   ModalBody,
   Button,
 } from "@chakra-ui/react"
-import { useMemo } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { NFTMetadata } from "@/api/contracts/galaxyMember/hooks/useNFTImage"
 import { useIpfsImage, useIpfsMetadata } from "@/api/ipfs"
@@ -96,6 +96,24 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
     detachGmToXNodeModal.onOpen()
   }
 
+  const xNodeReceiverPOV = useCallback(() => {
+    return isXNodeAttachedAndTransferred && userXNodeId && nodeIdAttachedToToken
+  }, [isXNodeAttachedAndTransferred, userXNodeId, nodeIdAttachedToToken])
+
+  const xNodeSenderPOV = useCallback(() => {
+    return isXNodeAttachedAndTransferred && !userXNodeId && nodeIdAttachedToToken
+  }, [isXNodeAttachedAndTransferred, userXNodeId, nodeIdAttachedToToken])
+
+  const getTooltipMessage = () => {
+    if (xNodeReceiverPOV()) {
+      return t("This GM is attached to your newly received XNode. Detach it to start fresh with your own GM 🔄")
+    }
+    if (xNodeSenderPOV()) {
+      return t("This GM is still attached to an XNode you no longer own. Please detach it 🔓")
+    }
+    return ""
+  }
+
   return (
     <>
       <Card
@@ -103,8 +121,28 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
           isXNodeAttachedAndTransferred ? "errorWithBorder" : isGMSelected ? "primaryBoxShadow" : "baseWithBorder"
         }
         rounded="8px"
-        w="full">
+        w="full"
+        transition="all 0.3s ease-in-out">
         <CardBody p={"4"}>
+          {(xNodeReceiverPOV() || xNodeSenderPOV()) && (
+            <VStack
+              pos="absolute"
+              backdropFilter="blur(10px)"
+              top={0}
+              left={0}
+              w="full"
+              justify="center"
+              spacing={1}
+              p={4}
+              h="full"
+              rounded="12px"
+              zIndex={2}
+              bg="rgba(255, 255, 255, 0.6)">
+              <Text fontSize="sm" color="#6A6A6A" fontWeight={400} textAlign={"center"}>
+                {getTooltipMessage()}
+              </Text>
+            </VStack>
+          )}
           <VStack align="stretch" gap={4}>
             <HStack
               color="#252525"
