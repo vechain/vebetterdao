@@ -58,7 +58,7 @@ export const useEvents = <T extends Interface, R>({
         txOrigin: event.meta.txOrigin,
       })
     })
-  }, [thor, contractInterface, event, contractAddress])
+  }, [thor, contractInterface, event, filterParams, contractAddress, mapResponse])
 
   const queryKey = useMemo(() => getEventsKey({ event, filterParams }), [event, filterParams])
 

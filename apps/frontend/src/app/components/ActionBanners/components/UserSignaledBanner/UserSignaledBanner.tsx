@@ -12,28 +12,33 @@ export const UserSignaledBanner = () => {
   const { data: userSignals } = useUserSignalEvents(account ?? "")
   const { data: apps } = useXApps()
 
-  const getAppDetails = (appId: string) => apps?.allApps.find(app => app.id === appId)
+  const allApps = apps?.allApps ?? []
+  const signals = userSignals || []
 
-  const signalGroupedByApp = userSignals?.reduce<Record<string, string[]>>((acc, signal) => {
-    const appName = getAppDetails(signal.appId)?.name ?? "Unknown"
-    if (signal.reason) {
-      acc[appName] = acc[appName] || []
-      acc[appName].push(signal.reason)
-    }
-    return acc
-  }, {})
+  function getAppName(appId: string): string {
+    const found = allApps.find(app => app.id === appId)
+    return found ? found.name : "Unknown"
+  }
 
-  const appNames = Object.keys(signalGroupedByApp || {})
-  const formatAppNames = (appNames: string[]) => {
+  const appNames = [...new Set(signals.map(({ appId }) => getAppName(appId)))]
+
+  function formatAppNames(names: string[]): string {
     const MAX_LENGTH = 40
+    const joined = names.join(", ")
 
-    if (appNames.length > 3 || appNames.join(", ").length > MAX_LENGTH) return "many apps"
-    if (appNames.length === 2) return `${appNames[0]} and ${appNames[1]}`
-    if (appNames.length > 2) {
-      const lastApp = appNames.pop()
-      return `${appNames.join(", ")} and ${lastApp}`
+    if (names.length > 3 || joined.length > MAX_LENGTH) {
+      return "many apps"
     }
-    return appNames.join("")
+    if (names.length === 2) {
+      return names.join(" and ")
+    }
+    if (names.length > 2) {
+      const lastName = names[names.length - 1]
+      const rest = names.slice(0, -1).join(", ")
+      return `${rest} and ${lastName}`
+    }
+
+    return joined
   }
 
   const appSignals = formatAppNames(appNames)

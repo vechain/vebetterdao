@@ -148,16 +148,17 @@ export const ActionBanner = () => {
       bannerComponents.push(<CreatorApplicationUnderReviewBanner key="creator-under-review" />)
     return bannerComponents
   }, [
+    showSignaledBanner,
     showClaimB3trBanner,
+    showCastVoteBanner,
+    showCastVoteInProposalBanners,
+    proposalsToVoteBanners,
     newApps,
     showLowVthoBanner,
-    showCastVoteInProposalBanners,
     showDoActionBanner,
-    showCastVoteBanner,
     showCreatorRejectedBanner,
     showCreatorApprovedBanner,
     showCreatorUnderReviewBanner,
-    proposalsToVoteBanners,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
