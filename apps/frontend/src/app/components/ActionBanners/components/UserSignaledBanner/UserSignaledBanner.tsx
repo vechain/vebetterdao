@@ -58,6 +58,8 @@ export const UserSignaledBanner = () => {
         </Text>
       }
       logoSrc="/images/info-bell.png"
+      backgroundColor="#FFD979"
+      backgroundImageSrc="/images/cloud-background-orange.png"
       buttonLabel={t("Know more")}
       onButtonClick={() => {}}
       buttonVariant="outline"
