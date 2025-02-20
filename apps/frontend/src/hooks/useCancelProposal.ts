@@ -2,15 +2,22 @@ import { useCallback, useMemo } from "react"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getProposalStateQueryKey, useProposalCreatedEvent } from "@/api"
+import {
+  getAllProposalsStateQueryKey,
+  getProposalStateQueryKey,
+  getProposalUserDepositQueryKey,
+  useProposalCreatedEvent,
+} from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { ethers } from "ethers"
+import { useWallet } from "@vechain/dapp-kit-react"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
 type Props = { proposalId: string; onSuccess?: () => void }
 
 export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
+  const { account } = useWallet()
   const proposalCreatedEvent = useProposalCreatedEvent(proposalId)
 
   const clauseBuilder = useCallback(() => {
@@ -35,7 +42,14 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
     proposalCreatedEvent.data?.values,
   ])
 
-  const refetchQueryKeys = useMemo(() => [getProposalStateQueryKey(proposalId)], [proposalId])
+  const refetchQueryKeys = useMemo(
+    () => [
+      getProposalStateQueryKey(proposalId),
+      getAllProposalsStateQueryKey(),
+      getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
+    ],
+    [proposalId, account],
+  )
 
   return useBuildTransaction({
     clauseBuilder,

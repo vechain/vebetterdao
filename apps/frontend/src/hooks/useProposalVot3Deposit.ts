@@ -51,6 +51,7 @@ export const useProposalVot3Deposit = ({ proposalId, onSuccess }: UseProposalVot
   const refetchQueryKeys = useMemo(
     () => [
       getProposalUserDepositQueryKey(proposalId, account?.address ?? ""),
+      getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
       getProposalDepositQueryKey(proposalId),
       getIsDepositReachedQueryKey(proposalId),
       getProposalsEventsQueryKey(),

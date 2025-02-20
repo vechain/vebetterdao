@@ -5,6 +5,8 @@ import {
   useCurrentAllocationsRoundId,
   getRoundXAppsQueryKey,
   getAllocationAmountQueryKey,
+  getAllProposalsStateQueryKey,
+  getProposalUserDepositQueryKey,
 } from "@/api"
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
@@ -50,8 +52,10 @@ export const useDistributeEmission = ({ onSuccess }: useDistributeEmissionsProps
       currentBlockQueryKey(),
       getRoundXAppsQueryKey(currendRoundId ?? "0"),
       getAllocationAmountQueryKey(currendRoundId ?? "0"),
+      getAllProposalsStateQueryKey(),
+      getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
     ],
-    [currendRoundId],
+    [account?.address, currendRoundId],
   )
 
   return useBuildTransaction({

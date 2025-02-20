@@ -3,42 +3,29 @@ import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ethers } from "ethers"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { UseQueryResult } from "@tanstack/react-query"
 import { ProposalDeposit } from "@/api"
 import { useWithdrawDeposits } from "@/hooks/useWithdrawDeposits"
 import { TransactionModal, TransactionModalStatus } from "@/components"
 
 type Props = {
-  claimableDeposits: bigint
-  userProposalDeposits: UseQueryResult<ProposalDeposit[], Error>
+  totalClaimableDeposits: bigint
+  claimableDeposits: ProposalDeposit[]
 }
 
 const compactFormatter = getCompactFormatter(2)
 
-export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props) => {
+export const ClaimDeposits = ({ totalClaimableDeposits, claimableDeposits }: Props) => {
   const { t } = useTranslation()
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
-  const userProposalsDeposited = useMemo(() => {
-    const proposals: ProposalDeposit[] = []
-    if (!userProposalDeposits.data) return proposals
-    for (const proposal of userProposalDeposits.data) {
-      if (proposal && proposal.deposit !== "0") {
-        proposals.push(proposal)
-      }
-    }
-
-    return proposals
-  }, [userProposalDeposits])
+  const formattedDeposits = useMemo(() => {
+    return Number(ethers.formatEther(totalClaimableDeposits))
+  }, [totalClaimableDeposits])
 
   const { sendTransaction, resetStatus, status, txReceipt, error } = useWithdrawDeposits({
-    proposalDeposits: userProposalsDeposited,
+    proposalDeposits: claimableDeposits,
   })
-
-  const formattedDeposits = useMemo(() => {
-    return Number(ethers.formatEther(claimableDeposits))
-  }, [claimableDeposits])
 
   const handleClaim = useCallback(() => {
     sendTransaction(undefined)
@@ -69,9 +56,9 @@ export const ClaimDeposits = ({ claimableDeposits, userProposalDeposits }: Props
           <b>
             {compactFormatter.format(formattedDeposits)} {t("VOT3")}
           </b>{" "}
-          {t("that you used to support")} {userProposalsDeposited.length}
+          {t("that you used to support")} {claimableDeposits.length}
           {t(" proposal")}
-          {(userProposalDeposits.data?.length ?? 0) > 1 ? "s" : ""}
+          {(claimableDeposits.length ?? 0) > 1 ? "s" : ""}
           {t(".")}
         </Text>
         <Button onClick={handleClaim} w={"full"} variant={"primaryAction"} mt={5}>

@@ -41,7 +41,7 @@ export const useWithdrawDeposits = ({ proposalDeposits, onSuccess, onFailure }: 
     const queryKeys = proposalDeposits.map(proposalDeposit =>
       getProposalUserDepositQueryKey(proposalDeposit.proposalId, account?.address ?? ""),
     )
-
+    queryKeys.push(getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""))
     queryKeys.push(getVot3BalanceQueryKey(account?.address ?? ""))
 
     return queryKeys
