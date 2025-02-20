@@ -62,15 +62,15 @@ export const useCreateProposal = ({ invalidateCache = true, onSuccess }: useCrea
         queryKey: getProposalsEventsQueryKey(),
       })
       await queryClient.cancelQueries({
-        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
+        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
       })
       await queryClient.refetchQueries({
-        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
+        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
       })
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess])
+  }, [invalidateCache, onSuccess, queryClient, account?.address])
 
   const result = useSendTransaction({
     signerAccountAddress: account?.address,
