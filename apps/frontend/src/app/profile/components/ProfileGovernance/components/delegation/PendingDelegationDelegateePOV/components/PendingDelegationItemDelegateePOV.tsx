@@ -13,7 +13,7 @@ type Props = { address: string; isConnectedUser: boolean; delegationAddress: str
 export const PendingDelegationItemDelegateePOV = ({ address, isConnectedUser, delegationAddress }: Props) => {
   const { t } = useTranslation()
   //TODo: IS this right?
-  const { isPerson, isLoading: isScoreLoading } = useCanUserVote(address, delegationAddress)
+  const { isPersonNow, isLoading: isScoreLoading } = useCanUserVote(address, delegationAddress)
 
   const { domain } = useVechainDomain({ addressOrDomain: delegationAddress })
 
@@ -33,7 +33,7 @@ export const PendingDelegationItemDelegateePOV = ({ address, isConnectedUser, de
         </HStack>
         {!isScoreLoading && (
           <HStack>
-            <QualificationBadge qualified={isPerson} />
+            <QualificationBadge qualified={isPersonNow} />
           </HStack>
         )}
       </HStack>

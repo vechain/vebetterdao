@@ -16,7 +16,7 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
   const { t } = useTranslation()
   const { data: delegatorAddress, isLoading: isDelegatorLoading } = useGetDelegator(address)
   const isDelegated = !isDelegatorLoading && !!delegatorAddress
-  const { isPerson, isLoading } = useCanUserVote(address)
+  const { isPersonNow, isLoading } = useCanUserVote(address)
 
   const { domain } = useVechainDomain({ addressOrDomain: delegatorAddress })
 
@@ -37,7 +37,7 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
               </Heading>
             </HStack>
             <Text color="#6A6A6A" fontSize="md">
-              {isPerson
+              {isPersonNow
                 ? t("While this account keeps their qualification, you’ll be able to use it to vote.")
                 : t("This account is not currently qualified to vote.")}
             </Text>
@@ -57,7 +57,7 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
                     {domain ?? humanAddress(delegatorAddress, 4, 4)}
                   </Text>
                 </VStack>
-                <QualificationBadge qualified={isPerson} />
+                <QualificationBadge qualified={isPersonNow} />
               </HStack>
             </Stack>
             <HStack>
