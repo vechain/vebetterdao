@@ -1,4 +1,4 @@
-import { useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
+import { useVotingRewards } from "@/api"
 import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 import { useDisclosure } from "@chakra-ui/react"
@@ -13,10 +13,9 @@ const compactFormatter = getCompactFormatter(4)
 
 export const ClaimVotingRewardsBanner = () => {
   const { t } = useTranslation()
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { account } = useWallet()
 
-  const roundsRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
+  const roundsRewardsQuery = useVotingRewards(account?.address ?? undefined)
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
