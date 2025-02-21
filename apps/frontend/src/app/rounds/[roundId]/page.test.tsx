@@ -44,7 +44,7 @@ test("Allocations", async () => {
     data: true,
     hasVotesAtSnapshot: true,
     isLoading: false,
-    isPerson: true,
+    isPersonNow: true,
   })
 
   //@ts-ignore
@@ -121,7 +121,8 @@ test("Allocations", async () => {
       name: "Test Active App",
       teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
       createdAtTimestamp: "16347455",
-      metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+      metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+      isNew: false,
     },
   ]
 
@@ -133,6 +134,7 @@ test("Allocations", async () => {
       createdAtTimestamp: "0",
       metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
       appAvailableForAllocationVoting: false,
+      isNew: false,
     },
   ]
   //@ts-ignore
@@ -142,6 +144,11 @@ test("Allocations", async () => {
       unendorsed: unendorsedApps,
       allApps: [...activeApps, ...unendorsedApps],
       endorsed: activeApps,
+      newLookingForEndorsement: [],
+      othersLookingForEndorsement: [],
+      newApps: [],
+      gracePeriod: [],
+      endorsementLost: [],
     },
     isLoading: false,
     isError: false,
