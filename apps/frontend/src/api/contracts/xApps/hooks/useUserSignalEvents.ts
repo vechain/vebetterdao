@@ -21,7 +21,7 @@ export const useUserSignalEvents = (user: string) => {
   const rawSignaledEvents = useEvents({
     contractAddress,
     contractInterface,
-    event: "UserSignaled",
+    eventName: "UserSignaled",
     filterParams,
     mapResponse: (decoded, meta) => ({
       user: decoded.user,
@@ -35,7 +35,7 @@ export const useUserSignalEvents = (user: string) => {
   const rawUnsignaledEvents = useEvents({
     contractAddress,
     contractInterface,
-    event: "UserSignalsResetForApp",
+    eventName: "UserSignalsResetForApp",
     filterParams,
     mapResponse: (decoded, meta) => ({
       user: decoded.user,
@@ -51,18 +51,20 @@ export const useUserSignalEvents = (user: string) => {
   const isLoading = rawSignaledEvents.isLoading || rawUnsignaledEvents.isLoading
 
   // Get the highest block number for each app that has been unsignaled
-  const unsignalBlockMap = new Map()
+  const latestUnsignalByApp = new Map()
   for (const unsignal of unsignaledEvents) {
-    const currentMaxBlock = unsignalBlockMap.get(unsignal.appId) || 0
-    unsignalBlockMap.set(unsignal.appId, Math.max(currentMaxBlock, unsignal.blockNumber))
+    const currentMaxBlock = latestUnsignalByApp.get(unsignal.appId) || 0
+    latestUnsignalByApp.set(unsignal.appId, Math.max(currentMaxBlock, unsignal.blockNumber))
+  }
+
+  // If an app has been unsignaled, we only show the signaled events that happened after the unsignal
+  const shouldKeepSignal = (event: SignalEvent) => {
+    const latestUnsignalBlock = latestUnsignalByApp.get(event.appId)
+    return !latestUnsignalBlock || event.blockNumber > latestUnsignalBlock
   }
 
   // Filter out signaled events that have been unsignaled
-  // If an app has been unsignaled, we only show the signaled events that happened after the unsignal
-  const activeSignalEvents = signaledEvents.filter(signaledEvent => {
-    const resetBlock = unsignalBlockMap.get(signaledEvent.appId)
-    return !resetBlock || signaledEvent.blockNumber > resetBlock
-  })
+  const activeSignalEvents = signaledEvents.filter(shouldKeepSignal)
 
   return {
     isLoading,

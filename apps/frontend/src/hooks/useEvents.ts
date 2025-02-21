@@ -10,7 +10,7 @@ type EventName<T> = T extends (nameOrSignature: infer U) => any ? U : never
 export type UseEventsParams<T extends Interface, R> = {
   contractInterface: T
   contractAddress: string
-  event: EventName<T["getEvent"]>
+  eventName: EventName<T["getEvent"]>
   filterParams?: Object
   mapResponse: (decoded: abi.Decoded, meta: { blockNumber: number; txOrigin: string }) => R
 }
@@ -21,7 +21,7 @@ export type UseEventsParams<T extends Interface, R> = {
 export const useEvents = <T extends Interface, R>({
   contractInterface,
   contractAddress,
-  event,
+  eventName,
   filterParams,
   mapResponse,
 }: UseEventsParams<T, R>) => {
@@ -31,8 +31,8 @@ export const useEvents = <T extends Interface, R>({
     if (!thor) return []
 
     // Get the event ABI
-    const eventFragment = contractInterface?.getEvent(event)?.format("json")
-    if (!eventFragment) throw new Error(`Event ${event} not found`)
+    const eventFragment = contractInterface?.getEvent(eventName)?.format("json")
+    if (!eventFragment) throw new Error(`Event ${eventName} not found`)
 
     const eventAbi = new abi.Event(JSON.parse(eventFragment) as abi.Event.Definition)
     const topics = eventAbi.encode(filterParams ?? {})
@@ -58,9 +58,9 @@ export const useEvents = <T extends Interface, R>({
         txOrigin: event.meta.txOrigin,
       })
     })
-  }, [thor, contractInterface, event, filterParams, contractAddress, mapResponse])
+  }, [thor, contractInterface, eventName, filterParams, contractAddress, mapResponse])
 
-  const queryKey = useMemo(() => getEventsKey({ event, filterParams }), [event, filterParams])
+  const queryKey = useMemo(() => getEventsKey({ eventName, filterParams }), [eventName, filterParams])
 
   return useQuery({
     queryFn,
@@ -70,10 +70,10 @@ export const useEvents = <T extends Interface, R>({
 }
 
 export type GetEventsKeyParams = {
-  event: string
+  eventName: string
   filterParams?: Object
 }
 
-export const getEventsKey = ({ event, filterParams }: GetEventsKeyParams) => {
-  return [event, filterParams ? JSON.stringify(filterParams) : "all"]
+export const getEventsKey = ({ eventName, filterParams }: GetEventsKeyParams) => {
+  return [eventName, filterParams ? JSON.stringify(filterParams) : "all"]
 }
