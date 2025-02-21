@@ -1451,5 +1451,9 @@
   "Cast your vote to your favorite app": "Cast your vote to your favorite app",
   "Convert your B3TR to VOT3": "Convert your B3TR to VOT3",
   "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.": "When a voting rounds begin, a record of the total supply of VOT3 tokens and each holder’s balance is taken to calculate individual voting power.",
-  "Next snapshot": "Next snapshot"
+  "Next snapshot": "Next snapshot",
+  "You have been signalled": "You have been signalled",
+  "You have been signalled by <em>{{appSignals}}</em>.": "You have been signalled by <em>{{appSignals}}</em>.",
+  "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.": "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.",
+  "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.": "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue."
 }
