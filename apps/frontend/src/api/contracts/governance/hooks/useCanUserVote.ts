@@ -22,7 +22,7 @@ type CanUserVoteResult = {
   isPersonAtSnapshot: boolean
   isPersonNow: boolean
   isEntity: boolean
-  isEntityInTimepoint: boolean
+  isEntityAtSnapshot: boolean
 }
 
 /**
@@ -55,14 +55,13 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string): CanUse
   )
   const { data: isPersonNow, isLoading: isPersonNowLoading } = useIsPerson(delegateeAddress ?? parsedAccount)
   const { data: isEntity, isLoading: isEntityLoading } = useIsEntity(delegateeAddress ?? parsedAccount)
-  const { data: isEntityInTimepoint, isLoading: isEntityInTimepointLoading } = useIsEntityInTimepoint(
+  const { data: isEntityAtSnapshot, isLoading: isEntityAtSnapshotLoading } = useIsEntityInTimepoint(
     delegateeAddress ?? parsedAccount,
     roundSnapshot,
   )
 
-  const canVote = !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && !isEntityInTimepoint && isPersonAtSnapshot
+  const canVote = !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && !isEntityAtSnapshot && isPersonAtSnapshot
 
-  console.log({ isPersonAtSnapshot, isPersonNow, isEntity, isEntityInTimepoint, canVote })
   return {
     data: canVote,
     isLoading:
@@ -73,11 +72,11 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string): CanUse
       isPersonNowLoading ||
       roundSnapshotLoading ||
       isEntityLoading ||
-      isEntityInTimepointLoading,
+      isEntityAtSnapshotLoading,
     hasVotesAtSnapshot,
     isPersonAtSnapshot,
     isPersonNow,
     isEntity,
-    isEntityInTimepoint,
+    isEntityAtSnapshot,
   }
 }

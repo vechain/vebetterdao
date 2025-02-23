@@ -46,7 +46,7 @@ test("Allocations", async () => {
     isLoading: false,
     isPersonNow: true,
     isEntity: false,
-    isEntityInTimepoint: false,
+    isEntityAtSnapshot: false,
   })
 
   //@ts-ignore
