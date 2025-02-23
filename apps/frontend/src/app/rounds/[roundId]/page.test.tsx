@@ -45,6 +45,8 @@ test("Allocations", async () => {
     hasVotesAtSnapshot: true,
     isLoading: false,
     isPersonNow: true,
+    isEntity: false,
+    isEntityInTimepoint: false,
   })
 
   //@ts-ignore
