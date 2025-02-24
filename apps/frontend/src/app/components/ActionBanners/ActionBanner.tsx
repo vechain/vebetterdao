@@ -79,8 +79,8 @@ export const ActionBanner = () => {
   const {
     data: canUserVote,
     hasVotesAtSnapshot,
-    isPersonNow,
     isPersonAtSnapshot,
+    isEntityAtSnapshot,
     isLoading,
   } = useCanUserVote(account ?? undefined, delegateeAddress)
 
@@ -127,8 +127,9 @@ export const ActionBanner = () => {
   // Can't Vote banners logic
   const showSignaledBanner = !!account && isUserSignaled
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
-  const showDoActionBanner = !!account && isPersonNow && !isLoading && !isDelegateeLoading
-  const showVotingDisqualificationBanner = !!account && !isPersonAtSnapshot && !isPersonNow && !isLoading
+  const showDoActionBanner =
+    !!account && !isPersonAtSnapshot && !isEntityAtSnapshot && !isEntity && !isLoading && !isDelegateeLoading
+  const showVotingDisqualificationBanner = !!account && isEntityAtSnapshot && !isLoading
 
   const showCastVoteBanner = !!account && !isLoading && canUserVote
 
@@ -147,16 +148,16 @@ export const ActionBanner = () => {
   // Only one of the following banners can be shown at a time
   // The order of the banners is as follows:
   // 1 - User is signaled
-  // 2 - User is
+  // 2 - User status is disqualified //todo: double check the order
   // 2 - User has low VTHO
   // 3 - User has to do some action
   const showCantVoteBanners =
     showSignaledBanner || showLowVthoBanner || showDoActionBanner || showVotingDisqualificationBanner
   const CantVoteBanner = useMemo(() => {
     if (showSignaledBanner) return <UserSignaledBanner key="user-signaled" />
+    if (showVotingDisqualificationBanner) return <VotingDisqualificationBanner key="voting-disqualification" />
     if (showLowVthoBanner) return <LowVthoBanner key="low-vtho" />
     if (showDoActionBanner) return <DoActionBanner key="do-action" />
-    if (showVotingDisqualificationBanner) return <VotingDisqualificationBanner key="voting-disqualification" />
   }, [showSignaledBanner, showLowVthoBanner, showDoActionBanner, showVotingDisqualificationBanner])
 
   //Show one of the banners for creator NFTs

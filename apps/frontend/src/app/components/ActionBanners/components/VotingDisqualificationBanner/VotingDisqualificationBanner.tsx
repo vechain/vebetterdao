@@ -7,9 +7,8 @@ import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotEx
 export const VotingDisqualificationBanner = () => {
   const { t } = useTranslation()
 
-  //todo : add here condition to check either voting power transferred to vedelegate, or to passport
   const description = t(
-    "Your voting power has been transferred to your linked passport account. Switch to your primary account to participate in voting.",
+    "Your voting power has been transferred to your linked passport account. To be able to vote, you must be the primary account at snapshot.",
   )
   const whatIsSnapshot = useDisclosure()
 
