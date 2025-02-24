@@ -57,7 +57,7 @@ export const Navbar: React.FC = () => {
         {isLargerThan1200 ? (
           <DesktopNavBar routesToRender={parsedRoutesToRender} />
         ) : (
-          <MobileNavBar routesToRender={parsedRoutesToRender} />
+          <MobileNavBar isNavbarVisible={isNavbarVisible} routesToRender={parsedRoutesToRender} />
         )}
       </HStack>
     </Box>

@@ -7,7 +7,6 @@ import {
   HStack,
   VStack,
   Text,
-  Link,
   Image,
   Box,
 } from "@chakra-ui/react"
@@ -56,9 +55,9 @@ export const SocialLoginTooltip: React.FC<Props> = ({ children, isOpen }) => {
               <Text alignSelf={"start"} fontSize="xs" color="#365217">
                 {t("NEW LOG IN IS OUT!")}
               </Text>
-              <Link fontSize="sm" fontWeight="bold" color="#365217" lineHeight={1.2}>
+              <Text fontSize="sm" fontWeight="bold" color="#365217" lineHeight={1.2}>
                 {t("Log in with your social media and start earning rewards!")}
-              </Link>
+              </Text>
             </VStack>
 
             {/* Social Icons */}
