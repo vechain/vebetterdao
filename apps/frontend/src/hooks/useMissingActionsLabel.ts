@@ -26,7 +26,7 @@ export const useMissingActionsLabel = ({
         missingActions,
       })
     return t(`You need {{missingActions}} more action${missingActions > 1 ? "s" : ""}`, { missingActions })
-  }, [t, missingActions, isUserDelegatee])
+  }, [t, missingActions, isUserDelegatee, delegatorQualified])
 
   const long = useMemo(() => {
     if (delegatorQualified) {
@@ -46,7 +46,7 @@ export const useMissingActionsLabel = ({
         missingActions,
       },
     )
-  }, [isUserDelegatee, t, missingActions])
+  }, [isUserDelegatee, t, missingActions, delegatorQualified])
 
   return { short, long }
 }

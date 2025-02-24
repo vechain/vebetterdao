@@ -85,7 +85,7 @@ export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps)
     if (isEntityAtSnapshot) return "secondary-at-snapshot"
 
     return null
-  }, [account, isEntity, isDelegator, hasVotesAtSnapshot, isPersonAtSnapshot, isLoading])
+  }, [account, isEntity, isDelegator, hasVotesAtSnapshot, isPersonAtSnapshot, isLoading, isEntityAtSnapshot])
 
   const cantVoteReasonText = useMemo<CantVoteWarningProps | null>(() => {
     switch (votingStatus) {
@@ -119,7 +119,7 @@ export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps)
       default:
         return null
     }
-  }, [votingStatus, handleGoToGovernance, handleGoToLinking])
+  }, [votingStatus, handleGoToGovernance, handleGoToLinking, t])
 
   const qualificationMessages = useMemo<StatusMessages | null>(() => {
     switch (votingStatus) {
@@ -139,8 +139,8 @@ export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps)
         return {
           labelStatus: t("Voting power transferred to passport"),
           descriptionLabel: isConnectedUser
-            ? t("To be availabe to vote on the platform, you must be the primary account at snapshot")
-            : t("To be availabe to vote on the platform, the user must be the primary account at snapshot"),
+            ? t("To be able to vote on the platform, you must be the primary account at snapshot")
+            : t("To be able to vote on the platform, the user must be the primary account at snapshot"),
         }
       case "no-actions":
       case "delegator":
@@ -151,7 +151,7 @@ export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps)
     }
 
     return null
-  }, [isPersonAtSnapshot, isConnectedUser, missingActionsLabel, isEntityAtSnapshot, isEntity, t])
+  }, [isConnectedUser, missingActionsLabel, t, votingStatus])
 
   return {
     cantVoteReasonText,
