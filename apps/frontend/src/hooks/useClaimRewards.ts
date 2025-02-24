@@ -43,9 +43,9 @@ export const useClaimRewards = ({
   const { account } = useWallet()
   const queryClient = useQueryClient()
 
-  const currendRoundId: string | undefined = queryClient.getQueryData(getCurrentAllocationsRoundIdQueryKey())
+  const currentRoundId: string | undefined = queryClient.getQueryData(getCurrentAllocationsRoundIdQueryKey())
 
-  const lastRoundId = parseInt(currendRoundId ?? "0") - 1
+  const lastRoundId = parseInt(currentRoundId ?? "0") - 1
 
   const buildClauses = useCallback(
     (roundRewards: RoundReward[]) => {

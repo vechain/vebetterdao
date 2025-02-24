@@ -24,9 +24,9 @@ export const useVotingRewards = (voter?: string) => {
   const { thor } = useConnex()
   const queryClient = useQueryClient()
 
-  const currendRoundId: string | undefined = queryClient.getQueryData(getCurrentAllocationsRoundIdQueryKey())
+  const currentRoundId: string | undefined = queryClient.getQueryData(getCurrentAllocationsRoundIdQueryKey())
 
-  const lastRoundId = parseInt(currendRoundId ?? "0") - 1
+  const lastRoundId = parseInt(currentRoundId ?? "0") - 1
 
   return useQuery({
     queryKey: getRoundRewardQueryKey(`ALL_TO_ROUND_${lastRoundId}`, voter),
