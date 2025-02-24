@@ -156,7 +156,7 @@ export const ActionBanner = () => {
     if (showVotingDisqualificationBanner) return <VotingDisqualificationBanner key="voting-disqualification" />
     if (showLowVthoBanner) return <LowVthoBanner key="low-vtho" />
     if (showDoActionBanner) return <DoActionBanner key="do-action" />
-  }, [showSignaledBanner, showLowVthoBanner, showDoActionBanner, showVotingDisqualificationBanner])
+  }, [showSignaledBanner, showLowVthoBanner, showDoActionBanner])
 
   //Show one of the banners for creator NFTs
   // Only one of the following banners can be shown at a time

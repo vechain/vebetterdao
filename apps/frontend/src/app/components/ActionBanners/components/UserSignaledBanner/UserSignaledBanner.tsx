@@ -55,21 +55,21 @@ export const UserSignaledBanner = () => {
   return (
     <>
       <GenericBanner
-        title={t("You have been signaled").toUpperCase()}
+        title={t("You have been signalled").toUpperCase()}
         titleColor="#8D6602"
         description={
           <>
             <Text fontSize="lg" fontWeight="700" color="#5F4400">
               <Trans
                 as="span"
-                i18nKey="You have been signaled by <em>{{appSignals}}</em>."
+                i18nKey="You have been signalled by <em>{{appSignals}}</em>."
                 values={{ appSignals }}
                 components={{ em: <em />, br: <br /> }}
               />
             </Text>
             <Text fontSize="lg" fontWeight="700" color="#5F4400">
               {t(
-                "If you believe this signal is unfair, please reach out to the app that signaled you to resolve the issue.",
+                "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.",
               )}
             </Text>
           </>
