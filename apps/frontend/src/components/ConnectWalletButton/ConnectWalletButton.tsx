@@ -63,10 +63,10 @@ export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
     <Fade in={true}>
       <IconButton
         onClick={open}
-        rounded={"md"}
+        rounded={"full"}
         border={"1px solid #EEEEEE"}
         bg={"rgba(255, 255, 255, 0.50)"}
-        icon={<AddressIcon address={account?.address} imageUrl={account?.image} />}
+        icon={<AddressIcon address={account?.address} imageUrl={account?.image} rounded={"full"} />}
         aria-label="Connect wallet"
       />
     </Fade>
