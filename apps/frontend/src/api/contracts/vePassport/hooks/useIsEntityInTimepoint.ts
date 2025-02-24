@@ -17,11 +17,6 @@ export const getIsEntityInTimepointQueryKey = (address?: string | null, timepoin
   return getCallKey({ method, keyArgs: [address, timepoint] })
 }
 
-// refetch keyy if the link / unlink operation are triggered
-export const getIsEntityInTimepointRefetchKey = (address?: string | null, timepoint?: number | null) => {
-  return getCallKey({ method, keyArgs: [address, timepoint] })
-}
-
 /**
  * Hook to check if an address is an entity using the VeBetterPassport contract.
  * @param address - The address to check.

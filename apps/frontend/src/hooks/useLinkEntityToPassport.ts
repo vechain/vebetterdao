@@ -5,7 +5,7 @@ import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
 import { buildClause } from "@/utils/buildClause"
 import { VeBetterPassport__factory } from "@repo/contracts"
-import { getPendingLinkingsQueryKey } from "@/api"
+import { getPendingLinkingsQueryKey, getIsEntityInTimepointQueryKey } from "@/api"
 
 const PassportContractInterface = VeBetterPassport__factory.createInterface()
 const passportContractAddress = getConfig().veBetterPassportContractAddress
@@ -44,7 +44,10 @@ export const useLinkEntityToPassport = ({ onSuccess }: UseLinkEntityToPassportPr
     [account],
   )
 
-  const refetchQueryKeys = useMemo(() => [getPendingLinkingsQueryKey(account)], [account])
+  const refetchQueryKeys = useMemo(
+    () => [getIsEntityInTimepointQueryKey(account), getPendingLinkingsQueryKey(account)],
+    [account],
+  )
 
   return useBuildTransaction<ClausesParams>({
     clauseBuilder,
