@@ -41,7 +41,7 @@ export type VotingQualification = {
 }
 
 /**
- * Centralized hook to be displayed in the voting qualification, the banner, and the can't vote warning in the home page
+ * Centralized hook to be displayed in the voting qualification and the warnings accross the app
  */
 export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps) => {
   const { t } = useTranslation()
@@ -77,12 +77,13 @@ export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps)
 
   const votingStatus = useMemo<VotingStatusProps | null>(() => {
     if (!account || isLoading) return null
-    if (isEntity && !isEntityAtSnapshot) return "secondary"
+    if (isPersonAtSnapshot) return "qualified"
     if (isDelegator) return "delegator"
+    if (isEntity && !isEntityAtSnapshot) return "secondary"
     if (!hasVotesAtSnapshot) return "no-votes"
     if (!isPersonAtSnapshot && !isEntityAtSnapshot && !isEntity) return "no-actions"
     if (isEntityAtSnapshot) return "secondary-at-snapshot"
-    if (isPersonAtSnapshot) return "qualified"
+
     return null
   }, [account, isEntity, isDelegator, hasVotesAtSnapshot, isPersonAtSnapshot, isLoading])
 
@@ -141,7 +142,8 @@ export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps)
             ? t("To be availabe to vote on the platform, you must be the primary account at snapshot")
             : t("To be availabe to vote on the platform, the user must be the primary account at snapshot"),
         }
-      case "no-actions" || "delegator":
+      case "no-actions":
+      case "delegator":
         return {
           labelStatus: missingActionsLabel.short,
           descriptionLabel: missingActionsLabel.long,

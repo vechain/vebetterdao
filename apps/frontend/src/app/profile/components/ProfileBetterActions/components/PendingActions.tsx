@@ -9,14 +9,14 @@ type Props = {
 export const PendingActions = ({ address }: Props) => {
   const { t } = useTranslation()
 
-  const { isPerson, isLoading } = useCanUserVote(address)
+  const { isPersonAtSnapshot, isLoading } = useCanUserVote(address)
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(address)
   const isDelegator = !isDelegateeLoading && !!delegateeAddress
   const { missingActions, isUserDelegatee, scorePercentage, isLoading: isScoreLoading } = useUserScore(address)
 
   const missingActionsLabel = useMissingActionsLabel({ missingActions, isUserDelegatee })
 
-  if (isScoreLoading || isPerson || isLoading || isDelegator) return null
+  if (isScoreLoading || isPersonAtSnapshot || isLoading || isDelegator) return null
 
   return (
     <Card bg="#FFD979" borderRadius="xl" w="full">
