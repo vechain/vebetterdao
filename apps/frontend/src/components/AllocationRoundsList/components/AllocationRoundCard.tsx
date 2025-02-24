@@ -89,8 +89,8 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
                 <Skeleton isLoaded={!isLoading}>
                   <Text fontWeight={400} color={"#6A6A6A"} fontSize={"14px"}>
                     {isActive
-                      ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
-                      : `${allocationRound.voteEndTimestamp?.fromNow()}`}
+                      ? `ends ${allocationRound?.voteEndTimestamp?.fromNow()}`
+                      : `${allocationRound?.voteEndTimestamp?.fromNow()}`}
                   </Text>
                 </Skeleton>
               </Show>
@@ -106,8 +106,8 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
             <HStack w="fit-content" justify="space-between" fontSize={"12px"} fontWeight={400} color={cardTextColor}>
               <Skeleton isLoaded={!isLoading}>
                 <Text>
-                  {allocationRound.voteStartTimestamp?.format("MMM D")} {" - "}
-                  {allocationRound.voteEndTimestamp?.format("MMM D")}
+                  {allocationRound?.voteStartTimestamp?.format("MMM D")} {" - "}
+                  {allocationRound?.voteEndTimestamp?.format("MMM D")}
                 </Text>
               </Skeleton>
             </HStack>

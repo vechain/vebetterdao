@@ -79,7 +79,7 @@ export const useCreateProposal = ({
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess])
+  }, [invalidateCache, queryClient, onSuccess, account])
 
   const result = useSendTransaction({
     signerAccount: account,

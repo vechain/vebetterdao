@@ -11,8 +11,8 @@ const XALLOCATION_CONTRACT = getConfig().xAllocationVotingContractAddress
 export type RoundCreated = {
   roundId: string
   proposer: string
-  voteStart: string
-  voteEnd: string
+  voteStart: number
+  voteEnd: number
   appsIds: string[]
 }
 
@@ -47,8 +47,8 @@ export const getAllocationsRoundsEvents = async (thor: Connex.Thor) => {
         decodedCreatedAllocationEvents.push({
           roundId: decoded[0],
           proposer: decoded[1],
-          voteStart: decoded[2],
-          voteEnd: decoded[3],
+          voteStart: Number(decoded[2]),
+          voteEnd: Number(decoded[3]),
           appsIds: decoded[4],
         })
         break

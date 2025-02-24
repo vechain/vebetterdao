@@ -42,14 +42,14 @@ export const StartRoundButton = () => {
       <VStack w="full" spacing={4} alignItems="start">
         <VStack>
           <Text>
-            {currentRound.voteEndTimestamp?.isBefore()
+            {currentRound?.voteEndTimestamp?.isBefore()
               ? t("Last round (#{{currentRoundId}}) ended {{currentRoundEndedAt}}", {
                   currentRoundId: currentRoundId,
-                  currentRoundEndedAt: currentRound.voteEndTimestamp?.fromNow(),
+                  currentRoundEndedAt: currentRound?.voteEndTimestamp?.fromNow(),
                 })
               : t("Current round (#{{currentRoundId}}) will end in {{currentRoundEndsAt}}", {
                   currentRoundId: currentRoundId,
-                  currentRoundEndsAt: currentRound.voteEndTimestamp?.fromNow(),
+                  currentRoundEndsAt: currentRound?.voteEndTimestamp?.fromNow(),
                 })}
           </Text>
         </VStack>

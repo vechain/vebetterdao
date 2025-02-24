@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation"
 import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
+import dayjs from "dayjs"
 
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
@@ -45,6 +46,8 @@ export const RoundInfoBottomSheet = () => {
 
   const isCardLoading = roundLoading || currentRoundIdLoading
 
+  console.log("allocationRound", allocationRound)
+
   return (
     <>
       {!isOpen && (
@@ -66,14 +69,18 @@ export const RoundInfoBottomSheet = () => {
           <Box>
             <Skeleton isLoaded={!isCardLoading}>
               <Heading fontSize={"20px"} fontWeight={400}>
-                <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
+                <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound?.roundId }} t={t} />
               </Heading>
             </Skeleton>
             <Skeleton isLoaded={!isCardLoading}>
               <Text fontSize={"14px"} fontWeight={400}>
                 {t("{{from}} to {{to}}", {
-                  from: allocationRound.voteStartTimestamp?.format("MMM D"),
-                  to: allocationRound.voteEndTimestamp?.format("MMM D"),
+                  from:
+                    !!allocationRound?.voteStartTimestamp &&
+                    dayjs.unix(allocationRound?.voteStartTimestamp).format("MMM D"),
+                  to:
+                    !!allocationRound?.voteEndTimestamp &&
+                    dayjs.unix(allocationRound?.voteEndTimestamp).format("MMM D"),
                 })}
               </Text>
             </Skeleton>
@@ -92,21 +99,25 @@ export const RoundInfoBottomSheet = () => {
       <BaseBottomSheet
         isOpen={isOpen}
         onClose={onClose}
-        ariaTitle={t("Round #{{round}}", { round: allocationRound.roundId })}
-        ariaDescription={t("Round #{{round}}", { round: allocationRound.roundId })}>
+        ariaTitle={t("Round #{{round}}", { round: allocationRound?.roundId })}
+        ariaDescription={t("Round #{{round}}", { round: allocationRound?.roundId })}>
         <VStack spacing={6} align="stretch" mx="auto">
           <HStack spacing={4} justify="space-between" w="full">
             <Box>
               <Skeleton isLoaded={!roundLoading}>
                 <Heading fontSize={"20px"} fontWeight={400}>
-                  <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound.roundId }} t={t} />
+                  <Trans i18nKey={"We're in Round #{{round}}"} values={{ round: allocationRound?.roundId }} t={t} />
                 </Heading>
               </Skeleton>
               <Skeleton isLoaded={!isCardLoading}>
                 <Text fontSize={"14px"} fontWeight={400}>
                   {t("{{from}} to {{to}}", {
-                    from: allocationRound.voteStartTimestamp?.format("MMM D"),
-                    to: allocationRound.voteEndTimestamp?.format("MMM D"),
+                    from:
+                      !!allocationRound?.voteStartTimestamp &&
+                      dayjs.unix(allocationRound?.voteStartTimestamp).format("MMM D"),
+                    to:
+                      !!allocationRound?.voteEndTimestamp &&
+                      dayjs.unix(allocationRound?.voteEndTimestamp).format("MMM D"),
                   })}
                 </Text>
               </Skeleton>
@@ -140,13 +151,13 @@ export const RoundInfoBottomSheet = () => {
               <HStack w="full" justify="space-between">
                 <VStack spacing={2} align={"flex-start"}>
                   <AllocationStateBadge
-                    roundId={allocationRound.roundId ?? ""}
-                    data-testid={"round-#" + allocationRound.roundId + "-status"}
+                    roundId={allocationRound?.roundId ?? ""}
+                    data-testid={"round-#" + allocationRound?.roundId + "-status"}
                     renderBadge={false}
                     renderIcon={true}
                   />
                   <Text fontSize="14px" fontWeight={600}>
-                    {t("#{{round}} allocation round", { round: allocationRound.roundId })}
+                    {t("#{{round}} allocation round", { round: allocationRound?.roundId })}
                   </Text>
                 </VStack>
                 <VStack align={"flex-end"} spacing={0}>
@@ -165,7 +176,7 @@ export const RoundInfoBottomSheet = () => {
               </HStack>
               <HStack w="full" justify="space-between">
                 <Button
-                  onClick={() => router.push(`/rounds/${allocationRound.roundId}`)}
+                  onClick={() => router.push(`/rounds/${allocationRound?.roundId}`)}
                   variant="primarySubtle"
                   w="full"
                   rounded={"full"}>
@@ -173,7 +184,7 @@ export const RoundInfoBottomSheet = () => {
                 </Button>
                 {canVote && (
                   <Button
-                    onClick={() => router.push(`/rounds/${allocationRound.roundId}/vote`)}
+                    onClick={() => router.push(`/rounds/${allocationRound?.roundId}/vote`)}
                     colorScheme="primary"
                     w="full"
                     rounded={"full"}>

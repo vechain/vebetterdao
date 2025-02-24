@@ -43,7 +43,7 @@ export const DashboardAllocationRounds = () => {
               variant="link"
               colorScheme="primary"
               leftIcon={<FaAngleLeft />}
-              isDisabled={allocationRound.isFirstRound}
+              isDisabled={allocationRound?.isFirstRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}>
               {t("Previous round")}
             </Button>
@@ -54,7 +54,7 @@ export const DashboardAllocationRounds = () => {
               variant="link"
               colorScheme="primary"
               icon={<Icon as={FaAngleLeft} boxSize={5} />}
-              isDisabled={allocationRound.isFirstRound}
+              isDisabled={allocationRound?.isFirstRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") - 1).toString())}
             />
           )}
@@ -67,15 +67,15 @@ export const DashboardAllocationRounds = () => {
               <Skeleton isLoaded={!roundInfoLoading}>
                 <Text fontSize="14px" color="#6A6A6A" fontWeight={400}>
                   {t("{{from}} to {{to}}", {
-                    from: roundInfo.voteStartTimestamp?.format("MMM D"),
-                    to: roundInfo.voteEndTimestamp?.format("MMM D"),
+                    from: roundInfo?.voteStartTimestamp?.format("MMM D"),
+                    to: roundInfo?.voteEndTimestamp?.format("MMM D"),
                   })}
                 </Text>
               </Skeleton>
               <DotSymbol color="#6A6A6A" size="2px" />
               <Skeleton isLoaded={!roundInfoLoading}>
                 <Text fontSize="14px" color="primary.500" fontWeight={600}>
-                  {roundInfo.voteEndTimestamp?.fromNow()}
+                  {roundInfo?.voteEndTimestamp?.fromNow()}
                 </Text>
               </Skeleton>
             </HStack>
@@ -85,7 +85,7 @@ export const DashboardAllocationRounds = () => {
               variant="link"
               colorScheme="primary"
               rightIcon={<FaAngleRight />}
-              isDisabled={allocationRound.isLastRound}
+              isDisabled={allocationRound?.isLastRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}>
               {t("Next round")}
             </Button>
@@ -96,7 +96,7 @@ export const DashboardAllocationRounds = () => {
               variant="link"
               colorScheme="primary"
               icon={<Icon as={FaAngleRight} boxSize={5} />}
-              isDisabled={allocationRound.isLastRound}
+              isDisabled={allocationRound?.isLastRound}
               onClick={onRoundChange((parseInt(selectedRoundId ?? "1") + 1).toString())}
             />
           )}

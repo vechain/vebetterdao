@@ -35,6 +35,7 @@ import { AllocationRoundBreakdownChart } from "./AllocationRoundBreakdownChart"
 import { useRouter } from "next/navigation"
 import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import dayjs from "dayjs"
 
 const compactFormatter = getCompactFormatter(2)
 type Props = {
@@ -51,7 +52,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
   const { data: userVotes, isLoading: userVotesLoading } = useUserVotesInRound(roundId, account ?? undefined)
 
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(data.voteStart),
+    data?.voteStart,
     account ?? undefined,
   )
 
@@ -73,9 +74,10 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
     return roundState !== undefined && roundState !== 0
   }, [roundState])
   const remainingTime = useMemo(() => {
+    if (!data?.voteEndTimestamp) return ""
     // remove prefix/suffix
-    if (isFinished) return `${data?.voteEndTimestamp?.fromNow()}`
-    return `${data?.voteEndTimestamp?.fromNow(true)}`
+    if (isFinished) return `${dayjs.unix(data.voteEndTimestamp).fromNow()}`
+    return `${dayjs.unix(data.voteEndTimestamp).fromNow(true)}`
   }, [data?.voteEndTimestamp, isFinished])
 
   const navigateToVote = useCallback(() => {

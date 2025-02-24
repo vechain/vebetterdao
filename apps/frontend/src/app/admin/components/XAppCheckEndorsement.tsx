@@ -76,14 +76,14 @@ export const XAppCheckEndorsement = () => {
           <VStack flex={1} align="flex-start" spacing={8}>
             <VStack align={"start"}>
               <Text>
-                {currentRound.voteEndTimestamp?.isBefore()
+                {currentRound?.voteEndTimestamp?.isBefore()
                   ? t("Last round (#{{currentRoundId}}) ended {{currentRoundEndedAt}}", {
                       currentRoundId: currentRoundId,
-                      currentRoundEndedAt: currentRound.voteEndTimestamp?.fromNow(),
+                      currentRoundEndedAt: currentRound?.voteEndTimestamp?.fromNow(),
                     })
                   : t("Current round (#{{currentRoundId}}) will end in {{currentRoundEndsAt}}", {
                       currentRoundId: currentRoundId,
-                      currentRoundEndsAt: currentRound.voteEndTimestamp?.fromNow(),
+                      currentRoundEndsAt: currentRound?.voteEndTimestamp?.fromNow(),
                     })}
               </Text>
             </VStack>

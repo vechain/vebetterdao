@@ -21,7 +21,7 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)
   const { data: roundInfo } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
-    Number(roundInfo.voteStart),
+    roundInfo?.voteStart,
     parsedAccount ?? undefined,
   )
   const { data: threshold } = useVotingThreshold()

@@ -36,7 +36,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
 
   const isLoading = xAppsSharesQuery.isLoading || roundInfoLoading
 
-  const title = roundInfo.isCurrent && roundInfo.state === 0 ? t("Real time votes") : t("Votes")
+  const title = roundInfo?.isCurrent && roundInfo?.state === 0 ? t("Real time votes") : t("Votes")
 
   const renderContent = () => {
     if (isLoading) {
@@ -80,7 +80,7 @@ export const AllocationXAppsVotesCard = ({ roundId }: Props) => {
       </CardHeader>
       <CardBody>
         <VStack spacing={12} align={"flex-start"} w="full">
-          {roundInfo.state === 1 && (
+          {roundInfo?.state === 1 && (
             <Alert status="error" borderRadius="16px" border={"1px solid #D23F63"} bg="#FCEEF1">
               <UilInfoCircle size={"36px"} color="#D23F63" />
               <Box>

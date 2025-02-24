@@ -31,8 +31,8 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)
   const currentVotesQuery = useAllocationVotes(roundId)
   const quorumQuery = useAllocationRoundQuorum(roundId)
-  const votesAtSnapshotQuery = useVot3PastSupply(roundInfo.voteStart)
-  const userVotesAtSnapshotQuery = useGetVotesOnBlock(Number(roundInfo.voteStart), account ?? "")
+  const votesAtSnapshotQuery = useVot3PastSupply(roundInfo?.voteStart)
+  const userVotesAtSnapshotQuery = useGetVotesOnBlock(roundInfo?.voteStart, account ?? "")
 
   const isRoundActive = useMemo(() => {
     return roundInfo?.state === 0
@@ -59,7 +59,7 @@ const AllocationRoundTimeline = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)
 
   const activeStep = useMemo(() => {
-    const stateNumber = Number(roundInfo.state)
+    const stateNumber = Number(roundInfo?.state)
     switch (stateNumber) {
       case 0:
         return 1
@@ -76,11 +76,12 @@ const AllocationRoundTimeline = ({ roundId }: Props) => {
     () => [
       {
         title: activeStep > 0 ? t("Voting session started") : t("Voting session starts"),
-        description: roundInfo?.voteStartTimestamp?.format("MMMM D hh:mm A"),
+        description:
+          !!roundInfo?.voteStartTimestamp && dayjs.unix(roundInfo?.voteStartTimestamp).format("MMMM D hh:mm A"),
       },
       {
         title: activeStep > 1 ? t("Voting session ended") : t("Voting session ends"),
-        description: roundInfo?.voteEndTimestamp?.format("MMMM D hh:mm A"),
+        description: !!roundInfo?.voteEndTimestamp && dayjs.unix(roundInfo?.voteEndTimestamp).format("MMMM D hh:mm A"),
       },
       {
         title: t("Voting rewards are claimable"),

@@ -89,15 +89,15 @@ describe("AllocationRoundHeaderCard", () => {
     //@ts-ignore
     spyOnUserAllocationRound.mockReturnValue({
       data: {
-        voteEndTimestamp: dayjs().add(1, "day"),
-        voteStartTimestamp: dayjs().subtract(1, "day"),
+        voteEndTimestamp: dayjs().add(1, "day").unix(),
+        voteStartTimestamp: dayjs().subtract(1, "day").unix(),
         appsIds: [],
         isCurrent: true,
         proposer: "0x123",
         roundId,
         state: 0,
-        voteEnd: "125",
-        voteStart: "120",
+        voteEnd: 125,
+        voteStart: 120,
       },
       isLoading: false,
     })

@@ -14,6 +14,7 @@ import {
   Skeleton,
   Container,
 } from "@chakra-ui/react"
+import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -25,7 +26,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   const { data, isLoading } = useAllocationsRound(roundId)
   const [isDesktop] = useMediaQuery("(min-width: 800px)")
 
-  const prevButtonDisabled = !data.roundId || data.roundId === "1"
+  const prevButtonDisabled = !data?.roundId || data?.roundId === "1"
   const goToPreviousRound = () => {
     if (prevButtonDisabled) return
     const prevRoud = Number(data?.roundId) - 1
@@ -35,7 +36,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
   const { data: state } = useAllocationsRoundState(roundId)
   const isActive = state === 0
 
-  const nextButtonDisabled = !data.roundId || data.isCurrent
+  const nextButtonDisabled = !data?.roundId || data?.isCurrent
 
   const goToNextRound = () => {
     if (nextButtonDisabled) return
@@ -43,7 +44,7 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
     router.push(`/rounds/${nextRound}`)
   }
 
-  const bgColor = data.state === 0 ? "#B1F16C" : "#E1E1E1"
+  const bgColor = data?.state === 0 ? "#B1F16C" : "#E1E1E1"
 
   // State to store the client width
   const [clientWidth, setClientWidth] = useState(document.body.clientWidth)
@@ -104,11 +105,15 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
             <Box w={1.5} h={1.5} borderRadius={"full"} bg="gray" />
             <HStack spacing={2} align={"center"}>
               <Skeleton isLoaded={!isLoading}>
-                <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
+                <Text>
+                  {!!data?.voteStartTimestamp ? dayjs.unix(data.voteStartTimestamp).format("D MMMM") : "8 February"}
+                </Text>
               </Skeleton>
               <Icon as={FaArrowRight} />
               <Skeleton isLoaded={!isLoading}>
-                <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
+                <Text>
+                  {!!data?.voteEndTimestamp ? dayjs.unix(data.voteEndTimestamp).format("D MMMM") : "8 February"}
+                </Text>
               </Skeleton>
             </HStack>
             <AllocationStateBadge roundId={roundId} renderIcon={isActive} />
@@ -160,11 +165,13 @@ export const AllocationRoundNavbar = ({ roundId }: { roundId: string }) => {
 
         <HStack spacing={2} align={"center"}>
           <Skeleton isLoaded={!isLoading}>
-            <Text>{!isLoading ? data?.voteStartTimestamp?.format("D MMMM") : "8 February"}</Text>
+            <Text>
+              {!!data?.voteStartTimestamp ? dayjs.unix(data.voteStartTimestamp).format("D MMMM") : "8 February"}
+            </Text>
           </Skeleton>
           <Icon as={FaArrowRight} />
           <Skeleton isLoaded={!isLoading}>
-            <Text>{!isLoading ? data?.voteEndTimestamp?.format("D MMMM") : "8 February"}</Text>
+            <Text>{!!data?.voteEndTimestamp ? dayjs.unix(data.voteEndTimestamp).format("D MMMM") : "8 February"}</Text>
           </Skeleton>
         </HStack>
       </VStack>
