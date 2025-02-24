@@ -15,8 +15,12 @@ export const useMissingActionsLabel = ({
   isUserDelegatee: boolean
 }) => {
   const { t } = useTranslation()
+  const delegatorQualified = missingActions === 0 && !isUserDelegatee
 
   const short = useMemo(() => {
+    if (delegatorQualified) {
+      return t("Qualified to vote")
+    }
     if (isUserDelegatee)
       return t(`Your delegator needs {{missingActions}} more action${missingActions > 1 ? "s" : ""}`, {
         missingActions,
@@ -25,6 +29,10 @@ export const useMissingActionsLabel = ({
   }, [t, missingActions, isUserDelegatee])
 
   const long = useMemo(() => {
+    if (delegatorQualified) {
+      return t("You are qualified to vote and your voting power is managed by your delegatee.")
+    }
+
     if (isUserDelegatee)
       return t(
         `Your delegator needs at least {{missingActions}} more action${missingActions > 1 ? "s" : ""} to become able to vote on this round.`,
