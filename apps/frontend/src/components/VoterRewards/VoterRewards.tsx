@@ -1,4 +1,4 @@
-import { useAllocationsRoundsEvents, useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
+import { useAllocationsRoundsEvents, useVotingRewards } from "@/api"
 import { Card, CardBody, Heading, VStack, Text, Button, Box, Image, useDisclosure } from "@chakra-ui/react"
 import { useWallet } from "@vechain/dapp-kit-react"
 import React, { useCallback } from "react"
@@ -15,10 +15,10 @@ import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/cons
 const compactFormatter = getCompactFormatter(4)
 export const VoterRewards: React.FC = () => {
   const { t } = useTranslation()
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
+
   const { account } = useWallet()
 
-  const roundsRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
+  const roundsRewardsQuery = useVotingRewards(account ?? undefined)
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
 
   const { isOpen, onClose, onOpen } = useDisclosure()
