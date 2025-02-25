@@ -8,38 +8,24 @@ import { GMNFTListItem } from "./GMNFTListItem"
 import { useMemo } from "react"
 import { FeatureFlagWrapper, BaseTooltip } from "@/components"
 import { FeatureFlag } from "@/constants"
-import { useXNode } from "@/api"
-import {
-  useGetNodeIdAttached,
-  useGetTokenIdAttachedToNode,
-  useSelectedTokenId,
-} from "@/api/contracts/galaxyMember/hooks"
 import { DetachGMToXNodeModal } from "@/app/apps/components/DetachGMToXNodeModal"
+import { useIsXNodeAttachedWhileTransferred } from "@/hooks"
 
 export const GMNFTList = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { data: tokensInfo, isFetchingNextPage, fetchNextPage, hasNextPage } = useGetTokensInfoByOwner(account)
-  const { xNodeId: userXNodeId, isXNodeDelegated, isXNodeAttachedToGM: xNodeHasGMAttached } = useXNode()
-  const { data: selectedTokenId } = useSelectedTokenId()
-  const { data: nodeIdAttachedToToken } = useGetNodeIdAttached(selectedTokenId)
-  const { data: gmAttachedToNode } = useGetTokenIdAttachedToNode(nodeIdAttachedToToken)
+  const { isXNodeAttachedWhileTransferred } = useIsXNodeAttachedWhileTransferred()
 
   const loadMore = () => {
     if (!isFetchingNextPage && hasNextPage) {
       fetchNextPage()
     }
   }
+
   const tokens = useMemo(() => {
     return tokensInfo?.pages.map(page => page.data).flat()
   }, [tokensInfo])
-
-  const isXNodeAttachedAndTransferred = useMemo(() => {
-    if (!isXNodeDelegated && (!userXNodeId || (nodeIdAttachedToToken !== userXNodeId && xNodeHasGMAttached))) {
-      return gmAttachedToNode === selectedTokenId
-    }
-    return false
-  }, [nodeIdAttachedToToken, userXNodeId, isXNodeDelegated, xNodeHasGMAttached, gmAttachedToNode, selectedTokenId])
 
   const detachGmToXNodeModal = useDisclosure()
   const handleDetachOnClick = () => {
@@ -84,7 +70,7 @@ export const GMNFTList = () => {
                 </VStack>
               </InfiniteScroll>
             </VStack>
-            {isXNodeAttachedAndTransferred && (
+            {isXNodeAttachedWhileTransferred && (
               <Button
                 leftIcon={<UilLinkBroken color="#C84968" />}
                 color="#C84968"
