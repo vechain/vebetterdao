@@ -14,7 +14,6 @@ import {
   Button,
 } from "@chakra-ui/react"
 import { t } from "i18next"
-import { Countdown } from "./Countdown"
 
 interface Props {
   isOpen: boolean
@@ -37,7 +36,6 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
       <ModalOverlay />
       <ModalContent rounded={"20px"} pt={10} px={3}>
         <VStack px={5} alignItems={"start"} spacing={6}>
-          <Countdown onOpen={onClose} />
           <Heading size={["lg", "xl"]}>{t("What is a snapshot ?")}</Heading>
         </VStack>
 

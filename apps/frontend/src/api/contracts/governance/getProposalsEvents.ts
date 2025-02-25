@@ -2,6 +2,7 @@ import { abi } from "thor-devkit"
 import { getAllEvents } from "@/api/blockchain/getEvents"
 import { getConfig } from "@repo/config"
 import { B3TRGovernorJson } from "@repo/contracts"
+
 const b3trGovernorAbi = B3TRGovernorJson.abi
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
@@ -83,14 +84,17 @@ export const getProposalsEvents = async (thor: Connex.Thor, proposalId?: string)
     {
       address: GOVERNANCE_CONTRACT,
       topic0: proposalCanceledEvent.signature,
+      topic1: proposalIdBytes,
     },
     {
       address: GOVERNANCE_CONTRACT,
       topic0: proposalExecutedEvent.signature,
+      topic1: proposalIdBytes,
     },
     {
       address: GOVERNANCE_CONTRACT,
       topic0: proposalQueuedEvent.signature,
+      topic1: proposalIdBytes,
     },
     {
       address: GOVERNANCE_CONTRACT,
