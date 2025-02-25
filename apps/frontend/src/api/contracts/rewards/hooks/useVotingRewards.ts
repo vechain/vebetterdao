@@ -6,7 +6,6 @@ import { abi } from "thor-devkit"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
 import { BigNumber } from "bignumber.js"
-import { getCurrentAllocationsRoundIdQueryKey } from "../../xAllocations"
 
 const voterRewardsInterface = VoterRewards__factory.createInterface()
 const voteRewardFragment = voterRewardsInterface.getFunction("getReward").format("json")
@@ -20,13 +19,12 @@ const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
  * @param {string} voter - The address of the voter. If not provided, the rewards for all voters will be fetched.
  * @returns {object} An object containing the status and data of the queries. Refer to the react-query documentation for more details.
  */
-export const useVotingRewards = (voter?: string) => {
+export const useVotingRewards = (currentRoundId: number, voter?: string) => {
   const { thor } = useConnex()
   const queryClient = useQueryClient()
 
-  const currentRoundId: string | undefined = queryClient.getQueryData(getCurrentAllocationsRoundIdQueryKey())
-
-  const lastRoundId = parseInt(currentRoundId ?? "0") - 1
+  //Make sure we don't go below 0
+  const lastRoundId = Math.max(0, currentRoundId - 1)
 
   return useQuery({
     queryKey: getRoundRewardQueryKey(`ALL_TO_ROUND_${lastRoundId}`, voter),
