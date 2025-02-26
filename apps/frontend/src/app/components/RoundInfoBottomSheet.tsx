@@ -4,6 +4,7 @@ import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton } f
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import {
+  ProposalState,
   useAllocationAmount,
   useAllocationsRoundState,
   useCanUserVote,
@@ -18,6 +19,7 @@ import { useRouter } from "next/navigation"
 import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/dapp-kit-react"
+import { useMemo } from "react"
 
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
@@ -28,6 +30,17 @@ export const RoundInfoBottomSheet = () => {
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
 
   const { allocationRound, roundLoading, proposalsToRender } = useRoundProposals(currentRoundId ?? "")
+  // First active, then looking for support (pending + deposit not met), then upcoming (pending + deposit met)
+  const sortedProposals = useMemo(() => {
+    return proposalsToRender.sort((a, b) => {
+      const getPriority = (proposal: (typeof proposalsToRender)[0]) => {
+        if (proposal.state === ProposalState.Active) return 1
+        return 2 // Everything else
+      }
+
+      return getPriority(a) - getPriority(b)
+    })
+  }, [proposalsToRender])
 
   const { data: amounts, isLoading: amountsLoading } = useAllocationAmount(currentRoundId)
 
@@ -193,9 +206,9 @@ export const RoundInfoBottomSheet = () => {
               </Text>
             </VStack>
 
-            {!!proposalsToRender.length ? (
+            {!!sortedProposals.length ? (
               <VStack spacing={4} w="full">
-                {proposalsToRender.map(proposal => (
+                {sortedProposals.map(proposal => (
                   <ProposalCompactCard key={proposal.proposalId} proposal={proposal} />
                 ))}
               </VStack>
