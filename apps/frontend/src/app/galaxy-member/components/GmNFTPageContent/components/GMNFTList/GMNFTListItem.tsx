@@ -45,13 +45,13 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
   const { data: selectedTokenId } = useSelectedTokenId()
   const { isXNodeAttachedToGM: isXNodeAttachedToSelectedGM } = useSelectedGmNft()
   const { data: nodeIdAttachedToToken } = useGetNodeIdAttached(token.tokenId)
-  const { xNodeName, xNodeImage, xNodeId, attachedGMTokenId } = useXNode()
+  const { xNodeName, xNodeImage, xNodeId: userXNodeId, attachedGMTokenId } = useXNode()
   const { data: gmRewardMultiplier } = useLevelMultiplier(token.tokenLevel)
 
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const isGMSelected = useMemo(() => selectedTokenId === token.tokenId, [selectedTokenId, token.tokenId])
-  const currentNFTAttachedToNode = nodeIdAttachedToToken === xNodeId && attachedGMTokenId === token.tokenId
+  const currentNFTAttachedToNode = nodeIdAttachedToToken === userXNodeId && attachedGMTokenId === token.tokenId
 
   const actionButton = useMemo(() => {
     return (
