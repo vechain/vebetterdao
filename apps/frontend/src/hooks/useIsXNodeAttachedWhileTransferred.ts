@@ -12,9 +12,20 @@ export type Props = {
 }
 
 /**
- * Hook to determine if an XNode has been transferred while attached to a GM NFT, and return the attached GM NFT token ID
- * @returns boolean indicating if the selected GM token is attached to a transferred X-Node and the GM NFT IF attached
+ * Hook to determine if a sender transferred an XNode while attached to his own GM NFT
+ *
+ * Steps:
+ * 1. Fetching the node of the user (he should not have one as the sender)
+ * 2. Fetching the XNode that is attached to the selected GM NFT (if there is one)
+ * 3. Checking that user no longer has the node, but the GM, that he owns, is attached to it
+ * 4. If so, the GM NFT is attached while the XNode has been transferred, indicating
+ *    a potential edge case that needs to be handled
+ *
+ * @returns {Props} Object containing:
+ *   - isXNodeAttachedWhileTransferred: boolean indicating if the selected GM token is attached to a transferred X-Node
+ *   - attachedGMTokenId: the GM NFT ID if attached, undefined otherwise
  */
+
 export const useIsXNodeAttachedWhileTransferred = (): Props => {
   const { xNodeId: userXNodeId, isXNodeDelegated, isXNodeAttachedToGM: xNodeHasGMAttached } = useXNode()
   const { data: selectedTokenId } = useSelectedTokenId()
