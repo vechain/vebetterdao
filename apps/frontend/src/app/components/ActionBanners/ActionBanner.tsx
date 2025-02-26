@@ -32,6 +32,7 @@ import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBann
 import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner"
+import { DelegatingBanner } from "./components/DelegatingBanner"
 
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
@@ -40,6 +41,7 @@ import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { UserSignaledBanner } from "./components/UserSignaledBanner"
+import { useIsVeDelegated } from "@/hooks"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -56,6 +58,8 @@ export const ActionBanner = () => {
   }, [])
 
   const { account } = useWallet()
+
+  const { isVeDelegated } = useIsVeDelegated(account ?? "")
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
   const currentRoundId = parseInt(currentRound ?? "0")
@@ -128,6 +132,8 @@ export const ActionBanner = () => {
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
 
+  const showDelegatingBanner = !!account && isVeDelegated && !isLoading
+
   const showCastVoteBanner = !!account && !isLoading && canUserVote
 
   const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
@@ -151,8 +157,9 @@ export const ActionBanner = () => {
   const CantVoteBanner = useMemo(() => {
     if (showSignaledBanner) return <UserSignaledBanner key="user-signaled" />
     if (showLowVthoBanner) return <LowVthoBanner key="low-vtho" />
+    if (showDelegatingBanner) return <DelegatingBanner key="delegating" />
     if (showDoActionBanner) return <DoActionBanner key="do-action" />
-  }, [showSignaledBanner, showLowVthoBanner, showDoActionBanner])
+  }, [showSignaledBanner, showLowVthoBanner, showDoActionBanner, showDelegatingBanner])
 
   //Show one of the banners for creator NFTs
   // Only one of the following banners can be shown at a time
