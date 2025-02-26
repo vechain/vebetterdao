@@ -67,14 +67,25 @@ export const useFilteredProposals = (selectedFilter?: (ProposalFilter | StateFil
     return proposals
   }, [selectedFilter, proposalsWithStateAndDeposit])
 
+  const priorityState = ProposalState.Active
+
   const sortedFilteredProposals = useMemo(() => {
     if (!filteredProposals) return []
 
     const sortedProposals = [...filteredProposals].sort((a, b) => {
-      // sort first by roundId, then by timestamp
+      // sort by priority state first
+      const aIsPriority = a.state === priorityState ? 1 : 0
+      const bIsPriority = b.state === priorityState ? 1 : 0
+
+      // if one is priority and the other is not, the priority one should come first
+      if (aIsPriority !== bIsPriority) return bIsPriority - aIsPriority
+
+      // if both are priority or both are not, sort by roundIs
       const aRoundID = Number(a.roundIdVoteStart)
       const bRoundID = Number(b.roundIdVoteStart)
       if (aRoundID !== bRoundID) return bRoundID - aRoundID
+
+      // if both are in the same round, sort by timestamp
       return b.blockMeta.blockTimestamp - a.blockMeta.blockTimestamp
     })
 
