@@ -21,7 +21,6 @@ export const useIsXNodeAttachedWhileTransferred = (): Props => {
   const { data: nodeIdAttachedToToken } = useGetNodeIdAttached(selectedTokenId)
   const { data: gmAttachedToNode } = useGetTokenIdAttachedToNode(nodeIdAttachedToToken)
 
-  console.log({ gmAttachedToNode, selectedTokenId })
   return useMemo(() => {
     if (!isXNodeDelegated && (!userXNodeId || (nodeIdAttachedToToken !== userXNodeId && xNodeHasGMAttached))) {
       return {

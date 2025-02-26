@@ -49,8 +49,9 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
 
     const clauses = []
 
+    const currentNodeIdAttachedToGM = currentNodeId && currentNodeId !== "0"
     // If GM is attached to another node, add detach clause first
-    if (currentNodeId && currentNodeId !== "0") {
+    if (currentNodeIdAttachedToGM) {
       clauses.push(
         buildClause({
           to: getConfig().galaxyMemberContractAddress,
