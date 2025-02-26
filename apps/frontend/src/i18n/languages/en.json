@@ -226,7 +226,7 @@
   "You can earn actions by using the dApps.": "You can earn actions by using the dApps.",
   "You can’t vote because you have no voting power.": "You can’t vote because you have no voting power.",
   "You can't vote because you haven't accumulated enough actions.": "You can't vote because you haven't accumulated enough actions.",
-  "A snapshot was taken when the round started {{snapshotDate}}. You can earn votes by using the dApps.": "A snapshot was taken when the round started {{snapshotDate}}. You can earn votes by using the dApps.",
+  "A snapshot was taken when the round started {{snapshotDate}}. To vote, complete sustainable actions and swap your B3TR for VOT3.": "A snapshot was taken when the round started {{snapshotDate}}. To vote, complete sustainable actions and swap your B3TR for VOT3.",
   "{{value}}": "{{value}}",
   "Error {{value}}": "Error {{value}}",
   "Something went wrong. Let’s try that again!": "Something went wrong. Let’s try that again!",

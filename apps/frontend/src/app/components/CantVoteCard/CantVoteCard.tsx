@@ -28,7 +28,7 @@ export const CantVoteCard = () => {
   const snapshotDateText = useMemo(() => {
     if (!snapshotTimestamp) return ""
 
-    const date = dayjs(snapshotTimestamp).format("dddd HH:mm")
+    const date = dayjs(snapshotTimestamp).format("MMM D [at] h:mm A")
 
     return `(${date})`
   }, [snapshotTimestamp])
@@ -79,7 +79,7 @@ export const CantVoteCard = () => {
         return {
           title: t("You can’t vote because you have no voting power."),
           description: t(
-            "A snapshot was taken when the round started {{snapshotDate}}. You can earn votes by using the dApps.",
+            "A snapshot was taken when the round started {{snapshotDate}}. To vote, complete sustainable actions and swap your B3TR for VOT3.",
             {
               snapshotDate: snapshotDateText,
             },
