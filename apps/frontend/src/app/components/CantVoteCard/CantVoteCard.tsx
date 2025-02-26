@@ -1,7 +1,9 @@
 import { useAccountLinking, useCanUserVote, useUserDelegation } from "@/api"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { Card, CardBody, HStack, Text, VStack, Button } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 import { useWallet } from "@vechain/dapp-kit-react"
+import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -20,7 +22,16 @@ export const CantVoteCard = () => {
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
 
-  const { hasVotesAtSnapshot, isLoading: canVoteLoading, isPerson } = useCanUserVote()
+  const { hasVotesAtSnapshot, snapshotBlock, isLoading: canVoteLoading, isPerson } = useCanUserVote()
+  const snapshotTimestamp = useEstimateBlockTimestamp({ blockNumber: snapshotBlock })
+
+  const snapshotDateText = useMemo(() => {
+    if (!snapshotTimestamp) return ""
+
+    const date = dayjs(snapshotTimestamp).format("MMM D [at] h:mm A")
+
+    return `(${date})`
+  }, [snapshotTimestamp])
 
   const handleGoToLinking = useCallback(() => {
     router.push("/profile?tab=linked-accounts")
@@ -67,7 +78,12 @@ export const CantVoteCard = () => {
       case "no-votes":
         return {
           title: t("You can’t vote because you have no voting power."),
-          description: "Snapshot is taken every sunday at 23:59 UTC. You can earn votes by using the dApps.",
+          description: t(
+            "A snapshot was taken when the round started {{snapshotDate}}. To vote, complete sustainable actions and swap your B3TR for VOT3.",
+            {
+              snapshotDate: snapshotDateText,
+            },
+          ),
         }
 
       case "no-actions":
@@ -78,7 +94,7 @@ export const CantVoteCard = () => {
       default:
         return null
     }
-  }, [cantVoteReason, t, handleGoToLinking, handleGoToGovernance])
+  }, [cantVoteReason, t, handleGoToGovernance, handleGoToLinking, snapshotDateText])
 
   if (!cantVoteReasonText) return null
 

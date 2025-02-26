@@ -38,6 +38,7 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
     data: !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && isPerson,
     isLoading: hasVotedLoading || stateLoading || votesAtSnapshotLoading || isPersonLoading || roundSnapshotLoading,
     hasVotesAtSnapshot,
+    snapshotBlock: Number(roundInfo.voteStart),
     isPerson,
   }
 }
