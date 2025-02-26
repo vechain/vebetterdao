@@ -6,7 +6,6 @@ import { abi } from "thor-devkit"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
 import { BigNumber } from "bignumber.js"
-import { getCurrentAllocationsRoundId, getCurrentAllocationsRoundIdQueryKey } from "../../xAllocations"
 
 const voterRewardsInterface = VoterRewards__factory.createInterface()
 const voteRewardFragment = voterRewardsInterface.getFunction("getReward").format("json")
@@ -20,21 +19,19 @@ const VOTER_REWARDS_CONTRACT = getConfig().voterRewardsContractAddress
  * @param {string} voter - The address of the voter. If not provided, the rewards for all voters will be fetched.
  * @returns {object} An object containing the status and data of the queries. Refer to the react-query documentation for more details.
  */
-export const useVotingRewards = (voter?: string) => {
+export const useVotingRewards = (currentRoundId: number, voter?: string) => {
   const { thor } = useConnex()
   const queryClient = useQueryClient()
 
+  //Make sure we don't go below 0
+  const lastRoundId = Math.max(0, currentRoundId - 1)
+
   return useQuery({
-    queryKey: getRoundRewardQueryKey("ALL", voter),
+    queryKey: getRoundRewardQueryKey(`ALL_TO_ROUND_${lastRoundId}`, voter),
     enabled: !!thor && !!voter,
     queryFn: async () => {
-      const currentRoundId = await queryClient.ensureQueryData({
-        queryKey: getCurrentAllocationsRoundIdQueryKey(),
-        queryFn: async () => getCurrentAllocationsRoundId(thor),
-      })
-
-      // Get array from 1 to currentRoundId - 1 (if currentRoundId is still active)
-      const rounds = Array.from({ length: parseInt(currentRoundId ?? "0") - 1 }, (_, i) => (i + 1).toString())
+      // Get array from 1 to lastRoundId (if currentRoundId is still active)
+      const rounds = Array.from({ length: lastRoundId }, (_, i) => (i + 1).toString())
       const clauses = rounds.map(roundId => ({
         to: VOTER_REWARDS_CONTRACT,
         value: "0x0",

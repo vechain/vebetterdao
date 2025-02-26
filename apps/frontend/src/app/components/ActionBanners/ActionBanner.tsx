@@ -3,6 +3,7 @@ import {
   useAccountLinking,
   useB3trBalance,
   useCanUserVote,
+  useCurrentAllocationsRoundId,
   useGetDelegatee,
   useUserBotSignals,
   useUserDelegation,
@@ -56,7 +57,9 @@ export const ActionBanner = () => {
 
   const { account } = useWallet()
 
-  const votingRewardsQuery = useVotingRewards(account?.address ?? undefined)
+  const { data: currentRound } = useCurrentAllocationsRoundId()
+  const currentRoundId = parseInt(currentRound ?? "0")
+  const votingRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
 
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
@@ -177,7 +180,8 @@ export const ActionBanner = () => {
   const slides = useMemo(() => {
     const bannerComponents = []
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
-    if (showClaimB3trBanner) bannerComponents.push(<ClaimVotingRewardsBanner key="claim-b3tr" />)
+    if (showClaimB3trBanner)
+      bannerComponents.push(<ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} key="claim-b3tr" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
@@ -187,6 +191,7 @@ export const ActionBanner = () => {
     showCantVoteBanners,
     CantVoteBanner,
     showClaimB3trBanner,
+    votingRewardsQuery,
     showCastVoteBanner,
     showCastVoteInProposalBanners,
     proposalsToVoteBanners,

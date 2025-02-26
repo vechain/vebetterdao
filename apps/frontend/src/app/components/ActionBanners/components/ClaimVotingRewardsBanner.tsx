@@ -5,17 +5,17 @@ import { useDisclosure } from "@chakra-ui/react"
 import { UilGift } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { GenericBanner } from "../../Banners/GenericBanner"
-import { useWallet } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(4)
 
-export const ClaimVotingRewardsBanner = () => {
-  const { t } = useTranslation()
-  const { account } = useWallet()
+export type Props = {
+  roundsRewardsQuery: ReturnType<typeof useVotingRewards>
+}
 
-  const roundsRewardsQuery = useVotingRewards(account?.address ?? undefined)
+export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery }: Props) => {
+  const { t } = useTranslation()
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 

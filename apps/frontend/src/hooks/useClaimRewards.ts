@@ -1,7 +1,12 @@
-import { RoundReward, buildClaimRewardsTx, getB3TrBalanceQueryKey, getRoundRewardQueryKey } from "@/api"
-
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
+import {
+  RoundReward,
+  buildClaimRewardsTx,
+  getB3TrBalanceQueryKey,
+  getRoundRewardQueryKey,
+  useCurrentAllocationsRoundId,
+} from "@/api"
 import { address } from "thor-devkit"
 import { useBuildTransaction } from "./useBuildTransaction"
 
@@ -24,6 +29,11 @@ type useClaimRewardsProps = {
  */
 export const useClaimRewards = ({ roundRewards, onSuccess, onFailure }: useClaimRewardsProps) => {
   const { account } = useWallet()
+  const { data: currentRound } = useCurrentAllocationsRoundId()
+  const currentRoundId = parseInt(currentRound ?? "0")
+
+  //Make sure we don't go below 0
+  const lastRoundId = Math.max(0, currentRoundId - 1)
 
   const buildClauses = useCallback(() => {
     if (!address) throw new Error("address is required")
@@ -34,10 +44,10 @@ export const useClaimRewards = ({ roundRewards, onSuccess, onFailure }: useClaim
 
   const refetchQueryKeys = useMemo(() => {
     return [
-      getRoundRewardQueryKey("ALL", account?.address ?? undefined),
+      getRoundRewardQueryKey(`ALL_TO_ROUND_${lastRoundId}`, account?.address ?? undefined),
       getB3TrBalanceQueryKey(account?.address ?? ""),
     ]
-  }, [account])
+  }, [account?.address, lastRoundId])
 
   return useBuildTransaction({
     clauseBuilder: buildClauses,
