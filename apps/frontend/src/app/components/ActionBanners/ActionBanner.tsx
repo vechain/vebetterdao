@@ -59,7 +59,7 @@ export const ActionBanner = () => {
 
   const { account } = useWallet()
 
-  const { isVeDelegated } = useIsVeDelegated(account ?? "")
+  const { isVeDelegated, isLoading: isVeDelegatedLoading } = useIsVeDelegated(account ?? "")
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
   const currentRoundId = parseInt(currentRound ?? "0")
@@ -131,7 +131,7 @@ export const ActionBanner = () => {
   const showSignaledBanner = !!account && isUserSignaled
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
-  const showDelegatingBanner = !!account && isVeDelegated && !isLoading
+  const showDelegatingBanner = !!account && isVeDelegated && !isVeDelegatedLoading
 
   const showCastVoteBanner = !!account && !isLoading && canUserVote
 
