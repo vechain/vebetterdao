@@ -15,8 +15,9 @@ type Props = {
   quorumQuery: UseQueryResult<string, Error>
   currentVotesQuery: UseQueryResult<string, Error>
   isEnded: boolean
+  showQuorumNeeded?: boolean
 }
-export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }: Props) => {
+export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded, showQuorumNeeded = true }: Props) => {
   const { t } = useTranslation()
 
   const isQuorumReached = useMemo(() => {
@@ -86,16 +87,18 @@ export const ProposalQuorumStatus = ({ quorumQuery, currentVotesQuery, isEnded }
           />
         </Skeleton>
       </Box>
-      <HStack>
-        <Skeleton isLoaded={quorumQueryReady}>
-          <Text color="#252525" fontWeight={600} fontSize={"14px"}>
-            {`${compactFormatter.format(Number(quorumQuery.data ?? 0))} VOT3`}
+      {showQuorumNeeded ? (
+        <HStack>
+          <Skeleton isLoaded={quorumQueryReady}>
+            <Text color="#252525" fontWeight={600} fontSize={"14px"}>
+              {`${compactFormatter.format(Number(quorumQuery.data ?? 0))} VOT3`}
+            </Text>
+          </Skeleton>
+          <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
+            {t("needed for quorum")}
           </Text>
-        </Skeleton>
-        <Text color="#6A6A6A" fontWeight={400} fontSize={"14px"}>
-          {t("needed for quorum")}
-        </Text>
-      </HStack>
+        </HStack>
+      ) : null}
     </VStack>
   )
 }

@@ -19,6 +19,7 @@ type CanUserVoteResult = {
   data: boolean
   isLoading: boolean
   hasVotesAtSnapshot: boolean
+  snapshotBlock: number
   isPersonAtSnapshot: boolean
   isPersonNow: boolean
   isEntity: boolean
@@ -74,6 +75,7 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string): CanUse
       isEntityLoading ||
       isEntityAtSnapshotLoading,
     hasVotesAtSnapshot,
+    snapshotBlock: Number(roundInfo.voteStart),
     isPersonAtSnapshot,
     isPersonNow,
     isEntity,

@@ -1,9 +1,11 @@
 import { useCanUserVote, useUserScore, useUserDelegation } from "@/api"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useMemo, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { useMissingActionsLabel } from "@/hooks"
 import { useRouter } from "next/navigation"
 import { useWallet } from "@vechain/dapp-kit-react"
+import dayjs from "dayjs"
 
 type UserProps = {
   address?: string
@@ -55,9 +57,12 @@ export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps)
     isEntityAtSnapshot,
     hasVotesAtSnapshot,
     isLoading: canVoteLoading,
+    snapshotBlock,
   } = useCanUserVote(address ?? account ?? undefined)
-  const { missingActions, isUserDelegatee, scorePercentage, isLoading: isScoreLoading } = useUserScore(address)
+  const snapshotTimestamp = useEstimateBlockTimestamp({ blockNumber: snapshotBlock })
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
+
+  const { missingActions, isUserDelegatee, scorePercentage, isLoading: isScoreLoading } = useUserScore(address)
   const missingActionsLabel = useMissingActionsLabel({
     missingActions,
     isUserDelegatee,
@@ -87,6 +92,14 @@ export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps)
     return null
   }, [account, isEntity, isDelegator, hasVotesAtSnapshot, isPersonAtSnapshot, isLoading, isEntityAtSnapshot])
 
+  const snapshotDateText = useMemo(() => {
+    if (!snapshotTimestamp) return ""
+
+    const date = dayjs(snapshotTimestamp).format("MMM D [at] h:mm A")
+
+    return `(${date})`
+  }, [snapshotTimestamp])
+
   const cantVoteReasonText = useMemo<CantVoteWarningProps | null>(() => {
     switch (votingStatus) {
       case "delegator":
@@ -106,9 +119,12 @@ export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps)
         }
       case "no-votes":
         return {
-          warningTitle: t("You can’t vote because you have no voting power."),
-          warningDescription: t(
-            "Snapshot is taken every sunday at 23:59 UTC. You can earn actions by using the dApps.",
+          title: t("You can’t vote because you have no voting power."),
+          description: t(
+            "A snapshot was taken when the round started {{snapshotDate}}. To vote, complete sustainable actions and swap your B3TR for VOT3.",
+            {
+              snapshotDate: snapshotDateText,
+            },
           ),
         }
       case "no-actions":
@@ -119,7 +135,7 @@ export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps)
       default:
         return null
     }
-  }, [votingStatus, handleGoToGovernance, handleGoToLinking, t])
+  }, [votingStatus, handleGoToGovernance, handleGoToLinking, t, snapshotDateText])
 
   const qualificationMessages = useMemo<StatusMessages | null>(() => {
     switch (votingStatus) {
