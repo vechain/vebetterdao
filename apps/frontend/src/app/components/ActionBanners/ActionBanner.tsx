@@ -131,9 +131,7 @@ export const ActionBanner = () => {
   const showSignaledBanner = !!account && isUserSignaled
   const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
-
   const showDelegatingBanner = !!account && isVeDelegated && !isLoading
-  console.log({ showDelegatingBanner })
 
   const showCastVoteBanner = !!account && !isLoading && canUserVote
 
