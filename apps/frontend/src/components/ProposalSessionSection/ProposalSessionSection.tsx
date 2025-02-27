@@ -13,6 +13,7 @@ type Props = {
   renderQuroum?: "none" | "upcoming" | "active"
   isEnded?: boolean
   renderTimeline?: React.ReactNode
+  showQuorumNeeded?: boolean
 }
 
 export const ProposalSessionSection = ({
@@ -23,6 +24,7 @@ export const ProposalSessionSection = ({
   renderTimeline,
   isEnded = false,
   renderQuroum = "active",
+  showQuorumNeeded = true,
 }: Props) => {
   const { t } = useTranslation()
 
@@ -47,6 +49,7 @@ export const ProposalSessionSection = ({
                   currentVotesQuery={currentVotesQuery}
                   quorumQuery={quorumQuery}
                   isEnded={isEnded}
+                  showQuorumNeeded={showQuorumNeeded}
                 />
                 <Divider />
                 <ProposalSessionVot3

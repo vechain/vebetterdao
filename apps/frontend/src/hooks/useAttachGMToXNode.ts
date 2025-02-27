@@ -13,7 +13,10 @@ import { buildClause } from "@/utils/buildClause"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
-import { getNodeIdAttachedQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetNodeIdAttached"
+import {
+  getNodeIdAttachedQueryKey,
+  useGetNodeIdAttached,
+} from "@/api/contracts/galaxyMember/hooks/useGetNodeIdAttached"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
@@ -34,6 +37,7 @@ type Props = {
 export const useAttachGMToXNode = ({ onSuccess }: Props) => {
   const { xNodeId } = useXNode()
   const { gmId } = useSelectedGmNft()
+  const { data: currentNodeId } = useGetNodeIdAttached(gmId)
 
   const clauseBuilder = useCallback(() => {
     if (!xNodeId) {
@@ -43,7 +47,24 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
       throw new Error("GM NFT ID is not available")
     }
 
-    return [
+    const clauses = []
+
+    const currentNodeIdAttachedToGM = currentNodeId && currentNodeId !== "0"
+    // If GM is attached to another node, add detach clause first
+    if (currentNodeIdAttachedToGM) {
+      clauses.push(
+        buildClause({
+          to: getConfig().galaxyMemberContractAddress,
+          contractInterface: GalaxyMemberInterface,
+          method: "detachNode",
+          args: [currentNodeId, gmId],
+          comment: `Detach GM NFT id ${gmId} from XNode ${currentNodeId}`,
+        }),
+      )
+    }
+
+    // Add attach clause
+    clauses.push(
       buildClause({
         to: getConfig().galaxyMemberContractAddress,
         contractInterface: GalaxyMemberInterface,
@@ -51,8 +72,10 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
         args: [xNodeId, gmId],
         comment: `Attach XNode ${xNodeId} to GM NFT id ${gmId}`,
       }),
-    ]
-  }, [xNodeId, gmId])
+    )
+
+    return clauses
+  }, [xNodeId, gmId, currentNodeId])
 
   const { account } = useWallet()
 

@@ -50,6 +50,7 @@ export const AllocationRoundSessionInfoCard = ({ roundId }: Props) => {
       userVotesAtSnapshotQuery={userVotesAtSnapshotQuery}
       renderQuroum={isUpcoming ? "upcoming" : "active"}
       isEnded={!isRoundActive}
+      showQuorumNeeded={false}
       renderTimeline={<AllocationRoundTimeline roundId={roundId} />}
     />
   )
