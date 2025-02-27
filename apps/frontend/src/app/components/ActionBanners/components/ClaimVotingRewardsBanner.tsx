@@ -1,22 +1,21 @@
-import { useCurrentAllocationsRoundId, useVotingRewards } from "@/api"
+import { useVotingRewards } from "@/api"
 import { TransactionModal } from "@/components"
 import { useClaimRewards } from "@/hooks/useClaimRewards"
 import { useDisclosure } from "@chakra-ui/react"
 import { UilGift } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { GenericBanner } from "../../Banners/GenericBanner"
-import { useWallet } from "@vechain/dapp-kit-react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(4)
 
-export const ClaimVotingRewardsBanner = () => {
-  const { t } = useTranslation()
-  const { data: currentRoundId } = useCurrentAllocationsRoundId()
-  const { account } = useWallet()
+export type Props = {
+  roundsRewardsQuery: ReturnType<typeof useVotingRewards>
+}
 
-  const roundsRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
+export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery }: Props) => {
+  const { t } = useTranslation()
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 

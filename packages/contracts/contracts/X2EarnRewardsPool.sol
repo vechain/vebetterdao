@@ -54,10 +54,6 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * - Updated the X2EarnApps interface to support node cooldown functionality
  * ----- Version 6 -----
  * - Added distribute with metadata functionality
- * ----- Version 7 -----
- * - Added toggleable pool system to manage rewards and treasury separately
- * - Implemented dual-pool balance tracking
- * - Modified availableFunds to totalBalance
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
@@ -608,7 +604,7 @@ contract X2EarnRewardsPool is
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "7";
+    return "6";
   }
 
   /**
@@ -634,6 +630,9 @@ contract X2EarnRewardsPool is
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.allowedImpactKeys;
   }
+
+
+  
 
   /**
    * @dev Retrieves the VeBetterPassport contract.

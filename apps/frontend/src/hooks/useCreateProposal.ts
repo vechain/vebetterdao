@@ -7,7 +7,7 @@ import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { isZero } from "@repo/utils/FormattingUtils"
-import { getProposalsEventsQueryKey } from "@/api"
+import { getProposalsEventsQueryKey, getProposalUserDepositQueryKey } from "@/api"
 export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
@@ -61,7 +61,7 @@ export const useCreateProposal = ({
   const { account } = useWallet()
   const queryClient = useQueryClient()
 
-  //Refetch queries to update ui after the tx is confirmed
+  // Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
       await queryClient.cancelQueries({
@@ -69,6 +69,12 @@ export const useCreateProposal = ({
       })
       await queryClient.refetchQueries({
         queryKey: getProposalsEventsQueryKey(),
+      })
+      await queryClient.cancelQueries({
+        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
+      })
+      await queryClient.refetchQueries({
+        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
       })
     }
 

@@ -1,4 +1,10 @@
-import { RoundReward, buildClaimRewardsTx, getB3TrBalanceQueryKey, getRoundRewardQueryKey } from "@/api"
+import {
+  RoundReward,
+  buildClaimRewardsTx,
+  getB3TrBalanceQueryKey,
+  getRoundRewardQueryKey,
+  useCurrentAllocationsRoundId,
+} from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
@@ -36,6 +42,11 @@ export const useClaimRewards = ({
 }: useClaimRewardsProps): useClaimRewardsReturnValue => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
+  const { data: currentRound } = useCurrentAllocationsRoundId()
+  const currentRoundId = parseInt(currentRound ?? "0")
+
+  //Make sure we don't go below 0
+  const lastRoundId = Math.max(0, currentRoundId - 1)
 
   const buildClauses = useCallback(
     (roundRewards: RoundReward[]) => {
@@ -51,10 +62,10 @@ export const useClaimRewards = ({
   const handleOnSuccess = useCallback(async () => {
     if (invalidateCache) {
       await queryClient.cancelQueries({
-        queryKey: getRoundRewardQueryKey("ALL", account ?? undefined),
+        queryKey: getRoundRewardQueryKey(`ALL_TO_ROUND_${lastRoundId}`, account ?? undefined),
       })
       await queryClient.refetchQueries({
-        queryKey: getRoundRewardQueryKey("ALL", account ?? undefined),
+        queryKey: getRoundRewardQueryKey(`ALL_TO_ROUND_${lastRoundId}`, account ?? undefined),
       })
 
       await queryClient.cancelQueries({
@@ -67,7 +78,7 @@ export const useClaimRewards = ({
     }
 
     onSuccess?.()
-  }, [account, invalidateCache, onSuccess, queryClient])
+  }, [account, invalidateCache, lastRoundId, onSuccess, queryClient])
 
   const result = useSendTransaction({
     signerAccount: account,

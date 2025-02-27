@@ -374,6 +374,34 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPoolV5.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
 
       // upgrade to new version
+      const x2EarnRewardsPoolV6 = (await upgradeProxy(
+        "X2EarnRewardsPoolV5",
+        "X2EarnRewardsPool",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [],
+        {
+          version: 6,
+        },
+      )) as X2EarnRewardsPool
+
+      expect(await x2EarnRewardsPool.version()).to.equal("6")
+      expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
+      expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
+      // upgrade to new version
+      const x2EarnRewardsPool = (await upgradeProxy(
+        "X2EarnRewardsPoolV5",
+        "X2EarnRewardsPool",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [],
+        {
+          version: 6,
+        },
+      )) as X2EarnRewardsPool
+
+      expect(await x2EarnRewardsPool.version()).to.equal("6")
+      expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
+      expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
+      // upgrade to new version
       const x2EarnRewardsPool = (await upgradeProxy(
         "X2EarnRewardsPoolV5",
         "X2EarnRewardsPool",
@@ -544,11 +572,10 @@ describe("X2EarnRewardsPool - @shard12", function () {
         await x2EarnRewardsPoolV1.getAddress(),
         [],
         {
-          version: 7,
+          version: 6,
         },
       )) as X2EarnRewardsPool
-
-      expect(await x2EarnRewardsPool.version()).to.equal("7")
+      expect(await x2EarnRewardsPool.version()).to.equal("5")
       expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
 

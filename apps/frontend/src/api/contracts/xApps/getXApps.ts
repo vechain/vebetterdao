@@ -1,19 +1,25 @@
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
 import { abi } from "thor-devkit"
+import dayjs from "dayjs"
+
 const X2EARNAPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
 const unendorsedAppsFragment = X2EarnApps.createInterface().getFunction("unendorsedApps").format("json")
 const unendorsedAppsAbi = new abi.Function(JSON.parse(unendorsedAppsFragment))
 const allAppsFragment = X2EarnApps.createInterface().getFunction("apps").format("json")
 const allAppsAbi = new abi.Function(JSON.parse(allAppsFragment))
+const isBlacklistedFragment = X2EarnApps.createInterface().getFunction("isBlacklisted").format("json")
+const isBlacklistedAbi = new abi.Function(JSON.parse(isBlacklistedFragment))
+
+const NEW_APP_PERIOD_SECONDS = 604800 // Considering a new app is defined as 7 days
 
 /**
  * xApp type
- * @property id  the xApp id
- * @property teamWalletAddress  the xApp address
- * @property name  the xApp name
- * @property metadataURI  the xApp metadata URI
- * @property createdAtTimestamp timestamp when xApp was added
+ * @property id - the xApp id
+ * @property teamWalletAddress - the xApp address
+ * @property name - the xApp name
+ * @property metadataURI - the xApp metadata URI
+ * @property createdAtTimestamp - timestamp when xApp was added
  */
 export type XApp = {
   id: string
@@ -21,10 +27,27 @@ export type XApp = {
   name: string
   metadataURI: string
   createdAtTimestamp: string
+  isNew: boolean
 }
 
+/**
+ * UnendorsedApp type
+ * @property appAvailableForAllocationVoting - whether the app is available for allocation voting
+ */
 export type UnendorsedApp = XApp & {
   appAvailableForAllocationVoting: boolean
+}
+
+type GetAllApps = {
+  allApps: (XApp | UnendorsedApp)[]
+  active: XApp[]
+  unendorsed: UnendorsedApp[]
+  newLookingForEndorsement: UnendorsedApp[]
+  othersLookingForEndorsement: UnendorsedApp[]
+  endorsed: XApp[]
+  newApps: XApp[]
+  gracePeriod: UnendorsedApp[]
+  endorsementLost: UnendorsedApp[]
 }
 
 /**
@@ -33,13 +56,6 @@ export type UnendorsedApp = XApp & {
  * @param thor  the thor client
  * @returns  all the available xApps in the ecosystem capped to 256 see {@link XApp}
  */
-
-type GetAllApps = {
-  active: XApp[]
-  unendorsed: UnendorsedApp[]
-  allApps: (XApp | UnendorsedApp)[]
-  endorsed: XApp[]
-}
 export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
   const clauses = [
     {
@@ -57,33 +73,35 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
   const res = await thor.explain(clauses).execute()
 
   const error = res.find(r => r.reverted)?.revertReason
-
   if (error) throw new Error(error ?? "Error fetching xApps")
 
   let apps: XApp[] = []
   let unendorsedApps: UnendorsedApp[] = []
+  type DecodedApp = [string, string, string, string, string, boolean]
 
   if (res[0]?.data) {
-    const appsDecoded = allAppsAbi.decode(res[0]?.data)[0]
+    const appsDecoded = allAppsAbi.decode(res[0]?.data)[0] as DecodedApp[]
     if (appsDecoded.length) {
-      apps = appsDecoded.map((app: any) => ({
+      apps = appsDecoded.map(app => ({
         id: app[0],
         teamWalletAddress: app[1],
         name: app[2],
         metadataURI: app[3],
         createdAtTimestamp: app[4],
+        isNew: dayjs().unix() - Number(app[4]) <= NEW_APP_PERIOD_SECONDS,
       }))
     }
   }
   if (res[1]?.data) {
-    const unendorsedAppsDecoded = unendorsedAppsAbi.decode(res[1]?.data)[0]
+    const unendorsedAppsDecoded = unendorsedAppsAbi.decode(res[1]?.data)[0] as DecodedApp[]
     if (unendorsedAppsDecoded.length) {
-      unendorsedApps = unendorsedAppsDecoded.map((app: any) => ({
+      unendorsedApps = unendorsedAppsDecoded.map((app: DecodedApp) => ({
         id: app[0],
         teamWalletAddress: app[1],
         name: app[2],
         metadataURI: app[3],
         createdAtTimestamp: app[4],
+        isNew: false,
         appAvailableForAllocationVoting: app[5],
       }))
     }
@@ -93,10 +111,40 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
     (app, index, self) => self.findIndex(a => a.id === app.id) === index,
   ) // all apps is a union of active and unendorsed apps with deduplication
 
+  // Fetch blacklisted apps from dedup list to avoid unnecessary calls
+  const clauses2 = allApps.map(app => ({
+    to: X2EARNAPPS_CONTRACT,
+    value: 0,
+    data: isBlacklistedAbi.encode(app.id),
+  }))
+  const res2 = await thor.explain(clauses2).execute()
+  const blacklistedApps = res2.map((r, index) => {
+    if (r.reverted) throw new Error(`Clause ${index + 1} reverted: ${r.revertReason}`)
+    return isBlacklistedAbi.decode(r.data)
+  })
+
+  // Filter out blacklisted apps
+  const allAppsFiltered = allApps.filter((_app, index) => blacklistedApps[index]?.[0] === false)
+  const allowedAppIds = new Set(allAppsFiltered.map(app => app.id))
+
+  // Filter apps and unendorsed apps based on allowedAppIds
+  const appsFiltered = apps.filter(app => allowedAppIds.has(app.id))
+  const unendorsedAppsFiltered = unendorsedApps.filter(app => allowedAppIds.has(app.id))
+
+  const isNewLookingForEndorsement = (xApp: UnendorsedApp) => xApp.createdAtTimestamp === "0"
+  const othersLookingForEndorsement = unendorsedAppsFiltered.filter(xApp => !isNewLookingForEndorsement(xApp))
+  const isInGracePeriod = (xApp: UnendorsedApp) => xApp.appAvailableForAllocationVoting
+  const hasLostEndorsement = (xApp: UnendorsedApp) => !xApp.appAvailableForAllocationVoting
+
   return {
-    allApps: allApps,
-    active: apps,
-    unendorsed: unendorsedApps,
-    endorsed: apps.filter(app => !unendorsedApps.some(unendorsedApp => unendorsedApp.id === app.id)),
+    allApps: allAppsFiltered,
+    active: appsFiltered,
+    unendorsed: unendorsedAppsFiltered,
+    newLookingForEndorsement: unendorsedAppsFiltered.filter(isNewLookingForEndorsement),
+    othersLookingForEndorsement,
+    endorsed: appsFiltered.filter(app => !unendorsedAppsFiltered.some(uApp => uApp.id === app.id)),
+    newApps: allAppsFiltered.filter(xApp => xApp.isNew),
+    gracePeriod: othersLookingForEndorsement?.filter(isInGracePeriod),
+    endorsementLost: othersLookingForEndorsement?.filter(hasLostEndorsement),
   }
 }

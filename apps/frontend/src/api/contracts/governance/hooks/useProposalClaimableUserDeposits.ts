@@ -1,12 +1,43 @@
 import { useQuery } from "@tanstack/react-query"
 import { useConnex } from "@vechain/dapp-kit-react"
-import { useMemo } from "react"
 import { getProposalUserDepositQueryKey, proposalDepositAbi } from "./useProposalUserDeposit"
 import { queryClient } from "@/api/QueryProvider"
-import { useProposalsEvents } from "./useProposalsEvents"
 import { getConfig } from "@repo/config"
+import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
+import { ProposalFilter, StateFilter } from "@/store"
 
 const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress
+
+// Filters for proposals that have claimable deposits
+const CLAIMABLE_STATES = [
+  ProposalFilter.InThisRound, // Active
+  StateFilter.Canceled,
+  StateFilter.Defeated,
+  StateFilter.Succeeded,
+  StateFilter.Queued,
+  StateFilter.Executed,
+  StateFilter.DepositNotMet,
+]
+
+/**
+ * Processes and caches the claimable deposits.
+ */
+const processDeposits = (res: any[], filteredProposals: any[], userAddress: string) => {
+  return res
+    .map((r, index) => {
+      if (r.reverted) throw new Error(`Clause ${index + 1} reverted: ${r.revertReason}`)
+
+      const decoded = proposalDepositAbi.decode(r.data)
+      const proposalId = filteredProposals[index]?.proposalId as string
+      const deposit = decoded[0] as string
+
+      // Cache individual proposal deposit
+      queryClient.setQueryData(getProposalUserDepositQueryKey(proposalId, userAddress), deposit)
+
+      return { proposalId, deposit }
+    })
+    .filter(({ deposit }) => deposit !== "0") // Remove zero deposits
+}
 
 /**
  * Custom React hook that fetches and monitors claimable user deposits for each proposal.
@@ -21,38 +52,27 @@ const GOVERNOR_CONTRACT = getConfig().b3trGovernorAddress
  */
 export const useProposalClaimableUserDeposits = (userAddress: string) => {
   const { thor } = useConnex()
-  const { data: proposals } = useProposalsEvents()
 
-  const proposalIds = useMemo(() => {
-    return proposals?.created.map(proposal => proposal.proposalId) ?? []
-  }, [proposals])
+  const { filteredProposals, isLoading: filteredProposalsLoading } = useFilteredProposals(CLAIMABLE_STATES)
 
   return useQuery({
-    queryKey: getProposalUserDepositQueryKey("ALL", userAddress),
-    enabled: !!thor && !!userAddress && !!proposalIds,
+    queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", userAddress),
+    enabled: !!thor && !!userAddress && !filteredProposalsLoading,
     queryFn: async () => {
-      const clauses = proposalIds.map(proposalId => ({
+      // Prepare the clauses to fetch relevant user deposits
+      const clauses = filteredProposals.map(proposal => ({
         to: GOVERNOR_CONTRACT,
         value: "0x0",
-        data: proposalDepositAbi.encode(proposalId, userAddress),
+        data: proposalDepositAbi.encode(proposal.proposalId, userAddress),
       }))
 
       const res = await thor.explain(clauses).execute()
+      const claimableDeposits = processDeposits(res, filteredProposals, userAddress)
 
-      const proposalsDeposit = res.map((r, index) => {
-        const decoded = proposalDepositAbi.decode(r.data)
-        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
-        const proposalId = proposalIds[index] as string
-        const deposit = decoded[0] as string
-
-        queryClient.setQueryData(getProposalUserDepositQueryKey(proposalId, userAddress), deposit)
-        return {
-          proposalId,
-          deposit,
-        }
-      })
-
-      return proposalsDeposit
+      return {
+        claimableDeposits,
+        totalClaimableDeposits: claimableDeposits.reduce((acc, { deposit }) => acc + BigInt(deposit), BigInt(0)),
+      }
     },
   })
 }

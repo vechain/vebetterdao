@@ -74,16 +74,18 @@ export const AppVotesHorizontalChart = ({
     <VStack spacing={4} align={"flex-start"} w="full">
       <HStack justify={"space-between"} w="full" align="center">
         <HStack spacing={3} align={"center"} justify={"flex-start"}>
-          <Skeleton isLoaded={!isLogoLoading} boxSize={["48px", "48px", "48px"]}>
-            <Image
-              _hover={{ cursor: "pointer", transform: "scale(1.05)", transition: "transform 0.2s" }}
-              onClick={onIconClick}
-              src={logo?.image ?? notFoundImage}
-              w="full"
-              borderRadius="9px"
-              alt={appMetadata?.name}
-            />
-          </Skeleton>
+          <VStack spacing={0} align={"flex-start"}>
+            <Skeleton isLoaded={!isLogoLoading} boxSize={["48px", "48px", "48px"]}>
+              <Image
+                _hover={{ cursor: "pointer", transform: "scale(1.05)", transition: "transform 0.2s" }}
+                onClick={onIconClick}
+                src={logo?.image ?? notFoundImage}
+                w="full"
+                borderRadius="9px"
+                alt={appMetadata?.name}
+              />
+            </Skeleton>
+          </VStack>
           <VStack spacing={0} align={"flex-start"}>
             <Heading fontSize={["16px"]} fontWeight={600}>
               {appMetadata?.name}

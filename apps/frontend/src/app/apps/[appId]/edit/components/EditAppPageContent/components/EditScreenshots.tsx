@@ -1,12 +1,12 @@
-import { Box, Button, HStack, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
+import { Button, HStack, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
 import { Controller, UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { ChangeEvent, useCallback, useRef, useState } from "react"
-import { UilTrash, UilUpload } from "@iconscout/react-unicons"
+import { UilDraggabledots, UilTrash, UilUpload } from "@iconscout/react-unicons"
 import { EditAppForm } from ".."
 import { imageListCompression } from "@/utils/imageListCompression"
 import { blobToBase64 } from "@/utils/BlobUtils"
-import { Reorder } from "framer-motion"
+import { Reorder, useDragControls } from "framer-motion"
 
 type Props = {
   form: UseFormReturn<EditAppForm, any, undefined>
@@ -88,59 +88,82 @@ export const EditScreenshots = ({ form }: Props) => {
           whiteSpace: "nowrap",
         }}>
         {screenshots.map((screenshot, index) => (
-          <Reorder.Item
+          <DraggableScreenshot
             key={screenshot}
-            value={screenshot}
-            as="div"
-            style={{
-              display: "inline-block",
-              width: "auto",
-              height: "400px",
-              margin: "0 8px",
-              position: "relative",
-            }}>
-            <Box
-              width="auto"
-              height="400px"
-              position="relative"
-              rounded={"8px"}
-              overflow={"hidden"}
-              _hover={{
-                cursor: "grab",
-                border: "2px solid black",
-              }}
-              border="2px solid transparent"
-              boxSizing="border-box">
-              <Image
-                src={screenshot}
-                alt={`Screenshot ${index + 1}`}
-                h="full"
-                objectFit="cover"
-                maxW="none"
-                draggable="false"
-              />
-              <IconButton
-                rounded="full"
-                color="#D23F63"
-                bgColor="#FCEEF1"
-                _hover={{ bgColor: "#FCEEF1DD" }}
-                aria-label="Delete screenshot"
-                icon={<UilTrash size="24px" />}
-                position="absolute"
-                top={2}
-                right={2}
-                colorScheme="red"
-                onClick={() => {
-                  form.setValue(
-                    "screenshots",
-                    screenshots.filter((_, i) => i !== index),
-                  )
-                }}
-              />
-            </Box>
-          </Reorder.Item>
+            screenshot={screenshot}
+            index={index}
+            screenshots={screenshots}
+            form={form}
+          />
         ))}
       </Reorder.Group>
     </VStack>
+  )
+}
+const DraggableScreenshot = ({
+  key,
+  screenshot,
+  index,
+  screenshots,
+  form,
+}: {
+  key: string
+  screenshot: string
+  index: number
+  screenshots: string[]
+  form: UseFormReturn<EditAppForm, any, undefined>
+}) => {
+  const dragControls = useDragControls()
+
+  return (
+    <Reorder.Item
+      key={key}
+      value={screenshot}
+      as="div"
+      style={{
+        display: "inline-block",
+        width: "auto",
+        height: "400px",
+        margin: "0 8px",
+        position: "relative",
+        maxWidth: "80vw",
+      }}
+      dragListener={false}
+      dragControls={dragControls}>
+      <HStack
+        bg="rgba(0, 0, 0, 0.2)"
+        width="100%"
+        height="50px"
+        position="absolute"
+        top={0}
+        justifyContent="space-between"
+        padding="8px"
+        style={{ touchAction: "none" }}>
+        <IconButton
+          rounded="full"
+          color="white"
+          bgColor="transparent"
+          _hover={{ bgColor: "gray.600" }}
+          aria-label="Drag screenshot"
+          icon={<UilDraggabledots size="24px" />}
+          onPointerDown={event => dragControls.start(event)}
+        />
+        <IconButton
+          rounded="full"
+          color="#D23F63"
+          bgColor="#FCEEF1"
+          _hover={{ bgColor: "#FCEEF1DD" }}
+          aria-label="Delete screenshot"
+          icon={<UilTrash size="24px" />}
+          onClick={() => {
+            form.setValue(
+              "screenshots",
+              screenshots.filter((_, i) => i !== index),
+            )
+          }}
+        />
+      </HStack>
+      <Image src={screenshot} alt={`Screenshot ${index + 1}`} h="full" objectFit="contain" draggable="false" />
+    </Reorder.Item>
   )
 }

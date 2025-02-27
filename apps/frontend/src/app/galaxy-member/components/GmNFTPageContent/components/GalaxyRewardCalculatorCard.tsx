@@ -1,0 +1,33 @@
+import { Button, Card, CardBody, Heading, Text, VStack } from "@chakra-ui/react"
+import { useTranslation } from "react-i18next"
+import { UilCalculatorAlt } from "@iconscout/react-unicons"
+import { useRouter } from "next/navigation"
+
+export const GalaxyRewardCalculatorCard = () => {
+  const { t } = useTranslation()
+
+  const router = useRouter()
+
+  const goToCalculator = () => {
+    router.push("/galaxy-member/rewards-calculator")
+  }
+
+  return (
+    <Card variant="baseWithBorder">
+      <CardBody>
+        <VStack align="stretch" gap={6}>
+          <VStack align="stretch">
+            <Heading fontSize="lg">{t("GM Reward Calculator")}</Heading>
+            <Text fontSize="sm" color="#6A6A6A">
+              {t("Estimate your rewards based on your GM NFT level, and potential upgrades")}
+            </Text>
+          </VStack>
+
+          <Button onClick={goToCalculator} leftIcon={<UilCalculatorAlt color="#004CFC" />} variant={"primarySubtle"}>
+            {t("Estimate Rewards")}
+          </Button>
+        </VStack>
+      </CardBody>
+    </Card>
+  )
+}

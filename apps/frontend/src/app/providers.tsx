@@ -11,6 +11,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { DappKitWithChakraProvider } from "@/providers/DappKitWithChakraProvider"
 import { lightTheme } from "./theme"
 import { AuthSessionProvider } from "@/providers/AuthSessionProvider"
+import { Analytics } from "@vercel/analytics/react"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -23,6 +24,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           </DappKitWithChakraProvider>
         </ChakraProvider>
       </PersistQueryClientProvider>
+      <Analytics />
     </CacheProvider>
   )
 }
