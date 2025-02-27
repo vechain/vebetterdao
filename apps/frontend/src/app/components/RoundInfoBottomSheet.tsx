@@ -30,7 +30,7 @@ export const RoundInfoBottomSheet = () => {
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
 
   const { allocationRound, roundLoading, proposalsToRender } = useRoundProposals(currentRoundId ?? "")
-  // First active, then looking for support (pending + deposit not met), then upcoming (pending + deposit met)
+  // First active, then looking for support (pending + deposit not met)
   const sortedProposals = useMemo(() => {
     return proposalsToRender.sort((a, b) => {
       const getPriority = (proposal: (typeof proposalsToRender)[0]) => {
