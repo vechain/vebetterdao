@@ -1,11 +1,11 @@
-import { useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
+import { ProposalState, useAllocationsRound, useCurrentAllocationsRoundId } from "@/api"
 import { DotSymbol, ProposalCompactCard, ResponsiveCard } from "@/components"
 import { AllocationRoundCard } from "@/components/AllocationRoundsList/components/AllocationRoundCard"
 import { useBreakpoints } from "@/hooks"
 import { Button, Heading, HStack, Icon, IconButton, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa6"
 import { NoActiveProposalCard } from "../NoActiveProposalCard"
@@ -33,6 +33,17 @@ export const DashboardAllocationRounds = () => {
   }
 
   const { allocationRound, proposalsToRender } = useRoundProposals(selectedRoundId ?? "1")
+  // First active, then looking for support (pending + deposit not met)
+  const sortedProposals = useMemo(() => {
+    return proposalsToRender.sort((a, b) => {
+      const getPriority = (proposal: (typeof proposalsToRender)[0]) => {
+        if (proposal.state === ProposalState.Active) return 1
+        return 2 // Everything else
+      }
+
+      return getPriority(a) - getPriority(b)
+    })
+  }, [proposalsToRender])
 
   return (
     <ResponsiveCard>
@@ -104,12 +115,12 @@ export const DashboardAllocationRounds = () => {
         {selectedRoundId && <AllocationRoundCard roundId={selectedRoundId} />}
         <VStack spacing={4} w="full">
           <Heading fontSize="24px" fontWeight={400}>
-            {t("Proposals in this round")}
+            {t("Proposals in this round or looking for support")}
           </Heading>
 
-          {!!proposalsToRender.length ? (
+          {!!sortedProposals.length ? (
             <VStack spacing={4} w="full">
-              {proposalsToRender.map(proposal => (
+              {sortedProposals.map(proposal => (
                 <ProposalCompactCard key={proposal.proposalId} proposal={proposal} />
               ))}
             </VStack>
