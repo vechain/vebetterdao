@@ -133,6 +133,7 @@ export const ActionBanner = () => {
   const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
 
   const showDelegatingBanner = !!account && isVeDelegated && !isLoading
+  console.log({ showDelegatingBanner })
 
   const showCastVoteBanner = !!account && !isLoading && canUserVote
 
@@ -153,7 +154,7 @@ export const ActionBanner = () => {
   // 1 - User is signaled
   // 2 - User has low VTHO
   // 3 - User has to do some action
-  const showCantVoteBanners = showSignaledBanner || showLowVthoBanner || showDoActionBanner
+  const showCantVoteBanners = showSignaledBanner || showLowVthoBanner || showDoActionBanner || showDelegatingBanner
   const CantVoteBanner = useMemo(() => {
     if (showSignaledBanner) return <UserSignaledBanner key="user-signaled" />
     if (showLowVthoBanner) return <LowVthoBanner key="low-vtho" />

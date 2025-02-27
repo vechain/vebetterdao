@@ -1,4 +1,5 @@
-import { useTranslation } from "react-i18next"
+import { Text } from "@chakra-ui/react"
+import { useTranslation, Trans } from "react-i18next"
 import { UilInfoCircle } from "@iconscout/react-unicons"
 
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
@@ -6,23 +7,34 @@ import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 export const DelegatingBanner = () => {
   const { t } = useTranslation()
 
-  const description = t(
-    "Your voting power has been transferred to VeDelegate. To be able to vote, you must be the primary account at snapshot.",
-  )
-
   const whatIsVeDelegate = () => {
     window.open("https://docs.vedelegate.vet/faq#what-is-a-vepassport", "_blank", "noopener noreferrer")
   }
+
+  const goToVeDelegate = () => {
+    window.open("https://vedelegate.vet", "_blank", "noopener noreferrer")
+  }
+
+  const description = (
+    <Text fontSize="lg" fontWeight="700" color="#5F4400">
+      <Trans
+        i18nKey="Your voting power has been transferred to <platform>veDelegate.vet</platform> which does vote automatically on your behalf. If you want to vote here, you must undelegate before snapshot."
+        components={{
+          platform: <Text as="span" cursor="pointer" fontWeight="900" onClick={goToVeDelegate} />,
+        }}
+      />
+    </Text>
+  )
 
   return (
     <>
       <GenericBanner
         title={t("Voting Power Delegated")}
         description={description}
-        logoSrc="https://vedelegate.vet/logo.eac72ee8.svg"
+        logoSrc="/images/logo/veDelegate.svg"
         backgroundColor="#FFD979"
         backgroundImageSrc=""
-        buttonLabel={t("Know more")}
+        buttonLabel={t("Learn more")}
         onButtonClick={whatIsVeDelegate}
         buttonVariant="outline"
         buttonIcon={<UilInfoCircle />}
