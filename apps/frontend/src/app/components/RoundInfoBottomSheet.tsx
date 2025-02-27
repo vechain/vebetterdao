@@ -199,7 +199,7 @@ export const RoundInfoBottomSheet = () => {
           <VStack spacing={4} w="full" align="flex-start">
             <VStack spacing={2} w="full" align="flex-start">
               <Heading fontSize="18px" fontWeight={700}>
-                {t("Proposals in this round")}
+                {t("Proposals in this round or looking for support")}
               </Heading>
               <Text fontSize="12px" fontWeight={400} color="#6A6A6A">
                 {t("Proposals shape the ecosystem. Vote on ideas and build our community together!")}

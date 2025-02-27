@@ -282,7 +282,7 @@
   "Vote didn't start": "Vote didn't start",
   "Starting {{date}}": "Starting {{date}}",
   "Ending {{date}}": "Ending {{date}}",
-  "Proposals in this round": "Proposals in this round",
+  "Proposals in this round or looking for support": "Proposals in this round or looking for support",
   "{{from}} to {{to}}": "{{from}} to {{to}}",
   "We're in Round #{{round}}": "We're in Round <strong> #{{round}} </strong>",
   "{{amount}}% distributed": "<strong>{{amount}}</strong>% distributed",
