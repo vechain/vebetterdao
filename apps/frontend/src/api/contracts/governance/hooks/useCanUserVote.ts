@@ -21,6 +21,7 @@ type CanUserVoteResult = {
   hasVotesAtSnapshot: boolean
   snapshotBlock: number
   isPersonAtSnapshot: boolean
+  isPersonAtSnapshotReason: string
   isPersonNow: boolean
   isEntity: boolean
   isEntityAtSnapshot: boolean
@@ -50,8 +51,8 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string): CanUse
   const isVotingConcluded = [1, 2].includes(state ?? 0)
 
   // Get both at snapshot and current status
-  const { data: isPersonAtSnapshot, isLoading: isPersonAtSnapshotLoading } = useIsPersonAtTimepoint(
-    delegateeAddress ?? parsedAccount,
+  const { data: isPersonAtSnapshotResult, isLoading: isPersonAtSnapshotLoading } = useIsPersonAtTimepoint(
+    delegateeAddress ?? parsedAccount ?? "",
     roundSnapshot,
   )
   const { data: isPersonNow, isLoading: isPersonNowLoading } = useIsPerson(delegateeAddress ?? parsedAccount)
@@ -61,7 +62,10 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string): CanUse
     roundSnapshot,
   )
 
-  const canVote = !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && !isEntityAtSnapshot && isPersonAtSnapshot
+  const isPersonAtSnapshot = isPersonAtSnapshotResult?.isPersonAtTimepoint ?? false
+  const isPersonAtSnapshotReason = isPersonAtSnapshotResult?.reason ?? ""
+
+  const canVote = !hasVoted && !isVotingConcluded && hasVotesAtSnapshot && isPersonAtSnapshot
 
   return {
     data: canVote,
@@ -77,6 +81,7 @@ export const useCanUserVote = (user?: string, delegateeAddress?: string): CanUse
     hasVotesAtSnapshot,
     snapshotBlock: Number(roundInfo.voteStart),
     isPersonAtSnapshot,
+    isPersonAtSnapshotReason,
     isPersonNow,
     isEntity,
     isEntityAtSnapshot,

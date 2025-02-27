@@ -119,8 +119,8 @@ export const useVotingStatusMessages = ({ address, isConnectedUser }: UserProps)
         }
       case "no-votes":
         return {
-          title: t("You can’t vote because you have no voting power."),
-          description: t(
+          warningTitle: t("You can’t vote because you have no voting power."),
+          warningDescription: t(
             "A snapshot was taken when the round started {{snapshotDate}}. To vote, complete sustainable actions and swap your B3TR for VOT3.",
             {
               snapshotDate: snapshotDateText,
