@@ -14,7 +14,12 @@ import { useIsXNodeAttachedWhileTransferred } from "@/hooks"
 export const GMNFTList = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: tokensInfo, isFetchingNextPage, fetchNextPage, hasNextPage } = useGetTokensInfoByOwner(account?.address)
+  const {
+    data: tokensInfo,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useGetTokensInfoByOwner(account?.address ?? "")
   const { isXNodeAttachedWhileTransferred } = useIsXNodeAttachedWhileTransferred()
 
   const loadMore = () => {
