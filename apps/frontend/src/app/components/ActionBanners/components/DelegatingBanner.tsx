@@ -18,7 +18,7 @@ export const DelegatingBanner = () => {
   const description = (
     <Text fontSize="lg" fontWeight="700" color="#5F4400">
       <Trans
-        i18nKey="Your voting power has been transferred to <platform>veDelegate.vet</platform> which does vote automatically on your behalf. If you want to vote here, you must undelegate before snapshot."
+        i18nKey="Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. If you want to vote here, you must remove delegation on veDelegate before snapshot."
         components={{
           platform: <Text as="span" cursor="pointer" fontWeight="900" onClick={goToVeDelegate} />,
         }}
