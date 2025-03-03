@@ -41,11 +41,12 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "XAllocation Pool": {
     name: "x-allocation-pool",
     configAddressField: "xAllocationPoolContractAddress",
-    versions: ["v2", "v3", "v4"],
+    versions: ["v2", "v3", "v4", "v5"],
     descriptions: {
       v2: "Add the abilty to toggle quadratic funding on and off.",
       v3: "Update X2Earn interface to include new endorsement feature",
       v4: "Update X2Earn interface to include node cooldown feature",
+      v5: "Updated X2EarnRewardsPool interface to support app rewards management feature",
     },
   },
   X2EarnApps: {

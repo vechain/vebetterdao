@@ -646,7 +646,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
    * @return string The version of the contract
    */
   function version() external pure virtual returns (string memory) {
-    return "4";
+    return "5";
   }
 
   /**
