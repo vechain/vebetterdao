@@ -7,6 +7,10 @@ const requiredFields: (keyof SubmitCreatorFormData)[] = [
   "adminEmail",
   "githubUsername",
   "twitterUsername",
+  "distributionStrategy",
+  "testnetProjectUrl",
+  "testnetAppId",
+  "securityActionVerification",
 ]
 
 export const checkMissingFields = (data: Partial<SubmitCreatorFormData>): string[] | null => {

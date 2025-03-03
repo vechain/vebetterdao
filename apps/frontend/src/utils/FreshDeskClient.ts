@@ -20,6 +20,14 @@ export type FreshdeskTicket = {
     cf_admin_wallet_address: string
     cf_app_creator_email: string
     cf_app_creator_name_optional: string
+    cf_testnet_project_url: string
+    cf_testnet_app_id: string
+    cf_distribution_strategy: string
+    cf_security_api_security_measures?: boolean
+    cf_security_action_verification: boolean
+    cf_security_device_fingerprint?: boolean
+    cf_security_secure_key_management?: boolean
+    cf_security_anti_farming?: boolean
   }
   created_at: string
 }
@@ -40,6 +48,14 @@ export type FreshdeskTicketBody = {
     cf_admin_wallet_address: string
     cf_app_creator_email: string
     cf_app_creator_name_optional?: string
+    cf_testnet_project_url: string
+    cf_testnet_app_id: string
+    cf_distribution_strategy: string
+    cf_security_api_security_measures?: boolean
+    cf_security_action_verification: boolean
+    cf_security_device_fingerprint?: boolean
+    cf_security_secure_key_management?: boolean
+    cf_security_anti_farming?: boolean
   }
 }
 
@@ -77,7 +93,7 @@ enum TicketPriority {
 }
 
 class FreshdeskClient {
-  private apiClient: AxiosInstance
+  private readonly apiClient: AxiosInstance
   private readonly baseURL: URL
   private readonly DEFAULT_PRIORITY = TicketPriority.Low
   private readonly DEFAULT_STATUS = TicketStatus.Pending
