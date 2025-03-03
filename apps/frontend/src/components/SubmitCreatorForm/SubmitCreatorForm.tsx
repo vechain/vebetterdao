@@ -29,6 +29,7 @@ import { FaXTwitter } from "react-icons/fa6"
 import { AddressUtils } from "@/utils"
 import { WalletAddressInput } from "@/app/components/Input"
 import { FormCheckbox, FormItem } from "./components"
+import AppUtils from "@/utils/AppUtils"
 
 export type SubmitCreatorFormData = {
   appName: string
@@ -62,6 +63,7 @@ type Props = {
 export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) => {
   const { t } = useTranslation()
   const { data: session } = useSession()
+
   const {
     setData,
     appName,
@@ -162,9 +164,31 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
     }
   }
 
+  const validateUrl = (value: string, fieldName: string) => {
+    try {
+      new URL(value)
+      return true
+    } catch {
+      return t("Invalid {{fieldName}}", { fieldName })
+    }
+  }
+
+  const validateEmail = (value: string, fieldName: string) => {
+    const emailRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)
+    return emailRegex.test(value) || t("Invalid {{fieldName}}", { fieldName })
+  }
+
+  const validateAppId = (value: string, fieldName: string) => {
+    return AppUtils.isValid(value) || t("Invalid {{fieldName}}", { fieldName })
+  }
+
+  const genericValidation = (value: string, fieldName: string) => {
+    return value && AddressUtils.isValid(value) ? t("Invalid {{fieldName}}", { fieldName }) : true
+  }
+
   return (
-    <Card w="full" py={4} borderRadius="xl">
-      <CardBody>
+    <Card w="full" borderRadius="xl">
+      <CardBody w="full" p={{ base: 2, md: 6 }}>
         <VStack spacing={4} w="full">
           <Card w="full" align="start" borderRadius="xl" borderColor="gray.200" p={4}>
             <Heading size="md" pb={6}>
@@ -180,13 +204,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                     required: "App Name is required",
                     minLength: { value: 2, message: t("{{fieldName}} is too short", { fieldName: t("App Name") }) },
                     maxLength: { value: 30, message: t("{{fieldName}} is too long", { fieldName: t("App Name") }) },
-                    validate: value => {
-                      if (value && AddressUtils.isValid(value)) {
-                        //Prevent user from entering wallet address in app name field
-                        return t("Invalid Name")
-                      }
-                      return true
-                    },
+                    validate: value => genericValidation(value, t("App Name")),
                   }),
                 }}
                 error={errors.appName?.message}
@@ -247,14 +265,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                   ...register("projectUrl", {
                     required: "Project URL is required",
                     maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Project URL") }) },
-                    validate: value => {
-                      try {
-                        new URL(value)
-                        return true
-                      } catch {
-                        return t("Invalid url")
-                      }
-                    },
+                    validate: value => validateUrl(value, t("Project URL")),
                   }),
                 }}
                 error={errors.projectUrl?.message}
@@ -316,14 +327,12 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                 label={t("Email")}
                 placeholder={"Eg. admin@myapp.vet"}
                 description={t("The email address that will be used for communication with VeBetterDAO.")}
+                type="email"
                 register={{
                   ...register("adminEmail", {
                     required: "Admin Email is required",
                     maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Email") }) },
-                    validate: value => {
-                      const emailRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)
-                      return emailRegex.test(value) || t("Please enter a valid email")
-                    },
+                    validate: value => validateEmail(value, t("Email")),
                   }),
                 }}
                 error={errors.adminEmail?.message}
@@ -337,13 +346,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                 register={{
                   ...register("adminName", {
                     maxLength: { value: 100, message: t("{{fieldName}} is too long", { fieldName: t("Name") }) },
-                    validate: (value: string) => {
-                      if (value && AddressUtils.isValid(value)) {
-                        // Prevent user from entering wallet address in admin name field
-                        return t("Invalid Name")
-                      }
-                      return true
-                    },
+                    validate: (value: string) => genericValidation(value, t("Name")),
                   }),
                 }}
                 error={errors.adminName?.message}
@@ -368,14 +371,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                       value: 255,
                       message: t("{{fieldName}} is too long", { fieldName: t("Testnet Project URL") }),
                     },
-                    validate: value => {
-                      try {
-                        new URL(value)
-                        return true
-                      } catch {
-                        return t("Invalid url")
-                      }
-                    },
+                    validate: value => validateUrl(value, t("Testnet Project URL")),
                   }),
                 }}
                 error={errors.testnetProjectUrl?.message}
@@ -388,16 +384,12 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                 description={t("The ID of your app on the testnet.")}
                 register={{
                   ...register("testnetAppId", {
+                    required: "Testnet App ID is required",
                     maxLength: {
                       value: 100,
                       message: t("{{fieldName}} is too long", { fieldName: t("Testnet App ID") }),
                     },
-                    validate: (value: string) => {
-                      if (value && AddressUtils.isValid(value)) {
-                        return t("Invalid Name")
-                      }
-                      return true
-                    },
+                    validate: (value: string) => validateAppId(value, t("Testnet App ID")),
                   }),
                 }}
                 error={errors.testnetAppId?.message}
@@ -418,7 +410,11 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
               />
 
               <FormCheckbox
-                register={{ ...register("securityActionVerification") }}
+                register={{
+                  ...register("securityActionVerification", {
+                    required: "Action Verification is required",
+                  }),
+                }}
                 label={t("Action Verification")}
                 description={t("Uses AI validation or unique identifiers to verify sustainable actions.")}
                 error={errors.securityActionVerification?.message}

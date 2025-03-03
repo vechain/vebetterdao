@@ -1486,5 +1486,6 @@
   "The email address that will be used for communication with VeBetterDAO.": "The email address that will be used for communication with VeBetterDAO.",
   "Your name or the name of the person responsible for the dApp.": "Your name or the name of the person responsible for the dApp.",
   "The URL of your testnet project.": "The URL of your testnet project.",
-  "The ID of your app on the testnet.": "The ID of your app on the testnet."
+  "The ID of your app on the testnet.": "The ID of your app on the testnet.",
+  "Invalid {{fieldName}}": "Invalid {{fieldName}}"
 }
