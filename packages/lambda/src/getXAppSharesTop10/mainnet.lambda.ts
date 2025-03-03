@@ -1,13 +1,17 @@
+import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
+import { clauseBuilder, FunctionFragment } from "@vechain/sdk-core"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
+import { AppConfig } from "@repo/config"
+import mainnetConfig from "@repo/config/mainnet"
+
 import {
   XAllocationVoting__factory as XAllocationVoting,
   XAllocationPool__factory as XAllocationPool,
   X2EarnApps__factory as X2EarnApps,
 } from "@repo/contracts"
-import { AppConfig } from "@repo/config"
-import mainnetConfig from "@repo/config/mainnet"
 import { getRoundXApps } from "../helpers"
-import { clauseBuilder, FunctionFragment } from "@vechain/sdk-core"
+import { buildResponse } from "../helpers/api/response"
+import { StandardApiError, SuccessResponseType } from "../helpers/api.types"
 
 const nodeURL = mainnetConfig.nodeUrl
 const ipfsFetchingService = mainnetConfig.ipfsFetchingService.endsWith("/")
@@ -95,6 +99,7 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
   // Get current last round id, then infer the previous round id
   const currentRoundId = await getCurrentRoundId(thor, mainnetConfig)
   const lastRoundId = Number(currentRoundId) - 1
+  console.log("Retrieve allocation shares data for round:", lastRoundId)
 
   // Get the round app ids
   const roundAppIds = await getRoundXApps(thor, lastRoundId.toString(), mainnetConfig)
@@ -138,7 +143,19 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
   return top10AppsData
 }
 
-// call getXAppSharesTop10
-const thorClient = new ThorClient(new HttpClient(nodeURL), { isPollingEnabled: false })
+export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
+  console.log(`Event: ${JSON.stringify(event, null, 2)}`)
+  console.log(`Context: ${JSON.stringify(context, null, 2)}`)
 
-getXAppSharesTop10(thorClient).then(console.log).catch(console.error)
+  try {
+    const thorClient = new ThorClient(new HttpClient(nodeURL), { isPollingEnabled: false })
+    const top10AppsData = await getXAppSharesTop10(thorClient)
+    console.log("Top 10 apps data:", top10AppsData)
+    return buildResponse(SuccessResponseType.SUCCESS, top10AppsData)
+  } catch (error) {
+    console.error("Error getting top 10 X-App shares:", error)
+    return buildResponse(StandardApiError.INTERNAL_SERVER_ERROR, {
+      error: error instanceof Error ? error.message : String(error),
+    })
+  }
+}
