@@ -32,6 +32,7 @@ import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBann
 import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner"
+import { DelegatingBanner } from "./components/DelegatingBanner"
 
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
@@ -40,6 +41,7 @@ import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { UserSignaledBanner } from "./components/UserSignaledBanner"
+import { useIsVeDelegated } from "@/hooks"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -56,6 +58,8 @@ export const ActionBanner = () => {
   }, [])
 
   const { account } = useWallet()
+
+  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
   const currentRoundId = parseInt(currentRound ?? "0")
@@ -128,6 +132,7 @@ export const ActionBanner = () => {
   const showSignaledBanner = !!account?.address && isUserSignaled
   const showLowVthoBanner = !!account?.address && isLowOnVtho && ownsTokens && !isBalanceLoading
   const showDoActionBanner = !!account?.address && !isPerson && !isLoading && !isDelegateeLoading
+  const showDelegatingBanner = !!account?.address && isVeDelegated && !isDelegateeLoading
 
   const showCastVoteBanner = !!account?.address && !isLoading && canUserVote
 
@@ -149,12 +154,13 @@ export const ActionBanner = () => {
   // 1 - User is signaled
   // 2 - User has low VTHO
   // 3 - User has to do some action
-  const showCantVoteBanners = showSignaledBanner || showLowVthoBanner || showDoActionBanner
+  const showCantVoteBanners = showSignaledBanner || showLowVthoBanner || showDoActionBanner || showDelegatingBanner
   const CantVoteBanner = useMemo(() => {
     if (showSignaledBanner) return <UserSignaledBanner key="user-signaled" />
     if (showLowVthoBanner) return <LowVthoBanner key="low-vtho" />
+    if (showDelegatingBanner) return <DelegatingBanner key="delegating" />
     if (showDoActionBanner) return <DoActionBanner key="do-action" />
-  }, [showSignaledBanner, showLowVthoBanner, showDoActionBanner])
+  }, [showSignaledBanner, showLowVthoBanner, showDoActionBanner, showDelegatingBanner])
 
   //Show one of the banners for creator NFTs
   // Only one of the following banners can be shown at a time

@@ -4,6 +4,7 @@ import { Box, VStack, Text, Heading, Button, useDisclosure, HStack, Skeleton } f
 import { BaseBottomSheet } from "@/components/BaseBottomSheet"
 import { OverlappedAppsImages } from "@/components/OverlappedAppsImages"
 import {
+  ProposalState,
   useAllocationAmount,
   useAllocationsRoundState,
   useCanUserVote,
@@ -18,6 +19,7 @@ import { useRouter } from "next/navigation"
 import { NoActiveProposalCard } from "../rounds/components/NoActiveProposalCard"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useWallet } from "@vechain/vechain-kit"
+import { useMemo } from "react"
 
 export const RoundInfoBottomSheet = () => {
   const { t } = useTranslation()
@@ -28,6 +30,17 @@ export const RoundInfoBottomSheet = () => {
   const { data: currentRoundId, isLoading: currentRoundIdLoading } = useCurrentAllocationsRoundId()
 
   const { allocationRound, roundLoading, proposalsToRender } = useRoundProposals(currentRoundId ?? "")
+  // First active, then looking for support (pending + deposit not met)
+  const sortedProposals = useMemo(() => {
+    return proposalsToRender.sort((a, b) => {
+      const getPriority = (proposal: (typeof proposalsToRender)[0]) => {
+        if (proposal.state === ProposalState.Active) return 1
+        return 2 // Everything else
+      }
+
+      return getPriority(a) - getPriority(b)
+    })
+  }, [proposalsToRender])
 
   const { data: amounts, isLoading: amountsLoading } = useAllocationAmount(currentRoundId)
 
@@ -186,16 +199,16 @@ export const RoundInfoBottomSheet = () => {
           <VStack spacing={4} w="full" align="flex-start">
             <VStack spacing={2} w="full" align="flex-start">
               <Heading fontSize="18px" fontWeight={700}>
-                {t("Proposals in this round")}
+                {t("Proposals in this round or looking for support")}
               </Heading>
               <Text fontSize="12px" fontWeight={400} color="#6A6A6A">
                 {t("Proposals shape the ecosystem. Vote on ideas and build our community together!")}
               </Text>
             </VStack>
 
-            {!!proposalsToRender.length ? (
+            {!!sortedProposals.length ? (
               <VStack spacing={4} w="full">
-                {proposalsToRender.map(proposal => (
+                {sortedProposals.map(proposal => (
                   <ProposalCompactCard key={proposal.proposalId} proposal={proposal} />
                 ))}
               </VStack>
