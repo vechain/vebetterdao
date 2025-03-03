@@ -75,6 +75,11 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
     distributionStrategy,
     testnetProjectUrl,
     testnetAppId,
+    securityActionVerification,
+    securityApiSecurityMeasures,
+    securityDeviceFingerprint,
+    securitySecureKeyManagement,
+    securityAntiFarming,
   } = useCreatorSubmissionFormStore()
 
   // Persist form data on re-render, redirect or page refresh
@@ -90,6 +95,12 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
       twitterUsername,
       distributionStrategy,
       testnetProjectUrl,
+      testnetAppId,
+      securityActionVerification,
+      securityApiSecurityMeasures,
+      securityDeviceFingerprint,
+      securitySecureKeyManagement,
+      securityAntiFarming,
     }
     Object.entries(formFields).forEach(([key, value]) => {
       if (!watch(key as keyof SubmitCreatorFormData) && value) {
@@ -110,11 +121,16 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
     testnetAppId,
     setValue,
     watch,
+    securityActionVerification,
+    securityApiSecurityMeasures,
+    securityDeviceFingerprint,
+    securitySecureKeyManagement,
+    securityAntiFarming,
   ])
 
   // Set linked social media usernames if available in session
   useEffect(() => {
-    if (setData && (session?.user?.githubUsername || session?.user?.twitterUsername)) {
+    if (session?.user?.githubUsername || session?.user?.twitterUsername) {
       if (session.user.githubUsername) {
         setValue("githubUsername", session.user.githubUsername)
         setData({ githubUsername: session.user.githubUsername })
@@ -141,7 +157,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
   // Store form data on blur
   const onBlur = (field: keyof SubmitCreatorFormData) => {
     const value = watch(field)
-    if (value && setData) {
+    if (value) {
       setData({ [field]: value })
     }
   }

@@ -10,7 +10,7 @@ export interface CreatorSubmissionFormStoreState extends SubmitCreatorFormData {
 /**
  * Store for the multi-step proposal form data
  */
-export const useCreatorSubmissionFormStore = create<Partial<CreatorSubmissionFormStoreState>>()(
+export const useCreatorSubmissionFormStore = create<CreatorSubmissionFormStoreState>()(
   devtools(
     persist(
       set => ({
@@ -25,6 +25,11 @@ export const useCreatorSubmissionFormStore = create<Partial<CreatorSubmissionFor
         distributionStrategy: "",
         testnetProjectUrl: "",
         testnetAppId: "",
+        securityApiSecurityMeasures: false,
+        securityActionVerification: false,
+        securityDeviceFingerprint: false,
+        securitySecureKeyManagement: false,
+        securityAntiFarming: false,
         setData: (data: Partial<CreatorSubmissionFormStoreState>) =>
           set(state => ({
             ...state,
@@ -43,6 +48,11 @@ export const useCreatorSubmissionFormStore = create<Partial<CreatorSubmissionFor
             distributionStrategy: "",
             testnetProjectUrl: "",
             testnetAppId: "",
+            securityApiSecurityMeasures: false,
+            securityActionVerification: false,
+            securityDeviceFingerprint: false,
+            securitySecureKeyManagement: false,
+            securityAntiFarming: false,
           }),
       }),
       {
