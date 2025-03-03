@@ -52,7 +52,10 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
     <>
       <VStack flex="2" align={"stretch"} gap="24px" {...containerProps}>
         {innerContent}
-        <Stack direction={isAbove600 ? "row" : "column"} justify={"space-between"}>
+        <Stack
+          direction={isAbove600 ? "row" : "column"}
+          justify={"space-between"}
+          align={isAbove600 ? "center" : "flex-start"}>
           <Text fontSize="xl" fontWeight={700}>
             {t("{{value}} tokens", {
               value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,

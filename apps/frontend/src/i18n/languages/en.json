@@ -282,7 +282,7 @@
   "Vote didn't start": "Vote didn't start",
   "Starting {{date}}": "Starting {{date}}",
   "Ending {{date}}": "Ending {{date}}",
-  "Proposals in this round": "Proposals in this round",
+  "Proposals in this round or looking for support": "Proposals in this round or looking for support",
   "{{from}} to {{to}}": "{{from}} to {{to}}",
   "We're in Round #{{round}}": "We're in Round <strong> #{{round}} </strong>",
   "{{amount}}% distributed": "<strong>{{amount}}</strong>% distributed",
@@ -1455,5 +1455,7 @@
   "You have been signalled": "You have been signalled",
   "You have been signalled by <em>{{appSignals}}</em>.": "You have been signalled by <em>{{appSignals}}</em>.",
   "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.": "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.",
-  "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.": "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue."
+  "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.": "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.",
+  "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. If you want to vote here, you must remove delegation on veDelegate before snapshot.",
+  "Voting Power Delegated": "Voting Power Delegated"
 }
