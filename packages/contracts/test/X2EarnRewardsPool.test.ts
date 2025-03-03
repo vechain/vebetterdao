@@ -22,7 +22,7 @@ import {
 import { endorseApp } from "./helpers/xnodes"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
-describe.only("X2EarnRewardsPool - @shard12", function () {
+describe("X2EarnRewardsPool - @shard12", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {
@@ -2839,20 +2839,15 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       await x2EarnApps.connect(owner).addRewardDistributor(appId, otherAccount.address)
       expect(await x2EarnApps.isRewardDistributor(appId, otherAccount.address)).to.equal(true)
 
+      await catchRevert(x2EarnRewardsPool.connect(otherAccount).increaseRewardsPoolBalance(appId, amount))
       // only admin can increase/ decrease distribution balance
-      expect(x2EarnRewardsPool.connect(otherAccount).increaseRewardsPoolBalance(appId, amount)).to.be.revertedWith(
-        "X2EarnRewardsPool: caller is not app admin",
-      )
+
       expect(x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, amount)).to.not.be.reverted
       expect(x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, amount)).to.not.be.reverted
-      expect(x2EarnRewardsPool.connect(otherAccount).decreaseRewardsPoolBalance(appId, amount)).to.be.revertedWith(
-        "X2EarnRewardsPool: caller is not app admin",
-      )
-
+      await catchRevert(x2EarnRewardsPool.connect(otherAccount).decreaseRewardsPoolBalance(appId, amount))
+      // only admin can increase/ decrease distribution balance
+      await catchRevert(x2EarnRewardsPool.connect(otherAccount).toggleRewardsPoolBalance(appId, true))
       // only admin can toggled on/off distribution
-      expect(x2EarnRewardsPool.connect(otherAccount).toggleRewardsPoolBalance(appId, true)).to.be.revertedWith(
-        "X2EarnRewardsPool: caller is not app admin",
-      )
       expect(x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, true)).to.not.be.reverted
     })
     // Events
@@ -2873,21 +2868,37 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
-      await await expect(x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, true))
-        .to.emit(x2EarnRewardsPool, "RewardsPoolBalanceToggled")
+      await expect(x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, true))
+        .to.emit(x2EarnRewardsPool, "RewardsPoolBalanceEnabled")
         .withArgs(appId, true)
 
       await expect(x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false))
-        .to.emit(x2EarnRewardsPool, "RewardsPoolBalanceToggled")
+        .to.emit(x2EarnRewardsPool, "RewardsPoolBalanceEnabled")
         .withArgs(appId, false)
+
+      // initial values
+      const initialAvailableFunds = await x2EarnRewardsPool.connect(owner).availableFunds(appId)
+      const initialRewardsPoolBalance = await x2EarnRewardsPool.connect(owner).rewardsPoolBalance(appId)
+
+      // calculate expected values after the transaction
+      const expectedAvailableFunds = initialAvailableFunds - amount
+      const expectedRewardsPoolBalance = initialRewardsPoolBalance + amount
 
       await expect(x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, amount))
         .to.emit(x2EarnRewardsPool, "RewardsPoolBalanceUpdated")
-        .withArgs(appId, amount)
+        .withArgs(appId, amount, expectedAvailableFunds, expectedRewardsPoolBalance)
+
+      // new values after the second transaction
+      const newAvailableFunds = await x2EarnRewardsPool.connect(owner).availableFunds(appId)
+      const newRewardsPoolBalance = await x2EarnRewardsPool.connect(owner).rewardsPoolBalance(appId)
+
+      // calculate expected values after the second transaction
+      const expectedAvailableFunds2 = newAvailableFunds + amount
+      const expectedRewardsPoolBalance2 = newRewardsPoolBalance - amount
 
       await expect(x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, amount))
         .to.emit(x2EarnRewardsPool, "RewardsPoolBalanceUpdated")
-        .withArgs(appId, amount)
+        .withArgs(appId, amount, expectedAvailableFunds2, expectedRewardsPoolBalance2)
     })
 
     it("Should revert when increasing or decreasing rewards pool amount beyond limits", async function () {
@@ -2916,7 +2927,7 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       // Cannot decrease rewards pool balance less than current balance
       await expect(
         x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, ethers.parseEther("91")),
-      ).to.be.revertedWith("X2EarnRewardsPool: decreasing amount exceeds rewards pool balance")
+      ).to.be.revertedWith("X2EarnRewardsPool: decreasing under rewards pool balance")
       await x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, ethers.parseEther("89"))
     })
 
@@ -2926,42 +2937,40 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
           forceDeploy: true,
           bootstrapAndStartEmissions: true,
         })
-      const teamWallet = otherAccount
-      const amount = ethers.parseEther("100")
-      const rewardsPoolAmount = ethers.parseEther("41")
-      const rewardsPoolNotAllowed = ethers.parseEther("42")
-      const rewardsPoolAmountAfterDecrease = ethers.parseEther("40")
 
-      // deploy app and deposit apps funds (+ 100 B3TR)
-      await b3tr.connect(minterAccount).mint(owner.address, amount)
-      await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      // Setup constants
+      const amount = ethers.parseEther("100")
+      const rewardsPoolAmount = ethers.parseEther("50")
+      const tooLargeAmount = ethers.parseEther("51")
+      const decreaseAmount = ethers.parseEther("10")
+      const remainingAmount = ethers.parseEther("40")
+
+      // deploy app and deposit apps funds (+ 200 B3TR)
+      await b3tr.connect(minterAccount).mint(owner.address, ethers.parseEther("200"))
+      await x2EarnApps.submitApp(otherAccount.address, owner.address, "My app", "metadataURI")
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
+      // Fund the app
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
-      // add reward distributor
+      // Add reward distributor
       await x2EarnApps.connect(owner).addRewardDistributor(appId, otherAccount.address)
-      expect(await x2EarnApps.isRewardDistributor(appId, otherAccount.address)).to.equal(true)
-
-      // enabling the feature
-      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, true)
+      // Enable rewards pool and fund it
       await x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, rewardsPoolAmount)
-      // try to distribute more than the rewards pool balance ( = 41 )
-      expect(
-        x2EarnRewardsPool.connect(otherAccount).distributeReward(appId, rewardsPoolNotAllowed, "", ""),
+      // Cannot distribute more than the rewards pool balance
+      await expect(
+        x2EarnRewardsPool.connect(otherAccount).distributeReward(appId, tooLargeAmount, owner.address, ""),
       ).to.be.revertedWith("X2EarnRewardsPool: not enough funds in the rewards pool")
-      // verifying that it is ok to distribute the full rewards pool balance
-      expect(x2EarnRewardsPool.connect(otherAccount).distributeReward(appId, rewardsPoolAmount, "", "")).to.not.be
-        .reverted
 
-      // decreasing by 1 the rewards pool balance
-      await x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, ethers.parseEther("1"))
-      // try to distribute again more than the rewards pool balance ( = 40 ), after decreasing the pool
-      expect(
-        x2EarnRewardsPool.connect(otherAccount).distributeReward(appId, rewardsPoolAmount, "", ""),
+      // Decrease the rewards pool balance
+      await x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, decreaseAmount)
+      // Cannot distribute the original amount after decreasing
+      await expect(
+        x2EarnRewardsPool.connect(otherAccount).distributeReward(appId, rewardsPoolAmount, owner.address, ""),
       ).to.be.revertedWith("X2EarnRewardsPool: not enough funds in the rewards pool")
-      expect(x2EarnRewardsPool.connect(otherAccount).distributeReward(appId, rewardsPoolAmountAfterDecrease, "", "")).to
-        .not.be.reverted
+      // Can distribute the new reduced amount
+      await expect(x2EarnRewardsPool.connect(otherAccount).distributeReward(appId, remainingAmount, owner.address, ""))
+        .to.not.be.reverted
     })
 
     it("Cannot withdraw the rewards pool balance", async function () {
@@ -3042,9 +3051,9 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPool.rewardsPoolBalance(appId)).to.equal(amount)
       expect(await x2EarnRewardsPool.totalBalance(appId)).to.equal(amount)
 
-      expect(await x2EarnRewardsPool.connect(otherAccount).rewardsPoolBalanceEnabled(appId)).to.equal(true)
+      expect(await x2EarnRewardsPool.connect(otherAccount).rewardsPoolEnabled(appId)).to.equal(true)
       await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
-      expect(await x2EarnRewardsPool.connect(otherAccount).rewardsPoolBalanceEnabled(appId)).to.equal(false)
+      expect(await x2EarnRewardsPool.connect(otherAccount).rewardsPoolEnabled(appId)).to.equal(false)
 
       expect(await x2EarnRewardsPool.availableFunds(appId)).to.equal(amount)
       expect(await x2EarnRewardsPool.rewardsPoolBalance(appId)).to.equal(0)

@@ -56,6 +56,8 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * - Added distribute with metadata functionality
  * ----- Version 7 -----
  * - Added optional dual-pool balance to manage rewards and treasury separately
+ * - Added 2 new storage variables: rewardsPoolBalance and rewardsPoolEnabled
+ * - Modified withdrawal access control to only admin
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
@@ -322,7 +324,7 @@ contract X2EarnRewardsPool is
     $.rewardsPoolBalance[appId] += amount;
     $.availableFunds[appId] -= amount;
 
-    emit RewardsPoolBalanceUpdated(appId, amount);
+    emit RewardsPoolBalanceUpdated(appId, amount, $.availableFunds[appId], $.rewardsPoolBalance[appId]);
   }
 
   /**
@@ -336,7 +338,7 @@ contract X2EarnRewardsPool is
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
-    require(amount <= $.rewardsPoolBalance[appId], "X2EarnRewardsPool: decreasing amount exceeds rewards pool balance");
+    require(amount <= $.rewardsPoolBalance[appId], "X2EarnRewardsPool: decreasing under rewards pool balance");
 
     $.rewardsPoolEnabled[appId] = true;
     require($.rewardsPoolEnabled[appId], "X2EarnRewardsPool: rewards pool balance is not enabled");
@@ -344,7 +346,7 @@ contract X2EarnRewardsPool is
     $.rewardsPoolBalance[appId] -= amount;
     $.availableFunds[appId] += amount;
 
-    emit RewardsPoolBalanceUpdated(appId, amount);
+    emit RewardsPoolBalanceUpdated(appId, amount, $.availableFunds[appId], $.rewardsPoolBalance[appId]);
   }
 
   /**
@@ -359,14 +361,15 @@ contract X2EarnRewardsPool is
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
+    require($.rewardsPoolEnabled[appId] != enable, "X2EarnRewardsPool: rewards pool is already in desired state");
 
-    if (!enable && $.rewardsPoolEnabled[appId]) {
+    if (!enable) {
       $.availableFunds[appId] += $.rewardsPoolBalance[appId];
       $.rewardsPoolBalance[appId] = 0;
     }
 
     $.rewardsPoolEnabled[appId] = enable;
-    emit RewardsPoolBalanceToggled(appId, enable);
+    emit RewardsPoolBalanceEnabled(appId, enable);
   }
 
   /**
@@ -395,7 +398,7 @@ contract X2EarnRewardsPool is
    */
   function _emitMetadata(
     bytes32 appId, 
-    uint256 amount, 
+    uint256 amount,
     address receiver, 
     string memory metadata
   ) internal {
@@ -609,9 +612,9 @@ contract X2EarnRewardsPool is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-rewardsPoolBalanceEnabled}
+   * @dev See {IX2EarnRewardsPool-rewardsPoolEnabled}
    */
-  function rewardsPoolBalanceEnabled(bytes32 appId) external view returns (bool) {
+  function rewardsPoolEnabled(bytes32 appId) external view returns (bool) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.rewardsPoolEnabled[appId];
   }

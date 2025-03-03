@@ -83,15 +83,17 @@ interface IX2EarnRewardsPool {
    * @param appId - the app ID
    * @param enable - true to enable, false to disable
    */
-  event RewardsPoolBalanceToggled(bytes32 indexed appId, bool enable);
+  event RewardsPoolBalanceEnabled(bytes32 indexed appId, bool enable);
 
   /**
    * @dev Event emitted when the balance of the rewards pool for an app is initialized or updated.
    *
    * @param appId The ID of the app for which the balance was updated.
-   * @param amount The new balance of the rewards pool for the app.
+   * @param amount The amount being added or removed from the rewards pool.
+   * @param availableFunds The current balance of the available funds for the app.
+   * @param rewardsPoolBalance The current balance of the rewards pool for the app.
    */
-  event RewardsPoolBalanceUpdated(bytes32 indexed appId, uint256 amount);
+  event RewardsPoolBalanceUpdated(bytes32 indexed appId, uint256 amount, uint256 availableFunds, uint256 rewardsPoolBalance);
 
 
   /**
@@ -137,7 +139,7 @@ interface IX2EarnRewardsPool {
    *
    * @param appId The ID of the app.
    */
-  function rewardsPoolBalanceEnabled(bytes32 appId) external view returns (bool);
+  function rewardsPoolEnabled(bytes32 appId) external view returns (bool);
 
   /**
    * @dev Gets the amount of funds available for an app to reward users if the dual-pool is enabled.
