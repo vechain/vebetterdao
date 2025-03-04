@@ -1,1 +1,5 @@
 export * from "./useAppBalance"
+export * from "./useIsRewardsPoolEnabled"
+export * from "./useAppRewardsBalance"
+export * from "./useAppFundActivityEvents"
+export * from "./useAppFundActivityEvents"
