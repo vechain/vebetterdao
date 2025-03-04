@@ -12,6 +12,13 @@ const ipfsFetchingService = mainnetConfig.ipfsFetchingService.endsWith("/")
   ? mainnetConfig.ipfsFetchingService
   : mainnetConfig.ipfsFetchingService + "/"
 
+/**
+ * Retrieves the top 10 XApp shares for the previous round on mainnet.
+ *
+ * @param thor - The ThorClient instance used to interact with the blockchain.
+ * @returns A promise that resolves to an array of the top 10 XApp shares with their metadata.
+ * @throws An error if any contract call to X2EarnApps::app reverts.
+ */
 const getXAppSharesTop10 = async (thor: ThorClient) => {
   // Get current last round id, then infer the previous round id
   const currentRoundId = await getCurrentRoundId(thor, mainnetConfig)
@@ -45,7 +52,11 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
 
   const top10AppsData = await Promise.all(
     res.map(async (r, index) => {
-      if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.vmError}`)
+      if (r.reverted) {
+        throw new Error(
+          `Error in contract call to X2EarnApps::app at ${mainnetConfig.x2EarnAppsContractAddress}. Clause ${index + 1} for appId ${top10AppShares[index].appId} reverted with reason ${r.vmError}`,
+        )
+      }
 
       const decoded = X2EarnApps.createInterface().decodeFunctionResult("app", r.data)
       const appMetadataURI = decoded[0][3]
@@ -56,7 +67,7 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
         metadataURI: appMetadataURI,
         percentage: top10AppShares[index].percentage.toFixed(2),
         name: appMetadata.name,
-        logo: appMetadata.logo?.replace("ipfs://", ipfsFetchingService) || "",
+        logo: appMetadata.logo,
       }
     }),
   )
@@ -64,6 +75,14 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
   return top10AppsData
 }
 
+/**
+ * AWS Lambda handler to get the top 10 X-App shares.
+ * This function feeds the VeBetter DAO website and should not be changed without prior discussion.
+ *
+ * @param event - The incoming event from API Gateway.
+ * @param context - The execution context of the Lambda function.
+ * @returns The result of the HTTP response.
+ */
 export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
   console.log(`Event: ${JSON.stringify(event, null, 2)}`)
   console.log(`Context: ${JSON.stringify(context, null, 2)}`)
