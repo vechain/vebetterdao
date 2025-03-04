@@ -1,15 +1,9 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
 import { clauseBuilder, FunctionFragment } from "@vechain/sdk-core"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
-import { AppConfig } from "@repo/config"
 import mainnetConfig from "@repo/config/mainnet"
-
-import {
-  XAllocationVoting__factory as XAllocationVoting,
-  XAllocationPool__factory as XAllocationPool,
-  X2EarnApps__factory as X2EarnApps,
-} from "@repo/contracts"
-import { getRoundXApps } from "../helpers"
+import { X2EarnApps__factory as X2EarnApps } from "@repo/contracts"
+import { findBlacklistedApps, getCurrentRoundId, getData, getRoundXApps, getRoundXAppShares } from "../helpers"
 import { buildResponse } from "../helpers/api/response"
 import { StandardApiError, SuccessResponseType } from "../helpers/api.types"
 
@@ -17,83 +11,6 @@ const nodeURL = mainnetConfig.nodeUrl
 const ipfsFetchingService = mainnetConfig.ipfsFetchingService.endsWith("/")
   ? mainnetConfig.ipfsFetchingService
   : mainnetConfig.ipfsFetchingService + "/"
-
-const getCurrentRoundId = async (thor: ThorClient, config: AppConfig) => {
-  const res = await thor.contracts.executeContractCall(
-    config.xAllocationVotingContractAddress,
-    XAllocationVoting.createInterface().getFunction("currentRoundId"),
-    [],
-  )
-
-  if (res.vmError) return Promise.reject(new Error(res.vmError))
-
-  return res[0]
-}
-
-const getRoundXAppShares = async (thor: ThorClient, roundId: Number, roundAppIds: string[]) => {
-  // Prepare the clauses to get the shares for the xApps in the round
-  const clauses = roundAppIds.map(appId =>
-    clauseBuilder.functionInteraction(
-      mainnetConfig.xAllocationPoolContractAddress,
-      XAllocationPool.createInterface().getFunction("getAppShares") as FunctionFragment,
-      [roundId, appId],
-    ),
-  )
-  const res = await thor.transactions.simulateTransaction(clauses)
-
-  // Transform the data to get the shares for the xApps in the round
-  const shares = res.map((r, index) => {
-    if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.vmError}`)
-
-    const decoded = XAllocationPool.createInterface().decodeFunctionResult("getAppShares", r.data)
-    const share = Number(decoded[0]) / 100
-    const unallocatedShare = Number(decoded[1]) / 100
-
-    return {
-      appId: roundAppIds[index] as string,
-      percentage: share + unallocatedShare,
-    }
-  })
-
-  return shares
-}
-
-const findBlacklistedApps = async (thor: ThorClient, appIds: string[]) => {
-  // Prepare the clauses to check if the xApps are blacklisted
-  const clauses = appIds.map(appId =>
-    clauseBuilder.functionInteraction(
-      mainnetConfig.x2EarnAppsContractAddress,
-      X2EarnApps.createInterface().getFunction("isBlacklisted") as FunctionFragment,
-      [appId],
-    ),
-  )
-  const res = await thor.transactions.simulateTransaction(clauses)
-
-  // Identify the blacklisted apps
-  const blacklistedAppIds: string[] = []
-  res.forEach((r, index) => {
-    if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.vmError}`)
-
-    const decoded = X2EarnApps.createInterface().decodeFunctionResult("isBlacklisted", r.data)
-
-    if (decoded[0]) blacklistedAppIds.push(appIds[index])
-  })
-
-  return blacklistedAppIds
-}
-
-const getDataFromIPFS = async (metadataURI: string) => {
-  try {
-    const response = await fetch(ipfsFetchingService + metadataURI)
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status} - for URI: ${metadataURI}`)
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error(error)
-  }
-}
 
 const getXAppSharesTop10 = async (thor: ThorClient) => {
   // Get current last round id, then infer the previous round id
@@ -104,13 +21,17 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
   // Get the round app ids
   const roundAppIds = await getRoundXApps(thor, lastRoundId.toString(), mainnetConfig)
 
-  // Find blacklisted apps, then filter out blacklisted ones
-  const blacklistedAppIds = await findBlacklistedApps(thor, roundAppIds)
-  const roundAppIdsFiltered = roundAppIds.filter(appId => !blacklistedAppIds.includes(appId))
+  // Find blacklisted apps and get the round app shares in parallel
+  const [blacklistedAppIds, roundAppShares] = await Promise.all([
+    findBlacklistedApps(thor, roundAppIds, mainnetConfig),
+    getRoundXAppShares(thor, lastRoundId, roundAppIds, mainnetConfig),
+  ])
 
-  // Get the round app shares, then sort by percentage (limit to 10)
-  const roundAppShares = await getRoundXAppShares(thor, lastRoundId, roundAppIdsFiltered)
-  const top10AppShares = roundAppShares.sort((a, b) => b.percentage - a.percentage).slice(0, 10)
+  // Filter out blacklisted apps, sort by percentage and get top 10
+  const top10AppShares = roundAppShares
+    .filter(app => !blacklistedAppIds.includes(app.appId))
+    .sort((a, b) => b.percentage - a.percentage)
+    .slice(0, 10)
 
   // Get app data only for top 10
   const clauses = top10AppShares.map(app =>
@@ -128,7 +49,7 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
 
       const decoded = X2EarnApps.createInterface().decodeFunctionResult("app", r.data)
       const appMetadataURI = decoded[0][3]
-      const appMetadata = await getDataFromIPFS(appMetadataURI)
+      const appMetadata = await getData(ipfsFetchingService + appMetadataURI)
 
       return {
         appId: top10AppShares[index].appId,
