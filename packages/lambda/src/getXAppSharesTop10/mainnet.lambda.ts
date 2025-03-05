@@ -90,7 +90,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
   try {
     const thorClient = new ThorClient(new HttpClient(nodeURL), { isPollingEnabled: false })
     const top10AppsData = await getXAppSharesTop10(thorClient)
-    console.log("Top 10 apps data:", top10AppsData)
+    console.log("Top 10 X-App shares:", top10AppsData)
     return buildResponse(SuccessResponseType.SUCCESS, top10AppsData)
   } catch (error) {
     console.error("Error getting top 10 X-App shares:", error)
