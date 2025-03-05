@@ -21,7 +21,7 @@ const ipfsFetchingService = mainnetConfig.ipfsFetchingService.endsWith("/")
  */
 const getXAppSharesTop10 = async (thor: ThorClient) => {
   // Get current last round id, then infer the previous round id
-  const currentRoundId = await getCurrentRoundId(thor, mainnetConfig)
+  const currentRoundId = await getCurrentRoundId(thor, mainnetConfig.xAllocationVotingContractAddress)
   const lastRoundId = Number(currentRoundId) - 1
   console.log("Retrieve allocation shares data for round:", lastRoundId)
 
@@ -30,8 +30,8 @@ const getXAppSharesTop10 = async (thor: ThorClient) => {
 
   // Find blacklisted apps and get the round app shares in parallel
   const [blacklistedAppIds, roundAppShares] = await Promise.all([
-    findBlacklistedApps(thor, roundAppIds, mainnetConfig),
-    getRoundXAppShares(thor, lastRoundId, roundAppIds, mainnetConfig),
+    findBlacklistedApps(thor, roundAppIds, mainnetConfig.x2EarnAppsContractAddress),
+    getRoundXAppShares(thor, lastRoundId, roundAppIds, mainnetConfig.xAllocationPoolContractAddress),
   ])
 
   // Filter out blacklisted apps, sort by percentage and get top 10

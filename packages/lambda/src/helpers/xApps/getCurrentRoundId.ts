@@ -1,18 +1,17 @@
 import { ThorClient } from "@vechain/sdk-network"
-import { AppConfig } from "@repo/config"
 import { XAllocationVoting__factory as XAllocationVoting } from "@repo/contracts"
 
 /**
  * Retrieves the current round ID from the XAllocationVoting contract.
  *
  * @param thor - The ThorClient instance used to interact with the blockchain.
- * @param config - The application configuration containing the contract address.
+ * @param contractAddress - The contract address.
  * @returns A promise that resolves to the current round ID.
  * @throws An error if there is an issue with the contract call.
  */
-export const getCurrentRoundId = async (thor: ThorClient, config: AppConfig) => {
+export const getCurrentRoundId = async (thor: ThorClient, contractAddress: string) => {
   const res = await thor.contracts.executeContractCall(
-    config.xAllocationVotingContractAddress,
+    contractAddress,
     XAllocationVoting.createInterface().getFunction("currentRoundId"),
     [],
   )
@@ -20,7 +19,7 @@ export const getCurrentRoundId = async (thor: ThorClient, config: AppConfig) => 
   if (res.reverted) {
     return Promise.reject(
       new Error(
-        `Error in contract call to XAllocationVoting::currentRoundId at ${config.xAllocationVotingContractAddress}. Reverted with reason ${res.vmError}`,
+        `Error in contract call to XAllocationVoting::currentRoundId at ${contractAddress}. Reverted with reason ${res.vmError}`,
       ),
     )
   }
