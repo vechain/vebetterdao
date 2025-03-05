@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { AppAmount } from "./components/AppAmount"
 import { useTranslation } from "react-i18next"
 
-const APPS_DISPLAY_LIMIT = 22
+const APPS_DISPLAY_LIMIT = 10
 
 export const TotalAllocations = () => {
   const { t } = useTranslation()
