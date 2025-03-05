@@ -25,6 +25,7 @@ export const getXAppsTotalEarningsQueryKey = (roundIds: number[], appIds: string
 export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string[]) => {
   const { thor } = useConnex()
   const queryClient = useQueryClient()
+
   return useQuery({
     queryKey: getXAppsTotalEarningsQueryKey(roundIds, appIds),
     queryFn: async () => {
@@ -32,28 +33,43 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
 
       const res = await thor.explain(earningsPerAppClauses).execute()
 
-      const decoded = res.map((r, index) => {
-        if (r.reverted) throw new Error(`Clause ${index + 1} reverted with reason ${r.revertReason}`)
-        const decoded = roundEarningsAbi.decode(r.data)
+      const clausesPerApp = roundIds.length
+
+      const results = res.reduce((acc: Record<string, { amount: number; appId: string }>, res, index) => {
+        if (res.reverted) return acc
+
+        const appIndex = Math.floor(index / clausesPerApp)
+        const roundIndex = index % clausesPerApp
+
+        // index is not out of bounds
+        if (appIndex >= appIds.length || roundIndex >= roundIds.length) {
+          return acc
+        }
+
+        const appId = appIds[appIndex]!
+        const roundId = roundIds[roundIndex]!
+
+        const decoded = roundEarningsAbi.decode(res.data)
         const parsedAmount = ethers.formatEther(decoded[0])
-        const appId = appIds[index]
-        // Update the cache with the new amount
-        queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundIds[index] as number, appId), {
+        const numAmount = Number(parsedAmount)
+
+        // Update the cache
+        queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundId, appId), {
           amount: parsedAmount,
           appId,
         })
-        return parsedAmount
-      })
 
-      // aggregate the earnings of each app, keeping in mind that the earnings are in the same order as the clauses and we have roundsIds.length clauses per app
+        // Add to the accumulator
+        if (!acc[appId]) {
+          acc[appId] = { amount: 0, appId }
+        }
 
-      const totalEarningsPerApp = appIds.map((appId, index) => {
-        const total = decoded.slice(index * roundIds.length, (index + 1) * roundIds.length).reduce((acc, amount) => {
-          return acc + Number(amount)
-        }, 0)
-        return { amount: total, appId }
-      })
-      return totalEarningsPerApp
+        acc[appId]!.amount += numAmount
+
+        return acc
+      }, {})
+
+      return appIds.map(appId => results[appId] || { amount: 0, appId })
     },
     enabled: !!thor && !!appIds.length && !!roundIds.length,
   })
