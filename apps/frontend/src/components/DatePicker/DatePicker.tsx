@@ -206,7 +206,7 @@ export const DatePicker = ({
         },
       ]}>
       <PopoverTrigger>
-        <InputGroup size={size} w="full" minW="220px">
+        <InputGroup size={size} w="full">
           <InputLeftElement pointerEvents="none">
             <FaCalendarAlt color="black" />
           </InputLeftElement>
@@ -247,9 +247,12 @@ export const DatePicker = ({
                 </Box>
               ))}
 
-              {/* Empty cells for days before the first day of month */}
-              {Array.from({ length: (firstDayOfMonth + 6) % 7 }).map((_, index) => (
-                <Box key={`empty-start-${index}`} h="8" />
+              {/* Empty cells for days before the first day of month with a random key */}
+              {[...Array((firstDayOfMonth + 6) % 7)].map(() => (
+                <Box
+                  key={`empty-start-${currentDate.format("YYYY-MM")}-${Math.random().toString(36).substring(2, 9)}`}
+                  h="8"
+                />
               ))}
 
               {/* Calendar Days */}

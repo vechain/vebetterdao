@@ -2,7 +2,6 @@ import {
   Button,
   Card,
   CardBody,
-  CardFooter,
   Divider,
   HStack,
   Stack,
@@ -170,6 +169,7 @@ export const AppBalanceCard = () => {
             justifyContent={isEnabled ? "space-between" : "flex-start"}
             alignItems="center"
             pt={4}
+            pb={isEnabled ? "10px" : "0px"}
             mt={2}>
             {isEnabled && (
               <VStack alignItems={"start"}>
@@ -188,15 +188,15 @@ export const AppBalanceCard = () => {
                 </Skeleton>
               </VStack>
             )}
-            <HStack border="1px solid red" onClick={onOpenRewardsPoolAccess} cursor="pointer" alignSelf={"start"}>
+            <HStack onClick={onOpenRewardsPoolAccess} cursor="pointer" alignSelf={"start"}>
               <Text fontSize="md" fontWeight={500} color="#004CFC">
-                {isEnabled ? t("Manage Allowance") : t("Enable Allowance")}
+                {isEnabled ? t("Manage") : t("Enable Allowance")}
               </Text>
               <Icon as={FaChevronRight} boxSize="12px" color="#004CFC" cursor="pointer" />
             </HStack>
           </Stack>
+          {isEnabled && warningType && <BalanceWarnings type={warningType} />}
         </CardBody>
-        <CardFooter>{isEnabled && warningType && <BalanceWarnings type={warningType} />}</CardFooter>
       </Card>
 
       {app && (
