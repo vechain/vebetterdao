@@ -16,6 +16,15 @@ export const getXAppsTotalEarningsQueryKey = (roundIds: number[], appIds: string
   roundIds,
 ]
 
+// Helper function to chunk an array into smaller arrays
+const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
+  const chunks: T[][] = []
+  for (let i = 0; i < array.length; i += chunkSize) {
+    chunks.push(array.slice(i, i + chunkSize))
+  }
+  return chunks
+}
+
 /**
  *  Total earnings of multiple xApps in multiple rounds
  * @param appIds  the ids of the xApps
@@ -29,46 +38,47 @@ export const useMultipleXAppsTotalEarnings = (roundIds: number[], appIds: string
   return useQuery({
     queryKey: getXAppsTotalEarningsQueryKey(roundIds, appIds),
     queryFn: async () => {
-      const earningsPerAppClauses = appIds.map(appId => getXAppTotalEarningsClauses(roundIds, appId)).flat()
+      const results: Record<string, { amount: number; appId: string }> = {}
 
-      const res = await thor.explain(earningsPerAppClauses).execute()
+      appIds.forEach(appId => {
+        results[appId] = { amount: 0, appId }
+      })
 
-      const clausesPerApp = roundIds.length
+      const BATCH_SIZE = 10
+      const roundBatches = chunkArray(roundIds, BATCH_SIZE)
 
-      const results = res.reduce((acc: Record<string, { amount: number; appId: string }>, res, index) => {
-        if (res.reverted) return acc
+      for (const roundBatch of roundBatches) {
+        const earningsPerAppClauses = appIds.map(appId => getXAppTotalEarningsClauses(roundBatch, appId)).flat()
 
-        const appIndex = Math.floor(index / clausesPerApp)
-        const roundIndex = index % clausesPerApp
+        const res = await thor.explain(earningsPerAppClauses).execute()
+        const clausesPerApp = roundBatch.length
 
-        // index is not out of bounds
-        if (appIndex >= appIds.length || roundIndex >= roundIds.length) {
-          return acc
-        }
+        res.forEach((result, index) => {
+          if (result.reverted) return
 
-        const appId = appIds[appIndex]!
-        const roundId = roundIds[roundIndex]!
+          const appIndex = Math.floor(index / clausesPerApp)
+          const roundIndex = index % clausesPerApp
 
-        const decoded = roundEarningsAbi.decode(res.data)
-        const parsedAmount = ethers.formatEther(decoded[0])
-        const numAmount = Number(parsedAmount)
+          if (appIndex >= appIds.length || roundIndex >= roundBatch.length) {
+            return
+          }
 
-        // Update the cache
-        queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundId, appId), {
-          amount: parsedAmount,
-          appId,
+          const appId = appIds[appIndex]!
+          const roundId = roundBatch[roundIndex]!
+
+          const decoded = roundEarningsAbi.decode(result.data)
+          const parsedAmount = ethers.formatEther(decoded[0])
+          const numAmount = Number(parsedAmount)
+
+          // Update the cache
+          queryClient.setQueryData(getXAppRoundEarningsQueryKey(roundId, appId), {
+            amount: parsedAmount,
+            appId,
+          })
+
+          results[appId]!.amount += numAmount
         })
-
-        // Add to the accumulator
-        if (!acc[appId]) {
-          acc[appId] = { amount: 0, appId }
-        }
-
-        acc[appId]!.amount += numAmount
-
-        return acc
-      }, {})
-
+      }
       return appIds.map(appId => results[appId] || { amount: 0, appId })
     },
     enabled: !!thor && !!appIds.length && !!roundIds.length,
