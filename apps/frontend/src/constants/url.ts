@@ -1,3 +1,1 @@
-export const URL_REGEX = new RegExp(
-  "^(https?:\\/\\/)[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z]{2,}([-a-zA-Z0-9@:%_+.~#?&//=]*)$",
-)
+export const URL_REGEX = /^(https?:\/\/)[\w@:%.+~#=]{1,256}\.[a-zA-Z]{2,}([\w@:%+~#?&/=]*)$/gm
