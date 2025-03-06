@@ -9,14 +9,14 @@ import { TokenBalance } from "../../b3tr"
 const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddress
 
 /**
- * Get the available balance in the x2Earn rewards pool contract for a specific xApp
+ * Get the total balance in the x2Earn rewards pool contract for a specific xApp
  *
- * @param thor  the connex instance
+ * @param thor the connex instance
  * @param xAppId  the xApp id
  * @returns the available balance in the x2Earn rewards pool contract for a specific xApp
  */
 export const getAppBalance = async (thor: Connex.Thor, xAppId: string): Promise<TokenBalance> => {
-  const functionFragment = X2EarnRewardsPool__factory.createInterface().getFunction("availableFunds").format("json")
+  const functionFragment = X2EarnRewardsPool__factory.createInterface().getFunction("totalBalance").format("json")
   const res = await thor.account(X2EARN_REWARDS_POOL_CONTRACT).method(JSON.parse(functionFragment)).call(xAppId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))

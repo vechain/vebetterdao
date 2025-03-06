@@ -3,7 +3,7 @@ import { buildClause } from "@/utils/buildClause"
 import { useCallback, useMemo } from "react"
 import { X2EarnRewardsPool__factory } from "@repo/contracts"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getIsRewardsPoolEnabledQueryKey } from "@/api/contracts/x2EarnRewardsPool"
+import { getAppRewardsBalanceQueryKey } from "@/api/contracts/x2EarnRewardsPool"
 
 interface Props {
   xAppId: string
@@ -27,7 +27,7 @@ export const useToggleRewardsPool = ({ xAppId, isEnabled, onSuccess }: Props) =>
     ]
   }, [xAppId, isEnabled])
 
-  const refetchQueryKeys = useMemo(() => [getIsRewardsPoolEnabledQueryKey(xAppId)], [xAppId])
+  const refetchQueryKeys = useMemo(() => [getAppRewardsBalanceQueryKey(xAppId)], [xAppId])
 
   const result = useBuildTransaction({
     clauseBuilder,

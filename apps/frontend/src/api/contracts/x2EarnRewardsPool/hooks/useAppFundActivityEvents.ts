@@ -2,6 +2,7 @@ import { useEvents } from "@/hooks"
 import { useMemo } from "react"
 import { X2EarnRewardsPool__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
+import { ethers } from "ethers"
 
 const contractInterface = X2EarnRewardsPool__factory.createInterface()
 const contractAddress = getConfig().x2EarnRewardsPoolContractAddress
@@ -14,6 +15,7 @@ export type AppFundActivityEvent = {
   availableFunds?: string
   rewardsPoolBalance?: string
   txType: "DEPOSIT" | "WITHDRAW" | "DISTRIBUTE_REWARDS" | "REWARDS_POOL_UPDATED"
+  blockTimestamp: number
 }
 
 /**
@@ -31,12 +33,11 @@ export const useAppFundActivityEvents = (appId: string) => {
     filterParams,
     mapResponse: (decoded, meta) => ({
       appId: decoded.app,
-      amount: decoded.amount,
+      amount: ethers.formatEther(decoded.amount),
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),
   })
-  console.log({ rawDepositEvents })
 
   const rawTeamWithdrawalEvents = useEvents({
     contractAddress,
@@ -45,7 +46,7 @@ export const useAppFundActivityEvents = (appId: string) => {
     filterParams,
     mapResponse: (decoded, meta) => ({
       appId: decoded.app,
-      amount: decoded.amount,
+      amount: ethers.formatEther(decoded.amount),
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),
@@ -58,7 +59,7 @@ export const useAppFundActivityEvents = (appId: string) => {
     filterParams,
     mapResponse: (decoded, meta) => ({
       appId: decoded.app,
-      amount: decoded.amount,
+      amount: ethers.formatEther(decoded.amount),
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),
@@ -71,9 +72,9 @@ export const useAppFundActivityEvents = (appId: string) => {
     filterParams,
     mapResponse: (decoded, meta) => ({
       appId: decoded.app,
-      amount: decoded.amount,
-      availableFunds: decoded.availableFunds,
-      rewardsPoolBalance: decoded.rewardsPoolBalance,
+      amount: ethers.formatEther(decoded.amount),
+      availableFunds: ethers.formatEther(decoded.availableFunds),
+      rewardsPoolBalance: ethers.formatEther(decoded.rewardsPoolBalance),
       blockNumber: meta.blockNumber,
       txOrigin: meta.txOrigin,
     }),
@@ -113,9 +114,7 @@ export const useAppFundActivityEvents = (appId: string) => {
 
     // Sort by block number (descending - newest first)
     return normalized.sort((a, b) => b.blockNumber - a.blockNumber)
-  }, [depositEvents, teamWithdrawalEvents, rewardDistributedEvents])
-
-  console.log({ allEvents })
+  }, [depositEvents, teamWithdrawalEvents, rewardDistributedEvents, rewardsPoolBalanceUpdatedEvents])
 
   return {
     isLoading,
