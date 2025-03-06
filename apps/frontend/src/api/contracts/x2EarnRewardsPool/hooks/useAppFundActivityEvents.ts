@@ -15,7 +15,6 @@ export type AppFundActivityEvent = {
   availableFunds?: string
   rewardsPoolBalance?: string
   txType: "DEPOSIT" | "WITHDRAW" | "DISTRIBUTE_REWARDS" | "REWARDS_POOL_UPDATED"
-  blockTimestamp: number
 }
 
 /**
