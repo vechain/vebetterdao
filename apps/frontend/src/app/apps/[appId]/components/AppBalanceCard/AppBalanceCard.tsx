@@ -19,7 +19,7 @@ import {
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
-import { useAppBalance, useIsRewardsPoolEnabled, useAppRewardsBalance } from "@/api/contracts/x2EarnRewardsPool"
+import { useAppBalance, useAppRewardsBalance, useIsRewardsPoolEnabled } from "@/api/contracts/x2EarnRewardsPool"
 import { WithdrawModal } from "./WithdrawModal"
 import { DepositModal } from "./DepositModal"
 import { FundsManagementModal } from "./FundsManagementModal"
@@ -28,13 +28,12 @@ import { BaseTooltip } from "@/components"
 import { FiInfo } from "react-icons/fi"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { useAccountAppPermissions } from "@/api"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect, useRef } from "react"
 import { HiMiniArrowsUpDown } from "react-icons/hi2"
 import { FaChevronRight } from "react-icons/fa6"
 import { BalanceWarnings, WarningType } from "./components/BalanceWarnings"
 
 const compactFormatter = getCompactFormatter(4)
-
 export const AppBalanceCard = () => {
   const { t } = useTranslation()
   const { isOpen: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
@@ -61,8 +60,18 @@ export const AppBalanceCard = () => {
     return appPermissions[app.id]?.isAdmin
   }, [appPermissions, app])
 
-  const { data: isRewardsPoolEnabled } = useIsRewardsPoolEnabled(app?.id ?? "")
   const [isExpanded, setIsExpanded] = useState(false)
+
+  const { data: isRewardsPoolEnabled } = useIsRewardsPoolEnabled(app?.id ?? "")
+  const [isEnabled, setIsEnabled] = useState(isRewardsPoolEnabled ?? false)
+
+  const prevStateOnChain = useRef(isRewardsPoolEnabled)
+  useEffect(() => {
+    if (isRewardsPoolEnabled !== undefined && isRewardsPoolEnabled !== prevStateOnChain.current) {
+      prevStateOnChain.current = isRewardsPoolEnabled
+      setIsEnabled(isRewardsPoolEnabled)
+    }
+  }, [isRewardsPoolEnabled])
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded)
@@ -71,15 +80,11 @@ export const AppBalanceCard = () => {
 
   const runningLow = useMemo(() => {
     return rewardsBalance && 0 < Number(rewardsBalance.scaled) && Number(rewardsBalance.scaled) < 100
-  }, [balance])
+  }, [rewardsBalance])
 
   const runningOut = useMemo(() => {
     return rewardsBalance && Number(rewardsBalance.scaled) === 0
-  }, [balance])
-
-  const isEnabled = useMemo(() => {
-    return isRewardsPoolEnabled ?? false
-  }, [isRewardsPoolEnabled])
+  }, [rewardsBalance])
 
   const warningType = useMemo<WarningType | null>(() => {
     if (runningOut) return "OUT"
@@ -207,14 +212,10 @@ export const AppBalanceCard = () => {
             appId={app.id}
             isOpen={isOpenRewardsPoolAccess}
             isEnabled={isEnabled}
+            setIsEnabled={setIsEnabled}
             onClose={onCloseRewardsPoolAccess}
           />
-          <FundsManagementModal
-            appId={app.id}
-            isOpen={isOpenFundsManagement}
-            isEnabled={isEnabled}
-            onClose={onCloseFundsManagement}
-          />
+          <FundsManagementModal appId={app.id} isOpen={isOpenFundsManagement} onClose={onCloseFundsManagement} />
         </>
       )}
     </>

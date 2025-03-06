@@ -37,7 +37,7 @@ export const useIncreaseRewardsPool = ({ xAppId, amount, onSuccess }: Props) => 
         comment: `Increase ${amount} b3tr to rewards pool balance for xApp ${xAppId}`,
       }),
     ]
-  }, [xAppId, amount])
+  }, [xAppId, amount, contractAmount])
 
   const refetchQueryKeys = useMemo(
     () => [getAppAvailableFundsQueryKey(xAppId), getAppRewardsBalanceQueryKey(xAppId), getAppBalanceQueryKey(xAppId)],
