@@ -89,9 +89,11 @@ export const NewAppPageFormContent = () => {
       })
       if (!metadataUri) return
 
+      const adminAddress = data.adminWalletAddress ?? account ?? data.teamWalletAddress
+
       submitAppMutation.sendTransaction({
         teamWalletAddress: data.teamWalletAddress,
-        adminAddress: account ?? data.teamWalletAddress,
+        adminAddress,
         appName: data.name,
         appMetadataUri: metadataUri,
       })
