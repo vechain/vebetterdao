@@ -17,6 +17,7 @@ import {
   X2EarnRewardsPoolV3,
   X2EarnRewardsPoolV4,
   X2EarnRewardsPoolV5,
+  X2EarnRewardsPoolV6,
 } from "../typechain-types"
 import { endorseApp } from "./helpers/xnodes"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
@@ -64,7 +65,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       const { x2EarnRewardsPool } = await getOrDeployContractInstances({
         forceDeploy: false,
       })
-      expect(await x2EarnRewardsPool.version()).to.equal("6")
+      expect(await x2EarnRewardsPool.version()).to.equal("7")
     })
 
     it("X2EarnApps should be set correctly", async function () {
@@ -143,7 +144,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
         forceDeploy: true,
       })
 
-      expect(await x2EarnRewardsPool.version()).to.equal("6")
+      expect(await x2EarnRewardsPool.version()).to.equal("7")
     })
 
     it("Storage should be preserved after upgrade", async () => {
@@ -244,17 +245,32 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPoolV5.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
 
       // upgrade to new version
-      const x2EarnRewardsPool = (await upgradeProxy(
+      const x2EarnRewardsPoolV6 = (await upgradeProxy(
         "X2EarnRewardsPoolV5",
-        "X2EarnRewardsPool",
+        "X2EarnRewardsPoolV6",
         await x2EarnRewardsPoolV1.getAddress(),
         [],
         {
           version: 6,
         },
+      )) as X2EarnRewardsPoolV6
+
+      expect(await x2EarnRewardsPoolV6.version()).to.equal("6")
+      expect(await x2EarnRewardsPoolV6.x2EarnApps()).to.equal(x2EarnAppsAddress)
+      expect(await x2EarnRewardsPoolV6.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
+
+      // upgrade to new version
+      const x2EarnRewardsPool = (await upgradeProxy(
+        "X2EarnRewardsPoolV6",
+        "X2EarnRewardsPool",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [],
+        {
+          version: 7,
+        },
       )) as X2EarnRewardsPool
 
-      expect(await x2EarnRewardsPool.version()).to.equal("6")
+      expect(await x2EarnRewardsPool.version()).to.equal("7")
       expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
     })
@@ -358,17 +374,32 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPoolV5.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
 
       // upgrade to new version
-      const x2EarnRewardsPool = (await upgradeProxy(
+      const x2EarnRewardsPoolV6 = (await upgradeProxy(
         "X2EarnRewardsPoolV5",
-        "X2EarnRewardsPool",
+        "X2EarnRewardsPoolV6",
         await x2EarnRewardsPoolV1.getAddress(),
         [],
         {
           version: 6,
         },
-      )) as X2EarnRewardsPool
+      )) as X2EarnRewardsPoolV6
 
-      expect(await x2EarnRewardsPool.version()).to.equal("6")
+      expect(await x2EarnRewardsPoolV6.version()).to.equal("6")
+      expect(await x2EarnRewardsPoolV6.x2EarnApps()).to.equal(x2EarnAppsAddress)
+      expect(await x2EarnRewardsPoolV6.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
+
+      // upgrade to new version
+      const x2EarnRewardsPool = (await upgradeProxy(
+        "X2EarnRewardsPoolV6",
+        "X2EarnRewardsPool",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [],
+        {
+          version: 7,
+        },
+      )) as X2EarnRewardsPoolV6
+
+      expect(await x2EarnRewardsPool.version()).to.equal("7")
       expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
 
@@ -522,17 +553,32 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPoolV5.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
 
       // upgrade to new version
-      const x2EarnRewardsPool = (await upgradeProxy(
+      const x2EarnRewardsPoolV6 = (await upgradeProxy(
         "X2EarnRewardsPoolV5",
-        "X2EarnRewardsPool",
+        "X2EarnRewardsPoolV6",
         await x2EarnRewardsPoolV1.getAddress(),
         [],
         {
           version: 6,
         },
+      )) as X2EarnRewardsPoolV6
+
+      expect(await x2EarnRewardsPoolV6.version()).to.equal("6")
+      expect(await x2EarnRewardsPoolV6.x2EarnApps()).to.equal(x2EarnAppsAddress)
+      expect(await x2EarnRewardsPoolV6.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
+
+      // upgrade to new version
+      const x2EarnRewardsPool = (await upgradeProxy(
+        "X2EarnRewardsPoolV6",
+        "X2EarnRewardsPool",
+        await x2EarnRewardsPoolV1.getAddress(),
+        [],
+        {
+          version: 7,
+        },
       )) as X2EarnRewardsPool
 
-      expect(await x2EarnRewardsPool.version()).to.equal("6")
+      expect(await x2EarnRewardsPool.version()).to.equal("7")
       expect(await x2EarnRewardsPool.x2EarnApps()).to.equal(x2EarnAppsAddress)
       expect(await x2EarnRewardsPool.availableFunds(await x2EarnApps.hashAppName("My app"))).to.equal(amount)
 
@@ -838,7 +884,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       })
       owner.sendTransaction({
         to: await x2EarnRewardsPool.getAddress(),
-        value: ethers.parseEther("0"),
+        value: 0,
         data: "0x1234", // some data
       })
     })
@@ -1008,7 +1054,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(event[0].args[4]).to.equal("For the team")
     })
 
-    it("The app distributor can withdraw", async function () {
+    it("The app distributor cannot withdraw", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccounts, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -1034,29 +1080,9 @@ describe("X2EarnRewardsPool - @shard12", function () {
 
       expect(await b3tr.balanceOf(teamWallet.address)).to.equal(0n)
 
-      await x2EarnRewardsPool.connect(appDistributor).withdraw(ethers.parseEther("1"), appId, "")
-
-      expect(await b3tr.balanceOf(await x2EarnRewardsPool.getAddress())).to.equal(ethers.parseEther("99"))
-
-      // money are sent to team wallet
-      expect(await b3tr.balanceOf(teamWallet.address)).to.equal(ethers.parseEther("1"))
-
-      // can leave a reason
-      const tx = await x2EarnRewardsPool
-        .connect(appDistributor)
-        .withdraw(ethers.parseEther("1"), await x2EarnApps.hashAppName("My app"), "For the team")
-
-      // "Should emit Withdraw event"
-      const receipt = await tx.wait()
-      if (!receipt) throw new Error("No receipt")
-
-      let event = filterEventsByName(receipt.logs, "TeamWithdrawal")
-      expect(event).not.to.eql([])
-      expect(event[0].args[0]).to.equal(ethers.parseEther("1"))
-      expect(event[0].args[1]).to.equal(await x2EarnApps.hashAppName("My app"))
-      expect(event[0].args[2]).to.equal(teamWallet.address)
-      expect(event[0].args[3]).to.equal(appDistributor.address)
-      expect(event[0].args[4]).to.equal("For the team")
+      await expect(
+        x2EarnRewardsPool.connect(appDistributor).withdraw(ethers.parseEther("1"), appId, ""),
+      ).to.be.revertedWith("X2EarnRewardsPool: not an app admin")
     })
 
     it("App must exist", async function () {
@@ -2788,5 +2814,250 @@ describe("X2EarnRewardsPool - @shard12", function () {
     expect(await veBetterPassport.userRoundScoreApp(user.address, roundId, appId)).to.equal(multiplier)
     expect(await veBetterPassport.userTotalScore(user.address)).to.equal(supposedScore2)
     expect(await veBetterPassport.userRoundScore(user.address, roundId)).to.equal(multiplier)
+  })
+
+  describe("Rewards Pool", async function () {
+    // Access Control
+    it("Only admin can enable, disable and modify rewards pool balance", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const teamWallet = otherAccount
+      const amount = ethers.parseEther("100")
+
+      // deploy app and deposit apps funds (+ 100 B3TR)
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+      await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await endorseApp(appId, owner)
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+      // add reward distributor
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, otherAccount.address)
+      expect(await x2EarnApps.isRewardDistributor(appId, otherAccount.address)).to.equal(true)
+
+      await catchRevert(x2EarnRewardsPool.connect(otherAccount).increaseRewardsPoolBalance(appId, amount))
+      // only admin can increase/ decrease distribution balance
+
+      expect(x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, amount)).to.not.be.reverted
+      expect(x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, amount)).to.not.be.reverted
+      await catchRevert(x2EarnRewardsPool.connect(otherAccount).decreaseRewardsPoolBalance(appId, amount))
+      // only admin can increase/ decrease distribution balance
+      await catchRevert(x2EarnRewardsPool.connect(otherAccount).toggleRewardsPoolBalance(appId, true))
+      // only admin can toggled on/off distribution
+      expect(x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, true)).to.not.be.reverted
+    })
+    // Events
+    it("Should emit events when enabling, disabling, and updating rewards pool balance", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+      const teamWallet = otherAccount
+      const amount = ethers.parseEther("100")
+
+      // deploy app and deposit apps funds (+ 100 B3TR)
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+      await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await endorseApp(appId, owner)
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      await expect(x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, true))
+        .to.emit(x2EarnRewardsPool, "RewardsPoolBalanceEnabled")
+        .withArgs(appId, true)
+
+      await expect(x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false))
+        .to.emit(x2EarnRewardsPool, "RewardsPoolBalanceEnabled")
+        .withArgs(appId, false)
+
+      // initial values
+      const initialAvailableFunds = await x2EarnRewardsPool.connect(owner).availableFunds(appId)
+      const initialRewardsPoolBalance = await x2EarnRewardsPool.connect(owner).rewardsPoolBalance(appId)
+
+      // calculate expected values after the transaction
+      const expectedAvailableFunds = initialAvailableFunds - amount
+      const expectedRewardsPoolBalance = initialRewardsPoolBalance + amount
+
+      await expect(x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, amount))
+        .to.emit(x2EarnRewardsPool, "RewardsPoolBalanceUpdated")
+        .withArgs(appId, amount, expectedAvailableFunds, expectedRewardsPoolBalance)
+
+      // new values after the second transaction
+      const newAvailableFunds = await x2EarnRewardsPool.connect(owner).availableFunds(appId)
+      const newRewardsPoolBalance = await x2EarnRewardsPool.connect(owner).rewardsPoolBalance(appId)
+
+      // calculate expected values after the second transaction
+      const expectedAvailableFunds2 = newAvailableFunds + amount
+      const expectedRewardsPoolBalance2 = newRewardsPoolBalance - amount
+
+      await expect(x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, amount))
+        .to.emit(x2EarnRewardsPool, "RewardsPoolBalanceUpdated")
+        .withArgs(appId, amount, expectedAvailableFunds2, expectedRewardsPoolBalance2)
+    })
+
+    it("Should revert when increasing or decreasing rewards pool amount beyond limits", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+      const teamWallet = otherAccount
+      const amount = ethers.parseEther("100")
+      const amount2 = ethers.parseEther("101")
+      // deploy app and deposit apps funds (+ 100 B3TR)
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+      await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await endorseApp(appId, owner)
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      // Cannot increase rewards pool balance more than the available funds
+      await expect(x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, amount2)).to.be.revertedWith(
+        "X2EarnRewardsPool: increasing amount exceeds available funds",
+      )
+      await x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, ethers.parseEther("90"))
+
+      // Cannot decrease rewards pool balance less than current balance
+      await expect(
+        x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, ethers.parseEther("91")),
+      ).to.be.revertedWith("X2EarnRewardsPool: decreasing under rewards pool balance")
+      await x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, ethers.parseEther("89"))
+    })
+
+    it("Cannot distribute more than the rewards pool when the feature is enabled", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      // Setup constants
+      const amount = ethers.parseEther("100")
+      const rewardsPoolAmount = ethers.parseEther("50")
+      const tooLargeAmount = ethers.parseEther("51")
+      const decreaseAmount = ethers.parseEther("10")
+      const remainingAmount = ethers.parseEther("40")
+
+      // deploy app and deposit apps funds (+ 200 B3TR)
+      await b3tr.connect(minterAccount).mint(owner.address, ethers.parseEther("200"))
+      await x2EarnApps.submitApp(otherAccount.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await endorseApp(appId, owner)
+      // Fund the app
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+      // Add reward distributor
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, otherAccount.address)
+      // Enable rewards pool and fund it
+      await x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, rewardsPoolAmount)
+      // Cannot distribute more than the rewards pool balance
+      await expect(
+        x2EarnRewardsPool.connect(otherAccount).distributeReward(appId, tooLargeAmount, owner.address, ""),
+      ).to.be.revertedWith("X2EarnRewardsPool: not enough funds in the rewards pool")
+
+      // Decrease the rewards pool balance
+      await x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, decreaseAmount)
+      // Cannot distribute the original amount after decreasing
+      await expect(
+        x2EarnRewardsPool.connect(otherAccount).distributeReward(appId, rewardsPoolAmount, owner.address, ""),
+      ).to.be.revertedWith("X2EarnRewardsPool: not enough funds in the rewards pool")
+      // Can distribute the new reduced amount
+      await expect(x2EarnRewardsPool.connect(otherAccount).distributeReward(appId, remainingAmount, owner.address, ""))
+        .to.not.be.reverted
+    })
+
+    it("Cannot withdraw the rewards pool balance", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+      const teamWallet = otherAccount
+      const amount = ethers.parseEther("100")
+      const rewardsPoolAmount = ethers.parseEther("41")
+      const withdrawAmount = ethers.parseEther("60")
+
+      // deploy app and deposit apps funds (+ 100 B3TR)
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+      await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await endorseApp(appId, owner)
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      await x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, rewardsPoolAmount)
+
+      await catchRevert(x2EarnRewardsPool.connect(owner).withdraw(withdrawAmount, appId, ""))
+      await catchRevert(x2EarnRewardsPool.connect(owner).withdraw(amount, appId, ""))
+
+      expect(await x2EarnRewardsPool.availableFunds(appId)).to.equal(ethers.parseEther("59"))
+      await x2EarnRewardsPool.connect(owner).withdraw(ethers.parseEther("59"), appId, "")
+    })
+
+    it("Should deposit app funds without affecting the rewards pool balance", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+      const teamWallet = otherAccount
+      const amount = ethers.parseEther("100")
+
+      // deploy app and deposit apps funds (+ 100 B3TR)
+      await b3tr.connect(minterAccount).mint(owner.address, ethers.parseEther("200"))
+      await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await endorseApp(appId, owner)
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      expect(await x2EarnRewardsPool.rewardsPoolBalance(appId)).to.equal(0)
+
+      await x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, amount)
+
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      // deposit again 100
+      expect(await x2EarnRewardsPool.rewardsPoolBalance(appId)).to.equal(amount)
+    })
+
+    it("Should correctly transfer all funds back to available funds when toggling off", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+      const teamWallet = otherAccount
+      const amount = ethers.parseEther("100")
+
+      // deploy app and deposit apps funds (+ 100 B3TR)
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+      await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await endorseApp(appId, owner)
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      await x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, amount)
+      expect(await x2EarnRewardsPool.availableFunds(appId)).to.equal(0)
+      expect(await x2EarnRewardsPool.rewardsPoolBalance(appId)).to.equal(amount)
+      expect(await x2EarnRewardsPool.totalBalance(appId)).to.equal(amount)
+
+      expect(await x2EarnRewardsPool.connect(otherAccount).rewardsPoolEnabled(appId)).to.equal(true)
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
+      expect(await x2EarnRewardsPool.connect(otherAccount).rewardsPoolEnabled(appId)).to.equal(false)
+
+      expect(await x2EarnRewardsPool.availableFunds(appId)).to.equal(amount)
+      expect(await x2EarnRewardsPool.rewardsPoolBalance(appId)).to.equal(0)
+      expect(await x2EarnRewardsPool.totalBalance(appId)).to.equal(amount)
+    })
   })
 })
