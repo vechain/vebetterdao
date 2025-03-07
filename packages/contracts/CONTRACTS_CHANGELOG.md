@@ -6,7 +6,6 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                                                                                                   | Summary                                                                                        |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| 3 March 2025  | `X2EarnRewardsPool` version `7`                                                                                               | Added support for rewards distribution with metadata.  |
 | 27th February 2025  | `X2EarnRewardsPool` version `6`                                                                                               | Added support for rewards distribution with metadata.                                          |
 | 13th January 2025   | `XAllocationVoting` version `5`                                                                                               | Fixed issue with duplicate app voting in the same transaction.                                 |
 | 4th December 2024   | `X2EarnApps` version `3`, `XAllocationVoting` version `4`, `XAllocationPool` version `4`, and `X2EarnRewardsPool` version `5` | Added endorsement cooldown feature to X2Earn contracts.                                        |
@@ -23,42 +22,6 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 | 4th September 2024  | `X2EarnRewardsPool` version `2`                                                                                               | - Added impact key management and proof building                                               |
 | 31st August 2024    | `VoterRewards` version `2`                                                                                                    | - Added quadratic rewarding features                                                           |
 | 29th August 2024    | `B3TRGovernor` version `2`                                                                                                    | Updated access control modifiers                                                               |
-
----
-
-## Upgrade `X2EarnRewardsPool` to Version 7
-
-This upgrade introduces an optional dual-pool mechanism that gives app admin more control over rewards distribution. When enabled, this feature creates a clear separation between funds for rewards and withdrawals.
-
-### Key Updates 🗂
-It separates app funds into two distinct pools (rewards pool for distributors and available funds pool for admin withdrawals), enhances access control by restricting withdrawals to app admins only, and maintains backward compatibility through an optional implementation that preserves existing behavior unless explicitly enabled.
-
-### Changes 🚀
-
-- **Upgraded Contract(s):**
-  - `X2EarnRewardsPool.sol` to version `7`
-  - `XAllocationVoting.sol` to version `5`
-
-### Storage Changes 📦
-
-- **`X2EarnRewardsPool`**:
-  - Added `rewardsPoolBalance` to store the balance for rewards distribution 
-  - Added `rewardsPoolEnabled` to store whether the rewards pool is enabled or not.
-
-### New Features 🚀
-
-- **`X2EarnRewardsPool`**:
-  - **Access Control**: Modified withdrawal permissions - only app admins can withdraw funds
-  - Added `toggleRewardsPoolBalance()` to enable/disable the dual-pool feature for an app
-  - Added `increaseRewardsPoolBalance()` to move funds from available pool to rewards pool 
-  - Added `decreaseRewardsPoolBalance()` to move funds from rewards pool back to available pool
-  - Added `rewardsPoolEnabled()` getter to check if the dual-pool feature is enabled for an app
-  - Added `rewardsPoolBalance()` getter to check the current rewards pool balance
-  - Added `totalBalance()` getter to check the total balance of the app, considering both available funds and rewards pool if the feature is enabled
-
-### Bug Fixes 🐛
-
-- None.
 
 ---
 

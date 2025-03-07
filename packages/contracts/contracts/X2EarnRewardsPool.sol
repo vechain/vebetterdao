@@ -54,10 +54,6 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * - Updated the X2EarnApps interface to support node cooldown functionality
  * ----- Version 6 -----
  * - Added distribute with metadata functionality
- * ----- Version 7 -----
- * - Added optional dual-pool balance to manage rewards and treasury separately
- * - Added 2 new storage variables: rewardsPoolBalance and rewardsPoolEnabled
- * - Modified withdrawal access control to only admin
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
@@ -78,12 +74,10 @@ contract X2EarnRewardsPool is
   struct X2EarnRewardsPoolStorage {
     IB3TR b3tr;
     IX2EarnApps x2EarnApps;
-    mapping(bytes32 appId => uint256) availableFunds; // App's treasury funds for withdrawal and rewards (when rewards pool is disabled)
+    mapping(bytes32 appId => uint256) availableFunds; // Funds that the app can use to reward users
     mapping(string => uint256) impactKeyIndex; // Mapping from impact key to its index (1-based to distinguish from non-existent)
     string[] allowedImpactKeys; // Array storing impact keys
     IVeBetterPassport veBetterPassport;
-    mapping(bytes32 appId => uint256) rewardsPoolBalance; // Distributable rewards funds (when rewards pool is enabled)
-    mapping(bytes32 appId => bool) rewardsPoolEnabled; // Whether the rewards pool is enabled for the app
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
@@ -188,7 +182,10 @@ contract X2EarnRewardsPool is
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
 
-    require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: not an app admin");
+    require(
+      $.x2EarnApps.isAppAdmin(appId, msg.sender) || $.x2EarnApps.isRewardDistributor(appId, msg.sender),
+      "X2EarnRewardsPool: not an app admin nor a reward distributor"
+    );
 
     // check if the app has enough available funds to withdraw
     require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
@@ -279,19 +276,12 @@ contract X2EarnRewardsPool is
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isRewardDistributor(appId, msg.sender), "X2EarnRewardsPool: not a reward distributor");
 
-    // check if the contract has enough funds
+    // check if the app has enough available funds to distribute
+    require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient funds");
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
 
-    // check to distribute from the correct pool if the feature is enabled
-    if ($.rewardsPoolEnabled[appId]) {
-      require($.rewardsPoolBalance[appId] >= amount, "X2EarnRewardsPool: not enough funds in the rewards pool");
-      $.rewardsPoolBalance[appId] -= amount;
-    } else {
-      require($.availableFunds[appId] >= amount, "X2EarnRewardsPool: app has insufficient available funds");
-      $.availableFunds[appId] -= amount;
-    }
-
     // Transfer the rewards to the receiver
+    $.availableFunds[appId] -= amount;
     require($.b3tr.transfer(receiver, amount), "X2EarnRewardsPool: Allocation transfer to app failed");
 
     // Try to register the action in the veBetterPassport contract
@@ -304,72 +294,6 @@ contract X2EarnRewardsPool is
       // If the call reverts without a revert reason or with a custom error, this block is executed.
       emit RegisterActionFailed("Low-level error", lowLevelData);
     }
-  }
-
-  /**
-   * @dev Increases the balance for rewards distribution and toggles the feature if needed
-   * @param appId - the app ID
-   * @param amount - the amount that will be used for rewards distribution
-   */
-  function increaseRewardsPoolBalance(bytes32 appId, uint256 amount) external {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-
-    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
-    require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
-    require(amount <= $.availableFunds[appId], "X2EarnRewardsPool: increasing amount exceeds available funds");
-
-    $.rewardsPoolEnabled[appId] = true;
-    require($.rewardsPoolEnabled[appId], "X2EarnRewardsPool: rewards pool balance is not enabled");
-
-    $.rewardsPoolBalance[appId] += amount;
-    $.availableFunds[appId] -= amount;
-
-    emit RewardsPoolBalanceUpdated(appId, amount, $.availableFunds[appId], $.rewardsPoolBalance[appId]);
-  }
-
-  /**
-   * @dev Decreases the balance for rewards distribution and toggles the feature if needed
-   * @param appId - the app ID
-   * @param amount - the amount that will be used for rewards distribution
-   *
-   */
-  function decreaseRewardsPoolBalance(bytes32 appId, uint256 amount) external {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-
-    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
-    require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
-    require(amount <= $.rewardsPoolBalance[appId], "X2EarnRewardsPool: decreasing under rewards pool balance");
-
-    $.rewardsPoolEnabled[appId] = true;
-    require($.rewardsPoolEnabled[appId], "X2EarnRewardsPool: rewards pool balance is not enabled");
-
-    $.rewardsPoolBalance[appId] -= amount;
-    $.availableFunds[appId] += amount;
-
-    emit RewardsPoolBalanceUpdated(appId, amount, $.availableFunds[appId], $.rewardsPoolBalance[appId]);
-  }
-
-  /**
-   * @dev Enable / Disable the rewards pool for rewards distribution
-   * @param appId - the app ID
-   * @param enable - true to enable, false to disable
-   *
-   * Note: When disabled, the main pool goes back to the available funds
-   */
-  function toggleRewardsPoolBalance(bytes32 appId, bool enable) external {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-
-    require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
-    require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
-    require($.rewardsPoolEnabled[appId] != enable, "X2EarnRewardsPool: rewards pool is already in desired state");
-
-    if (!enable) {
-      $.availableFunds[appId] += $.rewardsPoolBalance[appId];
-      $.rewardsPoolBalance[appId] = 0;
-    }
-
-    $.rewardsPoolEnabled[appId] = enable;
-    emit RewardsPoolBalanceEnabled(appId, enable);
   }
 
   /**
@@ -397,9 +321,9 @@ contract X2EarnRewardsPool is
    * @dev Emits the RewardMetadata event with the provided metadata.
    */
   function _emitMetadata(
-    bytes32 appId, 
+    bytes32 appId,
     uint256 amount,
-    address receiver, 
+    address receiver,
     string memory metadata
   ) internal {
     // emit event
@@ -604,34 +528,10 @@ contract X2EarnRewardsPool is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-totalBalance}
-   */
-  function totalBalance(bytes32 appId) external view returns (uint256) {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.availableFunds[appId] + $.rewardsPoolBalance[appId];
-  }
-
-  /**
-   * @dev See {IX2EarnRewardsPool-rewardsPoolEnabled}
-   */
-  function rewardsPoolEnabled(bytes32 appId) external view returns (bool) {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.rewardsPoolEnabled[appId];
-  }
-
-  /**
-   * @dev See {IX2EarnRewardsPool-rewardsPoolBalance}
-   */
-  function rewardsPoolBalance(bytes32 appId) external view returns (uint256) {
-    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.rewardsPoolBalance[appId];
-  }
-
-  /**
    * @dev See {IX2EarnRewardsPool-version}
    */
   function version() external pure virtual returns (string memory) {
-    return "7";
+    return "6";
   }
 
   /**
@@ -659,7 +559,7 @@ contract X2EarnRewardsPool is
   }
 
 
-
+  
 
   /**
    * @dev Retrieves the VeBetterPassport contract.
