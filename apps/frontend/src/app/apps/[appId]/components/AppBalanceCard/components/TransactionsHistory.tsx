@@ -64,7 +64,14 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
         timestampTxs: timestamp,
       },
     }
-    return transactionTypes[txType]
+    // Fallback for other transaction types
+    return (
+      transactionTypes[txType] || {
+        title: t("Transaction"),
+        amount: `${compactFormatter.format(parseFloat(transaction.amount || "0"))} B3TR`,
+        timestampTxs: timestamp,
+      }
+    )
   }
   const { title, amount, timestampTxs } = getTransactionProps()
   const bgColor = index % 2 === 0 ? "#FFFFFF" : "#F8F8F8"

@@ -223,7 +223,7 @@ export const RewardsPoolDetailsModal = ({ appId, isOpen, isEnabled, setIsEnabled
                 </CardBody>
               </Card>
             ) : (
-              <Card w={"full"} rounded={"20px"} border={"1px solid #D5D5D5"} mt={6} h="400px">
+              <Card w={"full"} rounded={"20px"} border={"1px solid #D5D5D5"} mt={6} h="500px">
                 <CardBody display="flex" flexDirection="column" justifyContent="center" alignItems="center">
                   <VStack>
                     {/* Circular icon with background */}
