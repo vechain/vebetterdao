@@ -1,5 +1,4 @@
-import { convertUriToUrl } from "@/utils"
-import axios from "axios"
+import { getIpfsMetadata } from "@/api/ipfs"
 
 /**
  * The metadata of an xApp from the xApps metadata base uri
@@ -38,9 +37,5 @@ export type XAppMetadata = {
    * @returns  The metadata of the xApp see {@link XAppMetadata}
    */
 export const getXAppMetadata = async (uri: string): Promise<XAppMetadata | undefined> => {
-  const metadata = await axios.get<XAppMetadata>(convertUriToUrl(uri), {
-    timeout: 20000,
-  })
-
-  return metadata.data
+  return getIpfsMetadata<XAppMetadata>(uri, true)
 }

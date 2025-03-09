@@ -1,4 +1,3 @@
-import axios from "axios"
 import FormData from "form-data"
 import { getConfig } from "@repo/config"
 
@@ -35,17 +34,23 @@ export function toIPFSURL(cid: string, fileName?: string): string {
  */
 export async function uploadBlobToIPFS(blob: Blob, filename: string): Promise<string> {
   try {
-    const form = new FormData();
-    form.append('file', blob, filename);
-    const response = await axios.post(getConfig().ipfsPinningService, form);
+    const form = new FormData()
+    form.append("file", blob, filename)
 
-    // Extract the IPFS hash from the response
-    const ipfsHash = response.data.IpfsHash
-    console.log("IPFS Hash:", ipfsHash)
+    const response = await fetch(getConfig().ipfsPinningService, {
+      method: "POST",
+      body: form as unknown as BodyInit,
+    })
+    if (!response.ok) {
+      throw new Error(`Failed to upload blob to IPFS: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    const ipfsHash = data.IpfsHash
 
     return ipfsHash
   } catch (error) {
-    console.error("Error uploading blob:", error)
-    throw new Error("Failed to upload blob to IPFS")
+    console.error("Error uploading blob to IPFS:", error)
+    throw error
   }
 }

@@ -1,7 +1,5 @@
 import { convertUriToUrl, resolveMediaTypeFromMimeType } from "@/utils"
 import { useQueries, useQuery } from "@tanstack/react-query"
-
-import axios from "axios"
 import { NFTMediaType } from "@/types"
 
 export interface IpfsImage {
@@ -17,12 +15,22 @@ export const MAX_IMAGE_SIZE = 1024 * 1024 * 10 // 10MB
  * @returns The NFT media
  */
 export const getIpfsImage = async (uri?: string): Promise<IpfsImage> => {
-  if (!uri) throw new Error("IPFS URI is required")
+  if (!uri) throw new Error("No URI provided")
 
-  const response = await axios.get(convertUriToUrl(uri), {
-    responseType: "blob",
-    maxContentLength: MAX_IMAGE_SIZE,
-  })
+  const newUri = convertUriToUrl(uri)
+
+  const response = await fetch(newUri)
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image from IPFS: ${response.status} ${response.statusText}`)
+  }
+
+  const blob = await response.blob()
+
+  // Check if the image size is within the limit
+  if (blob.size > MAX_IMAGE_SIZE) {
+    throw new Error(`IPFS image size exceeds limit of ${MAX_IMAGE_SIZE}, blob size is ${blob.size} bytes`)
+  }
 
   // Check if the MIME type is allowed
   const allowedMimeTypes = [
@@ -35,22 +43,24 @@ export const getIpfsImage = async (uri?: string): Promise<IpfsImage> => {
     "image/webp",
     "image/svg+xml",
   ]
-  if (!allowedMimeTypes.includes(response.data.type)) {
-    throw new Error(`Unsupported MIME type: ${response.data.type}`)
+  if (!allowedMimeTypes.includes(blob.type)) {
+    throw new Error(`IPFS image unsupported MIME type: ${blob.type}`)
   }
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.readAsDataURL(response.data)
+    reader.readAsDataURL(blob)
+
     reader.onloadend = () => {
       resolve({
         image: reader.result as string,
-        mime: response.data.type,
-        mediaType: resolveMediaTypeFromMimeType(response.data.type),
+        mime: blob.type,
+        mediaType: resolveMediaTypeFromMimeType(blob.type),
       })
     }
+
     reader.onerror = () => {
-      reject(Error("Error occurred while reading blob."))
+      reject(Error("Error occurred while reading IPFS image blob!"))
     }
   })
 }
