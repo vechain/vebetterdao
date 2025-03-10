@@ -59,6 +59,7 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * - Added optional dual-pool balance to manage rewards and treasury separately
  * - Added 2 new storage variables: rewardsPoolBalance and rewardsPoolEnabled
  * - Modified withdrawal access control to only admin
+ * - Rewards distribution can be paused by admin
  */
 contract X2EarnRewardsPool is
   IX2EarnRewardsPool,
