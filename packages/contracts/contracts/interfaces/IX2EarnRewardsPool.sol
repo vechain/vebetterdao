@@ -60,6 +60,20 @@ interface IX2EarnRewardsPool {
    */
   event RegisterActionFailed(string reason, bytes lowLevelData);
 
+  /**
+   * @dev Event emitted when an app's reward distribution is paused.
+   * @param appId The ID of the app that was paused.
+   * @param admin The address of the admin who paused the app.
+   */
+  event AppPaused(bytes32 indexed appId, address indexed admin);
+
+  /**
+   * @dev Event emitted when an app's reward distribution is unpaused.
+   * @param appId The ID of the app that was unpaused.
+   * @param admin The address of the admin who unpaused the app.
+   */
+  event AppUnpaused(bytes32 indexed appId, address indexed admin);
+
 
 /**
   * @dev Event emitted when a reward is emitted by an app with proof and metadata.
