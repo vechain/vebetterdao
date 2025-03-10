@@ -68,6 +68,7 @@ export type CreateEditAppFormData = {
   banner: string
   projectUrl: string
   teamWalletAddress: string
+  adminWalletAddress: string
 }
 
 type Props = {
@@ -122,6 +123,7 @@ export const CreateEditAppForm = ({
   const { open: openUploadBanner } = useDropzone({ onDrop: onDrop("banner") })
 
   const teamWalletAddress = watch("teamWalletAddress")
+  const adminWalletAddress = watch("adminWalletAddress")
 
   return (
     <Card>
@@ -183,6 +185,21 @@ export const CreateEditAppForm = ({
                 isDisabled={isReceiverAddressDisabled}
                 rounded={"xl"}
                 onAddressResolved={address => setValue("teamWalletAddress", address ?? "")}
+              />
+            </InputGroup>
+          </FormControl>
+          <FormControl isInvalid={!adminWalletAddress}>
+            <FormLabel>{t("Admin address")}</FormLabel>
+            <InputGroup>
+              <WalletAddressInput
+                inputLeftElement={
+                  <InputLeftElement pointerEvents="none">
+                    <AddressIcon borderRadius={"full"} boxSize={6} address={adminWalletAddress ?? ""} />
+                  </InputLeftElement>
+                }
+                isDisabled={isReceiverAddressDisabled}
+                rounded={"xl"}
+                onAddressResolved={address => setValue("adminWalletAddress", address ?? "")}
               />
             </InputGroup>
           </FormControl>
