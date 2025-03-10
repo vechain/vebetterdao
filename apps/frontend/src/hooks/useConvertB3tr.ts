@@ -5,12 +5,14 @@ import {
   getVotesQueryKey,
   buildB3trApprovesTx,
   getB3TrTokenDetailsQueryKey,
+  buildDelegateVot3Tx,
 } from "@/api"
 import { useCallback, useMemo } from "react"
 import { getConfig } from "@repo/config"
 import { removingExcessDecimals } from "@/utils/MathUtils"
 import { useWallet, useConnex } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { useVot3RequireSelfDelegation } from "./useVot3RequireSelfDelegation"
 
 const config = getConfig()
 
@@ -33,16 +35,26 @@ type useMintB3trProps = {
 export const useConvertB3tr = ({ amount, onSuccess }: useMintB3trProps) => {
   const { thor } = useConnex()
   const { account } = useWallet()
+  const requiresSelfDelegation = useVot3RequireSelfDelegation()
 
   const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
 
   const clauseBuilder = useCallback(() => {
     if (!contractAmount) throw new Error("amount is required")
-    return [
+    if (!account?.address) throw new Error("account address is required")
+    const convertClause = [
       buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress),
       buildConvertB3trTx(thor, contractAmount),
     ]
-  }, [thor, contractAmount])
+
+    // If the user requires self delegation, add the delegation clause
+    // This is required for privy users, in order to be able to capture the vot3 balance at the snapshot block
+    // Check https://github.com/vechain/vechain-kit/issues/102 for more info
+    if (requiresSelfDelegation) {
+      convertClause.unshift(buildDelegateVot3Tx(thor, account?.address))
+    }
+    return convertClause
+  }, [thor, contractAmount, requiresSelfDelegation, account?.address])
 
   const refetchQueryKeys = useMemo(
     () => [
