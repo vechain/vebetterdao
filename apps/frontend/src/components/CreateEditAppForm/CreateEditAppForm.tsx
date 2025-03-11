@@ -69,7 +69,7 @@ export type CreateEditAppFormData = {
   projectUrl: string
   teamWalletAddress: string
   adminWalletAddress: string
-  ve_world: string
+  ve_world_banner: string
 }
 
 type Props = {
@@ -102,7 +102,7 @@ export const CreateEditAppForm = ({
 
   // handle image uploads with validation
   const onDrop = useCallback(
-    (image: "logo" | "banner" | "ve_world") => async (acceptedFiles: File[]) => {
+    (image: "logo" | "banner" | "ve_world_banner") => async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0]
       if (!file) return
 
@@ -120,11 +120,11 @@ export const CreateEditAppForm = ({
         setValue("banner", base64Banner)
       }
 
-      if (image === "ve_world") {
-        clearErrors("ve_world")
-        const base64VeWorldBanner = await validateImageUpload(file, setError, "ve_world")
+      if (image === "ve_world_banner") {
+        clearErrors("ve_world_banner")
+        const base64VeWorldBanner = await validateImageUpload(file, setError, "ve_world_banner")
         if (!base64VeWorldBanner) return
-        setValue("ve_world", base64VeWorldBanner)
+        setValue("ve_world_banner", base64VeWorldBanner)
       }
     },
     [setError, setValue, clearErrors],
@@ -134,7 +134,7 @@ export const CreateEditAppForm = ({
 
   const { open: openUploadBanner } = useDropzone({ onDrop: onDrop("banner") })
 
-  const { open: openUploadVeWorldBanner } = useDropzone({ onDrop: onDrop("ve_world") })
+  const { open: openUploadVeWorldBanner } = useDropzone({ onDrop: onDrop("ve_world_banner") })
 
   const teamWalletAddress = watch("teamWalletAddress")
   const adminWalletAddress = watch("adminWalletAddress")
@@ -301,7 +301,7 @@ export const CreateEditAppForm = ({
           </Stack>
 
           <Controller
-            name="ve_world"
+            name="ve_world_banner"
             control={control}
             rules={{
               required: "VeWorld banner is required",
@@ -312,7 +312,7 @@ export const CreateEditAppForm = ({
               },
             }}
             render={({ field: { value } }) => (
-              <FormControl isInvalid={!!errors.ve_world}>
+              <FormControl isInvalid={!!errors.ve_world_banner}>
                 <FormLabel>{t("VeWorld Banner")}</FormLabel>
                 <VStack w="full" align="center">
                   <Image
@@ -323,12 +323,12 @@ export const CreateEditAppForm = ({
                     style={{ height: 76, width: computedWidth, borderRadius: 12, overflow: "hidden" }}
                     objectFit="cover"
                   />
-                  {errors.ve_world ? (
-                    <FormErrorMessage>{errors.ve_world.message}</FormErrorMessage>
+                  {errors.ve_world_banner ? (
+                    <FormErrorMessage>{errors.ve_world_banner.message}</FormErrorMessage>
                   ) : (
                     <FormHelperText>{t("Recommended size: 1500x2000px")}</FormHelperText>
                   )}
-                  <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("ve_world")} />
+                  <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("ve_world_banner")} />
                 </VStack>
               </FormControl>
             )}
