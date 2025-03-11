@@ -31,7 +31,7 @@ import {
 import { AddressIcon } from "../AddressIcon"
 import { UploadFileButton } from "../UploadFileButton"
 import { useCallback } from "react"
-import { notFoundImage } from "@/constants"
+import { AVG_PHONE_WIDTH, notFoundImage, VE_WOLRD_SCALING_FACTOR } from "@/constants"
 import { useDropzone } from "react-dropzone"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { useTranslation } from "react-i18next"
@@ -98,9 +98,6 @@ export const CreateEditAppForm = ({
   isReceiverAddressDisabled = false,
 }: Props) => {
   const { t } = useTranslation()
-
-  const VE_WOLRD_SCALING_FACTOR = 2.7
-  const AVG_PHONE_WIDTH = 400
   const computedWidth = Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR
 
   // handle image uploads with validation

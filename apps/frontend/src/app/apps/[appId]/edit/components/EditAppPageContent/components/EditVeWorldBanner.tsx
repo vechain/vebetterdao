@@ -1,7 +1,7 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
 import { Flex, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
-import { notFoundImage } from "@/constants"
+import { AVG_PHONE_WIDTH, notFoundImage, VE_WOLRD_SCALING_FACTOR } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
@@ -17,6 +17,8 @@ export const EditVeWorldBanner = ({ form }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const toast = useToast()
   const { t } = useTranslation()
+
+  const computedWidth = Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR
 
   const handleClickEdit = useCallback(() => inputRef.current?.click(), [])
 
@@ -53,20 +55,16 @@ export const EditVeWorldBanner = ({ form }: Props) => {
           {t("Upload a banner to be displayed on the VeWorld mobile wallet")}
         </Text>
       </VStack>
-      <Flex w="full" h="220px" flexBasis={"64px"} position={"relative"} rounded="16px" mt={4}>
+      <Flex w={computedWidth} h="220px" flexBasis={"64px"} position={"relative"} rounded="12px" mt={4}>
         <Image
           src={banner ?? notFoundImage}
-          alt={"banner"}
-          maxWidth="none"
-          h="220px"
-          w="full"
-          rounded="16px"
-          objectFit={"cover"}
-          objectPosition={"center"}
+          alt="ve_world_banner"
+          style={{ height: 76, width: computedWidth, borderRadius: 12, overflow: "hidden" }}
+          objectFit="cover"
         />
         <Input type="file" accept="image/*" display={"none"} ref={inputRef} onChange={handleUpload} />
         <Flex
-          rounded="16px"
+          rounded="12px"
           top={0}
           right={0}
           left={0}
