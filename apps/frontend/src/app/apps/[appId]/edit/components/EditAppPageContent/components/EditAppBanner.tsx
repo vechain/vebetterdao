@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
-import { Button, Flex, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
+import { Flex, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
 import { notFoundImage } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
@@ -43,15 +43,6 @@ export const EditAppBanner = ({ form }: Props) => {
     [form, toast],
   )
 
-  const handleDownload = () => {
-    const link = document.createElement("a")
-    link.href = "/images/VeBetterDAO-Banner Size Guide.zip"
-    link.download = "VeBetterDAO-Banner Size Guide.zip"
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
-
   return (
     <VStack gap={2} align={"start"}>
       <Flex w="full" h="220px" flexBasis={"64px"} position={"relative"} rounded="16px">
@@ -92,9 +83,6 @@ export const EditAppBanner = ({ form }: Props) => {
         {t(
           "App banners should be 1240×460 and have the most important content in a safe area of 820×240 in the center of the image to look good in every device.",
         )}
-        <Button variant="link" colorScheme="blue" size={"sm"} pl={2} onClick={handleDownload}>
-          {t("Download template")}
-        </Button>
       </Text>
     </VStack>
   )
