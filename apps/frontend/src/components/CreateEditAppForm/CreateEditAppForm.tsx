@@ -69,6 +69,7 @@ export type CreateEditAppFormData = {
   projectUrl: string
   teamWalletAddress: string
   adminWalletAddress: string
+  ve_world: string
 }
 
 type Props = {
@@ -97,22 +98,36 @@ export const CreateEditAppForm = ({
   isReceiverAddressDisabled = false,
 }: Props) => {
   const { t } = useTranslation()
+
+  const VE_WOLRD_SCALING_FACTOR = 2.7
+  const AVG_PHONE_WIDTH = 400
+  const computedWidth = Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR
+
   // handle image uploads with validation
   const onDrop = useCallback(
-    (image: "logo" | "banner") => async (acceptedFiles: File[]) => {
+    (image: "logo" | "banner" | "ve_world") => async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0]
       if (!file) return
+
       if (image === "logo") {
         clearErrors("logo")
         const base64Logo = await validateImageUpload(file, setError, "logo")
         if (!base64Logo) return
         setValue("logo", base64Logo)
       }
+
       if (image === "banner") {
         clearErrors("banner")
         const base64Banner = await validateImageUpload(file, setError, "banner")
         if (!base64Banner) return
         setValue("banner", base64Banner)
+      }
+
+      if (image === "ve_world") {
+        clearErrors("ve_world")
+        const base64VeWorldBanner = await validateImageUpload(file, setError, "ve_world")
+        if (!base64VeWorldBanner) return
+        setValue("ve_world", base64VeWorldBanner)
       }
     },
     [setError, setValue, clearErrors],
@@ -121,6 +136,8 @@ export const CreateEditAppForm = ({
   const { open: openUploadLogo } = useDropzone({ onDrop: onDrop("logo") })
 
   const { open: openUploadBanner } = useDropzone({ onDrop: onDrop("banner") })
+
+  const { open: openUploadVeWorldBanner } = useDropzone({ onDrop: onDrop("ve_world") })
 
   const teamWalletAddress = watch("teamWalletAddress")
   const adminWalletAddress = watch("adminWalletAddress")
@@ -142,6 +159,7 @@ export const CreateEditAppForm = ({
             />
             {errors.name && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
           </FormControl>
+
           <FormControl isInvalid={!!errors.description}>
             <FormLabel>{t("Description")}</FormLabel>
             <Textarea
@@ -153,6 +171,7 @@ export const CreateEditAppForm = ({
             />
             {errors.description && <FormErrorMessage>{errors.description.message}</FormErrorMessage>}
           </FormControl>
+
           <FormControl isInvalid={!!errors.projectUrl}>
             <FormLabel>{t("Project URL")}</FormLabel>
             <Input
@@ -173,6 +192,7 @@ export const CreateEditAppForm = ({
             />
             {errors.projectUrl && <FormErrorMessage>{errors.projectUrl.message}</FormErrorMessage>}
           </FormControl>
+
           <FormControl isInvalid={!teamWalletAddress}>
             <FormLabel>{t("Treasury address")}</FormLabel>
             <InputGroup>
@@ -188,6 +208,7 @@ export const CreateEditAppForm = ({
               />
             </InputGroup>
           </FormControl>
+
           <FormControl isInvalid={!adminWalletAddress}>
             <FormLabel>{t("Admin address")}</FormLabel>
             <InputGroup>
@@ -203,6 +224,7 @@ export const CreateEditAppForm = ({
               />
             </InputGroup>
           </FormControl>
+
           <Stack direction={["column", "row"]} w="full" justify={"space-between"} align={"flex-start"} spacing={4}>
             <Controller
               name="logo"
@@ -241,6 +263,7 @@ export const CreateEditAppForm = ({
                 </FormControl>
               )}
             />
+
             <Controller
               name="banner"
               control={control}
@@ -279,6 +302,40 @@ export const CreateEditAppForm = ({
               )}
             />
           </Stack>
+
+          <Controller
+            name="ve_world"
+            control={control}
+            rules={{
+              required: "VeWorld banner is required",
+              validate: value => {
+                if (!value) {
+                  return "VeWorld banner is required"
+                }
+              },
+            }}
+            render={({ field: { value } }) => (
+              <FormControl isInvalid={!!errors.ve_world}>
+                <FormLabel>{t("VeWorld Banner")}</FormLabel>
+                <VStack w="full" align="center">
+                  <Image
+                    onClick={openUploadVeWorldBanner}
+                    _hover={{ cursor: "pointer" }}
+                    src={value ?? notFoundImage}
+                    alt="ve_world_banner"
+                    style={{ height: 76, width: computedWidth, borderRadius: 12, overflow: "hidden" }}
+                    objectFit="cover"
+                  />
+                  {errors.ve_world ? (
+                    <FormErrorMessage>{errors.ve_world.message}</FormErrorMessage>
+                  ) : (
+                    <FormHelperText>{t("Recommended size: 1500x2000px")}</FormHelperText>
+                  )}
+                  <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("ve_world")} />
+                </VStack>
+              </FormControl>
+            )}
+          />
         </VStack>
       </CardBody>
       <CardFooter display={"flex"} flexDir={"column"} w="full">
