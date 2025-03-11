@@ -32,9 +32,9 @@ import { AddressIcon } from "../AddressIcon"
 import { UploadFileButton } from "../UploadFileButton"
 import { useCallback } from "react"
 import {
-  ADVISE_BANNER_TEXT,
-  ADVISE_LOGO_TEXT,
-  ADVISE_VEWORLD_BANNER_TEXT,
+  BANNER_UPLOAD_GUIDELINES,
+  LOGO_UPLOAD_GUIDELINES,
+  VEWORLD_BANNER_UPLOAD_GUIDELINES,
   AVG_PHONE_WIDTH,
   notFoundImage,
   VE_WOLRD_SCALING_FACTOR,
@@ -260,7 +260,7 @@ export const CreateEditAppForm = ({
                     {errors.logo ? (
                       <FormErrorMessage>{errors.logo.message}</FormErrorMessage>
                     ) : (
-                      <FormHelperText>{t(ADVISE_LOGO_TEXT)}</FormHelperText>
+                      <FormHelperText>{t(LOGO_UPLOAD_GUIDELINES)}</FormHelperText>
                     )}
                     <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("logo")} />
                   </VStack>
@@ -298,7 +298,7 @@ export const CreateEditAppForm = ({
                     {errors.banner ? (
                       <FormErrorMessage>{errors.banner.message}</FormErrorMessage>
                     ) : (
-                      <FormHelperText>{t(ADVISE_BANNER_TEXT)}</FormHelperText>
+                      <FormHelperText>{t(BANNER_UPLOAD_GUIDELINES)}</FormHelperText>
                     )}
                     <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("banner")} />
                   </VStack>
@@ -333,7 +333,7 @@ export const CreateEditAppForm = ({
                   {errors.ve_world_banner ? (
                     <FormErrorMessage>{errors.ve_world_banner.message}</FormErrorMessage>
                   ) : (
-                    <FormHelperText>{t(ADVISE_VEWORLD_BANNER_TEXT)}</FormHelperText>
+                    <FormHelperText>{t(VEWORLD_BANNER_UPLOAD_GUIDELINES)}</FormHelperText>
                   )}
                   <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("ve_world_banner")} />
                 </VStack>

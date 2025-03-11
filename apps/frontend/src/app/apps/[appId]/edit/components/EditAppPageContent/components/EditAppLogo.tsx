@@ -1,7 +1,7 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
 import { Box, Circle, Flex, Image, Input, useToast, Text, VStack } from "@chakra-ui/react"
-import { ADVISE_LOGO_TEXT, notFoundImage } from "@/constants"
+import { LOGO_UPLOAD_GUIDELINES, notFoundImage } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
@@ -82,7 +82,7 @@ export const EditAppLogo = ({ form }: Props) => {
         </Box>
       </Flex>
       <Text fontSize={14} color={"gray"} pt={0}>
-        {t(ADVISE_LOGO_TEXT)}
+        {t(LOGO_UPLOAD_GUIDELINES)}
       </Text>
     </VStack>
   )

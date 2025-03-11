@@ -1,7 +1,7 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
 import { Flex, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
-import { ADVISE_BANNER_TEXT, notFoundImage } from "@/constants"
+import { BANNER_UPLOAD_GUIDELINES, notFoundImage } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
@@ -83,7 +83,7 @@ export const EditAppBanner = ({ form }: Props) => {
         </Flex>
       </Flex>
       <Text fontSize={14} color={"gray"} pt={0}>
-        {t(ADVISE_BANNER_TEXT)}
+        {t(BANNER_UPLOAD_GUIDELINES)}
       </Text>
     </VStack>
   )

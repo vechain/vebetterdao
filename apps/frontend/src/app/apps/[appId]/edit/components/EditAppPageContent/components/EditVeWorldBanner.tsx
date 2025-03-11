@@ -1,7 +1,7 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
 import { Flex, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
-import { ADVISE_VEWORLD_BANNER_TEXT, AVG_PHONE_WIDTH, notFoundImage, VE_WOLRD_SCALING_FACTOR } from "@/constants"
+import { VEWORLD_BANNER_UPLOAD_GUIDELINES, AVG_PHONE_WIDTH, notFoundImage, VE_WOLRD_SCALING_FACTOR } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
@@ -81,7 +81,7 @@ export const EditVeWorldBanner = ({ form }: Props) => {
         </Flex>
       </Flex>
       <Text fontSize={14} color={"gray"} pt={0}>
-        {t(ADVISE_VEWORLD_BANNER_TEXT)}
+        {t(VEWORLD_BANNER_UPLOAD_GUIDELINES)}
       </Text>
     </VStack>
   )
