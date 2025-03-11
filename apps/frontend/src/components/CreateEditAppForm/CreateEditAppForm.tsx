@@ -31,7 +31,14 @@ import {
 import { AddressIcon } from "../AddressIcon"
 import { UploadFileButton } from "../UploadFileButton"
 import { useCallback } from "react"
-import { AVG_PHONE_WIDTH, notFoundImage, VE_WOLRD_SCALING_FACTOR } from "@/constants"
+import {
+  ADVISE_BANNER_TEXT,
+  ADVISE_LOGO_TEXT,
+  ADVISE_VEWORLD_BANNER_TEXT,
+  AVG_PHONE_WIDTH,
+  notFoundImage,
+  VE_WOLRD_SCALING_FACTOR,
+} from "@/constants"
 import { useDropzone } from "react-dropzone"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { useTranslation } from "react-i18next"
@@ -253,7 +260,7 @@ export const CreateEditAppForm = ({
                     {errors.logo ? (
                       <FormErrorMessage>{errors.logo.message}</FormErrorMessage>
                     ) : (
-                      <FormHelperText>{t("Recommended size: 96x96px")}</FormHelperText>
+                      <FormHelperText>{t(ADVISE_LOGO_TEXT)}</FormHelperText>
                     )}
                     <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("logo")} />
                   </VStack>
@@ -291,7 +298,7 @@ export const CreateEditAppForm = ({
                     {errors.banner ? (
                       <FormErrorMessage>{errors.banner.message}</FormErrorMessage>
                     ) : (
-                      <FormHelperText>{t("Recommended size: 1500x2000px")}</FormHelperText>
+                      <FormHelperText>{t(ADVISE_BANNER_TEXT)}</FormHelperText>
                     )}
                     <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("banner")} />
                   </VStack>
@@ -326,7 +333,7 @@ export const CreateEditAppForm = ({
                   {errors.ve_world_banner ? (
                     <FormErrorMessage>{errors.ve_world_banner.message}</FormErrorMessage>
                   ) : (
-                    <FormHelperText>{t("Recommended size: 1500x2000px")}</FormHelperText>
+                    <FormHelperText>{t(ADVISE_VEWORLD_BANNER_TEXT)}</FormHelperText>
                   )}
                   <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("ve_world_banner")} />
                 </VStack>

@@ -1,7 +1,7 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
 import { Flex, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
-import { AVG_PHONE_WIDTH, notFoundImage, VE_WOLRD_SCALING_FACTOR } from "@/constants"
+import { ADVISE_VEWORLD_BANNER_TEXT, AVG_PHONE_WIDTH, notFoundImage, VE_WOLRD_SCALING_FACTOR } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
@@ -47,15 +47,10 @@ export const EditVeWorldBanner = ({ form }: Props) => {
 
   return (
     <VStack gap={2} align={"start"}>
-      <VStack align="stretch" gap={2}>
-        <Heading fontSize="24px" fontWeight="700">
-          {t("VeWorld Banner")}
-        </Heading>
-        <Text fontSize="md" color="gray.500">
-          {t("Upload a banner to be displayed on the VeWorld mobile wallet")}
-        </Text>
-      </VStack>
-      <Flex w={computedWidth} h="220px" position={"relative"} rounded="12px" mt={4}>
+      <Heading fontSize="24px" fontWeight="700">
+        {t("VeWorld Banner")}
+      </Heading>
+      <Flex w={computedWidth} h="76px" position={"relative"} rounded="12px" mt={4}>
         <Image
           src={banner ?? notFoundImage}
           alt="ve_world_banner"
@@ -85,8 +80,8 @@ export const EditVeWorldBanner = ({ form }: Props) => {
           />
         </Flex>
       </Flex>
-      <Text fontSize={"sm"} color={"gray"} pt={0}>
-        {t("VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).")}
+      <Text fontSize={14} color={"gray"} pt={0}>
+        {t(ADVISE_VEWORLD_BANNER_TEXT)}
       </Text>
     </VStack>
   )
