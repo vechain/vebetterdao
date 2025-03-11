@@ -29,7 +29,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
 
   const networkType = getConfig().network.type
 
-  const allowCustomTokens = networkType === ("testnet" as NETWORK_TYPE)
+  const allowCustomTokens = networkType === ("test" as NETWORK_TYPE)
 
   return (
     <VeChainKitProvider
