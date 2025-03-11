@@ -12,7 +12,7 @@ import { getConfig } from "@repo/config"
 import { removingExcessDecimals } from "@/utils/MathUtils"
 import { useWallet, useConnex } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { useVot3RequireSelfDelegation } from "./useVot3RequireSelfDelegation"
+import { useVot3RequireSelfDelegation } from "./vechainKitHooks"
 
 const config = getConfig()
 
