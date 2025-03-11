@@ -1,8 +1,6 @@
-import { Button, Fade, IconButton, Skeleton, useMediaQuery } from "@chakra-ui/react"
-import { FaWallet } from "react-icons/fa6"
-import { useTranslation } from "react-i18next"
+import { Button, ButtonProps, Fade, IconButton, Skeleton, useMediaQuery } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { useWalletModal, useWallet } from "@vechain/vechain-kit"
+import { useWalletModal, useWallet, WalletButton, WalletButtonProps } from "@vechain/vechain-kit"
 import { AddressIcon } from "../AddressIcon"
 
 const DesktopConnectedUserButton = dynamic(
@@ -19,44 +17,39 @@ const DesktopConnectedUserButton = dynamic(
 
 type Props = {
   responsiveVariant?: "desktop" | "mobile"
+  connectionVariant?: WalletButtonProps["connectionVariant"]
+  buttonStyleProps?: ButtonProps
 }
 
-export const ConnectWalletButton = ({ responsiveVariant }: Props) => {
+export const ConnectWalletButton = ({ responsiveVariant, connectionVariant, buttonStyleProps }: Props) => {
   const { account } = useWallet()
 
   const { open } = useWalletModal()
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
-  const { t } = useTranslation()
 
   const shouldRenderDesktop = responsiveVariant === "desktop" || (!responsiveVariant && isDesktop)
+  const notLoggedIn = !account?.address
 
-  if (!account?.address)
-    if (shouldRenderDesktop)
-      return (
-        <Fade in={true}>
-          <Button
-            onClick={open}
-            variant={"primaryAction"}
-            size="md"
-            leftIcon={<FaWallet />}
-            data-testid="connect-wallet">
-            {t("Connect Wallet")}
-          </Button>
-        </Fade>
-      )
-    else
-      return (
-        <Fade in={true}>
-          <IconButton
-            onClick={open}
-            icon={<FaWallet />}
-            aria-label="Connect wallet"
-            variant={"primaryAction"}
-            borderRadius={"md"}
-          />
-        </Fade>
-      )
+  // If the user is not logged in, show the connect wallet button
+  if (notLoggedIn)
+    return (
+      <Fade in={true}>
+        <WalletButton
+          buttonStyle={{
+            variant: "primaryAction",
+            size: "md",
+            borderRadius: "24px",
+            bg: buttonStyleProps?.bg ?? "#004CFC",
+            textColor: buttonStyleProps?.textColor ?? "white",
+            ...buttonStyleProps,
+          }}
+          connectionVariant={connectionVariant ?? "popover"}
+          data-testid="connect-wallet"
+        />
+      </Fade>
+    )
 
+  // If the user is logged in and the on desktop, show the desktop connected user button
   if (shouldRenderDesktop) return <DesktopConnectedUserButton account={account} />
 
   return (
