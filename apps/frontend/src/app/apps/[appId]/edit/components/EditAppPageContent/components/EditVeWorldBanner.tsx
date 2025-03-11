@@ -55,7 +55,7 @@ export const EditVeWorldBanner = ({ form }: Props) => {
           {t("Upload a banner to be displayed on the VeWorld mobile wallet")}
         </Text>
       </VStack>
-      <Flex w={computedWidth} h="220px" flexBasis={"64px"} position={"relative"} rounded="12px" mt={4}>
+      <Flex w={computedWidth} h="220px" position={"relative"} rounded="12px" mt={4}>
         <Image
           src={banner ?? notFoundImage}
           alt="ve_world_banner"
