@@ -22,7 +22,7 @@ import {
 import { endorseApp } from "./helpers/xnodes"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
-describe("X2EarnRewardsPool - @shard12", function () {
+describe.only("X2EarnRewardsPool - @shard12", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {

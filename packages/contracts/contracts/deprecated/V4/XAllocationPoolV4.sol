@@ -52,7 +52,7 @@ import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
  * ---------------------- Version 4 ----------------------------------------
  * - Updated the X2EarnApps interface to support node cooldown functionality
  */
-contract XAllocationPoolV5 is IXAllocationPool, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+contract XAllocationPoolV4 is IXAllocationPool, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing the voting mechanism used in the XAllocationVoting contract
 
   uint256 public constant PERCENTAGE_PRECISION_SCALING_FACTOR = 1e4;

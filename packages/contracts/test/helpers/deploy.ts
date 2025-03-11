@@ -459,6 +459,7 @@ export const getOrDeployContractInstances = async ({
       "X2EarnRewardsPoolV3",
       "X2EarnRewardsPoolV4",
       "X2EarnRewardsPoolV5",
+      "X2EarnRewardsPoolV6",
       "X2EarnRewardsPool",
     ],
     [
@@ -468,14 +469,15 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5, 6, 7],
     },
   )) as X2EarnRewardsPool
 
   const xAllocationPool = (await deployAndUpgrade(
-    ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPool"],
+    ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPoolV4", "XAllocationPool"],
     [
       [
         owner.address,
@@ -489,9 +491,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4],
+      versions: [undefined, 2, 3, 4, 5],
     },
   )) as XAllocationPool
 
