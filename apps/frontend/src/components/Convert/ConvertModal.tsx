@@ -1,36 +1,28 @@
 "use-client"
-import {
-  Button,
-  Card,
-  CardBody,
-  Flex,
-  HStack,
-  Text,
-  VStack,
-  Modal,
-  ModalOverlay,
-  ModalCloseButton,
-} from "@chakra-ui/react"
+import { Card, CardBody, HStack, Text, Modal, ModalOverlay } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
-import { useConvertB3tr, useTokenColors, useConvertVot3 } from "@/hooks"
-import { FaArrowRight } from "react-icons/fa6"
+import { useConvertB3tr, useTokenColors, useConvertVot3, useSmartAccountUpgradeRequired } from "@/hooks"
 import { useForm } from "react-hook-form"
 import { CustomModalContent } from "../CustomModalContent"
-import { TokenCards } from "./TokenCards"
 import { TransactionModal, TransactionModalStatus } from "../TransactionModal"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { IoArrowBackOutline } from "react-icons/io5"
-import { BalanceInfo, TokenInfoCard } from "./components"
+import { TokenSelectionContent, UpgradeAccountContent } from "./components"
 import { useB3trBalance, useB3trConverted, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/vechain-kit"
-import { FiInfo } from "react-icons/fi"
-import { motion } from "framer-motion"
 import BigNumber from "bignumber.js"
 import { useTranslation } from "react-i18next"
+import { FaArrowRight } from "react-icons/fa6"
+import { SwapTokenContent } from "./components/SwapTokenContent"
 
 export type Props = {
   isOpen: boolean
   onClose: () => void
+}
+
+enum CardContentStep {
+  SELECT_TOKEN,
+  UPGRADE_ACCOUNT,
+  CONFIRM_SWAP,
 }
 
 const DECIMAL_PLACES = 4
@@ -52,6 +44,8 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
 
   const { account } = useWallet()
+
+  const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
 
   const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance } = useVot3Balance(account?.address ?? undefined)
@@ -96,7 +90,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const handleConvertB3tr = useCallback(() => {
     mutationData.resetStatus()
     mutationData.sendTransaction(undefined)
-  }, [mutationData])
+  }, [isSmartAccountUpgradeRequired, mutationData])
 
   const handleClose = useCallback(() => {
     mutationData.resetStatus()
@@ -178,120 +172,54 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     )
   }, [isB3trToVot3, t])
 
-  const renderCardContent = useCallback(() => {
-    return isB3trToVot3 !== undefined ? (
-      <form onSubmit={formData.handleSubmit(handleConvertB3tr)}>
-        <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
-        <VStack align={"flex-start"} maxW={"590px"} px={{ base: 0, md: 4 }}>
-          <HStack>
-            <IoArrowBackOutline onClick={handleGoBack} size={20} cursor={"pointer"} />
-            <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
-              {convertTitle}
-            </Text>
-          </HStack>
-          {convertDescription}
+  const isSubmitButtonLoading = useMemo(() => {
+    return mutationData.status === "pending"
+  }, [mutationData.status])
 
-          <Flex
-            flexDirection={{
-              base: isB3trToVot3 ? "column" : "column-reverse",
-              md: isB3trToVot3 ? "row" : "row-reverse",
-            }}
-            w={"full"}
-            gap={4}
-            mt={{ base: 2, md: 4 }}
-            // hide if below 667px height
-            css={
-              !isB3trToVot3 &&
-              isVOT3BalanceMoreThanStakedB3TR && {
-                "@media (max-height: 667px)": {
-                  display: "none",
-                },
-              }
-            }>
-            <BalanceInfo isB3TR={true} balanceScaled={b3trBalanceScaled} />
-            <BalanceInfo isB3TR={false} balanceScaled={vot3BalanceScaled} />
-          </Flex>
+  const disableSubmitButton = useMemo(() => {
+    return invalidAmount || isSubmitButtonLoading
+  }, [invalidAmount, isSubmitButtonLoading])
 
-          {!isB3trToVot3 && isVOT3BalanceMoreThanStakedB3TR && (
-            <HStack px={4} py={3} bg={"#F8F8F8"} borderRadius={8} mt={2}>
-              <FiInfo size={36} color="#6a6a6a" />
-              <Text fontSize={{ base: 14 }} fontWeight={400}>
-                {t("The maximum amount of VOT3 you can convert is ")}
-                <b>{swappableVot3Balance?.formatted}</b>
-                {t(". You can’t convert VOT3 that ")}
-                <b>{t("someone else transferred to you.")}</b>
-              </Text>
-            </HStack>
-          )}
+  const getCardContentStep = (isSmartAccountUpgradeRequired?: boolean, isB3trToVot3?: boolean) => {
+    if (isB3trToVot3 && isSmartAccountUpgradeRequired) return CardContentStep.UPGRADE_ACCOUNT
+    if (isB3trToVot3 === undefined) return CardContentStep.SELECT_TOKEN
+    return CardContentStep.CONFIRM_SWAP
+  }
 
-          <TokenCards
-            amount={amount}
-            formData={formData}
-            isB3trToVot3={isB3trToVot3}
-            swappableVot3Balance={swappableVot3Balance}
-            isVOT3BalanceMoreThanStakedB3TR={isVOT3BalanceMoreThanStakedB3TR}
-          />
+  const stepComponents = {
+    [CardContentStep.UPGRADE_ACCOUNT]: <UpgradeAccountContent onClose={handleClose} />,
+    [CardContentStep.SELECT_TOKEN]: (
+      <TokenSelectionContent
+        onSubmit={formData.handleSubmit(handleConvertB3tr)}
+        setIsB3trToVot3={setIsB3trToVot3}
+        zoomInVariants={zoomInVariants}
+      />
+    ),
+    [CardContentStep.CONFIRM_SWAP]: (
+      <SwapTokenContent
+        formData={formData}
+        onSubmit={formData.handleSubmit(handleConvertB3tr)}
+        amount={amount}
+        isB3trToVot3={isB3trToVot3}
+        swappableVot3Balance={swappableVot3Balance}
+        isVOT3BalanceMoreThanStakedB3TR={isVOT3BalanceMoreThanStakedB3TR}
+        convertTitle={convertTitle}
+        convertDescription={convertDescription}
+        b3trBalanceScaled={b3trBalanceScaled}
+        vot3BalanceScaled={vot3BalanceScaled}
+        handleGoBack={handleGoBack}
+        disableSubmitButton={disableSubmitButton}
+        isSubmitButtonLoading={isSubmitButtonLoading}
+      />
+    ),
+  }
 
-          <Button
-            mt={2}
-            type="submit"
-            variant={"primaryAction"}
-            w={"full"}
-            rounded={"full"}
-            isDisabled={invalidAmount}
-            size={"lg"}
-            data-testid={"confirm-swap-button"}>
-            <Text fontSize={{ base: 14, md: 18 }}>{t("Convert now")}</Text>
-          </Button>
+  const currentStep = useMemo(
+    () => getCardContentStep(isSmartAccountUpgradeRequired, isB3trToVot3),
+    [isSmartAccountUpgradeRequired, isB3trToVot3],
+  )
 
-          {/* <BaseTooltip
-            text={
-              "B3TR and VOT3 tokens convert 1:1. You can convert back to B3TR based on your total converted VOT3 tokens."
-            }>
-            <Flex w={"full"} justifyContent={"center"} mt={1}>
-              <HStack alignSelf={"center"}>
-                <FiInfo color="rgba(0, 76, 252, 1)" size={14} />
-                <Text fontSize={14} fontWeight={500} color={"rgba(0, 76, 252, 1)"}>
-                  More about conversions
-                </Text>
-              </HStack>
-            </Flex>
-          </BaseTooltip> */}
-        </VStack>
-      </form>
-    ) : (
-      <form onSubmit={formData.handleSubmit(handleConvertB3tr)}>
-        <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
-        <VStack align={"flex-start"}>
-          <Text fontSize={{ base: 18, md: 24 }} fontWeight={700}>
-            {t("Convert tokens")}
-          </Text>
-          <Flex w="100%" direction={{ base: "column", md: "row" }} gap={4}>
-            <motion.div variants={zoomInVariants} initial="hidden" animate="visible">
-              <TokenInfoCard isB3TRToVOT3={true} setIsB3TRToVOT3={setIsB3trToVot3} />
-            </motion.div>
-            <motion.div variants={zoomInVariants} initial="hidden" animate="visible">
-              <TokenInfoCard isB3TRToVOT3={false} setIsB3TRToVOT3={setIsB3trToVot3} />
-            </motion.div>
-          </Flex>
-        </VStack>
-      </form>
-    )
-  }, [
-    amount,
-    b3trBalanceScaled,
-    convertDescription,
-    convertTitle,
-    formData,
-    handleConvertB3tr,
-    handleGoBack,
-    invalidAmount,
-    isB3trToVot3,
-    isVOT3BalanceMoreThanStakedB3TR,
-    swappableVot3Balance,
-    t,
-    vot3BalanceScaled,
-  ])
+  const StepComponentContent = stepComponents[currentStep] || null
 
   if (mutationData.status !== "ready")
     return (
@@ -323,7 +251,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       <ModalOverlay />
       <CustomModalContent w={"auto"} maxW={"container.md"}>
         <Card rounded={20}>
-          <CardBody>{renderCardContent()}</CardBody>
+          <CardBody>{StepComponentContent}</CardBody>
         </Card>
       </CustomModalContent>
     </Modal>
