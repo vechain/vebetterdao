@@ -53,7 +53,7 @@ export const EditAppLogo = ({ form }: Props) => {
           src={logo ?? notFoundImage}
           alt={"logo"}
           maxWidth="none"
-          h="fulle"
+          h="full"
           w="64px"
           rounded="16px"
           objectFit={"cover"}
