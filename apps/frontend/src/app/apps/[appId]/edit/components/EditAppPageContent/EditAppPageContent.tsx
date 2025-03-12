@@ -177,7 +177,6 @@ export const EditAppPageContent = () => {
           justify={["flex-start", "space-between"]}
           align={["flex-start", "center"]}>
           <HStack gap={4}>
-            <EditAppLogo form={form} />
             <FormControl isInvalid={!!errors.name}>
               <Input
                 {...register("name", {
@@ -204,11 +203,15 @@ export const EditAppPageContent = () => {
             </Button>
           </HStack>
         </Stack>
+
         <EditAppBanner form={form} />
+
         <Stack flexDirection={["column", "row"]} gap={[20, 6]} align={"flex-start"}>
           <VStack align={"stretch"} flex={3} gap={8} w="full">
+            <EditAppLogo form={form} />
+
             <VStack align={"stretch"} gap={4}>
-              <Text fontSize={"14px"} fontWeight={400} color="#6A6A6A">
+              <Text fontSize={16} fontWeight={500}>
                 {t("Project URL")}
               </Text>
               <FormControl isInvalid={!!errors.external_url}>
@@ -225,18 +228,24 @@ export const EditAppPageContent = () => {
                 <FormErrorMessage fontSize={"12px"}>{errors?.external_url?.message || ""}</FormErrorMessage>
               </FormControl>
             </VStack>
-            <FormControl isInvalid={!!errors.description}>
-              <Textarea
-                {...register("description", {
-                  required: { value: true, message: t("Description required") },
-                  minLength: { value: 20, message: t("Description must be at least 20 characters") },
-                })}
-                defaultValue={appMetadata?.description || ""}
-                resize="none"
-                h="140px"
-              />
-              <FormErrorMessage fontSize={"12px"}>{errors?.description?.message || ""}</FormErrorMessage>
-            </FormControl>
+
+            <VStack align={"stretch"} gap={4}>
+              <Text fontSize={16} fontWeight={500}>
+                {t("Description")}
+              </Text>
+              <FormControl isInvalid={!!errors.description}>
+                <Textarea
+                  {...register("description", {
+                    required: { value: true, message: t("Description required") },
+                    minLength: { value: 20, message: t("Description must be at least 20 characters") },
+                  })}
+                  defaultValue={appMetadata?.description || ""}
+                  resize="none"
+                  h="140px"
+                />
+                <FormErrorMessage fontSize={"12px"}>{errors?.description?.message || ""}</FormErrorMessage>
+              </FormControl>
+            </VStack>
           </VStack>
           <EditAppSocialUrls form={form} />
         </Stack>
