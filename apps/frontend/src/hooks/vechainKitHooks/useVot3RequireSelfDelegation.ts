@@ -10,5 +10,5 @@ export const useVot3RequireSelfDelegation = () => {
 
   const isDelegatedToZeroAddress = compareAddresses(vot3DelegatedAddress, ZeroAddress)
 
-  return connection.isConnectedWithPrivy && isDelegatedToZeroAddress
+  return connection?.isConnectedWithPrivy && isDelegatedToZeroAddress
 }
