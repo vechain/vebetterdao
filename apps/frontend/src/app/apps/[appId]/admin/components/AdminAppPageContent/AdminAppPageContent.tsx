@@ -46,15 +46,15 @@ export const AdminAppPageContent = () => {
   const { app, isAppInfoLoading: appLoading } = useCurrentAppInfo()
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
-  const storedAddress = useRef({
-    admin: "",
+  const onchainAddresses = useRef({
     moderators: [] as string[],
     creators: [] as string[],
-    distributors: [] as string[],
+    adminAddress: "",
     teamWalletAddress: "",
+    distributors: [] as string[],
   })
 
-  const isAddressLoading = adminLoading || appLoading || moderatorsLoading || creatorsLoading || distributorsLoading
+  const isAddressesLoading = adminLoading || appLoading || moderatorsLoading || creatorsLoading || distributorsLoading
 
   const form = useForm<AdminAppForm>({
     defaultValues: {
@@ -69,29 +69,23 @@ export const AdminAppPageContent = () => {
   const syncForm = useCallback(() => {
     if (!admin || !app?.teamWalletAddress) return
 
-    storedAddress.current = {
-      admin: admin || "",
+    const newOnchainAddresses = {
       moderators: [...(moderators || [])],
       creators: [...(creators || [])],
-      distributors: [...(distributors || [])],
+      adminAddress: admin || "",
       teamWalletAddress: app?.teamWalletAddress || "",
+      distributors: [...(distributors || [])],
     }
-
+    onchainAddresses.current = newOnchainAddresses
     // Resetting the form with the most updated values onchain
-    form.reset({
-      adminAddress: storedAddress.current.admin,
-      moderators: storedAddress.current.moderators,
-      creators: storedAddress.current.creators,
-      distributors: storedAddress.current.distributors,
-      teamWalletAddress: storedAddress.current.teamWalletAddress,
-    })
+    form.reset(newOnchainAddresses)
   }, [admin, app?.teamWalletAddress, creators, distributors, form, moderators])
 
   useEffect(() => {
-    if (!isAddressLoading && admin && app?.teamWalletAddress) {
+    if (!isAddressesLoading && admin && app?.teamWalletAddress) {
       syncForm()
     }
-  }, [admin, app?.teamWalletAddress, syncForm, moderators, creators, distributors, isAddressLoading])
+  }, [admin, app?.teamWalletAddress, syncForm, moderators, creators, distributors, isAddressesLoading])
 
   const [adminAddress, teamWalletAddress, newModerators, newDistributors, newCreators] = form.watch([
     "adminAddress",
@@ -101,25 +95,23 @@ export const AdminAppPageContent = () => {
     "creators",
   ])
 
-  const isAdminAddressChanged = !compareAddresses(adminAddress, storedAddress.current.admin)
-  const isTeamWalletAddressChanged = !compareAddresses(teamWalletAddress, storedAddress.current.teamWalletAddress)
-  const isModeratorsChanged =
-    storedAddress.current.moderators.length !== newModerators.length ||
-    !storedAddress.current.moderators.every(
-      (moderator, index) => newModerators[index] && compareAddresses(moderator, newModerators[index]),
-    )
+  const areAddressChanged = (currentAddress: string[], newAddress: string[]) => {
+    if (currentAddress.length !== newAddress.length) return true
+    return !currentAddress.every((address, index) => newAddress[index] && compareAddresses(address, newAddress[index]))
+  }
 
-  const isDistributorsChanged =
-    storedAddress.current.distributors.length !== newDistributors.length ||
-    !storedAddress.current.distributors.every(
-      (distributor, index) => newDistributors[index] && compareAddresses(distributor, newDistributors[index]),
-    )
+  const getAddressesToAdd = (newAddress: string[], currentAddress: string[]) =>
+    newAddress.filter(newAddress => !currentAddress.some(address => compareAddresses(address, newAddress)))
 
-  const isCreatorsChanged =
-    storedAddress.current.creators.length !== newCreators.length ||
-    !storedAddress.current.creators.every(
-      (creator, index) => newCreators[index] && compareAddresses(creator, newCreators[index]),
-    )
+  const getAddressesToRemove = (currentAddress: string[], newAddress: string[]) =>
+    currentAddress.filter(address => !newAddress.some(newAddress => compareAddresses(address, newAddress)))
+
+  // Check if addresses have changed
+  const isAdminAddressChanged = !compareAddresses(adminAddress, onchainAddresses.current.adminAddress)
+  const isTeamWalletAddressChanged = !compareAddresses(teamWalletAddress, onchainAddresses.current.teamWalletAddress)
+  const isModeratorsChanged = areAddressChanged(onchainAddresses.current.moderators, newModerators)
+  const isDistributorsChanged = areAddressChanged(onchainAddresses.current.distributors, newDistributors)
+  const isCreatorsChanged = areAddressChanged(onchainAddresses.current.creators, newCreators)
 
   const hasUnsavedChanges =
     isAdminAddressChanged ||
@@ -136,8 +128,8 @@ export const AdminAppPageContent = () => {
     onSuccess: () => {
       onConfirmationClose()
       // After successful transaction, update the reference with form values
-      storedAddress.current = {
-        admin: adminAddress,
+      onchainAddresses.current = {
+        adminAddress: adminAddress,
         moderators: [...newModerators],
         creators: [...newCreators],
         distributors: [...newDistributors],
@@ -163,27 +155,14 @@ export const AdminAppPageContent = () => {
     (data: AdminAppForm) => {
       onConfirmationOpen()
 
-      // Calculate changes based on the initial snapshot
-      const moderatorsToBeAdded = data.moderators.filter(
-        newModerator => !storedAddress.current.moderators.some(moderator => compareAddresses(moderator, newModerator)),
-      )
-      const moderatorsToBeRemoved = storedAddress.current.moderators.filter(
-        moderator => !data.moderators.some(newModerator => compareAddresses(moderator, newModerator)),
-      )
+      const moderatorsToBeAdded = getAddressesToAdd(data.moderators, onchainAddresses.current.moderators)
+      const moderatorsToBeRemoved = getAddressesToRemove(onchainAddresses.current.moderators, data.moderators)
 
-      const distributorsToBeAdded = data.distributors.filter(
-        newDistributor =>
-          !storedAddress.current.distributors.some(distributor => compareAddresses(distributor, newDistributor)),
-      )
-      const distributorsToBeRemoved = storedAddress.current.distributors.filter(
-        distributor => !data.distributors.some(newDistributor => compareAddresses(distributor, newDistributor)),
-      )
-      const creatorsToBeAdded = data.creators.filter(
-        newCreator => !storedAddress.current.creators.some(creator => compareAddresses(creator, newCreator)),
-      )
-      const creatorsToBeRemoved = storedAddress.current.creators.filter(
-        creator => !data.creators.some(newCreator => compareAddresses(creator, newCreator)),
-      )
+      const distributorsToBeAdded = getAddressesToAdd(data.distributors, onchainAddresses.current.distributors)
+      const distributorsToBeRemoved = getAddressesToRemove(onchainAddresses.current.distributors, data.distributors)
+
+      const creatorsToBeAdded = getAddressesToAdd(data.creators, onchainAddresses.current.creators)
+      const creatorsToBeRemoved = getAddressesToRemove(onchainAddresses.current.creators, data.creators)
 
       updateMutation.sendTransaction({
         appId: app?.id || "",
