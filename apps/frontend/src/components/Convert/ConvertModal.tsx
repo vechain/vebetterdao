@@ -1,18 +1,18 @@
 "use-client"
-import { Card, CardBody, HStack, Text, Modal, ModalOverlay } from "@chakra-ui/react"
+import { Card, CardBody, HStack, Text, Modal, ModalOverlay, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useConvertB3tr, useTokenColors, useConvertVot3, useSmartAccountUpgradeRequired } from "@/hooks"
 import { useForm } from "react-hook-form"
 import { CustomModalContent } from "../CustomModalContent"
 import { TransactionModal, TransactionModalStatus } from "../TransactionModal"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { TokenSelectionContent, UpgradeAccountContent } from "./components"
+import { TokenSelectionContent, SwapTokenContent } from "./components"
 import { useB3trBalance, useB3trConverted, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/vechain-kit"
 import BigNumber from "bignumber.js"
 import { useTranslation } from "react-i18next"
 import { FaArrowRight } from "react-icons/fa6"
-import { SwapTokenContent } from "./components/SwapTokenContent"
+import { UpgradeSmartAccountModal } from "../UpgradeSmartAccountModal"
 
 export type Props = {
   isOpen: boolean
@@ -21,7 +21,6 @@ export type Props = {
 
 enum CardContentStep {
   SELECT_TOKEN,
-  UPGRADE_ACCOUNT,
   CONFIRM_SWAP,
 }
 
@@ -50,6 +49,8 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance } = useVot3Balance(account?.address ?? undefined)
   const { data: swappableVot3Balance } = useB3trConverted(account?.address ?? undefined)
+
+  const { isOpen: isSAUpgradeModalOpen, onClose: onCloseUpgradeModal, onOpen: openUpgradeModal } = useDisclosure()
 
   const b3trBalanceScaled = useMemo(() => {
     return b3trBalance?.scaled ?? "0"
@@ -88,9 +89,14 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
   }, [isB3trToVot3, convertB3trMutation, convertVot3Mutation])
 
   const handleConvertB3tr = useCallback(() => {
+    if (isSmartAccountUpgradeRequired && isB3trToVot3) {
+      //Open Upgrade Modal
+      return openUpgradeModal()
+    }
+
     mutationData.resetStatus()
     mutationData.sendTransaction(undefined)
-  }, [isSmartAccountUpgradeRequired, mutationData])
+  }, [isB3trToVot3, isSmartAccountUpgradeRequired, mutationData, openUpgradeModal])
 
   const handleClose = useCallback(() => {
     mutationData.resetStatus()
@@ -180,14 +186,12 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     return invalidAmount || isSubmitButtonLoading
   }, [invalidAmount, isSubmitButtonLoading])
 
-  const getCardContentStep = (isSmartAccountUpgradeRequired?: boolean, isB3trToVot3?: boolean) => {
-    if (isB3trToVot3 && isSmartAccountUpgradeRequired) return CardContentStep.UPGRADE_ACCOUNT
+  const getCardContentStep = (isB3trToVot3?: boolean) => {
     if (isB3trToVot3 === undefined) return CardContentStep.SELECT_TOKEN
     return CardContentStep.CONFIRM_SWAP
   }
 
   const stepComponents = {
-    [CardContentStep.UPGRADE_ACCOUNT]: <UpgradeAccountContent onClose={handleClose} />,
     [CardContentStep.SELECT_TOKEN]: (
       <TokenSelectionContent
         onSubmit={formData.handleSubmit(handleConvertB3tr)}
@@ -214,10 +218,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     ),
   }
 
-  const currentStep = useMemo(
-    () => getCardContentStep(isSmartAccountUpgradeRequired, isB3trToVot3),
-    [isSmartAccountUpgradeRequired, isB3trToVot3],
-  )
+  const currentStep = useMemo(() => getCardContentStep(isB3trToVot3), [isB3trToVot3])
 
   const StepComponentContent = stepComponents[currentStep] || null
 
@@ -247,13 +248,16 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     )
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
-      <ModalOverlay />
-      <CustomModalContent w={"auto"} maxW={"container.md"}>
-        <Card rounded={20}>
-          <CardBody>{StepComponentContent}</CardBody>
-        </Card>
-      </CustomModalContent>
-    </Modal>
+    <>
+      <Modal isOpen={isOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
+        <ModalOverlay />
+        <CustomModalContent w={"auto"} maxW={"container.md"}>
+          <Card rounded={20}>
+            <CardBody>{StepComponentContent}</CardBody>
+          </Card>
+        </CustomModalContent>
+      </Modal>
+      <UpgradeSmartAccountModal isOpen={isSAUpgradeModalOpen} onClose={onCloseUpgradeModal} />
+    </>
   )
 }
