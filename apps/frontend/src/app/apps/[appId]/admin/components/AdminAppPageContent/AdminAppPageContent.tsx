@@ -32,18 +32,18 @@ export type AdminAppForm = {
 
 export const AdminAppPageContent = () => {
   const { appMetadata } = useCurrentAppMetadata()
-  const { moderators } = useCurrentAppModerators()
-  const { creators } = useCurrentAppCreators()
-  const { distributors } = useCurrentAppRewardDistributors()
+  const { moderators, isLoading: moderatorsLoading } = useCurrentAppModerators()
+  const { creators, isLoading: creatorsLoading } = useCurrentAppCreators()
+  const { distributors, isLoading: distributorsLoading } = useCurrentAppRewardDistributors()
 
   const { t } = useTranslation()
   const [editAdminAddress, setEditAdminAddress] = useState(false)
   const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
   const updateConfirmationModal = useDisclosure()
-  const { admin } = useCurrentAppAdmin()
+  const { admin, isLoading: adminLoading } = useCurrentAppAdmin()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account || "")
-  const { app } = useCurrentAppInfo()
+  const { app, isAppInfoLoading: appLoading } = useCurrentAppInfo()
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
   const storedAddress = useRef({
@@ -53,7 +53,8 @@ export const AdminAppPageContent = () => {
     distributors: [] as string[],
     teamWalletAddress: "",
   })
-  const [isInitialized, setIsInitialized] = useState(false)
+
+  const isAddressLoading = adminLoading || appLoading || moderatorsLoading || creatorsLoading || distributorsLoading
 
   const form = useForm<AdminAppForm>({
     defaultValues: {
@@ -75,6 +76,7 @@ export const AdminAppPageContent = () => {
       distributors: [...(distributors || [])],
       teamWalletAddress: app?.teamWalletAddress || "",
     }
+
     // Resetting the form with the most updated values onchain
     form.reset({
       adminAddress: storedAddress.current.admin,
@@ -83,15 +85,13 @@ export const AdminAppPageContent = () => {
       distributors: storedAddress.current.distributors,
       teamWalletAddress: storedAddress.current.teamWalletAddress,
     })
-
-    setIsInitialized(true)
   }, [admin, app?.teamWalletAddress, creators, distributors, form, moderators])
 
   useEffect(() => {
-    if (!isInitialized && admin && app?.teamWalletAddress) {
+    if (!isAddressLoading && admin && app?.teamWalletAddress) {
       syncForm()
     }
-  }, [admin, app?.teamWalletAddress, isInitialized, syncForm])
+  }, [admin, app?.teamWalletAddress, syncForm, moderators, creators, distributors, isAddressLoading])
 
   const [adminAddress, teamWalletAddress, newModerators, newDistributors, newCreators] = form.watch([
     "adminAddress",
@@ -143,7 +143,6 @@ export const AdminAppPageContent = () => {
         distributors: [...newDistributors],
         teamWalletAddress: teamWalletAddress,
       }
-
       updateMutation.resetStatus()
     },
   })
