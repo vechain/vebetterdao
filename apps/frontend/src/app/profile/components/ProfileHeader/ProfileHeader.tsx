@@ -3,17 +3,21 @@ import { Text, VStack, HStack, Card, CardBody, useClipboard, IconButton, Stack, 
 import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { AddressIcon } from "@/components/AddressIcon"
 import { UilCopy, UilCheck } from "@iconscout/react-unicons"
-import { useVechainDomain } from "@vechain/vechain-kit"
+import { useGetAvatar, useIpfsImage, useVechainDomain } from "@vechain/vechain-kit"
 
 type Props = {
   address: string
+  imageUrl?: string
 }
 
-export const ProfileHeader = ({ address }: Props) => {
+export const ProfileHeader = ({ address, imageUrl }: Props) => {
   const { data: vnsData } = useVechainDomain(address ?? "")
   const domain = vnsData?.domain
   const { onCopy } = useClipboard(address ?? "")
   const [isCopied, setIsCopied] = useState(false)
+
+  const { data: profileAvatarUrl } = useGetAvatar(domain ?? "")
+  const { data: avatar } = useIpfsImage(profileAvatarUrl)
 
   useEffect(() => {
     if (isCopied) {
@@ -32,7 +36,7 @@ export const ProfileHeader = ({ address }: Props) => {
       <CardBody>
         <VStack align="stretch" gap={6}>
           <HStack spacing={4}>
-            <AddressIcon address={address ?? ""} rounded={"full"} boxSize={12} />
+            <AddressIcon address={address ?? ""} imageUrl={avatar?.image ?? imageUrl} rounded={"full"} boxSize={12} />
             <Stack
               direction={["column", "column", "column"]}
               align={["flex-start", "flex-start", "column"]}

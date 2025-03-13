@@ -125,7 +125,7 @@ export const ProfilePageContent = ({ address }: Props) => {
           {t("Go back")}
         </Button>
       )}
-      <ProfileHeader address={parsedAddress} />
+      <ProfileHeader address={parsedAddress} imageUrl={account?.image} />
       <Box
         w="full"
         overflowX="auto"
