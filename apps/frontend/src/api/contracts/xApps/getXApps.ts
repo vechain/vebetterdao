@@ -113,7 +113,6 @@ export const getXApps = async (thor: Connex.Thor, filterBlacklisted = false): Pr
   )
 
   // Filter blacklisted apps only if filterBlacklisted is true
-  console.log("***filterBlacklisted", filterBlacklisted)
   let allAppsFiltered = allApps
   if (filterBlacklisted) {
     const clauses2 = allApps.map(app => ({
@@ -127,7 +126,6 @@ export const getXApps = async (thor: Connex.Thor, filterBlacklisted = false): Pr
     if (error2) throw new Error(error2 ?? "Error fetching blacklisted xApps")
 
     const blacklistedApps = res2.map(r => isBlacklistedAbi.decode(r.data))
-    console.log("***blacklistedApps", blacklistedApps)
     allAppsFiltered = allApps.filter((_app, index) => blacklistedApps[index]?.[0] === false)
   }
 
