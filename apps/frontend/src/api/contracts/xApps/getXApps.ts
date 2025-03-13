@@ -20,6 +20,7 @@ const NEW_APP_PERIOD_SECONDS = 604800 // Considering a new app is defined as 7 d
  * @property name - the xApp name
  * @property metadataURI - the xApp metadata URI
  * @property createdAtTimestamp - timestamp when xApp was added
+ * @property isNew - whether the xApp is considered new as per {@link NEW_APP_PERIOD_SECONDS}
  */
 export type XApp = {
   id: string
@@ -54,6 +55,7 @@ type GetAllApps = {
  * This function is here nad not coupled with the hook as we need it with SSR, and dapp-kit broke the pre-fetching
  * Returns all the available xApps in the B3TR ecosystem
  * @param thor  the thor client
+ * @param filterBlacklisted  whether to filter blacklisted xApps
  * @returns  all the available xApps in the ecosystem capped to 256 see {@link XApp}
  */
 export const getXApps = async (thor: Connex.Thor, filterBlacklisted = false): Promise<GetAllApps> => {
