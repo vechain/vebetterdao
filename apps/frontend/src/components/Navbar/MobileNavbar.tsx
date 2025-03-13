@@ -20,10 +20,6 @@ import { NavbarLogo } from "./NavbarLogo"
 import { Route } from "./Routes"
 import { NavbarBalance } from "./NavbarBalance"
 import { ProfileButton } from "./ProfileButton"
-import { SocialLoginTooltip } from "../SocialLoginTooltip"
-import { FeatureFlag } from "@/constants"
-import { useFeatureFlag } from "@/hooks"
-import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 
 const ConnectWalletButton = dynamic(
   () => import("@/components/ConnectWalletButton").then(mod => mod.ConnectWalletButton),
@@ -60,37 +56,18 @@ const MobileMenuDrawer: React.FC<Omit<DrawerProps & Props, "children">> = ({
 type Props = {
   routesToRender: Route[]
   isNotMobile?: boolean
-  isNavbarVisible?: boolean
 }
-export const MobileNavBar: React.FC<Props> = ({ routesToRender, isNavbarVisible }) => {
+export const MobileNavBar: React.FC<Props> = ({ routesToRender }) => {
   const { isOpen: isMenuOpen, onClose: closeMenu, onOpen: openMenu } = useDisclosure()
 
   const [isLargerThan500] = useMediaQuery("(min-width: 500px)")
 
-  //VechainKit feature flag
-  const { isEnabled: isVechainKitFlagOn } = useFeatureFlag(FeatureFlag.VECHAIN_KIT)
-
-  const { account } = useWallet()
-  const { isOpen: isWalletModalOpen } = useWalletModal()
-
-  // Show the VeChainKit tooltip if :
-  // - the feature flag is enabled
-  // - the user is not connected
-  // - the wallet modal is not open
-  // - the menu is not open
-  // - the navbar is visible
-  const shouldRenderVeChainKitTooltip =
-    isVechainKitFlagOn && !account && !isWalletModalOpen && !isMenuOpen && isNavbarVisible
   return (
     <>
       <NavbarLogo />
       <HStack>{isLargerThan500 && <NavbarBalance />}</HStack>
       <HStack gap={2}>
-        <SocialLoginTooltip isOpen={shouldRenderVeChainKitTooltip}>
-          <HStack gap={2}>
-            <ConnectWalletButton />
-          </HStack>
-        </SocialLoginTooltip>
+        <ConnectWalletButton />
         {!!routesToRender.length && (
           <IconButton
             onClick={openMenu}
