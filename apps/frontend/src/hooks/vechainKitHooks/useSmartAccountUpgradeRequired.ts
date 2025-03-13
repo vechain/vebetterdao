@@ -8,5 +8,5 @@ export const useSmartAccountUpgradeRequired = () => {
     connectedWallet?.address ?? "",
     3, //Hardcoding the upgrade version for now, in the future if this is required vechain kit exposes the latest version on the useCurrentAccountImplementationVersion hook
   )
-  return connection?.isConnectedWithPrivy && isSmartAccountUpgradeRequired
+  return connection?.isConnectedWithCrossApp && isSmartAccountUpgradeRequired
 }
