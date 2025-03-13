@@ -22,7 +22,7 @@ import { BaseModal } from "@/components/BaseModal"
 import { GenericAlert } from "@/app/components/Alert"
 import dayjs from "dayjs"
 import { ConfirmationEndorsementModalContent } from "@/components/TransactionModal/ConfirmationModalContent"
-import { SuccessModalContent } from "@/components/TransactionModal/SuccessModalContent"
+import { SuccessEndorsementContent } from "@/components/TransactionModal/SuccessEndorsementContent"
 
 type Props = {
   isOpen: boolean
@@ -104,11 +104,10 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
           [TransactionModalStatus.Error]: "Error endorsing",
           [TransactionModalStatus.Pending]: "Endorsing app...",
         }}
-        showExplorerButton
         txId={endorseAppMutation.txReceipt?.meta.txID}
         customContent={{
           [TransactionModalStatus.Pending]: <ConfirmationEndorsementModalContent endorsementInfo={endorsementInfo} />,
-          [TransactionModalStatus.Success]: <SuccessModalContent endorsementInfo={endorsementInfo} />,
+          [TransactionModalStatus.Success]: <SuccessEndorsementContent endorsementInfo={endorsementInfo} />,
         }}
       />
     )

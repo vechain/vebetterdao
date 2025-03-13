@@ -3,7 +3,7 @@ import { useIpfsImage } from "@/api/ipfs"
 import { TransactionModal, TransactionModalStatus } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 import { ConfirmationEndorsementModalContent } from "@/components/TransactionModal/ConfirmationModalContent"
-import { SuccessModalContent } from "@/components/TransactionModal/SuccessModalContent"
+import { SuccessEndorsementContent } from "@/components/TransactionModal/SuccessEndorsementContent"
 
 import { useUnendorseApp } from "@/hooks"
 import { Text, Button, Image, Flex, HStack, Icon, VStack, Heading, Box } from "@chakra-ui/react"
@@ -70,11 +70,10 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
           [TransactionModalStatus.Pending]: "Unendorsing app...",
           [TransactionModalStatus.Success]: "Unendorsed app",
         }}
-        showExplorerButton
         txId={unendorseAppMutation.txReceipt?.meta.txID}
         customContent={{
           [TransactionModalStatus.Pending]: <ConfirmationEndorsementModalContent endorsementInfo={endorsementInfo} />,
-          [TransactionModalStatus.Success]: <SuccessModalContent endorsementInfo={endorsementInfo} />,
+          [TransactionModalStatus.Success]: <SuccessEndorsementContent endorsementInfo={endorsementInfo} />,
         }}
       />
     )
