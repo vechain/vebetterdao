@@ -25,6 +25,8 @@ import { TeamWalletAddress } from "./components/TeamWalletAddress"
 import { IoWalletOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
 import { WithdrawPercentageSelectorButtons } from "./components/WithdrawPercentageSelectorButtons"
+import { ConfirmationAppBalanceModalContent } from "@/components/TransactionModal/ConfirmationAppBalanceModalContent"
+import { SuccessAppBalanceModalContent } from "@/components/TransactionModal/SuccessAppBalanceModalContent"
 
 export type Props = {
   appId: string
@@ -312,11 +314,21 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         onTryAgain={handleWithdraw}
         pendingTitle={t("Withdrawing...")}
         showExplorerButton
-        isAppWithdraw
+        customContent={{
+          [TransactionModalStatus.Pending]: (
+            <ConfirmationAppBalanceModalContent b3trBalanceAfter={b3trBalanceAfterSwap} b3trAmount={amount} isDeposit />
+          ),
+          [TransactionModalStatus.Success]: (
+            <SuccessAppBalanceModalContent
+              b3trBalanceAfter={b3trBalanceAfterSwap}
+              b3trAmount={amount}
+              isDeposit
+              txId={txReceipt?.meta.txID}
+              onClose={handleClose}
+            />
+          ),
+        }}
         txId={txReceipt?.meta.txID}
-        b3trAmount={amount}
-        b3trBalanceAfterSwap={b3trBalanceAfterSwap}
-        b3trBalance={availableB3trToWithdrawScaled}
       />
     )
 

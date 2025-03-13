@@ -25,6 +25,8 @@ import { FormattingUtils } from "@repo/utils"
 import { useB3trBalance, useXApp } from "@/api"
 import { useWallet } from "@vechain/vechain-kit"
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
+import { ConfirmationAppBalanceModalContent } from "@/components/TransactionModal/ConfirmationAppBalanceModalContent"
+import { SuccessAppBalanceModalContent } from "@/components/TransactionModal/SuccessAppBalanceModalContent"
 
 export type Props = {
   appId: string
@@ -235,11 +237,21 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         onTryAgain={handleWithdraw}
         pendingTitle={t("Depositing...")}
         showExplorerButton
-        isAppDeposit
+        customContent={{
+          [TransactionModalStatus.Pending]: (
+            <ConfirmationAppBalanceModalContent b3trBalanceAfter={appBalanceAfterSwap} b3trAmount={amount} />
+          ),
+          [TransactionModalStatus.Success]: (
+            <SuccessAppBalanceModalContent
+              b3trBalanceAfter={appBalanceScaled}
+              b3trAmount={amount}
+              isDeposit
+              txId={txReceipt?.meta.txID}
+              onClose={handleClose}
+            />
+          ),
+        }}
         txId={txReceipt?.meta.txID}
-        b3trAmount={amount}
-        b3trBalanceAfterSwap={appBalanceAfterSwap}
-        b3trBalance={appBalanceScaled}
       />
     )
 

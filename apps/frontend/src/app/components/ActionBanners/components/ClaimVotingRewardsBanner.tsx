@@ -7,6 +7,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { GenericBanner } from "../../Banners/GenericBanner"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
+import { CoinsFlipModalContent } from "@/components/TransactionModal/CoinsFlipModalContent/CoinsFlipModalContent"
 
 const compactFormatter = getCompactFormatter(4)
 
@@ -58,7 +59,9 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery }: Props) => {
         socialDescriptionEncoded="%F0%9F%8E%89%20Just%20claimed%20my%20%24B3TR%20rewards%20for%20voting%20in%20the%20%23VeBetterDAO%21%20%0A%0AJoin%20us%20and%20have%20your%20say%20in%20the%20future%20of%20sustainability%20at%20https%3A%2F%2Fvebetterdao.org.%20%0A%0A%23VeBetterDAO%20%23Vechain"
         showExplorerButton
         txId={claimRewardsMutation.txReceipt?.meta.txID}
-        isClaimingRewards
+        customContent={{
+          [TransactionModalStatus.Pending]: <CoinsFlipModalContent />,
+        }}
       />
       <GenericBanner
         title={t("CLAIM YOUR REWARDS NOW! 💰")}

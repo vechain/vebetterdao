@@ -13,6 +13,8 @@ import BigNumber from "bignumber.js"
 import { useTranslation } from "react-i18next"
 import { FaArrowRight } from "react-icons/fa6"
 import { UpgradeSmartAccountModal } from "../UpgradeSmartAccountModal"
+import { ConfirmationConvertModalContent } from "../TransactionModal/ConfirmationConvertModalContent"
+import { SuccessConvertModalContent } from "../TransactionModal/SuccessConvertModalContent"
 
 export type Props = {
   isOpen: boolean
@@ -239,11 +241,22 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
         socialDescriptionEncoded="%F0%9F%94%84%20Just%20swapped%20between%20B3TR%20and%20VOT3%20on%20%23VeBetterDAO%21%20%0A%0A%F0%9F%8C%B1%20Explore%20and%20join%20us%20at%20https%3A%2F%2Fvebetterdao.org.%0A%0A%23VeBetterDAO%20%23Vechain"
         showExplorerButton
         txId={mutationData.txReceipt?.meta.txID}
-        isSwap
-        b3trBalanceAfterSwap={b3trBalanceAfterSwap}
-        vot3BalanceAfterSwap={vot3BalanceAfterSwap}
-        b3trBalance={b3trBalanceScaled}
-        vot3Balance={vot3BalanceScaled}
+        customContent={{
+          [TransactionModalStatus.Pending]: (
+            <ConfirmationConvertModalContent
+              b3trBalanceAfter={b3trBalanceAfterSwap}
+              vot3BalanceAfter={vot3BalanceAfterSwap}
+            />
+          ),
+          [TransactionModalStatus.Success]: (
+            <SuccessConvertModalContent
+              b3trBalanceAfter={b3trBalanceAfterSwap}
+              vot3BalanceAfter={vot3BalanceAfterSwap}
+              txId={mutationData.txReceipt?.meta.txID}
+              onClose={handleClose}
+            />
+          ),
+        }}
       />
     )
 

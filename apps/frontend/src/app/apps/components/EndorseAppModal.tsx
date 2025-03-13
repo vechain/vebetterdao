@@ -21,6 +21,8 @@ import { Trans } from "react-i18next"
 import { BaseModal } from "@/components/BaseModal"
 import { GenericAlert } from "@/app/components/Alert"
 import dayjs from "dayjs"
+import { ConfirmationEndorsementModalContent } from "@/components/TransactionModal/ConfirmationModalContent"
+import { SuccessModalContent } from "@/components/TransactionModal/SuccessModalContent"
 
 type Props = {
   isOpen: boolean
@@ -103,7 +105,10 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         pendingTitle={"Endorsing app..."}
         showExplorerButton
         txId={endorseAppMutation.txReceipt?.meta.txID}
-        endorsementInfo={endorsementInfo}
+        customContent={{
+          [TransactionModalStatus.Pending]: <ConfirmationEndorsementModalContent endorsementInfo={endorsementInfo} />,
+          [TransactionModalStatus.Success]: <SuccessModalContent endorsementInfo={endorsementInfo} />,
+        }}
       />
     )
 
