@@ -140,6 +140,24 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
     )
   }, [filterAmount, control])
 
+  const customTransactionContent = useMemo(
+    () => ({
+      [TransactionModalStatus.Pending]: (
+        <ConfirmationAppBalanceModalContent b3trBalanceAfter={appBalanceAfterSwap} b3trAmount={amount} />
+      ),
+      [TransactionModalStatus.Success]: (
+        <SuccessAppBalanceModalContent
+          b3trBalanceAfter={appBalanceScaled}
+          b3trAmount={amount}
+          isDeposit
+          txId={txReceipt?.meta.txID}
+          onClose={handleClose}
+        />
+      ),
+    }),
+    [appBalanceAfterSwap, amount, appBalanceScaled, txReceipt?.meta.txID, handleClose], // Dependencies
+  )
+
   const renderCardContent = useCallback(() => {
     return (
       <form onSubmit={formData.handleSubmit(handleWithdraw)}>
@@ -237,20 +255,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
           [TransactionModalStatus.Success]: t("Deposit completed!"),
           [TransactionModalStatus.Error]: t("Error depositing"),
         }}
-        customContent={{
-          [TransactionModalStatus.Pending]: (
-            <ConfirmationAppBalanceModalContent b3trBalanceAfter={appBalanceAfterSwap} b3trAmount={amount} />
-          ),
-          [TransactionModalStatus.Success]: (
-            <SuccessAppBalanceModalContent
-              b3trBalanceAfter={appBalanceScaled}
-              b3trAmount={amount}
-              isDeposit
-              txId={txReceipt?.meta.txID}
-              onClose={handleClose}
-            />
-          ),
-        }}
+        customContent={customTransactionContent}
         txId={txReceipt?.meta.txID}
       />
     )

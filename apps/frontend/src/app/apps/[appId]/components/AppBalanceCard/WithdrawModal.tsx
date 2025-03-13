@@ -301,6 +301,24 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     customReason,
   ])
 
+  const customTransactionContent = useMemo(
+    () => ({
+      //Custom content for the transaction modal with status pending
+      [TransactionModalStatus.Pending]: (
+        <ConfirmationAppBalanceModalContent b3trBalanceAfter={b3trBalanceAfterSwap} b3trAmount={amount} />
+      ),
+      //Custom content for the transaction modal with status success
+      [TransactionModalStatus.Success]: (
+        <SuccessAppBalanceModalContent
+          b3trBalanceAfter={b3trBalanceAfterSwap}
+          b3trAmount={amount}
+          onClose={handleClose}
+        />
+      ),
+    }),
+    [b3trBalanceAfterSwap, amount, handleClose],
+  )
+
   if (status !== "ready")
     return (
       <TransactionModal
@@ -314,20 +332,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
           [TransactionModalStatus.Success]: t("Withdraw completed!"),
           [TransactionModalStatus.Error]: t("Error withdrawing"),
         }}
-        customContent={{
-          [TransactionModalStatus.Pending]: (
-            <ConfirmationAppBalanceModalContent b3trBalanceAfter={b3trBalanceAfterSwap} b3trAmount={amount} isDeposit />
-          ),
-          [TransactionModalStatus.Success]: (
-            <SuccessAppBalanceModalContent
-              b3trBalanceAfter={b3trBalanceAfterSwap}
-              b3trAmount={amount}
-              isDeposit
-              txId={txReceipt?.meta.txID}
-              onClose={handleClose}
-            />
-          ),
-        }}
+        customContent={customTransactionContent}
         txId={txReceipt?.meta.txID}
       />
     )
