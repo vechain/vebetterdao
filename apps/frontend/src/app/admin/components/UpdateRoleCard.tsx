@@ -247,7 +247,7 @@ export const UpdateRoleCard = () => {
         titles={{
           [TransactionModalStatus.Pending]: t("Updating wallet address role..."),
           [TransactionModalStatus.Error]: t("Error updating role"),
-          [TransactionModalStatus.Success]: t("Role updated successfully"),
+          [TransactionModalStatus.Success]: "Role updated successfully",
         }}
       />
     </>

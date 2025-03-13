@@ -192,7 +192,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
         showExplorerButton
         titles={{
           [TransactionModalStatus.Success]: t("Rewards claimed!"),
-          [TransactionModalStatus.Error]: t("Error claiming rewards"),
+          [TransactionModalStatus.Error]: "Error claiming rewards",
           [TransactionModalStatus.Pending]: t("Claiming rewards..."),
         }}
         txId={txReceipt?.meta.txID}
