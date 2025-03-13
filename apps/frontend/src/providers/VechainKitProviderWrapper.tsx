@@ -38,6 +38,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
         clientId: process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID!,
         loginMethods: [
           "google",
+          "apple",
           "twitter",
           "farcaster",
           "email",
@@ -50,15 +51,6 @@ export function VechainKitProviderWrapper({ children }: Props) {
           "metamask",
         ],
         appearance: {
-          walletList: [
-            "metamask",
-            "rainbow",
-            "coinbase_wallet",
-            "detected_ethereum_wallets",
-            "rabby_wallet",
-            "safe",
-            "uniswap",
-          ],
           loginMessage: "Select a login method",
           logo: veChaninLogo,
         },
