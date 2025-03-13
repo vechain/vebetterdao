@@ -20,12 +20,9 @@ export enum TransactionModalStatus {
 export type TransactionModalProps = {
   isOpen: boolean
   onClose: () => void
+  titles?: Partial<Record<TransactionModalStatus, ReactNode>>
   status: TransactionModalStatus
-  pendingTitle?: ReactNode
-  confirmationTitle?: ReactNode
-  errorTitle?: ReactNode
   errorDescription?: string
-  successTitle?: ReactNode
   showSocialButtons?: boolean
   socialDescriptionEncoded?: string
   onTryAgain?: () => void
@@ -38,11 +35,8 @@ export const TransactionModal = ({
   isOpen,
   onClose,
   status,
-  pendingTitle,
-  confirmationTitle,
-  errorTitle,
+  titles,
   errorDescription,
-  successTitle,
   showSocialButtons = false,
   socialDescriptionEncoded,
   onTryAgain,
@@ -56,27 +50,33 @@ export const TransactionModal = ({
     if (CustomContent) {
       return CustomContent
     }
-    return <ConfirmationModalContent title={confirmationTitle} />
-  }, [confirmationTitle, customContent])
+    const customTitle = titles?.[TransactionModalStatus.Pending]
+
+    return <ConfirmationModalContent title={customTitle} />
+  }, [customContent, titles])
 
   const handleWaitingConfirmationStatus = useCallback(() => {
-    return <LoadingModalContent title={pendingTitle} showExplorerButton={showExplorerButton} txId={txId} />
-  }, [pendingTitle, showExplorerButton, txId])
+    const customTitle = titles?.[TransactionModalStatus.WaitingConfirmation]
+    return <LoadingModalContent title={customTitle} showExplorerButton={showExplorerButton} txId={txId} />
+  }, [showExplorerButton, titles, txId])
 
   const handleErrorStatus = useCallback(() => {
+    const customTitle = titles?.[TransactionModalStatus.Error]
+
     return (
       <ErrorModalContent
-        title={errorTitle}
+        title={customTitle}
         description={errorDescription}
         onTryAgain={onTryAgain}
         showExplorerButton={showExplorerButton}
         txId={txId}
       />
     )
-  }, [errorTitle, errorDescription, onTryAgain, showExplorerButton, txId])
+  }, [titles, errorDescription, onTryAgain, showExplorerButton, txId])
 
   const handleSuccessStatus = useCallback(() => {
     const CustomContent = customContent?.[TransactionModalStatus.Success]
+    const customTitle = titles?.[TransactionModalStatus.Success]
 
     if (CustomContent) {
       return CustomContent
@@ -84,22 +84,26 @@ export const TransactionModal = ({
 
     return (
       <SuccessModalContent
-        title={successTitle}
+        title={customTitle}
         showSocialButtons={showSocialButtons}
         socialDescriptionEncoded={socialDescriptionEncoded}
         showExplorerButton={showExplorerButton}
         txId={txId}
       />
     )
-  }, [customContent, showExplorerButton, showSocialButtons, socialDescriptionEncoded, successTitle, txId])
+  }, [customContent, showExplorerButton, showSocialButtons, socialDescriptionEncoded, titles, txId])
 
   const handleReadyStatus = useCallback(() => {
-    return <ConfirmationModalContent title={"Transaction Ready"} description="" />
-  }, [])
+    const customTitle = titles?.[TransactionModalStatus.Ready]
+    //TODO: It need a modal only for ready status
+    return <ConfirmationModalContent title={customTitle ?? "Transaction Ready"} description="" />
+  }, [titles])
 
   const handleUnknownStatus = useCallback(() => {
-    return <ConfirmationModalContent title={"Unknown Status"} description="" />
-  }, [])
+    const customTitle = titles?.[TransactionModalStatus.Unknown]
+    //TODO: It need a modal only for unknown status
+    return <ConfirmationModalContent title={customTitle ?? "Unknown Status"} description="" />
+  }, [titles])
 
   const modalContent = useMemo(() => {
     const statusComponentMap: Record<TransactionModalStatus, ReactNode> = {
