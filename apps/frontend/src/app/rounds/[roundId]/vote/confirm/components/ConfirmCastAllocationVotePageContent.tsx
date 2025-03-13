@@ -143,7 +143,6 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
         onTryAgain={onTryAgain}
         showExplorerButton
         txId={castAllocationVotes.txReceipt?.meta.txID}
-        isSuccessBeenTrack={true}
       />
 
       <ResponsiveCard>

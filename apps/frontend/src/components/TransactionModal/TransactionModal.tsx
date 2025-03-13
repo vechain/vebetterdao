@@ -32,7 +32,6 @@ export type TransactionModalProps = {
   showExplorerButton?: boolean
   txId?: string
   customContent?: Partial<Record<TransactionModalStatus, ReactNode>>
-  isSuccessBeenTrack?: boolean
 }
 
 export const TransactionModal = ({
@@ -49,7 +48,6 @@ export const TransactionModal = ({
   onTryAgain,
   showExplorerButton,
   txId,
-  isSuccessBeenTrack,
   customContent,
 }: TransactionModalProps) => {
   const handlePendingStatus = useCallback(() => {
@@ -75,7 +73,7 @@ export const TransactionModal = ({
         txId={txId}
       />
     )
-  }, [errorTitle, errorDescription, showTryAgainButton, onTryAgain, showExplorerButton, txId])
+  }, [errorTitle, errorDescription, onTryAgain, showExplorerButton, txId])
 
   const handleSuccessStatus = useCallback(() => {
     const CustomContent = customContent?.[TransactionModalStatus.Success]
@@ -91,18 +89,9 @@ export const TransactionModal = ({
         socialDescriptionEncoded={socialDescriptionEncoded}
         showExplorerButton={showExplorerButton}
         txId={txId}
-        isSuccessBeenTrack={isSuccessBeenTrack}
       />
     )
-  }, [
-    customContent,
-    isSuccessBeenTrack,
-    showExplorerButton,
-    showSocialButtons,
-    socialDescriptionEncoded,
-    successTitle,
-    txId,
-  ])
+  }, [customContent, showExplorerButton, showSocialButtons, socialDescriptionEncoded, successTitle, txId])
 
   const handleReadyStatus = useCallback(() => {
     return <ConfirmationModalContent title={"Transaction Ready"} description="" />

@@ -129,7 +129,6 @@ export const PublishAndPreviewPageContent = () => {
         pendingTitle={t("Creating proposal...")}
         txId={createProposalMutation.txReceipt?.meta.txID}
         showExplorerButton
-        isSuccessBeenTrack={true}
       />
 
       <Card w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">
