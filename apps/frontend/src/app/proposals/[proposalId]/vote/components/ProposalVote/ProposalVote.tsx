@@ -239,14 +239,16 @@ export const ProposalVote = ({ proposalId }: Props) => {
         <TransactionModal
           isOpen={isOpen}
           onClose={handleClose}
-          successTitle={t("Vote Completed!")}
           status={
             castVoteMutation.error ? TransactionModalStatus.Error : (castVoteMutation.status as TransactionModalStatus)
           }
           errorDescription={castVoteMutation.error?.reason}
-          errorTitle={castVoteMutation.error ? t("Error voting") : undefined}
           onTryAgain={handleCastVote}
-          pendingTitle={t("Voting...")}
+          titles={{
+            [TransactionModalStatus.Success]: t("Vote Completed!"),
+            [TransactionModalStatus.Error]: t("Error voting"),
+            [TransactionModalStatus.Pending]: t("Voting..."),
+          }}
           showSocialButtons
           socialDescriptionEncoded={encodeURIComponent(
             "🔄 Just voted for a proposal on #VeBetterDAO! \n\n🌱 Explore and join us at https://vebetterdao.org.\n\n#VeBetterDAO #Vechain",

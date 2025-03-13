@@ -44,12 +44,14 @@ export const RevokeDelegationDelegateePOVModal = ({
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
-        successTitle={t("Delegation revoked!")}
         status={revokeDelegation.status as TransactionModalStatus}
         errorDescription={revokeDelegation.error?.reason}
-        errorTitle={revokeDelegation.error ? t("Error revoking delegation") : undefined}
         onTryAgain={() => revokeDelegation.sendTransaction({})}
-        pendingTitle={t("Revoking delegation...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Delegation revoked!"),
+          [TransactionModalStatus.Error]: t("Error revoking delegation"),
+          [TransactionModalStatus.Pending]: t("Revoking delegation..."),
+        }}
         showExplorerButton
         txId={revokeDelegation.txReceipt?.meta.txID}
       />

@@ -86,16 +86,18 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={
-          isEligible ? `${name} will be eligible from next round` : `${name} will not be eligible from next round`
-        }
+        titles={{
+          [TransactionModalStatus.Success]: isEligible
+            ? `${name} will be eligible from next round`
+            : `${name} will not be eligible from next round`,
+          [TransactionModalStatus.Error]: "Error changing eligibility",
+          [TransactionModalStatus.Pending]: isEligible
+            ? `Enabling voting eligibility for ${name}...`
+            : `Disabling voting eligibility for ${name}...`,
+        }}
         onTryAgain={handleEligibilityChange}
         showExplorerButton
         txId={txReceipt?.meta.txID}
-        pendingTitle={
-          isEligible ? `Enabling voting eligibility for ${name}...` : `Disabling voting eligibility for ${name}...`
-        }
-        errorTitle={"Error changing eligibility"}
         errorDescription={error?.reason}
       />
     </VStack>

@@ -306,12 +306,14 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={t("Withdraw completed!")}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         errorDescription={error?.reason}
-        errorTitle={error ? t("Error withdrawing") : undefined}
         onTryAgain={handleWithdraw}
-        pendingTitle={t("Withdrawing...")}
+        titles={{
+          [TransactionModalStatus.Pending]: t("Withdrawing..."),
+          [TransactionModalStatus.Success]: t("Withdraw completed!"),
+          [TransactionModalStatus.Error]: t("Error withdrawing"),
+        }}
         showExplorerButton
         customContent={{
           [TransactionModalStatus.Pending]: (

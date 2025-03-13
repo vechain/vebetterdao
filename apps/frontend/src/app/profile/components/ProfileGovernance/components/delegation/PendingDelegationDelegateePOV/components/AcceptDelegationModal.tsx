@@ -41,12 +41,14 @@ export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
-        successTitle={t("Delegation accepted!")}
         status={acceptDelegation.status as TransactionModalStatus}
         errorDescription={acceptDelegation.error?.reason}
-        errorTitle={acceptDelegation.error ? t("Error accepting delegation") : undefined}
         onTryAgain={() => acceptDelegation.sendTransaction({ delegator })}
-        pendingTitle={t("Accepting delegation...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Delegation accepted!"),
+          [TransactionModalStatus.Error]: t("Error accepting delegation"),
+          [TransactionModalStatus.Pending]: t("Accepting delegation..."),
+        }}
         showExplorerButton
         txId={acceptDelegation.txReceipt?.meta.txID}
       />

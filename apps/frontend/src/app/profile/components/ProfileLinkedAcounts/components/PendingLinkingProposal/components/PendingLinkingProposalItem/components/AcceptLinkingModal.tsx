@@ -47,12 +47,14 @@ export const AcceptLinkingModal = ({
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
-        successTitle={t("Linking accepted!")}
         status={acceptLinking.status as TransactionModalStatus}
         errorDescription={acceptLinking.error?.reason}
-        errorTitle={acceptLinking.error ? t("Error accepting linking") : undefined}
         onTryAgain={() => acceptLinking.sendTransaction({ entity: secondaryAccount })}
-        pendingTitle={t("Linking account...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Linking accepted!"),
+          [TransactionModalStatus.Error]: t("Error accepting linking"),
+          [TransactionModalStatus.Pending]: t("Linking account..."),
+        }}
         showExplorerButton
         txId={acceptLinking.txReceipt?.meta.txID}
       />

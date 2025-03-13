@@ -158,19 +158,21 @@ export const NewAppPageFormContent = () => {
       <TransactionModal
         isOpen={isConfirmationOpen}
         onClose={onConfirmationClose}
-        confirmationTitle="Submit App"
-        successTitle="App submitted"
         status={useTransactionModalStatus([
           { status: metadataUploading ? TransactionModalStatus.UploadingMetadata : undefined },
           { status: submitAppMutation.error || metadataUploadError ? TransactionModalStatus.Error : undefined },
           { status: submitAppMutation.status as TransactionModalStatus },
         ])}
         errorDescription={metadataUploadError?.message ?? submitAppMutation.error?.reason}
-        errorTitle={useTransactionModalErrorTitle([
-          { error: metadataUploadError, title: "Error uploading metadata" },
-          { error: submitAppMutation.error, title: "Error submitting app" },
-        ])}
-        pendingTitle="Submitting new app..."
+        titles={{
+          [TransactionModalStatus.Error]: useTransactionModalErrorTitle([
+            { error: metadataUploadError, title: "Error uploading metadata" },
+            { error: submitAppMutation.error, title: "Error submitting app" },
+          ]),
+          [TransactionModalStatus.Success]: "App submitted",
+          [TransactionModalStatus.Pending]: "Submitting new app...",
+          [TransactionModalStatus.WaitingConfirmation]: "Submit App",
+        }}
         txId={submitAppMutation.txReceipt?.meta.txID}
         showExplorerButton={true}
       />

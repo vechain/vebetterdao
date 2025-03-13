@@ -152,13 +152,15 @@ export const RegisterUserAction = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={t("User action registered")}
         onTryAgain={handleSubmit}
         showExplorerButton
         txId={txReceipt?.meta.txID}
-        pendingTitle={t(`Registering user action...`)}
-        errorTitle={t("Error registering action")}
         errorDescription={error?.reason}
+        titles={{
+          [TransactionModalStatus.Success]: t("User action registered"),
+          [TransactionModalStatus.Pending]: t("Registering user action..."),
+          [TransactionModalStatus.Error]: t("Error registering action"),
+        }}
       />
     </>
   )

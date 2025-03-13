@@ -40,13 +40,15 @@ export const StartEmissionsButton = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={"Emissions and rounds started!"}
         onTryAgain={handleStartEmissions}
         showExplorerButton
         txId={txReceipt?.meta.txID}
-        pendingTitle="Starting emissions and rounds..."
-        errorTitle={"Error starting emissions and rounds"}
         errorDescription={error?.reason}
+        titles={{
+          [TransactionModalStatus.Success]: "Emissions and rounds started!",
+          [TransactionModalStatus.Error]: "Error starting emissions and rounds",
+          [TransactionModalStatus.Pending]: "Starting emissions and rounds...",
+        }}
       />
     </HStack>
   )

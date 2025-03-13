@@ -42,15 +42,17 @@ export const UpdateAppMetadataTransactionModal = ({
     <TransactionModal
       isOpen={transactionModal.isOpen}
       onClose={handleClose}
-      confirmationTitle="Update App details"
-      successTitle="App details updated!"
       status={modalStatus as TransactionModalStatus}
       errorDescription={uploadMetadataMutation.metadataUploadError?.message ?? updateAppDetailsMutation.error?.reason}
-      errorTitle={errorTitle}
       onTryAgain={onTryAgain}
-      pendingTitle="Updating app details..."
       txId={updateAppDetailsMutation.txReceipt?.meta.txID}
       showExplorerButton
+      titles={{
+        [TransactionModalStatus.Success]: "App details updated!",
+        [TransactionModalStatus.Error]: errorTitle,
+        [TransactionModalStatus.Pending]: "Updating app details...",
+        [TransactionModalStatus.UploadingMetadata]: "Uploading metadata...",
+      }}
     />
   )
 }

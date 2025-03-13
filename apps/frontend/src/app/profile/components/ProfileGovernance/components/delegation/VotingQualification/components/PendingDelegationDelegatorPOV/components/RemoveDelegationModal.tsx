@@ -38,12 +38,14 @@ export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosu
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
-        successTitle={t("Delegation request removed!")}
         status={removeDelegation.status as TransactionModalStatus}
         errorDescription={removeDelegation.error?.reason}
-        errorTitle={removeDelegation.error ? t("Error removing delegation request") : undefined}
         onTryAgain={() => removeDelegation.sendTransaction({})}
-        pendingTitle={t("Removing delegation request...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Delegation request removed!"),
+          [TransactionModalStatus.Error]: t("Error removing delegation request"),
+          [TransactionModalStatus.Pending]: t("Removing delegation request..."),
+        }}
         showExplorerButton
         txId={removeDelegation.txReceipt?.meta.txID}
       />

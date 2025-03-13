@@ -229,12 +229,14 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={t("Deposit completed!")}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         errorDescription={error?.reason}
-        errorTitle={error ? t("Error depositing") : undefined}
         onTryAgain={handleWithdraw}
-        pendingTitle={t("Depositing...")}
+        titles={{
+          [TransactionModalStatus.Pending]: t("Depositing..."),
+          [TransactionModalStatus.Success]: t("Deposit completed!"),
+          [TransactionModalStatus.Error]: t("Error depositing"),
+        }}
         showExplorerButton
         customContent={{
           [TransactionModalStatus.Pending]: (

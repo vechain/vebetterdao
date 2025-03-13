@@ -44,12 +44,14 @@ export const RejectLinkingModal = ({
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
-        successTitle={t("Linking rejected!")}
         status={rejectLinking.status as TransactionModalStatus}
         errorDescription={rejectLinking.error?.reason}
-        errorTitle={rejectLinking.error ? t("Error rejecting linking") : undefined}
         onTryAgain={() => rejectLinking.sendTransaction({ entity: secondaryAccount })}
-        pendingTitle={t("Rejecting linking...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Linking rejected!"),
+          [TransactionModalStatus.Error]: t("Error rejecting linking"),
+          [TransactionModalStatus.Pending]: t("Rejecting linking..."),
+        }}
         showExplorerButton
         txId={rejectLinking.txReceipt?.meta.txID}
       />

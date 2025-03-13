@@ -184,15 +184,17 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={t("Rewards claimed!")}
         status={claimRewardError ? TransactionModalStatus.Error : (claimRewardsStatus as TransactionModalStatus)}
         errorDescription={claimRewardError?.reason}
-        errorTitle={claimRewardError ? t("Error claiming") : undefined}
         onTryAgain={onTryAgain}
-        pendingTitle={t("Claiming rewards...")}
         showSocialButtons
         socialDescriptionEncoded="%F0%9F%8E%89%20Just%20claimed%20my%20%24B3TR%20rewards%20for%20voting%20in%20the%20%23VeBetterDAO%21%20%0A%0AJoin%20us%20and%20have%20your%20say%20in%20the%20future%20of%20sustainability%20at%20https%3A%2F%2Fvebetterdao.org.%20%0A%0A%23VeBetterDAO%20%23Vechain"
         showExplorerButton
+        titles={{
+          [TransactionModalStatus.Success]: t("Rewards claimed!"),
+          [TransactionModalStatus.Error]: t("Error claiming rewards"),
+          [TransactionModalStatus.Pending]: t("Claiming rewards..."),
+        }}
         txId={txReceipt?.meta.txID}
         customContent={{
           [TransactionModalStatus.Pending]: <CoinsFlipModalContent />,

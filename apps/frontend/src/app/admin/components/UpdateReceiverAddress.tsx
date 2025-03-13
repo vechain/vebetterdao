@@ -132,12 +132,14 @@ export const UpdateReceiverAddress = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={"Treasury address updated"}
+        titles={{
+          [TransactionModalStatus.Success]: "Treasury address updated",
+          [TransactionModalStatus.Pending]: "Updating team wallet address...",
+          [TransactionModalStatus.Error]: "Error updating address",
+        }}
         onTryAgain={handleSubmit}
         showExplorerButton
         txId={txReceipt?.meta.txID}
-        pendingTitle={`Updating team wallet address...`}
-        errorTitle={"Error updating address"}
         errorDescription={error?.reason}
       />
     </>

@@ -127,12 +127,14 @@ export const GMSetMaxLevel = () => {
         isOpen={isOpen}
         onClose={onClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={t("Transaction successful")}
+        titles={{
+          [TransactionModalStatus.Pending]: t("Processing transaction..."),
+          [TransactionModalStatus.Error]: t("Transaction error"),
+          [TransactionModalStatus.Success]: t("Transaction successful"),
+        }}
         onTryAgain={handleSubmit(onSubmit)}
         showExplorerButton
         txId={txReceipt?.meta.txID}
-        pendingTitle={t("Processing transaction...")}
-        errorTitle={t("Transaction error")}
         errorDescription={error?.reason}
       />
     </>

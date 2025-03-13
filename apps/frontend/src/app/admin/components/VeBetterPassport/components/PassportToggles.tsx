@@ -107,13 +107,15 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={isEnabled ? `${name} is now active` : `${name} is now deactivated`}
         onTryAgain={handleToggle}
         showExplorerButton
         txId={txReceipt?.meta.txID}
-        pendingTitle={isEnabled ? `Enabling ${name}...` : `Disabling ${name}...`}
-        errorTitle={"Error toggling check"}
         errorDescription={error?.reason}
+        titles={{
+          [TransactionModalStatus.Success]: isEnabled ? `${name} is now active` : `${name} is now deactivated`,
+          [TransactionModalStatus.Error]: "Error toggling check",
+          [TransactionModalStatus.Pending]: isEnabled ? `Enabling ${name}...` : `Disabling ${name}...`,
+        }}
       />
     </VStack>
   )

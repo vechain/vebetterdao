@@ -244,8 +244,11 @@ export const UpdateRoleCard = () => {
         showSocialButtons
         showExplorerButton
         onTryAgain={handleSubmit(handleFormSubmit)}
-        pendingTitle={t("Updating wallet address role...")}
-        errorTitle={t("Error updating role")}
+        titles={{
+          [TransactionModalStatus.Pending]: t("Updating wallet address role..."),
+          [TransactionModalStatus.Error]: t("Error updating role"),
+          [TransactionModalStatus.Success]: t("Role updated successfully"),
+        }}
       />
     </>
   )

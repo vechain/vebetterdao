@@ -59,16 +59,18 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={t("Detach GM from Node")}
         status={
           detachGMFromXNodeMutation.error
             ? TransactionModalStatus.Error
             : (detachGMFromXNodeMutation.status as TransactionModalStatus)
         }
         errorDescription={detachGMFromXNodeMutation.error?.reason}
-        errorTitle={detachGMFromXNodeMutation.error ? t("Error detaching") : undefined}
         onTryAgain={handleDetachment}
-        pendingTitle={t("Detaching GM from Node...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Detach GM from Node"),
+          [TransactionModalStatus.Error]: t("Error detaching"),
+          [TransactionModalStatus.Pending]: t("Detaching GM from Node..."),
+        }}
         showExplorerButton
         txId={detachGMFromXNodeMutation.txReceipt?.meta.txID}
       />

@@ -117,8 +117,10 @@ export const XAppCheckEndorsement = () => {
         onTryAgain={handleCheckEndorsement}
         showExplorerButton
         txId={txReceipt?.meta.txID}
-        pendingTitle={t("Checking endorsement...")}
-        errorTitle={t("Error checking endorsement")}
+        titles={{
+          [TransactionModalStatus.Pending]: t("Checking endorsement..."),
+          [TransactionModalStatus.Error]: t("Error checking endorsement"),
+        }}
         errorDescription={error?.reason}
       />
     </>

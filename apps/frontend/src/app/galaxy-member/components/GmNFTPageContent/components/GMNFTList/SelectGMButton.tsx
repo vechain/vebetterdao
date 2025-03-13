@@ -46,14 +46,16 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
       <TransactionModal
         isOpen={selectGMModal.isOpen}
         onClose={selectGMModal.onClose}
-        successTitle={t("GM NFT selected")}
         status={
           selectGMMutation.error ? TransactionModalStatus.Error : (selectGMMutation.status as TransactionModalStatus)
         }
         errorDescription={selectGMMutation.error?.reason}
-        errorTitle={selectGMMutation.error ? "Error selecting GM NFT" : undefined}
         onTryAgain={onTryAgain}
-        pendingTitle={"Selecting GM NFT..."}
+        titles={{
+          [TransactionModalStatus.Success]: t("GM NFT selected"),
+          [TransactionModalStatus.Error]: "Error selecting GM NFT",
+          [TransactionModalStatus.Pending]: "Selecting GM NFT...",
+        }}
         showExplorerButton
         txId={selectGMMutation.txReceipt?.meta.txID}
       />

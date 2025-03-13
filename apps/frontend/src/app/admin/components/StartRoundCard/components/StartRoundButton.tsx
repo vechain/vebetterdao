@@ -59,14 +59,16 @@ export const StartRoundButton = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={"Round started!"}
         onTryAgain={handleSubmit}
         showExplorerButton
         txId={txReceipt?.meta.txID}
-        pendingTitle="Starting round..."
-        errorTitle={"Error starting round"}
         errorDescription={error?.reason}
         data-testid={"round-start-modal-title"}
+        titles={{
+          [TransactionModalStatus.Success]: "Round started!",
+          [TransactionModalStatus.Error]: "Error starting round",
+          [TransactionModalStatus.Pending]: "Starting round...",
+        }}
       />
     </VStack>
   )

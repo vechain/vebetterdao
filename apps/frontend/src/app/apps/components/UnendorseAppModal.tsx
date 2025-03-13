@@ -58,16 +58,18 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        successTitle={t("Unendorse app")}
         status={
           unendorseAppMutation.error
             ? TransactionModalStatus.Error
             : (unendorseAppMutation.status as TransactionModalStatus)
         }
         errorDescription={unendorseAppMutation.error?.reason}
-        errorTitle={unendorseAppMutation.error ? t("Transaction error") : undefined}
         onTryAgain={handleUnendorsement}
-        pendingTitle={"Unendorsing app..."}
+        titles={{
+          [TransactionModalStatus.Error]: t("Transaction error"),
+          [TransactionModalStatus.Pending]: "Unendorsing app...",
+          [TransactionModalStatus.Success]: "Unendorsed app",
+        }}
         showExplorerButton
         txId={unendorseAppMutation.txReceipt?.meta.txID}
         customContent={{

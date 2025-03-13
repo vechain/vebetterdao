@@ -92,16 +92,18 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        successTitle={t("Endorse dApp")}
         status={
           endorseAppMutation.error
             ? TransactionModalStatus.Error
             : (endorseAppMutation.status as TransactionModalStatus)
         }
         errorDescription={endorseAppMutation.error?.reason}
-        errorTitle={endorseAppMutation.error ? "Error endorsing" : undefined}
         onTryAgain={handleEndorsement}
-        pendingTitle={"Endorsing app..."}
+        titles={{
+          [TransactionModalStatus.Success]: t("Endorse dApp"),
+          [TransactionModalStatus.Error]: "Error endorsing",
+          [TransactionModalStatus.Pending]: "Endorsing app...",
+        }}
         showExplorerButton
         txId={endorseAppMutation.txReceipt?.meta.txID}
         customContent={{

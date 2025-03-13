@@ -38,12 +38,14 @@ export const RemoveLinkModalEntityPOV = ({ modal, entity }: { modal: UseDisclosu
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
-        successTitle={t("Linking rejected!")}
         status={removeLinking.status as TransactionModalStatus}
         errorDescription={removeLinking.error?.reason}
-        errorTitle={removeLinking.error ? t("Error removing linking") : undefined}
         onTryAgain={() => removeLinking.sendTransaction({ entity })}
-        pendingTitle={t("Removing linking...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Linking rejected!"),
+          [TransactionModalStatus.Error]: t("Error removing linking"),
+          [TransactionModalStatus.Pending]: t("Removing linking..."),
+        }}
         showExplorerButton
         txId={removeLinking.txReceipt?.meta.txID}
       />

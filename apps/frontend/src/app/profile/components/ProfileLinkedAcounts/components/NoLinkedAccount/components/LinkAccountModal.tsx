@@ -31,12 +31,14 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
-        successTitle={t("Account linked successfully!")}
         status={linkEntityToPassport.status as TransactionModalStatus}
         errorDescription={linkEntityToPassport.error?.reason}
-        errorTitle={linkEntityToPassport.error ? t("Error linking account") : undefined}
         onTryAgain={() => linkEntityToPassport.sendTransaction({ passport: accountToConnect })}
-        pendingTitle={t("Linking account...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Account linked successfully!"),
+          [TransactionModalStatus.Error]: t("Error linking account"),
+          [TransactionModalStatus.Pending]: t("Linking account..."),
+        }}
         showExplorerButton
         txId={linkEntityToPassport.txReceipt?.meta.txID}
       />

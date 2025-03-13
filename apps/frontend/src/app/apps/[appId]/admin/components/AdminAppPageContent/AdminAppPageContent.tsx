@@ -235,15 +235,16 @@ export const AdminAppPageContent = () => {
       <TransactionModal
         isOpen={isConfirmationOpen}
         onClose={handleClose}
-        confirmationTitle="Update app admin info"
-        successTitle="App admin info updated!"
         status={updateMutation.status as TransactionModalStatus}
-        errorDescription={updateMutation.error?.reason}
-        errorTitle={"Error updating app admin info"}
-        onTryAgain={onTryAgain}
-        pendingTitle="Updating app admin info..."
-        txId={updateMutation.txReceipt?.meta.txID}
         showExplorerButton
+        errorDescription={updateMutation.error?.reason}
+        onTryAgain={onTryAgain}
+        txId={updateMutation.txReceipt?.meta.txID}
+        titles={{
+          [TransactionModalStatus.Pending]: "Updating app admin info...",
+          [TransactionModalStatus.Success]: "App admin info updated!",
+          [TransactionModalStatus.Error]: "Error updating app admin info",
+        }}
       />
     </>
   )

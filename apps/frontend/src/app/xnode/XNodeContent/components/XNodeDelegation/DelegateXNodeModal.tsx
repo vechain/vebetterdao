@@ -111,12 +111,14 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
-        successTitle={t("Node delegation completed!")}
         status={delegateXNode.status as TransactionModalStatus}
         errorDescription={delegateXNode.error?.reason}
-        errorTitle={delegateXNode.error ? t("Error delegating Node") : undefined}
         onTryAgain={() => delegateXNode.sendTransaction({ delegatee: delegateeAddressOrDomain })}
-        pendingTitle={t("Delegating Node...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Node delegation completed!"),
+          [TransactionModalStatus.Error]: t("Error delegating Node"),
+          [TransactionModalStatus.Pending]: t("Delegating Node..."),
+        }}
         showExplorerButton
         txId={delegateXNode.txReceipt?.meta.txID}
       />

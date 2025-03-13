@@ -45,13 +45,15 @@ export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; on
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={t("Deposit Completed!")}
         status={
           depositMutation.error ? TransactionModalStatus.Error : (depositMutation.status as TransactionModalStatus)
         }
         errorDescription={depositMutation.error?.reason}
-        errorTitle={depositMutation.error ? t("Error Depositing") : undefined}
-        pendingTitle={t("Depositing...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Deposit Completed!"),
+          [TransactionModalStatus.Error]: t("Error Depositing"),
+          [TransactionModalStatus.Pending]: t("Depositing..."),
+        }}
         showSocialButtons
         socialDescriptionEncoded={encodeURIComponent(
           "🔄 Just supported a proposal on #VeBetterDAO! \n\n🌱 Explore and join us at https://vebetterdao.org.\n\n#VeBetterDAO #Vechain",

@@ -120,13 +120,15 @@ export const PublishAndPreviewPageContent = () => {
       <TransactionModal
         isOpen={isConfirmationOpen}
         onClose={onConfirmationClose}
-        confirmationTitle={t("Create a proposal")}
-        successTitle={t("Proposal created!")}
         status={modalStatus as TransactionModalStatus}
         errorDescription={metadataUploadError?.message ?? createProposalMutation.error?.reason}
-        errorTitle={errorTitle}
         onTryAgain={onTryAgain}
-        pendingTitle={t("Creating proposal...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Proposal created!"),
+          [TransactionModalStatus.Error]: errorTitle,
+          [TransactionModalStatus.Pending]: t("Creating proposal..."),
+          [TransactionModalStatus.WaitingConfirmation]: t("Create a proposal"),
+        }}
         txId={createProposalMutation.txReceipt?.meta.txID}
         showExplorerButton
       />

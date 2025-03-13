@@ -69,11 +69,13 @@ export const ClaimDeposits = ({ totalClaimableDeposits, claimableDeposits }: Pro
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={t("Deposits Withdraw Completed!")}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         errorDescription={error?.reason}
-        errorTitle={error ? t("Error Withdrawing") : undefined}
-        pendingTitle={t("Withdrawing...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Deposits Withdraw Completed!"),
+          [TransactionModalStatus.Error]: t("Error Withdrawing"),
+          [TransactionModalStatus.Pending]: t("Withdrawing..."),
+        }}
         showExplorerButton
         txId={txReceipt?.meta.txID}
       />

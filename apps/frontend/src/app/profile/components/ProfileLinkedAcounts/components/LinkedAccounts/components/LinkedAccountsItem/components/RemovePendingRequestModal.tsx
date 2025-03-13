@@ -38,12 +38,14 @@ export const RemovePendingRequestModal = ({ modal, passport }: { modal: UseDiscl
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
-        successTitle={t("Pending request removed!")}
         status={removeLinkingRequest.status as TransactionModalStatus}
         errorDescription={removeLinkingRequest.error?.reason}
-        errorTitle={removeLinkingRequest.error ? t("Error removing pending request") : undefined}
         onTryAgain={() => removeLinkingRequest.sendTransaction({})}
-        pendingTitle={t("Removing pending request...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Pending request removed!"),
+          [TransactionModalStatus.Error]: t("Error removing pending request"),
+          [TransactionModalStatus.Pending]: t("Removing pending request..."),
+        }}
         showExplorerButton
         txId={removeLinkingRequest.txReceipt?.meta.txID}
       />

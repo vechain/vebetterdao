@@ -229,16 +229,18 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        confirmationTitle={swapText}
-        successTitle={t("Swap Completed!")}
         status={mutationData.error ? TransactionModalStatus.Error : (mutationData.status as TransactionModalStatus)}
         errorDescription={mutationData.error?.reason}
-        errorTitle={mutationData.error ? t("Error swapping") : undefined}
         onTryAgain={handleConvertB3tr}
-        pendingTitle={t("Swapping...")}
         showSocialButtons
         socialDescriptionEncoded="%F0%9F%94%84%20Just%20swapped%20between%20B3TR%20and%20VOT3%20on%20%23VeBetterDAO%21%20%0A%0A%F0%9F%8C%B1%20Explore%20and%20join%20us%20at%20https%3A%2F%2Fvebetterdao.org.%0A%0A%23VeBetterDAO%20%23Vechain"
         showExplorerButton
+        titles={{
+          [TransactionModalStatus.Success]: t("Swap Completed!"),
+          [TransactionModalStatus.Error]: t("Error swapping"),
+          [TransactionModalStatus.Pending]: t("Swapping..."),
+          [TransactionModalStatus.WaitingConfirmation]: swapText,
+        }}
         txId={mutationData.txReceipt?.meta.txID}
         customContent={{
           [TransactionModalStatus.Pending]: (

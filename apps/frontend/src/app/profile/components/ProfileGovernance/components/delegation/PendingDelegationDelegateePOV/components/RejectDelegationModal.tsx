@@ -38,12 +38,14 @@ export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
       <TransactionModal
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
-        successTitle={t("Delegation rejected!")}
         status={rejectDelegation.status as TransactionModalStatus}
         errorDescription={rejectDelegation.error?.reason}
-        errorTitle={rejectDelegation.error ? t("Error rejecting delegation") : undefined}
         onTryAgain={() => rejectDelegation.sendTransaction({ delegator })}
-        pendingTitle={t("Rejecting delegation...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Delegation rejected!"),
+          [TransactionModalStatus.Error]: t("Error rejecting delegation"),
+          [TransactionModalStatus.Pending]: t("Rejecting delegation..."),
+        }}
         showExplorerButton
         txId={rejectDelegation.txReceipt?.meta.txID}
       />

@@ -118,12 +118,14 @@ export const CancelProposalSection = () => {
             ? TransactionModalStatus.Error
             : (cancelProposalMutation.status as TransactionModalStatus)
         }
-        successTitle={t("Proposal canceled!")}
         onTryAgain={handleCancelProposal}
         showExplorerButton
         txId={cancelProposalMutation.txReceipt?.meta.txID}
-        pendingTitle={t("Cancelling proposal...")}
-        errorTitle={t("Error cancelling proposal")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Proposal canceled!"),
+          [TransactionModalStatus.Error]: t("Error cancelling proposal"),
+          [TransactionModalStatus.Pending]: t("Cancelling proposal..."),
+        }}
         errorDescription={cancelProposalMutation.error?.reason}
       />
     </Card>

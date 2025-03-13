@@ -51,13 +51,15 @@ export const ProposalExecuteButton = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        successTitle={t("Execute proposal completed!")}
         status={
           executeMutation.error ? TransactionModalStatus.Error : (executeMutation.status as TransactionModalStatus)
         }
         errorDescription={executeMutation.error?.reason}
-        errorTitle={executeMutation.error ? t("Error executing proposal") : undefined}
-        pendingTitle={t("Executing...")}
+        titles={{
+          [TransactionModalStatus.Success]: t("Execute proposal completed!"),
+          [TransactionModalStatus.Error]: t("Error executing proposal"),
+          [TransactionModalStatus.Pending]: t("Executing..."),
+        }}
         showExplorerButton
         txId={executeMutation.txReceipt?.meta.txID}
       />

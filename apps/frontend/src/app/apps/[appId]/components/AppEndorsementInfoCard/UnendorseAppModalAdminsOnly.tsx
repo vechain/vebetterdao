@@ -42,18 +42,18 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
       <TransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        successTitle={t("Remove endorsement")}
         status={
           rmNodeEndorsementMutation.error
             ? TransactionModalStatus.Error
             : (rmNodeEndorsementMutation.status as TransactionModalStatus)
         }
         errorDescription={rmNodeEndorsementMutation.error?.reason}
-        errorTitle={rmNodeEndorsementMutation.error ? t("Transaction error") : undefined}
-        onTryAgain={handleUnendorsement}
-        pendingTitle={t("Removing endorsement...")}
         showExplorerButton
+        onTryAgain={handleUnendorsement}
         txId={rmNodeEndorsementMutation.txReceipt?.meta.txID}
+        titles={{
+          [TransactionModalStatus.Pending]: t("Removing endorsement..."),
+        }}
       />
     )
 

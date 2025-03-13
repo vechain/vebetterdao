@@ -117,13 +117,15 @@ export const ManageUserStatus = () => {
         isOpen={isOpen}
         onClose={handleClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={currentConfig.modalSuccessTitle}
         onTryAgain={handleSubmit}
         showExplorerButton
         txId={txReceipt?.meta.txID}
-        pendingTitle={currentConfig.modalPendingTitle}
-        errorTitle={currentConfig.modalErrorTitle}
         errorDescription={error?.reason}
+        titles={{
+          [TransactionModalStatus.Success]: currentConfig.modalSuccessTitle,
+          [TransactionModalStatus.Pending]: currentConfig.modalPendingTitle,
+          [TransactionModalStatus.Error]: currentConfig.modalErrorTitle,
+        }}
       />
     </>
   )

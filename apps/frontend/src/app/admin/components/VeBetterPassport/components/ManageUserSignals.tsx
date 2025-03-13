@@ -190,13 +190,15 @@ export const ManageUserSignals = () => {
             ? TransactionModalStatus.Error
             : (resetStatus as TransactionModalStatus) || (signalStatus as TransactionModalStatus)
         }
-        successTitle={successTitle}
+        titles={{
+          [TransactionModalStatus.Pending]: pendingTitle,
+          [TransactionModalStatus.Error]: errorTitle,
+          [TransactionModalStatus.Success]: successTitle,
+        }}
         onTryAgain={resetStatus === "error" ? handleResetSignalsSubmit : handleSignalUserSubmit}
         showExplorerButton
         txId={resetTxReceipt?.meta.txID ?? signalTxReceipt?.meta.txID}
-        pendingTitle={pendingTitle}
-        errorTitle={errorTitle}
-        errorDescription={resetError?.reason || signalError?.reason}
+        errorDescription={resetError?.reason ?? signalError?.reason}
       />
     </>
   )
