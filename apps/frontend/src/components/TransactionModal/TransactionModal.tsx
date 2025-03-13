@@ -1,11 +1,11 @@
-import { ReactNode, useCallback, useMemo } from "react"
+import { ReactNode, useMemo } from "react"
 import { ConfirmationModalContent } from "./ConfirmationModalContent"
 import { ErrorModalContent } from "./ErrorModalContent"
 import { LoadingModalContent } from "./LoadingModalContent"
 import { SuccessModalContent } from "./SuccessModalContent"
 import { Modal, ModalOverlay } from "@chakra-ui/react"
 import { CustomModalContent } from "@/components/CustomModalContent"
-import { UploadingMetadataModalContent } from ".//UploadingMetadataModalContent"
+import { UploadingMetadataModalContent } from "./UploadingMetadataModalContent"
 import { UnknownModalContent } from "./UnknownModalContent"
 
 export enum TransactionModalStatus {
@@ -32,91 +32,57 @@ export type TransactionModalProps = {
   customContent?: Partial<Record<TransactionModalStatus, ReactNode>>
 }
 
-export const TransactionModal = ({
-  isOpen,
-  onClose,
-  status,
-  titles,
-  errorDescription,
-  txId,
-  customContent,
-  ...rest
-}: TransactionModalProps) => {
-  const handlePendingStatus = useCallback(() => {
-    const CustomContent = customContent?.[TransactionModalStatus.Pending]
+const defaultModalContent = (
+  status: TransactionModalStatus,
+  props: Omit<TransactionModalProps, "customContent">,
+): ReactNode => {
+  const { titles } = props
 
-    if (CustomContent) {
-      return CustomContent
-    }
-    const customTitle = titles?.[TransactionModalStatus.Pending]
+  const contentMap: Record<TransactionModalStatus, ReactNode> = {
+    [TransactionModalStatus.UploadingMetadata]: (
+      <UploadingMetadataModalContent title={titles?.[TransactionModalStatus.UploadingMetadata]} />
+    ),
+    [TransactionModalStatus.Pending]: (
+      <ConfirmationModalContent title={titles?.[TransactionModalStatus.Pending]} {...props} />
+    ),
+    [TransactionModalStatus.WaitingConfirmation]: (
+      <LoadingModalContent title={titles?.[TransactionModalStatus.WaitingConfirmation]} {...props} />
+    ),
+    [TransactionModalStatus.Error]: <ErrorModalContent title={titles?.[TransactionModalStatus.Error]} {...props} />,
+    [TransactionModalStatus.Success]: (
+      <SuccessModalContent title={titles?.[TransactionModalStatus.Success]} {...props} />
+    ),
+    [TransactionModalStatus.Ready]: (
+      <ConfirmationModalContent title={titles?.[TransactionModalStatus.Ready]} {...props} />
+    ),
+    [TransactionModalStatus.Unknown]: (
+      <UnknownModalContent title={titles?.[TransactionModalStatus.Unknown]} {...props} />
+    ),
+  }
 
-    return <ConfirmationModalContent title={customTitle} />
-  }, [customContent, titles])
+  return contentMap[status] || null
+}
 
-  const handleWaitingConfirmationStatus = useCallback(() => {
-    const customTitle = titles?.[TransactionModalStatus.WaitingConfirmation]
-    return <LoadingModalContent title={customTitle} {...rest} txId={txId} />
-  }, [titles, txId])
-
-  const handleErrorStatus = useCallback(() => {
-    const customTitle = titles?.[TransactionModalStatus.Error]
-
-    return <ErrorModalContent title={customTitle} description={errorDescription} {...rest} txId={txId} />
-  }, [titles, errorDescription, txId])
-
-  const handleSuccessStatus = useCallback(() => {
-    const CustomContent = customContent?.[TransactionModalStatus.Success]
-    const customTitle = titles?.[TransactionModalStatus.Success]
-
-    if (CustomContent) {
-      return CustomContent
-    }
-
-    return <SuccessModalContent title={customTitle} {...rest} txId={txId} />
-  }, [customContent, titles, txId])
-
-  const handleReadyStatus = useCallback(() => {
-    const customTitle = titles?.[TransactionModalStatus.Ready]
-    //TODO: It need a modal only for ready status
-    return <ConfirmationModalContent title={customTitle ?? "Transaction Ready"} description="" />
-  }, [titles])
-
-  const handleUnknownStatus = useCallback(() => {
-    const customTitle = titles?.[TransactionModalStatus.Unknown]
-    return <UnknownModalContent title={customTitle} />
-  }, [titles])
-
+export const TransactionModal = ({ isOpen, onClose, status, customContent, ...rest }: TransactionModalProps) => {
+  // Dynamically handle default and custom modal, expecting custom content to provide required props
   const modalContent = useMemo(() => {
-    const statusComponentMap: Record<TransactionModalStatus, ReactNode> = {
-      [TransactionModalStatus.UploadingMetadata]: <UploadingMetadataModalContent />,
-      [TransactionModalStatus.Pending]: handlePendingStatus(),
-      [TransactionModalStatus.WaitingConfirmation]: handleWaitingConfirmationStatus(),
-      [TransactionModalStatus.Error]: handleErrorStatus(),
-      [TransactionModalStatus.Success]: handleSuccessStatus(),
-      [TransactionModalStatus.Ready]: handleReadyStatus(),
-      [TransactionModalStatus.Unknown]: handleUnknownStatus(),
-    }
-    return statusComponentMap[status] || null
-  }, [
-    handleErrorStatus,
-    handlePendingStatus,
-    handleReadyStatus,
-    handleSuccessStatus,
-    handleUnknownStatus,
-    handleWaitingConfirmationStatus,
-    status,
-  ])
-  if (!modalContent) return null
+    return customContent?.[status] || defaultModalContent(status, { isOpen, onClose, status, ...rest })
+  }, [status, customContent, isOpen, onClose, rest])
+
+  if (!modalContent) return <UnknownModalContent {...rest} />
+
   return (
     <Modal
       data-testid="transaction-modal"
       isOpen={isOpen}
       onClose={onClose}
       trapFocus={false}
-      closeOnOverlayClick={status !== "waitingConfirmation" && status !== "pending"}
-      isCentered={true}>
+      closeOnOverlayClick={
+        status !== TransactionModalStatus.WaitingConfirmation && status !== TransactionModalStatus.Pending
+      }
+      isCentered>
       <ModalOverlay />
-      <CustomModalContent maxW={"590px"} minH={"300px"}>
+      <CustomModalContent maxW="590px" minH="300px">
         {modalContent}
       </CustomModalContent>
     </Modal>
