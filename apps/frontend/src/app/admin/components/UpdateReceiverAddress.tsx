@@ -134,7 +134,6 @@ export const UpdateReceiverAddress = () => {
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={"Treasury address updated"}
         onTryAgain={handleSubmit}
-        showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID}
         pendingTitle={`Updating team wallet address...`}

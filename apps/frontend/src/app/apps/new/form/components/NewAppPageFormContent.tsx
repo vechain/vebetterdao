@@ -170,7 +170,6 @@ export const NewAppPageFormContent = () => {
           { error: metadataUploadError, title: "Error uploading metadata" },
           { error: submitAppMutation.error, title: "Error submitting app" },
         ])}
-        showTryAgainButton={true}
         pendingTitle="Submitting new app..."
         txId={submitAppMutation.txReceipt?.meta.txID}
         showExplorerButton={true}

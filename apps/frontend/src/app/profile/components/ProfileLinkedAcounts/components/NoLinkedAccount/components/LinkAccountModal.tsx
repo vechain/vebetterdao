@@ -35,7 +35,6 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
         status={linkEntityToPassport.status as TransactionModalStatus}
         errorDescription={linkEntityToPassport.error?.reason}
         errorTitle={linkEntityToPassport.error ? t("Error linking account") : undefined}
-        showTryAgainButton
         onTryAgain={() => linkEntityToPassport.sendTransaction({ passport: accountToConnect })}
         pendingTitle={t("Linking account...")}
         showExplorerButton

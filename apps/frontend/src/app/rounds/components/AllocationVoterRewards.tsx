@@ -188,7 +188,6 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
         status={claimRewardError ? TransactionModalStatus.Error : (claimRewardsStatus as TransactionModalStatus)}
         errorDescription={claimRewardError?.reason}
         errorTitle={claimRewardError ? t("Error claiming") : undefined}
-        showTryAgainButton
         onTryAgain={onTryAgain}
         pendingTitle={t("Claiming rewards...")}
         showSocialButtons

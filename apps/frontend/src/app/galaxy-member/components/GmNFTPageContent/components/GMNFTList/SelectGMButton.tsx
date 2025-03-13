@@ -52,7 +52,6 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
         }
         errorDescription={selectGMMutation.error?.reason}
         errorTitle={selectGMMutation.error ? "Error selecting GM NFT" : undefined}
-        showTryAgainButton
         onTryAgain={onTryAgain}
         pendingTitle={"Selecting GM NFT..."}
         showExplorerButton

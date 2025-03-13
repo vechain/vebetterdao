@@ -115,7 +115,6 @@ export const XAppCheckEndorsement = () => {
         onClose={handleClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         onTryAgain={handleCheckEndorsement}
-        showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID}
         pendingTitle={t("Checking endorsement...")}

@@ -66,7 +66,6 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
         }
         errorDescription={unendorseAppMutation.error?.reason}
         errorTitle={unendorseAppMutation.error ? t("Transaction error") : undefined}
-        showTryAgainButton
         onTryAgain={handleUnendorsement}
         pendingTitle={"Unendorsing app..."}
         showExplorerButton

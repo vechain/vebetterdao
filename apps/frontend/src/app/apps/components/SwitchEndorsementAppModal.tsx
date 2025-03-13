@@ -90,7 +90,6 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
         }
         errorDescription={switchEndorsementMutation.error?.reason}
         errorTitle={switchEndorsementMutation.error ? t("Error switching endorsement") : undefined}
-        showTryAgainButton
         onTryAgain={handleSwitchEndorsement}
         pendingTitle={t("Switching Endorsement...")}
         showExplorerButton

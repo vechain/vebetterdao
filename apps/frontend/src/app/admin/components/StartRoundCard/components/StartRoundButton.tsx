@@ -61,7 +61,6 @@ export const StartRoundButton = () => {
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={"Round started!"}
         onTryAgain={handleSubmit}
-        showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID}
         pendingTitle="Starting round..."

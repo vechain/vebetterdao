@@ -42,7 +42,6 @@ export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosu
         status={removeDelegation.status as TransactionModalStatus}
         errorDescription={removeDelegation.error?.reason}
         errorTitle={removeDelegation.error ? t("Error removing delegation request") : undefined}
-        showTryAgainButton
         onTryAgain={() => removeDelegation.sendTransaction({})}
         pendingTitle={t("Removing delegation request...")}
         showExplorerButton

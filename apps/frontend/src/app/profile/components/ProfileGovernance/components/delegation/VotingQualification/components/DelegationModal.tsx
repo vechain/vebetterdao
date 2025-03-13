@@ -65,7 +65,6 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
         status={delegatePassport.status as TransactionModalStatus}
         errorDescription={delegatePassport.error?.reason}
         errorTitle={delegatePassport.error ? t("Error delegating") : undefined}
-        showTryAgainButton
         onTryAgain={() => delegatePassport.sendTransaction({ delegatee })}
         pendingTitle={t("Delegating...")}
         showExplorerButton

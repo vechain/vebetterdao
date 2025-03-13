@@ -154,7 +154,6 @@ export const RegisterUserAction = () => {
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("User action registered")}
         onTryAgain={handleSubmit}
-        showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID}
         pendingTitle={t(`Registering user action...`)}

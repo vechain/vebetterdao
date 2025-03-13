@@ -67,7 +67,6 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         }
         errorDescription={detachGMFromXNodeMutation.error?.reason}
         errorTitle={detachGMFromXNodeMutation.error ? t("Error detaching") : undefined}
-        showTryAgainButton
         onTryAgain={handleDetachment}
         pendingTitle={t("Detaching GM from Node...")}
         showExplorerButton

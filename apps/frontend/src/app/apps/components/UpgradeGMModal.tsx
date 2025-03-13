@@ -98,7 +98,6 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
         }
         errorDescription={upgradeGMMutation.error?.reason}
         errorTitle={upgradeGMMutation.error ? "Error upgrading GM NFT" : undefined}
-        showTryAgainButton
         onTryAgain={onTryAgain}
         pendingTitle={"Upgrading GM NFT..."}
         showExplorerButton

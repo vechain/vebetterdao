@@ -244,7 +244,6 @@ export const UpdateRoleCard = () => {
         showSocialButtons
         showExplorerButton
         onTryAgain={handleSubmit(handleFormSubmit)}
-        showTryAgainButton
         pendingTitle={t("Updating wallet address role...")}
         errorTitle={t("Error updating role")}
       />

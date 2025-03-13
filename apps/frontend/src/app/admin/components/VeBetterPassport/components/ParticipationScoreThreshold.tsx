@@ -112,7 +112,6 @@ export const ParticipationScoreThreshold = () => {
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("Participation score threshold updated")}
         onTryAgain={handleSubmit}
-        showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID}
         pendingTitle={t(`Updating participation score threshold...`)}

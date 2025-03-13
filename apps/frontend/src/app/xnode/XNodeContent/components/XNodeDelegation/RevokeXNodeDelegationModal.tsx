@@ -44,7 +44,6 @@ export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProp
         status={revokeXNodeDelegation.status as TransactionModalStatus}
         errorDescription={revokeXNodeDelegation.error?.reason}
         errorTitle={revokeXNodeDelegation.error ? t("Error revoking Node delegation") : undefined}
-        showTryAgainButton
         onTryAgain={() => revokeXNodeDelegation.sendTransaction({ isAttachedToGM: isXNodeAttachedToGM })}
         pendingTitle={t("Revoking Node delegation...")}
         showExplorerButton

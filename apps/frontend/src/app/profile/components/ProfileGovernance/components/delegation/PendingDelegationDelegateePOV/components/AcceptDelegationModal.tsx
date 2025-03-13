@@ -45,7 +45,6 @@ export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
         status={acceptDelegation.status as TransactionModalStatus}
         errorDescription={acceptDelegation.error?.reason}
         errorTitle={acceptDelegation.error ? t("Error accepting delegation") : undefined}
-        showTryAgainButton
         onTryAgain={() => acceptDelegation.sendTransaction({ delegator })}
         pendingTitle={t("Accepting delegation...")}
         showExplorerButton

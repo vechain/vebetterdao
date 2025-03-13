@@ -109,7 +109,6 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={isEnabled ? `${name} is now active` : `${name} is now deactivated`}
         onTryAgain={handleToggle}
-        showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID}
         pendingTitle={isEnabled ? `Enabling ${name}...` : `Disabling ${name}...`}

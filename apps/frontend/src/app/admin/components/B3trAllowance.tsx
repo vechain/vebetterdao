@@ -186,7 +186,6 @@ export const B3trAllowance = () => {
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("B3TR tokens allowance updated successfully")}
         onTryAgain={handleSubmit}
-        showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID}
         pendingTitle={t(`Updating B3TR tokens allowance...`)}

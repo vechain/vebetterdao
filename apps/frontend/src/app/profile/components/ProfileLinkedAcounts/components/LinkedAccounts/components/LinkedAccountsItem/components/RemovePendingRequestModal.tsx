@@ -42,7 +42,6 @@ export const RemovePendingRequestModal = ({ modal, passport }: { modal: UseDiscl
         status={removeLinkingRequest.status as TransactionModalStatus}
         errorDescription={removeLinkingRequest.error?.reason}
         errorTitle={removeLinkingRequest.error ? t("Error removing pending request") : undefined}
-        showTryAgainButton
         onTryAgain={() => removeLinkingRequest.sendTransaction({})}
         pendingTitle={t("Removing pending request...")}
         showExplorerButton

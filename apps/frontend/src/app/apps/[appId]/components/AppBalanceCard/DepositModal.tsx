@@ -233,7 +233,6 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         errorDescription={error?.reason}
         errorTitle={error ? t("Error depositing") : undefined}
-        showTryAgainButton
         onTryAgain={handleWithdraw}
         pendingTitle={t("Depositing...")}
         showExplorerButton

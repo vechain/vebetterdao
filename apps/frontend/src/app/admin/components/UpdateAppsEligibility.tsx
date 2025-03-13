@@ -90,7 +90,6 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
           isEligible ? `${name} will be eligible from next round` : `${name} will not be eligible from next round`
         }
         onTryAgain={handleEligibilityChange}
-        showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID}
         pendingTitle={

@@ -52,7 +52,6 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery }: Props) => {
         }
         errorDescription={claimRewardsMutation.error?.reason}
         errorTitle={claimRewardsMutation.error ? t("Error claiming") : undefined}
-        showTryAgainButton
         onTryAgain={onTryAgain}
         pendingTitle={t("Claiming rewards...")}
         showSocialButtons

@@ -120,7 +120,6 @@ export const CancelProposalSection = () => {
         }
         successTitle={t("Proposal canceled!")}
         onTryAgain={handleCancelProposal}
-        showTryAgainButton
         showExplorerButton
         txId={cancelProposalMutation.txReceipt?.meta.txID}
         pendingTitle={t("Cancelling proposal...")}

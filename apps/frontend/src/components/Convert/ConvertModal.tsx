@@ -234,7 +234,6 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
         status={mutationData.error ? TransactionModalStatus.Error : (mutationData.status as TransactionModalStatus)}
         errorDescription={mutationData.error?.reason}
         errorTitle={mutationData.error ? t("Error swapping") : undefined}
-        showTryAgainButton
         onTryAgain={handleConvertB3tr}
         pendingTitle={t("Swapping...")}
         showSocialButtons

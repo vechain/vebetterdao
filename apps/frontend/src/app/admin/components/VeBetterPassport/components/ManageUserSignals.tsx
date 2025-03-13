@@ -192,7 +192,6 @@ export const ManageUserSignals = () => {
         }
         successTitle={successTitle}
         onTryAgain={resetStatus === "error" ? handleResetSignalsSubmit : handleSignalUserSubmit}
-        showTryAgainButton
         showExplorerButton
         txId={resetTxReceipt?.meta.txID ?? signalTxReceipt?.meta.txID}
         pendingTitle={pendingTitle}

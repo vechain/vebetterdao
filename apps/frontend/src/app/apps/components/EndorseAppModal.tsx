@@ -100,7 +100,6 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
         }
         errorDescription={endorseAppMutation.error?.reason}
         errorTitle={endorseAppMutation.error ? "Error endorsing" : undefined}
-        showTryAgainButton
         onTryAgain={handleEndorsement}
         pendingTitle={"Endorsing app..."}
         showExplorerButton

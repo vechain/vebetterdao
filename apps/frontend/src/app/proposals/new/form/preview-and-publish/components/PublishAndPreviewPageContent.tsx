@@ -125,7 +125,6 @@ export const PublishAndPreviewPageContent = () => {
         status={modalStatus as TransactionModalStatus}
         errorDescription={metadataUploadError?.message ?? createProposalMutation.error?.reason}
         errorTitle={errorTitle}
-        showTryAgainButton={true}
         onTryAgain={onTryAgain}
         pendingTitle={t("Creating proposal...")}
         txId={createProposalMutation.txReceipt?.meta.txID}

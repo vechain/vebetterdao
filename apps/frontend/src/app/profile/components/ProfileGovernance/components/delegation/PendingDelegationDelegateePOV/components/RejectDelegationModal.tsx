@@ -42,7 +42,6 @@ export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
         status={rejectDelegation.status as TransactionModalStatus}
         errorDescription={rejectDelegation.error?.reason}
         errorTitle={rejectDelegation.error ? t("Error rejecting delegation") : undefined}
-        showTryAgainButton
         onTryAgain={() => rejectDelegation.sendTransaction({ delegator })}
         pendingTitle={t("Rejecting delegation...")}
         showExplorerButton

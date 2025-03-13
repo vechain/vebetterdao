@@ -42,7 +42,6 @@ export const StartEmissionsButton = () => {
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={"Emissions and rounds started!"}
         onTryAgain={handleStartEmissions}
-        showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID}
         pendingTitle="Starting emissions and rounds..."

@@ -240,7 +240,6 @@ export const AdminAppPageContent = () => {
         status={updateMutation.status as TransactionModalStatus}
         errorDescription={updateMutation.error?.reason}
         errorTitle={"Error updating app admin info"}
-        showTryAgainButton={true}
         onTryAgain={onTryAgain}
         pendingTitle="Updating app admin info..."
         txId={updateMutation.txReceipt?.meta.txID}

@@ -48,7 +48,6 @@ export const RejectLinkingModal = ({
         status={rejectLinking.status as TransactionModalStatus}
         errorDescription={rejectLinking.error?.reason}
         errorTitle={rejectLinking.error ? t("Error rejecting linking") : undefined}
-        showTryAgainButton
         onTryAgain={() => rejectLinking.sendTransaction({ entity: secondaryAccount })}
         pendingTitle={t("Rejecting linking...")}
         showExplorerButton

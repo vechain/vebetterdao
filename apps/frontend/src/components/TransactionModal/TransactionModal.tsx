@@ -28,7 +28,6 @@ export type TransactionModalProps = {
   successTitle?: ReactNode
   showSocialButtons?: boolean
   socialDescriptionEncoded?: string
-  showTryAgainButton?: boolean
   onTryAgain?: () => void
   showExplorerButton?: boolean
   txId?: string
@@ -47,7 +46,6 @@ export const TransactionModal = ({
   successTitle,
   showSocialButtons = false,
   socialDescriptionEncoded,
-  showTryAgainButton,
   onTryAgain,
   showExplorerButton,
   txId,
@@ -72,7 +70,6 @@ export const TransactionModal = ({
       <ErrorModalContent
         title={errorTitle}
         description={errorDescription}
-        showTryAgainButton={showTryAgainButton}
         onTryAgain={onTryAgain}
         showExplorerButton={showExplorerButton}
         txId={txId}

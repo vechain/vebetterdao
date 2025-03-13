@@ -86,7 +86,6 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         }
         errorDescription={attachGMToXNodeMutation.error?.reason}
         errorTitle={attachGMToXNodeMutation.error ? "Error attaching" : undefined}
-        showTryAgainButton
         onTryAgain={handleAttachment}
         pendingTitle={"Attaching GM to XNode..."}
         showExplorerButton

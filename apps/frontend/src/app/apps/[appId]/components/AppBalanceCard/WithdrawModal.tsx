@@ -310,7 +310,6 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         errorDescription={error?.reason}
         errorTitle={error ? t("Error withdrawing") : undefined}
-        showTryAgainButton
         onTryAgain={handleWithdraw}
         pendingTitle={t("Withdrawing...")}
         showExplorerButton

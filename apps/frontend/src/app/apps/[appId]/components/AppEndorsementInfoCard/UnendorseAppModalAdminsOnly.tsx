@@ -50,7 +50,6 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
         }
         errorDescription={rmNodeEndorsementMutation.error?.reason}
         errorTitle={rmNodeEndorsementMutation.error ? t("Transaction error") : undefined}
-        showTryAgainButton
         onTryAgain={handleUnendorsement}
         pendingTitle={t("Removing endorsement...")}
         showExplorerButton

@@ -47,7 +47,6 @@ export const UpdateAppMetadataTransactionModal = ({
       status={modalStatus as TransactionModalStatus}
       errorDescription={uploadMetadataMutation.metadataUploadError?.message ?? updateAppDetailsMutation.error?.reason}
       errorTitle={errorTitle}
-      showTryAgainButton={true}
       onTryAgain={onTryAgain}
       pendingTitle="Updating app details..."
       txId={updateAppDetailsMutation.txReceipt?.meta.txID}

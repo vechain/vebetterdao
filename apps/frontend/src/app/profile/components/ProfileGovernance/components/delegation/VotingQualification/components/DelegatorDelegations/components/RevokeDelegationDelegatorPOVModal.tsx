@@ -50,7 +50,6 @@ export const RevokeDelegationDelegatorPOVModal = ({
         status={revokeDelegation.status as TransactionModalStatus}
         errorDescription={revokeDelegation.error?.reason}
         errorTitle={revokeDelegation.error ? t("Error revoking delegation") : undefined}
-        showTryAgainButton
         onTryAgain={() => revokeDelegation.sendTransaction({})}
         pendingTitle={t("Revoking delegation...")}
         showExplorerButton

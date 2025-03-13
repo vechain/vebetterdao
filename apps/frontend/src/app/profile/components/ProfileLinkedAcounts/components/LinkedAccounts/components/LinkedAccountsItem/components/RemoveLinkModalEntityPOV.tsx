@@ -42,7 +42,6 @@ export const RemoveLinkModalEntityPOV = ({ modal, entity }: { modal: UseDisclosu
         status={removeLinking.status as TransactionModalStatus}
         errorDescription={removeLinking.error?.reason}
         errorTitle={removeLinking.error ? t("Error removing linking") : undefined}
-        showTryAgainButton
         onTryAgain={() => removeLinking.sendTransaction({ entity })}
         pendingTitle={t("Removing linking...")}
         showExplorerButton

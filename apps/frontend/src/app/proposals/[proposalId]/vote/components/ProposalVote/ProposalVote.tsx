@@ -245,7 +245,6 @@ export const ProposalVote = ({ proposalId }: Props) => {
           }
           errorDescription={castVoteMutation.error?.reason}
           errorTitle={castVoteMutation.error ? t("Error voting") : undefined}
-          showTryAgainButton
           onTryAgain={handleCastVote}
           pendingTitle={t("Voting...")}
           showSocialButtons

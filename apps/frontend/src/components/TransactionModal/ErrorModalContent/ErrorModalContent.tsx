@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next"
 export type ErrorModalContentProps = {
   title?: ReactNode
   description?: string
-  showTryAgainButton?: boolean
   onTryAgain?: () => void
   showExplorerButton?: boolean
   txId?: string
@@ -19,8 +18,7 @@ export type ErrorModalContentProps = {
 export const ErrorModalContent = ({
   title = "Error",
   description = "Something went wrong 😕",
-  showTryAgainButton = false,
-  onTryAgain = () => {},
+  onTryAgain,
   showExplorerButton,
   txId,
 }: ErrorModalContentProps) => {
@@ -66,8 +64,8 @@ export const ErrorModalContent = ({
               {t("View it on the explorer")}
             </Link>
           )}
-          {showTryAgainButton && (
-            <Button variant={"outline"} onClick={onTryAgain}>
+          {onTryAgain && (
+            <Button variant="outline" onClick={onTryAgain}>
               {t("Try again")}
             </Button>
           )}

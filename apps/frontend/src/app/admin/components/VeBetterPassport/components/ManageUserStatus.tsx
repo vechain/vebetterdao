@@ -119,7 +119,6 @@ export const ManageUserStatus = () => {
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={currentConfig.modalSuccessTitle}
         onTryAgain={handleSubmit}
-        showTryAgainButton
         showExplorerButton
         txId={txReceipt?.meta.txID}
         pendingTitle={currentConfig.modalPendingTitle}
