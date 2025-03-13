@@ -6,6 +6,7 @@ import { SuccessModalContent } from "./SuccessModalContent"
 import { Modal, ModalOverlay } from "@chakra-ui/react"
 import { CustomModalContent } from "@/components/CustomModalContent"
 import { UploadingMetadataModalContent } from ".//UploadingMetadataModalContent"
+import { UnknownModalContent } from "./UnknownModalContent"
 
 export enum TransactionModalStatus {
   Ready = "ready",
@@ -101,8 +102,7 @@ export const TransactionModal = ({
 
   const handleUnknownStatus = useCallback(() => {
     const customTitle = titles?.[TransactionModalStatus.Unknown]
-    //TODO: It need a modal only for unknown status
-    return <ConfirmationModalContent title={customTitle ?? "Unknown Status"} description="" />
+    return <UnknownModalContent title={customTitle} />
   }, [titles])
 
   const modalContent = useMemo(() => {
