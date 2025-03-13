@@ -78,7 +78,7 @@ export const useAccountAppPermissions = (address?: string): UseQueryResult<Accou
           },
         }
       }, {} as AccountAppPermissions)
-
+      console.log(permissions)
       return permissions
     },
   })
