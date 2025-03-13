@@ -119,7 +119,6 @@ export const CancelProposalSection = () => {
             : (cancelProposalMutation.status as TransactionModalStatus)
         }
         onTryAgain={handleCancelProposal}
-        showExplorerButton
         txId={cancelProposalMutation.txReceipt?.meta.txID}
         titles={{
           [TransactionModalStatus.Success]: t("Proposal canceled!"),

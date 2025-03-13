@@ -32,7 +32,6 @@ export const ProposalQueueButton = () => {
           [TransactionModalStatus.Error]: t("Error queueing proposal"),
           [TransactionModalStatus.Pending]: t("Queueing..."),
         }}
-        showExplorerButton
         txId={queueMutation.txReceipt?.meta.txID}
       />
     </>

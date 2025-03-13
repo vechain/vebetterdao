@@ -49,7 +49,6 @@ export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosu
           [TransactionModalStatus.Error]: t("Error accepting delegation"),
           [TransactionModalStatus.Pending]: t("Accepting delegation..."),
         }}
-        showExplorerButton
         txId={acceptDelegation.txReceipt?.meta.txID}
       />
     )

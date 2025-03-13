@@ -46,7 +46,6 @@ export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosu
           [TransactionModalStatus.Error]: t("Error removing delegation request"),
           [TransactionModalStatus.Pending]: t("Removing delegation request..."),
         }}
-        showExplorerButton
         txId={removeDelegation.txReceipt?.meta.txID}
       />
     )

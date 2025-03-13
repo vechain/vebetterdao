@@ -196,7 +196,6 @@ export const ManageUserSignals = () => {
           [TransactionModalStatus.Success]: successTitle,
         }}
         onTryAgain={resetStatus === "error" ? handleResetSignalsSubmit : handleSignalUserSubmit}
-        showExplorerButton
         txId={resetTxReceipt?.meta.txID ?? signalTxReceipt?.meta.txID}
         errorDescription={resetError?.reason ?? signalError?.reason}
       />

@@ -54,7 +54,6 @@ export const RevokeDelegationDelegatorPOVModal = ({
           [TransactionModalStatus.Error]: t("Error revoking delegation"),
           [TransactionModalStatus.Pending]: t("Revoking delegation..."),
         }}
-        showExplorerButton
         txId={revokeDelegation.txReceipt?.meta.txID}
       />
     )

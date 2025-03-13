@@ -130,7 +130,6 @@ export const PublishAndPreviewPageContent = () => {
           [TransactionModalStatus.WaitingConfirmation]: t("Create a proposal"),
         }}
         txId={createProposalMutation.txReceipt?.meta.txID}
-        showExplorerButton
       />
 
       <Card w="full" data-testid="new-proposal-preview-page" variant="baseWithBorder">

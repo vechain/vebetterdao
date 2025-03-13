@@ -48,7 +48,6 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
             : (rmNodeEndorsementMutation.status as TransactionModalStatus)
         }
         errorDescription={rmNodeEndorsementMutation.error?.reason}
-        showExplorerButton
         onTryAgain={handleUnendorsement}
         txId={rmNodeEndorsementMutation.txReceipt?.meta.txID}
         titles={{

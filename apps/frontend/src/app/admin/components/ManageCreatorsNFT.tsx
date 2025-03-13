@@ -184,7 +184,6 @@ export const ManageCreatorsNFT = () => {
         onClose={onClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         onTryAgain={handleSubmit(onSubmit)}
-        showExplorerButton
         txId={txReceipt?.meta.txID}
         errorDescription={error?.reason}
       />

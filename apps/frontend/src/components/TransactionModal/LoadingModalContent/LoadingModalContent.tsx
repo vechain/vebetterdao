@@ -14,7 +14,7 @@ export type LoadingModalContentProps = {
 
 export const LoadingModalContent = ({
   title = "Sending Transaction...",
-  showExplorerButton,
+  showExplorerButton = true,
   txId,
 }: LoadingModalContentProps) => {
   const { t } = useTranslation()

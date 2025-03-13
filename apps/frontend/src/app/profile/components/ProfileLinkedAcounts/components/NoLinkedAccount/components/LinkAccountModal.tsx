@@ -39,7 +39,6 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
           [TransactionModalStatus.Error]: t("Error linking account"),
           [TransactionModalStatus.Pending]: t("Linking account..."),
         }}
-        showExplorerButton
         txId={linkEntityToPassport.txReceipt?.meta.txID}
       />
     )

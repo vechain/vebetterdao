@@ -85,7 +85,6 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         }
         errorDescription={attachGMToXNodeMutation.error?.reason}
         onTryAgain={handleAttachment}
-        showExplorerButton
         txId={attachGMToXNodeMutation.txReceipt?.meta.txID}
         titles={{
           [TransactionModalStatus.Success]: t("Attach GM to Node"),

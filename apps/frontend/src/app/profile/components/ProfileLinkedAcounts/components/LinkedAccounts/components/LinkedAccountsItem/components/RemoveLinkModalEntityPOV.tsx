@@ -46,7 +46,6 @@ export const RemoveLinkModalEntityPOV = ({ modal, entity }: { modal: UseDisclosu
           [TransactionModalStatus.Error]: t("Error removing linking"),
           [TransactionModalStatus.Pending]: t("Removing linking..."),
         }}
-        showExplorerButton
         txId={removeLinking.txReceipt?.meta.txID}
       />
     )

@@ -52,7 +52,6 @@ export const RejectLinkingModal = ({
           [TransactionModalStatus.Error]: t("Error rejecting linking"),
           [TransactionModalStatus.Pending]: t("Rejecting linking..."),
         }}
-        showExplorerButton
         txId={rejectLinking.txReceipt?.meta.txID}
       />
     )

@@ -190,7 +190,6 @@ export const B3trAllowance = () => {
           [TransactionModalStatus.Error]: t("Error updating allowance"),
         }}
         onTryAgain={handleSubmit}
-        showExplorerButton
         txId={txReceipt?.meta.txID}
         errorDescription={error?.reason}
       />

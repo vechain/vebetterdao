@@ -69,7 +69,6 @@ export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
           [TransactionModalStatus.Error]: t("Error delegating"),
           [TransactionModalStatus.Pending]: t("Delegating..."),
         }}
-        showExplorerButton
         txId={delegatePassport.txReceipt?.meta.txID}
       />
     )

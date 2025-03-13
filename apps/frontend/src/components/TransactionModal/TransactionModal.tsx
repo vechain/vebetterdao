@@ -38,12 +38,9 @@ export const TransactionModal = ({
   status,
   titles,
   errorDescription,
-  showSocialButtons = false,
-  socialDescriptionEncoded,
-  onTryAgain,
-  showExplorerButton,
   txId,
   customContent,
+  ...rest
 }: TransactionModalProps) => {
   const handlePendingStatus = useCallback(() => {
     const CustomContent = customContent?.[TransactionModalStatus.Pending]
@@ -58,22 +55,14 @@ export const TransactionModal = ({
 
   const handleWaitingConfirmationStatus = useCallback(() => {
     const customTitle = titles?.[TransactionModalStatus.WaitingConfirmation]
-    return <LoadingModalContent title={customTitle} showExplorerButton={showExplorerButton} txId={txId} />
-  }, [showExplorerButton, titles, txId])
+    return <LoadingModalContent title={customTitle} {...rest} txId={txId} />
+  }, [titles, txId])
 
   const handleErrorStatus = useCallback(() => {
     const customTitle = titles?.[TransactionModalStatus.Error]
 
-    return (
-      <ErrorModalContent
-        title={customTitle}
-        description={errorDescription}
-        onTryAgain={onTryAgain}
-        showExplorerButton={showExplorerButton}
-        txId={txId}
-      />
-    )
-  }, [titles, errorDescription, onTryAgain, showExplorerButton, txId])
+    return <ErrorModalContent title={customTitle} description={errorDescription} {...rest} txId={txId} />
+  }, [titles, errorDescription, txId])
 
   const handleSuccessStatus = useCallback(() => {
     const CustomContent = customContent?.[TransactionModalStatus.Success]
@@ -83,16 +72,8 @@ export const TransactionModal = ({
       return CustomContent
     }
 
-    return (
-      <SuccessModalContent
-        title={customTitle}
-        showSocialButtons={showSocialButtons}
-        socialDescriptionEncoded={socialDescriptionEncoded}
-        showExplorerButton={showExplorerButton}
-        txId={txId}
-      />
-    )
-  }, [customContent, showExplorerButton, showSocialButtons, socialDescriptionEncoded, titles, txId])
+    return <SuccessModalContent title={customTitle} {...rest} txId={txId} />
+  }, [customContent, titles, txId])
 
   const handleReadyStatus = useCallback(() => {
     const customTitle = titles?.[TransactionModalStatus.Ready]

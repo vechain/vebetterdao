@@ -102,7 +102,6 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
           [TransactionModalStatus.Pending]: "Upgrading GM NFT...",
         }}
         onTryAgain={onTryAgain}
-        showExplorerButton
         txId={upgradeGMMutation.txReceipt?.meta.txID}
       />
     )

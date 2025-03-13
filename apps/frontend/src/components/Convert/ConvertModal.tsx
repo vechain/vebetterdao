@@ -234,7 +234,6 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
         onTryAgain={handleConvertB3tr}
         showSocialButtons
         socialDescriptionEncoded="%F0%9F%94%84%20Just%20swapped%20between%20B3TR%20and%20VOT3%20on%20%23VeBetterDAO%21%20%0A%0A%F0%9F%8C%B1%20Explore%20and%20join%20us%20at%20https%3A%2F%2Fvebetterdao.org.%0A%0A%23VeBetterDAO%20%23Vechain"
-        showExplorerButton
         titles={{
           [TransactionModalStatus.Success]: t("Swap Completed!"),
           [TransactionModalStatus.Error]: t("Error swapping"),

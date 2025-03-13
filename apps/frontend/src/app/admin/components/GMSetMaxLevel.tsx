@@ -133,7 +133,6 @@ export const GMSetMaxLevel = () => {
           [TransactionModalStatus.Success]: t("Transaction successful"),
         }}
         onTryAgain={handleSubmit(onSubmit)}
-        showExplorerButton
         txId={txReceipt?.meta.txID}
         errorDescription={error?.reason}
       />

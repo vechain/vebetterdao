@@ -119,7 +119,6 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
           [TransactionModalStatus.Error]: t("Error delegating Node"),
           [TransactionModalStatus.Pending]: t("Delegating Node..."),
         }}
-        showExplorerButton
         txId={delegateXNode.txReceipt?.meta.txID}
       />
     )

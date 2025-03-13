@@ -237,7 +237,6 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
           [TransactionModalStatus.Success]: t("Deposit completed!"),
           [TransactionModalStatus.Error]: t("Error depositing"),
         }}
-        showExplorerButton
         customContent={{
           [TransactionModalStatus.Pending]: (
             <ConfirmationAppBalanceModalContent b3trBalanceAfter={appBalanceAfterSwap} b3trAmount={amount} />

@@ -118,7 +118,6 @@ export const ManageUserStatus = () => {
         onClose={handleClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         onTryAgain={handleSubmit}
-        showExplorerButton
         txId={txReceipt?.meta.txID}
         errorDescription={error?.reason}
         titles={{

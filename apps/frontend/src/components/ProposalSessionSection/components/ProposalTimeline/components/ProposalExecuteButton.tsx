@@ -60,7 +60,6 @@ export const ProposalExecuteButton = () => {
           [TransactionModalStatus.Error]: t("Error executing proposal"),
           [TransactionModalStatus.Pending]: t("Executing..."),
         }}
-        showExplorerButton
         txId={executeMutation.txReceipt?.meta.txID}
       />
     </Box>

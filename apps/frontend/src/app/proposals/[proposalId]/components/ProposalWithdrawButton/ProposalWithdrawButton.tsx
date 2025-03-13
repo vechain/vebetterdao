@@ -39,7 +39,6 @@ export const ProposalWithdrawButton = () => {
           [TransactionModalStatus.Error]: t("Error Withdrawing"),
           [TransactionModalStatus.Pending]: t("Withdrawing..."),
         }}
-        showExplorerButton
         txId={withdrawMutation.txReceipt?.meta.txID}
       />
       <Button variant="primaryAction" onClick={withdraw}>

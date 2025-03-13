@@ -138,7 +138,6 @@ export const UpdateReceiverAddress = () => {
           [TransactionModalStatus.Error]: "Error updating address",
         }}
         onTryAgain={handleSubmit}
-        showExplorerButton
         txId={txReceipt?.meta.txID}
         errorDescription={error?.reason}
       />

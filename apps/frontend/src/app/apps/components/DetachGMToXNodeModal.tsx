@@ -71,7 +71,6 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
           [TransactionModalStatus.Error]: t("Error detaching"),
           [TransactionModalStatus.Pending]: t("Detaching GM from Node..."),
         }}
-        showExplorerButton
         txId={detachGMFromXNodeMutation.txReceipt?.meta.txID}
       />
     )

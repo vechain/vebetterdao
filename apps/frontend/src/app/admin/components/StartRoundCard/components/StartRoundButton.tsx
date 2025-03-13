@@ -60,7 +60,6 @@ export const StartRoundButton = () => {
         onClose={handleClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         onTryAgain={handleSubmit}
-        showExplorerButton
         txId={txReceipt?.meta.txID}
         errorDescription={error?.reason}
         data-testid={"round-start-modal-title"}

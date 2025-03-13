@@ -174,7 +174,6 @@ export const NewAppPageFormContent = () => {
           [TransactionModalStatus.WaitingConfirmation]: "Submit App",
         }}
         txId={submitAppMutation.txReceipt?.meta.txID}
-        showExplorerButton={true}
       />
       {!isSuccessSubmission ? renderAppSubmissionForm : renderAppSubmissionSuccess}
     </>

@@ -96,7 +96,6 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
             : `Disabling voting eligibility for ${name}...`,
         }}
         onTryAgain={handleEligibilityChange}
-        showExplorerButton
         txId={txReceipt?.meta.txID}
         errorDescription={error?.reason}
       />

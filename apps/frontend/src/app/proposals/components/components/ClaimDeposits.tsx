@@ -76,7 +76,6 @@ export const ClaimDeposits = ({ totalClaimableDeposits, claimableDeposits }: Pro
           [TransactionModalStatus.Error]: t("Error Withdrawing"),
           [TransactionModalStatus.Pending]: t("Withdrawing..."),
         }}
-        showExplorerButton
         txId={txReceipt?.meta.txID}
       />
     </>

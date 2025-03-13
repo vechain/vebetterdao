@@ -46,7 +46,6 @@ export const RemovePendingRequestModal = ({ modal, passport }: { modal: UseDiscl
           [TransactionModalStatus.Error]: t("Error removing pending request"),
           [TransactionModalStatus.Pending]: t("Removing pending request..."),
         }}
-        showExplorerButton
         txId={removeLinkingRequest.txReceipt?.meta.txID}
       />
     )

@@ -253,7 +253,6 @@ export const ProposalVote = ({ proposalId }: Props) => {
           socialDescriptionEncoded={encodeURIComponent(
             "🔄 Just voted for a proposal on #VeBetterDAO! \n\n🌱 Explore and join us at https://vebetterdao.org.\n\n#VeBetterDAO #Vechain",
           )}
-          showExplorerButton
           txId={castVoteMutation.txReceipt?.meta.txID}
         />
       </CardBody>

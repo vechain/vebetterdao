@@ -314,7 +314,6 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
           [TransactionModalStatus.Success]: t("Withdraw completed!"),
           [TransactionModalStatus.Error]: t("Error withdrawing"),
         }}
-        showExplorerButton
         customContent={{
           [TransactionModalStatus.Pending]: (
             <ConfirmationAppBalanceModalContent b3trBalanceAfter={b3trBalanceAfterSwap} b3trAmount={amount} isDeposit />

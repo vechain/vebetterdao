@@ -41,7 +41,6 @@ export const StartEmissionsButton = () => {
         onClose={handleClose}
         status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         onTryAgain={handleStartEmissions}
-        showExplorerButton
         txId={txReceipt?.meta.txID}
         errorDescription={error?.reason}
         titles={{

@@ -46,7 +46,6 @@ export const RemoveLinkModalPassportPOV = ({ modal, entity }: { modal: UseDisclo
           [TransactionModalStatus.Error]: t("Error removing linking"),
           [TransactionModalStatus.Pending]: t("Removing linking..."),
         }}
-        showExplorerButton
         txId={removeLinking.txReceipt?.meta.txID}
       />
     )

@@ -242,7 +242,6 @@ export const UpdateRoleCard = () => {
         txId={accessControlAction?.txReceipt?.meta.txID}
         errorDescription={accessControlAction?.error?.reason ?? "Unknown error"}
         showSocialButtons
-        showExplorerButton
         onTryAgain={handleSubmit(handleFormSubmit)}
         titles={{
           [TransactionModalStatus.Pending]: t("Updating wallet address role..."),

@@ -56,7 +56,6 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
           [TransactionModalStatus.Error]: "Error selecting GM NFT",
           [TransactionModalStatus.Pending]: "Selecting GM NFT...",
         }}
-        showExplorerButton
         txId={selectGMMutation.txReceipt?.meta.txID}
       />
       <DetachGMToXNodeModal isOpen={detachGMModal.isOpen} onClose={detachGMModal.onClose} />

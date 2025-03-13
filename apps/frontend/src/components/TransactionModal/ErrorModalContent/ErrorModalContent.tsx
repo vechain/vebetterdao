@@ -19,7 +19,7 @@ export const ErrorModalContent = ({
   title = "Error",
   description = "Something went wrong 😕",
   onTryAgain,
-  showExplorerButton,
+  showExplorerButton = true,
   txId,
 }: ErrorModalContentProps) => {
   const { t } = useTranslation()

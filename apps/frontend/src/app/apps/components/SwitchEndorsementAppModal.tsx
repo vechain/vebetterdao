@@ -94,7 +94,6 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
           [TransactionModalStatus.Error]: t("Error switching endorsement"),
           [TransactionModalStatus.Pending]: t("Switching Endorsement..."),
         }}
-        showExplorerButton
         txId={switchEndorsementMutation.txReceipt?.meta.txID}
       />
     )

@@ -236,7 +236,6 @@ export const AdminAppPageContent = () => {
         isOpen={isConfirmationOpen}
         onClose={handleClose}
         status={updateMutation.status as TransactionModalStatus}
-        showExplorerButton
         errorDescription={updateMutation.error?.reason}
         onTryAgain={onTryAgain}
         txId={updateMutation.txReceipt?.meta.txID}
