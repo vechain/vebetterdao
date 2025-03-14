@@ -43,9 +43,10 @@ export const AddTweetModal = ({ newTweetModal }: Props) => {
   const { appMetadata } = useCurrentAppMetadata()
   const { appId } = useParams<{ appId: string }>()
 
-  const resetForm = useCallback(() => {
+  const handleClose = useCallback(() => {
+    newTweetModal.onClose()
     form.reset()
-  }, [form])
+  }, [form, newTweetModal])
 
   const tweetUrl = form.watch("tweetUrl")
 
@@ -60,7 +61,7 @@ export const AddTweetModal = ({ newTweetModal }: Props) => {
   const updateAppDetailsMutation = useUpdateAppDetails({
     appId,
     onSuccess: async () => {
-      resetForm()
+      form.reset()
     },
   })
 
