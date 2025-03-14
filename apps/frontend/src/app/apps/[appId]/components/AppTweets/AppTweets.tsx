@@ -35,6 +35,11 @@ export const AppTweets = () => {
     setTweets(metadataTweets)
   }, [metadataTweets])
 
+  const handleClose = useCallback(() => {
+    handleCancelEdit()
+    transactionModal.onClose()
+  }, [handleCancelEdit, transactionModal])
+
   const updateAppDetailsMutation = useUpdateAppDetails({
     appId,
     onSuccess: () => {
