@@ -58,7 +58,9 @@ export const ManageCreatorsNFT = () => {
   const { mintNFT, burnNFT } = useAdminCreatorNFT({
     walletAddress: creatorWalletAddress ?? "",
     tokenId: tokenId ?? "",
-    onSuccess: onClose,
+    onSuccess: () => {
+      resetStatus()
+    },
   })
 
   const hasNFT = useHasCreatorNFT(lookupAddress ?? "")

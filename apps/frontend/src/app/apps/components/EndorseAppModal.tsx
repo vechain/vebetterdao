@@ -53,7 +53,6 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     userAddress: account?.address ?? "",
     onSuccess: () => {
       endorseAppMutation.resetStatus()
-      onClose()
     },
   })
 

@@ -53,8 +53,7 @@ export const NewAppPageFormContent = () => {
 
   const handleSuccess = useCallback(() => {
     setIsSuccessSubmission(true)
-    onConfirmationClose()
-  }, [onConfirmationClose])
+  }, [])
 
   const appName = watch("name")
   const appId = useMemo(() => {
