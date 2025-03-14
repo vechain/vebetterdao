@@ -39,7 +39,6 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const detachGMFromXNodeMutation = useDetachGMFromXNode({
     onSuccess: () => {
       detachGMFromXNodeMutation.resetStatus()
-      onClose()
     },
   })
 
