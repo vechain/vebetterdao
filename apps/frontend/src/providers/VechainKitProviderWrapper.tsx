@@ -24,6 +24,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
 
   const isDarkMode = colorMode === "dark"
 
+  const vebetterLogo = "https://i.ibb.co/7tBkpgvW/Ve-Better-Blue-300ppi.png"
   const vechainLogo = "https://vechain.org/wp-content/uploads/2025/02/VeChain_Icon_Quartz_300ppi.png"
 
   const networkType = getConfig().network.type
@@ -69,7 +70,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
             name: "VeBetterDAO App",
             description: "This is the official VeBetterDAO app.",
             url: typeof window !== "undefined" ? window.location.origin : "",
-            icons: [],
+            icons: [typeof window !== "undefined" ? vebetterLogo : ""],
           },
         },
       }}
