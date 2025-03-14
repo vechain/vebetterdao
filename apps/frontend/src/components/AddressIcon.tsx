@@ -19,11 +19,15 @@ const Picasso: React.FC<IPicasso> = ({ address, ...props }) => {
   const { data: profileAvatarUrl } = useGetAvatar(vnsData?.domain ?? "")
   const { data: avatar } = useIpfsImage(profileAvatarUrl)
 
+  //Temporary solution to display NFT avatar, this should be fixed and return resolved from the vechain-kit
+  const isVetDomainNFTPicture = profileAvatarUrl?.match(/eip155:(\d+)\/(?:erc721|erc1155):([^/]+)\/(\d+)/)
+  const avatarImage = isVetDomainNFTPicture ? getPicassoImgSrc(address) : avatar?.image
+
   return (
     <Img
       data-cy={`address-icon-${address}`}
       objectFit={"cover"}
-      src={avatar?.image ?? getPicassoImgSrc(address)}
+      src={avatarImage ?? getPicassoImgSrc(address)}
       h={"100%"}
       {...props}
     />
