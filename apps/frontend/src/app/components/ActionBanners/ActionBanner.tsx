@@ -33,6 +33,7 @@ import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
+import { VeChainKitLaunchBanner } from "./components/VeChainKitLaunchBanner"
 
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
@@ -41,7 +42,8 @@ import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { UserSignaledBanner } from "./components/UserSignaledBanner"
-import { useIsVeDelegated } from "@/hooks"
+import { useFeatureFlag, useIsVeDelegated } from "@/hooks"
+import { FeatureFlag } from "@/constants"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -183,6 +185,11 @@ export const ActionBanner = () => {
       description={proposal?.description}
     />
   ))
+
+  // VeChainKit launch banner
+  const { isEnabled: isVechainKitFlagOn } = useFeatureFlag(FeatureFlag.VECHAIN_KIT)
+  const showVeChainKitLaunchBanner = !!account?.address && isVechainKitFlagOn
+
   const slides = useMemo(() => {
     const bannerComponents = []
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
@@ -192,6 +199,7 @@ export const ActionBanner = () => {
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
+    if (showVeChainKitLaunchBanner) bannerComponents.push(<VeChainKitLaunchBanner key="vechain-kit-launch" />)
     return bannerComponents
   }, [
     showCantVoteBanners,
@@ -204,6 +212,7 @@ export const ActionBanner = () => {
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,
+    showVeChainKitLaunchBanner,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1
