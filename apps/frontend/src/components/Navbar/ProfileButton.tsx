@@ -81,7 +81,7 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
       <HStack p={2} spacing={2} w={"full"} justifyContent={"space-between"} px={3.5} py={4}>
         <HStack spacing={3}>
           <Box h={14}>
-            <AddressIcon address={account?.address ?? ""} imageUrl={account?.image} borderRadius={"full"} />
+            <AddressIcon address={account?.address ?? ""} borderRadius={"full"} />
           </Box>
           <VStack spacing={0} align={"flex-start"}>
             <Text fontSize={18} fontWeight={600}>
