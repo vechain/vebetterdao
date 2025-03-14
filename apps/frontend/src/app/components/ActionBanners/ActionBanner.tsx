@@ -197,9 +197,10 @@ export const ActionBanner = () => {
       bannerComponents.push(<ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} key="claim-b3tr" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
+    if (showVeChainKitLaunchBanner) bannerComponents.push(<VeChainKitLaunchBanner key="vechain-kit-launch" />)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
-    if (showVeChainKitLaunchBanner) bannerComponents.push(<VeChainKitLaunchBanner key="vechain-kit-launch" />)
+
     return bannerComponents
   }, [
     showCantVoteBanners,
