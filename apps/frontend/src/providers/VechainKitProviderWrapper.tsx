@@ -2,6 +2,7 @@
 
 import { useColorMode } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
+import { NETWORK_TYPE } from "@repo/constants"
 import dynamic from "next/dynamic"
 import { useTranslation } from "react-i18next"
 
@@ -23,56 +24,67 @@ export function VechainKitProviderWrapper({ children }: Props) {
 
   const isDarkMode = colorMode === "dark"
 
-  const appLogo = "https://governance.vebetterdao.org/images/logo/vebetter_light.svg"
-  const coloredLogo = "https://i.ibb.co/7G4PQNZ/vechain-kit-logo-colored-circle.png"
+  const vebetterLogo = "https://i.ibb.co/7tBkpgvW/Ve-Better-Blue-300ppi.png"
+  const vechainLogo = "https://vechain.org/wp-content/uploads/2025/02/VeChain_Icon_Quartz_300ppi.png"
+
+  const networkType = getConfig().network.type
+
+  const allowCustomTokens = networkType === ("test" as NETWORK_TYPE)
 
   return (
     <VeChainKitProvider
       privy={{
         appId: process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
         clientId: process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID!,
-        loginMethods: ["google", "twitter", "email", "discord", "farcaster", "tiktok", "wallet"],
+        loginMethods: [
+          "google",
+          "apple",
+          "twitter",
+          "farcaster",
+          "email",
+          "discord",
+          "tiktok",
+          "rabby_wallet",
+          "coinbase_wallet",
+          "rainbow",
+          "phantom",
+          "metamask",
+        ],
         appearance: {
-          walletList: [
-            "metamask",
-            "rainbow",
-            "coinbase_wallet",
-            "detected_ethereum_wallets",
-            "rabby_wallet",
-            "safe",
-            "uniswap",
-          ],
-          accentColor: "#696FFD",
           loginMessage: "Select a login method",
-          logo: "https://i.ibb.co/0Mxcw49/V-color.png",
+          logo: vechainLogo,
         },
-        allowPasskeyLinking: true,
+        embeddedWallets: {
+          createOnLogin: "all-users",
+        },
       }}
       feeDelegation={{
         delegatorUrl: process.env.NEXT_PUBLIC_DELEGATOR_URL!,
         delegateAllTransactions: false,
       }}
       dappKit={{
-        allowedWallets: ["veworld", "wallet-connect", "sync2"],
+        allowedWallets: ["veworld", "wallet-connect"],
         walletConnectOptions: {
           projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
           metadata: {
-            name: "VeChainKit Demo App",
-            description: "This is a demo app to show you how the VechainKit works.",
+            name: "VeBetterDAO App",
+            description: "This is the official VeBetterDAO app.",
             url: typeof window !== "undefined" ? window.location.origin : "",
-            icons: [typeof window !== "undefined" ? coloredLogo : ""],
+            icons: [typeof window !== "undefined" ? vebetterLogo : ""],
           },
         },
       }}
-      loginModalUI={{
-        logo: appLogo,
-        description: "Choose between social login through VeChain or by connecting your wallet.",
-      }}
+      loginMethods={[
+        { method: "vechain", gridColumn: 4 },
+        { method: "dappkit", gridColumn: 4 },
+        { method: "ecosystem", gridColumn: 4 },
+      ]}
       darkMode={isDarkMode}
       language={i18n.language}
       network={{
-        type: getConfig().network.type,
-      }}>
+        type: networkType,
+      }}
+      allowCustomTokens={allowCustomTokens}>
       {children}
     </VeChainKitProvider>
   )

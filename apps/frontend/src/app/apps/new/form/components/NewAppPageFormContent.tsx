@@ -53,8 +53,7 @@ export const NewAppPageFormContent = () => {
 
   const handleSuccess = useCallback(() => {
     setIsSuccessSubmission(true)
-    onConfirmationClose()
-  }, [onConfirmationClose])
+  }, [])
 
   const appName = watch("name")
   const appId = useMemo(() => {
@@ -89,9 +88,11 @@ export const NewAppPageFormContent = () => {
       })
       if (!metadataUri) return
 
+      const adminAddress = data.adminWalletAddress ?? account?.address ?? data.teamWalletAddress
+
       submitAppMutation.sendTransaction({
         teamWalletAddress: data.teamWalletAddress,
-        adminAddress: account?.address ?? data.teamWalletAddress,
+        adminAddress,
         appName: data.name,
         appMetadataUri: metadataUri,
       })

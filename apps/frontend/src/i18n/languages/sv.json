@@ -1456,5 +1456,6 @@
   "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.": "För att kunna delta i VeBetter DAO måste du ha ett gott rykte. Signaler är ett sätt för apparna att låta dig veta om du inte uppfyller standarderna.",
   "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.": "Om du tycker att denna signal är orättvis, vänligen kontakta appen som signalerade dig för att lösa problemet.",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Din röststyrka har överförts till <platform>veDelegate.vet</platform> som röstar för din räkning. Om du vill rösta här måste du ta bort delegeringen på veDelegate före snapshot.",
-  "Voting Power Delegated": "Röststyrka Delegerad"
+  "Voting Power Delegated": "Röststyrka Delegerad",
+  "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.": "Lämna in din app i ekosystemet med all nödvändig information, inklusive logotyp, skaparbio och länkar till sociala medier."
 }

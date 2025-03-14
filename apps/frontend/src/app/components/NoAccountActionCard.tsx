@@ -1,6 +1,7 @@
 import { ConnectWalletButton } from "@/components"
 import { Image, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
+import { FaWallet } from "react-icons/fa"
 
 export const NoAccountActionCard = () => {
   const { t } = useTranslation()
@@ -10,7 +11,15 @@ export const NoAccountActionCard = () => {
       <Text fontSize={"16px"} fontWeight={500} color={"#757575"} textAlign="center">
         {t("Create or connect a wallet to start doing Better Actions")}
       </Text>
-      <ConnectWalletButton />
+      <ConnectWalletButton
+        connectionVariant="modal"
+        buttonStyleProps={{
+          bg: "#E0E9FE",
+          textColor: "#004CFC",
+          px: 10,
+          leftIcon: <FaWallet />,
+        }}
+      />
     </VStack>
   )
 }

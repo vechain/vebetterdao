@@ -59,7 +59,7 @@ export const ActionBanner = () => {
     setIsSliderStart(_swiper.isBeginning)
   }, [])
 
-  const { account } = useWallet()
+  const { account, connection } = useWallet()
 
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
 
@@ -132,7 +132,8 @@ export const ActionBanner = () => {
 
   // Can't Vote banners logic
   const showSignaledBanner = !!account?.address && isUserSignaled
-  const showLowVthoBanner = !!account?.address && isLowOnVtho && ownsTokens && !isBalanceLoading
+  const showLowVthoBanner =
+    !!account?.address && isLowOnVtho && ownsTokens && !isBalanceLoading && !connection?.isConnectedWithPrivy
   const showDoActionBanner = !!account?.address && !isPerson && !isLoading && !isDelegateeLoading
   const showDelegatingBanner = !!account?.address && isVeDelegated && !isDelegateeLoading
 

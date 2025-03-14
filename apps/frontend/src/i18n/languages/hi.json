@@ -1457,5 +1457,6 @@
   "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.": "VeBetter DAO में भाग लेने के लिए, आपके पास अच्छी प्रतिष्ठा होनी चाहिए। संकेत ऐप्स के लिए एक तरीका है जिससे आप जान सकते हैं कि आप मानकों को पूरा नहीं कर रहे हैं।",
   "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.": "यदि आपको लगता है कि यह संकेत अनुचित है, तो कृपया उस ऐप से संपर्क करें जिसने आपको संकेतित किया है ताकि समस्या का समाधान हो सके।",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. If you want to vote here, you must remove delegation on veDelegate before snapshot.": "आपकी वोटिंग शक्ति को <platform>veDelegate.vet</platform> को स्थानांतरित कर दिया गया है जो आपके स्थान पर वोट देता है। यदि आप यहां मतदान करना चाहते हैं, तो आपको स्नैपशॉट से पहले veDelegate पर प्रतिनिधिमंडल को हटाना होगा।",
-  "Voting Power Delegated": "वोटिंग शक्ति प्रतिनियुक्त"
+  "Voting Power Delegated": "वोटिंग शक्ति प्रतिनियुक्त",
+  "You have been signalled": "आपको संकेत दिया गया है"
 }

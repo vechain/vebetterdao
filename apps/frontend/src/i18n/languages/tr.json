@@ -1457,5 +1457,6 @@
   "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.": "VeBetter DAO'ya katılabilmek için iyi bir itibara sahip olmalısınız. Sinyaller, standartları karşılamıyorsanız uygulamaların sizi bilgilendirme yöntemidir.",
   "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.": "Bu sinyalin adil olmadığını düşünüyorsanız, sorunu çözmek için sizi uyaran uygulama ile iletişime geçin.",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Oyunuzun gücü sizin adınıza oy veren <platform>veDelegate.vet</platform>'e devredildi. Burada oy kullanmak istiyorsanız, snapshot öncesinde veDelegate üzerinden delegasyonu kaldırmalısınız.",
-  "Voting Power Delegated": "Oy Yetkisi Delege Edildi"
+  "Voting Power Delegated": "Oy Yetkisi Delege Edildi",
+  "preferred to abastain": "çekimser kalmayı tercih etti"
 }

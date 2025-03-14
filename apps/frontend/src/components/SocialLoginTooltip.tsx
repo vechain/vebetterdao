@@ -21,7 +21,7 @@ export const SocialLoginTooltip: React.FC<Props> = ({ children, isOpen }) => {
   const { t } = useTranslation()
 
   return (
-    <Popover isOpen={isOpen} trigger="hover" openDelay={40} closeDelay={40} placement="bottom-end">
+    <Popover offset={[30, 10]} isOpen={isOpen} trigger="hover" openDelay={40} closeDelay={40} placement="bottom-end">
       <PopoverTrigger>{children}</PopoverTrigger>
       <PopoverContent
         paddingRight={10}

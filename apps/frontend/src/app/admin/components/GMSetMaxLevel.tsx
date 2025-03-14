@@ -47,7 +47,6 @@ export const GMSetMaxLevel = () => {
     maxLevel: newMaxLevel,
     onSuccess: () => {
       resetStatus()
-      onClose()
     },
   })
 
