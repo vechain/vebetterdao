@@ -77,7 +77,6 @@ export const UpdateRoleCard = () => {
     role: selectedRole ?? "",
     onSuccess: () => {
       accessControlAction.resetStatus()
-      closeTransactionModal()
     },
   })
   const isFormValid =

@@ -28,7 +28,6 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
     nodeId,
     onSuccess: () => {
       rmNodeEndorsementMutation.resetStatus()
-      onClose()
     },
   })
 

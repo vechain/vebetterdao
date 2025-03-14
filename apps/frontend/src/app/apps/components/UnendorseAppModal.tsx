@@ -35,7 +35,6 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
     userAddress: account?.address ?? "",
     onSuccess: () => {
       unendorseAppMutation.resetStatus()
-      onClose()
     },
   })
 
