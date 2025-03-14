@@ -24,8 +24,8 @@ export function VechainKitProviderWrapper({ children }: Props) {
 
   const isDarkMode = colorMode === "dark"
 
-  const veBetterLogo = "https://governance.vebetterdao.org/images/logo/vebetter_light.svg"
-  const veChaninLogo = "https://vechain.org/wp-content/uploads/2025/02/VeChain_Icon_Quartz_300ppi.png"
+  const vebetterLogo = "https://i.ibb.co/7tBkpgvW/Ve-Better-Blue-300ppi.png"
+  const vechainLogo = "https://vechain.org/wp-content/uploads/2025/02/VeChain_Icon_Quartz_300ppi.png"
 
   const networkType = getConfig().network.type
 
@@ -52,7 +52,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
         ],
         appearance: {
           loginMessage: "Select a login method",
-          logo: veChaninLogo,
+          logo: vechainLogo,
         },
         embeddedWallets: {
           createOnLogin: "all-users",
@@ -70,7 +70,7 @@ export function VechainKitProviderWrapper({ children }: Props) {
             name: "VeBetterDAO App",
             description: "This is the official VeBetterDAO app.",
             url: typeof window !== "undefined" ? window.location.origin : "",
-            icons: [typeof window !== "undefined" ? veBetterLogo : ""],
+            icons: [typeof window !== "undefined" ? vebetterLogo : ""],
           },
         },
       }}
@@ -79,10 +79,6 @@ export function VechainKitProviderWrapper({ children }: Props) {
         { method: "dappkit", gridColumn: 4 },
         { method: "ecosystem", gridColumn: 4 },
       ]}
-      loginModalUI={{
-        logo: veBetterLogo,
-        description: "Choose between social login through VeChain or by connecting your wallet.",
-      }}
       darkMode={isDarkMode}
       language={i18n.language}
       network={{
