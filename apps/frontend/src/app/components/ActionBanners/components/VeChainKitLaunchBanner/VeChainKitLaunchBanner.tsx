@@ -1,11 +1,17 @@
+import { UilBoltAlt } from "@iconscout/react-unicons"
 import { useWallet, useAccountModal } from "@vechain/vechain-kit"
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 import { AddressIcon } from "@/components/AddressIcon"
-import { UilBoltAlt } from "@iconscout/react-unicons"
+import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
+import { AnalyticsUtils } from "@/utils"
 
 export const VeChainKitLaunchBanner = () => {
   const { account } = useWallet()
+
   const { open: openAccount } = useAccountModal()
+  const buttonClickProperties = () => {
+    AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.BANNER_VECHAIN_KIT_LAUNCH))
+  }
 
   return (
     <GenericBanner
@@ -28,7 +34,10 @@ export const VeChainKitLaunchBanner = () => {
       buttonIconPosition="right"
       buttonLabel="Try It"
       buttonVariant="primaryAction"
-      onButtonClick={openAccount}
+      onButtonClick={() => {
+        openAccount()
+        buttonClickProperties()
+      }}
     />
   )
 }
