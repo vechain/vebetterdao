@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import { UilBoltAlt } from "@iconscout/react-unicons"
 import { useWallet, useAccountModal } from "@vechain/vechain-kit"
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
@@ -6,6 +7,7 @@ import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/cons
 import { AnalyticsUtils } from "@/utils"
 
 export const VeChainKitLaunchBanner = () => {
+  const { t } = useTranslation()
   const { account } = useWallet()
 
   const { open: openAccount } = useAccountModal()
@@ -15,9 +17,9 @@ export const VeChainKitLaunchBanner = () => {
 
   return (
     <GenericBanner
-      title="NEW FEATURE AVAILABLE"
+      title={t("NEW FEATURE AVAILABLE")}
       titleColor="#3A5798"
-      description="Click on your avatar and customise your profile, manage your assets and more!"
+      description={t("Click on your avatar and customise your profile, manage your assets and more!")}
       descriptionColor="#0C2D75"
       logoSrc={
         <AddressIcon
@@ -32,7 +34,7 @@ export const VeChainKitLaunchBanner = () => {
       backgroundImageSrc="/images/community-green-blob.png"
       buttonIcon={<UilBoltAlt />}
       buttonIconPosition="right"
-      buttonLabel="Try It"
+      buttonLabel={t("Try It")}
       buttonVariant="primaryAction"
       onButtonClick={() => {
         openAccount()
