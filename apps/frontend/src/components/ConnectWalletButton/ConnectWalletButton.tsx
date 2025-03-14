@@ -1,36 +1,22 @@
-import { Button, ButtonProps, Fade, IconButton, Skeleton, useMediaQuery } from "@chakra-ui/react"
-import dynamic from "next/dynamic"
-import { useWalletModal, useWallet, WalletButton, WalletButtonProps } from "@vechain/vechain-kit"
-import { AddressIcon } from "../AddressIcon"
+import { ButtonProps, Fade, useMediaQuery, keyframes } from "@chakra-ui/react"
+import { useWallet, WalletButton, WalletButtonProps } from "@vechain/vechain-kit"
 
-const DesktopConnectedUserButton = dynamic(
-  () => import("./components/DesktopConnectedUserButton").then(mod => mod.DesktopConnectedUserButton),
-  {
-    ssr: false,
-    loading: () => (
-      <Skeleton rounded="full">
-        <Button size="md">{"Connect wallet"}</Button>
-      </Skeleton>
-    ),
-  },
-)
+const rotateAnimation = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`
 
 type Props = {
-  responsiveVariant?: "desktop" | "mobile"
   connectionVariant?: WalletButtonProps["connectionVariant"]
   buttonStyleProps?: ButtonProps
 }
 
-export const ConnectWalletButton = ({ responsiveVariant, connectionVariant, buttonStyleProps }: Props) => {
+export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Props) => {
   const { account } = useWallet()
-
-  const { open } = useWalletModal()
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
-
-  const shouldRenderDesktop = responsiveVariant === "desktop" || (!responsiveVariant && isDesktop)
   const notLoggedIn = !account?.address
 
-  // If the user is not logged in, show the connect wallet button
   if (notLoggedIn)
     return (
       <Fade in={true}>
@@ -49,18 +35,24 @@ export const ConnectWalletButton = ({ responsiveVariant, connectionVariant, butt
       </Fade>
     )
 
-  // If the user is logged in and the on desktop, show the desktop connected user button
-  if (shouldRenderDesktop) return <DesktopConnectedUserButton account={account} />
-
   return (
     <Fade in={true}>
-      <IconButton
-        onClick={open}
-        rounded={"full"}
-        border={"1px solid #EEEEEE"}
-        bg={"rgba(255, 255, 255, 0.50)"}
-        icon={<AddressIcon address={account?.address} imageUrl={account?.image} rounded={"full"} />}
-        aria-label="Connect wallet"
+      <WalletButton
+        mobileVariant="icon"
+        desktopVariant="iconAndDomain"
+        buttonStyle={{
+          border: "2px solid transparent",
+          background:
+            "linear-gradient(white, white) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box",
+          backgroundSize: "300% 100%",
+          animation: `${rotateAnimation} 3s ease infinite`,
+          _hover: {
+            background:
+              "linear-gradient(#f8f8f8, #f8f8f8) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box",
+            backgroundSize: "300% 100%",
+          },
+          ...(isDesktop ? { borderRadius: "full", px: 4, py: 2 } : { borderRadius: "12px", p: 30 }),
+        }}
       />
     </Fade>
   )
