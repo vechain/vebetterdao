@@ -8110,10 +8110,10 @@
     "@openzeppelin/contracts-upgradeable" "5.0.2"
     ethers "^6.9.0"
 
-"@vechain/vechain-kit@^1.5.6":
-  version "1.5.6"
-  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-1.5.6.tgz#183c18917c308144fee3b618edc1ea7e8dbaaf7b"
-  integrity sha512-bWGdYdWrSvx2+Pfgo/jD6jRFhF9rXqS1sf0mawwP8WHF+eNIZiZHFxG3E22O4ugralkQHqXbn9tB/3d+k1v8Fg==
+"@vechain/vechain-kit@^1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@vechain/vechain-kit/-/vechain-kit-1.5.7.tgz#704c1e7432438df6c31f18e0747ba2fce8296532"
+  integrity sha512-eQ4+bUL9zqEcQM7hnZ44S0Jceukgln81XbHUB7Vvs6c7WhyZNAxIWd2vronaya7upfCy2Van2F0eqMmdgK9Ayw==
   dependencies:
     "@chakra-ui/react" "^2.8.2"
     "@choc-ui/chakra-autocomplete" "^5.3.0"
