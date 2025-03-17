@@ -49,7 +49,7 @@ export const LeaderboardPageContent = ({ roundId }: Props) => {
       address: account?.address ?? "",
       score: userRoundOverview.data?.actionsRewarded ?? 0,
     }
-  }, [userRoundOverview, account])
+  }, [userRoundOverview, account?.address])
 
   const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId: selectedRoundId, direction: "desc" })
 

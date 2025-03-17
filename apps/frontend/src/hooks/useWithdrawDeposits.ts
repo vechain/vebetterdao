@@ -2,7 +2,6 @@ import { ProposalDeposit, buildClaimDepositsTx, getProposalUserDepositQueryKey, 
 
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
-import { address } from "thor-devkit"
 import { useBuildTransaction } from "./useBuildTransaction"
 
 /**
@@ -30,7 +29,7 @@ export const useWithdrawDeposits = ({ proposalDeposits, onSuccess, onFailure }: 
   const { account } = useWallet()
 
   const buildClauses = useCallback(() => {
-    if (!address) throw new Error("address is required")
+    if (!account?.address) throw new Error("address is required")
 
     const clauses = buildClaimDepositsTx(proposalDeposits, account?.address ?? "")
 

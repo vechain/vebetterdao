@@ -32,12 +32,13 @@ export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3Dep
   const { account } = useWallet()
 
   const clauseBuilder = useCallback(() => {
+    if (!account?.address) throw new Error("address is required")
     return [
       buildClause({
         contractInterface: GovernorInterface,
         to: GOVERNANCE_CONTRACT,
         method: "withdraw",
-        args: [proposalId, account],
+        args: [proposalId, account?.address],
         comment: `withdraw deposited vot3 of proposal ${proposalId}`,
       }),
     ]

@@ -30,7 +30,7 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
   // - the feature flag is enabled
   // - the user is not connected
   // - the wallet modal is not open
-  const shouldRenderVeChainKitTooltip = isVechainKitFlagOn && !account && !isWalletModalOpen
+  const shouldRenderVeChainKitTooltip = isVechainKitFlagOn && !account?.address && !isWalletModalOpen
 
   return (
     <>

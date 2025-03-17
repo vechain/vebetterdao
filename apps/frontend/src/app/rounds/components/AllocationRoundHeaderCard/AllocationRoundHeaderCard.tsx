@@ -157,7 +157,7 @@ export const AllocationRoundHeaderCard = ({ roundId }: Props) => {
                     </HStack>
                   </Skeleton>
                 </Box>
-                {!!account && (
+                {!!account?.address && (
                   <Box data-testid="your-vote-box">
                     <Text color="#6A6A6A" fontSize={["lg", "lg", "md"]} fontWeight={400}>
                       {t("Your vote")}

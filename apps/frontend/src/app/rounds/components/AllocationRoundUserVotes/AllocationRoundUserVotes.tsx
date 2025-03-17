@@ -96,7 +96,7 @@ export const AllocationRoundUserVotes = ({ roundId, minPercentageToNotMerge }: P
       <Card
         w="full"
         id="user-votes"
-        maxH={[!account ? "600px" : "auto", "auto"]}
+        maxH={[!account?.address ? "600px" : "auto", "auto"]}
         overflowY={"hidden"}
         variant="baseWithBorder"
         data-testid={"user-votes-card"}>

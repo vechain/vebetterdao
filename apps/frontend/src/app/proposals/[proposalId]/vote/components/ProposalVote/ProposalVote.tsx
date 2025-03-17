@@ -65,7 +65,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
 
   const { data: userVote } = useUserSingleProposalVoteEvent(proposalId)
 
-  const isPageNotAllowed = proposal.state !== ProposalState.Active || !!userVote || !account
+  const isPageNotAllowed = proposal.state !== ProposalState.Active || !!userVote || !account?.address
 
   useLayoutEffect(() => {
     if (isPageNotAllowed) {

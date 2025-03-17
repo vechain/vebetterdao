@@ -74,7 +74,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
   }, [switchEndorsementMutation])
 
   const shouldDisplayCooldownAlert = useMemo(() => {
-    return account && !isXNodeOnCooldown
+    return account?.address && !isXNodeOnCooldown
   }, [account, isXNodeOnCooldown])
 
   if (switchEndorsementMutation.status !== "ready")
