@@ -31,19 +31,23 @@ export type AdminAppForm = {
 }
 
 export const AdminAppPageContent = () => {
-  const { appMetadata } = useCurrentAppMetadata()
+  const { t } = useTranslation()
+  const router = useRouter()
+
+  const { account } = useWallet()
+  const { data: permissions } = useAccountPermissions(account || "")
+
+  const { admin, isLoading: adminLoading } = useCurrentAppAdmin()
   const { moderators, isLoading: moderatorsLoading } = useCurrentAppModerators()
   const { creators, isLoading: creatorsLoading } = useCurrentAppCreators()
   const { distributors, isLoading: distributorsLoading } = useCurrentAppRewardDistributors()
+  const { app, isAppInfoLoading: appLoading } = useCurrentAppInfo()
+  const { appMetadata } = useCurrentAppMetadata()
 
-  const { t } = useTranslation()
   const [editAdminAddress, setEditAdminAddress] = useState(false)
   const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
+
   const updateConfirmationModal = useDisclosure()
-  const { admin, isLoading: adminLoading } = useCurrentAppAdmin()
-  const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account || "")
-  const { app, isAppInfoLoading: appLoading } = useCurrentAppInfo()
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
   const onchainAddresses = useRef({
@@ -95,23 +99,25 @@ export const AdminAppPageContent = () => {
     "creators",
   ])
 
-  const areAddressChanged = (currentAddress: string[], newAddress: string[]) => {
-    if (currentAddress.length !== newAddress.length) return true
-    return !currentAddress.every((address, index) => newAddress[index] && compareAddresses(address, newAddress[index]))
+  const haveAddressesChanged = (currentAddresses: string[], newAddresses: string[]) => {
+    if (currentAddresses.length !== newAddresses.length) return true
+    return !currentAddresses.every(
+      (address, index) => newAddresses[index] && compareAddresses(address, newAddresses[index]),
+    )
   }
 
-  const getAddressesToAdd = (newAddress: string[], currentAddress: string[]) =>
-    newAddress.filter(newAddress => !currentAddress.some(address => compareAddresses(address, newAddress)))
+  const getAddressesToAdd = (newAddresses: string[], currentAddresses: string[]) =>
+    newAddresses.filter(newAddress => !currentAddresses.some(address => compareAddresses(address, newAddress)))
 
-  const getAddressesToRemove = (currentAddress: string[], newAddress: string[]) =>
-    currentAddress.filter(address => !newAddress.some(newAddress => compareAddresses(address, newAddress)))
+  const getAddressesToRemove = (currentAddresses: string[], newAddresses: string[]) =>
+    currentAddresses.filter(address => !newAddresses.some(newAddress => compareAddresses(address, newAddress)))
 
   // Check if addresses have changed
   const isAdminAddressChanged = !compareAddresses(adminAddress, onchainAddresses.current.adminAddress)
   const isTeamWalletAddressChanged = !compareAddresses(teamWalletAddress, onchainAddresses.current.teamWalletAddress)
-  const isModeratorsChanged = areAddressChanged(onchainAddresses.current.moderators, newModerators)
-  const isDistributorsChanged = areAddressChanged(onchainAddresses.current.distributors, newDistributors)
-  const isCreatorsChanged = areAddressChanged(onchainAddresses.current.creators, newCreators)
+  const isModeratorsChanged = haveAddressesChanged(onchainAddresses.current.moderators, newModerators)
+  const isDistributorsChanged = haveAddressesChanged(onchainAddresses.current.distributors, newDistributors)
+  const isCreatorsChanged = haveAddressesChanged(onchainAddresses.current.creators, newCreators)
 
   const hasUnsavedChanges =
     isAdminAddressChanged ||
@@ -119,9 +125,7 @@ export const AdminAppPageContent = () => {
     isModeratorsChanged ||
     isDistributorsChanged ||
     isCreatorsChanged
-
   const disableSaveButton = !hasUnsavedChanges
-  const router = useRouter()
 
   const updateMutation = useUpdateAppAdminInfo({
     appId: app?.id || "",
@@ -146,7 +150,7 @@ export const AdminAppPageContent = () => {
 
   const goBack = useCallback(() => {
     onConfirmationClose()
-    router.back()
+    router.push(`/apps/${app?.id}`) // Fallback to a known safe route
     form.reset()
     updateMutation.resetStatus()
   }, [form, onConfirmationClose, router, updateMutation])
