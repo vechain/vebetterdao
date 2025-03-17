@@ -179,7 +179,7 @@ export const CreateEditAppForm = ({
               <WalletAddressInput
                 inputLeftElement={
                   <InputLeftElement pointerEvents="none">
-                    <AddressIcon borderRadius={"full"} boxSize={6} address={teamWalletAddress} />
+                    <AddressIcon borderRadius={"full"} boxSize={6} minW={6} minH={6} address={teamWalletAddress} />
                   </InputLeftElement>
                 }
                 isDisabled={isReceiverAddressDisabled}
@@ -194,7 +194,13 @@ export const CreateEditAppForm = ({
               <WalletAddressInput
                 inputLeftElement={
                   <InputLeftElement pointerEvents="none">
-                    <AddressIcon borderRadius={"full"} boxSize={6} address={adminWalletAddress ?? ""} />
+                    <AddressIcon
+                      borderRadius={"full"}
+                      boxSize={6}
+                      minW={6}
+                      minH={6}
+                      address={adminWalletAddress ?? ""}
+                    />
                   </InputLeftElement>
                 }
                 isDisabled={isReceiverAddressDisabled}

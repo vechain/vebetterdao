@@ -32,7 +32,7 @@ export const ProfileHeader = ({ address }: Props) => {
       <CardBody>
         <VStack align="stretch" gap={6}>
           <HStack spacing={4}>
-            <AddressIcon address={address ?? ""} rounded={"full"} boxSize={12} />
+            <AddressIcon address={address ?? ""} rounded={"full"} minW={14} minH={14} boxSize={14} />
             <Stack
               direction={["column", "column", "column"]}
               align={["flex-start", "flex-start", "column"]}

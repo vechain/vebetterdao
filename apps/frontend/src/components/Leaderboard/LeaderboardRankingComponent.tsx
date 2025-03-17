@@ -89,7 +89,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
         )}
         <HStack w="full" justify="space-between">
           <HStack spacing={2} zIndex={1}>
-            <AddressIcon address={ranking.address} boxSize={8} rounded={"full"} />
+            <AddressIcon address={ranking.address} boxSize={8} minW={8} minH={8} rounded={"full"} />
             <Box>
               <HStack spacing={1}>
                 {isYourRanking && (
