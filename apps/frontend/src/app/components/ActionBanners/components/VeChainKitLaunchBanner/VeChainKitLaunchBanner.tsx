@@ -25,6 +25,8 @@ export const VeChainKitLaunchBanner = () => {
         <AddressIcon
           address={account?.address ?? ""}
           rounded="full"
+          minW={20}
+          minH={20}
           boxSize={{ base: "56px", md: "64px", lg: "72px" }}
           maxWidth="72px"
           maxHeight="72px"
