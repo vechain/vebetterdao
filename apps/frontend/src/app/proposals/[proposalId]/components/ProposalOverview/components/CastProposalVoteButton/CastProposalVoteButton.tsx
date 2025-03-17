@@ -53,7 +53,7 @@ export const CastProposalVoteButton = ({ proposalId }: Props) => {
   const shouldSeeVoteButton = useMemo(() => {
     return (
       state === ProposalState.Active &&
-      !!account &&
+      !!account?.address &&
       !userVote &&
       !userVoteLoading &&
       hasVotesAtSnapshot &&

@@ -81,7 +81,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   }
 
   const shouldDisplayCooldownAlert = useMemo(() => {
-    return account && !isXNodeOnCooldown
+    return account?.address && !isXNodeOnCooldown
   }, [account, isXNodeOnCooldown])
 
   if (endorseAppMutation.status !== "ready")

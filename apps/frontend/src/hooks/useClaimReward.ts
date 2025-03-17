@@ -2,7 +2,6 @@ import { buildClaimRoundReward, getB3TrBalanceQueryKey, getRoundRewardQueryKey }
 
 import { useCallback, useMemo } from "react"
 import { useWallet } from "@vechain/vechain-kit"
-import { address } from "thor-devkit"
 import { useBuildTransaction } from "./useBuildTransaction"
 
 type useClaimRewardProps = {
@@ -23,7 +22,7 @@ export const useClaimReward = ({ roundId, onSuccess, onFailure }: useClaimReward
   const { account } = useWallet()
 
   const buildClauses = useCallback(() => {
-    if (!address) throw new Error("address is required")
+    if (!account?.address) throw new Error("address is required")
 
     const clauses = buildClaimRoundReward(roundId, account?.address ?? "")
     return [clauses]

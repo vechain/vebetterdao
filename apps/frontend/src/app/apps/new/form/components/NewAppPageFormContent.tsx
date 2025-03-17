@@ -48,8 +48,8 @@ export const NewAppPageFormContent = () => {
 
   useEffect(() => {
     //Users without Creator NFT should be redirected to home
-    if (!!account && !hasCreatorNft) router.push("/")
-  }, [hasCreatorNft, router, account])
+    if (!!account?.address && !hasCreatorNft) router.push("/")
+  }, [hasCreatorNft, router, account?.address])
 
   const handleSuccess = useCallback(() => {
     setIsSuccessSubmission(true)

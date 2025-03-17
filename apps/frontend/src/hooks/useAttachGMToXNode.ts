@@ -81,12 +81,12 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
 
   const refetchQueryKeys = useMemo(
     () => [
-      getSelectedTokenIdQueryKey(account?.address),
+      getSelectedTokenIdQueryKey(account?.address ?? ""),
       getLevelOfTokenQueryKey(gmId),
       getGetTokenIdAttachedToNodeQueryKey(xNodeId),
       getNodeIdAttachedQueryKey(gmId),
       getNFTMetadataUriQueryKey(gmId),
-      getTokensInfoByOwnerQueryKey(account?.address),
+      getTokensInfoByOwnerQueryKey(account?.address ?? ""),
     ],
     [account?.address, gmId, xNodeId],
   )

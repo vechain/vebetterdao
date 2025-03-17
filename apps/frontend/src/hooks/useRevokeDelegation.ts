@@ -35,11 +35,11 @@ export const useRevokeDelegation = ({ onSuccess, isDelegator }: UseRevokeDelegat
 
   const refetchQueryKeys = useMemo(() => {
     if (isDelegator) {
-      return [getDelegateeQueryKey(account?.address || "")]
+      return [getDelegateeQueryKey(account?.address ?? "")]
     } else {
-      return [getDelegatorQueryKey(account?.address || "")]
+      return [getDelegatorQueryKey(account?.address ?? "")]
     }
-  }, [isDelegator, account])
+  }, [isDelegator, account?.address])
 
   return useBuildTransaction({
     clauseBuilder,

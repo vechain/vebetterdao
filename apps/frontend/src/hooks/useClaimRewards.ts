@@ -7,7 +7,6 @@ import {
   getRoundRewardQueryKey,
   useCurrentAllocationsRoundId,
 } from "@/api"
-import { address } from "thor-devkit"
 import { useBuildTransaction } from "./useBuildTransaction"
 
 type useClaimRewardsProps = {
@@ -36,7 +35,7 @@ export const useClaimRewards = ({ roundRewards, onSuccess, onFailure }: useClaim
   const lastRoundId = Math.max(0, currentRoundId - 1)
 
   const buildClauses = useCallback(() => {
-    if (!address) throw new Error("address is required")
+    if (!account?.address) throw new Error("address is required")
 
     const clauses = buildClaimRewardsTx(roundRewards, account?.address ?? "")
     return clauses

@@ -60,7 +60,7 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
       router.push("/proposals/new/form/content")
       AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_ABOUT))
     },
-    [setData, router, account],
+    [setData, router, account?.address],
   )
 
   return (
