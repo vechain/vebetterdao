@@ -150,7 +150,7 @@ export const AdminAppPageContent = () => {
 
   const goBack = useCallback(() => {
     onConfirmationClose()
-    router.push(`/apps/${app?.id}`) // Fallback to a known safe route
+    router.push(`/apps/${app?.id}`)
     form.reset()
     updateMutation.resetStatus()
   }, [form, onConfirmationClose, router, updateMutation])
