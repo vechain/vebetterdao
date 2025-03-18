@@ -27,7 +27,7 @@ import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/I
 import { X2EarnAppsUpgradeable } from "../X2EarnAppsUpgradeable.sol";
 import { AdministrationUtils } from "../libraries/AdministrationUtils.sol";
 import { IX2EarnCreator } from "../../interfaces/IX2EarnCreator.sol";
-
+import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
 /**
  * @title AdministrationUpgradeable
  * @dev Contract module that provides the administration functionalities of the x2earn apps.
@@ -53,6 +53,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     mapping(bytes32 appId => address[]) _creators; // addresses that have a creators NFT and can manage interactions with Node holders
     mapping(address creator => uint256 apps) _creatorApps; // number of apps created by a creator
     IX2EarnCreator _x2EarnCreatorContract;
+    IX2EarnRewardsPool _x2EarnRewardsPoolContract;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnApps.Administration")) - 1)) & ~bytes32(uint256(0xff))
@@ -64,6 +65,20 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
       $.slot := AdministrationStorageLocation
     }
   }
+  
+  /**
+   * @dev Initializes the contract for version 3
+   * @notice This function adds initialization logic for the V3 upgrade.
+   */
+  function __Administration_init_v3(address _x2EarnRewardsPoolContract) internal {
+    __Administration_init_v3_unchained(_x2EarnRewardsPoolContract);
+  }
+
+  function __Administration_init_v3_unchained(address _x2EarnRewardsPoolContract) internal onlyInitializing {
+    // Set the x2EarnRewardsPool contract
+    _setX2EarnRewardsPoolContract(_x2EarnRewardsPoolContract);
+  }
+
 
   // ---------- Internal ---------- //
   /**
@@ -162,6 +177,27 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
   function _removeRewardDistributor(bytes32 appId, address distributor) internal {
     AdministrationStorage storage $ = _getAdministrationStorage();
     AdministrationUtils.removeRewardDistributor($._rewardDistributors, appId, distributor, _appSubmitted(appId));
+  }
+
+  /**
+   * @dev Internal function to enable the rewards pool for a new app by default 
+   *
+   * @param appId the hashed name of the app
+   */
+  function _enableRewardsPoolForNewApp(bytes32 appId) internal override {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+    AdministrationUtils.enableRewardsPoolForNewApp($._x2EarnRewardsPoolContract, appId);
+  }
+
+  /**
+   * @dev Internal function to set the x2EarnRewardsPool contract
+   *
+   * @param x2EarnRewardsPool the address of the x2EarnRewardsPool contract
+   */
+  function _setX2EarnRewardsPoolContract(address x2EarnRewardsPool) internal {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+    require(x2EarnRewardsPool!= address(0), "X2EarnApps: Invalid rewards pool address");
+    $._x2EarnRewardsPoolContract = IX2EarnRewardsPool(x2EarnRewardsPool);
   }
 
   /**
@@ -382,4 +418,13 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     AdministrationStorage storage $ = _getAdministrationStorage();
     return $._x2EarnCreatorContract;
   }
+
+  /**
+   * @dev See {IX2EarnApps-x2EarnRewardsPoolContract}.
+   */
+  function x2EarnRewardsPoolContract() public view virtual override returns (IX2EarnRewardsPool) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+    return $._x2EarnRewardsPoolContract;
+  }
+
 }

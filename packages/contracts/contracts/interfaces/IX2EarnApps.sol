@@ -5,6 +5,7 @@ import { X2EarnAppsDataTypes } from "../libraries/X2EarnAppsDataTypes.sol";
 import { VechainNodesDataTypes } from "../libraries/VechainNodesDataTypes.sol";
 import { IX2EarnCreator } from "./IX2EarnCreator.sol";
 import { IXAllocationVotingGovernor } from "./IXAllocationVotingGovernor.sol";
+import { IX2EarnRewardsPool } from "./IX2EarnRewardsPool.sol";
 
 /**
  * @title IX2EarnApps
@@ -410,6 +411,25 @@ interface IX2EarnApps {
    * @param distributorAddress the address of the account
    */
   function isRewardDistributor(bytes32 appId, address distributorAddress) external view returns (bool);
+
+  /**
+   * @dev Enable the rewards pool for a new app.
+   *
+   * @param appId the id of the app
+   */
+  function enableRewardsPoolForNewApp(bytes32 appId) external;
+
+  /**
+   * @dev Update the X2EarnRewardsPool contract address.
+   *
+   * @param  _x2EarnRewardsPoolContract the address of the X2EarnRewardsPool contract
+   */
+  function setX2EarnRewardsPoolContract(address  _x2EarnRewardsPoolContract) external;
+
+  /**
+   * @dev Get the X2EarnRewardsPool contract address.
+   */
+  function x2EarnRewardsPoolContract() external view returns (IX2EarnRewardsPool);
 
   /**
    * @notice Checks endorsements for a given app and updates its voting eligibility based on the endorsements' scores.

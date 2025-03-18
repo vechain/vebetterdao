@@ -156,6 +156,13 @@ interface IX2EarnRewardsPool {
   function rewardsPoolEnabled(bytes32 appId) external view returns (bool);
 
   /**
+   * @dev Enables the rewards pool for a newly created app.
+   * @param appId The ID of the app.
+   * @notice This function can only be called by the X2EarnApps contract during app submission
+   */
+  function enableRewardsPoolForNewApp(bytes32 appId) external;  
+
+  /**
    * @dev Gets the amount of funds available for an app to reward users if the dual-pool is enabled.
    *
    * @param appId The ID of the app.
