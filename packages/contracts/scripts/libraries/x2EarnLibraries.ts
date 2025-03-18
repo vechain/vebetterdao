@@ -18,17 +18,32 @@ export async function x2EarnLibraries() {
   const VoteEligibilityUtilsLibV2 = await VoteEligibilityUtilsV2.deploy()
   await VoteEligibilityUtilsLibV2.waitForDeployment()
 
-  // Deploy Passport Checks LogicV3 -- Latest version
+  //Enable X2EarnRewardsPool
+  const AdministrationUtilsV3 = await ethers.getContractFactory("AdministrationUtilsV3")
+  const AdministrationUtilsLibV3 = await AdministrationUtilsV3.deploy()
+  await AdministrationUtilsLibV3.waitForDeployment()
+
+  //Enable X2EarnRewardsPool
+  const EndorsementUtilsV3 = await ethers.getContractFactory("EndorsementUtilsV3")
+  const EndorsementUtilsLibV3 = await EndorsementUtilsV3.deploy()
+  await EndorsementUtilsLibV3.waitForDeployment()
+
+  //Enable X2EarnRewardsPool
+  const VoteEligibilityUtilsV3 = await ethers.getContractFactory("VoteEligibilityUtilsV3")
+  const VoteEligibilityUtilsLibV3 = await VoteEligibilityUtilsV3.deploy()
+  await VoteEligibilityUtilsLibV3.waitForDeployment()
+
+  // Latest version
   const AdministrationUtils = await ethers.getContractFactory("AdministrationUtils")
   const AdministrationUtilsLib = await AdministrationUtils.deploy()
   await AdministrationUtilsLib.waitForDeployment()
 
-  // Deploy Passport ConfiguratorV3 -- Latest version
+  // Latest version
   const EndorsementUtils = await ethers.getContractFactory("EndorsementUtils")
   const EndorsementUtilsLib = await EndorsementUtils.deploy()
   await EndorsementUtilsLib.waitForDeployment()
 
-  // Deploy Passport Delegation LogicV3 -- Latest version
+  // Latest version
   const VoteEligibilityUtils = await ethers.getContractFactory("VoteEligibilityUtils")
   const VoteEligibilityUtilsLib = await VoteEligibilityUtils.deploy()
   await VoteEligibilityUtilsLib.waitForDeployment()
@@ -37,6 +52,9 @@ export async function x2EarnLibraries() {
     AdministrationUtilsV2: AdministrationUtilsLibV2,
     EndorsementUtilsV2: EndorsementUtilsLibV2,
     VoteEligibilityUtilsV2: VoteEligibilityUtilsLibV2,
+    AdministrationUtilsV3: AdministrationUtilsLibV3,
+    EndorsementUtilsV3: EndorsementUtilsLibV3,
+    VoteEligibilityUtilsV3: VoteEligibilityUtilsLibV3,
     AdministrationUtils: AdministrationUtilsLib,
     EndorsementUtils: EndorsementUtilsLib,
     VoteEligibilityUtils: VoteEligibilityUtilsLib,

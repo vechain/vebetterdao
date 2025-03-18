@@ -70,6 +70,9 @@ import {
   AdministrationUtilsV2,
   VoteEligibilityUtilsV2,
   EndorsementUtilsV2,
+  AdministrationUtilsV3,
+  VoteEligibilityUtilsV3,
+  EndorsementUtilsV3,
   X2EarnCreator,
   NodeManagementV1,
   VeBetterPassportV2,
@@ -191,6 +194,9 @@ interface DeployInstance {
   administrationUtilsV2: AdministrationUtilsV2
   endorsementUtilsV2: EndorsementUtilsV2
   voteEligibilityUtilsV2: VoteEligibilityUtilsV2
+  administrationUtilsV3: AdministrationUtilsV3
+  endorsementUtilsV3: EndorsementUtilsV3
+  voteEligibilityUtilsV3: VoteEligibilityUtilsV3
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
   vechainNodesMock: TokenAuction
@@ -290,6 +296,9 @@ export const getOrDeployContractInstances = async ({
     AdministrationUtilsV2,
     EndorsementUtilsV2,
     VoteEligibilityUtilsV2,
+    AdministrationUtilsV3,
+    EndorsementUtilsV3,
+    VoteEligibilityUtilsV3,
   } = await x2EarnLibraries()
 
   // ---------------------- Deploy Mocks ----------------------
@@ -422,8 +431,11 @@ export const getOrDeployContractInstances = async ({
   // Set a temporary address for the xAllocationGovernor
   const xAllocationGovernor = otherAccounts[1].address
 
+  // Set a temporary address for the x2EarnRewardsPool to then set the correct address in x2EarnApps
+  const x2EarnRewardsPoolAddress = otherAccounts[2].address
+
   const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnApps"],
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnApps"],
     [
       ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
       [
@@ -433,15 +445,21 @@ export const getOrDeployContractInstances = async ({
         await x2EarnCreator.getAddress(),
       ],
       [config.X2EARN_NODE_COOLDOWN_PERIOD, xAllocationGovernor],
+      [x2EarnRewardsPoolAddress],
     ],
     {
-      versions: [undefined, 2, 3],
+      versions: [undefined, 2, 3, 4],
       libraries: [
         undefined,
         {
           AdministrationUtilsV2: await AdministrationUtilsV2.getAddress(),
           EndorsementUtilsV2: await EndorsementUtilsV2.getAddress(),
           VoteEligibilityUtilsV2: await VoteEligibilityUtilsV2.getAddress(),
+        },
+        {
+          AdministrationUtilsV3: await AdministrationUtilsV3.getAddress(),
+          EndorsementUtilsV3: await EndorsementUtilsV3.getAddress(),
+          VoteEligibilityUtilsV3: await VoteEligibilityUtilsV3.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),
@@ -863,6 +881,9 @@ export const getOrDeployContractInstances = async ({
   // Mint creator NFT to owner
   await x2EarnCreator.safeMint(await owner.getAddress())
 
+  // Set up the X2EarnRewardsPool contract in x2EarnApps
+  await x2EarnApps.connect(owner).setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
+
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
     await callBootstrapAndStartEmissions()
@@ -957,6 +978,9 @@ export const getOrDeployContractInstances = async ({
     administrationUtilsV2: AdministrationUtilsV2,
     endorsementUtilsV2: EndorsementUtilsV2,
     voteEligibilityUtilsV2: VoteEligibilityUtilsV2,
+    administrationUtilsV3: AdministrationUtilsV3,
+    endorsementUtilsV3: EndorsementUtilsV3,
+    voteEligibilityUtilsV3: VoteEligibilityUtilsV3,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vechainNodesMock,
