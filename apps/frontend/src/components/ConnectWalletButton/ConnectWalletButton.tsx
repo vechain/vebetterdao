@@ -76,7 +76,7 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
               "linear-gradient(#f8f8f8, #f8f8f8) padding-box, linear-gradient(90deg, #004CFC, #B1F16C, #004CFC) border-box",
             backgroundSize: "300% 100%",
           },
-          ...(isDesktop ? { borderRadius: "full", px: 4, py: 2 } : { borderRadius: "12px", p: 30 }),
+          ...(isDesktop ? { borderRadius: "full" } : { borderRadius: "12px" }),
         }}
       />
     </Fade>
