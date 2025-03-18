@@ -1427,8 +1427,6 @@
   "{{fieldName}} is too long": "{{fieldName}} is too long",
   "Confirm the operation to complete the transaction": "Confirm the operation to complete the transaction",
   "Confirm": "Confirm",
-  "NEW LOG IN IS OUT!": "NEW LOG IN IS OUT!",
-  "Log in with your social media and start earning rewards!": "Log in with your social media and start earning rewards!",
   "Actual Rewards": "Actual Rewards",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.",
   "just joined the DAO! Get involved in the app now!": "just joined the DAO! Get involved in the app now!",
