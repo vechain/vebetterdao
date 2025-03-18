@@ -1,6 +1,6 @@
 import { useUserBotSignals } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useResetUserBotSignals, useSignalBotUser } from "@/hooks"
 import {
   Button,
@@ -31,30 +31,28 @@ export const ManageUserSignals = () => {
   const {
     sendTransaction: resetSignalsTransaction,
     resetStatus: resetSignalsStatus,
-    isTxReceiptLoading: isResetTxLoading,
-    sendTransactionPending: isResetPending,
+    isTransactionPending: isResetTxLoading,
     status: resetStatus,
     error: resetError,
     txReceipt: resetTxReceipt,
-    sendTransactionTx: resetTxTransaction,
   } = useResetUserBotSignals({
     address: user,
     reason,
   })
+  const isResetPending = resetStatus === "pending"
 
   const {
     sendTransaction: signalUserTransaction,
     resetStatus: signalUserStatus,
-    isTxReceiptLoading: isSignalTxLoading,
-    sendTransactionPending: isSignalPending,
+    isTransactionPending: isSignalTxLoading,
     status: signalStatus,
     error: signalError,
     txReceipt: signalTxReceipt,
-    sendTransactionTx: signalTxTransaction,
   } = useSignalBotUser({
     address: user,
     reason,
   })
+  const isSignalPending = signalStatus === "pending"
 
   const isValidAddress = useMemo(() => {
     return AddressUtils.isValid(user)
@@ -187,17 +185,16 @@ export const ManageUserSignals = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={resetError || signalError ? "error" : resetStatus || signalStatus}
+        status={
+          resetError || signalError
+            ? TransactionModalStatus.Error
+            : (resetStatus as TransactionModalStatus) || (signalStatus as TransactionModalStatus)
+        }
         successTitle={successTitle}
         onTryAgain={resetStatus === "error" ? handleResetSignalsSubmit : handleSignalUserSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={
-          resetTxReceipt?.meta.txID ??
-          signalTxReceipt?.meta.txID ??
-          resetTxTransaction?.txid ??
-          signalTxTransaction?.txid
-        }
+        txId={resetTxReceipt?.meta.txID ?? signalTxReceipt?.meta.txID}
         pendingTitle={pendingTitle}
         errorTitle={errorTitle}
         errorDescription={resetError?.reason || signalError?.reason}

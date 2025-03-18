@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { RevokeDelegationDelegateePOVModal } from "./components/RevokeDelegationDelegateePOVModal"
 import { QualificationBadge } from "../QualificationBadges"
 import { useCanUserVote, useGetDelegator } from "@/api"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 
 type Props = {
   address: string
@@ -18,7 +18,8 @@ export const CurrentDelegation = ({ address, isConnectedUser }: Props) => {
   const isDelegated = !isDelegatorLoading && !!delegatorAddress
   const { isPerson, isLoading } = useCanUserVote(address)
 
-  const { domain } = useVechainDomain({ addressOrDomain: delegatorAddress })
+  const { data: vnsData } = useVechainDomain(delegatorAddress)
+  const domain = vnsData?.domain
 
   const delegationModal = useDisclosure()
 

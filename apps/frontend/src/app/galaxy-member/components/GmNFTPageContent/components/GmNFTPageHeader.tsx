@@ -22,7 +22,7 @@ import {
 } from "@chakra-ui/react"
 import { UilArrowCircleUp, UilTimesCircle } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
@@ -44,7 +44,7 @@ export const GmNFTPageHeader = () => {
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { account } = useWallet()
-  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account ?? "")
+  const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account?.address ?? "")
 
   const { isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
 

@@ -7,7 +7,7 @@ import {
   useThresholdParticipationScoreAtTimepoint,
 } from "@/api/contracts"
 import { useAllocationRoundSnapshot } from "@/api"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
 /**
@@ -25,7 +25,7 @@ export const useUserScore = (user?: string) => {
   // this is the user's cumulative score with decay, we use that because it must be greater than the threshold
   const { data: userScore, isLoading: isUserRoundScoreLoading } = useGetCumulativeScoreWithDecay(
     // if the user is delegated, we use the delegator's address, otherwise we use the user's address
-    delegatorAddress ?? user ?? account ?? "",
+    delegatorAddress ?? user ?? account?.address ?? "",
     Number(roundId),
   )
 

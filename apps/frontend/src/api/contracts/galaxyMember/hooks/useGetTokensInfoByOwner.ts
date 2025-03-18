@@ -2,7 +2,7 @@ import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
 import { getCallKey } from "@/hooks"
 import { useInfiniteQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 
 const contractAddress = getConfig().galaxyMemberContractAddress
 const contractInterface = GalaxyMember__factory.createInterface()

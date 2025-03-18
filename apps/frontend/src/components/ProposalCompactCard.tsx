@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
 import { FaAngleRight } from "react-icons/fa6"
 import dayjs from "dayjs"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { ProposalStatusBadge } from "./Proposal/ProposalStatusBadge"
 import { ProposalYourVote } from "./Proposal/ProposalYourVote"
 
@@ -96,7 +96,7 @@ export const ProposalCompactCard: React.FC<Props> = ({ proposal }) => {
                   {proposalMetadata.data?.title}
                 </Text>
               </SkeletonText>
-              {!!account && hasVotedText}
+              {!!account?.address && hasVotedText}
             </VStack>
           </VStack>
           <IconButton

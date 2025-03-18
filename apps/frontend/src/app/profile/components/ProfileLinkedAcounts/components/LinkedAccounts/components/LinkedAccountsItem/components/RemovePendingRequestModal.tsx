@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal } from "@/components"
+import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
 import { useRemoveLinkingRequestToPassport } from "@/hooks"
 
 export const RemovePendingRequestModal = ({ modal, passport }: { modal: UseDisclosureProps; passport: string }) => {
@@ -39,14 +39,14 @@ export const RemovePendingRequestModal = ({ modal, passport }: { modal: UseDiscl
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
         successTitle={t("Pending request removed!")}
-        status={removeLinkingRequest.status}
+        status={removeLinkingRequest.status as TransactionModalStatus}
         errorDescription={removeLinkingRequest.error?.reason}
         errorTitle={removeLinkingRequest.error ? t("Error removing pending request") : undefined}
         showTryAgainButton
         onTryAgain={() => removeLinkingRequest.sendTransaction({})}
         pendingTitle={t("Removing pending request...")}
         showExplorerButton
-        txId={removeLinkingRequest.txReceipt?.meta.txID ?? removeLinkingRequest.sendTransactionTx?.txid}
+        txId={removeLinkingRequest.txReceipt?.meta.txID}
       />
     )
   }

@@ -3,7 +3,7 @@
 /**
  * The type of network that we are connected to (indentified by the genesis block)
  * */
-export type NETWORK_TYPE = "main" | "test" | "solo" | "custom"
+export type NETWORK_TYPE = "main" | "test" | "solo"
 
 /**
  * A model for the VechainThor network that we are connected to

@@ -7,6 +7,9 @@ export enum ButtonClickProperties {
   SWAP_CONFIRMED = "Swap Confirmed",
   SEE_DETAILS_TX = "See Details Tx",
 
+  // DASHBOARD BANNER EVENTS
+  BANNER_VECHAIN_KIT_LAUNCH = "Banner VeChain Kit Launch",
+
   // VOTES EVENTS
   CASTING_VOTE = "Casting Vote",
   CONTINUE_CASTING_VOTE_SELECTION = "Continue Casting Vote Selection",

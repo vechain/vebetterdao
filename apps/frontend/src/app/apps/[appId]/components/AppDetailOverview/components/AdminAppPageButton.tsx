@@ -3,7 +3,7 @@ import { UilSetting } from "@iconscout/react-unicons"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useCurrentAppAdmin } from "../../../hooks"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useAccountPermissions } from "@/api/contracts/account"
 
@@ -17,10 +17,10 @@ export const AdminAppPageButton = () => {
 
   const { account } = useWallet()
   const { admin } = useCurrentAppAdmin()
-  const { data: permissions } = useAccountPermissions(account || "")
+  const { data: permissions } = useAccountPermissions(account?.address || "")
 
   const showAdminButton = useMemo(
-    () => compareAddresses(account || "", admin) || permissions?.isAdminOfX2EarnApps,
+    () => compareAddresses(account?.address || "", admin) || permissions?.isAdminOfX2EarnApps,
     [account, admin, permissions],
   )
 

@@ -1,5 +1,5 @@
 import { useQueries } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { getHasXAppClaimed, getHasXAppClaimedQueryKey } from "./useHasXAppClaimed"
 
 /**

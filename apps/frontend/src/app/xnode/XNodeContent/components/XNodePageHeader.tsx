@@ -2,7 +2,7 @@ import { useParticipatedInGovernance, useSelectedGmNft, useXNode } from "@/api"
 import { GmActionButton } from "@/components/GmActionButton"
 import { Card, Flex, Heading, HStack, Image, Skeleton, Stack, Text, useMediaQuery, VStack } from "@chakra-ui/react"
 import { UilArrowCircleUp } from "@iconscout/react-unicons"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -22,7 +22,7 @@ export const XNodePageHeader = () => {
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { account } = useWallet()
-  const { data: hasUserVoted } = useParticipatedInGovernance(account)
+  const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
   const { isGMOwned, isXNodeAttachedToGM, isMaxGmLevelReached } = useSelectedGmNft()
 
   const [actionTitle, actionDescription] = useMemo(() => {

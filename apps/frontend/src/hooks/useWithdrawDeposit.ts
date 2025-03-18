@@ -1,6 +1,6 @@
 import { getProposalUserDepositQueryKey } from "@/api"
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
@@ -32,12 +32,13 @@ export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3Dep
   const { account } = useWallet()
 
   const clauseBuilder = useCallback(() => {
+    if (!account?.address) throw new Error("address is required")
     return [
       buildClause({
         contractInterface: GovernorInterface,
         to: GOVERNANCE_CONTRACT,
         method: "withdraw",
-        args: [proposalId, account],
+        args: [proposalId, account?.address],
         comment: `withdraw deposited vot3 of proposal ${proposalId}`,
       }),
     ]
@@ -45,8 +46,8 @@ export const useWithdrawDeposit = ({ proposalId, onSuccess }: UseProposalVot3Dep
 
   const refetchQueryKeys = useMemo(
     () => [
-      getProposalUserDepositQueryKey(proposalId, account ?? ""),
-      getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
+      getProposalUserDepositQueryKey(proposalId, account?.address ?? ""),
+      getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
     ],
     [account, proposalId],
   )

@@ -2,14 +2,14 @@ import { VStack } from "@chakra-ui/react"
 import { AppBalanceCard } from "./AppBalanceCard"
 import { useAccountAppPermissions } from "@/api"
 import { useCurrentAppInfo } from "../hooks/useCurrentAppInfo"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
 export const AppDetailsSidebar = () => {
   const { app } = useCurrentAppInfo()
   const { account } = useWallet()
 
-  const { data: appPermissions } = useAccountAppPermissions(account ?? "")
+  const { data: appPermissions } = useAccountAppPermissions(account?.address ?? "")
 
   const isAppAdminOrModerator = useMemo(() => {
     if (!appPermissions || !app) return false

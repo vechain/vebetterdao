@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { getGracePeriodEvent } from "../getGracePeriodEvents"
 
 export const getGracePeriodQueryKey = (appId = "all") => ["AppUnendorsedGracePeriodStarted", appId]

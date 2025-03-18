@@ -1,13 +1,13 @@
 import { Card, CardHeader, Heading, CardBody, VStack } from "@chakra-ui/react"
 import { StartEmissionsButton } from "./components/StartEmissionsButton"
 import { StartRoundButton } from "./components/StartRoundButton"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useTranslation } from "react-i18next"
 
 export const StartRoundCard = () => {
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account ?? "")
+  const { data: permissions } = useAccountPermissions(account?.address ?? "")
   const { t } = useTranslation()
 
   return (

@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { buildClause } from "@/utils/buildClause"
@@ -22,7 +22,7 @@ export const useRemoveLinkingRequestToPassport = ({ onSuccess }: UseRemoveLinkin
   const { account } = useWallet()
 
   const clauseBuilder = useCallback(() => {
-    if (!account) throw new Error("Account is required")
+    if (!account?.address) throw new Error("Account is required")
 
     return [
       buildClause({
@@ -33,9 +33,9 @@ export const useRemoveLinkingRequestToPassport = ({ onSuccess }: UseRemoveLinkin
         comment: "cancel outgoing pending entity link",
       }),
     ]
-  }, [account])
+  }, [account?.address])
 
-  const refetchQueryKeys = useMemo(() => [getPendingLinkingsQueryKey(account || "")], [account])
+  const refetchQueryKeys = useMemo(() => [getPendingLinkingsQueryKey(account?.address || "")], [account?.address])
 
   return useBuildTransaction({
     clauseBuilder,

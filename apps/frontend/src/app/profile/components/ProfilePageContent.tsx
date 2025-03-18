@@ -9,7 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { ProfileLinkedAcounts } from "./ProfileLinkedAcounts"
 import { AnalyticsUtils } from "@/utils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { FaAngleLeft } from "react-icons/fa6"
 import { ProfileGMLevel } from "./ProfileGMLevel"
@@ -27,9 +27,9 @@ type Props = {
 }
 export const ProfilePageContent = ({ address }: Props) => {
   const { account } = useWallet()
-  const isConnectedUser = compareAddresses(account ?? "", address ?? "")
+  const isConnectedUser = compareAddresses(account?.address ?? "", address ?? "")
 
-  const parsedAddress = address ?? account ?? ""
+  const parsedAddress = address ?? account?.address ?? ""
   const { t } = useTranslation()
   const router = useRouter()
   const searchParams = useSearchParams()

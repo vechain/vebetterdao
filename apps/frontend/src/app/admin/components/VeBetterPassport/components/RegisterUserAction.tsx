@@ -1,6 +1,6 @@
 import { useXApps } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useRegisterUserAction } from "@/hooks"
 import {
   Button,
@@ -46,16 +46,7 @@ export const RegisterUserAction = () => {
   const { data: xApps } = useXApps()
   const { t } = useTranslation()
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useRegisterUserAction({
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useRegisterUserAction({
     address: user,
     appId: appId ?? "",
     roundId: round ?? 0,
@@ -76,7 +67,7 @@ export const RegisterUserAction = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
   const isFormValid = useMemo(() => isValidAddress && appId !== undefined && appId !== "", [appId, isValidAddress])
 
   return (
@@ -160,12 +151,12 @@ export const RegisterUserAction = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("User action registered")}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={t(`Registering user action...`)}
         errorTitle={t("Error registering action")}
         errorDescription={error?.reason}

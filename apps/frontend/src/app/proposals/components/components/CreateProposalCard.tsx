@@ -1,7 +1,7 @@
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
 import { AnalyticsUtils } from "@/utils"
 import { Box, Image, Text, Button } from "@chakra-ui/react"
-import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
@@ -15,14 +15,14 @@ export const CreateProposalCard = () => {
   const { t } = useTranslation()
 
   const onNewClick = useCallback(() => {
-    if (!account) {
+    if (!account?.address) {
       open()
       return
     }
 
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CREATE_PROPOSAL))
     router.push("/proposals/new")
-  }, [account, open, router])
+  }, [account?.address, open, router])
 
   return (
     <Box bg={"white"} borderRadius={12} p={6} alignContent={"flex-start"} borderWidth={1} borderColor={"#D5D5D5"}>

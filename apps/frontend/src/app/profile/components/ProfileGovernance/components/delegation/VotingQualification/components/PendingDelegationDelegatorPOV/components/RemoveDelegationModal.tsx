@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal } from "@/components"
+import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
 import { useRemovePendingDelegationDelegatorPOV } from "@/hooks/useRemovePendingDelegationDelegatorPOV"
 
 export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosureProps; delegatee: string }) => {
@@ -39,14 +39,14 @@ export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosu
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
         successTitle={t("Delegation request removed!")}
-        status={removeDelegation.status}
+        status={removeDelegation.status as TransactionModalStatus}
         errorDescription={removeDelegation.error?.reason}
         errorTitle={removeDelegation.error ? t("Error removing delegation request") : undefined}
         showTryAgainButton
         onTryAgain={() => removeDelegation.sendTransaction({})}
         pendingTitle={t("Removing delegation request...")}
         showExplorerButton
-        txId={removeDelegation.txReceipt?.meta.txID ?? removeDelegation.sendTransactionTx?.txid}
+        txId={removeDelegation.txReceipt?.meta.txID}
       />
     )
   }

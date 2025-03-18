@@ -15,7 +15,7 @@ import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSu
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { Hide, IconButton } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa6"
 // import Swiper core and required modules
@@ -32,6 +32,7 @@ import { DoActionBanner } from "./components/DoActionBanner"
 import { LowVthoBanner } from "./components/LowVthoBanner"
 import { NewAppBanner } from "./components/NewAppBanner"
 import { DelegatingBanner } from "./components/DelegatingBanner"
+import { VeChainKitLaunchBanner } from "./components/VeChainKitLaunchBanner"
 
 import "@/app/theme/swiper-custom.css"
 // Import Swiper styles
@@ -40,7 +41,8 @@ import { CastProposalVoteBanners } from "./components/CastProposalVoteBanners"
 import { ProposalFilter } from "@/store"
 import { useFilteredProposals } from "@/app/proposals/hooks/useFilteredProposals"
 import { UserSignaledBanner } from "./components/UserSignaledBanner"
-import { useIsVeDelegated } from "@/hooks"
+import { useFeatureFlag, useIsVeDelegated } from "@/hooks"
+import { FeatureFlag } from "@/constants"
 
 // VTHO threshold for low VTHO that triggers the banner
 const VTHO_THRESHOLD = 5
@@ -56,18 +58,18 @@ export const ActionBanner = () => {
     setIsSliderStart(_swiper.isBeginning)
   }, [])
 
-  const { account } = useWallet()
+  const { account, connection } = useWallet()
 
-  const { isVeDelegated } = useIsVeDelegated(account ?? "")
+  const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
   const currentRoundId = parseInt(currentRound ?? "0")
-  const votingRewardsQuery = useVotingRewards(currentRoundId, account ?? undefined)
-  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account)
+  const votingRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
+  const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
 
-  const { data: balance, isLoading: balanceLoading } = useAccountBalance(account ?? undefined)
-  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account ?? undefined)
-  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account ?? undefined)
+  const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
+  const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account?.address ?? undefined)
+  const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps(true) // filterBlacklisted = true
 
   const { filteredProposals, isLoading: isLoadingProposals } = useFilteredProposals([ProposalFilter.InThisRound])
@@ -77,14 +79,14 @@ export const ActionBanner = () => {
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
 
-  const { data: userSignalCounter } = useUserBotSignals(account ?? "")
+  const { data: userSignalCounter } = useUserBotSignals(account?.address ?? "")
 
   const {
     data: canUserVote,
     hasVotesAtSnapshot,
     isPerson,
     isLoading,
-  } = useCanUserVote(account ?? undefined, delegateeAddress)
+  } = useCanUserVote(account?.address ?? undefined, delegateeAddress)
 
   // Custom computed values
   const isUserSignaled = useMemo(() => {
@@ -112,7 +114,7 @@ export const ActionBanner = () => {
   }, [isEntity, isDelegator, hasVotesAtSnapshot, isPerson, isLoadingAccountLinking, isLoadingDelegator])
 
   // Creator banners
-  const { data: submissions, isLoading: submissionsLoading } = useCreatorSubmission(account ?? "")
+  const { data: submissions, isLoading: submissionsLoading } = useCreatorSubmission(account?.address ?? "")
   const latestSubmissionStatus = submissions?.submissions[0]?.status // Only take into account the latest submission
   const isLatestSubmissionRejected = latestSubmissionStatus === HumanizedTicketStatus.Closed
   const isLatestSubmissionOngoing =
@@ -120,27 +122,31 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.Pending ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
-  const hasCreatorNFT = useHasCreatorNFT(account ?? "") // No loading state
+  const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
 
-  // New apps banner logic
+  // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0
 
   // Can't Vote banners logic
-  const showSignaledBanner = !!account && isUserSignaled
-  const showLowVthoBanner = !!account && isLowOnVtho && ownsTokens && !isBalanceLoading
-  const showDoActionBanner = !!account && !isPerson && !isLoading && !isDelegateeLoading
-  const showDelegatingBanner = !!account && isVeDelegated && !isDelegateeLoading
+  const showSignaledBanner = !!account?.address && isUserSignaled
+  const showLowVthoBanner =
+    !!account?.address && isLowOnVtho && ownsTokens && !isBalanceLoading && !connection?.isConnectedWithPrivy
+  const showDoActionBanner = !!account?.address && !isPerson && !isLoading && !isDelegateeLoading
+  const showDelegatingBanner = !!account?.address && isVeDelegated && !isDelegateeLoading
 
-  const showCastVoteBanner = !!account && !isLoading && canUserVote
+  const showCastVoteBanner = !!account?.address && !isLoading && canUserVote
 
-  const showClaimB3trBanner = !!account && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
+  const showClaimB3trBanner =
+    !!account?.address && votingRewardsQuery.data?.total && Number(votingRewardsQuery.data.total) !== 0
 
   // Creator NFT banners logic
-  const showCreatorRejectedBanner = !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
-  const showCreatorApprovedBanner = !!account && hasCreatorNFT
-  const showCreatorUnderReviewBanner = !!account && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
+  const showCreatorRejectedBanner =
+    !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
+  const showCreatorApprovedBanner = !!account?.address && hasCreatorNFT
+  const showCreatorUnderReviewBanner =
+    !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
-  const showCastVoteInProposalBanners = !!account && hasProposals && userCanVoteInProposals
+  const showCastVoteInProposalBanners = !!account?.address && hasProposals && userCanVoteInProposals
 
   //Show one of the banners explainining why the user can't vote
   // Only one of the following banners can be shown at a time
@@ -177,6 +183,11 @@ export const ActionBanner = () => {
       description={proposal?.description}
     />
   ))
+
+  // VeChainKit launch banner
+  const { isEnabled: isVechainKitFlagOn } = useFeatureFlag(FeatureFlag.VECHAIN_KIT)
+  const showVeChainKitLaunchBanner = !!account?.address && isVechainKitFlagOn
+
   const slides = useMemo(() => {
     const bannerComponents = []
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
@@ -184,8 +195,10 @@ export const ActionBanner = () => {
       bannerComponents.push(<ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} key="claim-b3tr" />)
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
+    if (showVeChainKitLaunchBanner) bannerComponents.push(<VeChainKitLaunchBanner key="vechain-kit-launch" />)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)
+
     return bannerComponents
   }, [
     showCantVoteBanners,
@@ -198,6 +211,7 @@ export const ActionBanner = () => {
     newApps,
     showCreatorNftBanners,
     CreatorNftBanner,
+    showVeChainKitLaunchBanner,
   ])
 
   const slidesPerView = slides.length === 1 ? 1 : 1.1

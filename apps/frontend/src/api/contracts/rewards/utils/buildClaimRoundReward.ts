@@ -1,4 +1,4 @@
-import { EnhancedClause } from "@/hooks"
+import { EnhancedClause } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@repo/contracts"
 

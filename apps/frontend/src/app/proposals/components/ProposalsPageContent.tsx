@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { ClaimDeposits, CreateProposalCard, ProposalsFilters, NoProposalsCard } from "./components"
-import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useFilteredProposals } from "../hooks/useFilteredProposals"
 import { useProposalFilters } from "@/store"
 import { buttonClickActions, ButtonClickProperties, buttonClicked } from "@/constants"
@@ -20,12 +20,12 @@ export const ProposalsPageContent = () => {
   const { selectedFilter } = useProposalFilters()
   const { filteredProposals, isLoading } = useFilteredProposals(selectedFilter)
 
-  const { data } = useProposalClaimableUserDeposits(account ?? "")
+  const { data } = useProposalClaimableUserDeposits(account?.address ?? "")
   const claimableDeposits = data?.claimableDeposits ?? []
   const totalClaimableDeposits = data?.totalClaimableDeposits ?? BigInt(0)
 
   const onNewClick = useCallback(() => {
-    if (!account) {
+    if (!account?.address) {
       open()
       return
     }

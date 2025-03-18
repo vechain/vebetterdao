@@ -1,11 +1,11 @@
 import { useXNode } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 
 import { useUnendorseApp } from "@/hooks"
 import { Text, Button, Image, Flex, HStack, Icon, VStack, Heading, Box } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
@@ -32,10 +32,9 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
   const unendorseAppMutation = useUnendorseApp({
     appId: endorsedApp?.id,
     nodeId: xNodeId,
-    userAddress: account ?? "",
+    userAddress: account?.address ?? "",
     onSuccess: () => {
       unendorseAppMutation.resetStatus()
-      onClose()
     },
   })
 
@@ -57,14 +56,18 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
         isOpen={isOpen}
         onClose={onClose}
         successTitle={t("Unendorse app")}
-        status={unendorseAppMutation.error ? "error" : unendorseAppMutation.status}
+        status={
+          unendorseAppMutation.error
+            ? TransactionModalStatus.Error
+            : (unendorseAppMutation.status as TransactionModalStatus)
+        }
         errorDescription={unendorseAppMutation.error?.reason}
         errorTitle={unendorseAppMutation.error ? t("Transaction error") : undefined}
         showTryAgainButton
         onTryAgain={handleUnendorsement}
         pendingTitle={"Unendorsing app..."}
         showExplorerButton
-        txId={unendorseAppMutation.txReceipt?.meta.txID ?? unendorseAppMutation.sendTransactionTx?.txid}
+        txId={unendorseAppMutation.txReceipt?.meta.txID}
         endorsementInfo={endorsementInfo}
       />
     )

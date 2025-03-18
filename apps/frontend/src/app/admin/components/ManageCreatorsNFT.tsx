@@ -1,4 +1,4 @@
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import {
   VStack,
   Button,
@@ -58,7 +58,9 @@ export const ManageCreatorsNFT = () => {
   const { mintNFT, burnNFT } = useAdminCreatorNFT({
     walletAddress: creatorWalletAddress ?? "",
     tokenId: tokenId ?? "",
-    onSuccess: onClose,
+    onSuccess: () => {
+      resetStatus()
+    },
   })
 
   const hasNFT = useHasCreatorNFT(lookupAddress ?? "")
@@ -70,7 +72,7 @@ export const ManageCreatorsNFT = () => {
   const onSubmit = useCallback(() => {
     if (actionType !== "check") {
       resetStatus()
-      sendTransaction()
+      sendTransaction(undefined)
       onOpen()
     }
   }, [actionType, resetStatus, sendTransaction, onOpen])
@@ -182,7 +184,7 @@ export const ManageCreatorsNFT = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("Transaction successful")}
         onTryAgain={handleSubmit(onSubmit)}
         showTryAgainButton

@@ -18,7 +18,7 @@ import { useCallback } from "react"
 import { UseFormReturn, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { AdminAppForm } from "../../../AdminAppPageContent"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 import { WalletAddressInput } from "@/app/components/Input"
 
 type Props = {
@@ -31,8 +31,8 @@ export const AddRewardDistributorButton = ({ editAdminForm }: Props) => {
   const addressForm = useForm<{ distributorAddress: string }>()
   const { watch, setValue } = addressForm
   const distributorAddress = watch("distributorAddress")
-  const { domain } = useVechainDomain({ addressOrDomain: distributorAddress })
-
+  const { data: vnsData } = useVechainDomain(distributorAddress)
+  const domain = vnsData?.domain
   const onSubmit = useCallback(
     (data: { distributorAddress: string }) => {
       editAdminForm.setValue("distributors", [...editAdminForm.getValues("distributors"), data.distributorAddress])

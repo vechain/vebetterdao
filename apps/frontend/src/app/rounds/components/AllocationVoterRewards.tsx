@@ -1,10 +1,10 @@
 import { useAllocationsRound, useAllocationsRoundState, useRoundReward } from "@/api"
 import { Box, Button, Image, Text, VStack, useDisclosure } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { FaRegClock } from "react-icons/fa"
 import { useClaimReward } from "@/hooks/useClaimReward"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { Trans, useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { AnalyticsUtils } from "@/utils"
@@ -27,7 +27,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
   const { data: allocationRound } = useAllocationsRound(roundId)
 
-  const { data: roundReward, isLoading: isRoundRewardLoading } = useRoundReward(account ?? "", roundId)
+  const { data: roundReward, isLoading: isRoundRewardLoading } = useRoundReward(account?.address ?? "", roundId)
 
   const { t } = useTranslation()
 
@@ -37,13 +37,12 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
     error: claimRewardError,
     status: claimRewardsStatus,
     txReceipt,
-    sendTransactionTx,
   } = useClaimReward({ roundId })
 
   const { isOpen, onClose, onOpen } = useDisclosure()
 
   const handleClaim = useCallback(() => {
-    sendTransaction()
+    sendTransaction(undefined)
     onOpen()
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CLAIM_REWARDS))
   }, [onOpen, sendTransaction])
@@ -185,7 +184,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Rewards claimed!")}
-        status={claimRewardError ? "error" : claimRewardsStatus}
+        status={claimRewardError ? TransactionModalStatus.Error : (claimRewardsStatus as TransactionModalStatus)}
         errorDescription={claimRewardError?.reason}
         errorTitle={claimRewardError ? t("Error claiming") : undefined}
         showTryAgainButton
@@ -194,7 +193,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
         showSocialButtons
         socialDescriptionEncoded="%F0%9F%8E%89%20Just%20claimed%20my%20%24B3TR%20rewards%20for%20voting%20in%20the%20%23VeBetterDAO%21%20%0A%0AJoin%20us%20and%20have%20your%20say%20in%20the%20future%20of%20sustainability%20at%20https%3A%2F%2Fvebetterdao.org.%20%0A%0A%23VeBetterDAO%20%23Vechain"
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         isClaimingRewards
         isSuccessBeenTrack={true}
       />
