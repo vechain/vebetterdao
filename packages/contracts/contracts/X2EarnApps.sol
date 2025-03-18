@@ -49,6 +49,9 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  *
  * -------------------- Version 3 --------------------
  * - The contract has been upgraded to version 3 to add node cooldown period.
+ * 
+ * -------------------- Version 4 --------------------
+ * - Enabling by default the rewards pool for new apps submitted.
  */
 contract X2EarnApps is
   X2EarnAppsUpgradeable,
@@ -71,16 +74,16 @@ contract X2EarnApps is
   }
 
   /**
-   * @notice Initialize the version 3 contract
-   * @param _cooldownPeriod the cooldown period for the endorsement
+   * @notice Initialize the version 4 contract
+   * @param _x2EarnRewardsPoolContract the address of the x2EarnRewardsPool contract to enable the rewards pool for new apps
    *
    * @dev This function is called only once during the contract upgrade
    */
-  function initializeV3(
-    uint48 _cooldownPeriod,
-    address _xAllocationVotingGovernor
-  ) public reinitializer(3) {
-    __Endorsement_init_v3(_cooldownPeriod, _xAllocationVotingGovernor);
+  function initializeV4(
+    address  _x2EarnRewardsPoolContract
+  ) public reinitializer(4) {
+    require( _x2EarnRewardsPoolContract != address(0), "X2EarnApps: Invalid x2EarnRewardsPool contract address");
+    __Administration_init_v3( _x2EarnRewardsPoolContract);
   }
 
   // ---------- Modifiers ------------ //
@@ -122,7 +125,7 @@ contract X2EarnApps is
    * @return sting The version of the contract
    */
   function version() public pure virtual returns (string memory) {
-    return "3";
+    return "4";
   }
 
   // ---------- Overrides ------------ //
@@ -223,6 +226,13 @@ contract X2EarnApps is
    */
   function removeAppCreator(bytes32 _appId, address _creator) public onlyRoleAndAppAdmin(DEFAULT_ADMIN_ROLE, _appId) {
     _removeAppCreator(_appId, _creator);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-enableRewardsPoolForNewApp}.
+   */
+  function enableRewardsPoolForNewApp(bytes32 _appId) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _enableRewardsPoolForNewApp(_appId);
   }
 
   /**
@@ -342,5 +352,12 @@ contract X2EarnApps is
    */
   function setX2EarnCreatorContract(address _x2EarnCreatorContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
     _setX2EarnCreatorContract(_x2EarnCreatorContract);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-setX2EarnRewardsPool}.
+   */
+  function setX2EarnRewardsPoolContract(address  _x2EarnRewardsPoolContract) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setX2EarnRewardsPoolContract( _x2EarnRewardsPoolContract);
   }
 }

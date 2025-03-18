@@ -158,6 +158,17 @@ contract X2EarnRewardsPool is
     _;
   }
 
+  /**
+   * @notice Modifier to ensure function can only be called by the X2EarnApps contract
+   */
+  modifier onlyX2EarnApps() {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    if(msg.sender != address($.x2EarnApps)) {
+      revert("X2EarnRewardsPool: caller is not X2EarnApps contract");
+    }
+    _;
+  }
+
   // ---------- Authorizers ---------- //
 
   function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADER_ROLE) {}
@@ -414,6 +425,21 @@ contract X2EarnRewardsPool is
 
     $.rewardsPoolEnabled[appId] = enable;
     emit RewardsPoolBalanceEnabled(appId, enable);
+  }
+
+  /**
+   * @dev Function to enable rewards pool on all newly registered apps
+   * @param appId - the app ID
+   * @notice This function can only be called by the X2EarnApps contract during app submission
+   */
+  function enableRewardsPoolForNewApp(bytes32 appId) external onlyX2EarnApps {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    
+    require(!$.rewardsPoolEnabled[appId], "X2EarnRewardsPool: rewards pool already enabled");
+    require(!$.distributionPaused[appId], "X2EarnRewardsPool: distribution is paused");
+
+    $.rewardsPoolEnabled[appId] = true;
+    emit RewardsPoolBalanceEnabled(appId, true);
   }
 
   /**
