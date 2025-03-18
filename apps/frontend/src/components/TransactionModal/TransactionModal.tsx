@@ -219,7 +219,7 @@ export const TransactionModal = ({
     handleWaitingConfirmationStatus,
     status,
   ])
-  if (!modalContent) return null
+  if (!modalContent || status === TransactionModalStatus.Ready) return null
   return (
     <Modal
       data-testid="transaction-modal"
