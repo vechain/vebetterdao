@@ -1,5 +1,7 @@
+import { AnalyticsUtils } from "@/utils"
 import { ButtonProps, Fade, useMediaQuery, keyframes } from "@chakra-ui/react"
 import { useWallet, WalletButton, WalletButtonProps } from "@vechain/vechain-kit"
+import { useEffect } from "react"
 
 const rotateAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -13,9 +15,32 @@ type Props = {
 }
 
 export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Props) => {
-  const { account } = useWallet()
+  const { account, connection } = useWallet()
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
   const notLoggedIn = !account?.address
+
+  useEffect(() => {
+    if (connection.isConnected && account?.address) {
+      // Get last logged address from localStorage
+      const lastLoggedAddress = localStorage.getItem("last_logged_address")
+
+      // Only log if this is a different address
+      if (lastLoggedAddress !== account.address) {
+        const connectionType = connection.isConnectedWithDappKit
+          ? "DappKit"
+          : connection.isConnectedWithVeChain
+            ? "VeChain"
+            : "Ecosystem"
+
+        AnalyticsUtils.trackEvent("Connection", {
+          action: connectionType,
+        })
+
+        // Save current address to localStorage
+        localStorage.setItem("last_logged_address", account.address)
+      }
+    }
+  }, [connection, connection?.isConnected, account?.address])
 
   if (notLoggedIn)
     return (
