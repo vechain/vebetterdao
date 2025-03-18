@@ -13,7 +13,7 @@ import "dayjs/locale/vi"
 import "dayjs/locale/nl"
 import "dayjs/locale/ko"
 import "dayjs/locale/sv"
-import "dayjs/locale/zh-tw" // Link: tw needs special handling in dayjs - https://github.com/iamkun/dayjs/blob/main/src/locale/zh-tw.js
+import "dayjs/locale/zh-tw" // Link: 'tw' is 'zh-tw' in dayjs - https://github.com/iamkun/dayjs/blob/main/src/locale/zh-tw.js
 import "dayjs/locale/tr"
 import "dayjs/locale/hi"
 

@@ -128,5 +128,7 @@ i18next
   })
 
 i18next.on("languageChanged", lng => {
-  dayjs.locale(lng)
+  // Map 'tw' to 'zh-tw' for dayjs
+  const dayjsLocale = lng === "tw" ? "zh-tw" : lng
+  dayjs.locale(dayjsLocale)
 })
