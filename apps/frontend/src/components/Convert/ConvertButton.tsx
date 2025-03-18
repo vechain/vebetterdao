@@ -1,6 +1,6 @@
 import { useB3trBalance, useVot3Balance } from "@/api"
 import { Button, useDisclosure, Text } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { FaRepeat } from "react-icons/fa6"
 import { ConvertModal } from "./ConvertModal"
 import { useTranslation } from "react-i18next"
@@ -9,8 +9,8 @@ type Props = { isIconButton?: boolean }
 
 export const ConvertButton: React.FC<Props> = ({ isIconButton = false }) => {
   const { account } = useWallet()
-  const { data: balance, isLoading: isBalanceLoading } = useB3trBalance(account ?? undefined)
-  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(account ?? undefined)
+  const { data: balance, isLoading: isBalanceLoading } = useB3trBalance(account?.address ?? undefined)
+  const { data: vot3Balance, isLoading: isVot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
 
   const hasNoBalance = (!balance || balance.scaled === "0") && (!vot3Balance || vot3Balance.scaled === "0")
   const isLoading = isBalanceLoading || isVot3BalanceLoading

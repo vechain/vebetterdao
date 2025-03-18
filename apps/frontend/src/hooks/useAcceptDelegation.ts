@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
@@ -35,7 +35,7 @@ export const useAcceptDelegation = ({ onSuccess }: UseAcceptDelegationProps) => 
 
   const clauseBuilder = useCallback(
     ({ delegator }: ClausesParams) => {
-      if (!account) throw new Error("Account is required")
+      if (!account?.address) throw new Error("Account is required")
       if (!isValid(delegator)) throw new Error("Invalid delegatee address")
 
       return [
@@ -48,17 +48,17 @@ export const useAcceptDelegation = ({ onSuccess }: UseAcceptDelegationProps) => 
         }),
       ]
     },
-    [account],
+    [account?.address],
   )
 
   const refetchQueryKeys = useMemo(
     () => [
-      getPendingDelegationsQueryKeyDelegatorPOV(account || ""),
-      getPendingDelegationsQueryKeyDelegateePOV(account || ""),
-      getDelegatorQueryKey(account || ""),
-      getGetCumulativeScoreWithDecayQueryKey(account || "", Number(roundId)),
+      getPendingDelegationsQueryKeyDelegatorPOV(account?.address || ""),
+      getPendingDelegationsQueryKeyDelegateePOV(account?.address || ""),
+      getDelegatorQueryKey(account?.address || ""),
+      getGetCumulativeScoreWithDecayQueryKey(account?.address || "", Number(roundId)),
     ],
-    [account, roundId],
+    [account?.address, roundId],
   )
 
   return useBuildTransaction<ClausesParams>({

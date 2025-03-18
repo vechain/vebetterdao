@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
@@ -28,7 +28,7 @@ export const useLinkEntityToPassport = ({ onSuccess }: UseLinkEntityToPassportPr
 
   const clauseBuilder = useCallback(
     ({ passport }: ClausesParams) => {
-      if (!account) throw new Error("Account is required")
+      if (!account?.address) throw new Error("Account is required")
       if (!isValid(passport)) throw new Error("Invalid passport address")
 
       return [
@@ -41,10 +41,10 @@ export const useLinkEntityToPassport = ({ onSuccess }: UseLinkEntityToPassportPr
         }),
       ]
     },
-    [account],
+    [account?.address],
   )
 
-  const refetchQueryKeys = useMemo(() => [getPendingLinkingsQueryKey(account)], [account])
+  const refetchQueryKeys = useMemo(() => [getPendingLinkingsQueryKey(account?.address)], [account?.address])
 
   return useBuildTransaction<ClausesParams>({
     clauseBuilder,

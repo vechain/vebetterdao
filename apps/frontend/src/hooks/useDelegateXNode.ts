@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { getConfig } from "@repo/config"
 import { isValid } from "@repo/utils/AddressUtils"
@@ -43,7 +43,7 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
 
   const clauseBuilder = useCallback(
     ({ delegatee, isAttachedToGM }: ClausesParams) => {
-      if (!account) throw new Error("Account is required")
+      if (!account?.address) throw new Error("Account is required")
       if (!isValid(delegatee)) throw new Error("Invalid delegatee address")
 
       const clauses = []
@@ -77,11 +77,11 @@ export const useDelegateXNode = ({ onSuccess }: UseDelegateXNodeProps = {}) => {
 
   const refetchQueryKeys = useMemo(
     () => [
-      getUserXNodesQueryKey(account || ""),
-      getUserNodesQueryKey(account || ""),
+      getUserXNodesQueryKey(account?.address || ""),
+      getUserNodesQueryKey(account?.address || ""),
       getLevelOfTokenQueryKey(attachedGMTokenId || ""),
       getGetTokenIdAttachedToNodeQueryKey(xNodeId || ""),
-      getIsNodeHolderQueryKey(account || ""),
+      getIsNodeHolderQueryKey(account?.address || ""),
     ],
     [account, attachedGMTokenId, xNodeId],
   )

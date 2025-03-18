@@ -1,4 +1,4 @@
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import {
   useAllocationsRound,
   useAllocationsRoundState,
@@ -15,7 +15,7 @@ import { useAllocationRoundSnapshot, useIsPersonAtTimepoint } from "@/api"
  */
 export const useCanUserVote = (user?: string, delegateeAddress?: string) => {
   const { account } = useWallet()
-  const parsedAccount = user || account
+  const parsedAccount = user ?? account?.address
   const { data: roundId } = useCurrentAllocationsRoundId()
   const { data: roundSnapshot, isLoading: roundSnapshotLoading } = useAllocationRoundSnapshot(roundId ?? "")
   const { data: state, isLoading: stateLoading } = useAllocationsRoundState(roundId)

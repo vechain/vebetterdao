@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
@@ -41,7 +41,7 @@ export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegation
 
   const clauseBuilder = useCallback(
     ({ isAttachedToGM }: ClausesParams) => {
-      if (!account) throw new Error("Account is required")
+      if (!account?.address) throw new Error("Account is required")
 
       const clauses = []
 
@@ -74,11 +74,11 @@ export const useRevokeXNodeDelegation = ({ onSuccess }: UseRevokeXNodeDelegation
 
   const refetchQueryKeys = useMemo(
     () => [
-      getUserXNodesQueryKey(account || ""),
-      getUserNodesQueryKey(account || ""),
+      getUserXNodesQueryKey(account?.address || ""),
+      getUserNodesQueryKey(account?.address || ""),
       getLevelOfTokenQueryKey(attachedGMTokenId),
       getGetTokenIdAttachedToNodeQueryKey(xNodeId || ""),
-      getIsNodeHolderQueryKey(account || ""),
+      getIsNodeHolderQueryKey(account?.address || ""),
     ],
     [account, attachedGMTokenId, xNodeId],
   )

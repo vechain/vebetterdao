@@ -1,4 +1,3 @@
-import { UseSendTransactionReturnValue } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
@@ -21,7 +20,6 @@ type Props = {
   currentStatus: UserStatus
   newStatus: UserStatus
   onSuccess?: () => void
-  invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
 
@@ -33,12 +31,7 @@ type Props = {
  * @param {UserStatus} props.newStatus - the new status of the user
  * @returns the return value of the send transaction hook and the result of the transaction
  */
-export const useWhitelistBlacklistUser = ({
-  address,
-  currentStatus,
-  newStatus,
-  onSuccess,
-}: Props): UseSendTransactionReturnValue => {
+export const useWhitelistBlacklistUser = ({ address, currentStatus, newStatus, onSuccess }: Props) => {
   const method = useMemo(() => {
     switch (newStatus) {
       case UserStatus.WHITELIST:

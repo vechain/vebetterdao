@@ -1,4 +1,4 @@
-import { EnhancedClause } from "@/hooks/useSendTransaction"
+import { EnhancedClause } from "@vechain/vechain-kit"
 import { Interface } from "ethers"
 
 // Define a type to infer method names from the function definition

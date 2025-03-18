@@ -11,7 +11,7 @@ import {
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { getGetTokenIdAttachedToNodeQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokenIdAttachedToNode"
 import {
   getNodeIdAttachedQueryKey,
@@ -81,14 +81,14 @@ export const useAttachGMToXNode = ({ onSuccess }: Props) => {
 
   const refetchQueryKeys = useMemo(
     () => [
-      getSelectedTokenIdQueryKey(account),
+      getSelectedTokenIdQueryKey(account?.address ?? ""),
       getLevelOfTokenQueryKey(gmId),
       getGetTokenIdAttachedToNodeQueryKey(xNodeId),
       getNodeIdAttachedQueryKey(gmId),
       getNFTMetadataUriQueryKey(gmId),
-      getTokensInfoByOwnerQueryKey(account),
+      getTokensInfoByOwnerQueryKey(account?.address ?? ""),
     ],
-    [account, gmId, xNodeId],
+    [account?.address, gmId, xNodeId],
   )
 
   return useBuildTransaction({

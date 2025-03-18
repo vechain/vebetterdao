@@ -3,14 +3,14 @@ import { Button, Card, CardBody, HStack, Heading, VStack, useDisclosure } from "
 import { AppDetails } from "./components/AppDetails"
 import { useTranslation } from "react-i18next"
 import { AllManagedAppsModal, AppAdministrationRole } from "./components/AllManagedAppsModal"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 
 export const ManagedAppsCard = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const { data: appsPermissions } = useAccountAppPermissions(account ?? "")
+  const { data: appsPermissions } = useAccountAppPermissions(account?.address ?? "")
 
   // filter only apps that are managed by the user and recreate the array by not using UseQueryResult but directly data
   const userAppRoles: AppAdministrationRole[] = useMemo(() => {

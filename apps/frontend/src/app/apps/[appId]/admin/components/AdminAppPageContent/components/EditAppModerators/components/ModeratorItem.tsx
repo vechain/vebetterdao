@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react"
 import { UilTrash } from "@iconscout/react-unicons"
 import { humanAddress } from "@repo/utils/FormattingUtils"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
 type Props = {
@@ -27,8 +27,8 @@ type Props = {
 export const ModeratorItem = ({ moderator, handleDeleteModerator }: Props) => {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { domain } = useVechainDomain({ addressOrDomain: moderator })
-
+  const { data: vnsData } = useVechainDomain(moderator)
+  const domain = vnsData?.domain
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} size={"xl"}>

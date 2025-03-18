@@ -1,5 +1,5 @@
 import { useCurrentBlock } from "@/api/blockchain"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { useProposalsEvents } from "./useProposalsEvents"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getProposalDeadline, getProposalDeadlineQueryKey } from "./useProposalDeadline"

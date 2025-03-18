@@ -1424,6 +1424,8 @@
   "GitHub Username is required": "GitHub Username is required",
   "{{fieldName}} is too short": "{{fieldName}} is too short",
   "{{fieldName}} is too long": "{{fieldName}} is too long",
+  "Confirm the operation to complete the transaction": "Confirm the operation to complete the transaction",
+  "Confirm": "Confirm",
   "Actual Rewards": "Actual Rewards",
   "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.": "The rewards are estimated based on the parameters of round {{round}} (GM level, B3TR allocated, VOT3 used, total voters). The exact rewards will only be known once the round ends and all participants have cast their votes.",
   "just joined the DAO! Get involved in the app now!": "just joined the DAO! Get involved in the app now!",
@@ -1456,5 +1458,13 @@
   "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.": "To be able to participate in the VeBetter DAO, you need to have a good reputation. Signals are a way for the apps to let you know if you are not meeting the standards.",
   "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.": "If you believe this signal is unfair, please reach out to the app that signalled you to resolve the issue.",
   "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. If you want to vote here, you must remove delegation on veDelegate before snapshot.": "Your voting power has been transferred to <platform>veDelegate.vet</platform> which votes on your behalf. If you want to vote here, you must remove delegation on veDelegate before snapshot.",
-  "Voting Power Delegated": "Voting Power Delegated"
+  "Voting Power Delegated": "Voting Power Delegated",
+  "Upgrade Your Account": "Upgrade Your Account",
+  "Profile Picture": "Profile Picture",
+  "Upgrading unlocks enhanced security, multi-clause support, and better features for your smart account. It’s quick, just a click away!": "Upgrading unlocks enhanced security, multi-clause support, and better features for your smart account. It’s quick, just a click away!",
+  "Upgrade Now": "Upgrade Now",
+  "To proceed, you must upgrade your smart account. This upgrade unlocks enhanced security, enables multi-clause support, and provides additional features essential for transactions on VeChain. It's a quick and seamless process—just one click away!": "To proceed, you must upgrade your smart account. This upgrade unlocks enhanced security, enables multi-clause support, and provides additional features essential for transactions on VeChain. It's a quick and seamless process—just one click away!",
+  "NEW FEATURE AVAILABLE": "NEW FEATURE AVAILABLE",
+  "Click on your avatar and customise your profile, manage your assets and more!": "Click on your avatar and customise your profile, manage your assets and more!",
+  "Try It": "Try It"
 }

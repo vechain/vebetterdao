@@ -1,7 +1,7 @@
 import { getGMbalanceQueryKey, getTokenIdByAccountQueryKey } from "@/api"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { GalaxyMember__factory } from "@repo/contracts"
 import { getTokensInfoByOwnerQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokensInfoByOwner"
@@ -38,12 +38,12 @@ export const useMintNFT = ({ onFailure, onSuccess }: useMintNFTProps) => {
 
   const refetchQueryKeys = useMemo(
     () => [
-      getSelectedTokenIdQueryKey(account),
-      getTokenIdByAccountQueryKey(account),
-      getGMbalanceQueryKey(account),
-      getTokensInfoByOwnerQueryKey(account),
+      getSelectedTokenIdQueryKey(account?.address),
+      getTokenIdByAccountQueryKey(account?.address ?? ""),
+      getGMbalanceQueryKey(account?.address ?? ""),
+      getTokensInfoByOwnerQueryKey(account?.address),
     ],
-    [account],
+    [account?.address],
   )
 
   const handleOnFailure = useCallback(() => {

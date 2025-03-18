@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import { LinkedAccountsItem } from "./components/LinkedAccountsItem"
 import { useAccountLinking } from "@/api"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 type Props = {
   address: string
@@ -12,7 +12,7 @@ export const LinkedAccounts = ({ address }: Props) => {
   const { t } = useTranslation()
 
   const { account: connectedAccount } = useWallet()
-  const isConnectedUser = compareAddresses(connectedAccount ?? "", address)
+  const isConnectedUser = compareAddresses(connectedAccount?.address ?? "", address)
   const { isLinked, passport, passportLinkedEntities, outgoingPendingLink, isLoading } = useAccountLinking(address)
 
   if (isLoading || (!isLinked && !outgoingPendingLink)) return null

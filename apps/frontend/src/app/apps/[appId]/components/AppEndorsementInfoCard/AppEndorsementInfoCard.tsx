@@ -26,7 +26,7 @@ import { useTranslation } from "react-i18next"
 import { EndorseAppModal } from "@/app/apps/components/EndorseAppModal"
 import { UnendorseAppModal } from "@/app/apps/components/UnendorseAppModal"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { SwitchEndorsementAppModal } from "@/app/apps/components/SwitchEndorsementAppModal"
 import { AppEndorsementInfoCardModal } from "./AppEndorsementInfoCardModal"
@@ -59,8 +59,11 @@ export const AppEndorsementInfoCard = ({
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
   // User roles data
-  const { data: isAppModerator, isLoading: isAppModeratorLoading } = useIsAppModerator(app?.id ?? "", account ?? "")
-  const { data: isAppAdmin, isLoading: isAppAdminLoading } = useIsAppAdmin(app?.id ?? "", account ?? "")
+  const { data: isAppModerator, isLoading: isAppModeratorLoading } = useIsAppModerator(
+    app?.id ?? "",
+    account?.address ?? "",
+  )
+  const { data: isAppAdmin, isLoading: isAppAdminLoading } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
   const isUserRolesDataLoading = isAppModeratorLoading || isAppAdminLoading
 
   // User xnodes, TODO support multiple xnodes

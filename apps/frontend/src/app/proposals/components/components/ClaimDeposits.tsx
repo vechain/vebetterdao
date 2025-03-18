@@ -5,7 +5,7 @@ import { ethers } from "ethers"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { ProposalDeposit } from "@/api"
 import { useWithdrawDeposits } from "@/hooks/useWithdrawDeposits"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 
 type Props = {
   totalClaimableDeposits: bigint
@@ -23,12 +23,12 @@ export const ClaimDeposits = ({ totalClaimableDeposits, claimableDeposits }: Pro
     return Number(ethers.formatEther(totalClaimableDeposits))
   }, [totalClaimableDeposits])
 
-  const { sendTransaction, resetStatus, status, txReceipt, sendTransactionTx, error } = useWithdrawDeposits({
+  const { sendTransaction, resetStatus, status, txReceipt, error } = useWithdrawDeposits({
     proposalDeposits: claimableDeposits,
   })
 
   const handleClaim = useCallback(() => {
-    sendTransaction()
+    sendTransaction(undefined)
     onOpen()
   }, [sendTransaction, onOpen])
 
@@ -70,12 +70,12 @@ export const ClaimDeposits = ({ totalClaimableDeposits, claimableDeposits }: Pro
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Deposits Withdraw Completed!")}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         errorDescription={error?.reason}
         errorTitle={error ? t("Error Withdrawing") : undefined}
         pendingTitle={t("Withdrawing...")}
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
       />
     </>
   )

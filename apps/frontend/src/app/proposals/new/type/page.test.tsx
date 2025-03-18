@@ -2,7 +2,7 @@ import { describe, expect, vi } from "vitest"
 import NewproposalPage from "./page"
 import { fireEvent, render, renderHook, screen, waitFor } from "../../../../../test"
 import * as router from "next/navigation"
-import * as dappKit from "@vechain/dapp-kit-react"
+import * as vechainKit from "@vechain/vechain-kit"
 import { Steps } from "./components/NewProposalTypePageContent"
 import { useTranslation } from "react-i18next"
 
@@ -18,7 +18,7 @@ vi.spyOn(router, "useRouter").mockReturnValue({
 describe("NewProposalType", async () => {
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
-    vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
+    vi.spyOn(vechainKit, "useWallet").mockReturnValueOnce({
       account: null,
     })
     render(<NewproposalPage />)

@@ -1,6 +1,6 @@
 import { useB3trDonated, useXNode } from "@/api"
 import { getGMLevel } from "@/api/contracts/galaxyMember/utils"
-import { CustomModalContent, TransactionModal } from "@/components"
+import { CustomModalContent, TransactionModal, TransactionModalStatus } from "@/components"
 import { useDetachGMFromXNode } from "@/hooks"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
@@ -39,7 +39,6 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const detachGMFromXNodeMutation = useDetachGMFromXNode({
     onSuccess: () => {
       detachGMFromXNodeMutation.resetStatus()
-      onClose()
     },
   })
 
@@ -60,14 +59,18 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Detach GM from Node")}
-        status={detachGMFromXNodeMutation.error ? "error" : detachGMFromXNodeMutation.status}
+        status={
+          detachGMFromXNodeMutation.error
+            ? TransactionModalStatus.Error
+            : (detachGMFromXNodeMutation.status as TransactionModalStatus)
+        }
         errorDescription={detachGMFromXNodeMutation.error?.reason}
         errorTitle={detachGMFromXNodeMutation.error ? t("Error detaching") : undefined}
         showTryAgainButton
         onTryAgain={handleDetachment}
         pendingTitle={t("Detaching GM from Node...")}
         showExplorerButton
-        txId={detachGMFromXNodeMutation.txReceipt?.meta.txID ?? detachGMFromXNodeMutation.sendTransactionTx?.txid}
+        txId={detachGMFromXNodeMutation.txReceipt?.meta.txID}
       />
     )
 

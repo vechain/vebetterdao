@@ -30,7 +30,7 @@ import {
   updateMarkdownTemplatePlaceholders,
   validateProposalTemplate,
 } from "@/constants"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { AnalyticsUtils } from "@/utils"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
@@ -73,14 +73,14 @@ export const NewProposalPageDiscussionContent = () => {
 
   const resetMarkdownToDefault = useCallback(() => {
     const defaultMarkdown = updateMarkdownTemplatePlaceholders({
-      account,
+      account: account?.address,
       title,
       shortDescription,
       actionsLength: actions.length,
     })
     setValue("markdownDescription", defaultMarkdown)
     setData({ markdownDescription: defaultMarkdown })
-  }, [setData, setValue, account, title, shortDescription, actions])
+  }, [setData, setValue, account?.address, title, shortDescription, actions])
 
   return (
     <Card w="full" variant="baseWithBorder" data-testid="new-proposal-content-page">
