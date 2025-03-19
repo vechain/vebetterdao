@@ -36,11 +36,7 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
     return getGMLevel(1, Number(b3trDonated ?? 0))
   }, [b3trDonated])
 
-  const detachGMFromXNodeMutation = useDetachGMFromXNode({
-    onSuccess: () => {
-      detachGMFromXNodeMutation.resetStatus()
-    },
-  })
+  const detachGMFromXNodeMutation = useDetachGMFromXNode({})
 
   const handleClose = useCallback(() => {
     detachGMFromXNodeMutation.resetStatus()
