@@ -73,11 +73,15 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
   const seeAllModal = useDisclosure()
 
+  const navigateToRoundPage = useCallback(() => {
+    router.push(`/rounds/${roundId}`)
+  }, [router, roundId])
+
   const delayedRouterPush = useCallback(() => {
     setTimeout(() => {
-      router.push(`/rounds/${roundId}`)
-    }, 2500)
-  }, [router, roundId])
+      navigateToRoundPage()
+    }, 4000)
+  }, [navigateToRoundPage])
 
   const onSuccess = useCallback(() => {
     delayedRouterPush()
@@ -88,7 +92,8 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const handleClose = useCallback(() => {
     castAllocationVotes.resetStatus()
     transactionModal.onClose()
-  }, [castAllocationVotes, transactionModal])
+    navigateToRoundPage()
+  }, [castAllocationVotes, transactionModal, navigateToRoundPage])
 
   const totalVotesToCast = useMemo(() => {
     return (votes.reduce((acc, vote) => acc + Number(vote.rawValue), 0) * Number(votesAtSnapshot)) / 100
@@ -196,6 +201,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
           <CastAllocationControlsBottomBar
             onContinue={onContinue}
+            isDisabled={!shouldSeeThePage?.value || hasVoted}
             helperText={
               <Text fontSize={"16px"} fontWeight={400} color={"#F29B32"} textAlign={["center", "center", "left"]}>
                 <Trans i18nKey={"Once your vote has been cast, you will not be able to revert it."} t={t} />

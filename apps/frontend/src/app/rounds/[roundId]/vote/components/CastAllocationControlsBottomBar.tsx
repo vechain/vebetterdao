@@ -7,8 +7,9 @@ import { useRouter } from "next/navigation"
 type Props = {
   onContinue: () => void
   helperText?: React.ReactNode
+  isDisabled?: boolean
 }
-export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Props) => {
+export const CastAllocationControlsBottomBar = ({ onContinue, helperText, isDisabled = false }: Props) => {
   const router = useRouter()
   const { isMobile } = useBreakpoints()
 
@@ -48,6 +49,7 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
             flex={1}
             borderRadius={"16px"}
             size="lg"
+            isDisabled={isDisabled}
             rightIcon={<UilArrowRight />}
             fontSize="18px"
             data-testid="continue"
@@ -79,6 +81,7 @@ export const CastAllocationControlsBottomBar = ({ onContinue, helperText }: Prop
         </Button>
         <Button
           flex={1}
+          isDisabled={isDisabled}
           //   borderRadius={"16px"}
           size="lg"
           rightIcon={<UilArrowRight />}
