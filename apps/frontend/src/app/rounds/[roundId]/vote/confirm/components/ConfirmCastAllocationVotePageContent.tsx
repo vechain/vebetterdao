@@ -73,7 +73,15 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
   const seeAllModal = useDisclosure()
 
-  const onSuccess = useCallback(() => router.push(`/rounds/${roundId}`), [router, roundId])
+  const delayedRouterPush = useCallback(() => {
+    setTimeout(() => {
+      router.push(`/rounds/${roundId}`)
+    }, 2500)
+  }, [router, roundId])
+
+  const onSuccess = useCallback(() => {
+    delayedRouterPush()
+  }, [delayedRouterPush])
 
   const castAllocationVotes = useCastAllocationVotes({ roundId, onSuccess })
 
@@ -117,9 +125,9 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   useLayoutEffect(() => {
     if (shouldSeeThePage.loading) return
     if (!shouldSeeThePage.value) {
-      router.push(`/rounds/${roundId}`)
+      delayedRouterPush()
     }
-  }, [shouldSeeThePage, roundId, router])
+  }, [shouldSeeThePage, roundId, router, delayedRouterPush])
 
   if (!shouldSeeThePage) return null
 
