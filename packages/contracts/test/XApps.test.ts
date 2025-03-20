@@ -727,14 +727,7 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV4.checkCooldown(1)).to.eql(false)
     })
 
-    /**
-     * TODO:
-     * 1. Each module of X Apps contract has it's own storage location, the current implementation is aggregating storage slots of different modules.
-     * 2. The test should test that each module storage has not got conflict and not that the aggregated storage slots are the same.
-     *    That's why, when adding _x2EarnRewardsPoolContract slot to AdministrationUtils, it's resulting in a new non-zero slot,
-     *    but because we are comparing the aggregation of all slots then it's resulting in a conflict.
-     */
-    it.only("Should not have state conflict after upgrading to V4", async () => {
+    it("Should not have state conflict after upgrading to V4", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
       config.X2EARN_NODE_COOLDOWN_PERIOD = 1
@@ -854,9 +847,6 @@ describe("X-Apps - @shard15", function () {
         initialSlotAdministration,
         initialEndorsementSlot,
       )
-
-      console.log("storageSlots", storageSlots)
-
       config.X2EARN_NODE_COOLDOWN_PERIOD = 24
 
       // Upgrade X2EarnAppsV2 to X2EarnAppsV3
@@ -884,16 +874,34 @@ describe("X-Apps - @shard15", function () {
         initialEndorsementSlot,
       )
 
-      console.log("storageSlotsAfterV3", storageSlotsAfterV3)
-
       expect(await x2EarnAppsV3.version()).to.equal("3")
       expect(storageSlotsAfterV3[storageSlotsAfterV3.length - 2]).to.equal(BigInt(config.X2EARN_NODE_COOLDOWN_PERIOD))
+
+      for (let i = 0; i < storageSlots.length; i++) {
+        expect(storageSlots[i]).to.equal(storageSlotsAfterV3[i])
+      }
 
       const storageSlotsAdministrationAfterV3 = await getStorageSlots(
         await x2EarnAppsV2.getAddress(),
         initialSlotAdministration,
       )
 
+      const storageSlotsVoteEligibilityAfterV3 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialSlotVoteEligibility,
+      )
+
+      const storageSlotsSettingsAfterV3 = await getStorageSlots(await x2EarnAppsV2.getAddress(), initialSlotSettings)
+
+      const storageSlotsAppsStorageAfterV3 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialSlotAppsStorage,
+      )
+
+      const storageSlotsEndorsementSlotAfterV3 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialEndorsementSlot,
+      )
       // Upgrade X2EarnAppsV2 to X2EarnAppsV3
       const x2EarnAppsV4 = (await upgradeProxy(
         "X2EarnAppsV3",
@@ -910,39 +918,64 @@ describe("X-Apps - @shard15", function () {
         },
       )) as X2EarnApps
 
-      const storageSlotsAfterV4 = await getStorageSlots(
-        x2EarnAppsV4.getAddress(),
-        initialSlotVoteEligibility,
-        initialSlotSettings,
-        initialSlotAppsStorage,
-        initialSlotAdministration,
-        initialEndorsementSlot,
-      )
-
       const storageSlotsAdministrationAfterV4 = await getStorageSlots(
         await x2EarnAppsV2.getAddress(),
         initialSlotAdministration,
       )
 
-      console.log("STORAGE SLOTS ADMINISTRATION AFTER V3", storageSlotsAdministrationAfterV3)
-      console.log("STORAGE SLOTS ADMINISTRATION AFTER V4", storageSlotsAdministrationAfterV4)
+      const storageSlotsVoteEligibilityAfterV4 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialSlotVoteEligibility,
+      )
 
-      console.log("storageSlotsAfterV4", storageSlotsAfterV4)
+      const storageSlotsSettingsAfterV4 = await getStorageSlots(await x2EarnAppsV2.getAddress(), initialSlotSettings)
+
+      const storageSlotsAppsStorageAfterV4 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialSlotAppsStorage,
+      )
+
+      const storageSlotsEndorsementSlotAfterV4 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialEndorsementSlot,
+      )
+
       expect(await x2EarnAppsV4.version()).to.equal("4")
 
-      // TODO : fix the slot issue -> storageSlotsAfterV4[5] is not the same as storageSlots[5]
-      // Instead of the end of the array, the v4 slot variable is append after the v1 slot variable
-      for (let i = 0; i < storageSlots.length; i++) {
-        console.log("storageSlotsAfterV4[i]", storageSlotsAfterV4[i])
-        console.log("--------------------------------")
-
-        expect(storageSlots[i]).to.equal(storageSlotsAfterV4[i])
+      // Check that the storage slots are the same for the administration module
+      for (let i = 0; i < storageSlotsAdministrationAfterV3.length; i++) {
+        expect(storageSlotsAdministrationAfterV3[i]).to.equal(storageSlotsAdministrationAfterV4[i])
       }
 
-      // storage slot is all the prev + the new one ( x2earnRewardsPool )
-      // expect(storageSlotsAfterV4[storageSlotsAfterV4.length - 1]).to.equal(await x2EarnRewardsPool.getAddress())
-      // expect(storageSlotsAfterV4[storageSlotsAfterV4.length - 2]).to.equal(BigInt(config.X2EARN_NODE_COOLDOWN_PERIOD))
-      // expect(storageSlotsAfterV4[storageSlotsAfterV4.length - 3]).to.equal(await xAllocationVoting.getAddress())
+      // Check that the storage slots are the same for the vote eligibility module
+      for (let i = 0; i < storageSlotsVoteEligibilityAfterV3.length; i++) {
+        expect(storageSlotsVoteEligibilityAfterV3[i]).to.equal(storageSlotsVoteEligibilityAfterV4[i])
+      }
+
+      // Check that the storage slots are the same for the settings module
+      for (let i = 0; i < storageSlotsSettingsAfterV3.length; i++) {
+        expect(storageSlotsSettingsAfterV3[i]).to.equal(storageSlotsSettingsAfterV4[i])
+      }
+
+      // Check that the storage slots are the same for the apps storage module
+      for (let i = 0; i < storageSlotsAppsStorageAfterV3.length; i++) {
+        expect(storageSlotsAppsStorageAfterV3[i]).to.equal(storageSlotsAppsStorageAfterV4[i])
+      }
+
+      // Check that the storage slots are the same for the endorsement slot
+      for (let i = 0; i < storageSlotsEndorsementSlotAfterV3.length; i++) {
+        expect(storageSlotsEndorsementSlotAfterV3[i]).to.equal(storageSlotsEndorsementSlotAfterV4[i])
+      }
+
+      // The first slot is the x2earnCreator contract address
+      const addressFromSlot = ethers.getAddress("0x" + storageSlotsAdministrationAfterV4[0].slice(26))
+      const expectedAddress = ethers.getAddress(await x2EarnCreator.getAddress())
+      expect(addressFromSlot).to.equal(expectedAddress)
+
+      // The second slot is the x2earnRewardsPool contract address
+      const addressFromSlot2 = ethers.getAddress("0x" + storageSlotsAdministrationAfterV4[1].slice(26))
+      const expectedAddress2 = ethers.getAddress(await x2EarnRewardsPool.getAddress())
+      expect(addressFromSlot2).to.equal(expectedAddress2)
     })
 
     it.skip("Check no issues upgrading to V4 with update of libraries", async function () {
@@ -1524,18 +1557,18 @@ describe("X-Apps - @shard15", function () {
       // Upgrade to V3 of X2EarnApps
       const x2EarnAppsV3 = (await upgradeProxy(
         "X2EarnAppsV2",
-        "X2EarnApps",
-        await x2EarnAppsV1.getAddress(),
+        "X2EarnAppsV3",
+        await x2EarnAppsV2.getAddress(),
         [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
           version: 3,
           libraries: {
-            AdministrationUtils: await administrationUtils.getAddress(),
-            EndorsementUtils: await endorsementUtils.getAddress(),
-            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+            AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
+            EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
+            VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
           },
         },
-      )) as X2EarnApps
+      )) as X2EarnAppsV3
 
       // Upgrade contracts that need new interfaces
       ;(await upgradeProxy("X2EarnRewardsPoolV4", "X2EarnRewardsPool", await x2EarnRewardsPool.getAddress(), [], {
@@ -1683,6 +1716,23 @@ describe("X-Apps - @shard15", function () {
       expect(await xAllocationPool.claimableAmount(currentRound + 1n, newAppId)).to.not.eql(0n)
       const tx = await xAllocationPool.connect(owner).claim(currentRound + 1n, newAppId)
       await tx.wait()
+
+      // Upgrade to V4
+      const x2EarnAppsV4 = (await upgradeProxy(
+        "X2EarnAppsV3",
+        "X2EarnApps",
+        await x2EarnAppsV3.getAddress(),
+        [await x2EarnRewardsPool.getAddress()],
+        {
+          version: 4,
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        },
+      )) as X2EarnApps
+      expect(await x2EarnAppsV4.version()).to.eql("4")
     })
   })
 
