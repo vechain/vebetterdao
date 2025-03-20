@@ -8,7 +8,7 @@ const APPS_DISPLAY_LIMIT = 10
 
 export const TotalAllocations = () => {
   const { t } = useTranslation()
-  const { data: xApps } = useXApps(true) // filterBlacklisted = true
+  const { data: xApps } = useXApps({ filterBlacklisted: true })
   const activeApps = xApps?.active
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()

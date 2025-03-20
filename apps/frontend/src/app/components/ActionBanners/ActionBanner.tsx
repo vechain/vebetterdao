@@ -70,7 +70,7 @@ export const ActionBanner = () => {
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
-  const { data: xApps } = useXApps(true) // filterBlacklisted = true
+  const { data: xApps } = useXApps({ filterBlacklisted: true })
 
   const { filteredProposals, isLoading: isLoadingProposals } = useFilteredProposals([ProposalFilter.InThisRound])
 

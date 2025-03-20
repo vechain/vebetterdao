@@ -17,7 +17,7 @@ export const getXAppsQueryKey = (filterBlacklisted: boolean = false) => [
  * @param filterBlacklisted - whether to filter blacklisted xApps
  * @returns all the available xApps in the B3TR ecosystem capped to 256
  */
-export const useXApps = (filterBlacklisted = false) => {
+export const useXApps = ({ filterBlacklisted = false } = {}) => {
   const { thor } = useConnex()
 
   return useQuery({

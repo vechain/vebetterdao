@@ -20,7 +20,7 @@ export type XAppInformations = {
 export const AppsPageContent = () => {
   const { t } = useTranslation()
   const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
-  const { data: xApps, isLoading: isXAppsLoading } = useXApps(true) // filterBlacklisted = true
+  const { data: xApps, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
 
   const newApps = xApps?.newLookingForEndorsement
   const gracePeriodApps = xApps?.gracePeriod
