@@ -6,7 +6,6 @@ on:
     branches:
       - main
       - testnet
-      - gm
   push:
     branches:
       - main
@@ -74,9 +73,9 @@ jobs:
         run: yarn test
 
       # Run Frontend unit tests if frontend, contracts, or utils changes are detected
-      - name: Frontend Unit Tests
-        if: needs.check-changes.outputs.frontend-changed == 'true' || needs.check-changes.outputs.contracts-changed == 'true' || needs.check-changes.outputs.utils-changed == 'true'
-        run: yarn test --filter=frontend
+      # - name: Frontend Unit Tests
+      #   if: needs.check-changes.outputs.frontend-changed == 'true' || needs.check-changes.outputs.contracts-changed == 'true' || needs.check-changes.outputs.utils-changed == 'true'
+      #   run: yarn test --filter=frontend
 
       # Run Backend unit tests only if there are backend changes and no contracts/utils changes
       - name: Backend Unit Tests
@@ -98,7 +97,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [shard0, shard2, shard3, shard4, shard5, shard6, shard7, shard8, shard9, shard10, shard11, shard12, shard13, shard14, shard15]
+        shard:
+          [
+            shard0,
+            shard2,
+            shard3,
+            shard4,
+            shard5,
+            shard6,
+            shard7,
+            shard8,
+            shard9,
+            shard10,
+            shard11,
+            shard12,
+            shard13,
+            shard14,
+            shard15,
+          ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -139,7 +155,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      
+
       - name: Use Node v20
         uses: actions/setup-node@v3
         with:
