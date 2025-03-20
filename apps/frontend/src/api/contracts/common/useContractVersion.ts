@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { B3TRGovernor__factory } from "@repo/contracts/typechain-types"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 
 const B3TRGovernorInterface = B3TRGovernor__factory.createInterface()
 

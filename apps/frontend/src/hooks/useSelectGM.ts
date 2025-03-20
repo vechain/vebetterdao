@@ -4,7 +4,7 @@ import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
@@ -31,7 +31,7 @@ export const useSelectGM = ({ tokenId, onSuccess }: Props) => {
     ]
   }, [tokenId])
 
-  const refetchQueryKeys = useMemo(() => [getSelectedTokenIdQueryKey(account)], [account])
+  const refetchQueryKeys = useMemo(() => [getSelectedTokenIdQueryKey(account?.address)], [account?.address])
 
   return useBuildTransaction({
     clauseBuilder,

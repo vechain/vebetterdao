@@ -1,6 +1,6 @@
 import { FormattingUtils } from "@repo/utils"
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { ethers } from "ethers"
 
 export const getAccountBalance = async (thor: Connex.Thor, address?: string) => {

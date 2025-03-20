@@ -10,5 +10,6 @@ export * from "./Passport"
 export * from "./transactions"
 export * from "./AnalyticsEvents"
 export * from "./featureFlag"
+export * from "./XAppsMedia"
 
 export const notFoundImage = "/images/image-not-found.png"

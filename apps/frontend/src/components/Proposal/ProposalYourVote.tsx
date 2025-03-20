@@ -11,7 +11,7 @@ import { UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { useMemo } from "react"
 import { MdHowToVote } from "react-icons/md"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 const forColor = "#3DBA67"
 const againstColor = "#C84968"
@@ -55,7 +55,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
   }, [proposalState])
 
   const yourVoteLabel = useMemo(() => {
-    if (!account) return null
+    if (!account?.address) return null
     if (!userVote)
       return (
         <Text fontSize={12} color={"#6A6A6A"} fontWeight={400} {...textProps}>
@@ -85,11 +85,11 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
         </Text>
       </HStack>
     )
-  }, [userVote, account, textProps, t])
+  }, [userVote, account?.address, textProps, t])
 
   const shouldRender = useMemo(() => {
     return (
-      account &&
+      account?.address &&
       [
         ProposalState.Active,
         ProposalState.Defeated,
@@ -98,7 +98,7 @@ export const ProposalYourVote = ({ proposalId, renderTitle = true, textProps = {
         ProposalState.Succeeded,
       ].includes(proposalState as ProposalState)
     )
-  }, [proposalState, account])
+  }, [proposalState, account?.address])
 
   if (!shouldRender) return null
 
@@ -144,7 +144,7 @@ const NoVoteAndActiveCheckVotingPower = ({
   const { data: snapshotBlock, isLoading: snapshotBlockloading } = useProposalSnapshot(proposalId)
   const { data: userSnapshot, isLoading: userSnapshotLoading } = useGetVotesOnBlock(
     snapshotBlock ? Number(snapshotBlock) : undefined,
-    account ?? undefined,
+    account?.address ?? undefined,
   )
   const { data: threshold } = useVotingThreshold()
 

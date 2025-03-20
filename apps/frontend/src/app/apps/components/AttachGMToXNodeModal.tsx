@@ -1,6 +1,6 @@
 import { getGMLevel, useB3trDonated, useSelectedGmNft, useXNode } from "@/api"
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
-import { CustomModalContent, TransactionModal } from "@/components"
+import { CustomModalContent, TransactionModal, TransactionModalStatus } from "@/components"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
 import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
@@ -79,14 +79,18 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Attach GM to Node")}
-        status={attachGMToXNodeMutation.error ? "error" : attachGMToXNodeMutation.status}
+        status={
+          attachGMToXNodeMutation.error
+            ? TransactionModalStatus.Error
+            : (attachGMToXNodeMutation.status as TransactionModalStatus)
+        }
         errorDescription={attachGMToXNodeMutation.error?.reason}
         errorTitle={attachGMToXNodeMutation.error ? "Error attaching" : undefined}
         showTryAgainButton
         onTryAgain={handleAttachment}
         pendingTitle={"Attaching GM to XNode..."}
         showExplorerButton
-        txId={attachGMToXNodeMutation.txReceipt?.meta.txID ?? attachGMToXNodeMutation.sendTransactionTx?.txid}
+        txId={attachGMToXNodeMutation.txReceipt?.meta.txID}
       />
     )
 

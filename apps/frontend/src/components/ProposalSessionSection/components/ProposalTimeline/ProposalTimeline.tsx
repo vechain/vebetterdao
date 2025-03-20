@@ -5,7 +5,7 @@ import { TimelineItem } from "./components/TimelineItem"
 import { ProposalCreatedTimelineItem } from "./components/ProposalCreatedTimelineItem"
 import { ProposalState } from "@/api"
 import dayjs from "dayjs"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { ProposalQueueButton } from "./components/ProposalQueueButton"
 import { ProposalExecuteButton } from "./components/ProposalExecuteButton"
@@ -14,7 +14,7 @@ import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 export const ProposalTimeline = () => {
   const { proposal } = useProposalDetail()
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account || "")
+  const { data: permissions } = useAccountPermissions(account?.address || "")
 
   const showQueueButton = proposal.state === ProposalState.Succeeded && permissions?.isProposalExecutor
   const showExecuteButton = proposal.state === ProposalState.Queued && permissions?.isProposalExecutor

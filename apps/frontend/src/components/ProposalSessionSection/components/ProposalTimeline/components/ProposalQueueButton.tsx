@@ -1,5 +1,5 @@
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useQueueProposal } from "@/hooks/useQueueProposal"
 import { Button, useDisclosure } from "@chakra-ui/react"
 import { t } from "i18next"
@@ -26,12 +26,12 @@ export const ProposalQueueButton = () => {
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Queue proposal completed!")}
-        status={queueMutation.error ? "error" : queueMutation.status}
+        status={queueMutation.error ? TransactionModalStatus.Error : (queueMutation.status as TransactionModalStatus)}
         errorDescription={queueMutation.error?.reason}
         errorTitle={queueMutation.error ? t("Error queueing proposal") : undefined}
         pendingTitle={t("Queueing...")}
         showExplorerButton
-        txId={queueMutation.txReceipt?.meta.txID ?? queueMutation.sendTransactionTx?.txid}
+        txId={queueMutation.txReceipt?.meta.txID}
       />
     </>
   )

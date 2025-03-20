@@ -1,6 +1,6 @@
 import { useXApps } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useUpdateXAppReceiverAddress } from "@/hooks"
 import {
   VStack,
@@ -27,21 +27,13 @@ export const UpdateReceiverAddress = () => {
   const { t } = useTranslation()
   const { data: xApps } = useXApps()
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useUpdateXAppReceiverAddress({
-    appId: appId ?? "",
-    newAddress,
-    invalidateCache: true,
-  })
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useUpdateXAppReceiverAddress(
+    {
+      appId: appId ?? "",
+      newAddress,
+    },
+  )
+  const isLoading = isTransactionPending || status === "pending"
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -139,12 +131,12 @@ export const UpdateReceiverAddress = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={"Treasury address updated"}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={`Updating team wallet address...`}
         errorTitle={"Error updating address"}
         errorDescription={error?.reason}

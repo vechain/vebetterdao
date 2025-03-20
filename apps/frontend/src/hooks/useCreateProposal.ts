@@ -1,7 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { governanceAvailableContracts } from "@/constants"
 import { ethers } from "ethers"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
@@ -42,11 +41,6 @@ type BuildClausesProps = {
   startRoundId: number | string
   depositAmount: string
 }
-
-type useCreateProposalReturnValue = {
-  sendTransaction: (props: BuildClausesProps) => Promise<void>
-} & Omit<UseSendTransactionReturnValue, "sendTransaction">
-
 /**
  * Hook to create a proposal with the given calldata or actions. I.e functions to call if the proposal is executed
  * @param description The description of the proposal
@@ -54,10 +48,7 @@ type useCreateProposalReturnValue = {
  * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useCreateProposal = ({
-  invalidateCache = true,
-  onSuccess,
-}: useCreateProposalProps): useCreateProposalReturnValue => {
+export const useCreateProposal = ({ invalidateCache = true, onSuccess }: useCreateProposalProps) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
 
@@ -71,24 +62,24 @@ export const useCreateProposal = ({
         queryKey: getProposalsEventsQueryKey(),
       })
       await queryClient.cancelQueries({
-        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
+        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
       })
       await queryClient.refetchQueries({
-        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
+        queryKey: getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
       })
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess])
+  }, [invalidateCache, onSuccess, queryClient, account?.address])
 
   const result = useSendTransaction({
-    signerAccount: account,
+    signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
   })
 
   const buildClauses = useCallback(
     ({ description, actions, startRoundId, depositAmount }: BuildClausesProps) => {
-      if (!account) throw new Error("Account is required")
+      if (!account?.address) throw new Error("Account is required")
 
       const clauses: EnhancedClause[] = []
       const parsedDepositAmount = ethers.parseEther(depositAmount).toString()
@@ -131,7 +122,7 @@ export const useCreateProposal = ({
 
       return clauses
     },
-    [account],
+    [account?.address],
   )
 
   const onMutate = useCallback(
@@ -146,6 +137,6 @@ export const useCreateProposal = ({
     },
     [buildClauses, result],
   )
-
+  //TODO: Refactor to use `useBuildTransaction`
   return { ...result, sendTransaction: onMutate }
 }

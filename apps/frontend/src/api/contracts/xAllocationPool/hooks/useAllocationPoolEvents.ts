@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { abi } from "thor-devkit"
 import { getAllEvents } from "@/api/blockchain"
 import { getConfig } from "@repo/config"

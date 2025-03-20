@@ -21,7 +21,7 @@ import { AppEndorsedEvent } from "@/api/contracts/xApps/hooks/endorsement/useApp
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
 import { useState } from "react"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 
 type Props = {
   isAppAdmin: boolean
@@ -70,7 +70,8 @@ export const EndorsersItem = ({
   const goToEndorserUserProfilePage = () => {
     router.push("/profile/" + endorserAddress + "?tab=gm")
   }
-  const { domain } = useVechainDomain({ addressOrDomain: endorserAddress })
+  const { data: vnsData } = useVechainDomain(endorserAddress)
+  const domain = vnsData?.domain
 
   return (
     <HStack

@@ -1,9 +1,4 @@
-import dayjs from "dayjs"
-import relativeTime from "dayjs/plugin/relativeTime"
-import duration from "dayjs/plugin/duration"
-
-dayjs.extend(relativeTime)
-dayjs.extend(duration)
+import dayjs from "@/utils/dayjsConfig"
 /**
  * Converts a timestamp to a compact time left string.
  * @param endDate - The end date timestamp.

@@ -19,7 +19,7 @@ import {
 } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -52,22 +52,28 @@ export const Leaderboard = () => {
     }
   }, [roundId, selectedRoundId])
 
-  const userRoundOverview = useSustainabilitySingleUserOverview({ wallet: account ?? "", roundId: selectedRoundId })
+  const userRoundOverview = useSustainabilitySingleUserOverview({
+    wallet: account?.address ?? "",
+    roundId: selectedRoundId,
+  })
 
   const onRoundChange = (roundId: string) => () => {
     setSelectedRoundId(roundId)
   }
 
   const yourRaking = useMemo(() => {
-    if (!account) return undefined
+    if (!account?.address) return undefined
     if (userRoundOverview.isLoading) return undefined
-    if (userRoundOverview.isError) return undefined
+    if (userRoundOverview.isError) {
+      console.error(userRoundOverview.error)
+      return undefined
+    }
     return {
       position: userRoundOverview.data?.rankByActionsRewarded ?? 0,
-      address: account ?? "",
+      address: account?.address ?? "",
       score: userRoundOverview.data?.actionsRewarded ?? 0,
     }
-  }, [userRoundOverview, account])
+  }, [userRoundOverview, account?.address])
 
   const leaderboardQuery = useSustainabilityUserOverviewPerRound({ roundId: selectedRoundId, direction: "desc" })
 
@@ -95,7 +101,7 @@ export const Leaderboard = () => {
         <Skeleton key={ranking.position} borderRadius={"lg"}>
           <LeaderboardRankingComponent
             ranking={ranking}
-            isYourRanking={AddressUtils.compareAddresses(ranking.address, account ?? "")}
+            isYourRanking={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
           />
         </Skeleton>
       ))
@@ -125,7 +131,7 @@ export const Leaderboard = () => {
             <LeaderboardRankingComponent
               key={ranking.position}
               ranking={ranking}
-              isYourRanking={AddressUtils.compareAddresses(ranking.address, account ?? "")}
+              isYourRanking={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
             />
           ))}
         </VStack>
@@ -134,12 +140,14 @@ export const Leaderboard = () => {
       <LeaderboardRankingComponent
         ranking={ranking}
         key={ranking.position}
-        isYourRanking={AddressUtils.compareAddresses(ranking.address, account ?? "")}
+        isYourRanking={AddressUtils.compareAddresses(ranking.address, account?.address ?? "")}
       />
     ))
   }, [leaderboardQuery, account, rankings, t])
 
-  const isRankingInTop5 = rankings.some(ranking => AddressUtils.compareAddresses(ranking.address, account ?? ""))
+  const isRankingInTop5 = rankings.some(ranking =>
+    AddressUtils.compareAddresses(ranking.address, account?.address ?? ""),
+  )
   return (
     <Card w="full" variant={"baseWithBorder"}>
       <CardBody>
