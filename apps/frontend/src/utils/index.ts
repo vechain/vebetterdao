@@ -7,5 +7,6 @@ export * from "./ipfs"
 export * from "./date"
 export * from "./filterAmountInput"
 export * from "./getNodeJsConnex"
+export * from "./dayjsConfig"
 
 export { AddressUtils, AnalyticsUtils, HexUtils }
