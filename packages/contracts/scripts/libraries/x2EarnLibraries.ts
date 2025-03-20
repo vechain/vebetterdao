@@ -3,6 +3,7 @@ import { ethers } from "hardhat"
 export async function x2EarnLibraries() {
   // NOTE: V1 libraries do not exist, libraries were added in V2 of X2EarnApps contract
 
+  // ---------------------- Version 2 ----------------------
   // Deploy Passport Checks LogicV2
   const AdministrationUtilsV2 = await ethers.getContractFactory("AdministrationUtilsV2")
   const AdministrationUtilsLibV2 = await AdministrationUtilsV2.deploy()
@@ -18,22 +19,20 @@ export async function x2EarnLibraries() {
   const VoteEligibilityUtilsLibV2 = await VoteEligibilityUtilsV2.deploy()
   await VoteEligibilityUtilsLibV2.waitForDeployment()
 
-  //Enable X2EarnRewardsPool
+  // ---------------------- Version 3 ----------------------
   const AdministrationUtilsV3 = await ethers.getContractFactory("AdministrationUtilsV3")
   const AdministrationUtilsLibV3 = await AdministrationUtilsV3.deploy()
   await AdministrationUtilsLibV3.waitForDeployment()
 
-  //Enable X2EarnRewardsPool
   const EndorsementUtilsV3 = await ethers.getContractFactory("EndorsementUtilsV3")
   const EndorsementUtilsLibV3 = await EndorsementUtilsV3.deploy()
   await EndorsementUtilsLibV3.waitForDeployment()
 
-  //Enable X2EarnRewardsPool
   const VoteEligibilityUtilsV3 = await ethers.getContractFactory("VoteEligibilityUtilsV3")
   const VoteEligibilityUtilsLibV3 = await VoteEligibilityUtilsV3.deploy()
   await VoteEligibilityUtilsLibV3.waitForDeployment()
 
-  // Latest version
+  // ---------------------- Version 4  ----------------------
   const AdministrationUtils = await ethers.getContractFactory("AdministrationUtils")
   const AdministrationUtilsLib = await AdministrationUtils.deploy()
   await AdministrationUtilsLib.waitForDeployment()

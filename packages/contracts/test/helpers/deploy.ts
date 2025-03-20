@@ -445,7 +445,7 @@ export const getOrDeployContractInstances = async ({
         await x2EarnCreator.getAddress(),
       ],
       [config.X2EARN_NODE_COOLDOWN_PERIOD, xAllocationGovernor],
-      [x2EarnRewardsPoolAddress],
+      [x2EarnRewardsPoolAddress], // Setting temporary address for the x2EarnRewardsPool
     ],
     {
       versions: [undefined, 2, 3, 4],
@@ -857,6 +857,8 @@ export const getOrDeployContractInstances = async ({
 
   // Setup the X2EarnApps XAllocationVote address
   await x2EarnApps.connect(owner).setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
+  // Set up the X2EarnRewardsPool contract in x2EarnApps
+  await x2EarnApps.connect(owner).setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
 
   // Set up veBetterPassport
   await veBetterPassport
@@ -880,9 +882,6 @@ export const getOrDeployContractInstances = async ({
 
   // Mint creator NFT to owner
   await x2EarnCreator.safeMint(await owner.getAddress())
-
-  // Set up the X2EarnRewardsPool contract in x2EarnApps
-  await x2EarnApps.connect(owner).setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
 
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
