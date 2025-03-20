@@ -4,7 +4,7 @@ import { useCurrentAllocationsRoundId } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { AnalyticsUtils } from "@/utils"
 import { Grid, GridItem, Stack, Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useEffect } from "react"
 import { B3trAllowance } from "./components/B3trAllowance"
 import { BulkClaimXAppsAllocations } from "./components/BulkClaimXAppsAllocations"
@@ -26,7 +26,7 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account ?? "")
+  const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 

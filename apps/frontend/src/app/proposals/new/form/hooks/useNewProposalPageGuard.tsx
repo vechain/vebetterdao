@@ -1,5 +1,5 @@
 import { useProposalFormStore } from "@/store"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { usePathname } from "next/navigation"
 import { useMemo } from "react"
 
@@ -15,7 +15,7 @@ export const useNewProposalPageGuard = () => {
     useProposalFormStore()
 
   const isVisitAuthorized = useMemo(() => {
-    if (!account) return false
+    if (!account?.address) return false
     switch (pathname) {
       case "/proposals/new/form/functions/details":
         return !!actions.length
@@ -30,12 +30,21 @@ export const useNewProposalPageGuard = () => {
       default:
         return true
     }
-  }, [title, shortDescription, markdownDescription, account, pathname, actions, votingStartRoundId, depositAmount])
+  }, [
+    title,
+    shortDescription,
+    markdownDescription,
+    account?.address,
+    pathname,
+    actions,
+    votingStartRoundId,
+    depositAmount,
+  ])
 
   const redirectPath = useMemo(() => {
-    if (!account) return "/proposals"
+    if (!account?.address) return "/proposals"
     return "/proposals/new"
-  }, [account])
+  }, [account?.address])
 
   return { isVisitAuthorized, redirectPath }
 }

@@ -14,9 +14,9 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal } from "@/components"
+import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
 import { useAcceptEntityLink } from "@/hooks"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 
 export const AcceptLinkingModal = ({
   modal,
@@ -26,7 +26,8 @@ export const AcceptLinkingModal = ({
   secondaryAccount: string
 }) => {
   const { t } = useTranslation()
-  const { domain } = useVechainDomain({ addressOrDomain: secondaryAccount || "" })
+  const { data: vnsData } = useVechainDomain(secondaryAccount || "")
+  const domain = vnsData?.domain
 
   const acceptLinking = useAcceptEntityLink({})
 
@@ -47,14 +48,14 @@ export const AcceptLinkingModal = ({
         isOpen={modal.isOpen ?? false}
         onClose={handleClose}
         successTitle={t("Linking accepted!")}
-        status={acceptLinking.status}
+        status={acceptLinking.status as TransactionModalStatus}
         errorDescription={acceptLinking.error?.reason}
         errorTitle={acceptLinking.error ? t("Error accepting linking") : undefined}
         showTryAgainButton
         onTryAgain={() => acceptLinking.sendTransaction({ entity: secondaryAccount })}
         pendingTitle={t("Linking account...")}
         showExplorerButton
-        txId={acceptLinking.txReceipt?.meta.txID ?? acceptLinking.sendTransactionTx?.txid}
+        txId={acceptLinking.txReceipt?.meta.txID}
       />
     )
   }

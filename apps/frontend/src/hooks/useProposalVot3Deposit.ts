@@ -1,7 +1,6 @@
 import { getProposalsEventsQueryKey, getProposalUserDepositQueryKey, getVot3BalanceQueryKey } from "@/api"
-import { UseSendTransactionReturnValue } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory, VOT3__factory } from "@repo/contracts"
 import { buildClause } from "@/utils/buildClause"
@@ -27,19 +26,7 @@ type UseProposalVot3DepositProps = {
   onSuccess?: () => void
 }
 
-type SendTransactionProps = {
-  amount: string | number
-  proposalId: string
-}
-
-type UseProposalVot3DepositReturnValue = {
-  sendTransaction: (props: SendTransactionProps) => void
-} & Omit<UseSendTransactionReturnValue, "sendTransaction">
-
-export const useProposalVot3Deposit = ({
-  proposalId,
-  onSuccess,
-}: UseProposalVot3DepositProps): UseProposalVot3DepositReturnValue => {
+export const useProposalVot3Deposit = ({ proposalId, onSuccess }: UseProposalVot3DepositProps) => {
   const { account } = useWallet()
 
   const clauseBuilder = useCallback(({ amount, proposalId }: { amount: string | number; proposalId: string }) => {
@@ -63,12 +50,12 @@ export const useProposalVot3Deposit = ({
 
   const refetchQueryKeys = useMemo(
     () => [
-      getProposalUserDepositQueryKey(proposalId, account ?? ""),
-      getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
+      getProposalUserDepositQueryKey(proposalId, account?.address ?? ""),
+      getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
       getProposalDepositQueryKey(proposalId),
       getIsDepositReachedQueryKey(proposalId),
       getProposalsEventsQueryKey(),
-      getVot3BalanceQueryKey(account ?? ""),
+      getVot3BalanceQueryKey(account?.address ?? ""),
     ],
     [account, proposalId],
   )

@@ -2,7 +2,7 @@ import NewProposalFunctionsDetails from "./page"
 import FormProposalLayout from "../../layout"
 import * as store from "@/store"
 import * as router from "next/navigation"
-import * as dappKit from "@vechain/dapp-kit-react"
+import * as vechainKit from "@vechain/vechain-kit"
 import { fireEvent, render, waitFor, screen } from "../../../../../../../test"
 import { vi } from "vitest"
 import { transferAction } from "../../../../../../../__mocks__/Actions"
@@ -52,7 +52,7 @@ describe("NewProposalFunctionsDetails", async () => {
   }) // beforeEach
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
-    vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
+    vi.spyOn(vechainKit, "useWallet").mockReturnValueOnce({
       account: null,
     })
     render(

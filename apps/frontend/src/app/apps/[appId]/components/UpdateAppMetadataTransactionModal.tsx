@@ -1,4 +1,4 @@
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useDisclosure } from "@chakra-ui/react"
 import {
   useUpdateAppDetails,
@@ -23,9 +23,14 @@ export const UpdateAppMetadataTransactionModal = ({
   onTryAgain,
 }: Props) => {
   const modalStatus = useTransactionModalStatus([
-    { status: uploadMetadataMutation.metadataUploading ? "uploadingMetadata" : undefined },
-    { status: updateAppDetailsMutation.error || uploadMetadataMutation.metadataUploadError ? "error" : undefined },
-    { status: updateAppDetailsMutation.status },
+    { status: uploadMetadataMutation.metadataUploading ? TransactionModalStatus.UploadingMetadata : undefined },
+    {
+      status:
+        updateAppDetailsMutation.error || uploadMetadataMutation.metadataUploadError
+          ? TransactionModalStatus.Error
+          : undefined,
+    },
+    { status: updateAppDetailsMutation.status as TransactionModalStatus },
   ])
 
   const errorTitle = useTransactionModalErrorTitle([
@@ -39,7 +44,7 @@ export const UpdateAppMetadataTransactionModal = ({
       onClose={handleClose}
       confirmationTitle="Update App details"
       successTitle="App details updated!"
-      status={modalStatus}
+      status={modalStatus as TransactionModalStatus}
       errorDescription={uploadMetadataMutation.metadataUploadError?.message ?? updateAppDetailsMutation.error?.reason}
       errorTitle={errorTitle}
       showTryAgainButton={true}

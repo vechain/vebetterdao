@@ -9,8 +9,8 @@ import {
   useTransactionModalStatus,
   useTransactionModalErrorTitle,
 } from "@/hooks"
-import { TransactionModal } from "@/components"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { TransactionModal, TransactionModalStatus } from "@/components"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { PreviewAppCard } from "./PreviewAppCard"
@@ -44,17 +44,16 @@ export const NewAppPageFormContent = () => {
 
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
-  const hasCreatorNft = useHasCreatorNFT(account ?? "")
+  const hasCreatorNft = useHasCreatorNFT(account?.address ?? "")
 
   useEffect(() => {
     //Users without Creator NFT should be redirected to home
-    if (!!account && !hasCreatorNft) router.push("/")
-  }, [hasCreatorNft, router, account])
+    if (!!account?.address && !hasCreatorNft) router.push("/")
+  }, [hasCreatorNft, router, account?.address])
 
   const handleSuccess = useCallback(() => {
     setIsSuccessSubmission(true)
-    onConfirmationClose()
-  }, [onConfirmationClose])
+  }, [])
 
   const appName = watch("name")
   const appId = useMemo(() => {
@@ -89,7 +88,7 @@ export const NewAppPageFormContent = () => {
       })
       if (!metadataUri) return
 
-      const adminAddress = data.adminWalletAddress ?? account ?? data.teamWalletAddress
+      const adminAddress = data.adminWalletAddress ?? account?.address ?? data.teamWalletAddress
 
       submitAppMutation.sendTransaction({
         teamWalletAddress: data.teamWalletAddress,
@@ -161,9 +160,9 @@ export const NewAppPageFormContent = () => {
         confirmationTitle="Submit App"
         successTitle="App submitted"
         status={useTransactionModalStatus([
-          { status: metadataUploading ? "uploadingMetadata" : undefined },
-          { status: submitAppMutation.error || metadataUploadError ? "error" : undefined },
-          { status: submitAppMutation.status },
+          { status: metadataUploading ? TransactionModalStatus.UploadingMetadata : undefined },
+          { status: submitAppMutation.error || metadataUploadError ? TransactionModalStatus.Error : undefined },
+          { status: submitAppMutation.status as TransactionModalStatus },
         ])}
         errorDescription={metadataUploadError?.message ?? submitAppMutation.error?.reason}
         errorTitle={useTransactionModalErrorTitle([

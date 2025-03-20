@@ -4,14 +4,14 @@ import { useIsGMpaused } from "@/api/contracts/galaxyMember"
 import { usePauseContract } from "@/hooks"
 import { Button, HStack, VStack, Text, Show, Card, CardHeader, Heading, CardBody } from "@chakra-ui/react"
 import { getConfig } from "@repo/config"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import React, { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 
 export const Pause: React.FC = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account ?? "")
+  const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
   const { data: isGalaxyMemberPaused, isLoading: isGalaxyMemberPausedLoading } = useIsGMpaused()
 
@@ -43,31 +43,31 @@ export const Pause: React.FC = () => {
 
   const isToggleB3trPausedLoading =
     isB3trPausedLoading ||
-    pauseB3trTxResult.isTxReceiptLoading ||
-    unpauseB3trTxResult.isTxReceiptLoading ||
-    pauseB3trTxResult.sendTransactionPending ||
-    unpauseB3trTxResult.sendTransactionPending
+    pauseB3trTxResult.isTransactionPending ||
+    unpauseB3trTxResult.isTransactionPending ||
+    pauseB3trTxResult.status === "pending" ||
+    unpauseB3trTxResult.status === "pending"
 
   const isToggleVot3PausedLoading =
     isVot3PausedLoading ||
-    pauseVot3TxResult.isTxReceiptLoading ||
-    unpauseVot3TxResult.isTxReceiptLoading ||
-    pauseVot3TxResult.sendTransactionPending ||
-    unpauseVot3TxResult.sendTransactionPending
+    pauseVot3TxResult.isTransactionPending ||
+    unpauseVot3TxResult.isTransactionPending ||
+    pauseVot3TxResult.status === "pending" ||
+    unpauseVot3TxResult.status === "pending"
 
   const isToggleGalaxyMemberPausedLoading =
     isGalaxyMemberPausedLoading ||
-    pauseGalaxyMemberTxResult.isTxReceiptLoading ||
-    unpauseGalaxyMemberTxResult.isTxReceiptLoading ||
-    pauseGalaxyMemberTxResult.sendTransactionPending ||
-    unpauseGalaxyMemberTxResult.sendTransactionPending
+    pauseGalaxyMemberTxResult.isTransactionPending ||
+    unpauseGalaxyMemberTxResult.isTransactionPending ||
+    pauseGalaxyMemberTxResult.status === "pending" ||
+    unpauseGalaxyMemberTxResult.status === "pending"
 
   const isToggleB3TRGovernorPausedLoading =
     isB3TRGovernorPausedLoading ||
-    pauseB3TRGovernorTxResult.isTxReceiptLoading ||
-    unpauseB3TRGovernorTxResult.isTxReceiptLoading ||
-    pauseB3TRGovernorTxResult.sendTransactionPending ||
-    unpauseB3TRGovernorTxResult.sendTransactionPending
+    pauseB3TRGovernorTxResult.isTransactionPending ||
+    unpauseB3TRGovernorTxResult.isTransactionPending ||
+    pauseB3TRGovernorTxResult.status === "pending" ||
+    unpauseB3TRGovernorTxResult.status === "pending"
 
   const handleToggleB3trPause = useCallback(() => {
     if (isB3trPaused) {

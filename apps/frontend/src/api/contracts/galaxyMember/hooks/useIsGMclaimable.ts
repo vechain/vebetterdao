@@ -1,4 +1,4 @@
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useParticipatedInGovernance } from "./useParticipatedInGovernance"
 import { useGMbalance } from "./useGMbalance"
 
@@ -9,9 +9,9 @@ import { useGMbalance } from "./useGMbalance"
 
 export const useIsGMclaimable = (profile?: string) => {
   const { account } = useWallet()
-  const { data: hasVoted } = useParticipatedInGovernance(profile ?? account)
+  const { data: hasVoted } = useParticipatedInGovernance(profile ?? account?.address ?? "")
 
-  const { data: nftBalance } = useGMbalance(profile ?? account)
+  const { data: nftBalance } = useGMbalance(profile ?? account?.address ?? "")
 
   if (Number(nftBalance) > 0) return { isClaimable: false, isOwned: true }
 

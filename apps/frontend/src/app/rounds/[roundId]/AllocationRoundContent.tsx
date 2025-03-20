@@ -9,7 +9,7 @@ import { useAllocationsRoundState, useHasVotedInRound } from "@/api"
 import { useLayoutEffect } from "react"
 import { redirect } from "next/navigation"
 import { AllocationXAppsVotesCard } from "../components/AllocationXAppsVotesCard"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { AllocationVoterRewards } from "../components/AllocationVoterRewards"
 import { CantVoteCard } from "@/app/components/CantVoteCard/CantVoteCard"
 
@@ -32,7 +32,7 @@ export const AllocationRoundContent = ({ roundId }: Readonly<Props>) => {
   )
 
   const currentAllocationState = useAllocationsRoundState(roundId)
-  const { data: hasVoted } = useHasVotedInRound(roundId, account ?? undefined)
+  const { data: hasVoted } = useHasVotedInRound(roundId, account?.address ?? undefined)
 
   useLayoutEffect(() => {
     if (currentAllocationState.error) redirect("/")

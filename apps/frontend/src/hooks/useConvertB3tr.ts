@@ -5,13 +5,14 @@ import {
   getVotesQueryKey,
   buildB3trApprovesTx,
   getB3TrTokenDetailsQueryKey,
+  buildDelegateVot3Tx,
 } from "@/api"
-import { useQueryClient } from "@tanstack/react-query"
-import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { getConfig } from "@repo/config"
 import { removingExcessDecimals } from "@/utils/MathUtils"
+import { useWallet, useConnex } from "@vechain/vechain-kit"
+import { useBuildTransaction } from "./useBuildTransaction"
+import { useVot3RequireSelfDelegation } from "./vechainKitHooks"
 
 const config = getConfig()
 
@@ -22,91 +23,53 @@ const config = getConfig()
 type useMintB3trProps = {
   amount?: string | number
   onSuccess?: () => void
-  invalidateCache?: boolean
-  onSuccessMessageTitle?: string
 }
+
 /**
  * Hook to convert B3tr to Vot3
  * This hook will convert the tokens and wait for the txConfirmation
  * @param amount the amount of tokens to convert. Should not already include decimals
  * @param onSuccess callback to run when the upgrade is successful
- * @param invalidateCache boolean to indicate if the related react-query cache should be updated (default: true)
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useConvertB3tr = ({
-  amount,
-  onSuccess,
-  invalidateCache = true,
-}: useMintB3trProps): UseSendTransactionReturnValue => {
+export const useConvertB3tr = ({ amount, onSuccess }: useMintB3trProps) => {
   const { thor } = useConnex()
   const { account } = useWallet()
-  const queryClient = useQueryClient()
+  const requiresSelfDelegation = useVot3RequireSelfDelegation()
 
   const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
 
-  const buildClauses = useCallback(() => {
+  const clauseBuilder = useCallback(() => {
     if (!contractAmount) throw new Error("amount is required")
-    const approveClause = buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress)
-    const convertB3trClause = buildConvertB3trTx(thor, contractAmount)
-    return [approveClause, convertB3trClause]
-  }, [thor, contractAmount])
+    if (!account?.address) throw new Error("account address is required")
+    const convertClause = [
+      buildB3trApprovesTx(thor, contractAmount, config.vot3ContractAddress),
+      buildConvertB3trTx(thor, contractAmount),
+    ]
 
-  //Refetch queries to update ui after the tx is confirmed
-  const handleOnSuccess = useCallback(async () => {
-    if (invalidateCache) {
-      //b3tr user balance
-      await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? undefined),
-      })
-
-      await queryClient.refetchQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? undefined),
-      })
-
-      // vot3 balance
-      await queryClient.cancelQueries({
-        queryKey: getVot3BalanceQueryKey(account ?? ""),
-      })
-
-      await queryClient.refetchQueries({
-        queryKey: getVot3BalanceQueryKey(account ?? ""),
-      })
-
-      //user votes
-      await queryClient.cancelQueries({
-        queryKey: getVotesQueryKey(account ?? undefined),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getVotesQueryKey(account ?? undefined),
-      })
-
-      //global locked b3tr => vot3
-      await queryClient.refetchQueries({
-        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
-      })
-
-      await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(config.vot3ContractAddress),
-      })
-
-      // b3tr balance and details
-      await queryClient.cancelQueries({
-        queryKey: getB3TrTokenDetailsQueryKey(),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getB3TrTokenDetailsQueryKey(),
-      })
+    // If the user requires self delegation, add the delegation clause
+    // This is required for privy users, in order to be able to capture the vot3 balance at the snapshot block
+    // Check https://github.com/vechain/vechain-kit/issues/102 for more info
+    if (requiresSelfDelegation) {
+      convertClause.unshift(buildDelegateVot3Tx(thor, account?.address))
     }
+    return convertClause
+  }, [thor, contractAmount, requiresSelfDelegation, account?.address])
 
-    onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess, account])
+  const refetchQueryKeys = useMemo(
+    () => [
+      getB3TrBalanceQueryKey(account?.address ?? undefined),
+      getVot3BalanceQueryKey(account?.address ?? ""),
+      getVotesQueryKey(account?.address ?? undefined),
+      getB3TrBalanceQueryKey(config.vot3ContractAddress),
+      getB3TrTokenDetailsQueryKey(),
+    ],
+    [account?.address],
+  )
 
-  const result = useSendTransaction({
-    signerAccount: account,
-    clauses: buildClauses,
-    onTxConfirmed: handleOnSuccess,
-    // suggestedMaxGas,
+  return useBuildTransaction({
+    clauseBuilder,
+    refetchQueryKeys,
+    onSuccess,
   })
-
-  return result
 }

@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
@@ -35,11 +35,11 @@ export const useRevokeDelegation = ({ onSuccess, isDelegator }: UseRevokeDelegat
 
   const refetchQueryKeys = useMemo(() => {
     if (isDelegator) {
-      return [getDelegateeQueryKey(account || "")]
+      return [getDelegateeQueryKey(account?.address ?? "")]
     } else {
-      return [getDelegatorQueryKey(account || "")]
+      return [getDelegatorQueryKey(account?.address ?? "")]
     }
-  }, [isDelegator, account])
+  }, [isDelegator, account?.address])
 
   return useBuildTransaction({
     clauseBuilder,

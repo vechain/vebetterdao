@@ -7,7 +7,7 @@ import { NoActionsCard } from "./NoActionsCard"
 import { useRouter } from "next/navigation"
 import { BetterActionCard } from "@/components/TransactionCard/cards/BetterActionCard"
 import { NoAccountActionCard } from "./NoAccountActionCard"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 
 type Props = {
@@ -21,7 +21,7 @@ export const YourBetterActionsCard = ({ address, renderActions = true, maxAction
   const router = useRouter()
 
   const { account } = useWallet()
-  const isConnectedUser = compareAddresses(account ?? "", address)
+  const isConnectedUser = compareAddresses(account?.address ?? "", address)
 
   const { data } = useSustainabilityActions({
     wallet: address ?? undefined,

@@ -1,5 +1,5 @@
 import { APP_SECURITY_LEVELS, useAppSecurityLevel, useXApps } from "@/api"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useUpdateAppSecurityLevel } from "@/hooks"
 import {
   Button,
@@ -27,16 +27,7 @@ export const AppSecurity = () => {
   const { data: selectedAppSecurityLevel } = useAppSecurityLevel(appId ?? "")
   const { t } = useTranslation()
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useUpdateAppSecurityLevel({
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useUpdateAppSecurityLevel({
     appId: appId ?? "",
     securityLevel: appSecurityLevel ?? 0,
   })
@@ -56,7 +47,7 @@ export const AppSecurity = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
   const isFormValid = useMemo(
     () => appSecurityLevel && appSecurityLevel !== selectedAppSecurityLevel,
     [appSecurityLevel, selectedAppSecurityLevel],
@@ -124,12 +115,12 @@ export const AppSecurity = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("User action registered")}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={t(`Registering user action...`)}
         errorTitle={t("Error registering action")}
         errorDescription={error?.reason}

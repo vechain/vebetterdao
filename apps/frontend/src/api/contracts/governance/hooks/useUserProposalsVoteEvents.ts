@@ -1,7 +1,7 @@
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { useQuery } from "@tanstack/react-query"
 import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
 import { useMemo } from "react"
+import { useWallet, useConnex } from "@vechain/vechain-kit"
 
 export const getUserProposalsVoteEventsQueryKey = (user?: string) => ["PROPOSALS", "ALL", "VOTES", user]
 
@@ -30,7 +30,7 @@ export const useUserProposalsVoteEvents = (user?: string) => {
  */
 export const useUserSingleProposalVoteEvent = (proposalId?: string) => {
   const { account } = useWallet()
-  const userProposalVoteEventsQuery = useUserProposalsVoteEvents(account ?? undefined)
+  const userProposalVoteEventsQuery = useUserProposalsVoteEvents(account?.address ?? undefined)
 
   const vote = useMemo(() => {
     return userProposalVoteEventsQuery.data?.find(vote => vote.proposalId === proposalId)

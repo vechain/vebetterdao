@@ -13,7 +13,7 @@ import {
   useXNode,
 } from "@/api"
 import { useTranslation } from "react-i18next"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { MintNFTModal } from "./MintNFTModal"
 import { FeatureFlagWrapper } from "./FeatureFlagWrapper"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
@@ -23,7 +23,7 @@ import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: hasUserVoted } = useParticipatedInGovernance(account)
+  const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const {
     isGMOwned,
@@ -40,8 +40,8 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   const {
     sendTransaction: freeMint,
     resetStatus: resetFreeMintStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
+    isTransactionPending,
+    status,
   } = useMintNFT({
     onFailure: () => {
       mintNftModal.onClose()
@@ -202,8 +202,8 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       {actionButton}
       <MintNFTModal
         mintNftModal={mintNftModal}
-        isTxReceiptLoading={isTxReceiptLoading}
-        sendTransactionPending={sendTransactionPending}
+        isTransactionPending={isTransactionPending}
+        sendTransactionPending={status === "pending"}
       />
       <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
       <UpgradeGMModal

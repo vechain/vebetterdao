@@ -5,7 +5,7 @@ import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useSelectedGmNft, useParticipatedInGovernance, useXNode, useB3trBalance } from "@/api"
 import { useMemo } from "react"
 import { SparklesIcon } from "@/components/Icons"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { GmActionButton } from "@/components/GmActionButton"
 import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
@@ -16,7 +16,7 @@ export const GmNFTAndNodeFooter = () => {
   const { t } = useTranslation()
   const [isAbove1200] = useMediaQuery("(min-width: 1200px)")
   const { account } = useWallet()
-  const { data: hasUserVoted } = useParticipatedInGovernance(account)
+  const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
   const {
     nextLevelGMRewardMultiplier,
     isGMOwned,
@@ -28,7 +28,7 @@ export const GmNFTAndNodeFooter = () => {
   } = useSelectedGmNft()
   const { isXNodeHolder, isXNodeDelegator } = useXNode()
 
-  const { isLoading: isB3trBalanceLoading } = useB3trBalance(account ?? "")
+  const { isLoading: isB3trBalanceLoading } = useB3trBalance(account?.address ?? "")
 
   const upgradeMessage = useMemo(() => {
     if (!hasUserVoted && !isGMOwned) {

@@ -11,7 +11,7 @@ import {
   useBreakpointValue,
   VStack,
 } from "@chakra-ui/react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { FiArrowUpRight } from "react-icons/fi"
 import { useTranslation } from "react-i18next"
 import { useRouter } from "next/navigation"
@@ -24,7 +24,7 @@ export const CastYourVoteCard: React.FC = () => {
   const { account } = useWallet()
   const { data: roundId } = useCurrentAllocationsRoundId()
   const { data: roundDetail } = useAllocationsRound(roundId)
-  const { data: votesAtSnapshot } = useGetVotesOnBlock(Number(roundDetail.voteStart), account ?? undefined)
+  const { data: votesAtSnapshot } = useGetVotesOnBlock(Number(roundDetail.voteStart), account?.address ?? undefined)
 
   const lottieSize = useBreakpointValue(
     {
@@ -42,7 +42,7 @@ export const CastYourVoteCard: React.FC = () => {
     data: hasVoted,
     isLoading: hasVotedLoading,
     isError: hasVotingError,
-  } = useHasVotedInRound(roundId, account ?? undefined)
+  } = useHasVotedInRound(roundId, account?.address ?? undefined)
 
   const onClick = () => {
     router.push(`/rounds/${roundId}`)
@@ -50,7 +50,7 @@ export const CastYourVoteCard: React.FC = () => {
 
   const hasVotes = Number(votesAtSnapshot) > 0
 
-  if (!account || hasVotedLoading || hasVotingError || hasVoted || !hasVotes) return null
+  if (!account?.address || hasVotedLoading || hasVotingError || hasVoted || !hasVotes) return null
 
   return (
     <Card borderColor={"#B1F16C"} backgroundColor={"#B1F16C"} variant={"baseWithBorder"} overflow={"hidden"}>

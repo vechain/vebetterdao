@@ -1,5 +1,5 @@
 import { usePassportChecks } from "@/api"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { TogglePassportCheck } from "@/constants"
 import { useTogglePassportCheck } from "@/hooks"
 import {
@@ -73,16 +73,7 @@ type PassportCheckProps = {
 
 const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) => {
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useTogglePassportCheck({
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useTogglePassportCheck({
     checkToToggle,
   })
 
@@ -108,19 +99,19 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
         <Switch
           isChecked={isEnabled}
           onChange={event => handleToggle(event)}
-          disabled={isTxReceiptLoading || sendTransactionPending}
+          disabled={isTransactionPending || status === "pending"}
         />
       </HStack>
       <Divider />
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={isEnabled ? `${name} is now active` : `${name} is now deactivated`}
         onTryAgain={handleToggle}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={isEnabled ? `Enabling ${name}...` : `Disabling ${name}...`}
         errorTitle={"Error toggling check"}
         errorDescription={error?.reason}

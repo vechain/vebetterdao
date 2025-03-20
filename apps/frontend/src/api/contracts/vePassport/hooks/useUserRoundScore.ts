@@ -1,7 +1,7 @@
 import { getCallKey, useCall } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCurrentAllocationsRoundId } from "../../xAllocations"
 
 const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
@@ -40,6 +40,9 @@ export const useUserRoundScore = (user?: string | null, round?: number) => {
 export const useUserCurrentRoundScore = () => {
   const { account } = useWallet()
   const { data: roundId, isLoading: isRoundIdLoading } = useCurrentAllocationsRoundId()
-  const { data: userRoundScore, isLoading: isUserRoundScoreLoading } = useUserRoundScore(account, Number(roundId))
+  const { data: userRoundScore, isLoading: isUserRoundScoreLoading } = useUserRoundScore(
+    account?.address,
+    Number(roundId),
+  )
   return { data: userRoundScore, isLoading: isUserRoundScoreLoading || isRoundIdLoading }
 }

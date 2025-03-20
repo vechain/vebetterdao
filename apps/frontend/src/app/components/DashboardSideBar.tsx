@@ -3,7 +3,7 @@ import { ManagedAppsCard } from "../../components/ManagedAppsCard"
 import { YourBetterActionsCard } from "./YourBetterActionsCard"
 import { SupplyBreakdownCard } from "./SupplyBreakdownCard"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import dynamic from "next/dynamic"
 
 const Leaderboard = dynamic(() => import("../../components/Leaderboard/Leaderboard").then(mod => mod.Leaderboard), {
@@ -22,7 +22,7 @@ export const DashboardSideBar = () => {
       <Show below="md">
         <CantVoteCard />
       </Show>
-      <YourBetterActionsCard address={account ?? ""} />
+      <YourBetterActionsCard address={account?.address ?? ""} />
       <Leaderboard />
       <ManagedAppsCard />
       <SupplyBreakdownCard />

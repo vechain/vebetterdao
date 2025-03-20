@@ -1,6 +1,6 @@
 import { useUserStatus } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { UserStatus, useWhitelistBlacklistUser, useUserStatusConfig } from "@/hooks"
 import {
   Button,
@@ -36,16 +36,7 @@ export const ManageUserStatus = () => {
   const statusConfig = useUserStatusConfig()
   const currentConfig = statusConfig[actionType]
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useWhitelistBlacklistUser({
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useWhitelistBlacklistUser({
     address: user,
     currentStatus: userStatus,
     newStatus: actionType,
@@ -69,7 +60,7 @@ export const ManageUserStatus = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
   const isFormValid = isValidAddress
 
   return (
@@ -125,12 +116,12 @@ export const ManageUserStatus = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={currentConfig.modalSuccessTitle}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={currentConfig.modalPendingTitle}
         errorTitle={currentConfig.modalErrorTitle}
         errorDescription={error?.reason}

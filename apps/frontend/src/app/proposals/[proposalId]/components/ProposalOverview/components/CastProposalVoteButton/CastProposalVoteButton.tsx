@@ -9,7 +9,7 @@ import {
 } from "@/api"
 
 import { Button, Icon } from "@chakra-ui/react"
-import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
+import { useWallet, useWalletModal } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -30,7 +30,7 @@ export const CastProposalVoteButton = ({ proposalId }: Props) => {
   const { data: snapshotBlock } = useProposalSnapshot(proposalId)
   const { data: userSnapshot } = useGetVotesOnBlock(
     snapshotBlock ? Number(snapshotBlock) : undefined,
-    account ?? undefined,
+    account?.address ?? undefined,
   )
   const { data: threhsold } = useVotingThreshold()
 
@@ -43,7 +43,7 @@ export const CastProposalVoteButton = ({ proposalId }: Props) => {
   }, [proposalId, router])
 
   const handleClick = useCallback(() => {
-    if (!account) {
+    if (!account?.address) {
       openConnectModal()
       return
     }
@@ -53,7 +53,7 @@ export const CastProposalVoteButton = ({ proposalId }: Props) => {
   const shouldSeeVoteButton = useMemo(() => {
     return (
       state === ProposalState.Active &&
-      !!account &&
+      !!account?.address &&
       !userVote &&
       !userVoteLoading &&
       hasVotesAtSnapshot &&

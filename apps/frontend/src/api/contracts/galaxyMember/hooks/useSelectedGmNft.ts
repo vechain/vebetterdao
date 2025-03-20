@@ -11,7 +11,7 @@ import { useGetNodeIdAttached } from "./useGetNodeIdAttached"
 import { useXNode } from "../../xNodes"
 import { useGMMaxLevel } from "./useGMMaxLevel"
 import { gmNfts } from "@/constants/gmNfts"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useB3trToUpgrade } from "."
 
 /**
@@ -31,7 +31,7 @@ export const useSelectedGmNft = (profile?: string) => {
   const { account } = useWallet()
   const { isOwned: isGMOwned } = useIsGMclaimable(profile)
   const { isLoading: isGMLoading } = useNFTImage(profile)
-  const { data: b3trBalance } = useB3trBalance(account ?? "")
+  const { data: b3trBalance } = useB3trBalance(account?.address ?? "")
   const {
     data: selectedTokenId,
     isLoading: isSelectedTokenIdLoading,

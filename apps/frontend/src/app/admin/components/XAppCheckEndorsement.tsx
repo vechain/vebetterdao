@@ -1,5 +1,5 @@
 import { useAllocationsRound, useCurrentAllocationsRoundId, useXApps } from "@/api"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import {
   VStack,
   Button,
@@ -26,19 +26,10 @@ export const XAppCheckEndorsement = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: currentRound } = useAllocationsRound(currentRoundId?.toString() ?? "")
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    txReceipt,
-    sendTransactionTx,
-    error,
-  } = useCheckEndorsement({
+  const { sendTransaction, resetStatus, isTransactionPending, status, txReceipt, error } = useCheckEndorsement({
     appId: appId ?? "",
   })
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
 
   const handleSubmit = useCallback(
     (event: { preventDefault: () => void }) => {
@@ -122,11 +113,11 @@ export const XAppCheckEndorsement = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         onTryAgain={handleCheckEndorsement}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={t("Checking endorsement...")}
         errorTitle={t("Error checking endorsement")}
         errorDescription={error?.reason}

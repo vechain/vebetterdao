@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"
 import { getCallKey, useCall } from "@/hooks"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
 const governorInterface = B3TRGovernor__factory.createInterface()
@@ -26,7 +26,7 @@ export const useProposalSnapshotVotingPower = (roundId?: number, enabled = true)
     contractInterface: governorInterface,
     contractAddress: GOVERNANCE_CONTRACT,
     method: "getQuadraticVotingPower",
-    args: [account, roundId],
-    enabled: !!roundId && !!account && enabled,
+    args: [account?.address, roundId],
+    enabled: !!roundId && !!account?.address && enabled,
   })
 }
