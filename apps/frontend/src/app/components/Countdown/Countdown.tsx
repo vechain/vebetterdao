@@ -13,11 +13,27 @@ export const Countdown = ({ onOpen }: CountdownProps) => {
   const { data: allocationRound, isLoading: isCurrentRoundLoading } = useAllocationsRound(currentRoundId)
   const [isAbove500] = useMediaQuery("(min-width: 500px)")
 
-  const isLoading = isCurrentRoundIdLoading || isCurrentRoundLoading
+  const isLoading = isCurrentRoundIdLoading || isCurrentRoundLoading || !allocationRound?.voteEndTimestamp
 
   const timeLeft = useTimer({
     expiryTimestamp: allocationRound?.voteEndTimestamp?.toDate() ?? new Date(),
+    autoStart: !!allocationRound?.voteEndTimestamp,
   })
+
+  // show small rounded loading state
+  if (isLoading) {
+    return (
+      <Skeleton
+        as={HStack}
+        justify={"space-between"}
+        px={3}
+        py={1}
+        rounded={"full"}
+        fontSize={isAbove500 ? "13px" : "10px"}
+        height="24px"
+      />
+    )
+  }
 
   //check if near is close to 1h
   const isNearEnd = timeLeft.days === 0 && timeLeft.hours <= 1
@@ -26,12 +42,10 @@ export const Countdown = ({ onOpen }: CountdownProps) => {
   const isNearEndIcon = isNearEnd ? "/images/clock-red.svg" : "/images/clock-blue.svg"
 
   return (
-    <Skeleton
+    <HStack
       onClick={onOpen}
       cursor={"pointer"}
-      as={HStack}
       justify={"space-between"}
-      isLoaded={!isLoading}
       px={3}
       py={1}
       rounded={"full"}
@@ -61,6 +75,6 @@ export const Countdown = ({ onOpen }: CountdownProps) => {
         <Text minW={timeLeft.seconds >= 10 ? "1.4em" : "0.8em"}>{timeLeft.seconds}</Text>
         <Text>{"s"}</Text>
       </HStack>
-    </Skeleton>
+    </HStack>
   )
 }
