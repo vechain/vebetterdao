@@ -1,6 +1,6 @@
-import { VStack, HStack, Button, Box } from "@chakra-ui/react"
+import { VStack, HStack, Button, Box, Text } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
-import { useMemo, useEffect, useCallback } from "react"
+import { useMemo, useCallback, memo, useState } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
 import { useTranslation } from "react-i18next"
 import { ProfileBalance } from "./ProfileBalance"
@@ -22,62 +22,64 @@ enum Tab {
   GM = "gm",
 }
 
-type Props = {
+interface ProfilePageContentProps {
   address?: string
 }
-export const ProfilePageContent = ({ address }: Props) => {
-  const { account } = useWallet()
-  const isConnectedUser = compareAddresses(account?.address ?? "", address ?? "")
 
-  const parsedAddress = address ?? account?.address ?? ""
+interface TabContentProps {
+  tab: Tab
+  address: string
+}
+
+const TabContent = memo(function TabContent({ tab, address }: TabContentProps) {
+  switch (tab) {
+    case Tab.Balance:
+      return <ProfileBalance address={address} />
+    case Tab.BetterActions:
+      return <ProfileBetterActions address={address} />
+    case Tab.Governance:
+      return <ProfileGovernance address={address} />
+    case Tab.LinkedAccounts:
+      return <ProfileLinkedAcounts address={address} />
+    case Tab.GM:
+      return <ProfileGMLevel />
+    default:
+      return null
+  }
+})
+
+export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
+  const { account } = useWallet()
   const { t } = useTranslation()
   const router = useRouter()
+
+  const isConnectedUser = compareAddresses(account?.address ?? "", address ?? "")
+  const parsedAddress = address ?? account?.address ?? ""
   const searchParams = useSearchParams()
 
-  const onGoBack = useCallback(() => {
-    router.push("/")
-  }, [router])
-
-  const selectedTab = useMemo(() => {
-    const tabParam = searchParams.get("tab")
-    switch (tabParam) {
-      case Tab.BetterActions:
-        return Tab.BetterActions
-      case Tab.Governance:
-        return Tab.Governance
-      case Tab.LinkedAccounts:
-        return Tab.LinkedAccounts
-      case Tab.GM:
-        return Tab.GM
-      default:
-        return Tab.Balance
+  // Get the initial tab from the URL
+  const getInitialTab = useCallback(() => {
+    const tabFromURL = searchParams.get("tab")
+    const isValidTab = Object.values(Tab).includes(tabFromURL as Tab)
+    if (tabFromURL && isValidTab) {
+      return tabFromURL as Tab
     }
+    return Tab.Balance
   }, [searchParams])
+  const [activeTab, setActiveTab] = useState(getInitialTab)
 
-  const selectedTabContent = useMemo(() => {
-    switch (selectedTab) {
-      case Tab.Balance:
-        return <ProfileBalance address={parsedAddress} />
-      case Tab.BetterActions:
-        return <ProfileBetterActions address={parsedAddress} />
-      case Tab.Governance:
-        return <ProfileGovernance address={parsedAddress} />
-      case Tab.LinkedAccounts:
-        return <ProfileLinkedAcounts address={parsedAddress} />
-      case Tab.GM:
-        return <ProfileGMLevel />
-      default:
-        return null
-    }
-  }, [selectedTab, parsedAddress])
+  const tabs = useMemo(
+    () => [
+      { tab: Tab.Balance, label: t("Balance") },
+      { tab: Tab.BetterActions, label: t("Better Actions") },
+      { tab: Tab.GM, label: t("GM Level") },
+      { tab: Tab.Governance, label: t("Governance") },
+      { tab: Tab.LinkedAccounts, label: t("Linked Accounts") },
+    ],
+    [t],
+  )
 
-  useEffect(() => {
-    if (!parsedAddress) router.push("/")
-  }, [parsedAddress, router])
-
-  const handleTabChange = (tab: Tab) => {
-    router.push(`?tab=${tab}`)
-
+  const trackTabChange = (tab: Tab) => {
     switch (tab) {
       case Tab.Balance:
         AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.EXPLORE_BALANCE_FROM_PROFILE))
@@ -94,23 +96,49 @@ export const ProfilePageContent = ({ address }: Props) => {
           buttonClickActions(ButtonClickProperties.EXPLORE_GOVERNANCE_FROM_PROFILE),
         )
         break
-      default:
-        break
     }
   }
 
-  const tabs = useMemo(
-    () => [
-      { tab: Tab.Balance, label: t("Balance") },
-      { tab: Tab.BetterActions, label: t("Better Actions") },
-      { tab: Tab.GM, label: t("GM Level") },
-      { tab: Tab.Governance, label: t("Governance") },
-      { tab: Tab.LinkedAccounts, label: t("Linked Accounts") },
-    ],
-    [t],
-  )
+  // Update the URL with the new tab
+  const updateURLWithTab = (tab: Tab): void => {
+    // Guard against SSR
+    if (typeof window === "undefined") {
+      console.warn("Cannot update URL during server-side rendering")
+      return
+    }
 
-  if (!parsedAddress) return <></>
+    try {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set("tab", tab)
+      // Update URL without triggering a navigation that causes the page to flicker
+      window.history.replaceState(null, "", `?${params.toString()}`)
+    } catch (error) {
+      console.error("Error updating URL with tab:", error)
+    }
+  }
+
+  const handleTabChange = useCallback((tab: Tab) => {
+    updateURLWithTab(tab)
+    setActiveTab(tab)
+    trackTabChange(tab)
+  }, [])
+
+  // Go back to the home page
+  const onGoBack = useCallback(() => {
+    router.push("/")
+  }, [router])
+
+  if (!parsedAddress)
+    return (
+      <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
+        <VStack py={8} spacing={4}>
+          <Text fontSize="lg" fontWeight="medium">
+            {t("Invalid or missing address")}
+          </Text>
+          <Text color="gray.500">{t("Please check the URL or connect your wallet to view this profile")}</Text>
+        </VStack>
+      </VStack>
+    )
 
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
@@ -139,8 +167,8 @@ export const ProfilePageContent = ({ address }: Props) => {
           {tabs.map(({ tab, label }) => (
             <Button
               key={tab}
-              variant={"primaryGhost"}
-              borderBottom={selectedTab === tab ? "2px solid #004CFC" : "none"}
+              variant="primaryGhost"
+              borderBottom={activeTab === tab ? "2px solid #004CFC" : "none"}
               rounded="none"
               fontSize={["xs", "xs", "md"]}
               onClick={() => handleTabChange(tab)}>
@@ -149,7 +177,8 @@ export const ProfilePageContent = ({ address }: Props) => {
           ))}
         </HStack>
       </Box>
-      {selectedTabContent}
+
+      <TabContent tab={activeTab} address={parsedAddress} />
     </VStack>
   )
 }
