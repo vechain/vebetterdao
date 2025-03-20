@@ -89,8 +89,8 @@ export const AllocationRoundCard: React.FC<Props> = ({ roundId }) => {
                 <Skeleton isLoaded={!isLoading}>
                   <Text fontWeight={400} color={"#6A6A6A"} fontSize={"14px"}>
                     {isActive
-                      ? `ends ${allocationRound.voteEndTimestamp?.fromNow()}`
-                      : `${allocationRound.voteEndTimestamp?.fromNow()}`}
+                      ? t("ends {{value}}", { value: allocationRound.voteEndTimestamp?.fromNow() })
+                      : allocationRound.voteEndTimestamp?.fromNow()}
                   </Text>
                 </Skeleton>
               </Show>
