@@ -153,7 +153,7 @@ interface IX2EarnRewardsPool {
    *
    * @param appId The ID of the app.
    */
-  function rewardsPoolEnabled(bytes32 appId) external view returns (bool);
+  function isRewardsPoolEnabled(bytes32 appId) external view returns (bool);
 
   /**
    * @dev Enables the rewards pool for a newly created app.

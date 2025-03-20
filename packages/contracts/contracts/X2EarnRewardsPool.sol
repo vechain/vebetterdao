@@ -26,7 +26,6 @@ pragma solidity 0.8.20;
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-
 import { IB3TR } from "./interfaces/IB3TR.sol";
 import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
@@ -57,7 +56,7 @@ import { IVeBetterPassport } from "./interfaces/IVeBetterPassport.sol";
  * - Added distribute with metadata functionality
  * ----- Version 7 -----
  * - Added optional dual-pool balance to manage rewards and treasury separately
- * - Added 2 new storage variables: rewardsPoolBalance and rewardsPoolEnabled
+ * - Added 2 new storage variables: rewardsPoolBalance and isRewardsPoolEnabled
  * - Modified withdrawal access control to only admin
  * - Rewards distribution can be paused by admin
  */
@@ -70,7 +69,6 @@ contract X2EarnRewardsPool is
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
   bytes32 public constant IMPACT_KEY_MANAGER_ROLE = keccak256("IMPACT_KEY_MANAGER_ROLE");
-
 
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
@@ -86,7 +84,7 @@ contract X2EarnRewardsPool is
     string[] allowedImpactKeys; // Array storing impact keys
     IVeBetterPassport veBetterPassport;
     mapping(bytes32 appId => uint256) rewardsPoolBalance; // Distributable rewards funds (when rewards pool is enabled)
-    mapping(bytes32 appId => bool) rewardsPoolEnabled; // Whether the rewards pool is enabled for the app
+    mapping(bytes32 appId => bool) isRewardsPoolEnabled; // Whether the rewards pool is enabled for the app
     mapping(bytes32 appId => bool) distributionPaused; // Whether reward distribution is paused for the app
   }
 
@@ -335,7 +333,7 @@ contract X2EarnRewardsPool is
     require($.b3tr.balanceOf(address(this)) >= amount, "X2EarnRewardsPool: insufficient funds on contract");
 
     // check to distribute from the correct pool if the feature is enabled
-    if ($.rewardsPoolEnabled[appId]) {
+    if ($.isRewardsPoolEnabled[appId]) {
       require($.rewardsPoolBalance[appId] >= amount, "X2EarnRewardsPool: not enough funds in the rewards pool");
       $.rewardsPoolBalance[appId] -= amount;
     } else {
@@ -371,8 +369,8 @@ contract X2EarnRewardsPool is
     require(!$.distributionPaused[appId], "X2EarnRewardsPool: distribution is paused");
     require(amount <= $.availableFunds[appId], "X2EarnRewardsPool: increasing amount exceeds available funds");
 
-    $.rewardsPoolEnabled[appId] = true;
-    require($.rewardsPoolEnabled[appId], "X2EarnRewardsPool: rewards pool balance is not enabled");
+    $.isRewardsPoolEnabled[appId] = true;
+    require($.isRewardsPoolEnabled[appId], "X2EarnRewardsPool: rewards pool balance is not enabled");
 
     $.rewardsPoolBalance[appId] += amount;
     $.availableFunds[appId] -= amount;
@@ -394,8 +392,8 @@ contract X2EarnRewardsPool is
     require(!$.distributionPaused[appId], "X2EarnRewardsPool: distribution is paused");
     require(amount <= $.rewardsPoolBalance[appId], "X2EarnRewardsPool: decreasing under rewards pool balance");
 
-    $.rewardsPoolEnabled[appId] = true;
-    require($.rewardsPoolEnabled[appId], "X2EarnRewardsPool: rewards pool balance is not enabled");
+    $.isRewardsPoolEnabled[appId] = true;
+    require($.isRewardsPoolEnabled[appId], "X2EarnRewardsPool: rewards pool balance is not enabled");
 
     $.rewardsPoolBalance[appId] -= amount;
     $.availableFunds[appId] += amount;
@@ -415,7 +413,7 @@ contract X2EarnRewardsPool is
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
-    require($.rewardsPoolEnabled[appId] != enable, "X2EarnRewardsPool: rewards pool is already in desired state");
+    require($.isRewardsPoolEnabled[appId] != enable, "X2EarnRewardsPool: rewards pool is already in desired state");
     require(!$.distributionPaused[appId], "X2EarnRewardsPool: distribution is paused");
 
     if (!enable) {
@@ -423,7 +421,7 @@ contract X2EarnRewardsPool is
       $.rewardsPoolBalance[appId] = 0;
     }
 
-    $.rewardsPoolEnabled[appId] = enable;
+    $.isRewardsPoolEnabled[appId] = enable;
     emit RewardsPoolBalanceEnabled(appId, enable);
   }
 
@@ -435,10 +433,10 @@ contract X2EarnRewardsPool is
   function enableRewardsPoolForNewApp(bytes32 appId) external onlyX2EarnApps {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     
-    require(!$.rewardsPoolEnabled[appId], "X2EarnRewardsPool: rewards pool already enabled");
+    require(!$.isRewardsPoolEnabled[appId], "X2EarnRewardsPool: rewards pool already enabled");
     require(!$.distributionPaused[appId], "X2EarnRewardsPool: distribution is paused");
 
-    $.rewardsPoolEnabled[appId] = true;
+    $.isRewardsPoolEnabled[appId] = true;
     emit RewardsPoolBalanceEnabled(appId, true);
   }
 
@@ -467,9 +465,9 @@ contract X2EarnRewardsPool is
    * @dev Emits the RewardMetadata event with the provided metadata.
    */
   function _emitMetadata(
-    bytes32 appId, 
+    bytes32 appId,
     uint256 amount,
-    address receiver, 
+    address receiver,
     string memory metadata
   ) internal {
     // emit event
@@ -682,11 +680,11 @@ contract X2EarnRewardsPool is
   }
 
   /**
-   * @dev See {IX2EarnRewardsPool-rewardsPoolEnabled}
+   * @dev See {IX2EarnRewardsPool-isRewardsPoolEnabled}
    */
-  function rewardsPoolEnabled(bytes32 appId) external view returns (bool) {
+  function isRewardsPoolEnabled(bytes32 appId) external view returns (bool) {
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
-    return $.rewardsPoolEnabled[appId];
+    return $.isRewardsPoolEnabled[appId];
   }
 
   /**
@@ -727,7 +725,6 @@ contract X2EarnRewardsPool is
     X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
     return $.allowedImpactKeys;
   }
-
 
 
 

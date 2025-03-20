@@ -80,10 +80,9 @@ contract X2EarnApps is
    * @dev This function is called only once during the contract upgrade
    */
   function initializeV4(
-    address  _x2EarnRewardsPoolContract
+    address _x2EarnRewardsPoolContract
   ) public reinitializer(4) {
-    require( _x2EarnRewardsPoolContract != address(0), "X2EarnApps: Invalid x2EarnRewardsPool contract address");
-    __Administration_init_v3( _x2EarnRewardsPoolContract);
+    __Administration_init_v4(_x2EarnRewardsPoolContract);
   }
 
   // ---------- Modifiers ------------ //
