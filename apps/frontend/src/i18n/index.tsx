@@ -1,5 +1,6 @@
 import detector from "i18next-browser-languagedetector"
 import i18next from "i18next"
+import dayjs from "../utils/dayjsConfig"
 
 import en from "./languages/en.json"
 import it from "./languages/it.json"
@@ -125,3 +126,9 @@ i18next
     fallbackLng: enLang,
     lng: enLang,
   })
+
+i18next.on("languageChanged", lng => {
+  // Map 'tw' to 'zh-tw' for dayjs
+  const dayjsLocale = lng === "tw" ? "zh-tw" : lng
+  dayjs.locale(dayjsLocale)
+})

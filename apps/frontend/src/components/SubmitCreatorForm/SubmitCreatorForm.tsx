@@ -180,7 +180,7 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
                 maxLength: { value: 30, message: t("{{fieldName}} is too long", { fieldName: t("App Name") }) },
                 validate: value => {
                   if (value && AddressUtils.isValid(value)) {
-                    //Prevent user from entering wallet address in app name field
+                    //Prevent user from entering wallet address in app name field.
                     return t("Invalid Name")
                   }
                   return true
