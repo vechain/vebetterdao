@@ -727,6 +727,13 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV4.checkCooldown(1)).to.eql(false)
     })
 
+    /**
+     * TODO:
+     * 1. Each module of X Apps contract has it's own storage location, the current implementation is aggregating storage slots of different modules.
+     * 2. The test should test that each module storage has not got conflict and not that the aggregated storage slots are the same.
+     *    That's why, when adding _x2EarnRewardsPoolContract slot to AdministrationUtils, it's resulting in a new non-zero slot,
+     *    but because we are comparing the aggregation of all slots then it's resulting in a conflict.
+     */
     it.only("Should not have state conflict after upgrading to V4", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
@@ -881,6 +888,12 @@ describe("X-Apps - @shard15", function () {
 
       expect(await x2EarnAppsV3.version()).to.equal("3")
       expect(storageSlotsAfterV3[storageSlotsAfterV3.length - 2]).to.equal(BigInt(config.X2EARN_NODE_COOLDOWN_PERIOD))
+
+      const storageSlotsAdministrationAfterV3 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialSlotAdministration,
+      )
+
       // Upgrade X2EarnAppsV2 to X2EarnAppsV3
       const x2EarnAppsV4 = (await upgradeProxy(
         "X2EarnAppsV3",
@@ -905,6 +918,14 @@ describe("X-Apps - @shard15", function () {
         initialSlotAdministration,
         initialEndorsementSlot,
       )
+
+      const storageSlotsAdministrationAfterV4 = await getStorageSlots(
+        await x2EarnAppsV2.getAddress(),
+        initialSlotAdministration,
+      )
+
+      console.log("STORAGE SLOTS ADMINISTRATION AFTER V3", storageSlotsAdministrationAfterV3)
+      console.log("STORAGE SLOTS ADMINISTRATION AFTER V4", storageSlotsAdministrationAfterV4)
 
       console.log("storageSlotsAfterV4", storageSlotsAfterV4)
       expect(await x2EarnAppsV4.version()).to.equal("4")
