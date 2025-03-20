@@ -16,7 +16,7 @@ import {
 import { useCallback, useMemo } from "react"
 import { useWithdrawAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
-import { TransactionModal, CustomModalContent, B3TRIcon } from "@/components"
+import { TransactionModal, TransactionModalStatus, CustomModalContent, B3TRIcon } from "@/components"
 import BigNumber from "bignumber.js"
 import { useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
@@ -95,7 +95,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
     [availableB3trToWithdrawScaled],
   )
 
-  const { sendTransaction, resetStatus, status, error, txReceipt, sendTransactionTx } = useWithdrawAppBalance({
+  const { sendTransaction, resetStatus, status, error, txReceipt } = useWithdrawAppBalance({
     appId,
     amount,
     reason: reason === "Other" ? customReason : reason,
@@ -305,7 +305,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Withdraw completed!")}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         errorDescription={error?.reason}
         errorTitle={error ? t("Error withdrawing") : undefined}
         showTryAgainButton
@@ -313,7 +313,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
         pendingTitle={t("Withdrawing...")}
         showExplorerButton
         isAppWithdraw
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         b3trAmount={amount}
         b3trBalanceAfterSwap={b3trBalanceAfterSwap}
         b3trBalance={availableB3trToWithdrawScaled}

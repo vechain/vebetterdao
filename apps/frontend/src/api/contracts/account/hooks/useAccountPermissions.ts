@@ -1,7 +1,7 @@
 import { getConfig } from "@repo/config"
 import { AccessControl__factory } from "@repo/contracts/typechain-types"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { abi } from "thor-devkit"
 import { getBytes32Role } from "./useHasRole"
 

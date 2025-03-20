@@ -23,7 +23,7 @@ import {
 import { useTranslation, Trans } from "react-i18next"
 import { useMemo, useState } from "react"
 import { BaseModal } from "@/components/BaseModal"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { EndorsementDetails } from "./EndorsementDetails"
 import { EndorsementStatusCallout } from "./EndorsementStatusCallout"
 import { UnendorseAppModalAdminsOnly } from "./UnendorseAppModalAdminsOnly"
@@ -49,7 +49,7 @@ export const AppEndorsementInfoCardModal = ({ isOpen, onClose, appId }: Props) =
   } = useAppEndorsementStatus(appId)
 
   // User roles data
-  const { data: isAppAdmin } = useIsAppAdmin(appId ?? "", account ?? "")
+  const { data: isAppAdmin } = useIsAppAdmin(appId ?? "", account?.address ?? "")
 
   // User xnodes, TODO support multiple xnodes
   const { isXNodeLoading, isEndorsingApp, isXNodeHolder, endorsedApp, xNodePoints } = useXNode()

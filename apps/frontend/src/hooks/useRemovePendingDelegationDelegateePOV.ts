@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useBuildTransaction } from "./useBuildTransaction"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
@@ -28,7 +28,7 @@ export const useRemovePendingDelegationDelegateePOV = ({ onSuccess }: UseRemoveP
 
   const clauseBuilder = useCallback(
     ({ delegator }: ClausesParams) => {
-      if (!account) throw new Error("Account is required")
+      if (!account?.address) throw new Error("Account is required")
       if (!isValid(delegator)) throw new Error("Invalid delegatee address")
 
       return [
@@ -41,15 +41,15 @@ export const useRemovePendingDelegationDelegateePOV = ({ onSuccess }: UseRemoveP
         }),
       ]
     },
-    [account],
+    [account?.address],
   )
 
   const refetchQueryKeys = useMemo(
     () => [
-      getPendingDelegationsQueryKeyDelegatorPOV(account || ""),
-      getPendingDelegationsQueryKeyDelegateePOV(account || ""),
+      getPendingDelegationsQueryKeyDelegatorPOV(account?.address || ""),
+      getPendingDelegationsQueryKeyDelegateePOV(account?.address || ""),
     ],
-    [account],
+    [account?.address],
   )
 
   return useBuildTransaction<ClausesParams>({

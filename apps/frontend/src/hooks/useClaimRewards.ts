@@ -1,3 +1,5 @@
+import { useCallback, useMemo } from "react"
+import { useWallet } from "@vechain/vechain-kit"
 import {
   RoundReward,
   buildClaimRewardsTx,
@@ -5,23 +7,14 @@ import {
   getRoundRewardQueryKey,
   useCurrentAllocationsRoundId,
 } from "@/api"
-import { useQueryClient } from "@tanstack/react-query"
-import { UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
-import { useCallback } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
-import { address } from "thor-devkit"
+import { useBuildTransaction } from "./useBuildTransaction"
 
 type useClaimRewardsProps = {
   roundRewards: RoundReward[]
   onSuccess?: () => void
   onFailure?: () => void
-  invalidateCache?: boolean
   onSuccessMessageTitle?: string
 }
-
-export type useClaimRewardsReturnValue = {
-  sendTransaction: () => Promise<void>
-} & Omit<UseSendTransactionReturnValue, "sendTransaction">
 
 // const buffer = 1.01
 // Derived from mainnet onchain txs https://vechain-foundation.slack.com/archives/C06BLEJE5SA/p1723109024015819?thread_ts=1723106964.183119&cid=C06BLEJE5SA
@@ -32,65 +25,33 @@ export type useClaimRewardsReturnValue = {
  * It uses the useSendTransaction hook to send the transaction and the useQueryClient hook to invalidate the queries after the transaction.
  *
  * @param {useClaimRewardsProps} props - The properties for the hook.
- * @returns {useClaimRewardsReturnValue} An object containing the sendTransaction function and the return value of the useSendTransaction hook.
  */
-export const useClaimRewards = ({
-  roundRewards,
-  onSuccess,
-  onFailure,
-  invalidateCache = true,
-}: useClaimRewardsProps): useClaimRewardsReturnValue => {
+export const useClaimRewards = ({ roundRewards, onSuccess, onFailure }: useClaimRewardsProps) => {
   const { account } = useWallet()
-  const queryClient = useQueryClient()
   const { data: currentRound } = useCurrentAllocationsRoundId()
   const currentRoundId = parseInt(currentRound ?? "0")
 
   //Make sure we don't go below 0
   const lastRoundId = Math.max(0, currentRoundId - 1)
 
-  const buildClauses = useCallback(
-    (roundRewards: RoundReward[]) => {
-      if (!address) throw new Error("address is required")
+  const buildClauses = useCallback(() => {
+    if (!account?.address) throw new Error("address is required")
 
-      const clauses = buildClaimRewardsTx(roundRewards, account ?? "")
-      return clauses
-    },
-    [account],
-  )
+    const clauses = buildClaimRewardsTx(roundRewards, account?.address ?? "")
+    return clauses
+  }, [account?.address, roundRewards])
 
-  // Refetch queries to update ui after the tx is confirmed
-  const handleOnSuccess = useCallback(async () => {
-    if (invalidateCache) {
-      await queryClient.cancelQueries({
-        queryKey: getRoundRewardQueryKey(`ALL_TO_ROUND_${lastRoundId}`, account ?? undefined),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getRoundRewardQueryKey(`ALL_TO_ROUND_${lastRoundId}`, account ?? undefined),
-      })
+  const refetchQueryKeys = useMemo(() => {
+    return [
+      getRoundRewardQueryKey(`ALL_TO_ROUND_${lastRoundId}`, account?.address ?? undefined),
+      getB3TrBalanceQueryKey(account?.address ?? ""),
+    ]
+  }, [account?.address, lastRoundId])
 
-      await queryClient.cancelQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? ""),
-      })
-
-      await queryClient.refetchQueries({
-        queryKey: getB3TrBalanceQueryKey(account ?? ""),
-      })
-    }
-
-    onSuccess?.()
-  }, [account, invalidateCache, lastRoundId, onSuccess, queryClient])
-
-  const result = useSendTransaction({
-    signerAccount: account,
-    onTxConfirmed: handleOnSuccess,
-    onTxFailedOrCancelled: onFailure,
-    // suggestedMaxGas,
+  return useBuildTransaction({
+    clauseBuilder: buildClauses,
+    onSuccess,
+    onFailure,
+    refetchQueryKeys,
   })
-
-  const onMutate = useCallback(async () => {
-    const clauses = buildClauses(roundRewards)
-    return result.sendTransaction(clauses)
-  }, [buildClauses, result, roundRewards])
-
-  return { ...result, sendTransaction: onMutate }
 }

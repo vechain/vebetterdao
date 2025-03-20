@@ -9,12 +9,12 @@ import {
 } from "@/api"
 import { Button, HStack, Heading, Skeleton, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { useCallback, useLayoutEffect, useMemo } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { Trans, useTranslation } from "react-i18next"
 import { CastAllocationVoteFormData, useCastAllocationFormStore } from "@/store"
 import { AppVotesBreakdown } from "@/app/rounds/components/AppVotesBreakdown/AppVotesBreakdown"
-import { ResponsiveCard, TransactionModal } from "@/components"
+import { ResponsiveCard, TransactionModal, TransactionModalStatus } from "@/components"
 import { useCastAllocationVotes, CastAllocationVotesProps } from "@/hooks"
 import { scaledDivision } from "@/utils/MathUtils"
 import { FiArrowUpRight } from "react-icons/fi"
@@ -57,7 +57,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const { data: roundInfo, isLoading: stateLoading } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
     Number(roundInfo.voteStart),
-    account ?? undefined,
+    account?.address ?? undefined,
   )
 
   const { data: threshold } = useVotingThreshold()
@@ -66,7 +66,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
     return Number(votesAtSnapshot) >= (threshold ?? 0)
   }, [votesAtSnapshot, threshold])
 
-  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account ?? undefined)
+  const { data: hasVoted, isLoading: hasVotedLoading } = useHasVotedInRound(roundId, account?.address ?? undefined)
   const isVotingConcluded = roundInfo?.voteEndTimestamp?.isBefore() && [1, 2].includes(state ?? 0)
 
   const transactionModal = useDisclosure()
@@ -129,7 +129,11 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
       <TransactionModal
         isOpen={transactionModal.isOpen}
         onClose={handleClose}
-        status={castAllocationVotes.error ? "error" : castAllocationVotes.status}
+        status={
+          castAllocationVotes.error
+            ? TransactionModalStatus.Error
+            : (castAllocationVotes.status as TransactionModalStatus)
+        }
         confirmationTitle={t("Confirm Vote")}
         successTitle={t("Vote Cast!")}
         errorTitle={t("Error casting vote")}
@@ -139,7 +143,7 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
         onTryAgain={onTryAgain}
         showTryAgainButton
         showExplorerButton
-        txId={castAllocationVotes.txReceipt?.meta.txID ?? castAllocationVotes.sendTransactionTx?.txid}
+        txId={castAllocationVotes.txReceipt?.meta.txID}
         isSuccessBeenTrack={true}
       />
 

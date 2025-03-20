@@ -1,8 +1,8 @@
-import { useConnex, useWallet } from "@vechain/dapp-kit-react"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 
 import { useQuery } from "@tanstack/react-query"
 import { getProposalsVoteEvents } from "../getProposalsVotesEvents"
+import { useWallet, useConnex } from "@vechain/vechain-kit"
 
 export const getProposalVoteEventsQueryKey = (proposalId: string) => ["PROPOSALS", proposalId, "VOTES"]
 
@@ -22,7 +22,7 @@ export const useProposalVoteEvents = (proposalId: string) => {
       const totalVot3UsedInVotes = votes.reduce((acc, event) => acc + Number(event.weight), 0)
       const totalVotingPowerUsedInVotes = votes.reduce((acc, event) => acc + Number(event.power), 0)
       const votesWithComment = votes.filter(event => !!event.reason)
-      const userVote = votes.find(event => compareAddresses(event.account, account || ""))
+      const userVote = votes.find(event => compareAddresses(event.account, account?.address ?? ""))
       const hasUserVoted = !!userVote
       return {
         hasUserVoted,

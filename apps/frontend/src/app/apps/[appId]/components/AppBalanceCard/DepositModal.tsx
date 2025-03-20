@@ -15,7 +15,7 @@ import {
 import { useCallback, useMemo } from "react"
 import { useDepositToAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
-import { TransactionModal, CustomModalContent, B3TRIcon } from "@/components"
+import { TransactionModal, TransactionModalStatus, CustomModalContent, B3TRIcon } from "@/components"
 import BigNumber from "bignumber.js"
 import { Trans, useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
@@ -23,7 +23,7 @@ import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
 import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
 import { useB3trBalance, useXApp } from "@/api"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
 
 export type Props = {
@@ -59,7 +59,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
 
   const { data: app } = useXApp(appId)
 
-  const { data: availableBalanceToDeposit } = useB3trBalance(account ?? "")
+  const { data: availableBalanceToDeposit } = useB3trBalance(account?.address ?? "")
 
   const { data: appBalance, isLoading: isAppBalanceLoading } = useAppAvailableFunds(appId)
 
@@ -100,7 +100,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
     [availableB3trToDepositScaled],
   )
 
-  const { sendTransaction, resetStatus, status, error, txReceipt, sendTransactionTx } = useDepositToAppBalance({
+  const { sendTransaction, resetStatus, status, error, txReceipt } = useDepositToAppBalance({
     appId,
     amount,
   })
@@ -228,7 +228,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         isOpen={isOpen}
         onClose={handleClose}
         successTitle={t("Deposit completed!")}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         errorDescription={error?.reason}
         errorTitle={error ? t("Error depositing") : undefined}
         showTryAgainButton
@@ -236,7 +236,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
         pendingTitle={t("Depositing...")}
         showExplorerButton
         isAppDeposit
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         b3trAmount={amount}
         b3trBalanceAfterSwap={appBalanceAfterSwap}
         b3trBalance={appBalanceScaled}

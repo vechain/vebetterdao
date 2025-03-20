@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import NewProposalPreviewAndPublishPage from "./page"
 import { fireEvent, render, screen, waitFor } from "../../../../../../test"
 import * as router from "next/navigation"
-import * as dappKit from "@vechain/dapp-kit-react"
+import * as vechainKit from "@vechain/vechain-kit"
 import * as store from "@/store"
 import * as hooks from "@/hooks"
 import * as apiHooks from "@/api"
@@ -51,13 +51,11 @@ describe("NewProposalPreviewAndPublish", async () => {
 
     //@ts-ignore
     spyOnuseCreateProposal.mockReturnValue({
-      isTxReceiptLoading: false,
+      isTransactionPending: false,
       txReceipt: null,
       txReceiptError: null,
       sendTransaction: mockSendTransaction,
       sendTransactionError: null,
-      sendTransactionPending: false,
-      sendTransactionTx: null,
       resetStatus: vi.fn(),
       status: "pending",
       error: undefined,
@@ -66,7 +64,7 @@ describe("NewProposalPreviewAndPublish", async () => {
 
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
-    vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
+    vi.spyOn(vechainKit, "useWallet").mockReturnValueOnce({
       account: null,
     })
 

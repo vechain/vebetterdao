@@ -4,7 +4,7 @@ import { ResponsiveCard, VOT3Icon } from "@/components"
 import { useBreakpoints } from "@/hooks"
 import { VStack, Heading, Box, HStack, Skeleton, Text } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
 const compactFormatter = getCompactFormatter(2)
@@ -19,7 +19,7 @@ export const YourVoteBalanceCard = ({ roundId }: Props) => {
   const { data: roundInfo } = useAllocationsRound(roundId)
   const { data: votesAtSnapshot, isLoading: votesAtSnapshotLoading } = useGetVotesOnBlock(
     Number(roundInfo.voteStart),
-    account ?? undefined,
+    account?.address ?? undefined,
   )
   const { data: isQuadraticFundingDisabled } = useIsQuadraticFundingDisabled()
 

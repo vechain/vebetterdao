@@ -123,4 +123,5 @@ i18next
     defaultNS: "translation",
     debug: false,
     fallbackLng: enLang,
+    lng: enLang,
   })

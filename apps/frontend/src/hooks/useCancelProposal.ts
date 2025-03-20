@@ -10,7 +10,7 @@ import {
 } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 import { ethers } from "ethers"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 const GovernorInterface = B3TRGovernor__factory.createInterface()
 
@@ -46,9 +46,9 @@ export const useCancelProposal = ({ proposalId, onSuccess }: Props) => {
     () => [
       getProposalStateQueryKey(proposalId),
       getAllProposalsStateQueryKey(),
-      getProposalUserDepositQueryKey("allClaimableDeposits", account ?? ""),
+      getProposalUserDepositQueryKey("allClaimableDeposits", account?.address ?? ""),
     ],
-    [proposalId, account],
+    [proposalId, account?.address],
   )
 
   return useBuildTransaction({

@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { Image, Card, HStack, Heading, Stack, Text } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import {
   usePotentialRewards,
   useCurrentAllocationsRoundId,
@@ -31,17 +31,17 @@ export const GalaxyRewardsCalculator = () => {
 
   const [selectedGMLevel, setSelectedGMLevel] = useState<string>()
   const { data: currentRound } = useCurrentAllocationsRoundId()
-  const latestRounds = useLatestVotingRound(currentRound ?? "", account ?? "")
+  const latestRounds = useLatestVotingRound(currentRound ?? "", account?.address ?? "")
 
   const { data: emissionAmount } = useAllocationAmount(latestRounds?.roundId)
   const { data: cycleToVoterToTotalEvents } = useVoteRegisteredEvents({
     cycle: Number(latestRounds?.roundId),
-    voter: account ?? "",
+    voter: account?.address ?? "",
   })
-  const { data: hasVoted } = useParticipatedInGovernance(account)
+  const { data: hasVoted } = useParticipatedInGovernance(account?.address ?? "")
   const { data: cycleToTotal } = useCycleToTotal(latestRounds.roundId)
 
-  const currentReward = useGetRewardsEventsOrFunction(account ?? "", latestRounds.roundId)
+  const currentReward = useGetRewardsEventsOrFunction(account?.address ?? "", latestRounds.roundId)
   const emissionAmount_voterRewards = Number(emissionAmount?.voteX2Earn)
 
   const cycleToVoterToTotal = useMemo(() => {

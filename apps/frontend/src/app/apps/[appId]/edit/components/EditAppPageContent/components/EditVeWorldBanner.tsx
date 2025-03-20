@@ -1,7 +1,7 @@
 import { UseFormReturn } from "react-hook-form"
 import { EditAppForm } from ".."
 import { Flex, Heading, IconButton, Image, Input, Text, VStack, useToast } from "@chakra-ui/react"
-import { notFoundImage } from "@/constants"
+import { VEWORLD_BANNER_UPLOAD_GUIDELINES, AVG_PHONE_WIDTH, notFoundImage, VE_WOLRD_SCALING_FACTOR } from "@/constants"
 import { useCallback, useRef } from "react"
 import { UilPen } from "@iconscout/react-unicons"
 import { blobToBase64 } from "@/utils/BlobUtils"
@@ -17,6 +17,8 @@ export const EditVeWorldBanner = ({ form }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const toast = useToast()
   const { t } = useTranslation()
+
+  const computedWidth = Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR
 
   const handleClickEdit = useCallback(() => inputRef.current?.click(), [])
 
@@ -45,28 +47,19 @@ export const EditVeWorldBanner = ({ form }: Props) => {
 
   return (
     <VStack gap={2} align={"start"}>
-      <VStack align="stretch" gap={2}>
-        <Heading fontSize="24px" fontWeight="700">
-          {t("VeWorld Banner")}
-        </Heading>
-        <Text fontSize="md" color="gray.500">
-          {t("Upload a banner to be displayed on the VeWorld mobile wallet")}
-        </Text>
-      </VStack>
-      <Flex w="full" h="220px" flexBasis={"64px"} position={"relative"} rounded="16px" mt={4}>
+      <Heading fontSize="24px" fontWeight="700">
+        {t("VeWorld Banner")}
+      </Heading>
+      <Flex w={computedWidth} h="76px" position={"relative"} rounded="12px" mt={4}>
         <Image
           src={banner ?? notFoundImage}
-          alt={"banner"}
-          maxWidth="none"
-          h="220px"
-          w="full"
-          rounded="16px"
-          objectFit={"cover"}
-          objectPosition={"center"}
+          alt="ve_world_banner"
+          style={{ height: 76, width: computedWidth, borderRadius: 12, overflow: "hidden" }}
+          objectFit="cover"
         />
         <Input type="file" accept="image/*" display={"none"} ref={inputRef} onChange={handleUpload} />
         <Flex
-          rounded="16px"
+          rounded="12px"
           top={0}
           right={0}
           left={0}
@@ -87,8 +80,8 @@ export const EditVeWorldBanner = ({ form }: Props) => {
           />
         </Flex>
       </Flex>
-      <Text fontSize={"sm"} color={"gray"} pt={0}>
-        {t("VeWorld mobile wallet banner should be 1024x576 or a multiple of it (eg: 2048x1152 or 3072x1728).")}
+      <Text fontSize={14} color={"gray"} pt={0}>
+        {t(VEWORLD_BANNER_UPLOAD_GUIDELINES)}
       </Text>
     </VStack>
   )

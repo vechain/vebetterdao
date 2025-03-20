@@ -1,4 +1,3 @@
-import { UseSendTransactionReturnValue } from "./useSendTransaction"
 import { useCallback, useMemo } from "react"
 import { VeBetterPassport__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
@@ -27,7 +26,7 @@ type Props = {
  *
  * @returns the return value of the send transaction hook and the result of the transaction
  */
-export const useRegisterUserAction = ({ address, appId, roundId, onSuccess }: Props): UseSendTransactionReturnValue => {
+export const useRegisterUserAction = ({ address, appId, roundId, onSuccess }: Props) => {
   const clauseBuilder = useCallback(() => {
     const clauses = buildClause({
       contractInterface: VeBetterPassportInterface,

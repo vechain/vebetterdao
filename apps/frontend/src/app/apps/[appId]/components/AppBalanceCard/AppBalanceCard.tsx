@@ -25,7 +25,7 @@ import { FundsManagementModal } from "./FundsManagementModal"
 import { RewardsPoolDetailsModal } from "./RewardsPoolDetailsModal"
 import { BaseTooltip } from "@/components"
 import { FiInfo } from "react-icons/fi"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useAccountAppPermissions } from "@/api"
 import { useMemo, useState, useEffect, useRef } from "react"
 import { HiMiniArrowsUpDown } from "react-icons/hi2"
@@ -52,7 +52,7 @@ export const AppBalanceCard = () => {
   const { data: rewardsBalance, isLoading: isRewardsBalanceLoading } = useAppRewardsBalance(app?.id ?? "")
   const { account } = useWallet()
 
-  const { data: appPermissions } = useAccountAppPermissions(account ?? "")
+  const { data: appPermissions } = useAccountAppPermissions(account?.address ?? "")
 
   const isAppAdmin = useMemo(() => {
     if (!appPermissions || !app) return false
