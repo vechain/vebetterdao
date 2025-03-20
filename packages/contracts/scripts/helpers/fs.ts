@@ -2,6 +2,7 @@ import fs from "fs"
 import path from "path"
 import FormData from "form-data"
 import archiver from "archiver"
+import { getMimeType } from "./utils/mime"
 
 /**
  * Reads files from a directory and returns an array of `File` objects.
@@ -17,10 +18,11 @@ async function readFilesFromDirectory(dirPath: string): Promise<File[]> {
 
   for (const entry of entries) {
     if (entry.isFile()) {
-      const filePath = path.join(dirPath, entry.name)
+      const fileName = entry.name
+      const filePath = path.join(dirPath, fileName)
       const content = await fs.promises.readFile(filePath)
-      const mimeType = "image/png" // TODO: Get the MIME type from the file
-      const file: File = new File([content], entry.name, { type: mimeType })
+      const mimeType = getMimeType(fileName)
+      const file: File = new File([content], fileName, { type: mimeType })
       files.push(file)
     }
   }
