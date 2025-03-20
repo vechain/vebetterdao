@@ -1,6 +1,6 @@
 import { FormattingUtils } from "@repo/utils"
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { VOT3__factory } from "@repo/contracts/typechain-types"
 import { TokenBalance } from "./useB3trBalance"

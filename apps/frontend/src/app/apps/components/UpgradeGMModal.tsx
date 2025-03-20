@@ -1,6 +1,12 @@
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { B3TRIcon, CustomModalContent, FeatureFlagWrapper, TransactionModal } from "@/components"
+import {
+  B3TRIcon,
+  CustomModalContent,
+  FeatureFlagWrapper,
+  TransactionModal,
+  TransactionModalStatus,
+} from "@/components"
 import { useUpgradeGM } from "@/hooks"
 import {
   Button,
@@ -87,14 +93,16 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
         isOpen={upgradeGMModal.isOpen}
         onClose={handleClose}
         successTitle={t("GM NFT upgraded")}
-        status={upgradeGMMutation.error ? "error" : upgradeGMMutation.status}
+        status={
+          upgradeGMMutation.error ? TransactionModalStatus.Error : (upgradeGMMutation.status as TransactionModalStatus)
+        }
         errorDescription={upgradeGMMutation.error?.reason}
         errorTitle={upgradeGMMutation.error ? "Error upgrading GM NFT" : undefined}
         showTryAgainButton
         onTryAgain={onTryAgain}
         pendingTitle={"Upgrading GM NFT..."}
         showExplorerButton
-        txId={upgradeGMMutation.txReceipt?.meta.txID ?? upgradeGMMutation.sendTransactionTx?.txid}
+        txId={upgradeGMMutation.txReceipt?.meta.txID}
       />
     )
 

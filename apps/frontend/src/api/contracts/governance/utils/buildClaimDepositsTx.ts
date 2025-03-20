@@ -1,4 +1,4 @@
-import { EnhancedClause } from "@/hooks"
+import { EnhancedClause } from "@vechain/vechain-kit"
 import { buildClause } from "@/utils/buildClause"
 import { getConfig } from "@repo/config"
 import { B3TRGovernor__factory } from "@repo/contracts"

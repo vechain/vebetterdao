@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import NewProposalTextOnlyPage from "./page"
 import { fireEvent, render, screen, waitFor } from "../../../../../../test"
 import * as router from "next/navigation"
-import * as dappKit from "@vechain/dapp-kit-react"
+import * as vechainKit from "@vechain/vechain-kit"
 import FormProposalLayout from "../layout"
 
 const mockRouterPush = vi.fn()
@@ -23,7 +23,7 @@ describe("NewProposalDiscussion", async () => {
 
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
-    vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
+    vi.spyOn(vechainKit, "useWallet").mockReturnValueOnce({
       account: null,
     })
     render(

@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getUserVotesInRound, getUserVotesInRoundQueryKey } from "."
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 
 /**
  * useUserVotes is a custom hook that fetches the votes of a user for all rounds up to the current one.

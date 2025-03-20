@@ -3,7 +3,7 @@ import { UilPen } from "@iconscout/react-unicons"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
 import { useCurrentAppAdmin, useCurrentAppModerators } from "../../../hooks"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useAccountPermissions } from "@/api/contracts/account"
 
@@ -18,11 +18,11 @@ export const EditAppPageButton = () => {
   const { account } = useWallet()
   const { admin } = useCurrentAppAdmin()
   const { moderators } = useCurrentAppModerators()
-  const { data: permissions } = useAccountPermissions(account || "")
+  const { data: permissions } = useAccountPermissions(account?.address || "")
 
   const showEditButton = useMemo(() => {
-    if (compareAddresses(account || "", admin)) return true
-    if (moderators?.find(moderator => compareAddresses(account || "", moderator))) return true
+    if (compareAddresses(account?.address || "", admin)) return true
+    if (moderators?.find(moderator => compareAddresses(account?.address || "", moderator))) return true
     if (permissions?.isAdminOfX2EarnApps) return true
     return false
   }, [account, admin, moderators, permissions])

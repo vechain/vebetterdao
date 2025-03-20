@@ -1,6 +1,6 @@
 import { useMemo } from "react"
 import { useProposalsEvents } from "./useProposalsEvents"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { ethers } from "ethers"
 /**
@@ -28,13 +28,13 @@ export const useProposalDepositEvent = (proposalId: string) => {
 
   const userSupport = useMemo(() => {
     const deposits = proposalDeposits
-      .filter(deposit => compareAddresses(deposit.depositor, account || ""))
+      .filter(deposit => compareAddresses(deposit.depositor, account?.address || ""))
       .reduce((acc, deposit) => acc + Number(deposit.amount), 0)
     return Number(ethers.formatEther(BigInt(deposits || 0)))
   }, [account, proposalDeposits])
 
   const othersDeposits = useMemo(
-    () => proposalDeposits.filter(deposit => !compareAddresses(deposit.depositor, account || "")),
+    () => proposalDeposits.filter(deposit => !compareAddresses(deposit.depositor, account?.address || "")),
     [account, proposalDeposits],
   )
   const othersSupport = useMemo(() => {

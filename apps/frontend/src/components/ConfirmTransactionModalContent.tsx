@@ -9,7 +9,7 @@ import {
   ModalHeader,
   VStack,
 } from "@chakra-ui/react"
-import { TransactionStatus } from "@/hooks"
+import { TransactionStatus } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 
 type Props = {

@@ -1,5 +1,5 @@
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { useCurrentAppAdmin } from "./useCurrentAppAdmin"
 import { useCurrentAppModerators } from "./useCurrentAppModerators"
@@ -14,12 +14,12 @@ export const useCurrentAppRole = () => {
   const { admin, isLoading: isAdminLoading } = useCurrentAppAdmin()
 
   const isAdmin = useMemo(() => {
-    if (compareAddresses(account || "", admin)) return true
+    if (compareAddresses(account?.address || "", admin)) return true
     return false
   }, [account, admin])
 
   const isModerator = useMemo(() => {
-    if (moderators?.find(moderator => compareAddresses(account || "", moderator))) return true
+    if (moderators?.find(moderator => compareAddresses(account?.address || "", moderator))) return true
     return false
   }, [account, moderators])
 

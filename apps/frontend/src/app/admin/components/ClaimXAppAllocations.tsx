@@ -55,19 +55,11 @@ export const ClaimXAppAllocations = () => {
 
   const { data: claimedResponse } = useHasXAppClaimed(roundId?.toString() ?? "", appId ?? "")
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    txReceipt,
-    sendTransactionTx,
-  } = useClaimXAppsAllocations({
+  const { sendTransaction, resetStatus, isTransactionPending, status, txReceipt } = useClaimXAppsAllocations({
     roundId: roundId?.toString() ?? "",
     appIds: appId ? [appId] : [],
   })
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
 
   const handleSubmit = useCallback(
     (event: { preventDefault: () => void }) => {
@@ -95,13 +87,7 @@ export const ClaimXAppAllocations = () => {
 
   const modalContent = useMemo(() => {
     if (status === "success") {
-      return (
-        <SuccessModalContent
-          title={"Allocations claimed"}
-          showExplorerButton
-          txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
-        />
-      )
+      return <SuccessModalContent title={"Allocations claimed"} showExplorerButton txId={txReceipt?.meta.txID} />
     }
 
     if (isLoading)
@@ -109,12 +95,12 @@ export const ClaimXAppAllocations = () => {
         <ModalBody py={6} px={12}>
           <VStack alignItems={"center"}>
             <MotionImage {...coinFlipAnimation} src="/images/b3tr-token-3d.png" maxH="250px" />
-            {sendTransactionPending /* sendTransactionPending */ && (
+            {status === "pending" /* sendTransactionPending */ && (
               <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
                 {t("Please confirm the transaction in your wallet")}
               </Text>
             )}
-            {isTxReceiptLoading && (
+            {isTransactionPending && (
               <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }}>
                 {t("Almost there...")}
               </Text>
@@ -122,7 +108,7 @@ export const ClaimXAppAllocations = () => {
           </VStack>{" "}
         </ModalBody>
       )
-  }, [status, isLoading, isTxReceiptLoading, sendTransactionPending, txReceipt, sendTransactionTx, t])
+  }, [status, isLoading, isTransactionPending, txReceipt, t])
 
   return (
     <>

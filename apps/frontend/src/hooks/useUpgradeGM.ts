@@ -13,7 +13,7 @@ import {
 } from "@/api"
 import { B3TR__factory } from "@repo/contracts/typechain-types"
 import { ethers } from "ethers"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 const B3trInterface = B3TR__factory.createInterface()
@@ -53,8 +53,8 @@ export const useUpgradeGM = ({ tokenId, b3trToUpgrade, onSuccess }: Props) => {
     () => [
       getLevelOfTokenQueryKey(tokenId),
       getB3trToUpgradeQueryKey(tokenId),
-      getB3TrBalanceQueryKey(account ?? ""),
-      getTokensInfoByOwnerQueryKey(account),
+      getB3TrBalanceQueryKey(account?.address ?? ""),
+      getTokensInfoByOwnerQueryKey(account?.address),
       getB3trDonatedQueryKey(tokenId),
       getNFTMetadataUriQueryKey(tokenId),
     ],

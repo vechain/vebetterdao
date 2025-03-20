@@ -5,12 +5,13 @@ import { UilCheck, UilTimes } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import { AcceptLinkingModal } from "./components/AcceptLinkingModal"
 import { RejectLinkingModal } from "./components/RejectLinkingModal"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 
 type Props = { isConnectedUser: boolean; secondaryAccount: string }
 export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }: Props) => {
   const { t } = useTranslation()
-  const { domain } = useVechainDomain({ addressOrDomain: secondaryAccount || "" })
+  const { data: vnsData } = useVechainDomain(secondaryAccount || "")
+  const domain = vnsData?.domain
   const rejectLinkingModal = useDisclosure()
   const acceptLinkingModal = useDisclosure()
   return (

@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from "react-i18next"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 import { useUserSignalEvents } from "@/api/contracts/xApps/hooks/useUserSignalEvents"
 import { useXApps } from "@/api"
@@ -12,7 +12,7 @@ export const UserSignaledBanner = () => {
   const { account } = useWallet()
   const {
     data: { activeSignalEvents },
-  } = useUserSignalEvents(account ?? "")
+  } = useUserSignalEvents(account?.address ?? "")
   const { data: apps } = useXApps()
 
   const { isOpen, onOpen, onClose } = useDisclosure()

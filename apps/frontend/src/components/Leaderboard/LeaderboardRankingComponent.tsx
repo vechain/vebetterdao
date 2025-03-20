@@ -5,7 +5,7 @@ import { useMemo } from "react"
 import { Trans } from "react-i18next"
 import { AddressButton } from "../AddressButton"
 import { AddressIcon } from "../AddressIcon"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 
 export type LeaderboardRanking = {
   position: number
@@ -17,7 +17,8 @@ type LeaderboardRankingComponentProps = {
   isYourRanking?: boolean
 }
 export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: LeaderboardRankingComponentProps) => {
-  const { domain } = useVechainDomain({ addressOrDomain: ranking.address })
+  const { data: vnsData } = useVechainDomain(ranking.address)
+  const domain = vnsData?.domain
   const router = useRouter()
 
   const onClick = () => {
@@ -88,7 +89,7 @@ export const LeaderboardRankingComponent = ({ ranking, isYourRanking }: Leaderbo
         )}
         <HStack w="full" justify="space-between">
           <HStack spacing={2} zIndex={1}>
-            <AddressIcon address={ranking.address} boxSize={8} rounded={"full"} />
+            <AddressIcon address={ranking.address} boxSize={8} minW={8} minH={8} rounded={"full"} />
             <Box>
               <HStack spacing={1}>
                 {isYourRanking && (

@@ -3,7 +3,7 @@ import { UilInfoCircle, UilLinkBroken } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
 import InfiniteScroll from "react-infinite-scroll-component"
 import { useGetTokensInfoByOwner } from "@/api/contracts/galaxyMember/hooks/useGetTokensInfoByOwner"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { GMNFTListItem } from "./GMNFTListItem"
 import { useMemo } from "react"
 import { FeatureFlagWrapper, BaseTooltip } from "@/components"
@@ -14,7 +14,12 @@ import { useIsXNodeAttachedWhileTransferred } from "@/hooks"
 export const GMNFTList = () => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { data: tokensInfo, isFetchingNextPage, fetchNextPage, hasNextPage } = useGetTokensInfoByOwner(account)
+  const {
+    data: tokensInfo,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useGetTokensInfoByOwner(account?.address ?? "")
   const { isXNodeAttachedWhileTransferred } = useIsXNodeAttachedWhileTransferred()
 
   const loadMore = () => {

@@ -1,11 +1,12 @@
 import { useXApps, useXNode } from "@/api"
 import { AppsBanner } from "@/components"
-import { VStack, Heading, Text } from "@chakra-ui/react"
+import { VStack, Heading, Text, Box } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
 import { AllApps } from "./AllApps"
 import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
+import { AppsDisclaimer } from "./AppsDisclaimer"
 
 export type XAppInformations = {
   key?: string
@@ -56,6 +57,10 @@ export const AppsPageContent = () => {
       </VStack>
 
       {/* TODO: mascot release <JoinB3TRAppsBanner /> */}
+
+      <Box mt={10}>
+        <AppsDisclaimer />
+      </Box>
     </VStack>
   )
 }

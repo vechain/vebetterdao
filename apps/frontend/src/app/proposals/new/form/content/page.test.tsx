@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import NewProposalPageDiscussion from "./page"
 import { fireEvent, render, screen, waitFor, within } from "../../../../../../test"
 import * as router from "next/navigation"
-import * as dappKit from "@vechain/dapp-kit-react"
+import * as vechainKit from "@vechain/vechain-kit"
 import FormProposalLayout from "../layout"
 import { GovernanceProposalTemplate, removePlaceholders } from "@/constants"
 
@@ -20,7 +20,7 @@ vi.spyOn(router, "usePathname").mockImplementation(() => "/proposals/new/form/co
 describe("NewProposalContent", async () => {
   it("redirects to /proposals if no account connected", async () => {
     //@ts-ignore
-    vi.spyOn(dappKit, "useWallet").mockReturnValueOnce({
+    vi.spyOn(vechainKit, "useWallet").mockReturnValueOnce({
       account: null,
     })
     render(

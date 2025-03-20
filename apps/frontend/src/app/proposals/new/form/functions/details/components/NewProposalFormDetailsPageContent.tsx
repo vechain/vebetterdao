@@ -6,7 +6,7 @@ import { abi } from "thor-devkit"
 import { useProposalFormStore } from "@/store"
 import { ethers } from "ethers"
 import { useTranslation } from "react-i18next"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 import {
   buttonClicked,
@@ -32,7 +32,7 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
         title: data.title,
         shortDescription: data.description,
         actionsLength: data.actions.length,
-        account,
+        account: account?.address,
       })
       setData({
         title: data.title,
@@ -60,7 +60,7 @@ export const NewProposalFormDetailsPageContent: React.FC = () => {
       router.push("/proposals/new/form/content")
       AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_ABOUT))
     },
-    [setData, router, account],
+    [setData, router, account?.address],
   )
 
   return (

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { pollForReceipt } from "../pollForReceipt"
 
 export const txReceiptQueryKey = (txId?: string) => ["TX_RECEIPT", txId]

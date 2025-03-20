@@ -4,7 +4,7 @@ import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 import { useEffect, useState } from "react"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { SubmitCreatorFormData, SubmitCreatorForm } from "@/components/SubmitCreatorForm"
 import { useCreatorSubmissionFormStore } from "@/store/useCreatorSubmissionFormStore"
@@ -33,7 +33,7 @@ export const NewCreatorPageFormContent = () => {
   const [submitStatus, setSubmitStatus] = useState<"success" | "error">("success")
   const [submitErrorMessage, setSubmitErrorMessage] = useState("")
   const { account } = useWallet()
-  const hasCreatorNft = useHasCreatorNFT(account ?? "")
+  const hasCreatorNft = useHasCreatorNFT(account?.address ?? "")
 
   useEffect(() => {
     //Users with Creator NFT should be redirected to the new app page

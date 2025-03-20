@@ -8,7 +8,7 @@ import dayjs from "dayjs"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { useNodeEndorsementScore } from "@/hooks/useNodeEndorsementScore"
 import { useGetNodeManager } from "@/api"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 
 type Props = {
   event: AppEndorsedEvent
@@ -41,8 +41,8 @@ export const EndorsementHistoryItem = ({ event }: Props) => {
     }, 2000)
   }, [endorserAddress])
 
-  const { domain } = useVechainDomain({ addressOrDomain: endorserAddress })
-
+  const { data: vnsData } = useVechainDomain(endorserAddress)
+  const domain = vnsData?.domain
   return (
     <HStack
       p={2}

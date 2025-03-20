@@ -1,6 +1,6 @@
 import { Box, HStack, Text, VStack, Flex, Button, Image } from "@chakra-ui/react"
 import { AddressIcon } from "../AddressIcon"
-import { useWallet, useWalletModal } from "@vechain/dapp-kit-react"
+import { useWallet, useWalletModal, useVechainDomain } from "@vechain/vechain-kit"
 import { humanAddress } from "@repo/utils/FormattingUtils"
 import { FaChevronRight } from "react-icons/fa6"
 import { useTranslation } from "react-i18next"
@@ -15,6 +15,8 @@ type Props = {
 
 export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
   const { account } = useWallet()
+  const { data: vnsData } = useVechainDomain(account?.address)
+  const domain = vnsData?.domain
   const { t } = useTranslation()
   const { open } = useWalletModal()
   const router = useRouter()
@@ -29,7 +31,7 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
     onMenuClose?.()
   }, [open, onMenuClose])
 
-  if (!account)
+  if (!account?.address)
     return (
       <Flex
         borderRadius={"lg"}
@@ -77,13 +79,11 @@ export const ProfileButton: React.FC<Props> = ({ onMenuClose }: Props) => {
   return (
     <Box borderWidth={1} borderColor={"#A8A8A8"} w={"full"} borderRadius={9} onClick={onClick}>
       <HStack p={2} spacing={2} w={"full"} justifyContent={"space-between"} px={3.5} py={4}>
-        <HStack spacing={3}>
-          <Box h={14}>
-            <AddressIcon address={account ?? ""} borderRadius={"full"} />
-          </Box>
+        <HStack w="full">
+          <AddressIcon address={account?.address ?? ""} minW={14} minH={14} boxSize={14} rounded="full" />
           <VStack spacing={0} align={"flex-start"}>
             <Text fontSize={18} fontWeight={600}>
-              {humanAddress(account ?? "", 4, 6)}
+              {domain ?? humanAddress(account?.address ?? "", 4, 6)}
             </Text>
             <Text fontSize={12} fontWeight={400}>
               {t("View your Better Profile")}

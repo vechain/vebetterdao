@@ -1,7 +1,7 @@
 import { Box, Card, Heading, HStack, Stack, Text, useMediaQuery, VStack, Flex } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { NotConnectedWallet } from "./components/NotConnectedWallet"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { SwapB3trVot3 } from "./components/SwapB3trVot3"
 import { FeatureFlagWrapper } from "../FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
@@ -66,7 +66,7 @@ export const GmNFTAndNodeCard = () => {
       : t("{{value}} is a galaxy member", { value: domainOrAddress })
   }, [isGMOwned, hasUserVoted, t, isConnectedUser, domain, profile, isOnProfilePage])
 
-  if (!account && !viewMode) {
+  if (!account?.address && !viewMode) {
     return <NotConnectedWallet />
   }
 
@@ -145,7 +145,7 @@ export const GmNFTAndNodeCard = () => {
           {!isOnProfilePage && <GmNFTAndNodeFooter />}
         </VStack>
         {!isOnProfilePage && <Flex w={isAbove800 ? "1px" : "auto"} h={isAbove800 ? "auto" : "1px"} bg="#FFFFFF80" />}
-        {account && !isOnProfilePage && <SwapB3trVot3 address={account} />}
+        {account?.address && !isOnProfilePage && <SwapB3trVot3 address={account?.address} />}
       </Stack>
     </Card>
   )

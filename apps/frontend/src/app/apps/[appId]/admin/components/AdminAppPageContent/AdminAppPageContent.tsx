@@ -16,8 +16,8 @@ import { UpdateConfirmationModal } from "./components/UpdateConfirmationModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useUpdateAppAdminInfo } from "@/hooks/useUpdateAppAdminInfo"
-import { TransactionModal } from "@/components/TransactionModal"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
+import { useWallet } from "@vechain/vechain-kit"
 import { EditAppRewardDistributors } from "./components/EditAppRewardDistributors"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { EditAppCreatorNFT } from "./components/EditAppCreatorNFT"
@@ -35,7 +35,7 @@ export const AdminAppPageContent = () => {
   const router = useRouter()
 
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account || "")
+  const { data: permissions } = useAccountPermissions(account?.address || "")
 
   const { admin, isLoading: adminLoading } = useCurrentAppAdmin()
   const { moderators, isLoading: moderatorsLoading } = useCurrentAppModerators()
@@ -200,7 +200,7 @@ export const AdminAppPageContent = () => {
   }, [form, handleClose, onSubmit])
 
   const allowedToEditAdminInfo = useMemo(
-    () => compareAddresses(account || "", admin) || permissions?.isAdminOfX2EarnApps,
+    () => compareAddresses(account?.address || "", admin) || permissions?.isAdminOfX2EarnApps,
     [account, admin, permissions],
   )
 
@@ -257,7 +257,7 @@ export const AdminAppPageContent = () => {
         onClose={handleClose}
         confirmationTitle="Update app admin info"
         successTitle="App admin info updated!"
-        status={updateMutation.status}
+        status={updateMutation.status as TransactionModalStatus}
         errorDescription={updateMutation.error?.reason}
         errorTitle={"Error updating app admin info"}
         showTryAgainButton={true}

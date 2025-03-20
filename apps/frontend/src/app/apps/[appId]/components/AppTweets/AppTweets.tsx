@@ -43,7 +43,7 @@ export const AppTweets = () => {
   const updateAppDetailsMutation = useUpdateAppDetails({
     appId,
     onSuccess: () => {
-      handleClose()
+      handleCancelEdit()
       updateAppDetailsMutation.resetStatus()
     },
   })

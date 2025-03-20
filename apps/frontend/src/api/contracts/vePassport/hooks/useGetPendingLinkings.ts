@@ -1,7 +1,7 @@
 import { getCallKey, useCall } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
 const vePassportInterface = VeBetterPassport__factory.createInterface()
@@ -41,5 +41,5 @@ export const useGetPendingLinkings = (user?: string | null) => {
  */
 export const useGetUserPendingLinkings = () => {
   const { account } = useWallet()
-  return useGetPendingLinkings(account)
+  return useGetPendingLinkings(account?.address)
 }

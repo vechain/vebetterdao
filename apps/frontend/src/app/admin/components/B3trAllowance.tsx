@@ -1,5 +1,5 @@
 import { useB3trAllowance, useB3trBalance } from "@/api"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useB3trApprove } from "@/hooks"
 import {
   VStack,
@@ -24,35 +24,29 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { WalletAddressInput } from "@/app/components/Input"
 
 export const B3trAllowance = () => {
   const { account } = useWallet()
-  const { data: b3trBalance } = useB3trBalance(account ?? undefined)
+  const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
   const { isOpen, onClose, onOpen } = useDisclosure()
   const [amount, setAmount] = useState<number>(0)
   const [spender, setSpender] = useState<string>("")
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)
   const { t } = useTranslation()
 
-  const { data: allowedAmount, isLoading: allowedAmountLoading } = useB3trAllowance(account ?? undefined, spender)
+  const { data: allowedAmount, isLoading: allowedAmountLoading } = useB3trAllowance(
+    account?.address ?? undefined,
+    spender,
+  )
   const allowedAmountScaled = useMemo(() => {
     return allowedAmount?.scaled ?? "0"
   }, [allowedAmount])
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useB3trApprove({
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useB3trApprove({
     spender: spender ?? "",
     amount: amount ?? 0,
   })
@@ -85,7 +79,7 @@ export const B3trAllowance = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
 
   return (
     <>
@@ -189,12 +183,12 @@ export const B3trAllowance = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("B3TR tokens allowance updated successfully")}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={t(`Updating B3TR tokens allowance...`)}
         errorTitle={t("Error updating allowance")}
         errorDescription={error?.reason}

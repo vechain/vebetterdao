@@ -10,7 +10,7 @@ import {
   ButtonClickProperties,
   updateMarkdownTemplatePlaceholders,
 } from "@/constants"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { AnalyticsUtils } from "@/utils"
 
 export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
@@ -29,7 +29,7 @@ export const NewProposalPageTextOnlyDiscussionContent: React.FC = () => {
       const markdownDescription = updateMarkdownTemplatePlaceholders({
         title: data.title,
         shortDescription: data.description,
-        account,
+        account: account?.address,
       })
       setData({
         title: data.title,

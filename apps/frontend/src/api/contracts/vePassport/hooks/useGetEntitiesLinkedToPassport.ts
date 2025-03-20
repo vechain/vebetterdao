@@ -1,7 +1,7 @@
 import { getCallKey, useCall } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 
 const VEPASSPORT_CONTRACT = getConfig().veBetterPassportContractAddress
 const vePassportInterface = VeBetterPassport__factory.createInterface()
@@ -37,5 +37,5 @@ export const useGetEntitiesLinkedToPassport = (passport?: string | null) => {
  */
 export const useGetUserEntitiesLinkedToPassport = () => {
   const { account } = useWallet()
-  return useGetEntitiesLinkedToPassport(account)
+  return useGetEntitiesLinkedToPassport(account?.address)
 }
