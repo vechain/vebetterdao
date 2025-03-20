@@ -8,8 +8,8 @@ import { useCurrentAllocationsRoundId } from "@/api/contracts"
 const indexerUrl = getConfig().indexerUrl
 
 const SustainabilitySingleUserOverviewObjectSchema = SustainabilityMultipleUsersOverviewObjectSchema.extend({
-  rankByReward: z.number(),
-  rankByActionsRewarded: z.number(),
+  rankByReward: z.number().optional(),
+  rankByActionsRewarded: z.number().optional(),
   uniqueXAppInteractions: z.array(z.string()),
   roundId: z.number().optional(),
 })

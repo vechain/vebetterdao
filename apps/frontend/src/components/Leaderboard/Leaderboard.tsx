@@ -64,7 +64,10 @@ export const Leaderboard = () => {
   const yourRaking = useMemo(() => {
     if (!account?.address) return undefined
     if (userRoundOverview.isLoading) return undefined
-    if (userRoundOverview.isError) return undefined
+    if (userRoundOverview.isError) {
+      console.error(userRoundOverview.error)
+      return undefined
+    }
     return {
       position: userRoundOverview.data?.rankByActionsRewarded ?? 0,
       address: account?.address ?? "",
