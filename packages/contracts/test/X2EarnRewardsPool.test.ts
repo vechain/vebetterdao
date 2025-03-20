@@ -22,7 +22,7 @@ import {
 import { endorseApp } from "./helpers/xnodes"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 
-describe.only("X2EarnRewardsPool - @shard12", function () {
+describe("X2EarnRewardsPool - @shard12", function () {
   // deployment
   describe("Deployment", function () {
     it("Cannot deploy contract with zero address", async function () {
@@ -1225,6 +1225,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -1462,6 +1464,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -1526,6 +1530,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -1602,6 +1608,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -1668,6 +1676,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -1734,6 +1744,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -1797,6 +1809,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -1875,6 +1889,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -1953,6 +1969,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -2029,6 +2047,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -2083,6 +2103,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -2149,6 +2171,9 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
+
       // fill the pool
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
@@ -2191,6 +2216,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -2287,6 +2314,9 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
+
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
 
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
@@ -2605,6 +2635,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       const appId = await x2EarnApps.hashAppName("My app")
       await endorseApp(appId, owner)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
       await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
       expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -2706,6 +2738,8 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
     const appId = await x2EarnApps.hashAppName("My app")
     await endorseApp(appId, owner)
 
+    // By default, the rewards pool is enabled for new apps
+    await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
     await x2EarnApps.connect(owner).addRewardDistributor(appId, owner.address)
     expect(await x2EarnApps.isRewardDistributor(appId, owner.address)).to.equal(true)
 
@@ -2903,6 +2937,9 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
+      // By default, the rewards pool is enabled for new apps
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
+
       await expect(x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, true))
         .to.emit(x2EarnRewardsPool, "RewardsPoolBalanceEnabled")
         .withArgs(appId, true)
@@ -3086,9 +3123,9 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPool.rewardsPoolBalance(appId)).to.equal(amount)
       expect(await x2EarnRewardsPool.totalBalance(appId)).to.equal(amount)
 
-      expect(await x2EarnRewardsPool.connect(otherAccount).rewardsPoolEnabled(appId)).to.equal(true)
+      expect(await x2EarnRewardsPool.connect(otherAccount).isRewardsPoolEnabled(appId)).to.equal(true)
       await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)
-      expect(await x2EarnRewardsPool.connect(otherAccount).rewardsPoolEnabled(appId)).to.equal(false)
+      expect(await x2EarnRewardsPool.connect(otherAccount).isRewardsPoolEnabled(appId)).to.equal(false)
 
       expect(await x2EarnRewardsPool.availableFunds(appId)).to.equal(amount)
       expect(await x2EarnRewardsPool.rewardsPoolBalance(appId)).to.equal(0)
@@ -3134,6 +3171,49 @@ describe.only("X2EarnRewardsPool - @shard12", function () {
         "X2EarnRewardsPool: app has insufficient funds",
       )
       await x2EarnRewardsPool.connect(owner).withdraw(ethers.parseEther("30"), appId, "")
+    })
+
+    it("Should emit event when enabling by default for new apps", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+      const teamWallet = otherAccount
+      const amount = ethers.parseEther("100")
+
+      // deploy app and deposit apps funds (+ 100 B3TR)
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+      await expect(x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")).to.emit(
+        x2EarnRewardsPool,
+        "RewardsPoolBalanceEnabled",
+      )
+    })
+
+    it("Only x2earn apps can enable rewards pool for new apps", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+      const teamWallet = otherAccount
+      const amount = ethers.parseEther("100")
+
+      // deploy app and deposit apps funds (+ 100 B3TR)
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+      await x2EarnApps.submitApp(teamWallet.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await endorseApp(appId, owner)
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      await expect(x2EarnRewardsPool.connect(otherAccount).enableRewardsPoolForNewApp(appId)).to.be.revertedWith(
+        "X2EarnRewardsPool: only X2EarnApps contract can enable rewards pool for new apps",
+      )
+      //the pool is already enabled for new apps, so should revert with already enabled
+      await expect(x2EarnApps.connect(owner).enableRewardsPoolForNewApp(appId)).to.be.revertedWith(
+        "X2EarnRewardsPool: caller is not X2EarnApps contract",
+      )
     })
   })
 })

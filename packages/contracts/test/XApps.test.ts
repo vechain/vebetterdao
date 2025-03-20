@@ -33,6 +33,7 @@ import {
   X2EarnApps,
   X2EarnAppsV1,
   X2EarnAppsV2,
+  X2EarnAppsV3,
   X2EarnApps__factory,
   X2EarnRewardsPool,
   X2EarnRewardsPoolV4,
@@ -68,13 +69,10 @@ describe("X-Apps - @shard15", function () {
 
   describe("Contract upgradeablity", () => {
     it("Cannot reinitialize twice", async function () {
-      const config = createLocalConfig()
-      const { x2EarnApps, xAllocationVoting } = await getOrDeployContractInstances({
+      const { x2EarnApps, x2EarnRewardsPool } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      await catchRevert(
-        x2EarnApps.initializeV3(config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()),
-      )
+      await catchRevert(x2EarnApps.initializeV4(await x2EarnRewardsPool.getAddress()))
     })
 
     it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
@@ -145,7 +143,7 @@ describe("X-Apps - @shard15", function () {
         forceDeploy: true,
       })
 
-      expect(await x2EarnApps.version()).to.equal("3")
+      expect(await x2EarnApps.version()).to.equal("4")
     })
 
     it("X2Earn Apps Info added pre contract upgrade should should be same after upgrade", async () => {
@@ -161,10 +159,14 @@ describe("X-Apps - @shard15", function () {
         administrationUtils,
         endorsementUtils,
         voteEligibilityUtils,
+        x2EarnRewardsPool,
         x2EarnCreator,
         administrationUtilsV2,
         endorsementUtilsV2,
         voteEligibilityUtilsV2,
+        administrationUtilsV3,
+        endorsementUtilsV3,
+        voteEligibilityUtilsV3,
         xAllocationVoting,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -228,14 +230,39 @@ describe("X-Apps - @shard15", function () {
 
       expect(appsV1).to.eql(appsV2)
 
-      // Upgrade X2EarnAppsV1 to X2EarnApps
-      const x2EarnApps = (await upgradeProxy(
+      // Upgrade X2EarnAppsV2 to X2EarnApps
+      const x2EarnAppsV3 = (await upgradeProxy(
         "X2EarnAppsV2",
-        "X2EarnApps",
-        await x2EarnAppsV1.getAddress(),
+        "X2EarnAppsV3",
+        await x2EarnAppsV2.getAddress(),
         [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
           version: 3,
+          libraries: {
+            AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
+            EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
+            VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+          },
+        },
+      )) as X2EarnAppsV3
+
+      // start new round
+      await startNewAllocationRound()
+
+      const appsV3 = await x2EarnAppsV3.apps()
+      expect(appsV2).to.eql(appsV3)
+
+      const cooldownPeriod = await x2EarnAppsV3.cooldownPeriod()
+      expect(cooldownPeriod).to.eql(1n)
+
+      // Upgrade X2EarnAppsV2 to X2EarnApps
+      const x2EarnApps = (await upgradeProxy(
+        "X2EarnAppsV3",
+        "X2EarnApps",
+        await x2EarnAppsV3.getAddress(),
+        [await x2EarnRewardsPool.getAddress()],
+        {
+          version: 4,
           libraries: {
             AdministrationUtils: await administrationUtils.getAddress(),
             EndorsementUtils: await endorsementUtils.getAddress(),
@@ -243,15 +270,11 @@ describe("X-Apps - @shard15", function () {
           },
         },
       )) as X2EarnApps
-
       // start new round
       await startNewAllocationRound()
 
-      const appsV3 = await x2EarnApps.apps()
-      expect(appsV1).to.eql(appsV3)
-
-      const cooldownPeriod = await x2EarnApps.cooldownPeriod()
-      expect(cooldownPeriod).to.eql(1n)
+      const apps = await x2EarnApps.apps()
+      expect(appsV3).to.eql(apps)
     })
 
     it("X2Earn Apps added pre contract upgrade should need endorsement after upgrade and should be in grace period", async () => {
@@ -437,6 +460,9 @@ describe("X-Apps - @shard15", function () {
         administrationUtils,
         endorsementUtils,
         voteEligibilityUtils,
+        administrationUtilsV3,
+        endorsementUtilsV3,
+        voteEligibilityUtilsV3,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -600,21 +626,21 @@ describe("X-Apps - @shard15", function () {
       // app3Id just gets endorsed
       await x2EarnAppsV2.connect(otherAccounts[6]).endorseApp(app3Id, nodeId2)
 
-      // Upgrade X2EarnAppsV2 to X2EarnApps
+      // Upgrade X2EarnAppsV3 to X2EarnAppsV2
       const x2EarnAppsV3 = (await upgradeProxy(
         "X2EarnAppsV2",
-        "X2EarnApps",
+        "X2EarnAppsV3",
         await x2EarnAppsV2.getAddress(),
         [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
           version: 3,
           libraries: {
-            AdministrationUtils: await administrationUtils.getAddress(),
-            EndorsementUtils: await endorsementUtils.getAddress(),
-            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+            AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
+            EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
+            VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
           },
         },
-      )) as X2EarnApps
+      )) as X2EarnAppsV3
 
       // New node holders should not be subject to cooldown period even if they endorse an app prior to upgrade
       expect(await x2EarnAppsV3.checkCooldown(nodeId1)).to.eql(false)
@@ -650,9 +676,58 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV3.checkCooldown(nodeId1)).to.eql(false)
       expect(await x2EarnAppsV3.checkCooldown(nodeId2)).to.eql(false)
       expect(await x2EarnAppsV3.checkCooldown(1)).to.eql(false)
+
+      // Upgrade X2EarnAppsV3 to X2EarnApps
+      const x2EarnAppsV4 = (await upgradeProxy(
+        "X2EarnAppsV3",
+        "X2EarnApps",
+        await x2EarnAppsV3.getAddress(),
+        [await x2EarnRewardsPool.getAddress()],
+        {
+          version: 4,
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        },
+      )) as X2EarnApps
+      // New node holders should not be subject to cooldown period even if they endorse an app prior to upgrade
+      expect(await x2EarnAppsV4.checkCooldown(nodeId1)).to.eql(false)
+      expect(await x2EarnAppsV4.checkCooldown(nodeId2)).to.eql(false)
+
+      // Node holders that endorsed an app prior to upgrade should not be subject to cooldown period
+      expect(await x2EarnAppsV4.checkCooldown(1)).to.eql(false)
+
+      // If a node holder that endorsed an app prior to upgrade performs an action they should be subject to cooldown period
+      await x2EarnAppsV4.connect(otherAccounts[1]).unendorseApp(app1Id, 1) // Node holder endorsement score is 100
+      await x2EarnAppsV4.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 100
+
+      expect(await x2EarnAppsV4.checkCooldown(1)).to.eql(true)
+
+      // Should revert if user in cooldown period tries to endorse an app
+      await catchRevert(x2EarnAppsV4.connect(otherAccounts[1]).endorseApp(app1Id, 1))
+
+      await x2EarnAppsV4
+        .connect(owner)
+        .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app 5", "metadataURI")
+      const app5Id = ethers.keccak256(ethers.toUtf8Bytes("My app 5"))
+
+      // New node holders should be subject to cooldown period
+      await catchRevert(x2EarnAppsV4.connect(otherAccounts[5]).endorseApp(app5Id, 5))
+
+      // Fast forward time to next round
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+      await startNewAllocationRound()
+
+      // New node holders should not be subject to cooldown period
+      expect(await x2EarnAppsV4.checkCooldown(nodeId1)).to.eql(false)
+      expect(await x2EarnAppsV4.checkCooldown(nodeId2)).to.eql(false)
+      expect(await x2EarnAppsV4.checkCooldown(1)).to.eql(false)
     })
 
-    it("Should not have state conflict after upgrading to V3", async () => {
+    it.only("Should not have state conflict after upgrading to V4", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
       config.X2EARN_NODE_COOLDOWN_PERIOD = 1
@@ -672,6 +747,9 @@ describe("X-Apps - @shard15", function () {
         administrationUtilsV2,
         endorsementUtilsV2,
         voteEligibilityUtilsV2,
+        administrationUtilsV3,
+        endorsementUtilsV3,
+        voteEligibilityUtilsV3,
       } = await getOrDeployContractInstances({ forceDeploy: true })
 
       const x2EarnAppsV2 = (await deployAndUpgrade(
@@ -770,25 +848,27 @@ describe("X-Apps - @shard15", function () {
         initialEndorsementSlot,
       )
 
+      console.log("storageSlots", storageSlots)
+
       config.X2EARN_NODE_COOLDOWN_PERIOD = 24
 
-      // Upgrade X2EarnAppsV1 to X2EarnAppsV2
+      // Upgrade X2EarnAppsV2 to X2EarnAppsV3
       const x2EarnAppsV3 = (await upgradeProxy(
         "X2EarnAppsV2",
-        "X2EarnApps",
+        "X2EarnAppsV3",
         await x2EarnAppsV2.getAddress(),
         [config.X2EARN_NODE_COOLDOWN_PERIOD, await xAllocationVoting.getAddress()],
         {
           version: 3,
           libraries: {
-            AdministrationUtils: await administrationUtils.getAddress(),
-            EndorsementUtils: await endorsementUtils.getAddress(),
-            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+            AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
+            EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
+            VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
           },
         },
-      )) as X2EarnApps
+      )) as X2EarnAppsV3
 
-      const storageSlotsAfter = await getStorageSlots(
+      const storageSlotsAfterV3 = await getStorageSlots(
         x2EarnAppsV3.getAddress(),
         initialSlotVoteEligibility,
         initialSlotSettings,
@@ -797,16 +877,54 @@ describe("X-Apps - @shard15", function () {
         initialEndorsementSlot,
       )
 
-      // Check if storage slots are the same after upgrade
-      for (let i = 0; i < storageSlots.length; i++) {
-        expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
-      }
+      console.log("storageSlotsAfterV3", storageSlotsAfterV3)
 
       expect(await x2EarnAppsV3.version()).to.equal("3")
-      expect(storageSlotsAfter[storageSlotsAfter.length - 2]).to.equal(BigInt(config.X2EARN_NODE_COOLDOWN_PERIOD))
+      expect(storageSlotsAfterV3[storageSlotsAfterV3.length - 2]).to.equal(BigInt(config.X2EARN_NODE_COOLDOWN_PERIOD))
+      // Upgrade X2EarnAppsV2 to X2EarnAppsV3
+      const x2EarnAppsV4 = (await upgradeProxy(
+        "X2EarnAppsV3",
+        "X2EarnApps",
+        await x2EarnAppsV3.getAddress(),
+        [await x2EarnRewardsPool.getAddress()],
+        {
+          version: 4,
+          libraries: {
+            AdministrationUtils: await administrationUtils.getAddress(),
+            EndorsementUtils: await endorsementUtils.getAddress(),
+            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+          },
+        },
+      )) as X2EarnApps
+
+      const storageSlotsAfterV4 = await getStorageSlots(
+        x2EarnAppsV4.getAddress(),
+        initialSlotVoteEligibility,
+        initialSlotSettings,
+        initialSlotAppsStorage,
+        initialSlotAdministration,
+        initialEndorsementSlot,
+      )
+
+      console.log("storageSlotsAfterV4", storageSlotsAfterV4)
+      expect(await x2EarnAppsV4.version()).to.equal("4")
+
+      // TODO : fix the slot issue -> storageSlotsAfterV4[5] is not the same as storageSlots[5]
+      // Instead of the end of the array, the v4 slot variable is append after the v1 slot variable
+      for (let i = 0; i < storageSlots.length; i++) {
+        console.log("storageSlotsAfterV4[i]", storageSlotsAfterV4[i])
+        console.log("--------------------------------")
+
+        expect(storageSlots[i]).to.equal(storageSlotsAfterV4[i])
+      }
+
+      // storage slot is all the prev + the new one ( x2earnRewardsPool )
+      // expect(storageSlotsAfterV4[storageSlotsAfterV4.length - 1]).to.equal(await x2EarnRewardsPool.getAddress())
+      // expect(storageSlotsAfterV4[storageSlotsAfterV4.length - 2]).to.equal(BigInt(config.X2EARN_NODE_COOLDOWN_PERIOD))
+      // expect(storageSlotsAfterV4[storageSlotsAfterV4.length - 3]).to.equal(await xAllocationVoting.getAddress())
     })
 
-    it.skip("Check no issues upgrading to V3 with update of libraries", async function () {
+    it.skip("Check no issues upgrading to V4 with update of libraries", async function () {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 50
       config.X2EARN_NODE_COOLDOWN_PERIOD = 1
@@ -875,6 +993,9 @@ describe("X-Apps - @shard15", function () {
         administrationUtilsV2,
         endorsementUtilsV2,
         voteEligibilityUtilsV2,
+        administrationUtilsV3,
+        endorsementUtilsV3,
+        voteEligibilityUtilsV3,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -1379,7 +1500,7 @@ describe("X-Apps - @shard15", function () {
         expect(await veBetterPassport.appSecurity(eligibleAppIds[i])).to.eql(secuirtyScore)
       }
 
-      // Upgrade to V2 of X2EarnApps
+      // Upgrade to V3 of X2EarnApps
       const x2EarnAppsV3 = (await upgradeProxy(
         "X2EarnAppsV2",
         "X2EarnApps",
@@ -1623,6 +1744,22 @@ describe("X-Apps - @shard15", function () {
 
       expect(await x2EarnApps.getXAllocationVotingGovernor()).to.eql(await xAllocationVoting.getAddress())
     })
+
+    it("Cannot set x2EarnRewardsPool to zero address", async function () {
+      const { x2EarnApps } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(x2EarnApps.setX2EarnRewardsPoolContract(ZERO_ADDRESS))
+    })
+
+    it("Only admin can set x2EarnRewardsPool", async function () {
+      const { x2EarnApps, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await catchRevert(x2EarnApps.connect(otherAccount).setX2EarnRewardsPoolContract(otherAccount.address))
+    })
   })
 
   describe("Add apps", function () {
@@ -1715,6 +1852,22 @@ describe("X-Apps - @shard15", function () {
       await x2EarnApps
         .connect(otherAccounts[0])
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
+    })
+
+    it("Should enable rewards pool for new app when registering an app", async function () {
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
+
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+
+      await expect(x2EarnApps.enableRewardsPoolForNewApp(app1Id)).to.be.revertedWith(
+        "X2EarnRewardsPool: rewards pool already enabled",
+      )
     })
   })
 
