@@ -23,15 +23,16 @@
 
 pragma solidity 0.8.20;
 
-import { X2EarnAppsUpgradeableV2 } from "./x-2-earn-apps/X2EarnAppsUpgradeableV2.sol";
-import { AdministrationUpgradeableV2 } from "./x-2-earn-apps/modules/AdministrationUpgradeableV2.sol";
-import { AppsStorageUpgradeableV2 } from "./x-2-earn-apps/modules/AppsStorageUpgradeableV2.sol";
-import { ContractSettingsUpgradeableV2 } from "./x-2-earn-apps/modules/ContractSettingsUpgradeableV2.sol";
-import { VoteEligibilityUpgradeableV2 } from "./x-2-earn-apps/modules//VoteEligibilityUpgradeableV2.sol";
-import { EndorsementUpgradeableV2 } from "./x-2-earn-apps/modules/EndorsementUpgradeableV2.sol";
+import { X2EarnAppsUpgradeableV3 } from "./x-2-earn-apps/X2EarnAppsUpgradeableV3.sol";
+import { AdministrationUpgradeableV3 } from "./x-2-earn-apps/modules/AdministrationUpgradeableV3.sol";
+import { AppsStorageUpgradeableV3 } from "./x-2-earn-apps/modules/AppsStorageUpgradeableV3.sol";
+import { ContractSettingsUpgradeableV3 } from "./x-2-earn-apps/modules/ContractSettingsUpgradeableV3.sol";
+import { VoteEligibilityUpgradeableV3 } from "./x-2-earn-apps/modules/VoteEligibilityUpgradeableV3.sol";
+import { EndorsementUpgradeableV3 } from "./x-2-earn-apps/modules/EndorsementUpgradeableV3.sol";
 import { VechainNodesDataTypes } from "../../libraries/VechainNodesDataTypes.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
 
 /**
  * @title X2EarnApps
@@ -41,14 +42,21 @@ import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/ac
  * Only users with the DEFAULT_ADMIN_ROLE can add new apps, set the base URI and set the voting eligibility for an app.
  * Admins can also control the app metadata and management.
  * Each app has a set of admins and moderators that can manage the app and settings.
+ *
+ * -------------------- Version 2 --------------------
+ * - The contract has been upgraded to version 2 to include the X2Earn endorsement system.
+ * - Added libraries to reduce the contract size and improve readability.
+ *
+ * -------------------- Version 3 --------------------
+ * - The contract has been upgraded to version 3 to add node cooldown period.
  */
-contract X2EarnAppsV2 is
-  X2EarnAppsUpgradeableV2,
-  AdministrationUpgradeableV2,
-  ContractSettingsUpgradeableV2,
-  VoteEligibilityUpgradeableV2,
-  AppsStorageUpgradeableV2,
-  EndorsementUpgradeableV2,
+contract X2EarnAppsV3 is
+  X2EarnAppsUpgradeableV3,
+  AdministrationUpgradeableV3,
+  ContractSettingsUpgradeableV3,
+  VoteEligibilityUpgradeableV3,
+  AppsStorageUpgradeableV3,
+  EndorsementUpgradeableV3,
   AccessControlUpgradeable,
   UUPSUpgradeable
 {
@@ -63,24 +71,16 @@ contract X2EarnAppsV2 is
   }
 
   /**
-   * @notice Initialize the version 2 contract
-   * @param _gracePeriod the grace period to be reendorsed
-   * @param _nodeManagementContract the address of the vechain node management contract
-   * @param _veBetterPassportContract the address of the VeBetterPassport contract
+   * @notice Initialize the version 3 contract
+   * @param _cooldownPeriod the cooldown period for the endorsement
    *
-   * @dev This function is called only once during the contract deployment
+   * @dev This function is called only once during the contract upgrade
    */
-  function initializeV2(
-    uint48 _gracePeriod,
-    address _nodeManagementContract,
-    address _veBetterPassportContract,
-    address _x2EarnCreatorContract
-  ) public reinitializer(2) {
-    require(_nodeManagementContract != address(0), "X2EarnApps: Invalid Node Managementcontract address");
-    require(_veBetterPassportContract != address(0), "X2EarnApps: Invalid VeBetterPassport contract address");
-    require(_x2EarnCreatorContract != address(0), "X2EarnApps: Invalid X2EarnCreator contract address");
-    __Endorsement_init(_gracePeriod, _nodeManagementContract, _veBetterPassportContract);
-    __Administration_init_v2(_x2EarnCreatorContract);
+  function initializeV3(
+    uint48 _cooldownPeriod,
+    address _xAllocationVotingGovernor
+  ) public reinitializer(3) {
+    __Endorsement_init_v3(_cooldownPeriod, _xAllocationVotingGovernor);
   }
 
   // ---------- Modifiers ------------ //
@@ -122,7 +122,7 @@ contract X2EarnAppsV2 is
    * @return sting The version of the contract
    */
   function version() public pure virtual returns (string memory) {
-    return "2";
+    return "3";
   }
 
   // ---------- Overrides ------------ //
@@ -270,6 +270,13 @@ contract X2EarnAppsV2 is
   }
 
   /**
+   * @dev See {IX2EarnApps-updateCooldownPeriod}.
+   */
+  function updateCooldownPeriod(uint256 _newCooldownPeriod) public virtual onlyRole(GOVERNANCE_ROLE) {
+    _setCooldownPeriod(_newCooldownPeriod);
+  }
+
+  /**
    * @dev See {IX2EarnApps-updateNodeEndorsementScores}.
    */
   function updateNodeEndorsementScores(
@@ -321,6 +328,13 @@ contract X2EarnAppsV2 is
    */
   function setVeBetterPassportContract(address _veBetterPassportContract) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     _setVeBetterPassportContract(_veBetterPassportContract);
+  }
+
+  /**
+   * @dev See {IX2EarnApps-setXAllocationVotingGovernor}.
+   */
+  function setXAllocationVotingGovernor(address _xAllocationVotingGovernor) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setXAllocationVotingGovernor(_xAllocationVotingGovernor);
   }
 
   /**
