@@ -2,6 +2,7 @@ import { getConfig } from "@repo/config"
 import { upgradeProxy } from "../../../helpers"
 import { EnvConfig } from "@repo/config/contracts"
 import { X2EarnRewardsPool } from "../../../../typechain-types"
+import { ethers } from "hardhat"
 
 async function main() {
   if (!process.env.NEXT_PUBLIC_APP_ENV) {
@@ -13,6 +14,16 @@ async function main() {
   console.log(
     `Upgrading X2EarnRewardsPool contract at address: ${config.x2EarnRewardsPoolContractAddress} on network: ${config.network.name}`,
   )
+  const x2EarnRewardsPoolCurrent = await ethers.getContractAt(
+    "X2EarnRewardsPool",
+    config.x2EarnRewardsPoolContractAddress,
+  )
+  const currentVersion = await x2EarnRewardsPoolCurrent.version()
+  console.log("Current contract version:", currentVersion)
+  if (parseInt(currentVersion) === 7) {
+    console.log("X2EarnRewardsPool is already at version 7, skipping upgrade")
+    process.exit(0)
+  }
 
   const x2EarnRewardsPool = (await upgradeProxy(
     "X2EarnRewardsPoolV6",

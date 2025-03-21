@@ -2852,6 +2852,12 @@ describe("VeBetterPassport - @shard8", function () {
       await veBetterPassport.connect(owner).setAppSecurity(app2Id, 1)
       await veBetterPassport.connect(owner).setAppSecurity(app3Id, 1)
 
+      // x2EarnApps V4 introduced a default rewards pool for each new app
+      // For backwards compatibility, we need to disable the default rewards pool for the apps created in this test
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(app1Id, false)
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(app2Id, false)
+      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(app3Id, false)
+
       // Owner can distribute rewards for all apps
       await x2EarnApps.connect(owner).addRewardDistributor(app1Id, owner.address)
       expect(await x2EarnApps.isRewardDistributor(app1Id, owner.address)).to.equal(true)

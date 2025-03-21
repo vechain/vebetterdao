@@ -1,6 +1,6 @@
 import { getConfig } from "@repo/config"
 import { saveLibrariesToFile, upgradeProxy } from "../../../helpers"
-import { EnvConfig, getContractsConfig } from "@repo/config/contracts"
+import { EnvConfig } from "@repo/config/contracts"
 import { X2EarnApps } from "../../../../typechain-types"
 import { ethers } from "hardhat"
 import { x2EarnLibraries } from "../../../libraries/x2EarnLibraries"
@@ -11,8 +11,16 @@ async function main() {
   }
 
   const config = getConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
-  const contractsConfig = getContractsConfig(process.env.NEXT_PUBLIC_APP_ENV as EnvConfig)
   const deployer = (await ethers.getSigners())[0]
+
+  // check if already at the desired version
+  const x2EarnApps = await ethers.getContractAt("X2EarnApps", config.x2EarnAppsContractAddress)
+  const currentVersion = await x2EarnApps.version()
+  console.log("Current contract version:", currentVersion)
+  if (parseInt(currentVersion) === 4) {
+    console.log("X2EarnApps is already at version 4, skipping upgrade")
+    process.exit(0)
+  }
 
   console.log(
     `Deploying X2EarnApps libraries on network: ${config.network.name} (env: ${config.environment}) with account: ${deployer.address}`,
