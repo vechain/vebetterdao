@@ -25,6 +25,45 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 ---
 
+## Upgrade `X2EarnRewardsPool` to Version 7
+
+This upgrade introduces an optional dual-pool mechanism that gives app admin more control over rewards distribution, and a pause option for reward distribution. When enabled, this feature creates a clear separation between funds for rewards and withdrawals.
+
+### Key Updates 🗂
+It separates app funds into two distinct pools (rewards pool for distributors and available funds pool for admin withdrawals), enhances access control by restricting withdrawals to app admins only, and maintains backward compatibility through an optional implementation that preserves existing behavior unless explicitly enabled. It allow app admin to pause or unpause reward distribution for their app. Once paused, if the rewards pool is enabled, the app admin won't be able to move funds from one pool to another.
+
+### Changes 🚀
+
+- **Upgraded Contract(s):**
+  - `X2EarnRewardsPool.sol` to version `7`
+  - `XAllocationVoting.sol` to version `5`
+
+### Storage Changes 📦
+
+- **`X2EarnRewardsPool`**:
+  - Added `rewardsPoolBalance` to store the balance for rewards distribution 
+  - Added `isRewardsPoolEnabled` to store whether the rewards pool is enabled or not.
+  - Added `distributionPaused` to store whether the rewards distribution is paused or not.
+
+### New Features 🚀
+
+- **`X2EarnRewardsPool`**:
+  - **Access Control**: Modified withdrawal permissions - only app admins can withdraw funds
+  - Added `toggleRewardsPoolBalance()` to enable/disable the dual-pool feature for an app
+  - Added `increaseRewardsPoolBalance()` to move funds from available pool to rewards pool 
+  - Added `decreaseRewardsPoolBalance()` to move funds from rewards pool back to available pool
+  - Added `isRewardsPoolEnabled()` getter to check if the dual-pool feature is enabled for an app
+  - Added `rewardsPoolBalance()` getter to check the current rewards pool balance
+  - Added `totalBalance()` getter to check the total balance of the app, considering both available funds and rewards pool if the feature is enabled
+  - Added `pauseDistribution()` setter to pause reward distribution for an app
+  - Added `unpauseDistribution()` setter to unpause reward distribution for an app
+
+### Bug Fixes 🐛
+
+- None.
+
+---
+
 ## Upgrade `X2EarnRewardsPool` to Version 6
 
 This upgrade introduces the ability for XApps to include metadata in the reward distribution process, enabling richer and more context-specific information to be stored and emitted during events. A new function, `distributeRewardWithProofAndMetadata`, has been added for this purpose.

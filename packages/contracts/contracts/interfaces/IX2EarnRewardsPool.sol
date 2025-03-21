@@ -60,6 +60,20 @@ interface IX2EarnRewardsPool {
    */
   event RegisterActionFailed(string reason, bytes lowLevelData);
 
+  /**
+   * @dev Event emitted when an app's reward distribution is paused.
+   * @param appId The ID of the app that was paused.
+   * @param admin The address of the admin who paused the app.
+   */
+  event AppPaused(bytes32 indexed appId, address indexed admin);
+
+  /**
+   * @dev Event emitted when an app's reward distribution is unpaused.
+   * @param appId The ID of the app that was unpaused.
+   * @param admin The address of the admin who unpaused the app.
+   */
+  event AppUnpaused(bytes32 indexed appId, address indexed admin);
+
 
 /**
   * @dev Event emitted when a reward is emitted by an app with proof and metadata.
@@ -108,6 +122,34 @@ interface IX2EarnRewardsPool {
    */
   function availableFunds(bytes32 appId) external view returns (uint256);
 
+  /**
+   * @dev Gets the total of funds available for withdrawal and rewards distribution.
+   *
+   * @param appId The ID of the app.
+   */
+  function totalBalance(bytes32 appId) external view returns (uint256);
+
+  /**
+   * @dev Gets either the dual-pool rewards pool balance is enabled or not.
+   *
+   * @param appId The ID of the app.
+   */
+  function isRewardsPoolEnabled(bytes32 appId) external view returns (bool);
+
+  /**
+   * @dev Enables the rewards pool for a newly created app.
+   * @param appId The ID of the app.
+   * @notice This function can only be called by the X2EarnApps contract during app submission
+   */
+  function enableRewardsPoolForNewApp(bytes32 appId) external;  
+
+  /**
+   * @dev Gets the amount of funds available for an app to reward users if the dual-pool is enabled.
+   *
+   * @param appId The ID of the app.
+   */
+  function rewardsPoolBalance(bytes32 appId) external view returns (uint256);
+  
   /**
    * @dev Function used by x2earn apps to reward users that performed sustainable actions.
    *
