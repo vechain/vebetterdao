@@ -2852,12 +2852,6 @@ describe("VeBetterPassport - @shard8", function () {
       await veBetterPassport.connect(owner).setAppSecurity(app2Id, 1)
       await veBetterPassport.connect(owner).setAppSecurity(app3Id, 1)
 
-      // x2EarnApps V4 introduced a default rewards pool for each new app
-      // For backwards compatibility, we need to disable the default rewards pool for the apps created in this test
-      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(app1Id, false)
-      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(app2Id, false)
-      await x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(app3Id, false)
-
       // Owner can distribute rewards for all apps
       await x2EarnApps.connect(owner).addRewardDistributor(app1Id, owner.address)
       expect(await x2EarnApps.isRewardDistributor(app1Id, owner.address)).to.equal(true)
@@ -2879,6 +2873,16 @@ describe("VeBetterPassport - @shard8", function () {
       const currentRoundDeadline = await xAllocationVoting.currentRoundDeadline()
       expect(currentRound).to.equal(5n)
       expect(currentBlock > currentRoundSnapshot && currentBlock < currentRoundDeadline).to.be.true
+
+      expect(await x2EarnApps.isAppAdmin(app1Id, otherAccounts[2].address)).to.equal(true)
+      expect(await x2EarnApps.isAppAdmin(app2Id, otherAccounts[3].address)).to.equal(true)
+      expect(await x2EarnApps.isAppAdmin(app3Id, otherAccounts[4].address)).to.equal(true)
+
+      // // x2EarnApps V4 introduced a default rewards pool for each new app
+      // // For backwards compatibility, we need to disable the default rewards pool for the apps created in this test
+      await x2EarnRewardsPool.connect(otherAccounts[2]).toggleRewardsPoolBalance(app1Id, false)
+      await x2EarnRewardsPool.connect(otherAccounts[3]).toggleRewardsPoolBalance(app2Id, false)
+      await x2EarnRewardsPool.connect(otherAccounts[4]).toggleRewardsPoolBalance(app3Id, false)
 
       // Let's assume we deployed VeBetterPassport in the middle of the 5th round
       // and we want to register the actions for the first 4 rounds aggregating data offchain.
