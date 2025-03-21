@@ -51,6 +51,8 @@ import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
  * - Use new interface IX2EarnApps that supports endorsement.
  * ---------------------- Version 4 ----------------------------------------
  * - Updated the X2EarnApps interface to support node cooldown functionality
+ * ---------------------- Version 5 ----------------------------------------
+ * - Updated the X2EarnRewardsPool interface to support app rewards management feature
  */
 contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing the voting mechanism used in the XAllocationVoting contract
@@ -644,7 +646,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
    * @return string The version of the contract
    */
   function version() external pure virtual returns (string memory) {
-    return "4";
+    return "5";
   }
 
   /**
