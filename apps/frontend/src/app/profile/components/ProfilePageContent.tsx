@@ -1,6 +1,6 @@
-import { VStack, HStack, Button, Box, Text } from "@chakra-ui/react"
+import { VStack, HStack, Button, Box } from "@chakra-ui/react"
 import { ProfileHeader } from "./ProfileHeader/ProfileHeader"
-import { useMemo, useCallback, memo, useState } from "react"
+import { useMemo, useCallback, memo, useState, useEffect } from "react"
 import { ProfileBetterActions } from "./ProfileBetterActions"
 import { useTranslation } from "react-i18next"
 import { ProfileBalance } from "./ProfileBalance"
@@ -56,6 +56,12 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   const isConnectedUser = compareAddresses(account?.address ?? "", address ?? "")
   const parsedAddress = address ?? account?.address ?? ""
   const searchParams = useSearchParams()
+
+  useEffect(() => {
+    if (!parsedAddress) {
+      router.push("/error")
+    }
+  }, [parsedAddress, router])
 
   // Get the initial tab from the URL
   const getInitialTab = useCallback(() => {
@@ -127,18 +133,6 @@ export const ProfilePageContent = ({ address }: ProfilePageContentProps) => {
   const onGoBack = useCallback(() => {
     router.push("/")
   }, [router])
-
-  if (!parsedAddress)
-    return (
-      <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
-        <VStack py={8} spacing={4}>
-          <Text fontSize="lg" fontWeight="medium">
-            {t("Invalid or missing address")}
-          </Text>
-          <Text color="gray.500">{t("Please check the URL or connect your wallet to view this profile")}</Text>
-        </VStack>
-      </VStack>
-    )
 
   return (
     <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto">
