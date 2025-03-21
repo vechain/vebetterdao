@@ -47,8 +47,8 @@ const getStatusConfig = (t: TFunction): Partial<Record<XAppStatus, ConfigType>> 
       title: t("Blacklisted"),
       description:
         "This app was blacklisted by the community and will not join future allocation rounds while blacklisted.",
-      backgroundColor: "#FCEEF1",
-      color: "#C84968",
+      backgroundColor: "#F8F8F8",
+      color: "#6A6A6A",
       icon: UilExclamationCircle,
     },
   }
