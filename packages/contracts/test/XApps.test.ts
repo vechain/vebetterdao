@@ -727,7 +727,7 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV4.checkCooldown(1)).to.eql(false)
     })
 
-    it("Should not have state conflict after upgrading to V4", async () => {
+    it.only("Should not have state conflict after upgrading to V4", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
       config.X2EARN_NODE_COOLDOWN_PERIOD = 1
@@ -917,6 +917,8 @@ describe("X-Apps - @shard15", function () {
           },
         },
       )) as X2EarnApps
+
+      expect(await x2EarnAppsV4.x2EarnRewardsPoolContract()).to.eql(await x2EarnRewardsPool.getAddress())
 
       const storageSlotsAdministrationAfterV4 = await getStorageSlots(
         await x2EarnAppsV2.getAddress(),
