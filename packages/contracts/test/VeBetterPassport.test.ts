@@ -5440,7 +5440,10 @@ describe("VeBetterPassport - @shard8", function () {
       expect(await veBetterPassport.CLOCK_MODE()).to.be.equal("mode=blocknumber&from=default")
     })
   })
+})
 
+// Isolated tests for shard16 because of the size of the tests
+describe("VeBetterPassport - @shard16", function () {
   describe("Passport PoP Score", function () {
     it("Should be able to register participation of user with ACTION_REGISTRAR_ROLE", async function () {
       const { x2EarnApps, otherAccounts, owner, veBetterPassport, otherAccount, xAllocationVoting } =

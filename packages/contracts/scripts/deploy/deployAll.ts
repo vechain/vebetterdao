@@ -141,6 +141,9 @@ export async function deployAll(config: ContractsConfig) {
     AdministrationUtilsV2,
     EndorsementUtilsV2,
     VoteEligibilityUtilsV2,
+    AdministrationUtilsV3,
+    EndorsementUtilsV3,
+    VoteEligibilityUtilsV3,
   } = await x2EarnLibraries()
 
   let vechainNodesAddress = "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302" // this is the mainnet address
@@ -244,8 +247,9 @@ export async function deployAll(config: ContractsConfig) {
 
   // Set XAllocationVoting to temp address
   const X_ALLOCATION_ADRESS_TEMP = TEMP_ADMIN
+  const X2EARNREWARDSPOOL_ADDRESS_TEMP = TEMP_ADMIN
   const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnApps"],
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnApps"],
     [
       [
         config.XAPP_BASE_URI,
@@ -260,15 +264,21 @@ export async function deployAll(config: ContractsConfig) {
         await x2EarnCreator.getAddress(),
       ],
       [config.X2EARN_NODE_COOLDOWN_PERIOD, X_ALLOCATION_ADRESS_TEMP],
+      [X2EARNREWARDSPOOL_ADDRESS_TEMP],
     ],
     {
-      versions: [undefined, 2, 3],
+      versions: [undefined, 2, 3, 4],
       libraries: [
         undefined,
         {
           AdministrationUtilsV2: await AdministrationUtilsV2.getAddress(),
           EndorsementUtilsV2: await EndorsementUtilsV2.getAddress(),
           VoteEligibilityUtilsV2: await VoteEligibilityUtilsV2.getAddress(),
+        },
+        {
+          AdministrationUtilsV3: await AdministrationUtilsV3.getAddress(),
+          EndorsementUtilsV3: await EndorsementUtilsV3.getAddress(),
+          VoteEligibilityUtilsV3: await VoteEligibilityUtilsV3.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),
@@ -312,7 +322,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as X2EarnRewardsPool
 
   const xAllocationPool = (await deployAndUpgrade(
-    ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPool"],
+    ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPoolV4", "XAllocationPool"],
     [
       [
         TEMP_ADMIN, // admin
@@ -326,9 +336,10 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4],
+      versions: [undefined, 2, 3, 4, 5],
       logOutput: true,
     },
   )) as XAllocationPool
@@ -757,6 +768,10 @@ export async function deployAll(config: ContractsConfig) {
   await x2EarnApps
     .connect(deployer)
     .setXAllocationVotingGovernor(await xAllocationVoting.getAddress())
+    .then(async tx => await tx.wait())
+  await x2EarnApps
+    .connect(deployer)
+    .setX2EarnRewardsPoolContract(await x2EarnRewardsPool.getAddress())
     .then(async tx => await tx.wait())
 
   // Setup XAllocationPool addresses
