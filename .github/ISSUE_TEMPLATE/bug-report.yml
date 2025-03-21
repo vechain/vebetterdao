@@ -1,0 +1,49 @@
+name: "🐛 Bug Report"
+description: Create a new ticket for a bug.
+title: "🐛 Bug: <title>"
+labels: [
+"bug"
+]
+body:
+- type: textarea
+  id: description
+  attributes:
+    label: "Description"
+    description: Please enter an explicit description of your issue, including screenshots if applicable.
+    placeholder: Short and explicit description of your incident...
+  validations:
+    required: true
+- type: textarea
+  id: reprod
+  attributes:
+    label: "Reproduction steps"
+    description: Please enter the steps to reproduce the issue.
+    value: |
+      1. Go to '...'
+      2. Click on '....'
+      3. Scroll down to '....'
+      4. See error
+    render: bash
+  validations:
+    required: true
+- type: textarea
+  id: expected-behavior
+  attributes:
+    label: "Expected Behavior"
+    description: Please enter the expected behavior.
+    value: |
+      1. Go to '...'
+      2. Click on '....'
+      3. Scroll down to '....'
+      4. See success
+    render: bash
+  validations:
+    required: false
+- type: input
+  id: dapp-version
+  attributes:
+    label: "Governance Dapp Version"
+    description: What version of the governance dapp are you using?
+    placeholder: "1.3.0"
+  validations:
+    required: true
