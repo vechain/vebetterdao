@@ -47,7 +47,7 @@ import { APPS } from "../scripts/deploy/setup"
 import { clauseBuilder, unitsUtils, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
 import { airdropVTHO } from "../scripts/helpers/airdrop"
 
-describe("X-Apps - @shard15", function () {
+describe.only("X-Apps - @shard15", function () {
   describe("Deployment", function () {
     it("Clock mode is set correctly", async function () {
       const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -1939,6 +1939,80 @@ describe("X-Apps - @shard15", function () {
       await expect(x2EarnApps.enableRewardsPoolForNewApp(app1Id)).to.be.revertedWith(
         "X2EarnRewardsPool: rewards pool already enabled",
       )
+    })
+
+    it("Rewards pool should be enabled for new apps and disabled for older apps", async function () {
+      const {
+        x2EarnApps,
+        otherAccounts,
+        owner,
+        x2EarnRewardsPool,
+        timeLock,
+        nodeManagement,
+        veBetterPassport,
+        x2EarnCreator,
+        administrationUtilsV2,
+        endorsementUtilsV2,
+        voteEligibilityUtilsV2,
+        administrationUtilsV3,
+        endorsementUtilsV3,
+        voteEligibilityUtilsV3,
+      } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const config = createLocalConfig()
+      config.EMISSIONS_CYCLE_DURATION = 24
+      config.X2EARN_NODE_COOLDOWN_PERIOD = 1
+
+      const xAllocationGovernor = otherAccounts[1].address
+      const veBetterPassportContractAddress = await veBetterPassport.getAddress()
+
+      const x2EarnAppsV3 = (await deployAndUpgrade(
+        ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3"],
+        [
+          ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
+          [
+            config.XAPP_GRACE_PERIOD,
+            await nodeManagement.getAddress(),
+            veBetterPassportContractAddress,
+            await x2EarnCreator.getAddress(),
+          ],
+          [config.X2EARN_NODE_COOLDOWN_PERIOD, xAllocationGovernor],
+        ],
+        {
+          versions: [undefined, 2, 3],
+          libraries: [
+            undefined,
+            {
+              AdministrationUtilsV2: await administrationUtilsV2.getAddress(),
+              EndorsementUtilsV2: await endorsementUtilsV2.getAddress(),
+              VoteEligibilityUtilsV2: await voteEligibilityUtilsV2.getAddress(),
+            },
+            {
+              AdministrationUtilsV3: await administrationUtilsV3.getAddress(),
+              EndorsementUtilsV3: await endorsementUtilsV3.getAddress(),
+              VoteEligibilityUtilsV3: await voteEligibilityUtilsV3.getAddress(),
+            },
+          ],
+        },
+      )) as X2EarnAppsV3
+
+      // The app was prev deployed with version 3 of x2earn app
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
+      await x2EarnAppsV3
+        .connect(owner)
+        .submitApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
+
+      await x2EarnApps
+        .connect(owner)
+        .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
+      const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
+
+      // check that the rewards pool is not disabled for the older app
+      expect(await x2EarnRewardsPool.isRewardsPoolEnabled(app1Id)).to.be.equal(false)
+
+      expect(await x2EarnRewardsPool.isRewardsPoolEnabled(app2Id)).to.be.equal(true)
     })
   })
 
