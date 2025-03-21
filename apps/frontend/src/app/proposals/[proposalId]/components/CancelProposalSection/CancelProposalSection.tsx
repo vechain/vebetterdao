@@ -1,5 +1,5 @@
 import { ProposalState } from "@/api"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useCancelProposal } from "@/hooks/useCancelProposal"
 import {
   Button,
@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react"
 import { UilBan } from "@iconscout/react-unicons"
 import { compareAddresses } from "@repo/utils/AddressUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useProposalDetail } from "../../hooks"
@@ -29,7 +29,7 @@ export const CancelProposalSection = () => {
   const { proposal } = useProposalDetail()
   const confirmationModal = useDisclosure()
   const transactionModal = useDisclosure()
-  const { data: permissions } = useAccountPermissions(account ?? "")
+  const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
   const handleCloseConfirmationModal = useCallback(() => {
     confirmationModal.onClose()
@@ -51,7 +51,7 @@ export const CancelProposalSection = () => {
   }, [cancelProposalMutation, transactionModal])
 
   const accountCanCancelProposal = useMemo(
-    () => compareAddresses(proposal.proposer, account || "") || permissions?.isAdminOfB3TRGovernor,
+    () => compareAddresses(proposal.proposer, account?.address || "") || permissions?.isAdminOfB3TRGovernor,
     [proposal.proposer, account, permissions],
   )
 
@@ -113,12 +113,16 @@ export const CancelProposalSection = () => {
       <TransactionModal
         isOpen={transactionModal.isOpen}
         onClose={handleCloseTransactionModal}
-        status={cancelProposalMutation.error ? "error" : cancelProposalMutation.status}
+        status={
+          cancelProposalMutation.error
+            ? TransactionModalStatus.Error
+            : (cancelProposalMutation.status as TransactionModalStatus)
+        }
         successTitle={t("Proposal canceled!")}
         onTryAgain={handleCancelProposal}
         showTryAgainButton
         showExplorerButton
-        txId={cancelProposalMutation.txReceipt?.meta.txID ?? cancelProposalMutation.sendTransactionTx?.txid}
+        txId={cancelProposalMutation.txReceipt?.meta.txID}
         pendingTitle={t("Cancelling proposal...")}
         errorTitle={t("Error cancelling proposal")}
         errorDescription={cancelProposalMutation.error?.reason}

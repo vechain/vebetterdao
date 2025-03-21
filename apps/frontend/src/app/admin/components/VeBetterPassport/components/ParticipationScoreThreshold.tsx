@@ -1,5 +1,5 @@
 import { useParticipationScoreThreshold } from "@/api"
-import { TransactionModal } from "@/components"
+import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useSetParticipationThreshold } from "@/hooks"
 import {
   Button,
@@ -36,18 +36,11 @@ export const ParticipationScoreThreshold = () => {
   const { data: participationScoreThreshold } = useParticipationScoreThreshold()
   const { t } = useTranslation()
 
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useSetParticipationThreshold({
-    participationThreshold: threshold ?? 0,
-  })
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useSetParticipationThreshold(
+    {
+      participationThreshold: threshold ?? 0,
+    },
+  )
 
   const handleSubmit = useCallback(
     (event?: { preventDefault: () => void }) => {
@@ -64,7 +57,7 @@ export const ParticipationScoreThreshold = () => {
     onClose()
   }, [resetStatus, onClose])
 
-  const isLoading = isTxReceiptLoading || sendTransactionPending
+  const isLoading = isTransactionPending || status === "pending"
   const isFormValid = useMemo(() => isThresholdValid, [isThresholdValid])
 
   return (
@@ -116,12 +109,12 @@ export const ParticipationScoreThreshold = () => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={t("Participation score threshold updated")}
         onTryAgain={handleSubmit}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={t(`Updating participation score threshold...`)}
         errorTitle={t("Error updating threshold")}
         errorDescription={error?.reason}

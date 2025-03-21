@@ -1,13 +1,13 @@
 import { useMemo } from "react"
-import { TransactionStatus } from "@/hooks"
+import { TransactionModalStatus } from "@/components"
 
 export type TransactionState = {
-  status?: TransactionStatus | "uploadingMetadata"
+  status?: TransactionModalStatus
 }
 
 export const useTransactionModalStatus = (states: TransactionState[]) => {
   return useMemo(() => {
     const activeState = states.find(state => state.status)
-    return activeState?.status ?? "unknown"
+    return activeState?.status ?? TransactionModalStatus.Unknown
   }, [states])
 }

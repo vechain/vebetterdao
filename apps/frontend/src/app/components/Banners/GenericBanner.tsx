@@ -1,11 +1,12 @@
 import { Heading, Text, VStack, Card, CardBody, HStack, Image, Button, Show, useMediaQuery } from "@chakra-ui/react"
+import React from "react"
 
 type GenericBannerProps = {
   title: string
   titleColor?: string
   description: string | React.ReactElement
   descriptionColor?: string
-  logoSrc?: string
+  logoSrc?: string | React.ReactElement
   backgroundColor?: string
   backgroundImageSrc?: string
   buttonLabel?: string
@@ -72,7 +73,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
         )}
         <Show breakpoint="(min-width: 768px)">
           <HStack align="stretch" zIndex={1} position="relative" w="full">
-            {logoSrc && <Image src={logoSrc} alt="logo" w={24} h={24} />}
+            {logoSrc && (typeof logoSrc === "string" ? <Image src={logoSrc} alt="logo" w={24} h={24} /> : logoSrc)}
             <HStack flex={1}>
               <VStack gap={2} align="stretch" flex={1}>
                 <Text size="xs" color={titleColor} fontWeight="600">
@@ -121,9 +122,15 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
                 </Button>
               )}
             </VStack>
-            {logoSrc && (
-              <Image src={logoSrc} alt="logo" w={isVerySmallMobile ? 16 : 24} h={isVerySmallMobile ? 16 : 24} />
-            )}
+            {logoSrc &&
+              (typeof logoSrc === "string" ? (
+                <Image src={logoSrc} alt="logo" w={isVerySmallMobile ? 16 : 24} h={isVerySmallMobile ? 16 : 24} />
+              ) : (
+                React.cloneElement(logoSrc, {
+                  w: isVerySmallMobile ? 16 : 24,
+                  h: isVerySmallMobile ? 16 : 24,
+                })
+              ))}
           </HStack>
         </Show>
       </CardBody>

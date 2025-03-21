@@ -47,7 +47,7 @@ import { APPS } from "../scripts/deploy/setup"
 import { clauseBuilder, unitsUtils, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
 import { airdropVTHO } from "../scripts/helpers/airdrop"
 
-describe.only("X-Apps - @shard15", function () {
+describe("X-Apps - @shard15", function () {
   describe("Deployment", function () {
     it("Clock mode is set correctly", async function () {
       const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -2009,9 +2009,9 @@ describe.only("X-Apps - @shard15", function () {
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app #2", "metadataURI")
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
 
-      // check that the rewards pool is not disabled for the older app
+      // check that the rewards pool is not enabled by default for the older app
       expect(await x2EarnRewardsPool.isRewardsPoolEnabled(app1Id)).to.be.equal(false)
-
+      // check that the rewards pool is enabled by default for the new app
       expect(await x2EarnRewardsPool.isRewardsPoolEnabled(app2Id)).to.be.equal(true)
     })
   })

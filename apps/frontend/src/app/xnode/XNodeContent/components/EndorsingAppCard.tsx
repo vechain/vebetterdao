@@ -27,7 +27,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { UilInfoCircle, UilSearch } from "@iconscout/react-unicons"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -73,8 +73,8 @@ export const EndorsingAppCard = () => {
     return isXNodeDelegator || isXNodeOnCooldown
   }, [isXNodeDelegator, isXNodeOnCooldown])
   const shouldDisplayCooldownAlert = useMemo(() => {
-    return account && !isXNodeDelegator
-  }, [account, isXNodeDelegator])
+    return account?.address && !isXNodeDelegator
+  }, [account?.address, isXNodeDelegator])
   return (
     <Card variant="baseWithBorder" w="full" h="min-content">
       <CardBody>

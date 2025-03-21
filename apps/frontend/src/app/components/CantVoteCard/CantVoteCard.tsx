@@ -2,7 +2,7 @@ import { useAccountLinking, useCanUserVote, useUserDelegation } from "@/api"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
 import { Card, CardBody, HStack, Text, VStack, Button } from "@chakra-ui/react"
 import { UilInfoCircle } from "@iconscout/react-unicons"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import dayjs from "dayjs"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo } from "react"
@@ -42,14 +42,14 @@ export const CantVoteCard = () => {
   }, [router])
 
   const cantVoteReason = useMemo<CantVoteReason | null>(() => {
-    if (!account || isLoadingAccountLinking || isLoadingDelegator || canVoteLoading) return null
+    if (!account?.address || isLoadingAccountLinking || isLoadingDelegator || canVoteLoading) return null
     if (isEntity) return "secondary"
     if (isDelegator) return "delegator"
     if (!hasVotesAtSnapshot) return "no-votes"
     if (!isPerson) return "no-actions"
     return null
   }, [
-    account,
+    account?.address,
     isEntity,
     isLoadingAccountLinking,
     isLoadingDelegator,

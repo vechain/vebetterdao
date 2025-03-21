@@ -4,7 +4,7 @@ import { MobileNavBar } from "./MobileNavbar"
 import { DesktopNavBar } from "./DesktopNavbar"
 import { useAllocationsRoundsEvents } from "@/api"
 import { useAccountPermissions } from "@/api/contracts/account"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
 import { Routes } from "./Routes"
 import { useHideOnScroll } from "@/hooks"
@@ -14,7 +14,7 @@ export const Navbar: React.FC = () => {
 
   const { account } = useWallet()
   const { data: allocationRoundsEvents } = useAllocationsRoundsEvents()
-  const { data: permissions } = useAccountPermissions(account ?? "")
+  const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
   const isNavbarVisible = useHideOnScroll()
 
@@ -27,10 +27,10 @@ export const Navbar: React.FC = () => {
           (route.name === "Allocations" ? !!allocationRoundsEvents?.created?.length : true) &&
           (route.name === "Admin" ? permissions?.isAdmin : true) &&
           (route.name === "Governance" ? !!allocationRoundsEvents?.created?.length : true) &&
-          (route.name === "Profile" ? isLargerThan1200 && !!account : true)
+          (route.name === "Profile" ? isLargerThan1200 && !!account?.address : true)
         )
       }),
-    [account, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200],
+    [account?.address, allocationRoundsEvents?.created?.length, permissions, isLargerThan1200],
   )
 
   const parsedRoutesToRender = useMemo(() => {

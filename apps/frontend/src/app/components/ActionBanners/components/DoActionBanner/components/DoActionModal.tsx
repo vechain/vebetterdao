@@ -8,6 +8,8 @@ import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { IoGridOutline } from "react-icons/io5"
 
+const VEPASSPORT_DOCS_URL = "https://docs.vebetterdao.org/vepassport/vepassport"
+
 type Props = {
   doActionModal: UseDisclosureProps
 }
@@ -20,15 +22,12 @@ export const DoActionModal = ({ doActionModal }: Props) => {
     router.push("/apps")
   }, [router])
 
-  const goToKnowMoreLink = useCallback(() => {
-    window?.open("https://vebetterdao.org/blog/inside-vepassport", "_blank")
-  }, [])
-
   const { scorePercentage, missingActions, isUserDelegatee, isLoading } = useUserScore()
 
   const missingActionsLabel = useMissingActionsLabel({ missingActions, isUserDelegatee })
 
   if (isLoading) return null
+
   return (
     <BaseModal isOpen={doActionModal.isOpen || false} onClose={doActionModal.onClose || (() => {})}>
       <VStack align="stretch" spacing={4}>
@@ -77,10 +76,9 @@ export const DoActionModal = ({ doActionModal }: Props) => {
         <Button
           variant="primarySubtle"
           leftIcon={<UilInfoCircle />}
-          onClick={goToKnowMoreLink}
           _hover={{ textDecoration: "none" }}
           as={Link}
-          href={"https://vebetterdao.org/blog/vepassport-powering-up-sybil-defence-rewarding-better-actions"}
+          href={VEPASSPORT_DOCS_URL}
           isExternal>
           {t("Know more")}
         </Button>

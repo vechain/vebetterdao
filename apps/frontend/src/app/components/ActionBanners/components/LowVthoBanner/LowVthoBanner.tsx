@@ -3,7 +3,7 @@ import { UilArrowRight } from "@iconscout/react-unicons"
 import { useCallback, useMemo } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Transak, TransakConfig } from "@transak/transak-sdk"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { getAccountBalanceQueryKey } from "@/api"
 import { GenericBanner } from "@/app/components/Banners/GenericBanner"
 
@@ -17,7 +17,7 @@ export const LowVthoBanner = () => {
   const transakConfig: TransakConfig = useMemo(
     () => ({
       apiKey,
-      walletAddress: account ?? "",
+      walletAddress: account?.address ?? "",
       productsAvailed: "BUY",
       networks: "vechain",
       paymentMethod: "credit_debit_card",
@@ -46,11 +46,11 @@ export const LowVthoBanner = () => {
     Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
       // Refresh user balance
       queryClient.cancelQueries({
-        queryKey: getAccountBalanceQueryKey(account ?? undefined),
+        queryKey: getAccountBalanceQueryKey(account?.address ?? undefined),
       })
 
       queryClient.refetchQueries({
-        queryKey: getAccountBalanceQueryKey(account ?? undefined),
+        queryKey: getAccountBalanceQueryKey(account?.address ?? undefined),
       })
     })
   }, [transakConfig, account, queryClient])

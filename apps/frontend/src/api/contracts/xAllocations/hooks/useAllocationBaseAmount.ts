@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { getConfig } from "@repo/config"
 import { XAllocationPool__factory } from "@repo/contracts"
 import { ethers } from "ethers"

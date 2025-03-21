@@ -1,5 +1,5 @@
 import { useAppsEligibleInNextRound, useXApps } from "@/api"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useSetVotingEligibility } from "@/hooks"
 import {
   VStack,
@@ -50,20 +50,10 @@ export const UpdateAppsEligibility = () => {
 
 const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; isEligible: boolean }) => {
   const { isOpen, onClose, onOpen } = useDisclosure()
-  const {
-    sendTransaction,
-    resetStatus,
-    isTxReceiptLoading,
-    sendTransactionPending,
-    status,
-    error,
-    txReceipt,
-    sendTransactionTx,
-  } = useSetVotingEligibility({
+  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useSetVotingEligibility({
     appId: id,
     isEligible: !isEligible,
     appName: name,
-    invalidateCache: true,
   })
 
   const handleEligibilityChange = useCallback(
@@ -88,21 +78,21 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
         <Switch
           isChecked={isEligible}
           onChange={event => handleEligibilityChange(event)}
-          disabled={isTxReceiptLoading || sendTransactionPending}
+          disabled={isTransactionPending || status === "pending"}
         />
       </HStack>
       <Divider />
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        status={error ? "error" : status}
+        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
         successTitle={
           isEligible ? `${name} will be eligible from next round` : `${name} will not be eligible from next round`
         }
         onTryAgain={handleEligibilityChange}
         showTryAgainButton
         showExplorerButton
-        txId={txReceipt?.meta.txID ?? sendTransactionTx?.txid}
+        txId={txReceipt?.meta.txID}
         pendingTitle={
           isEligible ? `Enabling voting eligibility for ${name}...` : `Disabling voting eligibility for ${name}...`
         }

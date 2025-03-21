@@ -1,6 +1,6 @@
 import { ProposalState, useUserSingleProposalVoteEvent, useIsQuadraticVotingDisabled } from "@/api"
 import { AbstainedIcon, VoteIcon } from "@/components"
-import { TransactionModal } from "@/components/TransactionModal"
+import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
 import {
   Box,
@@ -21,7 +21,7 @@ import {
 } from "@chakra-ui/react"
 import { UilInfoCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { FormEvent, useCallback, useLayoutEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -65,7 +65,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
 
   const { data: userVote } = useUserSingleProposalVoteEvent(proposalId)
 
-  const isPageNotAllowed = proposal.state !== ProposalState.Active || !!userVote || !account
+  const isPageNotAllowed = proposal.state !== ProposalState.Active || !!userVote || !account?.address
 
   useLayoutEffect(() => {
     if (isPageNotAllowed) {
@@ -240,7 +240,9 @@ export const ProposalVote = ({ proposalId }: Props) => {
           isOpen={isOpen}
           onClose={handleClose}
           successTitle={t("Vote Completed!")}
-          status={castVoteMutation.error ? "error" : castVoteMutation.status}
+          status={
+            castVoteMutation.error ? TransactionModalStatus.Error : (castVoteMutation.status as TransactionModalStatus)
+          }
           errorDescription={castVoteMutation.error?.reason}
           errorTitle={castVoteMutation.error ? t("Error voting") : undefined}
           showTryAgainButton
@@ -251,7 +253,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
             "🔄 Just voted for a proposal on #VeBetterDAO! \n\n🌱 Explore and join us at https://vebetterdao.org.\n\n#VeBetterDAO #Vechain",
           )}
           showExplorerButton
-          txId={castVoteMutation.txReceipt?.meta.txID ?? castVoteMutation.sendTransactionTx?.txid}
+          txId={castVoteMutation.txReceipt?.meta.txID}
         />
       </CardBody>
     </Card>

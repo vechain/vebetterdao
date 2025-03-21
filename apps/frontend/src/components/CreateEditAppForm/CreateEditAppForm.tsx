@@ -31,7 +31,14 @@ import {
 import { AddressIcon } from "../AddressIcon"
 import { UploadFileButton } from "../UploadFileButton"
 import { useCallback } from "react"
-import { notFoundImage } from "@/constants"
+import {
+  BANNER_UPLOAD_GUIDELINES,
+  LOGO_UPLOAD_GUIDELINES,
+  VEWORLD_BANNER_UPLOAD_GUIDELINES,
+  AVG_PHONE_WIDTH,
+  notFoundImage,
+  VE_WOLRD_SCALING_FACTOR,
+} from "@/constants"
 import { useDropzone } from "react-dropzone"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { useTranslation } from "react-i18next"
@@ -68,6 +75,8 @@ export type CreateEditAppFormData = {
   banner: string
   projectUrl: string
   teamWalletAddress: string
+  adminWalletAddress: string
+  ve_world_banner: string
 }
 
 type Props = {
@@ -96,22 +105,33 @@ export const CreateEditAppForm = ({
   isReceiverAddressDisabled = false,
 }: Props) => {
   const { t } = useTranslation()
+  const computedWidth = Math.min(window.innerWidth, AVG_PHONE_WIDTH) / VE_WOLRD_SCALING_FACTOR
+
   // handle image uploads with validation
   const onDrop = useCallback(
-    (image: "logo" | "banner") => async (acceptedFiles: File[]) => {
+    (image: "logo" | "banner" | "ve_world_banner") => async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0]
       if (!file) return
+
       if (image === "logo") {
         clearErrors("logo")
         const base64Logo = await validateImageUpload(file, setError, "logo")
         if (!base64Logo) return
         setValue("logo", base64Logo)
       }
+
       if (image === "banner") {
         clearErrors("banner")
         const base64Banner = await validateImageUpload(file, setError, "banner")
         if (!base64Banner) return
         setValue("banner", base64Banner)
+      }
+
+      if (image === "ve_world_banner") {
+        clearErrors("ve_world_banner")
+        const base64VeWorldBanner = await validateImageUpload(file, setError, "ve_world_banner")
+        if (!base64VeWorldBanner) return
+        setValue("ve_world_banner", base64VeWorldBanner)
       }
     },
     [setError, setValue, clearErrors],
@@ -121,7 +141,10 @@ export const CreateEditAppForm = ({
 
   const { open: openUploadBanner } = useDropzone({ onDrop: onDrop("banner") })
 
+  const { open: openUploadVeWorldBanner } = useDropzone({ onDrop: onDrop("ve_world_banner") })
+
   const teamWalletAddress = watch("teamWalletAddress")
+  const adminWalletAddress = watch("adminWalletAddress")
 
   return (
     <Card>
@@ -140,6 +163,7 @@ export const CreateEditAppForm = ({
             />
             {errors.name && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
           </FormControl>
+
           <FormControl isInvalid={!!errors.description}>
             <FormLabel>{t("Description")}</FormLabel>
             <Textarea
@@ -151,6 +175,7 @@ export const CreateEditAppForm = ({
             />
             {errors.description && <FormErrorMessage>{errors.description.message}</FormErrorMessage>}
           </FormControl>
+
           <FormControl isInvalid={!!errors.projectUrl}>
             <FormLabel>{t("Project URL")}</FormLabel>
             <Input
@@ -171,13 +196,14 @@ export const CreateEditAppForm = ({
             />
             {errors.projectUrl && <FormErrorMessage>{errors.projectUrl.message}</FormErrorMessage>}
           </FormControl>
+
           <FormControl isInvalid={!teamWalletAddress}>
             <FormLabel>{t("Treasury address")}</FormLabel>
             <InputGroup>
               <WalletAddressInput
                 inputLeftElement={
                   <InputLeftElement pointerEvents="none">
-                    <AddressIcon borderRadius={"full"} boxSize={6} address={teamWalletAddress} />
+                    <AddressIcon borderRadius={"full"} boxSize={6} minW={6} minH={6} address={teamWalletAddress} />
                   </InputLeftElement>
                 }
                 isDisabled={isReceiverAddressDisabled}
@@ -186,6 +212,29 @@ export const CreateEditAppForm = ({
               />
             </InputGroup>
           </FormControl>
+
+          <FormControl isInvalid={!adminWalletAddress}>
+            <FormLabel>{t("Admin address")}</FormLabel>
+            <InputGroup>
+              <WalletAddressInput
+                inputLeftElement={
+                  <InputLeftElement pointerEvents="none">
+                    <AddressIcon
+                      borderRadius={"full"}
+                      boxSize={6}
+                      minW={6}
+                      minH={6}
+                      address={adminWalletAddress ?? ""}
+                    />
+                  </InputLeftElement>
+                }
+                isDisabled={isReceiverAddressDisabled}
+                rounded={"xl"}
+                onAddressResolved={address => setValue("adminWalletAddress", address ?? "")}
+              />
+            </InputGroup>
+          </FormControl>
+
           <Stack direction={["column", "row"]} w="full" justify={"space-between"} align={"flex-start"} spacing={4}>
             <Controller
               name="logo"
@@ -217,13 +266,14 @@ export const CreateEditAppForm = ({
                     {errors.logo ? (
                       <FormErrorMessage>{errors.logo.message}</FormErrorMessage>
                     ) : (
-                      <FormHelperText>{t("Recommended size: 96x96px")}</FormHelperText>
+                      <FormHelperText>{t(LOGO_UPLOAD_GUIDELINES)}</FormHelperText>
                     )}
                     <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("logo")} />
                   </VStack>
                 </FormControl>
               )}
             />
+
             <Controller
               name="banner"
               control={control}
@@ -254,7 +304,7 @@ export const CreateEditAppForm = ({
                     {errors.banner ? (
                       <FormErrorMessage>{errors.banner.message}</FormErrorMessage>
                     ) : (
-                      <FormHelperText>{t("Recommended size: 1500x2000px")}</FormHelperText>
+                      <FormHelperText>{t(BANNER_UPLOAD_GUIDELINES)}</FormHelperText>
                     )}
                     <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("banner")} />
                   </VStack>
@@ -262,6 +312,40 @@ export const CreateEditAppForm = ({
               )}
             />
           </Stack>
+
+          <Controller
+            name="ve_world_banner"
+            control={control}
+            rules={{
+              required: "VeWorld banner is required",
+              validate: value => {
+                if (!value) {
+                  return "VeWorld banner is required"
+                }
+              },
+            }}
+            render={({ field: { value } }) => (
+              <FormControl isInvalid={!!errors.ve_world_banner}>
+                <FormLabel>{t("VeWorld Banner")}</FormLabel>
+                <VStack w="full" align="center">
+                  <Image
+                    onClick={openUploadVeWorldBanner}
+                    _hover={{ cursor: "pointer" }}
+                    src={value ?? notFoundImage}
+                    alt="ve_world_banner"
+                    style={{ height: 76, width: computedWidth, borderRadius: 12, overflow: "hidden" }}
+                    objectFit="cover"
+                  />
+                  {errors.ve_world_banner ? (
+                    <FormErrorMessage>{errors.ve_world_banner.message}</FormErrorMessage>
+                  ) : (
+                    <FormHelperText>{t(VEWORLD_BANNER_UPLOAD_GUIDELINES)}</FormHelperText>
+                  )}
+                  <UploadFileButton mt={4} alignSelf={"flex-end"} onDrop={onDrop("ve_world_banner")} />
+                </VStack>
+              </FormControl>
+            )}
+          />
         </VStack>
       </CardBody>
       <CardFooter display={"flex"} flexDir={"column"} w="full">

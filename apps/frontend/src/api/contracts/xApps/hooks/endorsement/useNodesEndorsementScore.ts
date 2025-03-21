@@ -2,7 +2,7 @@ import { allNodeStrengthLevelToName } from "@/constants/XNode"
 import { getConfig } from "@repo/config"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { useQuery } from "@tanstack/react-query"
-import { useConnex } from "@vechain/dapp-kit-react"
+import { useConnex } from "@vechain/vechain-kit"
 import { abi } from "thor-devkit"
 const X2EARN_APPPS_CONTRACT = getConfig().x2EarnAppsContractAddress
 const getNodeScoreFragment = X2EarnApps__factory.createInterface()

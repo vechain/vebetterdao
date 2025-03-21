@@ -3208,11 +3208,11 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
 
       await expect(x2EarnRewardsPool.connect(otherAccount).enableRewardsPoolForNewApp(appId)).to.be.revertedWith(
-        "X2EarnRewardsPool: only X2EarnApps contract can enable rewards pool for new apps",
+        "X2EarnRewardsPool: caller is not X2EarnApps contract",
       )
       //the pool is already enabled for new apps, so should revert with already enabled
       await expect(x2EarnApps.connect(owner).enableRewardsPoolForNewApp(appId)).to.be.revertedWith(
-        "X2EarnRewardsPool: caller is not X2EarnApps contract",
+        "X2EarnRewardsPool: rewards pool already enabled",
       )
     })
   })

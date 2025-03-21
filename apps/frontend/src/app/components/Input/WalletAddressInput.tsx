@@ -1,7 +1,7 @@
 import { useId, useState, useEffect, useRef, useCallback } from "react"
 import { Input, InputGroup, InputProps, FormControl, FormErrorMessage } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-import { useVechainDomain } from "@vechain/dapp-kit-react"
+import { useVechainDomain } from "@vechain/vechain-kit"
 import { isValid as isWalletAddressValid } from "@repo/utils/AddressUtils"
 
 type Props = InputProps & {
@@ -30,9 +30,9 @@ export const WalletAddressInput = ({
   const hasNotifiedInvalid = useRef(false)
 
   // Resolve the domain or address using the input value
-  const { domain, address } = useVechainDomain({
-    addressOrDomain: inputValue,
-  })
+  const { data: vnsData } = useVechainDomain(inputValue)
+  const domain = vnsData?.domain
+  const address = vnsData?.address
 
   const handleOnChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)

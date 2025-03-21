@@ -3,10 +3,6 @@
 import { Container, Flex, VStack } from "@chakra-ui/react"
 import { Providers } from "./providers"
 
-import dayjs from "dayjs"
-
-import relativeTime from "dayjs/plugin/relativeTime"
-import duration from "dayjs/plugin/duration"
 import { Footer } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
@@ -15,9 +11,6 @@ import "@/i18n"
 import { useEffect } from "react"
 import { t } from "i18next"
 import { datadogRum } from "@datadog/browser-rum"
-
-dayjs.extend(relativeTime)
-dayjs.extend(duration)
 
 const mixpanelToken = getEnvMixPanel()
 const isProduction = process.env.NODE_ENV === "production"
@@ -114,7 +107,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Flex flex={1}>
               <Container
                 mt={{ base: 2, md: 10 }}
-                mb={[20, 20, 40]}
+                mb={[20, 20, 20]}
                 maxW={"container.xl"}
                 display={"flex"}
                 flex={1}

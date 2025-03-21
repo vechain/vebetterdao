@@ -66,20 +66,18 @@ vi.mock("@chakra-ui/hooks", async importOriginal => {
   }
 })
 
-//mock dappkit
-vi.mock("@vechain/dapp-kit-react", async importOriginal => {
-  const mod = await importOriginal<typeof import("@vechain/dapp-kit-react")>()
+//mock vechain kit
+vi.mock("@vechain/vechain-kit", async importOriginal => {
+  const mod = await importOriginal<typeof import("@vechain/vechain-kit")>()
   return {
     ...mod,
     useWallet: () => ({
-      account: adminAddress,
+      account: { address: adminAddress },
     }),
     useConnex: () => ({
-      connex: {
-        thor: {
-          block: {
-            get: vi.fn(),
-          },
+      thor: {
+        block: {
+          get: vi.fn(),
         },
       },
       vendor: {

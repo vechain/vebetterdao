@@ -21,7 +21,7 @@ import { WithdrawModal } from "./WithdrawModal"
 import { DepositModal } from "./DepositModal"
 import { B3TRIcon, BaseTooltip } from "@/components"
 import { FiInfo } from "react-icons/fi"
-import { useWallet } from "@vechain/dapp-kit-react"
+import { useWallet } from "@vechain/vechain-kit"
 import { useAccountAppPermissions } from "@/api"
 import { useMemo } from "react"
 
@@ -35,7 +35,7 @@ export const AppBalanceCard = () => {
   const { data: balance, isLoading: isBalanceLoading } = useAppBalance(app?.id ?? "")
   const { account } = useWallet()
 
-  const { data: appPermissions } = useAccountAppPermissions(account ?? "")
+  const { data: appPermissions } = useAccountAppPermissions(account?.address ?? "")
 
   const isAppAdmin = useMemo(() => {
     if (!appPermissions || !app) return false
