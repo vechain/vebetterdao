@@ -13,7 +13,6 @@ import {
 } from "@/api"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
-import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import { HumanizedTicketStatus } from "@/utils/FreshDeskClient"
 import { Hide, IconButton } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
@@ -71,7 +70,7 @@ export const ActionBanner = () => {
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
   const { data: b3trBalance, isLoading: b3trBalanceLoading } = useB3trBalance(account?.address ?? undefined)
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
-  const { data: xApps } = useXApps()
+  const { data: xApps } = useXApps({ filterBlacklisted: true })
 
   const { filteredProposals, isLoading: isLoadingProposals } = useFilteredProposals([ProposalFilter.InThisRound])
 
@@ -125,9 +124,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
   const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
 
-  // Check if user has an app
-  const userHasApp =
-    !!account?.address && !!xApps?.allApps?.find(app => compareAddresses(app.teamWalletAddress, account?.address))
+  // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0
 
   // Can't Vote banners logic
@@ -144,10 +141,10 @@ export const ActionBanner = () => {
 
   // Creator NFT banners logic
   const showCreatorRejectedBanner =
-    !userHasApp && !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
-  const showCreatorApprovedBanner = !userHasApp && !!account?.address && hasCreatorNFT
+    !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
+  const showCreatorApprovedBanner = !!account?.address && hasCreatorNFT
   const showCreatorUnderReviewBanner =
-    !userHasApp && !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
+    !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
   const showCastVoteInProposalBanners = !!account?.address && hasProposals && userCanVoteInProposals
 
