@@ -6,6 +6,7 @@ import {
   getAppAvailableFundsQueryKey,
   getAppRewardsBalanceQueryKey,
   getAppBalanceQueryKey,
+  getIsRewardsPoolEnabledQueryKey,
 } from "@/api/contracts/x2EarnRewardsPool"
 interface Props {
   xAppId: string
@@ -62,7 +63,12 @@ export const useRefillRewardsPool = ({ xAppId, amount, onSuccess }: Props) => {
   }, [xAppId, amount, contractAmount])
 
   const refetchQueryKeys = useMemo(
-    () => [getAppAvailableFundsQueryKey(xAppId), getAppRewardsBalanceQueryKey(xAppId), getAppBalanceQueryKey(xAppId)],
+    () => [
+      getAppAvailableFundsQueryKey(xAppId),
+      getAppRewardsBalanceQueryKey(xAppId),
+      getAppBalanceQueryKey(xAppId),
+      getIsRewardsPoolEnabledQueryKey(xAppId),
+    ],
     [xAppId],
   )
 

@@ -2,7 +2,11 @@ import { getConfig } from "@repo/config"
 import { useCallback, useMemo } from "react"
 import { X2EarnRewardsPool__factory } from "@repo/contracts"
 import { useBuildTransaction } from "@/hooks/useBuildTransaction"
-import { getAppRewardsBalanceQueryKey, getIsDistributionPausedQueryKey } from "@/api/contracts/x2EarnRewardsPool"
+import {
+  getAppRewardsBalanceQueryKey,
+  getIsDistributionPausedQueryKey,
+  getIsRewardsPoolEnabledQueryKey,
+} from "@/api/contracts/x2EarnRewardsPool"
 import { EnhancedClause } from "@vechain/vechain-kit"
 
 /**
@@ -65,7 +69,11 @@ export const useDistributionManagement = ({ xAppId, onSuccess, isEnabled }: Prop
   }, [xAppId, isEnabled])
 
   const refetchQueryKeys = useMemo(
-    () => [getIsDistributionPausedQueryKey(xAppId), getAppRewardsBalanceQueryKey(xAppId)],
+    () => [
+      getIsDistributionPausedQueryKey(xAppId),
+      getAppRewardsBalanceQueryKey(xAppId),
+      getIsRewardsPoolEnabledQueryKey(xAppId),
+    ],
     [xAppId],
   )
 
