@@ -1,11 +1,10 @@
 import { ethers } from "hardhat"
 import { expect } from "chai"
-import { catchRevert, getOrDeployContractInstances } from "./helpers"
+import { getOrDeployContractInstances } from "./helpers"
 import { describe, it } from "mocha"
-import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { ZeroAddress } from "ethers"
 
-describe.only("B3TR Multi Sig - @shard0", function () {
+describe("B3TR Multi Sig - @shard0", function () {
   describe("Constructor", function () {
     it("should deploy the contract", async function () {
       const { b3trMultiSig } = await getOrDeployContractInstances({ forceDeploy: false })
