@@ -242,7 +242,7 @@ describe.only("B3TR Multi Sig - @shard0", function () {
   })
 
   describe("Execute Transaction", function () {
-    it("Transaction gets executed succesfully", async function () {
+    it.only("Transaction gets executed succesfully", async function () {
       const { b3trMultiSig, B3trContract, b3tr, otherAccount, owner, otherAccounts } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -270,6 +270,24 @@ describe.only("B3TR Multi Sig - @shard0", function () {
       expect(await b3trMultiSig.getConfirmations(0)).to.eql([owner.address, otherAccount.address])
 
       expect(await b3tr.balanceOf(otherAccounts[10].address)).to.eql(ethers.parseEther("10"))
+
+      expect(await b3trMultiSig.isConfirmed(0)).to.eql(true)
+    })
+
+    it("Should revert if trying to execute an already executed transaction", async function () {
+      const { b3trMultiSig, B3trContract, b3tr, owner, otherAccount } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const MINTER_ROLE = await b3tr.MINTER_ROLE()
+      await b3tr.connect(owner).grantRole(MINTER_ROLE, await b3trMultiSig.getAddress())
+
+      const encoded = B3trContract.interface.encodeFunctionData("mint", [otherAccount.address, ethers.parseEther("1")])
+      await b3trMultiSig.connect(owner).submitTransaction(await b3tr.getAddress(), 0, encoded)
+      await b3trMultiSig.connect(otherAccount).confirmTransaction(0)
+
+      // Already executed
+      await expect(b3trMultiSig.connect(owner).executeTransaction(0)).to.be.revertedWith("Transaction already executed")
     })
 
     it("Should emit event if executed succesfully", async function () {
@@ -506,6 +524,96 @@ describe.only("B3TR Multi Sig - @shard0", function () {
 
       expect(await b3trMultiSig.isOwner(minterAccount.address)).to.eql(false)
       expect(await b3trMultiSig.isOwner(otherAccounts[10].address)).to.eql(true)
+    })
+  })
+
+  describe("View Functions - getTransactionCount & getTransactionIds", function () {
+    it("Correctly returns count for pending and executed transactions", async function () {
+      const { b3trMultiSig, B3trContract, b3tr, otherAccount, owner, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      const MINTER_ROLE = await b3tr.MINTER_ROLE()
+      await b3tr.connect(owner).grantRole(MINTER_ROLE, await b3trMultiSig.getAddress())
+
+      // Submit TX 0 - Not executed yet
+      const encodedCall1 = B3trContract.interface.encodeFunctionData("mint", [
+        otherAccount.address,
+        ethers.parseEther("1"),
+      ])
+      await b3trMultiSig.connect(owner).submitTransaction(await b3tr.getAddress(), 0, encodedCall1)
+
+      // Submit TX 1 - Will be executed
+      const encodedCall2 = B3trContract.interface.encodeFunctionData("mint", [
+        minterAccount.address,
+        ethers.parseEther("2"),
+      ])
+      await b3trMultiSig.connect(owner).submitTransaction(await b3tr.getAddress(), 0, encodedCall2)
+      await b3trMultiSig.connect(otherAccount).confirmTransaction(1)
+
+      const pendingCount = await b3trMultiSig.getTransactionCount(true, false)
+      const executedCount = await b3trMultiSig.getTransactionCount(false, true)
+      const allCount = await b3trMultiSig.getTransactionCount(true, true)
+
+      expect(pendingCount).to.eql(1n)
+      expect(executedCount).to.eql(1n)
+      expect(allCount).to.eql(2n)
+    })
+
+    it("Correctly returns transaction IDs by status and range", async function () {
+      const { b3trMultiSig, B3trContract, b3tr, otherAccount, owner, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      const MINTER_ROLE = await b3tr.MINTER_ROLE()
+      await b3tr.connect(owner).grantRole(MINTER_ROLE, await b3trMultiSig.getAddress())
+
+      // TX 0 - Not executed
+      const encodedCall1 = B3trContract.interface.encodeFunctionData("mint", [
+        otherAccount.address,
+        ethers.parseEther("3"),
+      ])
+      await b3trMultiSig.connect(owner).submitTransaction(await b3tr.getAddress(), 0, encodedCall1)
+
+      // TX 1 - Executed
+      const encodedCall2 = B3trContract.interface.encodeFunctionData("mint", [
+        minterAccount.address,
+        ethers.parseEther("4"),
+      ])
+      await b3trMultiSig.connect(owner).submitTransaction(await b3tr.getAddress(), 0, encodedCall2)
+      await b3trMultiSig.connect(otherAccount).confirmTransaction(1)
+
+      // Test valid range for executed tx
+      const executedTxIds = await b3trMultiSig.getTransactionIds(0, 1, false, true)
+      expect(executedTxIds).to.eql([1n])
+
+      // Test valid range for pending tx
+      const pendingTxIds = await b3trMultiSig.getTransactionIds(0, 1, true, false)
+      expect(pendingTxIds).to.eql([0n])
+
+      // Test full list
+      const allTxIds = await b3trMultiSig.getTransactionIds(0, 2, true, true)
+      expect(allTxIds).to.eql([0n, 1n])
+    })
+
+    it("Reverts if range is invalid", async function () {
+      const { b3trMultiSig, B3trContract, b3tr, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const encodedCall = B3trContract.interface.encodeFunctionData("mint", [
+        otherAccount.address,
+        ethers.parseEther("5"),
+      ])
+      await b3trMultiSig.connect(owner).submitTransaction(await b3tr.getAddress(), 0, encodedCall)
+
+      // Should revert when `to < from`
+      await expect(b3trMultiSig.getTransactionIds(2, 1, true, true)).to.be.revertedWith("Invalid range")
+
+      // Should revert when `to > matching tx count`
+      await expect(b3trMultiSig.getTransactionIds(0, 2, true, false)).to.be.revertedWith("Range exceeds results")
     })
   })
 
