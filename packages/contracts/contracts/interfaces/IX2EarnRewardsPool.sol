@@ -156,6 +156,13 @@ interface IX2EarnRewardsPool {
   function isRewardsPoolEnabled(bytes32 appId) external view returns (bool);
 
   /**
+   * @dev Gets whether the distribution is paused or not for a specific xApp
+   *
+   * @param appId The ID of the app.
+   */
+  function isDistributionPaused(bytes32 appId) external view returns (bool);
+
+  /**
    * @dev Enables the rewards pool for a newly created app.
    * @param appId The ID of the app.
    * @notice This function can only be called by the X2EarnApps contract during app submission

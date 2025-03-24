@@ -688,6 +688,14 @@ contract X2EarnRewardsPool is
   }
 
   /**
+   * @dev See {IX2EarnRewardsPool-isDistributionPaused}
+   */
+  function isDistributionPaused(bytes32 appId) external view returns (bool) {
+    X2EarnRewardsPoolStorage storage $ = _getX2EarnRewardsPoolStorage();
+    return $.distributionPaused[appId];
+  }
+
+  /**
    * @dev See {IX2EarnRewardsPool-rewardsPoolBalance}
    */
   function rewardsPoolBalance(bytes32 appId) external view returns (uint256) {

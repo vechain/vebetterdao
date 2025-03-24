@@ -46,6 +46,9 @@ It separates app funds into two distinct pools (rewards pool for distributors an
   - Added `isRewardsPoolEnabled` to store whether the rewards pool is enabled or not.
   - Added `distributionPaused` to store whether the rewards distribution is paused or not.
 
+- **`X2EarnApps`**:
+  - Added `x2EarnRewardsPoolContract` to AdministrationUpgradeable librarie. 
+
 ### New Features 🚀
 
 - **`X2EarnRewardsPool`**:
@@ -58,6 +61,13 @@ It separates app funds into two distinct pools (rewards pool for distributors an
   - Added `totalBalance()` getter to check the total balance of the app, considering both available funds and rewards pool if the feature is enabled
   - Added `pauseDistribution()` setter to pause reward distribution for an app
   - Added `unpauseDistribution()` setter to unpause reward distribution for an app
+  - Added `onlyX2EarnApps` modifier, to only let x2EarnApps contract to enable rewards pool for new app
+  - Added `isDistributionPaused` getter to check whether the rewards pool is paused or not.
+
+- **`X2EarnApps`**:
+  - Added `setX2EarnRewardsPoolContract` to set the x2EarnRewardsPoolContract 
+  - Added `enableRewardsPoolForNewApp` to enabled rewards pool by default on submit app
+
 
 ### Bug Fixes 🐛
 
