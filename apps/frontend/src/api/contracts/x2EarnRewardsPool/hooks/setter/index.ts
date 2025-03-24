@@ -1,3 +1,2 @@
-export * from "./useDecreaseRewardsPool"
-export * from "./useIncreaseRewardsPool"
-export * from "./useToggleRewardsPool"
+export * from "./useRefillRewardsPool"
+export * from "./useDistributionManagement"

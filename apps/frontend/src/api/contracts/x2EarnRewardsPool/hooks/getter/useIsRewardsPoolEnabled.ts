@@ -13,7 +13,9 @@ const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddres
  * @returns the whether the rewards pool is enabled or not for a specific xApp
  */
 export const isRewardsPoolEnabled = async (thor: Connex.Thor, xAppId: string): Promise<boolean> => {
-  const functionFragment = X2EarnRewardsPool__factory.createInterface().getFunction("rewardsPoolEnabled").format("json")
+  const functionFragment = X2EarnRewardsPool__factory.createInterface()
+    .getFunction("isRewardsPoolEnabled")
+    .format("json")
   const res = await thor.account(X2EARN_REWARDS_POOL_CONTRACT).method(JSON.parse(functionFragment)).call(xAppId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
