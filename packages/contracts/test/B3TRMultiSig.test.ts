@@ -242,7 +242,7 @@ describe.only("B3TR Multi Sig - @shard0", function () {
   })
 
   describe("Execute Transaction", function () {
-    it.only("Transaction gets executed succesfully", async function () {
+    it("Transaction gets executed succesfully", async function () {
       const { b3trMultiSig, B3trContract, b3tr, otherAccount, owner, otherAccounts } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -384,6 +384,36 @@ describe.only("B3TR Multi Sig - @shard0", function () {
 
       expect(await b3tr.balanceOf(otherAccounts[10].address)).to.eql(ethers.parseEther("10"))
     })
+
+    it("Should not be able to retry if succesful", async function () {
+      const { b3trMultiSig, B3trContract, b3tr, otherAccount, owner, otherAccounts } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+      const MINTER_ROLE = await b3tr.MINTER_ROLE()
+      await b3tr.connect(owner).grantRole(MINTER_ROLE, await b3trMultiSig.getAddress())
+
+      const encodedFunctionCall = B3trContract.interface.encodeFunctionData("mint", [
+        otherAccounts[10].address,
+        ethers.parseEther("10"),
+      ])
+      expect(await b3tr.balanceOf(otherAccounts[10].address)).to.eql(0n)
+
+      await b3trMultiSig.connect(owner).submitTransaction(await b3tr.getAddress(), 0, encodedFunctionCall) /// TxId will be 0
+
+      expect(await b3trMultiSig.getConfirmations(0)).to.eql([owner.address])
+
+      // Confirming the transaction
+      await b3trMultiSig.connect(otherAccount).confirmTransaction(0)
+
+      expect(await b3trMultiSig.getConfirmations(0))
+        .to.eql([owner.address, otherAccount.address])
+        .to.emit(b3trMultiSig, "S")
+        .withArgs(otherAccount.address, 0)
+
+      // Should fail as the multi sig does not have the minter role
+      await expect(b3trMultiSig.connect(otherAccount).executeTransaction(0)).to.be.reverted
+    })
   })
 
   describe("Owner Management", function () {
@@ -454,6 +484,46 @@ describe.only("B3TR Multi Sig - @shard0", function () {
       expect(await b3trMultiSig.getConfirmations(0)).to.eql([owner.address, otherAccount.address])
 
       expect(await b3trMultiSig.getOwners()).to.eql([owner.address, otherAccount.address])
+    })
+
+    it("Proposal can be made to remove owner", async function () {
+      const { b3trMultiSig, minterAccount, otherAccount, owner } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      const owners = await b3trMultiSig.getOwners()
+      expect(owners).to.eql([owner.address, otherAccount.address, minterAccount.address])
+
+      const B3TRMultiSig = await ethers.getContractFactory("B3TRMultiSig")
+      const encodedFunctionCall = B3TRMultiSig.interface.encodeFunctionData("removeOwner", [minterAccount.address])
+
+      await b3trMultiSig.connect(owner).submitTransaction(await b3trMultiSig.getAddress(), 0, encodedFunctionCall) /// TxId will be 0
+
+      expect(await b3trMultiSig.getConfirmations(0)).to.eql([owner.address])
+
+      await expect(b3trMultiSig.connect(otherAccount).confirmTransaction(0))
+        .to.emit(b3trMultiSig, "Confirmation")
+        .withArgs(otherAccount.address, 0)
+
+      // 2/3 confirmations done -> Executution should have happened
+      expect(await b3trMultiSig.getConfirmations(0)).to.eql([owner.address, otherAccount.address])
+
+      expect(await b3trMultiSig.getOwners()).to.eql([owner.address, otherAccount.address])
+
+      const encodedFunctionCall2 = B3TRMultiSig.interface.encodeFunctionData("removeOwner", [otherAccount.address])
+
+      await b3trMultiSig.connect(owner).submitTransaction(await b3trMultiSig.getAddress(), 0, encodedFunctionCall2) /// TxId will be 0
+
+      await b3trMultiSig.connect(otherAccount).confirmTransaction(1)
+
+      expect(await b3trMultiSig.getOwners()).to.eql([owner.address])
+
+      const encodedFunctionCall3 = B3TRMultiSig.interface.encodeFunctionData("removeOwner", [owner.address])
+      await b3trMultiSig.connect(owner).submitTransaction(await b3trMultiSig.getAddress(), 0, encodedFunctionCall3) /// TxId will be 0
+
+      await expect(b3trMultiSig.connect(otherAccount).confirmTransaction(1)).to.be.reverted
+
+      expect(await b3trMultiSig.getOwners()).to.eql([owner.address])
     })
 
     it("If owners becomes less than required confirmations confiratirmations becomes equal to number of owners", async function () {

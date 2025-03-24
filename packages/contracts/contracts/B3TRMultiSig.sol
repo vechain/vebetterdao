@@ -176,6 +176,11 @@ contract B3TRMultiSig {
   }
 
   function removeOwner(address owner) external onlyWallet ownerExists(owner) {
+    // Do not allow to remove last owner
+    if (owners.length == 1) {
+      revert("Cannot remove owner");
+    }
+    
     isOwner[owner] = false;
     for (uint256 i = 0; i < owners.length; i++) {
       if (owners[i] == owner) {
