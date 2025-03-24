@@ -156,5 +156,11 @@ export function createTestnetStagingConfig() {
     CREATOR_NFT_URI: "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json",
 
     X2EARN_NODE_COOLDOWN_PERIOD: 1, // 1 round
+
+    MULTI_SIG_SIGNERS: [
+      "0x66E9709bc01B8c0AfC99a7dC513f501821306E85",
+      "0xeaE35dfE902C5D1a44e6b4080224a6621319A671",
+      "0x2ac2A050C45239159dBADab740A52e0A098a7ADD",
+    ],
   })
 }

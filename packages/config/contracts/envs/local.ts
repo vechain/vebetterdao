@@ -159,5 +159,11 @@ export function createLocalConfig() {
     //WARNING: Cooldown depends on the current round. If the current round is 1, the cooldown cannot be greater than 1. Otherwise the endorsement will fail.
     //Check `EndorsementUtils.sol` `checkCooldown` method for more details.
     X2EARN_NODE_COOLDOWN_PERIOD: 0, // 0 cycles
+
+    MULTI_SIG_SIGNERS: [
+      "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
+      "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68",
+      "0x0F872421Dc479F3c11eDd89512731814D0598dB5",
+    ],
   })
 }

@@ -67,4 +67,6 @@ export type ContractsConfig = {
   CREATOR_NFT_URI: string
 
   X2EARN_NODE_COOLDOWN_PERIOD: number
+
+  MULTI_SIG_SIGNERS: string[]
 }
