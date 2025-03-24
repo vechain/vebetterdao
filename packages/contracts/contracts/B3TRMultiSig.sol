@@ -42,6 +42,8 @@ contract B3TRMultiSig {
   address[] public owners;
   mapping(address => bool) public isOwner;
   uint256 public required;
+  Transaction[] public transactions;
+  mapping(uint256 => mapping(address => bool)) public confirmations;
 
   struct Transaction {
     address destination;
@@ -49,10 +51,6 @@ contract B3TRMultiSig {
     bytes data;
     bool executed;
   }
-
-  Transaction[] public transactions;
-
-  mapping(uint256 => mapping(address => bool)) public confirmations;
 
   // Modifiers
   modifier onlyWallet() {
