@@ -1,5 +1,5 @@
 import { useEvents } from "@/hooks"
-import { useMemo } from "react"
+import { useMemo, useCallback } from "react"
 import { X2EarnRewardsPool__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { ethers } from "ethers"
@@ -115,6 +115,13 @@ export const useAppFundActivityEvents = (appId: string) => {
     return normalized.sort((a, b) => b.blockNumber - a.blockNumber)
   }, [depositEvents, teamWithdrawalEvents, rewardDistributedEvents, rewardsPoolBalanceUpdatedEvents])
 
+  const refetch = useCallback(() => {
+    rawDepositEvents.refetch()
+    rawTeamWithdrawalEvents.refetch()
+    rawRewardDistributedEvents.refetch()
+    rawRewardsPoolBalanceUpdatedEvents.refetch()
+  }, [rawDepositEvents, rawTeamWithdrawalEvents, rawRewardDistributedEvents, rawRewardsPoolBalanceUpdatedEvents])
+
   return {
     isLoading,
     data: allEvents,
@@ -125,5 +132,6 @@ export const useAppFundActivityEvents = (appId: string) => {
       rewardDistributedEvents,
       rewardsPoolBalanceUpdatedEvents,
     },
+    refetch,
   }
 }

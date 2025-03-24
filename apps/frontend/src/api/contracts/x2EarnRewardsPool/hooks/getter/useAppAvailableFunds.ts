@@ -4,19 +4,19 @@ import { getConfig } from "@repo/config"
 import { X2EarnRewardsPool__factory } from "@repo/contracts"
 import { ethers } from "ethers"
 import { FormattingUtils } from "@repo/utils"
-import { TokenBalance } from "../../b3tr"
+import { TokenBalance } from "../../../b3tr"
 
 const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddress
 
 /**
- * Get the rewards balance in the x2Earn rewards pool contract for a specific xApp
+ * Get the available funds to withdraw in the x2Earn rewards pool contract for a specific xApp
  *
  * @param thor  the connex instance
  * @param xAppId  the xApp id
- * @returns the rewards balance in the x2Earn rewards pool contract for a specific xApp
+ * @returns the available funds to withdraw in the x2Earn rewards pool contract for a specific xApp
  */
-export const getAppRewardsBalance = async (thor: Connex.Thor, xAppId: string): Promise<TokenBalance> => {
-  const functionFragment = X2EarnRewardsPool__factory.createInterface().getFunction("rewardsPoolBalance").format("json")
+export const getAppAvailableFunds = async (thor: Connex.Thor, xAppId: string): Promise<TokenBalance> => {
+  const functionFragment = X2EarnRewardsPool__factory.createInterface().getFunction("availableFunds").format("json")
   const res = await thor.account(X2EARN_REWARDS_POOL_CONTRACT).method(JSON.parse(functionFragment)).call(xAppId)
 
   if (res.vmError) return Promise.reject(new Error(res.vmError))
@@ -32,20 +32,20 @@ export const getAppRewardsBalance = async (thor: Connex.Thor, xAppId: string): P
   }
 }
 
-export const getAppRewardsBalanceQueryKey = (xAppId: string) => ["X2EarnRewardsPool", "APP_REWARDS_BALANCE", xAppId]
+export const getAppAvailableFundsQueryKey = (xAppId: string) => ["X2EarnRewardsPool", "APP_AVAILABLE_FUNDS", xAppId]
 
 /**
- * Get the rewards balance in the x2Earn rewards pool contract
+ * Get the available funds to withdraw in the x2Earn rewards pool contract
  *
  * @param thor  the connex instance
  * @param xAppId  the xApp id
- * @returns the rewards balance in the x2Earn rewards pool contract.
+ * @returns the available funds to withdraw in the x2Earn rewards pool contract.
  */
-export const useAppRewardsBalance = (xAppId: string) => {
+export const useAppAvailableFunds = (xAppId: string) => {
   const { thor } = useConnex()
   return useQuery({
-    queryKey: getAppRewardsBalanceQueryKey(xAppId),
-    queryFn: async () => await getAppRewardsBalance(thor, xAppId),
+    queryKey: getAppAvailableFundsQueryKey(xAppId),
+    queryFn: async () => await getAppAvailableFunds(thor, xAppId),
     enabled: !!thor && !!xAppId,
   })
 }

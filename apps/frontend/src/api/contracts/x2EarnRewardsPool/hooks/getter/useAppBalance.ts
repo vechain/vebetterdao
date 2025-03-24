@@ -4,7 +4,7 @@ import { getConfig } from "@repo/config"
 import { X2EarnRewardsPool__factory } from "@repo/contracts"
 import { ethers } from "ethers"
 import { FormattingUtils } from "@repo/utils"
-import { TokenBalance } from "../../b3tr"
+import { TokenBalance } from "../../../b3tr"
 
 const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddress
 
