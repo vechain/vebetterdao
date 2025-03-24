@@ -1439,10 +1439,12 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await expect(x2EarnRewardsPool.connect(owner).pauseDistribution(appId))
         .to.emit(x2EarnRewardsPool, "AppPaused")
         .withArgs(appId, owner)
+      expect(await x2EarnRewardsPool.isDistributionPaused(appId)).to.equal(true)
 
       await expect(x2EarnRewardsPool.connect(owner).unpauseDistribution(appId))
         .to.emit(x2EarnRewardsPool, "AppUnpaused")
         .withArgs(appId, owner)
+      expect(await x2EarnRewardsPool.isDistributionPaused(appId)).to.equal(false)
     })
   })
 
@@ -3152,6 +3154,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       await x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, ethers.parseEther("70"))
 
       await x2EarnRewardsPool.connect(owner).pauseDistribution(appId)
+      expect(await x2EarnRewardsPool.isDistributionPaused(appId)).to.equal(true)
       await expect(
         x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, ethers.parseEther("70")),
       ).to.be.revertedWith("X2EarnRewardsPool: distribution is paused")

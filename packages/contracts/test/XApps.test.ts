@@ -918,6 +918,8 @@ describe("X-Apps - @shard15", function () {
         },
       )) as X2EarnApps
 
+      expect(await x2EarnAppsV4.x2EarnRewardsPoolContract()).to.eql(await x2EarnRewardsPool.getAddress())
+
       const storageSlotsAdministrationAfterV4 = await getStorageSlots(
         await x2EarnAppsV2.getAddress(),
         initialSlotAdministration,
@@ -3052,7 +3054,10 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
     })
   })
+})
 
+// Isolated tests for shard16 because of the size of the tests
+describe("X-Apps - @shard17", function () {
   describe("Admin address", function () {
     it("Admin can update the admin address of an app", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
