@@ -74,6 +74,5 @@ const config: AppConfig = {
       transactions: [],
     },
   },
-  b3TRMultiSig: "0x4Dd13fcb7b4f7DC19048ce0d23aAEbbDB3f3a1d9",
 }
 export default config

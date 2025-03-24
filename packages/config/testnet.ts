@@ -19,6 +19,7 @@ const config: AppConfig = {
   nodeManagementContractAddress: "0x0A548b38b03d0dA349483f5d3bcc46650313798D",
   veBetterPassportContractAddress: "0xB08939f434Ac5610D3847063bABd1F8833a66d75",
   x2EarnCreatorContractAddress: "0x2ea5424e92E9a803c5971b50350d119cdD7e196E",
+  b3trMultiSigAddress: "0x15bDc96B5C490A7948dA856B4Db32408DDD89a4B",
   indexerUrl: "https://b3tr.testnet.vechain.org/api/v1",
   nodeUrl: "https://testnet.vechain.org",
   network: {
@@ -73,6 +74,5 @@ const config: AppConfig = {
     passportSignalingLogicAddress: "0xd2599f2BBf3E3f45344d3FDFb1680f784eC3C911",
     passportWhitelistAndBlacklistLogicAddress: "0x1596e69Bd430388A860CEf94721aB39a12bcC1d1",
   },
-  b3TRMultiSig: "0x15bDc96B5C490A7948dA856B4Db32408DDD89a4B",
 }
 export default config
