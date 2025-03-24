@@ -2,11 +2,13 @@ import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import FreshdeskClient, { FreshdeskTicket } from "@/utils/FreshDeskClient"
 import { AddressUtils } from "@repo/utils"
 import { NextRequest, NextResponse } from "next/server"
+import { formatSubmission } from "../utils"
 
 export interface Submission {
   id: number
   status: string
   adminWalletAddress: string
+  distributionStrategy: string
   createdAt: string
 }
 
@@ -37,18 +39,11 @@ export async function GET(request: NextRequest): Promise<NextResponse<Submission
           result?.custom_fields?.cf_admin_wallet_address &&
           compareAddresses(result.custom_fields.cf_admin_wallet_address, walletAddress),
       )
-      .map((result: FreshdeskTicket) => {
-        const status = freshdeskClient.getHumanizedTicketStatus(result.status)
-        return {
-          id: result.id,
-          status,
-          adminWalletAddress: result.custom_fields.cf_admin_wallet_address?.toLowerCase(),
-          createdAt: result.created_at,
-        }
-      })
+      .map((result: FreshdeskTicket) => formatSubmission(result, freshdeskClient))
 
     return NextResponse.json({ submissions: formattedResponse.length > 0 ? formattedResponse : [] })
   } catch (error: any) {
+    console.error(error)
     return NextResponse.json({ error: "Failed to fetch submission" }, { status: 500 })
   }
 }
