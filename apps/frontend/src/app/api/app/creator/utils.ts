@@ -35,7 +35,7 @@ export const formatSubmission = (result: FreshdeskTicket, freshdeskClient: Fresh
     id: result?.id,
     status: freshdeskClient.getHumanizedTicketStatus(result.status),
     adminWalletAddress: result?.custom_fields?.cf_admin_wallet_address?.toLowerCase(),
-    distributionStrategy: result?.custom_fields?.cf_distribution_strategy ?? "", //Always return a string even if it's undefined
+    distributionStrategy: result?.custom_fields?.cf_distribution_startegy ?? "", //Always return a string even if it's undefined
     createdAt: result?.created_at,
   }
 }
