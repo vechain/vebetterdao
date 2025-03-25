@@ -248,12 +248,10 @@ export const DatePicker = ({
               ))}
 
               {/* Empty cells for days before the first day of month with a random key */}
-              {[...Array((firstDayOfMonth + 6) % 7)].map(() => (
-                <Box
-                  key={`empty-start-${currentDate.format("YYYY-MM")}-${Math.random().toString(36).substring(2, 9)}`}
-                  h="8"
-                />
-              ))}
+              {[...Array((firstDayOfMonth + 6) % 7)].map((_, i) => {
+                const date = currentDate.startOf("month").subtract(((firstDayOfMonth + 6) % 7) - i, "day")
+                return <Box key={`empty-${date.format("YYYY-MM-DD")}`} h="8" />
+              })}
 
               {/* Calendar Days */}
               {Array.from({ length: daysInMonth }).map((_, index) => {
