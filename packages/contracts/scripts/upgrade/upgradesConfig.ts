@@ -52,12 +52,11 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   X2EarnApps: {
     name: "x2-earn-apps",
     configAddressField: "x2EarnAppsContractAddress",
-    versions: ["v2", "v3", "v4", "v5"],
+    versions: ["v2", "v3", "v4"],
     descriptions: {
       v2: "Add xapp endorsement module",
       v3: "Add node cooldown feature",
       v4: "Enabling by default the rewards pool for new apps submitted",
-      v5: "Updated X2EarnRewardsPool interface to support app rewards management feature",
     },
   },
   "X2Earn Rewards Pool": {
