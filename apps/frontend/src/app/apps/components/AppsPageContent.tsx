@@ -1,5 +1,5 @@
 import { useXApps, useXNode } from "@/api"
-import { AppsBanner } from "@/components"
+import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
 import { VStack, Heading, Text, Box } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
@@ -56,7 +56,7 @@ export const AppsPageContent = () => {
         />
       </VStack>
 
-      {/* TODO: mascot release <JoinB3TRAppsBanner /> */}
+      <JoinB3TRAppsBanner />
 
       <Box mt={10}>
         <AppsDisclaimer />
