@@ -24,9 +24,10 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   isEnablingRewardsPool?: boolean
+  isPaused?: boolean
 }
 
-export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool }: Props) => {
+export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsPool, isPaused }: Props) => {
   const { t } = useTranslation()
 
   const { isOpen: isOpenWithdraw, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
@@ -104,10 +105,11 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
               <VStack
                 align="start"
                 spacing={4}
-                border="1px solid #D5D5D5"
                 borderRadius="20px"
                 p="16px"
                 color="#252525"
+                border={isPaused ? "1px solid #C84968" : "1px solid #D5D5D5"}
+                boxShadow={isPaused ? "0 0 8px rgba(245, 101, 101, 0.5)" : "none"}
                 justifyContent="space-between">
                 <Text fontSize={18} fontWeight={600}>
                   {t("Refill Pools")}
@@ -123,6 +125,7 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                     onOpenFundsManagement()
                     onClose()
                   }}
+                  isDisabled={isPaused}
                   variant={"primaryAction"}
                   borderRadius={"full"}
                   w={"200px"}>

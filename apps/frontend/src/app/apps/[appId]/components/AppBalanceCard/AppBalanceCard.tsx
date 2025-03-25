@@ -133,7 +133,7 @@ export const AppBalanceCard = () => {
                 color={isPaused ? "#C84968" : "white"}
                 borderRadius={"full"}
                 w={"full"}>
-                {t("Manage")}
+                {isPaused ? t("Resume") : t("Manage")}
               </Button>
             </VStack>
           </Stack>
@@ -157,6 +157,7 @@ export const AppBalanceCard = () => {
             isOpen={isOpenDepositOrWithdraw}
             onClose={onCloseDepositOrWithdraw}
             isEnablingRewardsPool={!isRewardsPoolEnabled}
+            isPaused={isPaused}
           />
           <ManagementCenterModal
             appId={app.id}

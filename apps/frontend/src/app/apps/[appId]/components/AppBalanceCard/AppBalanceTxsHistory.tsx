@@ -153,10 +153,6 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
                     <option value="WITHDRAW">{t("Withdrawals")}</option>
                     <option value="DISTRIBUTE_REWARDS">{t("Rewards Distribution")}</option>
                     <option value="REWARDS_POOL_UPDATED">{t("Reward Pool Update")}</option>
-                    <option value="PAUSE_DISTRIBUTION">{t("Pause Distribution")}</option>
-                    <option value="UNPAUSE_DISTRIBUTION">{t("Unpause Distribution")}</option>
-                    <option value="ENABLE_REWARDS_POOL">{t("Enable Rewards Pool")}</option>
-                    <option value="DISABLE_REWARDS_POOL">{t("Disable Rewards Pool")}</option>
                   </Select>
                 </VStack>
 

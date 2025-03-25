@@ -23,7 +23,6 @@ import { useTranslation } from "react-i18next"
 import { useCallback, useState, useMemo, useEffect } from "react"
 import { useBreakpoints } from "@/hooks"
 import { TransactionModal, TransactionModalStatus } from "@/components"
-import { FaMinus } from "react-icons/fa6"
 import { HiMiniArrowsUpDown } from "react-icons/hi2"
 import { removingExcessDecimals } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
@@ -71,11 +70,6 @@ export const FundsManagementModal = ({ appId, isOpen, onClose, isEnablingRewards
     }
   }, [activeTab, increaseRewardsPool, decreaseRewardsPool])
 
-  const handleRefillRewardsPool = () => {
-    refillRewardsPoolAction.sendTransaction(undefined)
-    onOpenTransactionModal()
-  }
-
   const pendingTitle = useMemo(() => {
     if (activeTab === "balance-to-rewards") {
       return t("Refilling rewards pool...")
@@ -120,11 +114,11 @@ export const FundsManagementModal = ({ appId, isOpen, onClose, isEnablingRewards
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
 
-      handleRefillRewardsPool()
+      refillRewardsPoolAction.sendTransaction(undefined)
       onOpenTransactionModal()
       setB3trBalanceAfter(activeTab === "balance-to-rewards" ? estimatedRewards : estimatedBalance)
     },
-    [handleRefillRewardsPool, onOpenTransactionModal, activeTab, amount, estimatedRewards, estimatedBalance],
+    [refillRewardsPoolAction, onOpenTransactionModal, activeTab, estimatedRewards, estimatedBalance],
   )
 
   const error = refillRewardsPoolAction.error
@@ -268,15 +262,6 @@ export const FundsManagementModal = ({ appId, isOpen, onClose, isEnablingRewards
                             )}
                           </Heading>
                         )}
-                        <Box
-                          bg="#FCEEF1"
-                          p="6px"
-                          display="flex"
-                          borderRadius="full"
-                          alignItems="center"
-                          justifyContent="center">
-                          <Icon as={FaMinus} color="#C84968" boxSize="12px" />
-                        </Box>
                       </HStack>
                     </VStack>
                     {/* The line between the two sections */}
