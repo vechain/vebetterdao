@@ -2,12 +2,7 @@ import { useCallback, useMemo } from "react"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { useBuildTransaction } from "./useBuildTransaction"
-import {
-  getAppEndorsementScoreQueryKey,
-  getEndorsersQueryKey,
-  getIsAppEligibleNowQueryKey,
-  getIsAppUnendorsedQueryKey,
-} from "@/api"
+import { getAppEndorsementScoreQueryKey, getEndorsersQueryKey, getIsAppUnendorsedQueryKey } from "@/api"
 import { buildClause } from "@/utils/buildClause"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
@@ -34,12 +29,7 @@ export const useCheckEndorsement = ({ appId, onSuccess }: Props) => {
   }, [appId])
 
   const refetchQueryKeys = useMemo(
-    () => [
-      getIsAppEligibleNowQueryKey(appId),
-      getIsAppUnendorsedQueryKey(appId),
-      getAppEndorsementScoreQueryKey(appId),
-      getEndorsersQueryKey(appId),
-    ],
+    () => [getIsAppUnendorsedQueryKey(appId), getAppEndorsementScoreQueryKey(appId), getEndorsersQueryKey(appId)],
     [appId],
   )
 

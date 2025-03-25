@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react"
 import { UilArrowUpRight } from "@iconscout/react-unicons"
 import dayjs from "dayjs"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useCurrentAppBanner, useCurrentAppLogo, useCurrentAppMetadata } from "../../hooks"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
@@ -47,11 +47,13 @@ export const AppDetailOverview = ({
     }
   }, [appMetadata?.external_url])
 
+  const showEndorsementStatusCallout = useMemo(() => {
+    return endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE && endorsementStatus !== XAppStatus.BLACKLISTED
+  }, [endorsementStatus])
+
   return (
     <VStack spacing={4} align="stretch">
-      {endorsementStatus !== XAppStatus.ENDORSED_AND_ELIGIBLE && (
-        <EndorsementStatusCallout endorsementStatus={endorsementStatus} />
-      )}
+      {showEndorsementStatusCallout && <EndorsementStatusCallout endorsementStatus={endorsementStatus} />}
       <Card variant="baseWithBorder">
         <CardBody>
           <VStack align="stretch" gap={4}>

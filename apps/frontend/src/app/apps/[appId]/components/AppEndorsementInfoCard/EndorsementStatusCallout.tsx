@@ -1,10 +1,12 @@
-import { XAppStatus } from "@/types"
 import { HStack, Icon, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { UilExclamationCircle } from "@iconscout/react-unicons"
+import dayjs from "dayjs"
 import { Trans, useTranslation } from "react-i18next"
-import { useXAppStatusConfig } from "../../hooks"
-import { useAppGracePeriodEndsAfterRound } from "@/api"
+import { useGracePeriodEvent } from "@/api"
+import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import { XAppStatus } from "@/types"
 import { useCurrentAppInfo } from "../../hooks/useCurrentAppInfo"
+import { useXAppStatusConfig } from "../../hooks"
 
 type Props = {
   endorsementStatus: XAppStatus
@@ -16,16 +18,13 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
   const STATUS_CONFIG = useXAppStatusConfig()
   const { t } = useTranslation()
 
-  const { app } = useCurrentAppInfo()
-  const { roundId, isLoading, isCurrentRound, isNextRound } = useAppGracePeriodEndsAfterRound(app?.id ?? "")
+  const { app, isAppInfoLoading } = useCurrentAppInfo()
+  const { data: gracePeriodEvents, isLoading: isGracePeriodEventLoading } = useGracePeriodEvent(app?.id ?? "")
 
-  let roundReference = `${t("round")} ${roundId}`
-  if (isCurrentRound) {
-    roundReference = t("the current round")
-  }
-  if (isNextRound) {
-    roundReference = t("the next round")
-  }
+  const gracePeriodEndBlockNumber = Number(gracePeriodEvents?.[0]?.endBlock) || 0
+  const gracePeriodEndTimestamp = useEstimateBlockTimestamp({ blockNumber: gracePeriodEndBlockNumber })
+  const gracePeriodEndDate =
+    gracePeriodEndTimestamp === 0 ? "Pending" : dayjs(gracePeriodEndTimestamp).format("ddd DD MMM")
 
   const { title, description, backgroundColor, color, icon } = STATUS_CONFIG[endorsementStatus] ?? {
     title: t("Endorsement coming soon"),
@@ -44,9 +43,9 @@ export const EndorsementStatusCallout = ({ endorsementStatus, showDescription = 
         </Text>
       </HStack>
       {showDescription && (
-        <Skeleton isLoaded={!isLoading} w="full">
+        <Skeleton isLoaded={!isAppInfoLoading && !isGracePeriodEventLoading} w="full">
           <Text fontSize="14px" color="#6A6A6A">
-            <Trans i18nKey={description as any} values={{ roundReference }} t={t} />
+            <Trans i18nKey={description as any} values={{ gracePeriodEndDate }} t={t} />
           </Text>
         </Skeleton>
       )}
