@@ -369,7 +369,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose, isEnablingRewards
         successTitle={activeTab === "balance-to-rewards" ? t("Rewards Pool Increased") : t("Balance Increased")}
         isEnablingRewardsPool={isEnablingRewardsPool}
         isRefillingPools={isRefillingPools}
-        isRewardsPoolToAppBalance={activeTab === "balance-to-rewards"}
+        isRewardsPoolToAppBalance={activeTab === "rewards-to-balance"}
         b3trBalanceAfterSwap={b3trBalanceAfter}
         b3trAmount={amount}
         onTryAgain={handleTransfer}

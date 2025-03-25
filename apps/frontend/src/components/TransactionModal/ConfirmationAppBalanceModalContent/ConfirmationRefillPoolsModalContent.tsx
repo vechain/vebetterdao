@@ -54,8 +54,8 @@ export const ConfirmationRefillPoolsModalContent = ({
               {isEnablingRewardsPool
                 ? t("You'll enable and refill the rewards pool to")
                 : isRewardsPoolToAppBalance
-                  ? t("You'll refill the rewards pool to")
-                  : t("You'll refill the app balance to")}
+                  ? t("You'll refill the app balance to")
+                  : t("You'll refill the rewards pool to")}
             </Text>
             <HStack>
               <B3TRIcon boxSize={"20px"} />
