@@ -10,7 +10,7 @@ import { useTranslation } from "react-i18next"
 import { EditAppModerators } from "./components/EditAppModerators"
 import { EditAppAddresses } from "./components/EditAppAddresses"
 import { useForm } from "react-hook-form"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { UpdateConfirmationModal } from "./components/UpdateConfirmationModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
@@ -31,30 +31,65 @@ export type AdminAppForm = {
 }
 
 export const AdminAppPageContent = () => {
-  const { appMetadata } = useCurrentAppMetadata()
-  const { moderators } = useCurrentAppModerators()
-  const { creators } = useCurrentAppCreators()
-  const { distributors } = useCurrentAppRewardDistributors()
-
   const { t } = useTranslation()
-  const [editAdminAddress, setEditAdminAddress] = useState(false)
-  const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
-  const updateConfirmationModal = useDisclosure()
-  const { admin } = useCurrentAppAdmin()
+  const router = useRouter()
+
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address || "")
-  const { app } = useCurrentAppInfo()
+
+  const { admin, isLoading: adminLoading } = useCurrentAppAdmin()
+  const { moderators, isLoading: moderatorsLoading } = useCurrentAppModerators()
+  const { creators, isLoading: creatorsLoading } = useCurrentAppCreators()
+  const { distributors, isLoading: distributorsLoading } = useCurrentAppRewardDistributors()
+  const { app, isAppInfoLoading: appLoading } = useCurrentAppInfo()
+  const { appMetadata } = useCurrentAppMetadata()
+
+  const [editAdminAddress, setEditAdminAddress] = useState(false)
+  const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
+
+  const updateConfirmationModal = useDisclosure()
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
+
+  const onchainAddresses = useRef({
+    moderators: [] as string[],
+    creators: [] as string[],
+    adminAddress: "",
+    teamWalletAddress: "",
+    distributors: [] as string[],
+  })
+
+  const isAddressesLoading = adminLoading || appLoading || moderatorsLoading || creatorsLoading || distributorsLoading
 
   const form = useForm<AdminAppForm>({
     defaultValues: {
-      moderators,
-      creators,
-      adminAddress: admin || "",
-      teamWalletAddress: app?.teamWalletAddress || "",
-      distributors,
+      moderators: [],
+      creators: [],
+      adminAddress: "",
+      teamWalletAddress: "",
+      distributors: [],
     },
   })
+
+  const syncForm = useCallback(() => {
+    if (!admin || !app?.teamWalletAddress) return
+
+    const newOnchainAddresses = {
+      moderators: [...(moderators || [])],
+      creators: [...(creators || [])],
+      adminAddress: admin || "",
+      teamWalletAddress: app?.teamWalletAddress || "",
+      distributors: [...(distributors || [])],
+    }
+    onchainAddresses.current = newOnchainAddresses
+    // Resetting the form with the most updated values onchain
+    form.reset(newOnchainAddresses)
+  }, [admin, app?.teamWalletAddress, creators, distributors, form, moderators])
+
+  useEffect(() => {
+    if (!isAddressesLoading && admin && app?.teamWalletAddress) {
+      syncForm()
+    }
+  }, [admin, app?.teamWalletAddress, syncForm, moderators, creators, distributors, isAddressesLoading])
 
   const [adminAddress, teamWalletAddress, newModerators, newDistributors, newCreators] = form.watch([
     "adminAddress",
@@ -64,42 +99,46 @@ export const AdminAppPageContent = () => {
     "creators",
   ])
 
-  // Update the form values when the app fetches the data from blockchain
-  useEffect(() => {
-    form.setValue("moderators", moderators)
-  }, [moderators, form])
-  useEffect(() => {
-    form.setValue("distributors", distributors)
-  }, [distributors, form])
-  useEffect(() => {
-    form.setValue("creators", creators)
-  }, [creators, form])
+  const haveAddressesChanged = (currentAddresses: string[], newAddresses: string[]) => {
+    if (currentAddresses.length !== newAddresses.length) return true
+    return !currentAddresses.every(
+      (address, index) => newAddresses[index] && compareAddresses(address, newAddresses[index]),
+    )
+  }
 
-  const isAdminAddressChanged = !compareAddresses(adminAddress, admin || "")
-  const isTeamWalletAddressChanged = !compareAddresses(teamWalletAddress, app?.teamWalletAddress || "")
-  const isModeratorsChanged =
-    moderators.length !== newModerators.length ||
-    !moderators.every((moderator, index) => compareAddresses(moderator, newModerators[index]))
-  const isDistributorsChanged =
-    distributors.length !== newDistributors.length ||
-    !distributors.every((distributor, index) => compareAddresses(distributor, newDistributors[index]))
-  const isCreatorsChanged =
-    creators.length !== newCreators.length ||
-    !creators.every((creator, index) => compareAddresses(creator, newCreators[index]))
-  const disableSaveButton =
-    !isAdminAddressChanged &&
-    !isTeamWalletAddressChanged &&
-    !isModeratorsChanged &&
-    !isDistributorsChanged &&
-    !isCreatorsChanged
-  const router = useRouter()
+  const getAddressesToAdd = (newAddresses: string[], currentAddresses: string[]) =>
+    newAddresses.filter(newAddress => !currentAddresses.some(address => compareAddresses(address, newAddress)))
+
+  const getAddressesToRemove = (currentAddresses: string[], newAddresses: string[]) =>
+    currentAddresses.filter(address => !newAddresses.some(newAddress => compareAddresses(address, newAddress)))
+
+  // Check if addresses have changed
+  const isAdminAddressChanged = !compareAddresses(adminAddress, onchainAddresses.current.adminAddress)
+  const isTeamWalletAddressChanged = !compareAddresses(teamWalletAddress, onchainAddresses.current.teamWalletAddress)
+  const isModeratorsChanged = haveAddressesChanged(onchainAddresses.current.moderators, newModerators)
+  const isDistributorsChanged = haveAddressesChanged(onchainAddresses.current.distributors, newDistributors)
+  const isCreatorsChanged = haveAddressesChanged(onchainAddresses.current.creators, newCreators)
+
+  const hasUnsavedChanges =
+    isAdminAddressChanged ||
+    isTeamWalletAddressChanged ||
+    isModeratorsChanged ||
+    isDistributorsChanged ||
+    isCreatorsChanged
+  const disableSaveButton = !hasUnsavedChanges
 
   const updateMutation = useUpdateAppAdminInfo({
     appId: app?.id || "",
     onSuccess: () => {
       onConfirmationClose()
-      router.back()
-      form.reset()
+      // After successful transaction, update the reference with form values
+      onchainAddresses.current = {
+        adminAddress: adminAddress,
+        moderators: [...newModerators],
+        creators: [...newCreators],
+        distributors: [...newDistributors],
+        teamWalletAddress: teamWalletAddress,
+      }
       updateMutation.resetStatus()
     },
   })
@@ -111,7 +150,7 @@ export const AdminAppPageContent = () => {
 
   const goBack = useCallback(() => {
     onConfirmationClose()
-    router.back()
+    router.push(`/apps/${app?.id}`)
     form.reset()
     updateMutation.resetStatus()
   }, [form, onConfirmationClose, router, updateMutation])
@@ -119,25 +158,15 @@ export const AdminAppPageContent = () => {
   const onSubmit = useCallback(
     (data: AdminAppForm) => {
       onConfirmationOpen()
-      const moderatorsToBeAdded = data.moderators.filter(
-        newModerator => !moderators.some(moderator => compareAddresses(moderator, newModerator)),
-      )
-      const moderatorsToBeRemoved = moderators.filter(
-        moderator => !data.moderators.some(newModerator => compareAddresses(moderator, newModerator)),
-      )
 
-      const distributorsToBeAdded = data.distributors.filter(
-        newDistributor => !distributors.some(distributor => compareAddresses(distributor, newDistributor)),
-      )
-      const distributorsToBeRemoved = distributors.filter(
-        distributor => !data.distributors.some(newDistributor => compareAddresses(distributor, newDistributor)),
-      )
-      const creatorsToBeAdded = data.creators.filter(
-        newCreator => !creators.some(creator => compareAddresses(creator, newCreator)),
-      )
-      const creatorsToBeRemoved = creators.filter(
-        creator => !data.creators.some(newCreator => compareAddresses(creator, newCreator)),
-      )
+      const moderatorsToBeAdded = getAddressesToAdd(data.moderators, onchainAddresses.current.moderators)
+      const moderatorsToBeRemoved = getAddressesToRemove(onchainAddresses.current.moderators, data.moderators)
+
+      const distributorsToBeAdded = getAddressesToAdd(data.distributors, onchainAddresses.current.distributors)
+      const distributorsToBeRemoved = getAddressesToRemove(onchainAddresses.current.distributors, data.distributors)
+
+      const creatorsToBeAdded = getAddressesToAdd(data.creators, onchainAddresses.current.creators)
+      const creatorsToBeRemoved = getAddressesToRemove(onchainAddresses.current.creators, data.creators)
 
       updateMutation.sendTransaction({
         appId: app?.id || "",
@@ -151,16 +180,7 @@ export const AdminAppPageContent = () => {
         creatorsToBeRemoved,
       })
     },
-    [
-      onConfirmationOpen,
-      moderators,
-      distributors,
-      creators,
-      updateMutation,
-      app?.id,
-      isAdminAddressChanged,
-      isTeamWalletAddressChanged,
-    ],
+    [onConfirmationOpen, updateMutation, app?.id, isAdminAddressChanged, isTeamWalletAddressChanged],
   )
 
   const checkAddresses = useCallback(

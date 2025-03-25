@@ -3,7 +3,13 @@ import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 import { buildClause } from "@/utils/buildClause"
 import { useBuildTransaction } from "./useBuildTransaction"
-import { getAppAdminQueryKey, getAppCreatorsQueryKey, getAppModeratorsQueryKey, getXAppsQueryKey } from "@/api"
+import {
+  getAppAdminQueryKey,
+  getAppCreatorsQueryKey,
+  getAppModeratorsQueryKey,
+  getXAppsQueryKey,
+  getAppRewardDistributorsQueryKey,
+} from "@/api"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 
@@ -161,6 +167,7 @@ export const useUpdateAppAdminInfo = ({ appId, onSuccess }: Props) => {
       getAppModeratorsQueryKey(appId),
       getAppCreatorsQueryKey(appId),
       getXAppsQueryKey(),
+      getAppRewardDistributorsQueryKey(appId),
     ],
     [appId],
   )

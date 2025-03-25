@@ -85,6 +85,7 @@ import {
   PassportChecksLogicV2,
   PassportSignalingLogicV2,
   VoterRewardsV3,
+  B3TRMultiSig,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -200,6 +201,7 @@ interface DeployInstance {
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
   vechainNodesMock: TokenAuction
+  b3trMultiSig: B3TRMultiSig
 }
 
 export const NFT_NAME = "GalaxyMember"
@@ -328,6 +330,11 @@ export const getOrDeployContractInstances = async ({
     myErc1155 = await MyERC1155.deploy(owner.address)
     await myErc1155.waitForDeployment()
   }
+
+  // ---------------------- Deploy MultiSig ----------------------
+
+  const B3TRMultiSig = await ethers.getContractFactory("B3TRMultiSig")
+  const b3trMultiSig = await B3TRMultiSig.deploy([owner.address, otherAccount.address, minterAccount.address], 2)
 
   // ---------------------- Deploy Contracts ----------------------
   // Deploy B3TR
@@ -915,6 +922,7 @@ export const getOrDeployContractInstances = async ({
     treasury,
     x2EarnRewardsPool,
     veBetterPassport,
+    b3trMultiSig,
     governorClockLogicLib: GovernorClockLogicLib,
     governorConfiguratorLib: GovernorConfiguratorLib,
     governorDepositLogicLib: GovernorDepositLogicLib,
