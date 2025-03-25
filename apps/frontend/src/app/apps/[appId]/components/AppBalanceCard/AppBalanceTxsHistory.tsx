@@ -1,7 +1,6 @@
 import {
   Card,
   CardBody,
-  Heading,
   Modal,
   ModalOverlay,
   ModalCloseButton,
@@ -99,7 +98,7 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
         <VStack align="stretch" spacing={0}>
           {filteredTransactions.map((transaction, index) => (
             <TransactionsHistory
-              key={`${transaction.txType}-${transaction.blockNumber}-${transaction.txOrigin}`}
+              key={`${transaction.txType}-${transaction.blockNumber}-${transaction.txId}`}
               transaction={transaction}
               index={index}
               start={startDate}
@@ -117,7 +116,9 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
       <ModalContent borderRadius="20px">
         <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
         <ModalHeader>
-          <Heading>{t("Transaction history")}</Heading>
+          <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+            {t("Transaction history")}
+          </Text>
         </ModalHeader>
 
         <ModalBody pb={6}>

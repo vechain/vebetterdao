@@ -11,7 +11,7 @@ export type AppFundActivityEvent = {
   appId: string
   amount: string
   blockNumber: number
-  txOrigin: string
+  txId: string
   availableFunds?: string
   rewardsPoolBalance?: string
   txType: "DEPOSIT" | "WITHDRAW" | "DISTRIBUTE_REWARDS" | "REWARDS_POOL_UPDATED"
@@ -34,7 +34,7 @@ export const useAppFundActivityEvents = (appId: string) => {
       appId: decoded.app,
       amount: ethers.formatEther(decoded.amount),
       blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
+      txId: meta.txId,
     }),
   })
 
@@ -47,7 +47,7 @@ export const useAppFundActivityEvents = (appId: string) => {
       appId: decoded.app,
       amount: ethers.formatEther(decoded.amount),
       blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
+      txId: meta.txId,
     }),
   })
 
@@ -60,7 +60,7 @@ export const useAppFundActivityEvents = (appId: string) => {
       appId: decoded.app,
       amount: ethers.formatEther(decoded.amount),
       blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
+      txId: meta.txId,
     }),
   })
 
@@ -75,7 +75,7 @@ export const useAppFundActivityEvents = (appId: string) => {
       availableFunds: ethers.formatEther(decoded.availableFunds),
       rewardsPoolBalance: ethers.formatEther(decoded.rewardsPoolBalance),
       blockNumber: meta.blockNumber,
-      txOrigin: meta.txOrigin,
+      txId: meta.txId,
     }),
   })
 

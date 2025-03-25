@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useBreakpoints } from "@/hooks"
 import { useEstimateBlockTimestamp } from "@/hooks/useEstimateBlockTimestamp"
+import { getExplorerTxLink } from "@/utils/VeChainStatsUtils/ExplorerUtils"
 import dayjs from "dayjs"
 
 type Props = {
@@ -20,6 +21,7 @@ type TransactionProps = {
   title: string
   amount: string
   timestampTxs: number
+  txId: string
 }
 
 const compactFormatter = getCompactFormatter(4)
@@ -41,27 +43,35 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
     }
   }
 
+  const seeTx = (txId: string) => {
+    window.open(getExplorerTxLink(txId), "_blank")
+  }
+
   const getTransactionProps = (): TransactionProps => {
     const transactionTypes: Record<TransactionType, TransactionProps> = {
       DEPOSIT: {
         title: t("Deposit"),
         amount: `${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
+        txId: transaction.txId,
       },
       WITHDRAW: {
         title: t("Withdraw"),
         amount: `${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
+        txId: transaction.txId,
       },
       DISTRIBUTE_REWARDS: {
         title: t("Rewards Distribution"),
         amount: `${compactFormatter.format(parseFloat(transaction.amount))} B3TR`,
         timestampTxs: timestamp,
+        txId: transaction.txId,
       },
       REWARDS_POOL_UPDATED: {
         title: t("Rewards Pool Updated"),
         amount: `${compactFormatter.format(parseFloat(transaction.rewardsPoolBalance || "0"))} B3TR`,
         timestampTxs: timestamp,
+        txId: transaction.txId,
       },
     }
     // Fallback for other transaction types
@@ -70,19 +80,30 @@ export const TransactionsHistory = ({ transaction, index, start, end }: Props) =
         title: t("Transaction"),
         amount: `${compactFormatter.format(parseFloat(transaction.amount || "0"))} B3TR`,
         timestampTxs: timestamp,
+        txId: transaction.txId,
       }
     )
   }
-  const { title, amount, timestampTxs } = getTransactionProps()
+  const { title, amount, timestampTxs, txId } = getTransactionProps()
   const bgColor = index % 2 === 0 ? "#FFFFFF" : "#F8F8F8"
 
   return (
     <HStack p={4} justify="space-between" borderRadius="md" bg={bgColor}>
       <VStack spacing={0} alignItems={"flex-start"}>
-        <Text fontSize={isMobile ? 12 : 14}>{title}</Text>
+        <Text
+          _hover={{
+            color: "blue.500",
+            cursor: "pointer",
+          }}
+          fontSize={isMobile ? 12 : 14}
+          fontWeight={"600"}
+          cursor={"pointer"}
+          onClick={() => seeTx(txId)}>
+          {title}
+        </Text>
         <Text fontSize={isMobile ? 12 : 14}>{dayjs(timestampTxs).format("DD/MM/YY")}</Text>
       </VStack>
-      <Text fontWeight={"600"} fontSize={isMobile ? 12 : 14}>
+      <Text fontSize={isMobile ? 12 : 14} fontWeight={"600"} onClick={() => seeTx(txId)}>
         {amount}
       </Text>
     </HStack>

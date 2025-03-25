@@ -8,8 +8,11 @@ import {
   ModalOverlay,
   VStack,
   useDisclosure,
-  Heading,
   Text,
+  Alert,
+  AlertIcon,
+  AlertDescription,
+  Box,
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
@@ -45,10 +48,24 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
         <ModalContent borderRadius="20px">
           <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
           <ModalHeader>
-            <Heading>{t("Transfer App Balance")}</Heading>
+            <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+              {t("Transfer App Balance")}
+            </Text>
           </ModalHeader>
           <ModalBody pb={6}>
             <VStack justifyContent={"space-between"}>
+              {isPaused && (
+                <Alert status="error" borderRadius={["xl", "xl", "3xl"]}>
+                  <AlertIcon w={5} h={5} />
+                  <Box lineHeight={"1.20rem"} fontSize="sm">
+                    <AlertDescription as="span">
+                      {t(
+                        "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.",
+                      )}
+                    </AlertDescription>
+                  </Box>
+                </Alert>
+              )}
               <VStack
                 align="start"
                 spacing={4}
@@ -108,8 +125,8 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                 borderRadius="20px"
                 p="16px"
                 color="#252525"
-                border={isPaused ? "1px solid #C84968" : "1px solid #D5D5D5"}
-                boxShadow={isPaused ? "0 0 8px rgba(245, 101, 101, 0.5)" : "none"}
+                border={"1px solid #D5D5D5"}
+                boxShadow={"none"}
                 justifyContent="space-between">
                 <Text fontSize={18} fontWeight={600}>
                   {t("Refill Pools")}
@@ -125,7 +142,6 @@ export const TransferAppFundsModal = ({ app, isOpen, onClose, isEnablingRewardsP
                     onOpenFundsManagement()
                     onClose()
                   }}
-                  isDisabled={isPaused}
                   variant={"primaryAction"}
                   borderRadius={"full"}
                   w={"200px"}>

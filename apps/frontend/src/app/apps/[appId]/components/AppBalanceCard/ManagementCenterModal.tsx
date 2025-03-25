@@ -142,7 +142,9 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose, b3trAppBalance }
           {!showConfirmation ? (
             <>
               <ModalHeader top={{ base: 5, md: 6 }}>
-                <Heading>{t("Manage distribution")}</Heading>
+                <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+                  {t("Manage distribution")}
+                </Text>
               </ModalHeader>
               <ModalBody pb={6}>
                 {!isPaused && (

@@ -59,6 +59,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose, isEnablingRewards
     onSuccess: () => {
       onCloseTransactionModal()
       refillRewardsPoolAction.resetStatus()
+      onClose()
     },
   })
 
@@ -219,12 +220,14 @@ export const FundsManagementModal = ({ appId, isOpen, onClose, isEnablingRewards
         <ModalContent borderRadius="20px">
           <ModalCloseButton top={{ base: 5, md: 6 }} right={4} />
           <ModalHeader>
-            <Heading>{t("Refill Pools")}</Heading>
+            <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
+              {t("Refill Pools")}
+            </Text>
           </ModalHeader>
 
           <ModalBody pb={6} gap={4}>
             <Box borderRadius="16px" p={isMobile ? "4px" : "6px"} mb={"25px"}>
-              <Text fontSize={16} fontWeight={400} color="#6A6A6A">
+              <Text fontSize={14} fontWeight={400} color="#6A6A6A">
                 {t(
                   "Transfer B3TR between your App Balance Pool and the Rewards Pool. Refill B3TR to the Rewards Pool to distribute rewards, or move them back to the app balance when needed.",
                 )}
