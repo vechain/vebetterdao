@@ -1446,6 +1446,40 @@ describe("X2EarnRewardsPool - @shard12", function () {
         .withArgs(appId, owner)
       expect(await x2EarnRewardsPool.isDistributionPaused(appId)).to.equal(false)
     })
+
+    it("Should not distribute rewards when the rewards distribution is paused", async function () {
+      const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          bootstrapAndStartEmissions: true,
+        })
+
+      const amount = ethers.parseEther("100")
+
+      // deploy app and deposit apps funds (+ 100 B3TR)
+      await b3tr.connect(minterAccount).mint(owner.address, amount)
+      await x2EarnApps.submitApp(owner.address, owner.address, "My app", "metadataURI")
+      const appId = await x2EarnApps.hashAppName("My app")
+      await endorseApp(appId, owner)
+      await b3tr.connect(owner).approve(await x2EarnRewardsPool.getAddress(), amount)
+      await x2EarnRewardsPool.connect(owner).deposit(amount, appId)
+
+      // add reward distributor
+      await x2EarnApps.connect(owner).addRewardDistributor(appId, otherAccount.address)
+      expect(await x2EarnApps.isRewardDistributor(appId, otherAccount.address)).to.equal(true)
+
+      // pause/unpause rewards distribution with distributor address should revert
+      await catchRevert(x2EarnRewardsPool.connect(otherAccount).pauseDistribution(appId))
+      await catchRevert(x2EarnRewardsPool.connect(otherAccount).unpauseDistribution(appId))
+
+      // Cannot increase rewards pool balance more than the available funds
+      await x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, amount)
+      await x2EarnRewardsPool.connect(owner).pauseDistribution(appId)
+
+      await expect(
+        x2EarnRewardsPool.connect(otherAccount).distributeReward(appId, ethers.parseEther("1"), owner.address, ""),
+      ).to.be.revertedWith("X2EarnRewardsPool: distribution is paused")
+    })
   })
 
   describe("Proofs, Impact and Metadata", async function () {
@@ -2911,18 +2945,17 @@ describe("X2EarnRewardsPool - @shard12", function () {
 
       await catchRevert(x2EarnRewardsPool.connect(otherAccount).increaseRewardsPoolBalance(appId, amount))
       // only admin can increase/ decrease distribution balance
-
-      expect(x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, amount)).to.not.be.reverted
-      expect(x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, amount)).to.not.be.reverted
+      await expect(x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, amount)).to.not.be.reverted
+      await expect(x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, amount)).to.not.be.reverted
       await catchRevert(x2EarnRewardsPool.connect(otherAccount).decreaseRewardsPoolBalance(appId, amount))
       // only admin can increase/ decrease distribution balance
       await catchRevert(x2EarnRewardsPool.connect(otherAccount).toggleRewardsPoolBalance(appId, true))
-      // only admin can toggled on/off distribution
-      expect(x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, true)).to.not.be.reverted
+      // only admin can toggled on/off distribution ( already enabled by default)
+      await expect(x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)).to.not.be.reverted
     })
 
     // Events
-    it("Should emit events when enabling, disabling, and updating rewards pool balance", async function () {
+    it("Should emit events when enabling, disabling, updating and pausingrewards pool balance", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -3134,7 +3167,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPool.totalBalance(appId)).to.equal(amount)
     })
 
-    it("Should not move funds from rewards pool to available funds or vise versa when the rewards distribution is paused", async function () {
+    it("Should move funds from rewards pool to available funds when the rewards distribution is paused", async function () {
       const { x2EarnRewardsPool, x2EarnApps, b3tr, owner, otherAccount, minterAccount } =
         await getOrDeployContractInstances({
           forceDeploy: true,
@@ -3155,21 +3188,13 @@ describe("X2EarnRewardsPool - @shard12", function () {
 
       await x2EarnRewardsPool.connect(owner).pauseDistribution(appId)
       expect(await x2EarnRewardsPool.isDistributionPaused(appId)).to.equal(true)
-      await expect(
-        x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, ethers.parseEther("70")),
-      ).to.be.revertedWith("X2EarnRewardsPool: distribution is paused")
-
-      await expect(
-        x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, ethers.parseEther("70")),
-      ).to.be.revertedWith("X2EarnRewardsPool: distribution is paused")
-
-      await expect(x2EarnRewardsPool.connect(owner).toggleRewardsPoolBalance(appId, false)).to.be.revertedWith(
-        "X2EarnRewardsPool: distribution is paused",
-      )
+      expect(x2EarnRewardsPool.connect(owner).decreaseRewardsPoolBalance(appId, ethers.parseEther("70"))).to.not.be
+        .reverted
+      expect(x2EarnRewardsPool.connect(owner).increaseRewardsPoolBalance(appId, ethers.parseEther("70"))).to.not.be
+        .reverted
 
       expect(await x2EarnRewardsPool.connect(owner).availableFunds(appId)).to.equal(ethers.parseEther("30"))
 
-      // can i withdraw 40 ? or the available funds that is 30 ?
       await expect(x2EarnRewardsPool.connect(owner).withdraw(ethers.parseEther("31"), appId, "")).to.be.revertedWith(
         "X2EarnRewardsPool: app has insufficient funds",
       )
