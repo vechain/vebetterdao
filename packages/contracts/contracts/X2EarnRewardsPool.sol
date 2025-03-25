@@ -366,7 +366,6 @@ contract X2EarnRewardsPool is
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin"); 
-    require(!$.distributionPaused[appId], "X2EarnRewardsPool: distribution is paused");
     require(amount <= $.availableFunds[appId], "X2EarnRewardsPool: increasing amount exceeds available funds");
 
     $.isRewardsPoolEnabled[appId] = true;
@@ -389,7 +388,6 @@ contract X2EarnRewardsPool is
 
     require($.x2EarnApps.appExists(appId), "X2EarnRewardsPool: app does not exist");
     require($.x2EarnApps.isAppAdmin(appId, msg.sender), "X2EarnRewardsPool: caller is not app admin");
-    require(!$.distributionPaused[appId], "X2EarnRewardsPool: distribution is paused");
     require(amount <= $.rewardsPoolBalance[appId], "X2EarnRewardsPool: decreasing under rewards pool balance");
 
     $.isRewardsPoolEnabled[appId] = true;
