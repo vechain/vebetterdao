@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         cf_x_username: twitterUsername,
         cf_testnet_project_url: testnetProjectUrl,
         cf_testnet_app_id: testnetAppId.toLowerCase(),
-        cf_distribution_strategy: distributionStrategy,
+        cf_distribution_startegy: distributionStrategy,
         cf_security_api_security_measures: securityApiSecurityMeasures,
         cf_security_action_verification: securityActionVerification,
         cf_security_device_fingerprint: securityDeviceFingerprint,

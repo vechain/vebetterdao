@@ -9,6 +9,8 @@ import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft
 import { SubmitCreatorFormData, SubmitCreatorForm } from "@/components/SubmitCreatorForm"
 import { useCreatorSubmissionFormStore } from "@/store/useCreatorSubmissionFormStore"
 import { CreatorApplicationModal } from "./CreatorApplicationModal"
+import { useQueryClient } from "@tanstack/react-query"
+import { creatorSubmissionQueryKey } from "@/api"
 
 export const NewCreatorPageFormContent = () => {
   const { register, reset, setValue, setError, watch, formState, control, handleSubmit, clearErrors } =
@@ -22,6 +24,14 @@ export const NewCreatorPageFormContent = () => {
         adminEmail: "",
         githubUsername: "",
         twitterUsername: "",
+        distributionStrategy: "",
+        testnetProjectUrl: "",
+        testnetAppId: "",
+        securityApiSecurityMeasures: false,
+        securityActionVerification: false,
+        securityDeviceFingerprint: false,
+        securitySecureKeyManagement: false,
+        securityAntiFarming: false,
       },
     })
 
@@ -34,7 +44,7 @@ export const NewCreatorPageFormContent = () => {
   const [submitErrorMessage, setSubmitErrorMessage] = useState("")
   const { account } = useWallet()
   const hasCreatorNft = useHasCreatorNFT(account?.address ?? "")
-
+  const queryClient = useQueryClient()
   useEffect(() => {
     //Users with Creator NFT should be redirected to the new app page
     if (hasCreatorNft) router.push("/apps/new")
@@ -62,6 +72,8 @@ export const NewCreatorPageFormContent = () => {
       signOut({ redirect: false })
       setSubmitStatus("success")
       setSubmitErrorMessage("")
+      //Refetch creator submissions query on success
+      queryClient.refetchQueries({ queryKey: creatorSubmissionQueryKey(adminWalletAddress ?? "") })
     } catch (error: unknown) {
       let errorMessage = "An error occurred while submitting the form."
       if (error instanceof Error) errorMessage = error.message
@@ -123,7 +135,7 @@ export const NewCreatorPageFormContent = () => {
           status={submitStatus}
           errorMessage={submitStatus === "error" ? submitErrorMessage : undefined}
           isOpen={isOpen}
-          onClose={navigateToHome}
+          onClose={onClose}
           onButtonClick={navigateToHome}
         />
       </VStack>
