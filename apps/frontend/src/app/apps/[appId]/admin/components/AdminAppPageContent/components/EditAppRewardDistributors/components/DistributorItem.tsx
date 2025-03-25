@@ -62,12 +62,14 @@ export const DistributorItem = ({ distributor, handleDeleteDistributor }: Props)
         <Show above={"sm"}>
           <HStack>
             <AddressIcon address={distributor} h="34px" w="34px" rounded={"full"} />
-            <Text fontSize={"14px"} color="#6A6A6A">
-              {distributor}
-            </Text>
-            <Text fontSize={"14px"} color="#6A6A6A" borderLeft={"1px solid"} paddingLeft={2}>
-              {domain}
-            </Text>
+            <VStack align="stretch" gap={0}>
+              <Text fontSize={"12px"} color="#6A6A6A" fontWeight={600}>
+                {domain}
+              </Text>
+              <Text fontSize={"14px"} color="#6A6A6A">
+                {distributor}
+              </Text>
+            </VStack>
           </HStack>
           <Button variant="dangerGhost" leftIcon={<UilTrash size={"14px"} color="#D23F63" />} onClick={onOpen}>
             {t("Remove")}

@@ -164,6 +164,11 @@ interface IX2EarnApps {
   event ModeratorRemovedFromApp(bytes32 indexed appId, address moderator);
 
   /**
+   * @dev Event fired when the admin removes a creator from the app.
+   */
+  event CreatorRemovedFromApp(bytes32 indexed appId, address creator);
+
+  /**
    * @dev Event fired when the admin adds a new creator to the app and new creator NFT is minted.
    */
   event CreatorAddedToApp(bytes32 indexed appId, address creatorAddress);

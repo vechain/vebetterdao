@@ -20,6 +20,7 @@ const NEW_APP_PERIOD_SECONDS = 604800 // Considering a new app is defined as 7 d
  * @property name - the xApp name
  * @property metadataURI - the xApp metadata URI
  * @property createdAtTimestamp - timestamp when xApp was added
+ * @property isNew - whether the xApp is considered new as per {@link NEW_APP_PERIOD_SECONDS}
  */
 export type XApp = {
   id: string
@@ -54,9 +55,10 @@ type GetAllApps = {
  * This function is here nad not coupled with the hook as we need it with SSR, and dapp-kit broke the pre-fetching
  * Returns all the available xApps in the B3TR ecosystem
  * @param thor  the thor client
+ * @param filterBlacklisted  whether to filter blacklisted xApps
  * @returns  all the available xApps in the ecosystem capped to 256 see {@link XApp}
  */
-export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
+export const getXApps = async (thor: Connex.Thor, filterBlacklisted = false): Promise<GetAllApps> => {
   const clauses = [
     {
       to: X2EARNAPPS_CONTRACT,
@@ -107,27 +109,30 @@ export const getXApps = async (thor: Connex.Thor): Promise<GetAllApps> => {
     }
   }
 
+  // Merge apps and unendorsed apps, deduplicate by id
   const allApps = [...apps, ...unendorsedApps].filter(
     (app, index, self) => self.findIndex(a => a.id === app.id) === index,
-  ) // all apps is a union of active and unendorsed apps with deduplication
+  )
 
-  // Fetch blacklisted apps from dedup list to avoid unnecessary calls
-  const clauses2 = allApps.map(app => ({
-    to: X2EARNAPPS_CONTRACT,
-    value: 0,
-    data: isBlacklistedAbi.encode(app.id),
-  }))
-  const res2 = await thor.explain(clauses2).execute()
-  const blacklistedApps = res2.map((r, index) => {
-    if (r.reverted) throw new Error(`Clause ${index + 1} reverted: ${r.revertReason}`)
-    return isBlacklistedAbi.decode(r.data)
-  })
+  // Filter blacklisted apps only if filterBlacklisted is true
+  let allAppsFiltered = allApps
+  if (filterBlacklisted) {
+    const clauses2 = allApps.map(app => ({
+      to: X2EARNAPPS_CONTRACT,
+      value: 0,
+      data: isBlacklistedAbi.encode(app.id),
+    }))
+    const res2 = await thor.explain(clauses2).execute()
 
-  // Filter out blacklisted apps
-  const allAppsFiltered = allApps.filter((_app, index) => blacklistedApps[index]?.[0] === false)
-  const allowedAppIds = new Set(allAppsFiltered.map(app => app.id))
+    const error2 = res2.find(r => r.reverted)?.revertReason
+    if (error2) throw new Error(error2 ?? "Error fetching blacklisted xApps")
+
+    const blacklistedApps = res2.map(r => isBlacklistedAbi.decode(r.data))
+    allAppsFiltered = allApps.filter((_app, index) => blacklistedApps[index]?.[0] === false)
+  }
 
   // Filter apps and unendorsed apps based on allowedAppIds
+  const allowedAppIds = new Set(allAppsFiltered.map(app => app.id))
   const appsFiltered = apps.filter(app => allowedAppIds.has(app.id))
   const unendorsedAppsFiltered = unendorsedApps.filter(app => allowedAppIds.has(app.id))
 

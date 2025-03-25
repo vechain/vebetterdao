@@ -106,6 +106,7 @@ describe("Apps", () => {
         teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
         createdAtTimestamp: "16347455",
         metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+        isNew: false,
       },
     ]
 
@@ -116,6 +117,7 @@ describe("Apps", () => {
         teamWalletAddress: "0xf077b491b355E64048cE21E3A6Fc4751eEeA77fa",
         createdAtTimestamp: "0",
         metadataURI: "ipfs://QmQmQmQmQmQmQmQmQmQmQmQmQmQm",
+        isNew: false,
         appAvailableForAllocationVoting: false,
       },
     ]
@@ -127,6 +129,11 @@ describe("Apps", () => {
         unendorsed: unendorsedApps,
         allApps: [...activeApps, ...unendorsedApps],
         endorsed: activeApps,
+        newApps: [],
+        gracePeriod: [],
+        endorsementLost: [],
+        newLookingForEndorsement: [],
+        othersLookingForEndorsement: [],
       },
       isLoading: false,
       isError: false,

@@ -51,6 +51,7 @@ export type AppConfig = {
   veBetterPassportContractAddress: string
   b3trGovernorLibraries: B3TRGovernorLibraries
   passportLibraries: PassportLibraries
+  b3trMultiSigAddress?: string
   nodeUrl: string
   indexerUrl?: string
   network: Network

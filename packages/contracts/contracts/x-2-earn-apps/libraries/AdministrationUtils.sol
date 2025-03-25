@@ -173,6 +173,13 @@ library AdministrationUtils {
    */
   event CreatorAddedToApp(bytes32 indexed appId, address creatorAddress);
 
+  /**
+   * @dev Event fired when the admin removes a creator from the app.
+   * @param appId The ID of the app.
+   * @param creator The address of the creator.
+   */
+  event CreatorRemovedFromApp(bytes32 indexed appId, address creator);
+
   // ------------------------------- Getter Functions -------------------------------
   /**
    * @dev Checks if an account is a reward distributor for an app.
@@ -446,7 +453,7 @@ library AdministrationUtils {
     // Decrease the number of apps created by the creator
     creatorApps[creator]--;
 
-    emit ModeratorRemovedFromApp(appId, creator);
+    emit CreatorRemovedFromApp(appId, creator);
   }
 
   /**
