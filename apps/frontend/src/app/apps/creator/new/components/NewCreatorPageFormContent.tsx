@@ -67,11 +67,11 @@ export const NewCreatorPageFormContent = () => {
       })
       if (!response.ok) throw new Error("Failed to submit creator application")
 
-      reset()
-      clearData()
-      signOut({ redirect: false })
       setSubmitStatus("success")
       setSubmitErrorMessage("")
+      reset() //Reset the form inputs
+      clearData() //Clear the form storage
+      signOut({ redirect: false }) //Sign out the user
       //Refetch creator submissions query on success
       queryClient.refetchQueries({ queryKey: creatorSubmissionQueryKey(adminWalletAddress ?? "") })
     } catch (error: unknown) {

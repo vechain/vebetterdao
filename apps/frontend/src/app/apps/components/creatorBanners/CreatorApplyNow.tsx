@@ -67,7 +67,11 @@ export const CreatorApplyNow = () => {
                   </Box>
                 )}
 
-                <Stack w={{ base: "full", md: "70%", lg: "80%" }} align={"end"} justify={"end"} py={isMobile ? 4 : 2}>
+                <Stack
+                  w={{ base: "full", md: "70%", lg: "80%" }}
+                  align={{ base: "center", md: "end" }}
+                  justify={{ base: "center", md: "end" }}
+                  py={isMobile ? 4 : 2}>
                   <Heading fontWeight={700} fontSize={"17px"}>
                     {t("Do you have a dApp to join the VeBetter DAO ecosystem?")}
                   </Heading>
