@@ -1,4 +1,4 @@
-import { Card, CardBody, Heading, Image, Stack, Text } from "@chakra-ui/react"
+import { Box, Card, CardBody, Heading, Image, Stack, Text } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 
 export const CreatorApplicationInProgress = () => {
@@ -9,26 +9,35 @@ export const CreatorApplicationInProgress = () => {
       variant={"baseWithBorder"}
       w="full"
       maxW="100%"
+      h={"full"}
       style={{
         backgroundColor: "#CEDCFD",
         borderRadius: "20px",
         border: "2px solid #E0E9FE",
       }}>
-      <CardBody px={{ base: 5, md: 5 }} py={{ base: 5, md: 5 }}>
+      <CardBody h={"full"} p={0}>
         <Stack direction={{ base: "column", md: "row" }} w="full" h="full">
           {/* Left Section: Image, Title, and Description */}
-          <Stack direction="row" spacing={{ base: 2, md: 2, lg: 4 }} align="center">
-            <Image
-              src={"images/creator-nft.png"}
-              alt="logo"
-              maxH="100px"
-              maxW="100px"
-              minW="90px"
-              minH="90px"
-              borderRadius="9px"
-            />
+          <Stack direction="row" h={"full"} align="center">
+            <Box w={"120px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
+              <Image
+                src="/images/mascote/mascote-welcoming.png"
+                alt="mascote-welcoming"
+                position="absolute"
+                top="30%"
+                left="-10%"
+                transform={"rotate(30deg) scale(1.8)"}
+                objectFit="contain"
+                borderRadius="9px"
+              />
+            </Box>
 
-            <Stack w={{ base: "full", md: "90%", lg: "80%" }} align="flex-start" justify="center">
+            <Stack
+              w={{ base: "full", md: "90%", lg: "80%" }}
+              px={{ base: 5, md: 5 }}
+              py={{ base: 5, md: 5 }}
+              align="flex-start"
+              justify="center">
               <Heading fontWeight={700} fontSize="18px">
                 {t("We're reviewing your Creator's NFT application form")}
               </Heading>
