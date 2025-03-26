@@ -1,4 +1,4 @@
-import { Image, Stack, Text, useDisclosure, VStack, HStack, Card } from "@chakra-ui/react"
+import { Image, Stack, Text, useDisclosure, VStack, HStack, Card, Box, Heading } from "@chakra-ui/react"
 import { useForm } from "react-hook-form"
 import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -88,34 +88,37 @@ export const NewCreatorPageFormContent = () => {
     <VStack align="center" w="100%" justify="center">
       <VStack w={{ base: "100%", sm: "100%", md: "80%" }} spacing={0}>
         <HStack
-          py={{ base: 5, md: 10 }}
           justify="space-between"
+          align="center"
           bgColor="#004CFC"
           w="full"
           borderTopRadius="12px"
-          px={{ base: 7, md: 10 }}
           bgImage={"/images/cloud-background.png"}
           bgSize="cover"
           bgPosition="center"
-          bgRepeat="no-repeat">
-          <Stack>
-            <Text color="white" fontWeight="bold" fontSize={{ base: "lg", md: "xl" }}>
+          bgRepeat="no-repeat"
+          px={4}>
+          {/* Text Container */}
+          <Stack w="60%" minW="200px" py={2} pl={{ base: 0, md: 4 }}>
+            <Heading color="white" fontWeight="bold" fontSize={{ base: "md", md: "xl", lg: "2xl" }}>
               {t("Apply for Creator's NFT")}
-            </Text>
-            <Text color="white" fontSize={{ base: "sm", md: "20" }}>
+            </Heading>
+            <Text color="white" fontSize={{ base: "sm", md: "md", lg: "lg" }}>
               {t("Get your Creator’s NFT to be able to submit your app into the VeBetterDAO ecosystem!")}
             </Text>
           </Stack>
-          <Image
-            src="/images/creator-nft-xl.png"
-            alt="Apply for Creator's NFT"
-            borderRadius={12}
-            alignSelf={{ base: "center", md: "bottom" }}
-            objectFit="cover"
-            objectPosition={{ base: "center", md: "bottom" }}
-            w={{ base: 90, md: 120, lg: 120 }}
-            h={{ base: 90, md: 120, lg: 120 }}
-          />
+
+          {/* Image Container */}
+          <Box w="full" h="full" maxW="180px" alignSelf="flex-end" display="flex" justifyContent="flex-end">
+            <Image
+              w="full"
+              h="full"
+              src="/images/mascote/mascot-holding-tokens.png"
+              alt="Apply for Creator's NFT"
+              objectFit="contain"
+              objectPosition="bottom"
+            />
+          </Box>
         </HStack>
 
         <Card w="full" borderTopRadius="0px" margin={0} py={0}>
