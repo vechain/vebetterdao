@@ -16,35 +16,38 @@ import { useRouter } from "next/navigation"
 import { PreviewAppCard } from "./PreviewAppCard"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { ethers } from "ethers"
+import { useCreatorSubmission } from "@/api"
 
 export const NewAppPageFormContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
-
-  const [appData, setAppData] = useState<CreateEditAppFormData | undefined>()
-  const [isSuccessSubmission, setIsSuccessSubmission] = useState(false)
-
-  const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
-    useForm<CreateEditAppFormData>({
-      defaultValues: {
-        name: "",
-        description: "",
-        logo: "/images/dapp_icon_placeholder.svg",
-        banner: "/images/dapp_banner_placeholder.svg",
-        projectUrl: "",
-        teamWalletAddress: "",
-      },
-    })
-
-  const { errors } = formState
-
-  const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
-
   const { account } = useWallet()
+  const { data: submission } = useCreatorSubmission(account?.address ?? "")
+  const { onMetadataUpload, metadataUploadError, metadataUploading } = useUploadAppMetadata()
 
   const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
   const hasCreatorNft = useHasCreatorNFT(account?.address ?? "")
+  const [appData, setAppData] = useState<CreateEditAppFormData | undefined>()
+  const [isSuccessSubmission, setIsSuccessSubmission] = useState(false)
+
+  const latestSubmission = submission?.submissions[0]
+
+  const { register, setValue, setError, formState, watch, handleSubmit, clearErrors, control } =
+    useForm<CreateEditAppFormData>({
+      defaultValues: {
+        name: latestSubmission?.appName ?? "",
+        description: "",
+        logo: "/images/dapp_icon_placeholder.svg",
+        banner: "/images/dapp_banner_placeholder.svg",
+        distributionStrategy: latestSubmission?.distributionStrategy ?? "",
+        projectUrl: latestSubmission?.projectUrl ?? "",
+        treasuryWalletAddress: "",
+        adminWalletAddress: "",
+      },
+    })
+
+  const { errors } = formState
 
   useEffect(() => {
     //Users without Creator NFT should be redirected to home
@@ -54,6 +57,7 @@ export const NewAppPageFormContent = () => {
   const handleSuccess = useCallback(() => {
     setIsSuccessSubmission(true)
   }, [])
+  const submitAppMutation = useSubmitNewApp({ onSuccess: handleSuccess })
 
   const appName = watch("name")
   const appId = useMemo(() => {
@@ -64,8 +68,6 @@ export const NewAppPageFormContent = () => {
     router.push(`/apps/${appId}`)
   }, [router, appId])
 
-  const submitAppMutation = useSubmitNewApp({ onSuccess: handleSuccess })
-
   const onSubmit = useCallback(
     async (data: CreateEditAppFormData) => {
       setAppData(data)
@@ -75,6 +77,7 @@ export const NewAppPageFormContent = () => {
       const metadataUri = await onMetadataUpload({
         name: data.name,
         description: data.description,
+        distribution_strategy: data.distributionStrategy,
         logo: data.logo,
         banner: data.banner,
         external_url: data.projectUrl,
@@ -88,10 +91,10 @@ export const NewAppPageFormContent = () => {
       })
       if (!metadataUri) return
 
-      const adminAddress = data.adminWalletAddress ?? account?.address ?? data.teamWalletAddress
+      const adminAddress = data.adminWalletAddress ?? account?.address ?? data.treasuryWalletAddress
 
       submitAppMutation.sendTransaction({
-        teamWalletAddress: data.teamWalletAddress,
+        teamWalletAddress: data.treasuryWalletAddress,
         adminAddress,
         appName: data.name,
         appMetadataUri: metadataUri,

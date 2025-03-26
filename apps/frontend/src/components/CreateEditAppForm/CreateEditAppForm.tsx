@@ -11,11 +11,10 @@ import {
   FormLabel,
   Heading,
   Image,
-  Input,
+  Text,
   InputGroup,
   InputLeftElement,
   Stack,
-  Textarea,
   VStack,
 } from "@chakra-ui/react"
 import {
@@ -43,6 +42,8 @@ import { useDropzone } from "react-dropzone"
 import { blobToBase64 } from "@/utils/BlobUtils"
 import { useTranslation } from "react-i18next"
 import { WalletAddressInput } from "@/app/components/Input"
+import { AddressUtils } from "@/utils"
+import { FormItem } from "../CustomFormFields"
 
 // Validate image uploads with size and type
 const validateImageUpload = async (
@@ -74,7 +75,8 @@ export type CreateEditAppFormData = {
   logo: string
   banner: string
   projectUrl: string
-  teamWalletAddress: string
+  distributionStrategy: string
+  treasuryWalletAddress: string
   adminWalletAddress: string
   ve_world_banner: string
 }
@@ -143,9 +145,20 @@ export const CreateEditAppForm = ({
 
   const { open: openUploadVeWorldBanner } = useDropzone({ onDrop: onDrop("ve_world_banner") })
 
-  const teamWalletAddress = watch("teamWalletAddress")
+  const treasuryWalletAddress = watch("treasuryWalletAddress")
   const adminWalletAddress = watch("adminWalletAddress")
+  const validateUrl = (value: string, fieldName: string) => {
+    try {
+      new URL(value)
+      return true
+    } catch {
+      return t("Invalid {{fieldName}}", { fieldName })
+    }
+  }
 
+  const genericValidation = (value: string, fieldName: string) => {
+    return value && AddressUtils.isValid(value) ? t("Invalid {{fieldName}}", { fieldName }) : true
+  }
   return (
     <Card>
       <CardHeader>
@@ -153,68 +166,103 @@ export const CreateEditAppForm = ({
       </CardHeader>
       <CardBody>
         <VStack spacing={8} w="full">
-          <FormControl isInvalid={!!errors.name}>
-            <FormLabel>{t("Name")}</FormLabel>
-            <Input
-              rounded={"xl"}
-              {...register("name", {
-                required: "Name is required",
-              })}
-            />
-            {errors.name && <FormErrorMessage>{errors.name.message}</FormErrorMessage>}
-          </FormControl>
+          <FormItem
+            label={t("Name")}
+            placeholder={t("Name")}
+            description={t("The name of your dApp.")}
+            register={{
+              ...register("name", {
+                required: "App Name is required",
+                minLength: { value: 2, message: t("{{fieldName}} is too short", { fieldName: t("App Name") }) },
+                maxLength: { value: 30, message: t("{{fieldName}} is too long", { fieldName: t("App Name") }) },
+                validate: value => genericValidation(value, t("App Name")),
+              }),
+            }}
+            error={errors.name?.message}
+          />
 
-          <FormControl isInvalid={!!errors.description}>
-            <FormLabel>{t("Description")}</FormLabel>
-            <Textarea
-              rounded={"xl"}
-              {...register("description", {
-                required: "Description is required",
-                min: { value: 100, message: "Description is too short" },
-              })}
-            />
-            {errors.description && <FormErrorMessage>{errors.description.message}</FormErrorMessage>}
-          </FormControl>
-
-          <FormControl isInvalid={!!errors.projectUrl}>
-            <FormLabel>{t("Project URL")}</FormLabel>
-            <Input
-              rounded={"xl"}
-              {...register("projectUrl", {
-                validate: value => {
-                  if (!value) {
-                    return "Project URL is required"
-                  }
-                  try {
-                    new URL(value)
-                    return true
-                  } catch (e) {
-                    return "Invalid URL"
-                  }
+          <FormItem
+            label={t("Description")}
+            placeholder={t("Description")}
+            description={t("The description and purpose of your dApp.")}
+            type="textarea"
+            register={{
+              ...register("description", {
+                required: "App Description is required",
+                minLength: {
+                  value: 100,
+                  message: t("{{fieldName}} is too short", { fieldName: t("App Description") }),
                 },
-              })}
-            />
-            {errors.projectUrl && <FormErrorMessage>{errors.projectUrl.message}</FormErrorMessage>}
-          </FormControl>
+                maxLength: {
+                  value: 1000,
+                  message: t("{{fieldName}} is too long", { fieldName: t("App Description") }),
+                },
+              }),
+            }}
+            error={errors.description?.message}
+          />
 
-          <FormControl isInvalid={!teamWalletAddress}>
+          <FormItem
+            label={t("Project URL")}
+            placeholder={t("Project URL")}
+            description={t("The URL of your dApp's website or repository.")}
+            register={{
+              ...register("projectUrl", {
+                required: "Project URL is required",
+                maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Project URL") }) },
+                validate: value => validateUrl(value, t("Project URL")),
+              }),
+            }}
+            error={errors.projectUrl?.message}
+          />
+
+          <FormItem
+            label={t("How does your dApp distribute B3TR to the users?")}
+            placeholder={t("Distribution Strategy")}
+            description={t(
+              "Describe how your app distributes rewards. This information will be publicly visible once your dApp is submitted to VeBetterDAO.",
+            )}
+            type="textarea"
+            register={{
+              ...register("distributionStrategy", {
+                required: "Distribution Strategy is required",
+                minLength: {
+                  value: 100,
+                  message: t("{{fieldName}} is too short", { fieldName: t("Distribution Strategy") }),
+                },
+                maxLength: {
+                  value: 1000,
+                  message: t("{{fieldName}} is too long", { fieldName: t("Distribution Strategy") }),
+                },
+              }),
+            }}
+            error={errors.distributionStrategy?.message}
+          />
+
+          <FormControl isInvalid={!treasuryWalletAddress}>
             <FormLabel>{t("Treasury address")}</FormLabel>
+            <Text fontSize="xs" color="gray.500" mb={2}>
+              {t("The wallet address where you will receive your app's B3TR")}
+            </Text>
             <InputGroup>
               <WalletAddressInput
                 inputLeftElement={
                   <InputLeftElement pointerEvents="none">
-                    <AddressIcon borderRadius={"full"} boxSize={6} minW={6} minH={6} address={teamWalletAddress} />
+                    <AddressIcon borderRadius={"full"} boxSize={6} minW={6} minH={6} address={treasuryWalletAddress} />
                   </InputLeftElement>
                 }
                 isDisabled={isReceiverAddressDisabled}
                 rounded={"xl"}
-                onAddressResolved={address => setValue("teamWalletAddress", address ?? "")}
+                onAddressResolved={address => setValue("treasuryWalletAddress", address ?? "")}
               />
             </InputGroup>
           </FormControl>
 
           <FormControl isInvalid={!adminWalletAddress}>
             <FormLabel>{t("Admin address")}</FormLabel>
+            <Text fontSize="xs" color="gray.500" mb={2}>
+              {t("The wallet address which will be used to manage your app")}
+            </Text>
             <InputGroup>
               <WalletAddressInput
                 inputLeftElement={
