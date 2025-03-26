@@ -1562,5 +1562,7 @@
   "Your new B3TR app rewards pool": "Your new B3TR app rewards pool",
   "You refilled your app balance": "You refilled your app balance",
   "You refilled your rewards pool": "You refilled your rewards pool",
-  "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.": "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance."
+  "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.": "The rewards distribution is paused. You can still transfer funds from the rewards pool to your app balance, or withdraw your app balance.",
+  "Resume": "Resume",
+  "Pause": "Pause"
 }
