@@ -50,13 +50,13 @@ export const AppPreviewDetailCard = ({
           <AppCardOptionsMobileModal
             isOpen={isMobileOptionsOpen}
             onClose={closeMobileOptions}
-            teamWalletAddress={app.teamWalletAddress}
+            teamWalletAddress={app.treasuryWalletAddress}
             externalUrl={app.projectUrl}
           />
         </>
       )
     }
-    return <AppCardOptionsDesktopMenu teamWalletAddress={app.teamWalletAddress} externalUrl={app.projectUrl} />
+    return <AppCardOptionsDesktopMenu teamWalletAddress={app.treasuryWalletAddress} externalUrl={app.projectUrl} />
   }, [isMobile, openMobileOptions, isMobileOptionsOpen, closeMobileOptions, app])
 
   return (
