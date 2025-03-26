@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth"
 import { SubmitCreatorFormData } from "@/components/SubmitCreatorForm"
 import FreshdeskClient, { FreshdeskTicketBody } from "@/utils/FreshDeskClient"
 import { authOptions } from "../../auth/[...nextauth]/options"
-import { checkMissingFields } from "./utils"
+import { checkMissingFields, humanizeSummary } from "./utils"
 
 // Handle POST request
 export async function POST(request: NextRequest) {
@@ -34,16 +34,15 @@ export async function POST(request: NextRequest) {
 
     const {
       appName,
-      appDescription,
-      adminWalletAddress,
-      adminName,
       adminEmail,
+      adminName,
+      adminWalletAddress,
       projectUrl = "",
       githubUsername,
       twitterUsername,
-      distributionStrategy,
       testnetProjectUrl,
       testnetAppId,
+      distributionStrategy,
       securityApiSecurityMeasures,
       securityActionVerification,
       securityDeviceFingerprint,
@@ -52,7 +51,7 @@ export async function POST(request: NextRequest) {
     } = data as SubmitCreatorFormData
 
     const ticketBody: FreshdeskTicketBody = {
-      description: appDescription,
+      description: humanizeSummary(data as SubmitCreatorFormData),
       subject: `[${appName}] Access Request`,
       group_id: Number(process.env.FRESHDESK_GROUP_ID),
       email: adminEmail,
