@@ -1,9 +1,10 @@
 "use client"
 
 import { MotionVStack } from "@/components"
-import { AnalyticsUtils } from "@/utils"
+import { AnalyticsUtils, AddressUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
+import Custom404 from "@/app/not-found"
 import { useEffect } from "react"
 
 const ProfilePageContent = dynamic(
@@ -28,6 +29,9 @@ export default function Profile({ params }: Readonly<Props>) {
   useEffect(() => {
     AnalyticsUtils.trackPage("Profile")
   }, [])
+  if (!AddressUtils.isValid(params.address)) {
+    return <Custom404 />
+  }
   return (
     <MotionVStack>
       <ProfilePageContent address={params.address} />
