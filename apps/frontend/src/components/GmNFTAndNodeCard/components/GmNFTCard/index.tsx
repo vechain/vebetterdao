@@ -5,7 +5,7 @@ import { FaChevronRight } from "react-icons/fa6"
 import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "@/components/FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+import { useDomainOrAddress } from "@/hooks"
 interface GmNFTCardProps {
   isGMOwned: boolean
   isGMLoading: boolean
@@ -34,6 +34,7 @@ export const GmNFTCard = ({
   profile,
 }: GmNFTCardProps) => {
   const { t } = useTranslation()
+  const domainOrAddress = useDomainOrAddress(domain ?? "", profile ?? "")
 
   if (!isGMOwned) {
     return (
@@ -49,7 +50,7 @@ export const GmNFTCard = ({
         <Text color={"#FFFFFF80"}>
           {viewMode
             ? t("{{value}} needs to mint an NFT to get reward multipliers", {
-                value: !!domain || humanAddress(profile ?? "", 6, 3),
+                value: domainOrAddress,
               })
             : t("You need to mint an NFT to get reward multipliers")}
         </Text>
