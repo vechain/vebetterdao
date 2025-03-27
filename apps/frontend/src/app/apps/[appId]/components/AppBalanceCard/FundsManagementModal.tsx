@@ -26,6 +26,7 @@ import { TransactionModal, TransactionModalStatus } from "@/components"
 import { HiMiniArrowsUpDown } from "react-icons/hi2"
 import { removingExcessDecimals } from "@/utils/MathUtils"
 import BigNumber from "bignumber.js"
+import { filterAmountInput } from "@/utils"
 
 type Props = {
   appId: string
@@ -143,11 +144,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose, isEnablingRewards
   }
 
   const handleAmountChange = (value: string) => {
-    const filteredValue = value
-      .replace(/[^\d.]/g, "")
-      .replace(/\.(?=.*\.)/g, "")
-      .replace(/^0+(\d)/, "$1")
-      .replace(/(\.\d{18})\d+/, "$1")
+    const filteredValue = filterAmountInput(value)
     // Ensure the amount doesn't exceed available balance
     const maxBalance = activeTab === "balance-to-rewards" ? availableBalanceFormatted : rewardsBalanceFormatted
 
