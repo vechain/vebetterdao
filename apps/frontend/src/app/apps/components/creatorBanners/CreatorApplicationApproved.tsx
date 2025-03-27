@@ -1,10 +1,11 @@
-import { Button, Card, CardBody, Heading, Image, Stack, Text } from "@chakra-ui/react"
+import { Button, Card, CardBody, Heading, Image, Stack, Text, Box, HStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "react-i18next"
 
 export const CreatorApplicationApproved = () => {
   const { t } = useTranslation()
   const router = useRouter()
+
   const goToAppCreation = () => {
     router.push("/apps/new")
   }
@@ -13,50 +14,43 @@ export const CreatorApplicationApproved = () => {
     <Card
       variant={"baseWithBorder"}
       w="full"
+      h="full"
       maxW="100%"
       style={{
         backgroundColor: "#CEDCFD",
         borderRadius: "20px",
       }}>
-      <CardBody px={{ base: 5, md: 5 }} py={{ base: 5, md: 5 }}>
-        <Stack direction={{ base: "column", md: "row" }} w="full" h="full">
-          {/* Left Section: Image, Title, and Description */}
-          <Stack direction="row" spacing={{ base: 2, md: 2, lg: 4 }} align="center">
+      <CardBody p={0}>
+        <HStack w="full" h="full">
+          {/* Left Section: Image full height when mobile */}
+          <Box w={"150px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
             <Image
-              src={"images/creator-nft.png"}
-              alt="logo"
-              maxH="100px"
-              maxW="100px"
-              minW="90px"
-              minH="90px"
+              src="/images/mascote/mascot-holding-tokens.png"
+              alt="mascot-holding-tokens"
+              position="absolute"
+              bottom={{ base: 5, md: 5, lg: 0 }}
+              left="0"
+              transform={{ base: "scale(1.8)", md: "scale(1.5)", lg: "scale(1.3)" }}
+              objectFit="contain"
               borderRadius="9px"
             />
+          </Box>
 
-            <Stack w={{ base: "full", md: "90%", lg: "80%" }} align="flex-start" justify="center">
-              <Heading fontWeight={700} fontSize={{ base: "15px", md: "15px" }}>
+          <Stack direction={{ base: "column" }} w="full" h="full" align={"center"} justify={"center"} py={4}>
+            {/* Right Section: Image, Title, and Description */}
+            <Stack align={"center"} justify={"center"}>
+              <Heading fontWeight={700} fontSize={"15px"}>
                 {t("Your Creator's NFT application was approved")}
               </Heading>
-              <Text fontSize={{ base: "14px", md: "14px" }} color="#6A6A6A" fontWeight={400}>
+              <Text fontSize={"14px"} color="#6A6A6A" fontWeight={400}>
                 {t("You can now submit your app to the VeBetterDAO ecosystem")}
               </Text>
             </Stack>
-          </Stack>
-
-          {/* Right Section: Score */}
-          <Stack direction="row" align="center" justify="center" w={{ base: "100%", md: "30%" }} alignSelf="center">
-            <Button
-              alignSelf="center"
-              fontSize={{ base: "14px" }}
-              variant="primaryAction"
-              borderRadius="full"
-              maxW="150px"
-              px={{ base: 2, md: 5 }}
-              onClick={goToAppCreation}
-              w={{ base: "full", md: "auto" }}>
+            <Button fontSize={{ base: "14px" }} variant="primaryAction" borderRadius="full" onClick={goToAppCreation}>
               {t("Submit app")}
             </Button>
           </Stack>
-        </Stack>
+        </HStack>
       </CardBody>
     </Card>
   )

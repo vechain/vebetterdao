@@ -1,4 +1,3 @@
-import axios, { AxiosInstance } from "axios"
 type FreshdeskQueryResult<T> = {
   results: T[]
 }
@@ -20,6 +19,14 @@ export type FreshdeskTicket = {
     cf_admin_wallet_address: string
     cf_app_creator_email: string
     cf_app_creator_name_optional: string
+    cf_testnet_project_url: string
+    cf_testnet_app_id: string
+    cf_distribution_startegy: string
+    cf_security_api_security_measures?: boolean
+    cf_security_action_verification: boolean
+    cf_security_device_fingerprint?: boolean
+    cf_security_secure_key_management?: boolean
+    cf_security_anti_farming?: boolean
   }
   created_at: string
 }
@@ -40,6 +47,14 @@ export type FreshdeskTicketBody = {
     cf_admin_wallet_address: string
     cf_app_creator_email: string
     cf_app_creator_name_optional?: string
+    cf_testnet_project_url: string
+    cf_testnet_app_id: string
+    cf_distribution_startegy: string
+    cf_security_api_security_measures?: boolean
+    cf_security_action_verification: boolean
+    cf_security_device_fingerprint?: boolean
+    cf_security_secure_key_management?: boolean
+    cf_security_anti_farming?: boolean
   }
 }
 
@@ -77,7 +92,7 @@ enum TicketPriority {
 }
 
 class FreshdeskClient {
-  private apiClient: AxiosInstance
+  private readonly apiKey: string
   private readonly baseURL: URL
   private readonly DEFAULT_PRIORITY = TicketPriority.Low
   private readonly DEFAULT_STATUS = TicketStatus.Pending
@@ -91,15 +106,30 @@ class FreshdeskClient {
       throw new Error("Freshdesk domain is required")
     }
 
+    this.apiKey = apiKey
     this.baseURL = new URL("/api/v2", freshdeskDomain)
+  }
 
-    this.apiClient = axios.create({
-      baseURL: this.baseURL.toString(),
+  private async request({
+    endpoint,
+    method = "GET",
+    body,
+  }: {
+    endpoint: string
+    method?: RequestInit["method"]
+    body?: FreshdeskTicketBody
+  }): Promise<Response> {
+    let url = `${this.baseURL.toString().replace(/\/$/, "")}${endpoint}`
+    const options: RequestInit = {
+      method,
       headers: {
-        Authorization: this.generateAuthHeader(apiKey),
+        Authorization: this.generateAuthHeader(this.apiKey),
         "Content-Type": "application/json",
       },
-    })
+      body: body ? JSON.stringify(body) : undefined,
+    }
+
+    return fetch(url, options)
   }
 
   /**
@@ -117,9 +147,17 @@ class FreshdeskClient {
       ...this.getDefaultTicketData(),
       ...ticketData,
     }
+    const response = await this.request({
+      endpoint: "/tickets",
+      method: "POST",
+      body: completeTicketData,
+    })
 
-    const response = await this.apiClient.post("tickets", completeTicketData)
-    return response.data
+    if (!response.ok) {
+      throw new Error(`Error creating ticket: ${response.statusText}`)
+    }
+
+    return response.json()
   }
 
   /**
@@ -128,8 +166,15 @@ class FreshdeskClient {
    * @returns  The ticket information for the specified ticket ID
    */
   public async getTicketById(ticketId: number): Promise<TicketResponse> {
-    const response = await this.apiClient.get(`tickets/${ticketId}`)
-    return response.data
+    const response = await this.request({
+      endpoint: `/tickets/${ticketId}`,
+    })
+
+    if (!response.ok) {
+      throw new Error(`Error fetching ticket: ${response.statusText}`)
+    }
+
+    return response.json()
   }
 
   /**
@@ -138,10 +183,16 @@ class FreshdeskClient {
    * @returns The ticket information for the specified admin wallet address
    */
   public async getTicketByAdminWalletAddress(walletAddress: string): Promise<FreshdeskQueryResult<FreshdeskTicket>> {
-    const response = await this.apiClient.get(
-      `search/tickets?query="cf_admin_wallet_address:'${walletAddress}' OR custom_string:'${walletAddress}'"`,
-    )
-    return response.data
+    const freshdeskQuery = `cf_admin_wallet_address:'${walletAddress}' OR custom_string:'${walletAddress}'`
+    const response = await this.request({
+      endpoint: `/search/tickets?query="${freshdeskQuery}"`,
+    })
+
+    if (!response.ok) {
+      throw new Error(`Error searching tickets: ${response.statusText}`)
+    }
+
+    return response.json()
   }
 
   /**
@@ -149,8 +200,15 @@ class FreshdeskClient {
    * @returns All tickets from Freshdesk specified by the API
    * **/
   public async getAllTickets(): Promise<TicketResponse[]> {
-    const response = await this.apiClient.get("tickets")
-    return response.data
+    const response = await this.request({
+      endpoint: "/tickets",
+    })
+
+    if (!response.ok) {
+      throw new Error(`Error fetching all tickets: ${response.statusText}`)
+    }
+
+    return response.json()
   }
 
   /**

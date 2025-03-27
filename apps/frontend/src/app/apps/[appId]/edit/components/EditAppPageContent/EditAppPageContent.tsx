@@ -42,6 +42,7 @@ export type EditAppForm = {
   name: string
   external_url: string
   description: string
+  distribution_strategy: string
   twitterUrl: string
   discordUrl: string
   telegramUrl: string
@@ -54,7 +55,7 @@ export type EditAppForm = {
 }
 
 const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
-  return urls?.find(url => url.name === name)?.url || ""
+  return urls?.find(url => url.name === name)?.url ?? ""
 }
 
 export const EditAppPageContent = () => {
@@ -69,7 +70,7 @@ export const EditAppPageContent = () => {
   const transactionModal = useDisclosure()
   const { isAdminOrModerator } = useCurrentAppRole()
   const { account } = useWallet()
-  const { data: permissions } = useAccountPermissions(account?.address || "")
+  const { data: permissions } = useAccountPermissions(account?.address ?? "")
   const { appId } = useParams<{ appId: string }>()
 
   const form = useForm<EditAppForm>({
@@ -77,9 +78,10 @@ export const EditAppPageContent = () => {
       screenshots: screenshots,
       logoImage: logo,
       bannerImage: banner,
-      name: appMetadata?.name || "",
-      external_url: appMetadata?.external_url || "",
-      description: appMetadata?.description || "",
+      name: appMetadata?.name ?? "",
+      external_url: appMetadata?.external_url ?? "",
+      description: appMetadata?.description ?? "",
+      distribution_strategy: appMetadata?.distribution_strategy ?? "",
       twitterUrl: findUrlByName(appMetadata?.social_urls, "Twitter"),
       discordUrl: findUrlByName(appMetadata?.social_urls, "Discord"),
       telegramUrl: findUrlByName(appMetadata?.social_urls, "Telegram"),
@@ -115,6 +117,7 @@ export const EditAppPageContent = () => {
       const metadataUri = await uploadMetadataMutation.onMetadataUpload({
         name: data.name,
         description: data.description,
+        distribution_strategy: data?.distribution_strategy ?? "",
         logo: data.logoImage,
         banner: data.bannerImage,
         external_url: data.external_url,
@@ -183,11 +186,11 @@ export const EditAppPageContent = () => {
                   required: { value: true, message: t("Name required") },
                   minLength: { value: 3, message: t("Name must be at least 3 characters") },
                 })}
-                defaultValue={appMetadata?.name || ""}
+                defaultValue={appMetadata?.name ?? ""}
                 fontSize={"28px"}
                 fontWeight={700}
               />
-              <FormErrorMessage fontSize={"12px"}>{errors?.name?.message || ""}</FormErrorMessage>
+              <FormErrorMessage fontSize={"12px"}>{errors?.name?.message ?? ""}</FormErrorMessage>
             </FormControl>
           </HStack>
           <HStack flexDir={["row-reverse", "row"]} mt={[2, 0]}>
@@ -225,7 +228,7 @@ export const EditAppPageContent = () => {
                     },
                   })}
                 />
-                <FormErrorMessage fontSize={"12px"}>{errors?.external_url?.message || ""}</FormErrorMessage>
+                <FormErrorMessage fontSize={"12px"}>{errors?.external_url?.message ?? ""}</FormErrorMessage>
               </FormControl>
             </VStack>
 
@@ -239,11 +242,34 @@ export const EditAppPageContent = () => {
                     required: { value: true, message: t("Description required") },
                     minLength: { value: 20, message: t("Description must be at least 20 characters") },
                   })}
-                  defaultValue={appMetadata?.description || ""}
+                  defaultValue={appMetadata?.description ?? ""}
                   resize="none"
                   h="140px"
                 />
-                <FormErrorMessage fontSize={"12px"}>{errors?.description?.message || ""}</FormErrorMessage>
+                <FormErrorMessage fontSize={"12px"}>{errors?.description?.message ?? ""}</FormErrorMessage>
+              </FormControl>
+            </VStack>
+            <VStack align={"stretch"} gap={4}>
+              <Text fontSize={16} fontWeight={500}>
+                {t("Distribution Strategy")}
+              </Text>
+              <FormControl isInvalid={!!errors.distribution_strategy}>
+                <Textarea
+                  {...register("distribution_strategy", {
+                    required: {
+                      value: true,
+                      message: t("This field is required"),
+                    },
+                    minLength: {
+                      value: 20,
+                      message: t("{{fieldName}} is too short", { fieldName: t("Distribution Strategy") }),
+                    },
+                  })}
+                  defaultValue={appMetadata?.distribution_strategy ?? ""}
+                  resize="none"
+                  h="140px"
+                />
+                <FormErrorMessage fontSize={"12px"}>{errors?.distribution_strategy?.message ?? ""}</FormErrorMessage>
               </FormControl>
             </VStack>
           </VStack>
