@@ -7,7 +7,7 @@ import {
   getIsDistributionPausedQueryKey,
   getIsRewardsPoolEnabledQueryKey,
 } from "@/api/contracts/x2EarnRewardsPool"
-import { EnhancedClause } from "@vechain/vechain-kit"
+import { buildClause } from "@/utils/buildClause"
 
 /**
  * Pause distribution for a specific xApp
@@ -27,45 +27,39 @@ export const useDistributionManagement = ({ xAppId, onSuccess, isEnabled }: Prop
   // build the clause and send the transaction
 
   const buildPauseClause = useCallback(() => {
-    const clauses: EnhancedClause[] = [
-      {
+    return [
+      buildClause({
         to: X2EARN_REWARDS_POOL_CONTRACT,
-        value: 0,
-        data: X2EarnRewardsPoolInterface.encodeFunctionData("pauseDistribution", [xAppId]),
+        contractInterface: X2EarnRewardsPoolInterface,
+        method: "pauseDistribution",
+        args: [xAppId],
         comment: `Pause distribution for xApp ${xAppId}`,
-        abi: JSON.parse(JSON.stringify(X2EarnRewardsPoolInterface.getFunction("pauseDistribution"))),
-      },
+      }),
     ]
-
-    return clauses
   }, [xAppId])
 
   const buildUnpauseClause = useCallback(() => {
-    const clauses: EnhancedClause[] = [
-      {
+    return [
+      buildClause({
         to: X2EARN_REWARDS_POOL_CONTRACT,
-        value: 0,
-        data: X2EarnRewardsPoolInterface.encodeFunctionData("unpauseDistribution", [xAppId]),
+        contractInterface: X2EarnRewardsPoolInterface,
+        method: "unpauseDistribution",
+        args: [xAppId],
         comment: `Unpause distribution for xApp ${xAppId}`,
-        abi: JSON.parse(JSON.stringify(X2EarnRewardsPoolInterface.getFunction("unpauseDistribution"))),
-      },
+      }),
     ]
-
-    return clauses
   }, [xAppId])
 
   const buildToggleRewardsPoolClause = useCallback(() => {
-    const clauses: EnhancedClause[] = [
-      {
+    return [
+      buildClause({
         to: X2EARN_REWARDS_POOL_CONTRACT,
-        value: 0,
-        data: X2EarnRewardsPoolInterface.encodeFunctionData("toggleRewardsPoolBalance", [xAppId, isEnabled]),
+        contractInterface: X2EarnRewardsPoolInterface,
+        method: "toggleRewardsPoolBalance",
+        args: [xAppId, isEnabled],
         comment: `Toggle rewards pool for xApp ${xAppId}`,
-        abi: JSON.parse(JSON.stringify(X2EarnRewardsPoolInterface.getFunction("toggleRewardsPoolBalance"))),
-      },
+      }),
     ]
-
-    return clauses
   }, [xAppId, isEnabled])
 
   const refetchQueryKeys = useMemo(

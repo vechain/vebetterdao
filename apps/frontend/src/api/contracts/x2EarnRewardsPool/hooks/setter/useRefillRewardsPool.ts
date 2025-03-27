@@ -15,7 +15,7 @@ interface Props {
 }
 import { removingExcessDecimals } from "@/utils/MathUtils"
 import { ethers } from "ethers"
-import { EnhancedClause } from "@vechain/vechain-kit"
+import { buildClause } from "@/utils/buildClause"
 
 const X2EarnRewardsPoolInterface = X2EarnRewardsPool__factory.createInterface()
 const X2EARN_REWARDS_POOL_CONTRACT = getConfig().x2EarnRewardsPoolContractAddress
@@ -29,37 +29,27 @@ export const useRefillRewardsPool = ({ xAppId, amount, onSuccess }: Props) => {
   const contractAmount = useMemo(() => removingExcessDecimals(amount), [amount])
 
   const buildIncreaseRewardsPoolClause = useCallback(() => {
-    const clauses: EnhancedClause[] = [
-      {
+    return [
+      buildClause({
         to: X2EARN_REWARDS_POOL_CONTRACT,
-        value: 0,
-        data: X2EarnRewardsPoolInterface.encodeFunctionData("increaseRewardsPoolBalance", [
-          xAppId,
-          ethers.parseEther(contractAmount.toString()).toString(),
-        ]),
+        contractInterface: X2EarnRewardsPoolInterface,
+        method: "increaseRewardsPoolBalance",
+        args: [xAppId, ethers.parseEther(contractAmount.toString()).toString()],
         comment: `Increase ${amount} b3tr to rewards pool balance for xApp ${xAppId}`,
-        abi: JSON.parse(JSON.stringify(X2EarnRewardsPoolInterface.getFunction("unpauseDistribution"))),
-      },
+      }),
     ]
-
-    return clauses
   }, [xAppId, amount, contractAmount])
 
   const buildDecreaseRewardsPoolClause = useCallback(() => {
-    const clauses: EnhancedClause[] = [
-      {
+    return [
+      buildClause({
         to: X2EARN_REWARDS_POOL_CONTRACT,
-        value: 0,
-        data: X2EarnRewardsPoolInterface.encodeFunctionData("decreaseRewardsPoolBalance", [
-          xAppId,
-          ethers.parseEther(contractAmount.toString()).toString(),
-        ]),
+        contractInterface: X2EarnRewardsPoolInterface,
+        method: "decreaseRewardsPoolBalance",
+        args: [xAppId, ethers.parseEther(contractAmount.toString()).toString()],
         comment: `Decrease ${amount} b3tr from rewards pool balance for xApp ${xAppId}`,
-        abi: JSON.parse(JSON.stringify(X2EarnRewardsPoolInterface.getFunction("decreaseRewardsPoolBalance"))),
-      },
+      }),
     ]
-
-    return clauses
   }, [xAppId, amount, contractAmount])
 
   const refetchQueryKeys = useMemo(
