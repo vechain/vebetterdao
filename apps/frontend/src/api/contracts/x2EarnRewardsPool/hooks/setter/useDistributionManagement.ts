@@ -6,6 +6,8 @@ import {
   getAppRewardsBalanceQueryKey,
   getIsDistributionPausedQueryKey,
   getIsRewardsPoolEnabledQueryKey,
+  getAppAvailableFundsQueryKey,
+  getAppBalanceQueryKey,
 } from "@/api/contracts/x2EarnRewardsPool"
 import { buildClause } from "@/utils/buildClause"
 
@@ -67,6 +69,8 @@ export const useDistributionManagement = ({ xAppId, onSuccess, isEnabled }: Prop
       getIsDistributionPausedQueryKey(xAppId),
       getAppRewardsBalanceQueryKey(xAppId),
       getIsRewardsPoolEnabledQueryKey(xAppId),
+      getAppAvailableFundsQueryKey(xAppId),
+      getAppBalanceQueryKey(xAppId),
     ],
     [xAppId],
   )

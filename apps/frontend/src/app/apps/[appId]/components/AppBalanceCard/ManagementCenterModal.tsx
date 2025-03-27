@@ -82,7 +82,8 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose, b3trAppBalance }
   const handleCloseTransactionModal = useCallback(() => {
     managementAction.resetStatus()
     onCloseTransactionModal()
-  }, [onCloseTransactionModal, managementAction])
+    onClose()
+  }, [onCloseTransactionModal, managementAction, onClose])
 
   const handleShowConfirmation = (action: "enable" | "disable" | "pause" | "resume") => {
     setActionToConfirm(action)
