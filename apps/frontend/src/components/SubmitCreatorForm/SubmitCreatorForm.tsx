@@ -28,9 +28,8 @@ import { UilGithub } from "@iconscout/react-unicons"
 import { FaXTwitter } from "react-icons/fa6"
 import { AddressUtils } from "@/utils"
 import { WalletAddressInput } from "@/app/components/Input"
-import { FormCheckbox, FormItem } from "./components"
 import AppUtils from "@/utils/AppUtils"
-
+import { FormCheckbox, FormItem } from "../CustomFormFields"
 export type SubmitCreatorFormData = {
   appName: string
   appDescription: string

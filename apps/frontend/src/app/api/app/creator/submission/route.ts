@@ -7,7 +7,9 @@ import { formatSubmission } from "../utils"
 export interface Submission {
   id: number
   status: string
+  appName: string
   adminWalletAddress: string
+  projectUrl: string
   distributionStrategy: string
   createdAt: string
 }
