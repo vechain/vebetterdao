@@ -14,7 +14,7 @@ export type AppFundActivityEvent = {
   txId: string
   availableFunds?: string
   rewardsPoolBalance?: string
-  txType: "DEPOSIT" | "WITHDRAW" | "DISTRIBUTE_REWARDS" | "REWARDS_POOL_UPDATED"
+  txType: string
 }
 
 /**
@@ -35,6 +35,7 @@ export const useAppFundActivityEvents = (appId: string) => {
       amount: ethers.formatEther(decoded.amount),
       blockNumber: meta.blockNumber,
       txId: meta.txId,
+      txType: "DEPOSIT",
     }),
   })
 
@@ -48,6 +49,7 @@ export const useAppFundActivityEvents = (appId: string) => {
       amount: ethers.formatEther(decoded.amount),
       blockNumber: meta.blockNumber,
       txId: meta.txId,
+      txType: "WITHDRAW",
     }),
   })
 
@@ -61,6 +63,7 @@ export const useAppFundActivityEvents = (appId: string) => {
       amount: ethers.formatEther(decoded.amount),
       blockNumber: meta.blockNumber,
       txId: meta.txId,
+      txType: "DISTRIBUTE_REWARDS",
     }),
   })
 
@@ -76,6 +79,7 @@ export const useAppFundActivityEvents = (appId: string) => {
       rewardsPoolBalance: ethers.formatEther(decoded.rewardsPoolBalance),
       blockNumber: meta.blockNumber,
       txId: meta.txId,
+      txType: "REWARDS_POOL_UPDATED",
     }),
   })
 
@@ -95,19 +99,15 @@ export const useAppFundActivityEvents = (appId: string) => {
     const normalized: AppFundActivityEvent[] = [
       ...(depositEvents?.map(event => ({
         ...event,
-        txType: "DEPOSIT" as const,
       })) || []),
       ...(teamWithdrawalEvents?.map(event => ({
         ...event,
-        txType: "WITHDRAW" as const,
       })) || []),
       ...(rewardDistributedEvents?.map(event => ({
         ...event,
-        txType: "DISTRIBUTE_REWARDS" as const,
       })) || []),
       ...(rewardsPoolBalanceUpdatedEvents?.map(event => ({
         ...event,
-        txType: "REWARDS_POOL_UPDATED" as const,
       })) || []),
     ]
 

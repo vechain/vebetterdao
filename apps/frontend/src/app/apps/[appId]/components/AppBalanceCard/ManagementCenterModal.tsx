@@ -132,6 +132,38 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose, b3trAppBalance }
     }
   }, [actionToConfirm, t])
 
+  const confirmationText = useMemo(() => {
+    switch (actionToConfirm) {
+      case "enable":
+        return t("Are you sure you want to enable the rewards pool?")
+      case "disable":
+        return t("Are you sure you want to disable the rewards pool?")
+      case "pause":
+        return t("Are you sure you want to pause rewards distribution?")
+      case "resume":
+        return t("Are you sure you want to resume rewards distribution?")
+    }
+  }, [actionToConfirm, t])
+
+  const informationOnConfirmationText = useMemo(() => {
+    switch (actionToConfirm) {
+      case "enable":
+        return t(
+          "When you enable the rewards pool, it starts empty. You'll need to transfer B3TR to it before you can distribute rewards.",
+        )
+      case "disable":
+        return t(
+          "This will automatically move your rewards pool to your app balance. You can enable back the rewards pool at any time.",
+        )
+      case "pause":
+        return t("This will temporarily stop rewards distribution for your app until you resume it.")
+      case "resume":
+        return t(
+          "Your distributor will have access back to the rewards pool if you enabled it, and users will start receiving rewards for their actions again.",
+        )
+    }
+  }, [actionToConfirm, t])
+
   return (
     <>
       <Modal isOpen={isOpen} onClose={handleClose} isCentered={true} size={"xl"}>
@@ -273,12 +305,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose, b3trAppBalance }
                 <HStack spacing={4}>
                   <Icon as={FaArrowLeft} onClick={handleGoBack} cursor="pointer" />
 
-                  <Heading>
-                    {actionToConfirm === "enable" && t("Enable Rewards Pool")}
-                    {actionToConfirm === "disable" && t("Disable Rewards Pool")}
-                    {actionToConfirm === "pause" && t("Pause Distribution")}
-                    {actionToConfirm === "resume" && t("Resume Distribution")}
-                  </Heading>
+                  <Heading>{successTitle}</Heading>
                 </HStack>
               </ModalHeader>
               <ModalBody pb={6}>
@@ -287,26 +314,10 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose, b3trAppBalance }
                     <ExclamationTriangle size={"100px"} />
 
                     <Text fontSize={16} fontWeight={600} color="#252525">
-                      {actionToConfirm === "enable" && t("Are you sure you want to enable the rewards pool?")}
-                      {actionToConfirm === "disable" && t("Are you sure you want to disable the rewards pool?")}
-                      {actionToConfirm === "pause" && t("Are you sure you want to pause rewards distribution?")}
-                      {actionToConfirm === "resume" && t("Are you sure you want to resume rewards distribution?")}
+                      {confirmationText}
                     </Text>
                     <Text fontSize={14} fontWeight={400} color="#252525" textAlign={"center"} px={8}>
-                      {actionToConfirm === "enable" &&
-                        t(
-                          "When you enable the rewards pool, it starts empty. You'll need to transfer B3TR to it before you can distribute rewards.",
-                        )}
-                      {actionToConfirm === "disable" &&
-                        t(
-                          "This will automatically move your rewards pool to your app balance. You can enable back the rewards pool at any time.",
-                        )}
-                      {actionToConfirm === "pause" &&
-                        t("This will temporarily stop rewards distribution for your app until you resume it.")}
-                      {actionToConfirm === "resume" &&
-                        t(
-                          "Your distributor will have access back to the rewards pool if you enabled it, and users will start receiving rewards for their actions again.",
-                        )}
+                      {informationOnConfirmationText}
                     </Text>
                   </VStack>
                   <HStack mt={6} spacing={4} width="full">
