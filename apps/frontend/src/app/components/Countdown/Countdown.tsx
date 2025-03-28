@@ -1,7 +1,7 @@
 import { useCurrentAllocationsRoundId, useAllocationsRound } from "@/api"
-import React from "react"
 import { Text, HStack, Image, useMediaQuery, Skeleton } from "@chakra-ui/react"
 import { t } from "i18next"
+import { useEffect } from "react"
 import { useTimer } from "react-timer-hook"
 
 interface CountdownProps {
@@ -17,8 +17,15 @@ export const Countdown = ({ onOpen }: CountdownProps) => {
 
   const timeLeft = useTimer({
     expiryTimestamp: allocationRound?.voteEndTimestamp?.toDate() ?? new Date(),
-    autoStart: !!allocationRound?.voteEndTimestamp,
   })
+
+  // Hard refresh the timer when the roundId changes ( more trustable )
+  useEffect(() => {
+    if (allocationRound?.roundId && allocationRound?.voteEndTimestamp) {
+      console.log("Restarting timer for round:", allocationRound.roundId)
+      timeLeft.restart(allocationRound.voteEndTimestamp.toDate(), true)
+    }
+  }, [allocationRound?.roundId])
 
   // show small rounded loading state
   if (isLoading) {
