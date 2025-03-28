@@ -34,7 +34,7 @@ export const GmNFTCard = ({
   profile,
 }: GmNFTCardProps) => {
   const { t } = useTranslation()
-  const domainOrAddress = useDomainOrAddress(domain ?? "", profile ?? "")
+  const domainOrAddress = useDomainOrAddress({ domain: domain ?? "", address: profile ?? "" })
 
   if (!isGMOwned) {
     return (

@@ -19,7 +19,7 @@ export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const { isConnectedUser, domain, profile, isOnProfilePage, viewMode } = useRetrieveProfilIdentity()
-  const domainOrAddress = useDomainOrAddress(domain ?? "", profile ?? "")
+  const domainOrAddress = useDomainOrAddress({ domain: domain ?? "", address: profile ?? "" })
 
   const {
     hasUserVoted,
