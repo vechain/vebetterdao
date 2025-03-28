@@ -104,3 +104,32 @@ records:
     records:
       - "399994ebbc7ed932c94b96556ad87f33.freshdesk.com"
     routing_policy: simple
+
+  - name: gulai._domainkey.vebetterdao.org 
+    type: CNAME
+    ttl: 300
+    records:
+      - "wl244435s1.domainkey.freshemail.io"
+    routing_policy: simple
+
+  - name: ijkzt._domainkey.vebetterdao.org  
+    type: CNAME
+    ttl: 300
+    records:
+      - "wl244435s2.domainkey.freshemail.io"
+    routing_policy: simple
+
+  - name: 1s3._domainkey.vebetterdao.org  
+    type: CNAME
+    ttl: 300
+    records:
+      - "wl244435s3.domainkey.freshemail.io"
+    routing_policy: simple
+  
+  - name: fwdkim1.vebetterdao.org 
+    type: CNAME
+    ttl: 300
+    records:
+      - "spfmx1.domainkey.freshemail.io"
+    routing_policy: simple
+  
