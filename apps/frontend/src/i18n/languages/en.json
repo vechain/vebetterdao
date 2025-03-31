@@ -888,6 +888,7 @@
   "Delegating since {{date}}": "Delegating since {{date}}",
   "You’ve delegated your qualification": "You’ve delegated your qualification",
   "You are not currently able to vote due other user is using your Voting Qualification.": "You are not currently able to vote due other user is using your Voting Qualification.",
+  "This user is not currently able to vote due other user is using their Voting Qualification.": "This user is not currently able to vote due other user is using their Voting Qualification.",
   "{{delegationAddress}} wants to delegate you their Voting Qualification": "{{delegationAddress}} wants to delegate you their Voting Qualification",
   "While these accounts keep their qualification, you’ll be able to use it to vote.": "While these accounts keep their qualification, you’ll be able to use it to vote.",
   "Users delegating to you": "Users delegating to you",
