@@ -23,11 +23,19 @@ export const PendingDelegationDelegatorPOV = ({ address }: Props) => {
         <VStack align="stretch">
           <HStack justify="space-between">
             <Heading fontSize="xl" fontWeight="700">
-              {t("You’ve requested to delegate your qualification")}
+              {t(
+                isConnectedUser
+                  ? "You’ve requested to delegate your qualification"
+                  : "This user requested to delegate their qualification",
+              )}
             </Heading>
           </HStack>
           <Text color="#6A6A6A" fontSize="md">
-            {t("You will not able to vote when the user accept your request.")}
+            {t(
+              isConnectedUser
+                ? "You will not able to vote when the user accept your request."
+                : "This user will not able to vote when the recipient accepts their request.",
+            )}
           </Text>
         </VStack>
         <VStack align="stretch">
