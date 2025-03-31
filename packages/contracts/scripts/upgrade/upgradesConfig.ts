@@ -41,32 +41,35 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "XAllocation Pool": {
     name: "x-allocation-pool",
     configAddressField: "xAllocationPoolContractAddress",
-    versions: ["v2", "v3", "v4"],
+    versions: ["v2", "v3", "v4", "v5"],
     descriptions: {
       v2: "Add the abilty to toggle quadratic funding on and off.",
       v3: "Update X2Earn interface to include new endorsement feature",
       v4: "Update X2Earn interface to include node cooldown feature",
+      v5: "Updated X2EarnRewardsPool interface to support app rewards management feature",
     },
   },
   X2EarnApps: {
     name: "x2-earn-apps",
     configAddressField: "x2EarnAppsContractAddress",
-    versions: ["v2", "v3"],
+    versions: ["v2", "v3", "v4"],
     descriptions: {
       v2: "Add xapp endorsement module",
       v3: "Add node cooldown feature",
+      v4: "Enabling by default the rewards pool for new apps submitted",
     },
   },
   "X2Earn Rewards Pool": {
     name: "x2-earn-rewards-pool",
     configAddressField: "x2EarnRewardsPoolContractAddress",
-    versions: ["v2", "v3", "v4", "v5", "v6"],
+    versions: ["v2", "v3", "v4", "v5", "v6", "v7"],
     descriptions: {
       v2: "Add onchain impacts and proof generation",
       v3: "Integrate VeBetterPassport contract",
       v4: "Update X2Earn interface to include new endorsement feature",
       v5: "Update X2Earn interface to include node cooldown feature",
       v6: "Add onchain metadata for rewards",
+      v7: "Add optional dual-pool balance to manage rewards and treasury separately",
     },
   },
   Emissions: {
