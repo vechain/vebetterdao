@@ -12,7 +12,7 @@ export type UseEventsParams<T extends Interface, R> = {
   contractAddress: string
   eventName: EventName<T["getEvent"]>
   filterParams?: Object
-  mapResponse: (decoded: abi.Decoded, meta: { blockNumber: number; txOrigin: string }) => R
+  mapResponse: (decoded: abi.Decoded, meta: { blockNumber: number; txOrigin: string; txId: string }) => R
 }
 
 /**
@@ -56,6 +56,7 @@ export const useEvents = <T extends Interface, R>({
       return mapResponse(decoded, {
         blockNumber: event.meta.blockNumber,
         txOrigin: event.meta.txOrigin,
+        txId: event.meta.txID,
       })
     })
   }, [thor, contractInterface, eventName, filterParams, contractAddress, mapResponse])
