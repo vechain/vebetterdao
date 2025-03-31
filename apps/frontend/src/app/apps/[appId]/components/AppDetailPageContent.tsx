@@ -1,4 +1,4 @@
-import { useAppEndorsementStatus, useAppExists, useIsAppAdmin, useIsAppModerator } from "@/api"
+import { useAppEndorsementStatus, useIsAppAdmin, useIsAppModerator } from "@/api"
 import { Grid, GridItem, Stack } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { useMemo } from "react"
@@ -15,13 +15,14 @@ export const AppDetailPageContent = () => {
   const { account } = useWallet()
   const { data: isAppModerator } = useIsAppModerator(app?.id ?? "", account?.address ?? "")
   const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
-  const { data: appHasBeenIntoAllocationRounds } = useAppExists(app?.id ?? "")
   const {
     score: endorsementScore,
     status: endorsementStatus,
     threshold: endorsementThreshold,
     isLoading: isEndorsementStatusLoading,
   } = useAppEndorsementStatus(app?.id ?? "")
+
+  const appHasBeenIntoAllocationRounds = app?.createdAtTimestamp !== "0"
 
   const shouldRenderCreationSteps = useMemo(() => {
     return !appHasBeenIntoAllocationRounds && (isAppModerator || isAppAdmin)

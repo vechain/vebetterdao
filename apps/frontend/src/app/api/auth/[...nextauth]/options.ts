@@ -61,17 +61,17 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, account, profile }: any) {
       // Assign GitHub username if provider is GitHub
       if (account?.provider === "github") {
-        if (profile && profile.login) {
+        if (profile?.login) {
           token.githubUsername = profile.login // Capture GitHub username
         }
       }
 
       // Assign Twitter username if provider is Twitter
       if (account?.provider === "twitter") {
-        if (token && token?.name) {
+        if (token?.name) {
           token.twitterUsername = token.name // Capture Twitter username
         }
-        if (profile && profile.username) {
+        if (profile?.username) {
           token.twitterUsername = profile.username // Capture Twitter username
         }
       }

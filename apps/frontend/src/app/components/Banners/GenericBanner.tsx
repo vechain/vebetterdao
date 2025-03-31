@@ -73,7 +73,12 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
         )}
         <Show breakpoint="(min-width: 768px)">
           <HStack align="stretch" zIndex={1} position="relative" w="full">
-            {logoSrc && (typeof logoSrc === "string" ? <Image src={logoSrc} alt="logo" w={24} h={24} /> : logoSrc)}
+            {logoSrc &&
+              (typeof logoSrc === "string" ? (
+                <Image src={logoSrc} alt="logo" objectFit="cover" w={24} h={24} />
+              ) : (
+                logoSrc
+              ))}
             <HStack flex={1}>
               <VStack gap={2} align="stretch" flex={1}>
                 <Text size="xs" color={titleColor} fontWeight="600">

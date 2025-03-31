@@ -6,7 +6,6 @@ import { SwapB3trVot3 } from "./components/SwapB3trVot3"
 import { FeatureFlagWrapper } from "../FeatureFlagWrapper"
 import { FeatureFlag } from "@/constants"
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
-import { humanAddress } from "@repo/utils/FormattingUtils"
 import { GmNFTCard } from "./components/GmNFTCard"
 import { XNodeCard } from "./components/XNodeCard"
 import { GmNFTAndNodeFooter } from "./components/GmNFTAndNodeFooter"
@@ -14,11 +13,13 @@ import { AttachmentIndicator } from "./components/AttachmentIndicator"
 import { useGmNFTState } from "./hooks/useGmNFTState"
 import { useXNodeState } from "./hooks/useXNodeState"
 import { useMemo } from "react"
+import { useDomainOrAddress } from "@/hooks"
 
 export const GmNFTAndNodeCard = () => {
   const { account } = useWallet()
   const { t } = useTranslation()
   const { isConnectedUser, domain, profile, isOnProfilePage, viewMode } = useRetrieveProfilIdentity()
+  const domainOrAddress = useDomainOrAddress({ domain: domain ?? "", address: profile ?? "" })
 
   const {
     hasUserVoted,
@@ -40,8 +41,6 @@ export const GmNFTAndNodeCard = () => {
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const headingText = useMemo(() => {
-    const domainOrAddress = domain && domain !== "" ? domain : humanAddress(profile ?? "", 6, 3)
-
     if (!isGMOwned) {
       if (!hasUserVoted) {
         return t(
@@ -64,7 +63,7 @@ export const GmNFTAndNodeCard = () => {
     return isConnectedUser || !isOnProfilePage
       ? t("Your galaxy member")
       : t("{{value}} is a galaxy member", { value: domainOrAddress })
-  }, [isGMOwned, hasUserVoted, t, isConnectedUser, domain, profile, isOnProfilePage])
+  }, [isGMOwned, hasUserVoted, t, isConnectedUser, isOnProfilePage, domainOrAddress])
 
   if (!account?.address && !viewMode) {
     return <NotConnectedWallet />

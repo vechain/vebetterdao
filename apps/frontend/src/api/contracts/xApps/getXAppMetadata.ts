@@ -5,6 +5,7 @@ import axios from "axios"
  * The metadata of an xApp from the xApps metadata base uri
  * @property name - The name of the xApp
  * @property description - The description of the xApp
+ * @property distribution_strategy - The B3TR distribution strategy of the xApp
  * @property external_url - The external url of the xApp
  * @property logo - The logo of the xApp (ipfs uri)
  * @property banner - The banner of the xApp (ipfs uri)
@@ -15,6 +16,7 @@ import axios from "axios"
 export type XAppMetadata = {
   name: string
   description: string
+  distribution_strategy?: string
   external_url: string
   logo: string
   banner: string

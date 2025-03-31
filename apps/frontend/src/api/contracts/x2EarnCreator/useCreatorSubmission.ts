@@ -22,7 +22,6 @@ export const useCreatorSubmission = (walletAddress: string) => {
       return (await response.json()) as SubmissionsResponse
     },
     staleTime: 1000 * 60,
-    refetchInterval: 1000 * 30,
     enabled: !!walletAddress,
   })
 }

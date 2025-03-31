@@ -1,5 +1,5 @@
 import { useXApps, useXNode } from "@/api"
-import { AppsBanner } from "@/components"
+import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
 import { VStack, Heading, Text, Box } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { AppsLookingForEndorsement } from "./AppsLookingForEndorsement"
@@ -7,6 +7,7 @@ import { AllApps } from "./AllApps"
 import { EndorsementPointsBanner } from "./EndorsementPointsBanner"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { AppsDisclaimer } from "./AppsDisclaimer"
+import { useCurrentAllocationAppIds } from "@/api/contracts/xAllocations/hooks/useCurrentAllocationAppIds"
 
 export type XAppInformations = {
   key?: string
@@ -19,13 +20,22 @@ export type XAppInformations = {
 
 export const AppsPageContent = () => {
   const { t } = useTranslation()
+
   const { isXNodeLoading, isEndorsingApp, endorsedApp } = useXNode()
   const { data: xApps, isLoading: isXAppsLoading } = useXApps({ filterBlacklisted: true })
+  const { data: currentAllocationAppIds, isLoading: isCurrentAllocationAppIdsLoading } = useCurrentAllocationAppIds()
+  const appsLoading = isXAppsLoading || isCurrentAllocationAppIdsLoading
 
-  const newApps = xApps?.newLookingForEndorsement
-  const gracePeriodApps = xApps?.gracePeriod
-  const lostEndorsementApps = xApps?.endorsementLost
-  const hasNewApps = newApps && newApps?.length > 0
+  // New apps looking for endorsement slider
+  const newApps = xApps?.newLookingForEndorsement ?? []
+  const hasNewApps = newApps.length > 0
+
+  // Apps tabs
+  const allApps = xApps?.allApps ?? []
+  const currentActiveApps = xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id)) ?? []
+  const gracePeriodApps = xApps?.gracePeriod ?? []
+  const endorsementLostApps = xApps?.endorsementLost ?? []
+
   // TODO: Pagination, search, filters
   return (
     <VStack alignItems={"flex-start"} position={"relative"} spacing={8} w="full">
@@ -41,22 +51,22 @@ export const AppsPageContent = () => {
         </VStack>
       )}
 
-      {hasNewApps ? <AppsLookingForEndorsement filteredApps={newApps} /> : undefined}
+      {hasNewApps && <AppsLookingForEndorsement filteredApps={newApps} />}
 
       {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 
       <VStack alignItems={"flex-start"} spacing={4} w="100%">
         <Heading size="lg">{t("All the apps")}</Heading>
         <AllApps
-          allApps={xApps?.allApps || []}
-          activeApps={xApps?.active || []}
-          gracePeriodApps={gracePeriodApps || []}
-          lostEndorsementApps={lostEndorsementApps || []}
-          isXAppsLoading={isXAppsLoading}
+          allApps={allApps}
+          currentActiveApps={currentActiveApps}
+          gracePeriodApps={gracePeriodApps}
+          endorsementLostApps={endorsementLostApps}
+          isXAppsLoading={appsLoading}
         />
       </VStack>
 
-      {/* TODO: mascot release <JoinB3TRAppsBanner /> */}
+      <JoinB3TRAppsBanner />
 
       <Box mt={10}>
         <AppsDisclaimer />

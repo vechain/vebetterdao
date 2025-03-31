@@ -4,13 +4,12 @@ import {
   Card,
   CardBody,
   CardFooter,
-  CardHeader,
   FormControl,
   FormErrorMessage,
   FormLabel,
   Heading,
   Input,
-  Textarea,
+  Text,
   VStack,
 } from "@chakra-ui/react"
 import {
@@ -29,7 +28,8 @@ import { UilGithub } from "@iconscout/react-unicons"
 import { FaXTwitter } from "react-icons/fa6"
 import { AddressUtils } from "@/utils"
 import { WalletAddressInput } from "@/app/components/Input"
-
+import AppUtils from "@/utils/AppUtils"
+import { FormCheckbox, FormItem } from "../CustomFormFields"
 export type SubmitCreatorFormData = {
   appName: string
   appDescription: string
@@ -39,6 +39,14 @@ export type SubmitCreatorFormData = {
   projectUrl: string
   githubUsername: string
   twitterUsername: string
+  distributionStrategy: string
+  testnetProjectUrl: string
+  testnetAppId: string
+  securityApiSecurityMeasures: boolean
+  securityActionVerification: boolean
+  securityDeviceFingerprint: boolean
+  securitySecureKeyManagement: boolean
+  securityAntiFarming: boolean
 }
 
 type Props = {
@@ -54,6 +62,7 @@ type Props = {
 export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) => {
   const { t } = useTranslation()
   const { data: session } = useSession()
+
   const {
     setData,
     appName,
@@ -64,6 +73,14 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
     projectUrl,
     githubUsername,
     twitterUsername,
+    distributionStrategy,
+    testnetProjectUrl,
+    testnetAppId,
+    securityActionVerification,
+    securityApiSecurityMeasures,
+    securityDeviceFingerprint,
+    securitySecureKeyManagement,
+    securityAntiFarming,
   } = useCreatorSubmissionFormStore()
 
   // Persist form data on re-render, redirect or page refresh
@@ -77,6 +94,14 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
       projectUrl,
       githubUsername,
       twitterUsername,
+      distributionStrategy,
+      testnetProjectUrl,
+      testnetAppId,
+      securityActionVerification,
+      securityApiSecurityMeasures,
+      securityDeviceFingerprint,
+      securitySecureKeyManagement,
+      securityAntiFarming,
     }
     Object.entries(formFields).forEach(([key, value]) => {
       if (!watch(key as keyof SubmitCreatorFormData) && value) {
@@ -92,13 +117,21 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
     projectUrl,
     githubUsername,
     twitterUsername,
+    distributionStrategy,
+    testnetProjectUrl,
+    testnetAppId,
     setValue,
     watch,
+    securityActionVerification,
+    securityApiSecurityMeasures,
+    securityDeviceFingerprint,
+    securitySecureKeyManagement,
+    securityAntiFarming,
   ])
 
   // Set linked social media usernames if available in session
   useEffect(() => {
-    if (session?.user) {
+    if (session?.user?.githubUsername || session?.user?.twitterUsername) {
       if (session.user.githubUsername) {
         setValue("githubUsername", session.user.githubUsername)
         setData({ githubUsername: session.user.githubUsername })
@@ -130,159 +163,284 @@ export const SubmitCreatorForm = ({ register, errors, setValue, watch }: Props) 
     }
   }
 
+  const validateUrl = (value: string, fieldName: string) => {
+    try {
+      new URL(value)
+      return true
+    } catch {
+      return t("Invalid {{fieldName}}", { fieldName })
+    }
+  }
+
+  const validateEmail = (value: string, fieldName: string) => {
+    const emailRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)
+    return emailRegex.test(value) || t("Invalid {{fieldName}}", { fieldName })
+  }
+
+  const validateAppId = (value: string, fieldName: string) => {
+    return AppUtils.isValid(value) || t("Invalid {{fieldName}}", { fieldName })
+  }
+
+  const genericValidation = (value: string, fieldName: string) => {
+    return value && AddressUtils.isValid(value) ? t("Invalid {{fieldName}}", { fieldName }) : true
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <Heading size="md">{t("Your App Creator Info")}</Heading>
-      </CardHeader>
-      <CardBody>
+    <Card w="full" borderRadius="xl">
+      <CardBody w="full" p={{ base: 2, md: 6 }}>
         <VStack spacing={4} w="full">
-          <FormControl isInvalid={!!errors.githubUsername}>
-            <FormLabel>{t("GitHub Username")}</FormLabel>
-            <Button
-              backgroundColor={"black"}
-              color={"white"}
-              onClick={() => handleAuth("github")}
-              size="lg"
-              alignSelf="flex-end"
-              borderRadius="full"
-              leftIcon={<UilGithub size={30} />}>
-              {watch("githubUsername") || t("Connect GitHub")}
-            </Button>
-            <Input type="hidden" {...register("githubUsername", { required: "GitHub Username is required" })} />
-            <FormErrorMessage>{errors.githubUsername?.message}</FormErrorMessage>
-          </FormControl>
+          <Card w="full" align="start" borderRadius="xl" borderColor="gray.200" p={4}>
+            <Heading size="md" pb={6}>
+              {t("App Information")}
+            </Heading>
+            <VStack w="full" spacing={4} align="stretch">
+              <FormItem
+                label={t("App Name")}
+                placeholder={t("App Name")}
+                description={t("The name of your dApp.")}
+                register={{
+                  ...register("appName", {
+                    required: "App Name is required",
+                    minLength: { value: 2, message: t("{{fieldName}} is too short", { fieldName: t("App Name") }) },
+                    maxLength: { value: 30, message: t("{{fieldName}} is too long", { fieldName: t("App Name") }) },
+                    validate: value => genericValidation(value, t("App Name")),
+                  }),
+                }}
+                error={errors.appName?.message}
+                onBlur={() => onBlur("appName")}
+              />
 
-          <FormControl isInvalid={!!errors.twitterUsername}>
-            <FormLabel>{t("X Username")}</FormLabel>
-            <Button
-              backgroundColor={"black"}
-              color={"white"}
-              onClick={() => handleAuth("twitter")}
-              size="lg"
-              alignSelf="flex-end"
-              borderRadius="full"
-              leftIcon={<FaXTwitter />}>
-              {watch("twitterUsername") || t("Connect X")}
-            </Button>
-            <Input type="hidden" {...register("twitterUsername", { required: "X Username is required" })} />
-            <FormErrorMessage>{errors.twitterUsername?.message}</FormErrorMessage>
-          </FormControl>
+              <FormItem
+                label={t("App Description")}
+                placeholder={t("App Description")}
+                description={t("The description and purpose of your dApp.")}
+                type="textarea"
+                register={{
+                  ...register("appDescription", {
+                    required: "App Description is required",
+                    minLength: {
+                      value: 100,
+                      message: t("{{fieldName}} is too short", { fieldName: t("App Description") }),
+                    },
+                    maxLength: {
+                      value: 1000,
+                      message: t("{{fieldName}} is too long", { fieldName: t("App Description") }),
+                    },
+                  }),
+                }}
+                error={errors.appDescription?.message}
+                onBlur={() => onBlur("appDescription")}
+              />
 
-          <FormControl isInvalid={!!errors.appName}>
-            <FormLabel>{t("App Name")}</FormLabel>
-            <Input
-              rounded={"xl"}
-              placeholder={t("App Name")}
-              {...register("appName", {
-                required: "App Name is required",
-                minLength: { value: 2, message: t("{{fieldName}} is too short", { fieldName: t("App Name") }) },
-                maxLength: { value: 30, message: t("{{fieldName}} is too long", { fieldName: t("App Name") }) },
-                validate: value => {
-                  if (value && AddressUtils.isValid(value)) {
-                    //Prevent user from entering wallet address in app name field.
-                    return t("Invalid Name")
-                  }
-                  return true
-                },
-              })}
-              onBlur={() => onBlur("appName")}
-            />
-            {errors.appName && <FormErrorMessage>{errors.appName.message}</FormErrorMessage>}
-          </FormControl>
+              <FormItem
+                label={t("How does your dApp distribute B3TR to the users?")}
+                placeholder={t("Distribution Strategy")}
+                description={t(
+                  "Describe how your app distributes rewards. This information will be publicly visible once your dApp is submitted to VeBetterDAO.",
+                )}
+                type="textarea"
+                register={{
+                  ...register("distributionStrategy", {
+                    required: "Distribution Strategy is required",
+                    minLength: {
+                      value: 100,
+                      message: t("{{fieldName}} is too short", { fieldName: t("Distribution Strategy") }),
+                    },
+                    maxLength: {
+                      value: 1000,
+                      message: t("{{fieldName}} is too long", { fieldName: t("Distribution Strategy") }),
+                    },
+                  }),
+                }}
+                onBlur={() => onBlur("distributionStrategy")}
+                error={errors.distributionStrategy?.message}
+              />
 
-          <FormControl isInvalid={!!errors.appDescription}>
-            <FormLabel>{t("App Description")}</FormLabel>
-            <Textarea
-              rounded={"xl"}
-              placeholder={t("App Description")}
-              {...register("appDescription", {
-                required: "App Description is required",
-                minLength: {
-                  value: 100,
-                  message: t("{{fieldName}} is too short", { fieldName: t("App Description") }),
-                },
-                maxLength: {
-                  value: 1000,
-                  message: t("{{fieldName}} is too long", { fieldName: t("App Description") }),
-                },
-              })}
-              onBlur={() => onBlur("appDescription")}
-            />
-            {errors.appDescription && <FormErrorMessage>{errors.appDescription.message}</FormErrorMessage>}
-          </FormControl>
+              <FormItem
+                label={t("Project URL")}
+                placeholder={t("Project URL")}
+                description={t("The URL of your dApp's website or repository.")}
+                register={{
+                  ...register("projectUrl", {
+                    required: "Project URL is required",
+                    maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Project URL") }) },
+                    validate: value => validateUrl(value, t("Project URL")),
+                  }),
+                }}
+                error={errors.projectUrl?.message}
+                onBlur={() => onBlur("projectUrl")}
+              />
+              <FormControl isInvalid={!!errors.adminWalletAddress}>
+                <FormLabel>{t("Creator NFT Wallet Address")}</FormLabel>
+                <Text fontSize="xs" color="gray.500" mb={2}>
+                  {t("The wallet address where you will receive your Creator NFT")}
+                </Text>
+                <WalletAddressInput
+                  onAddressResolved={address => {
+                    setValue("adminWalletAddress", address ?? "")
+                    onBlur("adminWalletAddress")
+                  }}
+                  rounded={"xl"}
+                  onBlur={() => onBlur("adminWalletAddress")}
+                />
+              </FormControl>
+            </VStack>
+          </Card>
+          <Card w="full" align="start" borderRadius="xl" borderColor="gray.200" p={4}>
+            <Heading size="md" pb={6}>
+              {t("Your Information")}
+            </Heading>
+            <VStack w="full" spacing={4} align="stretch">
+              <FormControl isInvalid={!!errors.githubUsername}>
+                <FormLabel>{t("GitHub Username")}</FormLabel>
+                <Button
+                  backgroundColor={"black"}
+                  color={"white"}
+                  onClick={() => handleAuth("github")}
+                  size="lg"
+                  alignSelf="flex-end"
+                  borderRadius="full"
+                  leftIcon={<UilGithub size={30} />}>
+                  {watch("githubUsername") || t("Connect GitHub")}
+                </Button>
+                <Input type="hidden" {...register("githubUsername", { required: "GitHub Username is required" })} />
+                <FormErrorMessage>{errors.githubUsername?.message}</FormErrorMessage>
+              </FormControl>
 
-          <FormControl isInvalid={!!errors.projectUrl}>
-            <FormLabel>{t("Project URL")}</FormLabel>
-            <Input
-              placeholder={t("Project URL")}
-              rounded={"xl"}
-              {...register("projectUrl", {
-                required: t("Project URL is required"),
-                maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Project URL") }) },
-                validate: value => {
-                  try {
-                    new URL(value)
-                    return true
-                  } catch {
-                    return t("Invalid url")
-                  }
-                },
-              })}
-              onBlur={() => onBlur("projectUrl")}
-            />
-            {errors.projectUrl && <FormErrorMessage>{errors.projectUrl.message}</FormErrorMessage>}
-          </FormControl>
+              <FormControl isInvalid={!!errors.twitterUsername}>
+                <FormLabel>{t("X Username")}</FormLabel>
+                <Button
+                  backgroundColor={"black"}
+                  color={"white"}
+                  onClick={() => handleAuth("twitter")}
+                  size="lg"
+                  alignSelf="flex-end"
+                  borderRadius="full"
+                  leftIcon={<FaXTwitter />}>
+                  {watch("twitterUsername") || t("Connect X")}
+                </Button>
+                <Input type="hidden" {...register("twitterUsername", { required: "X Username is required" })} />
+                <FormErrorMessage>{errors.twitterUsername?.message}</FormErrorMessage>
+              </FormControl>
+              <FormItem
+                label={t("Email")}
+                placeholder={"Eg. admin@myapp.vet"}
+                description={t("The email address that will be used for communication with VeBetterDAO.")}
+                type="email"
+                register={{
+                  ...register("adminEmail", {
+                    required: "Admin Email is required",
+                    maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Email") }) },
+                    validate: value => validateEmail(value, t("Email")),
+                  }),
+                }}
+                error={errors.adminEmail?.message}
+                onBlur={() => onBlur("adminEmail")}
+              />
 
-          <FormControl isInvalid={!!errors.adminName}>
-            <FormLabel>{t("Name (optional)")}</FormLabel>
-            <Input
-              rounded={"xl"}
-              placeholder={t("Your Name")}
-              {...register("adminName", {
-                maxLength: { value: 100, message: t("{{fieldName}} is too long", { fieldName: t("Name") }) },
-                validate: (value: string) => {
-                  if (value && AddressUtils.isValid(value)) {
-                    // Prevent user from entering wallet address in admin name field
-                    return t("Invalid Name")
-                  }
-                  return true
-                },
-              })}
-              onBlur={() => onBlur("adminName")}
-            />
-            {errors.adminName && <FormErrorMessage>{errors.adminName.message}</FormErrorMessage>}
-          </FormControl>
+              <FormItem
+                label={t("Name")}
+                placeholder={"Eg. John Doe"}
+                description={t("Your name or the name of the person responsible for the dApp.")}
+                register={{
+                  ...register("adminName", {
+                    maxLength: { value: 100, message: t("{{fieldName}} is too long", { fieldName: t("Name") }) },
+                    validate: (value: string) => genericValidation(value, t("Name")),
+                  }),
+                }}
+                error={errors.adminName?.message}
+                onBlur={() => onBlur("adminName")}
+              />
+            </VStack>
+          </Card>
 
-          <FormControl isInvalid={!!errors.adminEmail}>
-            <FormLabel>{t("Email")}</FormLabel>
-            <Input
-              placeholder={t("Email")}
-              rounded={"xl"}
-              {...register("adminEmail", {
-                required: t("Admin Email is required"),
-                maxLength: { value: 255, message: t("{{fieldName}} is too long", { fieldName: t("Email") }) },
-                validate: value => {
-                  const emailRegex = new RegExp(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)
-                  return emailRegex.test(value) || t("Please enter a valid email")
-                },
-              })}
-              onBlur={() => onBlur("adminEmail")}
-            />
-            {errors.adminEmail && <FormErrorMessage>{errors.adminEmail.message}</FormErrorMessage>}
-          </FormControl>
+          <Card w="full" align="start" borderRadius="xl" borderColor="gray.200" p={4}>
+            <Heading size="md" pb={4}>
+              {t("Testing Requirements")}
+            </Heading>
+            <VStack w="full" spacing={4} align="stretch">
+              <FormItem
+                label={t("Testnet Project URL")}
+                placeholder={"Eg. https://www.testnet.myapp.vet"}
+                description={t("The URL of your testnet project.")}
+                register={{
+                  ...register("testnetProjectUrl", {
+                    required: "Testnet Project URL is required",
+                    maxLength: {
+                      value: 255,
+                      message: t("{{fieldName}} is too long", { fieldName: t("Testnet Project URL") }),
+                    },
+                    validate: value => validateUrl(value, t("Testnet Project URL")),
+                  }),
+                }}
+                error={errors.testnetProjectUrl?.message}
+                onBlur={() => onBlur("testnetProjectUrl")}
+              />
 
-          <FormControl isInvalid={!!errors.adminWalletAddress}>
-            <FormLabel>{t("Wallet Address")}</FormLabel>
-            <WalletAddressInput
-              onAddressResolved={address => {
-                setValue("adminWalletAddress", address ?? "")
-                onBlur("adminWalletAddress")
-              }}
-              rounded={"xl"}
-              onBlur={() => onBlur("adminWalletAddress")}
-            />
-          </FormControl>
+              <FormItem
+                label={t("Testnet App ID")}
+                placeholder={"Eg. 0x1234567890abcdef"}
+                description={t("The ID of your app on the testnet.")}
+                register={{
+                  ...register("testnetAppId", {
+                    required: "Testnet App ID is required",
+                    maxLength: {
+                      value: 100,
+                      message: t("{{fieldName}} is too long", { fieldName: t("Testnet App ID") }),
+                    },
+                    validate: (value: string) => validateAppId(value, t("Testnet App ID")),
+                  }),
+                }}
+                error={errors.testnetAppId?.message}
+                onBlur={() => onBlur("testnetAppId")}
+              />
+            </VStack>
+          </Card>
+          <Card w="full" borderRadius="xl" borderColor="gray.200" p={4}>
+            <Heading size="md" pb={4}>
+              {t("Security Requirements")}
+            </Heading>
+            <VStack align="start" spacing={3}>
+              <FormCheckbox
+                register={{ ...register("securityApiSecurityMeasures") }}
+                label={t("API Security Measures (Optional)")}
+                description={t("Implements certificate-based authentication, CAPTCHA, CORS, and rate limiting.")}
+                error={errors.securityApiSecurityMeasures?.message}
+              />
+
+              <FormCheckbox
+                register={{
+                  ...register("securityActionVerification", {
+                    required: "Action Verification is required",
+                  }),
+                }}
+                label={t("Action Verification")}
+                description={t("Uses AI validation or unique identifiers to verify sustainable actions.")}
+                error={errors.securityActionVerification?.message}
+              />
+
+              <FormCheckbox
+                register={{ ...register("securityDeviceFingerprint") }}
+                label={t("Device Fingerprinting (Optional)")}
+                description={t("Implements device identification to prevent multiple installations.")}
+                error={errors.securityDeviceFingerprint?.message}
+              />
+
+              <FormCheckbox
+                register={{ ...register("securitySecureKeyManagement") }}
+                label={t("Secure Key Management (Optional)")}
+                description={t("Ensures secure storage and handling of private keys and sensitive data.")}
+                error={errors.securitySecureKeyManagement?.message}
+              />
+
+              <FormCheckbox
+                register={{ ...register("securityAntiFarming") }}
+                label={t("Anti-Farming Measures (Optional)")}
+                description={t("Implements progressive unlocking, reward scaling, or other anti-farming strategies.")}
+                error={errors.securityAntiFarming?.message}
+              />
+            </VStack>
+          </Card>
         </VStack>
       </CardBody>
       <CardFooter display={"flex"} flexDir={"column"} w="full" alignItems="center" justify="center">

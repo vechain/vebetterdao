@@ -41,7 +41,7 @@ export type UnendorsedApp = XApp & {
 
 type GetAllApps = {
   allApps: (XApp | UnendorsedApp)[]
-  active: XApp[]
+  active: XApp[] // Historically active apps
   unendorsed: UnendorsedApp[]
   newLookingForEndorsement: UnendorsedApp[]
   othersLookingForEndorsement: UnendorsedApp[]

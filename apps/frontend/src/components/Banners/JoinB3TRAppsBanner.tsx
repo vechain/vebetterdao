@@ -22,12 +22,15 @@ export const JoinB3TRAppsBanner = () => {
       bgImage="url('/images/community-green-blob.png')"
       bgPosition="center"
       bgSize="full">
-      <HStack justifyContent={"space-between"}>
-        <VStack alignItems={"flex-start"} my={"50px"} mx={"70px"} w={"50%"}>
+      <HStack justifyContent={{ base: "center", lg: "space-between" }} w="full">
+        <VStack
+          alignItems={"flex-start"}
+          py={{ base: "50px", md: "70px" }}
+          px={{ base: "20px", md: "70px" }}
+          w={{ base: "full", md: "50%" }}>
           {isMobile && (
-            // TODO: double check if only robot's head is display
             <Image
-              src="/images/mascote/mascote-welcoming-left-head.png"
+              src="/images/mascote/mascote-welcoming-left-head.svg"
               alt="mascote-welcoming-head"
               width="100%"
               boxSize="100px"
