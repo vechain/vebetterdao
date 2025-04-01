@@ -112,7 +112,6 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
     const totalVotes = Number(votesAtSnapshot)
     const numApps = votes.length
 
-    // Return true only when 1 VOT3 is being split into a multiple of 3 apps
     return totalVotes === 1 && numApps % 3 === 0
   }, [votesAtSnapshot, votes.length])
 
