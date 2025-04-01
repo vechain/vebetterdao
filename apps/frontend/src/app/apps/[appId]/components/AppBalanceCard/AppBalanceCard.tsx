@@ -22,6 +22,7 @@ import {
   useIsRewardsPoolEnabled,
   useIsDistributionPaused,
 } from "@/api/contracts/x2EarnRewardsPool"
+import { useIsAppAdmin } from "@/api"
 
 // Modal components
 import { AppBalanceTxsHistory } from "./AppBalanceTxsHistory"
@@ -32,11 +33,13 @@ import { BaseTooltip } from "@/components"
 import { FiInfo } from "react-icons/fi"
 import { useMemo } from "react"
 import { FaArrowUpRightFromSquare } from "react-icons/fa6"
-
+import { useWallet } from "@vechain/vechain-kit"
+import { GenericAlert } from "@/app/components/Alert"
 const compactFormatter = getCompactFormatter(4)
 
 export const AppBalanceCard = () => {
   const { t } = useTranslation()
+  const { account } = useWallet()
 
   const {
     isOpen: isOpenRewardsPoolAccess,
@@ -60,6 +63,7 @@ export const AppBalanceCard = () => {
   const { data: rewardsBalance, isLoading: isRewardsBalanceLoading } = useAppRewardsBalance(app?.id ?? "")
   const { data: isRewardsPoolEnabled } = useIsRewardsPoolEnabled(app?.id ?? "")
   const { data: isPaused } = useIsDistributionPaused(app?.id ?? "")
+  const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
 
   const rewardsPoolColor = useMemo(() => {
     if (isPaused) return "#FCEEF1"
@@ -73,7 +77,7 @@ export const AppBalanceCard = () => {
         w={"full"}
         border={isPaused ? "1px solid #C84968" : "1px solid #D5D5D5"}
         boxShadow={isPaused ? "0 0 8px rgba(245, 101, 101, 0.5)" : "none"}>
-        <CardBody pt={3}>
+        <CardBody pt={3} pb={2}>
           <HStack justify={"space-between"} w={"full"}>
             <VStack alignItems={"start"} spacing={0}>
               <HStack>
@@ -95,7 +99,7 @@ export const AppBalanceCard = () => {
             <VStack spacing={2}>
               <Button
                 mt={1}
-                isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading}
+                isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading || !isAppAdmin}
                 onClick={onOpenDepositOrWithdraw}
                 variant={"primaryAction"}
                 borderRadius={"full"}
@@ -128,6 +132,7 @@ export const AppBalanceCard = () => {
             <VStack alignItems={"flex-end"} spacing={0}>
               <Button
                 mt={1}
+                isDisabled={!isAppAdmin}
                 onClick={onOpenManagementCenter}
                 variant={isPaused ? "dangerFilledTonal" : "primaryAction"}
                 color={isPaused ? "#C84968" : "white"}
@@ -146,6 +151,14 @@ export const AppBalanceCard = () => {
             </Text>
             <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="#004CFC" cursor="pointer" />
           </HStack>
+          {!isAppAdmin && (
+            <GenericAlert
+              title={t("Access restricted")}
+              type="warning"
+              isLoading={false}
+              message={t("Only app admin can transfer and manage the rewards pool")}
+            />
+          )}
         </CardBody>
       </Card>
 
