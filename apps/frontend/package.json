@@ -80,7 +80,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@next/eslint-plugin-next": "^14.1.4",
+    "@next/eslint-plugin-next": "^14.2.25",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@testing-library/jest-dom": "^6.4.5",
@@ -95,7 +95,7 @@
     "@vitest/coverage-istanbul": "^1.4.0",
     "d3-array": "^3.2.4",
     "eslint": "^8",
-    "eslint-config-next": "14.0.4",
+    "eslint-config-next": "14.2.25",
     "happy-dom": "14.12.3",
     "resize-observer-polyfill": "^1.5.1",
     "typescript": "^5",
