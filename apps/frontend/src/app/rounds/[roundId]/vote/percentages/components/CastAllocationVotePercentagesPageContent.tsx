@@ -103,6 +103,19 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
     if (totalVotes > 100) return "Total votes exceed 100"
   }, [votes])
 
+  // Edge case: Check if 1 VOT3 is being split into thirds (which causes rounding issues)
+  const showWarning = useMemo(() => {
+    if (!votesAtSnapshot) {
+      return false
+    }
+
+    const totalVotes = Number(votesAtSnapshot)
+    const numApps = votes.length
+
+    // Return true only when 1 VOT3 is being split into a multiple of 3 apps
+    return totalVotes === 1 && numApps % 3 === 0
+  }, [votesAtSnapshot, votes.length])
+
   const onContinue = useCallback(() => {
     if (error) return
     router.push(`/rounds/${roundId}/vote/confirm`)
@@ -165,6 +178,16 @@ export const CastAllocationVotePercentagesPageContent = ({ roundId }: Props) => 
             error ? (
               <Text fontSize={"16px"} fontWeight={600} color="#C84968">
                 {error}
+              </Text>
+            ) : showWarning ? (
+              <Text fontSize={"16px"} fontWeight={400} color="#F29B32">
+                <Trans
+                  t={t}
+                  i18nKey={
+                    "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3."
+                  }
+                  values={{ amount: Number(votesAtSnapshot).toFixed(2), numApps: votes.length }}
+                />
               </Text>
             ) : (
               <Text fontSize={"16px"} fontWeight={400} color={isFullyDistributed ? "#3DBA67" : "#252525"}>
