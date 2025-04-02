@@ -214,9 +214,14 @@ library PassportSignalingLogic {
 
   /// @notice Private function to signal a user
   function _signalUser(PassportStorageTypes.PassportStorage storage self, address user, string memory reason) private {
-    self.signaledCounter[user]++;
-
     bytes32 app = self.appOfSignaler[msg.sender];
+
+    // If the app != 0, the sender must be associated with the app
+    if (app != bytes32(0)) {
+      require(self.appSignalsCounter[app][user] == 0, "User can only be signaled once by an app");
+    }
+
+    self.signaledCounter[user]++;
     self.appSignalsCounter[app][user]++;
     self.appTotalSignalsCounter[app]++;
 
