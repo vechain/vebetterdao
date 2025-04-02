@@ -1,17 +1,16 @@
 "use-client"
-import { Card, CardBody, HStack, Text, Modal, ModalOverlay } from "@chakra-ui/react"
+import { Card, CardBody, Text, Modal, ModalOverlay, VStack } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
-import { useConvertB3tr, useTokenColors, useConvertVot3, useSmartAccountUpgradeRequired } from "@/hooks"
+import { useConvertB3tr, useConvertVot3, useSmartAccountUpgradeRequired } from "@/hooks"
 import { useForm } from "react-hook-form"
 import { CustomModalContent } from "../CustomModalContent"
 import { TransactionModal, TransactionModalStatus } from "../TransactionModal"
-import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { TokenSelectionContent, SwapTokenContent } from "./components"
 import { useB3trBalance, useB3trConverted, useVot3Balance } from "@/api"
 import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
 import BigNumber from "bignumber.js"
 import { useTranslation } from "react-i18next"
-import { FaArrowRight } from "react-icons/fa6"
+import { SuccessConvertModalContent } from "../TransactionModal/SuccessConvertModalContent"
 
 export type Props = {
   isOpen: boolean
@@ -22,11 +21,6 @@ enum CardContentStep {
   SELECT_TOKEN,
   CONFIRM_SWAP,
 }
-
-const DECIMAL_PLACES = 4
-
-// Maximum precision of 4 decimals. Must also round down
-const compactFormatter = getCompactFormatter(DECIMAL_PLACES)
 
 const zoomInVariants = {
   hidden: { scale: 0.95, opacity: 0.8 },
@@ -109,16 +103,6 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     setValue("amount", "")
   }, [setValue])
 
-  const { b3trColor, vot3Color } = useTokenColors()
-
-  const amountText = useMemo(() => {
-    const amountNumber = Number(amount)
-
-    if (amountNumber < 0.0001) return `< 0.${"0".repeat(DECIMAL_PLACES - 1)}1`
-
-    return compactFormatter.format(amountNumber)
-  }, [amount])
-
   const b3trBalanceAfterSwap = useMemo(() => {
     if (isB3trToVot3) {
       return new BigNumber(b3trBalanceScaled).minus(amount).toString()
@@ -134,30 +118,6 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       return new BigNumber(vot3BalanceScaled).minus(amount).toString()
     }
   }, [isB3trToVot3, vot3BalanceScaled, amount])
-
-  const swapText = useMemo(() => {
-    if (isB3trToVot3) {
-      return (
-        <HStack>
-          <Text as="b">{amountText}</Text>
-          <Text color={b3trColor}>{t("B3TR")}</Text>
-          <FaArrowRight />
-          <Text as="b">{amountText}</Text>
-          <Text color={vot3Color}>{t("VOT3")}</Text>
-        </HStack>
-      )
-    } else {
-      return (
-        <HStack>
-          <Text as="b">{amountText}</Text>
-          <Text color={vot3Color}>{t("VOT3")}</Text>
-          <FaArrowRight />
-          <Text as="b">{amountText}</Text>
-          <Text color={b3trColor}>{t("B3TR")}</Text>
-        </HStack>
-      )
-    }
-  }, [isB3trToVot3, amountText, b3trColor, t, vot3Color])
 
   const convertTitle = useMemo(() => {
     return isB3trToVot3 ? t("Turn B3TR into VOT3") : t("Turn VOT3 into B3TR")
@@ -226,23 +186,36 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
       <TransactionModal
         isOpen={isOpen}
         onClose={handleClose}
-        confirmationTitle={swapText}
-        successTitle={t("Swap Completed!")}
         status={mutationData.error ? TransactionModalStatus.Error : (mutationData.status as TransactionModalStatus)}
         errorDescription={mutationData.error?.reason}
-        errorTitle={mutationData.error ? t("Error swapping") : undefined}
-        showTryAgainButton
         onTryAgain={handleConvertB3tr}
-        pendingTitle={t("Swapping...")}
         showSocialButtons
         socialDescriptionEncoded="%F0%9F%94%84%20Just%20swapped%20between%20B3TR%20and%20VOT3%20on%20%23VeBetterDAO%21%20%0A%0A%F0%9F%8C%B1%20Explore%20and%20join%20us%20at%20https%3A%2F%2Fvebetterdao.org.%0A%0A%23VeBetterDAO%20%23Vechain"
-        showExplorerButton
+        titles={{
+          [TransactionModalStatus.Success]: t("Swap Completed!"),
+          [TransactionModalStatus.Error]: t("Error swapping"),
+        }}
         txId={mutationData.txReceipt?.meta.txID}
-        isSwap
-        b3trBalanceAfterSwap={b3trBalanceAfterSwap}
-        vot3BalanceAfterSwap={vot3BalanceAfterSwap}
-        b3trBalance={b3trBalanceScaled}
-        vot3Balance={vot3BalanceScaled}
+        customContent={{
+          [TransactionModalStatus.Pending]: (
+            <VStack w={"full"} h={"full"} justifyContent={"center"} alignItems={"center"}>
+              <Text>{t("Pending")}</Text>
+            </VStack>
+          ),
+          [TransactionModalStatus.Success]: (
+            <SuccessConvertModalContent
+              b3trBalanceAfter={b3trBalanceAfterSwap}
+              vot3BalanceAfter={vot3BalanceAfterSwap}
+              txId={mutationData.txReceipt?.meta.txID}
+              onClose={handleClose}
+            />
+          ),
+          [TransactionModalStatus.WaitingConfirmation]: (
+            <VStack w={"full"} h={"full"} justifyContent={"center"} alignItems={"center"}>
+              <Text>{t("Waiting for confirmation")}</Text>
+            </VStack>
+          ),
+        }}
       />
     )
 
