@@ -3,7 +3,7 @@ import { Text, HStack, Image, useMediaQuery, Skeleton } from "@chakra-ui/react"
 import { t } from "i18next"
 import { useMemo } from "react"
 import Countdown from "react-countdown"
-import dayjs from "dayjs"
+import dayjs from "@/utils/dayjsConfig"
 
 interface CountdownProps {
   onOpen: () => void
@@ -18,8 +18,9 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
   const expiryTimestamp = useMemo(() => {
     // fallback to 7 days in the future if cached just after new round
     if (allocationRound?.voteEndTimestamp?.isBefore(dayjs())) {
-      return Date.now() + 604800000
+      return dayjs().add(7, "day").valueOf()
     }
+
     const date = allocationRound?.voteEndTimestamp?.toDate()
     return date
   }, [allocationRound?.voteEnd])
