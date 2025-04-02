@@ -16,7 +16,6 @@ import { UpdateConfirmationModal } from "./components/UpdateConfirmationModal"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useUpdateAppAdminInfo } from "@/hooks/useUpdateAppAdminInfo"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useWallet } from "@vechain/vechain-kit"
 import { EditAppRewardDistributors } from "./components/EditAppRewardDistributors"
 import { useAccountPermissions } from "@/api/contracts/account"
@@ -48,7 +47,6 @@ export const AdminAppPageContent = () => {
   const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
 
   const updateConfirmationModal = useDisclosure()
-  const { isOpen: isConfirmationOpen, onOpen: onConfirmationOpen, onClose: onConfirmationClose } = useDisclosure()
 
   const onchainAddresses = useRef({
     moderators: [] as string[],
@@ -130,7 +128,6 @@ export const AdminAppPageContent = () => {
   const updateMutation = useUpdateAppAdminInfo({
     appId: app?.id || "",
     onSuccess: () => {
-      onConfirmationClose()
       // After successful transaction, update the reference with form values
       onchainAddresses.current = {
         adminAddress: adminAddress,
@@ -143,22 +140,14 @@ export const AdminAppPageContent = () => {
     },
   })
 
-  const handleClose = useCallback(() => {
-    onConfirmationClose()
-    updateMutation.resetStatus()
-  }, [onConfirmationClose, updateMutation])
-
   const goBack = useCallback(() => {
-    onConfirmationClose()
     router.push(`/apps/${app?.id}`)
     form.reset()
     updateMutation.resetStatus()
-  }, [form, onConfirmationClose, router, updateMutation])
+  }, [form, router, updateMutation])
 
   const onSubmit = useCallback(
     (data: AdminAppForm) => {
-      onConfirmationOpen()
-
       const moderatorsToBeAdded = getAddressesToAdd(data.moderators, onchainAddresses.current.moderators)
       const moderatorsToBeRemoved = getAddressesToRemove(onchainAddresses.current.moderators, data.moderators)
 
@@ -180,7 +169,7 @@ export const AdminAppPageContent = () => {
         creatorsToBeRemoved,
       })
     },
-    [onConfirmationOpen, updateMutation, app?.id, isAdminAddressChanged, isTeamWalletAddressChanged],
+    [updateMutation, app?.id, isAdminAddressChanged, isTeamWalletAddressChanged],
   )
 
   const checkAddresses = useCallback(
@@ -193,11 +182,6 @@ export const AdminAppPageContent = () => {
     },
     [isAdminAddressChanged, isTeamWalletAddressChanged, onSubmit, updateConfirmationModal],
   )
-
-  const onTryAgain = useCallback(() => {
-    handleClose()
-    form.handleSubmit(onSubmit)()
-  }, [form, handleClose, onSubmit])
 
   const allowedToEditAdminInfo = useMemo(
     () => compareAddresses(account?.address || "", admin) || permissions?.isAdminOfX2EarnApps,
@@ -215,57 +199,41 @@ export const AdminAppPageContent = () => {
   }
 
   return (
-    <>
-      <Card variant="baseWithBorder" w="full">
-        <CardBody>
-          <VStack gap="48px" align="stretch" as="form" onSubmit={form.handleSubmit(checkAddresses)}>
-            <Heading fontSize={"36px"} fontWeight={700}>
-              {t("{{app}} settings", { app: appMetadata?.name })}
-            </Heading>
-            <EditAppCreatorNFT form={form} />
-            <Divider />
-            <EditAppModerators form={form} />
-            <Divider />
-            <EditAppAddresses
-              form={form}
-              editAdminAddress={editAdminAddress}
-              setEditAdminAddress={setEditAdminAddress}
-              editTeamWalletAddress={editTeamWalletAddress}
-              setEditTeamWalletAddress={setEditTeamWalletAddress}
-            />
-            <EditAppRewardDistributors form={form} />
-            <HStack justify={"space-between"} mt={8}>
-              <Button variant="primaryGhost" onClick={goBack}>
-                {t("Go back")}
-              </Button>
-              <Button variant="primaryAction" type="submit" isDisabled={disableSaveButton}>
-                {t("Save all changes")}
-              </Button>
-            </HStack>
-          </VStack>
-          <UpdateConfirmationModal
-            {...updateConfirmationModal}
+    <Card variant="baseWithBorder" w="full">
+      <CardBody>
+        <VStack gap="48px" align="stretch" as="form" onSubmit={form.handleSubmit(checkAddresses)}>
+          <Heading fontSize={"36px"} fontWeight={700}>
+            {t("{{app}} settings", { app: appMetadata?.name })}
+          </Heading>
+          <EditAppCreatorNFT form={form} />
+          <Divider />
+          <EditAppModerators form={form} />
+          <Divider />
+          <EditAppAddresses
             form={form}
-            onSubmit={form.handleSubmit(onSubmit)}
-            isAdminAddressChanged={isAdminAddressChanged}
-            isTeamWalletAddressChanged={isTeamWalletAddressChanged}
+            editAdminAddress={editAdminAddress}
+            setEditAdminAddress={setEditAdminAddress}
+            editTeamWalletAddress={editTeamWalletAddress}
+            setEditTeamWalletAddress={setEditTeamWalletAddress}
           />
-        </CardBody>
-      </Card>
-      <TransactionModal
-        isOpen={isConfirmationOpen}
-        onClose={handleClose}
-        confirmationTitle="Update app admin info"
-        successTitle="App admin info updated!"
-        status={updateMutation.status as TransactionModalStatus}
-        errorDescription={updateMutation.error?.reason}
-        errorTitle={"Error updating app admin info"}
-        showTryAgainButton={true}
-        onTryAgain={onTryAgain}
-        pendingTitle="Updating app admin info..."
-        txId={updateMutation.txReceipt?.meta.txID}
-        showExplorerButton
-      />
-    </>
+          <EditAppRewardDistributors form={form} />
+          <HStack justify={"space-between"} mt={8}>
+            <Button variant="primaryGhost" onClick={goBack}>
+              {t("Go back")}
+            </Button>
+            <Button variant="primaryAction" type="submit" isDisabled={disableSaveButton}>
+              {t("Save all changes")}
+            </Button>
+          </HStack>
+        </VStack>
+        <UpdateConfirmationModal
+          {...updateConfirmationModal}
+          form={form}
+          onSubmit={form.handleSubmit(onSubmit)}
+          isAdminAddressChanged={isAdminAddressChanged}
+          isTeamWalletAddressChanged={isTeamWalletAddressChanged}
+        />
+      </CardBody>
+    </Card>
   )
 }

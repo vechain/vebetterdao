@@ -1,4 +1,3 @@
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import {
   VStack,
   Button,
@@ -11,7 +10,6 @@ import {
   Card,
   CardHeader,
   CardBody,
-  useDisclosure,
   Radio,
   RadioGroup,
   Text,
@@ -36,7 +34,6 @@ type NFTFormInputs = {
 }
 
 export const ManageCreatorsNFT = () => {
-  const { isOpen, onClose, onOpen } = useDisclosure()
   const { t } = useTranslation()
 
   const {
@@ -65,7 +62,7 @@ export const ManageCreatorsNFT = () => {
 
   const hasNFT = useHasCreatorNFT(lookupAddress ?? "")
 
-  const { error, status, txReceipt, sendTransaction, resetStatus } = useMemo(() => {
+  const { sendTransaction, resetStatus } = useMemo(() => {
     return actionType === "mint" ? mintNFT : burnNFT
   }, [actionType, mintNFT, burnNFT])
 
@@ -73,9 +70,8 @@ export const ManageCreatorsNFT = () => {
     if (actionType !== "check") {
       resetStatus()
       sendTransaction(undefined)
-      onOpen()
     }
-  }, [actionType, resetStatus, sendTransaction, onOpen])
+  }, [actionType, resetStatus, sendTransaction])
 
   const renderBadge = (colorScheme: string, icon: As, text: string) => (
     <Badge
@@ -96,104 +92,88 @@ export const ManageCreatorsNFT = () => {
   )
 
   return (
-    <>
-      <Card w="full">
-        <CardHeader>
-          <Heading size="lg">{t("Manage Creator NFT")}</Heading>
-        </CardHeader>
+    <Card w="full">
+      <CardHeader>
+        <Heading size="lg">{t("Manage Creator NFT")}</Heading>
+      </CardHeader>
 
-        <CardBody>
-          <VStack spacing={8} align="start" w="full">
-            <RadioGroup defaultValue="mint">
-              <VStack align="start">
-                <Radio {...register("actionType", { required: true })} value="mint">
-                  {t("Mint NFT")}
-                </Radio>
-                <Radio {...register("actionType", { required: true })} value="burn">
-                  {t("Burn NFT")}
-                </Radio>
-                <Radio {...register("actionType", { required: true })} value="check">
-                  {t("Check Ownership")}
-                </Radio>
-              </VStack>
-            </RadioGroup>
+      <CardBody>
+        <VStack spacing={8} align="start" w="full">
+          <RadioGroup defaultValue="mint">
+            <VStack align="start">
+              <Radio {...register("actionType", { required: true })} value="mint">
+                {t("Mint NFT")}
+              </Radio>
+              <Radio {...register("actionType", { required: true })} value="burn">
+                {t("Burn NFT")}
+              </Radio>
+              <Radio {...register("actionType", { required: true })} value="check">
+                {t("Check Ownership")}
+              </Radio>
+            </VStack>
+          </RadioGroup>
 
-            <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
-              <VStack spacing={4} align="start">
-                {actionType === "mint" && (
-                  <FormControl>
-                    <FormLabel>
-                      <strong>{t("Wallet Address")}</strong>
-                    </FormLabel>
-                    <InputGroup>
-                      <WalletAddressInput
-                        onAddressResolved={address => setValue("creatorWalletAddress", address ?? "")}
-                      />
-                    </InputGroup>
-                  </FormControl>
-                )}
-                {actionType === "burn" && (
-                  <FormControl isRequired isInvalid={Boolean(errors.tokenId)}>
-                    <FormLabel>
-                      <strong>{t("Token ID")}</strong>
-                    </FormLabel>
-                    <InputGroup>
-                      <Input
-                        placeholder={t("Enter the token ID")}
-                        {...register("tokenId", {
-                          required: actionType === "burn",
-                        })}
-                      />
-                    </InputGroup>
-                    {errors.tokenId && <FormErrorMessage>{errors.tokenId.message}</FormErrorMessage>}
-                  </FormControl>
-                )}
-                {actionType === "check" && (
-                  <FormControl>
-                    <FormLabel>
-                      <strong>{t("Lookup Wallet Address")}</strong>
-                    </FormLabel>
-                    <InputGroup>
-                      <WalletAddressInput onAddressResolved={address => setValue("lookupAddress", address ?? "")} />
-                    </InputGroup>
-                    {lookupAddress && (
-                      <VStack mt={2} align="start">
-                        {renderBadge(
-                          hasNFT ? "green" : "red",
-                          hasNFT ? UilCheckCircle : UilExclamationCircle,
-                          hasNFT ? t("This address holds the NFT.") : t("This address does not hold the NFT."),
-                        )}
-                      </VStack>
-                    )}
-                  </FormControl>
-                )}
-                {actionType !== "check" && (
-                  <Button
-                    colorScheme="blue"
-                    type="submit"
-                    isDisabled={actionType === "mint" ? !creatorWalletAddress : !tokenId}>
-                    {t(actionType === "mint" ? "Mint" : "Burn")}
-                  </Button>
-                )}
-              </VStack>
-            </form>
-          </VStack>
-        </CardBody>
-      </Card>
-
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={onClose}
-        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={t("Transaction successful")}
-        onTryAgain={handleSubmit(onSubmit)}
-        showTryAgainButton
-        showExplorerButton
-        txId={txReceipt?.meta.txID}
-        pendingTitle={t("Processing transaction...")}
-        errorTitle={t("Transaction error")}
-        errorDescription={error?.reason}
-      />
-    </>
+          <form onSubmit={handleSubmit(onSubmit)} style={{ width: "100%" }}>
+            <VStack spacing={4} align="start">
+              {actionType === "mint" && (
+                <FormControl>
+                  <FormLabel>
+                    <strong>{t("Wallet Address")}</strong>
+                  </FormLabel>
+                  <InputGroup>
+                    <WalletAddressInput
+                      onAddressResolved={address => setValue("creatorWalletAddress", address ?? "")}
+                    />
+                  </InputGroup>
+                </FormControl>
+              )}
+              {actionType === "burn" && (
+                <FormControl isRequired isInvalid={Boolean(errors.tokenId)}>
+                  <FormLabel>
+                    <strong>{t("Token ID")}</strong>
+                  </FormLabel>
+                  <InputGroup>
+                    <Input
+                      placeholder={t("Enter the token ID")}
+                      {...register("tokenId", {
+                        required: actionType === "burn",
+                      })}
+                    />
+                  </InputGroup>
+                  {errors.tokenId && <FormErrorMessage>{errors.tokenId.message}</FormErrorMessage>}
+                </FormControl>
+              )}
+              {actionType === "check" && (
+                <FormControl>
+                  <FormLabel>
+                    <strong>{t("Lookup Wallet Address")}</strong>
+                  </FormLabel>
+                  <InputGroup>
+                    <WalletAddressInput onAddressResolved={address => setValue("lookupAddress", address ?? "")} />
+                  </InputGroup>
+                  {lookupAddress && (
+                    <VStack mt={2} align="start">
+                      {renderBadge(
+                        hasNFT ? "green" : "red",
+                        hasNFT ? UilCheckCircle : UilExclamationCircle,
+                        hasNFT ? t("This address holds the NFT.") : t("This address does not hold the NFT."),
+                      )}
+                    </VStack>
+                  )}
+                </FormControl>
+              )}
+              {actionType !== "check" && (
+                <Button
+                  colorScheme="blue"
+                  type="submit"
+                  isDisabled={actionType === "mint" ? !creatorWalletAddress : !tokenId}>
+                  {t(actionType === "mint" ? "Mint" : "Burn")}
+                </Button>
+              )}
+            </VStack>
+          </form>
+        </VStack>
+      </CardBody>
+    </Card>
   )
 }
