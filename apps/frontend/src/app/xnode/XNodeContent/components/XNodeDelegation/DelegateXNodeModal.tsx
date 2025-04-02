@@ -1,6 +1,6 @@
 import { useXNode } from "@/api"
 import { getIsNodeHolder } from "@/api/contracts/xNodes/useIsNodeHolder"
-import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
+import { ExclamationTriangle } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 import { useDelegateXNode } from "@/hooks/useDelegateXNode"
 import {
@@ -27,13 +27,14 @@ import { useWallet, useConnex, useVechainDomain } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-
+import { useTransaction } from "@/providers/TransactionProvider"
 type FormData = {
   walletAddress: string
 }
 
 export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
+  const { isTxModalOpen } = useTransaction()
   const { account } = useWallet()
   const { thor } = useConnex()
   const { isXNodeAttachedToGM } = useXNode()
@@ -106,27 +107,9 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
     reset()
   }, [modal, confirmationModal, delegateXNode, reset])
 
-  if (delegateXNode.status !== "ready") {
+  if (confirmationModal.isOpen && !isTxModalOpen) {
     return (
-      <TransactionModal
-        isOpen={modal.isOpen ?? false}
-        onClose={handleClose}
-        successTitle={t("Node delegation completed!")}
-        status={delegateXNode.status as TransactionModalStatus}
-        errorDescription={delegateXNode.error?.reason}
-        errorTitle={delegateXNode.error ? t("Error delegating Node") : undefined}
-        showTryAgainButton
-        onTryAgain={() => delegateXNode.sendTransaction({ delegatee: delegateeAddressOrDomain })}
-        pendingTitle={t("Delegating Node...")}
-        showExplorerButton
-        txId={delegateXNode.txReceipt?.meta.txID}
-      />
-    )
-  }
-
-  if (confirmationModal.isOpen) {
-    return (
-      <BaseModal onClose={handleClose} isOpen={confirmationModal.isOpen ?? false}>
+      <BaseModal onClose={handleClose} isOpen={(confirmationModal.isOpen && !isTxModalOpen) ?? false}>
         <VStack align="stretch" gap={6}>
           <VStack justify="center" align="center" gap={10}>
             <ExclamationTriangle color="#C84968" size={triangleSize} />
@@ -166,7 +149,7 @@ export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => 
   }
 
   return (
-    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={(modal.isOpen && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6} as="form" onSubmit={handleSubmit(openConfirmationModal)}>
         <UilArrowUpRight color="#004CFC" />
         <Heading fontSize="2xl">{t("Delegate your Node")}</Heading>

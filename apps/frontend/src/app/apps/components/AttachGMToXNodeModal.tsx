@@ -1,6 +1,6 @@
 import { getGMLevel, useB3trDonated, useSelectedGmNft, useXNode } from "@/api"
 import { useGMMaxLevel } from "@/api/contracts/galaxyMember/hooks/useGMMaxLevel"
-import { CustomModalContent, TransactionModal, TransactionModalStatus } from "@/components"
+import { CustomModalContent } from "@/components"
 import { CurveArrowIcon } from "@/components/Icons/CurveArrowIcon"
 import { ThreeSparklesIcon } from "@/components/Icons/ThreeSparklesIcon"
 import { ThreeTokensIcon } from "@/components/Icons/ThreeTokensIcon"
@@ -32,7 +32,7 @@ import { UilLink } from "@iconscout/react-unicons"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
-
+import { useTransaction } from "@/providers/TransactionProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -40,7 +40,7 @@ type Props = {
 
 export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-
+  const { isTxModalOpen } = useTransaction()
   const { gmId } = useSelectedGmNft()
 
   const { data: b3trDonated } = useB3trDonated(gmId)
@@ -73,26 +73,6 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   }, [attachGMToXNodeMutation])
 
   const iconSize = useBreakpointValue({ base: "48px", md: "108px" })
-  if (attachGMToXNodeMutation.status !== "ready")
-    return (
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        successTitle={t("Attach GM to Node")}
-        status={
-          attachGMToXNodeMutation.error
-            ? TransactionModalStatus.Error
-            : (attachGMToXNodeMutation.status as TransactionModalStatus)
-        }
-        errorDescription={attachGMToXNodeMutation.error?.reason}
-        errorTitle={attachGMToXNodeMutation.error ? "Error attaching" : undefined}
-        showTryAgainButton
-        onTryAgain={handleAttachment}
-        pendingTitle={"Attaching GM to XNode..."}
-        showExplorerButton
-        txId={attachGMToXNodeMutation.txReceipt?.meta.txID}
-      />
-    )
 
   const steps = [
     {
@@ -113,7 +93,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   ]
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size={"2xl"}>
+    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} size={"2xl"}>
       <ModalOverlay />
       <CustomModalContent p={{ base: 3, md: 5 }}>
         <ModalCloseButton />

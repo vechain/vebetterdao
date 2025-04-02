@@ -15,8 +15,7 @@ import {
 import { useCallback, useMemo } from "react"
 import { useDepositToAppBalance } from "@/hooks"
 import { Controller, useForm } from "react-hook-form"
-import { TransactionModal, TransactionModalStatus, CustomModalContent, B3TRIcon } from "@/components"
-import BigNumber from "bignumber.js"
+import { CustomModalContent, B3TRIcon } from "@/components"
 import { Trans, useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
 import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
@@ -25,7 +24,7 @@ import { FormattingUtils } from "@repo/utils"
 import { useB3trBalance, useXApp } from "@/api"
 import { useWallet } from "@vechain/vechain-kit"
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
-
+import { useTransaction } from "@/providers/TransactionProvider"
 export type Props = {
   appId: string
   isOpen: boolean
@@ -56,6 +55,7 @@ const layoutTransition = {
 export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { isTxModalOpen } = useTransaction()
 
   const { data: app } = useXApp(appId)
 
@@ -80,9 +80,10 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   const amount = watch("amount")
   const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
 
-  const appBalanceAfterSwap = useMemo(() => {
-    return new BigNumber(appBalanceScaled).plus(amount).toString()
-  }, [appBalanceScaled, amount])
+  //TODO: Add this to review modal before sending transaction
+  // const appBalanceAfterSwap = useMemo(() => {
+  //   return new BigNumber(appBalanceScaled).plus(amount).toString()
+  // }, [appBalanceScaled, amount])
 
   const filterAmount = useCallback(
     (text: string) => {
@@ -100,7 +101,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
     [availableB3trToDepositScaled],
   )
 
-  const { sendTransaction, resetStatus, status, error, txReceipt } = useDepositToAppBalance({
+  const { sendTransaction, resetStatus } = useDepositToAppBalance({
     appId,
     amount,
   })
@@ -222,29 +223,8 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
     app,
   ])
 
-  if (status !== "ready")
-    return (
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        successTitle={t("Deposit completed!")}
-        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        errorDescription={error?.reason}
-        errorTitle={error ? t("Error depositing") : undefined}
-        showTryAgainButton
-        onTryAgain={handleWithdraw}
-        pendingTitle={t("Depositing...")}
-        showExplorerButton
-        isAppDeposit
-        txId={txReceipt?.meta.txID}
-        b3trAmount={amount}
-        b3trBalanceAfterSwap={appBalanceAfterSwap}
-        b3trBalance={appBalanceScaled}
-      />
-    )
-
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
+    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
       <ModalOverlay />
       <CustomModalContent w={"auto"} maxW={"container.md"}>
         <Card rounded={20}>

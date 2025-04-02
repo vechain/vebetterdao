@@ -3,14 +3,12 @@ import { SupportInstructions } from "./components/SupportInstructions"
 import { Modal, ModalBody, ModalCloseButton, ModalOverlay } from "@chakra-ui/react"
 import { CustomModalContent } from "@/components"
 import { SupportDeposit } from "./components/SupportDeposit"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { useTranslation } from "react-i18next"
-
+import { useTransaction } from "@/providers/TransactionProvider"
 export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { t } = useTranslation()
   const { proposal } = useProposalDetail()
+  const { isTxModalOpen } = useTransaction()
   const [step, setStep] = useState(0)
   const depositMutation = useProposalVot3Deposit({ proposalId: proposal.id })
 
@@ -40,29 +38,8 @@ export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; on
     }
   }, [goToNextStep, onSubmit, step])
 
-  if (depositMutation.status !== "ready")
-    return (
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        successTitle={t("Deposit Completed!")}
-        status={
-          depositMutation.error ? TransactionModalStatus.Error : (depositMutation.status as TransactionModalStatus)
-        }
-        errorDescription={depositMutation.error?.reason}
-        errorTitle={depositMutation.error ? t("Error Depositing") : undefined}
-        pendingTitle={t("Depositing...")}
-        showSocialButtons
-        socialDescriptionEncoded={encodeURIComponent(
-          "🔄 Just supported a proposal on #VeBetterDAO! \n\n🌱 Explore and join us at https://vebetterdao.org.\n\n#VeBetterDAO #Vechain",
-        )}
-        showExplorerButton
-        txId={depositMutation.txReceipt?.meta.txID}
-      />
-    )
-
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size={"xl"}>
+    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} size={"xl"}>
       <ModalOverlay />
       <CustomModalContent>
         <ModalCloseButton />

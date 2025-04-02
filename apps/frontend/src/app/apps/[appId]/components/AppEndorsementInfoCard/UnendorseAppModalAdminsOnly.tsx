@@ -1,13 +1,12 @@
 import { useXAppMetadata } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
-import { TransactionModal, TransactionModalStatus } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 import { useRemoveNodeEndorsement } from "@/hooks"
 import { Text, Button, Image, Flex, HStack, Icon, VStack, Heading, Box } from "@chakra-ui/react"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
-
+import { useTransaction } from "@/providers/TransactionProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -18,7 +17,7 @@ type Props = {
 
 export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, nodePoints }: Props) => {
   const { t } = useTranslation()
-
+  const { isTxModalOpen } = useTransaction()
   // App data
   const { data: appMetadata } = useXAppMetadata(appId ?? "")
   const { data: logo } = useIpfsImage(appMetadata?.logo)
@@ -36,29 +35,8 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
     rmNodeEndorsementMutation.sendTransaction(undefined)
   }, [rmNodeEndorsementMutation])
 
-  if (rmNodeEndorsementMutation.status !== "ready")
-    return (
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={onClose}
-        successTitle={t("Remove endorsement")}
-        status={
-          rmNodeEndorsementMutation.error
-            ? TransactionModalStatus.Error
-            : (rmNodeEndorsementMutation.status as TransactionModalStatus)
-        }
-        errorDescription={rmNodeEndorsementMutation.error?.reason}
-        errorTitle={rmNodeEndorsementMutation.error ? t("Transaction error") : undefined}
-        showTryAgainButton
-        onTryAgain={handleUnendorsement}
-        pendingTitle={t("Removing endorsement...")}
-        showExplorerButton
-        txId={rmNodeEndorsementMutation.txReceipt?.meta.txID}
-      />
-    )
-
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose}>
+    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose}>
       <VStack spacing={6} align="flex-start" w="full">
         <Heading fontSize="2xl">{t("Remove endorsement")}</Heading>
 

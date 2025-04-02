@@ -1,55 +1,29 @@
 import { WalletAddressInput } from "@/app/components/Input"
-import { TransactionModal, TransactionModalStatus } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 import { useLinkEntityToPassport } from "@/hooks/useLinkEntityToPassport"
 import { UseDisclosureReturn, VStack, Heading, Box, Text, FormControl, FormLabel, Button } from "@chakra-ui/react"
 import { UilLink } from "@iconscout/react-unicons"
-import { useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-
+import { useTransaction } from "@/providers/TransactionProvider"
 type FormData = {
   accountToConnect: string
 }
 
 export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
   const { t } = useTranslation()
-  const { handleSubmit, setValue, watch, reset } = useForm<FormData>()
-
+  const { handleSubmit, setValue, watch } = useForm<FormData>()
+  const { isTxModalOpen } = useTransaction()
   const accountToConnect = watch("accountToConnect")
 
   const linkEntityToPassport = useLinkEntityToPassport({})
-
-  const handleClose = useCallback(() => {
-    modal.onClose?.()
-    linkEntityToPassport.resetStatus()
-    reset()
-  }, [modal, linkEntityToPassport, reset])
-
-  if (linkEntityToPassport.status !== "ready") {
-    return (
-      <TransactionModal
-        isOpen={modal.isOpen ?? false}
-        onClose={handleClose}
-        successTitle={t("Account linked successfully!")}
-        status={linkEntityToPassport.status as TransactionModalStatus}
-        errorDescription={linkEntityToPassport.error?.reason}
-        errorTitle={linkEntityToPassport.error ? t("Error linking account") : undefined}
-        showTryAgainButton
-        onTryAgain={() => linkEntityToPassport.sendTransaction({ passport: accountToConnect })}
-        pendingTitle={t("Linking account...")}
-        showExplorerButton
-        txId={linkEntityToPassport.txReceipt?.meta.txID}
-      />
-    )
-  }
 
   const onSubmit = (data: FormData) => {
     linkEntityToPassport.sendTransaction({ passport: data.accountToConnect })
   }
 
   return (
-    <BaseModal isOpen={modal.isOpen} onClose={modal.onClose}>
+    <BaseModal isOpen={(modal.isOpen && !isTxModalOpen) ?? false} onClose={modal.onClose}>
       <VStack align="stretch" gap={6} as="form" onSubmit={handleSubmit(onSubmit)}>
         <UilLink color="#004CFC" size={"3rem"} />
         <Heading fontSize="2xl">{t("Become a secondary account")}</Heading>

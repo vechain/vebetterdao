@@ -14,12 +14,12 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
+import { ExclamationTriangle } from "@/components"
 import { useRemoveEntityLink } from "@/hooks"
-
+import { useTransaction } from "@/providers/TransactionProvider"
 export const RemoveLinkModalPassportPOV = ({ modal, entity }: { modal: UseDisclosureProps; entity: string }) => {
   const { t } = useTranslation()
-
+  const { isTxModalOpen } = useTransaction()
   const removeLinking = useRemoveEntityLink({})
 
   const handleRemoveLink = useCallback(() => {
@@ -33,26 +33,8 @@ export const RemoveLinkModalPassportPOV = ({ modal, entity }: { modal: UseDisclo
     removeLinking.resetStatus()
   }, [modal, removeLinking])
 
-  if (removeLinking.status !== "ready") {
-    return (
-      <TransactionModal
-        isOpen={modal.isOpen ?? false}
-        onClose={handleClose}
-        successTitle={t("Linking rejected!")}
-        status={removeLinking.status as TransactionModalStatus}
-        errorDescription={removeLinking.error?.reason}
-        errorTitle={removeLinking.error ? t("Error removing linking") : undefined}
-        showTryAgainButton
-        onTryAgain={() => removeLinking.sendTransaction({ entity })}
-        pendingTitle={t("Removing linking...")}
-        showExplorerButton
-        txId={removeLinking.txReceipt?.meta.txID}
-      />
-    )
-  }
-
   return (
-    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={(modal.isOpen && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />

@@ -1,6 +1,5 @@
 import { useXNode } from "@/api"
 import { useIpfsImage } from "@/api/ipfs"
-import { TransactionModal, TransactionModalStatus } from "@/components"
 import { BaseModal } from "@/components/BaseModal"
 
 import { useUnendorseApp } from "@/hooks"
@@ -9,7 +8,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
-
+import { useTransaction } from "@/providers/TransactionProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -25,10 +24,10 @@ export type PropsEndorsement = {
 
 export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  const { endorsedApp, xNodeId, xNodePoints, xNodeLevel } = useXNode()
+  const { endorsedApp, xNodeId, xNodePoints } = useXNode()
   const { data: logo } = useIpfsImage(endorsedApp?.logo)
   const { account } = useWallet()
-
+  const { isTxModalOpen } = useTransaction()
   const unendorseAppMutation = useUnendorseApp({
     appId: endorsedApp?.id,
     nodeId: xNodeId,
@@ -43,37 +42,16 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
     unendorseAppMutation.sendTransaction(undefined)
   }, [unendorseAppMutation])
 
-  const endorsementInfo: PropsEndorsement = {
-    isUnendorsing: true,
-    isEndorsing: false,
-    points: xNodePoints,
-    endorsedAppName: endorsedApp?.name,
-    xNodeLevel,
-  }
-  if (unendorseAppMutation.status !== "ready")
-    return (
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={onClose}
-        successTitle={t("Unendorse app")}
-        status={
-          unendorseAppMutation.error
-            ? TransactionModalStatus.Error
-            : (unendorseAppMutation.status as TransactionModalStatus)
-        }
-        errorDescription={unendorseAppMutation.error?.reason}
-        errorTitle={unendorseAppMutation.error ? t("Transaction error") : undefined}
-        showTryAgainButton
-        onTryAgain={handleUnendorsement}
-        pendingTitle={"Unendorsing app..."}
-        showExplorerButton
-        txId={unendorseAppMutation.txReceipt?.meta.txID}
-        endorsementInfo={endorsementInfo}
-      />
-    )
-
+  //TODO: Add this to review modal before sending transaction
+  // const endorsementInfo: PropsEndorsement = {
+  //   isUnendorsing: true,
+  //   isEndorsing: false,
+  //   points: xNodePoints,
+  //   endorsedAppName: endorsedApp?.name,
+  //   xNodeLevel,
+  // }
   return (
-    <BaseModal isOpen={isOpen} onClose={onClose}>
+    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={onClose}>
       <VStack spacing={6} align="flex-start" w="full">
         <Heading fontSize="2xl">{t("Remove endorsement")}</Heading>
 

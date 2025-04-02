@@ -14,14 +14,14 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
+import { ExclamationTriangle } from "@/components"
 import { useRevokeXNodeDelegation } from "@/hooks"
 import { useXNode } from "@/api"
-
+import { useTransaction } from "@/providers/TransactionProvider"
 export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { isXNodeAttachedToGM } = useXNode()
-
+  const { isTxModalOpen } = useTransaction()
   const revokeXNodeDelegation = useRevokeXNodeDelegation({})
 
   const handleRevoke = useCallback(() => {
@@ -35,26 +35,8 @@ export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProp
     revokeXNodeDelegation.resetStatus()
   }, [modal, revokeXNodeDelegation])
 
-  if (revokeXNodeDelegation.status !== "ready") {
-    return (
-      <TransactionModal
-        isOpen={modal.isOpen ?? false}
-        onClose={handleClose}
-        successTitle={t("Node delegation revoked!")}
-        status={revokeXNodeDelegation.status as TransactionModalStatus}
-        errorDescription={revokeXNodeDelegation.error?.reason}
-        errorTitle={revokeXNodeDelegation.error ? t("Error revoking Node delegation") : undefined}
-        showTryAgainButton
-        onTryAgain={() => revokeXNodeDelegation.sendTransaction({ isAttachedToGM: isXNodeAttachedToGM })}
-        pendingTitle={t("Revoking Node delegation...")}
-        showExplorerButton
-        txId={revokeXNodeDelegation.txReceipt?.meta.txID}
-      />
-    )
-  }
-
   return (
-    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={(modal.isOpen && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />
