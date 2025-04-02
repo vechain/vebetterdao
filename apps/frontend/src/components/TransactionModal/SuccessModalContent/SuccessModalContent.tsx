@@ -1,4 +1,4 @@
-import { Heading, Text, VStack, ModalCloseButton, Link, Image, HStack } from "@chakra-ui/react"
+import { Heading, Text, VStack, Link, Image, HStack } from "@chakra-ui/react"
 import Lottie from "react-lottie"
 import successAnimation from "./success.json"
 import { ShareButtons } from "../../ShareButtons"
@@ -50,7 +50,6 @@ export const SuccessModalContent = ({
   }
   return (
     <ModalAnimation>
-      <ModalCloseButton top={4} right={4} data-testid={"modal-close-button"} />
       <VStack align={"center"} p={6}>
         <Heading size="md" data-testid={"tx-modal-title"}>
           {title}

@@ -1,6 +1,7 @@
-import { useCallback } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { useQueryClient } from "@tanstack/react-query"
+import { useTransaction } from "@/providers/TransactionProvider"
 
 export type BuildTransactionProps<ClausesParams> = {
   clauseBuilder: (props: ClausesParams) => EnhancedClause[]
@@ -31,6 +32,8 @@ export const useBuildTransaction = <ClausesParams>({
 }: BuildTransactionProps<ClausesParams>) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
+  const { startTransaction, transactionState, updateTransactionStatus } = useTransaction()
+  const lastReportedStatusRef = useRef<string | undefined>()
 
   /**
    * Callback function to be called when the transaction is successfully confirmed.
@@ -57,6 +60,12 @@ export const useBuildTransaction = <ClausesParams>({
     suggestedMaxGas,
     onTxFailedOrCancelled: onFailure,
   })
+  useEffect(() => {
+    if (result?.status !== lastReportedStatusRef.current) {
+      lastReportedStatusRef.current = result.status
+      updateTransactionStatus(result.status)
+    }
+  }, [result.status, transactionState?.status, updateTransactionStatus])
 
   /**
    * Function to send a transaction based on the provided parameters.
@@ -64,9 +73,11 @@ export const useBuildTransaction = <ClausesParams>({
    */
   const sendTransaction = useCallback(
     async (props: ClausesParams) => {
-      result.sendTransaction(clauseBuilder(props))
+      const txFunction = result.sendTransaction(clauseBuilder(props))
+      startTransaction(clauseBuilder(props), async () => txFunction)
+      return txFunction
     },
-    [clauseBuilder, result],
+    [clauseBuilder, result, startTransaction],
   )
 
   return { ...result, sendTransaction }
