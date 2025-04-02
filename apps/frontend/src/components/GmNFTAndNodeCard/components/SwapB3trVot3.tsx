@@ -19,7 +19,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { humanAddress, getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
-import { Countdown } from "@/app/components/Countdown/Countdown"
+import { CountdownVoting } from "@/app/components/Countdown"
 import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
 
 const compactFormatter = getCompactFormatter(4)
@@ -61,7 +61,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
               value: isConnectedUser || !isOnProfilePage ? t("Your") : domainOrAddress,
             })}
           </Text>
-          <Countdown onOpen={onOpenSnapshot} />
+          <CountdownVoting onOpen={onOpenSnapshot} />
           <SnapshotExplainationModal isOpen={isOpenSnapshot} onClose={onCloseSnapshot} />
         </Stack>
         <Stack gap="24px" direction={isAbove800 ? "row" : "column"}>
