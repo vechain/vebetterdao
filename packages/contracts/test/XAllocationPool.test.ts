@@ -224,10 +224,10 @@ describe("X-Allocation Pool - @shard13", async function () {
         forceDeploy: true,
       })
 
-      expect(await xAllocationPool.version()).to.equal("4")
+      expect(await xAllocationPool.version()).to.equal("5")
     })
 
-    it("Should not have state conflict after upgrading to V4", async () => {
+    it("Should not have state conflict after upgrading to V5", async () => {
       const config = createLocalConfig()
       config.X_ALLOCATION_POOL_APP_SHARES_MAX_CAP = 100
       config.X_ALLOCATION_POOL_BASE_ALLOCATION_PERCENTAGE = 0
@@ -251,7 +251,7 @@ describe("X-Allocation Pool - @shard13", async function () {
 
       // Deploy XAllocationPool
       const xAllocationPoolV1 = (await deployAndUpgrade(
-        ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3"],
+        ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPoolV4"],
         [
           [
             owner.address,
@@ -264,9 +264,10 @@ describe("X-Allocation Pool - @shard13", async function () {
           ],
           [],
           [],
+          [],
         ],
         {
-          versions: [undefined, 2, 3],
+          versions: [undefined, 2, 3, 4],
         },
       )) as XAllocationPool
 
@@ -375,12 +376,12 @@ describe("X-Allocation Pool - @shard13", async function () {
       ) // removing empty slots
 
       const xAllocationPool = (await upgradeProxy(
-        "XAllocationPoolV3",
+        "XAllocationPoolV4",
         "XAllocationPool",
         await xAllocationPoolV1.getAddress(),
         [],
         {
-          version: 4,
+          version: 5,
         },
       )) as XAllocationPool
 
@@ -584,15 +585,16 @@ describe("X-Allocation Pool - @shard13", async function () {
         })
 
         const xAllocationPool = (await deployAndUpgrade(
-          ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPool"],
+          ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPoolV4", "XAllocationPool"],
           [
             [owner.address, owner.address, owner.address, owner.address, owner.address, owner.address, owner.address],
             [],
             [],
             [],
+            [],
           ],
           {
-            versions: [undefined, 2, 3, 4],
+            versions: [undefined, 2, 3, 4, 5],
           },
         )) as XAllocationPool
         await xAllocationPool.setXAllocationVotingAddress(owner.address)
@@ -654,15 +656,16 @@ describe("X-Allocation Pool - @shard13", async function () {
         })
 
         const xAllocationPool = (await deployAndUpgrade(
-          ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPool"],
+          ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPoolV4", "XAllocationPool"],
           [
             [owner.address, owner.address, owner.address, owner.address, owner.address, owner.address, owner.address],
             [],
             [],
             [],
+            [],
           ],
           {
-            versions: [undefined, 2, 3, 4],
+            versions: [undefined, 2, 3, 4, 5],
           },
         )) as XAllocationPool
         expect(await xAllocationPool.xAllocationVoting()).to.eql(ZERO_ADDRESS)

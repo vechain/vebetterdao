@@ -20,7 +20,7 @@ import { TransactionModal, TransactionModalStatus, CustomModalContent, B3TRIcon 
 import BigNumber from "bignumber.js"
 import { useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
-import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
+import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
 import { TeamWalletAddress } from "./components/TeamWalletAddress"
 import { IoWalletOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
@@ -57,7 +57,7 @@ const layoutTransition = {
 export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
 
-  const { data: availableB3trToWithdraw, isLoading: isBalanceLoading } = useAppBalance(appId)
+  const { data: availableB3trToWithdraw, isLoading: isBalanceLoading } = useAppAvailableFunds(appId)
   const availableB3trToWithdrawScaled = useMemo(() => {
     return availableB3trToWithdraw?.scaled ?? "0"
   }, [availableB3trToWithdraw?.scaled])

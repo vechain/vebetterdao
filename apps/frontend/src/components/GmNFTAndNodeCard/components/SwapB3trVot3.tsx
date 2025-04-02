@@ -17,10 +17,11 @@ import {
 import { UilExchangeAlt } from "@iconscout/react-unicons"
 import React from "react"
 import { useTranslation } from "react-i18next"
-import { humanAddress, getCompactFormatter } from "@repo/utils/FormattingUtils"
+import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useRetrieveProfilIdentity } from "@/app/profile/components/utils"
 import { CountdownVoting } from "@/app/components/Countdown"
 import { SnapshotExplainationModal } from "@/app/components/Countdown/SnapshotExplainationModal"
+import { useDomainOrAddress } from "@/hooks"
 
 const compactFormatter = getCompactFormatter(4)
 type Props = {
@@ -44,7 +45,7 @@ export const SwapB3trVot3 = ({ address, containerProps, innerContent }: Props) =
   const isSwapDisabled = isLoading || hasNoBalance
 
   const { isConnectedUser, domain, profile, isOnProfilePage } = useRetrieveProfilIdentity()
-  const domainOrAddress = domain && domain !== "" ? domain : humanAddress(profile ?? "", 6, 3)
+  const domainOrAddress = useDomainOrAddress({ domain: domain ?? "", address: profile ?? "" })
 
   const { isOpen: isOpenSnapshot, onOpen: onOpenSnapshot, onClose: onCloseSnapshot } = useDisclosure()
 

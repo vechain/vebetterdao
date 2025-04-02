@@ -19,7 +19,7 @@ import { TransactionModal, TransactionModalStatus, CustomModalContent, B3TRIcon 
 import BigNumber from "bignumber.js"
 import { Trans, useTranslation } from "react-i18next"
 import { motion } from "framer-motion"
-import { useAppBalance } from "@/api/contracts/x2EarnRewardsPool"
+import { useAppAvailableFunds } from "@/api/contracts/x2EarnRewardsPool"
 import { IoAddCircleOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
 import { useB3trBalance, useXApp } from "@/api"
@@ -61,7 +61,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
 
   const { data: availableBalanceToDeposit } = useB3trBalance(account?.address ?? "")
 
-  const { data: appBalance, isLoading: isAppBalanceLoading } = useAppBalance(appId)
+  const { data: appBalance, isLoading: isAppBalanceLoading } = useAppAvailableFunds(appId)
 
   const appBalanceScaled = useMemo(() => {
     return appBalance?.scaled ?? "0"

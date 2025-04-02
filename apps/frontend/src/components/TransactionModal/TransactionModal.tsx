@@ -9,7 +9,10 @@ import { CustomModalContent } from "@/components/CustomModalContent"
 import { UploadingMetadataModalContent } from ".//UploadingMetadataModalContent"
 import { ConfirmationConvertModalContent } from "./ConfirmationConvertModalContent"
 import { SuccessConvertModalContent } from "./SuccessConvertModalContent"
-import { ConfirmationAppBalanceModalContent } from "./ConfirmationAppBalanceModalContent"
+import {
+  ConfirmationAppBalanceModalContent,
+  ConfirmationRefillPoolsModalContent,
+} from "./ConfirmationAppBalanceModalContent"
 import { SuccessAppBalanceModalContent } from "./SuccessAppBalanceModalContent"
 import { CoinsFlipModalContent } from "./CoinsFlipModalContent/CoinsFlipModalContent"
 import { PropsEndorsement } from "@/app/apps/components/UnendorseAppModal"
@@ -46,6 +49,9 @@ export type TransactionModalProps = {
   isClaimingRewards?: boolean
   isAppWithdraw?: boolean
   isAppDeposit?: boolean
+  isRefillingPools?: boolean
+  isRewardsPoolToAppBalance?: boolean
+  isEnablingRewardsPool?: boolean
   b3trBalance?: string
   vot3Balance?: string
   endorsementInfo?: PropsEndorsement
@@ -71,6 +77,9 @@ export const TransactionModal = ({
   isClaimingRewards,
   isAppWithdraw,
   isAppDeposit,
+  isRefillingPools,
+  isRewardsPoolToAppBalance,
+  isEnablingRewardsPool,
   b3trBalanceAfterSwap,
   vot3BalanceAfterSwap,
   b3trAmount,
@@ -97,6 +106,15 @@ export const TransactionModal = ({
           isDeposit={isAppDeposit}
         />
       )
+    } else if (isRefillingPools) {
+      return (
+        <ConfirmationRefillPoolsModalContent
+          b3trBalanceAfter={b3trBalanceAfterSwap}
+          b3trAmount={b3trAmount}
+          isRewardsPoolToAppBalance={isRewardsPoolToAppBalance}
+          isEnablingRewardsPool={isEnablingRewardsPool}
+        />
+      )
     } else if (endorsementInfo?.isUnendorsing || endorsementInfo?.isEndorsing) {
       return <ConfirmationEndorsementModalContent endorsementInfo={endorsementInfo} />
     } else {
@@ -112,6 +130,9 @@ export const TransactionModal = ({
     vot3BalanceAfterSwap,
     b3trAmount,
     confirmationTitle,
+    isRewardsPoolToAppBalance,
+    isEnablingRewardsPool,
+    isRefillingPools,
   ])
 
   const handleWaitingConfirmationStatus = useCallback(() => {
