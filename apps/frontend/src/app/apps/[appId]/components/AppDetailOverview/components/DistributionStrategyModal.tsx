@@ -1,7 +1,8 @@
 import { BaseModal } from "@/components/BaseModal"
-import { Box, Heading, Image, Text, VStack } from "@chakra-ui/react"
+import { Box, Divider, Heading, HStack, Image, Skeleton, Text, VStack } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
-
+import { DistributorItem } from "../../../admin/components/AdminAppPageContent/components/EditAppRewardDistributors/components/DistributorItem"
+import { useCurrentAppRewardDistributors } from "../../../hooks/useCurrentAppRewardDistributors"
 export const DistributionStrategyModal = ({
   isOpen,
   onClose,
@@ -14,6 +15,7 @@ export const DistributionStrategyModal = ({
   logo: string
 }) => {
   const { t } = useTranslation()
+  const { distributors, isLoading: distributorsLoading } = useCurrentAppRewardDistributors()
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose}>
@@ -39,6 +41,21 @@ export const DistributionStrategyModal = ({
             color={"gray.600"}>
             {distributionStrategy}
           </Text>
+          <Divider />
+          <Skeleton isLoaded={!distributorsLoading} w="full">
+            {distributors?.length > 0 ? (
+              <VStack align="stretch" w="full">
+                <Text fontSize="md" fontWeight={"500"}>
+                  {t("Reward distributors")}
+                </Text>
+                {distributors?.map((distributor: string) => (
+                  <HStack key={distributor} borderWidth={1} borderColor="gray.200" w="full" borderRadius="xl" p={2}>
+                    <DistributorItem distributor={distributor} />
+                  </HStack>
+                ))}
+              </VStack>
+            ) : null}
+          </Skeleton>
         </VStack>
       </VStack>
     </BaseModal>
