@@ -1,11 +1,5 @@
-import { TransactionModal, TransactionModalStatus } from "@/components"
 import { useDisclosure } from "@chakra-ui/react"
-import {
-  useUpdateAppDetails,
-  useUploadAppMetadata,
-  useTransactionModalErrorTitle,
-  useTransactionModalStatus,
-} from "@/hooks"
+import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
 
 type Props = {
   transactionModal: ReturnType<typeof useDisclosure>
@@ -14,44 +8,7 @@ type Props = {
   updateAppDetailsMutation: ReturnType<typeof useUpdateAppDetails>
   onTryAgain: () => void
 }
-
-export const UpdateAppMetadataTransactionModal = ({
-  transactionModal,
-  handleClose,
-  uploadMetadataMutation,
-  updateAppDetailsMutation,
-  onTryAgain,
-}: Props) => {
-  const modalStatus = useTransactionModalStatus([
-    { status: uploadMetadataMutation.metadataUploading ? TransactionModalStatus.UploadingMetadata : undefined },
-    {
-      status:
-        updateAppDetailsMutation.error || uploadMetadataMutation.metadataUploadError
-          ? TransactionModalStatus.Error
-          : undefined,
-    },
-    { status: updateAppDetailsMutation.status as TransactionModalStatus },
-  ])
-
-  const errorTitle = useTransactionModalErrorTitle([
-    { error: uploadMetadataMutation.metadataUploadError, title: "Error uploading metadata" },
-    { error: updateAppDetailsMutation.error, title: "Error updating app details" },
-  ])
-
-  return (
-    <TransactionModal
-      isOpen={transactionModal.isOpen}
-      onClose={handleClose}
-      confirmationTitle="Update App details"
-      successTitle="App details updated!"
-      status={modalStatus as TransactionModalStatus}
-      errorDescription={uploadMetadataMutation.metadataUploadError?.message ?? updateAppDetailsMutation.error?.reason}
-      errorTitle={errorTitle}
-      showTryAgainButton={true}
-      onTryAgain={onTryAgain}
-      pendingTitle="Updating app details..."
-      txId={updateAppDetailsMutation.txReceipt?.meta.txID}
-      showExplorerButton
-    />
-  )
+// TODO: Implement this modal to be a centralized modal for all metadata transactions
+export const UpdateAppMetadataTransactionModal = ({}: Props) => {
+  return <></>
 }
