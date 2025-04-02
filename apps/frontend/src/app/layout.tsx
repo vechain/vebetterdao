@@ -3,7 +3,7 @@
 import { Container, Flex, VStack } from "@chakra-ui/react"
 import { Providers } from "./providers"
 
-import { Footer } from "@/components"
+import { Footer, TransactionModalV2 } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel } from "@repo/config"
@@ -11,7 +11,6 @@ import "@/i18n"
 import { useEffect } from "react"
 import { t } from "i18next"
 import { datadogRum } from "@datadog/browser-rum"
-
 const mixpanelToken = getEnvMixPanel()
 const isProduction = process.env.NODE_ENV === "production"
 const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navbar), { ssr: false })
@@ -116,6 +115,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 flexDirection={"column"}>
                 {children}
               </Container>
+              <TransactionModalV2 />
             </Flex>
             <Footer />
           </VStack>
