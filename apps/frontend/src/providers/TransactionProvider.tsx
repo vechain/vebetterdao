@@ -89,9 +89,9 @@ export const TransactionProvider: React.FC<TransactionProviderProps> = ({ childr
       updateTransactionStatus,
       resetTransaction,
       isTxModalOpen,
-      onClose,
+      onClose: handleClose,
     }),
-    [transactionState, startTransaction, updateTransactionStatus, resetTransaction, isTxModalOpen, onClose],
+    [transactionState, startTransaction, updateTransactionStatus, resetTransaction, isTxModalOpen, handleClose],
   )
 
   return <TransactionContext.Provider value={value}>{children}</TransactionContext.Provider>
