@@ -58,7 +58,8 @@ export const useAllocationsRound = (roundId?: string) => {
     const endBlockFromNow = startBlock - currentBlock.number
 
     const durationLeftTimestamp = endBlockFromNow * blockTime
-    return dayjs().add(durationLeftTimestamp, "milliseconds")
+    const endTime = dayjs().add(durationLeftTimestamp, "milliseconds")
+    return endTime.set("second", 0).set("millisecond", 0)
   }, [currentBlock, currentAllocationRound])
 
   const isFirstRound = currentAllocationRound?.roundId === "1"
