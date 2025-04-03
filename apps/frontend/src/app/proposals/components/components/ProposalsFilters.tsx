@@ -18,6 +18,16 @@ const filters: Record<ProposalFilter, string[]> = {
   [ProposalFilter.UpcomingVoting]: [], // Pending
 }
 
+// The following are the default filters that are selected when no ProposalFilter.State is set
+const displayFilters = Object.keys(filters).filter(
+  filterKey =>
+    filterKey !== ProposalFilter.InThisRound &&
+    filterKey !== ProposalFilter.LookingForSupport &&
+    filterKey !== ProposalFilter.UpcomingVoting,
+)
+
+const defaultFilters = [ProposalFilter.InThisRound, ProposalFilter.LookingForSupport, ProposalFilter.UpcomingVoting]
+
 type Props = StackProps
 export const ProposalsFilters = (props: Props) => {
   const { t } = useTranslation()
@@ -35,9 +45,15 @@ export const ProposalsFilters = (props: Props) => {
         setSelectedFilter(selectedFilter?.filter(f => f !== filter))
         return
       }
-      setSelectedFilter([...selectedFilter, filter])
+
+      // If a state filter is selected, remove default filters
+      if (stateFilters.includes(filter as StateFilter)) {
+        setSelectedFilter([...selectedFilter.filter(f => !defaultFilters.includes(f as ProposalFilter)), filter])
+      } else {
+        setSelectedFilter([...selectedFilter, filter])
+      }
     },
-    [setSelectedFilter, selectedFilter],
+    [setSelectedFilter, selectedFilter, stateFilters],
   )
 
   return (
@@ -64,7 +80,7 @@ export const ProposalsFilters = (props: Props) => {
             msOverflowStyle: "none",
           }}
           {...props}>
-          {Object.keys(filters).map(filterKey => {
+          {displayFilters.map(filterKey => {
             const isStateButton = filterKey === ProposalFilter.State
 
             const onClick = () => {
@@ -99,7 +115,7 @@ export const ProposalsFilters = (props: Props) => {
                 }}>
                 <HStack spacing={2} alignItems={"center"}>
                   <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
-                    {filterKey}
+                    {t("Filters")}
                   </Text>
                   {stateCount > 0 && filterKey === ProposalFilter.State && (
                     <Text
