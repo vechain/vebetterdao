@@ -56,6 +56,9 @@ export const ProposalsFilters = (props: Props) => {
     [setSelectedFilter, selectedFilter, stateFilters],
   )
 
+  // Check if any non-default filters are selected
+  const hasNonDefaultFilters = selectedFilter.some(f => !defaultFilters.includes(f as ProposalFilter))
+
   return (
     <Stack
       pos="relative"
@@ -67,6 +70,7 @@ export const ProposalsFilters = (props: Props) => {
       w="full">
       {!isStateFilter ? (
         <HStack
+          justifyContent={"space-between"}
           spacing={2}
           overflowY={"visible"}
           overflowX={"auto"}
@@ -134,6 +138,11 @@ export const ProposalsFilters = (props: Props) => {
               </Button>
             )
           })}
+          {hasNonDefaultFilters && (
+            <Button variant="link" colorScheme="primary" onClick={clearFilter}>
+              {t("Reset filters")}
+            </Button>
+          )}
         </HStack>
       ) : (
         <HStack spacing={2} w="full" align={"center"}>
@@ -194,9 +203,6 @@ export const ProposalsFilters = (props: Props) => {
           </HStack>
         </HStack>
       )}
-      <Button variant="link" colorScheme="primary" onClick={clearFilter}>
-        {t("Reset filters")}
-      </Button>
     </Stack>
   )
 }
