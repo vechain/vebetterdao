@@ -16,14 +16,19 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
   const { data: allocationRound, isLoading: isCurrentRoundLoading } = useAllocationsRound(currentRoundId)
 
   const expiryTimestamp = useMemo(() => {
+    // no round left, most likely in test mode
+    if (allocationRound?.state === 1) {
+      return dayjs().valueOf()
+    }
     // fallback to 7 days in the future if cached just after new round
     if (allocationRound?.voteEndTimestamp?.isBefore(dayjs())) {
       return dayjs().add(7, "day").valueOf()
     }
 
-    const date = allocationRound?.voteEndTimestamp?.toDate()
-    return date
-  }, [allocationRound?.voteEnd])
+    // For accuracy in the UI, we round to the nearest minute
+    const endTime = allocationRound?.voteEndTimestamp?.toDate()
+    return endTime?.setSeconds(0, 0).valueOf()
+  }, [allocationRound?.voteEnd, allocationRound?.state, currentRoundId])
 
   const countdownKey = `countdown-${allocationRound?.roundId ?? "initial"}`
 
@@ -48,6 +53,7 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
     <Countdown
       key={countdownKey}
       date={expiryTimestamp}
+      now={() => Date.now()}
       renderer={({ days, hours, minutes, seconds }) => {
         // Check if near end (1 hour or less)
         const isNearEnd = days === 0 && hours <= 1
