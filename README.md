@@ -301,24 +301,6 @@ yarn contracts:deploy:testnet
 
 Addresses will be outputted in the console. If you want the frontend to use those addresses then copy them in the `testnet.ts` file inside `./packages/config/`.
 
-## Verify contracts (Optional)
-
-Optionally verify your smart contracts on Sourcify. This allows 3rd to view and independently verify all of the following:
-
-- Source code
-- Metadata
-- Contract ABI
-- Contract Bytecode
-- Contract transaction ID
-
-After deploying `SimpleStorage`, the console will print the address of the deployed contract. You can verify the contract on [sourcify.eth](https://repo.sourcify.dev/select-contract/):
-
-```bash
-yarn contracts:verify:mainnet 0x98307db87474fc30d6e022e2b31f384b134c2c2a
-```
-
-**Note:** Hardhat throws an error when verifying contracts on VeChain networks. This error can be ignored as the contract is still verified on Sourcify. See an [example here](https://repo.sourcify.dev/contracts/full_match/100010/0x98307db87474fC30D6E022E2b31f384B134C2c2A/sources/contracts/)
-
 ## Simulating rounds
 
 It is possible to simulate x-app voting rounds. Simply run a clean version of the app using `make solo-down && make solo-up && yarn dev:simulation`. The simulation will only work against thor solo in your local environment.
