@@ -61,7 +61,9 @@
     "playwright:e2e": "dotenv -v NEXT_PUBLIC_APP_ENV=e2e -- turbo run playwright:e2e",
     "generate-translations": "dotenv -e .env -- turbo generate-translations",
     "complete-translations": "dotenv -e .env -- turbo complete-translations",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "contracts:verify:testnet": "dotenv -v NEXT_PUBLIC_APP_ENV=testnet -- turbo run verify:testnet --filter=contracts -- ",
+    "contracts:verify:mainnet": "dotenv -v NEXT_PUBLIC_APP_ENV=mainnet -- turbo run verify:mainnet --filter=contracts -- "
   },
   "devDependencies": {
     "@datadog/browser-rum": "^5.23.0",

@@ -250,6 +250,14 @@
     },
     "complete-translations": {
       "cache": false
+    },
+    "verify:testnet": {
+      "cache": false,
+      "dependsOn": ["^compile"]
+    },
+    "verify:mainnet": {
+      "cache": false,
+      "dependsOn": ["^compile"]
     }
   }
 }
