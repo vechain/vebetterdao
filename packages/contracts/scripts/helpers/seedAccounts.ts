@@ -1,6 +1,5 @@
+import { VECHAIN_DEFAULT_MNEMONIC } from "@vechain/hardhat-vechain"
 import { unitsUtils, addressUtils, mnemonic } from "@vechain/sdk-core"
-
-const VECHAIN_DEFAULT_MNEMONIC = "denial kitchen pet squirrel other broom bar gas better priority spoil cross"
 
 export type TestPk = {
   pk: Uint8Array
