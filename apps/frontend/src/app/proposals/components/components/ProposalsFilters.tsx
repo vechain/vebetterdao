@@ -9,8 +9,6 @@ const filters: Record<ProposalFilter, string[]> = {
     StateFilter.Canceled,
     StateFilter.Defeated,
     StateFilter.Succeeded,
-    StateFilter.Queued,
-    StateFilter.Executed,
     StateFilter.DepositNotMet,
   ],
   [ProposalFilter.InThisRound]: [],
@@ -42,13 +40,31 @@ export const ProposalsFilters = (props: Props) => {
     (filter: ProposalFilter | StateFilter) => {
       const alreadySelected = selectedFilter?.includes(filter)
       if (alreadySelected) {
-        setSelectedFilter(selectedFilter?.filter(f => f !== filter))
+        // When deselecting Succeeded, remove all related states
+        if (filter === StateFilter.Succeeded) {
+          setSelectedFilter(
+            selectedFilter?.filter(
+              f => ![StateFilter.Succeeded, StateFilter.Queued, StateFilter.Executed].includes(f as StateFilter),
+            ),
+          )
+        } else {
+          setSelectedFilter(selectedFilter?.filter(f => f !== filter))
+        }
         return
       }
 
       // If a state filter is selected, remove default filters
       if (stateFilters.includes(filter as StateFilter)) {
-        setSelectedFilter([...selectedFilter.filter(f => !defaultFilters.includes(f as ProposalFilter)), filter])
+        let newFilters = [...selectedFilter.filter(f => !defaultFilters.includes(f as ProposalFilter))]
+
+        // When selecting Succeeded, add all related states
+        if (filter === StateFilter.Succeeded) {
+          newFilters = [...newFilters, StateFilter.Succeeded, StateFilter.Queued, StateFilter.Executed]
+        } else {
+          newFilters.push(filter)
+        }
+
+        setSelectedFilter(newFilters)
       } else {
         setSelectedFilter([...selectedFilter, filter])
       }
