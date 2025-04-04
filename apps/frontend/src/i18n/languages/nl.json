@@ -1604,5 +1604,10 @@
   "Resume": "Hervatten",
   "Pause": "Pauzeren",
   "Only app admin can transfer and manage the rewards pool": "Alleen de appbeheerder kan de beloningspool overboeken en beheren",
-  "Access restricted": "Toegang beperkt"
+  "Access restricted": "Toegang beperkt",
+  "This user requested to delegate their qualification": "Deze gebruiker heeft verzocht om hun kwalificatie te delegeren",
+  "This user will not able to vote when the recipient accepts their request.": "Deze gebruiker zal niet kunnen stemmen wanneer de ontvanger hun verzoek accepteert.",
+  "This user is not currently able to vote due other user is using their Voting Qualification.": "Deze gebruiker kan momenteel niet stemmen omdat een andere gebruiker hun stemkwalificatie gebruikt.",
+  "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "Met {{amount}} VOT3 kan stemmen voor {{numApps}} apps mislukken vanwege afronding. Overweeg om op minder apps te stemmen of meer VOT3 te krijgen.",
+  "Filters": "Filters"
 }
