@@ -30,7 +30,7 @@ export const JoinB3TRAppsBanner = () => {
           w={{ base: "full", md: "50%" }}>
           {isMobile && (
             <Image
-              src="/images/mascote/mascote-welcoming-left-head.svg"
+              src="/images/mascot/mascot-welcoming-left-head.png"
               alt="mascote-welcoming-head"
               width="100%"
               boxSize="100px"
@@ -53,7 +53,7 @@ export const JoinB3TRAppsBanner = () => {
         {!isMobile && (
           <Image
             alignSelf={"flex-end"}
-            src="/images/mascote/mascote-welcoming.png"
+            src="/images/mascot/mascot-welcoming.png"
             alt="mascote-welcoming"
             boxSize="200px"
             overflow={"hidden"}
