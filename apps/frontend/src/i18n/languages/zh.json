@@ -1604,5 +1604,10 @@
   "Resume": "继续",
   "Pause": "暂停",
   "Only app admin can transfer and manage the rewards pool": "只有应用管理员可以转移和管理奖励池",
-  "Access restricted": "访问受限"
+  "Access restricted": "访问受限",
+  "This user requested to delegate their qualification": "此用户请求委托其资格",
+  "This user will not able to vote when the recipient accepts their request.": "当接收者接受他们的请求时，该用户将无法投票。",
+  "This user is not currently able to vote due other user is using their Voting Qualification.": "由于其他用户正在使用其投票资格，当前此用户无法投票。",
+  "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "使用{{amount}} VOT3，投票给{{numApps}}个应用可能因四舍五入而失败。请考虑投票给更少的应用或获取更多的VOT3。",
+  "Filters": "筛选器"
 }
