@@ -50,13 +50,10 @@ export const ProposalsFilters = (props: Props) => {
           newFilters = selectedFilter?.filter(f => f !== filter)
         }
 
-        // If after removing filters there are no non-default filters left,
-        // restore default filters
-        const hasRemainingNonDefaultFilters = newFilters.some(
-          f => !defaultFilters.includes(f as ProposalFilter) && !stateFilters.includes(f as StateFilter),
-        )
+        // Only restore default filters if there are no state filters remaining
+        const hasRemainingStateFilters = newFilters.some(f => stateFilters.includes(f as StateFilter))
 
-        if (!hasRemainingNonDefaultFilters) {
+        if (!hasRemainingStateFilters) {
           setSelectedFilter(defaultFilters)
         } else {
           setSelectedFilter(newFilters)
