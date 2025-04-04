@@ -40,15 +40,26 @@ export const ProposalsFilters = (props: Props) => {
     (filter: ProposalFilter | StateFilter) => {
       const alreadySelected = selectedFilter?.includes(filter)
       if (alreadySelected) {
+        let newFilters
         // When deselecting Succeeded, remove all related states
         if (filter === StateFilter.Succeeded) {
-          setSelectedFilter(
-            selectedFilter?.filter(
-              f => ![StateFilter.Succeeded, StateFilter.Queued, StateFilter.Executed].includes(f as StateFilter),
-            ),
+          newFilters = selectedFilter?.filter(
+            f => ![StateFilter.Succeeded, StateFilter.Queued, StateFilter.Executed].includes(f as StateFilter),
           )
         } else {
-          setSelectedFilter(selectedFilter?.filter(f => f !== filter))
+          newFilters = selectedFilter?.filter(f => f !== filter)
+        }
+
+        // If after removing filters there are no non-default filters left,
+        // restore default filters
+        const hasRemainingNonDefaultFilters = newFilters.some(
+          f => !defaultFilters.includes(f as ProposalFilter) && !stateFilters.includes(f as StateFilter),
+        )
+
+        if (!hasRemainingNonDefaultFilters) {
+          setSelectedFilter(defaultFilters)
+        } else {
+          setSelectedFilter(newFilters)
         }
         return
       }
