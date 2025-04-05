@@ -1,13 +1,15 @@
 import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
 import { Grid, GridItem, Hide, Show, VStack } from "@chakra-ui/react"
 import { DashboardSideBar } from "./DashboardSideBar"
-import { DashboardXApps } from "./DashboardXApps"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 import { ActionBanner } from "./ActionBanners"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { GmNFTAndNodeCard } from "@/components/GmNFTAndNodeCard"
+import { useWallet } from "@vechain/vechain-kit"
 
 export const HomePageContent = () => {
+  const { connection } = useWallet()
+
   return (
     <>
       <Hide above="md">
@@ -20,9 +22,11 @@ export const HomePageContent = () => {
         maxW="full"
         alignItems={"flex-start"}
         data-testid="form-proposal-layout">
-        <GridItem colSpan={[1, 1, 3]} display="grid">
-          <ActionBanner />
-        </GridItem>
+        {connection.isConnected && (
+          <GridItem colSpan={[1, 1, 3]} display="grid">
+            <ActionBanner />
+          </GridItem>
+        )}
         <GridItem colSpan={[1, 1, 3]}>
           <GmNFTAndNodeCard />
         </GridItem>
@@ -34,7 +38,6 @@ export const HomePageContent = () => {
             <Show above="md">
               <DashboardAllocationRounds />
             </Show>
-            <DashboardXApps />
           </VStack>
         </GridItem>
         <GridItem colSpan={1} order={[1, 1, 2]}>

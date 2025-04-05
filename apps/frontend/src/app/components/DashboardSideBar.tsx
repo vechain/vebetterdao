@@ -22,7 +22,7 @@ export const DashboardSideBar = () => {
       <Show below="md">
         <CantVoteCard />
       </Show>
-      <YourBetterActionsCard address={account?.address ?? ""} />
+      {account?.address && <YourBetterActionsCard address={account?.address ?? ""} />}
       <Leaderboard />
       <ManagedAppsCard />
       <SupplyBreakdownCard />
