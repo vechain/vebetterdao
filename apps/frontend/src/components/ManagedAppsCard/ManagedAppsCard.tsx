@@ -32,11 +32,11 @@ export const ManagedAppsCard = () => {
   if (!userAppRoles || userAppRoles.length < 1) return null
 
   return (
-    <Card w="full" variant="baseWithBorder">
+    <Card w="full" variant="baseWithBorder" minH={"250px"}>
       <CardBody>
         <VStack spacing={4} align="flex-start" w={"full"}>
           <HStack justifyContent={"space-between"} w="full">
-            <Heading fontSize="24px">{t("Managed apps")}</Heading>
+            <Heading size="md">{t("Managed apps")}</Heading>
 
             {userAppRoles.length > 1 && (
               <HStack justifyContent={"flex-end"}>

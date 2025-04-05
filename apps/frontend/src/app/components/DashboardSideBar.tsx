@@ -24,8 +24,10 @@ export const DashboardSideBar = () => {
       </Show>
       {account?.address && <YourBetterActionsCard address={account?.address ?? ""} />}
       <Leaderboard />
-      <ManagedAppsCard />
-      <SupplyBreakdownCard />
+      <Show below="md">
+        <ManagedAppsCard />
+        <SupplyBreakdownCard />
+      </Show>
     </VStack>
   )
 }

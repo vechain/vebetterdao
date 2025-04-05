@@ -1,11 +1,12 @@
 import { DashboardAllocationRounds } from "@/app/rounds/components/DashboardAllocationRounds/DashboardAllocationRounds"
-import { Grid, GridItem, Hide, Show, VStack } from "@chakra-ui/react"
+import { Grid, GridItem, Hide, HStack, Show, VStack } from "@chakra-ui/react"
 import { DashboardSideBar } from "./DashboardSideBar"
 import { RoundInfoBottomSheet } from "./RoundInfoBottomSheet"
 import { ActionBanner } from "./ActionBanners"
 import { CantVoteCard } from "./CantVoteCard/CantVoteCard"
 import { GmNFTAndNodeCard } from "@/components/GmNFTAndNodeCard"
 import { useWallet } from "@vechain/vechain-kit"
+import { ManagedAppsCard, SupplyBreakdownCard } from "@/components"
 
 export const HomePageContent = () => {
   const { connection } = useWallet()
@@ -37,6 +38,12 @@ export const HomePageContent = () => {
             </Show>
             <Show above="md">
               <DashboardAllocationRounds />
+            </Show>
+            <Show above="md">
+              <HStack>
+                <ManagedAppsCard />
+                <SupplyBreakdownCard />
+              </HStack>
             </Show>
           </VStack>
         </GridItem>
