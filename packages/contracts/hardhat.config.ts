@@ -50,11 +50,12 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 1800000,
+    grep: process.env.SHARD || undefined,
   },
   gasReporter: {
     enabled: false,
   },
-  defaultNetwork: "hardhat",
+  defaultNetwork: process.env.IS_TEST_COVERAGE ? "hardhat" : "vechain_solo",
   networks: {
     hardhat: {
       chainId: 1337,
