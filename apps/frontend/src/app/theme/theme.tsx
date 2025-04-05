@@ -1,5 +1,4 @@
-import { extendTheme } from "@chakra-ui/react"
-import { keyframes } from "@emotion/react"
+import { extendTheme, keyframes } from "@chakra-ui/react"
 import { darkThemeColors, lightThemeColors } from "./colors"
 import { cardTheme } from "./card"
 import "@fontsource-variable/instrument-sans"
