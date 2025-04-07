@@ -1,25 +1,13 @@
-import { useEffect, useLayoutEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { AnalyticsUtils } from "@/utils"
-import {
-  VStack,
-  Heading,
-  Text,
-  Box,
-  Button,
-  Link,
-  Icon,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  // useToast,
-  Spinner,
-} from "@chakra-ui/react"
-import { FiExternalLink } from "react-icons/fi"
+import { VStack, Heading, Button, Spinner } from "@chakra-ui/react"
+
 import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
-// import { useVerifiedVetDomain } from "./hooks/useVerifiedVetDomain"
+import { useVerifiedVetDomain } from "./hooks/useVerifiedVetDomain"
+import { VerificationSection, VerificationResult, AppealDesc, AppealWarning } from "./components"
 
 export const AppealContent = () => {
   const router = useRouter()
@@ -27,15 +15,11 @@ export const AppealContent = () => {
   const { account: connectedAccount } = useWallet()
   const [verificationStatus, setVerificationStatus] = useState<"idle" | "pending" | "success" | "error">("idle")
   const isConnectedUser = !!connectedAccount?.address
-  // const {
-  // data: isVerifiedVetDomain,
-  // status: verifiedVetDomainStatus,
-  // error: verifiedVetDomainError,
-  // } = useVerifiedVetDomain(connectedAccount?.address)
+  const { data: isVerifiedVetDomain } = useVerifiedVetDomain(connectedAccount?.address)
 
-  // const isVerified = useMemo(() => {
-  //   return isVerifiedVetDomain
-  // }, [isVerifiedVetDomain])
+  const isVerified = useMemo(() => {
+    return false
+  }, [isVerifiedVetDomain])
 
   useEffect(() => {
     AnalyticsUtils.trackPage("Appeal")
@@ -56,29 +40,7 @@ export const AppealContent = () => {
     )
   }
 
-  // Top section
-  const needKYC =
-    "Your wallet has been flagged for bot-like behavior. To lift the restriction, please complete the KYC verification process."
-  // const alreadyKYCTop =
-  //   "Your wallet has been flagged again for bot-like behavior. Since you have already completed the KYC process, you can simply click the button below to appeal."
-
-  // Middle section
-  // const alreadyKYCMiddle = "KYC previously completed and verified."
-
-  // Bottom section
-  // const needKYCBottom = "Once you completed the KYC, please click on the following button to complete the appeal"
-  // const alreadyKYCBottom = "You can appeal again by clicking on the following button"
-
-  // Confirmation section
-  const successfulKYCAppeal = "The appeal process is complete. You have just been unbanned."
-  const failedKYCAppeal = "Your KYC verification was unsuccessful. Please try again or contact support."
-
-  const getVerificationUrl = () => {
-    return "https://vet.domains/verify"
-  }
-
   const handleVerificationSubmit = async () => {
-    // Set status to loading
     setVerificationStatus("pending")
 
     try {
@@ -90,117 +52,50 @@ export const AppealContent = () => {
         body: JSON.stringify({ walletAddress: connectedAccount?.address }),
       })
 
-      // const data = await response.json()
+      const data = await response.json()
+      console.log("data", data)
 
       if (response.ok) {
         setVerificationStatus("success")
-        // toast({
-        //   title: "Verification Successful",
-        //   status: "success",
-        //   duration: 5000,
-        //   isClosable: true,
-        // })
       } else {
         setVerificationStatus("error")
-        // toast({
-        //   title: "Verification Failed",
-        //   description: data.message,
-        //   status: "error",
-        //   duration: 5000,
-        //   isClosable: true,
-        // })
       }
     } catch (error) {
       setVerificationStatus("error")
-      // toast({
-      //   title: "Verification Failed",
-      //   description: "An unexpected error occurred",
-      //   status: "error",
-      //   duration: 5000,
-      //   isClosable: true,
-      // })
     }
   }
 
   return (
-    <VStack gap={6} align="stretch" w="full" maxW={"container.md"} mx="auto" data-testid="appeal-page">
+    <VStack gap={6} align="stretch" maxW={"container.md"} mx="auto" data-testid="appeal-page">
       <Heading size={"xl"}>{t("Wallet Restriction Appeal")}</Heading>
 
-      <VStack bg="white" borderRadius={12} p={6} gap={6}>
-        <Text color="black" fontSize="md" fontWeight={400}>
-          {needKYC}
-        </Text>
+      <VStack bg="white" borderRadius={12} borderWidth={1} borderColor="gray.200" gap={6} p={6}>
+        <AppealDesc isVerified={isVerified ?? false} />
 
-        <Alert status="warning" borderRadius="16px" bg="#FFF3E5">
-          <AlertIcon color="#F29B32" />
-          <Box>
-            <Text fontSize="sm">
-              {`You must complete the verification using the same wallet address that was flagged.
-              Verification with a different wallet will not lift the restrictions on your flagged wallet.`}
-            </Text>
-          </Box>
-        </Alert>
+        <AppealWarning isVerified={isVerified ?? false} />
 
-        {/* Verification information */}
-        <Box p={6} borderRadius="16px" bg="blue.50">
-          <VStack align="stretch" spacing={4}>
-            <Heading size="md">{`Complete Identity Verification`}</Heading>
+        {!isVerified && <VerificationSection />}
 
-            <Text>
-              {`For your security, we'll redirect you to our trusted verification partner (vet.domains) in a new tab.`}
-            </Text>
-
-            <Button
-              as={Link}
-              href={getVerificationUrl()}
-              isExternal
-              colorScheme="blue"
-              rightIcon={<Icon as={FiExternalLink} />}
-              width="fit-content"
-              _hover={{ textDecoration: "none" }}>
-              {`Start Verification`}
-            </Button>
-
-            <Text fontSize="sm" color="gray.600">
-              {`After completing verification, return to this page and click "I've Completed Verification" below.`}
-            </Text>
-          </VStack>
-        </Box>
-
-        {/* Completion button */}
         <Button
           colorScheme="green"
           size="lg"
           onClick={handleVerificationSubmit}
           isLoading={verificationStatus === "pending"}
-          loadingText="Verifying..."
+          loadingText={t("Verifying...")}
           isDisabled={verificationStatus === "success" || verificationStatus === "pending"}>
-          {`I've Completed Verification`}
+          {t("I've Completed Verification")}
         </Button>
 
-        {/* Verification result section */}
-        {verificationStatus === "success" && (
-          <Alert status="success" borderRadius="16px" variant="solid">
-            <AlertIcon />
-            <Box>
-              <AlertTitle fontWeight="600" pb={2}>
-                {`Verification Successful`}
-              </AlertTitle>
-              <Text fontSize="sm">{successfulKYCAppeal}</Text>
-            </Box>
-          </Alert>
-        )}
-
-        {verificationStatus === "error" && (
-          <Alert status="error" borderRadius="16px" bg="#FCEEF1">
-            <AlertIcon />
-            <Box>
-              <AlertTitle fontWeight="600" pb={2}>
-                {`Verification Failed`}
-              </AlertTitle>
-              <Text fontSize="sm">{failedKYCAppeal}</Text>
-            </Box>
-          </Alert>
+        {(verificationStatus === "success" || verificationStatus === "error") && (
+          <VerificationResult
+            status={verificationStatus as "success" | "error"}
+            title={verificationStatus === "success" ? t("Verification Successful") : t("Verification Failed")}
+            description={
+              verificationStatus === "success"
+                ? t("The appeal process is complete. You have just been unbanned.")
+                : t("Your KYC verification was unsuccessful. Please try again or contact support.")
+            }
+          />
         )}
       </VStack>
     </VStack>
