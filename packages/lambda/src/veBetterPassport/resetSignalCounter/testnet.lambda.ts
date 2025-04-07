@@ -1,20 +1,19 @@
-import path from "path"
-import dotenv from "dotenv"
+import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
 import { FunctionFragment } from "ethers"
 
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { HttpClient, ThorClient } from "@vechain/sdk-network"
-import { addressUtils, clauseBuilder, mnemonic } from "@vechain/sdk-core"
+import { addressUtils, clauseBuilder } from "@vechain/sdk-core"
 
+import { isValid } from "@repo/utils/AddressUtils"
 import { VeBetterPassport__factory } from "@repo/contracts/typechain-types"
-import localConfig from "@repo/config/local"
-import { getConfig } from "@repo/config"
+import testnetConfig from "@repo/config/testnet"
 
 import { getSecret } from "../../helpers/secret"
+import { CustomApiError, StandardApiError, SuccessResponseType } from "../../helpers/api.types"
+import { buildResponse } from "../../helpers/api/response"
 
-dotenv.config({ path: path.resolve(process.cwd(), "../../.env") })
-
-const NODE_URL = getConfig("testnet").nodeUrl
+const NODE_URL = "https://testnet.vechain.org/"
 
 /**
  * Retrieves the caller wallet information.
@@ -22,10 +21,8 @@ const NODE_URL = getConfig("testnet").nodeUrl
  */
 const getCallerWalletInfo = async (): Promise<{ walletAddress: string; privateKey: string }> => {
   const client = new SecretsManagerClient({ region: "eu-west-1" })
-  const AWS_MINTER_PK_SECRET_ID = "creator-nft-minter-pk"
-  const AWS_MINTER_PK_SECRET_NAME = "creator_nft_minter_pk"
 
-  const privateKey = await getSecret(client, AWS_MINTER_PK_SECRET_ID, AWS_MINTER_PK_SECRET_NAME)
+  const privateKey = await getSecret(client, "creator_nft_minter_pk", "creator-nft-minter-pk")
   const walletAddress = addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex"))
 
   return { walletAddress, privateKey }
@@ -41,7 +38,7 @@ const resetSignalCounter = async (thor: ThorClient, bannedWallet: string, reason
   const { privateKey, walletAddress } = await getCallerWalletInfo()
 
   const clause = clauseBuilder.functionInteraction(
-    localConfig.veBetterPassportContractAddress,
+    testnetConfig.veBetterPassportContractAddress,
     VeBetterPassport__factory.createInterface().getFunction("resetUserSignalsWithReason") as FunctionFragment,
     [bannedWallet, reason],
   )
@@ -60,47 +57,47 @@ const resetSignalCounter = async (thor: ThorClient, bannedWallet: string, reason
   return { receipt, gasResult }
 }
 
-/**
- * Retrieves the version of the VeBetterPassport contract.
- * @returns The version of the contract.
- */
-const getContractVersion = async (thor: ThorClient) => {
-  const getVersion = await thor.contracts.executeContractCall(
-    localConfig.veBetterPassportContractAddress,
-    VeBetterPassport__factory.createInterface().getFunction("version") as FunctionFragment,
-    [],
-  )
+export const handler = async (event: any, context: Context): Promise<APIGatewayProxyResult> => {
+  console.log(`Event: ${JSON.stringify(event, null, 2)}`)
+  console.log(`Context: ${JSON.stringify(context, null, 2)}`)
 
-  return getVersion[0]
-}
-
-// Main execution function with error handling
-const main = async () => {
   try {
-    const thor = new ThorClient(new HttpClient(NODE_URL), { isPollingEnabled: false })
+    const requestBody = event?.walletAddress
 
-    const version = await getContractVersion(thor)
-    console.log("Contract version:", version)
+    if (!requestBody) {
+      return buildResponse(StandardApiError.BAD_REQUEST, {
+        message: `Invalid request body: ${JSON.stringify(event)}`,
+      })
+    }
 
-    const bannedWallet = "0x0000000000000000000000000000000000000000"
-    const reason = "From script: reseting user signal counter"
-    const result = await resetSignalCounter(thor, bannedWallet, reason)
-    console.log("Signal counter reset successfully:", result)
+    const walletToBeUnbanned = requestBody
+
+    if (!isValid(walletToBeUnbanned)) {
+      return buildResponse(StandardApiError.BAD_REQUEST, {
+        message: "Invalid wallet address",
+      })
+    }
+
+    const thorClient = new ThorClient(new HttpClient(NODE_URL), { isPollingEnabled: false })
+
+    // TODO: Check if a wallet has completed the KYC
+
+    const reason = `From lambda: reseting user signal counter ${walletToBeUnbanned}`
+    const { receipt, gasResult } = await resetSignalCounter(thorClient, walletToBeUnbanned, reason)
+
+    if (!receipt) {
+      return buildResponse(CustomApiError.TRANSACTION_REVERTED, {
+        revertReasons: gasResult?.revertReasons,
+        vmErrors: gasResult?.vmErrors,
+      })
+    }
+
+    return buildResponse(SuccessResponseType.SUCCESS, { receipt })
   } catch (error) {
-    console.error("Error executing reset signal counter:", error)
-    throw error
+    console.error("Error resetting signal counter:", error)
+
+    return buildResponse(StandardApiError.INTERNAL_SERVER_ERROR, {
+      error: error instanceof Error ? error.message : String(error),
+    })
   }
 }
-
-// Execute main function if this script is run directly
-if (require.main === module) {
-  main()
-    .then(() => console.log("Process completed successfully"))
-    .catch(error => {
-      console.error("Process failed:", error)
-      process.exit(1)
-    })
-}
-
-// Export for external use
-export { resetSignalCounter, main }

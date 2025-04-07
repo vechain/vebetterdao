@@ -58,27 +58,10 @@ const resetSignalCounter = async (thor: ThorClient, bannedWallet: string, reason
   return { receipt, gasResult }
 }
 
-/**
- * Retrieves the version of the VeBetterPassport contract.
- * @returns The version of the contract.
- */
-const getContractVersion = async (thor: ThorClient) => {
-  const getVersion = await thor.contracts.executeContractCall(
-    localConfig.veBetterPassportContractAddress,
-    VeBetterPassport__factory.createInterface().getFunction("version") as FunctionFragment,
-    [],
-  )
-
-  return getVersion[0]
-}
-
 // Main execution function with error handling
 const main = async () => {
   try {
     const thor = new ThorClient(new HttpClient(NODE_URL), { isPollingEnabled: false })
-
-    const version = await getContractVersion(thor)
-    console.log("Contract version:", version)
 
     const bannedWallet = "0x55c033d731d3213254821f63C034243D2717C1a9"
     const reason = "Reseting user signal counter"
