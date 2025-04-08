@@ -24,8 +24,9 @@
 pragma solidity 0.8.20;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+
 import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
 import { INews } from "./interfaces/INews.sol";
 
@@ -34,12 +35,14 @@ import { INews } from "./interfaces/INews.sol";
 /// @dev This contract extends AccessControlUpgradeable with upgradeable pattern, enumerable, pausable, and access control functionalities.
 contract News is
   INews,
+  PausableUpgradeable,
   UUPSUpgradeable,
-  AccessControlUpgradeable,
+  AccessControlUpgradeable
 {
   // ---------------- Roles ----------------
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+  bytes32 public constant PUBLISHER_ROLE = keccak256("PUBLISHER_ROLE");
 
   // ---------------- Errors ----------------
   
@@ -57,7 +60,7 @@ contract News is
     IX2EarnApps x2EarnApps;
   }
 
-  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.X2EarnRewardsPool")) - 1)) & ~bytes32(uint256(0xff))
+  // keccak256(abi.encode(uint256(keccak256("b3tr.storage.News")) - 1)) & ~bytes32(uint256(0xff))
   bytes32 private constant NewsStorageLocation =
     0x7c0dcc5654efea34bf150fefe2d7f927494d4026026590e81037cb4c7a9cdc00; //TODO: change this
 
@@ -72,7 +75,8 @@ contract News is
   /// @param _x2EarnApps The address of the X2EarnApps contract
   /// @param _defaultAdmin Address to be assigned the default admin role
   /// @param _upgrader Address to be assigned the upgrader role
-  function initialize(IX2EarnApps _x2EarnApps, address _defaultAdmin, address _upgrader) public initializer {
+  /// @param _pauser Address to be assigned the pauser role
+  function initialize(IX2EarnApps _x2EarnApps, address _defaultAdmin, address _upgrader, address _pauser) public initializer {
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
@@ -82,6 +86,8 @@ contract News is
 
     _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
     _grantRole(UPGRADER_ROLE, _upgrader);
+    _grantRole(PAUSER_ROLE, _pauser);
+
 
 
     NewsStorage storage $ = _getNewsStorage();
@@ -98,8 +104,61 @@ contract News is
     }
     _;
   }
+    /// @notice Modifier to check if news is not paused
+  modifier whenNewsNotPaused() {
+    NewsStorage storage $ = _getNewsStorage();
+    require(!paused(), "News: News is paused");
+    _;
+  }
 
   // ---------- Setters ---------- //
+
+  /// @notice Publishes news for an app
+  /// @param appId The ID of the app for which the news was published
+  /// @param metadata The metadata of the news
+  /// @dev Only callable by app admins or creators
+  /// @notice Moderator checks will be added in the future.
+  /// @notice The current IX2EarnApps interface does not expose the `isAppModerator` function.
+  function publishNews(bytes32 appId, string memory metadata) public whenNewsNotPaused {
+    NewsStorage storage $ = _getNewsStorage();
+    require($.x2EarnApps.appExists(appId), "News: app does not exist");
+   
+    require($.x2EarnApps.isAppAdmin(appId, msg.sender) || $.x2EarnApps.isAppCreator(appId, msg.sender), "News: not a moderator or admin");
+    
+    emit NewsPublished(appId, metadata, msg.sender);
+  }
+
+
+  /// @notice Publishes news for an app
+  /// @param appId The ID of the app for which the news was published
+  /// @param metadata The metadata of the news
+  /// @dev Only callable by admins or accounts with the PUBLISHER_ROLE
+  function publishNewsAdmin(bytes32 appId, string memory metadata) public whenNewsNotPaused onlyRoleOrAdmin(PUBLISHER_ROLE) {
+    NewsStorage storage $ = _getNewsStorage();
+    require($.x2EarnApps.appExists(appId), "News: app does not exist");
+    emit NewsPublished(appId, metadata, msg.sender);
+  }
+
+  /**
+   * @dev Sets the X2EarnApps contract address.
+   *
+   * @param _x2EarnApps the new X2EarnApps contract
+   */
+  function setX2EarnApps(IX2EarnApps _x2EarnApps) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    require(address(_x2EarnApps) != address(0), "News: x2EarnApps is the zero address");
+
+    NewsStorage storage $ = _getNewsStorage();
+    $.x2EarnApps = _x2EarnApps;
+
+  }
+
+  /**
+   * @dev Retrieves the X2EarnApps contract.
+   */
+  function x2EarnApps() external view returns (IX2EarnApps) {
+    NewsStorage storage $ = _getNewsStorage();
+    return $.x2EarnApps;
+  }
 
   /// @notice Pauses all token transfers and minting functions
   /// @dev Only callable by accounts with the PAUSER_ROLE or the DEFAULT_ADMIN_ROLE
