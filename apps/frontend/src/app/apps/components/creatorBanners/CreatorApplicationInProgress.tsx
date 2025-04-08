@@ -22,7 +22,7 @@ export const CreatorApplicationInProgress = () => {
             <Box w={"120px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
               <Image
                 src="/images/mascot/mascot-welcoming.png"
-                alt="mascote-welcoming"
+                alt="mascot-welcoming"
                 position="absolute"
                 top="30%"
                 left="-10%"

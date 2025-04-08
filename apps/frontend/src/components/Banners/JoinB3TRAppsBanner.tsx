@@ -31,7 +31,7 @@ export const JoinB3TRAppsBanner = () => {
           {isMobile && (
             <Image
               src="/images/mascot/mascot-welcoming-left-head.png"
-              alt="mascote-welcoming-head"
+              alt="mascot-welcoming-head"
               width="100%"
               boxSize="100px"
               objectFit="cover"
@@ -54,7 +54,7 @@ export const JoinB3TRAppsBanner = () => {
           <Image
             alignSelf={"flex-end"}
             src="/images/mascot/mascot-welcoming.png"
-            alt="mascote-welcoming"
+            alt="mascot-welcoming"
             boxSize="200px"
             overflow={"hidden"}
             objectFit="contain"

@@ -42,7 +42,7 @@ export const CreatorApplyNow = () => {
               <Box w={"120px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
                 <Image
                   src="/images/mascot/mascot-welcoming.png"
-                  alt="mascote-welcoming"
+                  alt="mascot-welcoming"
                   position="absolute"
                   transform={"translate(-15%, 70%) rotate(30deg) scale(2.5)"}
                   objectFit="contain"
@@ -58,7 +58,7 @@ export const CreatorApplyNow = () => {
                   <Box w={"80px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
                     <Image
                       src="/images/mascot/mascot-welcoming.png"
-                      alt="mascote-welcoming"
+                      alt="mascot-welcoming"
                       position="absolute"
                       transform={"translate(-15%, 50%) rotate(30deg) scale(2.5)"}
                       objectFit="contain"
