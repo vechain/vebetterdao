@@ -1,40 +1,38 @@
 "use-client"
-import { Card, CardBody, Text, Modal, ModalOverlay } from "@chakra-ui/react"
+import { useSteps } from "@chakra-ui/react"
 import { useCallback, useMemo, useState } from "react"
 import { useConvertB3tr, useConvertVot3, useSmartAccountUpgradeRequired } from "@/hooks"
 import { useForm } from "react-hook-form"
-import { CustomModalContent } from "../CustomModalContent"
-import { TokenSelectionContent, SwapTokenContent } from "./components"
+import { TokenSelectionContent, SwapTokenContent, ReviewSwapContent } from "./components"
 import { useB3trBalance, useB3trConverted, useVot3Balance } from "@/api"
 import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 import { useTransaction } from "@/providers/TransactionProvider"
+import { StepModal, type Step } from "../StepModal"
+import BigNumber from "bignumber.js"
 
 export type Props = {
   isOpen: boolean
   onClose: () => void
 }
 
-enum CardContentStep {
-  SELECT_TOKEN,
-  CONFIRM_SWAP,
-}
-
-const zoomInVariants = {
-  hidden: { scale: 0.95, opacity: 0.8 },
-  visible: {
-    scale: 1,
-    opacity: 1,
-    transition: { duration: 0.3, ease: "easeInOut" },
-  },
+export enum ConvertStep {
+  SELECT_TOKEN = "SELECT_TOKEN",
+  CONFIRM_SWAP = "CONFIRM_SWAP",
+  REVIEW_TX = "REVIEW_TX",
 }
 
 export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const [isB3trToVot3, setIsB3trToVot3] = useState<boolean>()
+
   const { isTxModalOpen } = useTransaction()
   const { t } = useTranslation()
 
   const { account } = useWallet()
+  const { activeStep, goToPrevious, goToNext, setActiveStep } = useSteps({
+    index: 0,
+    count: Object.keys(ConvertStep).length,
+  })
 
   const isSmartAccountUpgradeRequired = useSmartAccountUpgradeRequired()
 
@@ -91,87 +89,104 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
   }, [isB3trToVot3, isSmartAccountUpgradeRequired, mutationData, openUpgradeModal])
 
   const handleClose = useCallback(() => {
-    mutationData.resetStatus()
     onClose()
     setIsB3trToVot3(undefined)
     setValue("amount", "")
-  }, [mutationData, onClose, setValue])
+  }, [onClose, setValue])
 
-  const handleGoBack = useCallback(() => {
-    setIsB3trToVot3(undefined)
-    setValue("amount", "")
-  }, [setValue])
+  const b3trBalanceAfterSwap = useMemo(() => {
+    if (isB3trToVot3) {
+      return new BigNumber(b3trBalanceScaled).minus(amount).toString()
+    } else {
+      return new BigNumber(b3trBalanceScaled).plus(amount).toString()
+    }
+  }, [isB3trToVot3, b3trBalanceScaled, amount])
+
+  const vot3BalanceAfterSwap = useMemo(() => {
+    if (isB3trToVot3) {
+      return new BigNumber(vot3BalanceScaled).plus(amount).toString()
+    } else {
+      return new BigNumber(vot3BalanceScaled).minus(amount).toString()
+    }
+  }, [isB3trToVot3, vot3BalanceScaled, amount])
 
   const convertTitle = useMemo(() => {
     return isB3trToVot3 ? t("Turn B3TR into VOT3") : t("Turn VOT3 into B3TR")
   }, [isB3trToVot3, t])
 
-  const convertDescription = useMemo(() => {
-    return isB3trToVot3 ? (
-      <Text fontSize={{ base: 14, md: 16 }} fontWeight={400}>
-        {t("The more VOT3 in your balance, the more ")}
-        <b>{t("voting power")}</b>
-        {t(" you’ll have. Use it to vote on proposals and allocation rounds.")}
-      </Text>
-    ) : (
-      <Text fontSize={{ base: 14, md: 16 }} fontWeight={400}>
-        {t("B3TR are the tokens that you earn through the dApps and by participating on the voting sessions.")}
-      </Text>
-    )
+  const convertDescription = useMemo((): string => {
+    return isB3trToVot3
+      ? t(
+          "The more VOT3 in your balance, the more voting power you'll have. Use it to vote on proposals and allocation rounds.",
+        )
+      : t("B3TR are the tokens that you earn through the dApps and by participating on the voting sessions.")
   }, [isB3trToVot3, t])
 
-  const isSubmitButtonLoading = useMemo(() => {
-    return mutationData.status === "pending"
-  }, [mutationData.status])
-
-  const disableSubmitButton = useMemo(() => {
-    return invalidAmount || isSubmitButtonLoading
-  }, [invalidAmount, isSubmitButtonLoading])
-
-  const getCardContentStep = (isB3trToVot3?: boolean) => {
-    if (isB3trToVot3 === undefined) return CardContentStep.SELECT_TOKEN
-    return CardContentStep.CONFIRM_SWAP
-  }
-
-  const stepComponents = {
-    [CardContentStep.SELECT_TOKEN]: (
-      <TokenSelectionContent
-        onSubmit={formData.handleSubmit(handleConvertB3tr)}
-        setIsB3trToVot3={setIsB3trToVot3}
-        zoomInVariants={zoomInVariants}
-      />
-    ),
-    [CardContentStep.CONFIRM_SWAP]: (
-      <SwapTokenContent
-        formData={formData}
-        onSubmit={formData.handleSubmit(handleConvertB3tr)}
-        amount={amount}
-        isB3trToVot3={isB3trToVot3}
-        swappableVot3Balance={swappableVot3Balance}
-        isVOT3BalanceMoreThanStakedB3TR={isVOT3BalanceMoreThanStakedB3TR}
-        convertTitle={convertTitle}
-        convertDescription={convertDescription}
-        b3trBalanceScaled={b3trBalanceScaled}
-        vot3BalanceScaled={vot3BalanceScaled}
-        handleGoBack={handleGoBack}
-        disableSubmitButton={disableSubmitButton}
-        isSubmitButtonLoading={isSubmitButtonLoading}
-      />
-    ),
-  }
-
-  const currentStep = useMemo(() => getCardContentStep(isB3trToVot3), [isB3trToVot3])
-
-  const StepComponentContent = stepComponents[currentStep] || null
+  const steps = useMemo<Step<ConvertStep>[]>(
+    () => [
+      {
+        key: ConvertStep.SELECT_TOKEN,
+        content: <TokenSelectionContent onSubmit={goToNext} setIsB3trToVot3={setIsB3trToVot3} />,
+        title: t("Convert tokens"),
+      },
+      {
+        key: ConvertStep.CONFIRM_SWAP,
+        content: (
+          <SwapTokenContent
+            formData={formData}
+            goToNextStep={goToNext}
+            amount={amount}
+            isB3trToVot3={isB3trToVot3}
+            swappableVot3Balance={swappableVot3Balance}
+            isVOT3BalanceMoreThanStakedB3TR={isVOT3BalanceMoreThanStakedB3TR}
+            b3trBalanceScaled={b3trBalanceScaled}
+            vot3BalanceScaled={vot3BalanceScaled}
+            disableSubmitButton={invalidAmount}
+          />
+        ),
+        title: convertTitle,
+        description: convertDescription,
+      },
+      {
+        key: ConvertStep.REVIEW_TX,
+        content: (
+          <ReviewSwapContent
+            onSubmitTx={handleConvertB3tr}
+            b3trBalanceAfterSwap={b3trBalanceAfterSwap}
+            vot3BalanceAfterSwap={vot3BalanceAfterSwap}
+          />
+        ),
+        title: t("Review transaction"),
+      },
+    ],
+    [
+      amount,
+      b3trBalanceAfterSwap,
+      b3trBalanceScaled,
+      convertDescription,
+      convertTitle,
+      formData,
+      goToNext,
+      handleConvertB3tr,
+      invalidAmount,
+      isB3trToVot3,
+      isVOT3BalanceMoreThanStakedB3TR,
+      swappableVot3Balance,
+      t,
+      vot3BalanceAfterSwap,
+      vot3BalanceScaled,
+    ],
+  )
 
   return (
-    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} trapFocus={true} isCentered={true}>
-      <ModalOverlay />
-      <CustomModalContent w={"auto"} maxW={"container.md"}>
-        <Card rounded={20}>
-          <CardBody>{StepComponentContent}</CardBody>
-        </Card>
-      </CustomModalContent>
-    </Modal>
+    <StepModal
+      isOpen={isOpen && !isTxModalOpen}
+      onClose={handleClose}
+      goToPrevious={goToPrevious}
+      goToNext={goToNext}
+      setActiveStep={setActiveStep}
+      steps={steps}
+      activeStep={activeStep}
+    />
   )
 }
