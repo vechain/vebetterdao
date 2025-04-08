@@ -62,6 +62,7 @@ export const TokenInfoCard: React.FC<Props> = ({ isB3TRToVOT3, setIsB3TRToVOT3 }
       py={{ base: 3, md: 5 }}
       spacing={{ base: 2, md: 5 }}
       maxW={"360px"}
+      h={"full"}
       textColor={color}
       borderRadius={"8px"}>
       <Image src="/images/vot3-to-b3tr.svg" alt="VOT3 to B3TR" boxSize={"87px"} />

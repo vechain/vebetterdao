@@ -111,7 +111,7 @@ export const TokenCards = ({
 
   const { t } = useTranslation()
 
-  const maxButton = useMemo(
+  const renderMaxButton = useMemo(
     () => (
       <Button onClick={() => setValue("amount", maxBalance)} variant={"secondary"} data-testid={"convert-all-button"}>
         <Text fontSize={14} fontWeight={500}>
@@ -124,7 +124,7 @@ export const TokenCards = ({
 
   return (
     <motion.div initial="initial" animate="animate" variants={containerVariants} style={{ width: "100%" }}>
-      <Stack direction={isB3trToVot3 ? "column" : "column-reverse"}>
+      <Stack direction={isB3trToVot3 ? "column" : "column-reverse"} w="full">
         <motion.div layout transition={layoutTransition}>
           <VStack
             py={3}
@@ -146,7 +146,7 @@ export const TokenCards = ({
                     <B3TRIcon boxSize={["30px", "36px"]} />
                     {amountInput}
                   </HStack>
-                  {isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
+                  {isB3trToVot3 && Number(maxBalance) !== Number(amount) ? renderMaxButton : null}
                 </HStack>
               </VStack>
             </HStack>
@@ -177,7 +177,7 @@ export const TokenCards = ({
                     />
                     {amountInput}
                   </HStack>
-                  {!isB3trToVot3 && Number(maxBalance) !== Number(amount) && maxButton}
+                  {!isB3trToVot3 && Number(maxBalance) !== Number(amount) ? renderMaxButton : null}
                 </HStack>
               </VStack>
             </HStack>
