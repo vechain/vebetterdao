@@ -1601,5 +1601,7 @@
   "Pause": "Pause",
   "Only app admin can transfer and manage the rewards pool": "Only app admin can transfer and manage the rewards pool",
   "Access restricted": "Access restricted",
-  "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. <strong>Consider voting for fewer apps or getting more VOT3.</strong>"
+  "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. <strong>Consider voting for fewer apps or getting more VOT3.</strong>",
+  "Review transaction": "Review transaction",
+  "Confirm and send transaction": "Confirm and send transaction"
 }
