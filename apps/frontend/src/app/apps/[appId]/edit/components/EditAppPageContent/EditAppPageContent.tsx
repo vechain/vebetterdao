@@ -29,7 +29,6 @@ import {
 } from "../../../hooks"
 import { EditAppBanner } from "./components/EditAppBanner"
 import { useCurrentAppScreenshots } from "../../../hooks/useCurrentAppScreenshots"
-import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useSocialUrls } from "./hooks/useSocialUrls"
 import { useIsFormChanged } from "./hooks/useIsFormChanged"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
@@ -72,7 +71,6 @@ export const EditAppPageContent = () => {
   const { banner } = useCurrentAppBanner()
   const { screenshots } = useCurrentAppScreenshots()
   const { veWorldBanner } = useCurrentAppVeWorldBanner()
-  const { app } = useCurrentAppInfo()
   const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { isTxModalOpen } = useTransaction()
@@ -112,9 +110,9 @@ export const EditAppPageContent = () => {
 
   useEffect(() => {
     if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
-      router.push(`/apps/${app?.id}`)
+      goToAppPage()
     }
-  }, [isAdminOrModerator, app?.id, router, permissions])
+  }, [isAdminOrModerator, appId, router, permissions, goToAppPage])
 
   const updateAppDetailsMutation = useUpdateAppDetails({
     appId,
@@ -151,15 +149,6 @@ export const EditAppPageContent = () => {
     [uploadMetadataMutation, socialUrls, appMetadata?.tweets],
   )
 
-  const updateAppDetails = useCallback(
-    async (metadataUri: string) => {
-      updateAppDetailsMutation.sendTransaction({
-        metadataUri,
-      })
-    },
-    [updateAppDetailsMutation],
-  )
-
   const onSubmit = useCallback(
     async (data: EditAppForm) => {
       updateAppDetailsMutation.resetStatus()
@@ -168,10 +157,11 @@ export const EditAppPageContent = () => {
       const metadataUri = await uploadMetadata(data)
       if (!metadataUri) return
 
-      const result = await updateAppDetails(metadataUri)
-      console.log("result", result)
+      updateAppDetailsMutation.sendTransaction({
+        metadataUri,
+      })
     },
-    [updateAppDetailsMutation, onOpen, uploadMetadata, updateAppDetails],
+    [updateAppDetailsMutation, onOpen, uploadMetadata],
   )
 
   // Update the form values when the app fetches the data from blockchain
