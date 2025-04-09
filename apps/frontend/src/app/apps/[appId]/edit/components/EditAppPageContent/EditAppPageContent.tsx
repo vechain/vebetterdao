@@ -111,7 +111,10 @@ export const EditAppPageContent = () => {
 
   const updateAppDetailsMutation = useUpdateAppDetails({
     appId,
-    onSuccess: goToAppPage,
+    onSuccess: () => {
+      onClose()
+      goToAppPage()
+    },
     onFailure: () => {
       onClose()
     },
