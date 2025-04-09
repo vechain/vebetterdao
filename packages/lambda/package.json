@@ -10,8 +10,7 @@
     "postbuild": "find dist/*/* -type d -exec sh -c 'cd {} && zip -r index.zip *' \\;",
     "test": "yarn build && TEST_ENVIRONMENT=testnet jest",
     "start": "npx ts-node",
-    "simulate:local:signal-bot-user": "TEST_ENVIRONMENT=local npx ts-node src/helpers/simulate/ve-better-passport/signalBotUser.ts",
-    "simulate:testnet:signal-bot-user": "TEST_ENVIRONMENT=testnet npx ts-node src/helpers/simulate/ve-better-passport/signalBotUser.ts"
+    "simulate:local:signal-bot-user": "TEST_ENVIRONMENT=local npx ts-node src/helpers/simulate/ve-better-passport/signalBotUser.ts"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.556.0",
