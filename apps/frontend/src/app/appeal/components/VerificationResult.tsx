@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react"
 import { UilArrowUp, UilArrowDown } from "@iconscout/react-unicons"
 import { useTranslation } from "react-i18next"
+import { useRouter } from "next/navigation"
 
 export function VerificationResult({
   status,
@@ -26,6 +27,8 @@ export function VerificationResult({
 }) {
   const { isOpen, onToggle } = useDisclosure()
   const { t } = useTranslation()
+  const router = useRouter()
+
   // Format the result as JSON if it's an object
   const formattedResult = typeof result === "object" ? JSON.stringify(result, null, 2) : result
 
@@ -38,7 +41,7 @@ export function VerificationResult({
       <AlertIcon alignSelf="flex-start" mt="3px" />
       <Box>
         <AlertTitle>{title}</AlertTitle>
-        <AlertDescription>{description}</AlertDescription>
+        <AlertDescription fontSize="sm">{description}</AlertDescription>
 
         {result && (
           <Box mt={2}>
@@ -48,12 +51,16 @@ export function VerificationResult({
               variant="ghost"
               onClick={onToggle}
               rightIcon={isOpen ? <UilArrowUp /> : <UilArrowDown />}
-              color={status === "success" ? "white" : "gray.600"}
-              _hover={{
-                bg: status === "success" ? "green.600" : "gray.100",
-              }}>
-              {isOpen ? "Hide Details" : "Show Details"}
+              color={status === "success" ? "white" : status === "error" ? "black" : "black"}
+              _hover={{ color: "black" }}>
+              {"Show Details"}
             </Button>
+
+            {status === "success" && (
+              <Button ml={2} size="sm" color={"gray.600"} onClick={() => router.push("/")}>
+                {t("Back To Dashboard")}
+              </Button>
+            )}
 
             <Collapse in={isOpen} animateOpacity>
               <Box mt={2} borderRadius="md" bg={status === "success" ? "green.600" : "gray.50"} overflowX="auto">

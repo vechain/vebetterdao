@@ -5,19 +5,21 @@ export function AppealWarning({
   walletAddress,
   title,
   description,
+  isVerified,
 }: {
   walletAddress?: string
   title: string
   description: string
+  isVerified: boolean
 }) {
   return (
-    <Alert status="warning" borderRadius="16px" bg="#FFF3E5">
-      <AlertIcon alignSelf="flex-start" />
+    <Alert status="warning" borderRadius="16px" bg={isVerified ? "green.600" : "#FFF3E5"}>
+      <AlertIcon alignSelf="flex-start" color={isVerified ? "white" : "orange.800"} />
       <Box>
-        <AlertTitle fontSize="md" color="orange.800">
+        <AlertTitle fontSize="md" color={isVerified ? "white" : "orange.800"}>
           {title}
         </AlertTitle>
-        <AlertDescription fontSize="sm" color="orange.600">
+        <AlertDescription fontSize="sm" color={isVerified ? "white" : "orange.600"}>
           {description}
         </AlertDescription>
         {walletAddress && (
@@ -25,8 +27,8 @@ export function AppealWarning({
             fontSize="sm"
             mt={2}
             fontFamily={"mono"}
-            color="black"
-            bg="orange.200"
+            color={"black"}
+            bg={isVerified ? "green.200" : "orange.200"}
             w="fit-content"
             p={1}
             borderRadius={4}>
