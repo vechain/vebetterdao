@@ -37,7 +37,10 @@ import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/vechain-kit"
 import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
 import { useTransaction } from "@/providers/TransactionProvider"
-import { UploadMetadataModal } from "@/components/UploadMetadataModal"
+import { StepModal } from "@/components/StepModal/StepModal"
+import Lottie from "react-lottie"
+import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
+import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 export type EditAppForm = {
   name: string
   external_url: string
@@ -54,6 +57,10 @@ export type EditAppForm = {
   ve_world_bannerImage: string
 }
 
+enum EditAppPageStep {
+  UPLOADING = "UPLOADING",
+}
+
 const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
   return urls?.find(url => url.name === name)?.url ?? ""
 }
@@ -68,7 +75,7 @@ export const EditAppPageContent = () => {
   const { app } = useCurrentAppInfo()
   const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { isTxModalOpen, transactionState } = useTransaction()
+  const { isTxModalOpen } = useTransaction()
   const { isAdminOrModerator } = useCurrentAppRole()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
@@ -174,17 +181,44 @@ export const EditAppPageContent = () => {
     }
   }, [veWorldBanner, form])
 
-  useEffect(() => {
-    console.log("transactionState", transactionState)
-  }, [transactionState])
-
   if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
     return null
   }
 
   return (
     <>
-      <UploadMetadataModal isOpen={isOpen && !isTxModalOpen} onClose={onClose} />
+      <StepModal
+        isOpen={isOpen && !isTxModalOpen}
+        onClose={onClose}
+        steps={[
+          {
+            key: EditAppPageStep.UPLOADING,
+            content: (
+              <ModalAnimation>
+                <VStack align={"center"} p={6}>
+                  <Lottie
+                    style={{
+                      pointerEvents: "none",
+                    }}
+                    options={{
+                      loop: true,
+                      autoplay: true,
+                      animationData: UploadingMetadataAnimation,
+                    }}
+                    height={200}
+                    width={200}
+                  />
+                </VStack>
+              </ModalAnimation>
+            ),
+            title: "Upload metadata",
+            description: "Please wait while we upload the metadata",
+          },
+        ]}
+        activeStep={0}
+        setActiveStep={() => {}}
+        goToPrevious={() => {}}
+      />
       <VStack alignItems={"stretch"} gap={8} as="form" onSubmit={handleSubmit(onSubmit)} w="full">
         <Stack
           flexDirection={["column", "row"]}
