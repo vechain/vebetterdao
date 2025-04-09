@@ -33,11 +33,11 @@ import { useCurrentAppInfo } from "../../../hooks/useCurrentAppInfo"
 import { useSocialUrls } from "./hooks/useSocialUrls"
 import { useIsFormChanged } from "./hooks/useIsFormChanged"
 import { useUpdateAppDetails, useUploadAppMetadata } from "@/hooks"
-import { UpdateAppMetadataTransactionModal } from "../../../components/UpdateAppMetadataTransactionModal"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/vechain-kit"
 import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
-
+import { useTransaction } from "@/providers/TransactionProvider"
+import { UploadMetadataModal } from "@/components/UploadMetadataModal"
 export type EditAppForm = {
   name: string
   external_url: string
@@ -67,7 +67,8 @@ export const EditAppPageContent = () => {
   const { veWorldBanner } = useCurrentAppVeWorldBanner()
   const { app } = useCurrentAppInfo()
   const router = useRouter()
-  const transactionModal = useDisclosure()
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isTxModalOpen, transactionState } = useTransaction()
   const { isAdminOrModerator } = useCurrentAppRole()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
@@ -102,18 +103,24 @@ export const EditAppPageContent = () => {
     router.push(`/apps/${appId}`)
   }, [appId, router])
 
+  useEffect(() => {
+    if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
+      router.push(`/apps/${app?.id}`)
+    }
+  }, [isAdminOrModerator, app?.id, router, permissions])
+
   const updateAppDetailsMutation = useUpdateAppDetails({
     appId,
     onSuccess: goToAppPage,
+    onFailure: () => {
+      onClose()
+    },
   })
 
   const uploadMetadataMutation = useUploadAppMetadata()
 
-  const onSubmit = useCallback(
+  const uploadMetadata = useCallback(
     async (data: EditAppForm) => {
-      updateAppDetailsMutation.resetStatus()
-      transactionModal.onOpen()
-
       const metadataUri = await uploadMetadataMutation.onMetadataUpload({
         name: data.name,
         description: data.description,
@@ -129,30 +136,33 @@ export const EditAppPageContent = () => {
           banner: data.ve_world_bannerImage,
         },
       })
-      if (!metadataUri) return
+      return metadataUri
+    },
+    [uploadMetadataMutation, socialUrls, appMetadata?.tweets],
+  )
 
+  const updateAppDetails = useCallback(
+    async (metadataUri: string) => {
       updateAppDetailsMutation.sendTransaction({
         metadataUri,
       })
     },
-    [updateAppDetailsMutation, transactionModal, uploadMetadataMutation, socialUrls, appMetadata?.tweets],
+    [updateAppDetailsMutation],
   )
 
-  const handleClose = useCallback(() => {
-    transactionModal.onClose()
-    updateAppDetailsMutation.resetStatus()
-  }, [transactionModal, updateAppDetailsMutation])
+  const onSubmit = useCallback(
+    async (data: EditAppForm) => {
+      updateAppDetailsMutation.resetStatus()
+      onOpen()
 
-  const onTryAgain = useCallback(() => {
-    handleClose()
-    handleSubmit(onSubmit)()
-  }, [handleClose, handleSubmit, onSubmit])
+      const metadataUri = await uploadMetadata(data)
+      if (!metadataUri) return
 
-  useEffect(() => {
-    if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
-      router.push(`/apps/${app?.id}`)
-    }
-  }, [isAdminOrModerator, app?.id, router, permissions])
+      const result = await updateAppDetails(metadataUri)
+      console.log("result", result)
+    },
+    [updateAppDetailsMutation, onOpen, uploadMetadata, updateAppDetails],
+  )
 
   // Update the form values when the app fetches the data from blockchain
   useEffect(() => {
@@ -161,19 +171,17 @@ export const EditAppPageContent = () => {
     }
   }, [veWorldBanner, form])
 
+  useEffect(() => {
+    console.log("transactionState", transactionState)
+  }, [transactionState])
+
   if (!isAdminOrModerator && !permissions?.isAdminOfX2EarnApps) {
     return null
   }
 
   return (
     <>
-      <UpdateAppMetadataTransactionModal
-        transactionModal={transactionModal}
-        handleClose={handleClose}
-        uploadMetadataMutation={uploadMetadataMutation}
-        updateAppDetailsMutation={updateAppDetailsMutation}
-        onTryAgain={onTryAgain}
-      />
+      <UploadMetadataModal isOpen={isOpen && !isTxModalOpen} onClose={onClose} />
       <VStack alignItems={"stretch"} gap={8} as="form" onSubmit={handleSubmit(onSubmit)} w="full">
         <Stack
           flexDirection={["column", "row"]}
