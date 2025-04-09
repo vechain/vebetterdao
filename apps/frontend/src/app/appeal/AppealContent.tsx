@@ -112,7 +112,7 @@ export const AppealContent = () => {
           onClick={handleVerificationSubmit}
           isLoading={verificationStatus === "pending"}
           loadingText={t("Verifying...")}
-          isDisabled={verificationStatus === "success" || verificationStatus === "pending"}>
+          isDisabled={!isVerified || verificationStatus === "success" || verificationStatus === "pending"}>
           {t("I've Completed Verification")}
         </Button>
 
