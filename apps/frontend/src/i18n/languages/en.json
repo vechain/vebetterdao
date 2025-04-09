@@ -1680,5 +1680,6 @@
   "Warning": "Warning",
   "Your wallet has received 2 or more bot signals and is now restricted from DAO participation. Complete verification immediately to restore access and prevent permanent banning.": "Your wallet has received 2 or more bot signals and is now restricted from DAO participation. Complete verification immediately to restore access and prevent permanent banning.",
   "API Response:": "API Response:",
-  "Back To Dashboard": "Back To Dashboard"
+  "Back To Dashboard": "Back To Dashboard",
+  "Show Details": "Show Details"
 }

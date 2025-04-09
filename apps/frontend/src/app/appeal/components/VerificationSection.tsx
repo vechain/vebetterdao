@@ -3,11 +3,14 @@ import { useTranslation } from "react-i18next"
 import { Heading, Icon, Link, Text, VStack, Button } from "@chakra-ui/react"
 import { FiExternalLink } from "react-icons/fi"
 
+const VET_DOMAINS_VERIFY_URL = "https://vet.domains/verify"
+const REDIRECT_URL = "https://governance.vebetterdao.org/appeal"
+
 export function VerificationSection() {
   const { t } = useTranslation()
 
   const getVetDomainsVerifyUrl = () => {
-    return "https://vet.domains/verify"
+    return `${VET_DOMAINS_VERIFY_URL}?redirect=${REDIRECT_URL}`
   }
 
   return (

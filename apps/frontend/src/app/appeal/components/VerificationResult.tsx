@@ -53,7 +53,7 @@ export function VerificationResult({
               rightIcon={isOpen ? <UilArrowUp /> : <UilArrowDown />}
               color={status === "success" ? "white" : status === "error" ? "black" : "black"}
               _hover={{ color: "black" }}>
-              {"Show Details"}
+              {t("Show Details")}
             </Button>
 
             {status === "success" && (
