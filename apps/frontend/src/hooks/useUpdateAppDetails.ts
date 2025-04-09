@@ -1,9 +1,7 @@
-import { getXAppMetadataQueryKey, getXAppsQueryKey } from "@/api"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
-import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
 import { useBuildTransaction } from "./useBuildTransaction"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
@@ -32,8 +30,6 @@ export const useUpdateAppDetails = ({
   onSuccess,
   onFailure,
 }: useUpdateAppDetailsProps): useUpdateAppMetadataReturnValue => {
-  const { app } = useCurrentAppInfo()
-
   const buildClauses = useCallback(
     ({ metadataUri }: BuildClausesProps) => {
       const clauses: EnhancedClause[] = [
@@ -51,14 +47,8 @@ export const useUpdateAppDetails = ({
     [appId],
   )
 
-  const refetchQueryKeys = useMemo(
-    () => [getXAppsQueryKey(), getXAppMetadataQueryKey(app?.metadataURI)],
-    [app?.metadataURI],
-  )
-
   return useBuildTransaction({
     clauseBuilder: buildClauses,
-    refetchQueryKeys,
     onSuccess,
     onFailure,
   })
