@@ -1,4 +1,4 @@
-FROM vechain/thor:v2.1.3
+FROM ghcr.io/vechain/thor:release-galactica-latest
 
 USER root
 
