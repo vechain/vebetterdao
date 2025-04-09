@@ -73,5 +73,9 @@ const config: AppConfig = {
     passportSignalingLogicAddress: "0x72F77f9C1E74e049A078674f9180fDDf043f784e",
     passportWhitelistAndBlacklistLogicAddress: "0xcd9344b9166dB3B64c6952065Fb59500a8a2114f",
   },
+  externalContractIntegrations: {
+    // This is a MOCK VetDomains contract
+    vetDomainsContractAddress: "0xE27C72E252D5C3B2daf871aB7628F29370438589",
+  },
 }
 export default config
