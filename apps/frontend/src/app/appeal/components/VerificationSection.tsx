@@ -1,6 +1,7 @@
+import { useTranslation } from "react-i18next"
+
 import { Heading, Icon, Link, Text, VStack, Button } from "@chakra-ui/react"
 import { FiExternalLink } from "react-icons/fi"
-import { useTranslation } from "react-i18next"
 
 export function VerificationSection() {
   const { t } = useTranslation()
@@ -10,7 +11,7 @@ export function VerificationSection() {
   }
 
   return (
-    <VStack align="stretch" w="full" borderRadius="16px" bg="blue.50" p={6} spacing={4}>
+    <VStack align="stretch" w="full" borderRadius="16px" bg="blue.50" p={6} spacing={2}>
       <Heading size="md">{t("Complete Identity Verification")}</Heading>
 
       <Text>

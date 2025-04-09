@@ -2,9 +2,10 @@ import { useEffect, useLayoutEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { AnalyticsUtils } from "@/utils"
+import { useWallet } from "@vechain/vechain-kit"
+import { useUserBotSignals } from "@/api"
 import { VStack, Heading, Button, Spinner } from "@chakra-ui/react"
 
-import { useWallet } from "@vechain/vechain-kit"
 import { useRouter } from "next/navigation"
 import { useVerifiedVetDomain } from "./hooks/useVerifiedVetDomain"
 import { VerificationSection, VerificationResult, AppealDesc, AppealWarning } from "./components"
@@ -14,12 +15,18 @@ export const AppealContent = () => {
   const { t } = useTranslation()
   const { account: connectedAccount } = useWallet()
   const [verificationStatus, setVerificationStatus] = useState<"idle" | "pending" | "success" | "error">("idle")
+  const [verificationResult, setVerificationResult] = useState<"">()
   const isConnectedUser = !!connectedAccount?.address
   const { data: isVerifiedVetDomain } = useVerifiedVetDomain(connectedAccount?.address)
+  const { data: userSignalCounter } = useUserBotSignals(connectedAccount?.address)
 
   const isVerified = useMemo(() => {
-    return false
+    return isVerifiedVetDomain
   }, [isVerifiedVetDomain])
+
+  const userSignaledCount = useMemo(() => {
+    return userSignalCounter
+  }, [userSignalCounter])
 
   useEffect(() => {
     AnalyticsUtils.trackPage("Appeal")
@@ -53,15 +60,17 @@ export const AppealContent = () => {
       })
 
       const data = await response.json()
-      console.log("data", data)
 
-      if (response.ok) {
+      if (data.status === "success") {
         setVerificationStatus("success")
+        setVerificationResult(data.message)
       } else {
         setVerificationStatus("error")
+        setVerificationResult(data.message)
       }
-    } catch (error) {
+    } catch (error: any) {
       setVerificationStatus("error")
+      setVerificationResult(error)
     }
   }
 
@@ -69,10 +78,30 @@ export const AppealContent = () => {
     <VStack gap={6} align="stretch" maxW={"container.md"} mx="auto" data-testid="appeal-page">
       <Heading size={"xl"}>{t("Wallet Restriction Appeal")}</Heading>
 
-      <VStack bg="white" borderRadius={12} borderWidth={1} borderColor="gray.200" gap={6} p={6}>
-        <AppealDesc isVerified={isVerified ?? false} />
+      <VStack bg="white" borderRadius={16} borderWidth={1} borderColor="gray.200" gap={10} p={6}>
+        {!isVerified && (
+          <AppealDesc
+            description={
+              userSignaledCount >= 2
+                ? t(
+                    "Your wallet has received 2 or more bot signals and is now restricted from DAO participation. Complete verification immediately to restore access and prevent permanent banning.",
+                  )
+                : t(
+                    "Your wallet has been flagged for bot-like behavior. To lift the restriction and avoid a permanent ban, please complete the KYC verification process.",
+                  )
+            }
+          />
+        )}
 
-        <AppealWarning isVerified={isVerified ?? false} />
+        <AppealWarning
+          walletAddress={connectedAccount?.address ?? ""}
+          title={t("Important: Use the same wallet address")}
+          description={t(
+            isVerified
+              ? "You have already completed the verification. Please click the button below to appeal."
+              : "You must complete the verification using the same wallet address that was flagged. Verification with a different wallet will not lift the restrictions on your flagged wallet.",
+          )}
+        />
 
         {!isVerified && <VerificationSection />}
 
@@ -92,9 +121,10 @@ export const AppealContent = () => {
             title={verificationStatus === "success" ? t("Verification Successful") : t("Verification Failed")}
             description={
               verificationStatus === "success"
-                ? t("The appeal process is complete. You have just been unbanned.")
+                ? t("The appeal process is complete.")
                 : t("Your KYC verification was unsuccessful. Please try again or contact support.")
             }
+            result={verificationResult}
           />
         )}
       </VStack>
