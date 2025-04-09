@@ -1,5 +1,24 @@
 import { NextRequest, NextResponse } from "next/server"
 
+interface ApiErrorDetails {
+  message: string
+}
+
+interface ApiError {
+  code: string
+  message: string
+  details?: ApiErrorDetails
+}
+
+interface ApiErrorResponse {
+  error: ApiError
+}
+
+type JsonApiResponse = {
+  statusCode: number
+  body: string
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Parse the request body to get the wallet address
@@ -25,7 +44,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing environment variables" }, { status: 500 })
     }
 
-    // Make API request to reset user signal count
+    // Make API request to reset user signal count to our Lambda function
     const apiResponse = await fetch(apiEndpoint, {
       method: "POST",
       body: JSON.stringify({ walletAddress }),
@@ -34,12 +53,17 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    if (!apiResponse.ok) {
-      console.error("Failed to reset user signal count", apiResponse)
+    const resJson = (await apiResponse.json()) as JsonApiResponse
+
+    if (resJson.statusCode !== 200) {
+      const errorResponse = JSON.parse(resJson.body) as ApiErrorResponse
+      const errorDetails = errorResponse.error
+      const errorMessage = errorDetails?.details?.message || "Failed to reset user signal count"
+
       return NextResponse.json(
         {
           status: "error",
-          message: "Failed to reset user signal count",
+          message: errorMessage,
         },
         { status: 500 },
       )
