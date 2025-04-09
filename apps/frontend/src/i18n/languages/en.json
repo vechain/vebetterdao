@@ -1672,9 +1672,12 @@
   "Complete Identity Verification": "Complete Identity Verification",
   "After completing verification, return to this page and click 'I've Completed Verification' below.": "After completing verification, return to this page and click 'I've Completed Verification' below.",
   "Start Verification": "Start Verification",
-  "The appeal process is complete. You have just been unbanned.": "The appeal process is complete. You have just been unbanned.",
+  "The appeal process is complete.": "The appeal process is complete.",
   "Your KYC verification was unsuccessful. Please try again or contact support.": "Your KYC verification was unsuccessful. Please try again or contact support.",
-  "Your wallet has been flagged for bot-like behavior. To lift the restriction, please complete the KYC verification process.": "Your wallet has been flagged for bot-like behavior. To lift the restriction, please complete the KYC verification process.",
+  "Your wallet has been flagged for bot-like behavior. To lift the restriction and avoid a permanent ban, please complete the KYC verification process.": "Your wallet has been flagged for bot-like behavior. To lift the restriction and avoid a permanent ban, please complete the KYC verification process.",
   "You have already completed the verification. Please click the button below to appeal.": "You have already completed the verification. Please click the button below to appeal.",
-  "Your wallet has been flagged again for bot-like behavior.": "Your wallet has been flagged again for bot-like behavior."
+  "Important: Use the same wallet address": "Important: Use the same wallet address",
+  "Warning": "Warning",
+  "Your wallet has received 2 or more bot signals and is now restricted from DAO participation. Complete verification immediately to restore access and prevent permanent banning.": "Your wallet has received 2 or more bot signals and is now restricted from DAO participation. Complete verification immediately to restore access and prevent permanent banning.",
+  "API Response:": "API Response:"
 }

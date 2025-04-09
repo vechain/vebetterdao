@@ -9,28 +9,46 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Wallet address is required" }, { status: 400 })
     }
 
-    // @TODO: To call VeBetterPassport resetSignalCounter lambda here
+    const isTestnetEnvironment = process.env.NEXT_PUBLIC_APP_ENV === "testnet-staging"
 
-    // Add artificial delay to simulate network request (2 seconds)
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    const apiEndpoint = isTestnetEnvironment
+      ? process.env.TESTNET_RESET_USER_SIGNAL_COUNT_DOMAIN
+      : process.env.RESET_USER_SIGNAL_COUNT_DOMAIN
 
-    // Simulate 70% success rate for demonstration purposes
-    const isSuccessful = Math.random() > 0.3
+    const apiAuthKey = isTestnetEnvironment
+      ? process.env.TESTNET_RESET_USER_SIGNAL_COUNT_API_KEY
+      : process.env.RESET_USER_SIGNAL_COUNT_API_KEY
 
-    if (isSuccessful) {
-      return NextResponse.json({
-        status: "success",
-        message: "The appeal process is complete. You have just been unbanned.",
-      })
-    } else {
+    // Validate environment configuration
+    if (!apiEndpoint || !apiAuthKey) {
+      console.warn("API: Missing environment variables for RESET_USER_SIGNAL_COUNT API")
+      return NextResponse.json({ error: "Missing environment variables" }, { status: 500 })
+    }
+
+    // Make API request to reset user signal count
+    const apiResponse = await fetch(apiEndpoint, {
+      method: "POST",
+      body: JSON.stringify({ walletAddress }),
+      headers: {
+        "x-api-key": apiAuthKey,
+      },
+    })
+
+    if (!apiResponse.ok) {
+      console.error("Failed to reset user signal count", apiResponse)
       return NextResponse.json(
         {
           status: "error",
-          message: "Your KYC verification was unsuccessful. Please try again or contact support.",
+          message: "Failed to reset user signal count",
         },
-        { status: 400 },
+        { status: 500 },
       )
     }
+
+    return NextResponse.json({
+      status: "success",
+      message: "Successfully reseting the user signal count",
+    })
   } catch (error: any) {
     console.error("Verification error:", error)
     return NextResponse.json(
