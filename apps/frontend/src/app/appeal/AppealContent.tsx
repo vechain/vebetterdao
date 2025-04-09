@@ -94,8 +94,9 @@ export const AppealContent = () => {
         )}
 
         <AppealWarning
+          isVerified={isVerified ?? false}
           walletAddress={connectedAccount?.address ?? ""}
-          title={t("Important: Use the same wallet address")}
+          title={t("Use the same wallet address")}
           description={t(
             isVerified
               ? "You have already completed the verification. Please click the button below to appeal."
