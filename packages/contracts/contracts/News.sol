@@ -44,12 +44,6 @@ contract News is
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant PUBLISHER_ROLE = keccak256("PUBLISHER_ROLE");
 
-  // ---------------- Errors ----------------
-  
-  /// @dev Error thrown when a user is not authorized to perform an action
-  error NewsUnauthorizedUser(address user);
-
-
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -70,7 +64,6 @@ contract News is
     }
   }
 
-
   /// @notice Initializes the contract with role-based access control
   /// @param _x2EarnApps The address of the X2EarnApps contract
   /// @param _defaultAdmin Address to be assigned the default admin role
@@ -88,8 +81,6 @@ contract News is
     _grantRole(UPGRADER_ROLE, _upgrader);
     _grantRole(PAUSER_ROLE, _pauser);
 
-
-
     NewsStorage storage $ = _getNewsStorage();
     $.x2EarnApps = _x2EarnApps;
   }
@@ -104,36 +95,27 @@ contract News is
     }
     _;
   }
-    /// @notice Modifier to check if news is not paused
-  modifier whenNewsNotPaused() {
-    NewsStorage storage $ = _getNewsStorage();
-    require(!paused(), "News: News is paused");
-    _;
-  }
 
   // ---------- Setters ---------- //
 
   /// @notice Publishes news for an app
   /// @param appId The ID of the app for which the news was published
   /// @param metadata The metadata of the news
-  /// @dev Only callable by app admins or creators
-  /// @notice Moderator checks will be added in the future.
-  /// @notice The current IX2EarnApps interface does not expose the `isAppModerator` function.
-  function publishNews(bytes32 appId, string memory metadata) public whenNewsNotPaused {
+  /// @dev Only callable by app admins, creators or moderators
+  function publishNews(bytes32 appId, string memory metadata) public whenNotPaused {
     NewsStorage storage $ = _getNewsStorage();
     require($.x2EarnApps.appExists(appId), "News: app does not exist");
    
-    require($.x2EarnApps.isAppAdmin(appId, msg.sender) || $.x2EarnApps.isAppCreator(appId, msg.sender), "News: not a moderator or admin");
+    require($.x2EarnApps.isAppAdmin(appId, msg.sender) || $.x2EarnApps.isAppCreator(appId, msg.sender) || $.x2EarnApps.isAppModerator(appId, msg.sender), "News: not a moderator or admin");
     
     emit NewsPublished(appId, metadata, msg.sender);
   }
-
 
   /// @notice Publishes news for an app
   /// @param appId The ID of the app for which the news was published
   /// @param metadata The metadata of the news
   /// @dev Only callable by admins or accounts with the PUBLISHER_ROLE
-  function publishNewsAdmin(bytes32 appId, string memory metadata) public whenNewsNotPaused onlyRoleOrAdmin(PUBLISHER_ROLE) {
+  function publishNewsAdmin(bytes32 appId, string memory metadata) public whenNotPaused onlyRoleOrAdmin(PUBLISHER_ROLE) {
     NewsStorage storage $ = _getNewsStorage();
     require($.x2EarnApps.appExists(appId), "News: app does not exist");
     emit NewsPublished(appId, metadata, msg.sender);
@@ -152,14 +134,6 @@ contract News is
 
   }
 
-  /**
-   * @dev Retrieves the X2EarnApps contract.
-   */
-  function x2EarnApps() external view returns (IX2EarnApps) {
-    NewsStorage storage $ = _getNewsStorage();
-    return $.x2EarnApps;
-  }
-
   /// @notice Pauses all token transfers and minting functions
   /// @dev Only callable by accounts with the PAUSER_ROLE or the DEFAULT_ADMIN_ROLE
   function pause() public onlyRoleOrAdmin(PAUSER_ROLE) {
@@ -172,14 +146,20 @@ contract News is
     _unpause();
   }
 
+ // ---------- Getters ---------- //
 
+  /**
+   * @dev Retrieves the X2EarnApps contract.
+   */
+  function x2EarnApps() external view returns (IX2EarnApps) {
+    NewsStorage storage $ = _getNewsStorage();
+    return $.x2EarnApps;
+  }
 
   /// @notice Retieves the version of the contract
   function version() public pure returns (string memory) {
     return "1";
   }
-
-
 
   // ---------------- Upgrade and Utility Overrides ----------------
 
