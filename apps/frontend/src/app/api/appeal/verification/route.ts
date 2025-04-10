@@ -19,6 +19,10 @@ type JsonApiResponse = {
   body: string
 }
 
+// Have tested this function on POSTMAN and it takes around 20 seconds to run
+// Setting maxDuration to 30 seconds to be safe
+export const maxDuration = 30
+
 export async function POST(request: NextRequest) {
   try {
     // Parse the request body to get the wallet address
