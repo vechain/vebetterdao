@@ -9,6 +9,9 @@ import { IX2EarnApps } from "./IX2EarnApps.sol";
  * @dev Interface designed to be used by admins of x2EarnApps contract to publish or retrieve news.
  */
 interface INews  {
+  /// @dev Error thrown when a user is not authorized to perform an action
+  error NewsUnauthorizedUser(address user);
+
   /**
    * @dev Event emitted when a new news is published.
    *

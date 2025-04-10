@@ -336,6 +336,14 @@ interface IX2EarnApps {
   function isAppCreator(bytes32 appId, address account) external view returns (bool);
 
   /**
+   * @dev Check if an account is a moderator of the app
+   *
+   * @param appId the hashed name of the app
+   * @param account the address of the account
+   */
+  function isAppModerator(bytes32 appId, address account) external view returns (bool);
+
+  /**
    * @dev Get the number of apps created by an account.
    *
    * @param creator the address of the creator
