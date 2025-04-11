@@ -688,12 +688,16 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Signals a user
+  /// @dev Can only signal other users who have interacted with the same app as the signaler.
+  /// DEFAULT_ADMIN signaler (with app=0) can bypass this restriction and signal any user.
   function signalUser(address _user) external onlyRoleOrAdmin(SIGNALER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.signalUser($, _user);
   }
 
   /// @notice Signals a user with a reason
+  /// @dev Can only signal other users who have interacted with the same app as the signaler.
+  /// DEFAULT_ADMIN signaler (with app=0) can bypass this restriction and signal any user.
   function signalUserWithReason(address _user, string memory reason) external onlyRoleOrAdmin(SIGNALER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.signalUserWithReason($, _user, reason);
