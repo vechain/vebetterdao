@@ -217,6 +217,17 @@ library PassportSignalingLogic {
     self.signaledCounter[user]++;
 
     bytes32 app = self.appOfSignaler[msg.sender];
+    
+    // Check if the user has interacted with the same app as the signaler
+    bool hasInteracted = self.userUniqueAppInteraction[user][app];
+
+    // If the signaler is not assigned to an app, it must be a default admin
+    bool isDefaultAdmin = (app == bytes32(0));
+
+    // check if the user has interacted with the signaler's app or if the signaler is a default admin
+    require(hasInteracted || isDefaultAdmin, "BotSignaling: user has not interacted with signaler's app");
+    
+    self.signaledCounter[user]++;
     self.appSignalsCounter[app][user]++;
     self.appTotalSignalsCounter[app]++;
 
