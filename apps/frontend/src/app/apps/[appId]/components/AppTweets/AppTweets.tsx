@@ -13,7 +13,7 @@ import { ModalAnimation } from "@/components/TransactionModal/ModalAnimation"
 import Lottie from "react-lottie"
 import UploadingMetadataAnimation from "@/lottieAnimations/uploadingMetadata.json"
 import { StepModal } from "@/components/StepModal/StepModal"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 enum AppTweetsStep {
   UPLOADING = "UPLOADING",
 }
@@ -26,7 +26,7 @@ export const AppTweets = () => {
   const { t } = useTranslation()
   const { appId } = useParams<{ appId: string }>()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const { appMetadata, appMetadataLoading } = useCurrentAppMetadata()
   const metadataTweets = useMemo(() => appMetadata?.tweets?.filter(Boolean) ?? [], [appMetadata?.tweets])
   const [tweets, setTweets] = useState<string[]>(metadataTweets)
