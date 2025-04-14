@@ -21,7 +21,7 @@ import {
   participateInAllocationVoting,
   upgradeNFTtoLevel,
 } from "./helpers"
-import { describe, it } from "mocha"
+import { describe, it, beforeEach } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { ZeroAddress } from "ethers"
 import { createTestConfig } from "./helpers/config"
@@ -29,23 +29,56 @@ import { deployAndUpgrade, deployProxyOnly, initializeProxy, upgradeProxy } from
 import {
   B3TRGovernor,
   Emissions,
+  GalaxyMember,
   VeBetterPassport,
   VeBetterPassportV1,
   VeBetterPassportV2,
   VoterRewards,
+  X2EarnApps,
   X2EarnRewardsPool,
   XAllocationPool,
   XAllocationVoting,
 } from "../typechain-types"
 import { endorseApp } from "./helpers/xnodes"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers"
+
+interface LoadedContractsInstances {
+  veBetterPassport: VeBetterPassport
+  x2EarnApps: X2EarnApps
+  xAllocationVoting: XAllocationVoting
+  galaxyMember: GalaxyMember
+}
 
 describe("VeBetterPassport - @shard8", function () {
+  // Environment params
+  let creator1: HardhatEthersSigner
+  let creator2: HardhatEthersSigner
+
+  beforeEach(async function () {
+    const { otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = otherAccounts[10]
+    creator2 = otherAccounts[11]
+  })
+
+  // SETUP FIXTURE ( TESTING ENVIRONMENT )
+  async function setupFixture(): Promise<LoadedContractsInstances> {
+    const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await getOrDeployContractInstances({
+      forceDeploy: true,
+    })
+
+    return {
+      veBetterPassport,
+      x2EarnApps,
+      xAllocationVoting,
+      galaxyMember,
+    }
+  }
+
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
-      const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await loadFixture(setupFixture)
 
       // Verify contract addresses
       expect(await veBetterPassport.getXAllocationVoting()).to.equal(await xAllocationVoting.getAddress())
@@ -678,10 +711,10 @@ describe("VeBetterPassport - @shard8", function () {
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
       await x2EarnApps
         .connect(owner)
@@ -1662,7 +1695,7 @@ describe("VeBetterPassport - @shard8", function () {
         .submitApp(otherAccounts[0].address, otherAccount, otherAccounts[0].address, "metadataURI")
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, owner, otherAccounts[1].address, "metadataURI")
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
@@ -2708,12 +2741,12 @@ describe("VeBetterPassport - @shard8", function () {
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
       await x2EarnApps
@@ -2836,11 +2869,11 @@ describe("VeBetterPassport - @shard8", function () {
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -2998,11 +3031,11 @@ describe("VeBetterPassport - @shard8", function () {
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -3386,7 +3419,7 @@ describe("VeBetterPassport - @shard8", function () {
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -3564,7 +3597,7 @@ describe("VeBetterPassport - @shard8", function () {
         .connect(owner)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -3615,7 +3648,7 @@ describe("VeBetterPassport - @shard8", function () {
       expect(storedDelegatee).to.equal(delegatee.address)
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       await endorseApp(app3Id, otherAccounts[4])
@@ -3685,10 +3718,10 @@ describe("VeBetterPassport - @shard8", function () {
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -3808,7 +3841,7 @@ describe("VeBetterPassport - @shard8", function () {
         .connect(owner)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -4082,7 +4115,7 @@ describe("VeBetterPassport - @shard8", function () {
         .connect(owner)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -4097,7 +4130,7 @@ describe("VeBetterPassport - @shard8", function () {
       expect(await veBetterPassport.getDelegator(delegatee.address)).to.equal(owner.address)
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       await endorseApp(app3Id, otherAccounts[4])
@@ -4922,7 +4955,7 @@ describe("VeBetterPassport - @shard8", function () {
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -5448,6 +5481,14 @@ describe("VeBetterPassport - @shard8", function () {
 
 // Isolated tests for shard16 because of the size of the tests
 describe("VeBetterPassport - @shard16", function () {
+  let creator1: HardhatEthersSigner
+  let creator2: HardhatEthersSigner
+
+  beforeEach(async function () {
+    const { otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = otherAccounts[10]
+    creator2 = otherAccounts[11]
+  })
   describe("Passport PoP Score", function () {
     it("Should be able to register participation of user with ACTION_REGISTRAR_ROLE", async function () {
       const { x2EarnApps, otherAccounts, owner, veBetterPassport, otherAccount, xAllocationVoting } =
@@ -5663,13 +5704,13 @@ describe("VeBetterPassport - @shard16", function () {
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
 
       await endorseApp(app2Id, otherAccounts[3])
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
       await endorseApp(app3Id, otherAccounts[4])
 
@@ -5819,11 +5860,11 @@ describe("VeBetterPassport - @shard16", function () {
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -5892,11 +5933,11 @@ describe("VeBetterPassport - @shard16", function () {
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[4].address))
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -6141,7 +6182,7 @@ describe("VeBetterPassport - @shard16", function () {
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -7113,10 +7154,10 @@ describe("VeBetterPassport - @shard16", function () {
         .connect(owner)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -7377,10 +7418,10 @@ describe("VeBetterPassport - @shard16", function () {
         .connect(owner)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
