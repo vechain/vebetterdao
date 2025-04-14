@@ -16,10 +16,10 @@ import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle } from "@/components"
 import { useRemovePendingDelegationDelegateePOV } from "@/hooks/useRemovePendingDelegationDelegateePOV"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const RejectDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const rejectDelegation = useRemovePendingDelegationDelegateePOV({})
 
   const handleDelegate = useCallback(() => {

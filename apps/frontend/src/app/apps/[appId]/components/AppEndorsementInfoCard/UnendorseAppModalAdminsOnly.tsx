@@ -6,7 +6,7 @@ import { Text, Button, Image, Flex, HStack, Icon, VStack, Heading, Box } from "@
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -17,7 +17,7 @@ type Props = {
 
 export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, nodePoints }: Props) => {
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   // App data
   const { data: appMetadata } = useXAppMetadata(appId ?? "")
   const { data: logo } = useIpfsImage(appMetadata?.logo)

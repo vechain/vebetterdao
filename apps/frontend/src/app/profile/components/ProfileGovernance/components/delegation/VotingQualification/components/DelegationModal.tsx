@@ -23,14 +23,14 @@ import { useCallback } from "react"
 import { ExclamationTriangle } from "@/components"
 import { useAccountLinking } from "@/api"
 import { WalletAddressInput } from "@/app/components/Input"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type FormData = {
   walletAddress: string
 }
 
 export const DelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const { handleSubmit, setValue, watch, reset } = useForm<FormData>()
   const { isEntity } = useAccountLinking()
 

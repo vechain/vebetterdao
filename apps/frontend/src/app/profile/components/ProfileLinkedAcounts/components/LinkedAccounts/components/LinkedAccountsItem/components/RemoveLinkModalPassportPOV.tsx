@@ -16,10 +16,10 @@ import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle } from "@/components"
 import { useRemoveEntityLink } from "@/hooks"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const RemoveLinkModalPassportPOV = ({ modal, entity }: { modal: UseDisclosureProps; entity: string }) => {
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const removeLinking = useRemoveEntityLink({})
 
   const handleRemoveLink = useCallback(() => {

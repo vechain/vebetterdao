@@ -19,7 +19,7 @@ import { notFoundImage } from "@/constants"
 import { BaseModal } from "@/components/BaseModal"
 import { GenericAlert } from "@/app/components/Alert"
 import dayjs from "dayjs"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -29,7 +29,7 @@ type Props = {
 
 export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, isOpen, onClose }: Props) => {
   const { account } = useWallet()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   //Hooks to fetch app metadata
   const { data: appToUnendorseMetadata, isLoading: isAppToUnendorseMetadataLoading } = useXAppMetadata(
     appIdToUnendorse ?? "",

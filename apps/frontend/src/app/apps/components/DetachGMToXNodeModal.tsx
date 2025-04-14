@@ -20,7 +20,7 @@ import {
 import { useCallback, useMemo } from "react"
 import { useTranslation, Trans } from "react-i18next"
 import { IoWarningOutline } from "react-icons/io5"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -28,7 +28,7 @@ type Props = {
 
 export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const { attachedGMTokenId } = useXNode()
 
   const { data: b3trDonated } = useB3trDonated(attachedGMTokenId)

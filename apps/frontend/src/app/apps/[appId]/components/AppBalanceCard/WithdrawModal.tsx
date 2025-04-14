@@ -24,7 +24,7 @@ import { TeamWalletAddress } from "./components/TeamWalletAddress"
 import { IoWalletOutline } from "react-icons/io5"
 import { FormattingUtils } from "@repo/utils"
 import { WithdrawPercentageSelectorButtons } from "./components/WithdrawPercentageSelectorButtons"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export type Props = {
   appId: string
   teamWalletAddress: string
@@ -55,7 +55,7 @@ const layoutTransition = {
 
 export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
 
   const { data: availableB3trToWithdraw, isLoading: isBalanceLoading } = useAppAvailableFunds(appId)
   const availableB3trToWithdrawScaled = useMemo(() => {

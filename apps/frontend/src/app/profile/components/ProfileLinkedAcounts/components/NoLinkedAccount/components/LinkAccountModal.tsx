@@ -5,7 +5,7 @@ import { UseDisclosureReturn, VStack, Heading, Box, Text, FormControl, FormLabel
 import { UilLink } from "@iconscout/react-unicons"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type FormData = {
   accountToConnect: string
 }
@@ -13,7 +13,7 @@ type FormData = {
 export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
   const { t } = useTranslation()
   const { handleSubmit, setValue, watch } = useForm<FormData>()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const accountToConnect = watch("accountToConnect")
 
   const linkEntityToPassport = useLinkEntityToPassport({})

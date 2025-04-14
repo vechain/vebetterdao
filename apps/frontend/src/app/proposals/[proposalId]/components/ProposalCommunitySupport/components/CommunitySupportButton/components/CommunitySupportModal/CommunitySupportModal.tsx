@@ -5,10 +5,10 @@ import { CustomModalContent } from "@/components"
 import { SupportDeposit } from "./components/SupportDeposit"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { proposal } = useProposalDetail()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const [step, setStep] = useState(0)
   const depositMutation = useProposalVot3Deposit({ proposalId: proposal.id })
 
