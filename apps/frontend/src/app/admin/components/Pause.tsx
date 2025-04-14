@@ -71,33 +71,33 @@ export const Pause: React.FC = () => {
 
   const handleToggleB3trPause = useCallback(() => {
     if (isB3trPaused) {
-      unpauseB3trTxResult.sendTransaction()
+      unpauseB3trTxResult.sendTransaction(undefined)
     } else {
-      pauseB3trTxResult.sendTransaction()
+      pauseB3trTxResult.sendTransaction(undefined)
     }
   }, [isB3trPaused, pauseB3trTxResult, unpauseB3trTxResult])
 
   const handleToggleVot3Pause = useCallback(() => {
     if (isVot3Paused) {
-      unpauseVot3TxResult.sendTransaction()
+      unpauseVot3TxResult.sendTransaction(undefined)
     } else {
-      pauseVot3TxResult.sendTransaction()
+      pauseVot3TxResult.sendTransaction(undefined)
     }
   }, [isVot3Paused, pauseVot3TxResult, unpauseVot3TxResult])
 
   const handleToggleGalaxyMemberPause = useCallback(() => {
     if (isGalaxyMemberPaused) {
-      unpauseGalaxyMemberTxResult.sendTransaction()
+      unpauseGalaxyMemberTxResult.sendTransaction(undefined)
     } else {
-      pauseGalaxyMemberTxResult.sendTransaction()
+      pauseGalaxyMemberTxResult.sendTransaction(undefined)
     }
   }, [isGalaxyMemberPaused, pauseGalaxyMemberTxResult, unpauseGalaxyMemberTxResult])
 
   const handleToggleB3TRGovernorPause = useCallback(() => {
     if (isB3TRGovernorPaused) {
-      unpauseB3TRGovernorTxResult.sendTransaction()
+      unpauseB3TRGovernorTxResult.sendTransaction(undefined)
     } else {
-      pauseB3TRGovernorTxResult.sendTransaction()
+      pauseB3TRGovernorTxResult.sendTransaction(undefined)
     }
   }, [isB3TRGovernorPaused, pauseB3TRGovernorTxResult, unpauseB3TRGovernorTxResult])
 
