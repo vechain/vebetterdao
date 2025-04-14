@@ -5,7 +5,7 @@ import { TokenBalance, useB3trBalance, useVot3Balance } from "@/api"
 import { useWallet } from "@vechain/vechain-kit"
 import { motion } from "framer-motion"
 import { useTranslation } from "react-i18next"
-import { B3TRIcon } from "../Icons"
+import { B3TRIcon } from "@/components/Icons"
 
 type Props = {
   amount: string

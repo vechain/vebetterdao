@@ -3,8 +3,8 @@ import { Text, HStack, Flex, Button } from "@chakra-ui/react"
 import { t } from "i18next"
 import { UseFormReturn } from "react-hook-form"
 import { FiInfo } from "react-icons/fi"
-import { TokenCards } from "../TokenCards"
-import { BalanceInfo } from "./BalanceInfo"
+import { TokenCards } from "../../TokenCards"
+import { BalanceInfo } from "../../BalanceInfo"
 
 type Props = {
   amount: string
