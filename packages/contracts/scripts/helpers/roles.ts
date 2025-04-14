@@ -14,6 +14,7 @@ import {
   X2EarnRewardsPool,
   XAllocationPool,
   XAllocationVoting,
+  NodeManagement,
 } from "../../typechain-types"
 
 export const transferAdminRole = async (
@@ -231,7 +232,8 @@ export const validateContractRole = async (
     | X2EarnRewardsPool
     | X2EarnApps
     | VeBetterPassport
-    | X2EarnCreator,
+    | X2EarnCreator
+    | NodeManagement,
   expectedAddress: string,
   tempAdmin: string,
   role: string,

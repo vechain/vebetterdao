@@ -134,6 +134,9 @@
     "deploy:mainnet": {
       "dependsOn": ["^deploy:mainnet"]
     },
+    "deploy:hardhat": {
+      "dependsOn": ["^deploy:hardhat"]
+    },
     "upgrade:contract": {
       "dependsOn": ["@repo/config#check-or-generate-local-config"],
       "outputs": [],

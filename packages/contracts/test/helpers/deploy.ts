@@ -86,13 +86,14 @@ import {
   PassportSignalingLogicV2,
   VoterRewardsV3,
   B3TRMultiSig,
+  EmissionsV2,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deployAll"
-import { B3TRGovernorV4 } from "../../typechain-types/contracts/deprecated/V4"
+import { B3TRGovernorV4, VoterRewardsV4 } from "../../typechain-types/contracts/deprecated/V4"
 import { VoterRewardsV2 } from "../../typechain-types/contracts/deprecated/V2/VoterRewardsV2"
 import {
   GovernorClockLogicV4,
@@ -122,7 +123,6 @@ interface DeployInstance {
   xAllocationPool: XAllocationPool
   emissions: Emissions
   voterRewards: VoterRewards
-  voterRewardsV1: VoterRewardsV1
   treasury: Treasury
   nodeManagement: NodeManagement
   x2EarnCreator: X2EarnCreator
@@ -526,66 +526,80 @@ export const getOrDeployContractInstances = async ({
   const X_ALLOCATIONS_ADDRESS = await xAllocationPool.getAddress()
   const VOTE_2_EARN_ADDRESS = otherAccounts[1].address
 
-  const emissionsV1 = (await deployProxy("Emissions", [
-    {
-      minter: minterAccount.address,
-      admin: owner.address,
-      upgrader: owner.address,
-      contractsAddressManager: owner.address,
-      decaySettingsManager: owner.address,
-      b3trAddress: await b3tr.getAddress(),
-      destinations: [X_ALLOCATIONS_ADDRESS, VOTE_2_EARN_ADDRESS, await treasury.getAddress(), config.MIGRATION_ADDRESS],
-      initialXAppAllocation: config.INITIAL_X_ALLOCATION,
-      cycleDuration: config.EMISSIONS_CYCLE_DURATION,
-      decaySettings: [
-        config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
-        config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
-        config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
-        config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+  const emissions = (await deployAndUpgrade(
+    ["EmissionsV1", "EmissionsV2", "Emissions"],
+    [
+      [
+        {
+          minter: minterAccount.address,
+          admin: owner.address,
+          upgrader: owner.address,
+          contractsAddressManager: owner.address,
+          decaySettingsManager: owner.address,
+          b3trAddress: await b3tr.getAddress(),
+          destinations: [
+            X_ALLOCATIONS_ADDRESS,
+            VOTE_2_EARN_ADDRESS,
+            await treasury.getAddress(),
+            config.MIGRATION_ADDRESS,
+          ],
+          initialXAppAllocation: config.INITIAL_X_ALLOCATION,
+          cycleDuration: config.EMISSIONS_CYCLE_DURATION,
+          decaySettings: [
+            config.EMISSIONS_X_ALLOCATION_DECAY_PERCENTAGE,
+            config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE,
+            config.EMISSIONS_X_ALLOCATION_DECAY_PERIOD,
+            config.EMISSIONS_VOTE_2_EARN_ALLOCATION_DECAY_PERIOD,
+          ],
+          treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
+          maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
+          migrationAmount: config.MIGRATION_AMOUNT,
+        },
       ],
-      treasuryPercentage: config.EMISSIONS_TREASURY_PERCENTAGE,
-      maxVote2EarnDecay: config.EMISSIONS_MAX_VOTE_2_EARN_DECAY_PERCENTAGE,
-      migrationAmount: config.MIGRATION_AMOUNT,
-    },
-  ])) as EmissionsV1
-
-  const emissions = (await upgradeProxy(
-    "EmissionsV1",
-    "Emissions",
-    await emissionsV1.getAddress(),
-    [config.EMISSIONS_IS_NOT_ALIGNED ?? false],
+      [],
+      [],
+    ],
     {
-      version: 2,
+      versions: [undefined, 2, 3],
+      logOutput: false,
     },
   )) as Emissions
 
-  const voterRewardsV1 = (await deployProxy("VoterRewardsV1", [
-    owner.address, // admin
-    owner.address, // upgrader
-    owner.address, // contractsAddressManager
-    await emissions.getAddress(),
-    await galaxyMember.getAddress(),
-    await b3tr.getAddress(),
-    levels,
-    multipliers,
-  ])) as VoterRewardsV1
-
-  ;(await upgradeProxy("VoterRewardsV1", "VoterRewardsV2", await voterRewardsV1.getAddress(), [], {
-    version: 2,
-  })) as VoterRewardsV2
-  ;(await upgradeProxy("VoterRewardsV2", "VoterRewardsV3", await voterRewardsV1.getAddress(), [], {
-    version: 3,
-  })) as VoterRewardsV3
-
-  const voterRewards = (await upgradeProxy("VoterRewardsV3", "VoterRewards", await voterRewardsV1.getAddress(), [], {
-    version: 4,
-  })) as VoterRewards
+  const voterRewards = (await deployAndUpgrade(
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewards"],
+    [
+      [
+        owner.address, // admin
+        owner.address, // upgrader
+        owner.address, // contractsAddressManager
+        await emissions.getAddress(),
+        await galaxyMember.getAddress(),
+        await b3tr.getAddress(),
+        levels,
+        multipliers,
+      ],
+      [],
+      [],
+      [],
+      [],
+    ],
+    {
+      versions: [undefined, 2, 3, 4, 5],
+    },
+  )) as VoterRewardsV4
 
   // Set vote 2 earn (VoterRewards deployed contract) address in emissions
-  await emissions.connect(owner).setVote2EarnAddress(await voterRewardsV1.getAddress())
+  await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
 
   const xAllocationVoting = (await deployAndUpgrade(
-    ["XAllocationVotingV1", "XAllocationVotingV2", "XAllocationVotingV3", "XAllocationVotingV4", "XAllocationVoting"],
+    [
+      "XAllocationVotingV1",
+      "XAllocationVotingV2",
+      "XAllocationVotingV3",
+      "XAllocationVotingV4",
+      "XAllocationVotingV5",
+      "XAllocationVoting",
+    ],
     [
       [
         {
@@ -608,9 +622,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4, 5, 6],
       logOutput: false,
     },
   )) as XAllocationVoting
@@ -913,7 +928,6 @@ export const getOrDeployContractInstances = async ({
     xAllocationPool,
     emissions,
     voterRewards,
-    voterRewardsV1,
     owner,
     otherAccount,
     minterAccount,

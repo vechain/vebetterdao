@@ -13,6 +13,7 @@ import {
   X2EarnRewardsPool,
   X2EarnApps,
   NodeManagement,
+  NodeManagementV1,
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
@@ -200,10 +201,7 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as TimeLock
 
-  const x2EarnCreator = (await deployProxy("X2EarnCreator", [
-    TEMP_ADMIN,
-    config.CONTRACTS_ADMIN_ADDRESS,
-  ])) as X2EarnCreator
+  const x2EarnCreator = (await deployProxy("X2EarnCreator", [TEMP_ADMIN, TEMP_ADMIN])) as X2EarnCreator
 
   const treasury = (await deployProxy(
     "Treasury",
@@ -226,7 +224,7 @@ export async function deployAll(config: ContractsConfig) {
   // Deploy NodeManagement
   const nodeManagement = (await deployAndUpgrade(
     ["NodeManagementV1", "NodeManagement"],
-    [[vechainNodesAddress, config.CONTRACTS_ADMIN_ADDRESS, config.CONTRACTS_ADMIN_ADDRESS], []],
+    [[vechainNodesAddress, TEMP_ADMIN, deployer.address], []], // Use deployer as upgrader initially
     {
       versions: [undefined, 2],
       logOutput: true,
@@ -254,7 +252,7 @@ export async function deployAll(config: ContractsConfig) {
       [
         config.XAPP_BASE_URI,
         [TEMP_ADMIN], //admins
-        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        deployer.address, // upgrader - use deployer address for initial upgrade
         TEMP_ADMIN, // governance role
       ],
       [
@@ -352,7 +350,7 @@ export async function deployAll(config: ContractsConfig) {
           name: name,
           symbol: symbol,
           admin: TEMP_ADMIN,
-          upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+          upgrader: deployer.address,
           pauser: config.CONTRACTS_ADMIN_ADDRESS,
           minter: config.CONTRACTS_ADMIN_ADDRESS,
           contractsAddressManager: TEMP_ADMIN,
@@ -378,7 +376,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as GalaxyMember
 
   const emissions = (await deployAndUpgrade(
-    ["EmissionsV1", "Emissions"],
+    ["EmissionsV1", "EmissionsV2", "Emissions"],
     [
       [
         {
@@ -408,15 +406,16 @@ export async function deployAll(config: ContractsConfig) {
         },
       ],
       [config.EMISSIONS_IS_NOT_ALIGNED],
+      [],
     ],
     {
-      versions: [undefined, 2],
+      versions: [undefined, 2, 3],
       logOutput: true,
     },
   )) as Emissions
 
   const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewards"],
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewards"],
     [
       [
         TEMP_ADMIN, // admin
@@ -431,15 +430,23 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [], // Match the number of versions (5 versions need 5 argument arrays)
     ],
     {
-      versions: [undefined, 2, 3, 4],
+      versions: [undefined, 2, 3, 4, 5],
       logOutput: true,
     },
   )) as VoterRewards
 
   const xAllocationVoting = (await deployAndUpgrade(
-    ["XAllocationVotingV1", "XAllocationVotingV2", "XAllocationVotingV3", "XAllocationVotingV4", "XAllocationVoting"],
+    [
+      "XAllocationVotingV1",
+      "XAllocationVotingV2",
+      "XAllocationVotingV3",
+      "XAllocationVotingV4",
+      "XAllocationVotingV5",
+      "XAllocationVoting",
+    ],
     [
       [
         {
@@ -462,9 +469,10 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4, 5, 6],
       logOutput: true,
     },
   )) as XAllocationVoting
@@ -486,9 +494,9 @@ export async function deployAll(config: ContractsConfig) {
         decayRate: config.VEPASSPORT_DECAY_RATE, //decayRate
       },
       {
-        admin: config.CONTRACTS_ADMIN_ADDRESS, // admins
+        admin: TEMP_ADMIN, // admins
         botSignaler: config.CONTRACTS_ADMIN_ADDRESS, // botSignaler
-        upgrader: config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        upgrader: TEMP_ADMIN, // upgrader
         settingsManager: TEMP_ADMIN, // settingsManager
         roleGranter: config.CONTRACTS_ADMIN_ADDRESS, // roleGranter
         blacklister: config.CONTRACTS_ADMIN_ADDRESS, // blacklister
@@ -914,6 +922,26 @@ export async function deployAll(config: ContractsConfig) {
     await transferUpgraderRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferUpgraderRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
+    // Transfer UPGRADER_ROLE for nodeManagement
+    const nodeManagementUpgraderRoleForTransfer = await nodeManagement.UPGRADER_ROLE()
+    await nodeManagement
+      .connect(deployer)
+      .grantRole(nodeManagementUpgraderRoleForTransfer, config.CONTRACTS_ADMIN_ADDRESS)
+    await nodeManagement.connect(deployer).renounceRole(nodeManagementUpgraderRoleForTransfer, deployer.address)
+    console.log("Upgrader role transferred for NodeManagement")
+
+    // Transfer UPGRADER_ROLE for X2EarnApps
+    const x2EarnAppsUpgraderRole = await x2EarnApps.UPGRADER_ROLE()
+    await x2EarnApps.connect(deployer).grantRole(x2EarnAppsUpgraderRole, config.CONTRACTS_ADMIN_ADDRESS)
+    await x2EarnApps.connect(deployer).renounceRole(x2EarnAppsUpgraderRole, deployer.address)
+    console.log("Upgrader role transferred for X2EarnApps")
+
+    // Transfer UPGRADER_ROLE for GalaxyMember
+    const galaxyMemberUpgraderRole = await galaxyMember.UPGRADER_ROLE()
+    await galaxyMember.connect(deployer).grantRole(galaxyMemberUpgraderRole, config.CONTRACTS_ADMIN_ADDRESS)
+    await galaxyMember.connect(deployer).renounceRole(galaxyMemberUpgraderRole, deployer.address)
+    console.log("Upgrader role transferred for GalaxyMember")
+
     await transferSettingsManagerRole(veBetterPassport, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     console.log("Roles updated successfully!")
@@ -927,6 +955,68 @@ export async function deployAll(config: ContractsConfig) {
       TEMP_ADMIN,
       await veBetterPassport.SETTINGS_MANAGER_ROLE(),
     )
+
+    // NodeManagement
+    const nodeManagementUpgraderRoleForValidation = await nodeManagement.UPGRADER_ROLE()
+    const nodeManagementAdminRole = await nodeManagement.DEFAULT_ADMIN_ROLE()
+    console.log("Verifying NodeManagement roles...")
+
+    if (!(await nodeManagement.hasRole(nodeManagementUpgraderRoleForValidation, config.CONTRACTS_ADMIN_ADDRESS))) {
+      throw new Error(`UPGRADER_ROLE not set correctly on NodeManagement for ${config.CONTRACTS_ADMIN_ADDRESS}`)
+    }
+    if (await nodeManagement.hasRole(nodeManagementUpgraderRoleForValidation, deployer.address)) {
+      throw new Error(`UPGRADER_ROLE not removed correctly from deployer on NodeManagement`)
+    }
+    if (!(await nodeManagement.hasRole(nodeManagementAdminRole, TEMP_ADMIN))) {
+      throw new Error(`DEFAULT_ADMIN_ROLE not set correctly on NodeManagement for ${TEMP_ADMIN}`)
+    }
+    console.log("NodeManagement roles verified successfully!")
+
+    // X2EarnApps
+    const x2EarnAppsUpgraderRoleForValidation = await x2EarnApps.UPGRADER_ROLE()
+    console.log("Verifying X2EarnApps roles...")
+
+    if (!(await x2EarnApps.hasRole(x2EarnAppsUpgraderRoleForValidation, config.CONTRACTS_ADMIN_ADDRESS))) {
+      throw new Error(`UPGRADER_ROLE not set correctly on X2EarnApps for ${config.CONTRACTS_ADMIN_ADDRESS}`)
+    }
+    if (await x2EarnApps.hasRole(x2EarnAppsUpgraderRoleForValidation, deployer.address)) {
+      throw new Error(`UPGRADER_ROLE not removed correctly from deployer on X2EarnApps`)
+    }
+    console.log("X2EarnApps roles verified successfully!")
+
+    // GalaxyMember
+    console.log("Verifying GalaxyMember roles...")
+    await validateContractRole(
+      galaxyMember,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await galaxyMember.DEFAULT_ADMIN_ROLE(),
+    )
+    await validateContractRole(
+      galaxyMember,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await galaxyMember.UPGRADER_ROLE(),
+    )
+    await validateContractRole(
+      galaxyMember,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await galaxyMember.CONTRACTS_ADDRESS_MANAGER_ROLE(),
+    )
+    await validateContractRole(
+      galaxyMember,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await galaxyMember.PAUSER_ROLE(),
+    )
+    await validateContractRole(
+      galaxyMember,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await galaxyMember.MINTER_ROLE(),
+    )
+    console.log("GalaxyMember roles validated successfully!")
 
     // B3TR
     await validateContractRole(b3tr, await emissions.getAddress(), TEMP_ADMIN, await b3tr.MINTER_ROLE())
@@ -1137,38 +1227,6 @@ export async function deployAll(config: ContractsConfig) {
       config.CONTRACTS_ADMIN_ADDRESS,
       TEMP_ADMIN,
       await x2EarnApps.GOVERNANCE_ROLE(),
-    )
-
-    // GalaxyMember
-    await validateContractRole(
-      galaxyMember,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await galaxyMember.DEFAULT_ADMIN_ROLE(),
-    )
-    await validateContractRole(
-      galaxyMember,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await galaxyMember.UPGRADER_ROLE(),
-    )
-    await validateContractRole(
-      galaxyMember,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await galaxyMember.CONTRACTS_ADDRESS_MANAGER_ROLE(),
-    )
-    await validateContractRole(
-      galaxyMember,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await galaxyMember.PAUSER_ROLE(),
-    )
-    await validateContractRole(
-      galaxyMember,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await galaxyMember.MINTER_ROLE(),
     )
 
     // X2EarnCreator
