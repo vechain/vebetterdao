@@ -3,7 +3,7 @@
 import { Container, Flex, VStack } from "@chakra-ui/react"
 import { Providers } from "./providers"
 
-import { Footer, TransactionModalV2 } from "@/components"
+import { Footer, TransactionModal } from "@/components"
 import dynamic from "next/dynamic"
 import { AnalyticsUtils } from "@/utils"
 import { getConfig, getEnvDatadogApp, getEnvDatadogClient, getEnvDatadogEnv, getEnvMixPanel } from "@repo/config"
@@ -115,7 +115,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 flexDirection={"column"}>
                 {children}
               </Container>
-              <TransactionModalV2 />
+              <TransactionModal />
             </Flex>
             <Footer />
           </VStack>
