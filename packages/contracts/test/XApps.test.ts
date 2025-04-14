@@ -17,7 +17,7 @@ import {
   waitForCurrentRoundToEnd,
   waitForRoundToEnd,
 } from "./helpers"
-import { describe, it } from "mocha"
+import { describe, it, beforeEach } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { createNodeHolder, endorseApp } from "./helpers/xnodes"
@@ -46,8 +46,23 @@ import { buildTxBody, signAndSendTx } from "../scripts/helpers/txHelper"
 import { APPS } from "../scripts/deploy/setup"
 import { clauseBuilder, unitsUtils, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
 import { airdropVTHO } from "../scripts/helpers/airdrop"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
 describe("X-Apps - @shard15", function () {
+  // We prepare the environment for 4 creators
+  let creator1: HardhatEthersSigner
+  let creator2: HardhatEthersSigner
+  let creator3: HardhatEthersSigner
+  let creator4: HardhatEthersSigner
+
+  beforeEach(async function () {
+    const { otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = otherAccounts[10]
+    creator2 = otherAccounts[11]
+    creator3 = otherAccounts[12]
+    creator4 = otherAccounts[13]
+  })
+
   describe("Deployment", function () {
     it("Clock mode is set correctly", async function () {
       const { x2EarnApps } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -659,7 +674,7 @@ describe("X-Apps - @shard15", function () {
       await catchRevert(x2EarnAppsV3.connect(otherAccounts[1]).endorseApp(app1Id, 1))
 
       await x2EarnAppsV3
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app 4", "metadataURI")
       const app4Id = ethers.keccak256(ethers.toUtf8Bytes("My app 4"))
 
@@ -709,7 +724,7 @@ describe("X-Apps - @shard15", function () {
       await catchRevert(x2EarnAppsV4.connect(otherAccounts[1]).endorseApp(app1Id, 1))
 
       await x2EarnAppsV4
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app 5", "metadataURI")
       const app5Id = ethers.keccak256(ethers.toUtf8Bytes("My app 5"))
 
@@ -1879,7 +1894,7 @@ describe("X-Apps - @shard15", function () {
         .connect(owner)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, "My app #2", "metadataURI")
 
       const app1ReceiverAddress = await x2EarnApps.teamWalletAddress(app1Id)
@@ -2025,14 +2040,14 @@ describe("X-Apps - @shard15", function () {
       })
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await endorseApp(app1Id, owner)
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
@@ -2055,7 +2070,7 @@ describe("X-Apps - @shard15", function () {
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
 
@@ -2094,7 +2109,7 @@ describe("X-Apps - @shard15", function () {
       await endorseApp(app1Id, otherAccounts[0])
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
@@ -2108,11 +2123,11 @@ describe("X-Apps - @shard15", function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
 
       const apps = await x2EarnApps.unendorsedApps()
@@ -2123,25 +2138,25 @@ describe("X-Apps - @shard15", function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, "My app", "metadataURI")
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))
       await endorseApp(app1Id, otherAccounts[0])
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
       await endorseApp(app2Id, otherAccounts[1])
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator3)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
       await endorseApp(app3Id, otherAccounts[2])
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator4)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
       const app4Id = ethers.keccak256(ethers.toUtf8Bytes("My app #4"))
       await endorseApp(app4Id, otherAccounts[3])
@@ -2168,19 +2183,19 @@ describe("X-Apps - @shard15", function () {
       await endorseApp(app1Id, otherAccounts[0])
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, "My app #2", "metadataURI")
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes("My app #2"))
       await endorseApp(app2Id, otherAccounts[1])
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, "My app #3", "metadataURI")
       const app3Id = ethers.keccak256(ethers.toUtf8Bytes("My app #3"))
       await endorseApp(app3Id, otherAccounts[2])
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator3)
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, "My app #4", "metadataURI")
       const app4Id = ethers.keccak256(ethers.toUtf8Bytes("My app #4"))
       await endorseApp(app4Id, otherAccounts[3])
@@ -2533,7 +2548,7 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
     })
 
-    it("App admin can add more creators for the app", async function () {
+    it("App admin can't add more than 1 creator for the app", async function () {
       const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2552,6 +2567,10 @@ describe("X-Apps - @shard15", function () {
 
       // User should be listed as one of the apps creators
       expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
+
+      // UPDATE : MAX CREATORS = 1 REACHED ( by default the admin on submitApp is the creator )
+      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[0].address)
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
 
       // App admin can add more creators for the app
       await expect(x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)).to.emit(
@@ -2560,10 +2579,10 @@ describe("X-Apps - @shard15", function () {
       )
 
       // New creator should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[1].address])
     })
 
-    it("An app can have up to 3 creators", async function () {
+    it("An app can have only 1 creator", async function () {
       const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2583,25 +2602,13 @@ describe("X-Apps - @shard15", function () {
       // User should be listed as one of the apps creators
       expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
 
-      // App admin can add more creators for the app
-      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
-
-      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)
-
-      // New creators should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([
-        otherAccounts[0].address,
-        otherAccounts[1].address,
-        otherAccounts[2].address,
-      ])
-
-      // Adding a fourth creator should fail
+      // Adding another creator should fail
       await expect(
-        x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[3].address),
+        x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address),
       ).to.be.revertedWithCustomError(x2EarnApps, "X2EarnMaxCreatorsReached")
     })
 
-    it("Same creator cannot be added twice to the same app", async function () {
+    it("Same creator cannot be part of more than 1 app", async function () {
       const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2620,17 +2627,21 @@ describe("X-Apps - @shard15", function () {
 
       // User should be listed as one of the apps creators
       expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
+
+      // UPDATE : MAX CREATORS = 1 REACHED ( by default the admin on submitApp is the creator )
+      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[0].address)
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
 
       // App admin can add more creators for the app
       await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
 
       // New creator should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[1].address])
 
-      // Adding the same creator again should fail
+      // Adding the same creator again should fail ( MAX CREATORS = 1 REACHED )
       await expect(
         x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address),
-      ).to.be.revertedWithCustomError(x2EarnApps, "X2EarnAlreadyCreator")
+      ).to.be.revertedWithCustomError(x2EarnApps, "X2EarnMaxCreatorsReached")
     })
 
     it("Should mint a creator NFT for a creator that gets added after registration that doesnt currently hold one", async function () {
@@ -2647,6 +2658,10 @@ describe("X-Apps - @shard15", function () {
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
 
+      // UPDATE : MAX CREATORS = 1 REACHED ( by default the admin on submitApp is the creator )
+      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[0].address)
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
+
       // Adding a new creator that doesnt hold a creator NFT
       await expect(x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)).to.emit(
         x2EarnCreator,
@@ -2654,7 +2669,7 @@ describe("X-Apps - @shard15", function () {
       )
 
       // New creator should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[1].address])
 
       // New creator should have a creator NFT minted for them
       expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
@@ -2663,6 +2678,10 @@ describe("X-Apps - @shard15", function () {
       await x2EarnCreator.safeMint(otherAccounts[2].address) // Mint the NFT
 
       const balanceBefore = await x2EarnCreator.balanceOf(otherAccounts[2].address)
+
+      // MAX CREATORS = 1, REACHED ( removing the previous creator )
+      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[1].address)
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
 
       // Adding the user with a creator NFT
       await expect(x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)).to.not.emit(
@@ -2688,11 +2707,15 @@ describe("X-Apps - @shard15", function () {
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
 
+      // UPDATE : MAX CREATORS = 1 REACHED ( by default the admin on submitApp is the creator )
+      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[0].address)
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
+
       // Adding a new creator
       await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
 
       // New creator should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[1].address])
 
       // New creator should have a creator NFT minted for them
       expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
@@ -2707,7 +2730,7 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
     })
 
-    it("Should track the number of apps a creator is a part of", async function () {
+    it("A creator should be part of only one app", async function () {
       const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2718,49 +2741,12 @@ describe("X-Apps - @shard15", function () {
       await x2EarnApps
         .connect(otherAccounts[0])
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
-
-      await x2EarnApps
-        .connect(otherAccounts[0])
-        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
-
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
-
-      // Adding a new creator
-      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
-      await x2EarnApps.connect(otherAccounts[3]).addCreator(app2Id, otherAccounts[1].address)
-
-      // New creator should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
-      expect(await x2EarnApps.appCreators(app2Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
-
-      // Should be considered a creator for 2 apps
-      expect(await x2EarnApps.isAppCreator(app1Id, otherAccounts[1].address)).to.eql(true)
-
-      // New creator should have a creator NFT minted for them
-      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
-      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(2n)
-
-      // New creator should be part of 2 apps
-      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(2n)
-      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(2n)
-
-      // Removing the creator
-      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[1].address)
-      await x2EarnApps.connect(otherAccounts[3]).removeAppCreator(app2Id, otherAccounts[1].address)
-
-      // New creator should have their creator NFT burned
-      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
-      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(0n)
-
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
-      expect(await x2EarnApps.appCreators(app2Id)).to.deep.equal([otherAccounts[0].address])
-
-      // Should not be considered a creator for 2 apps
-      expect(await x2EarnApps.isAppCreator(app1Id, otherAccounts[1].address)).to.eql(false)
-
-      // Other creator should still be part of 2 apps
-      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(2n)
+      // try to submit another app with the same creator will fail
+      await expect(
+        x2EarnApps
+          .connect(otherAccounts[0])
+          .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI"),
+      ).to.be.revertedWithCustomError(x2EarnApps, "CreatorNFTAlreadyUsed")
     })
 
     it("Should not be able to remove a creator that is not part of the app", async function () {
@@ -2811,7 +2797,7 @@ describe("X-Apps - @shard15", function () {
       )
     })
 
-    it("Should revoke all creator rights if their XApp is blacklisted, unless they are still aprt of other app", async function () {
+    it("Should revoke all creator rights if their XApp is blacklisted", async function () {
       const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2819,47 +2805,31 @@ describe("X-Apps - @shard15", function () {
       // Mint the NFT
       await x2EarnCreator.safeMint(otherAccounts[0].address)
 
-      // Other Accounts 0 creates 2 apps -> Creator of both apps
+      // Other Accounts 0 creates 1 apps -> Creator of the app1
       await x2EarnApps
         .connect(otherAccounts[0])
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
 
-      await x2EarnApps
-        .connect(otherAccounts[0])
-        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
-
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
 
-      // Other account 2 and 3 are added as creators to the app 1
+      // decide to change the creator of the app for another creator addressse
+      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[0].address)
       await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
-      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)
 
-      // Both apps get endorsed
+      // It gets endorsed
       await endorseApp(app1Id, otherAccounts[2])
-      await endorseApp(app2Id, otherAccounts[3])
 
-      // Each account should have a creator NFT minted for them
-      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
+      // creator should have a creator NFT minted for them
       expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
 
       // Blacklisting the first app
       await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app
 
-      // Other account 1 & 2 should have their creator NFT burned
+      // creator should have their creator NFT burned
       expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
 
-      // Other account 0 should still have their creator NFT
-      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
-
-      // Should all still be considered creators of the app for info purposes
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([
-        otherAccounts[0].address,
-        otherAccounts[1].address,
-        otherAccounts[2].address,
-      ])
+      // Should still be considered creators of the app for info purposes
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[1].address])
     })
 
     it("Should regrant creator rights if their XApp is unblacklisted", async function () {
@@ -2870,54 +2840,40 @@ describe("X-Apps - @shard15", function () {
       // Mint the NFT
       await x2EarnCreator.safeMint(otherAccounts[0].address)
 
-      // Other Accounts 0 creates 2 apps -> Creator of both apps
+      // Other Accounts 0 creates 1 apps -> Creator of the app1
       await x2EarnApps
         .connect(otherAccounts[0])
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
 
-      await x2EarnApps
-        .connect(otherAccounts[0])
-        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
-
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
 
-      // Other account 2 and 3 are added as creators to the app 1
+      // decide to change the creator of the app for another creator addressse
+      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[0].address)
+      // default creator should have their creator NFT burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(0n)
+
       await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
-      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)
 
       // Both apps get endorsed
       await endorseApp(app1Id, otherAccounts[2])
-      await endorseApp(app2Id, otherAccounts[3])
 
       // Each account should have a creator NFT minted for them
-      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
       expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
 
       // Blacklisting the first app
       await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app
 
-      // Other account 1 & 2 should have their creator NFT burned
+      // creator should have their creator NFT burned
       expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
-
-      // Other account 0 should still have their creator NFT
-      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
 
       // Should all still be considered creators of the app for info purposes
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([
-        otherAccounts[0].address,
-        otherAccounts[1].address,
-        otherAccounts[2].address,
-      ])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[1].address])
 
       // Unblacklisting the first app
       await x2EarnApps.setVotingEligibility(app1Id, true) // Unblacklist the app
 
-      // Other account 1 & 2 should have their creator NFT minted
+      // creator should have their creator NFT minted
       expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
     })
 
     it("XApps user endorsed should not go into negative if blacklisted multiple times", async function () {
@@ -2928,56 +2884,36 @@ describe("X-Apps - @shard15", function () {
       // Mint the NFT
       await x2EarnCreator.safeMint(otherAccounts[0].address)
 
-      // Other Accounts 0 creates 2 apps -> Creator of both apps
+      // Other Accounts 0 creates 1 apps -> Creator of the app1
       await x2EarnApps
         .connect(otherAccounts[0])
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
 
-      await x2EarnApps
-        .connect(otherAccounts[0])
-        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
-
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
 
-      // Other account 2 and 3 are added as creators to the app 1
-      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
-      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)
-
-      // Both apps get endorsed
+      // app get endorsed
       await endorseApp(app1Id, otherAccounts[2])
-      await endorseApp(app2Id, otherAccounts[3])
 
-      // Each account should have a creator NFT minted for them
+      // Creator should have their NFT minted
       expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
-
-      // Other account 1 & 2 should be creators of 1 app
-      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(1n)
-      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(1n)
 
       // Blacklisting the first app
       await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app
 
-      // Other account 1 & 2 should have their creator NFT burned
-      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
+      // Creator should have their creator NFT burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(0n)
 
-      // Other account 1 & 2 should be creators of 0 apps
-      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(0n)
-      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(0n)
+      // Creator should be creators of 0 apps
+      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(0n)
 
       // Blacklisting the first app again
       await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app
 
-      // Other account 1 & 2 should not have their creator NFT burned again as they are already burned
-      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
+      // Creator should not have their creator NFT burned again as they are already burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(0n)
 
-      // Other account 1 & 2 should be creators of 0 apps
-      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(0n)
-      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(0n)
+      // Creator should be creators of 0 apps
+      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(0n)
     })
 
     it("XApps user endorsed should not keep increasing if de-blacklisted multiple times", async function () {
@@ -2988,70 +2924,45 @@ describe("X-Apps - @shard15", function () {
       // Mint the NFT
       await x2EarnCreator.safeMint(otherAccounts[0].address)
 
-      // Other Accounts 0 creates 2 apps -> Creator of both apps
+      // Other Accounts 0 creates 1 apps -> Creator of the app1
       await x2EarnApps
         .connect(otherAccounts[0])
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
 
-      await x2EarnApps
-        .connect(otherAccounts[0])
-        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
-
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
-      const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
 
-      // Other account 2 and 3 are added as creators to the app 1
-      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
-      await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)
-
-      // Both apps get endorsed
+      // App get endorsed
       await endorseApp(app1Id, otherAccounts[2])
-      await endorseApp(app2Id, otherAccounts[3])
 
-      // Each account should have a creator NFT minted for them
+      // Creator = account 0 should have their creator NFT minted
       expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
 
       // De- Blacklisting the first app (It is not blacklisted)
       await x2EarnApps.setVotingEligibility(app1Id, true)
 
-      // Other account 1 & 2 should have their no changes in creator NFT
-      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(1n)
+      // Creator should not have their creator NFT burned
+      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
 
-      // Other account 1 & 2 should be creators of 1 app
-      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(1n)
-      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(1n)
+      // Creator should be creators of 1 app
+      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(1n)
 
       // De- Blacklisting the first app (It is not blacklisted)
       await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app
 
       // Should all still be considered creators of the app for info purposes
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([
-        otherAccounts[0].address,
-        otherAccounts[1].address,
-        otherAccounts[2].address,
-      ])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
 
-      // Other account 1 & 2 should be creators of 0 apps
-      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(0n)
-      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(0n)
+      // Creator should be creators of 0 apps
+      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(0n)
 
-      // Other account 1 & 2 should have their creator NFT burned
-      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
+      // Creator should have their creator NFT burned again
+      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(0n)
 
       // Blacklisting the first app again (should not decrease the creator NFT)
       await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app again
 
-      // Other account 1 & 2 should be creators of 0 apps
-      expect(await x2EarnApps.creatorApps(otherAccounts[1].address)).to.eql(0n)
-      expect(await x2EarnApps.creatorApps(otherAccounts[2].address)).to.eql(0n)
-
-      // Other account 1 & 2 should have their creator NFT burned
-      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(0n)
-      expect(await x2EarnCreator.balanceOf(otherAccounts[2].address)).to.eql(0n)
+      // Creator should be creators of 0 apps ==> De-blacklisting multiple times should not decrease the creator NFT
+      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(0n)
     })
   })
 })
