@@ -47,6 +47,12 @@ library PassportSignalingLogic {
   /// @param reason  The reason for signaling the user.
   event UserSignaled(address indexed user, address indexed signaler, bytes32 indexed app, string reason);
 
+  /// @notice Emitted when a user is unsignaled.
+  /// @param user The address of the user that was unsignaled.
+  /// @param signaler The address of the user that unsignaled the user.
+  /// @param reason The reason for unsignaling the user.
+  event UserUnsignaled(address indexed user, address indexed signaler, string reason);
+
   /// @notice Emited when an address is associated with an app.
   /// @param signaler  The address of the signaler.
   /// @param app  The app that the signaler was associated with.
@@ -67,12 +73,6 @@ library PassportSignalingLogic {
   /// @param app  The app that the user had their signals reset for.
   /// @param reason - The reason for resetting the signals.
   event UserSignalsResetForApp(address indexed user, bytes32 indexed app, string reason);
-
-  /// @notice Emitted when a user is unsignaled.
-  /// @param user The address of the user that was unsignaled.
-  /// @param signaler The address of the user that unsignaled the user.
-  /// @param app The app that the user was unsignaled for.
-  event UserUnsignaled(address indexed user, address indexed signaler, bytes32 indexed app);
 
   // ---------- Getters ---------- //
 
@@ -233,8 +233,28 @@ library PassportSignalingLogic {
 
   /// @notice Removes a signal from a user
   /// @param user - the user to unsignal
+  /// @dev Only use with the DEFAULT_ADMIN_ROLE
+  function unsignalUser(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    string memory reason
+  ) external {
+    // Check if the user any signals
+    require(self.signaledCounter[user] > 0, "BotSignaling: user has no signals");
+    
+    _decrementSignalCounters(self, user);
+
+    emit UserUnsignaled(user, msg.sender, reason);
+  }
+
+  /// @notice Removes a signal from a user
+  /// @param user - the user to unsignal
   /// @dev Only use with the SIGNALER_ROLE
-  function unsignalUserByAppAdmin(PassportStorageTypes.PassportStorage storage self, address user) external {
+  function unsignalUserByAppAdmin(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    string memory reason
+  ) external {
     bytes32 app = self.appOfSignaler[msg.sender];
     
     // If the sender is not assigned to an app, revert
@@ -243,22 +263,9 @@ library PassportSignalingLogic {
     // Check if the user has signals from this app
     require(self.appSignalsCounter[app][user] > 0, "BotSignaling: user has no signals from this app");
     
-    _decrementSignalCounters(self, user, app);
-  }
+    _decrementSignalCountersForAppAdmin(self, user, app);
 
-  /// @notice Removes a signal from a user with a specified app
-  /// @param user - the user to unsignal
-  /// @param app - the app to unsignal the user for
-  /// @dev Only use with the DEFAULT_ADMIN_ROLE
-  function unsignalUser(
-    PassportStorageTypes.PassportStorage storage self,
-    address user,
-    bytes32 app
-  ) external {
-    // Check if the user has signals from this app
-    require(self.appSignalsCounter[app][user] > 0, "BotSignaling: user has no signals from this app");
-    
-    _decrementSignalCounters(self, user, app);
+    emit UserUnsignaled(user, msg.sender, reason);
   }
 
   // ---------- Private ---------- //
@@ -266,32 +273,40 @@ library PassportSignalingLogic {
   /// @notice Private helper function to decrement signal counters
   /// @param self - the passport storage
   /// @param user - the user to decrement signals for
-  /// @param app - the app to decrement signals for
   function _decrementSignalCounters(
+    PassportStorageTypes.PassportStorage storage self,
+    address user
+  ) private {
+    self.signaledCounter[user]--;
+
+    address passport = PassportEntityLogic._getPassportForEntity(self, user);
+    if (user != passport) {
+      self.signaledCounter[passport]--;
+    }
+  }
+
+  /// @notice Private helper function to decrement signal counters for app admins
+  function _decrementSignalCountersForAppAdmin(
     PassportStorageTypes.PassportStorage storage self,
     address user,
     bytes32 app
   ) private {
-    // Decrement the counters
     self.signaledCounter[user]--;
     self.appSignalsCounter[app][user]--;
     self.appTotalSignalsCounter[app]--;
 
-    // If user has attached their entity to a passport, also update the passport
     address passport = PassportEntityLogic._getPassportForEntity(self, user);
     if (user != passport) {
       self.signaledCounter[passport]--;
       self.appSignalsCounter[app][passport]--;
     }
-
-    emit UserUnsignaled(user, msg.sender, app);
   }
 
   /// @notice Private function to signal a user
   function _signalUser(PassportStorageTypes.PassportStorage storage self, address user, string memory reason) private {
     bytes32 app = self.appOfSignaler[msg.sender];
     
-    // Check if the user has interacted with the same app as the signaler
+    // Check if the user has interacted with the same app as the signaler to avoid cross-app signaling
     bool hasInteracted = self.userUniqueAppInteraction[user][app];
 
     // If the signaler is not assigned to an app, it must be a default admin

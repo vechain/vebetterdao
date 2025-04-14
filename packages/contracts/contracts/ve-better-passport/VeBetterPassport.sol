@@ -706,18 +706,19 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
 
   /// @notice Removes a signal from a user
   /// @param _user - the user to unsignal
-  /// @param _app - the app to unsignal the user for
-  function unsignalUser(address _user, bytes32 _app) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  /// @param reason - the reason for unsignaling the user
+  function unsignalUser(address _user, string memory reason) external onlyRole(DEFAULT_ADMIN_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportSignalingLogic.unsignalUser($, _user, _app);  
+    PassportSignalingLogic.unsignalUser($, _user, reason);  
   }
 
   /// @notice Removes a signal from a user for a specified app
   /// @param _user - the user to unsignal
+  /// @param reason - the reason for unsignaling the user
   /// @dev Only wallets with the SIGNALER_ROLE can call this function.
-  function unsignalUserByAppAdmin(address _user) external onlyRole(SIGNALER_ROLE) {
+  function unsignalUserByAppAdmin(address _user, string memory reason) external onlyRole(SIGNALER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportSignalingLogic.unsignalUserByAppAdmin($, _user);
+    PassportSignalingLogic.unsignalUserByAppAdmin($, _user, reason);
   }
 
   /// @notice this method allows an app admin to assign a signaler to an app
