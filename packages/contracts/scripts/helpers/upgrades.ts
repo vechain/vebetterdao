@@ -121,7 +121,7 @@ export const upgradeProxy = async (
   await tx.wait()
 
   const newImplementationAddress = await getImplementationAddress(ethers.provider, proxyAddress)
-  if (newImplementationAddress !== (await implementation.getAddress())) {
+  if (!AddressUtils.compareAddresses(newImplementationAddress, await implementation.getAddress())) {
     throw new Error(
       `The implementation address is not the one expected: ${newImplementationAddress} !== ${await implementation.getAddress()}`,
     )
