@@ -890,6 +890,12 @@ export const getOrDeployContractInstances = async ({
   // Mint creator NFT to owner
   await x2EarnCreator.safeMint(await owner.getAddress())
 
+  // Since x2EarnApps v5, new apps => new creator != owner
+  await x2EarnCreator.safeMint(await otherAccounts[10].getAddress())
+  await x2EarnCreator.safeMint(await otherAccounts[11].getAddress())
+  await x2EarnCreator.safeMint(await otherAccounts[12].getAddress())
+  await x2EarnCreator.safeMint(await otherAccounts[13].getAddress())
+
   // Bootstrap and start emissions
   if (bootstrapAndStartEmissions) {
     await callBootstrapAndStartEmissions()
