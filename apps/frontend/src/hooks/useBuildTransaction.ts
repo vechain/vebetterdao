@@ -32,7 +32,7 @@ export const useBuildTransaction = <ClausesParams>({
 }: BuildTransactionProps<ClausesParams>) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
-  const { startTransaction, transactionState, updateTransactionStatus } = useTransactionModal()
+  const { setupModal, transactionModalState, updateModal } = useTransactionModal()
   const lastReportedStatusRef = useRef<string | undefined>()
 
   /**
@@ -63,9 +63,9 @@ export const useBuildTransaction = <ClausesParams>({
   useEffect(() => {
     if (result?.status !== lastReportedStatusRef.current) {
       lastReportedStatusRef.current = result.status
-      updateTransactionStatus(result.status)
+      updateModal(result.status)
     }
-  }, [result.status, transactionState?.status, updateTransactionStatus])
+  }, [result.status, transactionModalState?.status, updateModal])
 
   /**
    * Function to send a transaction based on the provided parameters.
@@ -73,10 +73,10 @@ export const useBuildTransaction = <ClausesParams>({
    */
   const sendTransaction = useCallback(
     async (props: ClausesParams) => {
-      startTransaction(clauseBuilder(props), async () => result.sendTransaction(clauseBuilder(props)))
+      setupModal(async () => result.sendTransaction(clauseBuilder(props)))
       return result.sendTransaction(clauseBuilder(props))
     },
-    [clauseBuilder, result, startTransaction],
+    [clauseBuilder, result, setupModal],
   )
 
   return { ...result, sendTransaction }

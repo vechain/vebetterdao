@@ -1,19 +1,18 @@
 import React, { createContext, useContext, useState, ReactNode, useMemo, useCallback } from "react"
-import { EnhancedClause, TransactionStatus } from "@vechain/vechain-kit"
+import { TransactionStatus } from "@vechain/vechain-kit"
 import { useDisclosure } from "@chakra-ui/react"
 interface TransactionState {
   status: TransactionStatus
-  clauses?: EnhancedClause[]
   isTxModalOpen: boolean
   onClose: () => void
   tryAgain?: () => Promise<void>
 }
 
 interface TransactionContextType {
-  transactionState: TransactionState | null
-  startTransaction: (clauses: EnhancedClause[], tryAgain?: () => Promise<void>) => void
-  updateTransactionStatus: (status: TransactionStatus) => void
-  resetTransaction: () => void
+  transactionModalState: TransactionState | null
+  setupModal: (tryAgain?: () => Promise<void>) => void
+  updateModal: (status: TransactionStatus) => void
+  resetModal: () => void
   isTxModalOpen: boolean
   onClose: () => void
 }
@@ -39,22 +38,21 @@ interface TransactionModalProviderProps {
 }
 
 export const TransactionModalProvider: React.FC<TransactionModalProviderProps> = ({ children }) => {
-  const [transactionState, setTransactionState] = useState<TransactionState | null>(null)
+  const [transactionModalState, setTransactionModalState] = useState<TransactionState | null>(null)
   const { isOpen: isTxModalOpen, onOpen, onClose } = useDisclosure()
 
   const handleClose = useCallback(() => {
-    if (transactionState?.status === "pending" || transactionState?.status === "waitingConfirmation") return //Prevent closing the modal if the transaction is pending or waiting for confirmation
+    if (transactionModalState?.status === "pending" || transactionModalState?.status === "waitingConfirmation") return //Prevent closing the modal if the transaction is pending or waiting for confirmation
     onClose()
-    setTransactionState(null)
-  }, [onClose, transactionState?.status])
+    setTransactionModalState(null)
+  }, [onClose, transactionModalState?.status])
 
-  const startTransaction = useCallback(
-    (clauses: EnhancedClause[], tryAgain?: () => Promise<void>) => {
+  const setupModal = useCallback(
+    (tryAgain?: () => Promise<void>) => {
       onOpen()
-      setTransactionState({
+      setTransactionModalState({
         ...initialState,
         status: "pending",
-        clauses,
         isTxModalOpen,
         onClose: handleClose,
         ...(tryAgain && { tryAgain }),
@@ -63,9 +61,9 @@ export const TransactionModalProvider: React.FC<TransactionModalProviderProps> =
     [isTxModalOpen, onOpen, handleClose],
   )
 
-  const updateTransactionStatus = useCallback(
+  const updateModal = useCallback(
     (status: TransactionStatus) => {
-      setTransactionState(prev => {
+      setTransactionModalState(prev => {
         if (!prev) return null
         return {
           ...prev,
@@ -78,20 +76,20 @@ export const TransactionModalProvider: React.FC<TransactionModalProviderProps> =
     [handleClose, isTxModalOpen],
   )
 
-  const resetTransaction = useCallback(() => {
-    setTransactionState(null)
+  const resetModal = useCallback(() => {
+    setTransactionModalState(null)
   }, [])
 
   const value = useMemo(
     () => ({
-      transactionState,
-      startTransaction,
-      updateTransactionStatus,
-      resetTransaction,
+      transactionModalState,
+      setupModal,
+      updateModal,
+      resetModal,
       isTxModalOpen,
       onClose: handleClose,
     }),
-    [transactionState, startTransaction, updateTransactionStatus, resetTransaction, isTxModalOpen, handleClose],
+    [transactionModalState, setupModal, updateModal, resetModal, isTxModalOpen, handleClose],
   )
 
   return <TransactionContext.Provider value={value}>{children}</TransactionContext.Provider>

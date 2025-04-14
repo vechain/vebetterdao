@@ -7,33 +7,36 @@ import { ErrorModalContent } from "../TransactionModal/ErrorModalContent"
 import { LoadingModalContent } from "../TransactionModal/LoadingModalContent"
 import { ConfirmationModalContent } from "../TransactionModal/ConfirmationModalContent"
 export const TransactionModalV2 = () => {
-  const { transactionState, isTxModalOpen, onClose } = useTransactionModal()
+  const { transactionModalState, isTxModalOpen, onClose } = useTransactionModal()
   const portalRef = useRef(document.body)
   const canShowCloseButton = useMemo(() => {
-    return transactionState?.status !== "pending" && transactionState?.status !== "waitingConfirmation"
-  }, [transactionState?.status])
+    return transactionModalState?.status !== "pending" && transactionModalState?.status !== "waitingConfirmation"
+  }, [transactionModalState?.status])
 
   const handleTryAgain = useCallback(async () => {
-    if (transactionState?.tryAgain) {
-      return await transactionState.tryAgain()
+    if (transactionModalState?.tryAgain) {
+      return await transactionModalState.tryAgain()
     }
-  }, [transactionState])
+  }, [transactionModalState])
 
   const modalContent = useMemo(() => {
     const statusComponentMap: Record<TransactionStatus, ReactNode> = {
       pending: <ConfirmationModalContent />,
       waitingConfirmation: <LoadingModalContent />,
       error: (
-        <ErrorModalContent showTryAgainButton {...(transactionState?.tryAgain ? { onTryAgain: handleTryAgain } : {})} />
+        <ErrorModalContent
+          showTryAgainButton
+          {...(transactionModalState?.tryAgain ? { onTryAgain: handleTryAgain } : {})}
+        />
       ),
       success: <SuccessModalContent />,
       ready: null,
       unknown: null,
     }
-    return statusComponentMap[transactionState?.status ?? "unknown"] || null
-  }, [transactionState?.status, transactionState?.tryAgain, handleTryAgain])
+    return statusComponentMap[transactionModalState?.status ?? "unknown"] || null
+  }, [transactionModalState?.status, transactionModalState?.tryAgain, handleTryAgain])
 
-  if (transactionState?.status === "ready") return null
+  if (transactionModalState?.status === "ready") return null
 
   return (
     <BaseModal

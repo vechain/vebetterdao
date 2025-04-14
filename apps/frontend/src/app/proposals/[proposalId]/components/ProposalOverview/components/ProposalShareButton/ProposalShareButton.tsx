@@ -40,7 +40,7 @@ export const ProposalShareButton = () => {
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const [showCopiedLink, setShowCopiedLink] = useState(false)
-  const { transactionState } = useTransactionModal()
+  const { transactionModalState } = useTransactionModal()
   const handleCopyLink = useCallback(async () => {
     await navigator.clipboard.writeText(location.href)
     setShowCopiedLink(true)
@@ -59,7 +59,7 @@ export const ProposalShareButton = () => {
         onClose={onClose}
         trapFocus={false}
         closeOnOverlayClick={
-          transactionState?.status !== "waitingConfirmation" && transactionState?.status !== "pending"
+          transactionModalState?.status !== "waitingConfirmation" && transactionModalState?.status !== "pending"
         }
         isCentered={true}
         size={"xl"}>
