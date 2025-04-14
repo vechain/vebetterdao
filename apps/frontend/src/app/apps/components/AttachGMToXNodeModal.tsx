@@ -32,7 +32,7 @@ import { UilLink } from "@iconscout/react-unicons"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { v4 as uuid } from "uuid"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -40,7 +40,7 @@ type Props = {
 
 export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const { gmId } = useSelectedGmNft()
 
   const { data: b3trDonated } = useB3trDonated(gmId)

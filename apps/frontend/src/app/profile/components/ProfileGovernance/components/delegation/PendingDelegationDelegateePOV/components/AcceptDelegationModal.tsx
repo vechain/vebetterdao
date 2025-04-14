@@ -17,10 +17,10 @@ import { useCallback } from "react"
 import { ExclamationTriangle } from "@/components"
 import { useAcceptDelegation } from "@/hooks"
 import { useVechainDomain } from "@vechain/vechain-kit"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const AcceptDelegationModal = ({ modal, delegator }: { modal: UseDisclosureProps; delegator: string }) => {
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const { data: vnsData } = useVechainDomain(delegator ?? "")
   const delegatorName = vnsData?.domain
 

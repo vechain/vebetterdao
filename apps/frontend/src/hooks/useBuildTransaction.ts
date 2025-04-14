@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react"
 import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { useQueryClient } from "@tanstack/react-query"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 export type BuildTransactionProps<ClausesParams> = {
   clauseBuilder: (props: ClausesParams) => EnhancedClause[]
@@ -32,7 +32,7 @@ export const useBuildTransaction = <ClausesParams>({
 }: BuildTransactionProps<ClausesParams>) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
-  const { startTransaction, transactionState, updateTransactionStatus } = useTransaction()
+  const { startTransaction, transactionState, updateTransactionStatus } = useTransactionModal()
   const lastReportedStatusRef = useRef<string | undefined>()
 
   /**

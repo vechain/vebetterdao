@@ -26,19 +26,19 @@ const initialState: TransactionState = {
 
 const TransactionContext = createContext<TransactionContextType | null>(null)
 
-export const useTransaction = () => {
+export const useTransactionModal = () => {
   const context = useContext(TransactionContext)
   if (!context) {
-    throw new Error("useTransaction must be used within a TransactionProvider")
+    throw new Error("useTransactionModal must be used within a TransactionModalProvider")
   }
   return context
 }
 
-interface TransactionProviderProps {
+interface TransactionModalProviderProps {
   children: ReactNode
 }
 
-export const TransactionProvider: React.FC<TransactionProviderProps> = ({ children }) => {
+export const TransactionModalProvider: React.FC<TransactionModalProviderProps> = ({ children }) => {
   const [transactionState, setTransactionState] = useState<TransactionState | null>(null)
   const { isOpen: isTxModalOpen, onOpen, onClose } = useDisclosure()
 

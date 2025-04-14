@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
 import { ExclamationTriangle } from "@/components"
 import { useRejectEntityLink } from "@/hooks"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const RejectLinkingModal = ({
   modal,
   secondaryAccount,
@@ -25,7 +25,7 @@ export const RejectLinkingModal = ({
   secondaryAccount: string
 }) => {
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const rejectLinking = useRejectEntityLink({})
 
   const handleDelegate = useCallback(() => {

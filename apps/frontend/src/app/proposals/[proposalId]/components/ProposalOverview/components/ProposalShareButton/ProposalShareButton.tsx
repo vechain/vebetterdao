@@ -20,7 +20,7 @@ import { useTranslation } from "react-i18next"
 import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
 import { useCallback, useState } from "react"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 const containerVariants = {
   initial: {
@@ -40,7 +40,7 @@ export const ProposalShareButton = () => {
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const [showCopiedLink, setShowCopiedLink] = useState(false)
-  const { transactionState } = useTransaction()
+  const { transactionState } = useTransactionModal()
   const handleCopyLink = useCallback(async () => {
     await navigator.clipboard.writeText(location.href)
     setShowCopiedLink(true)

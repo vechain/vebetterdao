@@ -1,6 +1,6 @@
 import { BaseModal } from "../BaseModal"
 import { Text } from "@chakra-ui/react"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { ReactNode, useMemo, useRef, useCallback } from "react"
 import { TransactionStatus } from "@vechain/vechain-kit"
 import { SuccessModalContent } from "../TransactionModal/SuccessModalContent"
@@ -8,7 +8,7 @@ import { ErrorModalContent } from "../TransactionModal/ErrorModalContent"
 import { LoadingModalContent } from "../TransactionModal/LoadingModalContent"
 import { ConfirmationModalContent } from "../TransactionModal/ConfirmationModalContent"
 export const TransactionModalV2 = () => {
-  const { transactionState, isTxModalOpen, onClose } = useTransaction()
+  const { transactionState, isTxModalOpen, onClose } = useTransactionModal()
   const portalRef = useRef(document.body)
   const canShowCloseButton = useMemo(() => {
     return transactionState?.status !== "pending" && transactionState?.status !== "waitingConfirmation"

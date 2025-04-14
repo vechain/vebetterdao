@@ -29,7 +29,7 @@ import { getLevelGradient, useNextLevelImage } from "@/api"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
 import { gmNfts } from "@/constants/gmNfts"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 const compactFormatter = getCompactFormatter(2)
 interface UpgradeGMModalProps {
   gmLevel: string
@@ -47,7 +47,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const upgradeGMMutation = useUpgradeGM({
     tokenId,
     b3trToUpgrade: b3trToUpgradeGMToNextLevel,

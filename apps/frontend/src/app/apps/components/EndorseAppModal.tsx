@@ -19,7 +19,7 @@ import { Trans } from "react-i18next"
 import { BaseModal } from "@/components/BaseModal"
 import { GenericAlert } from "@/app/components/Alert"
 import dayjs from "dayjs"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -28,7 +28,7 @@ type Props = {
 
 export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { account } = useWallet()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const { data: endorsementScore, isLoading: isAppScoreLoading } = useAppEndorsementScore(xApp?.id ?? "")
   const { data: endorsementScoreThreshold, isLoading: isEndorsementThresholdLoading } = useEndorsementScoreThreshold()
 
