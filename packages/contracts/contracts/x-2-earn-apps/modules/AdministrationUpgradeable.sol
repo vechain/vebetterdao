@@ -40,7 +40,7 @@ import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
 abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
   uint256 public constant MAX_MODERATORS = 100;
   uint256 public constant MAX_REWARD_DISTRIBUTORS = 100;
-  uint256 public constant MAX_CREATORS = 3;
+  uint256 public constant MAX_CREATORS = 1;
 
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Administration
   struct AdministrationStorage {
@@ -335,6 +335,16 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
     AdministrationStorage storage $ = _getAdministrationStorage();
 
     return AdministrationUtils.isAppCreator($._creators, appId, account);
+  }
+
+  /**
+   * @dev Returns true if the creator has already been used for another app.
+   *
+   * @param creator the address of the creator
+   */
+  function checkCreatorAlreadyUsed(address creator) public view override returns (bool) {
+    AdministrationStorage storage $ = _getAdministrationStorage();
+    return $._creatorApps[creator] > 0;
   }
 
   /**
