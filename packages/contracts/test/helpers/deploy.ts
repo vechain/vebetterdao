@@ -891,6 +891,7 @@ export const getOrDeployContractInstances = async ({
   await x2EarnCreator.safeMint(await owner.getAddress())
 
   // Since x2EarnApps v5, new apps => new creator != owner
+  // Token id 2, 3, 4, 5 are reserved for the creator NFTs
   await x2EarnCreator.safeMint(await otherAccounts[10].getAddress())
   await x2EarnCreator.safeMint(await otherAccounts[11].getAddress())
   await x2EarnCreator.safeMint(await otherAccounts[12].getAddress())

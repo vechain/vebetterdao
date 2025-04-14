@@ -5,7 +5,7 @@ import { ethers } from "hardhat"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 
-describe("X2EarnCreator - @shard11", () => {
+describe.only("X2EarnCreator - @shard11", () => {
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { x2EarnCreator, owner } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -129,12 +129,12 @@ describe("X2EarnCreator - @shard11", () => {
 
   describe("Minting", () => {
     it("Should mint a token to the caller", async () => {
-      const { x2EarnCreator, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { x2EarnCreator, owner, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      await expect(x2EarnCreator.connect(owner).safeMint(otherAccount.address)).to.emit(x2EarnCreator, "Transfer")
+      await expect(x2EarnCreator.connect(owner).safeMint(otherAccounts[14].address)).to.emit(x2EarnCreator, "Transfer")
 
-      expect(await x2EarnCreator.ownerOf(2)).to.equal(otherAccount.address)
-      expect(await x2EarnCreator.tokenURI(2)).to.equal(
+      expect(await x2EarnCreator.ownerOf(6)).to.equal(otherAccounts[14].address)
+      expect(await x2EarnCreator.tokenURI(6)).to.equal(
         "ipfs://bafybeie2onvzl3xsod5becuswpdmi63gtq7wgjqhqjecehytt7wdeg4py4/metadata/1.json",
       )
     })
@@ -176,7 +176,8 @@ describe("X2EarnCreator - @shard11", () => {
     it("Should be able to get the token URI if token not minted", async () => {
       const { x2EarnCreator } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      await expect(x2EarnCreator.tokenURI(2)).to.be.reverted
+      // x2earnApp v5: Token [2...5] are reserved for the creator NFTs
+      await expect(x2EarnCreator.tokenURI(6)).to.be.reverted
     })
 
     it("Should not be able to mint token to a user that already has a token", async () => {
@@ -284,7 +285,7 @@ describe("X2EarnCreator - @shard11", () => {
     it("Should not be able to burn a token that does not exist", async () => {
       const { x2EarnCreator, owner } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      await catchRevert(x2EarnCreator.connect(owner).burn(3))
+      await catchRevert(x2EarnCreator.connect(owner).burn(6))
     })
 
     it("Should not be able to get the token URI after burning", async () => {
@@ -309,12 +310,13 @@ describe("X2EarnCreator - @shard11", () => {
       )
     })
     it("Should return the correct token owner", async () => {
-      const { x2EarnCreator, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
+      const { x2EarnCreator, owner, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      await x2EarnCreator.connect(owner).safeMint(otherAccount.address)
+      let creator5 = otherAccounts[14]
+      await x2EarnCreator.connect(owner).safeMint(creator5.address)
 
       expect(await x2EarnCreator.ownerOf(1)).to.equal(owner.address)
-      expect(await x2EarnCreator.ownerOf(2)).to.equal(otherAccount.address)
+      expect(await x2EarnCreator.ownerOf(6)).to.equal(creator5.address)
     })
     it("Should return the correct token balance", async () => {
       const { x2EarnCreator, owner, otherAccount } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -327,22 +329,23 @@ describe("X2EarnCreator - @shard11", () => {
     it("Should return the correct token total supply", async () => {
       const { x2EarnCreator, owner, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      await x2EarnCreator.connect(owner).safeMint(otherAccounts[0].address)
-      await x2EarnCreator.connect(owner).safeMint(otherAccounts[1].address)
+      // Already minted 5 tokens to otherAccounts[10..13] and owner -> see deploy.ts
+      await x2EarnCreator.connect(owner).safeMint(otherAccounts[14].address)
+      await x2EarnCreator.connect(owner).safeMint(otherAccounts[15].address)
 
-      await x2EarnCreator.connect(owner).burn(1)
+      await x2EarnCreator.connect(owner).burn(6)
 
-      expect(await x2EarnCreator.totalSupply()).to.equal(2)
+      expect(await x2EarnCreator.totalSupply()).to.equal(6)
     })
     it("Should return the correct token owner by index", async () => {
       const { x2EarnCreator, owner, otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
 
-      await x2EarnCreator.connect(owner).safeMint(otherAccounts[0].address)
-      await x2EarnCreator.connect(owner).safeMint(otherAccounts[1].address)
+      await x2EarnCreator.connect(owner).safeMint(otherAccounts[14].address)
+      await x2EarnCreator.connect(owner).safeMint(otherAccounts[15].address)
 
       expect(await x2EarnCreator.tokenOfOwnerByIndex(owner.address, 0)).to.equal(1)
-      expect(await x2EarnCreator.tokenOfOwnerByIndex(otherAccounts[0].address, 0)).to.equal(2)
-      expect(await x2EarnCreator.tokenOfOwnerByIndex(otherAccounts[1].address, 0)).to.equal(3)
+      expect(await x2EarnCreator.tokenOfOwnerByIndex(otherAccounts[14].address, 0)).to.equal(6)
+      expect(await x2EarnCreator.tokenOfOwnerByIndex(otherAccounts[15].address, 0)).to.equal(7)
     })
   })
 })
