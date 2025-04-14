@@ -74,6 +74,7 @@ library PassportTypes {
     address whitelister;
     address actionRegistrar;
     address actionScoreManager;
+    address resetSignaler;
   }
 
   enum CheckType {

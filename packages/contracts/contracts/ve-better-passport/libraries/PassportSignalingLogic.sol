@@ -216,6 +216,21 @@ library PassportSignalingLogic {
     _resetUserSignalsOfApp(self, user, app, reason);
   }
 
+  /// @notice Resets the signals of a user
+  /// @param user - the user to reset the signals of
+  /// @param reason - the reason for resetting the signals
+  function resetUserSignalsByResetSignalerWithReason(
+    PassportStorageTypes.PassportStorage storage self,
+    address user,
+    string memory reason
+  ) external {
+    bytes32 app = self.appOfSignaler[msg.sender];
+
+    require(self.appSignalsCounter[app][user] > 0, "BotSignaling: user has no signals from this app");
+
+    _resetUserSignalsOfApp(self, user, app, reason);
+  }
+
   /// @notice Removes a signal from a user
   /// @param user - the user to unsignal
   /// @dev Only use with the SIGNALER_ROLE

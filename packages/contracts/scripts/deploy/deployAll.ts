@@ -505,6 +505,7 @@ export async function deployAll(config: ContractsConfig) {
         whitelister: config.CONTRACTS_ADMIN_ADDRESS, // whitelistManager
         actionRegistrar: config.CONTRACTS_ADMIN_ADDRESS, // actionRegistrar
         actionScoreManager: config.CONTRACTS_ADMIN_ADDRESS, // actionScoreManager
+        resetSignaler: config.CONTRACTS_ADMIN_ADDRESS, // resetSignaler
       },
     ],
     {
