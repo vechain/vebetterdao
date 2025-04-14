@@ -4,6 +4,7 @@ import { useDisclosure } from "@chakra-ui/react"
 interface TransactionState {
   status: TransactionStatus
   isTxModalOpen: boolean
+  txId?: string
   onClose: () => void
   tryAgain?: () => Promise<void>
 }
@@ -11,7 +12,7 @@ interface TransactionState {
 interface TransactionContextType {
   transactionModalState: TransactionState | null
   setupModal: (tryAgain?: () => Promise<void>) => void
-  updateModal: (status: TransactionStatus) => void
+  updateModal: (status: TransactionStatus, txId?: string) => void
   resetModal: () => void
   isTxModalOpen: boolean
   onClose: () => void
@@ -62,7 +63,7 @@ export const TransactionModalProvider: React.FC<TransactionModalProviderProps> =
   )
 
   const updateModal = useCallback(
-    (status: TransactionStatus) => {
+    (status: TransactionStatus, txId?: string) => {
       setTransactionModalState(prev => {
         if (!prev) return null
         return {
@@ -70,6 +71,7 @@ export const TransactionModalProvider: React.FC<TransactionModalProviderProps> =
           status,
           isTxModalOpen,
           onClose: handleClose,
+          txId,
         }
       })
     },

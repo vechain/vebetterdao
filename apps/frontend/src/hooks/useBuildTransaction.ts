@@ -63,9 +63,9 @@ export const useBuildTransaction = <ClausesParams>({
   useEffect(() => {
     if (result?.status !== lastReportedStatusRef.current) {
       lastReportedStatusRef.current = result.status
-      updateModal(result.status)
+      updateModal(result.status, result?.txReceipt?.meta?.txID)
     }
-  }, [result.status, transactionModalState?.status, updateModal])
+  }, [result.status, result?.txReceipt?.meta?.txID, transactionModalState?.status, updateModal])
 
   /**
    * Function to send a transaction based on the provided parameters.
