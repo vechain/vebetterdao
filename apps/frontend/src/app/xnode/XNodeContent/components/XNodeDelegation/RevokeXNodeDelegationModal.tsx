@@ -17,11 +17,11 @@ import { useCallback } from "react"
 import { ExclamationTriangle } from "@/components"
 import { useRevokeXNodeDelegation } from "@/hooks"
 import { useXNode } from "@/api"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
   const { isXNodeAttachedToGM } = useXNode()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const revokeXNodeDelegation = useRevokeXNodeDelegation({})
 
   const handleRevoke = useCallback(() => {

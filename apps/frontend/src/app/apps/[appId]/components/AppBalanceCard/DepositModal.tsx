@@ -24,7 +24,7 @@ import { FormattingUtils } from "@repo/utils"
 import { useB3trBalance, useXApp } from "@/api"
 import { useWallet } from "@vechain/vechain-kit"
 import { DepositPercentageSelectorButtons } from "./components/DepositPercentageSelectorButtons"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export type Props = {
   appId: string
   isOpen: boolean
@@ -55,7 +55,7 @@ const layoutTransition = {
 export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
 
   const { data: app } = useXApp(appId)
 

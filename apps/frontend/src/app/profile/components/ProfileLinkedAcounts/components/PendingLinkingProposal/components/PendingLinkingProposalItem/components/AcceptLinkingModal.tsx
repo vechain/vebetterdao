@@ -17,7 +17,7 @@ import { useCallback } from "react"
 import { ExclamationTriangle } from "@/components"
 import { useAcceptEntityLink } from "@/hooks"
 import { useVechainDomain } from "@vechain/vechain-kit"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const AcceptLinkingModal = ({
   modal,
   secondaryAccount,
@@ -26,7 +26,7 @@ export const AcceptLinkingModal = ({
   secondaryAccount: string
 }) => {
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const { data: vnsData } = useVechainDomain(secondaryAccount || "")
   const domain = vnsData?.domain
 

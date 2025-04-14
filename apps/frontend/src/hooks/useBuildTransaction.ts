@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react"
 import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { useQueryClient } from "@tanstack/react-query"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 export type BuildTransactionProps<ClausesParams> = {
   clauseBuilder: (props: ClausesParams) => EnhancedClause[]
@@ -32,7 +32,7 @@ export const useBuildTransaction = <ClausesParams>({
 }: BuildTransactionProps<ClausesParams>) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
-  const { startTransaction, transactionState, updateTransactionStatus } = useTransaction()
+  const { setupModal, transactionModalState, updateModal } = useTransactionModal()
   const lastReportedStatusRef = useRef<string | undefined>()
 
   /**
@@ -63,9 +63,9 @@ export const useBuildTransaction = <ClausesParams>({
   useEffect(() => {
     if (result?.status !== lastReportedStatusRef.current) {
       lastReportedStatusRef.current = result.status
-      updateTransactionStatus(result.status)
+      updateModal(result.status, result?.txReceipt?.meta?.txID)
     }
-  }, [result.status, transactionState?.status, updateTransactionStatus])
+  }, [result.status, result?.txReceipt?.meta?.txID, transactionModalState?.status, updateModal])
 
   /**
    * Function to send a transaction based on the provided parameters.
@@ -73,10 +73,10 @@ export const useBuildTransaction = <ClausesParams>({
    */
   const sendTransaction = useCallback(
     async (props: ClausesParams) => {
-      startTransaction(clauseBuilder(props), async () => result.sendTransaction(clauseBuilder(props)))
+      setupModal(async () => result.sendTransaction(clauseBuilder(props)))
       return result.sendTransaction(clauseBuilder(props))
     },
-    [clauseBuilder, result, startTransaction],
+    [clauseBuilder, result, setupModal],
   )
 
   return { ...result, sendTransaction }

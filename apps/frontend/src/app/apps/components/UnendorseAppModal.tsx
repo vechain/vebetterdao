@@ -8,7 +8,7 @@ import { useWallet } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { FaClock } from "react-icons/fa6"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -27,7 +27,7 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
   const { endorsedApp, xNodeId, xNodePoints } = useXNode()
   const { data: logo } = useIpfsImage(endorsedApp?.logo)
   const { account } = useWallet()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const unendorseAppMutation = useUnendorseApp({
     appId: endorsedApp?.id,
     nodeId: xNodeId,

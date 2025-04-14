@@ -8,7 +8,7 @@ import { TokenSelectionContent, SwapTokenContent } from "./components"
 import { useB3trBalance, useB3trConverted, useVot3Balance } from "@/api"
 import { useUpgradeSmartAccountModal, useWallet } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 export type Props = {
   isOpen: boolean
@@ -31,7 +31,7 @@ const zoomInVariants = {
 
 export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const [isB3trToVot3, setIsB3trToVot3] = useState<boolean>()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const { t } = useTranslation()
 
   const { account } = useWallet()

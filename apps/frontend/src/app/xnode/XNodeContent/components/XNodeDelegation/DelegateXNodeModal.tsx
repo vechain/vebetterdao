@@ -27,14 +27,14 @@ import { useWallet, useConnex, useVechainDomain } from "@vechain/vechain-kit"
 import { useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useTransaction } from "@/providers/TransactionProvider"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type FormData = {
   walletAddress: string
 }
 
 export const DelegateXNodeModal = ({ modal }: { modal: UseDisclosureProps }) => {
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransaction()
+  const { isTxModalOpen } = useTransactionModal()
   const { account } = useWallet()
   const { thor } = useConnex()
   const { isXNodeAttachedToGM } = useXNode()
