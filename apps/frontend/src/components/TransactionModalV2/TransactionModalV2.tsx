@@ -1,5 +1,4 @@
 import { BaseModal } from "../BaseModal"
-import { Text } from "@chakra-ui/react"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { ReactNode, useMemo, useRef, useCallback } from "react"
 import { TransactionStatus } from "@vechain/vechain-kit"
@@ -18,7 +17,7 @@ export const TransactionModalV2 = () => {
     if (transactionState?.tryAgain) {
       return await transactionState.tryAgain()
     }
-  }, [transactionState?.tryAgain])
+  }, [transactionState])
 
   const modalContent = useMemo(() => {
     const statusComponentMap: Record<TransactionStatus, ReactNode> = {
@@ -50,7 +49,6 @@ export const TransactionModalV2 = () => {
         zIndex: 9999,
       }}>
       {modalContent}
-      <Text>{JSON.stringify(transactionState)}</Text>
     </BaseModal>
   )
 }
