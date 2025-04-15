@@ -113,7 +113,7 @@ export const NewCreatorPageFormContent = () => {
             <Image
               w="full"
               h="full"
-              src="/images/mascote/mascot-holding-tokens.png"
+              src="/images/mascot/mascot-holding-tokens.png"
               alt="Apply for Creator's NFT"
               objectFit="contain"
               objectPosition="bottom"

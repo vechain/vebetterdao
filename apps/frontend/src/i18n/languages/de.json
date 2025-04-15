@@ -1604,5 +1604,10 @@
   "Resume": "Fortsetzen",
   "Pause": "Pausieren",
   "Only app admin can transfer and manage the rewards pool": "Nur der App-Administrator kann den Belohnungspool transferieren und verwalten",
-  "Access restricted": "Zugriff eingeschränkt"
+  "Access restricted": "Zugriff eingeschränkt",
+  "This user requested to delegate their qualification": "Dieser Benutzer hat beantragt, seine Qualifikation zu delegieren.",
+  "This user will not able to vote when the recipient accepts their request.": "Dieser Benutzer wird nicht abstimmen können, wenn der Empfänger seine Anfrage akzeptiert.",
+  "This user is not currently able to vote due other user is using their Voting Qualification.": "Dieser Benutzer kann derzeit nicht abstimmen, da ein anderer Benutzer seine Wahlqualifikation verwendet.",
+  "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "Mit {{amount}} VOT3 kann das Abstimmen für {{numApps}} Apps aufgrund von Rundungen fehlschlagen. Erwägen Sie, für weniger Apps abzustimmen oder mehr VOT3 zu erhalten.",
+  "Filters": "Filter"
 }
