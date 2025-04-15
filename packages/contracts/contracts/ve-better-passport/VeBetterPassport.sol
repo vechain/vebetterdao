@@ -465,7 +465,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
 
   /// @notice Returns the version of the contract
   function version() external pure returns (string memory) {
-    return "3";
+    return "4";
   }
 
   // ---------- Setters ---------- //
@@ -768,7 +768,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   /// @dev assigns the signals of a user to zero
   /// @param user - the address of the user
   /// @param reason - the reason for resetting the signals
-  function resetUserSignalsWithReason(address user, string memory reason) external onlyRole(DEFAULT_ADMIN_ROLE) {
+  function resetUserSignalsWithReason(address user, string memory reason) external onlyRoleOrAdmin(RESET_SIGNALER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.resetUserSignals($, user, reason);
   }
@@ -779,14 +779,6 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   function resetUserSignalsByAppAdminWithReason(address user, string memory reason) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.resetUserSignalsByAppAdminWithReason($, user, reason);
-  }
-
-  /// @notice Resets the signals of a user by reset signaler
-  /// @param user - the user to reset the signals of
-  /// @param reason - the reason for resetting the signals
-  function resetUserSignalsByResetSignalerWithReason(address user, string memory reason) external onlyRoleOrAdmin(ROLE_GRANTER) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportSignalingLogic.resetUserSignalsByResetSignalerWithReason($, user, reason);
   }
 
   /// @notice Sets the minimum galaxy member level
