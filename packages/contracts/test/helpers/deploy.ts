@@ -73,6 +73,9 @@ import {
   AdministrationUtilsV3,
   VoteEligibilityUtilsV3,
   EndorsementUtilsV3,
+  AdministrationUtilsV4,
+  VoteEligibilityUtilsV4,
+  EndorsementUtilsV4,
   X2EarnCreator,
   NodeManagementV1,
   VeBetterPassportV2,
@@ -198,6 +201,9 @@ interface DeployInstance {
   administrationUtilsV3: AdministrationUtilsV3
   endorsementUtilsV3: EndorsementUtilsV3
   voteEligibilityUtilsV3: VoteEligibilityUtilsV3
+  administrationUtilsV4: AdministrationUtilsV4
+  endorsementUtilsV4: EndorsementUtilsV4
+  voteEligibilityUtilsV4: VoteEligibilityUtilsV4
   myErc721: MyERC721 | undefined
   myErc1155: MyERC1155 | undefined
   vechainNodesMock: TokenAuction
@@ -301,6 +307,9 @@ export const getOrDeployContractInstances = async ({
     AdministrationUtilsV3,
     EndorsementUtilsV3,
     VoteEligibilityUtilsV3,
+    AdministrationUtilsV4,
+    EndorsementUtilsV4,
+    VoteEligibilityUtilsV4,
   } = await x2EarnLibraries()
 
   // ---------------------- Deploy Mocks ----------------------
@@ -442,7 +451,7 @@ export const getOrDeployContractInstances = async ({
   const x2EarnRewardsPoolAddress = otherAccounts[2].address
 
   const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnApps"],
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnApps"],
     [
       ["ipfs://", [await timeLock.getAddress(), owner.address], owner.address, owner.address],
       [
@@ -453,9 +462,10 @@ export const getOrDeployContractInstances = async ({
       ],
       [config.X2EARN_NODE_COOLDOWN_PERIOD, xAllocationGovernor],
       [x2EarnRewardsPoolAddress], // Setting temporary address for the x2EarnRewardsPool
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4],
+      versions: [undefined, 2, 3, 4, 5],
       libraries: [
         undefined,
         {
@@ -467,6 +477,11 @@ export const getOrDeployContractInstances = async ({
           AdministrationUtilsV3: await AdministrationUtilsV3.getAddress(),
           EndorsementUtilsV3: await EndorsementUtilsV3.getAddress(),
           VoteEligibilityUtilsV3: await VoteEligibilityUtilsV3.getAddress(),
+        },
+        {
+          AdministrationUtilsV4: await AdministrationUtilsV4.getAddress(),
+          EndorsementUtilsV4: await EndorsementUtilsV4.getAddress(),
+          VoteEligibilityUtilsV4: await VoteEligibilityUtilsV4.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),
@@ -995,6 +1010,9 @@ export const getOrDeployContractInstances = async ({
     administrationUtilsV3: AdministrationUtilsV3,
     endorsementUtilsV3: EndorsementUtilsV3,
     voteEligibilityUtilsV3: VoteEligibilityUtilsV3,
+    administrationUtilsV4: AdministrationUtilsV4,
+    endorsementUtilsV4: EndorsementUtilsV4,
+    voteEligibilityUtilsV4: VoteEligibilityUtilsV4,
     myErc721: myErc721,
     myErc1155: myErc1155,
     vechainNodesMock,

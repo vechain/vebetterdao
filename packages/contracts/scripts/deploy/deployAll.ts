@@ -144,6 +144,9 @@ export async function deployAll(config: ContractsConfig) {
     AdministrationUtilsV3,
     EndorsementUtilsV3,
     VoteEligibilityUtilsV3,
+    AdministrationUtilsV4,
+    EndorsementUtilsV4,
+    VoteEligibilityUtilsV4,
   } = await x2EarnLibraries()
 
   let vechainNodesAddress = "0xb81E9C5f9644Dec9e5e3Cac86b4461A222072302" // this is the mainnet address
@@ -249,7 +252,7 @@ export async function deployAll(config: ContractsConfig) {
   const X_ALLOCATION_ADRESS_TEMP = TEMP_ADMIN
   const X2EARNREWARDSPOOL_ADDRESS_TEMP = TEMP_ADMIN
   const x2EarnApps = (await deployAndUpgrade(
-    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnApps"],
+    ["X2EarnAppsV1", "X2EarnAppsV2", "X2EarnAppsV3", "X2EarnAppsV4", "X2EarnApps"],
     [
       [
         config.XAPP_BASE_URI,
@@ -265,9 +268,10 @@ export async function deployAll(config: ContractsConfig) {
       ],
       [config.X2EARN_NODE_COOLDOWN_PERIOD, X_ALLOCATION_ADRESS_TEMP],
       [X2EARNREWARDSPOOL_ADDRESS_TEMP],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4],
+      versions: [undefined, 2, 3, 4, 5],
       libraries: [
         undefined,
         {
@@ -279,6 +283,11 @@ export async function deployAll(config: ContractsConfig) {
           AdministrationUtilsV3: await AdministrationUtilsV3.getAddress(),
           EndorsementUtilsV3: await EndorsementUtilsV3.getAddress(),
           VoteEligibilityUtilsV3: await VoteEligibilityUtilsV3.getAddress(),
+        },
+        {
+          AdministrationUtilsV4: await AdministrationUtilsV4.getAddress(),
+          EndorsementUtilsV4: await EndorsementUtilsV4.getAddress(),
+          VoteEligibilityUtilsV4: await VoteEligibilityUtilsV4.getAddress(),
         },
         {
           AdministrationUtils: await AdministrationUtils.getAddress(),
