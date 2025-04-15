@@ -18,7 +18,7 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
 
   return (
     <>
-      <HStack flex="1 0 120px" justifyContent={"start"}>
+      <HStack flex="0 0 120px" justifyContent={"start"}>
         <NavbarLogo />
       </HStack>
 
@@ -36,7 +36,7 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
           <NavbarMenu routesToRender={routesToRender} />
         </HStack>
       )}
-      <HStack flex={1} spacing={4} justifyContent={"end"}>
+      <HStack flexShrink={0} spacing={4} justifyContent={"end"}>
         {/* <ThemeSwitcher /> */}
         {isLargerThan1800 && <NavbarBalance />}
         <Box as="span">
