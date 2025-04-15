@@ -1604,5 +1604,10 @@
   "Resume": "재개",
   "Pause": "일시 중지",
   "Only app admin can transfer and manage the rewards pool": "보상 풀 이체 및 관리는 오직 앱 관리자만 가능합니다",
-  "Access restricted": "접근 제한됨"
+  "Access restricted": "접근 제한됨",
+  "This user requested to delegate their qualification": "이 사용자는 자신의 자격을 위임하도록 요청했습니다.",
+  "This user will not able to vote when the recipient accepts their request.": "수령인이 요청을 수락하면 이 사용자는 투표할 수 없습니다.",
+  "This user is not currently able to vote due other user is using their Voting Qualification.": "다른 사용자가 자신의 투표 자격을 사용하고 있어 이 사용자는 현재 투표할 수 없습니다.",
+  "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "{{amount}} VOT3로 {{numApps}} 개의 앱에 투표 시 반올림 문제로 실패할 수 있습니다. 더 적은 앱에 투표하거나 더 많은 VOT3를 확보하는 것을 고려하십시오.",
+  "Filters": "필터"
 }

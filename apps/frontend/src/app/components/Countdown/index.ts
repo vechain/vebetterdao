@@ -1,2 +1,2 @@
-export * from "./Countdown"
+export * from "./CountdownVoting"
 export * from "./SnapshotExplainationModal"

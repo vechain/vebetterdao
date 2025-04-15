@@ -12,7 +12,7 @@
     "@repo/constants": "*"
   },
   "scripts": {
-    "check-or-generate-local-config": "ts-node ./scripts/generateMockLocalConfig.ts"
+    "check-or-generate-local-config": "ts-node ./scripts/generateMockLocalConfig.mjs"
   },
   "devDependencies": {
     "ts-node": "^10.9.2"

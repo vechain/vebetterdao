@@ -1604,5 +1604,10 @@
   "Resume": "फिर से शुरू करें",
   "Pause": "विराम",
   "Only app admin can transfer and manage the rewards pool": "केवल ऐप एडमिन ही पुरस्कार पूल का स्थानांतरण और प्रबंधन कर सकते हैं",
-  "Access restricted": "प्रवेश सीमित है"
+  "Access restricted": "प्रवेश सीमित है",
+  "This user requested to delegate their qualification": "इस उपयोगकर्ता ने अपनी योग्यता प्रतिनिधि करने का अनुरोध किया",
+  "This user will not able to vote when the recipient accepts their request.": "जब प्राप्तकर्ता उनके अनुरोध को स्वीकार करता है, तो यह उपयोगकर्ता वोट नहीं कर सकेगा।",
+  "This user is not currently able to vote due other user is using their Voting Qualification.": "यह उपयोगकर्ता वर्तमान में वोट नहीं दे पा रहे हैं क्योंकि कोई अन्य उपयोगकर्ता उनकी वोटिंग योग्यता का उपयोग कर रहा है।",
+  "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "{{amount}} VOT3 के साथ, संख्यात्मक त्रुटि के कारण {{numApps}} ऐप्स के लिए मतदान विफल हो सकता है। कम ऐप्स के लिए मतदान करने पर विचार करें या अधिक VOT3 प्राप्त करें।",
+  "Filters": "फ़िल्टर"
 }
