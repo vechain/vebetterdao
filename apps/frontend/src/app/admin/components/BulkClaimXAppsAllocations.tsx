@@ -82,7 +82,7 @@ export const BulkClaimXAppsAllocations = () => {
   const handleSubmit = useCallback(
     (event: { preventDefault: () => void }) => {
       event.preventDefault()
-      sendTransaction()
+      sendTransaction(undefined)
       onOpen()
     },
     [sendTransaction, onOpen],
