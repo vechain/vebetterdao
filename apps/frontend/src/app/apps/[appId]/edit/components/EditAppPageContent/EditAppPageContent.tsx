@@ -118,6 +118,7 @@ export const EditAppPageContent = () => {
     appId,
     onSuccess: () => {
       onClose()
+      updateAppDetailsMutation.resetStatus()
       goToAppPage()
     },
     onFailure: () => {
