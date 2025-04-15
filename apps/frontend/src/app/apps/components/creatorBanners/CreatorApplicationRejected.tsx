@@ -26,7 +26,7 @@ export const CreatorApplicationRejected = () => {
             {/* Left Section: Image, Title, and Description */}
             <Stack direction="row" spacing={{ base: 2, md: 2, lg: 4 }} align="center">
               <Image
-                src={"images/mascote/mascot-warning-head.png"}
+                src={"images/mascot/mascot-warning-head.png"}
                 alt="logo"
                 maxH="100px"
                 maxW="100px"

@@ -1604,5 +1604,10 @@
   "Resume": "Återuppta",
   "Pause": "Pausa",
   "Only app admin can transfer and manage the rewards pool": "Endast appadministratören kan överföra och hantera belöningspoolen",
-  "Access restricted": "Åtkomst begränsad"
+  "Access restricted": "Åtkomst begränsad",
+  "This user requested to delegate their qualification": "Denna användare har begärt att delegera sin kvalifikation",
+  "This user will not able to vote when the recipient accepts their request.": "Denna användare kommer inte att kunna rösta när mottagaren accepterar deras begäran.",
+  "This user is not currently able to vote due other user is using their Voting Qualification.": "Denna användare kan för närvarande inte rösta eftersom en annan användare använder deras rösträtt.",
+  "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "Med {{amount}} VOT3 kan det misslyckas att rösta på {{numApps}} appar på grund av avrundning. Överväg att rösta på färre appar eller skaffa mer VOT3.",
+  "Filters": "Filter"
 }

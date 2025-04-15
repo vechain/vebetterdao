@@ -9,14 +9,22 @@ const filters: Record<ProposalFilter, string[]> = {
     StateFilter.Canceled,
     StateFilter.Defeated,
     StateFilter.Succeeded,
-    StateFilter.Queued,
-    StateFilter.Executed,
     StateFilter.DepositNotMet,
   ],
   [ProposalFilter.InThisRound]: [],
   [ProposalFilter.LookingForSupport]: [],
   [ProposalFilter.UpcomingVoting]: [], // Pending
 }
+
+// The following are the default filters that are selected when no ProposalFilter.State is set
+const displayFilters = Object.keys(filters).filter(
+  filterKey =>
+    filterKey !== ProposalFilter.InThisRound &&
+    filterKey !== ProposalFilter.LookingForSupport &&
+    filterKey !== ProposalFilter.UpcomingVoting,
+)
+
+const defaultFilters = [ProposalFilter.InThisRound, ProposalFilter.LookingForSupport, ProposalFilter.UpcomingVoting]
 
 type Props = StackProps
 export const ProposalsFilters = (props: Props) => {
@@ -32,13 +40,48 @@ export const ProposalsFilters = (props: Props) => {
     (filter: ProposalFilter | StateFilter) => {
       const alreadySelected = selectedFilter?.includes(filter)
       if (alreadySelected) {
-        setSelectedFilter(selectedFilter?.filter(f => f !== filter))
+        let newFilters
+        // When deselecting Succeeded, remove all related states
+        if (filter === StateFilter.Succeeded) {
+          newFilters = selectedFilter?.filter(
+            f => ![StateFilter.Succeeded, StateFilter.Queued, StateFilter.Executed].includes(f as StateFilter),
+          )
+        } else {
+          newFilters = selectedFilter?.filter(f => f !== filter)
+        }
+
+        // Only restore default filters if there are no state filters remaining
+        const hasRemainingStateFilters = newFilters.some(f => stateFilters.includes(f as StateFilter))
+
+        if (!hasRemainingStateFilters) {
+          setSelectedFilter(defaultFilters)
+        } else {
+          setSelectedFilter(newFilters)
+        }
         return
       }
-      setSelectedFilter([...selectedFilter, filter])
+
+      // If a state filter is selected, remove default filters
+      if (stateFilters.includes(filter as StateFilter)) {
+        let newFilters = [...selectedFilter.filter(f => !defaultFilters.includes(f as ProposalFilter))]
+
+        // When selecting Succeeded, add all related states
+        if (filter === StateFilter.Succeeded) {
+          newFilters = [...newFilters, StateFilter.Succeeded, StateFilter.Queued, StateFilter.Executed]
+        } else {
+          newFilters.push(filter)
+        }
+
+        setSelectedFilter(newFilters)
+      } else {
+        setSelectedFilter([...selectedFilter, filter])
+      }
     },
-    [setSelectedFilter, selectedFilter],
+    [setSelectedFilter, selectedFilter, stateFilters],
   )
+
+  // Check if any non-default filters are selected
+  const hasNonDefaultFilters = selectedFilter.some(f => !defaultFilters.includes(f as ProposalFilter))
 
   return (
     <Stack
@@ -51,6 +94,7 @@ export const ProposalsFilters = (props: Props) => {
       w="full">
       {!isStateFilter ? (
         <HStack
+          justifyContent={"space-between"}
           spacing={2}
           overflowY={"visible"}
           overflowX={"auto"}
@@ -64,7 +108,7 @@ export const ProposalsFilters = (props: Props) => {
             msOverflowStyle: "none",
           }}
           {...props}>
-          {Object.keys(filters).map(filterKey => {
+          {displayFilters.map(filterKey => {
             const isStateButton = filterKey === ProposalFilter.State
 
             const onClick = () => {
@@ -99,7 +143,7 @@ export const ProposalsFilters = (props: Props) => {
                 }}>
                 <HStack spacing={2} alignItems={"center"}>
                   <Text fontSize={14} fontWeight={600} whiteSpace={"nowrap"}>
-                    {filterKey}
+                    {t("Filters")}
                   </Text>
                   {stateCount > 0 && filterKey === ProposalFilter.State && (
                     <Text
@@ -118,6 +162,11 @@ export const ProposalsFilters = (props: Props) => {
               </Button>
             )
           })}
+          {hasNonDefaultFilters && (
+            <Button variant="link" colorScheme="primary" onClick={clearFilter}>
+              {t("Reset filters")}
+            </Button>
+          )}
         </HStack>
       ) : (
         <HStack spacing={2} w="full" align={"center"}>
@@ -178,9 +227,6 @@ export const ProposalsFilters = (props: Props) => {
           </HStack>
         </HStack>
       )}
-      <Button variant="link" colorScheme="primary" onClick={clearFilter}>
-        {t("Reset filters")}
-      </Button>
     </Stack>
   )
 }

@@ -18,7 +18,11 @@ export enum StateFilter {
   DepositNotMet = "Support not reached",
 }
 
-export const initialProposalsFilterValues = [ProposalFilter.InThisRound, ProposalFilter.LookingForSupport]
+export const initialProposalsFilterValues = [
+  ProposalFilter.InThisRound,
+  ProposalFilter.LookingForSupport,
+  ProposalFilter.UpcomingVoting,
+]
 
 interface ProposalFilterStoreState {
   selectedFilter: (ProposalFilter | StateFilter)[]
