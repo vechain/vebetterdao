@@ -41,8 +41,8 @@ export const CreatorApplyNow = () => {
             {isMobile && (
               <Box w={"120px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
                 <Image
-                  src="/images/mascote/mascote-welcoming.png"
-                  alt="mascote-welcoming"
+                  src="/images/mascot/mascot-welcoming.png"
+                  alt="mascot-welcoming"
                   position="absolute"
                   transform={"translate(-15%, 70%) rotate(30deg) scale(2.5)"}
                   objectFit="contain"
@@ -57,8 +57,8 @@ export const CreatorApplyNow = () => {
                 {!isMobile && (
                   <Box w={"80px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
                     <Image
-                      src="/images/mascote/mascote-welcoming.png"
-                      alt="mascote-welcoming"
+                      src="/images/mascot/mascot-welcoming.png"
+                      alt="mascot-welcoming"
                       position="absolute"
                       transform={"translate(-15%, 50%) rotate(30deg) scale(2.5)"}
                       objectFit="contain"
