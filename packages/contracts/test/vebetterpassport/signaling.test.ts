@@ -22,14 +22,12 @@ describe("Passport Signaling Logic - @shard8a", function () {
     regularSignaler = fixture.regularSignaler
   })
 
-  describe("Default Admin Signaling", function () {
-    it("Should allow default admin signaler to signal any user without prior interaction", async function () {
+  describe("Signaling By Default Admin", function () {
+    it("Should allow to signal any user without prior interaction", async function () {
       const user = otherAccounts[4]
 
-      // Verify default admin signaler has no app
       expect(await veBetterPassport.hasRole(await veBetterPassport.DEFAULT_ADMIN_ROLE(), owner.address)).to.be.true
 
-      // Default admin can signal without prior interaction
       await expect(veBetterPassport.connect(owner).signalUser(user.address))
         .to.emit(veBetterPassport, "UserSignaled")
         .withArgs(user.address, owner.address, ethers.ZeroHash, "")
@@ -38,8 +36,8 @@ describe("Passport Signaling Logic - @shard8a", function () {
     })
   })
 
-  describe("Signaler Signaling", function () {
-    it("Should reject signaling if user has no app interaction", async function () {
+  describe("Signaling By SIGNALER_ROLE", function () {
+    it("Should revert signaling if user has no app interaction", async function () {
       const userWithNoInteraction = otherAccounts[3]
 
       await expect(
@@ -50,10 +48,8 @@ describe("Passport Signaling Logic - @shard8a", function () {
     it("Should allow signaling after user interacts with app", async function () {
       const user = otherAccounts[3]
 
-      // Register an action for the user to create an interaction
       await veBetterPassport.connect(owner).registerActionForRound(user.address, appId, 1)
 
-      // Now signaler can signal the user
       await expect(veBetterPassport.connect(regularSignaler).signalUser(user.address))
         .to.emit(veBetterPassport, "UserSignaled")
         .withArgs(user.address, regularSignaler.address, appId, "")
