@@ -141,6 +141,9 @@ interface DeployInstance {
   x2EarnCreator: X2EarnCreator
   x2EarnRewardsPool: X2EarnRewardsPool
   veBetterPassport: VeBetterPassport
+  veBetterPassportV1: VeBetterPassportV1
+  veBetterPassportV2: VeBetterPassportV2
+  veBetterPassportV3: VeBetterPassportV3
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -689,6 +692,7 @@ export const getOrDeployContractInstances = async ({
         blacklister: owner.address, // blacklister
         whitelister: owner.address, // whitelistManager
         actionRegistrar: owner.address, // actionRegistrar
+        actionScoreManager: owner.address, // actionScoreManager
       },
     ],
     {
@@ -996,6 +1000,9 @@ export const getOrDeployContractInstances = async ({
     treasury,
     x2EarnRewardsPool,
     veBetterPassport,
+    veBetterPassportV1,
+    veBetterPassportV2,
+    veBetterPassportV3,
     b3trMultiSig,
     governorClockLogicLib: GovernorClockLogicLib,
     governorConfiguratorLib: GovernorConfiguratorLib,

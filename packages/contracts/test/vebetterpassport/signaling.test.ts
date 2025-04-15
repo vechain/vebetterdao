@@ -6,7 +6,7 @@ import { VeBetterPassport } from "../../typechain-types"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
 
-describe("Passport Signaling Logic - @shard8a", function () {
+describe("VeBetterPassportV4 (Signaling Logic) - @shard8b", function () {
   let veBetterPassport: VeBetterPassport
   let owner: SignerWithAddress
   let otherAccounts: SignerWithAddress[]
