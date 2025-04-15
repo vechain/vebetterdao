@@ -84,11 +84,11 @@ describe("X-Apps - @shard15", function () {
   })
 
   describe("Contract upgradeablity", () => {
-    it("Cannot reinitialize twice", async function () {
-      const { x2EarnApps, x2EarnRewardsPool } = await getOrDeployContractInstances({
+    it("v5 initializer is empty", async function () {
+      const { x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-      await catchRevert(x2EarnApps.initializeV4(await x2EarnRewardsPool.getAddress()))
+      await x2EarnApps.initializeV5()
     })
 
     it("User with UPGRADER_ROLE should be able to upgrade the contract", async function () {
@@ -491,12 +491,15 @@ describe("X-Apps - @shard15", function () {
         administrationUtilsV2,
         endorsementUtilsV2,
         voteEligibilityUtilsV2,
-        administrationUtils,
-        endorsementUtils,
-        voteEligibilityUtils,
         administrationUtilsV3,
         endorsementUtilsV3,
         voteEligibilityUtilsV3,
+        administrationUtilsV4,
+        endorsementUtilsV4,
+        voteEligibilityUtilsV4,
+        administrationUtils,
+        endorsementUtils,
+        voteEligibilityUtils,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -714,18 +717,18 @@ describe("X-Apps - @shard15", function () {
       // Upgrade X2EarnAppsV3 to X2EarnApps
       const x2EarnAppsV4 = (await upgradeProxy(
         "X2EarnAppsV3",
-        "X2EarnApps",
+        "X2EarnAppsV4",
         await x2EarnAppsV3.getAddress(),
         [await x2EarnRewardsPool.getAddress()],
         {
           version: 4,
           libraries: {
-            AdministrationUtils: await administrationUtils.getAddress(),
-            EndorsementUtils: await endorsementUtils.getAddress(),
-            VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+            AdministrationUtilsV4: await administrationUtilsV4.getAddress(),
+            EndorsementUtilsV4: await endorsementUtilsV4.getAddress(),
+            VoteEligibilityUtilsV4: await voteEligibilityUtilsV4.getAddress(),
           },
         },
-      )) as X2EarnApps
+      )) as X2EarnAppsV4
       // New node holders should not be subject to cooldown period even if they endorse an app prior to upgrade
       expect(await x2EarnAppsV4.checkCooldown(nodeId1)).to.eql(false)
       expect(await x2EarnAppsV4.checkCooldown(nodeId2)).to.eql(false)
@@ -759,6 +762,56 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV4.checkCooldown(nodeId1)).to.eql(false)
       expect(await x2EarnAppsV4.checkCooldown(nodeId2)).to.eql(false)
       expect(await x2EarnAppsV4.checkCooldown(1)).to.eql(false)
+
+      // Upgrade X2EarnAppsV4 to X2EarnAppsV5
+      const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnApps", await x2EarnAppsV4.getAddress(), [], {
+        version: 5,
+        libraries: {
+          AdministrationUtils: await administrationUtils.getAddress(),
+          EndorsementUtils: await endorsementUtils.getAddress(),
+          VoteEligibilityUtils: await voteEligibilityUtils.getAddress(),
+        },
+      })) as X2EarnApps
+
+      // New node holders should not be subject to cooldown period
+      expect(await x2EarnAppsV5.checkCooldown(nodeId1)).to.eql(false)
+      expect(await x2EarnAppsV5.checkCooldown(nodeId2)).to.eql(false)
+      expect(await x2EarnAppsV5.checkCooldown(1)).to.eql(false)
+
+      // If a node holder that endorsed an app prior to upgrade performs an action they should be subject to cooldown period
+      await x2EarnAppsV5.connect(otherAccounts[1]).unendorseApp(app1Id, 1) // Node holder endorsement score is 100
+      await x2EarnAppsV5.connect(otherAccounts[1]).endorseApp(app1Id, 1) // Node holder endorsement score is 100
+
+      expect(await x2EarnAppsV5.checkCooldown(1)).to.eql(true)
+
+      // Should revert if user in cooldown period tries to endorse an app
+      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).endorseApp(app1Id, 1))
+
+      // Should revert if user in cooldown period tries to unendorse an app
+      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).unendorseApp(app1Id, 1))
+
+      // Should revert if user in cooldown period tries to endorse an app
+      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).endorseApp(app1Id, 1))
+
+      // Should revert if user in cooldown period tries to unendorse an app
+      await catchRevert(x2EarnAppsV5.connect(otherAccounts[1]).unendorseApp(app1Id, 1))
+      await x2EarnAppsV5
+        .connect(creator3)
+        .submitApp(otherAccounts[4].address, otherAccounts[4].address, "My app 6", "metadataURI")
+      const app6Id = ethers.keccak256(ethers.toUtf8Bytes("My app 6"))
+
+      // New node holders should be subject to cooldown period
+      await catchRevert(x2EarnAppsV5.connect(otherAccounts[5]).endorseApp(app6Id, 5))
+
+      // Fast forward time to next round
+      // wait for round to end
+      await waitForCurrentRoundToEnd()
+      await startNewAllocationRound()
+
+      // New node holders should not be subject to cooldown period
+      expect(await x2EarnAppsV5.checkCooldown(nodeId1)).to.eql(false)
+      expect(await x2EarnAppsV5.checkCooldown(nodeId2)).to.eql(false)
+      expect(await x2EarnAppsV5.checkCooldown(1)).to.eql(false)
     })
 
     it("Should not have state conflict after upgrading to V5", async () => {
