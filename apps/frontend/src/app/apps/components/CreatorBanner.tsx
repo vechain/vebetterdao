@@ -5,8 +5,10 @@ import {
   CreatorApplicationInProgress,
   CreatorApplicationRejected,
   CreatorApplyNow,
+  CreatorApplicationAlreadySubmitted,
 } from "./creatorBanners"
 import { useHasCreatorNFT, useCreatorSubmission } from "@/api/contracts/x2EarnCreator"
+import { useCheckCreatorAlreadyUsed } from "@/api/contracts/xApps"
 
 export const CreatorBanner = () => {
   const { account } = useWallet()
@@ -21,8 +23,9 @@ export const CreatorBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
 
   const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
+  const { data: hasAlreadySubmitted } = useCheckCreatorAlreadyUsed(account?.address ?? "")
 
-  const isApproved = !!account?.address && hasCreatorNFT
+  const isApproved = !!account?.address && hasCreatorNFT && !hasAlreadySubmitted
   const isRejected = !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
   const isInProgress = !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
@@ -36,6 +39,10 @@ export const CreatorBanner = () => {
 
   if (isInProgress) {
     return <CreatorApplicationInProgress />
+  }
+
+  if (hasAlreadySubmitted) {
+    return <CreatorApplicationAlreadySubmitted />
   }
 
   return <CreatorApplyNow />

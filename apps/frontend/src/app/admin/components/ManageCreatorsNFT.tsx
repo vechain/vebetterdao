@@ -27,12 +27,14 @@ import { useForm } from "react-hook-form"
 import { useAdminCreatorNFT } from "@/hooks/useAdminCreatorNFT"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { WalletAddressInput } from "@/app/components/Input"
+import { useCheckCreatorAlreadyUsed, useGetCreatorApps } from "@/api"
 
 type NFTFormInputs = {
   creatorWalletAddress: string
   tokenId: string
   lookupAddress: string
   actionType: string
+  lookupCreatorAddress: string
 }
 
 export const ManageCreatorsNFT = () => {
@@ -46,14 +48,21 @@ export const ManageCreatorsNFT = () => {
     setValue,
     formState: { errors },
   } = useForm<NFTFormInputs>({
-    defaultValues: { creatorWalletAddress: "", tokenId: "", lookupAddress: "", actionType: "mint" },
+    defaultValues: {
+      creatorWalletAddress: "",
+      tokenId: "",
+      lookupAddress: "",
+      actionType: "mint",
+      lookupCreatorAddress: "",
+    },
   })
 
-  const [tokenId, actionType, lookupAddress, creatorWalletAddress] = watch([
+  const [tokenId, actionType, lookupAddress, creatorWalletAddress, lookupCreatorAddress] = watch([
     "tokenId",
     "actionType",
     "lookupAddress",
     "creatorWalletAddress",
+    "lookupCreatorAddress",
   ])
   const { mintNFT, burnNFT } = useAdminCreatorNFT({
     walletAddress: creatorWalletAddress ?? "",
@@ -64,18 +73,21 @@ export const ManageCreatorsNFT = () => {
   })
 
   const hasNFT = useHasCreatorNFT(lookupAddress ?? "")
+  const { data: checkSubmittedApps } = useCheckCreatorAlreadyUsed(lookupCreatorAddress ?? "")
+  const { data: creatorApps } = useGetCreatorApps(lookupCreatorAddress ?? "")
 
   const { error, status, txReceipt, sendTransaction, resetStatus } = useMemo(() => {
     return actionType === "mint" ? mintNFT : burnNFT
   }, [actionType, mintNFT, burnNFT])
 
+  const check = useMemo(() => ["check-submitted-apps", "check-ownership"], [])
   const onSubmit = useCallback(() => {
-    if (actionType !== "check") {
+    if (!check.includes(actionType)) {
       resetStatus()
       sendTransaction(undefined)
       onOpen()
     }
-  }, [actionType, resetStatus, sendTransaction, onOpen])
+  }, [actionType, resetStatus, sendTransaction, onOpen, check])
 
   const renderBadge = (colorScheme: string, icon: As, text: string) => (
     <Badge
@@ -112,8 +124,11 @@ export const ManageCreatorsNFT = () => {
                 <Radio {...register("actionType", { required: true })} value="burn">
                   {t("Burn NFT")}
                 </Radio>
-                <Radio {...register("actionType", { required: true })} value="check">
+                <Radio {...register("actionType", { required: true })} value="check-ownership">
                   {t("Check Ownership")}
+                </Radio>
+                <Radio {...register("actionType", { required: true })} value="check-submitted-apps">
+                  {t("Check submitted apps")}
                 </Radio>
               </VStack>
             </RadioGroup>
@@ -148,7 +163,7 @@ export const ManageCreatorsNFT = () => {
                     {errors.tokenId && <FormErrorMessage>{errors.tokenId.message}</FormErrorMessage>}
                   </FormControl>
                 )}
-                {actionType === "check" && (
+                {actionType === "check-ownership" && (
                   <FormControl>
                     <FormLabel>
                       <strong>{t("Lookup Wallet Address")}</strong>
@@ -167,7 +182,31 @@ export const ManageCreatorsNFT = () => {
                     )}
                   </FormControl>
                 )}
-                {actionType !== "check" && (
+                {actionType === "check-submitted-apps" && (
+                  <FormControl>
+                    <FormLabel>
+                      <strong>{t("Lookup Wallet Address")}</strong>
+                    </FormLabel>
+                    <InputGroup>
+                      <WalletAddressInput
+                        onAddressResolved={address => setValue("lookupCreatorAddress", address ?? "")}
+                      />
+                    </InputGroup>
+                    {lookupCreatorAddress && (
+                      <VStack mt={2} align="start">
+                        {renderBadge(
+                          checkSubmittedApps ? "green" : "red",
+                          checkSubmittedApps ? UilCheckCircle : UilExclamationCircle,
+                          checkSubmittedApps
+                            ? t("This address have submitted {{count}} apps.", { count: creatorApps })
+                            : t("This address have not submitted app."),
+                        )}
+                      </VStack>
+                    )}
+                  </FormControl>
+                )}
+
+                {!check.includes(actionType) && (
                   <Button
                     colorScheme="blue"
                     type="submit"
