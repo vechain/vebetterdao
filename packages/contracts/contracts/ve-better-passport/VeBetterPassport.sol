@@ -67,7 +67,14 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     _grantRole(WHITELISTER_ROLE, roles.whitelister);
     _grantRole(ACTION_REGISTRAR_ROLE, roles.actionRegistrar);
     _grantRole(ACTION_SCORE_MANAGER_ROLE, roles.actionScoreManager);
-    _grantRole(RESET_SIGNALER_ROLE, roles.resetSignaler);
+  }
+
+  /// @notice Initializes the contract for version 4
+  /// @param _resetSignaler - the address of the reset signaler
+  function initializeV4(address _resetSignaler) external reinitializer(4) {
+    require(_resetSignaler != address(0), "VeBetterPassport: reset signaler is the zero address");
+
+    _grantRole(RESET_SIGNALER_ROLE, _resetSignaler);
   }
 
   // ---------- Modifiers ------------ //
