@@ -18,7 +18,7 @@ export const DesktopNavBar: React.FC<Props> = ({ routesToRender }) => {
 
   return (
     <>
-      <HStack flex={1} justifyContent={"start"}>
+      <HStack flex="1 0 120px" justifyContent={"start"}>
         <NavbarLogo />
       </HStack>
 
