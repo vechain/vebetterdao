@@ -19,8 +19,16 @@ import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/cons
 export const PublishAndPreviewPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
-  const { actions, markdownDescription, title, shortDescription, votingStartRoundId, depositAmount } =
-    useProposalFormStore()
+  const {
+    actions,
+    markdownDescription,
+    title,
+    shortDescription,
+    votingStartRoundId,
+    depositAmount,
+    metadataUri,
+    clearData,
+  } = useProposalFormStore()
   const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string | undefined>(undefined)
 
   const { data: threshold } = useDepositThreshold()
@@ -39,11 +47,16 @@ export const PublishAndPreviewPageContent = () => {
     proposalDescriptionUriHash ?? "",
   )
 
-  const onSuccess = useCallback(() => router.push(`/proposals/${expectedProposalId}`), [router, expectedProposalId])
+  const onSuccess = useCallback(() => {
+    //Clear the form store data
+    clearData()
+    //Redirect to the proposal page
+    router.push(`/proposals/${expectedProposalId}`)
+  }, [router, expectedProposalId, clearData])
 
   const createProposalMutation = useCreateProposal({ onSuccess })
 
-  const { onMetadataUpload } = useUploadProposalMetadata() //TODO: Add this to review modal before sending transaction
+  const { onMetadataUpload } = useUploadProposalMetadata()
 
   const isDepositReached = useMemo(
     () => !!depositAmount && !!threshold && depositAmount >= Number(threshold),
@@ -55,11 +68,15 @@ export const PublishAndPreviewPageContent = () => {
     createProposalMutation.resetStatus()
     if (!title || !shortDescription || !markdownDescription || depositAmount === undefined)
       throw new Error("Missing data")
-    const metadataUri = await onMetadataUpload({ title, shortDescription, markdownDescription })
-    if (!metadataUri) return
+    //Try to use the metadata uri from the form store, if it's not set, upload the metadata and use the uploaded uri
+    let uploadedMetadataUri = metadataUri
+    if (!uploadedMetadataUri) {
+      uploadedMetadataUri = await onMetadataUpload({ title, shortDescription, markdownDescription })
+      if (!uploadedMetadataUri) throw new Error("Failed to upload metadata")
+    }
 
     // We hash the metadata uri, which will be used by the useHashProposal hook to calculate the proposal id
-    setProposalDescriptionUriHash(ethers.keccak256(ethers.toUtf8Bytes(metadataUri)))
+    setProposalDescriptionUriHash(ethers.keccak256(ethers.toUtf8Bytes(uploadedMetadataUri)))
 
     if (!votingStartRoundId || !actions || !shortDescription) throw new Error("Missing data")
 
@@ -71,7 +88,7 @@ export const PublishAndPreviewPageContent = () => {
         contractAddress: action.contractAddress,
         calldata: action.calldata as string,
       })),
-      description: metadataUri,
+      description: uploadedMetadataUri,
       startRoundId: votingStartRoundId,
       depositAmount: depositAmount.toString(),
     })
@@ -80,10 +97,11 @@ export const PublishAndPreviewPageContent = () => {
     title,
     shortDescription,
     markdownDescription,
-    actions,
-    votingStartRoundId,
-    onMetadataUpload,
     depositAmount,
+    metadataUri,
+    votingStartRoundId,
+    actions,
+    onMetadataUpload,
   ])
 
   return (
