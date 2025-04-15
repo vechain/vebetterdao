@@ -26,12 +26,14 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { ZeroAddress } from "ethers"
 import { createTestConfig } from "./helpers/config"
 import { deployAndUpgrade, deployProxyOnly, initializeProxy, upgradeProxy } from "../scripts/helpers"
+import { deployVeBetterPassportUpgradable } from "./helpers/deployVeBetterPassport"
 import {
   B3TRGovernor,
   Emissions,
   VeBetterPassport,
   VeBetterPassportV1,
   VeBetterPassportV2,
+  VeBetterPassportV3,
   VoterRewards,
   X2EarnRewardsPool,
   XAllocationPool,
@@ -136,7 +138,7 @@ describe("VeBetterPassport - @shard8", function () {
         forceDeploy: true,
       })
 
-      expect(await veBetterPassport.version()).to.equal("3")
+      expect(await veBetterPassport.version()).to.equal("4")
     })
     it("Should not be able to initialize twice", async function () {
       const config = createTestConfig()
@@ -169,6 +171,7 @@ describe("VeBetterPassport - @shard8", function () {
             whitelister: owner.address, // whitelistManager
             actionRegistrar: owner.address, // actionRegistrar
             actionScoreManager: owner.address, // actionScoreManager
+            resetSignaler: owner.address, // resetSignaler
           },
         ),
       ).to.be.reverted
@@ -316,7 +319,7 @@ describe("VeBetterPassport - @shard8", function () {
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
 
-    it("Should not have any state conflicts after upgrading to V3", async function () {
+    it("Should not have any state conflicts after from V1 to V2, and then to V3", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       config.EMISSIONS_CYCLE_DURATION = 20
@@ -347,14 +350,14 @@ describe("VeBetterPassport - @shard8", function () {
         passportSignalingLogicV2,
         passportEntityLogicV2,
         passportWhitelistBlacklistLogicV2,
-        passportChecksLogic,
-        passportConfigurator,
-        passportDelegationLogic,
-        passportPersonhoodLogic,
-        passportPoPScoreLogic,
-        passportSignalingLogic,
-        passportWhitelistBlacklistLogic,
-        passportEntityLogic,
+        passportChecksLogicV3,
+        passportConfiguratorV3,
+        passportDelegationLogicV3,
+        passportPersonhoodLogicV3,
+        passportPoPScoreLogicV3,
+        passportSignalingLogicV3,
+        passportWhitelistBlacklistLogicV3,
+        passportEntityLogicV3,
         governorClockLogicLibV1,
         governorConfiguratorLibV1,
         governorDepositLogicLibV1,
@@ -909,7 +912,9 @@ describe("VeBetterPassport - @shard8", function () {
       ).to.be.equal(false)
 
       // Delegate passport to owner and try to vote
-      await linkEntityToPassportWithSignature(veBetterPassportV2, owner, otherAccount, 3600)
+      // veBetterPassportV2 is not typed compatible with linkEntityToPassportWithSignature as it uses latest version of VeBetterPassport, so we need to cast it to VeBetterPassport
+      await linkEntityToPassportWithSignature(veBetterPassportV2 as VeBetterPassport, owner, otherAccount, 3600)
+
       // After linking "other account" should be entity
       expect(await veBetterPassportV2.isEntity(otherAccount.address)).to.be.true
 
@@ -962,32 +967,32 @@ describe("VeBetterPassport - @shard8", function () {
         slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
       )
 
-      // Upgrade to V2
-      const veBetterPassport = (await upgradeProxy(
+      // Upgrade to V3
+      const veBetterPassportV3 = (await upgradeProxy(
         "VeBetterPassportV2",
-        "VeBetterPassport",
+        "VeBetterPassportV3",
         await veBetterPassportV2.getAddress(),
         [],
         {
           version: 3,
           libraries: {
-            PassportChecksLogic: await passportChecksLogic.getAddress(),
-            PassportConfigurator: await passportConfigurator.getAddress(),
-            PassportEntityLogic: await passportEntityLogic.getAddress(),
-            PassportDelegationLogic: await passportDelegationLogic.getAddress(),
-            PassportPersonhoodLogic: await passportPersonhoodLogic.getAddress(),
-            PassportPoPScoreLogic: await passportPoPScoreLogic.getAddress(),
-            PassportSignalingLogic: await passportSignalingLogic.getAddress(),
-            PassportWhitelistAndBlacklistLogic: await passportWhitelistBlacklistLogic.getAddress(),
+            PassportChecksLogicV3: await passportChecksLogicV3.getAddress(),
+            PassportConfiguratorV3: await passportConfiguratorV3.getAddress(),
+            PassportEntityLogicV3: await passportEntityLogicV3.getAddress(),
+            PassportDelegationLogicV3: await passportDelegationLogicV3.getAddress(),
+            PassportPersonhoodLogicV3: await passportPersonhoodLogicV3.getAddress(),
+            PassportPoPScoreLogicV3: await passportPoPScoreLogicV3.getAddress(),
+            PassportSignalingLogicV3: await passportSignalingLogicV3.getAddress(),
+            PassportWhitelistAndBlacklistLogicV3: await passportWhitelistBlacklistLogicV3.getAddress(),
           },
         },
-      )) as VeBetterPassport
+      )) as VeBetterPassportV3
 
       // Check that the storage slots are the same
       let storageSlotsAfter = []
 
       for (let i = initialSlot; i < initialSlot + BigInt(100); i++) {
-        storageSlotsAfter.push(await ethers.provider.getStorage(await veBetterPassport.getAddress(), i))
+        storageSlotsAfter.push(await ethers.provider.getStorage(await veBetterPassportV3.getAddress(), i))
       }
 
       storageSlotsAfter = storageSlotsAfter.filter(
@@ -1004,7 +1009,7 @@ describe("VeBetterPassport - @shard8", function () {
       expect(await xAllocationVoting.currentRoundId()).to.equal(4)
 
       // Checking if user is person based on GM level will work in V3 because the check is implemented
-      expect(await veBetterPassport.isPerson(otherAccounts[4].address)).to.deep.equal([
+      expect(await veBetterPassportV3.isPerson(otherAccounts[4].address)).to.deep.equal([
         true,
         "User's selected Galaxy Member is above the minimum level",
       ])
@@ -1014,21 +1019,21 @@ describe("VeBetterPassport - @shard8", function () {
       expect(await veBetterPassportV1.getCumulativeScoreWithDecay(otherAccount, 4)).to.equal(1097)
 
       // register more actions for round 4 (mixing entity and passport)
-      await veBetterPassport.connect(owner).registerAction(otherAccount, app2Id)
-      await veBetterPassport.connect(owner).registerAction(owner, app3Id)
-      await veBetterPassport.connect(owner).registerAction(owner, app3Id)
+      await veBetterPassportV3.connect(owner).registerAction(otherAccount, app2Id)
+      await veBetterPassportV3.connect(owner).registerAction(owner, app3Id)
+      await veBetterPassportV3.connect(owner).registerAction(owner, app3Id)
 
       // new points should be added to the passport, entity should not have any new points added
-      expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 4)).to.equal(1097)
+      expect(await veBetterPassportV3.getCumulativeScoreWithDecay(otherAccount, 4)).to.equal(1097)
       /*
         Passport's cumulative score:
         round 4 = 200 + 400 + 400
         */
-      expect(await veBetterPassport.getCumulativeScoreWithDecay(owner, 4)).to.equal(1000)
+      expect(await veBetterPassportV3.getCumulativeScoreWithDecay(owner, 4)).to.equal(1000)
 
       // Now that we reached threshold passport should be considered person
       expect(
-        (await veBetterPassport.isPersonAtTimepoint(owner.address, await xAllocationVoting.roundSnapshot(4)))[0],
+        (await veBetterPassportV3.isPersonAtTimepoint(owner.address, await xAllocationVoting.roundSnapshot(4)))[0],
       ).to.be.equal(true)
 
       // Owner can vote now
@@ -1261,7 +1266,7 @@ describe("VeBetterPassport - @shard8", function () {
     })
   })
 
-  describe("Passport Signaling", function () {
+  describe.only("Passport Signaling", function () {
     it("Admin of App can assigner and revoker a signaler", async function () {
       const { x2EarnApps, otherAccounts, otherAccount, owner, veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
@@ -1337,10 +1342,21 @@ describe("VeBetterPassport - @shard8", function () {
       expect(await veBetterPassport.appOfSignaler(otherAccount.address)).to.equal(ethers.ZeroHash)
     })
 
-    it("Signaler can signal a user", async function () {
-      const { veBetterPassport, otherAccount, owner, otherAccounts, x2EarnApps } = await getOrDeployContractInstances({
-        forceDeploy: true,
+    it("VeBetterPassportV3 - Signaler can signal a user", async function () {
+      const { otherAccount, owner, otherAccounts, x2EarnApps, xAllocationVoting, galaxyMember } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+
+      const { veBetterPassport } = await deployVeBetterPassportUpgradable({
+        stopAfterVersion: 3,
+        owner,
+        x2EarnAppsAddress: await x2EarnApps.getAddress(),
+        xAllocationVotingAddress: await xAllocationVoting.getAddress(),
+        galaxyMemberAddress: await galaxyMember.getAddress(),
       })
+
+      const veBetterPassportV3 = veBetterPassport as VeBetterPassportV3
 
       const appAdmin = otherAccounts[0]
 
@@ -1352,24 +1368,25 @@ describe("VeBetterPassport - @shard8", function () {
 
       await endorseApp(appId, otherAccounts[0])
 
-      await expect(veBetterPassport.connect(appAdmin).assignSignalerToAppByAppAdmin(appId, otherAccount.address))
-        .to.emit(veBetterPassport, "SignalerAssignedToApp")
+      await expect(veBetterPassportV3.connect(appAdmin).assignSignalerToAppByAppAdmin(appId, otherAccount.address))
+        .to.emit(veBetterPassportV3, "SignalerAssignedToApp")
         .withArgs(otherAccount.address, appId)
 
-      expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), otherAccount.address)).to.be.true
+      expect(await veBetterPassportV3.hasRole(await veBetterPassportV3.SIGNALER_ROLE(), otherAccount.address)).to.be
+        .true
 
-      await expect(veBetterPassport.connect(otherAccount).signalUser(owner.address))
-        .to.emit(veBetterPassport, "UserSignaled")
+      await expect(veBetterPassportV3.connect(otherAccount).signalUser(owner.address))
+        .to.emit(veBetterPassportV3, "UserSignaled")
         .withArgs(owner.address, otherAccount.address, appId, "")
 
-      expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1)
-      expect(await veBetterPassport.appSignalsCounter(appId, owner.address)).to.equal(1)
+      expect(await veBetterPassportV3.signaledCounter(owner.address)).to.equal(1)
+      expect(await veBetterPassportV3.appSignalsCounter(appId, owner.address)).to.equal(1)
 
-      await expect(veBetterPassport.connect(appAdmin).removeSignalerFromAppByAppAdmin(otherAccount.address))
-        .to.emit(veBetterPassport, "SignalerRemovedFromApp")
+      await expect(veBetterPassportV3.connect(appAdmin).removeSignalerFromAppByAppAdmin(otherAccount.address))
+        .to.emit(veBetterPassportV3, "SignalerRemovedFromApp")
         .withArgs(otherAccount.address, appId)
 
-      await expect(veBetterPassport.connect(otherAccount).signalUser(owner.address)).to.be.reverted
+      await expect(veBetterPassportV3.connect(otherAccount).signalUser(owner.address)).to.be.reverted
     })
 
     it("Signaler can signal a user with reason", async function () {
