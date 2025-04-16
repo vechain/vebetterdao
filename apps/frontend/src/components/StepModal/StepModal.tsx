@@ -19,20 +19,7 @@ export type StepModalProps<T extends string> = {
   goToNext?: () => void
   setActiveStep: (step: number) => void
   activeStep: number
-  variants?: {
-    hidden: object
-    visible: object
-  }
   disableBackButton?: boolean
-}
-
-const zoomInVariants = {
-  hidden: { scale: 0.95, opacity: 0.8 },
-  visible: {
-    scale: 1,
-    opacity: 1,
-    transition: { duration: 0.3, ease: "easeInOut" },
-  },
 }
 
 export const StepModal = <T extends string>({
@@ -42,8 +29,7 @@ export const StepModal = <T extends string>({
   activeStep,
   goToPrevious,
   setActiveStep,
-  variants = zoomInVariants,
-  disableBackButton = false,
+  disableBackButton,
 }: StepModalProps<T>) => {
   const handleClose = () => {
     // reset the active step to 0
@@ -85,12 +71,7 @@ export const StepModal = <T extends string>({
             </Text>
           ) : null}
 
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={variants}
-            key={currentStepContent.key}
-            style={{ width: "100%" }}>
+          <motion.div initial="hidden" animate="visible" key={currentStepContent.key} style={{ width: "100%" }}>
             {currentStepContent.content}
           </motion.div>
         </CardBody>

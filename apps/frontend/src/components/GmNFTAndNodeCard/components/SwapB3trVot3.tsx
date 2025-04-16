@@ -1,5 +1,5 @@
 import { useB3trBalance, useVot3Balance } from "@/api"
-import { ConvertModal } from "@/components/Convert/ConvertModal"
+import { ConvertModal } from "@/components/Convert/components/Modal/ConvertModal"
 import { B3TRIcon } from "@/components/Icons"
 import {
   Button,
