@@ -1609,5 +1609,6 @@
   "This user will not able to vote when the recipient accepts their request.": "Este usuario no podrá votar cuando el destinatario acepte su solicitud.",
   "This user is not currently able to vote due other user is using their Voting Qualification.": "Este usuario no puede votar actualmente porque otro usuario está usando su Calificación de Voto.",
   "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "Con {{amount}} VOT3, votar por {{numApps}} aplicaciones puede fallar debido a redondeos. Considere votar por menos aplicaciones o conseguir más VOT3.",
-  "Filters": "Filtros"
+  "Filters": "Filtros",
+  "Browse and discover dApps where you can earn tokens for sustainable actions.": "Explora y descubre dApps donde puedes ganar tokens por acciones sostenibles."
 }

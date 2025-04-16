@@ -1609,5 +1609,6 @@
   "This user will not able to vote when the recipient accepts their request.": "Alıcı isteklerini kabul ettiğinde bu kullanıcı oy kullanamayacak.",
   "This user is not currently able to vote due other user is using their Voting Qualification.": "Bu kullanıcı, başka bir kullanıcı oy kullanma niteliklerini kullandığından şu anda oy kullanamıyor.",
   "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "{{amount}} VOT3 ile, {{numApps}} uygulama için oy verme yuvarlama nedeniyle başarısız olabilir. Daha az uygulama için oy vermeyi veya daha fazla VOT3 almayı düşünün.",
-  "Filters": "Filtreler"
+  "Filters": "Filtreler",
+  "Browse and discover dApps where you can earn tokens for sustainable actions.": "Jeton kazanabileceğiniz sürdürülebilir eylemler için dApp'leri keşfedin ve inceleyin."
 }

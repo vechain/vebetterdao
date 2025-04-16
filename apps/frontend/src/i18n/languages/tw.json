@@ -1609,5 +1609,6 @@
   "This user will not able to vote when the recipient accepts their request.": "當接收者接受他們的請求時，該用戶將無法投票。",
   "This user is not currently able to vote due other user is using their Voting Qualification.": "由於其他用戶正在使用其投票資格，該用戶目前無法投票。",
   "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "使用 {{amount}} VOT3，由於四捨五入，為 {{numApps}} 個應用投票可能會失敗。考慮投票給較少的應用或獲取更多 VOT3。",
-  "Filters": "篩選"
+  "Filters": "篩選",
+  "Browse and discover dApps where you can earn tokens for sustainable actions.": "瀏覽和探索可以透過永續行動獲得代幣的去中心化應用程式。"
 }
