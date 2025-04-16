@@ -100,5 +100,7 @@ export function createTestnetConfig() {
     X2EARN_NODE_COOLDOWN_PERIOD: 1, // 1 round
 
     MULTI_SIG_SIGNERS: [],
+
+    GM_PERCENTAGE_OF_TREASURY: 2500, // 25% of the treasury will be used for GM Holder Rewards
   })
 }
