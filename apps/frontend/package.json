@@ -29,6 +29,7 @@
     "@fontsource-variable/instrument-sans": "^5.0.4",
     "@fontsource-variable/inter": "^5.0.17",
     "@iconscout/react-unicons": "^2.0.2",
+    "@next/bundle-analyzer": "^15.3.0",
     "@repo/config": "*",
     "@repo/constants": "*",
     "@repo/contracts": "*",

@@ -146,7 +146,7 @@ export const NewAppPageFormContent = () => {
           </Button>
         </VStack>
         <VStack position={"relative"} w={"full"} order={[1, 1, 2]}>
-          <Image src="/images/blue-cloud-full.png" alt="Submit app success" />
+          <Image src="/assets/backgrounds/blue-cloud-full.webp" alt="Submit app success" />
           <Box w="full" h="full" position="absolute" display="flex" alignItems="center" justifyContent="center">
             <PreviewAppCard name={appData?.name} logo={appData?.logo} banner={appData?.banner} appId={appId} />
           </Box>

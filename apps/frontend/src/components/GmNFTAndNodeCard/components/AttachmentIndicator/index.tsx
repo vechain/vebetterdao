@@ -16,7 +16,7 @@ export const AttachmentIndicator = ({ isXNodeAttachedToGM, isGMOwned, isAbove800
       align="center"
       justify="center">
       <Image
-        src={isXNodeAttachedToGM ? "/images/nft-attachment.png" : "/images/nft-attachment-off.png"}
+        src={isXNodeAttachedToGM ? "/assets/images/nft-attachment.webp" : "/assets/images/nft-attachment-off.webp"}
         alt="nft-attachment"
         w="50px"
         h="50px"

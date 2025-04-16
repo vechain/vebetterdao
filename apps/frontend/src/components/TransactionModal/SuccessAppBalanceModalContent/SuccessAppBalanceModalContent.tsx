@@ -49,7 +49,7 @@ export const SuccessAppBalanceModalContent = ({
   return (
     <VStack align={"center"} p={8} gap={2}>
       <MotionImage
-        src="/images/ok-hand.svg"
+        src="/assets/icons/ok-hand.svg"
         boxSize={"150px"}
         alt="B3TR Ok Hand"
         variants={okHandVariants}

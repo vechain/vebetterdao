@@ -22,7 +22,7 @@ export const PendingActions = ({ address }: Props) => {
     <Card bg="#FFD979" borderRadius="xl" w="full">
       <CardBody position="relative" overflow="hidden" borderRadius="xl">
         <Image
-          src="/images/cloud-background-orange.png"
+          src="/assets/backgrounds/cloud-background-orange.webp"
           alt="cloud-background-orange"
           position="absolute"
           right={"-50%"}
@@ -30,7 +30,7 @@ export const PendingActions = ({ address }: Props) => {
         />
         <Show above="md">
           <HStack align="stretch" zIndex={1} position="relative" w="full">
-            <Image src="/images/info-bell.png" alt="Pending actions" w={32} h={32} />
+            <Image src="/assets/icons/info-bell.webp" alt="Pending actions" w={32} h={32} />
             <VStack align="stretch" flex={1} gap={4}>
               <HStack align="flex-start" justify={"space-between"}>
                 <VStack spacing={4} align="stretch" gap={0.5}>
@@ -82,7 +82,7 @@ export const PendingActions = ({ address }: Props) => {
                   {t("Increase your sustainable score to become eligible for voting.")}
                 </Heading>
               </VStack>
-              <Image src="/images/info-bell.png" alt="Pending actions" w={24} h={24} />
+              <Image src="/assets/icons/info-bell.webp" alt="Pending actions" w={24} h={24} />
             </HStack>
             <Flex
               bg="white"

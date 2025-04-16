@@ -54,7 +54,7 @@ export const MintNFTModal = ({
     if (showLoader)
       return (
         <VStack alignItems={"center"} py={6} px={12}>
-          <MotionImage {...coinFlipAnimation} src="/images/gm-nft-placeholder.png" maxW="250px" />
+          <MotionImage {...coinFlipAnimation} src="/assets/images/gm-nft-placeholder.webp" maxW="250px" />
           {isClaimLoading && (
             <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
               {t("Please confirm the transaction in your wallet")}

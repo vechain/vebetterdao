@@ -94,7 +94,7 @@ export const ClaimXAppAllocations = () => {
       return (
         <ModalBody py={6} px={12}>
           <VStack alignItems={"center"}>
-            <MotionImage {...coinFlipAnimation} src="/images/b3tr-token-3d.png" maxH="250px" />
+            <MotionImage {...coinFlipAnimation} src="/assets/tokens/b3tr-token-3d.webp" maxH="250px" />
             {status === "pending" /* sendTransactionPending */ && (
               <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
                 {t("Please confirm the transaction in your wallet")}

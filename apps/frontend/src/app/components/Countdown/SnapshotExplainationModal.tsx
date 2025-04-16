@@ -66,7 +66,7 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
 
               <HStack w="full" justifyContent="start" p={2} bg={"#f7f7f7"} borderRadius={"9px"}>
                 <Box boxSize={["70px", "100px"]} alignItems={"start"}>
-                  <Image boxSize={["70px", "100px"]} src="/images/vote-icon.png" alt="Cast your vote" />
+                  <Image boxSize={["70px", "100px"]} src="/assets/icons/vote-icon.webp" alt="Cast your vote" />
                 </Box>
                 <VStack gap={0} alignItems={"start"} p={1}>
                   {renderStep(2)}
@@ -78,7 +78,11 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
 
               <HStack w="full" justifyContent="start" p={2} bg={"#f7f7f7"} borderRadius={"9px"}>
                 <Box boxSize={["70px", "100px"]} alignItems={"start"}>
-                  <Image boxSize={["70px", "100px"]} src="/images/claim-b3tr-icon.png" alt="Receive your rewards" />
+                  <Image
+                    boxSize={["70px", "100px"]}
+                    src="/assets/icons/claim-b3tr-icon.webp"
+                    alt="Receive your rewards"
+                  />
                 </Box>
                 <VStack gap={0} alignItems={"start"} p={1}>
                   {renderStep(3)}

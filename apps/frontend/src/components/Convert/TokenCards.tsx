@@ -171,7 +171,7 @@ export const TokenCards = ({
                 <HStack w="full" data-testid={"VOT3"}>
                   <HStack flex={1}>
                     <Image
-                      src="/images/logo/vot3_logo_dark.svg"
+                      src="/assets/logos/vot3_logo_dark.svg"
                       boxSize={{ base: "30px", md: "36px" }}
                       alt="B3TR Icon"
                     />

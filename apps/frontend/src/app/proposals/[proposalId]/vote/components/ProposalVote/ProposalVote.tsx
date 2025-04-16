@@ -129,7 +129,7 @@ export const ProposalVote = ({ proposalId }: Props) => {
                   alignItems={"baseline"}
                   direction={["column", "column", "row"]}
                   align={["flex-start", "flex-start", "center"]}>
-                  <Image h="24px" w="24px" src="/images/vot3-token.png" alt="vot3-token" />
+                  <Image h="24px" w="24px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
                   <Text fontSize={"28px"} fontWeight={700}>
                     {compactFormatter.format(Number(proposal.userVot3OnSnapshot || 0))}
                   </Text>

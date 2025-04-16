@@ -49,7 +49,7 @@ export const SuccessConvertModalContent = ({
   return (
     <VStack align={"center"} p={8} gap={2}>
       <MotionImage
-        src="/images/ok-hand.svg"
+        src="/assets/icons/ok-hand.svg"
         boxSize={"150px"}
         alt="B3TR Ok Hand"
         variants={okHandVariants}
@@ -88,7 +88,7 @@ export const SuccessConvertModalContent = ({
             </Text>
 
             <HStack>
-              <Image src={"/images/logo/vot3_logo_dark.svg"} boxSize={"20px"} alt="VOT3 Icon" />
+              <Image src={"/assets/logos/vot3_logo_dark.webp"} boxSize={"20px"} alt="VOT3 Icon" />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
                 {compactFormatter.format(Number(vot3BalanceAfter))}
               </Text>
