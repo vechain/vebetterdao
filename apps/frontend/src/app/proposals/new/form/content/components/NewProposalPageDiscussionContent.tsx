@@ -32,11 +32,13 @@ import {
 } from "@/constants"
 import { useWallet } from "@vechain/vechain-kit"
 import { AnalyticsUtils } from "@/utils"
+import { useUploadProposalMetadata } from "@/hooks"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
 type FormData = {
   markdownDescription: string
+  metadataUri: string
 }
 
 export const NewProposalPageDiscussionContent = () => {
@@ -44,11 +46,13 @@ export const NewProposalPageDiscussionContent = () => {
   const router = useRouter()
   const { account } = useWallet()
 
-  const { title, shortDescription, markdownDescription, actions, setData } = useProposalFormStore()
+  const { title, shortDescription, markdownDescription, actions, setData, metadataUri } = useProposalFormStore()
+  const { onMetadataUpload, metadataUploading: isMetadataUploading } = useUploadProposalMetadata()
 
   const { control, formState, handleSubmit, setValue } = useForm<FormData>({
     defaultValues: {
       markdownDescription,
+      metadataUri,
     },
   })
 
@@ -57,15 +61,24 @@ export const NewProposalPageDiscussionContent = () => {
   const { errors } = formState
 
   const onSubmit = useCallback(
-    (data: FormData) => {
+    async (data: FormData) => {
+      if (!title || !shortDescription || !data.markdownDescription)
+        return control.setError("markdownDescription", { message: "Missing data" })
       setData({ markdownDescription: data.markdownDescription })
+      const metadataUri = await onMetadataUpload({
+        title,
+        shortDescription,
+        markdownDescription: data.markdownDescription,
+      })
+      if (!metadataUri) return
+      setData({ metadataUri })
       router.push("/proposals/new/form/round")
       AnalyticsUtils.trackEvent(
         buttonClicked,
         buttonClickActions(ButtonClickProperties.CONTINUE_CREATE_PROPOSAL_CONTENT),
       )
     },
-    [setData, router],
+    [setData, router, title, shortDescription, onMetadataUpload, control],
   )
   const goBack = useCallback(() => {
     router.back()
@@ -148,10 +161,15 @@ export const NewProposalPageDiscussionContent = () => {
           </FormControl>
 
           <HStack alignSelf={"flex-end"} justify={"flex-end"} spacing={4} flex={1}>
-            <Button data-testid="go-back" variant="primarySubtle" onClick={goBack}>
+            <Button data-testid="go-back" variant="primarySubtle" onClick={goBack} disabled={isMetadataUploading}>
               {t("Go back")}
             </Button>
-            <Button data-testid="continue" variant="primaryAction" type="submit">
+            <Button
+              data-testid="continue"
+              variant="primaryAction"
+              type="submit"
+              disabled={isMetadataUploading}
+              isLoading={isMetadataUploading}>
               {t("Continue")}
             </Button>
           </HStack>
