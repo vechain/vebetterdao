@@ -1,25 +1,24 @@
-import { getXAppMetadataQueryKey, getXAppsQueryKey } from "@/api"
-import { useQueryClient } from "@tanstack/react-query"
-import { useCallback } from "react"
-import { useWallet, EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "@vechain/vechain-kit"
+import { useCallback, useMemo } from "react"
+import { EnhancedClause, UseSendTransactionReturnValue } from "@vechain/vechain-kit"
 import { X2EarnApps__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
+import { useBuildTransaction } from "./useBuildTransaction"
+import { getXAppMetadataQueryKey, getXAppsQueryKey } from "@/api"
 import { useCurrentAppInfo } from "@/app/apps/[appId]/hooks/useCurrentAppInfo"
 
 const X2EarnAppsInterface = X2EarnApps__factory.createInterface()
 
 type useUpdateAppDetailsProps = {
   appId: string
-  onSuccess?: () => Promise<void> | void
-  invalidateCache?: boolean
-  onSuccessMessageTitle?: string
+  onSuccess?: () => void
+  onFailure?: () => void
 }
 
 type BuildClausesProps = {
   metadataUri: string
   teamWalletAddress?: string
 }
-type useUpdateAppMetadataReturnValue = {
+export type useUpdateAppMetadataReturnValue = {
   sendTransaction: (data: BuildClausesProps) => Promise<void>
 } & Omit<UseSendTransactionReturnValue, "sendTransaction">
 
@@ -31,12 +30,9 @@ type useUpdateAppMetadataReturnValue = {
 export const useUpdateAppDetails = ({
   appId,
   onSuccess,
-  invalidateCache = true,
+  onFailure,
 }: useUpdateAppDetailsProps): useUpdateAppMetadataReturnValue => {
-  const { account } = useWallet()
-  const queryClient = useQueryClient()
   const { app } = useCurrentAppInfo()
-
   const buildClauses = useCallback(
     ({ metadataUri }: BuildClausesProps) => {
       const clauses: EnhancedClause[] = [
@@ -53,45 +49,15 @@ export const useUpdateAppDetails = ({
     },
     [appId],
   )
-
-  //Refetch queries to update ui after the tx is confirmed
-  const handleOnSuccess = useCallback(async () => {
-    if (invalidateCache) {
-      await queryClient.cancelQueries({
-        queryKey: getXAppsQueryKey(),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getXAppsQueryKey(),
-      })
-      await queryClient.cancelQueries({
-        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
-      })
-      await queryClient.refetchQueries({
-        queryKey: getXAppMetadataQueryKey(app?.metadataURI),
-      })
-    }
-
-    onSuccess?.()
-  }, [invalidateCache, onSuccess, queryClient, app?.metadataURI])
-
-  const result = useSendTransaction({
-    signerAccountAddress: account?.address,
-    onTxConfirmed: handleOnSuccess,
-  })
-
-  /**
-   * Send a transaction with the given clauses (in case you need to pass data to build the clauses to mutate directly)
-   * @param vote the vote to cast
-   * @param reason the reason for the vote
-   * @returns see x@xxxx UseSendTransactionReturnValue}
-   */
-  const onMutate = useCallback(
-    async (data: BuildClausesProps) => {
-      const clauses = buildClauses(data)
-      return result.sendTransaction(clauses)
-    },
-    [buildClauses, result],
+  const refetchQueryKeys = useMemo(
+    () => [getXAppsQueryKey(), getXAppMetadataQueryKey(app?.metadataURI)],
+    [app?.metadataURI],
   )
 
-  return { ...result, sendTransaction: onMutate }
+  return useBuildTransaction({
+    clauseBuilder: buildClauses,
+    refetchQueryKeys,
+    onSuccess,
+    onFailure,
+  })
 }

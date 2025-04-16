@@ -64,7 +64,7 @@ export const ClaimXAppAllocations = () => {
   const handleSubmit = useCallback(
     (event: { preventDefault: () => void }) => {
       event.preventDefault()
-      sendTransaction()
+      sendTransaction(undefined)
       onOpen()
     },
     [sendTransaction, onOpen],
@@ -87,7 +87,7 @@ export const ClaimXAppAllocations = () => {
 
   const modalContent = useMemo(() => {
     if (status === "success") {
-      return <SuccessModalContent title={"Allocations claimed"} showExplorerButton txId={txReceipt?.meta.txID} />
+      return <SuccessModalContent title={"Allocations claimed"} txId={txReceipt?.meta.txID} />
     }
 
     if (isLoading)

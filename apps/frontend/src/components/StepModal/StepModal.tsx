@@ -27,7 +27,7 @@ export const StepModal = <T extends string>({
   steps,
   activeStep,
   goToPrevious,
-  setActiveStep,
+  setActiveStep
 }: StepModalProps<T>) => {
   const handleClose = () => {
     // reset the active step to 0
@@ -56,7 +56,9 @@ export const StepModal = <T extends string>({
       <Card p={0}>
         <CardBody p={0}>
           <HStack>
-            {!isFirstStep ? <IoArrowBackOutline onClick={goToPrevious} size={30} cursor={"pointer"} /> : null}
+            {!isFirstStep && !disableBackButton ? (
+              <IoArrowBackOutline onClick={goToPrevious} size={30} cursor={"pointer"} />
+            ) : null}
             <Text fontSize={{ base: 18, md: 24 }} fontWeight={700} alignSelf={"center"}>
               {currentStepContent.title}
             </Text>
