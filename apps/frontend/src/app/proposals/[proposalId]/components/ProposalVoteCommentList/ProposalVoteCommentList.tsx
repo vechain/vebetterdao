@@ -26,7 +26,7 @@ export const ProposalVoteCommentList = ({ proposalId }: Props) => {
             next={fetchNextPage}
             hasMore={hasNextPage}
             loader={
-              <Center>
+              <Center p={4}>
                 <Spinner size="md" mt={4} alignSelf="center" />
               </Center>
             }
