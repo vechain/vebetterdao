@@ -19,6 +19,7 @@ export type StepModalProps<T extends string> = {
   goToNext?: () => void
   setActiveStep: (step: number) => void
   activeStep: number
+  disableBackButton?: boolean
 }
 
 export const StepModal = <T extends string>({
@@ -27,7 +28,8 @@ export const StepModal = <T extends string>({
   steps,
   activeStep,
   goToPrevious,
-  setActiveStep
+  setActiveStep,
+  disableBackButton,
 }: StepModalProps<T>) => {
   const handleClose = () => {
     // reset the active step to 0
