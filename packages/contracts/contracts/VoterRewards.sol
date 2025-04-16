@@ -245,16 +245,8 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // Determine the reward multiplier based on the GM NFT level and if the GM NFT or Vechain node attached have already voted on this proposal.
     uint256 multiplier = getMultiplier(selectedGMNFT, proposalId);
 
-    // Set the scaled vote power to the total votes cast by the voter.
-    uint256 scaledVotePower = votes;
-
-    // Get the block number the emission cycle started.
-    uint48 emissionCycleStartBlock = SafeCast.toUint48($.emissions.lastEmissionBlock());
-
-    // If quadratic rewarding is enabled, scale the vote power by 1e9 to counteract the square root operation on 1e18. (0: enabled, 1: disabled)
-    if ($.quadraticRewardingDisabled.upperLookupRecent(emissionCycleStartBlock) == 0) {
-      scaledVotePower = votePower * 1e9;
-    }
+    // Get the scaled vote power.
+    uint256 scaledVotePower = _getScaledVotePower(votes, votePower);
 
     // GM Pool Amount -> If this is 0 we are using the original calculation. In the future we should remove this check and use the GM Pool Amount.
     uint256 gmPoolAmount = $.emissions.getGMAmount(cycle);
@@ -582,5 +574,24 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @dev Clock used for flagging checkpoints.
   function clock() public view virtual returns (uint48) {
     return Time.blockNumber();
+  }
+
+  // ----------------- Private Functions ----------------- //
+
+  /// @notice Scales the vote power based on the quadratic rewarding status.
+  /// @param votes - The total votes cast by the voter.
+  /// @param votePower - The vote power to scale.
+  /// @return scaledVotePower - The scaled vote power.
+  function _getScaledVotePower(
+    uint256 votes,
+    uint256 votePower
+  ) private view returns (uint256) {
+    // If quadratic rewarding is disabled, return votes as scaled vote power
+    if (isQuadraticRewardingDisabledForCurrentCycle()) {
+      return votes;
+    }
+
+    // If quadratic rewarding is enabled, scale the vote power by 1e9 to counteract the square root operation on 1e18.
+    return votePower * 1e9;
   }
 }
