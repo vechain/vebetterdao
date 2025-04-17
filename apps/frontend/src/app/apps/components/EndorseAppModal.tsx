@@ -67,7 +67,7 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   )
   const handleEndorsement = useCallback(() => {
     endorseAppMutation.resetStatus()
-    endorseAppMutation.sendTransaction(undefined)
+    endorseAppMutation.sendTransaction()
   }, [endorseAppMutation])
 
   //TODO: Add this to review modal before sending transaction

@@ -20,7 +20,7 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery }: Props) => {
   })
 
   const handleClaim = useCallback(() => {
-    claimRewardsMutation.sendTransaction(undefined)
+    claimRewardsMutation.sendTransaction()
   }, [claimRewardsMutation])
 
   return (

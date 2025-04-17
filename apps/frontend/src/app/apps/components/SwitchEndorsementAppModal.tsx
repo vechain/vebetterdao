@@ -69,7 +69,7 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
 
   const handleSwitchEndorsement = useCallback(() => {
     switchEndorsementMutation.resetStatus()
-    switchEndorsementMutation.sendTransaction(undefined)
+    switchEndorsementMutation.sendTransaction()
   }, [switchEndorsementMutation])
 
   const shouldDisplayCooldownAlert = useMemo(() => {

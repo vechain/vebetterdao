@@ -93,7 +93,7 @@ export const UpdateRoleCard = () => {
   }, [userAlreadyHasRole, account?.address, walletAddress, grantRole, renounceRole, revokeRole])
 
   const handleFormSubmit = (_: any) => {
-    accessControlAction.sendTransaction(undefined)
+    accessControlAction.sendTransaction()
   }
 
   useEffect(() => {

@@ -15,7 +15,7 @@ export const StartRoundButton = () => {
   const distributionLoading = isTransactionPending || status === "pending"
 
   const handleSubmit = useCallback(() => {
-    sendTransaction(undefined)
+    sendTransaction()
   }, [sendTransaction])
 
   if (parseInt(currentRoundId ?? "0") < 1) return null

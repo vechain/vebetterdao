@@ -69,7 +69,7 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const handleAttachment = useCallback(() => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.ATTACHED_GM_TO_XNODE))
     attachGMToXNodeMutation.resetStatus()
-    attachGMToXNodeMutation.sendTransaction(undefined)
+    attachGMToXNodeMutation.sendTransaction()
   }, [attachGMToXNodeMutation])
 
   const iconSize = useBreakpointValue({ base: "48px", md: "108px" })

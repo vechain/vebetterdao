@@ -49,7 +49,7 @@ export const GMSetMaxLevel = () => {
 
   const onSubmit = useCallback(() => {
     resetStatus()
-    sendTransaction(undefined)
+    sendTransaction()
   }, [resetStatus, sendTransaction])
   const { data: currentMaxLevel } = useGMMaxLevel()
   const isFormValid = useMemo(

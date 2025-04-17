@@ -18,7 +18,7 @@ export const SelectGMButton: React.FC<SelectGMButtonProps> = ({ tokenId, isSelec
   const detachGMModal = useDisclosure()
 
   const handleSelectGM = useCallback(() => {
-    selectGMMutation.sendTransaction({})
+    selectGMMutation.sendTransaction()
   }, [selectGMMutation])
 
   return (

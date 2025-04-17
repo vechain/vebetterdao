@@ -32,7 +32,7 @@ export const UnendorseAppModalAdminsOnly = ({ isOpen, onClose, appId, nodeId, no
 
   const handleUnendorsement = useCallback(() => {
     rmNodeEndorsementMutation.resetStatus()
-    rmNodeEndorsementMutation.sendTransaction(undefined)
+    rmNodeEndorsementMutation.sendTransaction()
   }, [rmNodeEndorsementMutation])
 
   return (

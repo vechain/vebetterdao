@@ -84,7 +84,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     }
 
     mutationData.resetStatus()
-    mutationData.sendTransaction(undefined)
+    mutationData.sendTransaction()
   }, [isB3trToVot3, isSmartAccountUpgradeRequired, mutationData, openUpgradeModal])
 
   const handleClose = useCallback(() => {

@@ -65,7 +65,7 @@ export const B3trAllowance = () => {
       if (event) event.preventDefault()
 
       if (!isValidAddress) return
-      sendTransaction(undefined)
+      sendTransaction()
     },
     [sendTransaction, isValidAddress],
   )

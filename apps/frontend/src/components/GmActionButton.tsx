@@ -50,7 +50,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   })
 
   const handleMintGM = useCallback(() => {
-    freeMint({})
+    freeMint()
     mintNftModal.onOpen()
   }, [freeMint, mintNftModal])
 

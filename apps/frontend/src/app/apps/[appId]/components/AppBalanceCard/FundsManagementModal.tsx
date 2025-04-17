@@ -93,7 +93,7 @@ export const FundsManagementModal = ({ appId, isOpen, onClose }: Props) => {
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
 
-      refillRewardsPoolAction.sendTransaction(undefined)
+      refillRewardsPoolAction.sendTransaction()
       //TODO: Add this to review modal before sending transaction
       // setB3trBalanceAfter(activeTab === "balance-to-rewards" ? estimatedRewards : estimatedBalance)
     },

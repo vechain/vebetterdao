@@ -25,7 +25,7 @@ export const ClaimDeposits = ({ totalClaimableDeposits, claimableDeposits }: Pro
   })
 
   const handleClaim = useCallback(() => {
-    sendTransaction(undefined)
+    sendTransaction()
   }, [sendTransaction])
 
   return (

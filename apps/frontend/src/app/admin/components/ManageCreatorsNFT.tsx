@@ -69,7 +69,7 @@ export const ManageCreatorsNFT = () => {
   const onSubmit = useCallback(() => {
     if (actionType !== "check") {
       resetStatus()
-      sendTransaction(undefined)
+      sendTransaction()
     }
   }, [actionType, resetStatus, sendTransaction])
 

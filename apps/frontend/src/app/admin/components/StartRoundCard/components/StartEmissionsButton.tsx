@@ -10,7 +10,7 @@ export const StartEmissionsButton = () => {
   const { sendTransaction, isTransactionPending, status } = useStartEmission({})
 
   const handleStartEmissions = useCallback(() => {
-    sendTransaction(undefined)
+    sendTransaction()
   }, [sendTransaction])
 
   const loading = isTransactionPending || status === "pending"

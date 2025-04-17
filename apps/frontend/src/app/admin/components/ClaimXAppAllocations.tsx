@@ -64,7 +64,7 @@ export const ClaimXAppAllocations = () => {
   const handleSubmit = useCallback(
     (event: { preventDefault: () => void }) => {
       event.preventDefault()
-      sendTransaction(undefined)
+      sendTransaction()
       onOpen()
     },
     [sendTransaction, onOpen],

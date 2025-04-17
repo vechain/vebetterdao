@@ -23,7 +23,7 @@ export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosu
   const removeDelegation = useRemovePendingDelegationDelegatorPOV({})
 
   const handleDelegate = useCallback(() => {
-    removeDelegation.sendTransaction({})
+    removeDelegation.sendTransaction()
   }, [removeDelegation])
 
   const handleClose = useCallback(() => {

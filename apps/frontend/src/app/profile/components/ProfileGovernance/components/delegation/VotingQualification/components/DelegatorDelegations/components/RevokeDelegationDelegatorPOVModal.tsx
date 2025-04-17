@@ -31,7 +31,7 @@ export const RevokeDelegationDelegatorPOVModal = ({
   })
 
   const handleDelegate = useCallback(() => {
-    revokeDelegation.sendTransaction({})
+    revokeDelegation.sendTransaction()
   }, [revokeDelegation])
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
