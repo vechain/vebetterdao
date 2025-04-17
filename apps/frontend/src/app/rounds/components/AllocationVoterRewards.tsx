@@ -33,7 +33,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
   const { sendTransaction } = useClaimReward({ roundId })
 
   const handleClaim = useCallback(() => {
-    sendTransaction(undefined)
+    sendTransaction()
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.CLAIM_REWARDS))
   }, [sendTransaction])
 

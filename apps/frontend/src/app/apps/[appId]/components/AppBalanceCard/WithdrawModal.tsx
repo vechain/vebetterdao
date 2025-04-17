@@ -103,7 +103,7 @@ export const WithdrawModal = ({ appId, teamWalletAddress, isOpen, onClose }: Pro
   })
 
   const handleWithdraw = useCallback(() => {
-    sendTransaction(undefined)
+    sendTransaction()
   }, [sendTransaction])
 
   const handleClose = useCallback(() => {

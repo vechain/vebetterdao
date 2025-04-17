@@ -39,7 +39,7 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
 
   const handleUnendorsement = useCallback(() => {
     unendorseAppMutation.resetStatus()
-    unendorseAppMutation.sendTransaction(undefined)
+    unendorseAppMutation.sendTransaction()
   }, [unendorseAppMutation])
 
   //TODO: Add this to review modal before sending transaction

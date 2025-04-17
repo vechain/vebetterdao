@@ -108,7 +108,7 @@ export const DepositModal = ({ appId, isOpen, onClose }: Props) => {
 
   const handleWithdraw = useCallback(() => {
     resetStatus()
-    sendTransaction(undefined)
+    sendTransaction()
   }, [sendTransaction, resetStatus])
 
   const handleClose = useCallback(() => {

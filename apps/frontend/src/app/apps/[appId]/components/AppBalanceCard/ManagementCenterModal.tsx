@@ -62,7 +62,7 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
   }, [actionToConfirm, toggleRewardsPool, pauseDistribution, unpauseDistribution])
 
   const handleManagementAction = () => {
-    managementAction.sendTransaction(undefined)
+    managementAction.sendTransaction()
   }
 
   // Modal management

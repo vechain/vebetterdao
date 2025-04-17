@@ -57,7 +57,7 @@ const AppEligibility = ({ id, name, isEligible }: { id: string; name: string; is
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
 
-      sendTransaction(undefined)
+      sendTransaction()
     },
     [sendTransaction],
   )

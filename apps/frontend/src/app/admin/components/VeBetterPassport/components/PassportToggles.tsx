@@ -78,7 +78,7 @@ const PassportCheck = ({ name, isEnabled, checkToToggle }: PassportCheckProps) =
     (event?: { preventDefault: () => void }) => {
       if (event) event.preventDefault()
 
-      sendTransaction(undefined)
+      sendTransaction()
     },
     [sendTransaction],
   )
