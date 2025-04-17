@@ -99,7 +99,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           name="twitter:description"
           content="Vote for your favourite sustainability Apps in VeBetterDAO's governance."
         />
-        <meta name="twitter:image" content={`${getConfig().basePath}/images/social_image.png`} />
+        <meta name="twitter:image" content={`${getConfig().basePath}/assets/images/social_image.png`} />
         <meta name="twitter:image:alt" content="VeBetterDAO" />
       </head>
       <body>

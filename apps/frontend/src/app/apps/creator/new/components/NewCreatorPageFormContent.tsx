@@ -93,7 +93,7 @@ export const NewCreatorPageFormContent = () => {
           bgColor="#004CFC"
           w="full"
           borderTopRadius="12px"
-          bgImage={"/images/cloud-background.png"}
+          bgImage={"/assets/backgrounds/cloud-background.webp"}
           bgSize="cover"
           bgPosition="center"
           bgRepeat="no-repeat"
