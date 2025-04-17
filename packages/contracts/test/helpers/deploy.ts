@@ -87,6 +87,7 @@ import {
   VoterRewardsV3,
   B3TRMultiSig,
   EmissionsV2,
+  B3TRGovernorV5,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -261,6 +262,15 @@ export const getOrDeployContractInstances = async ({
     GovernorVotesLogicLibV4,
     GovernorDepositLogicLibV4,
     GovernorStateLogicLibV4,
+    GovernorClockLogicLibV5,
+    GovernorConfiguratorLibV5,
+    GovernorFunctionRestrictionsLogicLibV5,
+    GovernorGovernanceLogicLibV5,
+    GovernorQuorumLogicLibV5,
+    GovernorProposalLogicLibV5,
+    GovernorVotesLogicLibV5,
+    GovernorDepositLogicLibV5,
+    GovernorStateLogicLibV5,
   } = await governanceLibraries()
 
   // Deploy Passport Libraries
@@ -502,7 +512,14 @@ export const getOrDeployContractInstances = async ({
   )) as X2EarnRewardsPool
 
   const xAllocationPool = (await deployAndUpgrade(
-    ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPoolV4", "XAllocationPool"],
+    [
+      "XAllocationPoolV1",
+      "XAllocationPoolV2",
+      "XAllocationPoolV3",
+      "XAllocationPoolV4",
+      "XAllocationPoolV5",
+      "XAllocationPool",
+    ],
     [
       [
         owner.address,
@@ -517,9 +534,10 @@ export const getOrDeployContractInstances = async ({
       [],
       [],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4, 5, 6],
     },
   )) as XAllocationPool
 
@@ -557,7 +575,7 @@ export const getOrDeployContractInstances = async ({
         },
       ],
       [],
-      [],
+      [config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE],
     ],
     {
       versions: [undefined, 2, 3],
@@ -710,103 +728,102 @@ export const getOrDeployContractInstances = async ({
     },
   )) as VeBetterPassport
 
-  // Deploy Governor
-  const governorV1 = (await deployProxy(
-    "B3TRGovernorV1",
+  const governor = (await deployAndUpgrade(
+    ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernorV5", "B3TRGovernor"],
     [
-      {
-        vot3Token: await vot3.getAddress(),
-        timelock: await timeLock.getAddress(),
-        xAllocationVoting: await xAllocationVoting.getAddress(),
-        b3tr: await b3tr.getAddress(),
-        quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE, // quorum percentage
-        initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD, // deposit threshold
-        initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY, // delay before vote starts
-        initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD, // voting threshold
-        voterRewards: await voterRewards.getAddress(),
-        isFunctionRestrictionEnabled: true,
-      },
-      {
-        governorAdmin: owner.address,
-        pauser: owner.address,
-        contractsAddressManager: owner.address,
-        proposalExecutor: owner.address,
-        governorFunctionSettingsRoleAddress: owner.address,
-      },
+      [
+        {
+          vot3Token: await vot3.getAddress(),
+          timelock: await timeLock.getAddress(),
+          xAllocationVoting: await xAllocationVoting.getAddress(),
+          b3tr: await b3tr.getAddress(),
+          quorumPercentage: config.B3TR_GOVERNOR_QUORUM_PERCENTAGE,
+          initialDepositThreshold: config.B3TR_GOVERNOR_DEPOSIT_THRESHOLD,
+          initialMinVotingDelay: config.B3TR_GOVERNOR_MIN_VOTING_DELAY,
+          initialVotingThreshold: config.B3TR_GOVERNOR_VOTING_THRESHOLD,
+          voterRewards: await voterRewards.getAddress(),
+          isFunctionRestrictionEnabled: true,
+        },
+        {
+          governorAdmin: owner.address, // admin
+          pauser: owner.address, // botSignaler
+          contractsAddressManager: owner.address, // upgrader
+          proposalExecutor: owner.address, // settingsManager
+          governorFunctionSettingsRoleAddress: owner.address, // roleGranter
+        },
+      ],
+      [],
+      [],
+      [await veBetterPassport.getAddress()],
+      [],
+      [],
     ],
     {
-      GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
-      GovernorConfiguratorV1: await GovernorConfiguratorLibV1.getAddress(),
-      GovernorDepositLogicV1: await GovernorDepositLogicLibV1.getAddress(),
-      GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLibV1.getAddress(),
-      GovernorProposalLogicV1: await GovernorProposalLogicLibV1.getAddress(),
-      GovernorQuorumLogicV1: await GovernorQuorumLogicLibV1.getAddress(),
-      GovernorStateLogicV1: await GovernorStateLogicLibV1.getAddress(),
-      GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
+      versions: [undefined, 2, 3, 4, 5, 6],
+      libraries: [
+        {
+          GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
+          GovernorConfiguratorV1: await GovernorConfiguratorLibV1.getAddress(),
+          GovernorDepositLogicV1: await GovernorDepositLogicLibV1.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLibV1.getAddress(),
+          GovernorProposalLogicV1: await GovernorProposalLogicLibV1.getAddress(),
+          GovernorQuorumLogicV1: await GovernorQuorumLogicLibV1.getAddress(),
+          GovernorStateLogicV1: await GovernorStateLogicLibV1.getAddress(),
+          GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
+        },
+        {
+          GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
+          GovernorConfiguratorV1: await GovernorConfiguratorLibV1.getAddress(),
+          GovernorDepositLogicV1: await GovernorDepositLogicLibV1.getAddress(),
+          GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLibV1.getAddress(),
+          GovernorProposalLogicV1: await GovernorQuorumLogicLibV1.getAddress(),
+          GovernorQuorumLogicV1: await GovernorQuorumLogicLibV1.getAddress(),
+          GovernorStateLogicV1: await GovernorStateLogicLibV1.getAddress(),
+          GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
+        },
+        {
+          GovernorClockLogicV3: await GovernorClockLogicLibV3.getAddress(),
+          GovernorConfiguratorV3: await GovernorConfiguratorLibV3.getAddress(),
+          GovernorDepositLogicV3: await GovernorDepositLogicLibV3.getAddress(),
+          GovernorFunctionRestrictionsLogicV3: await GovernorFunctionRestrictionsLogicLibV3.getAddress(),
+          GovernorProposalLogicV3: await GovernorProposalLogicLibV3.getAddress(),
+          GovernorQuorumLogicV3: await GovernorQuorumLogicLibV3.getAddress(),
+          GovernorStateLogicV3: await GovernorStateLogicLibV3.getAddress(),
+          GovernorVotesLogicV3: await GovernorVotesLogicLibV3.getAddress(),
+        },
+        {
+          GovernorClockLogicV4: await GovernorClockLogicLibV4.getAddress(),
+          GovernorConfiguratorV4: await GovernorConfiguratorLibV4.getAddress(),
+          GovernorDepositLogicV4: await GovernorDepositLogicLibV4.getAddress(),
+          GovernorFunctionRestrictionsLogicV4: await GovernorFunctionRestrictionsLogicLibV4.getAddress(),
+          GovernorProposalLogicV4: await GovernorProposalLogicLibV4.getAddress(),
+          GovernorQuorumLogicV4: await GovernorQuorumLogicLibV4.getAddress(),
+          GovernorStateLogicV4: await GovernorStateLogicLibV4.getAddress(),
+          GovernorVotesLogicV4: await GovernorVotesLogicLibV4.getAddress(),
+        },
+        {
+          GovernorClockLogicV5: await GovernorClockLogicLibV5.getAddress(),
+          GovernorConfiguratorV5: await GovernorConfiguratorLibV5.getAddress(),
+          GovernorDepositLogicV5: await GovernorDepositLogicLibV5.getAddress(),
+          GovernorFunctionRestrictionsLogicV5: await GovernorFunctionRestrictionsLogicLibV5.getAddress(),
+          GovernorQuorumLogicV5: await GovernorQuorumLogicLibV5.getAddress(),
+          GovernorProposalLogicV5: await GovernorProposalLogicLibV5.getAddress(),
+          GovernorStateLogicV5: await GovernorStateLogicLibV5.getAddress(),
+          GovernorVotesLogicV5: await GovernorVotesLogicLibV5.getAddress(),
+        },
+        {
+          GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
+          GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
+          GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
+          GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
+          GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
+          GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
+          GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
+          GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+        },
+      ],
     },
-  )) as B3TRGovernorV1
-
-  const governorV2 = (await upgradeProxy("B3TRGovernorV1", "B3TRGovernorV2", await governorV1.getAddress(), [], {
-    version: 2,
-    libraries: {
-      GovernorClockLogicV1: await GovernorClockLogicLibV1.getAddress(),
-      GovernorConfiguratorV1: await GovernorConfiguratorLibV1.getAddress(),
-      GovernorDepositLogicV1: await GovernorDepositLogicLibV1.getAddress(),
-      GovernorFunctionRestrictionsLogicV1: await GovernorFunctionRestrictionsLogicLibV1.getAddress(),
-      GovernorProposalLogicV1: await GovernorQuorumLogicLibV1.getAddress(),
-      GovernorQuorumLogicV1: await GovernorQuorumLogicLibV1.getAddress(),
-      GovernorStateLogicV1: await GovernorStateLogicLibV1.getAddress(),
-      GovernorVotesLogicV1: await GovernorVotesLogicLibV1.getAddress(),
-    },
-  })) as B3TRGovernorV2
-
-  const governorV3 = (await upgradeProxy("B3TRGovernorV2", "B3TRGovernorV3", await governorV1.getAddress(), [], {
-    version: 3,
-    libraries: {
-      GovernorClockLogicV3: await GovernorClockLogicLibV3.getAddress(),
-      GovernorConfiguratorV3: await GovernorConfiguratorLibV3.getAddress(),
-      GovernorDepositLogicV3: await GovernorDepositLogicLibV3.getAddress(),
-      GovernorFunctionRestrictionsLogicV3: await GovernorFunctionRestrictionsLogicLibV3.getAddress(),
-      GovernorProposalLogicV3: await GovernorProposalLogicLibV3.getAddress(),
-      GovernorQuorumLogicV3: await GovernorQuorumLogicLibV3.getAddress(),
-      GovernorStateLogicV3: await GovernorStateLogicLibV3.getAddress(),
-      GovernorVotesLogicV3: await GovernorVotesLogicLibV3.getAddress(),
-    },
-  })) as B3TRGovernorV3
-
-  const governorV4 = (await upgradeProxy(
-    "B3TRGovernorV3",
-    "B3TRGovernorV4",
-    await governorV1.getAddress(),
-    [await veBetterPassport.getAddress()],
-    {
-      version: 4,
-      libraries: {
-        GovernorClockLogicV4: await GovernorClockLogicLibV4.getAddress(),
-        GovernorConfiguratorV4: await GovernorConfiguratorLibV4.getAddress(),
-        GovernorDepositLogicV4: await GovernorDepositLogicLibV4.getAddress(),
-        GovernorFunctionRestrictionsLogicV4: await GovernorFunctionRestrictionsLogicLibV4.getAddress(),
-        GovernorProposalLogicV4: await GovernorProposalLogicLibV4.getAddress(),
-        GovernorQuorumLogicV4: await GovernorQuorumLogicLibV4.getAddress(),
-        GovernorStateLogicV4: await GovernorStateLogicLibV4.getAddress(),
-        GovernorVotesLogicV4: await GovernorVotesLogicLibV4.getAddress(),
-      },
-    },
-  )) as B3TRGovernorV4
-
-  const governor = (await upgradeProxy("B3TRGovernorV4", "B3TRGovernor", await governorV1.getAddress(), [], {
-    version: 5,
-    libraries: {
-      GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
-      GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
-      GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
-      GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
-      GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
-      GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
-      GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
-      GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
-    },
-  })) as B3TRGovernor
+  )) as B3TRGovernor
 
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
@@ -917,10 +934,6 @@ export const getOrDeployContractInstances = async ({
     timeLock,
     x2EarnCreator,
     governor,
-    governorV1,
-    governorV2,
-    governorV3,
-    governorV4,
     galaxyMember,
     x2EarnApps,
     xAllocationVoting,
