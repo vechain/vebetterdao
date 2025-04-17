@@ -81,7 +81,6 @@
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.2.25",
-    "@next/bundle-analyzer": "^15.3.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@testing-library/jest-dom": "^6.4.5",
