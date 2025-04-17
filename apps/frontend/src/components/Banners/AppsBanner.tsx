@@ -32,7 +32,7 @@ export const AppsBanner = () => {
         bottom="0"
         right={{ base: "-5%", md: "0" }}
         src="/assets/mascot/mascot-explore-dapps@1x.webp"
-        srcSet="/images/mascot/mascot-explore-dapps@1x.webp 1x, /images/mascot/mascot-explore-dapps@2x.webp 2x"
+        srcSet="/assets/mascot/mascot-explore-dapps@1x.webp 1x, /assets/mascot/mascot-explore-dapps@2x.webp 2x"
         alt="mascot-explore-dapps"
         boxSize="200px"
         overflow="visible"
