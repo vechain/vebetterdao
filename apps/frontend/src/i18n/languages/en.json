@@ -1606,5 +1606,6 @@
   "The more VOT3 in your balance, the more voting power you'll have. Use it to vote on proposals and allocation rounds.": "The more VOT3 in your balance, the more voting power you'll have. Use it to vote on proposals and allocation rounds.",
   "By confirming the operation in your wallet, you will complete the convertion": "By confirming the operation in your wallet, you will complete the convertion",
   "Confirm and send transaction": "Confirm and send transaction",
-  "Filters": "Filters"
+  "Filters": "Filters",
+  "Send transaction": "Send transaction"
 }
