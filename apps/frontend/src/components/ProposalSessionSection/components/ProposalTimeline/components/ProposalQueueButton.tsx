@@ -8,7 +8,7 @@ export const ProposalQueueButton = () => {
   const { proposal } = useProposalDetail()
   const queueMutation = useQueueProposal({ proposalId: proposal.id })
   const queueProposal = useCallback(() => {
-    queueMutation.sendTransaction({})
+    queueMutation.sendTransaction()
   }, [queueMutation])
   return (
     <Button my="2" onClick={queueProposal} variant={"primaryAction"}>

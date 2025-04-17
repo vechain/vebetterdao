@@ -11,7 +11,7 @@ export const ProposalExecuteButton = () => {
   const { proposal } = useProposalDetail()
   const executeMutation = useExecuteProposal({ proposalId: proposal.id })
   const executeProposal = useCallback(() => {
-    executeMutation.sendTransaction({})
+    executeMutation.sendTransaction()
   }, [executeMutation])
 
   const { isLoading, isOperationDone, isOperationWaiting, readyTimestamp } = useProposalOperationState(proposal.id)

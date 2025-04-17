@@ -23,7 +23,7 @@ export const RemovePendingRequestModal = ({ modal, passport }: { modal: UseDiscl
   const removeLinkingRequest = useRemoveLinkingRequestToPassport({})
 
   const handleRemoveLink = useCallback(() => {
-    removeLinkingRequest.sendTransaction({})
+    removeLinkingRequest.sendTransaction()
   }, [removeLinkingRequest])
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })

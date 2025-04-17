@@ -41,7 +41,7 @@ export const CancelProposalSection = () => {
   const handleCancelProposal = useCallback(() => {
     confirmationModal.onClose()
     transactionModal.onOpen()
-    cancelProposalMutation.sendTransaction({})
+    cancelProposalMutation.sendTransaction()
   }, [cancelProposalMutation, confirmationModal, transactionModal])
 
   const accountCanCancelProposal = useMemo(

@@ -13,7 +13,7 @@ export const ProposalWithdrawButton = () => {
 
   const withdraw = useCallback(
     (e: React.FormEvent) => {
-      withdrawMutation.sendTransaction({})
+      withdrawMutation.sendTransaction()
       e.preventDefault()
     },
     [withdrawMutation],

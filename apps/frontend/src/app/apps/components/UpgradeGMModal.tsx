@@ -68,7 +68,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
 
   const handleUpgradeGM = useCallback(() => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.UPGRADED_GM))
-    upgradeGMMutation.sendTransaction({})
+    upgradeGMMutation.sendTransaction()
   }, [upgradeGMMutation])
 
   const handleClose = useCallback(() => {
