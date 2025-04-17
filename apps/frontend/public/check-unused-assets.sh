@@ -7,7 +7,7 @@ FAVICON_MANIFEST="$ASSETS_DIR/favicon/manifest.json"
 FAVICON_CONFIG="$ASSETS_DIR/favicon/browserconfig.xml"
 
 # Get changed asset files in the current commit (staged), exclude deletions
-changed_assets=$(git diff --cached --name-status | awk '$2 ~ /^public\/assets\// && $1 != "D" { sub(/^public\/assets\//, "", $2); print $2 }' | grep -v ".DS_Store")
+changed_assets=$(git diff --cached --name-status | awk '$2 ~ /^apps\/frontend\/public\/assets\// && $1 != "D" { sub(/^apps\/frontend\/public\/assets\//, "", $2); print $2 }' | grep -v ".DS_Store")
 
 # Start fresh report file
 echo "🔍 Unused Asset Report - $(date)" > "$REPORT_FILE"
