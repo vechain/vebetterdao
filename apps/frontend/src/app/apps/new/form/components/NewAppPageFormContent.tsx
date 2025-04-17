@@ -38,8 +38,8 @@ export const NewAppPageFormContent = () => {
       defaultValues: {
         name: latestSubmission?.appName ?? "",
         description: "",
-        logo: "/images/dapp_icon_placeholder.svg",
-        banner: "/images/dapp_banner_placeholder.svg",
+        logo: "/assets/icons/dapp_icon_placeholder.svg",
+        banner: "/assets/icons/dapp_banner_placeholder.svg",
         distributionStrategy: latestSubmission?.distributionStrategy ?? "",
         projectUrl: latestSubmission?.projectUrl ?? "",
         treasuryWalletAddress: "",

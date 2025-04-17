@@ -142,7 +142,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
               {/*GM CARD */}
               <Card>
                 <Image
-                  src={"/images/nft-page-background.png"}
+                  src={"/assets/backgrounds/nft-page-background.webp"}
                   alt="gm-nft-header"
                   position={"absolute"}
                   w="full"

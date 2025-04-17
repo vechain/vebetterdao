@@ -58,7 +58,7 @@ export const ProposalOverviewVotes = ({ proposalId }: Props) => {
       text: t("Abstained"),
       percentage: proposalVotes?.votes.abstain.percentagePower ?? 0,
       voters: proposalVotes?.votes.abstain.voters ?? 0,
-      icon: <Image src={"/images/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
+      icon: <Image src={"/assets/icons/abstained.svg"} alt="abstained" boxSize={["20px", "20px", "16px"]} />,
     },
   }
 

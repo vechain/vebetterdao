@@ -29,7 +29,6 @@
     "@fontsource-variable/instrument-sans": "^5.0.4",
     "@fontsource-variable/inter": "^5.0.17",
     "@iconscout/react-unicons": "^2.0.2",
-    "@next/bundle-analyzer": "^15.3.0",
     "@repo/config": "*",
     "@repo/constants": "*",
     "@repo/contracts": "*",
@@ -82,6 +81,7 @@
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.2.25",
+    "@next/bundle-analyzer": "^15.3.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
     "@testing-library/jest-dom": "^6.4.5",
