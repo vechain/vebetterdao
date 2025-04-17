@@ -6,9 +6,12 @@ import { SuccessModalContent } from "./SuccessModalContent"
 import { ErrorModalContent } from "./ErrorModalContent"
 import { LoadingModalContent } from "./LoadingModalContent"
 import { UnknownModalContent } from "./UnknownModalContent"
+import { useTranslation } from "react-i18next"
+
 export const TransactionModal = () => {
   const { transactionModalState, isTxModalOpen, onClose } = useTransactionModal()
   const portalRef = useRef(document.body)
+  const { t } = useTranslation()
 
   const canShowCloseButton = useMemo(() => {
     return transactionModalState?.status !== "pending" && transactionModalState?.status !== "waitingConfirmation"
@@ -20,27 +23,47 @@ export const TransactionModal = () => {
     }
   }, [transactionModalState])
 
+  const getCustomUIProps = useCallback(
+    (status: TransactionStatus) => {
+      return transactionModalState?.customUI?.[status] || {}
+    },
+    [transactionModalState?.customUI],
+  )
+
   const modalContent = useMemo(() => {
+    const defaultContent = {
+      pending: {
+        title: t("Waiting for confirmation..."),
+        description: t("Confirm the operation in your wallet to complete it"),
+      },
+      ready: {
+        title: t("Transaction Ready"),
+        description: t(
+          "Transaction status unclear. If you haven't confirmed it in your wallet yet, you can try again. Otherwise, you can close this window and check your transaction history.",
+        ),
+      },
+    }
+
     const statusComponentMap: Record<TransactionStatus, ReactNode> = {
-      //Waiting for user confirmation
-      pending: (
-        <LoadingModalContent
-          title="Waiting for confirmation..."
-          description="Confirm the operation in your wallet to complete it"
-        />
-      ),
-      waitingConfirmation: <LoadingModalContent />, //Waiting for confirmation from the network
+      pending: <LoadingModalContent {...defaultContent.pending} {...getCustomUIProps("pending")} />,
+      waitingConfirmation: <LoadingModalContent {...getCustomUIProps("waitingConfirmation")} />,
       error: (
         <ErrorModalContent
+          {...getCustomUIProps("error")}
           showTryAgainButton
           {...(transactionModalState?.tryAgain ? { onTryAgain: handleTryAgain } : {})}
         />
       ),
-      success: <SuccessModalContent txId={transactionModalState?.txId} showSocialButtons={true} />,
+      success: (
+        <SuccessModalContent
+          {...getCustomUIProps("success")}
+          txId={transactionModalState?.txId}
+          showSocialButtons={true}
+        />
+      ),
       ready: (
         <UnknownModalContent
-          title="Transaction Ready"
-          description="Transaction status unclear. If you haven't confirmed it in your wallet yet, you can try again. Otherwise, you can close this window and check your transaction history."
+          {...defaultContent.ready}
           showTryAgainButton
           {...(transactionModalState?.tryAgain ? { onTryAgain: handleTryAgain } : {})}
         />
@@ -48,7 +71,14 @@ export const TransactionModal = () => {
       unknown: <UnknownModalContent />,
     }
     return statusComponentMap[transactionModalState?.status ?? "unknown"] || null
-  }, [transactionModalState?.status, transactionModalState?.tryAgain, handleTryAgain, transactionModalState?.txId])
+  }, [
+    t,
+    getCustomUIProps,
+    transactionModalState?.tryAgain,
+    transactionModalState?.txId,
+    transactionModalState?.status,
+    handleTryAgain,
+  ])
 
   return (
     <BaseModal

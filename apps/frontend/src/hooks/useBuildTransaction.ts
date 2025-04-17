@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react"
 import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { useQueryClient } from "@tanstack/react-query"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useTransactionModal, TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 export type BuildTransactionProps<ClausesParams = void> = {
   clauseBuilder: (props: ClausesParams) => EnhancedClause[]
@@ -10,6 +10,7 @@ export type BuildTransactionProps<ClausesParams = void> = {
   invalidateCache?: boolean
   suggestedMaxGas?: number
   onFailure?: () => void
+  transactionModalCustomUI?: TransactionCustomUI
 }
 
 /**
@@ -29,6 +30,7 @@ export const useBuildTransaction = <ClausesParams = void>({
   onSuccess,
   onFailure,
   suggestedMaxGas,
+  transactionModalCustomUI = {},
 }: BuildTransactionProps<ClausesParams>) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
@@ -73,10 +75,10 @@ export const useBuildTransaction = <ClausesParams = void>({
    */
   const sendTransaction = useCallback(
     async (props?: ClausesParams) => {
-      setupModal(async () => result.sendTransaction(clauseBuilder(props as any)))
+      setupModal(async () => result.sendTransaction(clauseBuilder(props as any)), transactionModalCustomUI)
       return result.sendTransaction(clauseBuilder(props as any))
     },
-    [clauseBuilder, result, setupModal],
+    [clauseBuilder, result, setupModal, transactionModalCustomUI],
   )
 
   return { ...result, sendTransaction }
