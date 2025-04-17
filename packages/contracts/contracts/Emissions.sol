@@ -474,6 +474,8 @@ contract Emissions is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPS
   function getTreasuryAmount(uint256 cycle) public view virtual returns (uint256) {
     EmissionsStorage storage $ = _getEmissionsStorage();
 
+    require(cycle <= $.nextCycle, "Emissions: Cycle not reached yet");
+
     if (isCycleDistributed(cycle)) {
       return $.emissions[cycle].treasury;
     }
@@ -489,6 +491,7 @@ contract Emissions is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPS
   function getGMAmount(uint256 cycle) public view virtual returns (uint256) {
     EmissionsStorage storage $ = _getEmissionsStorage();
 
+    require(cycle <= $.nextCycle, "Emissions: Cycle not reached yet");
     if (isCycleDistributed(cycle)) {
       return $.gmEmissions[cycle];
     }
@@ -625,6 +628,12 @@ contract Emissions is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPS
   /// @return uint256 The treasury percentage
   function treasuryPercentage() public view returns (uint256) {
     return _getEmissionsStorage().treasuryPercentage;
+  }
+
+  /// @notice Retrieves the percentage of the Treasury pool allocated to GM
+  /// @return uint256 The GM percentage of the Treasury pool
+  function gmPercentage() public view returns (uint256) {
+    return _getEmissionsStorage().gmPercentage;
   }
 
   /// @notice Retrieves the block number when the last emission occurred
