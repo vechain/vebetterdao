@@ -3,7 +3,7 @@ import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-
 import { useQueryClient } from "@tanstack/react-query"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
-export type BuildTransactionProps<ClausesParams> = {
+export type BuildTransactionProps<ClausesParams = void> = {
   clauseBuilder: (props: ClausesParams) => EnhancedClause[]
   refetchQueryKeys?: (string | undefined)[][]
   onSuccess?: () => void
@@ -22,7 +22,7 @@ export type BuildTransactionProps<ClausesParams> = {
  * @param suggestedMaxGas - The suggested maximum gas for the transaction.
  * @returns An object containing the result of the `useSendTransaction` hook and a `sendTransaction` function.
  */
-export const useBuildTransaction = <ClausesParams>({
+export const useBuildTransaction = <ClausesParams = void>({
   clauseBuilder,
   refetchQueryKeys,
   invalidateCache = true,
@@ -72,9 +72,9 @@ export const useBuildTransaction = <ClausesParams>({
    * @param props - The parameters to be passed to the `clauseBuilder` function.
    */
   const sendTransaction = useCallback(
-    async (props: ClausesParams) => {
-      setupModal(async () => result.sendTransaction(clauseBuilder(props)))
-      return result.sendTransaction(clauseBuilder(props))
+    async (props?: ClausesParams) => {
+      setupModal(async () => result.sendTransaction(clauseBuilder(props as any)))
+      return result.sendTransaction(clauseBuilder(props as any))
     },
     [clauseBuilder, result, setupModal],
   )
