@@ -5,9 +5,11 @@ import { TransactionStatus } from "@vechain/vechain-kit"
 import { SuccessModalContent } from "./SuccessModalContent"
 import { ErrorModalContent } from "./ErrorModalContent"
 import { LoadingModalContent } from "./LoadingModalContent"
+import { UnknownModalContent } from "./UnknownModalContent"
 export const TransactionModal = () => {
   const { transactionModalState, isTxModalOpen, onClose } = useTransactionModal()
   const portalRef = useRef(document.body)
+
   const canShowCloseButton = useMemo(() => {
     return transactionModalState?.status !== "pending" && transactionModalState?.status !== "waitingConfirmation"
   }, [transactionModalState?.status])
@@ -35,13 +37,18 @@ export const TransactionModal = () => {
         />
       ),
       success: <SuccessModalContent txId={transactionModalState?.txId} showSocialButtons={true} />,
-      ready: null,
-      unknown: null,
+      ready: (
+        <UnknownModalContent
+          title="Transaction Ready"
+          description="Transaction status unclear. If you haven't confirmed it in your wallet yet, you can try again. Otherwise, you can close this window and check your transaction history."
+          showTryAgainButton
+          {...(transactionModalState?.tryAgain ? { onTryAgain: handleTryAgain } : {})}
+        />
+      ),
+      unknown: <UnknownModalContent />,
     }
     return statusComponentMap[transactionModalState?.status ?? "unknown"] || null
   }, [transactionModalState?.status, transactionModalState?.tryAgain, handleTryAgain, transactionModalState?.txId])
-
-  if (transactionModalState?.status === "ready") return null
 
   return (
     <BaseModal
