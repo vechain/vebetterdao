@@ -1609,5 +1609,6 @@
   "This user will not able to vote when the recipient accepts their request.": "수령인이 요청을 수락하면 이 사용자는 투표할 수 없습니다.",
   "This user is not currently able to vote due other user is using their Voting Qualification.": "다른 사용자가 자신의 투표 자격을 사용하고 있어 이 사용자는 현재 투표할 수 없습니다.",
   "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "{{amount}} VOT3로 {{numApps}} 개의 앱에 투표 시 반올림 문제로 실패할 수 있습니다. 더 적은 앱에 투표하거나 더 많은 VOT3를 확보하는 것을 고려하십시오.",
-  "Filters": "필터"
+  "Filters": "필터",
+  "Browse and discover dApps where you can earn tokens for sustainable actions.": "토큰을 적립할 수 있는 지속 가능한 행동을 지원하는 dApps를 탐색하고 발견하세요."
 }
