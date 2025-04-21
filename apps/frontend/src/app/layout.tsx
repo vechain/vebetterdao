@@ -70,9 +70,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         {/* Favicons */}
         <meta name="apple-mobile-web-app-title" content="VeBetterDAO" />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/icon?<generated>" type="image/<generated>" sizes="<generated>" />
-        <link rel="apple-touch-icon" href="/apple-icon?<generated>" type="image/<generated>" sizes="<generated>" />
 
         {/* Open Graph Metadata */}
         <meta name="title" property="og:title" content="VeBetterDAO" />
