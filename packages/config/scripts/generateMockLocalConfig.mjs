@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path"
-import { IPFS_FETCHING_SERVICE_DEV, IPFS_PINNING_SERVICE_DEV } from "@repo/constants"
+
 /**
  * Generates a mock local config file if it does not exist yet
  * This is needed and executed in the dev pipeline to avoid versioning local.ts
@@ -17,8 +17,8 @@ export const generateMockLocalConfig = () => {
   const toWrite = `import { AppConfig } from "." \n const config: AppConfig = {
     basePath: "http://localhost:3000",
     environment: "local",
-    ipfsPinningService: "${IPFS_PINNING_SERVICE_DEV}",
-    ipfsFetchingService: "${IPFS_FETCHING_SERVICE_DEV}",
+    ipfsPinningService: "https://api.dev.gateway-proxy.vechain.org/api/v1/pinning/pinFileToIPFS",
+    ipfsFetchingService: "https://api.dev.gateway-proxy.vechain.org/ipfs",
     b3trContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     vot3ContractAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
     b3trGovernorAddress: "0x45d5CA3f295ad8BCa291cC4ecd33382DE40E4FAc",
