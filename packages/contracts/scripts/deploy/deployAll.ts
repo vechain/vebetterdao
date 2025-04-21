@@ -16,6 +16,7 @@ import {
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
+  News,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
@@ -636,6 +637,14 @@ export async function deployAll(config: ContractsConfig) {
     },
   )) as B3TRGovernor
 
+  const news = (await deployAndUpgrade(
+    ["News"],
+    [[await x2EarnApps.getAddress(), config.NEWS_COOLDOWN_PERIOD, TEMP_ADMIN, TEMP_ADMIN, TEMP_ADMIN]],
+    {
+      versions: [undefined],
+    },
+  )) as News
+
   const date = new Date(performance.now() - start)
   console.log(`================  Contracts deployed in ${date.getMinutes()}m ${date.getSeconds()}s `)
 
@@ -655,6 +664,7 @@ export async function deployAll(config: ContractsConfig) {
     vechainNodesManagement: await nodeManagement.getAddress(),
     VeBetterPassport: await veBetterPassport.getAddress(),
     X2EarnCreator: await x2EarnCreator.getAddress(),
+    News: await news.getAddress(),
   }
 
   const libraries: {
@@ -1222,6 +1232,7 @@ export async function deployAll(config: ContractsConfig) {
     vechainNodeManagement: nodeManagement,
     veBetterPassport: veBetterPassport,
     x2EarnCreator: x2EarnCreator,
+    news: news,
     libraries: {
       governorClockLogic: GovernorClockLogicLib,
       governorConfigurator: GovernorConfiguratorLib,

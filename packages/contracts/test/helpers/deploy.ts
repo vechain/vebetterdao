@@ -86,6 +86,7 @@ import {
   PassportSignalingLogicV2,
   VoterRewardsV3,
   B3TRMultiSig,
+  News,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -128,6 +129,7 @@ interface DeployInstance {
   x2EarnCreator: X2EarnCreator
   x2EarnRewardsPool: X2EarnRewardsPool
   veBetterPassport: VeBetterPassport
+  news: News
   owner: HardhatEthersSigner
   otherAccount: HardhatEthersSigner
   minterAccount: HardhatEthersSigner
@@ -793,6 +795,16 @@ export const getOrDeployContractInstances = async ({
     },
   })) as B3TRGovernor
 
+  // ---------------------- Deploy News ----------------------
+
+  const news = (await deployProxy("News", [
+    await x2EarnApps.getAddress(),
+    config.NEWS_COOLDOWN_PERIOD,
+    owner.address,
+    owner.address,
+    owner.address,
+  ])) as News
+
   const contractAddresses: Record<string, string> = {
     B3TR: await b3tr.getAddress(),
     VoterRewards: await voterRewards.getAddress(),
@@ -806,6 +818,7 @@ export const getOrDeployContractInstances = async ({
     B3TRGovernor: await governor.getAddress(),
     X2EarnApps: await x2EarnApps.getAddress(),
     VeBetterPassport: veBetterPassportContractAddress,
+    News: await news.getAddress(),
   }
 
   const libraries = {
@@ -921,6 +934,7 @@ export const getOrDeployContractInstances = async ({
     otherAccounts,
     treasury,
     x2EarnRewardsPool,
+    news,
     veBetterPassport,
     b3trMultiSig,
     governorClockLogicLib: GovernorClockLogicLib,

@@ -135,5 +135,8 @@ export function createMainnetConfig() {
       "0x4e4f66f189c8708964b44eba29481fddfafa59ba",
       "0x3bdda2E9F66e8c3fE96F7152b61566B282c2781C",
     ],
+
+    // News
+    NEWS_COOLDOWN_PERIOD: 60479, // 1 week in blocks
   })
 }

@@ -1,7 +1,6 @@
 import { ethers, network } from "hardhat"
 import { deployAll } from "./deploy/deployAll"
-import { getConfig, getContractsConfig } from "@repo/config"
-import { AppConfig } from "@repo/config"
+import { AppConfig, getConfig, getContractsConfig } from "@repo/config"
 import fs from "fs"
 import path from "path"
 import { Network } from "@repo/constants"
@@ -54,6 +53,7 @@ async function overrideLocalConfigWithNewContracts(contracts: Awaited<ReturnType
     x2EarnAppsContractAddress: await contracts.x2EarnApps.getAddress(),
     x2EarnRewardsPoolContractAddress: await contracts.x2EarnRewardsPool.getAddress(),
     x2EarnCreatorContractAddress: await contracts.x2EarnCreator.getAddress(),
+    newsContractAddress: await contracts.news.getAddress(),
     nodeManagementContractAddress: await contracts.vechainNodeManagement.getAddress(),
     veBetterPassportContractAddress: await contracts.veBetterPassport.getAddress(),
     b3trGovernorLibraries: {

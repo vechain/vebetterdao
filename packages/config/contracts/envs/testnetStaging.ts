@@ -162,5 +162,8 @@ export function createTestnetStagingConfig() {
       "0xeaE35dfE902C5D1a44e6b4080224a6621319A671",
       "0x2ac2A050C45239159dBADab740A52e0A098a7ADD",
     ],
+
+    // News
+    NEWS_COOLDOWN_PERIOD: 10, // 10 blocks
   })
 }
