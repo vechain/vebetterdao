@@ -8,8 +8,8 @@ import { IX2EarnApps } from "./IX2EarnApps.sol";
  * @title INews
  * @dev Interface designed to be used by admins of x2EarnApps contract to publish or retrieve news.
  */
-interface INews  {
-   struct NewsType {
+interface INews {
+  struct NewsType {
     string title;
     string description;
     string image;
@@ -32,7 +32,14 @@ interface INews  {
    * @param callToActionUrl The call to action URL of the news.
    * @param publisher The address of the user that published the news.
    */
-  event NewsPublished(bytes32 indexed appId, string title, string description, string image, string callToActionUrl, address indexed publisher);
+  event NewsPublished(
+    bytes32 indexed appId,
+    string title,
+    string description,
+    string image,
+    string callToActionUrl,
+    address indexed publisher
+  );
 
   /**
    * @dev Event emitted when the cooldown period is updated.
@@ -50,7 +57,13 @@ interface INews  {
    * @param _upgrader Address to be assigned the upgrader role
    * @param _pauser Address to be assigned the pauser role
    */
-  function initialize(IX2EarnApps _x2EarnApps, uint256 _cooldownPeriod, address _defaultAdmin, address _upgrader, address _pauser) external;
+  function initialize(
+    IX2EarnApps _x2EarnApps,
+    uint256 _cooldownPeriod,
+    address _defaultAdmin,
+    address _upgrader,
+    address _pauser
+  ) external;
 
   /**
    * @dev Publishes news for an app
@@ -60,7 +73,13 @@ interface INews  {
    * @param image The image of the news
    * @param callToActionUrl The call to action URL of the news
    */
-  function publish(bytes32 appId, string memory title, string memory description, string memory image, string memory callToActionUrl) external;
+  function publish(
+    bytes32 appId,
+    string memory title,
+    string memory description,
+    string memory image,
+    string memory callToActionUrl
+  ) external;
 
   /**
    * @dev Sets the X2EarnApps contract address.
@@ -84,6 +103,13 @@ interface INews  {
    * @return The cooldown period.
    */
   function cooldownPeriod() external view returns (uint256);
+
+  /**
+   * @dev Retrieves the cooldown status of an app.
+   * @param appId The ID of the app.
+   * @return True if the app is in a cooldown period.
+   */
+  function isUnderCooldown(bytes32 appId) external view returns (bool);
 
   /**
    * @dev Retrieves the last news block.
