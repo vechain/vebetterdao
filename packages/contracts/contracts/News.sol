@@ -33,12 +33,7 @@ import { INews } from "./interfaces/INews.sol";
 /// @title News
 /// @notice Contract for news of VeBetterDAO.
 /// @dev This contract extends AccessControlUpgradeable with upgradeable pattern, enumerable, pausable, and access control functionalities.
-contract News is
-  INews,
-  PausableUpgradeable,
-  UUPSUpgradeable,
-  AccessControlUpgradeable
-{
+contract News is INews, PausableUpgradeable, UUPSUpgradeable, AccessControlUpgradeable {
   // ---------------- Roles ----------------
   bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
@@ -58,8 +53,7 @@ contract News is
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.News")) - 1)) & ~bytes32(uint256(0xff))
-  bytes32 private constant NewsStorageLocation =
-    0x5bef5c2fccff019296bd4b93f8c16a61495761f5d9e4b8788aad428bd3500400;
+  bytes32 private constant NewsStorageLocation = 0x5bef5c2fccff019296bd4b93f8c16a61495761f5d9e4b8788aad428bd3500400;
 
   function _getNewsStorage() private pure returns (NewsStorage storage $) {
     assembly {
@@ -72,7 +66,13 @@ contract News is
   /// @param _defaultAdmin Address to be assigned the default admin role
   /// @param _upgrader Address to be assigned the upgrader role
   /// @param _pauser Address to be assigned the pauser role
-  function initialize(IX2EarnApps _x2EarnApps, uint256 _cooldownPeriod, address _defaultAdmin, address _upgrader, address _pauser) public initializer {
+  function initialize(
+    IX2EarnApps _x2EarnApps,
+    uint256 _cooldownPeriod,
+    address _defaultAdmin,
+    address _upgrader,
+    address _pauser
+  ) public initializer {
     __AccessControl_init();
     __UUPSUpgradeable_init();
 
@@ -100,6 +100,13 @@ contract News is
     _;
   }
 
+  // ---------------- Upgrade and Utility Overrides ----------------
+
+  /**
+   * @dev See {UUPSUpgradeable-_authorizeUpgrade}
+   */
+  function _authorizeUpgrade(address newImplementation) internal override onlyRoleOrAdmin(UPGRADER_ROLE) {}
+
   // ---------- Setters ---------- //
 
   /**
@@ -110,13 +117,44 @@ contract News is
    * @param image The image of the news
    * @param callToActionUrl The call to action URL of the news
    */
-  function publish(bytes32 appId, string memory title, string memory description, string memory image, string memory callToActionUrl) public onlyRoleOrAdmin(PUBLISHER_ROLE) {
+  function publish(
+    bytes32 appId,
+    string memory title,
+    string memory description,
+    string memory image,
+    string memory callToActionUrl
+  ) public onlyRoleOrAdmin(PUBLISHER_ROLE) {
     NewsStorage storage $ = _getNewsStorage();
-    require($.x2EarnApps.isAppAdmin(appId, msg.sender) || $.x2EarnApps.isAppCreator(appId, msg.sender) || $.x2EarnApps.isAppModerator(appId, msg.sender), "News: not a moderator, creator or admin");
+    require(
+      $.x2EarnApps.isAppAdmin(appId, msg.sender) ||
+        $.x2EarnApps.isAppCreator(appId, msg.sender) ||
+        $.x2EarnApps.isAppModerator(appId, msg.sender),
+      "News: not a moderator, creator or admin"
+    );
     //Check if app already published news in this week
-    require(!checkCooldown(appId), "News: app is in cooldown period");
+    require(!isUnderCooldown(appId), "News: app is in cooldown period");
     //If not, publish news
     _publish(appId, title, description, image, callToActionUrl);
+  }
+  /**
+   * @dev Internal function to publish news for an app
+   * @param appId The ID of the app for which the news was published
+   * @param title The title of the news
+   * @param description The description of the news
+   * @param image The image of the news
+   * @param callToActionUrl The call to action URL of the news
+   */
+  function _publish(
+    bytes32 appId,
+    string memory title,
+    string memory description,
+    string memory image,
+    string memory callToActionUrl
+  ) internal {
+    NewsStorage storage $ = _getNewsStorage();
+    $.news[appId].push(NewsType(title, description, image, callToActionUrl));
+    $.lastNewsBlock[appId] = block.number;
+    emit NewsPublished(appId, title, description, image, callToActionUrl, msg.sender);
   }
 
   /**
@@ -125,7 +163,9 @@ contract News is
    * @param _cooldownPeriod the new cooldown period
    */
   function setCooldownPeriod(uint256 _cooldownPeriod) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    _setCooldownPeriod(_cooldownPeriod);
+    NewsStorage storage $ = _getNewsStorage();
+    emit CooldownPeriodUpdated($.cooldownPeriod, _cooldownPeriod);
+    $.cooldownPeriod = _cooldownPeriod;
   }
 
   /**
@@ -151,7 +191,7 @@ contract News is
     _unpause();
   }
 
- // ---------- Getters ---------- //
+  // ---------- Getters ---------- //
 
   /**
    * @dev Retrieves the news for an app
@@ -164,14 +204,15 @@ contract News is
   }
 
   /**
-   * @dev See {INews-checkCooldown}.
+   * @dev See {INews-isUnderCooldown}.
    * @param appId The unique identifier of the app.
    * @return True if the app is in a cooldown period.
    */
-  function checkCooldown(bytes32 appId) public view returns (bool) {
+  function isUnderCooldown(bytes32 appId) public view returns (bool) {
     NewsStorage storage $ = _getNewsStorage();
     uint256 _lastNewsBlock = $.lastNewsBlock[appId];
-    return _checkCooldown(_lastNewsBlock);
+    uint256 requiredBlock = _lastNewsBlock + $.cooldownPeriod;
+    return requiredBlock > block.number;
   }
 
   /**
@@ -205,46 +246,4 @@ contract News is
   function version() public pure returns (uint256) {
     return 1;
   }
-  // ---------- Internal ---------- //
-  /**
-   * @dev Internal function to publish news for an app
-   * @param appId The ID of the app for which the news was published
-   * @param title The title of the news
-   * @param description The description of the news
-   * @param image The image of the news
-   * @param callToActionUrl The call to action URL of the news
-   */
-  function _publish(bytes32 appId, string memory title, string memory description, string memory image, string memory callToActionUrl) internal {    
-    NewsStorage storage $ = _getNewsStorage();
-    $.news[appId].push(NewsType(title, description, image, callToActionUrl));
-    $.lastNewsBlock[appId] = block.number;
-    emit NewsPublished(appId, title, description, image, callToActionUrl, msg.sender);
-  }
-
-  /**
-   * @dev Internal function to update the cooldown period.
-   *
-   * @param cooldownPeriodDuration The new cooldown period.
-   *
-   * Emits a {CooldownPeriodUpdated} event.
-   */
-  function _setCooldownPeriod(uint256 cooldownPeriodDuration) internal {
-    NewsStorage storage $ = _getNewsStorage();
-    emit CooldownPeriodUpdated($.cooldownPeriod, cooldownPeriodDuration);
-    $.cooldownPeriod = cooldownPeriodDuration;
-  }
-
-  function _checkCooldown(uint256 _lastNewsBlock) internal view returns (bool) {
-    NewsStorage storage $ = _getNewsStorage();
-    uint256 requiredBlock = _lastNewsBlock + $.cooldownPeriod;
-    return requiredBlock > block.number;
-  }
-
-  // ---------------- Upgrade and Utility Overrides ----------------
-
-    /**
-   * @dev See {UUPSUpgradeable-_authorizeUpgrade}
-   */
-  function _authorizeUpgrade(address newImplementation) internal override onlyRoleOrAdmin(UPGRADER_ROLE) {}
-
 }
