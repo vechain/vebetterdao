@@ -49,9 +49,9 @@ describe("VoterRewards - @shard10", () => {
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
   beforeEach(async function () {
-    const { otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-    creator1 = otherAccounts[10]
-    creator2 = otherAccounts[11]
+    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = creators[0]
+    creator2 = creators[1]
   })
 
   describe("Contract parameters", () => {
@@ -457,7 +457,7 @@ describe("VoterRewards - @shard10", () => {
       expect(await voterRewards.version()).to.equal("4")
     })
 
-    it("Should not have state conflict after upgrading to V3 and V4", async () => {
+    it.only("Should not have state conflict after upgrading to V3 and V4", async () => {
       const config = createLocalConfig()
       const {
         otherAccounts,

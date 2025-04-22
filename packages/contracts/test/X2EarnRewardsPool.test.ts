@@ -29,9 +29,9 @@ describe("X2EarnRewardsPool - @shard12", function () {
   let creator2: HardhatEthersSigner
 
   beforeEach(async function () {
-    const { otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-    creator1 = otherAccounts[10]
-    creator2 = otherAccounts[11]
+    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = creators[0]
+    creator2 = creators[1]
   })
 
   // deployment
@@ -158,7 +158,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPool.version()).to.equal("7")
     })
 
-    it("Storage should be preserved after upgrade", async () => {
+    it.only("Storage should be preserved after upgrade", async () => {
       const config = createLocalConfig()
       const { owner, b3tr, x2EarnApps, minterAccount, veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,

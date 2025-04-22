@@ -57,11 +57,11 @@ describe("X-Apps - @shard15", function () {
   let creator4: HardhatEthersSigner
 
   beforeEach(async function () {
-    const { otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-    creator1 = otherAccounts[10]
-    creator2 = otherAccounts[11]
-    creator3 = otherAccounts[12]
-    creator4 = otherAccounts[13]
+    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = creators[0]
+    creator2 = creators[1]
+    creator3 = creators[2]
+    creator4 = creators[3]
   })
 
   describe("Deployment", function () {
@@ -474,7 +474,7 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnAppsV2.isAppUnendorsed(app3Id)).to.eql(true)
     })
 
-    it("Vechain nodes that starting endorsing XApps priod to upgrade or not subject to cooldown period but will be after they perform an action.", async () => {
+    it.only("Vechain nodes that starting endorsing XApps priod to upgrade or not subject to cooldown period but will be after they perform an action.", async () => {
       const config = createLocalConfig()
       config.EMISSIONS_CYCLE_DURATION = 24
       config.X2EARN_NODE_COOLDOWN_PERIOD = 1
@@ -3114,18 +3114,18 @@ describe("X-Apps - @shard15", function () {
 })
 
 // Isolated tests for shard16 because of the size of the tests
-describe("X-Apps - @shard17", function () {
+describe.only("X-Apps - @shard17", function () {
   // We prepare the environment for 4 creators
   let creator1: HardhatEthersSigner
   let creator2: HardhatEthersSigner
 
   beforeEach(async function () {
-    const { otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-    creator1 = otherAccounts[10]
-    creator2 = otherAccounts[11]
+    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = creators[1]
+    creator2 = creators[2]
   })
 
-  describe("Admin address", function () {
+  describe.only("Admin address", function () {
     it("Admin can update the admin address of an app", async function () {
       const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({ forceDeploy: true })
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes("My app"))

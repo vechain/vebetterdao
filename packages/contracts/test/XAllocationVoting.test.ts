@@ -46,11 +46,11 @@ describe("X-Allocation Voting - @shard14", function () {
   let creator4: HardhatEthersSigner
 
   beforeEach(async function () {
-    const { otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-    creator1 = otherAccounts[10]
-    creator2 = otherAccounts[11]
-    creator3 = otherAccounts[12]
-    creator4 = otherAccounts[13]
+    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = creators[0]
+    creator2 = creators[1]
+    creator3 = creators[2]
+    creator4 = creators[3]
   })
 
   describe("Deployment", function () {

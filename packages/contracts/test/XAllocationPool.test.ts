@@ -27,9 +27,9 @@ describe("X-Allocation Pool - @shard13", async function () {
   let creator2: HardhatEthersSigner
 
   beforeEach(async function () {
-    const { otherAccounts } = await getOrDeployContractInstances({ forceDeploy: true })
-    creator1 = otherAccounts[10]
-    creator2 = otherAccounts[11]
+    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = creators[0]
+    creator2 = creators[1]
   })
   describe("Deployment", async function () {
     it("Contract is correctly initialized", async function () {
