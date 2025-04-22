@@ -5,7 +5,7 @@ import { describe, it } from "mocha"
 import { VeBetterPassportV1, VeBetterPassportV2, VeBetterPassportV3, VeBetterPassport } from "../../typechain-types"
 import { createTestConfig } from "../helpers/config"
 
-describe("VeBetterPassportV4 Upgrade - @shard8a", function () {
+describe("VeBetterPassport Upgrade - @shard8a", function () {
   it("Should upgrade from V1 -> V2 -> V3 -> V4 (latest) and preserve storage", async function () {
     const config = createTestConfig()
     const {

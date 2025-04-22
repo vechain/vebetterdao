@@ -125,6 +125,27 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
 
       expect(await veBetterPassport.appOfSignaler(targetSignaler.address)).to.equal(ethers.ZeroHash)
     })
+
+    it("DEFAULT_ADMIN_ROLE can signal a user without reason", async function () {
+      const targetUser = otherAccounts[5]
+
+      // Admin can signal without providing a reason
+      await expect(veBetterPassport.connect(owner).signalUser(targetUser.address))
+        .to.emit(veBetterPassport, "UserSignaled")
+        .withArgs(targetUser.address, owner.address, "")
+
+      expect(await veBetterPassport.signaledCounter(targetUser.address)).to.equal(1)
+    })
+
+    it("Non-admin users cannot use signalUser (no reason)", async function () {
+      const targetUser = otherAccounts[7]
+
+      // Regular signaler should not be able to use the no-reason function
+      await expect(veBetterPassport.connect(regularSignaler).signalUser(targetUser.address)).to.be.reverted
+
+      // Verify no signals were recorded
+      expect(await veBetterPassport.signaledCounter(targetUser.address)).to.equal(0)
+    })
   })
 
   describe("Signaling By SIGNALER_ROLE", function () {
@@ -166,7 +187,6 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), regularSignaler.address)).to.be.true
       expect(await veBetterPassport.signaledCounter(targetUser.address)).to.equal(0)
 
-      // Signal the user
       await expect(veBetterPassport.connect(regularSignaler).signalUserWithReason(targetUser.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
         .withArgs(targetUser.address, regularSignaler.address, "Some reason")
@@ -241,7 +261,6 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
         .to.emit(veBetterPassport, "UserSignaled")
         .withArgs(entity.address, regularSignaler.address, "Some reason")
 
-      // Verify signals for both entity and passport
       expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(1)
       expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(1)
 

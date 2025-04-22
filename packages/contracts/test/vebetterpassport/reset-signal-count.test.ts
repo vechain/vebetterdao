@@ -5,7 +5,7 @@ import { VeBetterPassport } from "../../typechain-types"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
 
-describe("VeBetterPassportV4 (Reset Signal Count) - @shard8d", function () {
+describe("VeBetterPassport (Reset Signal Count) - @shard8d", function () {
   let veBetterPassport: VeBetterPassport
   let owner: SignerWithAddress
   let otherAccounts: SignerWithAddress[]
@@ -13,6 +13,7 @@ describe("VeBetterPassportV4 (Reset Signal Count) - @shard8d", function () {
   let regularSignaler: SignerWithAddress
   let resetSignaler: SignerWithAddress
   let user: SignerWithAddress
+  let appAdmin: SignerWithAddress
 
   beforeEach(async function () {
     const fixture = await setupSignalingFixture()
@@ -21,6 +22,7 @@ describe("VeBetterPassportV4 (Reset Signal Count) - @shard8d", function () {
     otherAccounts = fixture.otherAccounts
     appId = fixture.appId
     regularSignaler = fixture.regularSignaler
+    appAdmin = fixture.appAdmin
 
     // Setup a reset signaler with proper role
     resetSignaler = otherAccounts[5]
@@ -47,6 +49,24 @@ describe("VeBetterPassportV4 (Reset Signal Count) - @shard8d", function () {
 
       // Verify signals were reset
       expect(await veBetterPassport.signaledCounter(user.address)).to.equal(0)
+    })
+
+    it("Should allow admin to assign and remove a reset signaler", async function () {
+      const newResetSignaler = otherAccounts[7]
+
+      await expect(veBetterPassport.connect(owner).assignResetSignalerToApp(appId, newResetSignaler.address))
+        .to.emit(veBetterPassport, "ResetSignalerAssignedToApp")
+        .withArgs(newResetSignaler.address, appId)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.RESET_SIGNALER_ROLE(), newResetSignaler.address)).to
+        .be.true
+
+      await expect(veBetterPassport.connect(owner).removeResetSignalerFromApp(newResetSignaler.address))
+        .to.emit(veBetterPassport, "ResetSignalerRemovedFromApp")
+        .withArgs(newResetSignaler.address, appId)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.RESET_SIGNALER_ROLE(), newResetSignaler.address)).to
+        .be.false
     })
   })
 
@@ -87,6 +107,104 @@ describe("VeBetterPassportV4 (Reset Signal Count) - @shard8d", function () {
 
       expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(0)
       expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(0)
+    })
+
+    it("Should allow app admin to assign a reset signaler", async function () {
+      const targetResetSignaler = otherAccounts[7]
+
+      // App admin assigns reset signaler
+      await expect(
+        veBetterPassport.connect(appAdmin).assignResetSignalerToAppByAppAdmin(appId, targetResetSignaler.address),
+      )
+        .to.emit(veBetterPassport, "ResetSignalerAssignedToApp")
+        .withArgs(targetResetSignaler.address, appId)
+
+      // Verify the user has the role
+      expect(await veBetterPassport.hasRole(await veBetterPassport.RESET_SIGNALER_ROLE(), targetResetSignaler.address))
+        .to.be.true
+
+      // New reset signaler should be able to reset signals
+      await expect(
+        veBetterPassport
+          .connect(targetResetSignaler)
+          .resetUserSignalsWithReason(user.address, "app admin assigned reset"),
+      )
+        .to.emit(veBetterPassport, "UserSignalsReset")
+        .withArgs(user.address, "app admin assigned reset")
+
+      expect(await veBetterPassport.signaledCounter(user.address)).to.equal(0)
+    })
+
+    it("Should allow app admin to remove a reset signaler", async function () {
+      const targetResetSignaler = otherAccounts[8]
+
+      await veBetterPassport.connect(appAdmin).assignResetSignalerToAppByAppAdmin(appId, targetResetSignaler.address)
+
+      await expect(veBetterPassport.connect(appAdmin).removeResetSignalerFromAppByAppAdmin(targetResetSignaler.address))
+        .to.emit(veBetterPassport, "ResetSignalerRemovedFromApp")
+        .withArgs(targetResetSignaler.address, appId)
+
+      expect(await veBetterPassport.hasRole(await veBetterPassport.RESET_SIGNALER_ROLE(), targetResetSignaler.address))
+        .to.be.false
+
+      await expect(
+        veBetterPassport.connect(targetResetSignaler).resetUserSignalsWithReason(user.address, "should fail"),
+      ).to.be.reverted
+    })
+
+    it("Should not allow non-app-admin to assign reset signalers", async function () {
+      const nonAdminAccount = otherAccounts[9]
+      const targetResetSignaler = otherAccounts[10]
+
+      await expect(
+        veBetterPassport
+          .connect(nonAdminAccount)
+          .assignResetSignalerToAppByAppAdmin(appId, targetResetSignaler.address),
+      ).to.be.reverted
+    })
+
+    it("Should not allow non-app-admin to remove reset signalers", async function () {
+      const targetResetSignaler = otherAccounts[11]
+      const nonAdminAccount = otherAccounts[12]
+
+      await veBetterPassport.connect(appAdmin).assignResetSignalerToAppByAppAdmin(appId, targetResetSignaler.address)
+
+      await expect(
+        veBetterPassport.connect(nonAdminAccount).removeResetSignalerFromAppByAppAdmin(targetResetSignaler.address),
+      ).to.be.reverted
+    })
+
+    it("Should allow resetting signals for a user with zero signals", async function () {
+      const userWithZeroSignals = otherAccounts[13]
+
+      // Verify the user starts with 0 signals
+      expect(await veBetterPassport.signaledCounter(userWithZeroSignals.address)).to.equal(0)
+
+      // Reset the signals
+      await expect(
+        veBetterPassport
+          .connect(resetSignaler)
+          .resetUserSignalsWithReason(userWithZeroSignals.address, "preventative reset"),
+      )
+        .to.emit(veBetterPassport, "UserSignalsReset")
+        .withArgs(userWithZeroSignals.address, "preventative reset")
+
+      expect(await veBetterPassport.signaledCounter(userWithZeroSignals.address)).to.equal(0)
+    })
+
+    it("Should allow a reset signaler to reset their own signals", async function () {
+      await veBetterPassport.connect(regularSignaler).signalUserWithReason(resetSignaler.address, "Suspicious activity")
+      expect(await veBetterPassport.signaledCounter(resetSignaler.address)).to.equal(1)
+
+      await expect(
+        veBetterPassport
+          .connect(resetSignaler)
+          .resetUserSignalsWithReason(resetSignaler.address, "clearing my own record"),
+      )
+        .to.emit(veBetterPassport, "UserSignalsReset")
+        .withArgs(resetSignaler.address, "clearing my own record")
+
+      expect(await veBetterPassport.signaledCounter(resetSignaler.address)).to.equal(0)
     })
   })
 })

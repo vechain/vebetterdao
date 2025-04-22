@@ -62,6 +62,11 @@ interface IVeBetterPassport {
   /// @param app  The app that the signaler was associated with.
   event ResetSignalerAssignedToApp(address indexed signaler, bytes32 indexed app);
 
+  /// @notice Emited when an address is removed from an app.
+  /// @param signaler  The address of the signaler.
+  /// @param app  The app that the signaler was removed from.
+  event ResetSignalerRemovedFromApp(address indexed signaler, bytes32 indexed app);
+
   /// @notice Emitted when an address is removed from an app.
   /// @param signaler  The address of the signaler.
   /// @param app  The app that the signaler was removed from.
