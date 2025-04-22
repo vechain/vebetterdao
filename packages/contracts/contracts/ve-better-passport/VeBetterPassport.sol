@@ -407,18 +407,6 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     return PassportSignalingLogic.appOfSignaler($, _signaler);
   }
 
-  /// @notice Returns the number of times a user has been signaled by an app
-  function appSignalsCounter(bytes32 _app, address _user) external view returns (uint256) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportSignalingLogic.appSignalsCounter($, _app, _user);
-  }
-
-  /// @notice Returns the total number of signals for an app
-  function appTotalSignalsCounter(bytes32 _app) external view returns (uint256) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    return PassportSignalingLogic.appTotalSignalsCounter($, _app);
-  }
-
   /// @notice Returns the signaling threshold
   function signalingThreshold() external view returns (uint256) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
@@ -697,35 +685,15 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice Signals a user
-  /// @dev Can only signal other users who have interacted with the same app as the signaler.
-  /// DEFAULT_ADMIN signaler (with app=0) can bypass this restriction and signal any user.
-  function signalUser(address _user) external onlyRoleOrAdmin(SIGNALER_ROLE) {
+  function signalUser(address _user) external onlyRole(DEFAULT_ADMIN_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.signalUser($, _user);
   }
 
   /// @notice Signals a user with a reason
-  /// @dev Can only signal other users who have interacted with the same app as the signaler.
   function signalUserWithReason(address _user, string memory reason) external onlyRoleOrAdmin(SIGNALER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.signalUserWithReason($, _user, reason);
-  }
-
-  /// @notice Removes a signal from a user
-  /// @param _user - the user to unsignal
-  /// @param reason - the reason for unsignaling the user
-  function unsignalUser(address _user, string memory reason) external onlyRole(DEFAULT_ADMIN_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportSignalingLogic.unsignalUser($, _user, reason);  
-  }
-
-  /// @notice Removes a signal from a user for a specified app
-  /// @param _user - the user to unsignal
-  /// @param reason - the reason for unsignaling the user
-  /// @dev Only wallets with the SIGNALER_ROLE can call this function.
-  function unsignalUserByAppAdmin(address _user, string memory reason) external onlyRole(SIGNALER_ROLE) {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportSignalingLogic.unsignalUserByAppAdmin($, _user, reason);
   }
 
   /// @notice this method allows an app admin to assign a signaler to an app
@@ -771,21 +739,40 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     _revokeRole(SIGNALER_ROLE, user);
   }
 
+  function assignResetSignalerToApp(bytes32 app, address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.assignResetSignalerToApp($, app, user);
+    _grantRole(RESET_SIGNALER_ROLE, user);
+  }
+
+  function removeResetSignalerFromApp(address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.removeResetSignalerFromApp($, user);
+    _revokeRole(RESET_SIGNALER_ROLE, user);
+  }
+
+  function assignResetSignalerToAppByAppAdmin(bytes32 app, address user) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.assignResetSignalerToAppByAppAdmin($, app, user);
+    _grantRole(RESET_SIGNALER_ROLE, user);
+  }
+
+  function removeResetSignalerFromAppByAppAdmin(address user) external {
+    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
+    PassportSignalingLogic.removeResetSignalerFromAppByAppAdmin($, user);
+    _revokeRole(RESET_SIGNALER_ROLE, user);
+  }
+
   /// @notice Resets the signals of a user with a given reason
   /// @dev assigns the signals of a user to zero
   /// @param user - the address of the user
   /// @param reason - the reason for resetting the signals
-  function resetUserSignalsWithReason(address user, string memory reason) external onlyRoleOrAdmin(RESET_SIGNALER_ROLE) {
+  function resetUserSignalsWithReason(
+    address user,
+    string memory reason
+  ) external onlyRoleOrAdmin(RESET_SIGNALER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.resetUserSignals($, user, reason);
-  }
-
-  /// @notice Resets the signals of a user by app admin
-  /// @param user - the user to reset the signals of
-  /// @param reason - the reason for resetting the signals
-  function resetUserSignalsByAppAdminWithReason(address user, string memory reason) external {
-    PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportSignalingLogic.resetUserSignalsByAppAdminWithReason($, user, reason);
   }
 
   /// @notice Sets the minimum galaxy member level
