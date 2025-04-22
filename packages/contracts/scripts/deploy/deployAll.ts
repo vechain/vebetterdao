@@ -19,7 +19,7 @@ import {
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
-import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } from "./setup"
+import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment, APPS } from "./setup"
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { shouldEndorseXApps, shouldRunSimulation } from "@repo/config/contracts"
@@ -55,7 +55,8 @@ export async function deployAll(config: ContractsConfig) {
   console.log(
     `================  Deploying contracts on ${network.name} (${networkConfig.url}) with ${config.NEXT_PUBLIC_APP_ENV} configurations `,
   )
-  const [deployer] = await ethers.getSigners()
+  const [deployer, ...allCreators] = await ethers.getSigners()
+  const creators = allCreators.slice(0, APPS.length)
   console.log(`================  Address used to deploy: ${deployer.address}`)
 
   // We use a temporary admin to deploy and initialize contracts then transfer role to the real admin
@@ -823,11 +824,13 @@ export async function deployAll(config: ContractsConfig) {
   await x2EarnCreator.grantRole(await x2EarnCreator.MINTER_ROLE(), await x2EarnApps.getAddress())
   await x2EarnCreator.grantRole(await x2EarnCreator.BURNER_ROLE(), await x2EarnApps.getAddress())
 
-  // Mint the initial X2EarnCreator NFT to first admin
-  await x2EarnCreator
-    .connect(deployer)
-    .safeMint(await deployer.getAddress())
-    .then(async tx => await tx.wait())
+  // Mint the initial X2EarnCreator NFT to first admin and all the creators
+  for (const creator of [deployer, ...creators]) {
+    await x2EarnCreator
+      .connect(deployer)
+      .safeMint(creator.getAddress())
+      .then(async tx => await tx.wait())
+  }
 
   // ---------- Setup Contracts ---------- //
   // Notice: admin account allowed to perform actions is retrieved again inside the setup functions
