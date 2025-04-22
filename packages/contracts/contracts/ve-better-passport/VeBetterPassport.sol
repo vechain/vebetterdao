@@ -739,24 +739,28 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
     _revokeRole(SIGNALER_ROLE, user);
   }
 
+  /// @dev Assigns a reset signaler to an app
   function assignResetSignalerToApp(bytes32 app, address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.assignResetSignalerToApp($, app, user);
     _grantRole(RESET_SIGNALER_ROLE, user);
   }
 
+  /// @dev Removes a reset signaler from an app
   function removeResetSignalerFromApp(address user) external onlyRoleOrAdmin(ROLE_GRANTER) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.removeResetSignalerFromApp($, user);
     _revokeRole(RESET_SIGNALER_ROLE, user);
   }
 
+  /// @dev Assigns a reset signaler to an app by an app admin
   function assignResetSignalerToAppByAppAdmin(bytes32 app, address user) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.assignResetSignalerToAppByAppAdmin($, app, user);
     _grantRole(RESET_SIGNALER_ROLE, user);
   }
 
+  /// @dev Removes a reset signaler from an app by an app admin
   function removeResetSignalerFromAppByAppAdmin(address user) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.removeResetSignalerFromAppByAppAdmin($, user);

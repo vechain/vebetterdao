@@ -46,12 +46,6 @@ interface IVeBetterPassport {
   /// @param reason  The reason for signaling the user.
   event UserSignaled(address indexed user, address indexed signaler, string reason);
 
-  /// @notice Emitted when a user is unsignaled.
-  /// @param user The address of the user that was unsignaled.
-  /// @param signaler The address of the user that unsignaled the user.
-  /// @param reason The reason for unsignaling the user.
-  event UserUnsignaled(address indexed user, address indexed signaler, string reason);
-
   /// @notice Emited when an address is associated with an app.
   /// @param signaler  The address of the signaler.
   /// @param app  The app that the signaler was associated with.
@@ -532,5 +526,21 @@ interface IVeBetterPassport {
   /// @param timepoint The timepoint to query
   function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool);
 
-  /// @todo Add new functions to here
+  /// @notice Assigns a reset signaler to an app
+  /// @param app The app ID
+  /// @param user The reset signaler address
+  function assignResetSignalerToApp(bytes32 app, address user) external;
+
+  /// @notice Removes a reset signaler from an app
+  /// @param user The reset signaler address
+  function removeResetSignalerFromApp(address user) external;
+
+  /// @notice Assigns a reset signaler to an app by an app admin
+  /// @param app The app ID
+  /// @param user The reset signaler address
+  function assignResetSignalerToAppByAppAdmin(bytes32 app, address user) external;
+
+  /// @notice Removes a reset signaler from an app by an app admin
+  /// @param user The reset signaler address
+  function removeResetSignalerFromAppByAppAdmin(address user) external;
 }
