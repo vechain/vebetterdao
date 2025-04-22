@@ -26,7 +26,7 @@ import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { ZeroAddress } from "ethers"
 import { createTestConfig } from "./helpers/config"
 import { deployAndUpgrade, deployProxyOnly, initializeProxy, upgradeProxy } from "../scripts/helpers"
-import { deployVeBetterPassportUpgradable } from "./helpers/deployVeBetterPassport"
+
 import {
   B3TRGovernor,
   Emissions,
@@ -1343,17 +1343,8 @@ describe("VeBetterPassport - @shard8", function () {
     })
 
     it("VeBetterPassportV3 - Signaler can signal a user", async function () {
-      const { otherAccount, owner, otherAccounts, x2EarnApps, xAllocationVoting, galaxyMember } =
-        await getOrDeployContractInstances({
-          forceDeploy: true,
-        })
-
-      const { veBetterPassport } = await deployVeBetterPassportUpgradable({
-        stopAfterVersion: 3,
-        owner,
-        x2EarnAppsAddress: await x2EarnApps.getAddress(),
-        xAllocationVotingAddress: await xAllocationVoting.getAddress(),
-        galaxyMemberAddress: await galaxyMember.getAddress(),
+      const { veBetterPassport, otherAccount, owner, otherAccounts, x2EarnApps } = await getOrDeployContractInstances({
+        forceDeploy: true,
       })
 
       const veBetterPassportV3 = veBetterPassport as VeBetterPassportV3

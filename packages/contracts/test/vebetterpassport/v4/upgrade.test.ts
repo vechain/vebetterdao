@@ -1,9 +1,9 @@
-import { deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers/upgrades"
-import { getOrDeployContractInstances } from "../helpers/deploy"
+import { deployProxyOnly, initializeProxy, upgradeProxy } from "../../../scripts/helpers/upgrades"
+import { getOrDeployContractInstances } from "../../helpers/deploy"
 import { expect } from "chai"
 import { describe, it } from "mocha"
-import { VeBetterPassportV1, VeBetterPassportV2, VeBetterPassportV3, VeBetterPassport } from "../../typechain-types"
-import { createTestConfig } from "../helpers/config"
+import { VeBetterPassportV1, VeBetterPassportV2, VeBetterPassportV3, VeBetterPassport } from "../../../typechain-types"
+import { createTestConfig } from "../../helpers/config"
 
 describe("VeBetterPassportV4 Upgrade - @shard8a", function () {
   it("Should upgrade from V1 -> V2 -> V3 -> V4 (latest) and preserve storage", async function () {

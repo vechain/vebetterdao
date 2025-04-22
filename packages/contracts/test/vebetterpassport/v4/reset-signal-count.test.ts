@@ -1,7 +1,7 @@
 import { describe, it, beforeEach } from "mocha"
 import { expect } from "chai"
-import { setupSignalingFixture } from "./fixture.test"
-import { VeBetterPassport } from "../../typechain-types"
+import { setupSignalingFixture } from "../fixture.test"
+import { VeBetterPassport } from "../../../typechain-types"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
 
