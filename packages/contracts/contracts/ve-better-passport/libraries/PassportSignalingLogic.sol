@@ -43,8 +43,9 @@ library PassportSignalingLogic {
   /// @notice Emitted when a user is signaled.
   /// @param user  The address of the user that was signaled.
   /// @param signaler  The address of the user that signaled the user.
+  /// @param app  The app that the signaler was associated with.
   /// @param reason  The reason for signaling the user.
-  event UserSignaled(address indexed user, address indexed signaler, string reason);
+  event UserSignaled(address indexed user, address indexed signaler, bytes32 indexed app, string reason);
 
   /// @notice Emited when an address is associated with an app.
   /// @param signaler  The address of the signaler.
@@ -270,6 +271,7 @@ library PassportSignalingLogic {
 
   /// @notice Private function to signal a user
   function _signalUser(PassportStorageTypes.PassportStorage storage self, address user, string memory reason) private {
+    bytes32 app = self.appOfSignaler[msg.sender];
     self.signaledCounter[user]++;
 
     // Check if the user has attached their entity to a passport, if so, also signal the passport
@@ -278,7 +280,7 @@ library PassportSignalingLogic {
       self.signaledCounter[passport]++;
     }
 
-    emit UserSignaled(user, msg.sender, reason);
+    emit UserSignaled(user, msg.sender, app, reason);
   }
 
   /**

@@ -43,8 +43,9 @@ interface IVeBetterPassport {
   /// @notice Emitted when a user is signaled.
   /// @param user  The address of the user that was signaled.
   /// @param signaler  The address of the user that signaled the user.
+  /// @param app  The app that the signaler was associated with.
   /// @param reason  The reason for signaling the user.
-  event UserSignaled(address indexed user, address indexed signaler, string reason);
+  event UserSignaled(address indexed user, address indexed signaler, bytes32 indexed app, string reason);
 
   /// @notice Emited when an address is associated with an app.
   /// @param signaler  The address of the signaler.

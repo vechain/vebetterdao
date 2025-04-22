@@ -2729,7 +2729,7 @@ describe("VeBetterPassport - @shard8", function () {
 
       await expect(veBetterPassport.connect(otherAccount).signalUserWithReason(owner.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(owner.address, otherAccount.address, "Some reason")
+        .withArgs(owner.address, otherAccount.address, appId, "Some reason")
 
       expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1)
 
@@ -2743,7 +2743,7 @@ describe("VeBetterPassport - @shard8", function () {
 
       await expect(veBetterPassport.connect(otherAccount).signalUserWithReason(owner.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(owner.address, otherAccount.address, "Some reason")
+        .withArgs(owner.address, otherAccount.address, appId, "Some reason")
 
       expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(2)
 
@@ -2779,7 +2779,7 @@ describe("VeBetterPassport - @shard8", function () {
 
       await expect(veBetterPassport.connect(otherAccount).signalUserWithReason(owner.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(owner.address, otherAccount.address, "Some reason")
+        .withArgs(owner.address, otherAccount.address, appId, "Some reason")
 
       expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1)
 
@@ -2793,7 +2793,7 @@ describe("VeBetterPassport - @shard8", function () {
 
       await expect(veBetterPassport.connect(otherAccount).signalUserWithReason(owner.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(owner.address, otherAccount.address, "Some reason")
+        .withArgs(owner.address, otherAccount.address, appId, "Some reason")
 
       expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(2)
 

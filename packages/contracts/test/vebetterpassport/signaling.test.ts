@@ -42,7 +42,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
 
       await expect(veBetterPassport.connect(regularSignaler).signalUserWithReason(owner.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(owner.address, regularSignaler.address, "Some reason")
+        .withArgs(owner.address, regularSignaler.address, appId, "Some reason")
 
       expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1)
 
@@ -70,7 +70,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       // Signal the user
       await expect(veBetterPassport.connect(regularSignaler).signalUserWithReason(owner.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(owner.address, regularSignaler.address, "Some reason")
+        .withArgs(owner.address, regularSignaler.address, appId, "Some reason")
 
       expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1)
 
@@ -90,7 +90,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       // Signal the user
       await expect(veBetterPassport.connect(regularSignaler).signalUserWithReason(owner.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(owner.address, regularSignaler.address, "Some reason")
+        .withArgs(owner.address, regularSignaler.address, appId, "Some reason")
 
       expect(await veBetterPassport.signaledCounter(owner.address)).to.equal(1)
 
@@ -132,7 +132,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       // Admin can signal without providing a reason
       await expect(veBetterPassport.connect(owner).signalUser(targetUser.address))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(targetUser.address, owner.address, "")
+        .withArgs(targetUser.address, owner.address, ethers.ZeroHash, "")
 
       expect(await veBetterPassport.signaledCounter(targetUser.address)).to.equal(1)
     })
@@ -189,7 +189,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
 
       await expect(veBetterPassport.connect(regularSignaler).signalUserWithReason(targetUser.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(targetUser.address, regularSignaler.address, "Some reason")
+        .withArgs(targetUser.address, regularSignaler.address, appId, "Some reason")
 
       expect(await veBetterPassport.signaledCounter(targetUser.address)).to.equal(1)
 
@@ -223,7 +223,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       // Signal the entity
       await expect(veBetterPassport.connect(passport).signalUserWithReason(entity.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(entity.address, passport.address, "Some reason")
+        .withArgs(entity.address, passport.address, appId, "Some reason")
 
       // Verify signals for both entity and passport
       expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(1)
@@ -259,7 +259,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       // Signal the entity
       await expect(veBetterPassport.connect(regularSignaler).signalUserWithReason(entity.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(entity.address, regularSignaler.address, "Some reason")
+        .withArgs(entity.address, regularSignaler.address, appId, "Some reason")
 
       expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(1)
       expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(1)
@@ -304,11 +304,11 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       // Signal user with both signalers
       await expect(veBetterPassport.connect(regularSignaler).signalUserWithReason(targetUser.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(targetUser.address, regularSignaler.address, "Some reason")
+        .withArgs(targetUser.address, regularSignaler.address, appId, "Some reason")
 
       await expect(veBetterPassport.connect(newAppAdmin).signalUserWithReason(targetUser.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(targetUser.address, newAppAdmin.address, "Some reason")
+        .withArgs(targetUser.address, newAppAdmin.address, newAppId, "Some reason")
 
       expect(await veBetterPassport.signaledCounter(targetUser.address)).to.equal(2)
 
