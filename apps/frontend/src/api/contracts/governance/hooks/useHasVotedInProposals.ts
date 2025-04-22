@@ -25,17 +25,23 @@ export const getHasVoted = async (thor: Connex.Thor, proposalId: string, address
   return res.decoded[0]
 }
 
-export const getHasVotedQueryKey = (proposalId: string, address?: string) => ["hasVoted", proposalId, address]
+export const getHasVotedQueryKey = (proposalIds: string[], address?: string) => ["hasVoted", ...proposalIds, address]
 /**
  * Hook to check if the given address has voted on the given proposal
  * @returns true if the given address has voted on the given proposal
  */
-export const useHasVoted = (proposalId: string, address?: string) => {
+export const useHasVotedInProposals = (proposalIds: string[], address?: string) => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getHasVotedQueryKey(proposalId, address),
-    queryFn: async () => await getHasVoted(thor, proposalId, address),
+    queryKey: getHasVotedQueryKey(proposalIds, address),
+    queryFn: async () =>
+      Promise.all(
+        proposalIds.map(async proposalId => {
+          const hasVoted = await getHasVoted(thor, proposalId, address)
+          return { proposalId, hasVoted }
+        }),
+      ),
     enabled: !!thor && !!address,
   })
 }
