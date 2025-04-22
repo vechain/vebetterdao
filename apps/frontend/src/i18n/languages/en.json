@@ -1606,5 +1606,12 @@
   "The more VOT3 in your balance, the more voting power you'll have. Use it to vote on proposals and allocation rounds.": "The more VOT3 in your balance, the more voting power you'll have. Use it to vote on proposals and allocation rounds.",
   "By confirming the operation in your wallet, you will complete the convertion": "By confirming the operation in your wallet, you will complete the convertion",
   "Confirm and send transaction": "Confirm and send transaction",
-  "Filters": "Filters"
+  "Filters": "Filters",
+  "Send transaction": "Send transaction",
+  "Conversion Completed": "Conversion Completed",
+  "Your VOT3 has been converted to B3TR": "Your VOT3 has been converted to B3TR",
+  "Your B3TR has been converted to VOT3": "Your B3TR has been converted to VOT3",
+  "Waiting for confirmation...": "Waiting for confirmation...",
+  "Transaction Ready": "Transaction Ready",
+  "Transaction status unclear. If you haven't confirmed it in your wallet yet, you can try again. Otherwise, you can close this window and check your transaction history.": "Transaction status unclear. If you haven't confirmed it in your wallet yet, you can try again. Otherwise, you can close this window and check your transaction history."
 }

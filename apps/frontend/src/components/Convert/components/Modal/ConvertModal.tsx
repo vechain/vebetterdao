@@ -66,10 +66,20 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
 
   const convertB3trMutation = useConvertB3tr({
     amount,
+    transactionModalCustomUI: {
+      success: {
+        title: t("Conversion Completed"),
+      },
+    },
   })
 
   const convertVot3Mutation = useConvertVot3({
     amount,
+    transactionModalCustomUI: {
+      success: {
+        title: t("Conversion Completed"),
+      },
+    },
   })
 
   const mutationData = useMemo(() => {
