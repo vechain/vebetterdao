@@ -205,6 +205,7 @@ library PassportSignalingLogic {
     emit UserSignalsReset(user, reason);
   }
 
+  /// @notice Assigns a reset signaler to an app
   function assignResetSignalerToApp(
     PassportStorageTypes.PassportStorage storage self,
     bytes32 app,
@@ -214,11 +215,13 @@ library PassportSignalingLogic {
     emit ResetSignalerAssignedToApp(user, app);
   }
 
+  /// @notice Removes a reset signaler from an app
   function removeResetSignalerFromApp(PassportStorageTypes.PassportStorage storage self, address user) external {
     bytes32 app = _removeAppFromSignaler(self, user);
     emit ResetSignalerRemovedFromApp(user, app);
   }
 
+  /// @notice Assigns a reset signaler to an app by an app admin
   function assignResetSignalerToAppByAppAdmin(
     PassportStorageTypes.PassportStorage storage self,
     bytes32 app,
@@ -229,6 +232,7 @@ library PassportSignalingLogic {
     emit ResetSignalerAssignedToApp(user, app);
   }
 
+  /// @notice Removes a reset signaler from an app by an app admin
   function removeResetSignalerFromAppByAppAdmin(
     PassportStorageTypes.PassportStorage storage self,
     address user
