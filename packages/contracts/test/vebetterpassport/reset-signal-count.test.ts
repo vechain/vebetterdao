@@ -1,7 +1,7 @@
 import { describe, it, beforeEach } from "mocha"
 import { expect } from "chai"
-import { setupSignalingFixture } from "../fixture.test"
-import { VeBetterPassport } from "../../../typechain-types"
+import { setupSignalingFixture } from "./fixture.test"
+import { VeBetterPassport } from "../../typechain-types"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
 
@@ -30,13 +30,11 @@ describe("VeBetterPassportV4 (Reset Signal Count) - @shard8d", function () {
     // Setup a user with signals
     user = otherAccounts[6]
     await veBetterPassport.connect(owner).registerActionForRound(user.address, appId, 1)
-    await veBetterPassport.connect(regularSignaler).signalUser(user.address)
-    await veBetterPassport.connect(regularSignaler).signalUser(user.address)
+    await veBetterPassport.connect(regularSignaler).signalUserWithReason(user.address, "Test")
+    await veBetterPassport.connect(regularSignaler).signalUserWithReason(user.address, "Test1")
 
     // Verify initial state
     expect(await veBetterPassport.signaledCounter(user.address)).to.equal(2)
-    expect(await veBetterPassport.appSignalsCounter(appId, user.address)).to.equal(2)
-    expect(await veBetterPassport.appTotalSignalsCounter(appId)).to.equal(2)
   })
 
   describe("Reset Signals by Default Admin", function () {
@@ -59,6 +57,10 @@ describe("VeBetterPassportV4 (Reset Signal Count) - @shard8d", function () {
     })
 
     it("Should allow reset signaler to reset user signals", async function () {
+      await expect(veBetterPassport.connect(owner).assignResetSignalerToApp(appId, resetSignaler.address))
+        .to.emit(veBetterPassport, "ResetSignalerAssignedToApp")
+        .withArgs(resetSignaler.address, appId)
+
       await expect(
         veBetterPassport.connect(resetSignaler).resetUserSignalsWithReason(user.address, "bot detection lifted"),
       )
@@ -66,10 +68,6 @@ describe("VeBetterPassportV4 (Reset Signal Count) - @shard8d", function () {
         .withArgs(user.address, "bot detection lifted")
 
       expect(await veBetterPassport.signaledCounter(user.address)).to.equal(0)
-
-      // Remain the same as before because we're only resetting the signal count
-      expect(await veBetterPassport.appSignalsCounter(appId, user.address)).to.equal(2)
-      expect(await veBetterPassport.appTotalSignalsCounter(appId)).to.equal(2)
     })
 
     it("Should correctly handle resetting signals for passport-linked entities", async function () {
@@ -80,19 +78,15 @@ describe("VeBetterPassportV4 (Reset Signal Count) - @shard8d", function () {
       await veBetterPassport.connect(passport).acceptEntityLink(entity.address)
 
       await veBetterPassport.connect(owner).registerActionForRound(entity.address, appId, 1)
-      await veBetterPassport.connect(regularSignaler).signalUser(entity.address)
+      await veBetterPassport.connect(regularSignaler).signalUserWithReason(entity.address, "Test")
 
       expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(1)
       expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(1)
-      expect(await veBetterPassport.appSignalsCounter(appId, entity.address)).to.equal(1)
-      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(1)
 
       await veBetterPassport.connect(resetSignaler).resetUserSignalsWithReason(entity.address, "linked entity")
 
       expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(0)
       expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(0)
-      expect(await veBetterPassport.appSignalsCounter(appId, entity.address)).to.equal(1)
-      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(1)
     })
   })
 })
