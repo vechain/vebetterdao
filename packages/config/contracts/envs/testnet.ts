@@ -100,5 +100,8 @@ export function createTestnetConfig() {
     X2EARN_NODE_COOLDOWN_PERIOD: 1, // 1 round
 
     MULTI_SIG_SIGNERS: [],
+
+    // News
+    NEWS_COOLDOWN_PERIOD: 10, // 10 round
   })
 }
