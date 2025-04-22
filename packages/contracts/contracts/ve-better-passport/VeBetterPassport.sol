@@ -23,6 +23,14 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
 /// @title VeBetterPassport
 /// @notice Contract to manage the VeBetterPassport, a system to determine if a wallet is a person or not
 /// based on the participation score, blacklisting, GM holdings and much more that can be added in the future.
+/**
+ * -------------------- Version 4 --------------------
+ * - Added RESET_SIGNALER_ROLE initialization
+ * - Added functions to manage RESET_SIGNALER_ROLE with events
+ * - Extended resetUserSignalsWithReason to RESET_SIGNALER_ROLE
+ * - Removed redundant app signal counters
+ * - Required reason parameter when signaling users by app admins
+ */
 contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBetterPassport {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
   bytes32 public constant ROLE_GRANTER = keccak256("ROLE_GRANTER");
