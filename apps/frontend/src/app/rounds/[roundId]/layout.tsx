@@ -3,12 +3,13 @@ import { Metadata, ResolvingMetadata } from "next"
 
 type Props = {
   children: React.ReactNode
-  params: {
+  params: Promise<{
     roundId: string
-  }
+  }>
 }
 
-export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata(props: Props, _parent: ResolvingMetadata): Promise<Metadata> {
+  const params = await props.params
   // read route params
   const id = params.roundId
 

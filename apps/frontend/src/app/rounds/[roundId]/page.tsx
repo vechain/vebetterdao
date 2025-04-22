@@ -4,7 +4,7 @@ import { MotionVStack } from "@/components"
 import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { useEffect } from "react"
+import { useEffect, use } from "react"
 
 const AllocationRoundContent = dynamic(
   () => import("./AllocationRoundContent").then(mod => mod.AllocationRoundContent),
@@ -23,7 +23,8 @@ type Props = {
   }
 }
 
-export default function Round({ params }: Readonly<Props>) {
+export default function Round(props: Readonly<Props>) {
+  const params = use(props.params)
   useEffect(() => {
     AnalyticsUtils.trackPage(`Round/${params.roundId}`)
   }, [params.roundId])

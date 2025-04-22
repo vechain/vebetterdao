@@ -1,4 +1,5 @@
-import { extendTheme, keyframes } from "@chakra-ui/react"
+import { extendTheme } from "@chakra-ui/react"
+import { keyframes } from "@emotion/react"
 import { darkThemeColors, lightThemeColors } from "./colors"
 import { cardTheme } from "./card"
 import "@fontsource-variable/instrument-sans"
@@ -8,16 +9,9 @@ import { StepperStyle } from "./stepper"
 
 const themeConfig = {
   //@ts-ignore
-  fonts: {
-    heading: `"Instrument Sans Variable", sans-serif`,
-    body: `"Inter Variable", sans-serif`,
-  },
+  fonts: { heading: `"Instrument Sans Variable", sans-serif`, body: `"Inter Variable", sans-serif` },
 
-  components: {
-    Card: cardTheme,
-    Button: ButtonStyle,
-    Stepper: StepperStyle,
-  },
+  components: { Card: cardTheme, Button: ButtonStyle, Stepper: StepperStyle },
 
   // 2. Add your color mode config
   initialColorMode: "system",
@@ -25,14 +19,8 @@ const themeConfig = {
   //@ts-ignore
   semanticTokens: {
     colors: {
-      "chakra-body-text": {
-        _light: "#1E1E1E",
-        _dark: "#E4E4E4",
-      },
-      "chakra-body-bg": {
-        _light: "#F7F7F7",
-        _dark: "#131313",
-      },
+      "chakra-body-text": { _light: "#1E1E1E", _dark: "#E4E4E4" },
+      "chakra-body-bg": { _light: "#F7F7F7", _dark: "#131313" },
     },
   },
   colors: {
@@ -80,11 +68,5 @@ export const TooltipBackgroundColor = (isDark = false) => (isDark ? "#CBD5E0" : 
 
 export const TooltipTextColor = (isDark = false) => (isDark ? "#171923" : "white")
 
-export const lightTheme = extendTheme({
-  ...themeConfig,
-  colors: lightThemeColors,
-})
-export const darkTheme = extendTheme({
-  ...themeConfig,
-  colors: darkThemeColors,
-})
+export const lightTheme = extendTheme({ ...themeConfig, colors: lightThemeColors })
+export const darkTheme = extendTheme({ ...themeConfig, colors: darkThemeColors })

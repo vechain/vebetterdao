@@ -1,7 +1,7 @@
 "use client"
 import { VStack, Spinner } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { useEffect } from "react"
+import { useEffect, use } from "react"
 import { AnalyticsUtils } from "@/utils"
 
 const ProposalPage = dynamic(() => import("./components/ProposalVote").then(mod => mod.ProposalVote), {
@@ -19,7 +19,8 @@ type Props = {
   }
 }
 
-const ProposalPageContainer = ({ params }: Readonly<Props>) => {
+const ProposalPageContainer = (props: Readonly<Props>) => {
+  const params = use(props.params)
   useEffect(() => {
     AnalyticsUtils.trackPage(`Proposal/${params.proposalId}`)
   }, [params.proposalId])

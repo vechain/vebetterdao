@@ -1,7 +1,7 @@
 {
   "extends": "next",
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint", "react-hooks"],
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "react/display-name": "off",
     "import/no-anonymous-default-export": "off",

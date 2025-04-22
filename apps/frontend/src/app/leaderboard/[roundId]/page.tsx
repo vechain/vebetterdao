@@ -4,7 +4,7 @@ import { MotionVStack } from "@/components"
 import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { useEffect } from "react"
+import { useEffect, use } from "react"
 
 const LeaderboardPageContent = dynamic(
   () => import("../LeaderboardPageContent").then(mod => mod.LeaderboardPageContent),
@@ -18,8 +18,9 @@ const LeaderboardPageContent = dynamic(
   },
 )
 
-type Props = { params: { roundId: string } }
-export default function LeaderboardPage({ params }: Props) {
+type Props = { params: Promise<{ roundId: string }> }
+export default function LeaderboardPage(props: Props) {
+  const params = use(props.params)
   useEffect(() => {
     AnalyticsUtils.trackPage(`Leaderboard/${params.roundId}`)
   }, [params.roundId])

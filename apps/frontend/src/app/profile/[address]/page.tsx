@@ -5,7 +5,7 @@ import { AnalyticsUtils, AddressUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 import Custom404 from "@/app/not-found"
-import { useEffect } from "react"
+import { useEffect, use } from "react"
 
 const ProfilePageContent = dynamic(
   () => import("../components/ProfilePageContent").then(mod => mod.ProfilePageContent),
@@ -25,7 +25,8 @@ type Props = {
   }
 }
 
-export default function Profile({ params }: Readonly<Props>) {
+export default function Profile(props: Readonly<Props>) {
+  const params = use(props.params)
   useEffect(() => {
     AnalyticsUtils.trackPage("Profile")
   }, [])

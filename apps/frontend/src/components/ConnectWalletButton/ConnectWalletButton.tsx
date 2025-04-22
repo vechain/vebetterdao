@@ -1,5 +1,6 @@
 import { AnalyticsUtils } from "@/utils"
-import { ButtonProps, Fade, useMediaQuery, keyframes } from "@chakra-ui/react"
+import { ButtonProps, Fade, useMediaQuery } from "@chakra-ui/react"
+import { keyframes } from "@emotion/react"
 import { useWallet, WalletButton, WalletButtonProps } from "@vechain/vechain-kit"
 import { useEffect } from "react"
 
@@ -9,10 +10,7 @@ const rotateAnimation = keyframes`
   100% { background-position: 0% 50%; }
 `
 
-type Props = {
-  connectionVariant?: WalletButtonProps["connectionVariant"]
-  buttonStyleProps?: ButtonProps
-}
+type Props = { connectionVariant?: WalletButtonProps["connectionVariant"]; buttonStyleProps?: ButtonProps }
 
 export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Props) => {
   const { account, connection } = useWallet()
@@ -33,9 +31,7 @@ export const ConnectWalletButton = ({ connectionVariant, buttonStyleProps }: Pro
             ? "VeChain"
             : "Ecosystem"
 
-        AnalyticsUtils.trackEvent("Connection", {
-          action: connectionType,
-        })
+        AnalyticsUtils.trackEvent("Connection", { action: connectionType })
 
         // Save current address to localStorage
         localStorage.setItem("last_logged_address", account.address)

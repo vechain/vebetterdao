@@ -11,7 +11,8 @@ import { getXAppsMetadataBaseUri } from "@/api/contracts/xApps/getXAppsMetadataB
 import { getIpfsMetadata } from "@/api/ipfs"
 import { compareAddresses } from "@repo/utils/AddressUtils"
 
-export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata(props: Props, _parent: ResolvingMetadata): Promise<Metadata> {
+  const params = await props.params
   // read route params
   const id = params.appId
 
@@ -53,11 +54,12 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
 }
 
 type Props = {
-  params: {
+  params: Promise<{
     appId: string
-  }
+  }>
 }
 
-export default function AppDetail({ params }: Readonly<Props>) {
+export default async function AppDetail(props: Readonly<Props>) {
+  const params = await props.params
   return <AppDetailPage params={params} />
 }

@@ -6,12 +6,13 @@ import { getConfig } from "@repo/config"
 import { ProposalPage } from "./ProposalPage"
 
 type Props = {
-  params: {
+  params: Promise<{
     proposalId: string
-  }
+  }>
 }
 
-export async function generateMetadata({ params }: Props, _parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata(props: Props, _parent: ResolvingMetadata): Promise<Metadata> {
+  const params = await props.params
   // read route params
   const id = params.proposalId
 
@@ -44,6 +45,7 @@ export async function generateMetadata({ params }: Props, _parent: ResolvingMeta
   }
 }
 
-export default function Proposal({ params }: Readonly<Props>) {
+export default async function Proposal(props: Readonly<Props>) {
+  const params = await props.params
   return <ProposalPage params={params} />
 }

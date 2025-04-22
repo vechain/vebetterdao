@@ -4,7 +4,7 @@ import { MotionVStack } from "@/components"
 import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { useEffect } from "react"
+import { useEffect, use } from "react"
 
 const TransactionsContent = dynamic(
   () => import("../components/TransactionsContent").then(mod => mod.TransactionsContent),
@@ -19,11 +19,12 @@ const TransactionsContent = dynamic(
 )
 
 type Props = {
-  params: {
+  params: Promise<{
     address: string
-  }
+  }>
 }
-export default function Home({ params }: Props) {
+export default function Home(props: Props) {
+  const params = use(props.params)
   useEffect(() => {
     AnalyticsUtils.trackPage("Transactions")
   }, [])

@@ -4,7 +4,7 @@ import { MotionVStack } from "@/components"
 import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { useEffect } from "react"
+import { useEffect, use } from "react"
 
 const AdminAppPageContent = dynamic(
   () => import("./components/AdminAppPageContent").then(mod => mod.AdminAppPageContent),
@@ -23,7 +23,8 @@ type Props = {
   }
 }
 
-export default function AppAdmin({ params }: Readonly<Props>) {
+export default function AppAdmin(props: Readonly<Props>) {
+  const params = use(props.params)
   useEffect(() => {
     AnalyticsUtils.trackPage(`App/${params.appId}`)
   }, [params.appId])

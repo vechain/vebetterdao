@@ -4,7 +4,7 @@ import { MotionVStack } from "@/components"
 import { AnalyticsUtils } from "@/utils"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
-import { useEffect } from "react"
+import { useEffect, use } from "react"
 
 const CastAllocationVotePageContent = dynamic(
   () =>
@@ -26,7 +26,8 @@ type Props = {
   }
 }
 
-export default function CastAllocationVotePage({ params }: Readonly<Props>) {
+export default function CastAllocationVotePage(props: Readonly<Props>) {
+  const params = use(props.params)
   useEffect(() => {
     AnalyticsUtils.trackPage(`Round/${params.roundId}/vote`)
   }, [params.roundId])

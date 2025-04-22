@@ -1,4 +1,5 @@
 "use client"
+import { use } from "react"
 import { useBreakpoints } from "@/hooks"
 import { VStack, Spinner, Grid, GridItem } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
@@ -34,7 +35,11 @@ const YourVoteBalanceCard = dynamic(
   },
 )
 
-export default function CastAllocationVoteLayout({ children, params }: Readonly<Props>) {
+export default function CastAllocationVoteLayout(props: Readonly<Props>) {
+  const params = use(props.params)
+
+  const { children } = props
+
   const { isMobile } = useBreakpoints()
   if (isMobile)
     return (
