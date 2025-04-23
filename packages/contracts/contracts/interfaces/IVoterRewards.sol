@@ -54,7 +54,8 @@ interface IVoterRewards {
   /// @param cycle The reward cycle
   /// @param voter The voter's address
   /// @param reward The reward amount
-  event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward);
+  /// @param gmReward The GM reward amount
+  event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward, uint256 gmReward);
 
   /// @notice Emitted when role admin is changed
   /// @param role The role being modified
@@ -138,11 +139,21 @@ interface IVoterRewards {
   /// @return uint256 The total rewards
   function cycleToTotal(uint256 cycle) external view returns (uint256);
 
+  /// @notice Gets total GM weight for a cycle
+  /// @param cycle The cycle to query
+  /// @return uint256 The total GM weight
+  function cycleToTotalGM(uint256 cycle) external view returns (uint256);
+
   /// @notice Gets voter's total for a cycle
   /// @param cycle The cycle to query
   /// @param voter The voter's address
   /// @return uint256 The voter's total
   function cycleToVoterToTotal(uint256 cycle, address voter) external view returns (uint256);
+
+  /// @notice Gets total GM weight for a cycle
+  /// @param cycle The cycle to query
+  /// @return uint256 The total GM weight
+  function cycleToTotalGMWeight(uint256 cycle) external view returns (uint256);
 
   /// @notice Gets the emissions contract address
   /// @return address The emissions contract address
@@ -153,6 +164,12 @@ interface IVoterRewards {
   /// @param voter The voter's address
   /// @return uint256 The reward amount
   function getReward(uint256 cycle, address voter) external view returns (uint256);
+
+  /// @notice Gets GM reward amount for voter in cycle
+  /// @param cycle The reward cycle
+  /// @param voter The voter's address
+  /// @return uint256 The GM reward amount
+  function getGMReward(uint256 cycle, address voter) external view returns (uint256);
 
   /// @notice Gets admin role for a role
   /// @param role The role to query

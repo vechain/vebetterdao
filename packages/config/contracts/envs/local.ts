@@ -165,5 +165,7 @@ export function createLocalConfig() {
       "0x435933c8064b4Ae76bE665428e0307eF2cCFBD68",
       "0x0F872421Dc479F3c11eDd89512731814D0598dB5",
     ],
+
+    GM_PERCENTAGE_OF_TREASURY: 2500, // 25% of the treasury will be used for GM Holder Rewards
   })
 }

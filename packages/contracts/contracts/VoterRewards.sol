@@ -66,6 +66,12 @@ import "@openzeppelin/contracts/utils/types/Time.sol";
  *
  * ------------------ Version 4 Changes ------------------
  * - Update the contract to use new Galaxy Member interface.
+ * ------------------ Version 5 Changes ------------------
+ * - Create a seperate pool for GM rewards.
+ * - Updated the registerVote function to support GM rewards pool.
+ * - Updated the claimReward function to support GM rewards pool.
+ * - Added a function to get the total GM Weight for a user in a specific cycle.
+ * - Added a function to get the total GM Weight in a specific cycle.
  */
 contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
@@ -101,6 +107,11 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     mapping(uint256 proposalId => mapping(uint256 tokenId => bool)) proposalToGalaxyMemberToHasVoted;
     // proposalId => nodeId => hasVoted (keeps track of whether a vechain node has been used while attached to a galaxy member NFT when voting for a proposal)
     mapping(uint256 proposalId => mapping(uint256 nodeId => bool)) proposalToNodeToHasVoted;
+    // --------------------------- V4 Additions --------------------------- //
+    // cycle => total GM Weight used for rewards in the cycle
+    mapping(uint256 cycle => uint256 totalGMWeight) cycleToTotalGMWeight;
+    // cycle => voter => total GM Weight used for rewards in the cycle
+    mapping(uint256 cycle => mapping(address voter => uint256 gmWeight)) cycleToVoterToGMWeight;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.VoterRewards")) - 1)) & ~bytes32(uint256(0xff))
@@ -125,7 +136,8 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param cycle - The cycle in which the rewards were claimed.
   /// @param voter - The address of the voter.
   /// @param reward - The amount of B3TR reward claimed by the voter.
-  event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward);
+  /// @param gmReward - The amount of B3TR GM reward claimed by the voter.
+  event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward, uint256 gmReward);
 
   /// @notice Emitted when the Galaxy Member contract address is set.
   /// @param newAddress - The address of the new Galaxy Member contract.
@@ -233,24 +245,24 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // Determine the reward multiplier based on the GM NFT level and if the GM NFT or Vechain node attached have already voted on this proposal.
     uint256 multiplier = getMultiplier(selectedGMNFT, proposalId);
 
-    // Set the scaled vote power to the total votes cast by the voter.
-    uint256 scaledVotePower = votes;
+    // Get the scaled vote power.
+    uint256 scaledVotePower = _getScaledVotePower(votes, votePower);
 
-    // Get the block number the emission cycle started.
-    uint48 emissionCycleStartBlock = SafeCast.toUint48($.emissions.lastEmissionBlock());
+    // GM Pool Amount -> If this is 0 we are using the original calculation. In the future we should remove this check and use the GM Pool Amount.
+    uint256 gmPoolAmount = $.emissions.getGMAmount(cycle);
+    uint256 rewardWeightedVote = scaledVotePower;
 
-    // If quadratic rewarding is enabled, scale the vote power by 1e9 to counteract the square root operation on 1e18. (0: enabled, 1: disabled)
-    if ($.quadraticRewardingDisabled.upperLookupRecent(emissionCycleStartBlock) == 0) {
-      scaledVotePower = votePower * 1e9;
+    if (gmPoolAmount > 0) {
+      // Use GM pool logic only if pool is funded
+      $.cycleToTotalGMWeight[cycle] += multiplier;
+      $.cycleToVoterToGMWeight[cycle][voter] += multiplier;
+    } else {
+      // Use old logic — just apply multiplier to vote power (but don’t write GM weight)
+      rewardWeightedVote += (scaledVotePower * multiplier) / 100;
     }
-
-    // Calculate the weighted vote power for rewards, adjusting vote power with the level-based multiplier.
-    // votePower is the square root of the total votes cast by the voter.
-    uint256 rewardWeightedVote = scaledVotePower + ((scaledVotePower * multiplier) / 100); // Adjusted vote power used for rewards calculation.
 
     // Update the total reward-weighted votes in the cycle.
     $.cycleToTotal[cycle] += rewardWeightedVote;
-
     // Record the reward-weighted vote power for the voter in the cycle.
     $.cycleToVoterToTotal[cycle][voter] += rewardWeightedVote;
 
@@ -282,20 +294,27 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     // Check if the cycle has ended before claiming rewards.
     require($.emissions.isCycleEnded(cycle), "VoterRewards: cycle must be ended");
 
-    // Get the reward for the voter in the cycle.
+    // Get the voter reward for the voter in the cycle.
     uint256 reward = getReward(cycle, voter);
+    // Get the GM reward for the voter in the cycle.
+    uint256 gmReward = getGMReward(cycle, voter);
 
-    require(reward > 0, "VoterRewards: reward must be greater than 0");
-    require($.b3tr.balanceOf(address(this)) >= reward, "VoterRewards: not enough B3TR in the contract to pay reward");
+    uint256 totalReward = reward + gmReward;
+
+    require(totalReward > 0, "VoterRewards: reward must be greater than 0");
+    require(
+      $.b3tr.balanceOf(address(this)) >= totalReward,
+      "VoterRewards: not enough B3TR in the contract to pay reward"
+    );
 
     // Reset the reward-weighted votes for the voter in the cycle.
     $.cycleToVoterToTotal[cycle][voter] = 0;
-
+    $.cycleToVoterToGMWeight[cycle][voter] = 0;
     // transfer reward to voter
-    require($.b3tr.transfer(voter, reward), "VoterRewards: transfer failed");
+    require($.b3tr.transfer(voter, totalReward), "VoterRewards: transfer failed");
 
     // Emit an event to log the reward claimed by the voter.
-    emit RewardClaimed(cycle, voter, reward);
+    emit RewardClaimed(cycle, voter, reward, gmReward);
   }
 
   // ----------------- Getters ----------------- //
@@ -373,6 +392,44 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     return reward / SCALING_FACTOR;
   }
 
+  /// @notice Get the GM reward for a user in a specific cycle.
+  /// @param cycle - The cycle in which the rewards are claimed.
+  /// @param voter - The address of the voter.
+  function getGMReward(uint256 cycle, address voter) public view virtual returns (uint256) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    // Get the total GM Weight for the voter in the cycle.
+    uint256 total = $.cycleToVoterToGMWeight[cycle][voter];
+
+    // If total is zero, return 0
+    if (total == 0) {
+      return 0;
+    }
+
+    // Get the total GM Weight in the cycle.
+    uint256 totalCycle = $.cycleToTotalGMWeight[cycle];
+
+    // If totalCycle is zero, return 0
+    if (totalCycle == 0) {
+      return 0;
+    }
+
+    // Get the emissions for GM rewards in the cycle.
+    uint256 emissionsAmount = $.emissions.getGMAmount(cycle);
+
+    // If emissionsAmount is zero, return 0
+    if (emissionsAmount == 0) {
+      return 0;
+    }
+
+    // Scale up the numerator before division to improve precision
+    uint256 scaledNumerator = total * emissionsAmount * SCALING_FACTOR; // Scale by a factor of SCALING_FACTOR for precision
+    uint256 reward = scaledNumerator / totalCycle;
+
+    // Scale down the reward to the original scale
+    return reward / SCALING_FACTOR;
+  }
+
   /// @notice Get the total reward-weighted votes for a user in a specific cycle.
   /// @param cycle - The cycle in which the rewards are claimed.
   /// @param voter - The address of the voter.
@@ -381,11 +438,26 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     return $.cycleToVoterToTotal[cycle][voter];
   }
 
+  /// @notice Get the total GM Weight for a user in a specific cycle.
+  /// @param cycle - The cycle in which the rewards are claimed.
+  /// @param voter - The address of the voter.
+  function cycleToVoterToGMWeight(uint256 cycle, address voter) external view returns (uint256) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.cycleToVoterToGMWeight[cycle][voter];
+  }
+
   /// @notice Get the total reward-weighted votes in a specific cycle.
   /// @param cycle - The cycle in which the rewards are claimed.
   function cycleToTotal(uint256 cycle) external view returns (uint256) {
     VoterRewardsStorage storage $ = _getVoterRewardsStorage();
     return $.cycleToTotal[cycle];
+  }
+
+  /// @notice Get the total GM Weight in a specific cycle.
+  /// @param cycle - The cycle in which the rewards are claimed.
+  function cycleToTotalGMWeight(uint256 cycle) external view returns (uint256) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    return $.cycleToTotalGMWeight[cycle];
   }
 
   /// @notice Get the reward multiplier for a specific level of the Galaxy Member NFT.
@@ -496,11 +568,30 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @dev This should be updated every time a new version of implementation is deployed
   /// @return string The version of the contract
   function version() external pure virtual returns (string memory) {
-    return "4";
+    return "5";
   }
 
   /// @dev Clock used for flagging checkpoints.
   function clock() public view virtual returns (uint48) {
     return Time.blockNumber();
+  }
+
+  // ----------------- Private Functions ----------------- //
+
+  /// @notice Scales the vote power based on the quadratic rewarding status.
+  /// @param votes - The total votes cast by the voter.
+  /// @param votePower - The vote power to scale.
+  /// @return scaledVotePower - The scaled vote power.
+  function _getScaledVotePower(
+    uint256 votes,
+    uint256 votePower
+  ) private view returns (uint256) {
+    // If quadratic rewarding is disabled, return votes as scaled vote power
+    if (isQuadraticRewardingDisabledForCurrentCycle()) {
+      return votes;
+    }
+
+    // If quadratic rewarding is enabled, scale the vote power by 1e9 to counteract the square root operation on 1e18.
+    return votePower * 1e9;
   }
 }

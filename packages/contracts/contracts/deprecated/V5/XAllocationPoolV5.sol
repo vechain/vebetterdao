@@ -23,19 +23,19 @@
 
 pragma solidity 0.8.20;
 
-import { IXAllocationPool } from "./interfaces/IXAllocationPool.sol";
+import { IXAllocationPool } from "../../interfaces/IXAllocationPool.sol";
 import { AccessControlUpgradeable } from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import { Checkpoints } from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import { Time } from "@openzeppelin/contracts/utils/types/Time.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGovernor.sol";
-import { ITreasury } from "./interfaces/ITreasury.sol";
-import { IEmissions } from "./interfaces/IEmissions.sol";
+import { IXAllocationVotingGovernor } from "../../interfaces/IXAllocationVotingGovernor.sol";
+import { ITreasury } from "../../interfaces/ITreasury.sol";
+import { IEmissionsV2 } from "../V2/interfaces/IEmissionsV2.sol";
 import { ReentrancyGuardUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import { IB3TR } from "./interfaces/IB3TR.sol";
+import { IB3TR } from "../../interfaces/IB3TR.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { IX2EarnApps } from "./interfaces/IX2EarnApps.sol";
-import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
+import { IX2EarnApps } from "../../interfaces/IX2EarnApps.sol";
+import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
 
 /**
  * @title XAllocationPool
@@ -53,10 +53,8 @@ import { IX2EarnRewardsPool } from "./interfaces/IX2EarnRewardsPool.sol";
  * - Updated the X2EarnApps interface to support node cooldown functionality
  * ---------------------- Version 5 ----------------------------------------
  * - Updated the X2EarnRewardsPool and X2EarnApps interfaces to support app rewards management feature
- * ---------------------- Version 6 ----------------------------------------
- * - Updated the Emissions contract interface to support GM Rewards Pool
  */
-contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
+contract XAllocationPoolV5 is IXAllocationPool, AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing the voting mechanism used in the XAllocationVoting contract
 
   uint256 public constant PERCENTAGE_PRECISION_SCALING_FACTOR = 1e4;
@@ -68,7 +66,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationPool
   struct XAllocationPoolStorage {
     IXAllocationVotingGovernor _xAllocationVoting;
-    IEmissions _emissions;
+    IEmissionsV2 _emissions;
     IB3TR b3tr;
     ITreasury treasury;
     IX2EarnApps x2EarnApps;
@@ -171,7 +169,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
     require(emissions_ != address(0), "XAllocationPool: new emissions is the zero address");
 
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
-    $._emissions = IEmissions(emissions_);
+    $._emissions = IEmissionsV2(emissions_);
 
     emit EmissionsContractSet(address($._emissions), emissions_);
   }
@@ -302,8 +300,8 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
    * @param roundId The round ID for which to calculate the amount available for allocation.
    */
   function _emissionAmount(uint256 roundId) internal view returns (uint256) {
-    IEmissions _emissions = emissions();
-    require(_emissions != IEmissions(address(0)), "Emissions contract not set");
+    IEmissionsV2 _emissions = emissions();
+    require(_emissions != IEmissionsV2(address(0)), "Emissions contract not set");
 
     // Amount available for this round (assuming the amount is already scaled by 1e18 for precision)
     return _emissions.getXAllocationAmount(roundId);
@@ -614,7 +612,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
   /**
    * @dev Returns the emissions contract.
    */
-  function emissions() public view returns (IEmissions) {
+  function emissions() public view returns (IEmissionsV2) {
     XAllocationPoolStorage storage $ = _getXAllocationPoolStorage();
     return $._emissions;
   }
@@ -648,7 +646,7 @@ contract XAllocationPool is IXAllocationPool, AccessControlUpgradeable, Reentran
    * @return string The version of the contract
    */
   function version() external pure virtual returns (string memory) {
-    return "6";
+    return "5";
   }
 
   /**
