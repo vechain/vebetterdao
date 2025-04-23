@@ -56,19 +56,20 @@ export const SwitchEndorsementAppModal = ({ appIdToEndorse, appIdToUnendorse, is
 
   const buttonTextSize = appToEndorseMetadata?.name && appToEndorseMetadata.name.length > 20 ? "12px" : "16px"
 
+  const handleSuccess = useCallback(() => {
+    onClose()
+  }, [onClose])
+
   //Mutation to switch endorsement
   //TODO: Multiple nodes
   const switchEndorsementMutation = useSwitchEndorsement({
     appIdToEndorse: appIdToEndorse ?? "",
     appIdToUnendorse: appIdToUnendorse ?? "",
     nodeId,
-    onSuccess: () => {
-      switchEndorsementMutation.resetStatus()
-    },
+    onSuccess: handleSuccess,
   })
 
   const handleSwitchEndorsement = useCallback(() => {
-    switchEndorsementMutation.resetStatus()
     switchEndorsementMutation.sendTransaction()
   }, [switchEndorsementMutation])
 
