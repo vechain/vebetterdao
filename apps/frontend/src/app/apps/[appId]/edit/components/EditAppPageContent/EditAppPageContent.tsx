@@ -73,7 +73,7 @@ export const EditAppPageContent = () => {
   const { veWorldBanner } = useCurrentAppVeWorldBanner()
   const router = useRouter()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { isTxModalOpen } = useTransactionModal()
+  const { isTxModalOpen, onClose: onTxModalClose } = useTransactionModal()
   const { isAdminOrModerator } = useCurrentAppRole()
   const { account } = useWallet()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
@@ -114,13 +114,15 @@ export const EditAppPageContent = () => {
     }
   }, [isAdminOrModerator, appId, router, permissions, goToAppPage])
 
+  const handleSuccess = useCallback(() => {
+    onClose()
+    onTxModalClose()
+    goToAppPage()
+  }, [onClose, onTxModalClose, goToAppPage])
+
   const updateAppDetailsMutation = useUpdateAppDetails({
     appId,
-    onSuccess: () => {
-      onClose()
-      updateAppDetailsMutation.resetStatus()
-      goToAppPage()
-    },
+    onSuccess: handleSuccess,
     onFailure: () => {
       onClose()
     },
@@ -152,7 +154,7 @@ export const EditAppPageContent = () => {
 
   const onSubmit = useCallback(
     async (data: EditAppForm) => {
-      updateAppDetailsMutation.resetStatus()
+      onTxModalClose()
       onOpen()
 
       const metadataUri = await uploadMetadata(data)
@@ -162,7 +164,7 @@ export const EditAppPageContent = () => {
         metadataUri,
       })
     },
-    [updateAppDetailsMutation, onOpen, uploadMetadata],
+    [updateAppDetailsMutation, onOpen, uploadMetadata, onTxModalClose],
   )
 
   // Update the form values when the app fetches the data from blockchain
