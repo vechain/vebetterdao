@@ -44,7 +44,6 @@ export const ManagementCenterModal = ({ appId, isOpen, onClose }: Props) => {
     xAppId: appId,
     isEnabled: isEnabled === undefined ? false : !isEnabled,
     onSuccess: () => {
-      managementAction.resetStatus()
       setShowConfirmation(false)
     },
   })
