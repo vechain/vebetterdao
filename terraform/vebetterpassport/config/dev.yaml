@@ -1,0 +1,20 @@
+---
+# AWS Configuration
+aws_region: eu-west-1
+aws_account_id: "211125319139"
+environment: "testnet"
+
+# Lambda Configuration
+lambda_function_name: "resetUserSignalsWithReason_vebetterpassport_testnet"
+lambda_handler: "index.handler"
+lambda_runtime: "nodejs20.x"
+lambda_memory_size: 128
+lambda_timeout: 30
+lambda_role: "arn:aws:iam::211125319139:role/b3tr-discord-bot-lambda"
+
+# API Gateway Configuration
+api_gateway_name: "Reset User Signals With Reason - Testnet"
+api_gateway_id: "m0xna6yoc6"
+api_endpoint_path: "reset-user-signal-count"
+api_resource_id: "si8suu"
+api_key_required: true 

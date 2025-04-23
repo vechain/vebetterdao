@@ -1,0 +1,89 @@
+# API Gateway REST API
+resource "aws_api_gateway_rest_api" "reset_user_signals_api" {
+  api_key_source               = "HEADER"
+  disable_execute_api_endpoint = "false"
+
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
+
+  name = "Reset User Signals With Reason - ${var.network == "dev" ? "Testnet" : "Mainnet"}"
+}
+
+# API Gateway Resource
+resource "aws_api_gateway_resource" "reset_user_signals_resource" {
+  parent_id   = "${aws_api_gateway_rest_api.reset_user_signals_api.root_resource_id}"
+  path_part   = "reset-user-signal-count"
+  rest_api_id = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
+}
+
+# API Gateway Method
+resource "aws_api_gateway_method" "reset_user_signals_method" {
+  api_key_required = "true"
+  authorization    = "NONE"
+  http_method      = "POST"
+  resource_id      = "${aws_api_gateway_resource.reset_user_signals_resource.id}"
+  rest_api_id      = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
+}
+
+# API Gateway Integration
+resource "aws_api_gateway_integration" "reset_user_signals_integration" {
+  cache_namespace         = "si8suu"
+  connection_type         = "INTERNET"
+  content_handling        = "CONVERT_TO_TEXT"
+  http_method             = "POST"
+  integration_http_method = "POST"
+  passthrough_behavior    = "WHEN_NO_MATCH"
+  resource_id             = "si8suu"
+  rest_api_id             = "m0xna6yoc6"
+  timeout_milliseconds    = "29000"
+  type                    = "AWS"
+  uri                     = "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${aws_lambda_function.resetUserSignalsWithReason_vebetterpassport.arn}/invocations"
+}
+
+# API Gateway Method Response
+resource "aws_api_gateway_method_response" "reset_user_signals_method_response" {
+  http_method = "${aws_api_gateway_method.reset_user_signals_method.http_method}"
+  resource_id = "${aws_api_gateway_resource.reset_user_signals_resource.id}"
+  rest_api_id = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
+  status_code = "200"
+}
+
+# API Gateway Integration Response
+resource "aws_api_gateway_integration_response" "reset_user_signals_integration_response" {
+  http_method = "${aws_api_gateway_method.reset_user_signals_method.http_method}"
+  resource_id = "${aws_api_gateway_resource.reset_user_signals_resource.id}"
+  rest_api_id = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
+  status_code = "${aws_api_gateway_method_response.reset_user_signals_method_response.status_code}"
+}
+
+# API Gateway Stage
+resource "aws_api_gateway_stage" "reset_user_signals_stage" {
+  deployment_id = "${aws_api_gateway_deployment.reset_user_signals_deployment.id}"
+  rest_api_id   = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
+  stage_name    = "default"
+}
+
+# API Gateway Deployment
+resource "aws_api_gateway_deployment" "reset_user_signals_deployment" {
+  rest_api_id = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
+  
+  depends_on = [
+    aws_api_gateway_integration.reset_user_signals_integration
+  ]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# terraform import aws_api_gateway_resource.reset_user_signals_resource m0xna6yoc6/si8suu
+# terraform import aws_api_gateway_method.reset_user_signals_method m0xna6yoc6/si8suu/POST
+# terraform import aws_api_gateway_integration.reset_user_signals_integration m0xna6yoc6/si8suu/POST
+# terraform import aws_api_gateway_method_response.reset_user_signals_method_response m0xna6yoc6/si8suu/POST/200
+# terraform import aws_api_gateway_integration_response.reset_user_signals_integration_response m0xna6yoc6/si8suu/POST/200
+# terraform import aws_api_gateway_stage.reset_user_signals_stage m0xna6yoc6/default
+# terraform import aws_api_gateway_deployment.reset_user_signals_deployment m0xna6yoc6/abc123
+# terraform import aws_lambda_permission.resetUserSignalsWithReason_permission resetUserSignalsWithReason_vebetterpassport_testnet/apigateway.amazonaws.com
+
+
