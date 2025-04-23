@@ -105,7 +105,7 @@ const DashboardXAppCard = ({ xApp }: { xApp: XApp }) => {
           <HStack spacing={3} justifyContent={"space-between"} w={"full"} alignItems={"start"}>
             <Skeleton isLoaded={!appMetadataLoading} justifyContent={"end"}>
               <Text fontSize={"sm"} color={"gray.500"}>
-                {appMetadata?.description.slice(0, 150) + "..." ??
+                {(appMetadata?.description ? appMetadata.description.slice(0, 150) + "..." : null) ??
                   appMetadataError?.message ??
                   "Error loading description"}
               </Text>

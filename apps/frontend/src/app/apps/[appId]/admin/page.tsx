@@ -18,9 +18,9 @@ const AdminAppPageContent = dynamic(
   },
 )
 type Props = {
-  params: {
+  params: Promise<{
     appId: string
-  }
+  }>
 }
 
 export default function AppAdmin(props: Readonly<Props>) {

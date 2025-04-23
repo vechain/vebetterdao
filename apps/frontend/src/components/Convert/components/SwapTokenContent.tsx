@@ -15,7 +15,7 @@ type Props = {
   swappableVot3Balance?: TokenBalance
   isVOT3BalanceMoreThanStakedB3TR: boolean
   convertTitle: string
-  convertDescription: JSX.Element
+  convertDescription: React.ReactElement
   b3trBalanceScaled: string
   vot3BalanceScaled: string
   handleGoBack: () => void

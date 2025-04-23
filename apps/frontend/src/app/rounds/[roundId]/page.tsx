@@ -18,9 +18,9 @@ const AllocationRoundContent = dynamic(
   },
 )
 type Props = {
-  params: {
+  params: Promise<{
     roundId: string
-  }
+  }>
 }
 
 export default function Round(props: Readonly<Props>) {

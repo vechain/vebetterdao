@@ -79,7 +79,7 @@
     "turbo": "^2.5.0"
   },
   "engines": {
-    "node": "22.x.x"
+    "node": "20.x.x"
   },
   "packageManager": "yarn@1.22.19",
   "workspaces": [

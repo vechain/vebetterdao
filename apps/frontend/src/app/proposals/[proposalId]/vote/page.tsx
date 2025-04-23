@@ -14,9 +14,9 @@ const ProposalPage = dynamic(() => import("./components/ProposalVote").then(mod 
 })
 
 type Props = {
-  params: {
+  params: Promise<{
     proposalId: string
-  }
+  }>
 }
 
 const ProposalPageContainer = (props: Readonly<Props>) => {

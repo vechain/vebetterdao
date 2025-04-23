@@ -6,7 +6,7 @@ export interface Route {
   onClick?: string | (() => void)
   icon?: React.FC
   isVisible?: boolean
-  component?: JSX.Element
+  component?: React.JSX.Element
   description?: string
 }
 

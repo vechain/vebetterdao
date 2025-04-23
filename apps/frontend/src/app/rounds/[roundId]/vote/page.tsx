@@ -21,9 +21,9 @@ const CastAllocationVotePageContent = dynamic(
   },
 )
 type Props = {
-  params: {
+  params: Promise<{
     roundId: string
-  }
+  }>
 }
 
 export default function CastAllocationVotePage(props: Readonly<Props>) {

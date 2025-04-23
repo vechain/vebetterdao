@@ -25,7 +25,7 @@ export const WalletAddressInput = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // Tracks last resolved value (address or domain)
-  const lastResolvedValue = useRef<string | undefined>()
+  const lastResolvedValue = useRef<string | undefined>(undefined)
   // Tracks if the parent was notified of invalid input
   const hasNotifiedInvalid = useRef(false)
 

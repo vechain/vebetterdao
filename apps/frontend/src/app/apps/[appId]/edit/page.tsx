@@ -18,9 +18,9 @@ const EditAppPageContent = dynamic(
   },
 )
 type Props = {
-  params: {
+  params: Promise<{
     appId: string
-  }
+  }>
 }
 
 export default function AppEdit(props: Readonly<Props>) {

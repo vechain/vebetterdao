@@ -6,9 +6,9 @@ import dynamic from "next/dynamic"
 
 type Props = {
   children: React.ReactNode
-  params: {
+  params: Promise<{
     roundId: string
-  }
+  }>
 }
 
 const CastAllocationVoteStepperCard = dynamic(

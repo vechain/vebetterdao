@@ -20,9 +20,9 @@ const ProfilePageContent = dynamic(
 )
 
 type Props = {
-  params: {
+  params: Promise<{
     address: string
-  }
+  }>
 }
 
 export default function Profile(props: Readonly<Props>) {

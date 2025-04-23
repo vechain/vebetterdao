@@ -6,7 +6,7 @@ type GenericBannerProps = {
   titleColor?: string
   description: string | React.ReactElement
   descriptionColor?: string
-  logoSrc?: string | React.ReactElement
+  logoSrc?: string | React.ReactElement<{ w?: number; h?: number }>
   backgroundColor?: string
   backgroundImageSrc?: string
   buttonLabel?: string

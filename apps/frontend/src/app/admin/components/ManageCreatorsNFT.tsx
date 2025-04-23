@@ -18,9 +18,8 @@ import {
   Badge,
   HStack,
   Icon,
-  As,
 } from "@chakra-ui/react"
-import { UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
+import { Icon as IconType, UilCheckCircle, UilExclamationCircle } from "@iconscout/react-unicons"
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
@@ -77,7 +76,7 @@ export const ManageCreatorsNFT = () => {
     }
   }, [actionType, resetStatus, sendTransaction, onOpen])
 
-  const renderBadge = (colorScheme: string, icon: As, text: string) => (
+  const renderBadge = (colorScheme: string, icon: IconType, text: string) => (
     <Badge
       textTransform="none"
       fontSize="sm"
