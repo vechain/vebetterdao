@@ -49,12 +49,19 @@ interface IEmissions {
 
   event EmissionCycleDurationUpdated(uint256 indexed newDuration, uint256 indexed oldDuration);
 
-  event EmissionDistributed(
+  event EmissionDistributedV2(
     uint256 indexed cycle,
     uint256 xAllocations,
     uint256 vote2Earn,
     uint256 treasury,
     uint256 gm
+  );
+
+  event EmissionDistributed(
+    uint256 indexed cycle,
+    uint256 xAllocations,
+    uint256 vote2Earn,
+    uint256 treasury
   );
 
   event Initialized(uint64 version);

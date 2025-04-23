@@ -47,8 +47,15 @@ contract Emissions is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPS
   uint256 public constant SCALING_FACTOR = 1e6;
 
   // ---------------- Events ---------------- //
-  /// @notice Emitted when emissions are distributed for a cycle
+  /// @dev Deprecated, use new EmissionDistributed instead
   event EmissionDistributed(
+    uint256 indexed cycle,
+    uint256 xAllocations,
+    uint256 vote2Earn,
+    uint256 treasury
+  );
+    /// @notice Emitted when emissions are distributed for a cycle
+  event EmissionDistributedV2(
     uint256 indexed cycle,
     uint256 xAllocations,
     uint256 vote2Earn,
@@ -293,8 +300,7 @@ contract Emissions is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPS
       $.nextCycle,
       $.initialXAppAllocation,
       initialVote2EarnAllocation,
-      initialTreasuryAllocation,
-      0
+      initialTreasuryAllocation
     );
   }
 
@@ -339,7 +345,7 @@ contract Emissions is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPS
 
     $.xAllocationsGovernor.startNewRound();
 
-    emit EmissionDistributed($.nextCycle, xAllocationsAmount, vote2EarnAmount, treasuryAmount, gmAmount);
+    emit EmissionDistributedV2($.nextCycle, xAllocationsAmount, vote2EarnAmount, treasuryAmount, gmAmount);
     $.nextCycle++;
   }
 
