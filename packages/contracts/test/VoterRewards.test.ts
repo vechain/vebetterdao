@@ -457,7 +457,7 @@ describe("VoterRewards - @shard10", () => {
       expect(await voterRewards.version()).to.equal("4")
     })
 
-    it.only("Should not have state conflict after upgrading to V3 and V4", async () => {
+    it("Should not have state conflict after upgrading to V3 and V4", async () => {
       const config = createLocalConfig()
       const {
         otherAccounts,

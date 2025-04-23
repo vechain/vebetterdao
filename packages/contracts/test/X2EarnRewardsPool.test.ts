@@ -158,7 +158,7 @@ describe("X2EarnRewardsPool - @shard12", function () {
       expect(await x2EarnRewardsPool.version()).to.equal("7")
     })
 
-    it.only("Storage should be preserved after upgrade", async () => {
+    it("Storage should be preserved after upgrade", async () => {
       const config = createLocalConfig()
       const { owner, b3tr, x2EarnApps, minterAccount, veBetterPassport } = await getOrDeployContractInstances({
         forceDeploy: true,
