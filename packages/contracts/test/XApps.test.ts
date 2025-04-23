@@ -2070,21 +2070,18 @@ describe("X-Apps - @shard15", function () {
     })
 
     it("Only users with the XAPP creator nft can register an app", async function () {
-      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       await expect(
         x2EarnApps
-          .connect(otherAccounts[0])
+          .connect(otherAccounts[11])
           .submitApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI"),
       ).to.be.revertedWithCustomError(x2EarnApps, "X2EarnUnverifiedCreator")
 
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
-
       await x2EarnApps
-        .connect(otherAccounts[0])
+        .connect(creator1)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, "My app", "metadataURI")
     })
 
@@ -2674,93 +2671,76 @@ describe("X-Apps - @shard15", function () {
 
   describe("Creator NFT", function () {
     it("Users with the XAPP creator nft can register an app sucesfully", async function () {
-      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+      const { x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
+      await x2EarnApps.connect(creator1).submitApp(creator2.address, creator2.address, creator2.address, "metadataURI")
 
-      await x2EarnApps
-        .connect(otherAccounts[0])
-        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
-
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator2.address))
 
       // App should be registered successfully
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
 
       // User should be listed as one of the apps creators
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([creator1.address])
     })
 
     it("App admin can't add more than 1 creator for the app", async function () {
-      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+      const { x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
+      await x2EarnApps.connect(creator1).submitApp(creator2.address, creator2.address, creator2.address, "metadataURI")
 
-      await x2EarnApps
-        .connect(otherAccounts[0])
-        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
-
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator2.address))
 
       // App should be registered successfully
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
 
       // User should be listed as one of the apps creators
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([creator1.address])
 
       // UPDATE : MAX CREATORS = 1 REACHED ( by default the admin on submitApp is the creator )
-      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[0].address)
+      await x2EarnApps.connect(creator2).removeAppCreator(app1Id, creator1.address)
       expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
 
       // App admin can add more creators for the app
-      await expect(x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)).to.emit(
+      await expect(x2EarnApps.connect(creator2).addCreator(app1Id, creator1.address)).to.emit(
         x2EarnApps,
         "CreatorAddedToApp",
       )
 
       // New creator should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[1].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([creator1.address])
     })
 
     it("An app can have only 1 creator", async function () {
-      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+      const { x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
+      await x2EarnApps.connect(creator1).submitApp(creator2.address, creator2.address, creator2.address, "metadataURI")
 
-      await x2EarnApps
-        .connect(otherAccounts[0])
-        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
-
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator2.address))
 
       // App should be registered successfully
       expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
 
       // User should be listed as one of the apps creators
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([creator1.address])
 
       // Adding another creator should fail
-      await expect(
-        x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address),
-      ).to.be.revertedWithCustomError(x2EarnApps, "X2EarnMaxCreatorsReached")
+      await expect(x2EarnApps.connect(creator2).addCreator(app1Id, creator1.address)).to.be.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnMaxCreatorsReached",
+      )
     })
 
     it("Same creator cannot be part of more than 1 app", async function () {
-      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
 
       await x2EarnApps
         .connect(otherAccounts[0])
@@ -2795,9 +2775,6 @@ describe("X-Apps - @shard15", function () {
         forceDeploy: true,
       })
 
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
-
       await x2EarnApps
         .connect(otherAccounts[0])
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
@@ -2809,24 +2786,23 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
 
       // Adding a new creator that doesnt hold a creator NFT
-      await expect(x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)).to.emit(
+      await expect(x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[10].address)).to.emit(
         x2EarnCreator,
         "Transfer",
       )
 
       // New creator should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[1].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[10].address])
 
       // New creator should have a creator NFT minted for them
-      expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(otherAccounts[10].address)).to.eql(1n)
 
-      // Adding a new creator that already holds a creator NFT should not mint a new one
-      await x2EarnCreator.safeMint(otherAccounts[2].address) // Mint the NFT
+      // Adding a new creator(otherAccounts[2]) that already holds a creator NFT should not mint a new one
 
       const balanceBefore = await x2EarnCreator.balanceOf(otherAccounts[2].address)
 
       // MAX CREATORS = 1, REACHED ( removing the previous creator )
-      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[1].address)
+      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[10].address)
       expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
 
       // Adding the user with a creator NFT
@@ -2843,10 +2819,6 @@ describe("X-Apps - @shard15", function () {
       const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
-
       await x2EarnApps
         .connect(otherAccounts[0])
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
@@ -2877,12 +2849,9 @@ describe("X-Apps - @shard15", function () {
     })
 
     it("A creator should be part of only one app", async function () {
-      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
 
       await x2EarnApps
         .connect(otherAccounts[0])
@@ -2896,12 +2865,9 @@ describe("X-Apps - @shard15", function () {
     })
 
     it("Should not be able to remove a creator that is not part of the app", async function () {
-      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
 
       await x2EarnApps
         .connect(otherAccounts[0])
@@ -2948,9 +2914,6 @@ describe("X-Apps - @shard15", function () {
         forceDeploy: true,
       })
 
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
-
       // Other Accounts 0 creates 1 apps -> Creator of the app1
       await x2EarnApps
         .connect(otherAccounts[0])
@@ -2982,9 +2945,6 @@ describe("X-Apps - @shard15", function () {
       const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
 
       // Other Accounts 0 creates 1 apps -> Creator of the app1
       await x2EarnApps
@@ -3026,9 +2986,6 @@ describe("X-Apps - @shard15", function () {
       const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
-
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
 
       // Other Accounts 0 creates 1 apps -> Creator of the app1
       await x2EarnApps
