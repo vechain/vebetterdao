@@ -20,7 +20,6 @@ import { useWallet } from "@vechain/vechain-kit"
 import { EditAppRewardDistributors } from "./components/EditAppRewardDistributors"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { EditAppCreatorNFT } from "./components/EditAppCreatorNFT"
-
 export type AdminAppForm = {
   adminAddress: string
   teamWalletAddress: string
@@ -47,7 +46,6 @@ export const AdminAppPageContent = () => {
   const [editTeamWalletAddress, setEditTeamWalletAddress] = useState(false)
 
   const updateConfirmationModal = useDisclosure()
-
   const onchainAddresses = useRef({
     moderators: [] as string[],
     creators: [] as string[],
@@ -125,26 +123,26 @@ export const AdminAppPageContent = () => {
     isCreatorsChanged
   const disableSaveButton = !hasUnsavedChanges
 
+  const handleSuccess = useCallback(() => {
+    // After successful transaction, update the reference with form values
+    onchainAddresses.current = {
+      adminAddress: adminAddress,
+      moderators: [...newModerators],
+      creators: [...newCreators],
+      distributors: [...newDistributors],
+      teamWalletAddress: teamWalletAddress,
+    }
+  }, [adminAddress, newModerators, newCreators, newDistributors, teamWalletAddress])
+
   const updateMutation = useUpdateAppAdminInfo({
     appId: app?.id || "",
-    onSuccess: () => {
-      // After successful transaction, update the reference with form values
-      onchainAddresses.current = {
-        adminAddress: adminAddress,
-        moderators: [...newModerators],
-        creators: [...newCreators],
-        distributors: [...newDistributors],
-        teamWalletAddress: teamWalletAddress,
-      }
-      updateMutation.resetStatus()
-    },
+    onSuccess: handleSuccess,
   })
 
   const goBack = useCallback(() => {
     router.push(`/apps/${app?.id}`)
     form.reset()
-    updateMutation.resetStatus()
-  }, [form, router, updateMutation])
+  }, [app?.id, form, router])
 
   const onSubmit = useCallback(
     (data: AdminAppForm) => {
