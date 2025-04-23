@@ -284,7 +284,7 @@ describe("VoterRewards - @shard10", () => {
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
 
-    it(" admin should be able to upgrade the contract", async function () {
+    it("Admin should be able to upgrade the contract", async function () {
       const { voterRewards, otherAccount } = await getOrDeployContractInstances({
         forceDeploy: true,
       })

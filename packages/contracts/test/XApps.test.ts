@@ -3063,52 +3063,47 @@ describe("X-Apps - @shard15", function () {
     })
 
     it("XApps user endorsed should not keep increasing if de-blacklisted multiple times", async function () {
-      const { x2EarnApps, otherAccounts, x2EarnCreator } = await getOrDeployContractInstances({
+      const { x2EarnApps, x2EarnCreator } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
-      // Mint the NFT
-      await x2EarnCreator.safeMint(otherAccounts[0].address)
-
       // Other Accounts 0 creates 1 apps -> Creator of the app1
-      await x2EarnApps
-        .connect(otherAccounts[0])
-        .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
+      await x2EarnApps.connect(creator1).submitApp(creator2.address, creator2.address, creator2.address, "metadataURI")
 
-      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator2.address))
 
       // App get endorsed
-      await endorseApp(app1Id, otherAccounts[2])
+      await endorseApp(app1Id, creator2)
 
       // Creator = account 0 should have their creator NFT minted
-      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(creator1.address)).to.eql(1n)
 
       // De- Blacklisting the first app (It is not blacklisted)
       await x2EarnApps.setVotingEligibility(app1Id, true)
 
       // Creator should not have their creator NFT burned
-      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(1n)
+      expect(await x2EarnCreator.balanceOf(creator1.address)).to.eql(1n)
 
       // Creator should be creators of 1 app
-      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(1n)
+      expect(await x2EarnApps.creatorApps(creator1.address)).to.eql(1n)
 
       // De- Blacklisting the first app (It is not blacklisted)
       await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app
 
       // Should all still be considered creators of the app for info purposes
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([creator1.address])
 
       // Creator should be creators of 0 apps
-      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(0n)
+      expect(await x2EarnApps.creatorApps(creator1.address)).to.eql(0n)
 
       // Creator should have their creator NFT burned again
-      expect(await x2EarnCreator.balanceOf(otherAccounts[0].address)).to.eql(0n)
+      expect(await x2EarnCreator.balanceOf(creator1.address)).to.eql(0n)
 
       // Blacklisting the first app again (should not decrease the creator NFT)
       await x2EarnApps.setVotingEligibility(app1Id, false) // Blacklist the app again
 
       // Creator should be creators of 0 apps ==> De-blacklisting multiple times should not decrease the creator NFT
-      expect(await x2EarnApps.creatorApps(otherAccounts[0].address)).to.eql(0n)
+      expect(await x2EarnApps.creatorApps(creator1.address)).to.eql(0n)
     })
   })
 })
@@ -6638,7 +6633,7 @@ describe("X-Apps - @shard17", function () {
     })
 
     it("Only app admins and contract admin should be able to remove an XApp from submission list", async function () {
-      const { x2EarnApps, otherAccounts, owner, x2EarnCreator } = await getOrDeployContractInstances({
+      const { x2EarnApps, otherAccounts, owner } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
@@ -6646,10 +6641,6 @@ describe("X-Apps - @shard17", function () {
 
       const app1Id = await x2EarnApps.hashAppName(otherAccounts[1].address)
       const app2Id = await x2EarnApps.hashAppName(otherAccounts[2].address)
-
-      // Mint creator NFTs to accounts sumbmitting XApps
-      await x2EarnCreator.safeMint(otherAccounts[1].address)
-      await x2EarnCreator.safeMint(otherAccounts[2].address)
 
       // Register XAPP -> XAPP is pedning endorsement
       await x2EarnApps
