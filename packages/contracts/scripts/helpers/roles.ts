@@ -275,7 +275,7 @@ export const transferSettingsManagerRole = async (
 }
 
 export const transferUpgraderRole = async (
-  contract: Emissions | XAllocationPool,
+  contract: Emissions | XAllocationPool | NodeManagement | X2EarnApps | GalaxyMember,
   admin: HardhatEthersSigner,
   newAddress: string,
 ) => {
