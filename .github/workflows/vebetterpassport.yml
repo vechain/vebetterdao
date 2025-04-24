@@ -1,0 +1,86 @@
+name: VeBetterPassport Infrastructure
+
+on:
+  push:
+    branches:
+      - terraformer-import
+    paths:
+      - 'terraform/vebetterpassport/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: read
+
+jobs:
+  vebetterpassport-plan:
+    name: VeBetterPassport Plan
+    runs-on: ubuntu-latest
+    outputs:
+      plan_changes_detected: ${{ steps.check_changes.outputs.plan_changes_detected }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ACCESS_ROLE }}
+          aws-region: eu-west-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.3
+    
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
+
+      - name: Terraform Format
+        id: fmt
+        working-directory: terraform/vebetterpassport
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      - name: Terraform Init
+        working-directory: terraform/vebetterpassport
+        run: terraform init
+
+    #   - name: Terraform Workspace
+    #     working-directory: terraform/vebetterpassport
+    #     id: workspace
+    #     run: terraform workspace select dev
+    
+      - name: Terraform Validate
+        working-directory: terraform/vebetterpassport
+        id: validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: terraform/vebetterpassport
+        id: plan
+        run: terraform plan -out=vebetterpassport.tfplan -detailed-exitcode
+    
+      - name: Check for plan changes
+        id: check_changes
+        run: |
+          if [ ${{ steps.plan.outcome }} == 'success' ] && [ ${{ steps.plan.outputs.exitcode }} == 2 ]; then
+            echo "Changes detected"
+            echo "plan_changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes detected"
+            echo "plan_changes_detected=false" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+        continue-on-error: false
+
+      - name: Upload Plan
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vebetterpassport-plan
+          path: terraform/vebetterpassport/vebetterpassport.tfplan
+          retention-days: 5
