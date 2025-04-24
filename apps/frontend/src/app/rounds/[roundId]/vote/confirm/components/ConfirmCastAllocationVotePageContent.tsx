@@ -23,7 +23,7 @@ import { SeeVoteDetailsModal } from "@/app/rounds/components/AllocationRoundUser
 import { CastAllocationControlsBottomBar } from "../../components/CastAllocationControlsBottomBar"
 import { AnalyticsUtils } from "@/utils"
 import { ButtonClickProperties, buttonClickActions, buttonClicked } from "@/constants"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   roundId: string
 }
@@ -32,7 +32,7 @@ const compactFormatter = getCompactFormatter(2)
 export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
   const { t } = useTranslation()
   const { account } = useWallet()
-
+  const { onClose: closeTxModal } = useTransactionModal()
   const router = useRouter()
 
   const xAppsQuery = useRoundXApps(roundId)
@@ -71,7 +71,10 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
 
   const seeAllModal = useDisclosure()
 
-  const onSuccess = useCallback(() => router.push(`/rounds/${roundId}`), [router, roundId])
+  const onSuccess = useCallback(() => {
+    closeTxModal()
+    router.push(`/rounds/${roundId}`)
+  }, [router, roundId, closeTxModal])
 
   const castAllocationVotes = useCastAllocationVotes({ roundId, onSuccess })
 
