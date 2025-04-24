@@ -4,22 +4,23 @@ import { X2EarnApps__factory } from "@repo/contracts/typechain-types"
 
 const x2EarnAppsContractAddress = getConfig().x2EarnAppsContractAddress
 const x2EarnAppsInterface = X2EarnApps__factory.createInterface()
-const method = "checkCreatorAlreadyUsed"
+const method = "isCreatorOfAnyApp"
 
 /**
- * Returns the query key boolean if the creator have already created an app
+ * Returns the query key boolean if the creator have already submitted an app
  * @returns The query key for fetching the creator NFT.
  */
-export const getCreatorAlreadyUsedQueryKey = (walletAddress: string) => {
+export const getHasAlreadySubmittedAppQueryKey = (walletAddress: string) => {
   return getCallKey({ method, keyArgs: [walletAddress] })
 }
 
 /**
- * Hook to get weither the creator have already created an app
+ * Hook to get if the user has already submitted an app
+ *
  * @param walletAddress The wallet address to check for the creator NFT.
- * @returns True if the wallet address has already created an app, false otherwise.
+ * @returns True if the wallet address has already submitted an app, false otherwise.
  */
-export const useCheckCreatorAlreadyUsed = (walletAddress: string) => {
+export const useHasAlreadySubmittedApp = (walletAddress: string) => {
   return useCall({
     contractInterface: x2EarnAppsInterface,
     contractAddress: x2EarnAppsContractAddress,

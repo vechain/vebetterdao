@@ -27,7 +27,7 @@ import { useForm } from "react-hook-form"
 import { useAdminCreatorNFT } from "@/hooks/useAdminCreatorNFT"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { WalletAddressInput } from "@/app/components/Input"
-import { useCheckCreatorAlreadyUsed, useGetCreatorApps } from "@/api"
+import { useHasAlreadySubmittedApp, useGetCreatorApps } from "@/api"
 
 type NFTFormInputs = {
   creatorWalletAddress: string
@@ -73,7 +73,7 @@ export const ManageCreatorsNFT = () => {
   })
 
   const hasNFT = useHasCreatorNFT(lookupAddress ?? "")
-  const { data: checkSubmittedApps } = useCheckCreatorAlreadyUsed(lookupCreatorAddress ?? "")
+  const { data: hasAlreadySubmitted } = useHasAlreadySubmittedApp(lookupCreatorAddress ?? "")
   const { data: creatorApps } = useGetCreatorApps(lookupCreatorAddress ?? "")
 
   const { error, status, txReceipt, sendTransaction, resetStatus } = useMemo(() => {
@@ -195,9 +195,9 @@ export const ManageCreatorsNFT = () => {
                     {lookupCreatorAddress && (
                       <VStack mt={2} align="start">
                         {renderBadge(
-                          checkSubmittedApps ? "green" : "red",
-                          checkSubmittedApps ? UilCheckCircle : UilExclamationCircle,
-                          checkSubmittedApps
+                          hasAlreadySubmitted ? "green" : "red",
+                          hasAlreadySubmitted ? UilCheckCircle : UilExclamationCircle,
+                          hasAlreadySubmitted
                             ? t("This address have submitted {{count}} apps.", { count: creatorApps })
                             : t("This address have not submitted app."),
                         )}

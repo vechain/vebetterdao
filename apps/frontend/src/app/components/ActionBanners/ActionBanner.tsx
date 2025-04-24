@@ -3,9 +3,9 @@ import {
   useAccountLinking,
   useB3trBalance,
   useCanUserVote,
-  useCheckCreatorAlreadyUsed,
   useCurrentAllocationsRoundId,
   useGetDelegatee,
+  useHasAlreadySubmittedApp,
   useUserBotSignals,
   useUserDelegation,
   useVot3Balance,
@@ -124,7 +124,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
   const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
-  const { data: hasAlreadySubmitted } = useCheckCreatorAlreadyUsed(account?.address ?? "")
+  const { data: hasAlreadySubmitted } = useHasAlreadySubmittedApp(account?.address ?? "")
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0
 
