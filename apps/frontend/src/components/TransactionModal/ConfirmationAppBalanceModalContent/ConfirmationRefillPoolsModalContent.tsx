@@ -2,7 +2,7 @@ import { VStack, Text, HStack } from "@chakra-ui/react"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
 import { useTranslation } from "react-i18next"
 import loadingAnimation from "./loading.json"
-import Lottie from "react-lottie"
+import LazyLottie from "@/app/components/LazyLottie"
 import { B3TRIcon } from "@/components/Icons"
 
 export type ConfirmationRefillPoolsModalContentProps = {
@@ -24,7 +24,7 @@ export const ConfirmationRefillPoolsModalContent = ({
 
   return (
     <VStack align={"center"} p={6} gap={2}>
-      <Lottie
+      <LazyLottie
         style={{
           pointerEvents: "none",
         }}

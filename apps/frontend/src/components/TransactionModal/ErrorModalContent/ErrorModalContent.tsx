@@ -1,5 +1,5 @@
 import { Heading, VStack, Text, ModalCloseButton, Button, Link } from "@chakra-ui/react"
-import Lottie from "react-lottie"
+import LazyLottie from "@/app/components/LazyLottie"
 import errorAnimation from "./error.json"
 import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
@@ -41,7 +41,7 @@ export const ErrorModalContent = ({
           animate={{
             scale: [1, 1.1, 1],
           }}>
-          <Lottie
+          <LazyLottie
             style={{
               pointerEvents: "none",
             }}

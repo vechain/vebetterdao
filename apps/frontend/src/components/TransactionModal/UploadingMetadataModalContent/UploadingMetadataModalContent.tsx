@@ -1,5 +1,5 @@
 import { Heading, Text, VStack } from "@chakra-ui/react"
-import Lottie from "react-lottie"
+import LazyLottie from "@/app/components/LazyLottie"
 import UploadingMetadataAnimation from "./uploadingMetadata.json"
 import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
@@ -17,7 +17,7 @@ export const UploadingMetadataModalContent = ({
     <ModalAnimation>
       <VStack align={"center"} p={6}>
         <Heading size="md">{title}</Heading>
-        <Lottie
+        <LazyLottie
           style={{
             pointerEvents: "none",
           }}

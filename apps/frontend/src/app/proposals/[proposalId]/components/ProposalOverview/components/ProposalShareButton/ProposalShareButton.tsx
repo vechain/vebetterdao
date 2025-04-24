@@ -10,7 +10,7 @@ import {
   Text,
   HStack,
 } from "@chakra-ui/react"
-import Lottie from "react-lottie"
+import LazyLottie from "@/app/components/LazyLottie"
 import loadingAnimation from "./loading.json"
 import { motion } from "framer-motion"
 import { CustomModalContent } from "@/components"
@@ -67,7 +67,7 @@ export const ProposalShareButton = () => {
               <ModalCloseButton top={4} right={4} />
               <VStack align={"center"} p={8} gap={8}>
                 <Box my="10px">
-                  <Lottie
+                  <LazyLottie
                     style={{
                       pointerEvents: "none",
                     }}

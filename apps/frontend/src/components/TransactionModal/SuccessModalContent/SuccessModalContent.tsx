@@ -1,5 +1,5 @@
 import { Heading, Text, VStack, ModalCloseButton, Link, Image, HStack } from "@chakra-ui/react"
-import Lottie from "react-lottie"
+import LazyLottie from "@/app/components/LazyLottie"
 import successAnimation from "./success.json"
 import { ShareButtons } from "../../ShareButtons"
 import { ReactNode, useState } from "react"
@@ -64,7 +64,7 @@ export const SuccessModalContent = ({
           animate={{
             scale: [1, 1.1, 1],
           }}>
-          <Lottie
+          <LazyLottie
             style={{
               pointerEvents: "none",
             }}

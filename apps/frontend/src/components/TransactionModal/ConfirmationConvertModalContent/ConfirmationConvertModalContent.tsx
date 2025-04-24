@@ -18,18 +18,6 @@ export const ConfirmationConvertModalContent = ({
   return (
     <VStack align={"center"} p={6} gap={2}>
       <Image src="/images/b3trvot3-tokens.png" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
-      {/* <Lottie
-        style={{
-          pointerEvents: "none",
-        }}
-        options={{
-          loop: true,
-          autoplay: true,
-          animationData: confirmationAnimation,
-        }}
-        height={200}
-        width={200}
-      /> */}
       <Text
         style={{ fontFamily: "Instrument Sans, sans-serif" }}
         fontSize={28}

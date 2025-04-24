@@ -1,5 +1,5 @@
 import { Heading, Link, VStack } from "@chakra-ui/react"
-import Lottie from "react-lottie"
+import LazyLottie from "@/app/components/LazyLottie"
 import loadingAnimation from "./loading.json"
 import { ReactNode } from "react"
 import { ModalAnimation } from "../ModalAnimation"
@@ -24,7 +24,7 @@ export const LoadingModalContent = ({
         <Heading data-testid={"tx-modal-title"} size="md">
           {title}
         </Heading>
-        <Lottie
+        <LazyLottie
           style={{
             pointerEvents: "none",
           }}

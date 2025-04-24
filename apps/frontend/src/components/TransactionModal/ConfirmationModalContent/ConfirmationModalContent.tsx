@@ -1,5 +1,5 @@
 import { Heading, VStack, Text } from "@chakra-ui/react"
-import Lottie from "react-lottie"
+import LazyLottie from "@/app/components/LazyLottie"
 import confirmationAnimation from "./confirmation.json"
 import { ReactNode } from "react"
 
@@ -17,7 +17,7 @@ export const ConfirmationModalContent = ({
       <Heading size="md" data-testid={"tx-modal-title"}>
         {title}
       </Heading>
-      <Lottie
+      <LazyLottie
         style={{
           pointerEvents: "none",
         }}
