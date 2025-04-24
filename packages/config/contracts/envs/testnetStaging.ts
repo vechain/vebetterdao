@@ -164,5 +164,7 @@ export function createTestnetStagingConfig() {
     ],
 
     GM_PERCENTAGE_OF_TREASURY: 2500, // 25% of the treasury will be used for GM Holder Rewards
+
+    GM_MULTIPLIERS_V2: [0, 110, 120, 150, 200, 250, 300, 500, 1000, 2500], // GM multipiers according
   })
 }

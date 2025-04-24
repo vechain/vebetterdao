@@ -48,6 +48,13 @@ import {
   GovernorQuorumLogicV3,
   GovernorVotesLogicV3,
   GovernorStateLogicV3,
+  GovernorClockLogicV5,
+  GovernorConfiguratorV5,
+  GovernorDepositLogicV5,
+  GovernorFunctionRestrictionsLogicV5,
+  GovernorProposalLogicV5,
+  GovernorQuorumLogicV5,
+  GovernorStateLogicV5,
   PassportChecksLogic,
   PassportEntityLogic,
   PassportPoPScoreLogic,
@@ -88,6 +95,7 @@ import {
   B3TRMultiSig,
   EmissionsV2,
   B3TRGovernorV5,
+  GovernorVotesLogicV5,
 } from "../../typechain-types"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
 import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgradeProxy } from "../../scripts/helpers"
@@ -114,10 +122,6 @@ interface DeployInstance {
   vot3: VOT3
   timeLock: TimeLock
   governor: B3TRGovernor
-  governorV1: B3TRGovernorV1
-  governorV2: B3TRGovernorV2
-  governorV3: B3TRGovernorV3
-  governorV4: B3TRGovernorV4
   galaxyMember: GalaxyMember
   x2EarnApps: X2EarnApps
   xAllocationVoting: XAllocationVoting
@@ -166,6 +170,14 @@ interface DeployInstance {
   governorQuorumLogicLibV4: GovernorQuorumLogicV4
   governorStateLogicLibV4: GovernorStateLogicV4
   governorVotesLogicLibV4: GovernorVotesLogicV4
+  governorClockLogicLibV5: GovernorClockLogicV5
+  governorConfiguratorLibV5: GovernorConfiguratorV5
+  governorDepositLogicLibV5: GovernorDepositLogicV5
+  governorFunctionRestrictionsLogicLibV5: GovernorFunctionRestrictionsLogicV5
+  governorProposalLogicLibV5: GovernorProposalLogicV5
+  governorQuorumLogicLibV5: GovernorQuorumLogicV5
+  governorStateLogicLibV5: GovernorStateLogicV5
+  governorVotesLogicLibV5: GovernorVotesLogicV5
   passportChecksLogic: PassportChecksLogic
   passportDelegationLogic: PassportDelegationLogic
   passportEntityLogic: PassportEntityLogic
@@ -575,7 +587,7 @@ export const getOrDeployContractInstances = async ({
         },
       ],
       [],
-      [config.EMISSIONS_VOTE_2_EARN_DECAY_PERCENTAGE],
+      [config.GM_PERCENTAGE_OF_TREASURY],
     ],
     {
       versions: [undefined, 2, 3],
@@ -604,7 +616,7 @@ export const getOrDeployContractInstances = async ({
     {
       versions: [undefined, 2, 3, 4, 5],
     },
-  )) as VoterRewardsV4
+  )) as VoterRewards
 
   // Set vote 2 earn (VoterRewards deployed contract) address in emissions
   await emissions.connect(owner).setVote2EarnAddress(await voterRewards.getAddress())
@@ -756,7 +768,7 @@ export const getOrDeployContractInstances = async ({
       [],
       [await veBetterPassport.getAddress()],
       [],
-      [],
+      [], // [levels, config.GM_MULTIPLIERS_V2] -> Will revert if emissions is not bootstrapped
     ],
     {
       versions: [undefined, 2, 3, 4, 5, 6],
@@ -982,6 +994,14 @@ export const getOrDeployContractInstances = async ({
     governorQuorumLogicLibV4: GovernorQuorumLogicLibV4,
     governorStateLogicLibV4: GovernorStateLogicLibV4,
     governorVotesLogicLibV4: GovernorVotesLogicLibV4,
+    governorClockLogicLibV5: GovernorClockLogicLibV5,
+    governorConfiguratorLibV5: GovernorConfiguratorLibV5,
+    governorDepositLogicLibV5: GovernorDepositLogicLibV5,
+    governorFunctionRestrictionsLogicLibV5: GovernorFunctionRestrictionsLogicLibV5,
+    governorProposalLogicLibV5: GovernorProposalLogicLibV5,
+    governorQuorumLogicLibV5: GovernorQuorumLogicLibV5,
+    governorStateLogicLibV5: GovernorStateLogicLibV5,
+    governorVotesLogicLibV5: GovernorVotesLogicLibV5,
     passportChecksLogic: PassportChecksLogic,
     passportDelegationLogic: PassportDelegationLogic,
     passportEntityLogic: PassportEntityLogic,

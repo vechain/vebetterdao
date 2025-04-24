@@ -167,5 +167,7 @@ export function createLocalConfig() {
     ],
 
     GM_PERCENTAGE_OF_TREASURY: 2500, // 25% of the treasury will be used for GM Holder Rewards
+
+    GM_MULTIPLIERS_V2: [0, 110, 120, 150, 200, 250, 300, 500, 1000, 2500], // GM multipiers scaled -> [0, 1.1x, 1.2x, 1.5x, 2x, 2.5x, 3x, 5x, 10x, 25x]
   })
 }
