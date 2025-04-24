@@ -51,11 +51,18 @@ interface IVoterRewards {
   event Initialized(uint64 version);
 
   /// @notice Emitted when reward is claimed
+  /// @dev This event is deprecated, use RewardClaimedV2 instead.
+  /// @param cycle The reward cycle
+  /// @param voter The voter's address
+  /// @param reward The reward amount
+  event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward);
+
+  /// @notice Emitted when reward is claimed, V2.
   /// @param cycle The reward cycle
   /// @param voter The voter's address
   /// @param reward The reward amount
   /// @param gmReward The GM reward amount
-  event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward, uint256 gmReward);
+  event RewardClaimedV2(uint256 indexed cycle, address indexed voter, uint256 reward, uint256 gmReward);
 
   /// @notice Emitted when role admin is changed
   /// @param role The role being modified
@@ -100,6 +107,11 @@ interface IVoterRewards {
   /// @param level The level being modified
   /// @param multiplier The new multiplier value
   event LevelToMultiplierSet(uint256 indexed level, uint256 multiplier);
+
+  /// @notice Emitted when the level to multiplier mapping is updated and will be applied to the next cycle.
+  /// @param level - The level of the Galaxy Member NFT.
+  /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
+  event LevelToMultiplierPending(uint256 indexed level, uint256 multiplier);
 
   /// @notice Emitted when quadratic rewarding is toggled
   /// @param disabled The new disabled state

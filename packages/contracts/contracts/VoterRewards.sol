@@ -72,6 +72,7 @@ import "@openzeppelin/contracts/utils/types/Time.sol";
  * - Updated the claimReward function to support GM rewards pool.
  * - Added a function to get the total GM Weight for a user in a specific cycle.
  * - Added a function to get the total GM Weight in a specific cycle.
+ * - Added the abiltity to be able to update GM Multipliers mid cycle.
  */
 contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUpgradeable {
   using Checkpoints for Checkpoints.Trace208; // Checkpoints library for managing checkpoints of the selected level of the user
@@ -87,6 +88,11 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
   /// @notice The scaling factor for the rewards calculation.
   uint256 public constant SCALING_FACTOR = 1e6;
+
+  struct GMMultiplier {
+    uint256 level;
+    uint256 multiplier;
+  }
 
   /// @custom:storage-location erc7201:b3tr.storage.VoterRewards
   struct VoterRewardsStorage {
@@ -107,11 +113,13 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     mapping(uint256 proposalId => mapping(uint256 tokenId => bool)) proposalToGalaxyMemberToHasVoted;
     // proposalId => nodeId => hasVoted (keeps track of whether a vechain node has been used while attached to a galaxy member NFT when voting for a proposal)
     mapping(uint256 proposalId => mapping(uint256 nodeId => bool)) proposalToNodeToHasVoted;
-    // --------------------------- V4 Additions --------------------------- //
+    // --------------------------- V5 Additions --------------------------- //
     // cycle => total GM Weight used for rewards in the cycle
     mapping(uint256 cycle => uint256 totalGMWeight) cycleToTotalGMWeight;
     // cycle => voter => total GM Weight used for rewards in the cycle
     mapping(uint256 cycle => mapping(address voter => uint256 gmWeight)) cycleToVoterToGMWeight;
+    // Incoming GM Multipliers, these are the multipliers that will be used for the next cycle
+    mapping(uint256 cycle => GMMultiplier[] incomingGMMultipliers) cycleToIncomingGMMultipliers;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.VoterRewards")) - 1)) & ~bytes32(uint256(0xff))
@@ -133,11 +141,18 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   event VoteRegistered(uint256 indexed cycle, address indexed voter, uint256 votes, uint256 rewardWeightedVote);
 
   /// @notice Emitted when a user claims their rewards.
+  /// @dev This event is deprecated, use RewardClaimedV2 instead.
+  /// @param cycle - The cycle in which the rewards were claimed.
+  /// @param voter - The address of the voter.
+  /// @param reward - The amount of B3TR reward claimed by the voter.
+  event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward);
+
+  /// @notice Emitted when a user claims their rewards, V2.
   /// @param cycle - The cycle in which the rewards were claimed.
   /// @param voter - The address of the voter.
   /// @param reward - The amount of B3TR reward claimed by the voter.
   /// @param gmReward - The amount of B3TR GM reward claimed by the voter.
-  event RewardClaimed(uint256 indexed cycle, address indexed voter, uint256 reward, uint256 gmReward);
+  event RewardClaimedV2(uint256 indexed cycle, address indexed voter, uint256 reward, uint256 gmReward);
 
   /// @notice Emitted when the Galaxy Member contract address is set.
   /// @param newAddress - The address of the new Galaxy Member contract.
@@ -148,6 +163,11 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param newAddress - The address of the new Emissions contract.
   /// @param oldAddress - The address of the old Emissions contract.
   event EmissionsAddressUpdated(address indexed newAddress, address indexed oldAddress);
+
+  /// @notice Emitted when the level to multiplier mapping is updated and will be applied to the next cycle.
+  /// @param level - The level of the Galaxy Member NFT.
+  /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
+  event LevelToMultiplierPending(uint256 indexed level, uint256 multiplier);
 
   /// @notice Emitted when the level to multiplier mapping is set.
   /// @param level - The level of the Galaxy Member NFT.
@@ -210,6 +230,17 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     _grantRole(CONTRACTS_ADDRESS_MANAGER_ROLE, contractsAddressManager);
   }
 
+  /// @notice Reinitializes the contract with new GM Multipliers.
+  /// @param levels - The levels of the Galaxy Member NFTs.
+  /// @param multipliers - The multipliers for the levels of the Galaxy Member NFTs.
+  function initializeV5(uint256[] memory levels, uint256[] memory multipliers) external reinitializer(5) {
+    require(levels.length == multipliers.length, "VoterRewards: levels and multipliers must have the same length");
+    // Loop through the levels and multipliers and set the level to multiplier mapping.
+    for (uint256 i; i < levels.length; i++) {
+      _setLevelToMultiplier(levels[i], multipliers[i]);
+    }
+  }
+
   /// @notice Upgrade the implementation of the VoterRewards contract.
   /// @dev Only the address with the UPGRADER_ROLE can call this function.
   /// @param newImplementation - The address of the new implementation contract.
@@ -241,6 +272,9 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     // Get the current cycle number.
     uint256 cycle = $.emissions.getCurrentCycle();
+
+    // If GM Multipliers are being updated, ensure the update has been applied to the cycle.
+    _checkIncomingGMMultipliers(cycle);
 
     // Determine the reward multiplier based on the GM NFT level and if the GM NFT or Vechain node attached have already voted on this proposal.
     uint256 multiplier = getMultiplier(selectedGMNFT, proposalId);
@@ -314,7 +348,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     require($.b3tr.transfer(voter, totalReward), "VoterRewards: transfer failed");
 
     // Emit an event to log the reward claimed by the voter.
-    emit RewardClaimed(cycle, voter, reward, gmReward);
+    emit RewardClaimedV2(cycle, voter, reward, gmReward);
   }
 
   // ----------------- Getters ----------------- //
@@ -524,9 +558,10 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   }
 
   /// @notice Set the Galaxy Member level to multiplier mapping.
+  /// @dev This change happens immediately and is not queued.
   /// @param level - The level of the Galaxy Member NFT.
   /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
-  function setLevelToMultiplier(uint256 level, uint256 multiplier) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+  function setLevelToMultiplierNow(uint256 level, uint256 multiplier) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
     require(level > 0, "VoterRewards: level must be greater than 0");
     require(multiplier > 0, "VoterRewards: multiplier must be greater than 0");
 
@@ -534,6 +569,14 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     $.levelToMultiplier[level] = multiplier;
 
     emit LevelToMultiplierSet(level, multiplier);
+  }
+
+  /// @notice Set the Galaxy Member level to multiplier mapping for the next cycle.
+  /// @dev This change happens at the start of the next cycle.
+  /// @param level - The level of the Galaxy Member NFT.
+  /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
+  function setLevelToMultiplier(uint256 level, uint256 multiplier) public virtual onlyRole(DEFAULT_ADMIN_ROLE) {
+    _setLevelToMultiplier(level, multiplier);
   }
 
   /// @notice Set the Emmissions contract.
@@ -582,10 +625,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param votes - The total votes cast by the voter.
   /// @param votePower - The vote power to scale.
   /// @return scaledVotePower - The scaled vote power.
-  function _getScaledVotePower(
-    uint256 votes,
-    uint256 votePower
-  ) private view returns (uint256) {
+  function _getScaledVotePower(uint256 votes, uint256 votePower) private view returns (uint256) {
     // If quadratic rewarding is disabled, return votes as scaled vote power
     if (isQuadraticRewardingDisabledForCurrentCycle()) {
       return votes;
@@ -593,5 +633,47 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     // If quadratic rewarding is enabled, scale the vote power by 1e9 to counteract the square root operation on 1e18.
     return votePower * 1e9;
+  }
+
+  /// @notice Checks if the GM Multipliers require updating for the next cycle and applies the update if necessary.
+  /// @param cycle - The cycle in which the GM Multipliers are being checked.
+  function _checkIncomingGMMultipliers(uint256 cycle) private {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    uint256 incomingGMMultipliersLength = $.cycleToIncomingGMMultipliers[cycle].length;
+
+    // If GM Multipliers are not being updated, return
+    if (incomingGMMultipliersLength == 0) {
+      return;
+    }
+
+    // Apply the new GM Multipliers
+    for (uint256 i; i < incomingGMMultipliersLength; i++) {
+      GMMultiplier memory incomingGMMultiplier = $.cycleToIncomingGMMultipliers[cycle][i];
+
+      // Set the new GM Multiplier for the level
+      $.levelToMultiplier[incomingGMMultiplier.level] = incomingGMMultiplier.multiplier;
+      // Emit an event to log the new GM Multiplier for the level
+      emit LevelToMultiplierSet(incomingGMMultiplier.level, incomingGMMultiplier.multiplier);
+    }
+
+    // Reset the incoming GM Multipliers
+    delete $.cycleToIncomingGMMultipliers[cycle];
+  }
+
+  /// @notice Sets the GM Multiplier for a specific level.
+  /// @param level - The level of the Galaxy Member NFT.
+  /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
+  function _setLevelToMultiplier(uint256 level, uint256 multiplier) private {
+    require(level > 0, "VoterRewards: level must be greater than 0");
+
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+    uint256 currentCycle = $.emissions.getCurrentCycle();
+
+    // Add the new GM Multiplier to the incoming GM Multipliers for the next cycle
+    $.cycleToIncomingGMMultipliers[currentCycle + 1].push(GMMultiplier({ level: level, multiplier: multiplier }));
+    
+    // Emit an event to log the new incoming GM Multiplier for the level
+    emit LevelToMultiplierPending(level, multiplier);
   }
 }
