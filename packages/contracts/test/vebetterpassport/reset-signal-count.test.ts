@@ -5,7 +5,7 @@ import { VeBetterPassport } from "../../typechain-types"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike } from "ethers"
 
-describe("VeBetterPassport (Reset Signal Count) - @shard8d", function () {
+describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
   let veBetterPassport: VeBetterPassport
   let owner: SignerWithAddress
   let otherAccounts: SignerWithAddress[]
