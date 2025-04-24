@@ -921,26 +921,9 @@ export async function deployAll(config: ContractsConfig) {
 
     await transferUpgraderRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferUpgraderRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
-
-    // Transfer UPGRADER_ROLE for nodeManagement
-    const nodeManagementUpgraderRoleForTransfer = await nodeManagement.UPGRADER_ROLE()
-    await nodeManagement
-      .connect(deployer)
-      .grantRole(nodeManagementUpgraderRoleForTransfer, config.CONTRACTS_ADMIN_ADDRESS)
-    await nodeManagement.connect(deployer).renounceRole(nodeManagementUpgraderRoleForTransfer, deployer.address)
-    console.log("Upgrader role transferred for NodeManagement")
-
-    // Transfer UPGRADER_ROLE for X2EarnApps
-    const x2EarnAppsUpgraderRole = await x2EarnApps.UPGRADER_ROLE()
-    await x2EarnApps.connect(deployer).grantRole(x2EarnAppsUpgraderRole, config.CONTRACTS_ADMIN_ADDRESS)
-    await x2EarnApps.connect(deployer).renounceRole(x2EarnAppsUpgraderRole, deployer.address)
-    console.log("Upgrader role transferred for X2EarnApps")
-
-    // Transfer UPGRADER_ROLE for GalaxyMember
-    const galaxyMemberUpgraderRole = await galaxyMember.UPGRADER_ROLE()
-    await galaxyMember.connect(deployer).grantRole(galaxyMemberUpgraderRole, config.CONTRACTS_ADMIN_ADDRESS)
-    await galaxyMember.connect(deployer).renounceRole(galaxyMemberUpgraderRole, deployer.address)
-    console.log("Upgrader role transferred for GalaxyMember")
+    await transferUpgraderRole(nodeManagement, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferUpgraderRole(x2EarnApps, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferUpgraderRole(galaxyMember, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferSettingsManagerRole(veBetterPassport, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
@@ -957,35 +940,23 @@ export async function deployAll(config: ContractsConfig) {
     )
 
     // NodeManagement
-    const nodeManagementUpgraderRoleForValidation = await nodeManagement.UPGRADER_ROLE()
-    const nodeManagementAdminRole = await nodeManagement.DEFAULT_ADMIN_ROLE()
-    console.log("Verifying NodeManagement roles...")
-
-    if (!(await nodeManagement.hasRole(nodeManagementUpgraderRoleForValidation, config.CONTRACTS_ADMIN_ADDRESS))) {
-      throw new Error(`UPGRADER_ROLE not set correctly on NodeManagement for ${config.CONTRACTS_ADMIN_ADDRESS}`)
-    }
-    if (await nodeManagement.hasRole(nodeManagementUpgraderRoleForValidation, deployer.address)) {
-      throw new Error(`UPGRADER_ROLE not removed correctly from deployer on NodeManagement`)
-    }
-    if (!(await nodeManagement.hasRole(nodeManagementAdminRole, TEMP_ADMIN))) {
-      throw new Error(`DEFAULT_ADMIN_ROLE not set correctly on NodeManagement for ${TEMP_ADMIN}`)
-    }
-    console.log("NodeManagement roles verified successfully!")
+    await validateContractRole(
+      nodeManagement,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await nodeManagement.UPGRADER_ROLE(),
+    )
+    await validateContractRole(
+      nodeManagement,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await nodeManagement.DEFAULT_ADMIN_ROLE(),
+    )
 
     // X2EarnApps
-    const x2EarnAppsUpgraderRoleForValidation = await x2EarnApps.UPGRADER_ROLE()
-    console.log("Verifying X2EarnApps roles...")
-
-    if (!(await x2EarnApps.hasRole(x2EarnAppsUpgraderRoleForValidation, config.CONTRACTS_ADMIN_ADDRESS))) {
-      throw new Error(`UPGRADER_ROLE not set correctly on X2EarnApps for ${config.CONTRACTS_ADMIN_ADDRESS}`)
-    }
-    if (await x2EarnApps.hasRole(x2EarnAppsUpgraderRoleForValidation, deployer.address)) {
-      throw new Error(`UPGRADER_ROLE not removed correctly from deployer on X2EarnApps`)
-    }
-    console.log("X2EarnApps roles verified successfully!")
+    await validateContractRole(x2EarnApps, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await x2EarnApps.UPGRADER_ROLE())
 
     // GalaxyMember
-    console.log("Verifying GalaxyMember roles...")
     await validateContractRole(
       galaxyMember,
       config.CONTRACTS_ADMIN_ADDRESS,
@@ -1016,7 +987,6 @@ export async function deployAll(config: ContractsConfig) {
       TEMP_ADMIN,
       await galaxyMember.MINTER_ROLE(),
     )
-    console.log("GalaxyMember roles validated successfully!")
 
     // B3TR
     await validateContractRole(b3tr, await emissions.getAddress(), TEMP_ADMIN, await b3tr.MINTER_ROLE())
