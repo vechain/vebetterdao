@@ -72,4 +72,6 @@ export type ContractsConfig = {
 
   // GM Reward Pool
   GM_PERCENTAGE_OF_TREASURY: number
+
+  GM_MULTIPLIERS_V2: number[]
 }
