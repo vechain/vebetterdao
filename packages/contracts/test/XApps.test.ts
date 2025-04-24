@@ -2686,7 +2686,7 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([creator1.address])
     })
 
-    it("App admin can't add more than 1 creator for the app", async function () {
+    it("App admin can't add more than 3 creator for the app", async function () {
       const { x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2701,21 +2701,61 @@ describe("X-Apps - @shard15", function () {
       // User should be listed as one of the apps creators
       expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([creator1.address])
 
-      // UPDATE : MAX CREATORS = 1 REACHED ( by default the admin on submitApp is the creator )
-      await x2EarnApps.connect(creator2).removeAppCreator(app1Id, creator1.address)
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
-
       // App admin can add more creators for the app
-      await expect(x2EarnApps.connect(creator2).addCreator(app1Id, creator1.address)).to.emit(
+      await expect(x2EarnApps.connect(creator2).addCreator(app1Id, creator2.address)).to.emit(
+        x2EarnApps,
+        "CreatorAddedToApp",
+      )
+      // App admin can add more creators for the app
+      await expect(x2EarnApps.connect(creator2).addCreator(app1Id, creator3.address)).to.emit(
+        x2EarnApps,
+        "CreatorAddedToApp",
+      )
+      // App admin can add more creators for the app
+      await expect(x2EarnApps.connect(creator2).addCreator(app1Id, creator4.address)).to.revertedWithCustomError(
+        x2EarnApps,
+        "X2EarnMaxCreatorsReached",
+      )
+
+      // New creator should be added to the app
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([creator1.address, creator2.address, creator3.address])
+    })
+
+    it("Added creator can't submit another app unless removed from the app as a creator", async function () {
+      const { x2EarnApps, x2EarnCreator } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
+
+      await x2EarnApps.connect(creator1).submitApp(creator2.address, creator2.address, creator2.address, "metadataURI")
+      const app1Id = ethers.keccak256(ethers.toUtf8Bytes(creator2.address))
+
+      // App should be registered successfully
+      expect(await x2EarnApps.isAppUnendorsed(app1Id)).to.eql(true)
+
+      // User should be listed as one of the apps creators
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([creator1.address])
+
+      // Adding creator2 to the app
+      await expect(x2EarnApps.connect(creator2).addCreator(app1Id, creator2.address)).to.emit(
         x2EarnApps,
         "CreatorAddedToApp",
       )
 
-      // New creator should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([creator1.address])
+      expect(await x2EarnApps.isCreatorOfAnyApp(creator2.address)).to.eql(true)
+
+      // the added creator try to submit another app
+      await expect(
+        x2EarnApps.connect(creator2).submitApp(creator4.address, creator4.address, creator4.address, "metadataURI2"),
+      ).to.be.revertedWithCustomError(x2EarnApps, "CreatorNFTAlreadyUsed")
+      // we remove the creator2 from the app, to let him submit another app
+      await x2EarnApps.connect(creator2).removeAppCreator(app1Id, creator2.address)
+      // creator2 should be eligible to submit another app ( go back to the process of minting a new creator NFT)
+      await x2EarnCreator.safeMint(creator2.address)
+      expect(await x2EarnApps.isCreatorOfAnyApp(creator2.address)).to.eql(false)
+      await x2EarnApps.connect(creator2).submitApp(creator3.address, creator3.address, creator3.address, "metadataURI2")
     })
 
-    it("An app can have only 1 creator", async function () {
+    it("An app can have MAX 3 creators", async function () {
       const { x2EarnApps } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -2731,7 +2771,9 @@ describe("X-Apps - @shard15", function () {
       expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([creator1.address])
 
       // Adding another creator should fail
-      await expect(x2EarnApps.connect(creator2).addCreator(app1Id, creator1.address)).to.be.revertedWithCustomError(
+      expect(await x2EarnApps.connect(creator2).addCreator(app1Id, creator2.address))
+      expect(await x2EarnApps.connect(creator2).addCreator(app1Id, creator3.address))
+      await expect(x2EarnApps.connect(creator2).addCreator(app1Id, creator4.address)).to.be.revertedWithCustomError(
         x2EarnApps,
         "X2EarnMaxCreatorsReached",
       )
@@ -2754,20 +2796,20 @@ describe("X-Apps - @shard15", function () {
       // User should be listed as one of the apps creators
       expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address])
 
-      // UPDATE : MAX CREATORS = 1 REACHED ( by default the admin on submitApp is the creator )
-      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[0].address)
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
-
       // App admin can add more creators for the app
       await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
 
       // New creator should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[1].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
 
-      // Adding the same creator again should fail ( MAX CREATORS = 1 REACHED )
+      await x2EarnApps
+        .connect(otherAccounts[2])
+        .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI2")
+
+      // Adding the creator of the appid2 to the appid1 should fail because he is already a creator of the appid1
       await expect(
         x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address),
-      ).to.be.revertedWithCustomError(x2EarnApps, "X2EarnMaxCreatorsReached")
+      ).to.be.revertedWithCustomError(x2EarnApps, "X2EarnAlreadyCreator")
     })
 
     it("Should mint a creator NFT for a creator that gets added after registration that doesnt currently hold one", async function () {
@@ -2781,10 +2823,6 @@ describe("X-Apps - @shard15", function () {
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
 
-      // UPDATE : MAX CREATORS = 1 REACHED ( by default the admin on submitApp is the creator )
-      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[0].address)
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
-
       // Adding a new creator that doesnt hold a creator NFT
       await expect(x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[10].address)).to.emit(
         x2EarnCreator,
@@ -2792,7 +2830,7 @@ describe("X-Apps - @shard15", function () {
       )
 
       // New creator should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[10].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[10].address])
 
       // New creator should have a creator NFT minted for them
       expect(await x2EarnCreator.balanceOf(otherAccounts[10].address)).to.eql(1n)
@@ -2800,10 +2838,6 @@ describe("X-Apps - @shard15", function () {
       // Adding a new creator(otherAccounts[2]) that already holds a creator NFT should not mint a new one
 
       const balanceBefore = await x2EarnCreator.balanceOf(otherAccounts[2].address)
-
-      // MAX CREATORS = 1, REACHED ( removing the previous creator )
-      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[10].address)
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
 
       // Adding the user with a creator NFT
       await expect(x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[2].address)).to.not.emit(
@@ -2825,15 +2859,11 @@ describe("X-Apps - @shard15", function () {
 
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
 
-      // UPDATE : MAX CREATORS = 1 REACHED ( by default the admin on submitApp is the creator )
-      await x2EarnApps.connect(otherAccounts[2]).removeAppCreator(app1Id, otherAccounts[0].address)
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([])
-
       // Adding a new creator
       await x2EarnApps.connect(otherAccounts[2]).addCreator(app1Id, otherAccounts[1].address)
 
       // New creator should be added to the app
-      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[1].address])
+      expect(await x2EarnApps.appCreators(app1Id)).to.deep.equal([otherAccounts[0].address, otherAccounts[1].address])
 
       // New creator should have a creator NFT minted for them
       expect(await x2EarnCreator.balanceOf(otherAccounts[1].address)).to.eql(1n)
