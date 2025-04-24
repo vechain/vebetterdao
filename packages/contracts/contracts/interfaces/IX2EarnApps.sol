@@ -320,7 +320,7 @@ interface IX2EarnApps {
    *
    * @param creator the address of the creator
    */
-  function checkCreatorAlreadyUsed(address creator) external returns (bool);
+  function isCreatorOfAnyApp(address creator) external returns (bool);
 
   /**
    * @dev Remove a creator from the app.

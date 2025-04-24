@@ -18,8 +18,7 @@ async function main() {
   const currentVersion = await x2EarnApps.version()
   console.log("Current contract version:", currentVersion)
   if (parseInt(currentVersion) === 5) {
-    console.log("X2EarnApps is already at version 5, skipping upgrade")
-    process.exit(0)
+    console.log("X2EarnApps is already at version 5, you are upgrading to the same version")
   }
 
   console.log(
@@ -44,20 +43,14 @@ async function main() {
     `Upgrading X2EarnApps contract at address: ${config.x2EarnAppsContractAddress} on network: ${config.network.name}`,
   )
 
-  const x2EarnAppsV5 = (await upgradeProxy(
-    "X2EarnAppsV4",
-    "X2EarnApps",
-    config.x2EarnAppsContractAddress,
-    [config.x2EarnRewardsPoolContractAddress],
-    {
-      version: 5,
-      libraries: {
-        AdministrationUtils: await AdministrationUtils.getAddress(),
-        EndorsementUtils: await EndorsementUtils.getAddress(),
-        VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
-      },
+  const x2EarnAppsV5 = (await upgradeProxy("X2EarnAppsV4", "X2EarnApps", config.x2EarnAppsContractAddress, [], {
+    version: 5,
+    libraries: {
+      AdministrationUtils: await AdministrationUtils.getAddress(),
+      EndorsementUtils: await EndorsementUtils.getAddress(),
+      VoteEligibilityUtils: await VoteEligibilityUtils.getAddress(),
     },
-  )) as X2EarnApps
+  })) as X2EarnApps
 
   console.log(`X2EarnApps upgraded`)
 

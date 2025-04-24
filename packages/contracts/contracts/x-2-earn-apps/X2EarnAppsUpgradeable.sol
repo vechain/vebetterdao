@@ -128,7 +128,7 @@ abstract contract X2EarnAppsUpgradeable is Initializable, IX2EarnApps {
   /**
    * @dev Returns true if the creator has already been used for another app.
    */
-  function checkCreatorAlreadyUsed(address creator) public view virtual returns (bool);
+  function isCreatorOfAnyApp(address creator) public view virtual returns (bool);
 
   /**
    * @dev Function to get the metadataURI of an app.

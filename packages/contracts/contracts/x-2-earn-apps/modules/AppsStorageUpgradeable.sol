@@ -125,7 +125,7 @@ abstract contract AppsStorageUpgradeable is Initializable, X2EarnAppsUpgradeable
       revert X2EarnUnverifiedCreator(msg.sender);
     }
 
-    if(checkCreatorAlreadyUsed(msg.sender)) {
+    if(isCreatorOfAnyApp(msg.sender)) {
       revert CreatorNFTAlreadyUsed(msg.sender);
     }
 

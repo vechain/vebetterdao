@@ -40,7 +40,7 @@ import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
 abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradeable {
   uint256 public constant MAX_MODERATORS = 100;
   uint256 public constant MAX_REWARD_DISTRIBUTORS = 100;
-  uint256 public constant MAX_CREATORS = 1;
+  uint256 public constant MAX_CREATORS = 3;
 
   /// @custom:storage-location erc7201:b3tr.storage.X2EarnApps.Administration
   struct AdministrationStorage {
@@ -342,7 +342,7 @@ abstract contract AdministrationUpgradeable is Initializable, X2EarnAppsUpgradea
    *
    * @param creator the address of the creator
    */
-  function checkCreatorAlreadyUsed(address creator) public view override returns (bool) {
+  function isCreatorOfAnyApp(address creator) public view override returns (bool) {
     AdministrationStorage storage $ = _getAdministrationStorage();
     return $._creatorApps[creator] > 0;
   }

@@ -564,7 +564,7 @@ export const participateInAllocationVoting = async (
 
   // Get or create app ID
   let appId: string | undefined
-  const appsAlreadySubmitted = await x2EarnApps.checkCreatorAlreadyUsed(user.address)
+  const appsAlreadySubmitted = await x2EarnApps.isCreatorOfAnyApp(user.address)
 
   if (!appsAlreadySubmitted) {
     // Create new app
