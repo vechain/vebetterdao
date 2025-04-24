@@ -5,13 +5,13 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
     size = "512"
   }
 
-  function_name = "resetUserSignalsWithReason_vebetterpassport_${var.network == "dev" ? "testnet" : "mainnet"}"
+  function_name = "resetUserSignalsWithReason_vebetterpassport_${terraform.workspace == "dev" ? "testnet" : "mainnet"}"
   handler       = "index.handler"
   filename      = "api/lambda/function.zip"
 
   logging_config {
     log_format = "Text"
-    log_group  = "/aws/lambda/resetUserSignalsWithReason_vebetterpassport_${var.network == "dev" ? "testnet" : "mainnet"}"
+    log_group  = "/aws/lambda/resetUserSignalsWithReason_vebetterpassport_${terraform.workspace == "dev" ? "testnet" : "mainnet"}"
   }
 
   memory_size                    = "128"

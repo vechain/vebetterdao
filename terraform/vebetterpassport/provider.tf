@@ -19,14 +19,9 @@ provider "aws" {
   
   default_tags {
     tags = {
+      Environment = terraform.workspace == "dev" ? "testnet" : "mainnet"
       Project     = "vebetterpassport"
       ManagedBy   = "terraform"
     }
   }
-}
-
-variable "network" {
-  description = "Network to deploy to (dev for testnet, prod for mainnet)"
-  type        = string
-  default     = "dev"
 }
