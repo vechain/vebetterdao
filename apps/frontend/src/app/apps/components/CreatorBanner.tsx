@@ -7,7 +7,7 @@ import {
   CreatorApplyNow,
 } from "./creatorBanners"
 import { useHasCreatorNFT, useCreatorSubmission } from "@/api/contracts/x2EarnCreator"
-import { useHasAlreadySubmittedApp } from "@/api/contracts/xApps"
+import { useIsCreatorOfAnyApp } from "@/api/contracts/xApps"
 
 export const CreatorBanner = () => {
   const { account } = useWallet()
@@ -22,7 +22,7 @@ export const CreatorBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
 
   const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
-  const { data: hasAlreadySubmitted } = useHasAlreadySubmittedApp(account?.address ?? "")
+  const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(account?.address ?? "")
 
   const isApproved = !!account?.address && hasCreatorNFT && !hasAlreadySubmitted
   const isRejected = !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
@@ -40,11 +40,6 @@ export const CreatorBanner = () => {
     return <CreatorApplicationInProgress />
   }
 
-  // flemme de ca
-  // if (hasAlreadySubmitted) {
-  //   return <CreatorApplicationAlreadySubmitted />
-  // }
-  // ne retourne pas le creator apply now, si on a deja soumis une app, montre rien
   if (hasAlreadySubmitted) {
     return null
   }

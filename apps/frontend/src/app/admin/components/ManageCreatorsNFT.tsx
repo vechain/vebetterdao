@@ -27,7 +27,7 @@ import { useForm } from "react-hook-form"
 import { useAdminCreatorNFT } from "@/hooks/useAdminCreatorNFT"
 import { useHasCreatorNFT } from "@/api/contracts/x2EarnCreator/useHasCreatorNft"
 import { WalletAddressInput } from "@/app/components/Input"
-import { useHasAlreadySubmittedApp, useGetCreatorApps } from "@/api"
+import { useIsCreatorOfAnyApp, useAppsCountFromCreator } from "@/api"
 
 type NFTFormInputs = {
   creatorWalletAddress: string
@@ -73,8 +73,8 @@ export const ManageCreatorsNFT = () => {
   })
 
   const hasNFT = useHasCreatorNFT(lookupAddress ?? "")
-  const { data: hasAlreadySubmitted } = useHasAlreadySubmittedApp(lookupCreatorAddress ?? "")
-  const { data: creatorApps } = useGetCreatorApps(lookupCreatorAddress ?? "")
+  const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(lookupCreatorAddress ?? "")
+  const { data: creatorApps } = useAppsCountFromCreator(lookupCreatorAddress ?? "")
 
   const { error, status, txReceipt, sendTransaction, resetStatus } = useMemo(() => {
     return actionType === "mint" ? mintNFT : burnNFT

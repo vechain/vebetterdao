@@ -1,4 +1,4 @@
-import { useXApps, useXNode, useHasAlreadySubmittedApp } from "@/api"
+import { useXApps, useXNode, useIsCreatorOfAnyApp } from "@/api"
 import { AppsBanner, JoinB3TRAppsBanner } from "@/components"
 import { VStack, Heading, Text, Box } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
@@ -28,7 +28,7 @@ export const AppsPageContent = () => {
   const { data: currentAllocationAppIds, isLoading: isCurrentAllocationAppIdsLoading } = useCurrentAllocationAppIds()
   const appsLoading = isXAppsLoading || isCurrentAllocationAppIdsLoading
 
-  const { data: hasAlreadySubmittedApp } = useHasAlreadySubmittedApp(account?.address ?? "")
+  const { data: isCreatorOfAnyApp } = useIsCreatorOfAnyApp(account?.address ?? "")
 
   // New apps looking for endorsement slider
   const newApps = xApps?.newLookingForEndorsement ?? []
@@ -70,8 +70,7 @@ export const AppsPageContent = () => {
         />
       </VStack>
 
-      {/* if has already submitted an app, don't show the banner */}
-      {!hasAlreadySubmittedApp && <JoinB3TRAppsBanner />}
+      {!isCreatorOfAnyApp && <JoinB3TRAppsBanner />}
 
       <Box mt={10}>
         <AppsDisclaimer />
