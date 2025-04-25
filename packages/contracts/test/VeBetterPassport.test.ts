@@ -21,7 +21,7 @@ import {
   participateInAllocationVoting,
   upgradeNFTtoLevel,
 } from "./helpers"
-import { describe, it, beforeEach } from "mocha"
+import { describe, it } from "mocha"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { ZeroAddress } from "ethers"
 import { createTestConfig } from "./helpers/config"
@@ -29,56 +29,23 @@ import { deployAndUpgrade, deployProxyOnly, initializeProxy, upgradeProxy } from
 import {
   B3TRGovernor,
   Emissions,
-  GalaxyMember,
   VeBetterPassport,
   VeBetterPassportV1,
   VeBetterPassportV2,
   VoterRewards,
-  X2EarnApps,
   X2EarnRewardsPool,
   XAllocationPool,
   XAllocationVoting,
 } from "../typechain-types"
 import { endorseApp } from "./helpers/xnodes"
 import { createLocalConfig } from "@repo/config/contracts/envs/local"
-import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers"
-
-interface LoadedContractsInstances {
-  veBetterPassport: VeBetterPassport
-  x2EarnApps: X2EarnApps
-  xAllocationVoting: XAllocationVoting
-  galaxyMember: GalaxyMember
-}
 
 describe("VeBetterPassport - @shard8", function () {
-  // Environment params
-  let creator1: HardhatEthersSigner
-  let creator2: HardhatEthersSigner
-
-  beforeEach(async function () {
-    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
-    creator1 = creators[0]
-    creator2 = creators[1]
-  })
-
-  // SETUP FIXTURE ( TESTING ENVIRONMENT )
-  async function setupFixture(): Promise<LoadedContractsInstances> {
-    const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await getOrDeployContractInstances({
-      forceDeploy: true,
-    })
-
-    return {
-      veBetterPassport,
-      x2EarnApps,
-      xAllocationVoting,
-      galaxyMember,
-    }
-  }
-
   describe("Contract parameters", function () {
     it("Should have contract addresses set correctly", async function () {
-      const { veBetterPassport, x2EarnApps, xAllocationVoting, galaxyMember } = await loadFixture(setupFixture)
+      const { veBetterPassport, xAllocationVoting, x2EarnApps, galaxyMember } = await getOrDeployContractInstances({
+        forceDeploy: true,
+      })
 
       // Verify contract addresses
       expect(await veBetterPassport.getXAllocationVoting()).to.equal(await xAllocationVoting.getAddress())
@@ -349,7 +316,7 @@ describe("VeBetterPassport - @shard8", function () {
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
 
-    it("Should not have any state conflicts after upgrading to V3", async function () {
+    it.only("Should not have any state conflicts after upgrading to V3", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       config.EMISSIONS_CYCLE_DURATION = 20
@@ -413,6 +380,7 @@ describe("VeBetterPassport - @shard8", function () {
         governorStateLogicLib,
         governorVotesLogicLib,
         B3trContract,
+        creators,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -706,6 +674,8 @@ describe("VeBetterPassport - @shard8", function () {
       await getVot3Tokens(owner, "10000")
       await getVot3Tokens(otherAccounts[4], "10000")
 
+      const creator1 = creators[0]
+      const creator2 = creators[1]
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
@@ -1686,9 +1656,11 @@ describe("VeBetterPassport - @shard8", function () {
     })
 
     it("App admin should be able to reset signals of a user and total signals should be tracked correctly", async function () {
-      const { veBetterPassport, otherAccount, owner, otherAccounts, x2EarnApps } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+      const { veBetterPassport, otherAccount, owner, otherAccounts, x2EarnApps, creators } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+      const creator1 = creators[0]
 
       await x2EarnApps
         .connect(owner)
@@ -2723,21 +2695,24 @@ describe("VeBetterPassport - @shard8", function () {
       ).to.be.revertedWithCustomError(veBetterPassport, "MaxEntitiesPerPassportReached")
     })
 
-    it("Should assign an enities score correctly", async function () {
+    it.only("Should assign an enities score correctly", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE = 5
 
-      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts, creators } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions()
 
       const passport = otherAccounts[0]
 
+      const creator1 = creators[0]
+      const creator2 = creators[1]
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
       await x2EarnApps
@@ -2850,12 +2825,15 @@ describe("VeBetterPassport - @shard8", function () {
         xAllocationVoting,
         x2EarnRewardsPool,
         minterAccount,
+        creators,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
 
       const user1 = otherAccounts[0]
       const user2 = otherAccounts[1]
+      const creator1 = creators[0]
+      const creator2 = creators[1]
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions()
@@ -3013,15 +2991,19 @@ describe("VeBetterPassport - @shard8", function () {
     it("Should remove an enities score correctly", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
-      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts, creators } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
 
       // Bootstrap emissions
       await bootstrapAndStartEmissions()
 
       const passport = otherAccounts[0]
+
+      const creator1 = creators[0]
+      const creator2 = creators[1]
 
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
@@ -3396,7 +3378,7 @@ describe("VeBetterPassport - @shard8", function () {
 
     it("Should be able to assign multiple entites to a passport, do actions with entities and use the combintation to meet personhood status", async function () {
       const config = createTestConfig()
-      const { veBetterPassport, x2EarnApps, owner, otherAccounts } = await getOrDeployContractInstances({
+      const { veBetterPassport, x2EarnApps, owner, otherAccounts, creators } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
       })
@@ -3404,6 +3386,7 @@ describe("VeBetterPassport - @shard8", function () {
       const enity1 = otherAccounts[0]
       const enity2 = otherAccounts[1]
       const passport = otherAccounts[2]
+      const creator1 = creators[0]
 
       // Set the threshold to 500
       await veBetterPassport.connect(owner).setThresholdPoPScore(500)
@@ -3550,7 +3533,7 @@ describe("VeBetterPassport - @shard8", function () {
   })
 
   describe("Passport Delegation", function () {
-    it("Should be able to delegate personhood with signature", async function () {
+    it.only("Should be able to delegate personhood with signature", async function () {
       const {
         xAllocationVoting,
         x2EarnApps,
@@ -3558,6 +3541,7 @@ describe("VeBetterPassport - @shard8", function () {
         owner,
         veBetterPassport,
         otherAccount: delegatee,
+        creators,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -3588,6 +3572,9 @@ describe("VeBetterPassport - @shard8", function () {
 
       // expect owner to be person
       expect(await veBetterPassport.isPerson(owner.address)).to.deep.equal([true, "User is whitelisted"])
+
+      const creator1 = creators[0]
+      const creator2 = creators[1]
 
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
@@ -3682,6 +3669,7 @@ describe("VeBetterPassport - @shard8", function () {
         owner,
         veBetterPassport,
         otherAccount: delegatee,
+        creators,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -3713,6 +3701,8 @@ describe("VeBetterPassport - @shard8", function () {
       // expect owner to be person
       expect(await veBetterPassport.isPerson(owner.address)).to.deep.equal([true, "User is whitelisted"])
 
+      const creator1 = creators[0]
+      const creator2 = creators[1]
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
@@ -3802,6 +3792,7 @@ describe("VeBetterPassport - @shard8", function () {
         owner,
         veBetterPassport,
         otherAccount: delegatee,
+        creators,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -3833,6 +3824,7 @@ describe("VeBetterPassport - @shard8", function () {
       // expect owner to be person
       expect(await veBetterPassport.isPerson(owner.address)).to.deep.equal([true, "User is whitelisted"])
 
+      const creator1 = creators[0]
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
@@ -4077,7 +4069,7 @@ describe("VeBetterPassport - @shard8", function () {
       expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[C.address], ZeroAddress])
     })
 
-    it("Should not be able to vote if delegating and not delegatee with allocation voting", async function () {
+    it.only("Should not be able to vote if delegating and not delegatee with allocation voting", async function () {
       const {
         xAllocationVoting,
         x2EarnApps,
@@ -4085,6 +4077,7 @@ describe("VeBetterPassport - @shard8", function () {
         owner,
         veBetterPassport,
         otherAccount: delegatee,
+        creators,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
       })
@@ -4107,6 +4100,8 @@ describe("VeBetterPassport - @shard8", function () {
       // expect owner to be person
       expect(await veBetterPassport.isPerson(owner.address)).to.deep.equal([true, "User is whitelisted"])
 
+      const creator1 = creators[0]
+      const creator2 = creators[1]
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
@@ -4924,7 +4919,7 @@ describe("VeBetterPassport - @shard8", function () {
       )
     })
 
-    it("Should be able to assign multiple entites to a passport, do actions and use the combintation to meet personhood status", async function () {
+    it.only("Should be able to assign multiple entites to a passport, do actions and use the combintation to meet personhood status", async function () {
       const config = createTestConfig()
       const {
         veBetterPassport,
@@ -4932,6 +4927,7 @@ describe("VeBetterPassport - @shard8", function () {
         owner,
         otherAccount: delegatee,
         otherAccounts,
+        creators,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -4940,6 +4936,7 @@ describe("VeBetterPassport - @shard8", function () {
       const enity1 = otherAccounts[0]
       const enity2 = otherAccounts[1]
       const passport = otherAccounts[2]
+      const creator1 = creators[0]
 
       // Set the score threshold to 500
       await veBetterPassport.connect(owner).setThresholdPoPScore(500)
@@ -5481,14 +5478,6 @@ describe("VeBetterPassport - @shard8", function () {
 
 // Isolated tests for shard16 because of the size of the tests
 describe("VeBetterPassport - @shard16", function () {
-  let creator1: HardhatEthersSigner
-  let creator2: HardhatEthersSigner
-
-  beforeEach(async function () {
-    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
-    creator1 = creators[0]
-    creator2 = creators[1]
-  })
   describe("Passport PoP Score", function () {
     it("Should be able to register participation of user with ACTION_REGISTRAR_ROLE", async function () {
       const { x2EarnApps, otherAccounts, owner, veBetterPassport, otherAccount, xAllocationVoting } =
@@ -5689,10 +5678,11 @@ describe("VeBetterPassport - @shard16", function () {
     it("Should calculate cumulative score correctly with different security multipliers", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
-      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts, creators } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
 
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
@@ -5701,6 +5691,9 @@ describe("VeBetterPassport - @shard16", function () {
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
+
+      const creator1 = creators[0]
+      const creator2 = creators[1]
 
       const app2Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[3].address))
       await x2EarnApps
@@ -5844,13 +5837,16 @@ describe("VeBetterPassport - @shard16", function () {
       expect(await veBetterPassport.userRoundScoreApp(otherAccount, 1, app1Id)).to.equal(200)
     })
 
-    it("Should calculate cumulative score correctly with different security multipliers", async function () {
+    it.only("Should calculate cumulative score correctly with different security multipliers", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
-      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts, creators } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+      const creator1 = creators[0]
+      const creator2 = creators[1]
 
       //Add apps
       const app1Id = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[2].address))
@@ -5915,13 +5911,16 @@ describe("VeBetterPassport - @shard16", function () {
       expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 5)).to.equal(780)
     })
 
-    it("Should be able to update rounds for cumulative scores", async function () {
+    it.only("Should be able to update rounds for cumulative scores", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
-      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts } = await getOrDeployContractInstances({
-        forceDeploy: true,
-        config,
-      })
+      const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts, creators } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+          config,
+        })
+      const creator1 = creators[0]
+      const creator2 = creators[1]
 
       await bootstrapAndStartEmissions()
 
@@ -6156,10 +6155,12 @@ describe("VeBetterPassport - @shard16", function () {
       expect(await veBetterPassport.userRoundScoreApp(otherAccount, 1, app1Id)).to.equal(100n)
     })
 
-    it("Should not register action score if user is blacklisted", async function () {
-      const { veBetterPassport, owner, otherAccounts, otherAccount, x2EarnApps } = await getOrDeployContractInstances({
-        forceDeploy: true,
-      })
+    it.only("Should not register action score if user is blacklisted", async function () {
+      const { veBetterPassport, owner, otherAccounts, otherAccount, x2EarnApps, creators } =
+        await getOrDeployContractInstances({
+          forceDeploy: true,
+        })
+      const creator1 = creators[0]
 
       await veBetterPassport.grantRole(await veBetterPassport.ACTION_SCORE_MANAGER_ROLE(), owner)
       await veBetterPassport.grantRole(await veBetterPassport.ACTION_REGISTRAR_ROLE(), owner)
@@ -7138,6 +7139,7 @@ describe("VeBetterPassport - @shard16", function () {
         B3trContract,
         xAllocationVoting,
         governor,
+        creators,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -7154,10 +7156,10 @@ describe("VeBetterPassport - @shard16", function () {
         .connect(owner)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
       await x2EarnApps
-        .connect(creator1)
+        .connect(creators[0])
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
       await x2EarnApps
-        .connect(creator2)
+        .connect(creators[1])
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
@@ -7402,6 +7404,7 @@ describe("VeBetterPassport - @shard16", function () {
         B3trContract,
         xAllocationVoting,
         governor,
+        creators,
       } = await getOrDeployContractInstances({
         forceDeploy: true,
         config,
@@ -7418,10 +7421,10 @@ describe("VeBetterPassport - @shard16", function () {
         .connect(owner)
         .submitApp(otherAccounts[2].address, otherAccounts[2].address, otherAccounts[2].address, "metadataURI")
       await x2EarnApps
-        .connect(creator1)
+        .connect(creators[0])
         .submitApp(otherAccounts[3].address, otherAccounts[3].address, otherAccounts[3].address, "metadataURI")
       await x2EarnApps
-        .connect(creator2)
+        .connect(creators[1])
         .submitApp(otherAccounts[4].address, otherAccounts[4].address, otherAccounts[4].address, "metadataURI")
 
       await endorseApp(app1Id, otherAccounts[2])
