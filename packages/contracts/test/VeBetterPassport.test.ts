@@ -316,7 +316,7 @@ describe("VeBetterPassport - @shard8", function () {
       expect(newImplAddress.toUpperCase()).to.eql((await implementation.getAddress()).toUpperCase())
     })
 
-    it.only("Should not have any state conflicts after upgrading to V3", async function () {
+    it("Should not have any state conflicts after upgrading to V3", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       config.EMISSIONS_CYCLE_DURATION = 20
@@ -2695,7 +2695,7 @@ describe("VeBetterPassport - @shard8", function () {
       ).to.be.revertedWithCustomError(veBetterPassport, "MaxEntitiesPerPassportReached")
     })
 
-    it.only("Should assign an enities score correctly", async function () {
+    it("Should assign an enities score correctly", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       config.VEPASSPORT_ROUNDS_FOR_CUMULATIVE_PARTICIPATION_SCORE = 5
@@ -3533,7 +3533,7 @@ describe("VeBetterPassport - @shard8", function () {
   })
 
   describe("Passport Delegation", function () {
-    it.only("Should be able to delegate personhood with signature", async function () {
+    it("Should be able to delegate personhood with signature", async function () {
       const {
         xAllocationVoting,
         x2EarnApps,
@@ -4069,7 +4069,7 @@ describe("VeBetterPassport - @shard8", function () {
       expect(await veBetterPassport.getPendingDelegations(B.address)).to.deep.equal([[C.address], ZeroAddress])
     })
 
-    it.only("Should not be able to vote if delegating and not delegatee with allocation voting", async function () {
+    it("Should not be able to vote if delegating and not delegatee with allocation voting", async function () {
       const {
         xAllocationVoting,
         x2EarnApps,
@@ -4919,7 +4919,7 @@ describe("VeBetterPassport - @shard8", function () {
       )
     })
 
-    it.only("Should be able to assign multiple entites to a passport, do actions and use the combintation to meet personhood status", async function () {
+    it("Should be able to assign multiple entites to a passport, do actions and use the combintation to meet personhood status", async function () {
       const config = createTestConfig()
       const {
         veBetterPassport,
@@ -5837,7 +5837,7 @@ describe("VeBetterPassport - @shard16", function () {
       expect(await veBetterPassport.userRoundScoreApp(otherAccount, 1, app1Id)).to.equal(200)
     })
 
-    it.only("Should calculate cumulative score correctly with different security multipliers", async function () {
+    it("Should calculate cumulative score correctly with different security multipliers", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts, creators } =
@@ -5911,7 +5911,7 @@ describe("VeBetterPassport - @shard16", function () {
       expect(await veBetterPassport.getCumulativeScoreWithDecay(otherAccount, 5)).to.equal(780)
     })
 
-    it.only("Should be able to update rounds for cumulative scores", async function () {
+    it("Should be able to update rounds for cumulative scores", async function () {
       const config = createTestConfig()
       config.VEPASSPORT_DECAY_RATE = 20
       const { veBetterPassport, owner, x2EarnApps, otherAccount, otherAccounts, creators } =
@@ -6155,7 +6155,7 @@ describe("VeBetterPassport - @shard16", function () {
       expect(await veBetterPassport.userRoundScoreApp(otherAccount, 1, app1Id)).to.equal(100n)
     })
 
-    it.only("Should not register action score if user is blacklisted", async function () {
+    it("Should not register action score if user is blacklisted", async function () {
       const { veBetterPassport, owner, otherAccounts, otherAccount, x2EarnApps, creators } =
         await getOrDeployContractInstances({
           forceDeploy: true,
