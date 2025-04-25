@@ -212,7 +212,9 @@ library PassportSignalingLogic {
     bytes32 app,
     address user
   ) external {
-    _assignAppToSignaler(self, app, user);
+    require(user != address(0), "BotSignaling: user cannot be zero");
+
+    self.appOfSignaler[user] = app;
     emit ResetSignalerAssignedToApp(user, app);
   }
 
@@ -229,7 +231,10 @@ library PassportSignalingLogic {
     address user
   ) external {
     require(self.x2EarnApps.isAppAdmin(app, msg.sender), "BotSignaling: caller is not an admin of the app");
-    _assignAppToSignaler(self, app, user);
+    require(app != bytes32(0), "BotSignaling: app cannot be zero");
+    require(user != address(0), "BotSignaling: user cannot be zero");
+
+    self.appOfSignaler[user] = app;
     emit ResetSignalerAssignedToApp(user, app);
   }
 
@@ -247,15 +252,6 @@ library PassportSignalingLogic {
   }
 
   // ---------- Private ---------- //
-
-  /// @notice Private function to assign an app to a signaler
-  function _assignAppToSignaler(PassportStorageTypes.PassportStorage storage self, bytes32 app, address user) private {
-    require(app != bytes32(0), "BotSignaling: app cannot be zero");
-    require(user != address(0), "BotSignaling: user cannot be zero");
-
-    self.appOfSignaler[user] = app;
-  }
-
   /// @notice Private function to remove an app from a signaler
   function _removeAppFromSignaler(
     PassportStorageTypes.PassportStorage storage self,
