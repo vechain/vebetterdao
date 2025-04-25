@@ -3,4 +3,4 @@
 
 yarn lint-staged
 
-./apps/frontend/public/check-unused-assets.sh
+./apps/frontend/scripts/check-unused-assets.sh

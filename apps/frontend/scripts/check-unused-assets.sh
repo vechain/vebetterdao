@@ -8,6 +8,11 @@ FAVICON_CONFIG="$ASSETS_DIR/favicon/browserconfig.xml"
 # Get changed asset files in the current commit (staged), exclude deletions
 changed_assets=$(git diff --cached --name-status | awk '$2 ~ /^apps\/frontend\/public\/assets\// && $1 != "D" { sub(/^apps\/frontend\/public\/assets\//, "", $2); print $2 }' | grep -v ".DS_Store")
 
+# if no changed assets, exit
+if [ -z "$changed_assets" ]; then
+  exit 0
+fi
+
 echo "🔍 Checking for unused changed assets..."
 unused_count=0
 
