@@ -34,6 +34,13 @@ abstract contract VotingSettingsUpgradeable is Initializable, XAllocationVotingG
   /// @custom:storage-location erc7201:b3tr.storage.XAllocationVotingGovernor.VotingSettings
   struct VotingSettingsStorage {
     uint32 _votingPeriod;
+    mapping(address => bool) _autovotingEnabled;
+    mapping(address => UserVotingPreferences) _userVotingPreferences;
+  }
+
+  struct UserVotingPreferences {
+    bytes32[] apps;
+    uint256[] percentages;
   }
 
   // keccak256(abi.encode(uint256(keccak256("b3tr.storage.XAllocationVotingGovernor.VotingSettings")) - 1)) & ~bytes32(uint256(0xff))
@@ -47,6 +54,7 @@ abstract contract VotingSettingsUpgradeable is Initializable, XAllocationVotingG
   }
 
   event VotingPeriodSet(uint256 oldVotingPeriod, uint256 newVotingPeriod);
+  event AutovotingToggled(address indexed account, bool enabled);
 
   /**
    * @dev Initialize the governance parameters.
@@ -87,5 +95,53 @@ abstract contract VotingSettingsUpgradeable is Initializable, XAllocationVotingG
 
     emit VotingPeriodSet($._votingPeriod, newVotingPeriod);
     $._votingPeriod = newVotingPeriod;
+  }
+
+  function _toggleAutovoting(address account) internal virtual {
+    require(account == msg.sender, "VotingSettingsUpgradeable: not authorized");
+    VotingSettingsStorage storage $ = _getVotingSettingsStorage();
+
+    if ($._autovotingEnabled[account]) {
+      _setUserVotingPreferences(account, new bytes32[](0), new uint256[](0));
+    }
+
+    $._autovotingEnabled[account] = !$._autovotingEnabled[account];
+
+    emit AutovotingToggled(account, $._autovotingEnabled[account]);
+  }
+
+  function _isAutovotingEnabled(address account) internal view override returns (bool) {
+    VotingSettingsStorage storage $ = _getVotingSettingsStorage();
+    return $._autovotingEnabled[account];
+  }
+
+  function _setUserVotingPreferences(
+    address account,
+    bytes32[] memory apps,
+    uint256[] memory percentages
+  ) internal virtual {
+    require(apps.length == percentages.length, "VotingSettingsUpgradeable: apps and percentages length mismatch");
+    // Iterate through the apps and percentages to calculate the total weight of votes cast by the voter
+    uint256 totalPercentage;
+    for (uint256 i; i < apps.length; i++) {
+      // app must be a valid app
+      require(x2EarnApps().appExists(apps[i]), "VotingSettingsUpgradeable: invalid app");
+
+      // Check current app against ALL previous apps
+      for (uint256 j; j < i; j++) {
+        require(apps[i] != apps[j], "VotingSettingsUpgradeable: duplicate app");
+      }
+      totalPercentage += percentages[i];
+    }
+
+    require(totalPercentage == 100, "VotingSettingsUpgradeable: total percentage must be 100");
+
+    VotingSettingsStorage storage $ = _getVotingSettingsStorage();
+    $._userVotingPreferences[account] = UserVotingPreferences({ apps: apps, percentages: percentages });
+  }
+
+  function _getUserVotingPreferences(address account) internal view virtual returns (UserVotingPreferences memory) {
+    VotingSettingsStorage storage $ = _getVotingSettingsStorage();
+    return $._userVotingPreferences[account];
   }
 }

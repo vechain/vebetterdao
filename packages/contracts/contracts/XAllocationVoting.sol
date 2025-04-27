@@ -78,6 +78,8 @@ contract XAllocationVoting is
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
   /// @notice The role that can set the addresses of the contracts used by the VoterRewards contract.
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
+  /// @notice The role that can autovote for an address
+  bytes32 public constant AUTOVOTING_ROLE = keccak256("AUTOVOTING_ROLE");
 
   /**
    * @notice Data for initializing the contract
@@ -152,6 +154,34 @@ contract XAllocationVoting is
   }
 
   // ---------- Setters ---------- //
+
+  function castVoteOnBehalfOf(
+    address voter,
+    uint256 roundId,
+    bytes32[] memory appIds,
+    uint256[] memory voteWeights
+  ) public onlyRole(AUTOVOTING_ROLE) {
+    _castVoteOnBehalfOf(voter, roundId, appIds, voteWeights);
+  }
+
+  function toggleAutovoting() public {
+    _toggleAutovoting(_msgSender());
+  }
+
+  function setUserVotingPreferences(bytes32[] memory appIds, uint256[] memory voteWeights) public {
+    _setUserVotingPreferences(_msgSender(), appIds, voteWeights);
+  }
+
+  function userAutovotingEnabled(address account) public view returns (bool) {
+    return _isAutovotingEnabled(account);
+  }
+
+  function getUserVotingPreferences(
+    address account
+  ) public view returns (VotingSettingsUpgradeable.UserVotingPreferences memory) {
+    return _getUserVotingPreferences(account);
+  }
+
   /**
    * @dev Set the address of the X2EarnApps contract
    */

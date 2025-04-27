@@ -134,6 +134,36 @@ abstract contract XAllocationVotingGovernor is
     _countVote(roundId, voter, appIds, voteWeights);
   }
 
+  function _castVoteOnBehalfOf(
+    address voter,
+    uint256 roundId,
+    bytes32[] memory appIds,
+    uint256[] memory voteWeights
+  ) internal {
+    _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
+
+    require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
+    require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
+
+    require(_isAutovotingEnabled(voter), "XAllocationVotingGovernor: autovoting is not enabled");
+
+    // TODO: Validate that the voting weights respect the user's preferences
+
+    uint256 _currentRoundSnapshot = currentRoundSnapshot();
+
+    (bool isPerson, string memory explanation) = veBetterPassport().isPersonAtTimepoint(
+      voter,
+      SafeCast.toUint48(_currentRoundSnapshot)
+    );
+
+    // Check if the voter or the delegator of personhood to the voter is a person and returning error with the reason
+    if (!isPerson) {
+      revert GovernorPersonhoodVerificationFailed(voter, explanation);
+    }
+
+    _countVote(roundId, voter, appIds, voteWeights);
+  }
+
   // ---------- Internal and Private ---------- //
 
   /**
@@ -339,4 +369,6 @@ abstract contract XAllocationVotingGovernor is
    * @dev Returns the VoterRewards contract.
    */
   function voterRewards() public view virtual returns (IVoterRewards);
+
+  function _isAutovotingEnabled(address account) internal view virtual returns (bool);
 }

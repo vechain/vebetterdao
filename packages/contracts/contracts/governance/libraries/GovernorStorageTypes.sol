@@ -94,5 +94,7 @@ library GovernorStorageTypes {
 
     // ------------------------------- Passport -------------------------------
     IVeBetterPassport veBetterPassport;
+    // ------------------------------- Version 3 -------------------------------
+    mapping(address => bool) autovotingEnabled;
   }
 }
