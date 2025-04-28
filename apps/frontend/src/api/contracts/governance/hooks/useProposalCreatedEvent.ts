@@ -8,7 +8,7 @@ export const useProposalCreatedEvent = (proposalId: string) => {
     () => ({
       data: events.data?.created.find(event => event.proposalId === proposalId),
       isLoading: events.isLoading,
-      error: events.error,
+      error: events.errorProposalCreated,
     }),
     [events, proposalId],
   )

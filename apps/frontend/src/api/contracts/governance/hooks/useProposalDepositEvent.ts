@@ -57,6 +57,6 @@ export const useProposalDepositEvent = (proposalId: string) => {
     hasUserSupported,
     deposits: events.data?.deposits,
     isLoading: events.isLoading,
-    error: events.error,
+    error: events.errorProposalDeposits,
   }
 }

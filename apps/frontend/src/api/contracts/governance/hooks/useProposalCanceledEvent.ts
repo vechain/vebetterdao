@@ -13,7 +13,7 @@ export const useProposalCanceledEvent = (proposalId: string) => {
     () => ({
       data: events.data?.canceled.find(event => event.proposalId === proposalId),
       isLoading: events.isLoading,
-      error: events.error,
+      error: events.errorProposalCanceled,
     }),
     [events, proposalId],
   )

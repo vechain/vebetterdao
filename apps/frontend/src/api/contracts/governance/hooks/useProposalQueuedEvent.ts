@@ -13,7 +13,7 @@ export const useProposalQueuedEvent = (proposalId: string) => {
     () => ({
       data: events.data?.queued.find(event => event.proposalId === proposalId),
       isLoading: events.isLoading,
-      error: events.error,
+      error: events.errorProposalQueued,
     }),
     [events, proposalId],
   )
