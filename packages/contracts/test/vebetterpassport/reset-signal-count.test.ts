@@ -112,16 +112,18 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
       await veBetterPassport.connect(appAdmin).assignResetSignalerToAppByAppAdmin(appId, targetResetSignaler.address)
 
       await expect(
-        veBetterPassport.connect(nonAdminAccount).removeResetSignalerFromAppByAppAdmin(targetResetSignaler.address),
+        veBetterPassport
+          .connect(nonAdminAccount)
+          .removeResetSignalerFromAppByAppAdmin(appId, targetResetSignaler.address),
       ).to.be.revertedWith("BotSignaling: caller is not an admin of the app")
     })
 
-    it("Should revert for user not associated with an app", async function () {
-      const newResetSignaler = otherAccounts[7]
+    it("Should revert if admin is not an app admin of the reset signaler app", async function () {
+      const otherAppAdmin = otherAccounts[13]
 
       await expect(
-        veBetterPassport.connect(appAdmin).removeResetSignalerFromAppByAppAdmin(newResetSignaler.address),
-      ).to.be.revertedWith("BotSignaling: user not associated with any app")
+        veBetterPassport.connect(otherAppAdmin).removeResetSignalerFromAppByAppAdmin(appId, resetSignaler.address),
+      ).to.be.revertedWith("BotSignaling: caller is not an admin of the app")
     })
 
     it("Should allow reset signaler to reset user signals", async function () {
@@ -188,7 +190,9 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
 
       await veBetterPassport.connect(appAdmin).assignResetSignalerToAppByAppAdmin(appId, targetResetSignaler.address)
 
-      await expect(veBetterPassport.connect(appAdmin).removeResetSignalerFromAppByAppAdmin(targetResetSignaler.address))
+      await expect(
+        veBetterPassport.connect(appAdmin).removeResetSignalerFromAppByAppAdmin(appId, targetResetSignaler.address),
+      )
         .to.emit(veBetterPassport, "ResetSignalerRemovedFromApp")
         .withArgs(targetResetSignaler.address, appId)
 

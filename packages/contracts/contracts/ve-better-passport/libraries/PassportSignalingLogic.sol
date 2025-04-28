@@ -241,13 +241,13 @@ library PassportSignalingLogic {
   /// @notice Removes a reset signaler from an app by an app admin
   function removeResetSignalerFromAppByAppAdmin(
     PassportStorageTypes.PassportStorage storage self,
+    bytes32 app,
     address user
   ) external {
-    bytes32 app = self.appOfSignaler[user];
-    require(app != bytes32(0), "BotSignaling: user not associated with any app");
     require(self.x2EarnApps.isAppAdmin(app, msg.sender), "BotSignaling: caller is not an admin of the app");
 
     self.appOfSignaler[user] = bytes32(0);
+
     emit ResetSignalerRemovedFromApp(user, app);
   }
 

@@ -542,6 +542,7 @@ interface IVeBetterPassport {
   function assignResetSignalerToAppByAppAdmin(bytes32 app, address user) external;
 
   /// @notice Removes a reset signaler from an app by an app admin
+  /// @param app The app ID
   /// @param user The reset signaler address
-  function removeResetSignalerFromAppByAppAdmin(address user) external;
+  function removeResetSignalerFromAppByAppAdmin(bytes32 app, address user) external;
 }
