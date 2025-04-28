@@ -26,7 +26,7 @@ export const NavbarBalance = () => {
       <HStack flexBasis="250px" gap={0} h={cardHeight} pl={5}>
         <HStack gap={0} align="flex-start">
           <HStack gap={1} bg="#004CFC" borderLeftRadius="full" p={padding} pr="0">
-            <Image h={iconHeight} w={iconHeight} src="/images/b3tr-token.png" alt="b3tr-token" />
+            <Image h={iconHeight} w={iconHeight} src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
             <Text color="#FFFFFF" fontSize={fontSize} fontWeight={600}>
               {compactFormatter.format(Number(b3trBalance?.scaled ?? 0))}
             </Text>
