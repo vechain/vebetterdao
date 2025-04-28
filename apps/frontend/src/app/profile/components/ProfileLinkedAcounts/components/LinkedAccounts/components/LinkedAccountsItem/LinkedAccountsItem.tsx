@@ -3,7 +3,7 @@ import { AddressIcon } from "@/components/AddressIcon"
 import { LeafIcon } from "@/components/Icons/LeafIcon"
 import { compareAddresses } from "@/utils/AddressUtils/AddressUtils"
 import { HStack, Text, Badge, Heading, Button, useDisclosure, Stack, Show } from "@chakra-ui/react"
-import { humanAddress } from "@repo/utils/FormattingUtils"
+import { humanAddress, humanDomain } from "@repo/utils/FormattingUtils"
 import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassportPOV"
@@ -17,11 +17,11 @@ type Props = { isConnectedUser: boolean; account: string; pending?: boolean }
 export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }: Props) => {
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
-  const { data: vnsData } = useVechainDomain(userAccount?.address ?? "")
+  const { data: vnsData } = useVechainDomain(account ? account : userAccount?.address ?? "")
   const domain = vnsData?.domain
   const isUserAccountCard = compareAddresses(account, userAccount)
   const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentRoundOverview(
-    userAccount?.address,
+    account ? account : userAccount?.address,
   )
   const {
     isPassport,
@@ -59,7 +59,7 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
             <HStack>
               {domain && (
                 <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} borderRight={"1px solid"} paddingRight={2}>
-                  {domain}
+                  {humanDomain(domain, 8, 4)}
                 </Text>
               )}
               <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
