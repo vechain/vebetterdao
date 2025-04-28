@@ -714,10 +714,11 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
   }
 
   /// @notice this method allows an app admin to remove a signaler from an app
+  /// @param app - the app to remove the signaler from
   /// @param user - the signaler to remove from the app
-  function removeSignalerFromAppByAppAdmin(address user) external {
+  function removeSignalerFromAppByAppAdmin(bytes32 app, address user) external {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
-    PassportSignalingLogic.removeSignalerFromAppByAppAdmin($, user);
+    PassportSignalingLogic.removeSignalerFromAppByAppAdmin($, app, user);
     _revokeRole(SIGNALER_ROLE, user);
   }
 

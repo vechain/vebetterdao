@@ -163,7 +163,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       expect(await veBetterPassport.appOfSignaler(targetSignaler.address)).to.equal(appId)
 
       // Remove signaler
-      await expect(veBetterPassport.connect(appAdmin).removeSignalerFromAppByAppAdmin(targetSignaler.address))
+      await expect(veBetterPassport.connect(appAdmin).removeSignalerFromAppByAppAdmin(appId, targetSignaler.address))
         .to.emit(veBetterPassport, "SignalerRemovedFromApp")
         .withArgs(targetSignaler.address, appId)
 
@@ -194,7 +194,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       expect(await veBetterPassport.signaledCounter(targetUser.address)).to.equal(1)
 
       // Remove signaler role
-      await expect(veBetterPassport.connect(appAdmin).removeSignalerFromAppByAppAdmin(regularSignaler.address))
+      await expect(veBetterPassport.connect(appAdmin).removeSignalerFromAppByAppAdmin(appId, regularSignaler.address))
         .to.emit(veBetterPassport, "SignalerRemovedFromApp")
         .withArgs(regularSignaler.address, appId)
 

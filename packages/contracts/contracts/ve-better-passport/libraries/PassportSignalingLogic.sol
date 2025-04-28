@@ -148,9 +148,11 @@ library PassportSignalingLogic {
   }
 
   /// @notice this method allows an app admin to remove a signaler from an app
-  /// @param user - the signaler to remove from the app
-  function removeSignalerFromAppByAppAdmin(PassportStorageTypes.PassportStorage storage self, address user) external {
-    bytes32 app = self.appOfSignaler[user];
+  function removeSignalerFromAppByAppAdmin(
+    PassportStorageTypes.PassportStorage storage self,
+    bytes32 app,
+    address user
+  ) external {
     require(self.x2EarnApps.isAppAdmin(app, msg.sender), "BotSignaling: caller is not an admin of the app");
 
     removeSignalerFromApp(self, user);
