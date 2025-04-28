@@ -57,7 +57,7 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v2: "Add xapp endorsement module",
       v3: "Add node cooldown feature",
       v4: "Enabling by default the rewards pool for new apps submitted",
-      v5: "Allowing a unique creator NFT for each app submitted",
+      v5: "Restricting one app per creator holding a creator NFT",
     },
   },
   "X2Earn Rewards Pool": {

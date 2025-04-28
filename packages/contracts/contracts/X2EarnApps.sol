@@ -54,7 +54,9 @@ import { IXAllocationVotingGovernor } from "./interfaces/IXAllocationVotingGover
  * - Enabling by default the rewards pool for new apps submitted.
  *
  * -------------------- Version 5 --------------------
- * - Allowing a unique creator NFT for each app submitted
+ * - Restricting one app per creator holding a creator NFT.
+ * A check on submitApp is added to ensure that the number of creatorApps[creator] is 0.
+ * This mapping is increased when a creator is added to an app, submit an app after approved by VBD, or got endorsed.
  */
 contract X2EarnApps is
   X2EarnAppsUpgradeable,
@@ -80,7 +82,7 @@ contract X2EarnApps is
    * @notice Initialize the version 5 contract
    *
    * @dev This function is called only once during the contract upgrade from V4 to V5.
-   * This upgrade adds a restriction allowing only one creator NFT per app submitted.
+   * This upgrade adds a restriction on creator NFTs holder: they can only be attached to one app.
    */
   function initializeV5() public reinitializer(5) {}
 
