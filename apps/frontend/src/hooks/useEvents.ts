@@ -12,7 +12,7 @@ export type UseEventsParams<T extends Interface, R> = {
   contractAddress: string
   eventName: EventName<T["getEvent"]>
   filterParams?: Object
-  mapResponse: (decoded: abi.Decoded, meta: { blockNumber: number; txOrigin: string; txId: string }) => R
+  mapResponse: (decoded: abi.Decoded, meta: Connex.Thor.Filter.WithMeta["meta"]) => R
 }
 
 /**
@@ -54,9 +54,12 @@ export const useEvents = <T extends Interface, R>({
     return events.map(event => {
       const decoded = eventAbi.decode(event.data, event.topics)
       return mapResponse(decoded, {
+        blockID: event.meta.blockID,
         blockNumber: event.meta.blockNumber,
+        blockTimestamp: event.meta.blockTimestamp,
+        txID: event.meta.txID,
         txOrigin: event.meta.txOrigin,
-        txId: event.meta.txID,
+        clauseIndex: event.meta.clauseIndex,
       })
     })
   }, [thor, contractInterface, eventName, filterParams, contractAddress, mapResponse])
