@@ -7,7 +7,6 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
 
   function_name = "resetUserSignalsWithReason_vebetterpassport_${terraform.workspace == "dev" ? "testnet" : "mainnet"}"
   handler       = "index.handler"
-  filename      = "api/lambda/function.zip"
 
   logging_config {
     log_format = "Text"
@@ -25,6 +24,16 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
 
   tracing_config {
     mode = "PassThrough"
+  }
+  
+  lifecycle {
+    ignore_changes = [
+      filename,
+      source_code_hash,
+      publish,
+      tags,
+      tags_all
+    ]
   }
 }
 # Lambda Permission
