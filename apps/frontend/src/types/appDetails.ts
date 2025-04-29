@@ -18,3 +18,18 @@ export enum XAppStatus {
   UNENDORSED_NOT_ELIGIBLE = "UNENDORSED_NOT_ELIGIBLE", // Endorsement score below threshold, not eligible (endorsement lost)
   UNKNOWN = "UNKNOWN",
 }
+
+export const APP_CATEGORIES = [
+  { id: "plastic-waste-recycling", name: "Plastic Waste & Recycling", color: "#FFD4E0" },
+  { id: "carbon-footprint", name: "Carbon Footprint", color: "#feeab6" },
+  { id: "nutrition", name: "Nutrition", color: "#CEF5D1" },
+  { id: "fitness-wellness", name: "Fitness & Wellness", color: "#D1E2FF" },
+  { id: "sustainable-shopping", name: "Sustainable Shopping", color: "#C4ECFF" },
+  { id: "social-community-activism", name: "Social, Community, Activism", color: "#c2f4f0" },
+  { id: "green-finance-defi", name: "Green Finance, DeFi", color: "##ffe0cd" },
+  { id: "green-mobility-travel", name: "Green Mobility & Travel", color: "#FAD1FC" },
+  { id: "renewable-energy-efficiency", name: "Renewable Energy & Efficiency", color: "#E0DAFD" },
+  { id: "education-learning", name: "Education & Learning", color: "#E5E9F0" },
+]
+
+export const MAX_CATEGORIES = 2
