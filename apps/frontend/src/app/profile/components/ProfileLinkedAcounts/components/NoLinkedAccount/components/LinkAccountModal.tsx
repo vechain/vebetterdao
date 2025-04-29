@@ -6,6 +6,7 @@ import { UilLink } from "@iconscout/react-unicons"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useCallback } from "react"
 type FormData = {
   accountToConnect: string
 }
@@ -15,15 +16,22 @@ export const LinkAccountModal = ({ modal }: { modal: UseDisclosureReturn }) => {
   const { handleSubmit, setValue, watch } = useForm<FormData>()
   const { isTxModalOpen } = useTransactionModal()
   const accountToConnect = watch("accountToConnect")
+  const { isOpen = false, onClose } = modal
 
-  const linkEntityToPassport = useLinkEntityToPassport({})
+  const handleClose = useCallback(() => {
+    onClose?.()
+  }, [onClose])
+
+  const linkEntityToPassport = useLinkEntityToPassport({
+    onSuccess: handleClose,
+  })
 
   const onSubmit = (data: FormData) => {
     linkEntityToPassport.sendTransaction({ passport: data.accountToConnect })
   }
 
   return (
-    <BaseModal isOpen={(modal.isOpen && !isTxModalOpen) ?? false} onClose={modal.onClose}>
+    <BaseModal isOpen={isOpen && !isTxModalOpen} onClose={handleClose}>
       <VStack align="stretch" gap={6} as="form" onSubmit={handleSubmit(onSubmit)}>
         <UilLink color="#004CFC" size={"3rem"} />
         <Heading fontSize="2xl">{t("Become a secondary account")}</Heading>
