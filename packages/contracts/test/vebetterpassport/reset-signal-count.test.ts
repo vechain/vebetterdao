@@ -3,7 +3,7 @@ import { expect } from "chai"
 import { setupSignalingFixture } from "./fixture.test"
 import { VeBetterPassport } from "../../typechain-types"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
-import { BytesLike } from "ethers"
+import { BytesLike, ethers } from "ethers"
 
 describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
   let veBetterPassport: VeBetterPassport
@@ -147,6 +147,22 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
         .withArgs(randomUser.address, appId, "clearing a record")
 
       expect(await veBetterPassport.signaledCounter(randomUser.address)).to.equal(0)
+    })
+
+    it("Should allow app admin to assign signaler role, then is able to revoke it, then is able to assign it again", async function () {
+      const newSignaler = otherAccounts[8]
+
+      await veBetterPassport.connect(appAdmin).assignSignalerToAppByAppAdmin(appId, newSignaler.address)
+      expect(await veBetterPassport.appOfSignaler(newSignaler.address)).to.equal(appId)
+      expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), newSignaler.address)).to.be.true
+
+      await veBetterPassport.connect(appAdmin).removeSignalerFromAppByAppAdmin(newSignaler.address)
+      expect(await veBetterPassport.appOfSignaler(newSignaler.address)).to.equal(ethers.ZeroHash)
+      expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), newSignaler.address)).to.be.false
+
+      await veBetterPassport.connect(appAdmin).assignSignalerToAppByAppAdmin(appId, newSignaler.address)
+      expect(await veBetterPassport.appOfSignaler(newSignaler.address)).to.equal(appId)
+      expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), newSignaler.address)).to.be.true
     })
   })
 })
