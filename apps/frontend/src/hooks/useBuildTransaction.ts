@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useWallet, EnhancedClause, useSendTransaction } from "@vechain/vechain-kit"
 import { useQueryClient } from "@tanstack/react-query"
 import { useTransactionModal, TransactionCustomUI } from "@/providers/TransactionModalProvider"
@@ -34,7 +34,7 @@ export const useBuildTransaction = <ClausesParams = void>({
 }: BuildTransactionProps<ClausesParams>) => {
   const { account } = useWallet()
   const queryClient = useQueryClient()
-  const { setupModal, transactionModalState, updateModal } = useTransactionModal()
+  const { setupModal, updateModal } = useTransactionModal()
   const lastReportedStatusRef = useRef<string | undefined>()
 
   /**
@@ -62,13 +62,20 @@ export const useBuildTransaction = <ClausesParams = void>({
     suggestedMaxGas,
     onTxFailedOrCancelled: onFailure,
   })
+
+  const transactionStatus = useMemo(() => result?.status, [result?.status])
+  const txID = useMemo(() => result?.txReceipt?.meta?.txID, [result?.txReceipt?.meta?.txID])
+
   useEffect(() => {
     // We don't want to update the modal when the transaction is ready because it will re-render the modal in a loop / undesired way
-    if (result?.status !== lastReportedStatusRef.current && result?.status !== "ready") {
-      lastReportedStatusRef.current = result.status
-      updateModal(result.status, result?.txReceipt?.meta?.txID)
+    // Also, we don't want to update the modal when the status is the same as the last reported status
+    if (!transactionStatus || transactionStatus === lastReportedStatusRef.current || transactionStatus === "ready") {
+      return
     }
-  }, [result.status, result?.txReceipt?.meta?.txID, transactionModalState?.status, updateModal])
+
+    lastReportedStatusRef.current = transactionStatus
+    updateModal(transactionStatus, txID)
+  }, [transactionStatus, txID])
 
   /**
    * Function to send a transaction based on the provided parameters.
