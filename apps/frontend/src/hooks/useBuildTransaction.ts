@@ -63,7 +63,8 @@ export const useBuildTransaction = <ClausesParams = void>({
     onTxFailedOrCancelled: onFailure,
   })
   useEffect(() => {
-    if (result?.status !== lastReportedStatusRef.current) {
+    // We don't want to update the modal when the transaction is ready because it will re-render the modal in a loop / undesired way
+    if (result?.status !== lastReportedStatusRef.current && result?.status !== "ready") {
       lastReportedStatusRef.current = result.status
       updateModal(result.status, result?.txReceipt?.meta?.txID)
     }
