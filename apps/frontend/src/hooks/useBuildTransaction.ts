@@ -56,26 +56,45 @@ export const useBuildTransaction = <ClausesParams = void>({
     onSuccess?.()
   }, [invalidateCache, onSuccess, queryClient, refetchQueryKeys])
 
+  const handleOnFailure = useCallback(
+    (error: Error | string | undefined) => {
+      //Catch async errors and manually update the modal
+      if (lastReportedStatusRef.current === "error") return
+      const errorReason = error instanceof Error ? error.message : error
+      lastReportedStatusRef.current = "error"
+
+      updateModal("error", "", {
+        type: "SendTransactionError",
+        reason: errorReason,
+      })
+      onFailure?.()
+    },
+    [onFailure],
+  )
+
   const result = useSendTransaction({
     signerAccountAddress: account?.address,
     onTxConfirmed: handleOnSuccess,
     suggestedMaxGas,
-    onTxFailedOrCancelled: onFailure,
+    onTxFailedOrCancelled: handleOnFailure,
   })
 
   const transactionStatus = useMemo(() => result?.status, [result?.status])
   const txID = useMemo(() => result?.txReceipt?.meta?.txID, [result?.txReceipt?.meta?.txID])
+  const error = useMemo(() => result?.error, [result?.error])
 
   useEffect(() => {
     // We don't want to update the modal when the transaction is ready because it will re-render the modal in a loop / undesired way
-    // Also, we don't want to update the modal when the status is the same as the last reported status
-    if (!transactionStatus || transactionStatus === lastReportedStatusRef.current || transactionStatus === "ready") {
+    // Also, we don't want to update the modal when the status is the same as the last reported status unless there is an error
+    const isSamePreviousStatus = transactionStatus === lastReportedStatusRef.current
+    const hasError = !!error?.reason
+    if ((isSamePreviousStatus && !hasError) || transactionStatus === "ready") {
       return
     }
 
     lastReportedStatusRef.current = transactionStatus
-    updateModal(transactionStatus, txID)
-  }, [transactionStatus, txID])
+    updateModal(transactionStatus, txID, error)
+  }, [transactionStatus, txID, error])
 
   /**
    * Function to send a transaction based on the provided parameters.

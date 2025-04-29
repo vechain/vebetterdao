@@ -51,6 +51,7 @@ export const TransactionModal = () => {
         <ErrorModalContent
           {...getCustomUIProps("error")}
           showTryAgainButton
+          {...(transactionModalState?.error?.reason ? { description: transactionModalState?.error?.reason } : {})}
           {...(transactionModalState?.tryAgain ? { onTryAgain: handleTryAgain } : {})}
         />
       ),
@@ -78,6 +79,7 @@ export const TransactionModal = () => {
     transactionModalState?.txId,
     transactionModalState?.status,
     handleTryAgain,
+    transactionModalState?.error?.reason,
   ])
 
   return (
