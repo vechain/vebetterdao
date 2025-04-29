@@ -1009,7 +1009,6 @@ describe("VoterRewards - @shard10", () => {
         owner,
         b3tr,
         timeLock,
-        vechainNodesMock,
         nodeManagement,
         vot3,
         treasury,
@@ -1641,7 +1640,7 @@ describe("VoterRewards - @shard10", () => {
 
       // Multiplier is set to latest update to level
       await expect(voterRewardsLatest.setLevelToMultiplier(2, 50))
-        .to.emit(voterRewardsLatest, "LevelToMultiplierUpdated")
+        .to.emit(voterRewardsLatest, "LevelToMultiplierPending")
         .withArgs(2, 50)
 
       const roundId4 = await xAllocationVoting.currentRoundId()
