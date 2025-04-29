@@ -8,6 +8,15 @@ on:
       - 'terraform/vebetterpassport/**'
       - '.github/workflows/vebetterpassport.yml'
   workflow_dispatch:
+    inputs:
+      workspace:
+        description: 'Terraform workspace to use (dev, prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
 
 permissions:
   id-token: write
@@ -27,7 +36,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.DEV_AWS_ACC_ROLE }}
+          role-to-assume: ${{ github.event.inputs.workspace == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
           aws-region: eu-west-1
 
       - name: Setup Terraform
@@ -54,10 +63,12 @@ jobs:
         working-directory: terraform/vebetterpassport
         id: workspace
         run: |
-          if ! terraform workspace list | grep -q "dev"; then
-            terraform workspace new dev
+          WORKSPACE="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workspace || 'dev' }}"
+          
+          if ! terraform workspace list | grep -q "$WORKSPACE"; then
+            terraform workspace new "$WORKSPACE"
           else
-            terraform workspace select dev
+            terraform workspace select "$WORKSPACE"
           fi
     
       - name: Terraform Validate
