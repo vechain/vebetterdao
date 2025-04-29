@@ -1,5 +1,18 @@
-import React, { useMemo, useState } from "react"
-import { Box, HStack, VStack, Grid, Spinner, GridItem, InputLeftElement, InputGroup, Input } from "@chakra-ui/react"
+import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
+import {
+  Box,
+  HStack,
+  VStack,
+  Grid,
+  Spinner,
+  GridItem,
+  InputLeftElement,
+  InputGroup,
+  Input,
+  Center,
+  Button,
+} from "@chakra-ui/react"
 import { FilterAppsTypeButton } from "./FilterAppsTypeButton"
 import { XApp, UnendorsedApp, useXNode } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
@@ -7,32 +20,37 @@ import { AppsEmptyState } from "./AppsEmptyState"
 import { CreatorBanner } from "./CreatorBanner"
 import { FaSearch } from "react-icons/fa"
 
-const FILTER_ALL = "All"
 const FILTER_ACTIVE_APPS = "Active apps"
+const FILTER_NEW_APPS = "New apps"
 const FILTER_GRACE_PERIOD = "In grace period"
 const FILTER_ENDORSEMENT_LOST = "Endorsement lost"
 
+// TODO : double check that they is not an app that have a particular status, other than the ones we want to display
 type Props = {
-  allApps: XApp[]
   currentActiveApps: XApp[]
+  newApps: UnendorsedApp[]
   gracePeriodApps: UnendorsedApp[]
   endorsementLostApps: UnendorsedApp[]
   isXAppsLoading: boolean
 }
 
 type LayoutKey = "endorser" | "default"
+const LOAD_MORE_APPS_COUNT = 25
 
 export const AllApps = ({
-  allApps,
   currentActiveApps,
+  newApps,
   gracePeriodApps,
   endorsementLostApps,
   isXAppsLoading,
 }: Props) => {
-  const [filter, setFilter] = useState(FILTER_ALL)
+  const { t } = useTranslation()
+  const [filter, setFilter] = useState(FILTER_ACTIVE_APPS)
   const [searchQuery, setSearchQuery] = useState("")
+  const [visibleAppsCount, setVisibleAppsCount] = useState(LOAD_MORE_APPS_COUNT)
 
-  const showCreatorBanner = useMemo(() => filter === FILTER_ALL, [filter])
+  const showCreatorBanner = useMemo(() => filter === FILTER_ACTIVE_APPS, [filter])
+
   const displayApps = useMemo(() => {
     let filteredApps: (XApp | UnendorsedApp)[] = []
 
@@ -41,6 +59,9 @@ export const AllApps = ({
       case FILTER_ACTIVE_APPS:
         filteredApps = currentActiveApps
         break
+      case FILTER_NEW_APPS:
+        filteredApps = newApps
+        break
       case FILTER_GRACE_PERIOD:
         filteredApps = gracePeriodApps
         break
@@ -48,7 +69,7 @@ export const AllApps = ({
         filteredApps = endorsementLostApps
         break
       default:
-        filteredApps = allApps
+        filteredApps = currentActiveApps
     }
 
     // Filter by search query if it exists
@@ -58,34 +79,53 @@ export const AllApps = ({
     }
 
     return filteredApps
-  }, [filter, searchQuery, currentActiveApps, gracePeriodApps, endorsementLostApps, allApps])
+  }, [filter, searchQuery, currentActiveApps, gracePeriodApps, endorsementLostApps, newApps])
+
+  const displayAppsRestricted = useMemo(() => {
+    return displayApps.slice(0, visibleAppsCount)
+  }, [displayApps, visibleAppsCount])
 
   const { isEndorsingApp } = useXNode()
   const layout: LayoutKey = isEndorsingApp ? "endorser" : "default"
 
+  const hasMoreApps = displayAppsRestricted.length < displayApps.length
+  const handleLoadMore = () => {
+    setVisibleAppsCount(prevApps => prevApps + LOAD_MORE_APPS_COUNT)
+  }
+
   const appsSection = useMemo(() => {
-    const isEmpty = !displayApps?.length
+    const isEmpty = !displayAppsRestricted?.length
     return isXAppsLoading ? (
       <VStack w="full" spacing={12} h="80vh" justify="center" data-testid="apps-page-loading">
         <Spinner size="lg" />
       </VStack>
     ) : (
-      <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4} w="full">
-        {isEmpty ? (
-          <GridItem colSpan={2}>
-            <AppsEmptyState />
-          </GridItem>
-        ) : (
-          <>
-            {showCreatorBanner ? <CreatorBanner /> : undefined}
-            {displayApps.map((xApp, _) => (
-              <UnendorsedAppCard key={xApp.id} xApp={xApp} layout={layout} />
-            ))}
-          </>
+      <VStack w="full" spacing={4}>
+        <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4} w="full">
+          {isEmpty ? (
+            <GridItem colSpan={2}>
+              <AppsEmptyState />
+            </GridItem>
+          ) : (
+            <>
+              {showCreatorBanner ? <CreatorBanner /> : undefined}
+              {displayAppsRestricted.map((xApp, _) => (
+                <UnendorsedAppCard key={xApp.id} xApp={xApp} layout={layout} />
+              ))}
+            </>
+          )}
+        </Grid>
+
+        {hasMoreApps && (
+          <Center w="full" py={4}>
+            <Button onClick={handleLoadMore} variant="outline" borderColor="black" borderRadius="full" size="md">
+              {t("Load more")}
+            </Button>
+          </Center>
         )}
-      </Grid>
+      </VStack>
     )
-  }, [displayApps, isXAppsLoading, showCreatorBanner, layout])
+  }, [displayAppsRestricted, isXAppsLoading, showCreatorBanner, layout, hasMoreApps])
 
   return (
     <>
@@ -100,7 +140,7 @@ export const AllApps = ({
             msOverflowStyle: "none",
           }}>
           <HStack spacing={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
-            {[FILTER_ALL, FILTER_ACTIVE_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST].map(filterType => (
+            {[FILTER_ACTIVE_APPS, FILTER_NEW_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST].map(filterType => (
               <FilterAppsTypeButton
                 key={filterType}
                 filterType={filterType}
@@ -109,24 +149,25 @@ export const AllApps = ({
               />
             ))}
           </HStack>
-          <HStack w="full" mt={4}>
-            <InputGroup w="full">
-              <InputLeftElement pointerEvents="none">
-                <FaSearch color="#3B3B3B" />
-              </InputLeftElement>
-              <Input
-                placeholder="Search apps..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                borderRadius="full"
-                bg="white"
-                _dark={{ bg: "#6a6a6a" }}
-                _hover={{ borderColor: "#004CFC" }}
-                _focus={{ borderColor: "#004CFC", boxShadow: "0px 0px 16px 0px rgba(0, 76, 252, 0.35)" }}
-              />
-            </InputGroup>
-          </HStack>
         </Box>
+        <HStack w="full" mt={0}>
+          <InputGroup w="full">
+            <InputLeftElement pointerEvents="none">
+              <FaSearch color="#3B3B3B" />
+            </InputLeftElement>
+            <Input
+              placeholder="Search apps..."
+              value={searchQuery}
+              borderColor="1px solid black"
+              opacity={0.6}
+              onChange={e => setSearchQuery(e.target.value)}
+              borderRadius={"24px"}
+              _dark={{ bg: "black" }}
+              _hover={{ borderColor: "black", opacity: 1 }}
+              _focus={{ borderColor: "black", boxShadow: "0px 0px 3px 0px rgba(0, 76, 252, 0.35)" }}
+            />
+          </InputGroup>
+        </HStack>
         {appsSection}
       </VStack>
     </>

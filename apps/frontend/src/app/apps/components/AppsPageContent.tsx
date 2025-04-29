@@ -31,7 +31,6 @@ export const AppsPageContent = () => {
   const hasNewApps = newApps.length > 0
 
   // Apps tabs
-  const allApps = xApps?.allApps ?? []
   const currentActiveApps = xApps?.active.filter(app => currentAllocationAppIds?.includes(app.id)) ?? []
   const gracePeriodApps = xApps?.gracePeriod ?? []
   const endorsementLostApps = xApps?.endorsementLost ?? []
@@ -55,10 +54,10 @@ export const AppsPageContent = () => {
 
       {!isXNodeLoading && !isEndorsingApp && <EndorsementPointsBanner />}
 
-      <VStack alignItems={"flex-start"} spacing={4} w="100%">
-        <Heading size="lg">{t("All the apps")}</Heading>
+      <VStack alignItems={"flex-start"} spacing={4} w="full">
+        <Heading size="lg">{t("Sustainability apps")}</Heading>
         <AllApps
-          allApps={allApps}
+          newApps={newApps}
           currentActiveApps={currentActiveApps}
           gracePeriodApps={gracePeriodApps}
           endorsementLostApps={endorsementLostApps}
