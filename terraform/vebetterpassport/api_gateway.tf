@@ -12,9 +12,9 @@ resource "aws_api_gateway_rest_api" "reset_user_signals_api" {
 
 # API Gateway Resource
 resource "aws_api_gateway_resource" "reset_user_signals_resource" {
-  parent_id   = "${aws_api_gateway_rest_api.reset_user_signals_api.root_resource_id}"
+  parent_id   = aws_api_gateway_rest_api.reset_user_signals_api.root_resource_id
   path_part   = "reset-user-signal-count"
-  rest_api_id = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
+  rest_api_id = aws_api_gateway_rest_api.reset_user_signals_api.id
 }
 
 # API Gateway Method
@@ -22,8 +22,8 @@ resource "aws_api_gateway_method" "reset_user_signals_method" {
   api_key_required = "true"
   authorization    = "NONE"
   http_method      = "POST"
-  resource_id      = "${aws_api_gateway_resource.reset_user_signals_resource.id}"
-  rest_api_id      = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
+  resource_id      = aws_api_gateway_resource.reset_user_signals_resource.id
+  rest_api_id      = aws_api_gateway_rest_api.reset_user_signals_api.id
 }
 
 # API Gateway Integration
@@ -43,31 +43,31 @@ resource "aws_api_gateway_integration" "reset_user_signals_integration" {
 
 # API Gateway Method Response
 resource "aws_api_gateway_method_response" "reset_user_signals_method_response" {
-  http_method = "${aws_api_gateway_method.reset_user_signals_method.http_method}"
-  resource_id = "${aws_api_gateway_resource.reset_user_signals_resource.id}"
-  rest_api_id = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
+  http_method = aws_api_gateway_method.reset_user_signals_method.http_method
+  resource_id = aws_api_gateway_resource.reset_user_signals_resource.id
+  rest_api_id = aws_api_gateway_rest_api.reset_user_signals_api.id
   status_code = "200"
 }
 
 # API Gateway Integration Response
 resource "aws_api_gateway_integration_response" "reset_user_signals_integration_response" {
-  http_method = "${aws_api_gateway_method.reset_user_signals_method.http_method}"
-  resource_id = "${aws_api_gateway_resource.reset_user_signals_resource.id}"
-  rest_api_id = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
-  status_code = "${aws_api_gateway_method_response.reset_user_signals_method_response.status_code}"
+  http_method = aws_api_gateway_method.reset_user_signals_method.http_method
+  resource_id = aws_api_gateway_resource.reset_user_signals_resource.id
+  rest_api_id = aws_api_gateway_rest_api.reset_user_signals_api.id
+  status_code = aws_api_gateway_method_response.reset_user_signals_method_response.status_code
 }
 
 # API Gateway Stage
 resource "aws_api_gateway_stage" "reset_user_signals_stage" {
-  deployment_id = "${aws_api_gateway_deployment.reset_user_signals_deployment.id}"
-  rest_api_id   = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
+  deployment_id = aws_api_gateway_deployment.reset_user_signals_deployment.id
+  rest_api_id   = aws_api_gateway_rest_api.reset_user_signals_api.id
   stage_name    = "default"
 }
 
 # API Gateway Deployment
 resource "aws_api_gateway_deployment" "reset_user_signals_deployment" {
-  rest_api_id = "${aws_api_gateway_rest_api.reset_user_signals_api.id}"
-  
+  rest_api_id = aws_api_gateway_rest_api.reset_user_signals_api.id
+
   depends_on = [
     aws_api_gateway_integration.reset_user_signals_integration
   ]
