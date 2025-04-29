@@ -1,5 +1,5 @@
 export * from "./utils"
 export * from "./hooks"
-export * from "./getProposalsEvents"
 export * from "./getProposalsVotesEvents"
-export * from "./getProposalsCreatedEvents"
+export * from "./getProposalsEventsQueryKey"
+export * from "./getProposalsEvents"

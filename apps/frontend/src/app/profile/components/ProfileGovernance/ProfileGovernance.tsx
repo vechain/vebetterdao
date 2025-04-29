@@ -1,9 +1,6 @@
-import {
-  useProposalsCreatedFromIds,
-  useUserProposalsCreatedEvents,
-  useUserProposalsVoteEvents,
-  useUserTopVotedApps,
-} from "@/api"
+"use client"
+
+import { useProposalsCreatedFromIds, useProposalsEvents, useUserProposalsVoteEvents, useUserTopVotedApps } from "@/api"
 import { useCallback, useMemo, useState } from "react"
 import {
   EmptyStateGovernance,
@@ -37,7 +34,9 @@ type Props = {
   address: string
 }
 export const ProfileGovernance = ({ address }: Props) => {
-  const { data: createdProposals } = useUserProposalsCreatedEvents(address ?? "")
+  const {
+    data: { created: createdProposals },
+  } = useProposalsEvents(undefined, address ?? "")
   const { data: votedProposals } = useUserProposalsVoteEvents(address ?? "")
 
   const { isConnectedUser } = useRetrieveProfilIdentity()
