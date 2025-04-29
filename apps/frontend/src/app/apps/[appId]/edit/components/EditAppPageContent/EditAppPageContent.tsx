@@ -37,6 +37,7 @@ import { UpdateAppMetadataTransactionModal } from "../../../components/UpdateApp
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/vechain-kit"
 import { EditVeWorldBanner } from "./components/EditVeWorldBanner"
+import { EditAppCategories } from "./components/EditAppCategories"
 
 export type EditAppForm = {
   name: string
@@ -52,6 +53,7 @@ export type EditAppForm = {
   logoImage: string
   bannerImage: string
   ve_world_bannerImage: string
+  categories: string[]
 }
 
 const findUrlByName = (urls: { name: string; url: string }[] | undefined, name: string) => {
@@ -88,6 +90,7 @@ export const EditAppPageContent = () => {
       youtubeUrl: findUrlByName(appMetadata?.social_urls, "Youtube"),
       mediumUrl: findUrlByName(appMetadata?.social_urls, "Medium"),
       ve_world_bannerImage: veWorldBanner,
+      categories: appMetadata?.categories ?? [],
     },
   })
   const {
@@ -125,6 +128,7 @@ export const EditAppPageContent = () => {
         app_urls: [],
         social_urls: socialUrls,
         tweets: appMetadata?.tweets ?? [],
+        categories: data.categories ?? [],
         ve_world: {
           banner: data.ve_world_bannerImage,
         },
@@ -272,6 +276,7 @@ export const EditAppPageContent = () => {
                 <FormErrorMessage fontSize={"12px"}>{errors?.distribution_strategy?.message ?? ""}</FormErrorMessage>
               </FormControl>
             </VStack>
+            <EditAppCategories form={form} />
           </VStack>
           <EditAppSocialUrls form={form} />
         </Stack>

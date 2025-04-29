@@ -1602,5 +1602,11 @@
   "Only app admin can transfer and manage the rewards pool": "Only app admin can transfer and manage the rewards pool",
   "Access restricted": "Access restricted",
   "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. <strong>Consider voting for fewer apps or getting more VOT3.</strong>",
-  "Filters": "Filters"
+  "Filters": "Filters",
+  "App Categories": "App Categories",
+  "Select up to 2 categories that best describe your app.": "Select up to 2 categories that best describe your app.",
+  "Add Category": "Add Category",
+  "Find a category": "Find a category",
+  "No categories found": "No categories found",
+  "No categories selected. Select up to 2 categories.": "No categories selected. Select up to 2 categories."
 }
