@@ -163,7 +163,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       expect(await veBetterPassport.appOfSignaler(targetSignaler.address)).to.equal(appId)
 
       // Remove signaler
-      await expect(veBetterPassport.connect(appAdmin).removeSignalerFromAppByAppAdmin(appId, targetSignaler.address))
+      await expect(veBetterPassport.connect(appAdmin).removeSignalerFromAppByAppAdmin(targetSignaler.address))
         .to.emit(veBetterPassport, "SignalerRemovedFromApp")
         .withArgs(targetSignaler.address, appId)
 
@@ -194,7 +194,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       expect(await veBetterPassport.signaledCounter(targetUser.address)).to.equal(1)
 
       // Remove signaler role
-      await expect(veBetterPassport.connect(appAdmin).removeSignalerFromAppByAppAdmin(appId, regularSignaler.address))
+      await expect(veBetterPassport.connect(appAdmin).removeSignalerFromAppByAppAdmin(regularSignaler.address))
         .to.emit(veBetterPassport, "SignalerRemovedFromApp")
         .withArgs(regularSignaler.address, appId)
 
@@ -216,10 +216,6 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
         .to.emit(veBetterPassport, "SignalerAssignedToApp")
         .withArgs(passport.address, appId)
 
-      await expect(veBetterPassport.connect(appAdmin).assignResetSignalerToAppByAppAdmin(appId, passport.address))
-        .to.emit(veBetterPassport, "ResetSignalerAssignedToApp")
-        .withArgs(passport.address, appId)
-
       // Signal the entity
       await expect(veBetterPassport.connect(passport).signalUserWithReason(entity.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
@@ -232,7 +228,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       // Reset signals
       await expect(
         veBetterPassport
-          .connect(passport)
+          .connect(owner)
           .resetUserSignalsWithReason(entity.address, "User demonstrated erroneous signaling"),
       )
         .to.emit(veBetterPassport, "UserSignalsReset")
@@ -251,11 +247,6 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       // Link entity to passport
       await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 100000)
 
-      // Make app admin both a signaler and a reset signaler
-      await expect(veBetterPassport.connect(appAdmin).assignResetSignalerToAppByAppAdmin(appId, appAdmin.address))
-        .to.emit(veBetterPassport, "ResetSignalerAssignedToApp")
-        .withArgs(appAdmin.address, appId)
-
       // Signal the entity
       await expect(veBetterPassport.connect(regularSignaler).signalUserWithReason(entity.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
@@ -267,7 +258,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       // Reset signals via app admin
       await expect(
         veBetterPassport
-          .connect(appAdmin)
+          .connect(owner)
           .resetUserSignalsWithReason(entity.address, "User demonstrated erroneous signaling"),
       )
         .to.emit(veBetterPassport, "UserSignalsReset")
@@ -295,12 +286,6 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
         .to.emit(veBetterPassport, "SignalerAssignedToApp")
         .withArgs(newAppAdmin.address, newAppId)
 
-      await expect(
-        veBetterPassport.connect(newAppAdmin).assignResetSignalerToAppByAppAdmin(newAppId, newAppAdmin.address),
-      )
-        .to.emit(veBetterPassport, "ResetSignalerAssignedToApp")
-        .withArgs(newAppAdmin.address, newAppId)
-
       // Signal user with both signalers
       await expect(veBetterPassport.connect(regularSignaler).signalUserWithReason(targetUser.address, "Some reason"))
         .to.emit(veBetterPassport, "UserSignaled")
@@ -315,7 +300,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       // Reset signals of user by app admin
       await expect(
         veBetterPassport
-          .connect(newAppAdmin)
+          .connect(owner)
           .resetUserSignalsWithReason(targetUser.address, "User demonstrated erroneous signaling"),
       )
         .to.emit(veBetterPassport, "UserSignalsReset")

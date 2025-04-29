@@ -43,7 +43,7 @@ interface IVeBetterPassport {
   /// @notice Emitted when a user is signaled.
   /// @param user  The address of the user that was signaled.
   /// @param signaler  The address of the user that signaled the user.
-  /// @param app  The app that the signaler was associated with.
+  /// @param app  The app that the user was signaled for.
   /// @param reason  The reason for signaling the user.
   event UserSignaled(address indexed user, address indexed signaler, bytes32 indexed app, string reason);
 
@@ -51,16 +51,6 @@ interface IVeBetterPassport {
   /// @param signaler  The address of the signaler.
   /// @param app  The app that the signaler was associated with.
   event SignalerAssignedToApp(address indexed signaler, bytes32 indexed app);
-
-  /// @notice Emited when an address is associated with an app.
-  /// @param signaler  The address of the signaler.
-  /// @param app  The app that the signaler was associated with.
-  event ResetSignalerAssignedToApp(address indexed signaler, bytes32 indexed app);
-
-  /// @notice Emited when an address is removed from an app.
-  /// @param signaler  The address of the signaler.
-  /// @param app  The app that the signaler was removed from.
-  event ResetSignalerRemovedFromApp(address indexed signaler, bytes32 indexed app);
 
   /// @notice Emitted when an address is removed from an app.
   /// @param signaler  The address of the signaler.
@@ -299,6 +289,11 @@ interface IVeBetterPassport {
   /// @return The signaling threshold
   function signalingThreshold() external view returns (uint256);
 
+  /// @notice Gets the total number of signals for an app
+  /// @param app The app ID
+  /// @return The total number of signals for the app
+  function appTotalSignalsCounter(bytes32 app) external view returns (uint256);
+
   /// @notice Returns the domain for EIP-712 signature
   function eip712Domain()
     external
@@ -526,23 +521,4 @@ interface IVeBetterPassport {
   /// @param user The user address
   /// @param timepoint The timepoint to query
   function isDelegateeInTimepoint(address user, uint256 timepoint) external view returns (bool);
-
-  /// @notice Assigns a reset signaler to an app
-  /// @param app The app ID
-  /// @param user The reset signaler address
-  function assignResetSignalerToApp(bytes32 app, address user) external;
-
-  /// @notice Removes a reset signaler from an app
-  /// @param user The reset signaler address
-  function removeResetSignalerFromApp(address user) external;
-
-  /// @notice Assigns a reset signaler to an app by an app admin
-  /// @param app The app ID
-  /// @param user The reset signaler address
-  function assignResetSignalerToAppByAppAdmin(bytes32 app, address user) external;
-
-  /// @notice Removes a reset signaler from an app by an app admin
-  /// @param app The app ID
-  /// @param user The reset signaler address
-  function removeResetSignalerFromAppByAppAdmin(bytes32 app, address user) external;
 }
