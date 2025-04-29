@@ -16,12 +16,10 @@ type Props = { isConnectedUser: boolean; account: string; pending?: boolean }
 export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }: Props) => {
   const { t } = useTranslation()
   const { account: userAccount } = useWallet()
-  const { data: vnsData } = useVechainDomain(account ? account : userAccount?.address ?? "")
+  const { data: vnsData } = useVechainDomain(account)
   const domain = vnsData?.domain
-  const isUserAccountCard = compareAddresses(account, userAccount)
-  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentRoundOverview(
-    account ? account : userAccount?.address,
-  )
+  const isUserAccountCard = compareAddresses(account, userAccount?.address ?? "")
+  const { data: userOverview, isLoading: isUserOverviewLoading } = useSustainabilityCurrentRoundOverview(account)
   const {
     isPassport,
     isEntity,
