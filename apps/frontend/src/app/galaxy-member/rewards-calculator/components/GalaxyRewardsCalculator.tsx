@@ -79,7 +79,7 @@ export const GalaxyRewardsCalculator = () => {
       variant="baseWithBorder"
       alignItems="center"
       style={{
-        backgroundImage: `url('/images/stardust.jpg')`,
+        backgroundImage: `url('/assets/backgrounds/stardust.webp')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
