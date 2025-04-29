@@ -9,22 +9,24 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "Voter Rewards": {
     name: "voter-rewards",
     configAddressField: "voterRewardsContractAddress",
-    versions: ["v2", "v3", "v4"],
+    versions: ["v2", "v3", "v4", "v5"],
     descriptions: {
       v2: "Add the ability to toggle quadratic rewarding on and off.",
       v3: "Vechain Nodes x GM upgrades feature",
       v4: "Update GalaxyMember interface to use version 3",
+      v5: "Proposal Execution: Add GM Pool for GM Holder Rewards",
     },
   },
   B3TRGovernor: {
     name: "b3tr-governor",
-    versions: ["v2", "v3", "v4", "v5"],
+    versions: ["v2", "v3", "v4", "v5", "v6"],
     configAddressField: "b3trGovernorAddress",
     descriptions: {
       v2: "Give ability to contract admins to call governance only functions",
       v3: "Add the ability to toggle quadratic voting on and off.",
       v4: "Integrate VeBetterPassport contract",
       v5: "Vechain Nodes x GM upgrades feature",
+      v6: "Proposal Execution: Add GM Pool for GM Holder Rewards (Align IVoterRwards)",
     },
   },
   XAllocationVoting: {
@@ -36,17 +38,19 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
       v3: "Update X2Earn interface to include new endorsement feature",
       v4: "Update X2Earn interface to include node cooldown feature",
       v5: "Fix casting votes multiple times for same app in single transaction",
+      v6: "Proposal Execution: Add GM Pool for GM Holder Rewards (Align IVoterRwards and IEmissions)",
     },
   },
   "XAllocation Pool": {
     name: "x-allocation-pool",
     configAddressField: "xAllocationPoolContractAddress",
-    versions: ["v2", "v3", "v4", "v5"],
+    versions: ["v2", "v3", "v4", "v5", "v6"],
     descriptions: {
       v2: "Add the abilty to toggle quadratic funding on and off.",
       v3: "Update X2Earn interface to include new endorsement feature",
       v4: "Update X2Earn interface to include node cooldown feature",
       v5: "Updated X2EarnRewardsPool interface to support app rewards management feature",
+      v6: "Proposal Execution: Add GM Pool for GM Holder Rewards (Align IEmissions)",
     },
   },
   X2EarnApps: {
@@ -75,9 +79,10 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   Emissions: {
     name: "emissions",
     configAddressField: "emissionsContractAddress",
-    versions: ["v2"],
+    versions: ["v2", "v3"],
     descriptions: {
       v2: "Aligns the emissions with the expected B3TR emissions schedule",
+      v3: "Proposal Execution: Add GM Pool for GM Holder Rewards",
     },
   },
   "VeBetter Passport": {
