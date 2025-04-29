@@ -34,8 +34,8 @@ resource "aws_api_gateway_integration" "reset_user_signals_integration" {
   http_method             = "POST"
   integration_http_method = "POST"
   passthrough_behavior    = "WHEN_NO_MATCH"
-  resource_id             = "si8suu"
-  rest_api_id             = "m0xna6yoc6"
+  resource_id             = aws_api_gateway_resource.reset_user_signals_resource.id
+  rest_api_id             = aws_api_gateway_rest_api.reset_user_signals_api.id
   timeout_milliseconds    = "29000"
   type                    = "AWS"
   uri                     = "arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${aws_lambda_function.resetUserSignalsWithReason_vebetterpassport.arn}/invocations"
