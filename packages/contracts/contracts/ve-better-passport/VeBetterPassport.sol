@@ -28,6 +28,7 @@ import { IX2EarnApps } from "../interfaces/IX2EarnApps.sol";
  * - Added RESET_SIGNALER_ROLE initialization
  * - Extended resetUserSignalsWithReason to RESET_SIGNALER_ROLE
  * - Restricted signalUser to DEFAULT_ADMIN_ROLE and signalUserWithReason to SIGNALER_ROLE
+ * - Renamed resetUserSignalsByAppAdminWithReason to resetUserSignalsByAppWithReason to be used by SIGNALER_ROLE
  */
 contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBetterPassport {
   bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
