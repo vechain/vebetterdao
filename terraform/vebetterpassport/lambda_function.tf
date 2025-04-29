@@ -7,6 +7,7 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
 
   function_name = "resetUserSignalsWithReason_vebetterpassport_${terraform.workspace == "dev" ? "testnet" : "mainnet"}"
   handler       = "index.handler"
+  filename      = "api/lambda/function.zip"
 
   logging_config {
     log_format = "Text"
