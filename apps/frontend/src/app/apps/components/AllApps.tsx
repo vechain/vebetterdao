@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from "react"
-import { Box, HStack, VStack, Grid, Spinner, GridItem } from "@chakra-ui/react"
+import { Box, HStack, VStack, Grid, Spinner, GridItem, InputLeftElement, InputGroup, Input } from "@chakra-ui/react"
 import { FilterAppsTypeButton } from "./FilterAppsTypeButton"
 import { XApp, UnendorsedApp, useXNode } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { AppsEmptyState } from "./AppsEmptyState"
 import { CreatorBanner } from "./CreatorBanner"
+import { FaSearch } from "react-icons/fa"
 
 const FILTER_ALL = "All"
 const FILTER_ACTIVE_APPS = "Active apps"
@@ -29,21 +30,35 @@ export const AllApps = ({
   isXAppsLoading,
 }: Props) => {
   const [filter, setFilter] = useState(FILTER_ALL)
+  const [searchQuery, setSearchQuery] = useState("")
 
   const showCreatorBanner = useMemo(() => filter === FILTER_ALL, [filter])
-  // Filter xApps based on selected filter value
   const displayApps = useMemo(() => {
+    let filteredApps: (XApp | UnendorsedApp)[] = []
+
+    // Filter xApps based on selected filter value
     switch (filter) {
       case FILTER_ACTIVE_APPS:
-        return currentActiveApps
+        filteredApps = currentActiveApps
+        break
       case FILTER_GRACE_PERIOD:
-        return gracePeriodApps
+        filteredApps = gracePeriodApps
+        break
       case FILTER_ENDORSEMENT_LOST:
-        return endorsementLostApps
+        filteredApps = endorsementLostApps
+        break
       default:
-        return allApps
+        filteredApps = allApps
     }
-  }, [filter, currentActiveApps, gracePeriodApps, endorsementLostApps, allApps])
+
+    // Filter by search query if it exists
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      return filteredApps.filter(app => app.name.toLowerCase().includes(query))
+    }
+
+    return filteredApps
+  }, [filter, searchQuery, currentActiveApps, gracePeriodApps, endorsementLostApps, allApps])
 
   const { isEndorsingApp } = useXNode()
   const layout: LayoutKey = isEndorsingApp ? "endorser" : "default"
@@ -73,28 +88,47 @@ export const AllApps = ({
   }, [displayApps, isXAppsLoading, showCreatorBanner, layout])
 
   return (
-    <VStack spacing={8} w="full" data-testid="apps-page">
-      <Box
-        w="full"
-        overflowX="auto"
-        whiteSpace="nowrap"
-        css={{
-          "&::-webkit-scrollbar": { display: "none" },
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}>
-        <HStack spacing={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
-          {[FILTER_ALL, FILTER_ACTIVE_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST].map(filterType => (
-            <FilterAppsTypeButton
-              key={filterType}
-              filterType={filterType}
-              currentFilter={filter}
-              setFilter={setFilter}
-            />
-          ))}
-        </HStack>
-      </Box>
-      {appsSection}
-    </VStack>
+    <>
+      <VStack spacing={8} w="full" data-testid="apps-page">
+        <Box
+          w="full"
+          overflowX="auto"
+          whiteSpace="nowrap"
+          css={{
+            "&::-webkit-scrollbar": { display: "none" },
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}>
+          <HStack spacing={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
+            {[FILTER_ALL, FILTER_ACTIVE_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST].map(filterType => (
+              <FilterAppsTypeButton
+                key={filterType}
+                filterType={filterType}
+                currentFilter={filter}
+                setFilter={setFilter}
+              />
+            ))}
+          </HStack>
+          <HStack w="full" mt={4}>
+            <InputGroup w="full">
+              <InputLeftElement pointerEvents="none">
+                <FaSearch color="#3B3B3B" />
+              </InputLeftElement>
+              <Input
+                placeholder="Search apps..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                borderRadius="full"
+                bg="white"
+                _dark={{ bg: "#6a6a6a" }}
+                _hover={{ borderColor: "#004CFC" }}
+                _focus={{ borderColor: "#004CFC", boxShadow: "0px 0px 16px 0px rgba(0, 76, 252, 0.35)" }}
+              />
+            </InputGroup>
+          </HStack>
+        </Box>
+        {appsSection}
+      </VStack>
+    </>
   )
 }
