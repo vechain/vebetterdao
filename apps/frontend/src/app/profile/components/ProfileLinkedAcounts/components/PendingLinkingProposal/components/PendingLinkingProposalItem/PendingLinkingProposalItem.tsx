@@ -28,11 +28,17 @@ export const PendingLinkingProposalItem = ({ isConnectedUser, secondaryAccount }
           <VStack align="start">
             <HStack>
               {domain && (
-                <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} borderRight={"1px solid"} paddingRight={2}>
+                <Text
+                  fontWeight="600"
+                  fontSize={["sm", "sm", "lg"]}
+                  borderRight={"1px solid"}
+                  paddingRight={2}
+                  noOfLines={1}
+                  title={domain}>
                   {humanDomain(domain, 8, 4)}
                 </Text>
               )}
-              <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
+              <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} title={secondaryAccount}>
                 {humanAddress(secondaryAccount, 4, 4)}
               </Text>
             </HStack>

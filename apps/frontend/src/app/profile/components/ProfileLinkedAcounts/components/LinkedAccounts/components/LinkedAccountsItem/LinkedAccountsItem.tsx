@@ -8,7 +8,6 @@ import { useWallet, useVechainDomain } from "@vechain/vechain-kit"
 import { useTranslation } from "react-i18next"
 import { RemoveLinkModalPassportPOV } from "./components/RemoveLinkModalPassportPOV"
 import { UilLinkBroken } from "@iconscout/react-unicons"
-import { useMemo } from "react"
 import { RemovePendingRequestModal } from "./components/RemovePendingRequestModal"
 import { RemoveLinkModalEntityPOV } from "./components/RemoveLinkModalEntityPOV"
 
@@ -33,11 +32,7 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
   const removeLinkModalEntityPOV = useDisclosure()
   const removePendingRequestModal = useDisclosure()
 
-  const border = useMemo(() => {
-    if (pending) return "none"
-    if (isUserAccountCard) return "1px solid #4A90E2"
-    return "none"
-  }, [pending, isUserAccountCard])
+  const canUnlinkAccount = isConnectedUser && ((isPassport && !isUserAccountCard) || (isEntity && isUserAccountCard))
 
   if (isUserOverviewLoading || isAccountLinkingLoading) return null
 
@@ -50,7 +45,7 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
       bg="#F8F8F8"
       rounded="xl"
       p={3}
-      border={border}
+      border={pending || !isUserAccountCard ? "none" : "1px solid #4A90E2"}
       boxShadow={pending ? "0px 0px 7.9px 0px rgba(242, 155, 50, 0.50)" : "none"}>
       <HStack gap={4} flex={1}>
         <AddressIcon address={account} w={12} h={12} rounded="full" />
@@ -58,11 +53,17 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
           <Stack direction={["column", "column", "row"]} align={["stretch", "stretch", "center"]}>
             <HStack>
               {domain && (
-                <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} borderRight={"1px solid"} paddingRight={2}>
+                <Text
+                  fontWeight="600"
+                  fontSize={["sm", "sm", "lg"]}
+                  borderRight={"1px solid"}
+                  paddingRight={2}
+                  noOfLines={1}
+                  title={domain}>
                   {humanDomain(domain, 8, 4)}
                 </Text>
               )}
-              <Text fontWeight="600" fontSize={["sm", "sm", "lg"]}>
+              <Text fontWeight="600" fontSize={["sm", "sm", "lg"]} noOfLines={1} title={account}>
                 {humanAddress(account, 4, 4)}
               </Text>
             </HStack>
@@ -96,21 +97,12 @@ export const LinkedAccountsItem = ({ isConnectedUser, account, pending = false }
             </Heading>
           </HStack>
         </Show>
-        {isConnectedUser && isPassport && !isUserAccountCard && (
+        {canUnlinkAccount && (
           <Button
             flex={1}
             variant={"dangerGhost"}
             leftIcon={<UilLinkBroken color="#C84968" />}
-            onClick={removeLinkModalPassportPOV.onOpen}>
-            {t("Unlink account")}
-          </Button>
-        )}
-        {isConnectedUser && isEntity && isUserAccountCard && (
-          <Button
-            flex={1}
-            variant={"dangerGhost"}
-            leftIcon={<UilLinkBroken color="#C84968" />}
-            onClick={removeLinkModalEntityPOV.onOpen}>
+            onClick={isPassport ? removeLinkModalPassportPOV.onOpen : removeLinkModalEntityPOV.onOpen}>
             {t("Unlink account")}
           </Button>
         )}
