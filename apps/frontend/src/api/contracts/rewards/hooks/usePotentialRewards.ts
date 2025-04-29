@@ -13,8 +13,8 @@ export const usePotentialRewards = (
   cycleToTotalGMWeight: number,
   emissionAmount_gmRewards: number,
   cycleToVoterToGMWeight: number,
-  GMlevel?: number,
-  GMUserLevel?: number, // level of GM NFT used already
+  GMlevel?: string,
+  GMUserLevel?: string, // level of GM NFT used already
 ): PotentialRewards => {
   const newGm = gmNfts.find((nft: { level: any }) => nft.level === GMlevel)
   const existingGm = gmNfts.find((nft: { level: any }) => nft.level === GMUserLevel)
