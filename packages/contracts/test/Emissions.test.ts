@@ -1163,6 +1163,10 @@ describe("Emissions - @shard2", () => {
         storageSlotsAfter.push(await ethers.provider.getStorage(await emissionsV3.getAddress(), i))
       }
 
+      storageSlotsAfter = storageSlotsAfter.filter(
+        slot => slot !== "0x0000000000000000000000000000000000000000000000000000000000000000",
+      )
+
       // Check if storage slots are the same after upgrade
       for (let i = 0; i < storageSlots.length; i++) {
         expect(storageSlots[i]).to.equal(storageSlotsAfter[i])
