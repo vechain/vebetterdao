@@ -166,7 +166,7 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
       expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), newSignaler.address)).to.be.true
     })
 
-    it.only("Should should be able to be reset by DEFAULT ADMIN and SIGNALER_ROLE", async function () {
+    it("Should should be able to be reset by DEFAULT ADMIN and SIGNALER_ROLE", async function () {
       const badWallet = otherAccounts[11]
       const defaultWalletSignaler = otherAccounts[12]
 
@@ -187,7 +187,7 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
       expect(await veBetterPassport.appSignalsCounter(appId, badWallet.address)).to.equal(0)
     })
 
-    it.only("Should handle underflow protection when resetting app signals for an entity with passport", async function () {
+    it("Should handle underflow protection when resetting app signals for an entity with passport", async function () {
       // Setup entity and passport
       const entity = otherAccounts[13]
       const passport = otherAccounts[14]
@@ -228,7 +228,7 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
       expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(0)
     })
 
-    it.only("Should handle underflow protection when removing entity link from passport", async function () {
+    it("Should handle underflow protection when removing entity link from passport", async function () {
       // Setup entity and passport
       const entity = otherAccounts[13]
       const passport = otherAccounts[14]
