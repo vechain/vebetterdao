@@ -4,6 +4,7 @@ import { setupSignalingFixture } from "./fixture.test"
 import { VeBetterPassport } from "../../typechain-types"
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers"
 import { BytesLike, ethers } from "ethers"
+import { linkEntityToPassportWithSignature } from "../helpers/common"
 
 describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
   let veBetterPassport: VeBetterPassport
@@ -163,6 +164,117 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
       await veBetterPassport.connect(appAdmin).assignSignalerToAppByAppAdmin(appId, newSignaler.address)
       expect(await veBetterPassport.appOfSignaler(newSignaler.address)).to.equal(appId)
       expect(await veBetterPassport.hasRole(await veBetterPassport.SIGNALER_ROLE(), newSignaler.address)).to.be.true
+    })
+
+    it.only("Should should be able to be reset by DEFAULT ADMIN and SIGNALER_ROLE", async function () {
+      const badWallet = otherAccounts[11]
+      const defaultWalletSignaler = otherAccounts[12]
+
+      await veBetterPassport.connect(regularSignaler).signalUserWithReason(badWallet.address, "Test")
+      await veBetterPassport.connect(regularSignaler).signalUserWithReason(badWallet.address, "Test")
+      expect(await veBetterPassport.signaledCounter(badWallet.address)).to.equal(2)
+      expect(await veBetterPassport.appSignalsCounter(appId, badWallet.address)).to.equal(2)
+
+      await veBetterPassport
+        .connect(owner)
+        .grantRole(await veBetterPassport.RESET_SIGNALER_ROLE(), defaultWalletSignaler.address)
+
+      await veBetterPassport.connect(defaultWalletSignaler).resetUserSignalsWithReason(badWallet.address, "Test")
+      expect(await veBetterPassport.signaledCounter(badWallet.address)).to.equal(0)
+      expect(await veBetterPassport.appSignalsCounter(appId, badWallet.address)).to.equal(2) // reset signal count should not be affected by default admin signaler
+
+      await veBetterPassport.connect(regularSignaler).resetUserSignalsByAppWithReason(badWallet.address, "Test")
+      expect(await veBetterPassport.appSignalsCounter(appId, badWallet.address)).to.equal(0)
+    })
+
+    it.only("Should handle underflow protection when resetting app signals for an entity with passport", async function () {
+      // Setup entity and passport
+      const entity = otherAccounts[13]
+      const passport = otherAccounts[14]
+
+      // Link entity to passport
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 100000)
+
+      // Signal the entity to accumulate some signals
+      await veBetterPassport.connect(regularSignaler).signalUserWithReason(entity.address, "Test signal 1")
+      await veBetterPassport.connect(regularSignaler).signalUserWithReason(entity.address, "Test signal 2")
+
+      // Verify signals are correctly assigned to both entity and passport
+      expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(2)
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(2)
+      expect(await veBetterPassport.appSignalsCounter(appId, entity.address)).to.equal(2)
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(2)
+
+      // Reset passport signals directly to create an inconsistency
+      // This creates the condition where passport has 0 signals but entity still has app signals
+      await veBetterPassport.connect(owner).resetUserSignalsWithReason(passport.address, "Resetting passport signals")
+
+      // Verify passport general signals are now 0, but app signals still exist
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(0)
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(2)
+
+      // Now reset entity app signals - this would have triggered underflow in passport signals before the fix
+      // Commit fix: https://github.com/vechain/b3tr/pull/2139/commits/8a1447fc11081947c61e48caab077c7c8311e9ff
+      await veBetterPassport
+        .connect(regularSignaler)
+        .resetUserSignalsByAppWithReason(entity.address, "Resetting entity app signals")
+
+      // Verify entity app signals are reset
+      expect(await veBetterPassport.appSignalsCounter(appId, entity.address)).to.equal(0)
+
+      // Verify passport counter remains at 0 (not underflowed to a large number)
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(0)
+      // Verify passport app signals are also reset
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(0)
+    })
+
+    it.only("Should handle underflow protection when removing entity link from passport", async function () {
+      // Setup entity and passport
+      const entity = otherAccounts[13]
+      const passport = otherAccounts[14]
+
+      // Link entity to passport
+      await linkEntityToPassportWithSignature(veBetterPassport, passport, entity, 100000)
+
+      // Signal the entity to accumulate some signals
+      await veBetterPassport.connect(regularSignaler).signalUserWithReason(entity.address, "Test signal 1")
+      await veBetterPassport.connect(regularSignaler).signalUserWithReason(entity.address, "Test signal 2")
+
+      // Verify signals correctly assigned to both entity and passport
+      expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(2)
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(2)
+
+      // Verify app signals are also correctly assigned
+      expect(await veBetterPassport.appSignalsCounter(appId, entity.address)).to.equal(2)
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(2)
+
+      // Reset passport signals directly, creating an inconsistency
+      await veBetterPassport.connect(owner).resetUserSignalsWithReason(passport.address, "Resetting passport signals")
+
+      // Manually reset passport app signals to 0 (this would normally be done by app-specific reset)
+      // This creates the potential underflow condition for app signals
+      await veBetterPassport
+        .connect(regularSignaler)
+        .resetUserSignalsByAppWithReason(passport.address, "Reset app signals")
+
+      // Verify passport signals are now 0, but entity still has signals
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(0)
+      expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(2)
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(0)
+      expect(await veBetterPassport.appSignalsCounter(appId, entity.address)).to.equal(2)
+
+      // Remove entity link from passport - this calls removeEntitySignalsFromPassport internally
+      // This would have failed before the fix with "VM Exception: underflow"
+      // Commit fix: https://github.com/vechain/b3tr/pull/2139/commits/8a1447fc11081947c61e48caab077c7c8311e9ff
+      await veBetterPassport.connect(entity).removeEntityLink(entity.address)
+
+      // Verify passport counters remain at 0 (not underflowed)
+      expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(0)
+      expect(await veBetterPassport.appSignalsCounter(appId, passport.address)).to.equal(0)
+
+      // Entity signals should be unchanged since they're not affected by the link removal
+      expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(2)
+      expect(await veBetterPassport.appSignalsCounter(appId, entity.address)).to.equal(2)
     })
   })
 })
