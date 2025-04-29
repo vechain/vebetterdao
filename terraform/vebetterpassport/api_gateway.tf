@@ -47,6 +47,9 @@ resource "aws_api_gateway_method_response" "reset_user_signals_method_response" 
   resource_id = aws_api_gateway_resource.reset_user_signals_resource.id
   rest_api_id = aws_api_gateway_rest_api.reset_user_signals_api.id
   status_code = "200"
+  response_models = {
+    "application/json" = "Empty"
+  }
 }
 
 # API Gateway Integration Response
@@ -55,6 +58,9 @@ resource "aws_api_gateway_integration_response" "reset_user_signals_integration_
   resource_id = aws_api_gateway_resource.reset_user_signals_resource.id
   rest_api_id = aws_api_gateway_rest_api.reset_user_signals_api.id
   status_code = aws_api_gateway_method_response.reset_user_signals_method_response.status_code
+  response_templates = {
+    "application/json" = ""
+  }
 }
 
 # API Gateway Stage
