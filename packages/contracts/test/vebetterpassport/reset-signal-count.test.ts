@@ -13,6 +13,7 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
   let regularSignaler: SignerWithAddress
   let resetSignaler: SignerWithAddress
   let user: SignerWithAddress
+  let appAdmin: SignerWithAddress
 
   beforeEach(async function () {
     const fixture = await setupSignalingFixture()
@@ -21,6 +22,7 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
     otherAccounts = fixture.otherAccounts
     appId = fixture.appId
     regularSignaler = fixture.regularSignaler
+    appAdmin = fixture.appAdmin
 
     // Setup a reset signaler with proper role
     resetSignaler = otherAccounts[5]
@@ -50,7 +52,7 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
     })
   })
 
-  describe("Reset Signals by RESET_SIGNALER_ROLE", function () {
+  describe("Reset Signals by RESET_SIGNALER_ROLE (internal use)", function () {
     it("Should revert if a caller does not have RESET_SIGNALER_ROLE", async function () {
       await expect(veBetterPassport.connect(otherAccounts[7]).resetUserSignalsWithReason(user.address, "no signals")).to
         .be.reverted
@@ -106,6 +108,45 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
         .withArgs(resetSignaler.address, "clearing my own record")
 
       expect(await veBetterPassport.signaledCounter(resetSignaler.address)).to.equal(0)
+    })
+  })
+
+  describe.only("Reset Signals by SIGNALER_ROLE (for app admins)", function () {
+    it("Should revert if a caller does not have SIGNALER_ROLE", async function () {
+      await expect(
+        veBetterPassport.connect(otherAccounts[7]).resetUserSignalsByAppWithReason(user.address, "no signals"),
+      ).to.be.reverted
+    })
+
+    it("Should revert if random user tries to assign signaler role", async function () {
+      await expect(
+        veBetterPassport.connect(otherAccounts[7]).assignSignalerToAppByAppAdmin(appId, otherAccounts[7].address),
+      ).to.be.reverted
+    })
+
+    it("Should revert if random user tries to remove signaler role", async function () {
+      await expect(veBetterPassport.connect(otherAccounts[7]).removeSignalerFromApp(otherAccounts[7].address)).to.be
+        .reverted
+    })
+
+    it("Should allow a signaler to reset signals", async function () {
+      const randomUser = otherAccounts[14]
+
+      await veBetterPassport.connect(appAdmin).assignSignalerToAppByAppAdmin(appId, regularSignaler.address)
+
+      await veBetterPassport.connect(regularSignaler).signalUserWithReason(randomUser.address, "Suspicious activity")
+
+      expect(await veBetterPassport.signaledCounter(randomUser.address)).to.equal(1)
+
+      await expect(
+        veBetterPassport
+          .connect(regularSignaler)
+          .resetUserSignalsByAppWithReason(randomUser.address, "clearing a record"),
+      )
+        .to.emit(veBetterPassport, "UserSignalsResetForApp")
+        .withArgs(randomUser.address, appId, "clearing a record")
+
+      expect(await veBetterPassport.signaledCounter(randomUser.address)).to.equal(0)
     })
   })
 })

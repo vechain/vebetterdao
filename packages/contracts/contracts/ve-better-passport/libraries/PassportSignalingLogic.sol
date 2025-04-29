@@ -199,13 +199,12 @@ library PassportSignalingLogic {
   /// @notice Resets the signals of a user
   /// @param user - the user to reset the signals of
   /// @param reason - the reason for resetting the signals
-  function resetUserSignalsByAppAdminWithReason(
+  function resetUserSignalsByAppWithReason(
     PassportStorageTypes.PassportStorage storage self,
     address user,
     string memory reason
   ) external {
     bytes32 app = self.appOfSignaler[msg.sender];
-    require(self.x2EarnApps.isAppAdmin(app, msg.sender), "BotSignaling: caller is not an admin of the app");
 
     _resetUserSignalsOfApp(self, user, app, reason);
   }
