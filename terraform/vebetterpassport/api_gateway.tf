@@ -8,7 +8,7 @@ resource "aws_api_gateway_rest_api" "reset_user_signals_api" {
   }
 
   name = "Reset User Signals With Reason - ${terraform.workspace == "dev" ? "Testnet" : "Mainnet"}"
-  
+
   lifecycle {
     ignore_changes = [tags, tags_all]
   }
@@ -72,7 +72,7 @@ resource "aws_api_gateway_stage" "reset_user_signals_stage" {
   deployment_id = aws_api_gateway_deployment.reset_user_signals_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.reset_user_signals_api.id
   stage_name    = "default"
-  
+
   lifecycle {
     ignore_changes = [tags, tags_all]
   }

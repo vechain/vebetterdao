@@ -26,7 +26,7 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
   tracing_config {
     mode = "PassThrough"
   }
-  
+
   lifecycle {
     ignore_changes = [
       filename,
