@@ -14,12 +14,19 @@ terraform {
   }
 }
 
+# Load workspace configuration from YAML
+locals {
+  config       = yamldecode(file("${path.module}/config/${terraform.workspace}.yaml"))
+  network      = local.config.environment
+  account_id   = local.config.aws_account_id
+}
+
 provider "aws" {
-  region = "eu-west-1"
+  region = local.config.aws_region
 
   default_tags {
     tags = {
-      Environment = terraform.workspace == "dev" ? "testnet" : "mainnet"
+      Environment = local.network
       Project     = "vebetterpassport"
       ManagedBy   = "terraform"
     }

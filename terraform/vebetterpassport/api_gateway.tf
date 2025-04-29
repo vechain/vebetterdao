@@ -7,7 +7,7 @@ resource "aws_api_gateway_rest_api" "reset_user_signals_api" {
     types = ["REGIONAL"]
   }
 
-  name = "Reset User Signals With Reason - ${terraform.workspace == "dev" ? "Testnet" : "Mainnet"}"
+  name = "Reset User Signals With Reason - ${title(local.network)}"
 
   lifecycle {
     ignore_changes = [tags, tags_all]
