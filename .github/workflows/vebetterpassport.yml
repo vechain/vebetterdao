@@ -6,6 +6,7 @@ on:
       - terraformer-import
     paths:
       - 'terraform/vebetterpassport/**'
+      - '.github/workflows/vebetterpassport.yml'
   workflow_dispatch:
 
 permissions:
@@ -26,7 +27,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ACCESS_ROLE }}
+          role-to-assume: ${{ secrets.DEV_AWS_ACC_ROLE }}
           aws-region: eu-west-1
 
       - name: Setup Terraform
