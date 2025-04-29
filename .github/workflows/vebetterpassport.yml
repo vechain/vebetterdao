@@ -50,10 +50,10 @@ jobs:
         working-directory: terraform/vebetterpassport
         run: terraform init
 
-    #   - name: Terraform Workspace
-    #     working-directory: terraform/vebetterpassport
-    #     id: workspace
-    #     run: terraform workspace select dev
+      - name: Terraform Workspace
+        working-directory: terraform/vebetterpassport
+        id: workspace
+        run: terraform workspace select dev
     
       - name: Terraform Validate
         working-directory: terraform/vebetterpassport
