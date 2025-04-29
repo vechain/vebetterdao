@@ -37,16 +37,16 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
     return getGMLevel(1, Number(b3trDonated ?? 0))
   }, [b3trDonated])
 
-  const detachGMFromXNodeMutation = useDetachGMFromXNode({})
-
   const handleClose = useCallback(() => {
-    detachGMFromXNodeMutation.resetStatus()
     onClose()
-  }, [detachGMFromXNodeMutation, onClose])
+  }, [onClose])
+
+  const detachGMFromXNodeMutation = useDetachGMFromXNode({
+    onSuccess: handleClose,
+  })
 
   const handleDetachment = useCallback(() => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHED_GM_FROM_XNODE))
-    detachGMFromXNodeMutation.resetStatus()
     detachGMFromXNodeMutation.sendTransaction()
   }, [detachGMFromXNodeMutation])
 

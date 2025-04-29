@@ -48,9 +48,16 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
 
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
+  const { isOpen = false, onClose } = upgradeGMModal
+
+  const handleClose = useCallback(() => {
+    onClose()
+  }, [onClose])
+
   const upgradeGMMutation = useUpgradeGM({
     tokenId,
     b3trToUpgrade: b3trToUpgradeGMToNextLevel,
+    onSuccess: handleClose,
   })
 
   // Get the next level GM NFT image
@@ -71,13 +78,8 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
     upgradeGMMutation.sendTransaction()
   }, [upgradeGMMutation])
 
-  const handleClose = useCallback(() => {
-    upgradeGMMutation.resetStatus()
-    upgradeGMModal.onClose()
-  }, [upgradeGMMutation, upgradeGMModal])
-
   return (
-    <Modal isOpen={upgradeGMModal.isOpen && !isTxModalOpen} onClose={handleClose} size={"2xl"}>
+    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} size={"2xl"}>
       <ModalOverlay />
       <CustomModalContent p={{ base: 3, md: 5 }}>
         <ModalCloseButton />
