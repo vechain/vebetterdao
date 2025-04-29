@@ -163,6 +163,7 @@ export const CreateEditAppForm = ({
                     new URL(value)
                     return true
                   } catch (e) {
+                    console.error(e)
                     return "Invalid URL"
                   }
                 },

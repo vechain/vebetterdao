@@ -19,6 +19,7 @@ export const compareAddresses = (address1?: string, address2?: string): boolean 
   try {
     return HexUtils.normalize(address1) === HexUtils.normalize(address2)
   } catch (e) {
+    console.error(e)
     return false
   }
 }

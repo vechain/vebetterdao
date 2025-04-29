@@ -15,12 +15,12 @@ const DAppKitProvider = dynamic(
 )
 
 const walletConnectOptions: WalletConnectOptions = {
-  projectId: "06c045cd12ae0906fe5ad7d737fcdc04",
+  projectId: "edd5fa0afa1a22e42362891aeef466bf",
   metadata: {
-    name: "VeBetterDAO Governance",
-    description: "Participate in the VeBetterDAO Governance",
-    url: "https://governance.vebetterdao.org",
-    icons: ["https://governance.vebetterdao.org/images/favicon.png"],
+    name: "VeBetterDAO Governance Developer Testnet",
+    description: "An environment for developers to test the VeBetterDAO Governance",
+    url: "https://dev.testnet.governance.vebetterdao.org",
+    icons: ["https://dev.testnet.governance.vebetterdao.org/images/favicon.png"],
   },
 }
 
