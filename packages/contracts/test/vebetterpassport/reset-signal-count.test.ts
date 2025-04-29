@@ -111,7 +111,7 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
     })
   })
 
-  describe.only("Reset Signals by SIGNALER_ROLE (for app admins)", function () {
+  describe("Reset Signals by SIGNALER_ROLE (for app admins)", function () {
     it("Should revert if a caller does not have SIGNALER_ROLE", async function () {
       await expect(
         veBetterPassport.connect(otherAccounts[7]).resetUserSignalsByAppWithReason(user.address, "no signals"),
