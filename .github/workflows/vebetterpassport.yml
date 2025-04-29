@@ -53,7 +53,12 @@ jobs:
       - name: Terraform Workspace
         working-directory: terraform/vebetterpassport
         id: workspace
-        run: terraform workspace select dev
+        run: |
+          if ! terraform workspace list | grep -q "dev"; then
+            terraform workspace new dev
+          else
+            terraform workspace select dev
+          fi
     
       - name: Terraform Validate
         working-directory: terraform/vebetterpassport
