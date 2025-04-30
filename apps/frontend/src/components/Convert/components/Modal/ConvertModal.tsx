@@ -73,8 +73,14 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const convertB3trMutation = useConvertB3tr({
     amount,
     transactionModalCustomUI: {
+      waitingConfirmation: {
+        title: t("Conversion in progress..."),
+      },
       success: {
         title: t("Conversion Completed"),
+      },
+      error: {
+        title: t("Error converting tokens"),
       },
     },
     onSuccess: handleClose,
@@ -83,8 +89,14 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const convertVot3Mutation = useConvertVot3({
     amount,
     transactionModalCustomUI: {
+      waitingConfirmation: {
+        title: t("Conversion in progress..."),
+      },
       success: {
         title: t("Conversion Completed"),
+      },
+      error: {
+        title: t("Error converting tokens"),
       },
     },
     onSuccess: handleClose,
@@ -167,7 +179,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
             vot3BalanceAfterSwap={vot3BalanceAfterSwap}
           />
         ),
-        title: t("Review transaction"),
+        title: t("Review operation"),
       },
     ],
     [

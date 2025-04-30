@@ -1023,7 +1023,7 @@
   "Quorum reached": "Quorum reached",
   "votes needed to reach quorum": "votes needed to reach quorum",
   "preferred to abastain": "preferred to abastain",
-  "Confirm the operation in your wallet to complete the convertion": "Confirm the operation in your wallet to complete the convertion",
+  "Confirm the operation in your wallet to complete the conversion": "Confirm the operation in your wallet to complete the conversion",
   "Remaing apps that needs claiming:": "Remaing apps that needs claiming:",
   "Allocation claiming": "Allocation claiming",
   "Pausing disables: Transfers, Minting, New Emissions, Swaps": "Pausing disables: Transfers, Minting, New Emissions, Swaps",
@@ -1602,9 +1602,9 @@
   "Only app admin can transfer and manage the rewards pool": "Only app admin can transfer and manage the rewards pool",
   "Access restricted": "Access restricted",
   "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. <strong>Consider voting for fewer apps or getting more VOT3.</strong>",
-  "Review transaction": "Review transaction",
+  "Review operation": "Review operation",
   "The more VOT3 in your balance, the more voting power you'll have. Use it to vote on proposals and allocation rounds.": "The more VOT3 in your balance, the more voting power you'll have. Use it to vote on proposals and allocation rounds.",
-  "By confirming the operation in your wallet, you will complete the convertion": "By confirming the operation in your wallet, you will complete the convertion",
+  "By confirming the operation in your wallet, you will complete the conversion": "By confirming the operation in your wallet, you will complete the conversion",
   "Confirm and send transaction": "Confirm and send transaction",
   "Filters": "Filters",
   "Send transaction": "Send transaction",
@@ -1618,5 +1618,8 @@
   "Minting your GM NFT...": "Minting your GM NFT...",
   "Casting your vote...": "Casting your vote...",
   "Vote cast successfully!": "Vote cast successfully!",
-  "Error casting your vote!": "Error casting your vote!"
+  "Error casting your vote!": "Error casting your vote!",
+  "Conversion in progress...": "Conversion in progress...",
+  "Confirm conversion": "Confirm conversion",
+  "Error converting tokens": "Error converting tokens"
 }

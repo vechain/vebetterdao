@@ -81,7 +81,7 @@ export const SwapTokenContent = ({
         onClick={goToNextStep}
         size={"lg"}
         data-testid={"confirm-swap-button"}>
-        <Text fontSize={{ base: 14, md: 18 }}>{t("Review transaction")}</Text>
+        <Text fontSize={{ base: 14, md: 18 }}>{t("Review operation")}</Text>
       </Button>
     </>
   )

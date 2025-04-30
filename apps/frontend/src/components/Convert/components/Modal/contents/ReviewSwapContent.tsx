@@ -18,7 +18,7 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
       <Image src="/images/b3trvot3-tokens.png" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
 
       <Text fontSize={16} fontWeight={400} textAlign={"center"}>
-        {t("By confirming the operation in your wallet, you will complete the convertion")}
+        {t("By confirming the operation in your wallet, you will complete the conversion")}
       </Text>
       <VStack w="full" mt={8}>
         {Number(b3trBalanceAfterSwap) >= 0 && (
@@ -57,8 +57,9 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
         onClick={onSubmitTx}
         size={"lg"}
         py={4}
+        mt={4}
         data-testid={"confirm-swap-button"}>
-        <Text fontSize={{ base: 14, md: 18 }}>{t("Confirm and send transaction")}</Text>
+        <Text fontSize={{ base: 14, md: 18 }}>{t("Confirm conversion")}</Text>
       </Button>
     </VStack>
   )

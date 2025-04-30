@@ -84,7 +84,7 @@ export const StepModal = <T extends string>({
             </Flex>
 
             {isDesktop && !disableCloseButton ? (
-              <Button position="absolute" variant={"ghost"} right={4} onClick={handleClose}>
+              <Button position="absolute" variant={"ghost"} right={0} onClick={handleClose}>
                 <IoClose size={30} />
               </Button>
             ) : null}
