@@ -183,6 +183,7 @@ export const EditAppPageContent = () => {
       <StepModal
         isOpen={isOpen && !isTxModalOpen}
         onClose={onClose}
+        disableCloseButton={true}
         steps={[
           {
             key: EditAppPageStep.UPLOADING,

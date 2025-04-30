@@ -20,6 +20,7 @@ export type StepModalProps<T extends string> = {
   setActiveStep: (step: number) => void
   activeStep: number
   disableBackButton?: boolean
+  disableCloseButton?: boolean
 }
 
 export const StepModal = <T extends string>({
@@ -30,6 +31,7 @@ export const StepModal = <T extends string>({
   goToPrevious,
   setActiveStep,
   disableBackButton,
+  disableCloseButton,
 }: StepModalProps<T>) => {
   const handleClose = () => {
     // reset the active step to 0
@@ -77,11 +79,11 @@ export const StepModal = <T extends string>({
               </Text>
             </Flex>
 
-            {isDesktop && (
+            {isDesktop && !disableCloseButton ? (
               <Box position="absolute" right={4}>
                 <IoClose onClick={handleClose} size={30} cursor={"pointer"} />
               </Box>
-            )}
+            ) : null}
           </Flex>
           {currentStepContent?.description ? (
             <Text fontSize={{ base: 14, md: 16 }} fontWeight={400} px={4}>

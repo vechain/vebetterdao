@@ -93,6 +93,7 @@ export const AppTweets = () => {
       <StepModal
         isOpen={isOpen && !isTxModalOpen}
         onClose={onClose}
+        disableCloseButton={true}
         steps={[
           {
             key: AppTweetsStep.UPLOADING,
