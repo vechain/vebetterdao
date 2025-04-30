@@ -124,11 +124,13 @@ jobs:
             -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}" \
             -out=vebetterpassport.tfplan \
             -detailed-exitcode
-    
+          echo "::set-output name=terraform_exit_code::$?"
+
       - name: Check for plan changes
         id: check_changes
         run: |
-          if [ ${{ steps.plan.outcome }} == 'success' ] && [ ${{ steps.plan.outputs.exitcode }} == 2 ]; then
+          # Check for the plan file's existence instead of relying on exit codes
+          if [ -f "terraform/vebetterpassport/vebetterpassport.tfplan" ]; then
             echo "Changes detected"
             echo "plan_changes_detected=true" >> $GITHUB_OUTPUT
           else
