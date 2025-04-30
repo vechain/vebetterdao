@@ -67,9 +67,9 @@ jobs:
 
       - name: Configure Secret Masking
         run: |
-          echo "::add-mask::${{ secrets.MAINNET_MNEMONIC }}"
+          echo "::add-mask::${{ secrets.TEST_MNEMONIC }}"
           # Add any parts of the mnemonic that might appear in logs
-          IFS=' ' read -ra WORDS <<< "${{ secrets.MAINNET_MNEMONIC }}"
+          IFS=' ' read -ra WORDS <<< "${{ secrets.TEST_MNEMONIC }}"
           for i in "${WORDS[@]}"; do
             echo "::add-mask::$i"
           done
@@ -107,7 +107,11 @@ jobs:
         env:
           MAINNET_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
           TF_LOG: ERROR # Limit Terraform logging to reduce chance of secrets exposure
-        run: terraform plan -out=vebetterpassport.tfplan -detailed-exitcode
+        run: |
+          terraform plan \
+            -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}" \
+            -out=vebetterpassport.tfplan \
+            -detailed-exitcode
     
       - name: Check for plan changes
         id: check_changes
@@ -133,6 +137,9 @@ jobs:
       - name: Terraform Apply
         working-directory: terraform/vebetterpassport
         env:
-          MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
+          MAINNET_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
           TF_LOG: ERROR # Limit Terraform logging to reduce chance of secrets exposure
-        run: terraform apply -auto-approve vebetterpassport.tfplan
+        run: |
+          terraform apply \
+            -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}" \
+            -auto-approve vebetterpassport.tfplan
