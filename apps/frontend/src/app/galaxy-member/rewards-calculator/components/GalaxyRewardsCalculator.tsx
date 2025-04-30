@@ -79,7 +79,7 @@ export const GalaxyRewardsCalculator = () => {
       variant="baseWithBorder"
       alignItems="center"
       style={{
-        backgroundImage: `url('/assets/backgrounds/stardust.webp')`,
+        backgroundImage: `url('/images/stardust.jpg')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -114,7 +114,7 @@ export const GalaxyRewardsCalculator = () => {
             </HStack>
 
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
-              <Image boxSize="7" rounded="full" src="/assets/logos/b3tr_logo.svg/" alt="b3tr" />
+              <Image boxSize="7" rounded="full" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
               <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
                 {compactFormatter.format(estimatedRewards?.potentialRewards ?? 0)}
               </Text>
@@ -134,7 +134,7 @@ export const GalaxyRewardsCalculator = () => {
             </HStack>
 
             <HStack display="flex" alignItems="center" borderLeft="4px" pl={4}>
-              <Image boxSize="7" rounded="full" src="/assets/logos/b3tr_logo.svg/" alt="b3tr" />
+              <Image boxSize="7" rounded="full" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
 
               <Text bg="transparent" fontWeight="semibold" px={2} w="full" fontSize="4xl">
                 {compactFormatter.format(Number(currentReward ?? 0))}

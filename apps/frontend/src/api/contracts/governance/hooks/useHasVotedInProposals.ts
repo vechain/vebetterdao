@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { useConnex } from "@vechain/vechain-kit"
 
 import { getConfig } from "@repo/config"
@@ -25,17 +25,30 @@ export const getHasVoted = async (thor: Connex.Thor, proposalId: string, address
   return res.decoded[0]
 }
 
-export const getHasVotedQueryKey = (proposalId: string, address?: string) => ["hasVoted", proposalId, address]
+export const getHasVotedQueryKey = (proposalIds: string[], address?: string) => ["hasVoted", proposalIds, address]
 /**
- * Hook to check if the given address has voted on the given proposal
- * @returns true if the given address has voted on the given proposal
+ * Hook to check if the given address has voted on the given proposals
+ * @param proposalIds Array of proposal IDs to check
+ * @param address Address to check voting status for
+ * @returns Array of objects containing proposalId and hasVoted status for each proposal
  */
-export const useHasVoted = (proposalId: string, address?: string) => {
+export const useHasVotedInProposals = (
+  proposalIds: string[],
+  address?: string,
+): UseQueryResult<Record<string, boolean>> => {
   const { thor } = useConnex()
 
   return useQuery({
-    queryKey: getHasVotedQueryKey(proposalId, address),
-    queryFn: async () => await getHasVoted(thor, proposalId, address),
-    enabled: !!thor && !!address,
+    queryKey: getHasVotedQueryKey(proposalIds, address),
+    queryFn: async () => Promise.all(proposalIds.map(proposalId => getHasVoted(thor, proposalId, address))),
+    select: hasVoted =>
+      proposalIds.reduce(
+        (acc, proposalId, index) => ({
+          ...acc,
+          [proposalId]: hasVoted[index],
+        }),
+        {},
+      ),
+    enabled: !!thor && !!address && !!proposalIds.length,
   })
 }
