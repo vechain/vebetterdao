@@ -76,7 +76,21 @@ export const ConfirmCastAllocationVotePageContent = ({ roundId }: Props) => {
     router.push(`/rounds/${roundId}`)
   }, [router, roundId, closeTxModal])
 
-  const castAllocationVotes = useCastAllocationVotes({ roundId, onSuccess })
+  const castAllocationVotes = useCastAllocationVotes({
+    roundId,
+    onSuccess,
+    transactionModalCustomUI: {
+      waitingConfirmation: {
+        title: t("Casting your vote..."),
+      },
+      success: {
+        title: t("Vote cast successfully!"),
+      },
+      error: {
+        title: t("Error casting your vote!"),
+      },
+    },
+  })
 
   const totalVotesToCast = useMemo(() => {
     return (votes.reduce((acc, vote) => acc + Number(vote.rawValue), 0) * Number(votesAtSnapshot)) / 100
