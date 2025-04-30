@@ -49,11 +49,12 @@ async function main() {
     `Upgrading VeBetterPassport contract at address: ${config.veBetterPassportContractAddress} on network: ${config.network.name} (env: ${config.environment}) with account: ${deployer.address}`,
   )
 
+  const RESET_SIGNALER_WALLET = "0x12a7f82621d518aed6bbadc7f9d6d2814934b259" // More info can be found in 1Password (b3tr)
   const veBetterPassport = (await upgradeProxy(
     "VeBetterPassportV3",
     "VeBetterPassport",
     config.veBetterPassportContractAddress,
-    [deployer.address],
+    [RESET_SIGNALER_WALLET],
     {
       version: 4,
       libraries: {
