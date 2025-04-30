@@ -1,7 +1,7 @@
 import { BaseModal } from "../BaseModal"
 import { motion } from "framer-motion"
 import { ReactNode } from "react"
-import { Card, CardBody, Text, useMediaQuery, Box, Flex } from "@chakra-ui/react"
+import { Card, CardBody, Text, useMediaQuery, Flex, Button } from "@chakra-ui/react"
 import { IoArrowBackOutline, IoClose } from "react-icons/io5"
 
 export type Step<T extends string> = {
@@ -58,17 +58,21 @@ export const StepModal = <T extends string>({
       modalContentProps={{
         maxW: "container.md",
         w: "auto",
-        bgColor: "#fff",
+        p: 6,
+        pt: 2,
+      }}
+      modalBodyProps={{
+        p: 0,
       }}
       closeButton={false}>
       <Card p={0}>
         <CardBody p={0}>
           <Flex position="relative" h="60px" alignItems="center">
-            <Box position="absolute" left={0} p={0}>
-              {!isFirstStep && !disableBackButton ? (
-                <IoArrowBackOutline onClick={goToPrevious} size={30} cursor={"pointer"} />
-              ) : null}
-            </Box>
+            {!isFirstStep && !disableBackButton ? (
+              <Button variant={"ghost"} position="absolute" left={0} p={0} onClick={goToPrevious}>
+                <IoArrowBackOutline size={30} />
+              </Button>
+            ) : null}
 
             <Flex
               justifyContent={["center", "center", "flex-start"]}
@@ -80,9 +84,9 @@ export const StepModal = <T extends string>({
             </Flex>
 
             {isDesktop && !disableCloseButton ? (
-              <Box position="absolute" right={4}>
-                <IoClose onClick={handleClose} size={30} cursor={"pointer"} />
-              </Box>
+              <Button position="absolute" variant={"ghost"} right={4} onClick={handleClose}>
+                <IoClose size={30} />
+              </Button>
             ) : null}
           </Flex>
           {currentStepContent?.description ? (

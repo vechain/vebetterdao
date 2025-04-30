@@ -14,7 +14,7 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
   const { t } = useTranslation()
 
   return (
-    <VStack align={"center"} p={6} gap={2}>
+    <VStack align={"center"} p={0} gap={2}>
       <Image src="/images/b3trvot3-tokens.png" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
 
       <Text fontSize={16} fontWeight={400} textAlign={"center"}>
