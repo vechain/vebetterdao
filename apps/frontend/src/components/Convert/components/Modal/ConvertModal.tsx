@@ -64,6 +64,12 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
   const amount = watch("amount")
   const invalidAmount = useMemo(() => Number(amount) === 0 || isNaN(Number(amount)), [amount])
 
+  const handleClose = useCallback(() => {
+    onClose()
+    setIsB3trToVot3(undefined)
+    setValue("amount", "")
+  }, [onClose, setValue])
+
   const convertB3trMutation = useConvertB3tr({
     amount,
     transactionModalCustomUI: {
@@ -71,6 +77,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
         title: t("Conversion Completed"),
       },
     },
+    onSuccess: handleClose,
   })
 
   const convertVot3Mutation = useConvertVot3({
@@ -80,6 +87,7 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
         title: t("Conversion Completed"),
       },
     },
+    onSuccess: handleClose,
   })
 
   const mutationData = useMemo(() => {
@@ -96,12 +104,6 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     mutationData.resetStatus()
     mutationData.sendTransaction()
   }, [isB3trToVot3, isSmartAccountUpgradeRequired, mutationData, openUpgradeModal])
-
-  const handleClose = useCallback(() => {
-    onClose()
-    setIsB3trToVot3(undefined)
-    setValue("amount", "")
-  }, [onClose, setValue])
 
   const b3trBalanceAfterSwap = useMemo(() => {
     if (isB3trToVot3) {
