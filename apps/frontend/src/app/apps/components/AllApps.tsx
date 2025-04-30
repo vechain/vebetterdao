@@ -25,7 +25,6 @@ const FILTER_NEW_APPS = "New apps"
 const FILTER_GRACE_PERIOD = "In grace period"
 const FILTER_ENDORSEMENT_LOST = "Endorsement lost"
 
-// TODO : double check that they is not an app that have a particular status, other than the ones we want to display
 type Props = {
   currentActiveApps: XApp[]
   newApps: UnendorsedApp[]
@@ -125,7 +124,7 @@ export const AllApps = ({
         )}
       </VStack>
     )
-  }, [displayAppsRestricted, isXAppsLoading, showCreatorBanner, layout, hasMoreApps])
+  }, [t, displayAppsRestricted, isXAppsLoading, showCreatorBanner, layout, hasMoreApps])
 
   return (
     <>
