@@ -1621,5 +1621,7 @@
   "Error casting your vote!": "Error casting your vote!",
   "Conversion in progress...": "Conversion in progress...",
   "Confirm conversion": "Confirm conversion",
-  "Error converting tokens": "Error converting tokens"
+  "Error converting tokens": "Error converting tokens",
+  "Proposal Created!": "Proposal Created!",
+  "Error creating proposal!": "Error creating proposal!"
 }

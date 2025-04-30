@@ -7,6 +7,7 @@ import { getConfig } from "@repo/config"
 import { isZero } from "@repo/utils/FormattingUtils"
 import { getProposalsEventsQueryKey, getProposalUserDepositQueryKey } from "@/api"
 import { useBuildTransaction } from "./useBuildTransaction"
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 export type AvailableContractAbis = (typeof governanceAvailableContracts)[number]["abi"]["abi"][number]
 
 const GOVERNANCE_CONTRACT = getConfig().b3trGovernorAddress
@@ -27,6 +28,7 @@ export type ProposalAction = {
  */
 export type useCreateProposalProps = {
   onSuccess?: () => void
+  transactionModalCustomUI?: TransactionCustomUI
 }
 
 export type ReducedActions = {
@@ -44,9 +46,10 @@ type BuildClausesProps = {
  * Hook to create a proposal with the given calldata or actions. I.e functions to call if the proposal is executed
  * @param description The description of the proposal
  * @param actions the functions we want to execute in case the proposal is successful
+ * @param transactionModalCustomUI custom UI for the transaction modal
  * @returns see {@link UseSendTransactionReturnValue}
  */
-export const useCreateProposal = ({ onSuccess }: useCreateProposalProps) => {
+export const useCreateProposal = ({ onSuccess, transactionModalCustomUI }: useCreateProposalProps) => {
   const { account } = useWallet()
 
   const buildClauses = useCallback(
@@ -111,5 +114,6 @@ export const useCreateProposal = ({ onSuccess }: useCreateProposalProps) => {
     clauseBuilder: buildClauses,
     onSuccess,
     refetchQueryKeys,
+    transactionModalCustomUI,
   })
 }

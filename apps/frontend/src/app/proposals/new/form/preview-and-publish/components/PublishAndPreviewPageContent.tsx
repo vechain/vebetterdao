@@ -48,13 +48,28 @@ export const PublishAndPreviewPageContent = () => {
   )
 
   const onSuccess = useCallback(() => {
-    //Clear the form store data
-    clearData()
+    console.log("expectedProposalId", expectedProposalId)
     //Redirect to the proposal page
     router.push(`/proposals/${expectedProposalId}`)
+
+    //Clear the form store data
+    clearData()
   }, [router, expectedProposalId, clearData])
 
-  const createProposalMutation = useCreateProposal({ onSuccess })
+  const createProposalMutation = useCreateProposal({
+    onSuccess,
+    transactionModalCustomUI: {
+      waitingConfirmation: {
+        title: t("Creating proposal..."),
+      },
+      success: {
+        title: t("Proposal Created!"),
+      },
+      error: {
+        title: t("Error creating proposal!"),
+      },
+    },
+  })
 
   const { onMetadataUpload } = useUploadProposalMetadata()
 
