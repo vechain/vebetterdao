@@ -309,4 +309,24 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       expect(await veBetterPassport.signaledCounter(targetUser.address)).to.equal(0)
     })
   })
+
+  describe("Signaling By UPGRADER_ROLE", function () {
+    it("Should allow to set signaling threshold", async function () {
+      await veBetterPassport.connect(owner).setSignalingThreshold(2)
+      expect(await veBetterPassport.signalingThreshold()).to.equal(2)
+
+      await expect(
+        veBetterPassport.connect(owner).grantRole(await veBetterPassport.UPGRADER_ROLE(), otherAccounts[2].address),
+      )
+        .to.emit(veBetterPassport, "RoleGranted")
+        .withArgs(await veBetterPassport.UPGRADER_ROLE(), otherAccounts[2].address, owner.address)
+
+      await veBetterPassport.connect(otherAccounts[2]).setSignalingThreshold(3)
+      expect(await veBetterPassport.signalingThreshold()).to.equal(3)
+    })
+
+    it("Should revert if not UPGRADER_ROLE", async function () {
+      await expect(veBetterPassport.connect(otherAccounts[3]).setSignalingThreshold(4)).to.be.reverted
+    })
+  })
 })

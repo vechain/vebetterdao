@@ -734,7 +734,7 @@ contract VeBetterPassport is AccessControlUpgradeable, UUPSUpgradeable, IVeBette
 
   /// @notice Sets the signaling threshold
   /// @param threshold - the signaling threshold
-  function setSignalingThreshold(uint256 threshold) external onlyRoleOrAdmin(DEFAULT_ADMIN_ROLE) {
+  function setSignalingThreshold(uint256 threshold) external onlyRoleOrAdmin(UPGRADER_ROLE) {
     PassportStorageTypes.PassportStorage storage $ = getPassportStorage();
     PassportSignalingLogic.setSignalingThreshold($, threshold);
   }
