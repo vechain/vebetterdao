@@ -51,12 +51,36 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
       // Verify signals were reset
       expect(await veBetterPassport.signaledCounter(user.address)).to.equal(0)
     })
+
+    it.only("Should allow to reset user without signals", async function () {
+      const userWithoutSignals = otherAccounts[7]
+
+      expect(await veBetterPassport.signaledCounter(userWithoutSignals.address)).to.equal(0)
+      await expect(veBetterPassport.connect(owner).resetUserSignalsWithReason(userWithoutSignals.address, "no signals"))
+        .to.emit(veBetterPassport, "UserSignalsReset")
+        .withArgs(userWithoutSignals.address, "no signals")
+    })
   })
 
   describe("Reset Signals by RESET_SIGNALER_ROLE (internal use)", function () {
     it("Should revert if a caller does not have RESET_SIGNALER_ROLE", async function () {
       await expect(veBetterPassport.connect(otherAccounts[7]).resetUserSignalsWithReason(user.address, "no signals")).to
         .be.reverted
+    })
+
+    it.only("Should allow to reset user without signals", async function () {
+      const userWithoutSignals = otherAccounts[7]
+
+      expect(await veBetterPassport.signaledCounter(userWithoutSignals.address)).to.equal(0)
+      expect(await veBetterPassport.appSignalsCounter(appId, userWithoutSignals.address)).to.equal(0)
+
+      await expect(
+        veBetterPassport
+          .connect(resetSignaler)
+          .resetUserSignalsByAppWithReason(userWithoutSignals.address, "no signals"),
+      )
+        .to.emit(veBetterPassport, "UserSignalsResetForApp")
+        .withArgs(userWithoutSignals.address, appId, "no signals")
     })
 
     it("Should correctly handle resetting signals for passport-linked entities", async function () {
