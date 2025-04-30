@@ -5,7 +5,10 @@ SRC_DIR="apps/frontend/src"
 FAVICON_MANIFEST="$ASSETS_DIR/favicon/manifest.json"
 FAVICON_CONFIG="$ASSETS_DIR/favicon/browserconfig.xml"
 
-# Get changed asset files in the current commit (staged), exclude deletions
+# all assets in the assets directory
+# all_assets=$(find "$ASSETS_DIR" -type f -not -name ".DS_Store" | sed "s|$ASSETS_DIR/||")
+
+# changed assets in the current commit
 changed_assets=$(git diff --cached --name-status | awk '$2 ~ /^apps\/frontend\/public\/assets\// && $1 != "D" { sub(/^apps\/frontend\/public\/assets\//, "", $2); print $2 }' | grep -v ".DS_Store")
 
 # if no changed assets, exit
@@ -16,6 +19,7 @@ fi
 echo "🔍 Checking for unused changed assets..."
 unused_count=0
 
+# for asset in $all_assets; do
 for asset in $changed_assets; do
   # Escape special characters for grep
   escaped_asset=$(printf '%s\n' "$asset" | sed 's/[][\.*^$/]/\\&/g')
