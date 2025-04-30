@@ -44,21 +44,48 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'yarn'
+
+      # Enhanced Yarn caching
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: |
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
+            **/node_modules
+            **/.eslintcache
+            packages/lambda/dist
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
 
       - name: Install dependencies
         run: |
           echo "Installing project dependencies..."
-          yarn install
+          yarn install --frozen-lockfile
           echo "Installing esbuild globally..."
           yarn global add esbuild
           echo "Verify esbuild installation..."
           esbuild --version
 
+      # # Cache Terraform plugins and modules
+      # - name: Cache Terraform
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.terraform.d/plugin-cache
+      #     key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/vebetterpassport/.terraform.lock.hcl') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-terraform-
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.3
+          terraform_wrapper: false
     
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.9.1
@@ -67,9 +94,9 @@ jobs:
 
       - name: Configure Secret Masking
         run: |
-          echo "::add-mask::${{ secrets.TEST_MNEMONIC }}"
+          echo "::add-mask::${{ secrets.MAINNET_MNEMONIC }}"
           # Add any parts of the mnemonic that might appear in logs
-          IFS=' ' read -ra WORDS <<< "${{ secrets.TEST_MNEMONIC }}"
+          IFS=' ' read -ra WORDS <<< "${{ secrets.MAINNET_MNEMONIC }}"
           for i in "${WORDS[@]}"; do
             echo "::add-mask::$i"
           done
@@ -82,7 +109,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: terraform/vebetterpassport
-        run: terraform init
+        run: terraform init -plugin-dir="$HOME/.terraform.d/plugin-cache"
 
       - name: Terraform Workspace
         working-directory: terraform/vebetterpassport
@@ -105,7 +132,7 @@ jobs:
         working-directory: terraform/vebetterpassport
         id: plan
         env:
-          MAINNET_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
+          MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
           TF_LOG: ERROR # Limit Terraform logging to reduce chance of secrets exposure
         run: |
           terraform plan \
