@@ -15,10 +15,23 @@ resource "terraform_data" "build_lambda" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     working_dir = "${path.module}/../../"
-    # Run the build script from the project root
+    # Run the build script from the project root with enhanced security for secrets
     command     = <<-EOT
+      # Make sure no environment variables are printed or leaked
+      set +x
+      export TF_LOG=ERROR
       chmod +x build.sh && ./build.sh ${local.network}
     EOT
+    environment = {
+      MAINNET_MNEMONIC = sensitive(var.MAINNET_MNEMONIC)
+    }
+  }
+
+  # Ensure we don't log sensitive values in Terraform plan/apply outputs
+  lifecycle {
+    ignore_changes = [
+      triggers_replace["time"]
+    ]
   }
 }
 

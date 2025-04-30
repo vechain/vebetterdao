@@ -65,6 +65,15 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.VECHAINCI_SSH_PRIVATE_KEYS }}
 
+      - name: Configure Secret Masking
+        run: |
+          echo "::add-mask::${{ secrets.MAINNET_MNEMONIC }}"
+          # Add any parts of the mnemonic that might appear in logs
+          IFS=' ' read -ra WORDS <<< "${{ secrets.MAINNET_MNEMONIC }}"
+          for i in "${WORDS[@]}"; do
+            echo "::add-mask::$i"
+          done
+
       - name: Terraform Format
         id: fmt
         working-directory: terraform/vebetterpassport
@@ -95,6 +104,9 @@ jobs:
       - name: Terraform Plan
         working-directory: terraform/vebetterpassport
         id: plan
+        env:
+          MAINNET_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
+          TF_LOG: ERROR # Limit Terraform logging to reduce chance of secrets exposure
         run: terraform plan -out=vebetterpassport.tfplan -detailed-exitcode
     
       - name: Check for plan changes
@@ -120,4 +132,7 @@ jobs:
       
       - name: Terraform Apply
         working-directory: terraform/vebetterpassport
+        env:
+          MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
+          TF_LOG: ERROR # Limit Terraform logging to reduce chance of secrets exposure
         run: terraform apply -auto-approve vebetterpassport.tfplan

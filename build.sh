@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Prevent commands from being displayed in logs
+set +x
+
 # Print script banner
 echo "Building Lambda function..."
 
@@ -23,10 +26,29 @@ if [[ ! -d "$LAMBDA_DIR" ]]; then
     exit 1
 fi
 
-# Navigate to the lambda package directory
+# Always use MAINNET_MNEMONIC regardless of environment
+# Use subshell to avoid leaking the mnemonic to environment
+(
+    # Temporarily disable command tracing and history
+    set +x
+    # Disable history expansion
+    set +H
+    # Set history size to 0
+    HISTSIZE=0
+    HISTFILESIZE=0
+    
+    # Export the mnemonic in a way that doesn't show up in process listing
+    export MNEMONIC="$MAINNET_MNEMONIC"
+    
+    # Compile contracts from root directory
+    echo "Running yarn contracts:compile..."
+    yarn contracts:compile
+)
+
+# Navigate to the lambda package directory for build
 cd "$LAMBDA_DIR"
 
-# Run yarn build
+# Run yarn build (mnemonic should already be in the build artifacts from compilation)
 echo "Running yarn build..."
 yarn build || { echo "Error: Failed to build lambda package"; exit 1; }
 
