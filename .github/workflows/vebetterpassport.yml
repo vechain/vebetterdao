@@ -58,7 +58,6 @@ jobs:
             ${{ steps.yarn-cache-dir-path.outputs.dir }}
             **/node_modules
             **/.eslintcache
-            packages/lambda/dist
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
@@ -133,7 +132,6 @@ jobs:
         id: plan
         env:
           MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
-          TF_LOG: ERROR # Limit Terraform logging to reduce chance of secrets exposure
         run: |
           terraform plan \
             -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}" \
