@@ -1626,5 +1626,6 @@
   "Error creating proposal!": "Error creating proposal!",
   "Supporting proposal...": "Supporting proposal...",
   "Proposal supported!": "Proposal supported!",
-  "Error supporting proposal!": "Error supporting proposal!"
+  "Error supporting proposal!": "Error supporting proposal!",
+  "Error claiming rewards!": "Error claiming rewards!"
 }

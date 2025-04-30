@@ -17,6 +17,11 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery }: Props) => {
 
   const claimRewardsMutation = useClaimRewards({
     roundRewards: roundsRewardsQuery.data?.roundsRewards ?? [],
+    transactionModalCustomUI: {
+      waitingConfirmation: { title: t("Claiming rewards...") },
+      success: { title: t("Rewards claimed!") },
+      error: { title: t("Error claiming rewards!") },
+    },
   })
 
   const handleClaim = useCallback(() => {
