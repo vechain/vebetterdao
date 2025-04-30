@@ -19,10 +19,11 @@ import { FeatureFlagWrapper } from "./FeatureFlagWrapper"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
 import { xNodeToGMstartingLevel } from "@/constants/gmNfts"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) => {
   const { t } = useTranslation()
   const { account } = useWallet()
+  const { onClose: closeTransactionModal } = useTransactionModal()
   const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const {
@@ -37,22 +38,32 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   const { xNodeLevel, isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
   const router = useRouter()
   const mintNftModal = useDisclosure()
-  const {
-    sendTransaction: freeMint,
-    resetStatus: resetFreeMintStatus,
-    isTransactionPending,
-    status,
-  } = useMintNFT({
+
+  const handleMintSuccess = useCallback(() => {
+    closeTransactionModal()
+    mintNftModal.onOpen()
+  }, [closeTransactionModal, mintNftModal])
+
+  const { sendTransaction: freeMint, resetStatus: resetFreeMintStatus } = useMintNFT({
+    transactionModalCustomUI: {
+      waitingConfirmation: {
+        title: t("Minting your GM NFT..."),
+      },
+    },
     onFailure: () => {
-      mintNftModal.onClose()
       resetFreeMintStatus()
     },
+    onSuccess: handleMintSuccess,
   })
+
+  const handleMintSuccessClose = useCallback(() => {
+    resetFreeMintStatus()
+    mintNftModal.onClose()
+  }, [resetFreeMintStatus, mintNftModal])
 
   const handleMintGM = useCallback(() => {
     freeMint()
-    mintNftModal.onOpen()
-  }, [freeMint, mintNftModal])
+  }, [freeMint])
 
   const attachGmToXNodeModal = useDisclosure()
 
@@ -200,11 +211,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   return (
     <>
       {actionButton}
-      <MintNFTModal
-        mintNftModal={mintNftModal}
-        isTransactionPending={isTransactionPending}
-        sendTransactionPending={status === "pending"}
-      />
+      <MintNFTModal isOpen={mintNftModal.isOpen} onClose={handleMintSuccessClose} tokenID={gmId} />
       <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
       <UpgradeGMModal
         gmLevel={gmLevel}

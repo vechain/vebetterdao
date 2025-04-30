@@ -1614,5 +1614,6 @@
   "Waiting for confirmation...": "Waiting for confirmation...",
   "Transaction Ready": "Transaction Ready",
   "Transaction status unclear. If you haven't confirmed it in your wallet yet, you can try again. Otherwise, you can close this window and check your transaction history.": "Transaction status unclear. If you haven't confirmed it in your wallet yet, you can try again. Otherwise, you can close this window and check your transaction history.",
-  "Confirm Delegation": "Confirm Delegation"
+  "Confirm Delegation": "Confirm Delegation",
+  "Minting your GM NFT...": "Minting your GM NFT..."
 }
