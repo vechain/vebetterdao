@@ -41,7 +41,7 @@ export const GalaxyRewardsCalculator = () => {
   const { data: hasVoted } = useParticipatedInGovernance(account?.address ?? "")
   const { data: cycleToTotal } = useCycleToTotal(latestRounds.roundId)
 
-  const currentReward = useGetRewardsEventsOrFunction(account?.address ?? "", latestRounds.roundId)
+  const { claimedGMReward: currentReward } = useGetRewardsEventsOrFunction(account?.address ?? "", latestRounds.roundId)
   const emissionAmount_voterRewards = Number(emissionAmount?.voteX2Earn)
 
   const cycleToVoterToTotal = useMemo(() => {

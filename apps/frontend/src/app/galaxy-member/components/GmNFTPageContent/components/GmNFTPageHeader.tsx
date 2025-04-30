@@ -40,6 +40,7 @@ export const GmNFTPageHeader = () => {
     b3trToUpgradeGMToNextLevel,
     isMaxGmLevelReached,
     isLoading,
+    b3trLeftover,
   } = useSelectedGmNft()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
@@ -137,11 +138,19 @@ export const GmNFTPageHeader = () => {
         <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
           {t("B3TR needed to upgrade your GM level")}
         </Text>
+        {b3trLeftover > 0 && (
+          <Text color="#B1F16C" fontSize={isAbove800 ? "sm" : "xs"} fontWeight={500}>
+            {t("You have {{amount}} B3TR leftover from a previous upgrade", {
+              amount: compactFormatter.format(Number(b3trLeftover)),
+            })}
+          </Text>
+        )}
       </>
     )
   }, [
     b3trBalance?.scaled,
     b3trToUpgradeGMToNextLevel,
+    b3trLeftover,
     isAbove800,
     isB3trBalanceLoading,
     isMaxGmLevelReached,

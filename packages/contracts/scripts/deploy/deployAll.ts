@@ -20,7 +20,7 @@ import {
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
-import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } from "./setup"
+import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment, updateGMMultipliers } from "./setup"
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { shouldEndorseXApps, shouldRunSimulation } from "@repo/config/contracts"
@@ -376,7 +376,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as GalaxyMember
 
   const emissions = (await deployAndUpgrade(
-    ["EmissionsV1", "EmissionsV2", "Emissions"],
+    ["EmissionsV1", "EmissionsV2"],
     [
       [
         {
@@ -406,16 +406,15 @@ export async function deployAll(config: ContractsConfig) {
         },
       ],
       [config.EMISSIONS_IS_NOT_ALIGNED],
-      [],
     ],
     {
-      versions: [undefined, 2, 3],
+      versions: [undefined, 2],
       logOutput: true,
     },
   )) as Emissions
 
   const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4", "VoterRewards"],
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4"],
     [
       [
         TEMP_ADMIN, // admin
@@ -430,10 +429,9 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
-      [], // Match the number of versions (5 versions need 5 argument arrays)
     ],
     {
-      versions: [undefined, 2, 3, 4, 5],
+      versions: [undefined, 2, 3, 4],
       logOutput: true,
     },
   )) as VoterRewards
@@ -864,6 +862,8 @@ export async function deployAll(config: ContractsConfig) {
       )
       break
   }
+
+  //await updateGMMultipliers(config.VOTER_REWARDS_LEVELS, config.GM_MULTIPLIERS_V2, voterRewards)
 
   // ---------- Run Simulation ---------- //
   if (shouldRunSimulation()) {
