@@ -109,7 +109,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: terraform/vebetterpassport
-        run: terraform init -plugin-dir="$HOME/.terraform.d/plugin-cache"
+        run: terraform init
 
       - name: Terraform Workspace
         working-directory: terraform/vebetterpassport
