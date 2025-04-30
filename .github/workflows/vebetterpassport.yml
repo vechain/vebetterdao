@@ -40,6 +40,21 @@ jobs:
           role-to-assume: ${{ github.event.inputs.workspace == 'prod' && secrets.AWS_ACCESS_ROLE || secrets.DEV_AWS_ACC_ROLE }}
           aws-region: eu-west-1
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: |
+          echo "Installing project dependencies..."
+          yarn install
+          echo "Installing esbuild globally..."
+          yarn global add esbuild
+          echo "Verify esbuild installation..."
+          esbuild --version
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
