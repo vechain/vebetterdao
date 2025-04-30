@@ -9,14 +9,14 @@ resource "terraform_data" "build_lambda" {
     # Use a timestamp to rebuild on every apply during development
     time = timestamp()
     # Add environment to trigger rebuilds when environment changes
-    env  = local.network
+    env = local.network
   }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     working_dir = "${path.module}/../../"
     # Run the build script from the project root with enhanced security for secrets
-    command     = <<-EOT
+    command = <<-EOT
       # Make sure no environment variables are printed or leaked
       set +x
       export TF_LOG=ERROR
@@ -43,10 +43,10 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
   function_name = local.config.lambda_function_name
   handler       = local.config.lambda_handler
   filename      = "${path.module}/../../${local.config.lambda_source_dir}/index.zip"
-  
+
   # Set this to a static value to avoid inconsistent plan errors
   source_code_hash = null
-  
+
   logging_config {
     log_format = "Text"
     log_group  = "/aws/lambda/${local.config.lambda_function_name}"

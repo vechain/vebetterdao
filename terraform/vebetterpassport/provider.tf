@@ -19,9 +19,9 @@ terraform {
 
 # Load workspace configuration from YAML
 locals {
-  config       = yamldecode(file("${path.module}/config/${terraform.workspace}.yaml"))
-  network      = local.config.environment
-  account_id   = local.config.aws_account_id
+  config     = yamldecode(file("${path.module}/config/${terraform.workspace}.yaml"))
+  network    = local.config.environment
+  account_id = local.config.aws_account_id
 }
 
 provider "aws" {

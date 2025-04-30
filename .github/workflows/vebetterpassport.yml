@@ -140,6 +140,4 @@ jobs:
           MAINNET_MNEMONIC: ${{ secrets.TEST_MNEMONIC }}
           TF_LOG: ERROR # Limit Terraform logging to reduce chance of secrets exposure
         run: |
-          terraform apply \
-            -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}" \
-            -auto-approve vebetterpassport.tfplan
+          terraform apply -auto-approve vebetterpassport.tfplan

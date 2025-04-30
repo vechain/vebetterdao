@@ -3,7 +3,7 @@
 # Create Lambda execution role with the same permissions as b3tr-discord-bot-lambda
 resource "aws_iam_role" "lambda_execution_role" {
   name = "b3tr-vebetterpassport-${local.network}-lambda"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -38,9 +38,9 @@ resource "aws_iam_policy" "secrets_manager_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid       = "BasePermissions",
-        Effect    = "Allow",
-        Action    = [
+        Sid    = "BasePermissions",
+        Effect = "Allow",
+        Action = [
           "secretsmanager:*",
           "cloudformation:CreateChangeSet",
           "cloudformation:DescribeChangeSet",
@@ -63,36 +63,36 @@ resource "aws_iam_policy" "secrets_manager_policy" {
           "redshift-serverless:GetNamespace",
           "tag:GetResources"
         ],
-        Resource  = "*"
+        Resource = "*"
       },
       {
-        Sid       = "LambdaPermissions",
-        Effect    = "Allow",
-        Action    = [
+        Sid    = "LambdaPermissions",
+        Effect = "Allow",
+        Action = [
           "lambda:AddPermission",
           "lambda:CreateFunction",
           "lambda:GetFunction",
           "lambda:InvokeFunction",
           "lambda:UpdateFunctionConfiguration"
         ],
-        Resource  = "arn:aws:lambda:*:*:function:SecretsManager*"
+        Resource = "arn:aws:lambda:*:*:function:SecretsManager*"
       },
       {
-        Sid       = "SARPermissions",
-        Effect    = "Allow",
-        Action    = [
+        Sid    = "SARPermissions",
+        Effect = "Allow",
+        Action = [
           "serverlessrepo:CreateCloudFormationChangeSet",
           "serverlessrepo:GetApplication"
         ],
-        Resource  = "arn:aws:serverlessrepo:*:*:applications/SecretsManager*"
+        Resource = "arn:aws:serverlessrepo:*:*:applications/SecretsManager*"
       },
       {
-        Sid       = "S3Permissions",
-        Effect    = "Allow",
-        Action    = [
+        Sid    = "S3Permissions",
+        Effect = "Allow",
+        Action = [
           "s3:GetObject"
         ],
-        Resource  = [
+        Resource = [
           "arn:aws:s3:::awsserverlessrepo-changesets*",
           "arn:aws:s3:::secrets-manager-rotation-apps-*/*"
         ]
