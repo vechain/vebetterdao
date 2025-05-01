@@ -1679,7 +1679,7 @@
   "Use the same wallet address": "Use the same wallet address",
   "Warning": "Warning",
   "Your wallet has received 2 or more bot signals and is now restricted from DAO participation. Complete verification immediately to restore access and prevent permanent banning.": "Your wallet has received 2 or more bot signals and is now restricted from DAO participation. Complete verification immediately to restore access and prevent permanent banning.",
-  "API Response:": "API Response:",
+  "Error Details": "Error Details",
   "Back To Dashboard": "Back To Dashboard",
   "Show Details": "Show Details"
 }
