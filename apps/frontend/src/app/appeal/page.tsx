@@ -4,7 +4,7 @@ import { MotionVStack } from "@/components"
 import { Spinner, VStack } from "@chakra-ui/react"
 import dynamic from "next/dynamic"
 
-const AppealPageContent = dynamic(() => import("./AppealContent").then(mod => mod.AppealContent), {
+const AppealSteps = dynamic(() => import("./AppealSteps").then(mod => mod.AppealSteps), {
   ssr: false,
   loading: () => (
     <VStack w="full" spacing={12} h="80vh" justify="center">
@@ -16,7 +16,7 @@ const AppealPageContent = dynamic(() => import("./AppealContent").then(mod => mo
 export default function AppealPage() {
   return (
     <MotionVStack>
-      <AppealPageContent />
+      <AppealSteps />
     </MotionVStack>
   )
 }
