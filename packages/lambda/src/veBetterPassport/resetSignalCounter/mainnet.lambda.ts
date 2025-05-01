@@ -129,7 +129,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
       })
     }
 
-    const reason = `Lambda operation: Resetting signal counter for verified wallet ${walletToBeUnbanned}`
+    const reason = `Resetting signal counter for KYC'ed wallet`
     const { receipt, gasResult } = await resetSignalCounter(thorClient, walletToBeUnbanned, reason)
 
     if (!receipt) {
