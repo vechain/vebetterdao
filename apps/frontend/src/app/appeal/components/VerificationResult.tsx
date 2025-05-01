@@ -65,7 +65,7 @@ export function VerificationResult({
             <Collapse in={isOpen} animateOpacity>
               <Box mt={2} borderRadius="md" bg={status === "success" ? "green.600" : "gray.50"} overflowX="auto">
                 <Text fontSize="xs" mb={1} fontWeight="bold" color={status === "success" ? "white" : "gray.600"}>
-                  {t("API Response:")}
+                  {t("Error Details")}
                 </Text>
                 <Code
                   display="block"
