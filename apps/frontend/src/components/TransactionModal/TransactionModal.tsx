@@ -91,6 +91,7 @@ export const TransactionModal = () => {
           containerRef: portalRef,
         },
       }}
+      showCloseButton={canShowCloseButton}
       isCloseable={canShowCloseButton}
       modalContentProps={{
         zIndex: 9999,
