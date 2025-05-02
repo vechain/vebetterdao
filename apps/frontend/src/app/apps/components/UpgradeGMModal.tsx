@@ -1,10 +1,8 @@
 import { useCallback, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { B3TRIcon, CustomModalContent, FeatureFlagWrapper } from "@/components"
-import { useUpgradeGM } from "@/hooks"
 import {
   Button,
-  useDisclosure,
   Box,
   Image,
   Modal,
@@ -29,36 +27,31 @@ import { getLevelGradient, useNextLevelImage } from "@/api"
 import { buttonClickActions, buttonClicked, ButtonClickProperties, FeatureFlag } from "@/constants"
 import { gmNfts } from "@/constants/gmNfts"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 const compactFormatter = getCompactFormatter(2)
 interface UpgradeGMModalProps {
   gmLevel: string
   tokenId: string
   b3trToUpgradeGMToNextLevel: string
-  upgradeGMModal: ReturnType<typeof useDisclosure>
+  isOpen: boolean
+  onClose: () => void
+  sendTransaction: () => void
 }
 
 export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   gmLevel,
   tokenId,
   b3trToUpgradeGMToNextLevel,
-  upgradeGMModal,
+  isOpen,
+  onClose,
+  sendTransaction,
 }) => {
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
   const { t } = useTranslation()
-  const { isTxModalOpen } = useTransactionModal()
-  const { isOpen = false, onClose } = upgradeGMModal
 
   const handleClose = useCallback(() => {
     onClose()
   }, [onClose])
-
-  const upgradeGMMutation = useUpgradeGM({
-    tokenId,
-    b3trToUpgrade: b3trToUpgradeGMToNextLevel,
-    onSuccess: handleClose,
-  })
 
   // Get the next level GM NFT image
   const { nextLevelGMImage, isLoading: nextLevelGMImageLoading } = useNextLevelImage(Number(gmLevel))
@@ -74,12 +67,13 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
   }, [levelAfterUpgrade])
 
   const handleUpgradeGM = useCallback(() => {
+    handleClose()
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.UPGRADED_GM))
-    upgradeGMMutation.sendTransaction()
-  }, [upgradeGMMutation])
+    sendTransaction()
+  }, [handleClose, sendTransaction])
 
   return (
-    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} size={"2xl"}>
+    <Modal isOpen={isOpen} onClose={handleClose} size={"2xl"}>
       <ModalOverlay />
       <CustomModalContent p={{ base: 3, md: 5 }}>
         <ModalCloseButton />
@@ -197,7 +191,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
             <Button variant={"primaryAction"} w={"full"} onClick={handleUpgradeGM}>
               {t("Upgrade GM NFT")}
             </Button>
-            <Button variant={"secondaryAction"} color={"#004CFC"} w={"full"} onClick={upgradeGMModal.onClose}>
+            <Button variant={"secondaryAction"} color={"#004CFC"} w={"full"} onClick={handleClose}>
               {t("Maybe later")}
             </Button>
           </VStack>

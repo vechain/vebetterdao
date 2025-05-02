@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react"
 import { Button, ButtonProps, useDisclosure, Text, HStack } from "@chakra-ui/react"
 import { useRouter } from "next/navigation"
-import { useMintNFT } from "@/hooks"
+import { useMintNFT, useUpgradeGM } from "@/hooks"
 import { AttachGMToXNodeModal } from "@/app/apps/components/AttachGMToXNodeModal"
 import { UpgradeGMModal } from "@/app/apps/components/UpgradeGMModal"
 import {
@@ -22,10 +22,15 @@ import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) => {
   const { t } = useTranslation()
+  const router = useRouter()
+  const { resetModal: resetTransactionModal } = useTransactionModal()
+
+  // Wallet and user data
   const { account } = useWallet()
-  const { onClose: closeTransactionModal } = useTransactionModal()
   const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
+
+  // GM NFT data
   const {
     isGMOwned,
     isEnoughBalanceToUpgradeGM,
@@ -35,14 +40,35 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     isMaxGmLevelReached,
     b3trToUpgradeGMToNextLevel,
   } = useSelectedGmNft()
-  const { xNodeLevel, isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
-  const router = useRouter()
-  const mintNftModal = useDisclosure()
+  const { data: b3trDonated } = useB3trDonated(gmId)
 
+  // X-Node data
+  const { xNodeLevel, isXNodeHolder, isXNodeDelegator, isXNodeAttachedToGM } = useXNode()
+
+  // Modal controls
+  const { isOpen: isMintNftModalOpen, onOpen: onOpenMintNftModal, onClose: onCloseMintNftModal } = useDisclosure()
+  const { isOpen: isUpgradeGMModalOpen, onOpen: onOpenUpgradeGMModal, onClose: onCloseUpgradeGMModal } = useDisclosure()
+  const { isOpen: isAttachGMModalOpen, onOpen: onOpenAttachGMModal, onClose: onCloseAttachGMModal } = useDisclosure()
+
+  // Computed values
+  const canAttach = useMemo(
+    () => isXNodeHolder && !isXNodeDelegator && isGMOwned && !isXNodeAttachedToGM,
+    [isXNodeAttachedToGM, isXNodeDelegator, isXNodeHolder, isGMOwned],
+  )
+
+  const gmStartingLevel = useMemo(() => {
+    const gmStartingLevel = xNodeToGMstartingLevel[xNodeLevel]
+    return Math.min(gmStartingLevel ?? 1, maxGmLevel ?? 1)
+  }, [maxGmLevel, xNodeLevel])
+
+  const levelAfterAttach = useMemo(() => {
+    return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0)) ?? 1
+  }, [b3trDonated, gmStartingLevel])
+
+  // Mint NFT handlers
   const handleMintSuccess = useCallback(() => {
-    closeTransactionModal()
-    mintNftModal.onOpen()
-  }, [closeTransactionModal, mintNftModal])
+    onOpenMintNftModal()
+  }, [onOpenMintNftModal])
 
   const { sendTransaction: freeMint, resetStatus: resetFreeMintStatus } = useMintNFT({
     transactionModalCustomUI: {
@@ -58,60 +84,56 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
 
   const handleMintSuccessClose = useCallback(() => {
     resetFreeMintStatus()
-    mintNftModal.onClose()
-  }, [resetFreeMintStatus, mintNftModal])
+    onCloseMintNftModal()
+  }, [resetFreeMintStatus, onCloseMintNftModal])
 
   const handleMintGM = useCallback(() => {
     freeMint()
   }, [freeMint])
 
-  const attachGmToXNodeModal = useDisclosure()
+  //Handle Upgrade GM
+  const { sendTransaction: upgradeGM } = useUpgradeGM({
+    tokenId: gmId,
+    b3trToUpgrade: b3trToUpgradeGMToNextLevel,
+  })
 
+  const handleUpgradeGM = useCallback(() => {
+    upgradeGM()
+  }, [upgradeGM])
+
+  // Navigation handlers
   const goToVote = useCallback(() => {
     router.push(`/rounds/${currentRoundId}/vote`)
   }, [currentRoundId, router])
 
-  const upgradeGMModal = useDisclosure()
-
-  const canAttach = useMemo(
-    () => isXNodeHolder && !isXNodeDelegator && isGMOwned && !isXNodeAttachedToGM,
-    [isXNodeAttachedToGM, isXNodeDelegator, isXNodeHolder, isGMOwned],
-  )
-  const { data: b3trDonated } = useB3trDonated(gmId)
-
-  const gmStartingLevel = useMemo(() => {
-    const gmStartingLevel = xNodeToGMstartingLevel[xNodeLevel]
-
-    return Math.min(gmStartingLevel ?? 1, maxGmLevel ?? 1)
-  }, [maxGmLevel, xNodeLevel])
-
-  const levelAfterAttach = useMemo(() => {
-    return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0)) ?? 1
-  }, [b3trDonated, gmStartingLevel])
-
+  // Action click handlers
   const handleOnClick = useCallback(
     (action: string) => {
       switch (action) {
         case "UPGRADE_GM":
-          upgradeGMModal.onOpen()
+          console.log("Opening upgrade GM modal")
+          resetTransactionModal()
+          onOpenUpgradeGMModal()
           AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.UPGRADING_NOW))
           break
         case "ATTACH_AND_UPGRADE_GM":
-          attachGmToXNodeModal.onOpen()
+          onOpenAttachGMModal()
           AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.ATTACH_AND_UPGRADE_NOW))
           break
         case "ATTACH_GM":
-          attachGmToXNodeModal.onOpen()
+          onOpenAttachGMModal()
           AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.ATTACH_NOW))
           break
         default:
           break
       }
     },
-    [attachGmToXNodeModal, upgradeGMModal],
+    [onOpenAttachGMModal, onOpenUpgradeGMModal],
   )
 
+  // Button rendering logic
   const actionButton = useMemo(() => {
+    // Case 1: User hasn't voted and doesn't own GM NFT
     if (!hasUserVoted && !isGMOwned) {
       return (
         <Button {...buttonProps} onClick={goToVote}>
@@ -119,6 +141,8 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
         </Button>
       )
     }
+
+    // Case 2: User doesn't own GM NFT
     if (!isGMOwned) {
       return (
         <Button {...buttonProps} onClick={handleMintGM}>
@@ -127,6 +151,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       )
     }
 
+    // Case 3: Max GM level reached
     if (isMaxGmLevelReached) {
       return (
         <HStack bg={"#ffffff4a"} alignSelf="start" rounded="8px" px={5} py={1} gap={1} justify="center">
@@ -145,6 +170,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       )
     }
 
+    // Case 4: Can attach GM to X-Node and GM level is >= level after attach
     if (canAttach && gmLevel >= levelAfterAttach) {
       return (
         <FeatureFlagWrapper
@@ -161,6 +187,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       )
     }
 
+    // Case 5: Can attach GM to X-Node and GM level is < level after attach
     if (canAttach && gmLevel < levelAfterAttach) {
       return (
         <FeatureFlagWrapper
@@ -177,6 +204,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
       )
     }
 
+    // Default case: Upgrade GM
     return (
       <FeatureFlagWrapper
         feature={FeatureFlag.GALAXY_MEMBER_UPGRADES}
@@ -211,13 +239,15 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   return (
     <>
       {actionButton}
-      <MintNFTModal isOpen={mintNftModal.isOpen} onClose={handleMintSuccessClose} tokenID={gmId} />
-      <AttachGMToXNodeModal isOpen={attachGmToXNodeModal.isOpen} onClose={attachGmToXNodeModal.onClose} />
+      <MintNFTModal isOpen={isMintNftModalOpen} onClose={handleMintSuccessClose} tokenID={gmId} />
+      <AttachGMToXNodeModal isOpen={isAttachGMModalOpen} onClose={onCloseAttachGMModal} />
       <UpgradeGMModal
         gmLevel={gmLevel}
         tokenId={gmId}
-        upgradeGMModal={upgradeGMModal}
         b3trToUpgradeGMToNextLevel={b3trToUpgradeGMToNextLevel}
+        isOpen={isUpgradeGMModalOpen}
+        onClose={onCloseUpgradeGMModal}
+        sendTransaction={handleUpgradeGM}
       />
     </>
   )
