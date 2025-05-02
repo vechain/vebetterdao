@@ -134,20 +134,10 @@ abstract contract XAllocationVotingGovernor is
     _countVote(roundId, voter, appIds, voteWeights);
   }
 
-  function _castVoteOnBehalfOf(
-    address voter,
-    uint256 roundId,
-    bytes32[] memory appIds,
-    uint256[] memory voteWeights
-  ) internal {
+  function _castVoteOnBehalfOf(address voter, uint256 roundId) internal {
     _validateStateBitmap(roundId, _encodeStateBitmap(RoundState.Active));
 
-    require(appIds.length == voteWeights.length, "XAllocationVotingGovernor: apps and weights length mismatch");
-    require(appIds.length > 0, "XAllocationVotingGovernor: no apps to vote for");
-
     require(_isAutovotingEnabled(voter), "XAllocationVotingGovernor: autovoting is not enabled");
-
-    // TODO: Validate that the voting weights respect the user's preferences
 
     uint256 _currentRoundSnapshot = currentRoundSnapshot();
 
@@ -161,7 +151,41 @@ abstract contract XAllocationVotingGovernor is
       revert GovernorPersonhoodVerificationFailed(voter, explanation);
     }
 
-    _countVote(roundId, voter, appIds, voteWeights);
+    bytes32[] memory appIds = _getUserVotingPreferences(voter);
+
+    // Get voter's available votes
+    uint256 voterAvailableVotes = getVotes(voter, roundSnapshot(roundId));
+    require(voterAvailableVotes > 0, "XAllocationVotingGovernor: no votes available");
+
+    // Filter eligible apps and count them
+    uint256 eligibleAppsCount = 0;
+    bytes32[] memory eligibleAppIds = new bytes32[](appIds.length);
+
+    for (uint256 i = 0; i < appIds.length; i++) {
+      if (isEligibleForVote(appIds[i], roundId)) {
+        eligibleAppIds[eligibleAppsCount] = appIds[i];
+        eligibleAppsCount++;
+      }
+    }
+
+    require(eligibleAppsCount > 0, "XAllocationVotingGovernor: no eligible apps to vote for");
+
+    // Create final arrays with exact size
+    bytes32[] memory finalAppIds = new bytes32[](eligibleAppsCount);
+    uint256[] memory voteWeights = new uint256[](eligibleAppsCount);
+
+    // Calculate equal vote weight per app
+    uint256 votePerApp = voterAvailableVotes / eligibleAppsCount;
+    // There could be some dust left, but it's fine
+    // uint256 remainingVotes = voterAvailableVotes % eligibleAppsCount;
+
+    // Distribute votes equally
+    for (uint256 i = 0; i < eligibleAppsCount; i++) {
+      finalAppIds[i] = eligibleAppIds[i];
+      voteWeights[i] = votePerApp;
+    }
+
+    _countVote(roundId, voter, finalAppIds, voteWeights);
   }
 
   // ---------- Internal and Private ---------- //
@@ -371,4 +395,6 @@ abstract contract XAllocationVotingGovernor is
   function voterRewards() public view virtual returns (IVoterRewards);
 
   function _isAutovotingEnabled(address account) internal view virtual returns (bool);
+
+  function _getUserVotingPreferences(address account) internal view virtual returns (bytes32[] memory);
 }

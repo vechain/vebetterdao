@@ -155,30 +155,23 @@ contract XAllocationVoting is
 
   // ---------- Setters ---------- //
 
-  function castVoteOnBehalfOf(
-    address voter,
-    uint256 roundId,
-    bytes32[] memory appIds,
-    uint256[] memory voteWeights
-  ) public onlyRole(AUTOVOTING_ROLE) {
-    _castVoteOnBehalfOf(voter, roundId, appIds, voteWeights);
+  function castVoteOnBehalfOf(address voter, uint256 roundId) public onlyRole(AUTOVOTING_ROLE) {
+    _castVoteOnBehalfOf(voter, roundId);
   }
 
   function toggleAutovoting() public {
     _toggleAutovoting(_msgSender());
   }
 
-  function setUserVotingPreferences(bytes32[] memory appIds, uint256[] memory voteWeights) public {
-    _setUserVotingPreferences(_msgSender(), appIds, voteWeights);
+  function setUserVotingPreferences(bytes32[] memory appIds) public {
+    _setUserVotingPreferences(_msgSender(), appIds);
   }
 
   function userAutovotingEnabled(address account) public view returns (bool) {
     return _isAutovotingEnabled(account);
   }
 
-  function getUserVotingPreferences(
-    address account
-  ) public view returns (VotingSettingsUpgradeable.UserVotingPreferences memory) {
+  function getUserVotingPreferences(address account) public view returns (bytes32[] memory) {
     return _getUserVotingPreferences(account);
   }
 

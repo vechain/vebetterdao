@@ -3010,21 +3010,17 @@ describe("X-Allocation Voting - @shard14", function () {
       await veBetterPassport.toggleCheck(1)
 
       console.log("Trying to vote on behalf of otherAccounts[1] with autovoting disabled")
-      await catchRevert(
-        xAllocationVoting.connect(owner).castVoteOnBehalfOf(otherAccounts[1], 1, [app1Id], [ethers.parseEther("100")]),
-      )
+      await catchRevert(xAllocationVoting.connect(owner).castVoteOnBehalfOf(otherAccounts[1], 1))
       console.log("Reverted as expected", "\n")
 
       console.log("Enabling autovoting for otherAccounts[1]")
       await xAllocationVoting.connect(otherAccounts[1]).toggleAutovoting()
 
       console.log("Setting user voting preferences")
-      await xAllocationVoting.connect(otherAccounts[1]).setUserVotingPreferences([app1Id], [100])
+      await xAllocationVoting.connect(otherAccounts[1]).setUserVotingPreferences([app1Id])
 
       console.log("Voting on behalf of otherAccounts[1]")
-      await xAllocationVoting
-        .connect(owner)
-        .castVoteOnBehalfOf(otherAccounts[1], 1, [app1Id], [ethers.parseEther("100")])
+      await xAllocationVoting.connect(owner).castVoteOnBehalfOf(otherAccounts[1], 1)
       console.log("Voted successfully on behalf of otherAccounts[1]", "\n")
 
       console.log("VOT3 balances:")
@@ -3056,9 +3052,7 @@ describe("X-Allocation Voting - @shard14", function () {
       )
 
       console.log("Voting on behalf of otherAccounts[1]")
-      await xAllocationVoting
-        .connect(owner)
-        .castVoteOnBehalfOf(otherAccounts[1], 2, [app1Id], [ethers.parseEther("500")])
+      await xAllocationVoting.connect(owner).castVoteOnBehalfOf(otherAccounts[1], 2)
       console.log("Voted on behalf of otherAccounts[1]", "\n")
 
       console.log("Checking rewards again")
