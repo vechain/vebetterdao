@@ -5,7 +5,6 @@ import {
   useCurrentAllocationsRoundId,
   getRoundXAppsQueryKey,
   getAllocationAmountQueryKey,
-  getHasXAppClaimedQueryKey,
   getB3TrBalanceQueryKey,
 } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
