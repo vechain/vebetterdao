@@ -19,16 +19,8 @@ import { buttonClicked, buttonClickActions, ButtonClickProperties } from "@/cons
 export const PublishAndPreviewPageContent = () => {
   const router = useRouter()
   const { t } = useTranslation()
-  const {
-    actions,
-    markdownDescription,
-    title,
-    shortDescription,
-    votingStartRoundId,
-    depositAmount,
-    metadataUri,
-    clearData,
-  } = useProposalFormStore()
+  const { actions, markdownDescription, title, shortDescription, votingStartRoundId, depositAmount, metadataUri } =
+    useProposalFormStore()
   const [proposalDescriptionUriHash, setProposalDescriptionUriHash] = useState<string | undefined>(undefined)
 
   const { data: threshold } = useDepositThreshold()
@@ -48,13 +40,9 @@ export const PublishAndPreviewPageContent = () => {
   )
 
   const onSuccess = useCallback(() => {
-    console.log("expectedProposalId", expectedProposalId)
     //Redirect to the proposal page
     router.push(`/proposals/${expectedProposalId}`)
-
-    //Clear the form store data
-    clearData()
-  }, [router, expectedProposalId, clearData])
+  }, [router, expectedProposalId])
 
   const createProposalMutation = useCreateProposal({
     onSuccess,
