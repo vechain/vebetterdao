@@ -178,6 +178,13 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param disabled - The flag to enable or disable quadratic rewarding.
   event QuadraticRewardingToggled(bool indexed disabled);
 
+  /// @notice GM NFT vote is registered.
+  /// @param cycle - The cycle in which the vote was registered.
+  /// @param tokenId - The ID of the Galaxy Member NFT.
+  /// @param level - The level of the Galaxy Member NFT.
+  /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
+  event GMVoteRegistered(uint256 indexed cycle, uint256 indexed tokenId, uint256 indexed level, uint256 multiplier);
+
   /// @custom:oz-upgrades-unsafe-allow constructor
   constructor() {
     _disableInitializers();
@@ -277,7 +284,7 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
     _checkIncomingGMMultipliers(cycle);
 
     // Determine the reward multiplier based on the GM NFT level and if the GM NFT or Vechain node attached have already voted on this proposal.
-    uint256 multiplier = getMultiplier(selectedGMNFT, proposalId);
+    (uint256 multiplier, uint256 gmLevel) = _getMultiplier(selectedGMNFT, proposalId);
 
     // Get the scaled vote power.
     uint256 scaledVotePower = _getScaledVotePower(votes, votePower);
@@ -302,14 +309,10 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     // Record that the GM NFT has voted in the proposal, if it exists.
     if (selectedGMNFT != 0) {
-      $.proposalToGalaxyMemberToHasVoted[proposalId][selectedGMNFT] = true;
-    }
+      _markTokenAsVoted(selectedGMNFT, proposalId);
 
-    uint256 nodeIdAttached = $.galaxyMember.getNodeIdAttached(selectedGMNFT);
-
-    // Record that the Vechain node attached to the GM NFT has voted in the proposal, if it exists.
-    if (nodeIdAttached != 0) {
-      $.proposalToNodeToHasVoted[proposalId][nodeIdAttached] = true;
+      // Emit an event to log the GM NFT vote registration.
+      emit GMVoteRegistered(cycle, selectedGMNFT, gmLevel, multiplier);
     }
 
     // Emit an event to log the registration of the votes.
@@ -357,17 +360,8 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
   /// @param tokenId Id of the Galaxy Member NFT
   /// @param proposalId Id of the proposal
   function getMultiplier(uint256 tokenId, uint256 proposalId) public view virtual returns (uint256) {
-    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
-
-    if (hasTokenVoted(tokenId, proposalId)) return 0;
-
-    uint256 nodeIdAttached = $.galaxyMember.getNodeIdAttached(tokenId);
-
-    if (hasNodeVoted(nodeIdAttached, proposalId)) return 0;
-
-    uint256 gmNftLevel = $.galaxyMember.levelOf(tokenId);
-
-    return $.levelToMultiplier[gmNftLevel];
+    (uint256 multiplier, ) = _getMultiplier(tokenId, proposalId);
+    return multiplier;
   }
 
   /// @notice Check if a Vechain Node has voted in a proposal
@@ -672,8 +666,47 @@ contract VoterRewards is AccessControlUpgradeable, ReentrancyGuardUpgradeable, U
 
     // Add the new GM Multiplier to the incoming GM Multipliers for the next cycle
     $.cycleToIncomingGMMultipliers[currentCycle + 1].push(GMMultiplier({ level: level, multiplier: multiplier }));
-    
+
     // Emit an event to log the new incoming GM Multiplier for the level
     emit LevelToMultiplierPending(level, multiplier);
+  }
+
+  /// @notice Get the multiplier for a specific Galaxy Member NFT and proposal.
+  /// @param tokenId - The ID of the Galaxy Member NFT.
+  /// @param proposalId - The ID of the proposal.
+  /// @return multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
+  /// @return gmLevel - The level of the Galaxy Member NFT.
+  function _getMultiplier(uint256 tokenId, uint256 proposalId) private view returns (uint256, uint256) {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    if (hasTokenVoted(tokenId, proposalId)) return (0, 0);
+
+    uint256 nodeIdAttached = $.galaxyMember.getNodeIdAttached(tokenId);
+
+    if (hasNodeVoted(nodeIdAttached, proposalId)) return (0, 0);
+
+    uint256 gmNftLevel = $.galaxyMember.levelOf(tokenId);
+
+    return ($.levelToMultiplier[gmNftLevel], gmNftLevel);
+  }
+
+  /// @notice Marks a Galaxy Member NFT as having voted in a proposal.
+  /// @param selectedGMNFT - The ID of the Galaxy Member NFT.
+  /// @param proposalId - The ID of the proposal.
+  /// @dev This function updates the mapping to indicate that the Galaxy Member NFT has voted in the proposal.
+  /// It also checks if the Vechain node attached to the Galaxy Member NFT has voted in the proposal and updates the mapping accordingly.
+  function _markTokenAsVoted(uint256 selectedGMNFT, uint256 proposalId) private {
+    VoterRewardsStorage storage $ = _getVoterRewardsStorage();
+
+    // Set the proposalId and tokenId to true in the mapping to mark that the GM NFT has voted in the proposal.
+    $.proposalToGalaxyMemberToHasVoted[proposalId][selectedGMNFT] = true;
+
+    // Check if the Vechain node attached to the GM NFT has voted in the proposal.
+    uint256 nodeIdAttached = $.galaxyMember.getNodeIdAttached(selectedGMNFT);
+
+    // Record that the Vechain node attached to the GM NFT has voted in the proposal, if it exists.
+    if (nodeIdAttached != 0) {
+      $.proposalToNodeToHasVoted[proposalId][nodeIdAttached] = true;
+    }
   }
 }

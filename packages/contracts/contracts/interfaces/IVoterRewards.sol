@@ -117,6 +117,13 @@ interface IVoterRewards {
   /// @param disabled The new disabled state
   event QuadraticRewardingDisabled(bool indexed disabled);
 
+  /// @notice GM NFT vote is registered.
+  /// @param cycle - The cycle in which the vote was registered.
+  /// @param tokenId - The ID of the Galaxy Member NFT.
+  /// @param level - The level of the Galaxy Member NFT.
+  /// @param multiplier - The percentage multiplier for the level of the Galaxy Member NFT.
+  event GMVoteRegistered(uint256 indexed cycle, uint256 indexed tokenId, uint256 indexed level, uint256 multiplier);
+
   /// @notice Gets the default admin role
   /// @return bytes32 The admin role identifier
   function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
