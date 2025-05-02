@@ -5,7 +5,6 @@ import { useEffect } from "react"
 import { AnalyticsUtils } from "@/utils"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { B3trAllowance } from "./components/B3trAllowance"
 import { BulkClaimXAppsAllocations } from "./components/BulkClaimXAppsAllocations"
 import { Pause } from "./components/Pause"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
@@ -20,7 +19,7 @@ export const AdminPageContent = () => {
   }, [])
 
   const { account } = useWallet()
-  const { isAdminOfX2EarnApps, isAdminOfVot3, isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfB3TRGovernor, isAdmin } =
+  const { isAdminOfX2EarnApps, isAdminOfVot3, isAdminOfB3tr, isAdminOfGalaxyMember, isAdminOfB3TRGovernor } =
     useAccountPermissions(account ?? "")
 
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
