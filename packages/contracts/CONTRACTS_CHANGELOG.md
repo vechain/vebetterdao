@@ -34,9 +34,7 @@ Restriction on creators who have already submitted an app. Any creator added to 
 
 ### Changes 🚀
 
-- **Upgraded Contract(s):**
-  - `X2EarnRewardsPool.sol` to version `7`
-  - `XAllocationVoting.sol` to version `5`
+- `x2EarnApps` updated to version `5`
 
 ### Storage Changes 📦
 - None.
@@ -63,20 +61,17 @@ This upgrade introduces the ability for XApps to include metadata in the reward 
 - **Backward Compatibility Preserved**: The original `distributeRewardWithProof` function remains unchanged and continues to work as before for apps that do not wish to use metadata.
 - **New Metadata Functionality**: The `distributeRewardWithProofAndMetadata` function accepts a string intended to be a JSON representation. A dedicated event, `RewardMetadata`, is emitted to store this information, following the established internal standards of `_emitProof`.
 
----
 
 ### Changes 🚀
 
 - **Upgraded Contracts:**
   - `X2EarnRewardsPool.sol` updated to version `6`.
 
----
 
 ### Storage Changes 📦
 
 - None.
 
----
 
 ### New Features 🚀
 
@@ -84,7 +79,6 @@ This upgrade introduces the ability for XApps to include metadata in the reward 
   - Added `distributeRewardWithProofAndMetadata()`, which accepts a string intended to be a JSON representation and emits a new event, `RewardMetadata`, containing this information.
   - Updated internal logic with `_emitMetadata`, following the `_emitProof` pattern, to emit the event with the JSON data.
 
----
 
 ### Bug Fixes 🐛
 
