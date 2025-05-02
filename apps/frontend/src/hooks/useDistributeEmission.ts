@@ -5,19 +5,17 @@ import {
   useCurrentAllocationsRoundId,
   getRoundXAppsQueryKey,
   getAllocationAmountQueryKey,
-  useRoundXApps,
   getHasXAppClaimedQueryKey,
   getB3TrBalanceQueryKey,
 } from "@/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { EnhancedClause, UseSendTransactionReturnValue, useSendTransaction } from "./useSendTransaction"
-import { useCallback, useMemo } from "react"
+import { useCallback } from "react"
 import { useWallet } from "@vechain/dapp-kit-react"
-import { Emissions__factory, XAllocationPool__factory } from "@repo/contracts"
+import { Emissions__factory } from "@repo/contracts"
 import { getConfig } from "@repo/config"
 
 const EmissionsInterface = Emissions__factory.createInterface()
-const XAllocationPoolInterface = XAllocationPool__factory.createInterface()
 
 type useDistributeEmissionsProps = {
   onSuccess?: () => void
@@ -39,25 +37,8 @@ export const useDistributeEmission = ({
   const { data: currendRoundId } = useCurrentAllocationsRoundId()
   const queryClient = useQueryClient()
 
-  const { data: apps } = useRoundXApps(currendRoundId ?? "0")
-  const appIds = useMemo(() => apps?.map(app => app.id) ?? [], [apps])
-
   const buildClauses = useCallback(() => {
-    // claim previous round and start next round
     let clauses: EnhancedClause[] = []
-
-    for (const id of appIds) {
-      const clause = {
-        to: getConfig().xAllocationPoolContractAddress,
-        value: 0,
-        // @ts-ignore
-        data: XAllocationPoolInterface.encodeFunctionData("claim", [currendRoundId, id]),
-        comment: "Claiming allocation rewards for round " + currendRoundId,
-        abi: JSON.parse(JSON.stringify(XAllocationPoolInterface.getFunction("claim"))),
-      }
-
-      clauses.push(clause)
-    }
 
     clauses.push({
       to: getConfig().emissionsContractAddress,
@@ -68,7 +49,7 @@ export const useDistributeEmission = ({
     })
 
     return clauses
-  }, [appIds, currendRoundId])
+  }, [])
 
   //Refetch queries to update ui after the tx is confirmed
   const handleOnSuccess = useCallback(async () => {
@@ -108,15 +89,6 @@ export const useDistributeEmission = ({
         queryKey: getAllocationAmountQueryKey(currendRoundId ?? "0"),
       })
 
-      for (const appId of appIds) {
-        await queryClient.cancelQueries({
-          queryKey: getHasXAppClaimedQueryKey(currendRoundId ?? "", appId),
-        })
-        await queryClient.refetchQueries({
-          queryKey: getHasXAppClaimedQueryKey(currendRoundId ?? "", appId),
-        })
-      }
-
       await queryClient.cancelQueries({
         queryKey: getB3TrBalanceQueryKey(account ?? ""),
       })
@@ -135,7 +107,7 @@ export const useDistributeEmission = ({
     }
 
     onSuccess?.()
-  }, [invalidateCache, queryClient, onSuccess, currendRoundId, appIds, account])
+  }, [invalidateCache, queryClient, onSuccess, currendRoundId, account])
 
   const result = useSendTransaction({
     signerAccount: account,

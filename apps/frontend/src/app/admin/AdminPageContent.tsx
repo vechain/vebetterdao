@@ -7,7 +7,6 @@ import { useAccountPermissions } from "@/api/contracts/account"
 import { useWallet } from "@vechain/dapp-kit-react"
 import { B3trAllowance } from "./components/B3trAllowance"
 import { BulkClaimXAppsAllocations } from "./components/BulkClaimXAppsAllocations"
-import { ClaimXAppAllocations } from "./components/ClaimXAppAllocations"
 import { Pause } from "./components/Pause"
 import { UpdateReceiverAddress } from "./components/UpdateReceiverAddress"
 import { StartRoundCard } from "./components/StartRoundCard/StartRoundCard"
@@ -55,10 +54,9 @@ export const AdminPageContent = () => {
             </Grid>
           </TabPanel>
 
-          {Number(currentRoundId) > 0 && isAdmin && (
+          {Number(currentRoundId) > 0 && (
             <TabPanel>
               <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-                <ClaimXAppAllocations />
                 <BulkClaimXAppsAllocations />
               </Grid>
             </TabPanel>
