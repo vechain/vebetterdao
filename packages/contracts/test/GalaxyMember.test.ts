@@ -3491,7 +3491,6 @@ describe("Galaxy Member - @shard3", () => {
 
         // Expect GM NFT level to be 7
         expect(await galaxyMember.levelOf(2)).to.equal(7)
-        console.log("end ???After crash")
       })
       it("Should update token level correctly when delegated node is upgraded", async () => {
         const { owner, vechainNodesMock, galaxyMember, otherAccounts, nodeManagement } =
