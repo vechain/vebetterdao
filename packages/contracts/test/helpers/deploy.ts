@@ -150,6 +150,7 @@ interface DeployInstance {
   timelockAdmin: HardhatEthersSigner
   otherAccounts: HardhatEthersSigner[]
   creators: HardhatEthersSigner[]
+
   // Governance
   governorClockLogicLib: GovernorClockLogic
   governorConfiguratorLib: GovernorConfigurator
