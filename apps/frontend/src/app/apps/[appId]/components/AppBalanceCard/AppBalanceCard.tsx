@@ -64,6 +64,11 @@ export const AppBalanceCard = () => {
   const { data: isRewardsPoolEnabled } = useIsRewardsPoolEnabled(app?.id ?? "")
   const { data: isPaused } = useIsDistributionPaused(app?.id ?? "")
   const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
+  const isTreasuryAddress = app?.teamWalletAddress === account?.address
+
+  const canTransferFunds = useMemo(() => {
+    return isAppAdmin || isTreasuryAddress
+  }, [isAppAdmin, isTreasuryAddress])
 
   const rewardsPoolColor = useMemo(() => {
     if (isPaused) return "#FCEEF1"
@@ -99,7 +104,7 @@ export const AppBalanceCard = () => {
             <VStack spacing={2}>
               <Button
                 mt={1}
-                isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading || !isAppAdmin}
+                isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading || !canTransferFunds}
                 onClick={onOpenDepositOrWithdraw}
                 variant={"primaryAction"}
                 borderRadius={"full"}
@@ -132,7 +137,7 @@ export const AppBalanceCard = () => {
             <VStack alignItems={"flex-end"} spacing={0}>
               <Button
                 mt={1}
-                isDisabled={!isAppAdmin}
+                isDisabled={!canTransferFunds}
                 onClick={onOpenManagementCenter}
                 variant={isPaused ? "dangerFilledTonal" : "primaryAction"}
                 color={isPaused ? "#C84968" : "white"}
@@ -151,11 +156,12 @@ export const AppBalanceCard = () => {
             </Text>
             <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="#004CFC" cursor="pointer" />
           </HStack>
-          {!isAppAdmin && (
+          {!canTransferFunds && (
             <GenericAlert
               title={t("Access restricted")}
               type="warning"
               isLoading={false}
+              // TODO: message needs to be updates in case of team wallet address would have transfer access
               message={t("Only app admin can transfer and manage the rewards pool")}
             />
           )}
