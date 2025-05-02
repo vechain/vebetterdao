@@ -23,8 +23,8 @@
 
 pragma solidity 0.8.20;
 
-import { IX2EarnCreator } from "../../interfaces/IX2EarnCreator.sol";
-import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
+import { IX2EarnCreator } from "../../../../interfaces/IX2EarnCreator.sol";
+import { IX2EarnRewardsPool } from "../../../../interfaces/IX2EarnRewardsPool.sol";
 
 /**
  * @title AdministrationUtils
@@ -32,7 +32,7 @@ import { IX2EarnRewardsPool } from "../../interfaces/IX2EarnRewardsPool.sol";
  *      managing moderators and reward distributors, updating team wallet addresses and allocation percentages,
  *      and handling metadata URIs with proper validation and event emission.
  */
-library AdministrationUtils {
+library AdministrationUtilsV4 {
   /**
    * @dev Thrown when an invalid allocation percentage is set (greater than 100).
    * @param percentage The invalid allocation percentage.
