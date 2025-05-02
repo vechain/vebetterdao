@@ -78,8 +78,6 @@ contract XAllocationVoting is
   bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
   /// @notice The role that can set the addresses of the contracts used by the VoterRewards contract.
   bytes32 public constant CONTRACTS_ADDRESS_MANAGER_ROLE = keccak256("CONTRACTS_ADDRESS_MANAGER_ROLE");
-  /// @notice The role that can autovote for an address
-  bytes32 public constant AUTOVOTING_ROLE = keccak256("AUTOVOTING_ROLE");
 
   /**
    * @notice Data for initializing the contract
@@ -155,7 +153,7 @@ contract XAllocationVoting is
 
   // ---------- Setters ---------- //
 
-  function castVoteOnBehalfOf(address voter, uint256 roundId) public onlyRole(AUTOVOTING_ROLE) {
+  function castVoteOnBehalfOf(address voter, uint256 roundId) public {
     _castVoteOnBehalfOf(voter, roundId);
   }
 

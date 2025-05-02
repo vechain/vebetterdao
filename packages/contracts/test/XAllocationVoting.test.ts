@@ -2998,9 +2998,6 @@ describe("X-Allocation Voting - @shard14", function () {
         "\n",
       )
 
-      console.log("Authorizing external wallet to vote on behalf of other users", "\n")
-      await xAllocationVoting.connect(owner).grantRole(await xAllocationVoting.AUTOVOTING_ROLE(), owner.address)
-
       console.log("Starting new round")
       await startNewAllocationRound()
       console.log("New round id: ", await xAllocationVoting.currentRoundId(), "\n")
