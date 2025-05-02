@@ -21,7 +21,7 @@ export const airdropVTHO = async (accounts: SeedAccount[], signingAcct: TestPk) 
     const clauses: TransactionClause[] = []
 
     accountChunk.forEach(account => {
-      clauses.push(clauseBuilder.transferToken(VTHO_ADDRESS, account.key.address, unitsUtils.parseVET("50")))
+      clauses.push(clauseBuilder.transferToken(VTHO_ADDRESS, account.key.address, unitsUtils.parseVET("5000")))
     })
 
     const body: TransactionBody = await buildTxBody(clauses, signingAcct.address, 32)

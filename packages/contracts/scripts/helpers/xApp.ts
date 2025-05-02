@@ -87,45 +87,58 @@ export const castVotesToXDapps = async (
   accounts: SeedAccount[],
   roundId: number,
   apps: string[],
+  ignoreErrors: boolean = false,
 ) => {
   console.log("Casting votes to xDapps...")
+  if (apps.length === 0) {
+    throw new Error("No xDapps to vote for.")
+  }
+
   const chunks = chunk(accounts, 50)
   const contractAddress = await xAllocationVoting.getAddress()
 
   for (const chunk of chunks) {
     await Promise.all(
       chunk.map(async account => {
-        const clauses: TransactionClause[] = []
-        const votePower = BigInt(await vot3.balanceOf(account.key.address))
+        try {
+          const clauses: TransactionClause[] = []
+          const votePower = BigInt(await vot3.balanceOf(account.key.address))
 
-        const splits: { app: string; weight: bigint }[] = []
+          const splits: { app: string; weight: bigint }[] = []
 
-        // eslint-disable-next-line no-unused-vars
-        let randomDappsToVote = apps.filter(_ => Math.floor(Math.random() * 2) == 0)
-        if (!randomDappsToVote.length) randomDappsToVote = apps
+          // eslint-disable-next-line no-unused-vars
+          let randomDappsToVote = apps.filter(_ => Math.floor(Math.random() * 2) == 0)
+          if (!randomDappsToVote.length) randomDappsToVote = apps
 
-        // Get the vote power per xDapp rounding down
-        const votePowerPerApp = votePower / BigInt(randomDappsToVote.length)
+          // Get the vote power per xDapp rounding down
+          const votePowerPerApp = votePower / BigInt(randomDappsToVote.length)
 
-        randomDappsToVote.forEach(app => splits.push({ app: app, weight: votePowerPerApp }))
+          randomDappsToVote.forEach(app => splits.push({ app: app, weight: votePowerPerApp }))
 
-        clauses.push(
-          clauseBuilder.functionInteraction(
-            contractAddress,
-            coder
-              .createInterface(JSON.stringify(XAllocationVoting__factory.abi))
-              .getFunction("castVote") as FunctionFragment,
-            [roundId, splits.map(split => split.app), splits.map(split => split.weight)],
-          ),
-        )
+          clauses.push(
+            clauseBuilder.functionInteraction(
+              contractAddress,
+              coder
+                .createInterface(JSON.stringify(XAllocationVoting__factory.abi))
+                .getFunction("castVote") as FunctionFragment,
+              [roundId, splits.map(split => split.app), splits.map(split => split.weight)],
+            ),
+          )
 
-        console.log(
-          `Casting votes for ${roundId} with ${splits.map(split => split.weight)} votes to ${splits.map(split => split.app)}`,
-        )
-        const body: TransactionBody = await buildTxBody(clauses, account.key.address, 32, 250_000 * splits.length)
+          console.log(
+            `Casting round ${roundId} votes for ${account.key.address} with ${splits.map(split => split.weight)} votes to ${splits.map(split => split.app)}`,
+          )
+          const body: TransactionBody = await buildTxBody(clauses, account.key.address, 32, 250_000 * splits.length)
 
-        await signAndSendTx(body, account.key.pk)
-        console.log("Votes cast fro account", account.key.address)
+          await signAndSendTx(body, account.key.pk)
+          console.log("Votes cast for account", account.key.address)
+        } catch (e) {
+          if (ignoreErrors) {
+            console.error(`Error casting vote for account ${account.key.address}:`, e)
+          } else {
+            throw e
+          }
+        }
       }),
     )
   }

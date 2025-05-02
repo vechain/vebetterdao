@@ -9,6 +9,7 @@ export const claimVoterRewards = async (
   roundId: number,
   signingAcct: TestPk,
   accounts: SeedAccount[],
+  ignoreErrors: boolean = false,
 ) => {
   console.log("Claiming voter rewards...")
 
@@ -16,26 +17,36 @@ export const claimVoterRewards = async (
   const accountChunks = chunk(accounts, 50)
 
   for (const accountChunk of accountChunks) {
-    const clauses: TransactionClause[] = []
+    try {
+      const clauses: TransactionClause[] = []
 
-    accountChunk.forEach(account => {
-      clauses.push(
-        clauseBuilder.functionInteraction(
-          contractAddress,
-          coder
-            .createInterface(JSON.stringify(VoterRewards__factory.abi))
-            .getFunction("claimReward") as FunctionFragment,
-          [roundId, account.key.address],
-        ),
-      )
-    })
+      accountChunk.forEach(account => {
+        clauses.push(
+          clauseBuilder.functionInteraction(
+            contractAddress,
+            coder
+              .createInterface(JSON.stringify(VoterRewards__factory.abi))
+              .getFunction("claimReward") as FunctionFragment,
+            [roundId, account.key.address],
+          ),
+        )
+      })
 
-    const body: TransactionBody = await buildTxBody(clauses, signingAcct.address, 32)
+      const body: TransactionBody = await buildTxBody(clauses, signingAcct.address, 32)
 
-    if (!signingAcct.pk) {
-      throw new Error("Account does not have a private key")
+      if (!signingAcct.pk) {
+        throw new Error("Account does not have a private key")
+      }
+
+      await signAndSendTx(body, signingAcct.pk)
+      console.log(`Rewards claimed for chunk starting with account ${accountChunk[0]?.key.address}`)
+    } catch (e) {
+      if (ignoreErrors) {
+        console.error(`Error claiming rewards for chunk starting with account ${accountChunk[0]?.key.address}:`, e)
+      } else {
+        throw e
+      }
     }
-
-    await signAndSendTx(body, signingAcct.pk)
   }
+  console.log("Finished attempting to claim voter rewards.")
 }

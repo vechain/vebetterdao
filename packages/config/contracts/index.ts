@@ -27,10 +27,6 @@ export function getContractsConfig(env: EnvConfig) {
   }
 }
 
-export function shouldRunSimulation() {
-  return process.env.NEXT_PUBLIC_APP_ENV == "local" && process.env.RUN_SIMULATION === "true"
-}
-
 export function shouldEndorseXApps() {
   return process.env.ENDORSE_XAPPS === "true"
 }

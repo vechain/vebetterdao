@@ -16,6 +16,7 @@
     "deploy:testnet-staging": "npx hardhat run scripts/deploy --network vechain_testnet",
     "deploy:testnet": "npx hardhat run scripts/deploy --network vechain_testnet",
     "deploy:mainnet": "npx hardhat run scripts/deploy --network vechain_mainnet",
+    "simulation": "npx hardhat run scripts/runSimulation.ts",
     "check-contracts-deployment": "npx hardhat run scripts/checkContractsDeployment.ts",
     "check-contracts-deployment:staging": "npx hardhat run scripts/checkContractsDeployment.ts --network vechain_testnet",
     "check-contracts-deployment:testnet": "npx hardhat run scripts/checkContractsDeployment.ts --network vechain_testnet",

@@ -10,7 +10,6 @@
     "NEXT_PUBLIC_DATADOG_CLIENT_TOKEN",
     "NEXT_PUBLIC_IPFS_PINNING_SERVICE",
     "IS_TEST_COVERAGE",
-    "RUN_SIMULATION",
     "ENDORSE_XAPPS",
     "DO_NOT_UPGRADE",
     "SHARD",
@@ -53,6 +52,11 @@
       "cache": false,
       "persistent": true,
       "dependsOn": ["^setup-contracts:mainnet"]
+    },
+    "dev:simulation": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["@repo/contracts#simulation"]
     },
     "start": {
       "cache": false,
@@ -111,6 +115,10 @@
     "@repo/contracts#check-contracts-deployment:mainnet": {
       "cache": false,
       "dependsOn": ["^compile", "@repo/config#check-or-generate-local-config"]
+    },
+    "@repo/contracts#simulation": {
+      "cache": false,
+      "dependsOn": ["^setup-contracts"]
     },
     "clean": {
       "cache": false

@@ -20,7 +20,7 @@ async function main() {
 }
 
 // check if the contracts specified in the config file are deployed on the network, if not, deploy them (only on solo network)
-async function checkContractsDeployment() {
+export async function checkContractsDeployment() {
   try {
     // if contract address is not set or it does not exist on the network, consider it as not deployed
     const code = config.b3trContractAddress === "" ? "0x" : await ethers.provider.getCode(config.b3trContractAddress)

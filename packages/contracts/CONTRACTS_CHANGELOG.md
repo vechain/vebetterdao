@@ -6,7 +6,7 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 
 | Date                | Contract(s)                                                                                                                   | Summary                                                                                        |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| 25 March 2025  | `X2EarnRewardsPool` version `7`, `X2EarnApps` version `4`, `XAllocationPool` version  `5`                                                                                                                                                   | Added optional dual-pool balance to manage rewards and app treasury separately |
+| 25 March 2025       | `X2EarnRewardsPool` version `7`, `X2EarnApps` version `4`, `XAllocationPool` version `5`                                      | Added optional dual-pool balance to manage rewards and app treasury separately                 |
 | 27th February 2025  | `X2EarnRewardsPool` version `6`                                                                                               | Added support for rewards distribution with metadata.                                          |
 | 13th January 2025   | `XAllocationVoting` version `5`                                                                                               | Fixed issue with duplicate app voting in the same transaction.                                 |
 | 4th December 2024   | `X2EarnApps` version `3`, `XAllocationVoting` version `4`, `XAllocationPool` version `4`, and `X2EarnRewardsPool` version `5` | Added endorsement cooldown feature to X2Earn contracts.                                        |
@@ -31,6 +31,7 @@ This document provides a detailed log of upgrades to the smart contract suite, e
 This upgrade introduces an optional dual-pool mechanism that gives app admin more control over rewards distribution, and a pause option for reward distribution. When enabled, this feature creates a clear separation between funds for rewards and withdrawals.
 
 ### Key Updates 🗂
+
 It separates app funds into two distinct pools (rewards pool for distributors and available funds pool for admin withdrawals), enhances access control by restricting withdrawals to app admins only, and maintains backward compatibility through an optional implementation that preserves existing behavior unless explicitly enabled. It allow app admin to pause or unpause reward distribution for their app. Once paused, if the rewards pool is enabled, the app admin won't be able to move funds from one pool to another.
 
 ### Changes 🚀
@@ -42,19 +43,21 @@ It separates app funds into two distinct pools (rewards pool for distributors an
 ### Storage Changes 📦
 
 - **`X2EarnRewardsPool`**:
-  - Added `rewardsPoolBalance` to store the balance for rewards distribution 
+
+  - Added `rewardsPoolBalance` to store the balance for rewards distribution
   - Added `isRewardsPoolEnabled` to store whether the rewards pool is enabled or not.
   - Added `distributionPaused` to store whether the rewards distribution is paused or not.
 
 - **`X2EarnApps`**:
-  - Added `x2EarnRewardsPoolContract` to AdministrationUpgradeable librarie. 
+  - Added `x2EarnRewardsPoolContract` to AdministrationUpgradeable librarie.
 
 ### New Features 🚀
 
 - **`X2EarnRewardsPool`**:
+
   - **Access Control**: Modified withdrawal permissions - only app admins can withdraw funds
   - Added `toggleRewardsPoolBalance()` to enable/disable the dual-pool feature for an app
-  - Added `increaseRewardsPoolBalance()` to move funds from available pool to rewards pool 
+  - Added `increaseRewardsPoolBalance()` to move funds from available pool to rewards pool
   - Added `decreaseRewardsPoolBalance()` to move funds from rewards pool back to available pool
   - Added `isRewardsPoolEnabled()` getter to check if the dual-pool feature is enabled for an app
   - Added `rewardsPoolBalance()` getter to check the current rewards pool balance
@@ -65,9 +68,8 @@ It separates app funds into two distinct pools (rewards pool for distributors an
   - Added `isDistributionPaused` getter to check whether the rewards pool is paused or not.
 
 - **`X2EarnApps`**:
-  - Added `setX2EarnRewardsPoolContract` to set the x2EarnRewardsPoolContract 
+  - Added `setX2EarnRewardsPoolContract` to set the x2EarnRewardsPoolContract
   - Added `enableRewardsPoolForNewApp` to enabled rewards pool by default on submit app
-
 
 ### Bug Fixes 🐛
 

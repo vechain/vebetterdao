@@ -20,9 +20,8 @@ import {
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
 import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment } from "./setup"
-import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
-import { shouldEndorseXApps, shouldRunSimulation } from "@repo/config/contracts"
+import { shouldEndorseXApps } from "@repo/config/contracts"
 import {
   deployAndUpgrade,
   deployProxy,
@@ -857,11 +856,6 @@ export async function deployAll(config: ContractsConfig) {
       break
   }
 
-  // ---------- Run Simulation ---------- //
-  if (shouldRunSimulation()) {
-    await simulateRounds(b3tr, vot3, xAllocationVoting, emissions, voterRewards, treasury)
-  }
-
   console.log(`appEnv: ${appEnv}`)
 
   // ---------- Role updates ---------- //
@@ -1241,7 +1235,6 @@ export async function deployAll(config: ContractsConfig) {
       passportWhitelistAndBlacklistLogic: PassportWhitelistAndBlacklistLogic,
     },
   }
-  // close the script
 }
 
 async function deployB3trToken(admin: string, minter: string, pauser: string): Promise<B3TR> {

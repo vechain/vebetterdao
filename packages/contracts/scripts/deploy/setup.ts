@@ -130,8 +130,8 @@ export const setupLocalEnvironment = async (
   if (endorseApps) {
     // Get unendorsed XAPPs
     const unedorsedApps = await x2EarnApps.unendorsedAppIds()
-    const appsToEndorse = unedorsedApps.slice(0, unedorsedApps.length / 2)
-    await endorseXApps(endorserAccounts, x2EarnApps, appsToEndorse, vechainNodesMock)
+    // const appsToEndorse = unedorsedApps.slice(0, unedorsedApps.length / 2)
+    await endorseXApps(endorserAccounts, x2EarnApps, unedorsedApps, vechainNodesMock)
   }
   await proposeUpgradeGovernance(governor, xAllocationVoting)
 
