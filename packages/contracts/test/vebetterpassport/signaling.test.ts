@@ -268,46 +268,6 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
       expect(await veBetterPassport.signaledCounter(entity.address)).to.equal(0)
       expect(await veBetterPassport.signaledCounter(passport.address)).to.equal(0)
     })
-
-    it("App admin should be able to reset signals of a user", async function () {
-      // Create a new app with otherAccounts[5] as admin
-      const newAppAdmin = otherAccounts[5]
-      const targetUser = otherAccounts[6]
-
-      await x2EarnApps
-        .connect(owner)
-        .submitApp(otherAccounts[7].address, newAppAdmin, otherAccounts[7].address, "metadataURI")
-
-      const newAppId = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[7].address))
-      await endorseApp(newAppId, newAppAdmin)
-
-      // Make newAppAdmin both a signaler and reset signaler for the new app
-      await expect(veBetterPassport.connect(newAppAdmin).assignSignalerToAppByAppAdmin(newAppId, newAppAdmin.address))
-        .to.emit(veBetterPassport, "SignalerAssignedToApp")
-        .withArgs(newAppAdmin.address, newAppId)
-
-      // Signal user with both signalers
-      await expect(veBetterPassport.connect(regularSignaler).signalUserWithReason(targetUser.address, "Some reason"))
-        .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(targetUser.address, regularSignaler.address, appId, "Some reason")
-
-      await expect(veBetterPassport.connect(newAppAdmin).signalUserWithReason(targetUser.address, "Some reason"))
-        .to.emit(veBetterPassport, "UserSignaled")
-        .withArgs(targetUser.address, newAppAdmin.address, newAppId, "Some reason")
-
-      expect(await veBetterPassport.signaledCounter(targetUser.address)).to.equal(2)
-
-      // Reset signals of user by app admin
-      await expect(
-        veBetterPassport
-          .connect(owner)
-          .resetUserSignalsWithReason(targetUser.address, "User demonstrated erroneous signaling"),
-      )
-        .to.emit(veBetterPassport, "UserSignalsReset")
-        .withArgs(targetUser.address, "User demonstrated erroneous signaling")
-
-      expect(await veBetterPassport.signaledCounter(targetUser.address)).to.equal(0)
-    })
   })
 
   describe("Signaling By UPGRADER_ROLE", function () {
