@@ -11,7 +11,7 @@ export const TokenSelectionContent = ({ setIsB3trToVot3, onSubmit }: Props) => {
   return (
     <form onSubmit={onSubmit}>
       <VStack align={"flex-start"}>
-        <Flex w="100%" h="100%" direction={{ base: "column", md: "row" }} gap={4}>
+        <Flex align={"center"} w="100%" h="100%" direction={{ base: "column", md: "row" }} gap={4}>
           <motion.div initial="hidden" animate="visible">
             <TokenInfoCard isB3TRToVOT3={true} setIsB3TRToVOT3={setIsB3trToVot3} />
           </motion.div>

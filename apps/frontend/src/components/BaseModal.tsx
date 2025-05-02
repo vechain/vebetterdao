@@ -20,6 +20,7 @@ type Props = {
   modalProps?: Partial<ModalProps>
   modalContentProps?: Partial<ModalContentProps>
   modalBodyProps?: Partial<ModalBodyProps>
+  showCloseButton?: boolean
   isCloseable?: boolean
 }
 export const BaseModal = ({
@@ -31,6 +32,7 @@ export const BaseModal = ({
   modalProps,
   modalContentProps,
   modalBodyProps,
+  showCloseButton = false,
   isCloseable = true,
 }: Props) => {
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
@@ -40,7 +42,7 @@ export const BaseModal = ({
       <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered trapFocus={false} {...modalProps}>
         <ModalOverlay />
         <ModalContent rounded={"2xl"} {...modalContentProps}>
-          {isCloseable && <ModalCloseButton />}
+          {isCloseable && showCloseButton ? <ModalCloseButton /> : null}
           <ModalBody p={10} rounded={"2xl"} {...modalBodyProps}>
             {children}
           </ModalBody>
