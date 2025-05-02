@@ -52,7 +52,7 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
       expect(await veBetterPassport.signaledCounter(user.address)).to.equal(0)
     })
 
-    it.only("Should allow to reset user without signals", async function () {
+    it("Should allow to reset user without signals", async function () {
       const userWithoutSignals = otherAccounts[7]
 
       expect(await veBetterPassport.signaledCounter(userWithoutSignals.address)).to.equal(0)
@@ -68,7 +68,7 @@ describe("VeBetterPassport (Reset Signal Count) - @shard8c", function () {
         .be.reverted
     })
 
-    it.only("Should allow to reset user without signals", async function () {
+    it("Should allow to reset user without signals", async function () {
       const userWithoutSignals = otherAccounts[7]
 
       expect(await veBetterPassport.signaledCounter(userWithoutSignals.address)).to.equal(0)
