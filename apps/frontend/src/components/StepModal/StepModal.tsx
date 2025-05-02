@@ -64,7 +64,7 @@ export const StepModal = <T extends string>({
       modalBodyProps={{
         p: 0,
       }}
-      closeButton={false}>
+      isCloseable={false}>
       <Card p={0}>
         <CardBody p={0}>
           <Flex position="relative" h="60px" alignItems="center">
