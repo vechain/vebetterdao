@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1578.5 1578.5">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #eef3f7;
+      }
+
+      .cls-2 {
+        opacity: .65;
+      }
+
+      .cls-2, .cls-3 {
+        fill: #6042dd;
+      }
+    </style>
+  </defs>
+  <g id="VeTHOR">
+    <rect class="cls-1" width="1578.5" height="1578.5" rx="147.81" ry="147.81"/>
+    <g>
+      <path class="cls-2" d="M983.34,285.88h146.6l-275.54,358.45h247.27l-614.18,682.1,214.6-483.78h-215.8l217.59-556.77h279.47Z"/>
+      <path class="cls-3" d="M992.16,285.88l-247.66,411.81h226.46l-483.49,628.74,214.6-483.78h-215.8l217.59-556.77"/>
+    </g>
+  </g>
+</svg>
