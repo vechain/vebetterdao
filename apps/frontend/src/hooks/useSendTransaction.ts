@@ -94,8 +94,9 @@ export const useSendTransaction = ({
   const sendTransaction = useCallback(async () => {
     if (!clauses) throw new Error("clauses is required")
     return await convertClauses(clauses).then(clauses => {
-      if (signerAccount) return vendor.sign("tx", clauses).signer(signerAccount).request()
-      return vendor.sign("tx", clauses).request()
+      // bump gas limit to 10M in dev testnet env
+      if (signerAccount) return vendor.sign("tx", clauses).gas(10_000_000).signer(signerAccount).request()
+      return vendor.sign("tx", clauses).gas(10_000_000).request()
     })
   }, [clauses, vendor, signerAccount])
 

@@ -39,9 +39,8 @@ export const AdminPageContent = () => {
             },
           }}>
           <Tab>{"Emissions"}</Tab>
-          {Number(currentRoundId) > 0 && isAdmin && <Tab>{"Allocation Rewards"}</Tab>}
+          {Number(currentRoundId) > 0 && <Tab>{"Allocation Rewards"}</Tab>}
           {isAdminOfX2EarnApps && <Tab>{"X2Earn Apps"}</Tab>}
-          <Tab>{"Utils"}</Tab>
           <Tab>{"Contracts"}</Tab>
           {canSeePauseTab && <Tab>{"Pausing"}</Tab>}
         </TabList>
@@ -69,12 +68,6 @@ export const AdminPageContent = () => {
               </Grid>
             </TabPanel>
           )}
-
-          <TabPanel>
-            <Grid templateColumns={["repeat(1, 1fr)", "repeat(2, 1fr)"]} gap={6} w="full">
-              <B3trAllowance />
-            </Grid>
-          </TabPanel>
 
           <TabPanel>
             <ContractsDetails />
