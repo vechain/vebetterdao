@@ -1602,5 +1602,10 @@
   "Only app admin can transfer and manage the rewards pool": "Only app admin can transfer and manage the rewards pool",
   "Access restricted": "Access restricted",
   "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. <strong>Consider voting for fewer apps or getting more VOT3.</strong>",
-  "Filters": "Filters"
+  "Filters": "Filters",
+  "This address have submitted {{count}} apps.": "This address have submitted {{count}} apps.",
+  "This address have not submitted app.": "This address have not submitted app.",
+  "You have already submitted your app.": "You have already submitted your app.",
+  "Thank you for joining VeBetterDao!": "Thank you for joining VeBetterDao!",
+  "Check submitted apps": "Check submitted apps"
 }

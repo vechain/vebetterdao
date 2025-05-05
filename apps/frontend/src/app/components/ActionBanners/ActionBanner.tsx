@@ -6,6 +6,7 @@ import {
   useCurrentAllocationsRoundId,
   useGetDelegatee,
   useHasVotedInProposals,
+  useIsCreatorOfAnyApp,
   useUserBotSignals,
   useUserDelegation,
   useVot3Balance,
@@ -130,7 +131,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
   const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
-
+  const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(account?.address ?? "")
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0
 
@@ -149,7 +150,7 @@ export const ActionBanner = () => {
   // Creator NFT banners logic
   const showCreatorRejectedBanner =
     !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
-  const showCreatorApprovedBanner = !!account?.address && hasCreatorNFT
+  const showCreatorApprovedBanner = !!account?.address && hasCreatorNFT && !hasAlreadySubmitted
   const showCreatorUnderReviewBanner =
     !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
