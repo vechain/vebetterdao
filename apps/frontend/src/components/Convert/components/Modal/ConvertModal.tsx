@@ -68,7 +68,8 @@ export const ConvertModal = ({ isOpen, onClose }: Props) => {
     onClose()
     setIsB3trToVot3(undefined)
     setValue("amount", "")
-  }, [onClose, setValue])
+    setActiveStep(0)
+  }, [onClose, setActiveStep, setValue])
 
   const convertB3trMutation = useConvertB3tr({
     amount,
