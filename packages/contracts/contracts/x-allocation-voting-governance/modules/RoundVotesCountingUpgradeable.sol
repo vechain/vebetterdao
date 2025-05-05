@@ -216,7 +216,6 @@ abstract contract RoundVotesCountingUpgradeable is Initializable, XAllocationVot
     }
 
     // Register the vote for rewards calculation where the vote power is the square root of the total votes cast by the voter
-    // TODO: The error is happening in here
     voterRewards().registerVote(roundStart, voter, totalWeight, Math.sqrt(totalWeight));
 
     // Emit the AllocationVoteCast event
