@@ -161,8 +161,7 @@ export const AppBalanceCard = () => {
               title={t("Access restricted")}
               type="warning"
               isLoading={false}
-              // TODO: message needs to be updates in case of team wallet address would have transfer access
-              message={t("Only app admin can transfer and manage the rewards pool")}
+              message={t("Only app admin and team wallet address can transfer and manage the rewards pool")}
             />
           )}
         </CardBody>
