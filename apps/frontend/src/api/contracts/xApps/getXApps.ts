@@ -39,8 +39,10 @@ export type UnendorsedApp = XApp & {
   appAvailableForAllocationVoting: boolean
 }
 
+export type AllApps = XApp | UnendorsedApp
+
 type GetAllApps = {
-  allApps: (XApp | UnendorsedApp)[]
+  allApps: AllApps[]
   active: XApp[] // Historically active apps
   unendorsed: UnendorsedApp[]
   newLookingForEndorsement: UnendorsedApp[]

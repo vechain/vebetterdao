@@ -27,8 +27,8 @@ export const APP_CATEGORIES = [
   { id: "sustainable-shopping", name: "Sustainable Shopping", color: "#C4ECFF" },
   { id: "social-community-activism", name: "Social, Community, Activism", color: "#c2f4f0" },
   { id: "green-finance-defi", name: "Green Finance, DeFi", color: "##ffe0cd" },
-  { id: "green-mobility-travel", name: "Green Mobility & Travel", color: "#FAD1FC" },
-  { id: "renewable-energy-efficiency", name: "Renewable Energy & Efficiency", color: "#E0DAFD" },
+  { id: "green-mobility-travel", name: "Green Travel", color: "#FAD1FC" },
+  { id: "renewable-energy-efficiency", name: "Renewable Energy", color: "#E0DAFD" },
   { id: "education-learning", name: "Education & Learning", color: "#E5E9F0" },
 ]
 
