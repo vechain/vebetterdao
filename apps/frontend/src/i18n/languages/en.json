@@ -1609,5 +1609,12 @@
   "Find a category": "Find a category",
   "No categories found": "No categories found",
   "No categories selected. Select up to 2 categories.": "No categories selected. Select up to 2 categories.",
-  "Sustainability apps": "Sustainability apps"
+  "Sustainability apps": "Sustainability apps",
+  "Newest": "Newest",
+  "Most recently created apps": "Most recently created apps",
+  "Alphabetical": "Alphabetical",
+  "A to Z by app name": "A to Z by app name",
+  "Highest rewards first": "Highest rewards first",
+  "Impact": "Impact",
+  "Highest impact first": "Highest impact first"
 }

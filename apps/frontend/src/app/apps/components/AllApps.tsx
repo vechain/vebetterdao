@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import {
   Box,
@@ -12,18 +12,31 @@ import {
   Input,
   Center,
   Button,
+  Icon,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Text,
 } from "@chakra-ui/react"
 import { FilterAppsTypeButton } from "./FilterAppsTypeButton"
 import { XApp, UnendorsedApp, useXNode } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { AppsEmptyState } from "./AppsEmptyState"
 import { CreatorBanner } from "./CreatorBanner"
-import { FaSearch } from "react-icons/fa"
+import { UilSortAmountDown, UilCheck, UilSearch } from "@iconscout/react-unicons"
 
-const FILTER_ACTIVE_APPS = "Active apps"
-const FILTER_NEW_APPS = "New apps"
-const FILTER_GRACE_PERIOD = "In grace period"
-const FILTER_ENDORSEMENT_LOST = "Endorsement lost"
+import {
+  useAppsSorting,
+  useAppsSearch,
+  useAppsFilteringByStatus,
+  useAppsPagination,
+  FILTER_ACTIVE_APPS,
+  FILTER_NEW_APPS,
+  FILTER_GRACE_PERIOD,
+  FILTER_ENDORSEMENT_LOST,
+} from "../hooks"
 
 type Props = {
   currentActiveApps: XApp[]
@@ -33,8 +46,8 @@ type Props = {
   isXAppsLoading: boolean
 }
 
+const NO_APPS_PER_PAGE = 25
 type LayoutKey = "endorser" | "default"
-const LOAD_MORE_APPS_COUNT = 25
 
 export const AllApps = ({
   currentActiveApps,
@@ -44,57 +57,24 @@ export const AllApps = ({
   isXAppsLoading,
 }: Props) => {
   const { t } = useTranslation()
-  const [filter, setFilter] = useState(FILTER_ACTIVE_APPS)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [visibleAppsCount, setVisibleAppsCount] = useState(LOAD_MORE_APPS_COUNT)
-
-  const showCreatorBanner = useMemo(() => filter === FILTER_ACTIVE_APPS, [filter])
-
-  const displayApps = useMemo(() => {
-    let filteredApps: (XApp | UnendorsedApp)[] = []
-
-    // Filter xApps based on selected filter value
-    switch (filter) {
-      case FILTER_ACTIVE_APPS:
-        filteredApps = currentActiveApps
-        break
-      case FILTER_NEW_APPS:
-        filteredApps = newApps
-        break
-      case FILTER_GRACE_PERIOD:
-        filteredApps = gracePeriodApps
-        break
-      case FILTER_ENDORSEMENT_LOST:
-        filteredApps = endorsementLostApps
-        break
-      default:
-        filteredApps = currentActiveApps
-    }
-
-    // Filter by search query if it exists
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      return filteredApps.filter(app => app.name.toLowerCase().includes(query))
-    }
-
-    return filteredApps
-  }, [filter, searchQuery, currentActiveApps, gracePeriodApps, endorsementLostApps, newApps])
-
-  const displayAppsRestricted = useMemo(() => {
-    return displayApps.slice(0, visibleAppsCount)
-  }, [displayApps, visibleAppsCount])
-
   const { isEndorsingApp } = useXNode()
-  const layout: LayoutKey = isEndorsingApp ? "endorser" : "default"
 
-  const hasMoreApps = displayAppsRestricted.length < displayApps.length
-  const handleLoadMore = () => {
-    setVisibleAppsCount(prevApps => prevApps + LOAD_MORE_APPS_COUNT)
-  }
+  const { sortOption, sortOptions, sortedApps, isSorting, onSortChange, isSorted } = useAppsSorting(
+    currentActiveApps,
+    newApps,
+    gracePeriodApps,
+    endorsementLostApps,
+  )
+  const { searchQuery, handleSearchChange } = useAppsSearch()
+  const { filter, setFilter, filteredApps } = useAppsFilteringByStatus(sortedApps, sortOption, searchQuery)
+  const { displayAppsRestricted, hasMoreApps, handleLoadMore } = useAppsPagination(filteredApps, NO_APPS_PER_PAGE)
+
+  const layout: LayoutKey = isEndorsingApp ? "endorser" : "default"
+  const showCreatorBanner = useMemo(() => filter === FILTER_ACTIVE_APPS, [filter])
 
   const appsSection = useMemo(() => {
     const isEmpty = !displayAppsRestricted?.length
-    return isXAppsLoading ? (
+    return isXAppsLoading || isSorting ? (
       <VStack w="full" spacing={12} h="80vh" justify="center" data-testid="apps-page-loading">
         <Spinner size="lg" />
       </VStack>
@@ -108,7 +88,7 @@ export const AllApps = ({
           ) : (
             <>
               {showCreatorBanner ? <CreatorBanner /> : undefined}
-              {displayAppsRestricted.map((xApp, _) => (
+              {displayAppsRestricted.map(xApp => (
                 <UnendorsedAppCard key={xApp.id} xApp={xApp} layout={layout} />
               ))}
             </>
@@ -124,7 +104,53 @@ export const AllApps = ({
         )}
       </VStack>
     )
-  }, [t, displayAppsRestricted, isXAppsLoading, showCreatorBanner, layout, hasMoreApps])
+  }, [t, displayAppsRestricted, isXAppsLoading, isSorting, showCreatorBanner, layout, hasMoreApps, handleLoadMore])
+
+  const sortingMenu = () => {
+    return (
+      <Menu closeOnSelect={true} placement="bottom-end">
+        <MenuButton
+          as={IconButton}
+          isRound={true}
+          aria-label={t("Sort by")}
+          bg={isSorted ? "black" : "transparent"}
+          transition="all 0.3s ease-in-out"
+          color={isSorted ? "white" : "black"}
+          _hover={{
+            opacity: "0.6",
+            transition: "all 0.3s ease-in-out",
+          }}
+          icon={<UilSortAmountDown />}
+          variant="black"
+        />
+        <MenuList minW="240px" shadow="lg" borderRadius="md" p={0}>
+          {sortOptions.map(option => (
+            <MenuItem
+              key={option.id}
+              onClick={() => onSortChange(option.id)}
+              role="group"
+              position="relative"
+              bg={sortOption === option.id && sortOption !== "default" ? "gray.100" : undefined}
+              _dark={{ bg: sortOption === option.id && sortOption !== "default" ? "gray.700" : undefined }}>
+              <HStack w="full" spacing={3} justifyContent="space-between">
+                <Box>
+                  <Text fontWeight={sortOption === option.id && sortOption !== "default" ? "semibold" : "normal"}>
+                    {option.label}
+                  </Text>
+                  <Text fontSize="xs" color="gray.500">
+                    {option.description}
+                  </Text>
+                </Box>
+                {sortOption === option.id && sortOption !== "default" && (
+                  <Icon as={UilCheck} color="black" boxSize={5} />
+                )}
+              </HStack>
+            </MenuItem>
+          ))}
+        </MenuList>
+      </Menu>
+    )
+  }
 
   return (
     <>
@@ -152,20 +178,21 @@ export const AllApps = ({
         <HStack w="full" mt={0}>
           <InputGroup w="full">
             <InputLeftElement pointerEvents="none">
-              <FaSearch color="#3B3B3B" />
+              <UilSearch color="#3B3B3B" />
             </InputLeftElement>
             <Input
               placeholder="Search apps..."
               value={searchQuery}
               borderColor="1px solid black"
               opacity={0.6}
-              onChange={e => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               borderRadius={"24px"}
               _dark={{ bg: "black" }}
               _hover={{ borderColor: "black", opacity: 1 }}
               _focus={{ borderColor: "black", boxShadow: "0px 0px 3px 0px rgba(0, 76, 252, 0.35)" }}
             />
           </InputGroup>
+          {sortingMenu()}
         </HStack>
         {appsSection}
       </VStack>
