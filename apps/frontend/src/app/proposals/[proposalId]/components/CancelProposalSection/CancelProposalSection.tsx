@@ -27,7 +27,6 @@ export const CancelProposalSection = () => {
   const { account } = useWallet()
   const { proposal } = useProposalDetail()
   const confirmationModal = useDisclosure()
-  const transactionModal = useDisclosure()
   const { data: permissions } = useAccountPermissions(account?.address ?? "")
 
   const handleCloseConfirmationModal = useCallback(() => {
@@ -40,9 +39,8 @@ export const CancelProposalSection = () => {
 
   const handleCancelProposal = useCallback(() => {
     confirmationModal.onClose()
-    transactionModal.onOpen()
     cancelProposalMutation.sendTransaction()
-  }, [cancelProposalMutation, confirmationModal, transactionModal])
+  }, [cancelProposalMutation, confirmationModal])
 
   const accountCanCancelProposal = useMemo(
     () => compareAddresses(proposal.proposer, account?.address || "") || permissions?.isAdminOfB3TRGovernor,

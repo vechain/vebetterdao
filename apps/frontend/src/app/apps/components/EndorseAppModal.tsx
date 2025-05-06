@@ -44,14 +44,16 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
   const { data: roundInfo, isLoading: roundInfoLoading } = useAllocationsRound(currentRoundId)
 
+  const handleSuccess = useCallback(() => {
+    onClose()
+  }, [onClose])
+
   //TODO: Multiple nodes
   const endorseAppMutation = useEndorseApp({
     appId: xApp?.id ?? "",
     nodeId,
     userAddress: account?.address ?? "",
-    onSuccess: () => {
-      endorseAppMutation.resetStatus()
-    },
+    onSuccess: handleSuccess,
   })
 
   //TODO: Handle multiple xNodes on UI
@@ -66,7 +68,6 @@ export const EndorseAppModal = ({ xApp, isOpen, onClose }: Props) => {
     [newScore, endorsementThreshold, appScore],
   )
   const handleEndorsement = useCallback(() => {
-    endorseAppMutation.resetStatus()
     endorseAppMutation.sendTransaction()
   }, [endorseAppMutation])
 

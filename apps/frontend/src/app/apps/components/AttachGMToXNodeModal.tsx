@@ -59,16 +59,16 @@ export const AttachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
     return getGMLevel(gmStartingLevel, Number(b3trDonated ?? 0))
   }, [b3trDonated, gmStartingLevel])
 
-  const attachGMToXNodeMutation = useAttachGMToXNode({})
-
   const handleClose = useCallback(() => {
-    attachGMToXNodeMutation.resetStatus()
     onClose()
-  }, [attachGMToXNodeMutation, onClose])
+  }, [onClose])
+
+  const attachGMToXNodeMutation = useAttachGMToXNode({
+    onSuccess: handleClose,
+  })
 
   const handleAttachment = useCallback(() => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.ATTACHED_GM_TO_XNODE))
-    attachGMToXNodeMutation.resetStatus()
     attachGMToXNodeMutation.sendTransaction()
   }, [attachGMToXNodeMutation])
 

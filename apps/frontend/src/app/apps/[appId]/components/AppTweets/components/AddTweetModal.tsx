@@ -127,6 +127,7 @@ export const AddTweetModal = ({ onClose, isOpen, updateAppDetailsMutation, uploa
   return (
     <StepModal
       disableBackButton={true}
+      disableCloseButton={true}
       steps={[
         {
           key: AddTweetModalStep.SUBMIT,

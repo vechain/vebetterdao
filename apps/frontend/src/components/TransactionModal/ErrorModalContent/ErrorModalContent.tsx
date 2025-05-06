@@ -27,7 +27,7 @@ export const ErrorModalContent = ({
   const { t } = useTranslation()
   return (
     <ModalAnimation>
-      <VStack align={"center"} p={6} gap={0}>
+      <VStack align={"center"} p={0} gap={0}>
         <Heading size="md" data-testid={"tx-modal-title"}>
           {title}
         </Heading>
@@ -66,7 +66,7 @@ export const ErrorModalContent = ({
             </Link>
           )}
           {showTryAgainButton && (
-            <Button variant={"outline"} onClick={onTryAgain}>
+            <Button variant={"outline"} fontWeight={700} w="full" onClick={onTryAgain}>
               {t("Try again")}
             </Button>
           )}

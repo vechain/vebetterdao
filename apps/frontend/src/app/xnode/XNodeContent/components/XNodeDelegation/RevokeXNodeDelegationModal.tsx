@@ -22,21 +22,24 @@ export const RevokeXNodeDelegationModal = ({ modal }: { modal: UseDisclosureProp
   const { t } = useTranslation()
   const { isXNodeAttachedToGM } = useXNode()
   const { isTxModalOpen } = useTransactionModal()
-  const revokeXNodeDelegation = useRevokeXNodeDelegation({})
 
+  const { isOpen = false, onClose } = modal
+
+  const handleClose = useCallback(() => {
+    onClose?.()
+  }, [onClose])
+
+  const revokeXNodeDelegation = useRevokeXNodeDelegation({
+    onSuccess: handleClose,
+  })
   const handleRevoke = useCallback(() => {
     revokeXNodeDelegation.sendTransaction({ isAttachedToGM: isXNodeAttachedToGM })
   }, [revokeXNodeDelegation, isXNodeAttachedToGM])
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
-  const handleClose = useCallback(() => {
-    modal.onClose?.()
-    revokeXNodeDelegation.resetStatus()
-  }, [modal, revokeXNodeDelegation])
-
   return (
-    <BaseModal onClose={handleClose} isOpen={(modal.isOpen && !isTxModalOpen) ?? false}>
+    <BaseModal onClose={handleClose} isOpen={isOpen && !isTxModalOpen}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />

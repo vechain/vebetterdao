@@ -28,17 +28,19 @@ export const UnendorseAppModal = ({ isOpen, onClose }: Props) => {
   const { data: logo } = useIpfsImage(endorsedApp?.logo)
   const { account } = useWallet()
   const { isTxModalOpen } = useTransactionModal()
+
+  const handleSuccess = useCallback(() => {
+    onClose()
+  }, [onClose])
+
   const unendorseAppMutation = useUnendorseApp({
     appId: endorsedApp?.id,
     nodeId: xNodeId,
     userAddress: account?.address ?? "",
-    onSuccess: () => {
-      unendorseAppMutation.resetStatus()
-    },
+    onSuccess: handleSuccess,
   })
 
   const handleUnendorsement = useCallback(() => {
-    unendorseAppMutation.resetStatus()
     unendorseAppMutation.sendTransaction()
   }, [unendorseAppMutation])
 

@@ -30,7 +30,14 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
 
   const { t } = useTranslation()
 
-  const { sendTransaction } = useClaimReward({ roundId })
+  const { sendTransaction } = useClaimReward({
+    roundId,
+    transactionModalCustomUI: {
+      waitingConfirmation: { title: t("Claiming rewards...") },
+      success: { title: t("Rewards claimed!") },
+      error: { title: t("Error claiming rewards!") },
+    },
+  })
 
   const handleClaim = useCallback(() => {
     sendTransaction()

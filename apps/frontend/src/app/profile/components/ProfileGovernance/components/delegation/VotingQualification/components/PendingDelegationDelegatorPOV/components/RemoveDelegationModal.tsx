@@ -20,21 +20,24 @@ import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const RemoveDelegationModal = ({ modal, delegatee }: { modal: UseDisclosureProps; delegatee: string }) => {
   const { t } = useTranslation()
   const { isTxModalOpen } = useTransactionModal()
-  const removeDelegation = useRemovePendingDelegationDelegatorPOV({})
+  const { isOpen = false, onClose } = modal
+
+  const handleClose = useCallback(() => {
+    onClose?.()
+  }, [onClose])
+
+  const removeDelegation = useRemovePendingDelegationDelegatorPOV({
+    onSuccess: handleClose,
+  })
 
   const handleDelegate = useCallback(() => {
     removeDelegation.sendTransaction()
   }, [removeDelegation])
 
-  const handleClose = useCallback(() => {
-    modal.onClose?.()
-    removeDelegation.resetStatus()
-  }, [modal, removeDelegation])
-
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
 
   return (
-    <BaseModal onClose={handleClose} isOpen={(modal.isOpen && !isTxModalOpen) ?? false}>
+    <BaseModal onClose={handleClose} isOpen={isOpen && !isTxModalOpen}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />

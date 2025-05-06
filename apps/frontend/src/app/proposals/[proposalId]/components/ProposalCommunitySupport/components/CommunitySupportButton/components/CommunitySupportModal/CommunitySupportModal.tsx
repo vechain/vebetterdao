@@ -1,26 +1,41 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useMemo } from "react"
 import { SupportInstructions } from "./components/SupportInstructions"
-import { Modal, ModalBody, ModalCloseButton, ModalOverlay } from "@chakra-ui/react"
-import { CustomModalContent } from "@/components"
 import { SupportDeposit } from "./components/SupportDeposit"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
 import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { useSteps } from "@chakra-ui/react"
+import { Step, StepModal } from "@/components/StepModal"
+import { useTranslation } from "react-i18next"
+
+enum CommunitySupportStep {
+  INSTRUCTIONS = "INSTRUCTIONS",
+  DEPOSIT = "DEPOSIT",
+}
+
 export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const { t } = useTranslation()
   const { proposal } = useProposalDetail()
   const { isTxModalOpen } = useTransactionModal()
-  const [step, setStep] = useState(0)
-  const depositMutation = useProposalVot3Deposit({ proposalId: proposal.id })
+  const { activeStep, goToPrevious, goToNext, setActiveStep } = useSteps({
+    index: 0,
+    count: Object.keys(CommunitySupportStep).length,
+  })
 
   const handleClose = useCallback(() => {
-    depositMutation.resetStatus()
-    setStep(0)
+    setActiveStep(0)
     onClose()
-  }, [depositMutation, onClose])
+  }, [onClose, setActiveStep])
 
-  const goToNextStep = useCallback(() => {
-    setStep(prev => prev + 1)
-  }, [])
+  const depositMutation = useProposalVot3Deposit({
+    proposalId: proposal.id,
+    onSuccess: handleClose,
+    transactionModalCustomUI: {
+      waitingConfirmation: { title: t("Supporting proposal...") },
+      success: { title: t("Proposal supported!") },
+      error: { title: t("Error supporting proposal!") },
+    },
+  })
 
   const onSubmit = useCallback(
     (amount: string) => {
@@ -29,22 +44,31 @@ export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; on
     [depositMutation, proposal.id],
   )
 
-  const stepContent = useMemo(() => {
-    switch (step) {
-      case 0:
-        return <SupportInstructions goToNextStep={goToNextStep} />
-      case 1:
-        return <SupportDeposit onSubmit={onSubmit} />
-    }
-  }, [goToNextStep, onSubmit, step])
+  const steps = useMemo<Step<CommunitySupportStep>[]>(
+    () => [
+      {
+        key: CommunitySupportStep.INSTRUCTIONS,
+        content: <SupportInstructions goToNextStep={goToNext} />,
+        title: t("What is community support?"),
+      },
+      {
+        key: CommunitySupportStep.DEPOSIT,
+        content: <SupportDeposit onSubmit={onSubmit} />,
+        title: t("Support this proposal with VOT3"),
+      },
+    ],
+    [goToNext, onSubmit, t],
+  )
 
   return (
-    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} size={"xl"}>
-      <ModalOverlay />
-      <CustomModalContent>
-        <ModalCloseButton />
-        <ModalBody p={8}>{stepContent}</ModalBody>
-      </CustomModalContent>
-    </Modal>
+    <StepModal
+      isOpen={isOpen && !isTxModalOpen}
+      onClose={handleClose}
+      goToPrevious={goToPrevious}
+      goToNext={goToNext}
+      setActiveStep={setActiveStep}
+      steps={steps}
+      activeStep={activeStep}
+    />
   )
 }

@@ -51,6 +51,7 @@ export const TransactionModal = () => {
         <ErrorModalContent
           {...getCustomUIProps("error")}
           showTryAgainButton
+          {...(transactionModalState?.error?.reason ? { description: transactionModalState?.error?.reason } : {})}
           {...(transactionModalState?.tryAgain ? { onTryAgain: handleTryAgain } : {})}
         />
       ),
@@ -78,6 +79,7 @@ export const TransactionModal = () => {
     transactionModalState?.txId,
     transactionModalState?.status,
     handleTryAgain,
+    transactionModalState?.error?.reason,
   ])
 
   return (
@@ -89,9 +91,13 @@ export const TransactionModal = () => {
           containerRef: portalRef,
         },
       }}
-      closeButton={canShowCloseButton}
+      showCloseButton={canShowCloseButton}
+      isCloseable={canShowCloseButton}
       modalContentProps={{
         zIndex: 9999,
+      }}
+      modalBodyProps={{
+        p: 10,
       }}>
       {modalContent}
     </BaseModal>
