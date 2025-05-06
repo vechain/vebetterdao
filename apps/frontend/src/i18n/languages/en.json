@@ -1603,5 +1603,9 @@
   "Only app admin can transfer and manage the rewards pool": "Only app admin can transfer and manage the rewards pool",
   "Access restricted": "Access restricted",
   "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. Consider voting for fewer apps or getting more VOT3.": "With {{amount}} VOT3, voting for {{numApps}} apps may fail due to rounding. <strong>Consider voting for fewer apps or getting more VOT3.</strong>",
-  "Filters": "Filters"
+  "Filters": "Filters",
+  "GM Rewards Pool is live from Round 46 💰": "GM Rewards Pool is live from Round 46 💰",
+  "GM Rewards Pool starts from Round 46. Upgrade your GM to earn more!": "GM Rewards Pool starts from Round 46. Upgrade your GM to earn more!",
+  "Upgrade your GM": "Upgrade your GM",
+  "You have {{amount}} B3TR leftover from a previous upgrade": "You have {{amount}} B3TR leftover from a previous upgrade"
 }

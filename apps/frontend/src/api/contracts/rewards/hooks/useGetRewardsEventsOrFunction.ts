@@ -1,6 +1,6 @@
 import { useRewardClaimedEvents } from "./useRewardClaimedEvents"
 
-export type RewardClaimed = {
+export type ClaimedReward = {
   claimedReward: number
   claimedGMReward?: number
 }
