@@ -1001,7 +1001,7 @@ describe("VoterRewards - @shard10", () => {
       await expect(voterRewardsV4.connect(voter2).claimReward(4, voter2)).to.emit(voterRewardsV4, "RewardClaimed")
     })
 
-    it.only("Should not have state conflict after upgrading to V5", async () => {
+    it("Should not have state conflict after upgrading to V5", async () => {
       const config = createLocalConfig()
       const {
         otherAccounts,
