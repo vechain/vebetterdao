@@ -32,4 +32,9 @@ export const APP_CATEGORIES = [
   { id: "education-learning", name: "Education & Learning", color: "#E5E9F0" },
 ]
 
+export const FILTER_ACTIVE_APPS = "Active apps"
+export const FILTER_NEW_APPS = "New apps"
+export const FILTER_GRACE_PERIOD = "In grace period"
+export const FILTER_ENDORSEMENT_LOST = "Endorsement lost"
+
 export const MAX_CATEGORIES = 2

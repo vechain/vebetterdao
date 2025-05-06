@@ -56,12 +56,12 @@ export function useAppsSorting(
       {
         id: "rewards",
         label: t("Rewards"),
-        description: t("Highest rewards first"),
+        description: t("Highest rewards distributed"),
       },
       {
         id: "impact",
         label: t("Impact"),
-        description: t("Highest impact first"),
+        description: t("Highest proof of impact"),
       },
     ],
     [t],
@@ -138,7 +138,6 @@ export function useAppsSorting(
     }
   }, [pendingSortOption, isSorting, isRewardsLoading])
 
-  // Determine if we're in a loading state
   const isLoadingState = isSorting || (isRewardsLoading && (sortOption === "rewards" || sortOption === "impact"))
 
   return {

@@ -1,5 +1,4 @@
 export * from "./useAppsSorting"
 export * from "./useAppsSearch"
-export * from "./useAppsPagination"
-export * from "./useAppsFilteringByStatus"
 export * from "./useAppsSustainabilityData"
+export * from "./useAppsFiltering"

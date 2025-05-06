@@ -28,7 +28,6 @@ export function useAppsSustainabilityData(apps: AllApps[]) {
   const [impactMap, setImpactMap] = useState<Map<string, number>>(new Map())
   const [isLoading, setIsLoading] = useState(true)
 
-  // Fetch data for all apps
   useEffect(() => {
     if (!apps.length) {
       setIsLoading(false)
@@ -37,14 +36,11 @@ export function useAppsSustainabilityData(apps: AllApps[]) {
 
     setIsLoading(true)
 
-    // Create new maps to store the data
     const newRewardsMap = new Map<string, number>()
     const newImpactMap = new Map<string, number>()
 
-    // Track how many requests have completed
     let completedRequests = 0
 
-    // Function to check if all requests are complete
     const checkAllComplete = () => {
       if (completedRequests === apps.length) {
         setRewardsMap(newRewardsMap)
@@ -65,9 +61,8 @@ export function useAppsSustainabilityData(apps: AllApps[]) {
           // Store the rewards data
           newRewardsMap.set(app.id, data.data?.[0]?.totalRewardAmount || 0)
 
-          // Calculate and store the total impact
+          // TODO : VALUES SEEMS WEIRD, double check with the index
           const totalImpactValue = calculateTotalImpact(data.data?.[0]?.totalImpact)
-          console.log({ totalImpactValue, app })
           newImpactMap.set(app.id, totalImpactValue)
         })
         .catch(error => {
