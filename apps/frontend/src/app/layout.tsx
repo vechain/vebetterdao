@@ -26,20 +26,21 @@ const datadog_app_token = getEnvDatadogApp()
 const datadog_client_token = getEnvDatadogClient()
 const datadog_env = getEnvDatadogEnv()
 
-datadogRum.init({
-  applicationId: datadog_app_token,
-  clientToken: datadog_client_token,
-  site: "datadoghq.eu",
-  service: "b3tr",
-  env: datadog_env,
-  sessionSampleRate: 100,
-  sessionReplaySampleRate: 20,
-  trackUserInteractions: true,
-  trackResources: true,
-  trackLongTasks: true,
-  defaultPrivacyLevel: "mask-user-input",
-})
-
+if (isProduction) {
+  datadogRum.init({
+    applicationId: datadog_app_token,
+    clientToken: datadog_client_token,
+    site: "datadoghq.eu",
+    service: "b3tr",
+    env: datadog_env,
+    sessionSampleRate: 100,
+    sessionReplaySampleRate: 20,
+    trackUserInteractions: true,
+    trackResources: true,
+    trackLongTasks: true,
+    defaultPrivacyLevel: "mask-user-input",
+  })
+}
 // workaround for "@iconscout/react-unicons and data-new-gr-c-s-check-loaded
 const error = console.error
 console.error = (...args: any) => {

@@ -5,6 +5,8 @@ import {
   useCanUserVote,
   useCurrentAllocationsRoundId,
   useGetDelegatee,
+  useHasVotedInProposals,
+  useIsCreatorOfAnyApp,
   useUserBotSignals,
   useUserDelegation,
   useVot3Balance,
@@ -72,9 +74,15 @@ export const ActionBanner = () => {
   const { data: vot3Balance, isLoading: vot3BalanceLoading } = useVot3Balance(account?.address ?? undefined)
   const { data: xApps } = useXApps({ filterBlacklisted: true })
 
-  const { filteredProposals, isLoading: isLoadingProposals } = useFilteredProposals([ProposalFilter.InThisRound])
+  const { filteredProposals: activeProposals, isLoading: isLoadingProposals } = useFilteredProposals([
+    ProposalFilter.InThisRound,
+  ])
+  const { data: hasVotedInProposals, isLoading: isLoadingHasVotedInProposals } = useHasVotedInProposals(
+    activeProposals?.map(proposal => proposal?.proposalId),
+    account?.address ?? undefined,
+  )
 
-  const hasProposals = filteredProposals?.length > 0 && !isLoadingProposals
+  const hasProposals = activeProposals?.length > 0 && !isLoadingProposals && isLoadingHasVotedInProposals
 
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
@@ -123,7 +131,7 @@ export const ActionBanner = () => {
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnCustomer ||
     latestSubmissionStatus === HumanizedTicketStatus.WaitingOnDev
   const hasCreatorNFT = useHasCreatorNFT(account?.address ?? "") // No loading state
-
+  const { data: hasAlreadySubmitted } = useIsCreatorOfAnyApp(account?.address ?? "")
   // New Apps banner logic
   const newApps = (xApps?.newApps ?? []).length > 0
 
@@ -142,7 +150,7 @@ export const ActionBanner = () => {
   // Creator NFT banners logic
   const showCreatorRejectedBanner =
     !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionRejected
-  const showCreatorApprovedBanner = !!account?.address && hasCreatorNFT
+  const showCreatorApprovedBanner = !!account?.address && hasCreatorNFT && !hasAlreadySubmitted
   const showCreatorUnderReviewBanner =
     !!account?.address && !hasCreatorNFT && !submissionsLoading && isLatestSubmissionOngoing
 
@@ -176,13 +184,15 @@ export const ActionBanner = () => {
   }, [showCreatorRejectedBanner, showCreatorApprovedBanner, showCreatorUnderReviewBanner])
 
   //Custom compute proposal banners
-  const proposalsToVoteBanners = filteredProposals.map(proposal => (
-    <CastProposalVoteBanners
-      key={`cast-vote-in-proposal-${proposal?.proposalId}`}
-      id={proposal?.proposalId}
-      description={proposal?.description}
-    />
-  ))
+  const proposalsToVoteBanners = activeProposals
+    .filter(proposal => hasVotedInProposals && !hasVotedInProposals[proposal.proposalId])
+    .map(proposal => (
+      <CastProposalVoteBanners
+        key={`cast-vote-in-proposal-${proposal?.proposalId}`}
+        id={proposal?.proposalId}
+        description={proposal?.description}
+      />
+    ))
 
   // VeChainKit launch banner
   const { isEnabled: isVechainKitFlagOn } = useFeatureFlag(FeatureFlag.VECHAIN_KIT)

@@ -103,7 +103,7 @@
   "Sort by name": "Sort by name",
   "Sort by score": "Sort by score",
   "Do you have a dApp to join the VeBetter DAO ecosystem?": "Do you have a dApp to join the VeBetter DAO ecosystem?",
-  "Do you have a sustainable application and want to become part of our ecosystem? Join our discord channel and introduce yourself and your app!": "Do you have a sustainable application and want to become part of our ecosystem? Join our discord channel and introduce yourself and your app!",
+  "Do you have a sustainable application and want to become part of our ecosystem? Learn how to get started through our Grant Program. Join our Discord channel and introduce yourself and your app!": "Do you have a sustainable application and want to become part of our ecosystem? Learn how to get started through our Grant Program. Join our Discord channel and introduce yourself and your app!",
   "These apps need to get enough endorsement score to become active": "These apps need to get enough endorsement score to become active",
   "New apps looking for endorsement": "New apps looking for endorsement",
   "Sort by": "Sort by",
@@ -1627,5 +1627,10 @@
   "Supporting proposal...": "Supporting proposal...",
   "Proposal supported!": "Proposal supported!",
   "Error supporting proposal!": "Error supporting proposal!",
-  "Error claiming rewards!": "Error claiming rewards!"
+  "Error claiming rewards!": "Error claiming rewards!",
+  "This address have submitted {{count}} apps.": "This address have submitted {{count}} apps.",
+  "This address have not submitted app.": "This address have not submitted app.",
+  "You have already submitted your app.": "You have already submitted your app.",
+  "Thank you for joining VeBetterDao!": "Thank you for joining VeBetterDao!",
+  "Check submitted apps": "Check submitted apps"
 }
