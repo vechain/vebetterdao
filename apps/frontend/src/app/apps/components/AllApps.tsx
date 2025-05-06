@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   Box,
@@ -10,8 +10,6 @@ import {
   InputLeftElement,
   InputGroup,
   Input,
-  Center,
-  Button,
   Icon,
   IconButton,
   Menu,
@@ -19,24 +17,22 @@ import {
   MenuList,
   MenuItem,
   Text,
+  Center,
+  Button,
+  Checkbox,
+  Flex,
+  MenuDivider,
 } from "@chakra-ui/react"
-import { FilterAppsTypeButton } from "./FilterAppsTypeButton"
 import { XApp, UnendorsedApp, useXNode } from "@/api"
 import { UnendorsedAppCard } from "./UnendorsedAppCard"
 import { AppsEmptyState } from "./AppsEmptyState"
 import { CreatorBanner } from "./CreatorBanner"
-import { UilSortAmountDown, UilCheck, UilSearch } from "@iconscout/react-unicons"
+import { UilSortAmountDown, UilCheck, UilSearch, UilFilter } from "@iconscout/react-unicons"
 
-import {
-  useAppsSorting,
-  useAppsSearch,
-  useAppsFilteringByStatus,
-  useAppsPagination,
-  FILTER_ACTIVE_APPS,
-  FILTER_NEW_APPS,
-  FILTER_GRACE_PERIOD,
-  FILTER_ENDORSEMENT_LOST,
-} from "../hooks"
+import { APP_CATEGORIES, FILTER_ACTIVE_APPS } from "@/types/appDetails"
+
+import { useAppsSorting, useAppsSearch, useAppsFiltering } from "../hooks"
+import { usePagination } from "@/hooks"
 
 type Props = {
   currentActiveApps: XApp[]
@@ -46,7 +42,6 @@ type Props = {
   isXAppsLoading: boolean
 }
 
-const NO_APPS_PER_PAGE = 25
 type LayoutKey = "endorser" | "default"
 
 export const AllApps = ({
@@ -66,14 +61,36 @@ export const AllApps = ({
     endorsementLostApps,
   )
   const { searchQuery, handleSearchChange } = useAppsSearch()
-  const { filter, setFilter, filteredApps } = useAppsFilteringByStatus(sortedApps, sortOption, searchQuery)
-  const { displayAppsRestricted, hasMoreApps, handleLoadMore } = useAppsPagination(filteredApps, NO_APPS_PER_PAGE)
+  const { setStatusFilter, toggleCategoryFilter, filteredApps, statusFilter, statusFilterOptions } = useAppsFiltering(
+    sortedApps,
+    sortOption,
+    searchQuery,
+  )
+
+  const itemsPerPage = 25
+  const { currentItems: displayAppsRestricted, hasMore, loadMore } = usePagination(filteredApps, itemsPerPage)
 
   const layout: LayoutKey = isEndorsingApp ? "endorser" : "default"
-  const showCreatorBanner = useMemo(() => filter === FILTER_ACTIVE_APPS, [filter])
+  const showCreatorBanner = useMemo(() => statusFilter === FILTER_ACTIVE_APPS, [statusFilter])
+
+  // State for selected categories
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+
+  // Handle category selection
+  const handleCategoryChange = (categoryId: string) => {
+    setSelectedCategories((prev: string[]) => {
+      if (prev.includes(categoryId)) {
+        return prev.filter((id: string) => id !== categoryId)
+      } else {
+        return [...prev, categoryId]
+      }
+    })
+
+    toggleCategoryFilter(categoryId)
+  }
 
   const appsSection = useMemo(() => {
-    const isEmpty = !displayAppsRestricted?.length
+    const isEmpty = !displayAppsRestricted?.length // if no apps or no categories selected, show empty state
     return isXAppsLoading || isSorting ? (
       <VStack w="full" spacing={12} h="80vh" justify="center" data-testid="apps-page-loading">
         <Spinner size="lg" />
@@ -95,16 +112,16 @@ export const AllApps = ({
           )}
         </Grid>
 
-        {hasMoreApps && (
+        {hasMore && (
           <Center w="full" py={4}>
-            <Button onClick={handleLoadMore} variant="outline" borderColor="black" borderRadius="full" size="md">
+            <Button onClick={loadMore} variant="outline" borderColor="black" borderRadius="full" size="md">
               {t("Load more")}
             </Button>
           </Center>
         )}
       </VStack>
     )
-  }, [t, displayAppsRestricted, isXAppsLoading, isSorting, showCreatorBanner, layout, hasMoreApps, handleLoadMore])
+  }, [t, displayAppsRestricted, isXAppsLoading, isSorting, showCreatorBanner, layout])
 
   const sortingMenu = () => {
     return (
@@ -152,29 +169,63 @@ export const AllApps = ({
     )
   }
 
+  const filteringMenu = () => {
+    return (
+      <Menu closeOnSelect={false} placement="bottom-end">
+        <MenuButton
+          as={IconButton}
+          isRound={true}
+          aria-label={t("Filters")}
+          icon={<UilFilter />}
+          variant="black"
+          bg={statusFilter !== FILTER_ACTIVE_APPS || selectedCategories.length > 0 ? "black" : "transparent"}
+          color={statusFilter !== FILTER_ACTIVE_APPS || selectedCategories.length > 0 ? "white" : "black"}
+        />
+        <MenuList minW="280px" shadow="lg" borderRadius="md" p={3}>
+          {/* Governance Status Section */}
+          <Text fontWeight="bold" mb={2}>
+            {t("Status")}
+          </Text>
+          <VStack align="start" spacing={2} mb={4} pl={2}>
+            {statusFilterOptions.map(status => (
+              <Checkbox
+                key={status}
+                isChecked={statusFilter === status}
+                onChange={() => setStatusFilter(status)}
+                colorScheme="blackAlpha">
+                {status}
+              </Checkbox>
+            ))}
+          </VStack>
+
+          <MenuDivider />
+
+          {/* Categories Section */}
+          <Text fontWeight="bold" mb={2} mt={2}>
+            {t("Categories")}
+          </Text>
+          <VStack align="start" spacing={2} pl={2}>
+            {APP_CATEGORIES.map(category => (
+              <Checkbox
+                key={category.id}
+                isChecked={selectedCategories.includes(category.id)}
+                onChange={() => handleCategoryChange(category.id)}
+                colorScheme="blackAlpha">
+                <Flex align="center">
+                  <Box w="12px" h="12px" borderRadius="full" bg={category.color} mr={2} />
+                  {category.name}
+                </Flex>
+              </Checkbox>
+            ))}
+          </VStack>
+        </MenuList>
+      </Menu>
+    )
+  }
+
   return (
     <>
       <VStack spacing={8} w="full" data-testid="apps-page">
-        <Box
-          w="full"
-          overflowX="auto"
-          whiteSpace="nowrap"
-          css={{
-            "&::-webkit-scrollbar": { display: "none" },
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-          }}>
-          <HStack spacing={4} minWidth="max-content" justifyContent="flex-start" flexWrap="nowrap">
-            {[FILTER_ACTIVE_APPS, FILTER_NEW_APPS, FILTER_GRACE_PERIOD, FILTER_ENDORSEMENT_LOST].map(filterType => (
-              <FilterAppsTypeButton
-                key={filterType}
-                filterType={filterType}
-                currentFilter={filter}
-                setFilter={setFilter}
-              />
-            ))}
-          </HStack>
-        </Box>
         <HStack w="full" mt={0}>
           <InputGroup w="full">
             <InputLeftElement pointerEvents="none">
@@ -193,6 +244,7 @@ export const AllApps = ({
             />
           </InputGroup>
           {sortingMenu()}
+          {filteringMenu()}
         </HStack>
         {appsSection}
       </VStack>

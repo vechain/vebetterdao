@@ -1614,7 +1614,8 @@
   "Most recently created apps": "Most recently created apps",
   "Alphabetical": "Alphabetical",
   "A to Z by app name": "A to Z by app name",
-  "Highest rewards first": "Highest rewards first",
+  "Highest rewards distributed": "Highest rewards distributed",
   "Impact": "Impact",
-  "Highest impact first": "Highest impact first"
+  "Highest proof of impact": "Highest proof of impact",
+  "Categories": "Categories"
 }
