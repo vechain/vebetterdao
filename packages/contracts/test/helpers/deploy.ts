@@ -414,7 +414,7 @@ export const getOrDeployContractInstances = async ({
   )) as NodeManagement
 
   const galaxyMember = (await deployAndUpgrade(
-    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMember"],
+    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMemberV3", "GalaxyMember"],
     [
       [
         {
@@ -439,9 +439,10 @@ export const getOrDeployContractInstances = async ({
         config.GM_NFT_NODE_TO_FREE_LEVEL,
       ],
       [],
+      [],
     ],
     {
-      versions: [undefined, 2, 3],
+      versions: [undefined, 2, 3, 4],
     },
   )) as GalaxyMember
 

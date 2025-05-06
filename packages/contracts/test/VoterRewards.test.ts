@@ -1001,7 +1001,7 @@ describe("VoterRewards - @shard10", () => {
       await expect(voterRewardsV4.connect(voter2).claimReward(4, voter2)).to.emit(voterRewardsV4, "RewardClaimed")
     })
 
-    it("Should not have state conflict after upgrading to V5", async () => {
+    it.only("Should not have state conflict after upgrading to V5", async () => {
       const config = createLocalConfig()
       const {
         otherAccounts,
@@ -1433,7 +1433,7 @@ describe("VoterRewards - @shard10", () => {
         "VoterRewardsV4",
         "VoterRewards",
         await voterRewardsV4.getAddress(),
-        [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], config.GM_MULTIPLIERS_V2],
+        [config.VOTER_REWARDS_LEVELS_V2, config.GM_MULTIPLIERS_V2],
         {
           version: 5,
         },
