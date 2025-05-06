@@ -270,7 +270,7 @@ describe("VeBetterPassport (Signaling Logic) - @shard8b", function () {
     })
   })
 
-  it.only("should be able to reset signals of a user by app admins", async function () {
+  it("should be able to reset signals of a user by app admins", async function () {
     // Create a new app with otherAccounts[5] as admin
     const newAppAdmin = otherAccounts[5]
     const targetUser = otherAccounts[6]
