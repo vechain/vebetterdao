@@ -53,8 +53,8 @@ export const SnapshotExplainationModal = ({ isOpen, onClose }: Props) => {
 
             <VStack w={"full"} h={"full"} justifyContent={"space-between"} alignItems={"flex-start"} gap={[2, 2, 4]}>
               <HStack w="full" justifyContent="start" p={2} bg={"#f7f7f7"} borderRadius={"9px"}>
-                <Box boxSize={["70px", "100px"]} alignItems={"start"}>
-                  <Image boxSize={["70px", "100px"]} src="/images/b3trvot3-tokens.png" alt="B3TR to VOT3" />
+                <Box display={"flex"} boxSize={["70px", "100px"]} justifyContent={"center"} alignItems={"center"}>
+                  <Image borderWidth={1} height={"auto"} src="/assets/tokens/b3trvot3-tokens.png" alt="B3TR to VOT3" />
                 </Box>
                 <VStack gap={0} alignItems={"start"} p={1}>
                   {renderStep(1)}

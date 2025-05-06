@@ -17,7 +17,7 @@ export const ConfirmationConvertModalContent = ({
   const { t } = useTranslation()
   return (
     <VStack align={"center"} p={6} gap={2}>
-      <Image src="/images/b3trvot3-tokens.png" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
+      <Image src="/assets/tokens/b3trvot3-tokens.png" width={"200px"} alt="B3TR and VOT3 Tokens" />
       {/* <Lottie
         style={{
           pointerEvents: "none",
