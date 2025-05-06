@@ -74,6 +74,7 @@ export type ContractsConfig = {
   GM_PERCENTAGE_OF_TREASURY: number
 
   GM_MULTIPLIERS_V2: number[]
+  VOTER_REWARDS_LEVELS_V2: number[]
 
   GM_NFT_B3TR_REQUIRED_TO_UPGRADE_TO_LEVEL_V2: bigint[]
 }

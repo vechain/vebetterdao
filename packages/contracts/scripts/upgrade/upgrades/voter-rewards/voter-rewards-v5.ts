@@ -17,23 +17,18 @@ async function main() {
   )
 
   const emissionsContract = await ethers.getContractAt("Emissions", config.emissionsContractAddress)
-  console.log(`Emissions contract address: ${config.emissionsContractAddress}`)
   const emissionsVersion = await emissionsContract.version()
   if (parseInt(emissionsVersion) !== 3) {
     console.log(`Emissions version is not 3: ${emissionsVersion}`)
     console.log("Please upgrade Emissions contract first")
     process.exit(1)
   }
-  console.log("About to upgrade VoterRewards contract...")
-  console.log(`VoterRewards contract address: ${config.voterRewardsContractAddress}`)
 
-  console.log(`VoterRewards contract description: ${contractsConfig.VOTER_REWARDS_LEVELS}`)
-  console.log(`GM multipliers: ${contractsConfig.GM_MULTIPLIERS_V2}`)
   const voterRewardsV5 = (await upgradeProxy(
     "VoterRewardsV4",
     "VoterRewards",
     config.voterRewardsContractAddress,
-    [contractsConfig.VOTER_REWARDS_LEVELS, contractsConfig.GM_MULTIPLIERS_V2],
+    [contractsConfig.VOTER_REWARDS_LEVELS_V2, contractsConfig.GM_MULTIPLIERS_V2],
     {
       version: 5,
     },
