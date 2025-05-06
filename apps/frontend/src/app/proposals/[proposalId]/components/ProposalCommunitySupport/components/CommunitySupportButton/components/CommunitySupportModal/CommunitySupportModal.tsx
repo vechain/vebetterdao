@@ -3,7 +3,6 @@ import { SupportInstructions } from "./components/SupportInstructions"
 import { SupportDeposit } from "./components/SupportDeposit"
 import { useProposalVot3Deposit } from "@/hooks/useProposalVot3Deposit"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
-import { useTransactionModal } from "@/providers/TransactionModalProvider"
 import { useSteps } from "@chakra-ui/react"
 import { Step, StepModal } from "@/components/StepModal"
 import { useTranslation } from "react-i18next"
@@ -16,7 +15,6 @@ enum CommunitySupportStep {
 export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { t } = useTranslation()
   const { proposal } = useProposalDetail()
-  const { isTxModalOpen } = useTransactionModal()
   const { activeStep, goToPrevious, goToNext, setActiveStep } = useSteps({
     index: 0,
     count: Object.keys(CommunitySupportStep).length,
@@ -29,7 +27,6 @@ export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; on
 
   const depositMutation = useProposalVot3Deposit({
     proposalId: proposal.id,
-    onSuccess: handleClose,
     transactionModalCustomUI: {
       waitingConfirmation: { title: t("Supporting proposal...") },
       success: { title: t("Proposal supported!") },
@@ -39,9 +36,10 @@ export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; on
 
   const onSubmit = useCallback(
     (amount: string) => {
+      handleClose()
       depositMutation.sendTransaction({ amount, proposalId: proposal.id })
     },
-    [depositMutation, proposal.id],
+    [depositMutation, proposal.id, handleClose],
   )
 
   const steps = useMemo<Step<CommunitySupportStep>[]>(
@@ -62,7 +60,7 @@ export const CommunitySupportModal = ({ isOpen, onClose }: { isOpen: boolean; on
 
   return (
     <StepModal
-      isOpen={isOpen && !isTxModalOpen}
+      isOpen={isOpen}
       onClose={handleClose}
       goToPrevious={goToPrevious}
       goToNext={goToNext}
