@@ -25,7 +25,6 @@ import { Swiper, SwiperClass, SwiperSlide } from "swiper/react"
 
 import { CastVoteBanner } from "./components/CastVoteBanner"
 import { ClaimVotingRewardsBanner } from "./components/ClaimVotingRewardsBanner"
-import { GMPoolRewardsBanner } from "./components/GMPoolRewardsBanner"
 import { CreatorApplicationApprovedBanner } from "./components/CreatorNFTBanner/CreatorApplicationApprovedBanner"
 import { CreatorApplicationRejectedBanner } from "./components/CreatorNFTBanner/CreatorApplicationRejectedBanner"
 import { CreatorApplicationUnderReviewBanner } from "./components/CreatorNFTBanner/CreatorApplicationUnderReviewBanner"
@@ -191,7 +190,6 @@ export const ActionBanner = () => {
 
   const slides = useMemo(() => {
     const bannerComponents = []
-    bannerComponents.push(<GMPoolRewardsBanner key="gm-pool-rewards" />)
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
     if (showClaimB3trBanner)
       bannerComponents.push(<ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} key="claim-b3tr" />)
