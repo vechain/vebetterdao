@@ -9,6 +9,7 @@ import {
   useUserDelegation,
   useVot3Balance,
   useVotingRewards,
+  useGMRewards,
   useXApps,
 } from "@/api"
 import { useCreatorSubmission } from "@/api/contracts/x2EarnCreator/useCreatorSubmission"
@@ -65,6 +66,7 @@ export const ActionBanner = () => {
   const { data: currentRound } = useCurrentAllocationsRoundId()
   const currentRoundId = parseInt(currentRound ?? "0")
   const votingRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
+  const gmRewards = useGMRewards(currentRoundId, account?.address ?? undefined)
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
 
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
@@ -192,7 +194,9 @@ export const ActionBanner = () => {
     const bannerComponents = []
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
     if (showClaimB3trBanner)
-      bannerComponents.push(<ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} key="claim-b3tr" />)
+      bannerComponents.push(
+        <ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} gmRewards={gmRewards} key="claim-b3tr" />,
+      )
     if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
     if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (showVeChainKitLaunchBanner) bannerComponents.push(<VeChainKitLaunchBanner key="vechain-kit-launch" />)
