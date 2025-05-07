@@ -64,11 +64,7 @@ export const AppBalanceCard = () => {
   const { data: isRewardsPoolEnabled } = useIsRewardsPoolEnabled(app?.id ?? "")
   const { data: isPaused } = useIsDistributionPaused(app?.id ?? "")
   const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
-  const isTreasuryAddress = app?.teamWalletAddress === account?.address
-
-  const canTransferFunds = useMemo(() => {
-    return isAppAdmin || isTreasuryAddress
-  }, [isAppAdmin, isTreasuryAddress])
+  const isAppAdminOrTreasuryAddress = isAppAdmin || app?.teamWalletAddress === account?.address
 
   const rewardsPoolColor = useMemo(() => {
     if (isPaused) return "#FCEEF1"
@@ -104,7 +100,7 @@ export const AppBalanceCard = () => {
             <VStack spacing={2}>
               <Button
                 mt={1}
-                isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading || !canTransferFunds}
+                isDisabled={!isAppAdminOrTreasuryAddress}
                 onClick={onOpenDepositOrWithdraw}
                 variant={"primaryAction"}
                 borderRadius={"full"}
@@ -137,7 +133,7 @@ export const AppBalanceCard = () => {
             <VStack alignItems={"flex-end"} spacing={0}>
               <Button
                 mt={1}
-                isDisabled={!canTransferFunds}
+                isDisabled={!isAppAdmin}
                 onClick={onOpenManagementCenter}
                 variant={isPaused ? "dangerFilledTonal" : "primaryAction"}
                 color={isPaused ? "#C84968" : "white"}
@@ -156,12 +152,12 @@ export const AppBalanceCard = () => {
             </Text>
             <Icon as={FaArrowUpRightFromSquare} boxSize="12px" color="#004CFC" cursor="pointer" />
           </HStack>
-          {!canTransferFunds && (
+          {!isAppAdmin && (
             <GenericAlert
               title={t("Access restricted")}
               type="warning"
               isLoading={false}
-              message={t("Only app admin and team wallet address can transfer and manage the rewards pool")}
+              message={t("Only app admin can transfer and manage the rewards pool")}
             />
           )}
         </CardBody>
@@ -176,6 +172,7 @@ export const AppBalanceCard = () => {
             onClose={onCloseDepositOrWithdraw}
             isEnablingRewardsPool={!isRewardsPoolEnabled}
             isPaused={isPaused}
+            isAppAdmin={isAppAdmin}
           />
           <ManagementCenterModal
             appId={app.id}
