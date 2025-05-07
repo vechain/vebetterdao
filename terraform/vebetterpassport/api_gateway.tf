@@ -32,7 +32,6 @@ resource "aws_api_gateway_method" "reset_user_signals_method" {
 
 # API Gateway Integration
 resource "aws_api_gateway_integration" "reset_user_signals_integration" {
-  cache_namespace         = "si8suu"
   connection_type         = "INTERNET"
   content_handling        = "CONVERT_TO_TEXT"
   http_method             = "POST"

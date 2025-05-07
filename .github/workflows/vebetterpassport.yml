@@ -119,11 +119,10 @@ jobs:
             -out=vebetterpassport.tfplan \
             -detailed-exitcode
 
-      - name: Check for plan changes
+      - name: Check for changes
         id: check_changes
         run: |
-          # Check for the plan file's existence instead of relying on exit codes
-          if [ -f "terraform/vebetterpassport/vebetterpassport.tfplan" ]; then
+          if [ ${{ steps.plan.outcome }} == 'success' ] && [ ${{ steps.plan.outputs.exitcode }} == 2 ]; then
             echo "Changes detected"
             echo "plan_changes_detected=true" >> $GITHUB_OUTPUT
           else
