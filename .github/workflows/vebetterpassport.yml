@@ -140,9 +140,11 @@ jobs:
           path: terraform/vebetterpassport/vebetterpassport.tfplan
           retention-days: 5
       
-      # - name: Terraform Apply
-      #   working-directory: terraform/vebetterpassport
-      #   env:
-      #     MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
-      #   run: |
-      #     terraform apply -auto-approve vebetterpassport.tfplan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        id: apply
+        working-directory: terraform/vebetterpassport
+        env:
+          MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
+        run: terraform apply -auto-approve
