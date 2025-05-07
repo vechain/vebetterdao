@@ -18,7 +18,7 @@ export const LoadingModalContent = ({
 }: LoadingModalContentProps) => {
   const { t } = useTranslation()
   return (
-    <VStack align={"center"} p={0} m={0}>
+    <VStack align={"center"} textAlign={"center"} p={0} m={0}>
       <Lottie
         style={{
           pointerEvents: "none",
