@@ -82,7 +82,7 @@ export const ActionBanner = () => {
     account?.address ?? undefined,
   )
 
-  const hasProposals = activeProposals?.length > 0 && !isLoadingProposals && isLoadingHasVotedInProposals
+  const hasProposals = activeProposals?.length > 0 && !isLoadingProposals && !isLoadingHasVotedInProposals
 
   const { isEntity, isLoading: isLoadingAccountLinking } = useAccountLinking()
   const { isDelegator, isLoading: isLoadingDelegator } = useUserDelegation()
