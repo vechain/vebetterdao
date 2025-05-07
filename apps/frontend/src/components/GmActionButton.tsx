@@ -111,7 +111,6 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
     (action: string) => {
       switch (action) {
         case "UPGRADE_GM":
-          console.log("Opening upgrade GM modal")
           resetTransactionModal()
           onOpenUpgradeGMModal()
           AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.UPGRADING_NOW))
@@ -128,7 +127,7 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
           break
       }
     },
-    [onOpenAttachGMModal, onOpenUpgradeGMModal],
+    [onOpenAttachGMModal, onOpenUpgradeGMModal, resetTransactionModal],
   )
 
   // Button rendering logic
