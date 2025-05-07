@@ -20,12 +20,16 @@ import { useWallet } from "@vechain/vechain-kit"
 import { EditAppRewardDistributors } from "./components/EditAppRewardDistributors"
 import { useAccountPermissions } from "@/api/contracts/account"
 import { EditAppCreatorNFT } from "./components/EditAppCreatorNFT"
+import { useCurrentAppSignalers } from "../../../hooks/useCurrentAppSignalers"
+import { EditAppSignalers } from "./components/EditAppSignalers"
+
 export type AdminAppForm = {
   adminAddress: string
   teamWalletAddress: string
   moderators: string[]
   creators: string[]
   distributors: string[]
+  signalers: string[]
 }
 
 export const AdminAppPageContent = () => {
@@ -39,6 +43,7 @@ export const AdminAppPageContent = () => {
   const { moderators, isLoading: moderatorsLoading } = useCurrentAppModerators()
   const { creators, isLoading: creatorsLoading } = useCurrentAppCreators()
   const { distributors, isLoading: distributorsLoading } = useCurrentAppRewardDistributors()
+  const { activeSignalers: signalers, isLoading: signalersLoading } = useCurrentAppSignalers()
   const { app, isAppInfoLoading: appLoading } = useCurrentAppInfo()
   const { appMetadata } = useCurrentAppMetadata()
 
@@ -52,9 +57,11 @@ export const AdminAppPageContent = () => {
     adminAddress: "",
     teamWalletAddress: "",
     distributors: [] as string[],
+    signalers: [] as string[],
   })
 
-  const isAddressesLoading = adminLoading || appLoading || moderatorsLoading || creatorsLoading || distributorsLoading
+  const isAddressesLoading =
+    adminLoading || appLoading || moderatorsLoading || creatorsLoading || distributorsLoading || signalersLoading
 
   const form = useForm<AdminAppForm>({
     defaultValues: {
@@ -63,6 +70,7 @@ export const AdminAppPageContent = () => {
       adminAddress: "",
       teamWalletAddress: "",
       distributors: [],
+      signalers: [],
     },
   })
 
@@ -75,24 +83,26 @@ export const AdminAppPageContent = () => {
       adminAddress: admin || "",
       teamWalletAddress: app?.teamWalletAddress || "",
       distributors: [...(distributors || [])],
+      signalers: [...(signalers || [])],
     }
     onchainAddresses.current = newOnchainAddresses
     // Resetting the form with the most updated values onchain
     form.reset(newOnchainAddresses)
-  }, [admin, app?.teamWalletAddress, creators, distributors, form, moderators])
+  }, [admin, app?.teamWalletAddress, creators, distributors, form, moderators, signalers])
 
   useEffect(() => {
     if (!isAddressesLoading && admin && app?.teamWalletAddress) {
       syncForm()
     }
-  }, [admin, app?.teamWalletAddress, syncForm, moderators, creators, distributors, isAddressesLoading])
+  }, [admin, app?.teamWalletAddress, syncForm, moderators, creators, distributors, signalers, isAddressesLoading])
 
-  const [adminAddress, teamWalletAddress, newModerators, newDistributors, newCreators] = form.watch([
+  const [adminAddress, teamWalletAddress, newModerators, newDistributors, newCreators, newSignalers] = form.watch([
     "adminAddress",
     "teamWalletAddress",
     "moderators",
     "distributors",
     "creators",
+    "signalers",
   ])
 
   const haveAddressesChanged = (currentAddresses: string[], newAddresses: string[]) => {
@@ -114,13 +124,15 @@ export const AdminAppPageContent = () => {
   const isModeratorsChanged = haveAddressesChanged(onchainAddresses.current.moderators, newModerators)
   const isDistributorsChanged = haveAddressesChanged(onchainAddresses.current.distributors, newDistributors)
   const isCreatorsChanged = haveAddressesChanged(onchainAddresses.current.creators, newCreators)
+  const isSignalersChanged = haveAddressesChanged(onchainAddresses.current.signalers, newSignalers)
 
   const hasUnsavedChanges =
     isAdminAddressChanged ||
     isTeamWalletAddressChanged ||
     isModeratorsChanged ||
     isDistributorsChanged ||
-    isCreatorsChanged
+    isCreatorsChanged ||
+    isSignalersChanged
   const disableSaveButton = !hasUnsavedChanges
 
   const handleSuccess = useCallback(() => {
@@ -130,9 +142,10 @@ export const AdminAppPageContent = () => {
       moderators: [...newModerators],
       creators: [...newCreators],
       distributors: [...newDistributors],
+      signalers: [...newSignalers],
       teamWalletAddress: teamWalletAddress,
     }
-  }, [adminAddress, newModerators, newCreators, newDistributors, teamWalletAddress])
+  }, [adminAddress, newModerators, newCreators, newDistributors, newSignalers, teamWalletAddress])
 
   const updateMutation = useUpdateAppAdminInfo({
     appId: app?.id || "",
@@ -155,6 +168,9 @@ export const AdminAppPageContent = () => {
       const creatorsToBeAdded = getAddressesToAdd(data.creators, onchainAddresses.current.creators)
       const creatorsToBeRemoved = getAddressesToRemove(onchainAddresses.current.creators, data.creators)
 
+      const signalersToBeAdded = getAddressesToAdd(data.signalers, onchainAddresses.current.signalers)
+      const signalersToBeRemoved = getAddressesToRemove(onchainAddresses.current.signalers, data.signalers)
+
       updateMutation.sendTransaction({
         appId: app?.id || "",
         adminAddress: isAdminAddressChanged ? data.adminAddress : undefined,
@@ -165,6 +181,8 @@ export const AdminAppPageContent = () => {
         distributorsToBeRemoved,
         creatorsToBeAdded,
         creatorsToBeRemoved,
+        signalersToBeAdded,
+        signalersToBeRemoved,
       })
     },
     [updateMutation, app?.id, isAdminAddressChanged, isTeamWalletAddressChanged],
@@ -206,6 +224,8 @@ export const AdminAppPageContent = () => {
           <EditAppCreatorNFT form={form} />
           <Divider />
           <EditAppModerators form={form} />
+          <Divider />
+          <EditAppSignalers form={form} />
           <Divider />
           <EditAppAddresses
             form={form}
