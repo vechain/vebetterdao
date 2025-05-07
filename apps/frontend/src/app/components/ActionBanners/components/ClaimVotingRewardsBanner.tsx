@@ -34,7 +34,7 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery }: Props) => {
       titleColor="#3A5798"
       description={t("Congratulations! You have B3TR to claim for casting your vote in governance.")}
       descriptionColor="#0C2D75"
-      logoSrc="/images/claim-b3tr-icon.png"
+      logoSrc="/assets/icons/claim-b3tr-icon.webp"
       backgroundColor="#C8DDFF"
       backgroundImageSrc="/assets/backgrounds/cloud-background.webp"
       buttonLabel={t("Claim your {{b3trToClaim}} B3TR", {
