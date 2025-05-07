@@ -84,7 +84,11 @@ jobs:
 
       - name: Terraform Init
         working-directory: terraform/vebetterpassport
-        run: terraform init
+        run: |
+          WORKSPACE="${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workspace || 'dev' }}"
+          BUCKET="b3tr-terraform-state-${WORKSPACE}"
+          
+          terraform init -backend-config="bucket=${BUCKET}"
 
       - name: Terraform Workspace
         working-directory: terraform/vebetterpassport
@@ -114,7 +118,6 @@ jobs:
             -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}" \
             -out=vebetterpassport.tfplan \
             -detailed-exitcode
-          echo "::set-output name=terraform_exit_code::$?"
 
       - name: Check for plan changes
         id: check_changes

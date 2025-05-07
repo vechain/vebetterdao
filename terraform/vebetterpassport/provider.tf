@@ -10,7 +10,6 @@ terraform {
 
   required_version = ">= 1.0.0"
   backend "s3" {
-    bucket               = "b3tr-terraform-state-dev"
     key                  = "b3tr-vebetterpassport.tfstate"
     region               = "eu-west-1"
     workspace_key_prefix = "workspaces"
