@@ -1,4 +1,4 @@
-import { Heading, Text, VStack, Link, Image, HStack, Flex } from "@chakra-ui/react"
+import { Heading, Text, VStack, Link, Image, HStack, Flex, Button } from "@chakra-ui/react"
 import { ShareButtons } from "../../ShareButtons"
 import { ReactNode, useState } from "react"
 import { motion } from "framer-motion"
@@ -13,6 +13,7 @@ export type SuccessModalContentProps = {
   socialDescriptionEncoded?: string
   txId?: string
   isSuccessBeenTrack?: boolean
+  onClose: () => void
 }
 
 const okHandVariants = {
@@ -50,6 +51,7 @@ export const SuccessModalContent = ({
   socialDescriptionEncoded = "%F0%9F%8C%B1%20Excited%20to%20contribute%20to%20a%20%23Better%20future%20with%20my%20latest%20activity%20on%20%23VeBetterDAO%21%0A%0AVisit%20https%3A%2F%2Fvebetterdao.org%20and%20start%20making%20a%20difference%20today%21%20%F0%9F%92%AB%0A%0A%23VeBetterDAO%20%23Vechain",
   txId,
   isSuccessBeenTrack,
+  onClose,
 }: SuccessModalContentProps) => {
   const { t } = useTranslation()
 
@@ -97,6 +99,11 @@ export const SuccessModalContent = ({
           </HStack>
         </Link>
       </Flex>
+      <HStack w={"full"} alignItems={"center"} justifyContent={"center"} gap={2} mt={4}>
+        <Button variant={"primaryAction"} w={"50%"} py={6} onClick={onClose}>
+          {t("Done")}
+        </Button>
+      </HStack>
     </VStack>
   )
 }

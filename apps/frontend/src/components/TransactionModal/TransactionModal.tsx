@@ -60,6 +60,7 @@ export const TransactionModal = () => {
           {...getCustomUIProps("success")}
           txId={transactionModalState?.txId}
           showSocialButtons={true}
+          onClose={onClose}
         />
       ),
       ready: (
@@ -75,11 +76,12 @@ export const TransactionModal = () => {
   }, [
     t,
     getCustomUIProps,
+    transactionModalState?.error?.reason,
     transactionModalState?.tryAgain,
     transactionModalState?.txId,
     transactionModalState?.status,
     handleTryAgain,
-    transactionModalState?.error?.reason,
+    onClose,
   ])
 
   return (
