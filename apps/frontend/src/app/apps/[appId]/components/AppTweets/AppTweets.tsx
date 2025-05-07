@@ -51,7 +51,6 @@ export const AppTweets = () => {
   const updateAppDetailsMutation = useUpdateAppDetails({
     appId,
     onSuccess: () => {
-      console.log("onSuccess updateAppDetailsMutation parent")
       handleClose()
       onNewTweetModalClose()
       updateAppDetailsMutation.resetStatus()
