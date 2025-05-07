@@ -21,9 +21,9 @@ export const CreatorApplicationApprovedBanner = () => {
       titleColor="#3A5798"
       description={description}
       descriptionColor="#0C2D75"
-      logoSrc="/images/creator-nft.png"
+      logoSrc="/assets/images/creator-nft.webp"
       backgroundColor="#C8DDFF"
-      backgroundImageSrc="/images/cloud-background.png"
+      backgroundImageSrc="/assets/backgrounds/cloud-background.webp"
       buttonLabel={doAction}
       onButtonClick={navigateToSubmitAppForm}
       buttonVariant="primaryAction"

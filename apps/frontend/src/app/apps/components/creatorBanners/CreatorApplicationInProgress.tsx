@@ -21,7 +21,7 @@ export const CreatorApplicationInProgress = () => {
           <Stack direction="row" h={"full"} align="center">
             <Box w={"120px"} h={"full"} overflow="hidden" position="relative" borderRadius="9px">
               <Image
-                src="/images/mascot/mascot-welcoming.png"
+                src="/assets/mascot/mascot-welcoming.webp"
                 alt="mascot-welcoming"
                 position="absolute"
                 top="30%"

@@ -86,7 +86,7 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
           {t("Your contribution")}
         </Text>
         <HStack>
-          <Image h="36px" w="36px" src="/images/vot3-token.png" alt="vot3-token" />
+          <Image h="36px" w="36px" src="/assets/tokens/vot3-token.webp" alt="vot3-token" />
           <Input
             h="50px"
             placeholder="0"

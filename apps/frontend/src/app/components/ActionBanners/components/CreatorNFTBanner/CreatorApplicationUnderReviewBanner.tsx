@@ -8,9 +8,9 @@ export const CreatorApplicationUnderReviewBanner = () => {
     <GenericBanner
       title={title}
       description={description}
-      logoSrc="/images/creator-nft.png"
+      logoSrc="/assets/images/creator-nft.webp"
       backgroundColor="#FFE6A1"
-      backgroundImageSrc="/images/cloud-background-orange.png"
+      backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
     />
   )
 }

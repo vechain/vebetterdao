@@ -42,7 +42,7 @@ export const MultipleXNodesInfoModal = ({ modal }: Props) => {
               p={4}
               bg="#FAFAFA"
               borderRadius="xl"
-              backgroundImage={"/images/xnode-page-background.png"}>
+              backgroundImage={"/assets/backgrounds/xnode-page-background.webp"}>
               <HStack align="stretch" gap={6}>
                 <Image
                   src={NodeStrengthLevelToImage[Number(node.nodeLevel)] as string}

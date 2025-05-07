@@ -154,7 +154,7 @@ export const GmNFTPageHeader = () => {
   return (
     <Card>
       <Image
-        src={"/images/nft-page-background.png"}
+        src={"/assets/backgrounds/nft-page-background.webp"}
         alt="gm-nft-header"
         position={"absolute"}
         w="100%"

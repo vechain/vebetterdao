@@ -19,7 +19,7 @@ export const JoinB3TRAppsBanner = () => {
       color="black"
       overflow={"hidden"}
       borderRadius={"12px"}
-      bgImage="url('/images/community-green-blob.png')"
+      bgImage="url('/assets/backgrounds/community-green-blob.webp')"
       bgPosition="center"
       bgSize="full">
       <HStack justifyContent={{ base: "center", lg: "space-between" }} w="full">
@@ -30,7 +30,7 @@ export const JoinB3TRAppsBanner = () => {
           w={{ base: "full", md: "50%" }}>
           {isMobile && (
             <Image
-              src="/images/mascot/mascot-welcoming-left-head.png"
+              src="/assets/mascot/mascot-welcoming-left-head.webp"
               alt="mascot-welcoming-head"
               width="100%"
               boxSize="100px"
@@ -53,7 +53,7 @@ export const JoinB3TRAppsBanner = () => {
         {!isMobile && (
           <Image
             alignSelf={"flex-end"}
-            src="/images/mascot/mascot-welcoming.png"
+            src="/assets/mascot/mascot-welcoming.webp"
             alt="mascot-welcoming"
             boxSize="200px"
             overflow={"hidden"}

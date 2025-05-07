@@ -44,7 +44,7 @@ export const XNodePageHeader = () => {
   return (
     <Card>
       <Image
-        src={"/images/xnode-page-background.png"}
+        src={"/assets/backgrounds/xnode-page-background.webp"}
         alt="gm-nft-header"
         position={"absolute"}
         w="100%"

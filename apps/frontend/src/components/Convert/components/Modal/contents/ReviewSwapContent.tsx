@@ -15,7 +15,7 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
 
   return (
     <VStack align={"center"} p={0} gap={2}>
-      <Image src="/images/b3trvot3-tokens.png" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
+      <Image src="/assets/tokens/b3trvot3-tokens.webp" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
 
       <Text fontSize={16} fontWeight={400} textAlign={"center"}>
         {t("By confirming the operation in your wallet, you will complete the conversion")}
@@ -42,7 +42,7 @@ export const ReviewSwapContent = ({ b3trBalanceAfterSwap, vot3BalanceAfterSwap, 
             </Text>
 
             <HStack>
-              <Image src={"/images/logo/vot3_logo_dark.svg"} boxSize={"20px"} alt="VOT3 Icon" />
+              <Image src="/assets/tokens/vot3-token.webp" boxSize={"20px"} alt="VOT3 Icon" />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
                 {compactFormatter.format(Number(vot3BalanceAfterSwap))}
               </Text>

@@ -140,7 +140,7 @@ export const AllocationVoterRewards = ({ roundId, hasVoted }: Props) => {
       mt={{ base: 0, md: 8 }}
       position={"relative"}
       overflow={"clip"}>
-      <Image src="/images/voter-reward.png" alt="Voter rewards" pos="absolute" right={0} top={0} zIndex={1} />
+      <Image src="/assets/icons/voter-reward.webp" alt="Voter rewards" pos="absolute" right={0} top={0} zIndex={1} />
       <VStack alignItems={"flex-start"}>
         <Image src="/images/gift.svg" alt="Allocation voter rewards" boxSize={"72px"} />
         <Text fontSize={24} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>

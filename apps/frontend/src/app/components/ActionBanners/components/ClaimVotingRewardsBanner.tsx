@@ -36,7 +36,7 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery }: Props) => {
       descriptionColor="#0C2D75"
       logoSrc="/images/claim-b3tr-icon.png"
       backgroundColor="#C8DDFF"
-      backgroundImageSrc="/images/cloud-background.png"
+      backgroundImageSrc="/assets/backgrounds/cloud-background.webp"
       buttonLabel={t("Claim your {{b3trToClaim}} B3TR", {
         b3trToClaim: compactFormatter.format(Number(roundsRewardsQuery.data?.totalFormatted ?? 0)),
       })}

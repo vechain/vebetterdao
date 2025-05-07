@@ -84,10 +84,11 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "VeBetter Passport": {
     name: "vebetter-passport",
     configAddressField: "veBetterPassportContractAddress",
-    versions: ["v2", "v3"],
+    versions: ["v2", "v3", "v4"],
     descriptions: {
       v2: "Prevent delegation of passports to entities",
       v3: "Add GM level to personhood check",
+      v4: "Add RESET_SIGNALER_ROLE, improve signaling management, and remove redundant app signal counters",
     },
   },
   "Galaxy Member": {
