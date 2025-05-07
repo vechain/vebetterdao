@@ -23,7 +23,7 @@ import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) => {
   const { t } = useTranslation()
   const router = useRouter()
-  const { resetModal: resetTransactionModal } = useTransactionModal()
+  const { resetModal: resetTransactionModal, onClose: closeTransactionModal } = useTransactionModal()
 
   // Wallet and user data
   const { account } = useWallet()
@@ -68,7 +68,8 @@ export const GmActionButton = ({ buttonProps }: { buttonProps: ButtonProps }) =>
   // Mint NFT handlers
   const handleMintSuccess = useCallback(() => {
     onOpenMintNftModal()
-  }, [onOpenMintNftModal])
+    closeTransactionModal()
+  }, [onOpenMintNftModal, closeTransactionModal])
 
   const { sendTransaction: freeMint, resetStatus: resetFreeMintStatus } = useMintNFT({
     transactionModalCustomUI: {
