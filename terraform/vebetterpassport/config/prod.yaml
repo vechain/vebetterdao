@@ -1,7 +1,7 @@
 ---
 # AWS Configuration
 aws_region: eu-west-1
-aws_account_id: "placeholder"
+aws_account_id: "851725442887"
 environment: "mainnet"
 
 # Lambda Configuration
