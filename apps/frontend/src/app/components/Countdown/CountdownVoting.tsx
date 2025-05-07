@@ -59,7 +59,7 @@ export const CountdownVoting = ({ onOpen }: CountdownProps) => {
         const isNearEnd = days === 0 && hours <= 1
         const isNearEndText = isNearEnd ? "#C84968" : "#004CFC"
         const isNearEndBg = isNearEnd ? "#FCEEF1" : "#E5EEFF"
-        const isNearEndIcon = isNearEnd ? "/images/clock-red.svg" : "/images/clock-blue.svg"
+        const isNearEndIcon = isNearEnd ? "/assets/icons/clock-red.svg" : "/assets/icons/clock-blue.svg"
 
         return (
           <HStack

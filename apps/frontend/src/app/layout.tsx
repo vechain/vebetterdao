@@ -67,11 +67,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       }}>
       <head>
         <title>{t("VeBetterDAO")}</title>
-        <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance." />
+        <meta name="description" content="Vote for your favourite sustainability Apps in VeBetterDAO's governance." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" href="/images/favicon.png" />
-        <link rel="apple-touch-icon" sizes="57x57" href="/images/favicon.png" />
-        <meta name="msapplication-TileImage" content="/images/favicon.png" />
+        {/* Favicons */}
+        <meta name="apple-mobile-web-app-title" content="VeBetterDAO" />
 
         {/* Open Graph Metadata */}
         <meta name="title" property="og:title" content="VeBetterDAO" />
@@ -80,10 +79,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta
           name="description"
           property="og:description"
-          content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance."
+          content="Vote for your favourite sustainability Apps in VeBetterDAO's governance."
         />
         <meta property="og:site_name" content="VeBetterDAO" />
-        <meta name="image" property="og:image" content={`${getConfig().basePath}/images/social_image.png`} />
+        <meta name="image" property="og:image" content={`${getConfig().basePath}/assets/images/social_image.webp`} />
         <meta property="og:image:type" content="image/png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -94,9 +93,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="twitter:title" content="VeBetterDAO" />
         <meta
           name="twitter:description"
-          content="Vote for your favourite sustainability Apps in VeBetterDAO’s governance."
+          content="Vote for your favourite sustainability Apps in VeBetterDAO's governance."
         />
-        <meta name="twitter:image" content={`${getConfig().basePath}/images/social_image.png`} />
+        <meta name="twitter:image" content={`${getConfig().basePath}/assets/images/social_image.webp`} />
         <meta name="twitter:image:alt" content="VeBetterDAO" />
       </head>
       <body>

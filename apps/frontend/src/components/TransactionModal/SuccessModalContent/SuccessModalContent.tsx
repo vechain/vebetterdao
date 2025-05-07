@@ -1,6 +1,6 @@
 import { Heading, Text, VStack, ModalCloseButton, Link, Image, HStack } from "@chakra-ui/react"
 import Lottie from "react-lottie"
-import successAnimation from "./success.json"
+import successAnimation from "../../../../public/assets/animations/success.json"
 import { ShareButtons } from "../../ShareButtons"
 import { ReactNode, useState } from "react"
 import { ModalAnimation } from "../ModalAnimation"

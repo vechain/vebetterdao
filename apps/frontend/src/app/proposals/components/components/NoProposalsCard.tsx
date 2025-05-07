@@ -20,7 +20,7 @@ export const NoProposalsCard = ({ buttonText, onClick, description }: Props) => 
       position={"relative"}
       overflow={"clip"}>
       <Image
-        src="/images/blue-cloud-bg-card.png"
+        src="/assets/backgrounds/blue-cloud-bg-card.webp"
         position={"absolute"}
         alt="blue-cloud-bg"
         right={{ base: -140, md: 0 }}

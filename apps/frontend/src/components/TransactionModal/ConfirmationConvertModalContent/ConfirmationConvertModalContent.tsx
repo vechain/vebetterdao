@@ -17,7 +17,7 @@ export const ConfirmationConvertModalContent = ({
   const { t } = useTranslation()
   return (
     <VStack align={"center"} p={6} gap={2}>
-      <Image src="/images/b3trvot3-tokens.png" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
+      <Image src="/assets/tokens/b3trvot3-tokens.webp" boxSize={"200px"} alt="B3TR and VOT3 Tokens" />
       {/* <Lottie
         style={{
           pointerEvents: "none",
@@ -62,7 +62,7 @@ export const ConfirmationConvertModalContent = ({
             </Text>
 
             <HStack>
-              <Image src={"/images/logo/vot3_logo_dark.svg"} boxSize={"20px"} alt="VOT3 Icon" />
+              <Image src={"/assets/logos/vot3_logo_dark.svg"} boxSize={"20px"} alt="VOT3 Icon" />
               <Text fontSize={20} fontWeight={700} style={{ fontFamily: "Instrument Sans, sans-serif" }}>
                 {compactFormatter.format(Number(vot3BalanceAfter))}
               </Text>

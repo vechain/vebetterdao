@@ -8,7 +8,7 @@ export const CoinsFlipModalContent = () => {
   const { t } = useTranslation()
   return (
     <VStack alignItems={"center"} p={6}>
-      <MotionImage {...coinFlipAnimation} src="/images/b3tr-token-3d.png" boxSize={200} />
+      <MotionImage {...coinFlipAnimation} src="/assets/tokens/b3tr-token-3d.webp" boxSize={200} />
       <Text fontWeight={400} lineHeight="22px" fontSize={{ base: "16px", md: "16px" }} align={"center"}>
         {t("Please confirm the transaction in your wallet")}
       </Text>

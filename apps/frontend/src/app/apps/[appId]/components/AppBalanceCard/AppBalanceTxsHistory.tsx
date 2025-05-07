@@ -70,7 +70,7 @@ export const AppBalanceTxsHistory = ({ appId, isOpen, onClose }: Props) => {
     if (filteredTransactions.length === 0) {
       return (
         <VStack py={100} textAlign="center" w="full">
-          <Image src="/images/nothing-to-show-endorsement.svg" alt="No transaction" />
+          <Image src="/assets/icons/nothing-to-show-endorsement.svg" alt="No transaction" />
           <Text color="#757575">{t("No transactions found for the selected type")}</Text>
         </VStack>
       )

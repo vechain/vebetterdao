@@ -77,7 +77,7 @@ export const GmNFTAndNodeCard = () => {
       color="white"
       position="relative"
       overflow={"hidden"}
-      bgImage="url('/images/cloud-background.png')"
+      bgImage="url('/assets/backgrounds/cloud-background.webp')"
       bgSize="cover"
       bgPosition="center"
       bgRepeat="no-repeat">

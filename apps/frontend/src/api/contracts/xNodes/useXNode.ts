@@ -68,8 +68,8 @@ export const useXNode = (profile?: string): XNodeData => {
     ? {
         id: firstNode.nodeId,
         level: Number(firstNode.nodeLevel),
-        image: NodeStrengthLevelToImage[Number(firstNode.nodeLevel)] as string,
-        name: allNodeStrengthLevelToName[Number(firstNode.nodeLevel)] as string,
+        image: NodeStrengthLevelToImage[String(firstNode.nodeLevel)],
+        name: allNodeStrengthLevelToName[String(firstNode.nodeLevel)],
       }
     : undefined
 

@@ -6,21 +6,21 @@ import { useTranslation } from "react-i18next"
 
 const Steps: StepCardProps[] = [
   {
-    stepImageSrc: "/images/sign.svg",
+    stepImageSrc: "/assets/icons/sign.svg",
     stepNumber: 1,
     stepTitle: "App submition",
     stepDescription:
       "Submit your app into the ecosystem with all the necessary information, including logo, creator bio,  and social media links.",
   },
   {
-    stepImageSrc: "/images/handshake.svg",
+    stepImageSrc: "/assets/icons/handshake.svg",
     stepNumber: 2,
     stepTitle: "Endorsement",
     stepDescription:
       "X Node Holders will use their NFTs to endorse your app. Once it reaches 100 points, it becomes eligible for allocations.",
   },
   {
-    stepImageSrc: "/images/vote.svg",
+    stepImageSrc: "/assets/icons/vote.svg",
     stepNumber: 3,
     stepTitle: "Allocation voting",
     stepDescription:
