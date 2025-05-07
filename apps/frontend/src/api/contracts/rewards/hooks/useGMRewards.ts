@@ -1,3 +1,4 @@
+import { ethers } from "ethers"
 import { getCallKey, useCall } from "@/hooks"
 import { getConfig } from "@repo/config"
 import { VoterRewards__factory } from "@repo/contracts/typechain-types"
@@ -26,7 +27,7 @@ export const useGMRewards = (currentRoundId: number, voter?: string) => {
     contractAddress: voterRewardsContractAddress,
     method,
     args: [currentRoundId, voter],
-    enabled: !!voter,
+    enabled: !!voter && !!currentRoundId,
   })
-  return gmRewards
+  return gmRewards ? Number(ethers.formatEther(gmRewards)) : 0
 }

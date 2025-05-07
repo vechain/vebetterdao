@@ -209,6 +209,7 @@ export const ActionBanner = () => {
     CantVoteBanner,
     showClaimB3trBanner,
     votingRewardsQuery,
+    gmRewards,
     showCastVoteBanner,
     showCastVoteInProposalBanners,
     proposalsToVoteBanners,
