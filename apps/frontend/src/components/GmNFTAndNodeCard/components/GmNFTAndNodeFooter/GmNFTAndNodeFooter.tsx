@@ -18,7 +18,7 @@ export const GmNFTAndNodeFooter = () => {
   const { account } = useWallet()
   const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
   const {
-    nextLevelGMRewardMultiplier,
+    nextLevelGMRewardShareInGMPool,
     isGMOwned,
     b3trToUpgradeGMToNextLevel,
     missingB3trToUpgrade,
@@ -106,8 +106,8 @@ export const GmNFTAndNodeFooter = () => {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
-            {t("You can upgrade and get {{rewardMultiplier}}x on your rewards for", {
-              rewardMultiplier: nextLevelGMRewardMultiplier,
+            {t("You can upgrade and get up to {{rewardMultiplier}}% of GM pool rewards for", {
+              rewardMultiplier: nextLevelGMRewardShareInGMPool,
             })}
           </Text>{" "}
           <Text as="span" fontSize={"16px"} color="#B1F16C">
@@ -142,7 +142,7 @@ export const GmNFTAndNodeFooter = () => {
     isXNodeAttachedToGM,
     isXNodeHolder,
     missingB3trToUpgrade,
-    nextLevelGMRewardMultiplier,
+    nextLevelGMRewardShareInGMPool,
     t,
     isXNodeDelegator,
   ])

@@ -197,7 +197,7 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                             {"x"}
                           </Text>
                           <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
-                            {t("Voting reward multiplier").toLowerCase()}
+                            {t("Galaxy reward weight").toLowerCase()}
                           </Text>
                         </HStack>
                       </FeatureFlagWrapper>

@@ -93,7 +93,7 @@ export const GmNFTCard = ({
               {"x"}
             </Text>
             <Text fontSize="xs" fontWeight={400} noOfLines={1}>
-              {t("Voting reward multiplier")}
+              {t("Galaxy reward weight")}
             </Text>
           </HStack>
         </FeatureFlagWrapper>

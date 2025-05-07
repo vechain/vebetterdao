@@ -14,6 +14,7 @@ type GenericBannerProps = {
   buttonVariant?: "outline" | "primaryAction"
   buttonIcon?: React.ReactElement
   buttonIconPosition?: "left" | "right"
+  disabled?: boolean
 }
 
 export const GenericBanner: React.FC<GenericBannerProps> = ({
@@ -29,6 +30,7 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
   buttonVariant = "outline",
   buttonIcon,
   buttonIconPosition = "right",
+  disabled = false,
 }) => {
   const [isVerySmallMobile] = useMediaQuery("(max-height: 667px)")
   const isOutlineBtn = buttonVariant === "outline"
@@ -86,9 +88,10 @@ export const GenericBanner: React.FC<GenericBannerProps> = ({
                 </Text>
                 {descriptionElement}
               </VStack>
-              {hasButton && (
+              {hasButton && !disabled && (
                 <Button
                   onClick={onButtonClick}
+                  isDisabled={disabled}
                   borderRadius="full"
                   variant={buttonVariant === "outline" ? "outline" : "primaryAction"}
                   {...(isOutlineBtn && {

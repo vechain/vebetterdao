@@ -7,6 +7,7 @@ import { useNFTMetadataUri } from "./useNFTMetadataUri"
 import { useIpfsImage, useIpfsMetadata } from "@/api/ipfs"
 import { useLevelOfToken } from "./useLevelOfToken"
 import { useLevelMultiplier } from "./useLevelMultiplier"
+import { useMultiplierToPercentage } from "./useMultiplierToPercentage"
 import { useGetNodeIdAttached } from "./useGetNodeIdAttached"
 import { useXNode } from "../../xNodes"
 import { useGMMaxLevel } from "./useGMMaxLevel"
@@ -59,6 +60,13 @@ export const useSelectedGmNft = (profile?: string) => {
     isError: isErrorNextLevelGMRewardMultiplier,
     error: errorNextLevelGMRewardMultiplier,
   } = useLevelMultiplier(gmLevel && String(Number(gmLevel) + 1))
+
+  const {
+    data: nextLevelGMRewardShareInGMPool,
+    isLoading: isNextLevelGMRewardShareInGMPoolLoading,
+    isError: isErrorNextLevelGMRewardShareInGMPool,
+    error: errorNextLevelGMRewardShareInGMPool,
+  } = useMultiplierToPercentage(gmRewardMultiplier)
 
   const {
     data: b3trToUpgradeGMToNextLevel,
@@ -115,6 +123,7 @@ export const useSelectedGmNft = (profile?: string) => {
     isGMLoadingMultiplier ||
     isB3trToUpgradeGMToNextLevelLoading ||
     isNextLevelGMRewardMultiplierLoading ||
+    isNextLevelGMRewardShareInGMPoolLoading ||
     isLoadingAttachedNodeId ||
     isLoadingMaxGmLevel ||
     isLoadingNFT
@@ -127,6 +136,7 @@ export const useSelectedGmNft = (profile?: string) => {
     isErrorGMLoadingMultiplier ||
     isErrorB3trToUpgradeGMToNextLevel ||
     isErrorNextLevelGMRewardMultiplier ||
+    isErrorNextLevelGMRewardShareInGMPool ||
     isErrorAttachedNodeId ||
     isErrorMaxGmLevel
   const error =
@@ -138,6 +148,7 @@ export const useSelectedGmNft = (profile?: string) => {
     errorGMLoadingMultiplier ||
     errorB3trToUpgradeGMToNextLevel ||
     errorNextLevelGMRewardMultiplier ||
+    errorNextLevelGMRewardShareInGMPool ||
     errorAttachedNodeId ||
     errorMaxGmLevel
 
@@ -163,6 +174,7 @@ export const useSelectedGmNft = (profile?: string) => {
     gmLevel,
     gmRewardMultiplier,
     nextLevelGMRewardMultiplier,
+    nextLevelGMRewardShareInGMPool,
     isGMLoading,
     isGMOwned,
     b3trToUpgradeGMToNextLevel,

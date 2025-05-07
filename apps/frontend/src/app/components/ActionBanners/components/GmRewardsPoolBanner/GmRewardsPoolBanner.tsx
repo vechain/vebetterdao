@@ -10,9 +10,10 @@ import { useCallback } from "react"
 export type Props = {
   b3trLeftover: number
   gmImage: string
+  notAGalaxyMember: boolean
 }
 
-export const GmRewardsPoolBanner = ({ b3trLeftover, gmImage }: Props) => {
+export const GmRewardsPoolBanner = ({ b3trLeftover, gmImage, notAGalaxyMember }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
 
@@ -28,12 +29,12 @@ export const GmRewardsPoolBanner = ({ b3trLeftover, gmImage }: Props) => {
       descriptionColor="#0A1C42"
       titleColor="#3A5798"
       description={
-        b3trLeftover
+        b3trLeftover > 0
           ? t(
               "You have {{value}} B3TR left over from the previous upgrade. Check out how many remains for your next GM!",
               { value: amount },
             )
-          : t("GM upgrade went down! Upgrade to get more voting rewards.")
+          : t("GM upgrades went down! Check out what's new for Galaxy Members. (LINK TO DOCS)")
       }
       logoSrc={
         <Flex position="relative" w="20" h="20" rounded="full" overflow={"hidden"}>
@@ -47,6 +48,7 @@ export const GmRewardsPoolBanner = ({ b3trLeftover, gmImage }: Props) => {
       buttonLabel={t("Your Galaxy Member")}
       onButtonClick={goToGalaxyMemberPage}
       buttonVariant="primaryAction"
+      disabled={notAGalaxyMember}
       buttonIcon={<UilArrowRight color="white" />}
     />
   )

@@ -4,6 +4,7 @@ import {
   useB3trBalance,
   useCanUserVote,
   useCurrentAllocationsRoundId,
+  useParticipatedInGovernance,
   useGetDelegatee,
   useUserBotSignals,
   useUserDelegation,
@@ -66,10 +67,13 @@ export const ActionBanner = () => {
   const { isVeDelegated } = useIsVeDelegated(account?.address ?? "")
 
   const { data: currentRound } = useCurrentAllocationsRoundId()
+  const { data: hasUserVoted } = useParticipatedInGovernance(account?.address ?? "")
+
   const currentRoundId = parseInt(currentRound ?? "0")
   const votingRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
   const gmRewards = useGMRewards(currentRoundId, account?.address ?? undefined)
-  const { b3trLeftover, gmImage } = useSelectedGmNft()
+  const { b3trLeftover, gmImage, isGMOwned } = useSelectedGmNft()
+
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
 
   const { data: balance, isLoading: balanceLoading } = useAccountBalance(account?.address ?? undefined)
@@ -118,8 +122,9 @@ export const ActionBanner = () => {
     return !isLoading && isValidUser
   }, [isEntity, isDelegator, hasVotesAtSnapshot, isPerson, isLoadingAccountLinking, isLoadingDelegator])
 
-  // GM Upgrade banner - keeping the banner for 2 rounds, or for those who haven't upgraded with the b3tr left over the upgrade
-  const showGmRewardsPoolBanner = b3trLeftover || (currentRoundId >= 48 && currentRoundId <= 50)
+  // GM Upgrade banner - keeping the banner for 3 rounds, or for those who haven't upgraded with the b3tr left over the upgrade
+  const showGmRewardsPoolBanner = !!account?.address && (b3trLeftover || currentRoundId <= 49)
+  const notAGalaxyMember = (hasUserVoted && !isGMOwned) || (!hasUserVoted && !isGMOwned)
 
   // Creator banners
   const { data: submissions, isLoading: submissionsLoading } = useCreatorSubmission(account?.address ?? "")
@@ -199,7 +204,14 @@ export const ActionBanner = () => {
   const slides = useMemo(() => {
     const bannerComponents = []
     if (showGmRewardsPoolBanner)
-      bannerComponents.push(<GmRewardsPoolBanner b3trLeftover={b3trLeftover} gmImage={gmImage} key="gm-rewards-pool" />)
+      bannerComponents.push(
+        <GmRewardsPoolBanner
+          b3trLeftover={b3trLeftover}
+          gmImage={gmImage}
+          notAGalaxyMember={notAGalaxyMember}
+          key="gm-rewards-pool"
+        />,
+      )
     if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
     if (showClaimB3trBanner)
       bannerComponents.push(
@@ -218,6 +230,8 @@ export const ActionBanner = () => {
     showGmRewardsPoolBanner,
     b3trLeftover,
     gmImage,
+    hasUserVoted,
+    isGMOwned,
     showClaimB3trBanner,
     votingRewardsQuery,
     gmRewards,

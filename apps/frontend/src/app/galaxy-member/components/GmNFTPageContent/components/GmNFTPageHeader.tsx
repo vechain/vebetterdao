@@ -140,7 +140,7 @@ export const GmNFTPageHeader = () => {
         </Text>
         {b3trLeftover > 0 && (
           <Text color="#B1F16C" fontSize={isAbove800 ? "sm" : "xs"} fontWeight={500}>
-            {t("You have {{amount}} B3TR leftover from a previous upgrade", {
+            {t("You have {{amount}} B3TR left over from a previous upgrade", {
               amount: compactFormatter.format(Number(b3trLeftover)),
             })}
           </Text>
@@ -228,7 +228,7 @@ export const GmNFTPageHeader = () => {
                   {"x"}
                 </Text>
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
-                  {t("Voting reward multiplier")}
+                  {t("Galaxy reward weight")}
                 </Text>
               </HStack>
             </FeatureFlagWrapper>
