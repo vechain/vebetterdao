@@ -194,7 +194,6 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                         <HStack rounded="8px" gap={1} color={""}>
                           <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                             {nextLevelGM?.multiplier}
-                            {"x"}
                           </Text>
                           <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
                             {t("GM reward weight").toLowerCase()}

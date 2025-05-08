@@ -225,7 +225,6 @@ export const GmNFTPageHeader = () => {
               <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                   {gmRewardMultiplier}
-                  {"x"}
                 </Text>
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
                   {t("GM reward weight")}
