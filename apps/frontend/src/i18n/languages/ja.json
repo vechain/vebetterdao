@@ -1191,7 +1191,7 @@
   "Rewards Pool": "報酬プール",
   "You are on LEVEL {{level}}": "あなたはレベル{{level}}です",
   "GM NFT attached to {{node}}": "{{node}}にGM NFTが添付されています",
-  "Voting reward multiplier": "投票報酬倍率",
+  "GM reward weight": "投票報酬倍率",
   "points to endorse Apps": "アプリを支持するためのポイント",
   "You need": "あなたが必要です",
   "Wait for the next round to mint the GM NFT": "次のラウンドを待ってGM NFTを鋳造してください",

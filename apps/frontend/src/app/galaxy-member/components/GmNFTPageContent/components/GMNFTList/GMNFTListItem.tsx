@@ -145,7 +145,7 @@ export const GMNFTListItem: React.FC<GMNFTListItemProps> = ({ token }) => {
                       whiteSpace={["normal", "nowrap"]}
                       wordBreak="break-word"
                       overflowWrap="break-word">
-                      {t("Voting reward multiplier")}
+                      {t("GM reward weight")}
                     </Text>
                   </HStack>
                 </FeatureFlagWrapper>

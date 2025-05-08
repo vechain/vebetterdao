@@ -1191,7 +1191,7 @@
   "Rewards Pool": "Quỹ thưởng",
   "You are on LEVEL {{level}}": "Bạn đang ở CẤP ĐỘ {{level}}",
   "GM NFT attached to {{node}}": "GM NFT được gắn với {{node}}",
-  "Voting reward multiplier": "Hệ số nhân phần thưởng bỏ phiếu",
+  "GM reward weight": "Hệ số nhân phần thưởng bỏ phiếu",
   "points to endorse Apps": "điểm để chứng thực ứng dụng",
   "You need": "Bạn cần",
   "Wait for the next round to mint the GM NFT": "Chờ vòng tiếp theo để đúc GM NFT",

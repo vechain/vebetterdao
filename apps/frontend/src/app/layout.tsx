@@ -11,6 +11,7 @@ import "@/i18n"
 import { useEffect } from "react"
 import { t } from "i18next"
 import { datadogRum } from "@datadog/browser-rum"
+import { AlphaTestnetBanner } from "@/components/Banners/AlphaTestnetBanner"
 
 const mixpanelToken = getEnvMixPanel()
 const isProduction = process.env.NODE_ENV === "production"
@@ -102,7 +103,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Providers>
           {isProduction && <FreshDeskWidget widgetId={103000007852} />}
           <VStack minH="100vh" gap={0} align="stretch">
-            {/* <AlphaTestnetBanner /> */}
+            <AlphaTestnetBanner />
             <Navbar />
             <Flex flex={1}>
               <Container

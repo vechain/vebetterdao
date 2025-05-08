@@ -1191,7 +1191,7 @@
   "Rewards Pool": "Pool de récompenses",
   "You are on LEVEL {{level}}": "Vous êtes au NIVEAU {{level}}",
   "GM NFT attached to {{node}}": "GM NFT attaché à {{node}}",
-  "Voting reward multiplier": "Multiplicateur de récompense de vote",
+  "GM reward weight": "Multiplicateur de récompense de vote",
   "points to endorse Apps": "points pour approuver les applications",
   "You need": "Vous avez besoin",
   "Wait for the next round to mint the GM NFT": "Attendez le prochain tour pour créer le GM NFT",

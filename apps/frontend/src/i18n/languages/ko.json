@@ -1191,7 +1191,7 @@
   "Rewards Pool": "보상 풀",
   "You are on LEVEL {{level}}": "당신은 {{level}} 레벨에 있습니다",
   "GM NFT attached to {{node}}": "GM NFT가 {{node}}에 연결됨",
-  "Voting reward multiplier": "투표 보상 배수",
+  "GM reward weight": "투표 보상 배수",
   "points to endorse Apps": "앱을 지지하기 위한 포인트",
   "You need": "당신은 필요합니다",
   "Wait for the next round to mint the GM NFT": "다음 라운드를 기다려 GM NFT를 발행하세요",

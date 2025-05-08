@@ -1191,7 +1191,7 @@
   "Rewards Pool": "Ödül Havuzu",
   "You are on LEVEL {{level}}": "{{level}} SEVİYESİndesiniz",
   "GM NFT attached to {{node}}": "GM NFT {{node}}'e eklenmiş",
-  "Voting reward multiplier": "Oylama ödül çarpanı",
+  "GM reward weight": "Oylama ödül çarpanı",
   "points to endorse Apps": "Uygulamaları onaylamak için puanlar",
   "You need": "Gerekli",
   "Wait for the next round to mint the GM NFT": "GM NFT basımı için bir sonraki turu bekleyin",

@@ -1191,7 +1191,7 @@
   "Rewards Pool": "Belöningspool",
   "You are on LEVEL {{level}}": "Du är på NIVÅ {{level}}",
   "GM NFT attached to {{node}}": "GM NFT bifogad till {{node}}",
-  "Voting reward multiplier": "Röstbelöningsmultiplikator",
+  "GM reward weight": "Röstbelöningsmultiplikator",
   "points to endorse Apps": "poäng för att stödja appar",
   "You need": "Du behöver",
   "Wait for the next round to mint the GM NFT": "Vänta på nästa omgång för att skapa GM NFT",

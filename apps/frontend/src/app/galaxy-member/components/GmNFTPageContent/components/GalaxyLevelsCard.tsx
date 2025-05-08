@@ -75,7 +75,7 @@ export const GalaxyLevelsCard = () => {
                             {t("Name")}
                           </Th>
                           <Th color="white" py={2} isNumeric>
-                            {t("Multiplier")}
+                            {t("Reward Weight")}
                           </Th>
                           <Th color="white" py={2} isNumeric>
                             {t("Cost")}
@@ -138,12 +138,10 @@ export const GalaxyLevelsCard = () => {
                       WebkitTextFillColor: "transparent",
                     }}>
                     {gmNft.multiplier}
-                    {"x"}
                   </Heading>
                 ) : (
                   <Text fontSize="lg" color="#6A6A6A">
                     {gmNft.multiplier}
-                    {"x"}
                   </Text>
                 )}
               </HStack>

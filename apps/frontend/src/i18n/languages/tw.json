@@ -1191,7 +1191,7 @@
   "Rewards Pool": "獎勵池",
   "You are on LEVEL {{level}}": "您在等級{{level}}",
   "GM NFT attached to {{node}}": "GM NFT 附加至{{node}}",
-  "Voting reward multiplier": "投票獎勵倍率",
+  "GM reward weight": "投票獎勵倍率",
   "points to endorse Apps": "支持應用程式的點數",
   "You need": "您需要",
   "Wait for the next round to mint the GM NFT": "等待下一輪鑄造GM NFT",

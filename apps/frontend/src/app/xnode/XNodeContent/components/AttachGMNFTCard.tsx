@@ -117,7 +117,7 @@ export const AttachGMNFTCard = () => {
                       {"x"}
                     </Text>
                     <Text fontSize="sm" fontWeight={400} noOfLines={1}>
-                      {t("Voting reward multiplier")}
+                      {t("GM reward weight")}
                     </Text>
                   </HStack>
                 </FeatureFlagWrapper>

@@ -3,7 +3,7 @@ export const gmNfts = [
     level: "1",
     name: "Earth",
     image: "/images/nft-levels/0.png",
-    multiplier: 1,
+    multiplier: 0,
     b3trToUpgrade: 0,
   },
   {

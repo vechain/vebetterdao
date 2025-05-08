@@ -228,7 +228,7 @@ export const GmNFTPageHeader = () => {
                   {"x"}
                 </Text>
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
-                  {t("Voting reward multiplier")}
+                  {t("GM reward weight")}
                 </Text>
               </HStack>
             </FeatureFlagWrapper>
