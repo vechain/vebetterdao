@@ -7,6 +7,7 @@ import { GalaxyMember__factory } from "@repo/contracts"
 import { getTokensInfoByOwnerQueryKey } from "@/api/contracts/galaxyMember/hooks/useGetTokensInfoByOwner"
 import { buildClause } from "@/utils/buildClause"
 import { getSelectedTokenIdQueryKey } from "@/api/contracts/galaxyMember/hooks/useSelectedTokenId"
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 
 const GalaxyMemberInterface = GalaxyMember__factory.createInterface()
 
@@ -14,6 +15,7 @@ type useMintNFTProps = {
   onFailure?: () => void
   onSuccess?: () => void
   invalidateCache?: boolean
+  transactionModalCustomUI?: TransactionCustomUI
 }
 
 /**
@@ -22,7 +24,7 @@ type useMintNFTProps = {
  * @param onFailure callback to call when the NFT is failed or cancelled
  * @returns the result of the transaction
  */
-export const useMintNFT = ({ onFailure, onSuccess }: useMintNFTProps) => {
+export const useMintNFT = ({ onFailure, onSuccess, transactionModalCustomUI }: useMintNFTProps) => {
   const { account } = useWallet()
   const clauseBuilder = useCallback(() => {
     return [
@@ -50,12 +52,11 @@ export const useMintNFT = ({ onFailure, onSuccess }: useMintNFTProps) => {
     onFailure?.()
   }, [onFailure])
 
-  const result = useBuildTransaction({
+  return useBuildTransaction({
     clauseBuilder,
     refetchQueryKeys,
     onFailure: handleOnFailure,
     onSuccess,
+    transactionModalCustomUI,
   })
-
-  return result
 }

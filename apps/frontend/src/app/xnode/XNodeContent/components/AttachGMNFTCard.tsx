@@ -83,7 +83,7 @@ export const AttachGMNFTCard = () => {
           </VStack>
           <Flex border="1px solid" rounded="12px" position="relative" onClick={goToGmNftPage} cursor="pointer">
             <Image
-              src={"/images/nft-page-background.png"}
+              src={"/assets/backgrounds/nft-page-background.webp"}
               alt="gm-nft-header"
               position={"absolute"}
               rounded={"12px"}

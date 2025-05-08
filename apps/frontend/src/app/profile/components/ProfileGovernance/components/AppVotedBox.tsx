@@ -46,7 +46,7 @@ export const AppVotedBox = ({ appVoted }: Props) => {
       </HStack>
       <VStack justifyContent={"center"} alignContent={"center"} spacing={0}>
         <HStack>
-          <Image src="/images/logo/vot3_logo_dark.svg" alt="Vot3" w="19px" h="19px" />
+          <Image src="/assets/logos/vot3_logo_dark.svg" alt="Vot3" w="19px" h="19px" />
           <Text fontSize={20} fontWeight={"700"}>
             {compactFormatter.format(appVoted.votes)}
           </Text>

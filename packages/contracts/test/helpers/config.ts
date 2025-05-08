@@ -142,7 +142,8 @@ export function createTestConfig() {
 
     GM_PERCENTAGE_OF_TREASURY: 2500,
 
-    GM_MULTIPLIERS_V2: [0, 110, 120, 150, 200, 250, 300, 500, 1000, 2500], // GM multipiers according
+    GM_MULTIPLIERS_V2: [110, 120, 150, 200, 250, 300, 500, 1000, 2500], // GM multipiers according
+    VOTER_REWARDS_LEVELS_V2: [2, 3, 4, 5, 6, 7, 8, 9, 10], // Voter rewards levels according to GM level
 
     /*
     Level => B3TR Required (halved)

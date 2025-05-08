@@ -1,6 +1,6 @@
 import { useB3trDonated, useXNode } from "@/api"
 import { getGMLevel } from "@/api/contracts/galaxyMember/utils"
-import { CustomModalContent, TransactionModal, TransactionModalStatus } from "@/components"
+import { CustomModalContent } from "@/components"
 import { useDetachGMFromXNode } from "@/hooks"
 import AnalyticsUtils from "@/utils/AnalyticsUtils/AnalyticsUtils"
 import { buttonClickActions, buttonClicked, ButtonClickProperties } from "@/constants"
@@ -20,7 +20,7 @@ import {
 import { useCallback, useMemo } from "react"
 import { useTranslation, Trans } from "react-i18next"
 import { IoWarningOutline } from "react-icons/io5"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 type Props = {
   isOpen: boolean
   onClose: () => void
@@ -28,6 +28,7 @@ type Props = {
 
 export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
   const { t } = useTranslation()
+  const { isTxModalOpen } = useTransactionModal()
   const { attachedGMTokenId } = useXNode()
 
   const { data: b3trDonated } = useB3trDonated(attachedGMTokenId)
@@ -36,42 +37,21 @@ export const DetachGMToXNodeModal = ({ isOpen, onClose }: Props) => {
     return getGMLevel(1, Number(b3trDonated ?? 0))
   }, [b3trDonated])
 
-  const detachGMFromXNodeMutation = useDetachGMFromXNode({})
-
   const handleClose = useCallback(() => {
-    detachGMFromXNodeMutation.resetStatus()
     onClose()
-  }, [detachGMFromXNodeMutation, onClose])
+  }, [onClose])
+
+  const detachGMFromXNodeMutation = useDetachGMFromXNode({
+    onSuccess: handleClose,
+  })
 
   const handleDetachment = useCallback(() => {
     AnalyticsUtils.trackEvent(buttonClicked, buttonClickActions(ButtonClickProperties.DETACHED_GM_FROM_XNODE))
-    detachGMFromXNodeMutation.resetStatus()
-    detachGMFromXNodeMutation.sendTransaction(undefined)
+    detachGMFromXNodeMutation.sendTransaction()
   }, [detachGMFromXNodeMutation])
 
-  if (detachGMFromXNodeMutation.status !== "ready")
-    return (
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        successTitle={t("Detach GM from Node")}
-        status={
-          detachGMFromXNodeMutation.error
-            ? TransactionModalStatus.Error
-            : (detachGMFromXNodeMutation.status as TransactionModalStatus)
-        }
-        errorDescription={detachGMFromXNodeMutation.error?.reason}
-        errorTitle={detachGMFromXNodeMutation.error ? t("Error detaching") : undefined}
-        showTryAgainButton
-        onTryAgain={handleDetachment}
-        pendingTitle={t("Detaching GM from Node...")}
-        showExplorerButton
-        txId={detachGMFromXNodeMutation.txReceipt?.meta.txID}
-      />
-    )
-
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size={"2xl"}>
+    <Modal isOpen={isOpen && !isTxModalOpen} onClose={handleClose} size={"2xl"}>
       <ModalOverlay />
       <CustomModalContent p={{ base: 3, md: 5 }}>
         <ModalCloseButton />

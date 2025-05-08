@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next"
 import { ShareButtonsBlue } from "@/components/ShareButtonsBlue"
 import { useCallback, useState } from "react"
 import { useProposalDetail } from "@/app/proposals/[proposalId]/hooks"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 
 const containerVariants = {
   initial: {
@@ -39,6 +40,7 @@ export const ProposalShareButton = () => {
   const { proposal } = useProposalDetail()
   const { t } = useTranslation()
   const [showCopiedLink, setShowCopiedLink] = useState(false)
+  const { transactionModalState } = useTransactionModal()
   const handleCopyLink = useCallback(async () => {
     await navigator.clipboard.writeText(location.href)
     setShowCopiedLink(true)
@@ -56,7 +58,9 @@ export const ProposalShareButton = () => {
         isOpen={isOpen}
         onClose={onClose}
         trapFocus={false}
-        closeOnOverlayClick={status !== "waitingConfirmation" && status !== "pending"}
+        closeOnOverlayClick={
+          transactionModalState?.status !== "waitingConfirmation" && transactionModalState?.status !== "pending"
+        }
         isCentered={true}
         size={"xl"}>
         <ModalOverlay />

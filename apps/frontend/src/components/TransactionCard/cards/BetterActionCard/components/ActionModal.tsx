@@ -109,7 +109,7 @@ export const ActionModal = ({ actionModal, proof, appId, blockTimestamp, blockNu
                   <Heading fontSize="3xl" fontWeight="bold">
                     {compactFormatter.format(Number(b3trAmount ?? 0))}
                   </Heading>
-                  <Image h="30px" w="30px" src="/images/b3tr-token.png" alt="b3tr-token" />
+                  <Image h="30px" w="30px" src="/assets/tokens/b3tr-token.svg" alt="b3tr-token" />
                 </HStack>
                 <HStack gap={1}>
                   <Heading fontSize="md">{t("Better action on")}</Heading>

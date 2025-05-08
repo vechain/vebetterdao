@@ -93,7 +93,7 @@ export const NewCreatorPageFormContent = () => {
           bgColor="#004CFC"
           w="full"
           borderTopRadius="12px"
-          bgImage={"/images/cloud-background.png"}
+          bgImage={"/assets/backgrounds/cloud-background.webp"}
           bgSize="cover"
           bgPosition="center"
           bgRepeat="no-repeat"
@@ -113,7 +113,7 @@ export const NewCreatorPageFormContent = () => {
             <Image
               w="full"
               h="full"
-              src="/images/mascot/mascot-holding-tokens.png"
+              src="/assets/mascot/mascot-holding-tokens.webp"
               alt="Apply for Creator's NFT"
               objectFit="contain"
               objectPosition="bottom"

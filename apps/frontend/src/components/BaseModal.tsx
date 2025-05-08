@@ -20,7 +20,8 @@ type Props = {
   modalProps?: Partial<ModalProps>
   modalContentProps?: Partial<ModalContentProps>
   modalBodyProps?: Partial<ModalBodyProps>
-  closeButton?: boolean
+  showCloseButton?: boolean
+  isCloseable?: boolean
 }
 export const BaseModal = ({
   isOpen,
@@ -31,7 +32,8 @@ export const BaseModal = ({
   modalProps,
   modalContentProps,
   modalBodyProps,
-  closeButton = true,
+  showCloseButton = false,
+  isCloseable = true,
 }: Props) => {
   const [isDesktop] = useMediaQuery("(min-width: 1060px)")
 
@@ -40,7 +42,7 @@ export const BaseModal = ({
       <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered trapFocus={false} {...modalProps}>
         <ModalOverlay />
         <ModalContent rounded={"2xl"} {...modalContentProps}>
-          {closeButton && <ModalCloseButton />}
+          {isCloseable && showCloseButton ? <ModalCloseButton /> : null}
           <ModalBody p={10} rounded={"2xl"} {...modalBodyProps}>
             {children}
           </ModalBody>
@@ -50,10 +52,12 @@ export const BaseModal = ({
 
   return (
     <BaseBottomSheet
+      {...(modalContentProps?.bgColor ? { customBgColor: modalContentProps.bgColor as string } : {})}
       isOpen={isOpen}
       onClose={onClose}
-      ariaTitle={ariaTitle || ""}
-      ariaDescription={ariaDescription || ""}>
+      ariaTitle={ariaTitle ?? ""}
+      isDismissable={isCloseable}
+      ariaDescription={ariaDescription ?? ""}>
       {children}
     </BaseBottomSheet>
   )

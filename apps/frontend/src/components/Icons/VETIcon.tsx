@@ -6,8 +6,8 @@ type Props = ImageProps & {
 }
 
 const paths = {
-  light: "/images/logo/pictogram.png",
-  dark: "/images/logo/pictogram_white.png",
+  light: "assets/logos/pictogram.webp",
+  dark: "assets/logos/pictogram_white.webp",
 }
 
 export const VETIcon: React.FC<Props> = ({ colorVariant, ...props }) => {

@@ -1,4 +1,4 @@
-import { describe, it } from "mocha"
+import { describe, it, beforeEach } from "mocha"
 import {
   catchRevert,
   getOrDeployContractInstances,
@@ -47,8 +47,18 @@ import {
 } from "../typechain-types"
 import { time } from "@nomicfoundation/hardhat-network-helpers"
 import { endorseApp } from "./helpers/xnodes"
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 
 describe("VoterRewards - @shard10", () => {
+  // Environment params
+  let creator1: HardhatEthersSigner
+  let creator2: HardhatEthersSigner
+  beforeEach(async function () {
+    const { creators } = await getOrDeployContractInstances({ forceDeploy: true })
+    creator1 = creators[0]
+    creator2 = creators[1]
+  })
+
   describe("Contract parameters", () => {
     it("Should have correct parameters set on deployment", async () => {
       const { voterRewards, owner, galaxyMember, emissions } = await getOrDeployContractInstances({ forceDeploy: true })
@@ -670,7 +680,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -1715,7 +1725,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -1921,7 +1931,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -2115,7 +2125,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -2382,7 +2392,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -2549,7 +2559,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -2720,7 +2730,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -2934,7 +2944,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -3111,7 +3121,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -3666,7 +3676,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -3878,7 +3888,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[5])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[6])
@@ -4045,7 +4055,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -4262,7 +4272,7 @@ describe("VoterRewards - @shard10", () => {
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[0])
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
       await endorseApp(app2, otherAccounts[1])
@@ -4427,7 +4437,6 @@ describe("VoterRewards - @shard10", () => {
         voterRewards,
         governor,
         x2EarnApps,
-        owner,
         veBetterPassport,
       } = await getOrDeployContractInstances({
         config: {
@@ -4442,14 +4451,14 @@ describe("VoterRewards - @shard10", () => {
       await veBetterPassport.toggleCheck(4)
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[0].address, otherAccounts[0].address, otherAccounts[0].address, "metadataURI")
 
       const app1 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[0].address))
       await endorseApp(app1, otherAccounts[8])
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator2)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -4653,7 +4662,7 @@ describe("VoterRewards - @shard10", () => {
       await endorseApp(app1, otherAccounts[5])
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -4847,7 +4856,7 @@ describe("VoterRewards - @shard10", () => {
       await endorseApp(app1, otherAccounts[6])
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))
@@ -5102,7 +5111,7 @@ describe("VoterRewards - @shard10", () => {
       await endorseApp(app1, otherAccounts[6])
 
       await x2EarnApps
-        .connect(owner)
+        .connect(creator1)
         .submitApp(otherAccounts[1].address, otherAccounts[1].address, otherAccounts[1].address, "metadataURI")
 
       const app2 = ethers.keccak256(ethers.toUtf8Bytes(otherAccounts[1].address))

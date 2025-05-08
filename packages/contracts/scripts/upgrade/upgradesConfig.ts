@@ -56,11 +56,12 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   X2EarnApps: {
     name: "x2-earn-apps",
     configAddressField: "x2EarnAppsContractAddress",
-    versions: ["v2", "v3", "v4"],
+    versions: ["v2", "v3", "v4", "v5"],
     descriptions: {
       v2: "Add xapp endorsement module",
       v3: "Add node cooldown feature",
       v4: "Enabling by default the rewards pool for new apps submitted",
+      v5: "Restricting one app per creator holding a creator NFT",
     },
   },
   "X2Earn Rewards Pool": {
@@ -88,10 +89,11 @@ export const upgradeConfig: Record<string, UpgradeContract> = {
   "VeBetter Passport": {
     name: "vebetter-passport",
     configAddressField: "veBetterPassportContractAddress",
-    versions: ["v2", "v3"],
+    versions: ["v2", "v3", "v4"],
     descriptions: {
       v2: "Prevent delegation of passports to entities",
       v3: "Add GM level to personhood check",
+      v4: "Add RESET_SIGNALER_ROLE, improve signaling management, and remove redundant app signal counters",
     },
   },
   "Galaxy Member": {

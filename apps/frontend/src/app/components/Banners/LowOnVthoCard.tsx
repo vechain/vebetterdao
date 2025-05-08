@@ -100,7 +100,7 @@ export const LowOnVthoCard: React.FC = () => {
       <CardBody>
         <Grid templateColumns={["repeat(1, 1fr)", "repeat(4, 1fr)"]} gap={[4, 10]} w="full">
           <GridItem colSpan={1} alignContent={["start", "center"]} justifySelf={["start", "center"]}>
-            <Image src="/images/alert.svg" boxSize={[16, 28]} alt="alert-icon" />
+            <Image src="/assets/icons/alert.svg" boxSize={[16, 28]} alt="alert-icon" />
           </GridItem>
           <GridItem colSpan={3}>
             <VStack spacing={4} w="full" justifyContent={"start"} alignItems={"start"}>
