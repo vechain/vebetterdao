@@ -5,6 +5,10 @@ import { VeBetterPassport__factory } from "@repo/contracts"
 const contractInterface = VeBetterPassport__factory.createInterface()
 const contractAddress = getConfig().veBetterPassportContractAddress
 
+/**
+ * Custom hook to fetch the SignalerAssignedToApp events.
+ * @param appId - The id of the app to fetch the signalers for.
+ */
 export const useSignalerAssignedToApp = (appId: string) => {
   const filterParams = { app: appId }
 
