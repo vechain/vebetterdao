@@ -1,12 +1,13 @@
 import { Treasury__factory } from "../../typechain-types"
 import {
-  clauseBuilder,
   type TransactionClause,
   type TransactionBody,
-  coder,
-  FunctionFragment,
-  VTHO_ADDRESS,
-  unitsUtils,
+  Clause,
+  Address,
+  Units,
+  VTHO,
+  ERC20_ABI,
+  ABIContract,
 } from "@vechain/sdk-core"
 import { buildTxBody, signAndSendTx } from "./txHelper"
 import { SeedAccount, TestPk } from "./seedAccounts"
@@ -21,7 +22,7 @@ export const airdropVTHO = async (accounts: SeedAccount[], signingAcct: TestPk) 
     const clauses: TransactionClause[] = []
 
     accountChunk.forEach(account => {
-      clauses.push(clauseBuilder.transferToken(VTHO_ADDRESS, account.key.address, unitsUtils.parseVET("5000")))
+      clauses.push(Clause.transferVTHOToken(Address.of(account.key.address), VTHO.of(5000, Units.wei)))
     })
 
     const body: TransactionBody = await buildTxBody(clauses, signingAcct.address, 32)
@@ -39,7 +40,12 @@ export const airdropVTHO = async (accounts: SeedAccount[], signingAcct: TestPk) 
 export const transferErc20 = async (tokenAddress: string, sender: TestPk, recipient: string, amount: bigint) => {
   const clauses: TransactionClause[] = []
 
-  clauses.push(clauseBuilder.transferToken(tokenAddress, recipient, amount))
+  clauses.push(
+    Clause.callFunction(Address.of(tokenAddress), ABIContract.ofAbi(ERC20_ABI).getFunction("transfer"), [
+      recipient,
+      amount,
+    ]),
+  )
 
   const body: TransactionBody = await buildTxBody(clauses, sender.address, 32)
 
@@ -59,9 +65,9 @@ export const airdropB3trFromTreasury = async (treasuryAddress: string, admin: Te
 
     accountChunk.forEach(account => {
       clauses.push(
-        clauseBuilder.functionInteraction(
-          treasuryAddress,
-          coder.createInterface(JSON.stringify(Treasury__factory.abi)).getFunction("transferB3TR") as FunctionFragment,
+        Clause.callFunction(
+          Address.of(treasuryAddress),
+          ABIContract.ofAbi(Treasury__factory.abi).getFunction("transferB3TR"),
           [account.key.address, account.amount],
         ),
       )

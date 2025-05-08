@@ -1,8 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda"
-import { HttpClient, ThorClient } from "@vechain/sdk-network"
+import { ThorClient } from "@vechain/sdk-network"
 import mainnetConfig from "@repo/config/mainnet"
-import { FunctionFragment } from "ethers"
-import { addressUtils, clauseBuilder } from "@vechain/sdk-core"
+import { ABIContract, Address, Clause, Transaction } from "@vechain/sdk-core"
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager"
 import { buildClaimClause, getAllApps } from "../helpers/xApps"
 import { getIdsOfUnclaimed } from "../helpers/xApps"
@@ -31,14 +30,14 @@ async function distributeEmissions(thor: ThorClient) {
   await waitForRoundStart(thor)
 
   // Prepare the contract function call with necessary parameters
-  const clause = clauseBuilder.functionInteraction(
-    mainnetConfig.emissionsContractAddress,
-    Emissions.createInterface().getFunction("distribute") as FunctionFragment,
+  const clause = Clause.callFunction(
+    Address.of(mainnetConfig.emissionsContractAddress),
+    ABIContract.ofAbi(Emissions.abi).getFunction("distribute"),
     [],
   )
 
   // Estimate the gas cost for the transaction
-  let gasResult = await thor.gas.estimateGas([clause], addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex")))
+  let gasResult = await thor.gas.estimateGas([clause], Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString())
 
   // Check if the transaction was estimated to revert and handle accordingly
   if (gasResult.reverted) {
@@ -58,7 +57,8 @@ async function distributeEmissions(thor: ThorClient) {
   let txBody = await thor.transactions.buildTransactionBody([clause], gasResult.totalGas * 2)
 
   // Sign the transaction with the developer's private key
-  let signedTx = await thor.transactions.signTransaction(txBody, privateKey)
+  // let signedTx = await thor.transactions.signTransaction(txBody, privateKey)
+  let signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey, "hex"))
 
   // Send the signed transaction to the blockchain
   let tx = await thor.transactions.sendTransaction(signedTx)
@@ -79,14 +79,13 @@ async function distributeXAllocations(thor: ThorClient) {
   const privateKey = await getSecret(client, "start_emissions_pk", "start-emissions-pk")
 
   // Get the current round number from the Emissions contract
-  const currentRound = await thor.contracts.executeContractCall(
+  const currentRound = await thor.contracts.executeCall(
     mainnetConfig.emissionsContractAddress,
-    Emissions.createInterface().getFunction("getCurrentCycle") as FunctionFragment,
+    ABIContract.ofAbi(Emissions.abi).getFunction("getCurrentCycle"),
     [],
   )
-
   // Get the previous round number for which the X-Allocations are to be distributed
-  const previousRound = Number(currentRound[0]) - 1
+  const previousRound = Number(currentRound.result?.array?.[0] ?? 0) - 1
 
   // Get the X-Apps for the current round
   const xApps = await getAllApps(thor, previousRound.toString(), mainnetConfig)
@@ -103,7 +102,7 @@ async function distributeXAllocations(thor: ThorClient) {
     // Estimate the gas cost for the transaction
     const gasResult = await thor.gas.estimateGas(
       [claimClause],
-      addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex")),
+      Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString(),
     )
 
     // Check if the transaction was estimated to revert and handle accordingly
@@ -115,7 +114,7 @@ async function distributeXAllocations(thor: ThorClient) {
   // Estimate the gas cost for the transaction
   const gasResult = await thor.gas.estimateGas(
     claimClauses,
-    addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex")),
+    Address.ofPrivateKey(Buffer.from(privateKey, "hex")).toString(),
   )
 
   // Check if the transaction was estimated to revert and handle accordingly
@@ -135,7 +134,7 @@ async function distributeXAllocations(thor: ThorClient) {
   const txBody = await thor.transactions.buildTransactionBody(claimClauses, gasResult.totalGas * 2)
 
   // Sign the transaction with the developer's private key
-  const signedTx = await thor.transactions.signTransaction(txBody, privateKey)
+  const signedTx = Transaction.of(txBody).sign(Buffer.from(privateKey))
 
   // Send the signed transaction to the blockchain
   const tx = await thor.transactions.sendTransaction(signedTx)
@@ -161,7 +160,7 @@ export const handler = async (event: APIGatewayEvent, context: Context): Promise
 
   try {
     // Initialize the Thor client with the testnet URL and disable polling
-    const thorClient = new ThorClient(new HttpClient(nodeURL), {
+    const thorClient = ThorClient.at(nodeURL, {
       isPollingEnabled: false,
     })
 

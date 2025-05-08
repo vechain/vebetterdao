@@ -1,5 +1,5 @@
 import { VoterRewards, VoterRewards__factory } from "../../typechain-types"
-import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
+import { type TransactionClause, type TransactionBody, Clause, ABIContract, Address } from "@vechain/sdk-core"
 import { buildTxBody, signAndSendTx } from "./txHelper"
 import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
@@ -22,11 +22,9 @@ export const claimVoterRewards = async (
 
       accountChunk.forEach(account => {
         clauses.push(
-          clauseBuilder.functionInteraction(
-            contractAddress,
-            coder
-              .createInterface(JSON.stringify(VoterRewards__factory.abi))
-              .getFunction("claimReward") as FunctionFragment,
+          Clause.callFunction(
+            Address.of(contractAddress),
+            ABIContract.ofAbi(VoterRewards__factory.abi).getFunction("claimReward"),
             [roundId, account.key.address],
           ),
         )

@@ -6,7 +6,7 @@ import {
   X2EarnApps,
   TokenAuction,
 } from "../../typechain-types"
-import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
+import { type TransactionClause, type TransactionBody, Clause, Address, ABIContract } from "@vechain/sdk-core"
 import { buildTxBody, signAndSendTx } from "./txHelper"
 import { SeedAccount, TestPk } from "./seedAccounts"
 import { chunk } from "./chunk"
@@ -31,9 +31,9 @@ export const registerXDapps = async (contractAddress: string, accounts: TestPk[]
       const app = appChunk[i]
       const account = accounts[i % accounts.length] // Unique signer for each app
 
-      const clause = clauseBuilder.functionInteraction(
-        contractAddress,
-        coder.createInterface(JSON.stringify(X2EarnApps__factory.abi)).getFunction("submitApp") as FunctionFragment,
+      const clause = Clause.callFunction(
+        Address.of(contractAddress),
+        ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("submitApp"),
         [app.teamWalletAddress, app.admin, app.name, app.metadataURI],
       )
 
@@ -64,9 +64,9 @@ export const endorseXApps = async (
   for (let i = 0; i < apps.length; i++) {
     const owner = endorsers[i].key.address
     const nodeId = await vechainNodesMock.ownerToId(owner)
-    const clause = clauseBuilder.functionInteraction(
-      await x2EarnApps.getAddress(),
-      coder.createInterface(JSON.stringify(X2EarnApps__factory.abi)).getFunction("endorseApp") as FunctionFragment,
+    const clause = Clause.callFunction(
+      Address.of(await x2EarnApps.getAddress()),
+      ABIContract.ofAbi(X2EarnApps__factory.abi).getFunction("endorseApp"),
       [apps[i], nodeId],
     )
 
@@ -116,11 +116,9 @@ export const castVotesToXDapps = async (
           randomDappsToVote.forEach(app => splits.push({ app: app, weight: votePowerPerApp }))
 
           clauses.push(
-            clauseBuilder.functionInteraction(
-              contractAddress,
-              coder
-                .createInterface(JSON.stringify(XAllocationVoting__factory.abi))
-                .getFunction("castVote") as FunctionFragment,
+            Clause.callFunction(
+              Address.of(contractAddress),
+              ABIContract.ofAbi(XAllocationVoting__factory.abi).getFunction("castVote"),
               [roundId, splits.map(split => split.app), splits.map(split => split.weight)],
             ),
           )

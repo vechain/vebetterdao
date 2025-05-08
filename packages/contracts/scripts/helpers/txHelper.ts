@@ -1,9 +1,8 @@
 import { getConfig } from "@repo/config"
-import { TransactionHandler, type TransactionClause, type TransactionBody } from "@vechain/sdk-core"
-import { HttpClient, ThorClient } from "@vechain/sdk-network"
+import { type TransactionClause, type TransactionBody, Transaction } from "@vechain/sdk-core"
+import { ThorClient } from "@vechain/sdk-network"
 
-const thorNetwork = new HttpClient(getConfig().nodeUrl)
-const thorClient = new ThorClient(thorNetwork)
+const thorClient = ThorClient.at(getConfig().nodeUrl)
 let chainTag: number
 
 export const getBestBlockRef = async (): Promise<string> => {
@@ -53,7 +52,7 @@ export const buildTxBody = async (
     blockRef: await getBestBlockRef(),
     expiration,
     clauses,
-    gasPriceCoef: 0,
+    gasPriceCoef: 128,
     gas,
     dependsOn: null,
     nonce: Math.floor(Math.random() * 10000000),
@@ -63,7 +62,7 @@ export const buildTxBody = async (
 }
 
 export const signAndSendTx = async (body: TransactionBody, pk: Uint8Array) => {
-  const signedTx = TransactionHandler.sign(body, Buffer.from(pk))
+  const signedTx = Transaction.of(body).sign(Buffer.from(pk))
 
   const sendTransactionResult = await thorClient.transactions.sendTransaction(signedTx)
 

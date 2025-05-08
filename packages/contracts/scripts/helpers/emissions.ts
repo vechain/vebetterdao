@@ -1,5 +1,5 @@
 import { Emissions__factory, VoterRewards, VoterRewards__factory } from "../../typechain-types"
-import { clauseBuilder, type TransactionClause, type TransactionBody, coder, FunctionFragment } from "@vechain/sdk-core"
+import { type TransactionClause, type TransactionBody, Clause, Address, ABIContract } from "@vechain/sdk-core"
 import { buildTxBody, signAndSendTx } from "./txHelper"
 import { TestPk } from "./seedAccounts"
 
@@ -9,9 +9,9 @@ export const bootstrapEmissions = async (contractAddress: string, admin: TestPk)
   const clauses: TransactionClause[] = []
 
   clauses.push(
-    clauseBuilder.functionInteraction(
-      contractAddress,
-      coder.createInterface(JSON.stringify(Emissions__factory.abi)).getFunction("bootstrap") as FunctionFragment,
+    Clause.callFunction(
+      Address.of(contractAddress),
+      ABIContract.ofAbi(Emissions__factory.abi).getFunction("bootstrap"),
       [],
     ),
   )
@@ -30,9 +30,9 @@ export const startEmissions = async (contractAddress: string, acct: TestPk) => {
   const clauses: TransactionClause[] = []
 
   clauses.push(
-    clauseBuilder.functionInteraction(
-      contractAddress,
-      coder.createInterface(JSON.stringify(Emissions__factory.abi)).getFunction("start") as FunctionFragment,
+    Clause.callFunction(
+      Address.of(contractAddress),
+      ABIContract.ofAbi(Emissions__factory.abi).getFunction("start"),
       [],
     ),
   )
@@ -52,11 +52,9 @@ export const toggleQuadraticRewarding = async (voterRewards: VoterRewards, acct:
   const clauses: TransactionClause[] = []
 
   clauses.push(
-    clauseBuilder.functionInteraction(
-      await voterRewards.getAddress(),
-      coder
-        .createInterface(JSON.stringify(VoterRewards__factory.abi))
-        .getFunction("toggleQuadraticRewarding") as FunctionFragment,
+    Clause.callFunction(
+      Address.of(await voterRewards.getAddress()),
+      ABIContract.ofAbi(VoterRewards__factory.abi).getFunction("toggleQuadraticRewarding"),
       [],
     ),
   )
@@ -76,9 +74,9 @@ export const distributeEmissions = async (contractAddress: string, acct: TestPk)
   const clauses: TransactionClause[] = []
 
   clauses.push(
-    clauseBuilder.functionInteraction(
-      contractAddress,
-      coder.createInterface(JSON.stringify(Emissions__factory.abi)).getFunction("distribute") as FunctionFragment,
+    Clause.callFunction(
+      Address.of(contractAddress),
+      ABIContract.ofAbi(Emissions__factory.abi).getFunction("distribute"),
       [],
     ),
   )

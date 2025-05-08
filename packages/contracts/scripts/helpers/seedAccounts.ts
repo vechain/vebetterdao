@@ -1,4 +1,4 @@
-import { unitsUtils, addressUtils, mnemonic } from "@vechain/sdk-core"
+import { Address, HDKey, VET } from "@vechain/sdk-core"
 
 const VECHAIN_DEFAULT_MNEMONIC = "denial kitchen pet squirrel other broom bar gas better priority spoil cross"
 
@@ -25,20 +25,22 @@ const PHRASE = (
   isStagingEnv ? process.env.TESTNET_STAGING_MNEMONIC : process.env.MNEMONIC || VECHAIN_DEFAULT_MNEMONIC
 )?.split(" ")
 
-export const TEST_DERIVATION_PATH = "m"
-
-export const getTestKey = (index: number, derivationPath: string = TEST_DERIVATION_PATH): TestPk => {
+export const getTestKey = (index: number): TestPk => {
   if (!PHRASE) {
     throw new Error("Mnemonic not found")
   }
 
-  const pk = mnemonic.derivePrivateKey(PHRASE, `${derivationPath}/${index}`)
-  const buffer = Buffer.from(pk)
+  const hdnode = HDKey.fromMnemonic(PHRASE)
+  const pk = hdnode.deriveChild(index)
+  if (!pk.privateKey) {
+    throw new Error("Private key not found")
+  }
+  const buffer = Buffer.from(pk.privateKey)
   const pkHex = buffer.toString("hex")
   return {
-    pk,
+    pk: pk.privateKey,
     pkHex,
-    address: addressUtils.fromPrivateKey(pk),
+    address: Address.ofPrivateKey(pk.privateKey).toString(),
   }
 }
 
@@ -62,7 +64,7 @@ const getRandomStartingBalance = (min: number, max: number): bigint => {
   const scale = Math.log(max) - Math.log(min)
   const random = Math.random() ** 6 // Raise to a power to skew towards smaller values.
   const result = Math.exp(Math.log(min) + scale * random)
-  return unitsUtils.parseVET(Math.floor(result).toString())
+  return VET.of(Math.floor(result)).wei
 }
 
 /**
@@ -93,7 +95,7 @@ const getSeedAccountsFixed = (numAccounts: number, acctOffset: number): SeedAcco
   keys.slice(acctOffset).forEach(key => {
     seedAccounts.push({
       key,
-      amount: unitsUtils.parseVET("200000"),
+      amount: VET.of(200000).wei,
     })
   })
 
@@ -123,7 +125,7 @@ const getSeedAccountsLinear = (numAccounts: number, acctOffset: number): SeedAcc
   keys.slice(acctOffset).forEach((key, index) => {
     seedAccounts.push({
       key,
-      amount: unitsUtils.parseVET(((index + 1) * 5).toFixed(2)),
+      amount: VET.of(((index + 1) * 5).toFixed(2)).wei,
     })
   })
 

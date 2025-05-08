@@ -2,14 +2,13 @@ import { BaseContract, Interface } from "ethers"
 import { ethers } from "hardhat"
 import { getImplementationAddress } from "@openzeppelin/upgrades-core"
 import { AddressUtils } from "@repo/utils"
-import { DeployUpgradeOptions } from "./type"
 
 export const deployProxy = async (
   contractName: string,
   args: any[],
   libraries: { [libraryName: string]: string } = {},
-  logOutput: boolean = false,
   version?: number,
+  logOutput: boolean = true,
 ): Promise<BaseContract> => {
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(contractName, {
@@ -42,7 +41,7 @@ export const deployProxy = async (
 export const deployProxyOnly = async (
   contractName: string,
   libraries: { [libraryName: string]: string } = {},
-  logOutput: boolean = false,
+  logOutput: boolean = true,
 ): Promise<string> => {
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(contractName, {
@@ -101,22 +100,26 @@ export const upgradeProxy = async (
   newVersionContractName: string,
   proxyAddress: string,
   args: any[] = [],
-  options?: { version?: number; libraries?: { [libraryName: string]: string }; logOutput?: boolean },
+  libraries?: { [libraryName: string]: string },
+  version?: number,
+  logOutput: boolean = true,
 ): Promise<BaseContract> => {
   // Deploy the implementation contract
   const Contract = await ethers.getContractFactory(newVersionContractName, {
-    libraries: options?.libraries,
+    libraries: libraries,
   })
   const implementation = await Contract.deploy()
   await implementation.waitForDeployment()
 
   const currentImplementationContract = await ethers.getContractAt(previousVersionContractName, proxyAddress)
 
-  options?.logOutput && console.log(`${newVersionContractName} impl.: ${await implementation.getAddress()}`)
+  if (logOutput) {
+    console.log(`${newVersionContractName} impl.: ${await implementation.getAddress()}`)
+  }
 
   const tx = await currentImplementationContract.upgradeToAndCall(
     await implementation.getAddress(),
-    args.length > 0 ? getInitializerData(Contract.interface, args, options?.version) : "0x",
+    args.length > 0 ? getInitializerData(Contract.interface, args, version) : "0x",
   )
   await tx.wait()
 
@@ -132,29 +135,25 @@ export const upgradeProxy = async (
 export const deployAndUpgrade = async (
   contractNames: string[],
   args: any[][],
-  options: DeployUpgradeOptions,
+  libraries?: ({ [libraryName: string]: string } | undefined)[],
+  versions?: (number | undefined)[],
+  logOutput: boolean = true,
 ): Promise<BaseContract> => {
   if (contractNames.length === 0) throw new Error("No contracts to deploy")
 
   if (contractNames.length !== args.length) throw new Error("Contract names and arguments must have the same length")
 
-  if (options.libraries && contractNames.length !== options.libraries.length)
+  if (libraries && contractNames.length !== libraries.length)
     throw new Error("Contract names and libraries must have the same length")
 
-  if (options.versions && contractNames.length !== options.versions.length)
+  if (versions && contractNames.length !== versions.length)
     throw new Error("Contract names and versions must have the same length")
 
   // 1. Deploy proxy and first implementation
   const contractName = contractNames[0]
   const contractArgs = args[0]
 
-  let proxy = await deployProxy(
-    contractName,
-    contractArgs,
-    options?.libraries?.[0],
-    options.logOutput,
-    options.versions?.[0],
-  )
+  let proxy = await deployProxy(contractName, contractArgs, libraries?.[0], versions?.[0], logOutput)
 
   // 2. Upgrade the proxy to the next versions
   for (let i = 1; i < contractNames.length; i++) {
@@ -167,7 +166,9 @@ export const deployAndUpgrade = async (
       newVersionContractName,
       await proxy.getAddress(),
       contractArgs,
-      { version: options.versions?.[i], libraries: options.libraries?.[i], logOutput: options.logOutput },
+      libraries?.[i],
+      versions?.[i],
+      logOutput,
     )
   }
 
