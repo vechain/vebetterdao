@@ -64,6 +64,7 @@ export const AppBalanceCard = () => {
   const { data: isRewardsPoolEnabled } = useIsRewardsPoolEnabled(app?.id ?? "")
   const { data: isPaused } = useIsDistributionPaused(app?.id ?? "")
   const { data: isAppAdmin } = useIsAppAdmin(app?.id ?? "", account?.address ?? "")
+  const isAppAdminOrTreasuryAddress = isAppAdmin || app?.teamWalletAddress === account?.address
 
   const rewardsPoolColor = useMemo(() => {
     if (isPaused) return "#FCEEF1"
@@ -99,7 +100,7 @@ export const AppBalanceCard = () => {
             <VStack spacing={2}>
               <Button
                 mt={1}
-                isDisabled={balance?.scaled === "0.0" || !balance || isBalanceLoading || !isAppAdmin}
+                isDisabled={!isAppAdminOrTreasuryAddress}
                 onClick={onOpenDepositOrWithdraw}
                 variant={"primaryAction"}
                 borderRadius={"full"}
@@ -171,6 +172,7 @@ export const AppBalanceCard = () => {
             onClose={onCloseDepositOrWithdraw}
             isEnablingRewardsPool={!isRewardsPoolEnabled}
             isPaused={isPaused}
+            isAppAdmin={isAppAdmin}
           />
           <ManagementCenterModal
             appId={app.id}
