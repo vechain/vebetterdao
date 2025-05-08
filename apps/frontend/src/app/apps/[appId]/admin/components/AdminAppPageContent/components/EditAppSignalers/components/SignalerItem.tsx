@@ -42,7 +42,7 @@ export const SignalerItem = ({ signaler, handleDeleteSignaler }: Props) => {
                 {t("Delete {{address}} as signaler?", { address: domain || humanAddress(signaler, 4, 4) })}
               </Heading>
               <Text color="#6A6A6A" textAlign={"center"}>
-                {t("The user will not be able to access the app edition mode anymore.")}
+                {t("The user will not be able to bot-signal and reset signal counts for individual users anymore.")}
               </Text>
               {domain && (
                 <Text color="#6A6A6A" textAlign={"center"}>
