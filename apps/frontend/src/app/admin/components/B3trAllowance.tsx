@@ -1,5 +1,4 @@
 import { useB3trAllowance, useB3trBalance } from "@/api"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useB3trApprove } from "@/hooks"
 import {
   VStack,
@@ -21,7 +20,6 @@ import {
   Heading,
   CardBody,
   Text,
-  useDisclosure,
 } from "@chakra-ui/react"
 import { AddressUtils } from "@repo/utils"
 import { useWallet } from "@vechain/vechain-kit"
@@ -32,7 +30,6 @@ import { WalletAddressInput } from "@/app/components/Input"
 export const B3trAllowance = () => {
   const { account } = useWallet()
   const { data: b3trBalance } = useB3trBalance(account?.address ?? undefined)
-  const { isOpen, onClose, onOpen } = useDisclosure()
   const [amount, setAmount] = useState<number>(0)
   const [spender, setSpender] = useState<string>("")
   const [amountFieldIsDirty, setAmountFieldIsDirty] = useState<boolean>(false)
@@ -46,7 +43,7 @@ export const B3trAllowance = () => {
     return allowedAmount?.scaled ?? "0"
   }, [allowedAmount])
 
-  const { sendTransaction, resetStatus, isTransactionPending, status, error, txReceipt } = useB3trApprove({
+  const { sendTransaction, isTransactionPending, status } = useB3trApprove({
     spender: spender ?? "",
     amount: amount ?? 0,
   })
@@ -68,131 +65,109 @@ export const B3trAllowance = () => {
       if (event) event.preventDefault()
 
       if (!isValidAddress) return
-      sendTransaction(undefined)
-      onOpen()
+      sendTransaction()
     },
-    [sendTransaction, onOpen, isValidAddress],
+    [sendTransaction, isValidAddress],
   )
-
-  const handleClose = useCallback(() => {
-    resetStatus()
-    onClose()
-  }, [resetStatus, onClose])
 
   const isLoading = isTransactionPending || status === "pending"
 
   return (
-    <>
-      <Card w={"full"}>
-        <CardHeader>
-          <Heading size="lg">{t("B3TR Token Allowance")}</Heading>
-          <Text fontSize="sm">{t("Allow an external address to spend your B3TR tokens.")}</Text>
-        </CardHeader>
-        <CardBody>
-          <form onSubmit={handleSubmit}>
-            <VStack spacing={4} alignItems={"start"}>
-              <HStack spacing={4} alignItems={"start"}>
-                <FormControl>
-                  <FormLabel>
-                    <strong>{t("Balance")}</strong>
-                  </FormLabel>
-                  <InputGroup>
-                    <Input value={b3trBalance?.scaled} disabled={true} />
-                    <InputRightAddon
-                      pointerEvents="none"
-                      pl={1}
-                      pr={1}
-                      ml={0}
-                      backgroundColor={"transparent"}
-                      borderColor={"inherit"}
-                      borderLeft={"none"}>
-                      {t("B3TR")}
-                    </InputRightAddon>
-                  </InputGroup>
-                </FormControl>
-              </HStack>
+    <Card w={"full"}>
+      <CardHeader>
+        <Heading size="lg">{t("B3TR Token Allowance")}</Heading>
+        <Text fontSize="sm">{t("Allow an external address to spend your B3TR tokens.")}</Text>
+      </CardHeader>
+      <CardBody>
+        <form onSubmit={handleSubmit}>
+          <VStack spacing={4} alignItems={"start"}>
+            <HStack spacing={4} alignItems={"start"}>
+              <FormControl>
+                <FormLabel>
+                  <strong>{t("Balance")}</strong>
+                </FormLabel>
+                <InputGroup>
+                  <Input value={b3trBalance?.scaled} disabled={true} />
+                  <InputRightAddon
+                    pointerEvents="none"
+                    pl={1}
+                    pr={1}
+                    ml={0}
+                    backgroundColor={"transparent"}
+                    borderColor={"inherit"}
+                    borderLeft={"none"}>
+                    {t("B3TR")}
+                  </InputRightAddon>
+                </InputGroup>
+              </FormControl>
+            </HStack>
 
-              <HStack spacing={4} alignItems={"start"} w={"full"}>
-                <FormControl isRequired>
-                  <FormLabel>
-                    <strong>{t("Spender")}</strong>
-                  </FormLabel>
-                  <InputGroup>
-                    <WalletAddressInput
-                      onAddressResolved={address => setSpender(address ?? "")}
-                      placeholder={t("Who should be able to use the tokens?")}
-                    />
-                  </InputGroup>
-                  <FormErrorMessage>{t("Address not valid")}</FormErrorMessage>
-                </FormControl>
-              </HStack>
+            <HStack spacing={4} alignItems={"start"} w={"full"}>
+              <FormControl isRequired>
+                <FormLabel>
+                  <strong>{t("Spender")}</strong>
+                </FormLabel>
+                <InputGroup>
+                  <WalletAddressInput
+                    onAddressResolved={address => setSpender(address ?? "")}
+                    placeholder={t("Who should be able to use the tokens?")}
+                  />
+                </InputGroup>
+                <FormErrorMessage>{t("Address not valid")}</FormErrorMessage>
+              </FormControl>
+            </HStack>
 
-              <HStack spacing={4} w={"full"} justify={"space-between"} align={"start"}>
-                <FormControl isRequired isInvalid={!isAmountValid && amountFieldIsDirty} w={"full"}>
-                  <FormLabel>
-                    <strong>{t("Amount to allow")}</strong>
-                  </FormLabel>
-                  <NumberInput
-                    min={0}
-                    value={allowedAmountLoading ? t("Loading...") : amount}
-                    isDisabled={isLoading}
-                    onChange={value => {
-                      setAmount(parseInt(value))
-                      setAmountFieldIsDirty(true)
-                    }}>
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                  <FormErrorMessage>{t("Invalid amount")}</FormErrorMessage>
-                </FormControl>
+            <HStack spacing={4} w={"full"} justify={"space-between"} align={"start"}>
+              <FormControl isRequired isInvalid={!isAmountValid && amountFieldIsDirty} w={"full"}>
+                <FormLabel>
+                  <strong>{t("Amount to allow")}</strong>
+                </FormLabel>
+                <NumberInput
+                  min={0}
+                  value={allowedAmountLoading ? t("Loading...") : amount}
+                  isDisabled={isLoading}
+                  onChange={value => {
+                    setAmount(parseInt(value))
+                    setAmountFieldIsDirty(true)
+                  }}>
+                  <NumberInputField />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+                <FormErrorMessage>{t("Invalid amount")}</FormErrorMessage>
+              </FormControl>
 
-                <FormControl w={"full"}>
-                  <FormLabel>
-                    <strong>{t("Current allowance")}</strong>
-                  </FormLabel>
-                  <InputGroup>
-                    <Input
-                      placeholder={t("Amount of tokens the inserted address is already allowed to spend")}
-                      value={allowedAmountScaled}
-                      disabled={true}
-                    />
-                    <InputRightAddon
-                      pointerEvents="none"
-                      pl={1}
-                      pr={1}
-                      ml={0}
-                      backgroundColor={"transparent"}
-                      borderColor={"inherit"}
-                      borderLeft={"none"}>
-                      {t("B3TR")}
-                    </InputRightAddon>
-                  </InputGroup>
-                </FormControl>
-              </HStack>
-              <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
-                {t("Allow")}
-              </Button>
-            </VStack>
-          </form>
-        </CardBody>
-      </Card>
-
-      <TransactionModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        status={error ? TransactionModalStatus.Error : (status as TransactionModalStatus)}
-        successTitle={t("B3TR tokens allowance updated successfully")}
-        onTryAgain={handleSubmit}
-        showTryAgainButton
-        showExplorerButton
-        txId={txReceipt?.meta.txID}
-        pendingTitle={t(`Updating B3TR tokens allowance...`)}
-        errorTitle={t("Error updating allowance")}
-        errorDescription={error?.reason}
-      />
-    </>
+              <FormControl w={"full"}>
+                <FormLabel>
+                  <strong>{t("Current allowance")}</strong>
+                </FormLabel>
+                <InputGroup>
+                  <Input
+                    placeholder={t("Amount of tokens the inserted address is already allowed to spend")}
+                    value={allowedAmountScaled}
+                    disabled={true}
+                  />
+                  <InputRightAddon
+                    pointerEvents="none"
+                    pl={1}
+                    pr={1}
+                    ml={0}
+                    backgroundColor={"transparent"}
+                    borderColor={"inherit"}
+                    borderLeft={"none"}>
+                    {t("B3TR")}
+                  </InputRightAddon>
+                </InputGroup>
+              </FormControl>
+            </HStack>
+            <Button isDisabled={!isFormValid} colorScheme="blue" type="submit" isLoading={isLoading}>
+              {t("Allow")}
+            </Button>
+          </VStack>
+        </form>
+      </CardBody>
+    </Card>
   )
 }

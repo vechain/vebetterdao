@@ -14,9 +14,9 @@ import {
 } from "@chakra-ui/react"
 import { useTranslation } from "react-i18next"
 import { useCallback } from "react"
-import { ExclamationTriangle, TransactionModal, TransactionModalStatus } from "@/components"
+import { ExclamationTriangle } from "@/components"
 import { useRevokeDelegation } from "@/hooks"
-
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
 export const RevokeDelegationDelegatorPOVModal = ({
   modal,
   delegatee,
@@ -25,13 +25,13 @@ export const RevokeDelegationDelegatorPOVModal = ({
   delegatee: string
 }) => {
   const { t } = useTranslation()
-
+  const { isTxModalOpen } = useTransactionModal()
   const revokeDelegation = useRevokeDelegation({
     isDelegator: true,
   })
 
   const handleDelegate = useCallback(() => {
-    revokeDelegation.sendTransaction({})
+    revokeDelegation.sendTransaction()
   }, [revokeDelegation])
 
   const triangleSize = useBreakpointValue({ base: 100, md: 220 })
@@ -41,26 +41,8 @@ export const RevokeDelegationDelegatorPOVModal = ({
     revokeDelegation.resetStatus()
   }, [modal, revokeDelegation])
 
-  if (revokeDelegation.status !== "ready") {
-    return (
-      <TransactionModal
-        isOpen={modal.isOpen ?? false}
-        onClose={handleClose}
-        successTitle={t("Delegation revoked!")}
-        status={revokeDelegation.status as TransactionModalStatus}
-        errorDescription={revokeDelegation.error?.reason}
-        errorTitle={revokeDelegation.error ? t("Error revoking delegation") : undefined}
-        showTryAgainButton
-        onTryAgain={() => revokeDelegation.sendTransaction({})}
-        pendingTitle={t("Revoking delegation...")}
-        showExplorerButton
-        txId={revokeDelegation.txReceipt?.meta.txID}
-      />
-    )
-  }
-
   return (
-    <BaseModal onClose={handleClose} isOpen={modal.isOpen ?? false}>
+    <BaseModal onClose={handleClose} isOpen={(modal.isOpen && !isTxModalOpen) ?? false}>
       <VStack align="stretch" gap={6}>
         <VStack justify="center" align="center" gap={10}>
           <ExclamationTriangle color="#C84968" size={triangleSize} />

@@ -1,258 +1,107 @@
-import { ReactNode, useCallback, useMemo } from "react"
-import { ConfirmationModalContent } from "./ConfirmationModalContent"
-import { ConfirmationEndorsementModalContent } from "./ConfirmationModalContent/ConfirmationEndorsementModalContent"
+import { BaseModal } from "../BaseModal"
+import { useTransactionModal } from "@/providers/TransactionModalProvider"
+import { ReactNode, useMemo, useRef, useCallback } from "react"
+import { TransactionStatus } from "@vechain/vechain-kit"
+import { SuccessModalContent } from "./SuccessModalContent"
 import { ErrorModalContent } from "./ErrorModalContent"
 import { LoadingModalContent } from "./LoadingModalContent"
-import { SuccessModalContent } from "./SuccessModalContent"
-import { Modal, ModalOverlay } from "@chakra-ui/react"
-import { CustomModalContent } from "@/components/CustomModalContent"
-import { UploadingMetadataModalContent } from ".//UploadingMetadataModalContent"
-import { ConfirmationConvertModalContent } from "./ConfirmationConvertModalContent"
-import { SuccessConvertModalContent } from "./SuccessConvertModalContent"
-import {
-  ConfirmationAppBalanceModalContent,
-  ConfirmationRefillPoolsModalContent,
-} from "./ConfirmationAppBalanceModalContent"
-import { SuccessAppBalanceModalContent } from "./SuccessAppBalanceModalContent"
-import { CoinsFlipModalContent } from "./CoinsFlipModalContent/CoinsFlipModalContent"
-import { PropsEndorsement } from "@/app/apps/components/UnendorseAppModal"
+import { UnknownModalContent } from "./UnknownModalContent"
+import { useTranslation } from "react-i18next"
 
-export enum TransactionModalStatus {
-  Ready = "ready",
-  Pending = "pending",
-  WaitingConfirmation = "waitingConfirmation",
-  Error = "error",
-  Success = "success",
-  UploadingMetadata = "uploadingMetadata",
-  Unknown = "unknown",
-}
+export const TransactionModal = () => {
+  const { transactionModalState, isTxModalOpen, onClose } = useTransactionModal()
+  const portalRef = useRef(document.body)
+  const { t } = useTranslation()
 
-export type TransactionModalProps = {
-  isOpen: boolean
-  onClose: () => void
-  status: TransactionModalStatus
-  pendingTitle?: ReactNode
-  confirmationTitle?: ReactNode
-  errorTitle?: ReactNode
-  errorDescription?: string
-  successTitle?: ReactNode
-  showSocialButtons?: boolean
-  socialDescriptionEncoded?: string
-  showTryAgainButton?: boolean
-  onTryAgain?: () => void
-  showExplorerButton?: boolean
-  txId?: string
-  b3trBalanceAfterSwap?: string
-  vot3BalanceAfterSwap?: string
-  b3trAmount?: string
-  isSwap?: boolean
-  isClaimingRewards?: boolean
-  isAppWithdraw?: boolean
-  isAppDeposit?: boolean
-  isRefillingPools?: boolean
-  isRewardsPoolToAppBalance?: boolean
-  isEnablingRewardsPool?: boolean
-  b3trBalance?: string
-  vot3Balance?: string
-  endorsementInfo?: PropsEndorsement
-  isSuccessBeenTrack?: boolean
-}
+  const canShowCloseButton = useMemo(() => {
+    return transactionModalState?.status !== "pending" && transactionModalState?.status !== "waitingConfirmation"
+  }, [transactionModalState?.status])
 
-export const TransactionModal = ({
-  isOpen,
-  onClose,
-  status,
-  pendingTitle,
-  confirmationTitle,
-  errorTitle,
-  errorDescription,
-  successTitle,
-  showSocialButtons = false,
-  socialDescriptionEncoded,
-  showTryAgainButton,
-  onTryAgain,
-  showExplorerButton,
-  txId,
-  isSwap,
-  isClaimingRewards,
-  isAppWithdraw,
-  isAppDeposit,
-  isRefillingPools,
-  isRewardsPoolToAppBalance,
-  isEnablingRewardsPool,
-  b3trBalanceAfterSwap,
-  vot3BalanceAfterSwap,
-  b3trAmount,
-  b3trBalance,
-  vot3Balance,
-  endorsementInfo,
-  isSuccessBeenTrack,
-}: TransactionModalProps) => {
-  const handlePendingStatus = useCallback(() => {
-    if (isClaimingRewards) {
-      return <CoinsFlipModalContent />
-    } else if (isSwap) {
-      return (
-        <ConfirmationConvertModalContent
-          b3trBalanceAfter={b3trBalanceAfterSwap}
-          vot3BalanceAfter={vot3BalanceAfterSwap}
-        />
-      )
-    } else if (isAppWithdraw || isAppDeposit) {
-      return (
-        <ConfirmationAppBalanceModalContent
-          b3trBalanceAfter={b3trBalanceAfterSwap}
-          b3trAmount={b3trAmount}
-          isDeposit={isAppDeposit}
-        />
-      )
-    } else if (isRefillingPools) {
-      return (
-        <ConfirmationRefillPoolsModalContent
-          b3trBalanceAfter={b3trBalanceAfterSwap}
-          b3trAmount={b3trAmount}
-          isRewardsPoolToAppBalance={isRewardsPoolToAppBalance}
-          isEnablingRewardsPool={isEnablingRewardsPool}
-        />
-      )
-    } else if (endorsementInfo?.isUnendorsing || endorsementInfo?.isEndorsing) {
-      return <ConfirmationEndorsementModalContent endorsementInfo={endorsementInfo} />
-    } else {
-      return <ConfirmationModalContent title={confirmationTitle} />
+  const handleTryAgain = useCallback(async () => {
+    if (transactionModalState?.tryAgain) {
+      return await transactionModalState.tryAgain()
     }
-  }, [
-    isClaimingRewards,
-    isSwap,
-    isAppWithdraw,
-    isAppDeposit,
-    endorsementInfo,
-    b3trBalanceAfterSwap,
-    vot3BalanceAfterSwap,
-    b3trAmount,
-    confirmationTitle,
-    isRewardsPoolToAppBalance,
-    isEnablingRewardsPool,
-    isRefillingPools,
-  ])
+  }, [transactionModalState])
 
-  const handleWaitingConfirmationStatus = useCallback(() => {
-    return <LoadingModalContent title={pendingTitle} showExplorerButton={showExplorerButton} txId={txId} />
-  }, [pendingTitle, showExplorerButton, txId])
-
-  const handleErrorStatus = useCallback(() => {
-    return (
-      <ErrorModalContent
-        title={errorTitle}
-        description={errorDescription}
-        showTryAgainButton={showTryAgainButton}
-        onTryAgain={onTryAgain}
-        showExplorerButton={showExplorerButton}
-        txId={txId}
-      />
-    )
-  }, [errorTitle, errorDescription, showTryAgainButton, onTryAgain, showExplorerButton, txId])
-
-  const handleSuccessStatus = useCallback(() => {
-    if (isSwap) {
-      return (
-        <SuccessConvertModalContent
-          b3trBalanceAfter={b3trBalance}
-          vot3BalanceAfter={vot3Balance}
-          txId={txId}
-          onClose={onClose}
-        />
-      )
-    } else if (isAppWithdraw || isAppDeposit) {
-      return (
-        <SuccessAppBalanceModalContent
-          b3trBalanceAfter={b3trBalance}
-          b3trAmount={b3trAmount}
-          isDeposit={isAppDeposit}
-          txId={txId}
-          onClose={onClose}
-        />
-      )
-    } else if (endorsementInfo?.isUnendorsing || endorsementInfo?.isEndorsing) {
-      return (
-        <SuccessModalContent
-          title={successTitle}
-          showSocialButtons={showSocialButtons}
-          socialDescriptionEncoded={socialDescriptionEncoded}
-          showExplorerButton={showExplorerButton}
-          txId={txId}
-          endorsementInfo={endorsementInfo}
-        />
-      )
-    } else {
-      return (
-        <SuccessModalContent
-          title={successTitle}
-          showSocialButtons={showSocialButtons}
-          socialDescriptionEncoded={socialDescriptionEncoded}
-          showExplorerButton={showExplorerButton}
-          txId={txId}
-          isSuccessBeenTrack={isSuccessBeenTrack}
-        />
-      )
-    }
-  }, [
-    b3trAmount,
-    b3trBalance,
-    endorsementInfo,
-    isAppDeposit,
-    isAppWithdraw,
-    isSuccessBeenTrack,
-    isSwap,
-    onClose,
-    showExplorerButton,
-    showSocialButtons,
-    socialDescriptionEncoded,
-    successTitle,
-    txId,
-    vot3Balance,
-  ])
-
-  const handleReadyStatus = useCallback(() => {
-    return <ConfirmationModalContent title={"Transaction Ready"} description="" />
-  }, [])
-
-  const handleUnknownStatus = useCallback(() => {
-    return <ConfirmationModalContent title={"Unknown Status"} description="" />
-  }, [])
+  const getCustomUIProps = useCallback(
+    (status: TransactionStatus) => {
+      return transactionModalState?.customUI?.[status] || {}
+    },
+    [transactionModalState?.customUI],
+  )
 
   const modalContent = useMemo(() => {
-    const statusComponentMap: Record<TransactionModalStatus, ReactNode> = {
-      [TransactionModalStatus.UploadingMetadata]: <UploadingMetadataModalContent />,
-      [TransactionModalStatus.Pending]: handlePendingStatus(),
-      [TransactionModalStatus.WaitingConfirmation]: handleWaitingConfirmationStatus(),
-      [TransactionModalStatus.Error]: handleErrorStatus(),
-      [TransactionModalStatus.Success]: handleSuccessStatus(),
-      [TransactionModalStatus.Ready]: handleReadyStatus(),
-      [TransactionModalStatus.Unknown]: handleUnknownStatus(),
+    const defaultContent = {
+      pending: {
+        title: t("Waiting for confirmation..."),
+        description: t("Confirm the operation in your wallet to complete it"),
+      },
+      ready: {
+        title: t("Transaction Ready"),
+        description: t(
+          "Transaction status unclear. If you haven't confirmed it in your wallet yet, you can try again. Otherwise, you can close this window and check your transaction history.",
+        ),
+      },
     }
-    return statusComponentMap[status] || null
+
+    const statusComponentMap: Record<TransactionStatus, ReactNode> = {
+      pending: <LoadingModalContent {...defaultContent.pending} {...getCustomUIProps("pending")} />,
+      waitingConfirmation: <LoadingModalContent {...getCustomUIProps("waitingConfirmation")} />,
+      error: (
+        <ErrorModalContent
+          {...getCustomUIProps("error")}
+          showTryAgainButton
+          {...(transactionModalState?.error?.reason ? { description: transactionModalState?.error?.reason } : {})}
+          {...(transactionModalState?.tryAgain ? { onTryAgain: handleTryAgain } : {})}
+        />
+      ),
+      success: (
+        <SuccessModalContent
+          {...getCustomUIProps("success")}
+          txId={transactionModalState?.txId}
+          showSocialButtons={true}
+          onClose={onClose}
+        />
+      ),
+      ready: (
+        <UnknownModalContent
+          {...defaultContent.ready}
+          showTryAgainButton
+          {...(transactionModalState?.tryAgain ? { onTryAgain: handleTryAgain } : {})}
+        />
+      ),
+      unknown: <UnknownModalContent />,
+    }
+    return statusComponentMap[transactionModalState?.status ?? "unknown"] || null
   }, [
-    handleErrorStatus,
-    handlePendingStatus,
-    handleReadyStatus,
-    handleSuccessStatus,
-    handleUnknownStatus,
-    handleWaitingConfirmationStatus,
-    status,
+    t,
+    getCustomUIProps,
+    transactionModalState?.error?.reason,
+    transactionModalState?.tryAgain,
+    transactionModalState?.txId,
+    transactionModalState?.status,
+    handleTryAgain,
+    onClose,
   ])
-  if (!modalContent || status === TransactionModalStatus.Ready) return null
+
   return (
-    <Modal
-      data-testid="transaction-modal"
-      isOpen={isOpen}
+    <BaseModal
+      isOpen={isTxModalOpen}
       onClose={onClose}
-      trapFocus={false}
-      closeOnOverlayClick={status !== "waitingConfirmation" && status !== "pending"}
-      isCentered={true}>
-      <ModalOverlay />
-      <CustomModalContent maxW={"590px"} minH={"300px"}>
-        {modalContent}
-      </CustomModalContent>
-    </Modal>
+      modalProps={{
+        portalProps: {
+          containerRef: portalRef,
+        },
+      }}
+      showCloseButton={canShowCloseButton}
+      isCloseable={canShowCloseButton}
+      modalContentProps={{
+        zIndex: 9999,
+      }}
+      modalBodyProps={{
+        p: 10,
+      }}>
+      {modalContent}
+    </BaseModal>
   )
 }

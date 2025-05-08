@@ -19,7 +19,7 @@ export const CreatorApplicationRejectedBanner = () => {
     <GenericBanner
       title={title}
       description={description}
-      logoSrc="images/mascot/mascot-warning-head.webp"
+      logoSrc="/assets/mascot/mascot-warning-head.webp"
       backgroundImageSrc="/assets/backgrounds/cloud-background-orange.webp"
       backgroundColor="#FFD979"
       buttonLabel={doAction}

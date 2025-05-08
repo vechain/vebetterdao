@@ -2,7 +2,7 @@ import { useB3trBalance, useVot3Balance } from "@/api"
 import { Button, useDisclosure, Text } from "@chakra-ui/react"
 import { useWallet } from "@vechain/vechain-kit"
 import { FaRepeat } from "react-icons/fa6"
-import { ConvertModal } from "./ConvertModal"
+import { ConvertModal } from "./Modal"
 import { useTranslation } from "react-i18next"
 
 type Props = { isIconButton?: boolean }

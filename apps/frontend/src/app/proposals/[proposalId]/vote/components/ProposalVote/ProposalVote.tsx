@@ -1,6 +1,5 @@
 import { ProposalState, useUserSingleProposalVoteEvent, useIsQuadraticVotingDisabled } from "@/api"
 import { AbstainedIcon, VoteIcon } from "@/components"
-import { TransactionModal, TransactionModalStatus } from "@/components/TransactionModal"
 import { useProposalCastVote } from "@/hooks/useProposalCastVote"
 import {
   Box,
@@ -17,7 +16,6 @@ import {
   Text,
   Textarea,
   VStack,
-  useDisclosure,
 } from "@chakra-ui/react"
 import { UilInfoCircle, UilThumbsDown, UilThumbsUp } from "@iconscout/react-unicons"
 import { getCompactFormatter } from "@repo/utils/FormattingUtils"
@@ -58,7 +56,6 @@ export const ProposalVote = ({ proposalId }: Props) => {
   const { t } = useTranslation()
   const [selectedVote, setSelectedVote] = useState("1")
   const [comment, setComment] = useState("")
-  const { isOpen, onClose, onOpen } = useDisclosure()
   const router = useRouter()
   const { account } = useWallet()
   const { data: isQuadraticVotingDisabled } = useIsQuadraticVotingDisabled()
@@ -90,18 +87,12 @@ export const ProposalVote = ({ proposalId }: Props) => {
 
   const castVoteMutation = useProposalCastVote({ proposalId: proposal.id, onSuccess })
 
-  const handleClose = useCallback(() => {
-    onClose()
-    castVoteMutation.resetStatus()
-  }, [onClose, castVoteMutation])
-
   const handleCastVote = useCallback(
     (e?: FormEvent) => {
-      onOpen()
       castVoteMutation.sendTransaction({ proposalId: proposal.id, vote: selectedVote, comment })
       e?.preventDefault()
     },
-    [castVoteMutation, comment, onOpen, proposal.id, selectedVote],
+    [castVoteMutation, comment, proposal.id, selectedVote],
   )
 
   if (isPageNotAllowed) {
@@ -236,25 +227,6 @@ export const ProposalVote = ({ proposalId }: Props) => {
             </Button>
           </VStack>
         </Stack>
-        <TransactionModal
-          isOpen={isOpen}
-          onClose={handleClose}
-          successTitle={t("Vote Completed!")}
-          status={
-            castVoteMutation.error ? TransactionModalStatus.Error : (castVoteMutation.status as TransactionModalStatus)
-          }
-          errorDescription={castVoteMutation.error?.reason}
-          errorTitle={castVoteMutation.error ? t("Error voting") : undefined}
-          showTryAgainButton
-          onTryAgain={handleCastVote}
-          pendingTitle={t("Voting...")}
-          showSocialButtons
-          socialDescriptionEncoded={encodeURIComponent(
-            "🔄 Just voted for a proposal on #VeBetterDAO! \n\n🌱 Explore and join us at https://vebetterdao.org.\n\n#VeBetterDAO #Vechain",
-          )}
-          showExplorerButton
-          txId={castVoteMutation.txReceipt?.meta.txID}
-        />
       </CardBody>
     </Card>
   )

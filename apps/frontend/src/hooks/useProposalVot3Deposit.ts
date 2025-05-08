@@ -8,7 +8,7 @@ import { useBuildTransaction } from "./useBuildTransaction"
 import { getProposalDepositQueryKey } from "@/api/contracts/governance/hooks/useGetProposalDeposit"
 import { getIsDepositReachedQueryKey } from "@/api/contracts/governance/hooks/useIsDepositReached"
 import { ethers } from "ethers"
-
+import { TransactionCustomUI } from "@/providers/TransactionModalProvider"
 const config = getConfig()
 
 const Vot3Interface = VOT3__factory.createInterface()
@@ -24,9 +24,14 @@ const GOVERNANCE_CONTRACT = config.b3trGovernorAddress
 type UseProposalVot3DepositProps = {
   proposalId: string
   onSuccess?: () => void
+  transactionModalCustomUI?: TransactionCustomUI
 }
 
-export const useProposalVot3Deposit = ({ proposalId, onSuccess }: UseProposalVot3DepositProps) => {
+export const useProposalVot3Deposit = ({
+  proposalId,
+  onSuccess,
+  transactionModalCustomUI,
+}: UseProposalVot3DepositProps) => {
   const { account } = useWallet()
 
   const clauseBuilder = useCallback(({ amount, proposalId }: { amount: string | number; proposalId: string }) => {
@@ -64,6 +69,7 @@ export const useProposalVot3Deposit = ({ proposalId, onSuccess }: UseProposalVot
     clauseBuilder,
     refetchQueryKeys,
     onSuccess,
+    transactionModalCustomUI,
     // suggestedMaxGas,
   })
 }
