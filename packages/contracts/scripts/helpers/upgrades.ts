@@ -114,19 +114,11 @@ export const upgradeProxy = async (
 
   options?.logOutput && console.log(`${newVersionContractName} impl.: ${await implementation.getAddress()}`)
 
-  console.log(`Proxy address: ${proxyAddress}`)
-  console.log(`Upgrading to: ${await implementation.getAddress()}`)
-  const signers = await ethers.getSigners()
-  const signer = signers[0]
-
-  console.log(`Signer: ${signer.address}`)
-
   const tx = await currentImplementationContract.upgradeToAndCall(
     await implementation.getAddress(),
     args.length > 0 ? getInitializerData(Contract.interface, args, options?.version) : "0x",
   )
   await tx.wait()
-  console.log(`Upgrade transaction: ${tx.hash}`)
   const newImplementationAddress = await getImplementationAddress(ethers.provider, proxyAddress)
   if (!AddressUtils.compareAddresses(newImplementationAddress, await implementation.getAddress())) {
     throw new Error(

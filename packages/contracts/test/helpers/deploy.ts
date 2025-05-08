@@ -94,10 +94,7 @@ import {
   PassportDelegationLogicV2,
   PassportChecksLogicV2,
   PassportSignalingLogicV2,
-  VoterRewardsV3,
   B3TRMultiSig,
-  EmissionsV2,
-  B3TRGovernorV5,
   GovernorVotesLogicV5,
   VeBetterPassportV3,
   PassportPersonhoodLogicV3,
@@ -114,8 +111,6 @@ import { deployAndUpgrade, deployProxy, deployProxyOnly, initializeProxy, upgrad
 import { bootstrapAndStartEmissions as callBootstrapAndStartEmissions } from "./common"
 import { governanceLibraries, passportLibraries } from "../../scripts/libraries"
 import { setWhitelistedFunctions } from "../../scripts/deploy/deployAll"
-import { B3TRGovernorV4, VoterRewardsV4 } from "../../typechain-types/contracts/deprecated/V4"
-import { VoterRewardsV2 } from "../../typechain-types/contracts/deprecated/V2/VoterRewardsV2"
 import {
   GovernorClockLogicV4,
   GovernorConfiguratorV4,
