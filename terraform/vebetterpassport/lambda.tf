@@ -23,6 +23,7 @@ resource "terraform_data" "build_lambda" {
     EOT
     environment = {
       MAINNET_MNEMONIC = sensitive(var.MAINNET_MNEMONIC)
+      TESTNET_MNEMONIC = sensitive(var.TESTNET_MNEMONIC)
     }
   }
 }
