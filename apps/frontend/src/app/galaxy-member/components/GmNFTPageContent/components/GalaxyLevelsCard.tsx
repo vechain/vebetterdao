@@ -64,7 +64,7 @@ export const GalaxyLevelsCard = () => {
         <VStack align="stretch" gap={6}>
           <VStack align="stretch">
             <HStack justify="space-between">
-              <Heading fontSize="lg">{t("Galaxy Levels")}</Heading>
+              <Heading fontSize="lg">{t("Reward Weight")}</Heading>
               <BaseTooltip
                 text={
                   <TableContainer maxW="280px" maxH="400px" overflowY="auto">
