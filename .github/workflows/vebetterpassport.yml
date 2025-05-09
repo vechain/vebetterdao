@@ -117,18 +117,18 @@ jobs:
             -out=vebetterpassport.tfplan \
             -detailed-exitcode
 
-      - name: Check for changes
-        id: check_changes
-        run: |
-          if [ ${{ steps.plan.outcome }} == 'success' ] && [ ${{ steps.plan.outputs.exitcode }} == 2 ]; then
-            echo "Changes detected"
-            echo "plan_changes_detected=true" >> $GITHUB_OUTPUT
-          else
-            echo "No changes detected"
-            echo "plan_changes_detected=false" >> $GITHUB_OUTPUT
-          fi
-        shell: bash
-        continue-on-error: false
+      # - name: Check for changes
+      #   id: check_changes
+      #   run: |
+      #     if [ ${{ steps.plan.outcome }} == 'success' ] && [ ${{ steps.plan.outputs.exitcode }} == 2 ]; then
+      #       echo "Changes detected"
+      #       echo "plan_changes_detected=true" >> $GITHUB_OUTPUT
+      #     else
+      #       echo "No changes detected"
+      #       echo "plan_changes_detected=false" >> $GITHUB_OUTPUT
+      #     fi
+      #   shell: bash
+      #   continue-on-error: false
 
       - name: Upload Plan
         if: github.event_name == 'pull_request'

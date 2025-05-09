@@ -53,9 +53,9 @@ resource "aws_lambda_function" "resetUserSignalsWithReason_vebetterpassport" {
 
   environment {
     variables = {
-      RESET_SIGNALER_PK    = local.minter_pk
-      MNEMONIC             = local.mnemonic
-      WALLET               = local.wallet
+      RESET_SIGNALER_PK = local.minter_pk
+      MNEMONIC          = local.mnemonic
+      WALLET            = local.wallet
     }
   }
 
