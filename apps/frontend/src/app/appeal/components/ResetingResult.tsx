@@ -14,12 +14,14 @@ import {
   Text,
 } from "@chakra-ui/react"
 import { UilArrowUp, UilArrowDown } from "@iconscout/react-unicons"
+import { ResetStatus } from "../types"
+import { RESET_STATUS } from "../constants"
 
 export const ResetingResult = ({
   resetingStatus,
   apiResponse,
 }: {
-  resetingStatus: "idle" | "pending" | "success" | "error"
+  resetingStatus: ResetStatus
   apiResponse: string | undefined
 }) => {
   const router = useRouter()
@@ -28,7 +30,7 @@ export const ResetingResult = ({
 
   return (
     <>
-      {resetingStatus === "success" && (
+      {resetingStatus === RESET_STATUS.SUCCESS && (
         <VStack align="stretch" gap={2}>
           <Button variant="primaryAction" w="auto" onClick={() => router.push("/")}>
             {"Back to the home page"}
@@ -36,7 +38,7 @@ export const ResetingResult = ({
         </VStack>
       )}
 
-      {resetingStatus === "error" && (
+      {resetingStatus === RESET_STATUS.ERROR && (
         <VStack align="stretch" gap={2}>
           <Alert status="error" size="md" borderRadius="16px">
             <AlertIcon w={4} h={4} color="#C84968" />
