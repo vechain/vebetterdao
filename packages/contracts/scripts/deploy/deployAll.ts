@@ -86,6 +86,14 @@ export async function deployAll(config: ContractsConfig) {
     GovernorQuorumLogicLibV1,
     GovernorVotesLogicLibV1,
     GovernorStateLogicLibV1,
+    GovernorClockLogicLib,
+    GovernorConfiguratorLib,
+    GovernorDepositLogicLib,
+    GovernorFunctionRestrictionsLogicLib,
+    GovernorProposalLogicLib,
+    GovernorQuorumLogicLib,
+    GovernorVotesLogicLib,
+    GovernorStateLogicLib,
     GovernorClockLogicLibV3,
     GovernorConfiguratorLibV3,
     GovernorFunctionRestrictionsLogicLibV3,
@@ -102,14 +110,15 @@ export async function deployAll(config: ContractsConfig) {
     GovernorVotesLogicLibV4,
     GovernorDepositLogicLibV4,
     GovernorStateLogicLibV4,
-    GovernorClockLogicLib,
-    GovernorConfiguratorLib,
-    GovernorDepositLogicLib,
-    GovernorFunctionRestrictionsLogicLib,
-    GovernorProposalLogicLib,
-    GovernorQuorumLogicLib,
-    GovernorVotesLogicLib,
-    GovernorStateLogicLib,
+    GovernorClockLogicLibV5,
+    GovernorConfiguratorLibV5,
+    GovernorFunctionRestrictionsLogicLibV5,
+    GovernorGovernanceLogicLibV5,
+    GovernorQuorumLogicLibV5,
+    GovernorProposalLogicLibV5,
+    GovernorVotesLogicLibV5,
+    GovernorDepositLogicLibV5,
+    GovernorStateLogicLibV5,
   } = await governanceLibraries()
 
   console.log("Deploying VeBetter Passport Libraries")
@@ -348,7 +357,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as X2EarnRewardsPool
 
   const xAllocationPool = (await deployAndUpgrade(
-    ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPoolV4", "XAllocationPool"],
+    ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPoolV4", "XAllocationPoolV5"],
     [
       [
         TEMP_ADMIN, // admin
@@ -465,14 +474,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as VoterRewards
 
   const xAllocationVoting = (await deployAndUpgrade(
-    [
-      "XAllocationVotingV1",
-      "XAllocationVotingV2",
-      "XAllocationVotingV3",
-      "XAllocationVotingV4",
-      "XAllocationVotingV5",
-      "XAllocationVoting",
-    ],
+    ["XAllocationVotingV1", "XAllocationVotingV2", "XAllocationVotingV3", "XAllocationVotingV4", "XAllocationVotingV5"],
     [
       [
         {
@@ -495,10 +497,9 @@ export async function deployAll(config: ContractsConfig) {
       [],
       [],
       [],
-      [],
     ],
     {
-      versions: [undefined, 2, 3, 4, 5, 6],
+      versions: [undefined, 2, 3, 4, 5],
       logOutput: true,
     },
   )) as XAllocationVoting
@@ -574,14 +575,14 @@ export async function deployAll(config: ContractsConfig) {
     {
       version: 3,
       libraries: {
-        PassportChecksLogic: await PassportChecksLogicV3.getAddress(),
-        PassportConfigurator: await PassportConfiguratorV3.getAddress(),
-        PassportEntityLogic: await PassportEntityLogicV3.getAddress(),
-        PassportDelegationLogic: await PassportDelegationLogicV3.getAddress(),
-        PassportPersonhoodLogic: await PassportPersonhoodLogicV3.getAddress(),
-        PassportPoPScoreLogic: await PassportPoPScoreLogicV3.getAddress(),
-        PassportSignalingLogic: await PassportSignalingLogicV3.getAddress(),
-        PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogicV3.getAddress(),
+        PassportChecksLogicV3: await PassportChecksLogicV3.getAddress(),
+        PassportConfiguratorV3: await PassportConfiguratorV3.getAddress(),
+        PassportEntityLogicV3: await PassportEntityLogicV3.getAddress(),
+        PassportDelegationLogicV3: await PassportDelegationLogicV3.getAddress(),
+        PassportPersonhoodLogicV3: await PassportPersonhoodLogicV3.getAddress(),
+        PassportPoPScoreLogicV3: await PassportPoPScoreLogicV3.getAddress(),
+        PassportSignalingLogicV3: await PassportSignalingLogicV3.getAddress(),
+        PassportWhitelistAndBlacklistLogicV3: await PassportWhitelistAndBlacklistLogicV3.getAddress(),
       },
     },
   )) as VeBetterPassport
@@ -608,7 +609,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as VeBetterPassport
 
   const governor = (await deployAndUpgrade(
-    ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernor"],
+    ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernorV5"],
     [
       [
         {
@@ -680,14 +681,14 @@ export async function deployAll(config: ContractsConfig) {
           GovernorVotesLogicV4: await GovernorVotesLogicLibV4.getAddress(),
         },
         {
-          GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
-          GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+          GovernorClockLogicV5: await GovernorClockLogicLibV5.getAddress(),
+          GovernorConfiguratorV5: await GovernorConfiguratorLibV5.getAddress(),
+          GovernorDepositLogicV5: await GovernorDepositLogicLibV5.getAddress(),
+          GovernorFunctionRestrictionsLogicV5: await GovernorFunctionRestrictionsLogicLibV5.getAddress(),
+          GovernorQuorumLogicV5: await GovernorQuorumLogicLibV5.getAddress(),
+          GovernorProposalLogicV5: await GovernorProposalLogicLibV5.getAddress(),
+          GovernorStateLogicV5: await GovernorStateLogicLibV5.getAddress(),
+          GovernorVotesLogicV5: await GovernorVotesLogicLibV5.getAddress(),
         },
       ],
       logOutput: true,

@@ -33,9 +33,9 @@ export const GmNFTPageContent = () => {
           <GMNFTList />
         </VStack>
         <VStack flex={1.5} align={"stretch"}>
+          <GalaxyRewardCalculatorCard />
           <GmPoolAmountCard />
           <GalaxyLevelsCard />
-          <GalaxyRewardCalculatorCard />
         </VStack>
       </Stack>
     </VStack>

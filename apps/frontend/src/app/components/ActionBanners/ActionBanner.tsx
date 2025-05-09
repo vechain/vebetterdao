@@ -213,6 +213,13 @@ export const ActionBanner = () => {
 
   const slides = useMemo(() => {
     const bannerComponents = []
+    if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
+    if (showClaimB3trBanner)
+      bannerComponents.push(
+        <ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} gmRewards={gmRewards} key="claim-b3tr" />,
+      )
+    if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
+    if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (showGmRewardsPoolBanner)
       bannerComponents.push(
         <GMPoolRewardsBanner
@@ -222,13 +229,6 @@ export const ActionBanner = () => {
           key="gm-rewards-pool"
         />,
       )
-    if (showCantVoteBanners) bannerComponents.push(CantVoteBanner)
-    if (showClaimB3trBanner)
-      bannerComponents.push(
-        <ClaimVotingRewardsBanner roundsRewardsQuery={votingRewardsQuery} gmRewards={gmRewards} key="claim-b3tr" />,
-      )
-    if (showCastVoteBanner) bannerComponents.push(<CastVoteBanner key="cast-vote" />)
-    if (showCastVoteInProposalBanners) bannerComponents.push(...proposalsToVoteBanners)
     if (showVeChainKitLaunchBanner) bannerComponents.push(<VeChainKitLaunchBanner key="vechain-kit-launch" />)
     if (newApps) bannerComponents.push(<NewAppBanner key="new-app" />)
     if (showCreatorNftBanners) bannerComponents.push(CreatorNftBanner)

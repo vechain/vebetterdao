@@ -48,12 +48,9 @@ export const getGMLevelOverview = async (level?: GMLevelName): Promise<GMLevelOv
 
   const query = level ? `?level=${encodeURIComponent(level)}` : ""
 
-  const response = await fetch(
-    `https://green-main-api-b3tr-alb-1591607428.eu-west-1.elb.amazonaws.com/api/v1/gm-nfts/level-overview${query}`,
-    {
-      method: "GET",
-    },
-  )
+  const response = await fetch(`${indexerUrl}/gm-nfts/level-overview${query}`, {
+    method: "GET",
+  })
 
   if (!response.ok) {
     throw new Error(`Failed to fetch GM Level Overview: ${response.statusText}`)
