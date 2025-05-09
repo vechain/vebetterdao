@@ -30,7 +30,7 @@ async function main() {
   const version = await xAllocationVotingV5.version()
   console.log(`New XAllocationVoting version: ${version}`)
 
-  if (parseInt(version) !== 5) {
+  if (parseInt(version) !== 6) {
     throw new Error(`XAllocationVoting version is not 6: ${version}`)
   }
 
