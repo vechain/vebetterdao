@@ -121,7 +121,8 @@ jobs:
             shard14,
             shard15,
             shard16,
-            shard17,
+            shard17a,
+            shard17b,
           ]
     steps:
       - name: Checkout repository
