@@ -1,7 +1,7 @@
 name: VeBetterPassport Infrastructure
 
 on:
-  push:
+  pull_request:
     paths:
       - 'terraform/vebetterpassport/**'
       - 'lambda/src/veBetterPassport/**'
@@ -115,12 +115,12 @@ jobs:
         run: |
           if [ "$WORKSPACE" == "dev" ]; then
             terraform plan \
-              -var="MNEMONIC=${TESTNET_MNEMONIC}" \
+              -var="TESTNET_MNEMONIC=${TESTNET_MNEMONIC}" \
               -out=vebetterpassport.tfplan \
               -detailed-exitcode
           else
             terraform plan \
-              -var="MNEMONIC=${MAINNET_MNEMONIC}" \
+              -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}" \
               -out=vebetterpassport.tfplan \
               -detailed-exitcode
           fi
@@ -160,7 +160,7 @@ jobs:
           WORKSPACE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workspace || 'dev' }}
         run: |
           if [ "$WORKSPACE" == "dev" ]; then
-            terraform apply -auto-approve -var="MNEMONIC=${TESTNET_MNEMONIC}"
+            terraform apply -auto-approve -var="TESTNET_MNEMONIC=${TESTNET_MNEMONIC}"
           else
-            terraform apply -auto-approve -var="MNEMONIC=${MAINNET_MNEMONIC}"
+            terraform apply -auto-approve -var="MAINNET_MNEMONIC=${MAINNET_MNEMONIC}"
           fi
