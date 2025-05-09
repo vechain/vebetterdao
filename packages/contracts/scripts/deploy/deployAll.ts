@@ -13,13 +13,20 @@ import {
   X2EarnRewardsPool,
   X2EarnApps,
   NodeManagement,
+  NodeManagementV1,
   VeBetterPassport,
   VeBetterPassportV1,
   X2EarnCreator,
 } from "../../typechain-types"
 import { ContractsConfig } from "@repo/config/contracts/type"
 import { HttpNetworkConfig } from "hardhat/types"
-import { setupLocalEnvironment, setupMainnetEnvironment, setupTestEnvironment, APPS } from "./setup"
+import {
+  setupLocalEnvironment,
+  setupMainnetEnvironment,
+  setupTestEnvironment,
+  updateGMMultipliers,
+  APPS,
+} from "./setup"
 import { simulateRounds } from "./simulateRounds"
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers"
 import { shouldEndorseXApps, shouldRunSimulation } from "@repo/config/contracts"
@@ -79,6 +86,14 @@ export async function deployAll(config: ContractsConfig) {
     GovernorQuorumLogicLibV1,
     GovernorVotesLogicLibV1,
     GovernorStateLogicLibV1,
+    GovernorClockLogicLib,
+    GovernorConfiguratorLib,
+    GovernorDepositLogicLib,
+    GovernorFunctionRestrictionsLogicLib,
+    GovernorProposalLogicLib,
+    GovernorQuorumLogicLib,
+    GovernorVotesLogicLib,
+    GovernorStateLogicLib,
     GovernorClockLogicLibV3,
     GovernorConfiguratorLibV3,
     GovernorFunctionRestrictionsLogicLibV3,
@@ -95,14 +110,15 @@ export async function deployAll(config: ContractsConfig) {
     GovernorVotesLogicLibV4,
     GovernorDepositLogicLibV4,
     GovernorStateLogicLibV4,
-    GovernorClockLogicLib,
-    GovernorConfiguratorLib,
-    GovernorDepositLogicLib,
-    GovernorFunctionRestrictionsLogicLib,
-    GovernorProposalLogicLib,
-    GovernorQuorumLogicLib,
-    GovernorVotesLogicLib,
-    GovernorStateLogicLib,
+    GovernorClockLogicLibV5,
+    GovernorConfiguratorLibV5,
+    GovernorFunctionRestrictionsLogicLibV5,
+    GovernorGovernanceLogicLibV5,
+    GovernorQuorumLogicLibV5,
+    GovernorProposalLogicLibV5,
+    GovernorVotesLogicLibV5,
+    GovernorDepositLogicLibV5,
+    GovernorStateLogicLibV5,
   } = await governanceLibraries()
 
   console.log("Deploying VeBetter Passport Libraries")
@@ -216,10 +232,7 @@ export async function deployAll(config: ContractsConfig) {
     true,
   )) as TimeLock
 
-  const x2EarnCreator = (await deployProxy("X2EarnCreator", [
-    TEMP_ADMIN,
-    config.CONTRACTS_ADMIN_ADDRESS,
-  ])) as X2EarnCreator
+  const x2EarnCreator = (await deployProxy("X2EarnCreator", [TEMP_ADMIN, TEMP_ADMIN])) as X2EarnCreator
 
   const treasury = (await deployProxy(
     "Treasury",
@@ -242,7 +255,7 @@ export async function deployAll(config: ContractsConfig) {
   // Deploy NodeManagement
   const nodeManagement = (await deployAndUpgrade(
     ["NodeManagementV1", "NodeManagement"],
-    [[vechainNodesAddress, config.CONTRACTS_ADMIN_ADDRESS, config.CONTRACTS_ADMIN_ADDRESS], []],
+    [[vechainNodesAddress, TEMP_ADMIN, deployer.address], []], // Use deployer as upgrader initially
     {
       versions: [undefined, 2],
       logOutput: true,
@@ -270,7 +283,7 @@ export async function deployAll(config: ContractsConfig) {
       [
         config.XAPP_BASE_URI,
         [TEMP_ADMIN], //admins
-        config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        deployer.address, // upgrader - use deployer address for initial upgrade
         TEMP_ADMIN, // governance role
       ],
       [
@@ -344,7 +357,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as X2EarnRewardsPool
 
   const xAllocationPool = (await deployAndUpgrade(
-    ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPoolV4", "XAllocationPool"],
+    ["XAllocationPoolV1", "XAllocationPoolV2", "XAllocationPoolV3", "XAllocationPoolV4", "XAllocationPoolV5"],
     [
       [
         TEMP_ADMIN, // admin
@@ -367,14 +380,14 @@ export async function deployAll(config: ContractsConfig) {
   )) as XAllocationPool
 
   const galaxyMember = (await deployAndUpgrade(
-    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMember"],
+    ["GalaxyMemberV1", "GalaxyMemberV2", "GalaxyMemberV3"],
     [
       [
         {
           name: name,
           symbol: symbol,
           admin: TEMP_ADMIN,
-          upgrader: config.CONTRACTS_ADMIN_ADDRESS,
+          upgrader: deployer.address,
           pauser: config.CONTRACTS_ADMIN_ADDRESS,
           minter: config.CONTRACTS_ADMIN_ADDRESS,
           contractsAddressManager: TEMP_ADMIN,
@@ -400,7 +413,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as GalaxyMember
 
   const emissions = (await deployAndUpgrade(
-    ["EmissionsV1", "Emissions"],
+    ["EmissionsV1", "EmissionsV2"],
     [
       [
         {
@@ -438,7 +451,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as Emissions
 
   const voterRewards = (await deployAndUpgrade(
-    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewards"],
+    ["VoterRewardsV1", "VoterRewardsV2", "VoterRewardsV3", "VoterRewardsV4"],
     [
       [
         TEMP_ADMIN, // admin
@@ -461,7 +474,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as VoterRewards
 
   const xAllocationVoting = (await deployAndUpgrade(
-    ["XAllocationVotingV1", "XAllocationVotingV2", "XAllocationVotingV3", "XAllocationVotingV4", "XAllocationVoting"],
+    ["XAllocationVotingV1", "XAllocationVotingV2", "XAllocationVotingV3", "XAllocationVotingV4", "XAllocationVotingV5"],
     [
       [
         {
@@ -508,9 +521,9 @@ export async function deployAll(config: ContractsConfig) {
         decayRate: config.VEPASSPORT_DECAY_RATE, //decayRate
       },
       {
-        admin: config.CONTRACTS_ADMIN_ADDRESS, // admins
+        admin: TEMP_ADMIN, // admins
         botSignaler: config.CONTRACTS_ADMIN_ADDRESS, // botSignaler
-        upgrader: config.CONTRACTS_ADMIN_ADDRESS, // upgrader
+        upgrader: TEMP_ADMIN, // upgrader
         settingsManager: TEMP_ADMIN, // settingsManager
         roleGranter: config.CONTRACTS_ADMIN_ADDRESS, // roleGranter
         blacklister: config.CONTRACTS_ADMIN_ADDRESS, // blacklister
@@ -562,14 +575,14 @@ export async function deployAll(config: ContractsConfig) {
     {
       version: 3,
       libraries: {
-        PassportChecksLogic: await PassportChecksLogicV3.getAddress(),
-        PassportConfigurator: await PassportConfiguratorV3.getAddress(),
-        PassportEntityLogic: await PassportEntityLogicV3.getAddress(),
-        PassportDelegationLogic: await PassportDelegationLogicV3.getAddress(),
-        PassportPersonhoodLogic: await PassportPersonhoodLogicV3.getAddress(),
-        PassportPoPScoreLogic: await PassportPoPScoreLogicV3.getAddress(),
-        PassportSignalingLogic: await PassportSignalingLogicV3.getAddress(),
-        PassportWhitelistAndBlacklistLogic: await PassportWhitelistAndBlacklistLogicV3.getAddress(),
+        PassportChecksLogicV3: await PassportChecksLogicV3.getAddress(),
+        PassportConfiguratorV3: await PassportConfiguratorV3.getAddress(),
+        PassportEntityLogicV3: await PassportEntityLogicV3.getAddress(),
+        PassportDelegationLogicV3: await PassportDelegationLogicV3.getAddress(),
+        PassportPersonhoodLogicV3: await PassportPersonhoodLogicV3.getAddress(),
+        PassportPoPScoreLogicV3: await PassportPoPScoreLogicV3.getAddress(),
+        PassportSignalingLogicV3: await PassportSignalingLogicV3.getAddress(),
+        PassportWhitelistAndBlacklistLogicV3: await PassportWhitelistAndBlacklistLogicV3.getAddress(),
       },
     },
   )) as VeBetterPassport
@@ -596,7 +609,7 @@ export async function deployAll(config: ContractsConfig) {
   )) as VeBetterPassport
 
   const governor = (await deployAndUpgrade(
-    ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernor"],
+    ["B3TRGovernorV1", "B3TRGovernorV2", "B3TRGovernorV3", "B3TRGovernorV4", "B3TRGovernorV5"],
     [
       [
         {
@@ -668,14 +681,14 @@ export async function deployAll(config: ContractsConfig) {
           GovernorVotesLogicV4: await GovernorVotesLogicLibV4.getAddress(),
         },
         {
-          GovernorClockLogic: await GovernorClockLogicLib.getAddress(),
-          GovernorConfigurator: await GovernorConfiguratorLib.getAddress(),
-          GovernorDepositLogic: await GovernorDepositLogicLib.getAddress(),
-          GovernorFunctionRestrictionsLogic: await GovernorFunctionRestrictionsLogicLib.getAddress(),
-          GovernorProposalLogic: await GovernorProposalLogicLib.getAddress(),
-          GovernorQuorumLogic: await GovernorQuorumLogicLib.getAddress(),
-          GovernorStateLogic: await GovernorStateLogicLib.getAddress(),
-          GovernorVotesLogic: await GovernorVotesLogicLib.getAddress(),
+          GovernorClockLogicV5: await GovernorClockLogicLibV5.getAddress(),
+          GovernorConfiguratorV5: await GovernorConfiguratorLibV5.getAddress(),
+          GovernorDepositLogicV5: await GovernorDepositLogicLibV5.getAddress(),
+          GovernorFunctionRestrictionsLogicV5: await GovernorFunctionRestrictionsLogicLibV5.getAddress(),
+          GovernorQuorumLogicV5: await GovernorQuorumLogicLibV5.getAddress(),
+          GovernorProposalLogicV5: await GovernorProposalLogicLibV5.getAddress(),
+          GovernorStateLogicV5: await GovernorStateLogicLibV5.getAddress(),
+          GovernorVotesLogicV5: await GovernorVotesLogicLibV5.getAddress(),
         },
       ],
       logOutput: true,
@@ -905,6 +918,8 @@ export async function deployAll(config: ContractsConfig) {
       break
   }
 
+  //await updateGMMultipliers(config.VOTER_REWARDS_LEVELS, config.GM_MULTIPLIERS_V2, voterRewards)
+
   // ---------- Run Simulation ---------- //
   if (shouldRunSimulation()) {
     await simulateRounds(b3tr, vot3, xAllocationVoting, emissions, voterRewards, treasury)
@@ -961,6 +976,9 @@ export async function deployAll(config: ContractsConfig) {
 
     await transferUpgraderRole(xAllocationPool, deployer, config.CONTRACTS_ADMIN_ADDRESS)
     await transferUpgraderRole(emissions, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferUpgraderRole(nodeManagement, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferUpgraderRole(x2EarnApps, deployer, config.CONTRACTS_ADMIN_ADDRESS)
+    await transferUpgraderRole(galaxyMember, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
     await transferSettingsManagerRole(veBetterPassport, deployer, config.CONTRACTS_ADMIN_ADDRESS)
 
@@ -974,6 +992,55 @@ export async function deployAll(config: ContractsConfig) {
       config.CONTRACTS_ADMIN_ADDRESS,
       TEMP_ADMIN,
       await veBetterPassport.SETTINGS_MANAGER_ROLE(),
+    )
+
+    // NodeManagement
+    await validateContractRole(
+      nodeManagement,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await nodeManagement.UPGRADER_ROLE(),
+    )
+    await validateContractRole(
+      nodeManagement,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await nodeManagement.DEFAULT_ADMIN_ROLE(),
+    )
+
+    // X2EarnApps
+    await validateContractRole(x2EarnApps, config.CONTRACTS_ADMIN_ADDRESS, TEMP_ADMIN, await x2EarnApps.UPGRADER_ROLE())
+
+    // GalaxyMember
+    await validateContractRole(
+      galaxyMember,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await galaxyMember.DEFAULT_ADMIN_ROLE(),
+    )
+    await validateContractRole(
+      galaxyMember,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await galaxyMember.UPGRADER_ROLE(),
+    )
+    await validateContractRole(
+      galaxyMember,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await galaxyMember.CONTRACTS_ADDRESS_MANAGER_ROLE(),
+    )
+    await validateContractRole(
+      galaxyMember,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await galaxyMember.PAUSER_ROLE(),
+    )
+    await validateContractRole(
+      galaxyMember,
+      config.CONTRACTS_ADMIN_ADDRESS,
+      TEMP_ADMIN,
+      await galaxyMember.MINTER_ROLE(),
     )
 
     // B3TR
@@ -1185,38 +1252,6 @@ export async function deployAll(config: ContractsConfig) {
       config.CONTRACTS_ADMIN_ADDRESS,
       TEMP_ADMIN,
       await x2EarnApps.GOVERNANCE_ROLE(),
-    )
-
-    // GalaxyMember
-    await validateContractRole(
-      galaxyMember,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await galaxyMember.DEFAULT_ADMIN_ROLE(),
-    )
-    await validateContractRole(
-      galaxyMember,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await galaxyMember.UPGRADER_ROLE(),
-    )
-    await validateContractRole(
-      galaxyMember,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await galaxyMember.CONTRACTS_ADDRESS_MANAGER_ROLE(),
-    )
-    await validateContractRole(
-      galaxyMember,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await galaxyMember.PAUSER_ROLE(),
-    )
-    await validateContractRole(
-      galaxyMember,
-      config.CONTRACTS_ADMIN_ADDRESS,
-      TEMP_ADMIN,
-      await galaxyMember.MINTER_ROLE(),
     )
 
     // X2EarnCreator

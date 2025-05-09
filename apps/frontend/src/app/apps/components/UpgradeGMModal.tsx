@@ -150,7 +150,6 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                       />
                     </Skeleton>
                   </Box>
-
                   <VStack flex="1" align={"flex-start"} justify={"center"} gap={isAbove800 ? 0.5 : 0}>
                     <Text fontWeight={700} noOfLines={1} fontSize={isAbove800 ? "x-large" : "md"}>
                       {`${nextLevelGM?.name} #${tokenId}`}
@@ -159,10 +158,9 @@ export const UpgradeGMModal: React.FC<UpgradeGMModalProps> = ({
                       <HStack rounded="8px" gap={1} color={""}>
                         <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                           {nextLevelGM?.multiplier}
-                          {"x"}
                         </Text>
                         <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
-                          {t("Voting reward multiplier").toLowerCase()}
+                          {t("GM reward weight").toLowerCase()}
                         </Text>
                       </HStack>
                     </FeatureFlagWrapper>

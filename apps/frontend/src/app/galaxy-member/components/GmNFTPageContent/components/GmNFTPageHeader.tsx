@@ -40,6 +40,7 @@ export const GmNFTPageHeader = () => {
     b3trToUpgradeGMToNextLevel,
     isMaxGmLevelReached,
     isLoading,
+    b3trLeftover,
   } = useSelectedGmNft()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
 
@@ -137,11 +138,19 @@ export const GmNFTPageHeader = () => {
         <Text color="#FFFFFFBF" fontSize={isAbove800 ? "md" : "xs"} fontWeight={400}>
           {t("B3TR needed to upgrade your GM level")}
         </Text>
+        {b3trLeftover > 0 && (
+          <Text color="#B1F16C" fontSize={isAbove800 ? "sm" : "xs"} fontWeight={500}>
+            {t("You have {{amount}} B3TR leftover from a previous upgrade", {
+              amount: compactFormatter.format(Number(b3trLeftover)),
+            })}
+          </Text>
+        )}
       </>
     )
   }, [
     b3trBalance?.scaled,
     b3trToUpgradeGMToNextLevel,
+    b3trLeftover,
     isAbove800,
     isB3trBalanceLoading,
     isMaxGmLevelReached,
@@ -216,10 +225,9 @@ export const GmNFTPageHeader = () => {
               <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
                   {gmRewardMultiplier}
-                  {"x"}
                 </Text>
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
-                  {t("Voting reward multiplier")}
+                  {t("GM reward weight")}
                 </Text>
               </HStack>
             </FeatureFlagWrapper>

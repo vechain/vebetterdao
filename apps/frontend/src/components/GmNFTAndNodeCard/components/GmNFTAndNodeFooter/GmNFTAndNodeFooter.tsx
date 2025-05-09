@@ -106,8 +106,8 @@ export const GmNFTAndNodeFooter = () => {
       return (
         <Box>
           <Text as="span" fontSize={"14px"}>
-            {t("You can upgrade and get {{rewardMultiplier}}x on your rewards for", {
-              rewardMultiplier: nextLevelGMRewardMultiplier,
+            {t("You can upgrade and get {{weight}}x weight on your GM rewards for", {
+              weight: nextLevelGMRewardMultiplier,
             })}
           </Text>{" "}
           <Text as="span" fontSize={"16px"} color="#B1F16C">

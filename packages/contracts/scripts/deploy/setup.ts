@@ -5,6 +5,7 @@ import {
   TokenAuction,
   Treasury,
   VOT3,
+  VoterRewards,
   X2EarnApps,
   XAllocationVoting,
 } from "../../typechain-types"
@@ -77,6 +78,16 @@ const padNodeTypes = (nodeTypes: number[], requiredLength: number) => {
   }
 
   return nodeTypes
+}
+
+export const updateGMMultipliers = async (levels: number[], multipliers: number[], voterRewards: VoterRewards) => {
+  for (let i = 0; i < levels.length; i++) {
+    const level = levels[i]
+    const multiplier = multipliers[i]
+
+    // Update the multiplier for the level
+    await voterRewards.setLevelToMultiplierNow(level, multiplier)
+  }
 }
 
 export const setupLocalEnvironment = async (

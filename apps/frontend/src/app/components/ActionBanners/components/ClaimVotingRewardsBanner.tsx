@@ -10,9 +10,10 @@ const compactFormatter = getCompactFormatter(4)
 
 export type Props = {
   roundsRewardsQuery: ReturnType<typeof useVotingRewards>
+  gmRewards: number
 }
 
-export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery }: Props) => {
+export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery, gmRewards }: Props) => {
   const { t } = useTranslation()
 
   const claimRewardsMutation = useClaimRewards({
@@ -28,11 +29,17 @@ export const ClaimVotingRewardsBanner = ({ roundsRewardsQuery }: Props) => {
     claimRewardsMutation.sendTransaction()
   }, [claimRewardsMutation])
 
+  const hasGMRewards = gmRewards > 0
+
   return (
     <GenericBanner
       title={t("CLAIM YOUR REWARDS NOW! 💰")}
       titleColor="#3A5798"
-      description={t("Congratulations! You have B3TR to claim for casting your vote in governance.")}
+      description={
+        hasGMRewards
+          ? t("Congratulations! You have B3TR to claim for casting your vote in governance and holding GM.")
+          : t("Congratulations! You have B3TR to claim for casting your vote in governance.")
+      }
       descriptionColor="#0C2D75"
       logoSrc="/assets/icons/claim-b3tr-icon.webp"
       backgroundColor="#C8DDFF"
