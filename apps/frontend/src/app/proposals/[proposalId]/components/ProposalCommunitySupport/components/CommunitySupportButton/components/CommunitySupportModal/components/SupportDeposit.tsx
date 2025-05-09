@@ -16,10 +16,6 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
   const { account } = useWallet()
   const { data: vot3Balance } = useVot3Balance(account?.address ?? undefined)
 
-  const missingSupport = useMemo(
-    () => proposal.depositThreshold - proposal.communityDeposits,
-    [proposal.communityDeposits, proposal.depositThreshold],
-  )
   const parsedAmount = useMemo(() => {
     if (!amount || !ethers) return "0"
 
@@ -34,28 +30,28 @@ export const SupportDeposit = ({ onSubmit }: { onSubmit: (amount: string) => voi
     if (!vot3Balance) return
 
     const scaledBalanceBN = BigNumber(vot3Balance.scaled)
-    const missingSupportBN = BigNumber(missingSupport)
+    const missingSupportBN = BigNumber(proposal.missingSupport)
 
     if (scaledBalanceBN.gt(missingSupportBN)) {
       setAmount(missingSupportBN.toString())
       return
     }
     setAmount(scaledBalanceBN.toString())
-  }, [vot3Balance, missingSupport])
+  }, [vot3Balance, proposal.missingSupport])
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!e.target.value) return setAmount("0")
       const input = filterAmountInput(e.target.value, { maxBalance: vot3Balance?.scaled })
       const scaledBalanceBN = BigNumber(vot3Balance?.scaled ?? 0)
-      const missingSupportBN = BigNumber(missingSupport ?? 0)
+      const missingSupportBN = BigNumber(proposal.missingSupport ?? 0)
 
       // Get the minimum value, between the input, the scaled balance and the missing support
       const cappedAmountBN = BigNumber.min(BigNumber(input), scaledBalanceBN, missingSupportBN)
 
       setAmount(cappedAmountBN.toString())
     },
-    [missingSupport, vot3Balance?.scaled],
+    [vot3Balance?.scaled, proposal.missingSupport],
   )
 
   const handleSubmit = useCallback(
