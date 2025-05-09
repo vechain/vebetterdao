@@ -73,7 +73,7 @@ export const ActionBanner = () => {
 
   const currentRoundId = parseInt(currentRound ?? "0")
   const votingRewardsQuery = useVotingRewards(currentRoundId, account?.address ?? undefined)
-  const gmRewards = useGMRewards(currentRoundId, account?.address ?? undefined)
+  const { original: gmRewards } = useGMRewards(currentRoundId, account?.address ?? undefined)
   const { b3trLeftover, gmImage, isGMOwned } = useSelectedGmNft()
 
   const { data: delegateeAddress, isLoading: isDelegateeLoading } = useGetDelegatee(account?.address)
