@@ -70,13 +70,13 @@
     "@datadog/browser-rum": "^5.23.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",
-    "dotenv-cli": "latest",
     "dotenv": "^16.4.5",
+    "dotenv-cli": "latest",
+    "hardhat": "2.19.1",
     "husky": "^8.0.0",
     "lint-staged": "^15.2.7",
     "prettier": "^3.3.0",
-    "turbo": "^1.13.3",
-    "hardhat": "2.19.1"
+    "turbo": "^1.13.3"
   },
   "engines": {
     "node": "20.x.x"
@@ -94,5 +94,6 @@
     "*.{json,html}": [
       "prettier --write --ignore-unknown"
     ]
-  }
+  },
+  "version": "0.0.1"
 }
