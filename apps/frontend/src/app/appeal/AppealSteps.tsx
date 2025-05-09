@@ -117,31 +117,14 @@ export const AppealSteps = () => {
     setResetingStatus(RESET_STATUS.PENDING)
 
     try {
-      // const response = await fetch("/api/appeal/reset-signal", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({ walletAddress: connectedAccount?.address }),
-      // })
-      // const data = await response.json()
-
-      const simulateApiCall = async (status: "success" | "error") => {
-        console.log("🔄 Simulating API call to reset signal count")
-
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1500))
-
-        // Simulate successful response
-        return {
-          status: status === "success" ? RESET_STATUS.SUCCESS : RESET_STATUS.ERROR,
-          message:
-            status === "success"
-              ? "Signal count reset successfully (simulated)"
-              : "Signal count reset failed (simulated)",
-        }
-      }
-      const data = await simulateApiCall(RESET_STATUS.SUCCESS)
+      const response = await fetch("/api/appeal/reset-signal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ walletAddress: connectedAccount?.address }),
+      })
+      const data = await response.json()
 
       if (data.status === RESET_STATUS.SUCCESS) {
         const resetEvents = userSignalsResetEvents?.userSignalsResetEvents ?? []
