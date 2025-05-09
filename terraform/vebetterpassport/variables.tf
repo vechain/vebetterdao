@@ -3,7 +3,7 @@ variable "MAINNET_MNEMONIC" {
   type        = string
   sensitive   = true
   default     = ""
-} 
+}
 
 variable "TESTNET_MNEMONIC" {
   description = "Mnemonic for testnet contracts"

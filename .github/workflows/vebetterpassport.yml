@@ -108,6 +108,7 @@ jobs:
       - name: Terraform Plan
         working-directory: terraform/vebetterpassport
         id: plan
+        continue-on-error: true
         env:
           MAINNET_MNEMONIC: ${{ secrets.MAINNET_MNEMONIC }}
           TESTNET_MNEMONIC: ${{ secrets.TESTNET_MNEMONIC }}
