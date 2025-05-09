@@ -3,6 +3,7 @@ import { getLevelGradient } from "@/api/contracts/galaxyMember/utils"
 import { FeatureFlagWrapper } from "@/components"
 import { GmActionButton } from "@/components/GmActionButton"
 import { FeatureFlag } from "@/constants"
+import { gmNfts } from "@/constants/gmNfts"
 import {
   Box,
   Card,
@@ -43,7 +44,8 @@ export const GmNFTPageHeader = () => {
     b3trLeftover,
   } = useSelectedGmNft()
   const [isAbove800] = useMediaQuery("(min-width: 800px)")
-
+  // TODO: REMOVE IN ROUND 46
+  const gmInfo = gmNfts.find(nft => nft.level === gmLevel)
   const { account } = useWallet()
   const { data: b3trBalance, isLoading: isB3trBalanceLoading } = useB3trBalance(account?.address ?? "")
 
@@ -224,7 +226,7 @@ export const GmNFTPageHeader = () => {
             <FeatureFlagWrapper feature={FeatureFlag.GALAXY_MEMBER_UPGRADES} fallback={<></>}>
               <HStack bg="#FFFFFF4A" rounded="8px" padding="4px 8px" gap={1}>
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={600}>
-                  {gmRewardMultiplier}
+                  {gmInfo?.multiplier ?? gmRewardMultiplier}
                 </Text>
                 <Text fontSize={isAbove800 ? "md" : "xs"} fontWeight={400} noOfLines={1}>
                   {t("GM reward weight")}
