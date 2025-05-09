@@ -33,8 +33,8 @@ export const GMPoolRewardsBanner = ({ currentRoundId, gmImage, notAGalaxyMember 
       titleColor="#3A5798"
       description={t("Upgrade for less. Earn more with a higher GM level!")}
       logoSrc={
-        <Flex position="relative" w="20" h="20" rounded="full" overflow={"hidden"}>
-          <Image src={gmImage} alt={gmImage} w="20" h="20" position={"absolute"} />
+        <Flex position="relative" w="20" h="20" rounded="full" overflow={"hidden"} flexShrink={0}>
+          <Image src={gmImage} alt={gmImage} w="full" h="full" position={"absolute"} />
           <Flex w="full" h="full" align="center" justify="center" bg={"rgba(0, 0, 0, 0.2)"} zIndex={1} />
         </Flex>
       }
