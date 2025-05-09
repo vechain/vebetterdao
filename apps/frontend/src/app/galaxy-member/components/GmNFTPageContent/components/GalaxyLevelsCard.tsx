@@ -104,7 +104,7 @@ export const GalaxyLevelsCard = () => {
               </BaseTooltip>
             </HStack>
             <Text fontSize="sm" color="#6A6A6A">
-              {t("Earn enough B3TR to upgrade your level and get multipliers for all your voting rewards!")}
+              {t("Earn enough B3TR to upgrade your level and get additional rewards for all your voting rewards!")}
             </Text>
           </VStack>
           {(showShortened ? gmNftsShortened : gmNfts.slice(0, maxGmLevel)).map(gmNft => {
