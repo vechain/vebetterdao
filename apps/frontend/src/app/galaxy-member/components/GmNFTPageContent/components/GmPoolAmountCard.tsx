@@ -8,7 +8,7 @@ export const GmPoolAmountCard = () => {
   const { data: currentRoundId } = useCurrentAllocationsRoundId()
 
   // TODO : for the first round, getting the gm amount from a constant value
-  const gmPoolAmount = useGMPoolAmount(Number(currentRoundId))
+  const { formatted: gmPoolAmount } = useGMPoolAmount(Number(currentRoundId))
 
   return (
     <Card variant="primaryBoxShadow">
