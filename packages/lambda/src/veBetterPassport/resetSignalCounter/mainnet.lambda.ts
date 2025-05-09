@@ -41,10 +41,7 @@ const VET_DOMAINS_CONTRACT_ABI_FRAGMENT = JSON.stringify({
  */
 const getCallerWalletInfo = async (): Promise<{ walletAddress: string; privateKey: string }> => {
   const client = new SecretsManagerClient({ region: "eu-west-1" })
-  const AWS_MINTER_PK_SECRET_ID = "TO BE ADDED"
-  const AWS_MINTER_PK_SECRET_NAME = "TO BE ADDED"
-
-  const privateKey = await getSecret(client, AWS_MINTER_PK_SECRET_ID, AWS_MINTER_PK_SECRET_NAME)
+  const privateKey = await getSecret(client, "vebetterpassport_reset_signal_mainnet", "RESET_SIGNALER_PK")
   const walletAddress = addressUtils.fromPrivateKey(Buffer.from(privateKey, "hex"))
 
   return { walletAddress, privateKey }
